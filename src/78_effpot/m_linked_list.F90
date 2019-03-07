@@ -40,7 +40,7 @@ module m_linked_list
   type, public:: lnode
      integer :: i
      real(dp):: val
-     type(lnode), pointer :: next
+     type(lnode), pointer :: next=>null()
   end type lnode
 
   ! linked list of (i, val), it can be a column or a row of LIL sparse matrix

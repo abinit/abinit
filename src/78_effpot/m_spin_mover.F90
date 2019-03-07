@@ -41,10 +41,10 @@ module m_spin_mover
   use m_multibinit_global
   use m_mpi_scheduler, only: mpi_scheduler_t
   use m_mathfuncs, only : cross
-  use m_spin_observables , only : spin_observable_t, ob_calc_observables, ob_reset
+  use m_spin_observables , only : spin_observable_t
   use m_spin_potential, only:  spin_potential_t
-  use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s, spin_hist_t_reset
-  use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
+  use m_spin_hist, only: spin_hist_t
+  use m_spin_ncfile, only: spin_ncfile_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   use m_abstract_potential, only: abstract_potential_t
@@ -90,8 +90,8 @@ module m_spin_mover
      procedure :: run_one_step => spin_mover_t_run_one_step
      procedure :: run_time => spin_mover_t_run_time
      procedure :: set_Langevin_params
-     procedure :: get_Langevin_Heff
-     procedure :: get_dSdt
+     procedure, private ::get_Langevin_Heff
+     procedure, private :: get_dSdt
   end type spin_mover_t
   !!***
 
@@ -272,6 +272,7 @@ contains
 
     ! predict
     S_out(:,:)=0.0_dp
+    self%Heff_tmp(:,:)=0.0_dp
     call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
@@ -287,6 +288,7 @@ contains
     call xmpi_bcast(S_out, master, comm, ierr)
 
     ! correction
+    self%Heff_tmp(:,:)=0.0_dp
     call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
 
@@ -342,6 +344,7 @@ contains
 
     ! predict
     S_out(:,:)=0.0_dp
+    self%Heff_tmp(:,:)=0.0_dp
     call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
@@ -355,6 +358,7 @@ contains
     call xmpi_bcast(S_out, master, comm, ierr)
 
     ! correction
+    self%Heff_tmp(:,:)=0.0_dp
     call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
 
@@ -379,7 +383,7 @@ contains
     class(spin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp) :: S_out(3,self%nspin), etot
-    if(iam_master) self%Stmp=spin_hist_t_get_S(self%hist)
+    if(iam_master) self%Stmp=self%hist%get_S()
     if(self%method==1) then
        call self%run_one_step_HeunP(effpot, self%Stmp, S_out, etot)
     else if (self%method==2) then
@@ -389,7 +393,7 @@ contains
     end if
     ! do not inc until time is set to hist.
     if(iam_master) then
-       call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
+       call self%hist%set_vars( S=S_out, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
     end if
   end subroutine spin_mover_t_run_one_step
 
@@ -460,9 +464,9 @@ contains
           counter=counter+1
           call self%run_one_step(effpot=calculator)
           if (iam_master) then
-             call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
+             call hist%set_vars( time=t,  inc=.True.)
              if(mod(counter, hist%spin_nctime)==0) then
-                call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
+                call ob%get_observables( hist%S(:,:, hist%ihist_prev), &
                      hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
                 write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                      & ob%Mst_norm_total/ob%Snorm_total, &
@@ -478,7 +482,7 @@ contains
        t=0.0
        counter=0
        if (iam_master) then
-          call spin_hist_t_reset(hist,array_to_zero=.False.)
+          call hist%reset(array_to_zero=.False.)
           msg="Measurement run:"
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
@@ -492,11 +496,11 @@ contains
        counter=counter+1
        call self%run_one_step(effpot=calculator)
        if (iam_master) then
-          call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
-          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
+          call hist%set_vars(time=t,  inc=.True.)
+          call ob%get_observables(hist%S(:,:, hist%ihist_prev), &
                hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
           if(mod(counter, hist%spin_nctime)==0) then
-             call spin_ncfile_t_write_one_step(ncfile, hist)
+             call ncfile%write_one_step(hist)
              write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
                   & hist%etot(hist%ihist_prev)/ob%nscell

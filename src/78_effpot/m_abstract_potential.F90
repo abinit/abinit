@@ -58,6 +58,7 @@ module m_abstract_potential
      !real(dp), allocatable :: ms(:)
      character (len=200) :: label="Abstract Potential"
    contains
+     procedure :: set_supercell   ! set_supercell
      procedure :: finalize        ! finalize
      procedure :: set_params      ! parameters from input file
      procedure :: calculate       ! get energy and 1st derivative from input state
@@ -65,6 +66,12 @@ module m_abstract_potential
   end type abstract_potential_t
 
 contains
+
+  subroutine set_supercell(self, supercell)
+    class(abstract_potential_t), intent(inout) :: self
+    type(mb_supercell_t), target, intent(inout) :: supercell
+    self%supercell=>supercell
+  end subroutine set_supercell
 
   subroutine finalize(self)
     class(abstract_potential_t), intent(inout) :: self

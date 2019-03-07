@@ -62,8 +62,9 @@ contains
   subroutine initialize(self, shape)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: shape(:)
-    self%shape=shape
     self%ndim=size(shape)
+    ABI_ALLOCATE(self%shape, (self%ndim))
+    self%shape=shape
     self%nnz=0
     self%is_sorted=.False.
     self%is_unique=.False.

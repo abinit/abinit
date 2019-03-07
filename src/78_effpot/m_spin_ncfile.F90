@@ -74,11 +74,20 @@ module m_spin_ncfile
      integer :: itime
      integer :: write_traj
      character(len=fnlen) :: filename
+   contains
+     procedure :: initialize
+     procedure :: def_spindynamics_var
+     procedure :: def_observable_var
+     procedure :: write_one_step
+     procedure :: write_primitive_cell
+     procedure :: write_supercell
+     procedure :: write_parameters
+     procedure :: close
   end type spin_ncfile_t
 
 contains
 
-  subroutine spin_ncfile_t_init(self, filename, write_traj)
+  subroutine initialize(self, filename, write_traj)
 
     class(spin_ncfile_t), intent(inout):: self
     character(len=*),intent(in) :: filename
@@ -96,9 +105,9 @@ contains
     self%isopen=.True.
     !NCF_CHECK_MSG(ncerr, "create netcdf history file")
 #endif
-  end subroutine spin_ncfile_t_init
+  end subroutine initialize
 
-  subroutine spin_ncfile_t_def_sd(self, hist)
+  subroutine def_spindynamics_var(self, hist)
 
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_hist_t),intent(in) :: hist
@@ -133,9 +142,9 @@ contains
          &         self%itime_id, NF90_INT, "itime", "index of time in spin timeline", "1")
     ncerr=nf90_enddef(self%ncid)
 #endif
-  end subroutine spin_ncfile_t_def_sd
+  end subroutine def_spindynamics_var
 
-  subroutine spin_ncfile_t_def_ob(self, ob)
+  subroutine def_observable_var(self, ob)
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_observable_t), intent(in) :: ob
     integer ncerr
@@ -173,9 +182,9 @@ contains
   ncerr=nf90_enddef(self%ncid)
 
 #endif
-end subroutine spin_ncfile_t_def_ob
+end subroutine def_observable_var
 
-  subroutine spin_ncfile_t_write_one_step(self, hist, ob)
+  subroutine write_one_step(self, hist, ob)
 
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_hist_t), intent(in) :: hist
@@ -229,9 +238,9 @@ end subroutine spin_ncfile_t_def_ob
     end if
 
 #endif
-  end subroutine spin_ncfile_t_write_one_step
+  end subroutine write_one_step
 
-  subroutine spin_ncfile_t_write_primitive_cell(self, prim)
+  subroutine write_primitive_cell(self, prim)
 
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_primitive_potential_t) :: prim
@@ -263,9 +272,9 @@ end subroutine spin_ncfile_t_def_ob
 !     !ncerr=nf90_put_var(self%ncid, znucl_id, hist%znucl)
 !     ncerr=nf90_put_var(self%ncid, self%spin_index_id, prim%index_spin)
 #endif
-  end subroutine spin_ncfile_t_write_primitive_cell
+  end subroutine write_primitive_cell
 
-  subroutine spin_ncfile_t_write_supercell(self, scell)
+  subroutine write_supercell(self, scell)
 
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_potential_t), intent(in) :: scell
@@ -304,9 +313,9 @@ end subroutine spin_ncfile_t_def_ob
     ! ncerr=nf90_put_var(self%ncid, rvec_id, scell%rvec)
     ! ncerr=nf90_put_var(self%ncid, iatoms_id, scell%iatoms)
 #endif
-  end subroutine spin_ncfile_t_write_supercell
+  end subroutine write_supercell
 
-  subroutine spin_ncfile_t_write_parameters(self, params)
+  subroutine write_parameters(self, params)
 
     class(spin_ncfile_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
@@ -347,9 +356,9 @@ end subroutine spin_ncfile_t_def_ob
     ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt/Time_Sec)
     ncerr=nf90_put_var(self%ncid, mfield_id, params%spin_mag_field/Bfield_Tesla)
 #endif
-  end subroutine spin_ncfile_t_write_parameters
+  end subroutine write_parameters
 
-  subroutine spin_ncfile_t_close(self)
+  subroutine close(self)
 
     class(spin_ncfile_t), intent(inout) :: self
     integer :: ncerr
@@ -360,7 +369,7 @@ end subroutine spin_ncfile_t_def_ob
     end if
     !NCF_CHECK_MSG(ncerr, "close netcdf spin history file"//trim(self%filename)//".")
 #endif
-  end subroutine spin_ncfile_t_close
+  end subroutine close
 
 
 end module m_spin_ncfile

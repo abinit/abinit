@@ -68,21 +68,22 @@ module m_spin_observables
      real(dp) :: avg_m_t   ! average of sum(Mst_norm_total) over t
      real(dp) :: avg_m2_t  ! average of sum(Mst_norm_total**2) over t
      real(dp) :: avg_m4_t  !average of sum(Mst_sub_total_norm**4) over t
+   contains
+     procedure :: initialize
+     procedure :: finalize
+     procedure :: reset
+     procedure :: get_staggered_M
+     procedure :: get_thermo_obs
+     procedure :: get_correlation_obs
+     procedure :: get_traj_obs
+     procedure :: get_observables
 
   end type spin_observable_t
 
-  public :: ob_initialize
-  public :: ob_finalize
-  public :: ob_reset
-  public :: ob_calc_staggered_M
-  public :: ob_calc_thermo_obs
-  public :: ob_calc_correlation_obs
-  public :: ob_calc_traj_obs
-  public :: ob_calc_observables
 contains
 
 
-  subroutine ob_initialize(self, supercell , params)
+  subroutine initialize(self, supercell , params)
 
     class(spin_observable_t) :: self
     type(mb_supercell_t) :: supercell
@@ -120,10 +121,10 @@ contains
        self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_qpoint, supercell%Rvec(:,i))))
     end do
 
-    call ob_reset(self, params)
-  end subroutine ob_initialize
+    call reset(self, params)
+  end subroutine initialize
 
-  subroutine ob_reset(self, params)
+  subroutine reset(self, params)
     ! set values to zeros.
     class(spin_observable_t), intent(inout) :: self
     class(multibinit_dtset_type), optional, intent(in) :: params
@@ -147,9 +148,9 @@ contains
     self%avg_m_t=0.0
     self%avg_m2_t=0.0
     self%avg_m4_t=0.0
-  end subroutine ob_reset
+  end subroutine reset
 
-  subroutine ob_finalize(self)
+  subroutine finalize(self)
     class(spin_observable_t) :: self
     if (allocated(self%isublatt)) then
        ABI_DEALLOCATE(self%isublatt)
@@ -181,17 +182,17 @@ contains
        ABI_DEALLOCATE(self%Avg_Mst_sub_norm)
     endif
 
-  end subroutine ob_finalize
+  end subroutine finalize
 
-  subroutine ob_update(self, S, Snorm, energy)
+  subroutine update(self, S, Snorm, energy)
     class(spin_observable_t), intent(inout) :: self
     real(dp), intent(in):: S(3,self%nspin), Snorm(self%nspin), energy
     self%S=S
     self%Snorm=Snorm
     self%energy=energy
-  end subroutine ob_update
+  end subroutine update
 
-  subroutine ob_calc_staggered_M(self)
+  subroutine get_staggered_M(self)
 
     class(spin_observable_t), intent(inout) :: self
     integer :: i, isub
@@ -210,13 +211,13 @@ contains
 
     self%avg_Mst_sub_norm(:)=(self%avg_Mst_sub_norm(:)*self%ntime + self%Mst_sub_norm(:))/(self%ntime+1)
     self%avg_Mst_norm_total=(self%avg_Mst_norm_total*self%ntime + self%Mst_norm_total)/(self%ntime+1)
-  end subroutine ob_calc_staggered_M
+  end subroutine get_staggered_M
 
-  subroutine ob_calc_traj_obs(self)
+  subroutine get_traj_obs(self)
     class(spin_observable_t) :: self
-  end subroutine ob_calc_traj_obs
+  end subroutine get_traj_obs
 
-  subroutine ob_calc_thermo_obs(self )
+  subroutine get_thermo_obs(self )
     class(spin_observable_t) :: self
     real(dp) :: avgm
     ! Cv
@@ -245,31 +246,30 @@ contains
     endif
 
 
-  end subroutine ob_calc_thermo_obs
+  end subroutine get_thermo_obs
 
-  subroutine ob_calc_correlation_obs(self)
-
+  subroutine get_correlation_obs(self)
     class(spin_observable_t) :: self
-  end subroutine ob_calc_correlation_obs
+  end subroutine get_correlation_obs
 
-  subroutine ob_calc_observables(self, S, Snorm, energy)
+  subroutine get_observables(self, S, Snorm, energy)
 
     class(spin_observable_t) :: self
     real(dp), intent(in) :: S(3,self%nspin), Snorm(self%nspin), energy
-    call ob_update(self, S, Snorm, energy)
-    call ob_calc_staggered_M(self)
+    call update(self, S, Snorm, energy)
+    call get_staggered_M(self)
     if(self%calc_traj_obs) then
-       call ob_calc_traj_obs(self)
+       call get_traj_obs(self)
     end if
     if(self%calc_thermo_obs) then
-       call ob_calc_thermo_obs(self)
+       call get_thermo_obs(self)
     end if
     if(self%calc_correlation_obs) then
-       call ob_calc_correlation_obs(self)
+       call get_correlation_obs(self)
     endif
     self%ntime=self%ntime+1
 
-  end subroutine ob_calc_observables
+  end subroutine get_observables
 
 
 end module m_spin_observables

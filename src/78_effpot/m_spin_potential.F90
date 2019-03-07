@@ -43,6 +43,7 @@ module  m_spin_potential
   use m_xmpi
   use m_multibinit_global
   use m_multibinit_dataset, only: multibinit_dtset_type
+  use m_multibinit_supercell, only: mb_supercell_t
   use m_spmat_coo, only: coo_mat_t
   use m_spmat_csr, only : CSR_mat_t
   use m_spmat_convert, only : coo_to_csr
@@ -88,26 +89,27 @@ module  m_spin_potential
 contains
 
   subroutine initialize(self, nspin)
-
-    implicit none
     !Arguments ------------------------------------
     !scalars
-    class(spin_potential_t), intent(out) :: self
-    integer, intent(inout) :: nspin
-
+    class(spin_potential_t), intent(inout) :: self
+    integer :: nspin
+    self%label="SpinPotential"
     self%has_spin=.True.
     self%has_displacement=.False.
     self%has_strain=.False.
     self%is_null=.False.
-
     self%nspin=nspin
-    call xmpi_bcast(nspin, master, comm, ierr)
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call self%coeff_coo%initialize([self%nspin*3, self%nspin*3])
-
-    ABI_ALLOCATE( self%Htmp, (3, nspin))
-
+    ABI_ALLOCATE(self%external_hfield, (3,self%nspin))
+    ABI_ALLOCATE( self%Htmp, (3, self%nspin))
   end subroutine initialize
+
+  subroutine set_supercell(self, supercell)
+    class(spin_potential_t), intent(inout) :: self
+    type(mb_supercell_t), target, intent(inout) :: supercell
+    self%supercell=>supercell
+  end subroutine set_supercell
 
   subroutine set_terms(self, &
        &     external_hfield, &
@@ -156,7 +158,6 @@ contains
   subroutine set_external_hfield(self, external_hfield)
     class(spin_potential_t), intent(inout) :: self
     real(dp), intent(in) :: external_hfield(:,:)
-    ABI_ALLOCATE(self%external_hfield, (3,self%nspin))
     self%has_external_hfield = .true.
     self%external_hfield = external_hfield
   end subroutine set_external_hfield

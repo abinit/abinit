@@ -47,7 +47,7 @@ module m_primitive_potential_list
   ! primitve_potential_pointer_t
   !-------------------------------------------------------------------!
   type, public:: primitive_potential_pointer_t ! pointer to effpot
-     class(primitive_potential_t), pointer :: obj
+     class(primitive_potential_t), pointer :: obj=>null()
   end type primitive_potential_pointer_t
 
 
@@ -184,13 +184,12 @@ contains
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     class(abstract_potential_t), pointer :: tmp
-    integer i
+    integer :: i
+    tmp=>null()
     do i =1, self%size
       call self%data(i)%obj%fill_supercell(sc_maker, tmp)
     end do
-    print *, "appending to scpot"
     call sc_pots%append(tmp)
-    print *, "appended"
   end subroutine fill_supercell_list
 
 end module m_primitive_potential_list

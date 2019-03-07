@@ -32,7 +32,7 @@ module m_dynamic_array
   use defs_basis
   use m_abicore
   use m_errors
-  use m_mathfuncs, only: array_morethan, binsearch_left_integerlist
+  use m_mathfuncs, only: array_morethan, binsearch_left_integerlist,binsearch_left_integer
 
   implicit none
   private
@@ -229,7 +229,8 @@ subroutine insertion_sort_int(a, order)
   do i = 2,n
      v=a(i)
      j=i-1
-     do while(j>=1 .and. a(j)>v)
+     do while(j>=1 )
+        if (a(j)<=v) exit
         a(j+1)=a(j)
         if(present(order)) order(j+1)=order(j)
         j=j-1
@@ -253,7 +254,8 @@ subroutine int_array_type_sort(self, order)
   do i = 2, self%size
      v=self%data(i)
      j=i-1
-     do while(j>=1 .and. self%data(j)>v)
+     do while(j>=1 )
+        if(.not. self%data(j)>v) exit
         self%data(j+1)=self%data(j)
         if(present(order)) order(j+1)=order(j)
         j=j-1
@@ -329,7 +331,9 @@ subroutine int2d_array_type_push(self, val)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
       !ABI_ALLOCATE(temp,(self%capacity))
-      ALLOCATE(temp(size(val), self%capacity), stat=err)
+
+      ABI_ALLOCATE(temp, (size(val), self%capacity))
+      !ALLOCATE(temp(size(val), self%capacity), stat=err)
       temp(:,:self%size-1) = self%data
       call move_alloc(temp, self%data) !temp gets deallocated
     end if
@@ -425,7 +429,8 @@ subroutine int2d_array_type_sort(self, order)
   do i = 2, self%size
      v=self%data(:,i)
      j=i-1
-     do while(j>=1 .and. array_morethan(self%data(:,j),v, size(self%data, dim=1)))
+     do while(j>=1 )
+        if (.not.array_morethan(self%data(:,j),v, size(self%data, dim=1))) exit
         self%data(:,j+1)=self%data(:,j)
         if(present(order)) order(j+1)=order(j)
         j=j-1
@@ -447,17 +452,20 @@ end function int2d_array_type_binsearch
 
 !====================== Unit tests======================
 
+subroutine binsearch_test()
+  integer :: a(4)=[1,2,3,4], b(3,3)=reshape([0,0,0,0,1,0,1,0,0], [3,3])
+  integer :: i
+  i=binsearch_left_integer(a, 5)
+  i=binsearch_left_integerlist(b, [0,0,0])
+end subroutine binsearch_test
+
 subroutine insertion_sort_int_test()
   integer :: a(4), order(4), b(4)
   a=[1,5,3,4]
   b=a
   call insertion_sort_int(a, order)
-  print *, a
-  print *, "order", order
-  print *, "by order", b(order)
   a=[3,6,2,4]
   call insertion_sort_int(a, order)
-  print *, a
 end subroutine insertion_sort_int_test
 
 subroutine int2d_array_test()
@@ -475,6 +483,7 @@ subroutine int2d_array_test()
 end subroutine int2d_array_test
 
 subroutine dynamic_array_unittest()
+  call binsearch_test()
   call insertion_sort_int_test()
   call int2d_array_test()
 end subroutine dynamic_array_unittest

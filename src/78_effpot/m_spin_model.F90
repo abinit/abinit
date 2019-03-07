@@ -53,13 +53,10 @@ module m_spin_model
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_spin_potential, only: spin_potential_t
   use m_spin_primitive_potential, only: spin_primitive_potential_t
-  use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
-       & spin_hist_t_set_params, spin_hist_t_reset, spin_hist_t_inc
+  use m_spin_hist, only: spin_hist_t
   use m_spin_mover, only: spin_mover_t
-  use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_init, spin_ncfile_t_close, spin_ncfile_t_def_sd, &
-       & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
-       & spin_ncfile_t_write_one_step, spin_ncfile_t_def_ob
-  use m_spin_observables, only: spin_observable_t, ob_reset, ob_initialize, ob_finalize, ob_calc_observables
+  use m_spin_ncfile, only: spin_ncfile_t
+  use m_spin_observables, only: spin_observable_t
   implicit none
   !!***
 
@@ -197,26 +194,21 @@ contains
        call self%set_params()
 
     if(iam_master) then
-       call spin_hist_t_init(hist=self%spin_hist, nspin=self%nspin, &
+       call self%spin_hist%initialize(nspin=self%nspin, &
             &   mxhist=3, has_latt=.False.)
-
-       call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
+       call self%spin_hist%set_params(spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=self%params%spin_temperature)
-
        call self%spin_mover%set_hist(self%spin_hist)
-
      endif
-       call self%set_initial_spin()
 
+       call self%set_initial_spin()
        call self%spin_mover%set_langevin_params(gyro_ratio=self%spin_calculator%supercell%gyro_ratio, &
             & damping=self%spin_calculator%supercell%gilbert_damping, ms=self%spin_calculator%supercell%ms )
 
     if(iam_master) then
-       call ob_initialize(self%spin_ob, self%spin_calculator%supercell, self%params)
-
+       call self%spin_ob%initialize(self%spin_calculator%supercell, self%params)
        call spin_model_t_prepare_ncfile(self, self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
-
-       call spin_ncfile_t_write_one_step(self%spin_ncfile, self%spin_hist)
+       call self%spin_ncfile%write_one_step(self%spin_hist)
      endif
 
   end subroutine spin_model_t_initialize
@@ -249,7 +241,7 @@ contains
       call self%spin_primitive%finalize()
       call spin_hist_t_free(self%spin_hist)
       call ob_finalize(self%spin_ob)
-      call spin_ncfile_t_close(self%spin_ncfile)
+      call self%spin_ncfile%close()
     end if
     call self%spin_calculator%finalize()
     call self%spin_mover%finalize()
@@ -284,7 +276,6 @@ contains
     ! params -> mover
     ! params -> calculator
 
-
     call xmpi_bcast(self%params%spin_damping, master, comm, ierr)
     if (self%params%spin_damping >=0) then
        damping(:)= self%params%spin_damping
@@ -296,13 +287,6 @@ contains
        mfield(:, i)=self%params%spin_mag_field(:)
     end do
     call self%spin_calculator%set_external_hfield(mfield)
-
-    !if (self%params%spin_sia_add /= 0 ) then
-    !   call spin_potential_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
-    !        &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
-    !end if
-
-    ! params -> hist
 
   end subroutine spin_model_t_set_params
   !!***
@@ -404,12 +388,12 @@ contains
     type(spin_ncfile_t), intent(out) :: spin_ncfile
     character(len=*) :: fname
     if(iam_master) then
-    call spin_ncfile_t_init(spin_ncfile, trim(fname), self%params%spin_write_traj)
-    call spin_ncfile_t_def_sd(spin_ncfile, self%spin_hist )
-    call spin_ncfile_t_def_ob(spin_ncfile, self%spin_ob)
+       call spin_ncfile%initialize( trim(fname), self%params%spin_write_traj)
+    call spin_ncfile%def_spindynamics_var(self%spin_hist )
+    call spin_ncfile%def_observable_var(self%spin_ob)
     !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
-    call spin_ncfile_t_write_supercell(spin_ncfile, self%spin_calculator)
-    call spin_ncfile_t_write_parameters(spin_ncfile, self%params)
+    call spin_ncfile%write_supercell(self%spin_calculator)
+    call spin_ncfile%write_parameters(self%params)
     endif
   end subroutine spin_model_t_prepare_ncfile
   !!***
@@ -592,7 +576,7 @@ contains
           write(post_fname, "(I4.4)") i
           call spin_model_t_prepare_ncfile(self, spin_ncfile, & 
                & trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
-          call spin_ncfile_t_write_one_step(spin_ncfile, self%spin_hist)
+          call spin_ncfile%write_one_step(self%spin_hist)
        endif
 
        ! run in parallel
@@ -600,7 +584,7 @@ contains
             & self%spin_hist, ncfile=spin_ncfile, ob=self%spin_ob)
 
        if(iam_master) then
-          call spin_ncfile_t_close(spin_ncfile)
+          call spin_ncfile%close()
           ! save observables
           Tlist(i)=T
           chi_list(i)=self%spin_ob%chi

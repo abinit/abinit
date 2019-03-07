@@ -150,9 +150,10 @@ contains
   subroutine trans_xred(self, xred, scxred)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: xred(:,:)
-    real(dp), intent(inout) :: scxred(3,size(xred, dim=2)*self%ncells)
+    real(dp), allocatable, intent(inout) :: scxred(:, :)
     integer :: npos, icell, ipos, counter=0
     npos=size(xred, dim=2)
+    ABI_ALLOCATE(scxred, (3,size(xred, dim=2)*self%ncells))
     do icell = 1, self%ncells
        do ipos=1 , npos
           counter=counter+1
@@ -185,16 +186,23 @@ contains
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: R(3)
     integer, intent(inout) :: ind_sc, R_sc(3)
-    integer :: rprim(3)
+    integer :: rprim(3), i
     R_sc=floor(self%to_red_sc(R*1.0d0))
     rprim(:)= R-matmul(R_sc, self%scmat)
-    ind_sc=binsearch_left_integerlist(self%rvecs, rprim)
-    !do i =0, self%ncells
-    !  if (all(self%rvecs(:,i) == rprim)) then
-    !      ind_sc=i
-    !      exit
-    !   end if
-    !end do
+    !ind_sc=binsearch_left_integerlist(self%rvecs, rprim)
+    ind_sc=0
+    do i =1, self%ncells
+      if (all(self%rvecs(:,i) == rprim)) then
+          ind_sc=i
+          exit
+       end if
+    end do
+    if (ind_sc==0) then
+       print *, "Cannot find rprim"
+       print *, "rprim", rprim
+       print *, "rvecs", self%rvecs
+    end if
+
   end subroutine R_to_sc
 
   ! ind: index in primitive cell
@@ -202,20 +210,33 @@ contains
   subroutine trans_i(self, nbasis, i, i_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: i, nbasis
-    integer, intent(out) :: i_sc(self%ncells)
+    integer, allocatable, intent(inout) :: i_sc(:)
     integer :: icell
+    if(.not. allocated(i_sc)) ABI_ALLOCATE(i_sc, (self%ncells))
     do icell =1, self%ncells
        i_sc(icell)=nbasis*(icell-1)+i
     end do
   end subroutine trans_i
 
+  subroutine trans_i_noalloc(self, nbasis, i, i_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    integer, intent(in) :: i, nbasis
+    integer, intent(inout) :: i_sc(:)
+    integer :: icell
+    do icell =1, self%ncells
+       i_sc(icell)=nbasis*(icell-1)+i
+    end do
+  end subroutine trans_i_noalloc
+
+
   subroutine trans_ilist(self, nbasis, ilist, ilist_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: ilist(:), nbasis
-    integer, intent(out) :: ilist_sc(size(ilist)*self%ncells)
+    integer, allocatable,  intent(inout) :: ilist_sc(:)
     integer :: i
+    if(.not. allocated(ilist_sc)) ABI_ALLOCATE(ilist_sc, (size(ilist)*self%ncells))
     do i =1, size(ilist)
-       call self%trans_i(nbasis, ilist(i), ilist_sc(self%ncells*(i-1)+1:self%ncells*i ))
+       call trans_i_noalloc(self,nbasis, ilist(i), ilist_sc(self%ncells*(i-1)+1:self%ncells*i ))
     end do
   end subroutine trans_ilist
 
@@ -223,20 +244,37 @@ contains
   subroutine trans_j_and_Rj(self, nbasis, j, Rj, j_sc, Rj_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: j, Rj(3), nbasis
-    integer, intent(out) :: j_sc(self%ncells), Rj_sc(3, self%ncells)
+    integer, allocatable , intent(inout) :: j_sc(:), Rj_sc(:, :)
     integer :: i,jj
+    if(.not. allocated(j_sc)) ABI_ALLOCATE(j_sc, (self%ncells))
+    if(.not. allocated(Rj_sc)) ABI_ALLOCATE(Rj_sc, (3, self%ncells))
     do i =1, self%ncells
        call self%R_to_sc(Rj + self%rvecs(:,i), Rj_sc(:,i), jj)
        j_sc(i)=nbasis*(jj-1)+j
     end do
   end subroutine trans_j_and_Rj
 
+  subroutine trans_j_and_Rj_noalloc(self, nbasis, j, Rj, j_sc, Rj_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    integer, intent(in) :: j, Rj(3), nbasis
+    integer, intent(inout) :: j_sc(:), Rj_sc(:, :)
+    integer :: i,jj
+    do i =1, self%ncells
+       call self%R_to_sc(Rj + self%rvecs(:,i), Rj_sc(:,i), jj)
+       j_sc(i)=nbasis*(jj-1)+j
+    end do
+  end subroutine trans_j_and_Rj_noalloc
+
+
+
 
   subroutine trans_jlist_and_Rj(self, nbasis, jlist, Rj, ind_sc, R_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: jlist(:), Rj(3), nbasis
-    integer, intent(out) :: ind_sc(self%ncells*size(jlist)), R_sc(3, self%ncells)
+    integer, allocatable, intent(inout) :: ind_sc(:), R_sc(:,:)
     integer :: i,jj, counter, indj
+    if (.not. allocated(ind_sc)) ABI_ALLOCATE(ind_sc, (self%ncells*size(jlist)) )
+    if (.not. allocated(R_sc)) ABI_ALLOCATE(R_sc, (3, self%ncells))
     counter=0
     do i =1, self%ncells
        call self%R_to_sc(Rj + self%rvecs(:,i), R_sc(:,i), jj)
@@ -291,8 +329,6 @@ contains
     end do
   end subroutine repeat_real2d
 
-
-
   subroutine repeat_realmat(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: a(:,:,:)
@@ -328,21 +364,21 @@ contains
     type(supercell_maker_t) :: maker
     integer :: err
     integer :: scmat(3,3)
-    integer :: ind_sc(8)
+    integer, allocatable :: ind_sc(:)
     integer :: R(3), R_sc(3), ind_sc2
-    integer ::  j_sc(8), R_sc3(3, 8)
+    integer, allocatable ::  j_sc(:), R_sc3(:, :)
     scmat=reshape([2,0, 0, 0,2, 0, 0,0,2], [3,3])
     call maker%initialize(scmat)
     err=0
     call maker%trans_i(nbasis=3, i=1, i_sc=ind_sc)
-
-    R=[0,0,3]
+    R=[0,0,0]
     call maker%R_to_sc(R, R_sc, ind_sc2)
-    if (.not.( (all(R_sc==[0,0,1])) .and. (ind_sc2==2 )))  then
-       print *, "R_to_sc is wrong"
+    if (.not.( (all(R_sc==[0,0,0])) .and. (ind_sc2==1 )))  then
+       print *, "R_to_sc is wrong", R_sc, ind_sc2
        err=1
     end if
 
+    R=[0,0,3]
     call maker%trans_j_and_Rj(nbasis=3, j=1, Rj=R, j_sc=j_sc, Rj_sc=R_sc3  )
     if (.not. (  all(j_sc(1:3)==[4,1,10]) &
          .and. all(R_sc3(:,1)==[0,0,1]) &
@@ -350,6 +386,9 @@ contains
        print *, "Wrong trans_j_and_Rj"
        err=1
     end if
+    ABI_DEALLOCATE(ind_sc)
+    ABI_DEALLOCATE(j_sc)
+    ABI_DEALLOCATE(R_sc3)
   end function test1
 
   function test2() result(err)
@@ -357,7 +396,7 @@ contains
     integer :: err
     integer :: scmat(3,3)
     real(dp) :: sccell(3,3)
-    real(dp) :: scxred(3, 2*9)
+    real(dp), allocatable :: scxred(:, :)
     integer, allocatable :: rep1(:)
     real(dp), allocatable :: rep2(:)
     scmat=transpose(reshape([1,2, 3, 4,5,6,7,8,6], [3,3]))

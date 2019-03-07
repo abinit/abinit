@@ -50,13 +50,13 @@ module m_spin_primitive_potential
   !!*** 
   type, public, extends(primitive_potential_t) :: spin_primitive_potential_t
      integer :: natoms, nspin
-     integer, allocatable :: index_spin(:)
      ! TOTAL
      !integer :: total_nnz=0
      !type(int_array_type):: total_ilist, total_jlist, total_Rlist(3)
      !type(real_array_type) :: total_val_list(3,3)
      type(ndcoo_mat_t) :: coeff
      type(int2d_array_type) :: Rlist
+     !integer, allocatable :: index_spin(:)
    contains
      procedure:: initialize
      procedure:: finalize
@@ -68,6 +68,7 @@ module m_spin_primitive_potential
      procedure:: set_dmi
      procedure:: set_sia
      procedure :: add_input_sia
+     procedure :: load_from_files
      procedure:: read_xml
      procedure:: fill_supercell
      procedure :: print_terms
@@ -79,6 +80,10 @@ contains
     class(spin_primitive_potential_t), intent(inout) :: self
     !integer, intent(in) :: nspin
     self%label="Spin_primitive_potential"
+    self%has_spin=.True.
+    self%has_displacement=.False.
+    self%has_strain=.False.
+    self%has_lwf=.False.
   end subroutine initialize
 
 
@@ -90,6 +95,7 @@ contains
     self%nspin=0
     self%natoms=0
     self%label="Destroyed Spin_primitive_potential"
+    call self%primitive_potential_t%finalize()
   end subroutine finalize
 
   subroutine set_atoms(self, primcell)
@@ -107,6 +113,7 @@ contains
          spinat(3,natoms), gyroratios(nspin), damping_factors(nspin)
     integer :: iatom, ispin
     real(dp) :: ms(nspin), spin_positions(3, nspin)
+    self%nspin=nspin
     call self%coeff%initialize(shape=[-1, nspin*3, nspin*3])
     do iatom=1, natoms
        ispin=index_spin(iatom)
@@ -121,40 +128,35 @@ contains
 
   subroutine load_from_files(self, params, fnames)
     class(spin_primitive_potential_t), intent(inout) :: self
-    type(multibinit_dtset_type), intent(inout) :: params
+    type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
     character(len=fnlen) :: xml_fname
     character(len=500) :: message
     integer :: ii
-    type(spin_primitive_potential_t), pointer:: spin_pot
     logical:: use_sia, use_exchange, use_dmi, use_bi
 
     xml_fname=fnames(3)
-    !call self%prim_pots%load_from_files(self%params, self%filenames)
-       if (iam_master) then
-          write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-               &     'reading spin terms.'
-          call wrtout(ab_out,message,'COLL')
-          call wrtout(std_out,message,'COLL')
-       end if
-       allocate(spin_primitive_potential_t::spin_pot)
-       call self%initialize()
+    if (iam_master) then
+       write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+            &     'reading spin terms.'
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+    end if
 
-       use_exchange=.True.
-       use_sia=.True.
-       use_dmi=.True.
-       use_bi=.True.
-       call spin_pot%read_xml(trim(xml_fname)//char(0))
-       !call spin_model%initialize( filnam, inp )
-       ! Do not use sia term in xml if spin_sia_add is set to 1.
-       if(params%spin_sia_add == 1) use_sia=.False.
-       call self%read_xml( xml_fname, &
-            & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
-       if (params%spin_sia_add /= 0 ) then
-          call spin_pot%add_input_sia(params%spin_sia_k1amp, &
-               & params%spin_sia_k1dir)
-       end if
+    use_exchange=.True.
+    use_sia=.True.
+    use_dmi=.True.
+    use_bi=.True.
+    ! Do not use sia term in xml if spin_sia_add is set to 1.
+    if(params%spin_sia_add == 1) use_sia=.False.
+    call self%read_xml( trim(xml_fname)//char(0), &
+         & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
+    if (params%spin_sia_add /= 0 ) then
+       call self%add_input_sia(params%spin_sia_k1amp, &
+            & params%spin_sia_k1dir)
+    end if
   end subroutine load_from_files
+
 
   subroutine set_bilinear_1term(self, i, j, R, val)
     class(spin_primitive_potential_t), intent(inout) :: self
@@ -410,25 +412,17 @@ contains
     class(spin_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t), intent(inout):: scmaker
     class(abstract_potential_t), pointer, intent(inout) :: scpot
-    type(spin_potential_t),pointer :: tpot
+    type(spin_potential_t), pointer:: tpot
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
-    integer :: i_sc(scmaker%ncells), j_sc(scmaker%ncells), R_sc(scmaker%ncells)
+    integer, allocatable :: i_sc(:), j_sc(:), R_sc(:, :)
     real(dp) :: val_sc(scmaker%ncells)
 
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
-
-    print *, "allocate tpot"
+    print *,"sc_nspin", sc_nspin
     allocate(spin_potential_t::tpot)
-
-    print *, "init tpot"
     call tpot%initialize(sc_nspin)
-    scpot=>tpot
-
-    print *, "prim coeff sum"
     call self%coeff%sum_duplicates()
-
-    print *, "make suprecell coeff"
     do inz=1, self%coeff%nnz
        ind_Rij=self%coeff%get_ind_inz(inz)
        iR=ind_Rij(1)
@@ -437,13 +431,13 @@ contains
        R=self%Rlist%data(:,iR)
        call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
        call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=R_sc)
+       print *, self%coeff%val%data(inz)
        val_sc(:)= self%coeff%val%data(inz)
        do i=1, scmaker%ncells
           call tpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
        end do
     end do
-    print *, "suprecell terms finished"
-
+    scpot=>tpot
   end subroutine fill_supercell
 
 

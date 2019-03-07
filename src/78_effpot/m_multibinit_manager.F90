@@ -46,6 +46,7 @@ module m_multibinit_manager
   use m_supercell_maker, only: supercell_maker_t
   use m_multibinit_supercell, only: mb_supercell_t
   use m_primitive_potential_list, only: primitive_potential_list_t
+  use m_primitive_potential, only: primitive_potential_t
   use m_spin_primitive_potential, only: spin_primitive_potential_t
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
@@ -54,15 +55,20 @@ module m_multibinit_manager
   use m_spin_potential, only : spin_potential_t
   use m_lattice_mover, only : lattice_mover_t
   use m_spin_mover, only : spin_mover_t
+  ! TODO : should these be moved into spin mover?
+  use m_spin_hist, only: spin_hist_t
+  use m_spin_ncfile, only: spin_ncfile_t
+  use m_spin_observables, only: spin_observable_t
+
   use m_spin_lattice_coupling_effpot, only : spin_lattice_coupling_effpot_t
   implicit none
   private
 
   !!***
 
-!-------------------------------------------------------------------!
-! Multibinit manager
-!-------------------------------------------------------------------!
+  !-------------------------------------------------------------------!
+  ! Multibinit manager
+  !-------------------------------------------------------------------!
   type, public :: mb_manager_t
      character(len=fnlen) :: filenames(17)
      type(multibinit_dtset_type) :: params
@@ -76,6 +82,9 @@ module m_multibinit_manager
      type(spin_mover_t) :: spin_mover
      ! type(lwf_mover_t) :: lwf_mover
 
+     type(spin_hist_t):: spin_hist
+     type(spin_ncfile_t) :: spin_ncfile
+     type(spin_observable_t) :: spin_ob
    contains
      procedure :: initialize
      procedure :: finalize
@@ -114,6 +123,9 @@ contains
     call self%supercell%finalize()
     call self%prim_pots%finalize()
     call self%pots%finalize()
+    call self%spin_mover%finalize()
+    call self%lattice_mover%finalize()
+    !call self%lwf_mover%finalize()
   end subroutine finalize
 
   !-------------------------------------------------------------------!
@@ -189,6 +201,7 @@ contains
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
     type(spin_primitive_potential_t), pointer :: spin_pot
+    !class(primitive_potential_t), pointer :: t
     call self%unitcell%initialize()
 
     ! latt : TODO
@@ -196,11 +209,23 @@ contains
     ! spin
     if(self%params%spin_dynamics>0) then
        allocate(spin_pot)
-       print *, "spin_pot allocated"
+       call spin_pot%initialize()
+       call spin_pot%set_atoms(self%unitcell)
        call spin_pot%load_from_files(self%params, self%filenames)
-       print *, "spin pot loaded"
        call self%prim_pots%append(spin_pot)
-       print *, "spin appended"
+
+       ! !DEBUG
+       ! print*, "nspin", self%unitcell%spin%nspin
+       ! print*, "ms", self%unitcell%spin%ms
+       ! print*, "gyro_ratio", self%unitcell%spin%gyro_ratio
+       ! print*, "damping_factor", self%unitcell%spin%damping_factor
+       ! print*, "positions", self%unitcell%spin%spin_positions
+       ! !t=>self%prim_pots%data(1)%obj
+       ! select type (t=>self%prim_pots%data(1)%obj)
+       !    type is(spin_primitive_potential_t)
+       !       print *, "nspin", t%nspin
+       !       call t%coeff%print()
+       ! end select
     end if
     if(self%params%dynamics>0) then
        !TODO: LATT
@@ -214,16 +239,28 @@ contains
   !-------------------------------------------------------------------!
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
+    class(abstract_potential_t), pointer :: q
+    integer :: i
     ! unitcell
-
-    print *, "build supercell"
     call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
-    print *, "initialize supercell potential"
-    call self%pots%initialize(self%supercell)
-    print *, "fill spin potential to supercell"
-    print *, "allocated:", allocated(self%pots%data)
+    ! print *, "sc_nspin",  self%supercell%nspin
+    ! print *, "sc_ms",  self%supercell%ms
+    ! print *, "sc_gyro",  self%supercell%gyro_ratio
+    ! print *, "sc_damping",  self%supercell%gilbert_damping
+    ! print *, "ispin_prim",  self%supercell%ispin_prim
+    ! print *, "sc_rvec",  self%supercell%rvec
+    call self%pots%initialize()
+    call self%pots%set_supercell(self%supercell)
     call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
-    print *, "supercell pots filled"
+
+    do i=1, self%pots%size
+       q=>self%pots%data(i)%obj
+    end do
+    !select type (t=>self%prim_pots%data(1)%obj)
+    !    type is(spin_primitive_potential_t)
+    !       print *, "fill spin pot supercell", t%nspin
+    !       call t%fill_supercell(self%sc_maker, q)
+    !end select
   end subroutine fill_supercell
 
   !-------------------------------------------------------------------!
@@ -251,26 +288,71 @@ contains
     ! TODO: LWF MOVER
   end subroutine set_movers
 
+  !-------------------------------------------------------------------!
+  ! set_spin_mover: prepare for spin mover
+  ! Should these be moved into mover?
+  ! including the observables and hist
+  !-------------------------------------------------------------------!
+  subroutine set_spin_mover(self)
+    class(mb_manager_t), intent(inout) :: self
+    real(dp):: mfield(3, self%supercell%nspin), damping(self%supercell%nspin)
+    integer ::  i
+    ! params -> mover
+    ! params -> calculator
+
+    call xmpi_bcast(self%params%spin_damping, master, comm, ierr)
+    if (self%params%spin_damping >=0) then
+       damping(:)= self%params%spin_damping
+    end if
+    call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature, &
+         & damping=damping, ms=self%supercell%ms, gyro_ratio=self%supercell%gyro_ratio)
+
+    call self%spin_mover%initialize(self%params, self%supercell%nspin )
+
+    if(iam_master) then
+       call self%spin_hist%initialize(nspin=self%nspin, &
+            &   mxhist=3, has_latt=.False.)
+       call self%spin_hist%set_params(spin_nctime=self%params%spin_nctime, &
+            &     spin_temperature=self%params%spin_temperature)
+       call self%spin_mover%set_hist(self%spin_hist)
+    endif
+
+    call self%set_initial_spin()
+    call self%spin_mover%set_langevin_params(gyro_ratio=self%spin_calculator%supercell%gyro_ratio, &
+         & damping=self%spin_calculator%supercell%gilbert_damping, ms=self%spin_calculator%supercell%ms )
+
+    if(iam_master) then
+       call self%spin_ob%initialize(self%spin_calculator%supercell, self%params)
+       call spin_model_t_prepare_ncfile(self, self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
+       call self%spin_ncfile%write_one_step(self%spin_hist)
+    endif
+
+
+  end subroutine set_spin_mover
 
   !-------------------------------------------------------------------!
   ! Run dynamics
   !-------------------------------------------------------------------!
   subroutine run_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
-
-    print *, "allocated1:", allocated(self%pots%data)
     call self%prim_pots%initialize()
-    print *, "allocated2:", allocated(self%pots%data)
     call self%sc_maker%initialize(diag(self%params%ncell))
-    print *, "allocated3:", allocated(self%pots%data)
+
+    
+    if(iam_master) then
+       call self%spin_ob%initialize(self%supercell, self%params)
+       call spin_model_t_prepare_ncfile(self, self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
+       call self%spin_ncfile%write_one_step(self%spin_hist)
+    endif
+
+
+
     ! read params
     call self%read_potentials()
-
-    print *, "allocated4:", allocated(self%pots%data)
     call self%fill_supercell()
-
-    print *, "allocated5:", allocated(self%pots%data)
     call self%set_movers()
+
+    print *, "Mover initialized"
   end subroutine run_dynamics
 
   !-------------------------------------------------------------------!
@@ -293,7 +375,6 @@ contains
   subroutine run_all(self, filenames)
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen), intent(inout) :: filenames(17)
-    print *, "allocated0:", allocated(self%pots%data)
     call self%initialize(filenames)
     call self%run()
     call self%finalize()

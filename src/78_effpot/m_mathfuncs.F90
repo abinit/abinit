@@ -82,37 +82,43 @@ contains
   function binsearch_left_integer(a, x) result(ix)
     integer, intent(in):: a(:), x
     integer :: n,ix, ub, lb
-    integer , save :: i=0
+    integer , save :: i=1
+    n=size(a)
+    if (i<0 .or. i>n) i=(size(a)/2+1)
     if (a(i)==x) then
        ix=i
     else
-       n=size(a)
        ub=n
-       lb=0
+       lb=1
        do while (lb<ub)
           i=floor((lb+ub)/2.0)
-          print *, ub, lb, i
           if (a(i)< x) then
-             lb=i+1     
+             lb=i+1
           else
              ub=i
           end if
        end do
-       ix=lb
+       if(a(lb)==x) then
+          ix=lb
+          i=ix
+       else
+          ix=0
+       end if
     endif
   end function binsearch_left_integer
 
   function binsearch_left_integerlist(a, x) result(ix)
     integer, intent(in):: a(:,:), x(:)
     integer :: n,ix, ub, lb, nx
-    integer , save :: i
+    integer , save :: i=1
     nx=size(x)
+    n=size(a, dim=2)
+    if (i<0 .or. i>n) i=(size(a, dim=2)/2+1)
     if (all(a(:,i)==x(:))) then
        ix=i
     else
-       n=size(a, dim=2)
        ub=n
-       lb=0
+       lb=1
        do while (lb<ub)
           i=floor((lb+ub)/2.0)
           if (array_lessthan(a(:, i), x, nx)) then
@@ -121,7 +127,12 @@ contains
              ub=i
           end if
        end do
-       ix=lb
+       if(all(a(:, lb)==x)) then
+          ix=lb
+          i=ix
+       else
+          ix=0
+       end if
     endif
   end function binsearch_left_integerlist
 
