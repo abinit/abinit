@@ -155,7 +155,7 @@ class SpecKey(object):
         return self.name != other.name
 
     def __repr__(self):
-        return self.name + '!' if self.hardreset else ''
+        return self.name + ('!' if self.hardreset else '')
 
 
 class ConfTree(object):
@@ -194,9 +194,9 @@ class ConfTree(object):
         for spec, spec_d in new_d['spec'].items():
             if spec not in old_d['spec']:
                 old_d['spec'][spec] = empty_tree()
-            if spec.hardreset:
-                old_d['spec'][spec] == spec_d[spec].copy()
-            else:
+            if spec.hardreset:  # simply override
+                old_d['spec'][spec] = deepcopy(spec_d)
+            else:  # recursively override individual items
                 self.__update(old_d['spec'][spec], spec_d)
 
     def get_spec_at(self, path):
@@ -329,7 +329,8 @@ class ConfParser(object):
             Create a ConfTree instance from the yaml parser output.
         '''
         assert isinstance(parsed_src, dict), ('parsed_src have to be derivated'
-                                              'from a dictionary.')
+                                              ' from a dictionary but it is'
+                                              ' a {}'.format(type(parsed_src)))
         filters = {}
         trees = {}
         self.metadata = metadata.copy()
