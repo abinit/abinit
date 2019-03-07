@@ -381,7 +381,9 @@ class FileToTest(object):
         except Exception as e:
             warnings.warn('[{}] Something went wrong with this test:\n{}: {}\n'
                           .format(self.name, e.__class__.__name__, str(e)))
-            isok, status, msg = False, 'failed', 'internal error:\n' + str(e)
+            isok, status = False, 'failed'
+            msg = 'internal error:\n{}: {}'.format(e.__class__.__name__,
+                                                   str(e))
 
         # Save comparison results.
         self.fld_isok = isok
