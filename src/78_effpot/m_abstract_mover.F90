@@ -38,7 +38,7 @@ module m_abstract_mover
 
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
-
+  use m_multibinit_supercell, only: mb_supercell_t
   implicit none
 !!***
 
@@ -49,6 +49,7 @@ module m_abstract_mover
      ! calculate d(var)/dt and integrate new var. 
      ! call functions to calculate observables.
      ! interact with hist file.
+     type(mb_supercell_t), pointer:: supercell=>null()
    contains
      !procedure:: initialize       ! perhaps each effpot type should have own 
      !procedure :: finalize
@@ -69,9 +70,17 @@ contains
     MSG_ERROR("set_params not implemented for this mover")
   end subroutine set_params
 
-  subroutine set_initial_state(self)
+
+  subroutine set_supercell(self, supercell)
+    class(abstract_mover_t), intent(inout) :: self
+    type(mb_supercell_t), target :: supercell
+    self%supercell=>supercell
+  end subroutine set_supercell
+
+  subroutine set_initial_state(self, mode)
     ! set initial positions, spin, etc
     class(abstract_mover_t), intent(inout) :: self
+    integer, optional, intent(in) :: mode
     MSG_ERROR("set_initial_state not implemented for this mover")
   end subroutine set_initial_state
 

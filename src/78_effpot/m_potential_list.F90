@@ -157,8 +157,10 @@ contains
     ! Note
     ! calculate force and strain if asked to
        do i=1, self%size
+          print *,"run calculate of potential", self%data(i)%obj%label
           call self%data(i)%obj%calculate(displacement=displacement, strain=strain, &
                & spin=spin, force=force, stress=stress, bfield=bfield, energy=energy)
+          print *,"finished", self%data(i)%obj%label
        end do
   end subroutine calculate
 

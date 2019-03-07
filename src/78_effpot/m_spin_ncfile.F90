@@ -45,6 +45,7 @@ module m_spin_ncfile
   use m_spin_primitive_potential, only: spin_primitive_potential_t
   use m_spin_potential , only: spin_potential_t
   use m_multibinit_dataset, only: multibinit_dtset_type
+  use m_multibinit_supercell, only: mb_supercell_t
   use m_spin_observables, only : spin_observable_t
 #if defined HAVE_NETCDF
   use netcdf
@@ -274,10 +275,10 @@ end subroutine def_observable_var
 #endif
   end subroutine write_primitive_cell
 
-  subroutine write_supercell(self, scell)
+  subroutine write_supercell(self, supercell)
 
     class(spin_ncfile_t), intent(inout) :: self
-    type(spin_potential_t), intent(in) :: scell
+    type(mb_supercell_t), intent(in) :: supercell
     integer :: rprimd_id, pos_id, ispin_prim_id, rvec_id, iatoms_id, ncerr
     ! sc_matric
 
@@ -370,6 +371,5 @@ end subroutine def_observable_var
     !NCF_CHECK_MSG(ncerr, "close netcdf spin history file"//trim(self%filename)//".")
 #endif
   end subroutine close
-
 
 end module m_spin_ncfile

@@ -56,9 +56,7 @@ module m_multibinit_manager
   use m_lattice_mover, only : lattice_mover_t
   use m_spin_mover, only : spin_mover_t
   ! TODO : should these be moved into spin mover?
-  use m_spin_hist, only: spin_hist_t
   use m_spin_ncfile, only: spin_ncfile_t
-  use m_spin_observables, only: spin_observable_t
 
   use m_spin_lattice_coupling_effpot, only : spin_lattice_coupling_effpot_t
   implicit none
@@ -82,9 +80,7 @@ module m_multibinit_manager
      type(spin_mover_t) :: spin_mover
      ! type(lwf_mover_t) :: lwf_mover
 
-     type(spin_hist_t):: spin_hist
      type(spin_ncfile_t) :: spin_ncfile
-     type(spin_observable_t) :: spin_ob
    contains
      procedure :: initialize
      procedure :: finalize
@@ -255,6 +251,7 @@ contains
 
     do i=1, self%pots%size
        q=>self%pots%data(i)%obj
+       print *, q%label
     end do
     !select type (t=>self%prim_pots%data(1)%obj)
     !    type is(spin_primitive_potential_t)
@@ -278,8 +275,11 @@ contains
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
     if (self%params%spin_dynamics>0) then
-       call self%spin_mover%initialize(self%params, nspin=self%supercell%nspin)
+
+       print *, "init spin_mover "
+       call self%spin_mover%initialize(self%params, supercell=self%supercell)
     end if
+    print *, "spin_mover initialized"
 
     if (self%params%dynamics>0) then
        call self%lattice_mover%initialize(self%params, self%filenames)
@@ -288,47 +288,6 @@ contains
     ! TODO: LWF MOVER
   end subroutine set_movers
 
-  !-------------------------------------------------------------------!
-  ! set_spin_mover: prepare for spin mover
-  ! Should these be moved into mover?
-  ! including the observables and hist
-  !-------------------------------------------------------------------!
-  subroutine set_spin_mover(self)
-    class(mb_manager_t), intent(inout) :: self
-    real(dp):: mfield(3, self%supercell%nspin), damping(self%supercell%nspin)
-    integer ::  i
-    ! params -> mover
-    ! params -> calculator
-
-    call xmpi_bcast(self%params%spin_damping, master, comm, ierr)
-    if (self%params%spin_damping >=0) then
-       damping(:)= self%params%spin_damping
-    end if
-    call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature, &
-         & damping=damping, ms=self%supercell%ms, gyro_ratio=self%supercell%gyro_ratio)
-
-    call self%spin_mover%initialize(self%params, self%supercell%nspin )
-
-    if(iam_master) then
-       call self%spin_hist%initialize(nspin=self%nspin, &
-            &   mxhist=3, has_latt=.False.)
-       call self%spin_hist%set_params(spin_nctime=self%params%spin_nctime, &
-            &     spin_temperature=self%params%spin_temperature)
-       call self%spin_mover%set_hist(self%spin_hist)
-    endif
-
-    call self%set_initial_spin()
-    call self%spin_mover%set_langevin_params(gyro_ratio=self%spin_calculator%supercell%gyro_ratio, &
-         & damping=self%spin_calculator%supercell%gilbert_damping, ms=self%spin_calculator%supercell%ms )
-
-    if(iam_master) then
-       call self%spin_ob%initialize(self%spin_calculator%supercell, self%params)
-       call spin_model_t_prepare_ncfile(self, self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
-       call self%spin_ncfile%write_one_step(self%spin_hist)
-    endif
-
-
-  end subroutine set_spin_mover
 
   !-------------------------------------------------------------------!
   ! Run dynamics
@@ -337,22 +296,13 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%sc_maker%initialize(diag(self%params%ncell))
-
-    
-    if(iam_master) then
-       call self%spin_ob%initialize(self%supercell, self%params)
-       call spin_model_t_prepare_ncfile(self, self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
-       call self%spin_ncfile%write_one_step(self%spin_hist)
-    endif
-
-
-
     ! read params
     call self%read_potentials()
     call self%fill_supercell()
+    print *, "supercell filled"
     call self%set_movers()
-
     print *, "Mover initialized"
+    call self%spin_mover%run_time(self%pots)
   end subroutine run_dynamics
 
   !-------------------------------------------------------------------!

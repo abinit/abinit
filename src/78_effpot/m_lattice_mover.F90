@@ -51,9 +51,10 @@ contains
     type(multibinit_dtset_type) :: params
   end subroutine set_params
 
-  subroutine set_initial_state(self)
+  subroutine set_initial_state(self, mode)
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
+    integer, optional, intent(in) :: mode
   end subroutine set_initial_state
 
   subroutine run_one_step(self, effpot)

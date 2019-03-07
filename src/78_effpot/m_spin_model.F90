@@ -190,7 +190,7 @@ contains
        ! set parameters to hamiltonian and mover
        self%nspin= self%spin_calculator%nspin
 
-       call self%spin_mover%initialize(self%params, self%nspin )
+       ! TODO: disabled and need to get back call self%spin_mover%initialize(self%params, self%spin_supercell)
        call self%set_params()
 
     if(iam_master) then
@@ -198,7 +198,7 @@ contains
             &   mxhist=3, has_latt=.False.)
        call self%spin_hist%set_params(spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=self%params%spin_temperature)
-       call self%spin_mover%set_hist(self%spin_hist)
+       !call self%spin_mover%set_hist(self%spin_hist)
      endif
 
        call self%set_initial_spin()
@@ -239,8 +239,8 @@ contains
     class(spin_model_t), intent(inout) :: self
     if(iam_master) then
       call self%spin_primitive%finalize()
-      call spin_hist_t_free(self%spin_hist)
-      call ob_finalize(self%spin_ob)
+      call self%spin_hist%finalize()
+      call self%spin_ob%finalize()
       call self%spin_ncfile%close()
     end if
     call self%spin_calculator%finalize()
@@ -392,7 +392,7 @@ contains
     call spin_ncfile%def_spindynamics_var(self%spin_hist )
     call spin_ncfile%def_observable_var(self%spin_ob)
     !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
-    call spin_ncfile%write_supercell(self%spin_calculator)
+    !TODO:call spin_ncfile%write_supercell(self%supercell)
     call spin_ncfile%write_parameters(self%params)
     endif
   end subroutine spin_model_t_prepare_ncfile
@@ -450,7 +450,7 @@ contains
 
     end if
 
-    call spin_hist_t_set_vars(self%spin_hist, S=S, Snorm=self%spin_calculator%supercell%ms, &
+    call self%spin_hist%set_vars( S=S, Snorm=self%spin_calculator%supercell%ms, &
          &  time=0.0_dp, ihist_latt=0, inc=.True.)
 
    endif
@@ -506,7 +506,8 @@ contains
   subroutine spin_model_t_run_time(self)
 
     class(spin_model_t), intent(inout) :: self
-    call self%spin_mover%run_time(self%spin_calculator,self%spin_hist, self%spin_ncfile, self%spin_ob)
+    ! TODO call self%spin_mover%run_time(self%spin_calculator,self%spin_hist, self%spin_ncfile, self%spin_ob)
+    ! call self%spin_mover%run_time(self%spin_calculator)
   end subroutine spin_model_t_run_time
   !!***
 
@@ -556,21 +557,21 @@ contains
           call wrtout(std_out, msg, "COLL")
           call wrtout(ab_out,  msg, "COLL")
 
-          call spin_hist_t_reset(self%spin_hist, array_to_zero=.False.)
+          call self%spin_hist%reset(array_to_zero=.False.)
           ! set temperature
           ! TODO make this into a subroutine set_params
           self%params%spin_temperature=T
         endif
         call self%spin_mover%set_Langevin_params(temperature=T)
         if(iam_master) then
-          call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
+          call self%spin_hist%set_params(spin_nctime=self%params%spin_nctime, &
                &     spin_temperature=T)
-          call ob_reset(self%spin_ob, self%params)
+          call self%spin_ob%reset(self%params)
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
           if(i==0) then
              call self%set_initial_spin()
           else
-             call spin_hist_t_inc(self%spin_hist)
+             call self%spin_hist%inc1()
           endif
 
           write(post_fname, "(I4.4)") i
@@ -580,8 +581,7 @@ contains
        endif
 
        ! run in parallel
-       call self%spin_mover%run_time(self%spin_calculator, & 
-            & self%spin_hist, ncfile=spin_ncfile, ob=self%spin_ob)
+       call self%spin_mover%run_time(self%spin_calculator)
 
        if(iam_master) then
           call spin_ncfile%close()

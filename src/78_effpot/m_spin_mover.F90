@@ -45,7 +45,9 @@ module m_spin_mover
   use m_spin_potential, only:  spin_potential_t
   use m_spin_hist, only: spin_hist_t
   use m_spin_ncfile, only: spin_ncfile_t
+  use m_spin_observables, only: spin_observable_t
   use m_multibinit_dataset, only: multibinit_dtset_type
+  use m_multibinit_supercell, only: mb_supercell_t
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
@@ -76,20 +78,23 @@ module m_spin_mover
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:)
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:)
      type(rng_t) :: rng
-     type(spin_hist_t), pointer :: hist
+     type(spin_hist_t) :: hist
      logical :: gamma_l_calculated
      type(spin_mc_t) :: spin_mc
      type(mpi_scheduler_t) :: mps
+     type(spin_observable_t) :: spin_ob
+     type(spin_ncfile_t) :: spin_ncfile
    CONTAINS
-     procedure :: initialize => spin_mover_t_initialize
-     procedure :: finalize => spin_mover_t_finalize
-     procedure :: set_hist => spin_mover_t_set_hist
+     procedure :: initialize
+     procedure :: finalize
+     procedure :: set_initial_state
      procedure, private :: run_one_step_DM => spin_mover_t_run_one_step_DM
      procedure, private :: run_one_step_HeunP => spin_mover_t_run_one_step_HeunP
      procedure, private :: run_one_step_MC=> spin_mover_t_run_one_step_MC
      procedure :: run_one_step => spin_mover_t_run_one_step
      procedure :: run_time => spin_mover_t_run_time
      procedure :: set_Langevin_params
+     procedure :: prepare_ncfile
      procedure, private ::get_Langevin_Heff
      procedure, private :: get_dSdt
   end type spin_mover_t
@@ -97,10 +102,10 @@ module m_spin_mover
 
 contains
 
-  !!****f* m_spin_mover/spin_mover_t_initialize
+  !!****f* m_spin_mover/initialize
   !!
   !! NAME
-  !!  spin_mover_t_initialize
+  !!  initialize
   !!
   !! FUNCTION
   !!  initialize the spin mover
@@ -116,19 +121,24 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_initialize(self, params, nspin)
+  subroutine initialize(self, params, supercell)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
-    integer, intent(inout) :: nspin
-    integer ::  i
-    self%nspin=nspin
-    self%dt= params%spin_dt
-    self%pre_time= params%spin_ntime_pre * self%dt
-    self%total_time= params%spin_ntime * self%dt
-    self%temperature=params%spin_temperature
-    if(params%spin_dynamics>=0) then
-       self%method=params%spin_dynamics
-    endif
+    type(mb_supercell_t), target :: supercell
+    !real(dp):: damping(self%supercell%nspin)
+    integer :: i, nspin
+    if (iam_master) then
+       self%supercell=>supercell
+       nspin=supercell%nspin
+       self%nspin=nspin
+       self%dt= params%spin_dt
+       self%pre_time= params%spin_ntime_pre * self%dt
+       self%total_time= params%spin_ntime * self%dt
+       self%temperature=params%spin_temperature
+       if(params%spin_dynamics>=0) then
+          self%method=params%spin_dynamics
+       endif
+    end if
     if(params%spin_dynamics==3) then ! Monte carlo
        call self%spin_mc%initialize(nspin=nspin, angle=1.0_dp, temperature=params%spin_temperature)
     end if
@@ -138,12 +148,15 @@ contains
     call xmpi_bcast(self%total_time, master, comm, ierr)
     call xmpi_bcast(self%temperature, master, comm, ierr)
     call xmpi_bcast(self%method, master, comm, ierr)
+
+    print *, "params set"
     call set_seed(self%rng, [111111_dp, 2_dp])
     if(my_rank>0) then
        do i =1,my_rank
           call self%rng%jump()
        end do
     end if
+    print *, "rng set"
 
     ABI_ALLOCATE(self%ms, (self%nspin) )
     ABI_ALLOCATE(self%gyro_ratio, (self%nspin) )
@@ -156,20 +169,118 @@ contains
     ABI_ALLOCATE(self%Hrotate, (3,self%nspin) )
     ABI_ALLOCATE(self%Stmp, (3,self%nspin) )
     ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
+    print *, "allocations done"
 
     self%gamma_l_calculated=.False.
 
     call self%mps%initialize(nspin, comm)
-  end subroutine spin_mover_t_initialize
+
+    print *, "mps set"
+
+    call xmpi_bcast(params%spin_damping, master, comm, ierr)
+    if (params%spin_damping >=0) then
+       self%damping(:)= params%spin_damping
+    end if
+    call self%set_langevin_params(temperature=params%spin_temperature, &
+         & damping=self%damping, ms=self%supercell%ms, gyro_ratio=self%supercell%gyro_ratio)
+
+    print * ,"langevin params set"
+
+    ! Hist and set initial spin state
+    if(iam_master) then
+       call self%hist%initialize(nspin=self%nspin, &
+            &   mxhist=3, has_latt=.False.)
+       call self%hist%set_params(spin_nctime=params%spin_nctime, &
+            &     spin_temperature=params%spin_temperature)
+    endif
+
+    print *, "spin hist initialzed"
+    call self%set_initial_state(mode=params%spin_init_state)
+
+    print *, "initial state ste"
+    ! observable
+    if(iam_master) then
+       call self%spin_ob%initialize(self%supercell, params)
+    endif
+
+    print *, "observables set"
+  end subroutine initialize
   !!***
 
-  subroutine spin_mover_t_set_hist(self, hist)
+  !-------------------------------------------------------------------!
+  !set_ncfile_name :
+  !-------------------------------------------------------------------!
+  subroutine set_ncfile_name(self, params, fname)
     class(spin_mover_t), intent(inout) :: self
-    type(spin_hist_t), target, intent(inout) :: hist
-    if (iam_master) then
-       self%hist=>hist
+    type(multibinit_dtset_type) :: params
+    character(len=fnlen), intent(in) :: fname
+    call self%prepare_ncfile(params, trim(fname)//'_spinhist.nc')
+    call self%spin_ncfile%write_one_step(self%hist)
+  end subroutine set_ncfile_name
+
+
+  !-------------------------------------------------------------------!
+  !set_initial_state:
+  !-------------------------------------------------------------------!
+  subroutine set_initial_state(self, mode)
+    class(spin_mover_t), intent(inout) :: self
+    integer, optional, intent(in) :: mode
+    integer :: i, m
+    real(dp) :: S(3, self%nspin)
+    character(len=500) :: msg
+    if(iam_master) then
+       if (present(mode)) then
+          m=mode
+       else
+          m=1
+       end if
+    if(m==2) then
+       ! set all spin to z direction.
+       S(1,:)=0.0d0
+       S(2,:)=0.0d0
+       S(3,:)=1.0d0
+    else if (m==1) then
+       ! randomize S using uniform random number
+       ! print *, "Initial spin set to random value"
+       write(msg,*) "Initial spin set to random value."
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,msg,'COLL')
+       call random_number(S)
+       S=S-0.5
+       do i=1, self%nspin
+          S(:,i)=S(:,i)/sqrt(sum(S(:, i)**2))
+       end do
+    else
+       write(msg,*) "Error: Set initial spin: mode should be 2(FM) or 1 (random). Others are not yet implemented."
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,msg,'COLL')
+
     end if
-  end subroutine spin_mover_t_set_hist
+    call self%hist%set_vars(S=S, Snorm=self%supercell%ms, &
+         &  time=0.0_dp, ihist_latt=0, inc=.True.)
+
+   endif
+ end subroutine set_initial_state
+
+
+ !-------------------------------------------------------------------!
+ ! prepare_ncfile:
+ !-------------------------------------------------------------------!
+ subroutine prepare_ncfile(self,  params, fname)
+   class(spin_mover_t), intent(inout) :: self
+   type(multibinit_dtset_type) :: params
+   character(len=*), intent(in) :: fname
+   if(iam_master) then
+      call self%spin_ncfile%initialize( trim(fname), params%spin_write_traj)
+      call self%spin_ncfile%def_spindynamics_var(self%hist )
+      call self%spin_ncfile%def_observable_var(self%spin_ob)
+      !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
+      call self%spin_ncfile%write_supercell(self%supercell)
+      call self%spin_ncfile%write_parameters(params)
+   endif
+ end subroutine prepare_ncfile
+
+
 
   subroutine set_Langevin_params(self, gyro_ratio, damping, temperature, ms)
     class(spin_mover_t), intent(inout) :: self
@@ -273,7 +384,10 @@ contains
     ! predict
     S_out(:,:)=0.0_dp
     self%Heff_tmp(:,:)=0.0_dp
+
+    print *, "before, calculated 1 bfield"
     call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
+    print *, "calculated 1 bfield"
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
@@ -384,6 +498,7 @@ contains
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp) :: S_out(3,self%nspin), etot
     if(iam_master) self%Stmp=self%hist%get_S()
+    print *, "Stmp", self%Stmp
     if(self%method==1) then
        call self%run_one_step_HeunP(effpot, self%Stmp, S_out, etot)
     else if (self%method==2) then
@@ -417,13 +532,13 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_run_time(self, calculator, hist, ncfile, ob)
+  subroutine spin_mover_t_run_time(self, calculator) !, hist, ncfile, ob)
 
     class(spin_mover_t), intent(inout):: self
     class(abstract_potential_t), intent(inout) :: calculator
-    type(spin_hist_t), intent(inout) :: hist
-    type(spin_ncfile_t), intent(inout) :: ncfile
-    type(spin_observable_t), intent(inout) :: ob
+    !type(spin_hist_t), intent(inout) :: hist
+    !type(spin_ncfile_t), intent(inout) :: ncfile
+    !type(spin_observable_t), intent(inout) :: ob
     !real(dp) ::  S(3, self%nspin)
     real(dp):: t
     integer :: counter, i, ii
@@ -463,14 +578,15 @@ contains
        do while(t<self%pre_time)
           counter=counter+1
           call self%run_one_step(effpot=calculator)
+          print *, "one time step passed"
           if (iam_master) then
-             call hist%set_vars( time=t,  inc=.True.)
-             if(mod(counter, hist%spin_nctime)==0) then
-                call ob%get_observables( hist%S(:,:, hist%ihist_prev), &
-                     hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
+             call self%hist%set_vars( time=t,  inc=.True.)
+             if(mod(counter, self%hist%spin_nctime)==0) then
+                call self%spin_ob%get_observables( self%hist%S(:,:, self%hist%ihist_prev), &
+                     self%hist%Snorm(:,self%hist%ihist_prev),self%hist%etot(self%hist%ihist_prev))
                 write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
-                     & ob%Mst_norm_total/ob%Snorm_total, &
-                     & hist%etot(hist%ihist_prev)/ob%nscell
+                     & self%spin_ob%Mst_norm_total/self%spin_ob%Snorm_total, &
+                     & self%hist%etot(self%hist%ihist_prev)/self%spin_ob%nscell
                 ! total : 13+4+...= 64 
                 call wrtout(std_out,msg,'COLL')
                 call wrtout(ab_out, msg, 'COLL')
@@ -482,28 +598,28 @@ contains
        t=0.0
        counter=0
        if (iam_master) then
-          call hist%reset(array_to_zero=.False.)
+          call self%hist%reset(array_to_zero=.False.)
           msg="Measurement run:"
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
        end if
     endif
     if(iam_master) then
-       call ob_reset(ob)
+       call self%spin_ob%reset()
     endif
 
     do while(t<self%total_time)
        counter=counter+1
        call self%run_one_step(effpot=calculator)
        if (iam_master) then
-          call hist%set_vars(time=t,  inc=.True.)
-          call ob%get_observables(hist%S(:,:, hist%ihist_prev), &
-               hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
-          if(mod(counter, hist%spin_nctime)==0) then
-             call ncfile%write_one_step(hist)
+          call self%hist%set_vars(time=t,  inc=.True.)
+          call self%spin_ob%get_observables(self%hist%S(:,:, self%hist%ihist_prev), &
+               self%hist%Snorm(:,self%hist%ihist_prev), self%hist%etot(self%hist%ihist_prev))
+          if(mod(counter, self%hist%spin_nctime)==0) then
+             call self%spin_ncfile%write_one_step(self%hist)
              write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
-                  & ob%Mst_norm_total/ob%Snorm_total, &
-                  & hist%etot(hist%ihist_prev)/ob%nscell
+                  & self%spin_ob%Mst_norm_total/self%spin_ob%Snorm_total, &
+                  & self%hist%etot(self%hist%ihist_prev)/self%spin_ob%nscell
              call wrtout(std_out,msg,'COLL')
              call wrtout(ab_out, msg, 'COLL')
           endif
@@ -528,9 +644,10 @@ contains
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
 
-       do i =1, ob%nsublatt
-          write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspin_sub(i)/mu_B , ii=1, 3), &
-               sqrt(sum((ob%Mst_sub(:, i)/ob%nspin_sub(i)/mu_B)**2))
+       do i =1, self%spin_ob%nsublatt
+          write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, &
+               (self%spin_ob%Mst_sub(ii,i)/self%spin_ob%nspin_sub(i)/mu_B , ii=1, 3), &
+               sqrt(sum((self%spin_ob%Mst_sub(:, i)/self%spin_ob%nspin_sub(i)/mu_B)**2))
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
        end do
@@ -543,7 +660,8 @@ contains
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out, msg, "COLL")
        write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X )" ) &
-            self%temperature*Ha_K , ob%Cv, ob%chi,  ob%binderU4, ob%Avg_Mst_norm_total/ob%snorm_total
+            self%temperature*Ha_K , self%spin_ob%Cv, self%spin_ob%chi, &
+            self%spin_ob%binderU4, self%spin_ob%Avg_Mst_norm_total/self%spin_ob%snorm_total
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out,  msg, "COLL")
 
@@ -555,10 +673,10 @@ contains
   !!***
 
 
-  !!****f* m_spin_mover/spin_mover_t_finalize
+  !!****f* m_spin_mover/finalize
   !!
   !! NAME
-  !!  spin_mover_t_finalize
+  !! finalize
   !!
   !! FUNCTION
   !! finalize spin mover.
@@ -575,7 +693,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_finalize(self)
+  subroutine finalize(self)
 
     class(spin_mover_t), intent(inout):: self
     if(allocated(self%gyro_ratio) ) then
@@ -607,8 +725,6 @@ contains
        ABI_DEALLOCATE(self%Heff_tmp)
     end if
 
-
-
     if(allocated(self%Htmp)) then
        ABI_DEALLOCATE(self%Htmp)
     end if
@@ -621,9 +737,12 @@ contains
        ABI_DEALLOCATE(self%H_lang)
     end if
 
-
+    nullify(self%supercell)
     call self%mps%finalize()
-  end subroutine spin_mover_t_finalize
+    call self%hist%finalize()
+    call self%spin_ob%finalize()
+    call self%spin_ncfile%close()
+  end subroutine finalize
   !!***
 
 end module m_spin_mover
