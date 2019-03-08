@@ -1,7 +1,11 @@
 from __future__ import print_function, division, unicode_literals
 
 
-class ConfigContextError(Exception):
+class YAMLTestError(Exception):
+    pass
+
+
+class ConfigContextError(YAMLTestError):
     def __init__(self, path):
         spath = '.'.join(path)
         msg = ('Tried to enter a None context in the config tree at {}'
@@ -9,7 +13,8 @@ class ConfigContextError(Exception):
         super(ConfigContextError, self).__init__(msg)
 
 
-class ConfigParserError(Exception):
+###############################################################################
+class ConfigParserError(YAMLTestError):
     pass
 
 
@@ -20,7 +25,8 @@ class UnknownParamError(ConfigParserError):
         super(UnknownParamError, self).__init__(msg.format(param, cons))
 
 
-class ConfigError(Exception):
+###############################################################################
+class ConfigError(YAMLTestError):
     pass
 
 
@@ -60,3 +66,16 @@ class IllegalFilterNameError(ConfigError):
     def __init__(self, name):
         msg = '{} is a reserved name, you cannot use it as a filter name.'
         ConfigError.__init__(self, msg.format(name))
+
+
+###############################################################################
+class InputFileError(YAMLTestError):
+    def __init__(self, line, msg):
+        msg = 'In input file at line {}:\n{}'.format(line, msg)
+        super(InputFileError, self).__init__(self, msg)
+
+
+class NoIteratorDefinedError(InputFileError):
+    def __init__(self, line):
+        msg = 'No iterator have been set before reaching the first document.'
+        super(InputFileError, self).__init__(self, line, msg)

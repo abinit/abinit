@@ -6,6 +6,7 @@ from __future__ import print_function, division, unicode_literals
 import re
 from .yaml_tools import is_available as has_yaml
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
+from .yaml_tools.errors import NoIteratorDefinedError
 if has_yaml:
     from .yaml_tools.structures import IterStart
     from .yaml_tools import yaml_parse
@@ -92,6 +93,9 @@ class DataExtractor:
                         self.iterators_state[current_doc['obj'].iterator] = \
                             current_doc['obj'].iteration
                     else:
+                        if not docs['iterators_state']:
+                            # This is not normal !
+                            raise NoIteratorDefinedError(current_doc.start)
                         docs.append(current_doc)
 
                     current_doc = None  # go back to normal mode
