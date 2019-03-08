@@ -95,7 +95,7 @@ class DataExtractor:
                     else:
                         if not current_doc['iterators']:
                             # This is not normal !
-                            raise NoIteratorDefinedError(current_doc.start)
+                            raise NoIteratorDefinedError(current_doc['start'])
                         docs.append(current_doc)
 
                     current_doc = None  # go back to normal mode
