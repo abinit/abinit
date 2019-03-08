@@ -170,15 +170,15 @@ for lib in abinit_corelibs:
   # Initialize includes
   inc = ""
   for dep in include_dirs:
-    inc += " \\\n\t@src_%s_incs@" % (dep)
+    inc += " \\\n\t@src_%s_fcflags@" % (dep)
 
   # Dependencies
   if ( cnf.has_option(lib,"dependencies") ):
     for dep in cnf.get(lib,"dependencies").split():
-      inc += " \\\n\t@abi_%s_incs@" % (dep)
+      inc += " \\\n\t@abi_%s_fcflags@" % (dep)
 
   # Required basic Fortran includes (must be last!)
-  inc += " \\\n\t@fc_mod_incs@"
+  inc += " \\\n\t@fc_mod_fcflags@"
 
   if ( inc != "" ):
     makefile += "AM_CPPFLAGS =%s\n\n" % (inc)
@@ -281,7 +281,7 @@ for lib in abinit_corelibs:
     for chk in checkers:
       # FIXME: hard-coded for now
       makefile += "\n%s_SOURCES = %s.F90" % (chk,chk)
-      makefile += "\n%s_CPPFLAGS = @abi_netcdf_incs@ @abi_linalg_incs@ -I$(top_srcdir)/src/incs" % \
+      makefile += "\n%s_CPPFLAGS = @abi_netcdf_cppflags@ @abi_linalg_cppflags@ -I$(top_srcdir)/src/incs" % \
        (chk)
       makefile += "\n%s_LDADD = \\\n\tlib%s.a" % (chk,lib)
       for elc in checkers[chk] + hard_chklibs:

@@ -129,7 +129,6 @@ for lib in abinit_corelibs:
 
   inc += "  src_{name}_incs='-I$(top_builddir)/{path} -I$(top_srcdir)/{path}'\n".format(
     name=lib, path=par_dir)
-  sub += "  AC_SUBST(src_%s_incs)\n" % (lib)
 
 # Update macro
 mac = macro_header(my_name,now)

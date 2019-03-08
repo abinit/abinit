@@ -145,7 +145,7 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
       else
         abi_@package@_enable="yes"
         abi_@package@_init="pfx"
-        abi_@package@_incs="@includes@"
+        abi_@package@_cppflags="@includes@"
         abi_@package@_libs="@libraries@"
         abi_@package@_prefix="${withval}"
       fi])@with_flavor@
@@ -170,7 +170,7 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
   AC_SUBST(abi_@package@_enable)@subst_flavor@
   AC_SUBST(abi_@package@_init)
   AC_SUBST(abi_@package@_ok)
-  AC_SUBST(abi_@package@_incs)
+  AC_SUBST(abi_@package@_cppflags)
   AC_SUBST(abi_@package@_libs)
   AC_SUBST(abi_@package@_prefix)
   AC_SUBST(abi_fbk_@package@_ok)"""

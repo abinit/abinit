@@ -24,12 +24,10 @@ AC_DEFUN([_ABI_FFT_CHECK_LIB],[
   abi_fft_has_libs="no"
   abi_fft_ok="no"
   abi_fft_mpi="no"
-  abi_fft_incs="${with_fft_incs}"
-  abi_fft_libs="${with_fft_libs}"
 
   dnl Prepare environment
   tmp_saved_LIBS="${LIBS}"
-  LIBS="${with_fft_libs} ${LIBS}"
+  LIBS="${abi_fft_libs} ${LIBS}"
 
   dnl FFT usually doesn't require any include (may change in the future)
   abi_fft_has_incs="yes"
@@ -116,7 +114,7 @@ AC_DEFUN([_ABI_FFTW3_CHECK_LIBS],[
   if test "${abi_fftw3_has_hdrs}" = "yes"; then
     LDFLAGS="${CC_LDFLAGS}"
     AC_LANG_PUSH([C])
-    if test "${with_fftw3_libs}" = ""; then
+    if test "${abi_fftw3_libs}" = ""; then
       AC_SEARCH_LIBS([fftw_execute], [fftw3],
         [abi_fftw3_has_libs="c"], [abi_fftw3_has_libs="no"])
       if test "${ac_cv_search_fftw_execute}" != "no"; then
@@ -147,7 +145,7 @@ AC_DEFUN([_ABI_FFTW3_CHECK_LIBS],[
   if test "${abi_fftw3_has_libs}" = "c"; then
     LDFLAGS="${FC_LDFLAGS}"
     AC_LANG_PUSH([Fortran])
-    if test "${with_fftw3_libs}" = ""; then
+    if test "${abi_fftw3_libs}" = ""; then
       AC_SEARCH_LIBS([sfftw_execute_dft], [fftw3f],
         [abi_fftw3_has_libs="yes"], [abi_fftw3_has_libs="no"])
       if test "${ac_cv_search_sfftw_execute_dft}" != "no"; then
@@ -296,9 +294,9 @@ AC_DEFUN([ABI_FFT_DETECT],[
   dnl Prepare environment
   ABI_ENV_BACKUP
   abi_saved_LIBS="${LIBS}"
-  CPPFLAGS="${with_fft_incs} ${CPPFLAGS}"
+  CPPFLAGS="${abi_fft_incs} ${CPPFLAGS}"
   LDFLAGS="${FC_LDFLAGS}"
-  LIBS="${with_fft_libs} ${LIBS}"
+  LIBS="${abi_fft_libs} ${LIBS}"
 
   dnl Display requested flavor
   AC_MSG_CHECKING([for the requested FFT support])
@@ -310,14 +308,12 @@ AC_DEFUN([ABI_FFT_DETECT],[
     case "${abi_fft_flavor}" in
 
       custom)
-        if test "${with_fft_libs}" == ""; then
+        if test "${abi_fft_libs}" == ""; then
           AC_MSG_ERROR([you must specify custom FFT libraries (--with-fft-libs)])
         fi
         abi_fft_ok="yes"
         abi_fft_serial="yes"
         abi_fft_mpi="yes"
-        abi_fft_incs="${with_fft_incs}"
-        abi_fft_libs="${with_fft_libs}"
         ;;
 
       dfti)

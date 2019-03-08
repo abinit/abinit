@@ -54,12 +54,12 @@ AC_DEFUN([ABI_EXTDEPS_INIT],[
   dnl Initial setup
     fallbacks_prefix=""
     fallbacks_bins=""
-    fallbacks_incs=""
+    fallbacks_cppflags=""
 @DEP_ZERO@
   if test "${with_fallbacks_prefix}" = ""; then
     fallbacks_prefix="${with_fallbacks_prefix}"
     fallbacks_bins="${fallbacks_prefix}/bin"
-    fallbacks_incs="-I${fallbacks_prefix}/include"
+    fallbacks_cppflags="-I${fallbacks_prefix}/include"
 @FBK_SETUP@  fi
 
 @DEP_SUBST@]) # ABI_EXTDEPS_INIT
@@ -81,7 +81,7 @@ AC_DEFUN([ABI_FALLBACKS_INIT],[
   dnl Substitute variables needed for the use of the fallbacks
   AC_SUBST(fallbacks_prefix)
   AC_SUBST(fallbacks_bins)
-  AC_SUBST(fallbacks_incs)
+  AC_SUBST(fallbacks_cppflags)
 @FBK_SUBST@]) # ABI_FALLBACKS_INIT
 """ % (name,stamp,name)
 
@@ -98,7 +98,7 @@ def fbk_select(pkg,detector,deps):
   return """\
     if test %s; then
       abi_%s_bins="${fallbacks_bins}"
-      abi_%s_incs="${fallbacks_incs}"
+      abi_%s_cppflags="${fallbacks_cppflags}"
       abi_%s_libs="${abi_fbk_%s_libs}"
     fi
 """ % (pkg_test,pkg,pkg,pkg,pkg)

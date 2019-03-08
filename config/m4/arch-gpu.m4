@@ -99,9 +99,9 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   abi_gpu_cuda_has_linalg="no"
   abi_gpu_cuda_has_runtime="no"
   abi_gpu_cuda_libdir=""
-  abi_gpu_cuda_incs="${with_gpu_incs}"
-  abi_gpu_cuda_libs="${with_gpu_libs}"
-  abi_gpu_cuda_root="${with_gpu_prefix}"
+  abi_gpu_cuda_incs="${GPU_CPPFLAGS}"
+  abi_gpu_cuda_libs="${GPU_LIBS}"
+  abi_gpu_cuda_root="${abi_gpu_prefix}"
 
   # Make use of the CUDA_ROOT environment variable
   if test "${abi_gpu_cuda_root}" = ""; then
@@ -141,7 +141,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     AC_MSG_CHECKING([for Cuda headers])
     abi_result=""
     if test -s "${abi_gpu_cuda_root}/include/cuda_runtime_api.h"; then
-      if test "${with_gpu_incs}" = ""; then
+      if test "${GPU_CPPFLAGS}" = ""; then
         abi_gpu_cuda_incs="-I${abi_gpu_cuda_root}/include"
       fi
       abi_gpu_cuda_has_incs="yes"
@@ -154,7 +154,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       abi_result="${abi_result} blas"
     fi
     if test -s "${abi_gpu_cuda_root}/SDK/C/common/inc/cutil.h"; then
-      if test "${with_gpu_incs}" = ""; then
+      if test "${GPU_CPPFLAGS}" = ""; then
         abi_gpu_cuda_incs="-I${abi_gpu_cuda_root}/SDK/C/common/inc ${abi_gpu_cuda_incs}"
       fi
       abi_result="${abi_result} sdk"
@@ -188,7 +188,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       fi
     done
     if test -e "${abi_gpu_cuda_libdir}/libcudart.${abi_so_ext}"; then
-      if test "${with_gpu_libs}" = ""; then
+      if test "${GPU_LIBS}" = ""; then
         abi_gpu_cuda_libs="-lcudart"
       fi
       abi_gpu_cuda_has_libs="yes"
@@ -197,25 +197,25 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     fi
     if test "${abi_gpu_cuda_has_libs}" = "yes"; then
       if test -e "${abi_gpu_cuda_libdir}/libcufft.${abi_so_ext}"; then
-        if test "${with_gpu_libs}" = ""; then
+        if test "${GPU_LIBS}" = ""; then
           abi_gpu_cuda_libs="-lcufft ${abi_gpu_cuda_libs}"
         fi
         abi_gpu_cuda_has_fft="yes"
         abi_result="${abi_result} fft"
       fi
       if test -e "${abi_gpu_cuda_libdir}/libcublas.${abi_so_ext}"; then
-        if test "${with_gpu_libs}" = ""; then
+        if test "${GPU_LIBS}" = ""; then
           abi_gpu_cuda_libs="-lcublas ${abi_gpu_cuda_libs}"
         fi
         abi_gpu_cuda_has_linalg="yes"
         abi_result="${abi_result} blas"
       fi
-      if test "${with_gpu_libs}" = ""; then
+      if test "${GPU_LIBS}" = ""; then
         abi_gpu_cuda_libs="-L${abi_gpu_cuda_libdir} ${abi_gpu_cuda_libs}"
       fi
     fi
     if test -s "${abi_gpu_cuda_root}/SDK/C/lib/libcutil.a"; then
-      if test "${with_gpu_libs}" = ""; then
+      if test "${GPU_LIBS}" = ""; then
         abi_gpu_cuda_libs="-L${abi_gpu_cuda_root}/SDK/C/lib -lcutil ${abi_gpu_cuda_libs}"
       fi
       abi_result="${abi_result} sdk"
@@ -224,7 +224,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       abi_result="none"
     fi
     AC_MSG_RESULT([${abi_result}])
-    if test "${with_gpu_libs}" = ""; then
+    if test "${GPU_LIBS}" = ""; then
       abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lcuda"
     fi
     if test "${abi_gpu_cuda_has_common}" = "no"; then
@@ -284,8 +284,8 @@ AC_DEFUN([ABI_GPU_INIT],[
   abi_gpu_fcflags=""
   abi_gpu_ldflags=""
   abi_gpu_flavor="${sd_gpu_flavor}"
-  abi_gpu_incs=""
-  abi_gpu_libs=""
+  abi_gpu_incs="${GPU_CPPFLAGS}"
+  abi_gpu_libs="${GPU_LIBS}"
 
   if test "${abi_gpu_enable}" = "yes" -o "${abi_gpu_enable}" = "auto"; then
 

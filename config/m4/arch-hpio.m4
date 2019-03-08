@@ -21,14 +21,12 @@
 AC_DEFUN([ABI_HPIO_DETECT],[
   dnl Initial setup
   abi_hpio_has_escdf="no"
-  abi_hpio_has_etsf_io="no"
   abi_hpio_has_netcdf="no"
   abi_hpio_flavor="${with_hpio_flavor}"
   abi_hpio_fcflags=""
   abi_hpio_ldflags=""
-  abi_hpio_incs="${with_hpio_incs}"
-  abi_hpio_libs="${with_hpio_libs}"
-  abi_etsf_io_fallback="unknown"
+  abi_hpio_incs="${HPIO_CPPFLAGS}"
+  abi_hpio_libs="${HPIO_LIBS}"
   abi_netcdf_fallback="unknown"
 
   dnl Display input parameters
@@ -101,15 +99,11 @@ AC_DEFUN([ABI_HPIO_DETECT],[
 
     auto)
       if test "${abi_netcdf_fallback}" = "yes"; then
-        abi_hpio_flavor="etsf_io"
+        abi_hpio_flavor="netcdf"
       else
         abi_hpio_flavor="escdf"
         ABI_TRIGGER_ESCDF
         if test "${abi_escdf_ok}" != "yes"; then
-          abi_hpio_flavor="etsf_io"
-          ABI_TRIGGER_ETSF_IO
-        fi
-        if test "${abi_etsf_io_ok}" != "yes"; then
           abi_hpio_flavor="none"
         fi
       fi
@@ -122,12 +116,6 @@ AC_DEFUN([ABI_HPIO_DETECT],[
                   to use ESCDF])
       else
         ABI_TRIGGER_ESCDF
-      fi
-      ;;
-
-    etsf_io)
-      if test "${abi_netcdf_fallback}" != "yes"; then
-        ABI_TRIGGER_ETSF_IO
       fi
       ;;
 
@@ -167,34 +155,6 @@ AC_DEFUN([ABI_HPIO_DETECT],[
       fi
       ;;
 
-    etsf_io)
-      if test "${abi_etsf_io_ok}" = "yes" -o \
-              "${enable_fallbacks}" = "yes"; then
-        AC_DEFINE([HAVE_ETSF_IO],1,
-          [Define to 1 if you have the ETSF_IO library.])
-      fi
-      if test "${abi_etsf_io_ok}" = "yes"; then
-        abi_hpio_fcflags="${abi_hpio_fcflags} ${abi_etsf_io_fcflags}"
-        abi_hpio_ldflags="${abi_hpio_ldflags} ${abi_etsf_io_ldflags}"
-        abi_hpio_incs="${abi_hpio_incs} ${abi_etsf_io_incs}"
-        abi_hpio_libs="${abi_etsf_io_libs} ${abi_hpio_libs}"
-        abi_etsf_io_fallback="no"
-      else
-        if test "${with_etsf_io_incs}" = "" -a "${with_etsf_io_libs}" = ""; then
-          AC_MSG_WARN([falling back to limited developer ETSF_IO version])
-          abi_etsf_io_fallback="yes"
-          abi_fallbacks="${abi_fallbacks} etsf_io"
-          abi_etsf_io_fcflags=""
-          abi_etsf_io_ldflags=""
-          abi_etsf_io_incs=""
-          abi_etsf_io_libs=""
-        else
-          ABI_MSG_NOTICE([connectors-failure],[ETSF_IO detection failure])
-          AC_MSG_ERROR([external ETSF_IO support does not work])
-        fi
-      fi
-      ;;
-
   esac
 
   dnl Propagate downgrade from ESCDF to Fortran I/O
@@ -205,7 +165,6 @@ AC_DEFUN([ABI_HPIO_DETECT],[
     abi_hpio_ldflags=""
     abi_hpio_incs=""
     abi_hpio_libs=""
-    abi_etsf_io_fallback="no"
     abi_netcdf_fallback="no"
   fi
 
@@ -222,12 +181,7 @@ AC_DEFUN([ABI_HPIO_DETECT],[
   AC_MSG_RESULT(['${abi_hpio_libs}'])
   AC_MSG_CHECKING([whether we need a NetCDF fallback])
   AC_MSG_RESULT([${abi_netcdf_fallback}])
-  if test "${abi_hpio_flavor}" = "etsf_io"; then
-    AC_MSG_CHECKING([whether we need an ETSF_IO fallback])
-    AC_MSG_RESULT([${abi_etsf_io_fallback}])
-  fi
-  if test "${abi_netcdf_fallback}" = "yes" -o \
-          "${abi_etsf_io_fallback}" = "yes"; then
+  if test "${abi_netcdf_fallback}" = "yes"; then
     AC_MSG_WARN([fallbacks have been requested
                   you should NOT run production calculations])
   fi

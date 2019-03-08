@@ -651,7 +651,12 @@ ABI_GPU_DETECT
 
 ABI_MSG_SECTION([Linear algebra support])
 
+# Initialize linear algebra support, using the available information
+# about other architectural aspects (compiler, OpenMP, MPI, GPU, ...)
 ABI_LINALG_INIT
+
+# Perform the actual detection separately, so that further adjustments
+# can be done after initialization
 ABI_LINALG_DETECT
 
 # ---------------------------------------------------------------------------- #
@@ -664,12 +669,12 @@ ABI_LINALG_DETECT
 ABI_MSG_SECTION([Optimized FFT support])
 
 # The best-suited FFT flavor is compiler-dependent
-if test "${with_fft_flavor}" = "" -o "${with_fft_flavor}" = "auto"; then
+if test "${abi_fft_flavor}" = "" -o "${abi_fft_flavor}" = "auto"; then
   AC_MSG_NOTICE([(DEBUG) FFT FLAVOR AUTO SETUP])
   ABI_FFT_SET_FLAVOR([${abi_linalg_flavor}])
-  else
+else
   abi_fft_flavor="${with_fft_flavor}"
-  fi
+fi
 
 ABI_FFT_DETECT([${abi_fft_flavor}])
 
@@ -680,7 +685,7 @@ ABI_FFT_DETECT([${abi_fft_flavor}])
 # Profiling and performance analysis
 #
 
-ABI_MSG_SECTION([Profiling and performance analysis])
+#ABI_MSG_SECTION([Profiling and performance analysis])
 
 # ---------------------------------------------------------------------------- #
 
