@@ -209,19 +209,6 @@ contains
        call spin_pot%set_atoms(self%unitcell)
        call spin_pot%load_from_files(self%params, self%filenames)
        call self%prim_pots%append(spin_pot)
-
-       ! !DEBUG
-       ! print*, "nspin", self%unitcell%spin%nspin
-       ! print*, "ms", self%unitcell%spin%ms
-       ! print*, "gyro_ratio", self%unitcell%spin%gyro_ratio
-       ! print*, "damping_factor", self%unitcell%spin%damping_factor
-       ! print*, "positions", self%unitcell%spin%spin_positions
-       ! !t=>self%prim_pots%data(1)%obj
-       ! select type (t=>self%prim_pots%data(1)%obj)
-       !    type is(spin_primitive_potential_t)
-       !       print *, "nspin", t%nspin
-       !       call t%coeff%print()
-       ! end select
     end if
     if(self%params%dynamics>0) then
        !TODO: LATT
@@ -252,7 +239,6 @@ contains
 
     do i=1, self%pots%size
        q=>self%pots%data(i)%obj
-       print *, q%label
     end do
     !select type (t=>self%prim_pots%data(1)%obj)
     !    type is(spin_primitive_potential_t)
@@ -277,10 +263,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
     if (self%params%spin_dynamics>0) then
 
-       print *, "init spin_mover "
        call self%spin_mover%initialize(self%params, supercell=self%supercell)
     end if
-    print *, "spin_mover initialized"
 
     if (self%params%dynamics>0) then
        call self%lattice_mover%initialize(self%params, self%filenames)
@@ -300,9 +284,7 @@ contains
     ! read params
     call self%read_potentials()
     call self%fill_supercell()
-    print *, "supercell filled"
     call self%set_movers()
-    print *, "Mover initialized"
     call self%spin_mover%run_time(self%pots)
   end subroutine run_dynamics
 

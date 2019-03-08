@@ -182,32 +182,40 @@ contains
 
 
   subroutine spmat_convert_unittest()
-    real(dp) ::mat(4,4)
+    real(dp) ::mat(4,4), x(4), b(4)
     type(coo_mat_t) :: coo
     type(csr_mat_t) :: csr, csr2
     integer :: ngroup
     integer, allocatable :: i1list(:), ise(:)
-    mat=reshape([1,2,0,0, 8, 3, 0,0, 0,0,0,0, 0,0,0,9], [4,4])*1.0d0
+    mat=reshape([1,2,0,0, 8, 3, 0,0, 0,2,0,0, 0,0,0,9], [4,4])*1.0d0
     call dense_to_coo(mat, coo)
     call coo%sum_duplicates()
-    call coo%print()
     call dense_to_csr(mat, csr)
-    call csr%print()
     call coo%group_by_1dim(ngroup, i1list, ise)
-    print *,  "ngroup: ", ngroup
-    print *, "i1list: ", i1list
-    print *, "ise: ", ise
+    call coo%sum_duplicates()
     if(allocated(i1list)) ABI_DEALLOCATE(i1list)
     if(allocated(ise)) ABI_DEALLOCATE(ise)
-
     call coo_to_csr(coo, csr2)
-    print *, "Csr2:"
-    call csr2%print()
+
+    x=[1,2,3,4]
+    b=matmul(mat, x)
+    print *, "b from dense mv", b
+    b=0
+    call csr%mv(x, b)
+    print *, "b from csr mv", b
+    b=0
+    call csr2%mv(x, b)
+    print *, "b from csr mv", b
+
+    b=0
+    call csr2%mv(x, b)
+    print *, "b from csr mv", b
+
+
 
     call coo%finalize()
     call csr%finalize()
     call csr2%finalize()
- 
   end subroutine spmat_convert_unittest
 
 

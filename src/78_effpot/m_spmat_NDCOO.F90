@@ -47,6 +47,7 @@ module m_spmat_NDCOO
      procedure :: initialize
      procedure :: finalize
      procedure :: add_entry
+     procedure :: remove_zeros
      procedure :: sort_indices
      procedure :: sum_duplicates
      procedure :: get_val_inz
@@ -90,9 +91,14 @@ contains
     self%nnz=self%nnz+1
     call self%ind%push(ind)
     call self%val%push(val)
+    self%is_sorted=.False.
+    self%is_unique=.False.
   end subroutine add_entry
 
 
+  !-------------------------------------------------------------------!
+  ! sort the entries by indices. (left to right)
+  !-------------------------------------------------------------------!
   subroutine sort_indices(self)
     class(ndcoo_mat_t), intent(inout) :: self
     real(dp) :: tmp(self%nnz)
@@ -104,16 +110,47 @@ contains
     self%is_sorted=.True.
   end subroutine sort_indices
 
+
+  !-------------------------------------------------------------------!
+  ! Remove zero entries in coo matrix.
+  !-------------------------------------------------------------------!
+  subroutine remove_zeros(self, eps)
+    class(ndcoo_mat_t), intent(inout) :: self
+    real(dp), optional, intent(in) :: eps
+    real(dp) :: eps1
+    integer :: i, counter
+    if (present(eps)) then
+       eps1=eps
+    else
+       eps1=epsilon(1.0_dp)
+    end if
+    counter=0
+    do i=1, self%nnz
+       if (abs(self%val%data(i))> epsilon(1.0_dp)) then
+          counter=counter+1
+          self%ind%data(:,counter) =self%ind%data(:, i)
+          self%val%data(counter) = self%val%data(i)
+       end if
+    end do
+    self%nnz=counter
+    self%ind%size=counter
+    self%val%size=counter
+  end subroutine remove_zeros
+
+  !-------------------------------------------------------------------!
+  ! sum duplicate entries (also sort by indices)
+  !-------------------------------------------------------------------!
   subroutine sum_duplicates(self)
     class(ndcoo_mat_t), intent(inout) :: self
     integer :: new_ind(self%ndim, self%nnz), i, counter
     real(dp) :: new_val(self%nnz)
-    if (.not. self%is_sorted) then
-       call self%sort_indices()
-    end if
     if (self%nnz==0) then
        self%is_unique=.True.
-       return 
+       return
+    end if
+    call self%remove_zeros()
+    if (.not. self%is_sorted) then
+       call self%sort_indices()
     end if
     counter=1
     new_ind(:, counter)= self%ind%data(:, 1)
@@ -130,6 +167,8 @@ contains
     self%nnz=counter
     self%ind%data(:,1:counter)=new_ind(:,1:counter)
     self%val%data(1:counter)=new_val(1:counter)
+    self%ind%size=self%nnz
+    self%val%size=self%nnz
     self%is_unique=.True.
   end subroutine sum_duplicates
 
@@ -218,8 +257,9 @@ contains
     call m%add_entry(ind=[1, 2,1], val=0.4d0)
     call m%add_entry(ind=[3, 2,1], val=0.5d0)
     call m%add_entry(ind=[1, 1,2], val=0.5d0)
-    call m%sort_indices()
+    call m%add_entry(ind=[2,5,1], val=0.0d0)
     call m%print()
+    call m%sort_indices()
     call m%sum_duplicates()
     print *, "After sum"
     call m%print()

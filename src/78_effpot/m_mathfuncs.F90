@@ -57,8 +57,11 @@ contains
     integer :: i
     y=.False.
     do i =1, N
-       if (a(i)<b(i)) then
+       if (a(i).lt.b(i)) then
           y=.True.
+          exit
+       elseif (a(i).gt.b(i)) then
+          y=.False.
           exit
        end if
     end do
@@ -70,14 +73,15 @@ contains
     integer :: i
     y=.False.
     do i =1, N
-       if (a(i)>b(i)) then
+       if (a(i).gt.b(i)) then
           y=.True.
+          exit
+       elseif (a(i).lt.b(i)) then
+          y=.False.
           exit
        end if
     end do
   end function array_morethan
-
-
 
   function binsearch_left_integer(a, x) result(ix)
     integer, intent(in):: a(:), x

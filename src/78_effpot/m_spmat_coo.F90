@@ -85,7 +85,6 @@ contains
     print *, "mpi COO mv Not implemented yet"
     ! TODO : use gather instead of reduce.
     !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
-
     call xmpi_sum_master(b, 0, xmpi_world, ierr )
   end subroutine COO_mat_t_mv_mpi
 

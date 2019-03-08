@@ -419,7 +419,6 @@ contains
 
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
-    print *,"sc_nspin", sc_nspin
     allocate(spin_potential_t::tpot)
     call tpot%initialize(sc_nspin)
     call self%coeff%sum_duplicates()
@@ -431,7 +430,6 @@ contains
        R=self%Rlist%data(:,iR)
        call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
        call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=R_sc)
-       print *, self%coeff%val%data(inz)
        val_sc(:)= self%coeff%val%data(inz)
        do i=1, scmaker%ncells
           call tpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))

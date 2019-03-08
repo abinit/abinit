@@ -53,8 +53,8 @@ module  m_spin_potential
   private
 
   type, public, extends(abstract_potential_t) :: spin_potential_t
-     real(dp) :: etot
-     integer :: nspin
+     real(dp) :: etot=0.0
+     integer :: nspin=0
      logical :: has_external_hfield, has_uniaxial_anistropy, has_exchange, &
           has_DMI, has_dipdip, has_bilinear
 
@@ -102,7 +102,9 @@ contains
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call self%coeff_coo%initialize([self%nspin*3, self%nspin*3])
     ABI_ALLOCATE(self%external_hfield, (3,self%nspin))
+    self%external_hfield=0.0_dp
     ABI_ALLOCATE( self%Htmp, (3, self%nspin))
+    self%Htmp(:,:)=0.0_dp
   end subroutine initialize
 
   subroutine set_supercell(self, supercell)
@@ -173,6 +175,7 @@ contains
     integer, intent(in) :: i, j
     real(dp), intent(in) :: val
     call self%coeff_coo%add_entry(ind=[i,j],val=val)
+    self%has_bilinear=.True.
   end subroutine add_bilinear_term
 
   
@@ -217,8 +220,8 @@ contains
        call self%bilinear_csr_mat%sync()
        self%csr_mat_ready=.True.
     endif
-    !call self%bilinear_csr_mat%mv(S ,Heff)
-    call self%bilinear_csr_mat%mv_mpi(S ,Heff)
+    call self%bilinear_csr_mat%mv(S ,Heff)
+    !call self%bilinear_csr_mat%mv_mpi(S ,Heff)
     do i =1, self%nspin
        Heff(:, i)=Heff(:,i)/self%supercell%ms(i)*2.0_dp
     end do
@@ -245,34 +248,31 @@ contains
     real(dp), intent(inout) :: energy
     integer :: i, j
 
-    Heff(:,:) =0.0_dp
-    energy=0.0_dp
-
     call xmpi_bcast(self%has_bilinear, master, comm, ierr)
-    print *, "has_bilinear", self%has_bilinear
     if(self%has_bilinear) then
+       self%Htmp=0.0_dp
        call self%calc_bilinear_term_Heff(S,self%Htmp)
        Heff=Heff+self%Htmp
     endif
-
-    print *, "Heff", Heff
     if(iam_master) then
        if (self%has_dipdip) then
           continue
           ! TODO implement dipdip and add it
        endif
-
        ! calculate energy from bilinear terms (all the above ones)
        do i=1, self%nspin
           do j=1, 3
              energy=energy-(Heff(j, i)*S(j,i)*self%supercell%ms(i))*0.5_dp
           end do
        end do
-
        if (self%has_external_hfield) then
           call spin_potential_t_calc_external_Heff(self,self%Htmp)
           Heff = Heff+self%Htmp
-          energy= energy- self%Htmp(j, i)*S(j, i)*self%supercell%ms(i)
+          do i=1, self%nspin
+             do j=1, 3
+                energy= energy- self%Htmp(j, i)*S(j, i)*self%supercell%ms(i)
+             end do
+          end do
        endif
     endif
 
@@ -283,12 +283,10 @@ contains
     real(dp), intent(inout):: S(3,self%nspin)
     real(dp), intent(inout) :: energy
     integer :: i, j
-    energy=0.0_dp
-
     if(self%has_bilinear) then
        if (.not. self%csr_mat_ready) then
-          call self%bilinear_csr_mat%sync()
           call coo_to_csr(self%coeff_coo, self%bilinear_csr_mat)
+          call self%bilinear_csr_mat%sync()
           self%csr_mat_ready=.True.
        endif
        call self%bilinear_csr_mat%mv_mpi(S ,self%Htmp)
@@ -296,7 +294,6 @@ contains
           energy=energy - sum(sum(self%Htmp* S, dim=1))
        endif
     end if
-
     if(iam_master) then
        if (self%has_external_hfield) then
           call spin_potential_t_calc_external_Heff(self,self%Htmp)

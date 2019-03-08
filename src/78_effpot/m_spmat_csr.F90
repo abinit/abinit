@@ -117,14 +117,9 @@ contains
   subroutine sync(self)
     class (csr_mat_t), intent(inout) :: self
     integer :: ierr, iproc
-    !call mpi_comm_rank(MPI_COMM_WORLD, iproc, ierr)
     iproc=xmpi_comm_rank(xmpi_world)
 
     call xmpi_barrier(xmpi_world)
-    !call mpi_barrier(MPI_COMM_WORLD, ierr)
-    !call mpi_bcast(self%ncol, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    !call mpi_bcast(self%nrow, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    !call mpi_bcast(self%nnz, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
     call xmpi_bcast(self%ncol, 0, xmpi_world, ierr)
     call xmpi_bcast(self%nrow, 0, xmpi_world, ierr)
@@ -182,7 +177,7 @@ contains
     real(dp), intent(in) :: x(self%ncol)
     real(dp), intent(out) :: b(self%nrow)
     integer::irow, i1, i2, i
-    !!b(:)=0.0d0
+    b(:)=0.0d0
     !!$OMP PARALLEL DO private(i, i1, i2)
     do irow=1, self%nrow
         i1=self%row_shift(irow)
@@ -203,9 +198,9 @@ contains
     integer :: ierr, irow,  i1, i2, i
     !call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
     call xmpi_bcast(x, 0, xmpi_world, ierr)
-    if (.not. iam_master) b(:)=0.0_dp
+    !if (.not. iam_master) b(:)=0.0_dp
     !my_b(:)=0.0_dp
-    !b(:)=0.0_dp
+    b(:)=0.0_dp
     do irow= self%mps%istart, self%mps%iend
        i1=self%row_shift(irow)
        i2=self%row_shift(irow+1)-1

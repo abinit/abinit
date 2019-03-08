@@ -186,22 +186,24 @@ contains
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: R(3)
     integer, intent(inout) :: ind_sc, R_sc(3)
-    integer :: rprim(3), i
+    integer :: rprim(3) 
     R_sc=floor(self%to_red_sc(R*1.0d0))
     rprim(:)= R-matmul(R_sc, self%scmat)
-    !ind_sc=binsearch_left_integerlist(self%rvecs, rprim)
-    ind_sc=0
-    do i =1, self%ncells
-      if (all(self%rvecs(:,i) == rprim)) then
-          ind_sc=i
-          exit
-       end if
-    end do
+    ind_sc=binsearch_left_integerlist(self%rvecs, rprim)
+
+    ! ind_sc=0
+    ! do i =1, self%ncells
+    !   if (all(self%rvecs(:,i) == rprim)) then
+    !       ind_sc=i
+    !       exit
+    !    end if
+    ! end do
     if (ind_sc==0) then
        print *, "Cannot find rprim"
        print *, "rprim", rprim
        print *, "rvecs", self%rvecs
     end if
+    !if (isc_ref/=ind_sc) print *, "Warning: two method of finding ind_sc give different result"
 
   end subroutine R_to_sc
 
@@ -434,10 +436,10 @@ contains
 
     ! test repeat
     call maker%repeat([1,2], rep1)
-    print *, rep1
+    !print *, rep1
 
     call maker%repeat([1.0d0,2.0d0], rep2)
-    print *, rep2
+    !print *, rep2
 
   end function test2
 

@@ -149,14 +149,12 @@ contains
     call xmpi_bcast(self%temperature, master, comm, ierr)
     call xmpi_bcast(self%method, master, comm, ierr)
 
-    print *, "params set"
     call set_seed(self%rng, [111111_dp, 2_dp])
     if(my_rank>0) then
        do i =1,my_rank
           call self%rng%jump()
        end do
     end if
-    print *, "rng set"
 
     ABI_ALLOCATE(self%ms, (self%nspin) )
     ABI_ALLOCATE(self%gyro_ratio, (self%nspin) )
@@ -169,13 +167,11 @@ contains
     ABI_ALLOCATE(self%Hrotate, (3,self%nspin) )
     ABI_ALLOCATE(self%Stmp, (3,self%nspin) )
     ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
-    print *, "allocations done"
 
     self%gamma_l_calculated=.False.
 
     call self%mps%initialize(nspin, comm)
 
-    print *, "mps set"
 
     call xmpi_bcast(params%spin_damping, master, comm, ierr)
     if (params%spin_damping >=0) then
@@ -184,7 +180,6 @@ contains
     call self%set_langevin_params(temperature=params%spin_temperature, &
          & damping=self%damping, ms=self%supercell%ms, gyro_ratio=self%supercell%gyro_ratio)
 
-    print * ,"langevin params set"
 
     ! Hist and set initial spin state
     if(iam_master) then
@@ -194,16 +189,13 @@ contains
             &     spin_temperature=params%spin_temperature)
     endif
 
-    print *, "spin hist initialzed"
     call self%set_initial_state(mode=params%spin_init_state)
 
-    print *, "initial state ste"
     ! observable
     if(iam_master) then
        call self%spin_ob%initialize(self%supercell, params)
     endif
 
-    print *, "observables set"
   end subroutine initialize
   !!***
 
@@ -241,7 +233,6 @@ contains
        S(3,:)=1.0d0
     else if (m==1) then
        ! randomize S using uniform random number
-       ! print *, "Initial spin set to random value"
        write(msg,*) "Initial spin set to random value."
        call wrtout(ab_out,msg,'COLL')
        call wrtout(std_out,msg,'COLL')
@@ -372,7 +363,6 @@ contains
   !!
   !! SOURCE
   subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, S_out, etot)
-    ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
     class(abstract_potential_t), intent(inout) :: effpot
@@ -383,11 +373,11 @@ contains
 
     ! predict
     S_out(:,:)=0.0_dp
-    self%Heff_tmp(:,:)=0.0_dp
-
-    print *, "before, calculated 1 bfield"
+    etot=0.0
     call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
-    print *, "calculated 1 bfield"
+    ! print *, "Heff:", self%Heff_tmp
+    ! print *, "gamma_L:", self%gamma_L
+    ! print *, "damping:", self%damping
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
@@ -400,9 +390,10 @@ contains
     end do
     call self%mps%gatherv_dp2d(S_out, 3)
     call xmpi_bcast(S_out, master, comm, ierr)
-
     ! correction
-    self%Heff_tmp(:,:)=0.0_dp
+
+    S_out(:,:)=0.0_dp
+    etot=0.0
     call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
 
@@ -418,8 +409,6 @@ contains
     call xmpi_bcast(S_out, master, comm, ierr)
   end subroutine spin_mover_t_run_one_step_HeunP
 !!***
-
-
 
   pure function rotate_S_DM(S_in, Heff, dt) result(S_out)
     ! Depondt & Mertens method to rotate S_in
@@ -458,6 +447,7 @@ contains
 
     ! predict
     S_out(:,:)=0.0_dp
+    etot=0.0
     self%Heff_tmp(:,:)=0.0_dp
     call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
@@ -472,7 +462,8 @@ contains
     call xmpi_bcast(S_out, master, comm, ierr)
 
     ! correction
-    self%Heff_tmp(:,:)=0.0_dp
+    self%Htmp(:,:)=0.0_dp
+    etot=0.0
     call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
 
@@ -498,7 +489,6 @@ contains
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp) :: S_out(3,self%nspin), etot
     if(iam_master) self%Stmp=self%hist%get_S()
-    print *, "Stmp", self%Stmp
     if(self%method==1) then
        call self%run_one_step_HeunP(effpot, self%Stmp, S_out, etot)
     else if (self%method==2) then
@@ -578,7 +568,6 @@ contains
        do while(t<self%pre_time)
           counter=counter+1
           call self%run_one_step(effpot=calculator)
-          print *, "one time step passed"
           if (iam_master) then
              call self%hist%set_vars( time=t,  inc=.True.)
              if(mod(counter, self%hist%spin_nctime)==0) then
