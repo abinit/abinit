@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2014 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2014-2019 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -11,6 +11,18 @@
 # Support for FFT libraries
 #
 
+
+AC_DEFUN([ABI_FFT_INIT], [
+  # Set defaults
+  abi_fft_init="bug"
+
+  # The best-suited FFT flavor is compiler-dependent
+  if test "${abi_fft_flavor}" = "" -o "${abi_fft_flavor}" = "auto"; then
+    ABI_FFT_SET_FLAVOR([${abi_linalg_flavor}])
+  else
+    abi_fft_flavor="${with_fft_flavor}"
+  fi
+])
 
 
 # _ABI_FFT_CHECK_LIB(LIBRARY,ROUTINE)
@@ -157,7 +169,7 @@ AC_DEFUN([_ABI_FFTW3_CHECK_LIBS],[
       AC_MSG_CHECKING([whether specified FFTW3 Fortran libraries work])
       AC_LINK_IFELSE([AC_LANG_PROGRAM([],
         [[
-          call sfftw_execute_dft
+          call dfftw_execute_dft
         ]])], [abi_fftw3_has_libs="yes"], [abi_fftw3_has_libs="no"])
       AC_MSG_RESULT([${abi_fftw3_has_libs}])
     fi
@@ -174,14 +186,14 @@ AC_DEFUN([_ABI_FFTW3_CHECK_LIBS],[
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
       [[
         use iso_c_binding
-        include "fftw3.f03"
+#       include "fftw3.f03"
       ]])], [abi_fftw3_has_mods="yes"], [abi_fftw3_has_mods="no"])
     if test "${abi_fftw3_has_mods}" = "no"; then
       FCFLAGS="${FCFLAGS} -I/usr/include"
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
         [[
           use iso_c_binding
-          include "fftw3.f03"
+#         include "fftw3.f03"
         ]])], [abi_fftw3_has_mods="yes"], [abi_fftw3_has_mods="no"])
       if test "${abi_fftw3_has_mods}" = "yes" -a \
               "${abi_fftw3_incs}" = ""; then
@@ -200,14 +212,14 @@ AC_DEFUN([_ABI_FFTW3_CHECK_LIBS],[
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
         use iso_c_binding
-        include "fftw3.f03"
+#       include "fftw3.f03"
         integer, parameter :: N = 10
         complex :: a1(N), a2(N)
         integer :: plan
    
-        call sfftw_plan_dft_1d(plan, N, a1, a2, FFTW_FORWARD, FFTW_ESTIMATE)
-        call sfftw_execute_dft(plan, a1, a2)
-        call sfftw_destroy_plan(plan)
+        call dfftw_plan_dft_1d(plan, N, a1, a2, FFTW_FORWARD, FFTW_ESTIMATE)
+        call dfftw_execute_dft(plan, a1, a2)
+        call dfftw_destroy_plan(plan)
       ]])], [abi_fftw3_has_fort="yes"], [abi_fftw3_has_fort="no"])
     AC_LANG_POP([Fortran])
     AC_MSG_RESULT([${abi_fftw3_has_fort}])
@@ -224,9 +236,6 @@ AC_DEFUN([_ABI_FFTW3_CHECK_LIBS],[
   fi
 
   dnl Handle the FFTW3 over MKL case
-  AC_MSG_NOTICE([(DEBUG) vari = ${abi_fftw3_variant}])
-  AC_MSG_NOTICE([(DEBUG) hdrs = ${abi_fftw3_has_hdrs}])
-  AC_MSG_NOTICE([(DEBUG) libs = ${abi_fftw3_has_libs}])
   if test "${abi_fftw3_variant}" = "mkl" -a \
           "${abi_fftw3_has_hdrs}" = "yes" -a \
           "${abi_fftw3_has_libs}" = "yes"; then

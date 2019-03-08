@@ -668,13 +668,7 @@ ABI_LINALG_DETECT
 
 ABI_MSG_SECTION([Optimized FFT support])
 
-# The best-suited FFT flavor is compiler-dependent
-if test "${abi_fft_flavor}" = "" -o "${abi_fft_flavor}" = "auto"; then
-  AC_MSG_NOTICE([(DEBUG) FFT FLAVOR AUTO SETUP])
-  ABI_FFT_SET_FLAVOR([${abi_linalg_flavor}])
-else
-  abi_fft_flavor="${with_fft_flavor}"
-fi
+ABI_FFT_INIT
 
 ABI_FFT_DETECT([${abi_fft_flavor}])
 
