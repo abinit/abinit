@@ -97,7 +97,7 @@
      integer :: i, j
      r=self%attempt(rng, effpot)
      !print *, "r", r
-     if(rng%rand_unif_01()< min(1.0, r) ) then
+     if(rng%rand_unif_01()< min(1.0_dp, r) ) then
         self%naccept=self%naccept+1
         call self%accept()
      else
