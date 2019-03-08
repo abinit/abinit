@@ -418,12 +418,16 @@ for arg in ("enable","with"):
         (arg,opt_name,opt_desc,opt_dflt))
 
     if ( opt_dflt is not None ):
-      defaults += "  if test \"${%s_%s}\" = \"\"; then\n    %s_%s=\"%s\"\n  fi\n" % \
-        (arg,var,arg,var,opt_dflt)
+      if ( arg == "enable" ):
+        defaults += "  if test \"${%s_%s}\" = \"\"; then\n    abi_%s_%s=\"%s\"\n  fi\n" % \
+          (arg,var,var,arg,opt_dflt)
+      else:
+        defaults += "  if test \"${%s_%s}\" = \"\"; then\n    abi_%s=\"%s\"\n  fi\n" % \
+          (arg,var,var,opt_dflt)
 
     if ( arg == "with" ):
-      defaults += "  if test \"${%s_%s}\" = \"no\"; then\n    %s_%s=\"%s\"\n  fi\n" % \
-        (arg,var,arg,var,opt_nega)
+      defaults += "  if test \"${%s_%s}\" = \"no\"; then\n    abi_%s=\"%s\"\n  fi\n" % \
+        (arg,var,var,opt_nega)
 
     if ( opt_vals is not None ):
       parse += "\n"+parse_opt(opt,opt_vals)
