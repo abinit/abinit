@@ -16,6 +16,7 @@ pawecutdg 10.
 #Self-consistent cycle parameters
 toldfe 1.d-5
 nstep 40
+nline 8
 
 #K-points and symetries
 nkpt 1
@@ -25,7 +26,7 @@ nsym 0
 chksymbreak 0
 
 #Electronic configuration
-nband 384 #192
+nband 192
 occopt 3
 tsmear 0.002 hartree
 
@@ -46,7 +47,7 @@ typat 31*1
 znucl 56.
 chkprim 0
 
-wfoptalg 111
+wfoptalg 1
 istwfk 2
 
 #Atomic positions

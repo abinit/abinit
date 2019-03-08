@@ -55,7 +55,7 @@ module m_chebfi2
     type(xg_t) :: X_NP
     type(xgBlock_t) :: X_next
     type(xgBlock_t) :: X_prev
-
+        
     type(xg_t) :: AX  
     type(xg_t) :: BX  
 
@@ -242,7 +242,9 @@ module m_chebfi2
     double precision :: radius
     
     integer :: info
-        
+    
+    type(xgBlock_t) :: X_save   !cg original pointer for return to SCF loop
+            
     interface
       subroutine getAX_BX(X,AX,BX)
         use m_xg, only : xgBlock_t
@@ -278,8 +280,7 @@ module m_chebfi2
     tolerance = chebfi%tolerance
     lambda_plus = chebfi%ecut
     chebfi%X = X0
-    
-        
+            
     call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
                
     !********************* Compute Rayleigh quotients for every band, and set λ − equal to the largest one *****!
@@ -309,8 +310,8 @@ module m_chebfi2
     do iline = 0, nline - 1 
     
       call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
-      
-      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
+            
+      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs, X_save, iline)
       
       !A * ψ      
       call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
@@ -322,9 +323,9 @@ module m_chebfi2
     call chebfi_rayleightRitz(chebfi)
         
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
-        
-    call xgBlock_copy(chebfi%X,chebfi%X_prev, 1, 1)
-            
+                
+    call xgBlock_copy(chebfi%X, X_save, 1, 1)  !can this be avoided somehow?
+
     deallocate(nline_bands)
     
     call xg_free(DivResults)
@@ -438,7 +439,7 @@ module m_chebfi2
         
   end subroutine chebfi_computeNextOrderChebfiPolynom
 
-  subroutine chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
+  subroutine chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs, X_save, iline)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -450,12 +451,25 @@ module m_chebfi2
     type(chebfi_t) , intent(inout) :: chebfi
     type(integer) , intent(in) :: spacedim
     type(integer) , intent(in) :: neigenpairs
-
+    type(xgBlock_t), intent(inout) :: X_save
+    type(integer) , intent(in) :: iline
+    
+    type(integer) :: remainder
+    
+    remainder = mod(iline + 1, 3) !3 buffer swap, keep the info which one contains X_data at the end of loop
+    
     !swap buffers
-    call xgBlock_setBlock(chebfi%X_prev, chebfi%SWP_X, 1, spacedim, neigenpairs) !*swap_psi = X_prev;	 
+    call xgBlock_setBlock(chebfi%X_prev, chebfi%SWP_X, 1, spacedim, neigenpairs) !*swap_psi = X_prev;	
     call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X;   !OK
     call xgBlock_setBlock(chebfi%X_next, chebfi%X, 1, spacedim, neigenpairs) !X = X_next; !OK
     call xgBlock_setBlock(chebfi%SWP_X, chebfi%X_next, 1, spacedim, neigenpairs) !X_next = *swap_psi;
+    if (remainder == 1) then  !save original cg address into X_save temp
+      call xgBlock_setBlock(chebfi%X_prev, X_save, 1, spacedim, neigenpairs) !*X_save = X_next;
+    else if (remainder == 2) then 
+      call xgBlock_setBlock(chebfi%X_next, X_save, 1, spacedim, neigenpairs) !*X_save = X_prev;	
+    else if (remainder == 0) then  
+      call xgBlock_setBlock(chebfi%X, X_save, 1, spacedim, neigenpairs) !*X_save = X_prev;
+    end if
 
   end subroutine chebfi_swapInnerBuffers
   

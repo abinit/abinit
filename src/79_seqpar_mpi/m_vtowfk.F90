@@ -50,7 +50,7 @@ module m_vtowfk
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
- 
+  
  implicit none
 
  private
@@ -215,8 +215,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
- 
+ type(pawcprj_type),allocatable :: cwaveprj(:,:) 
  
 ! **********************************************************************
 
@@ -404,7 +403,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          else
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k) 
-         end if    
+         end if            
        end if
        
 !      =========================================================================
