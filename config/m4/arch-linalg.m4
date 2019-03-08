@@ -12,6 +12,408 @@
 #
 
 
+# ABI_LINALG_INIT()
+# -----------------
+#
+# Select a linear algebra flavor according to the available system information.
+#
+AC_DEFUN([ABI_LINALG_INIT],[
+  # Init internal variables
+  abi_linalg_chk_gpu=""
+  abi_linalg_chk_mpi=""
+  abi_linalg_chk_mpiext=""
+  abi_linalg_chk_serial=""
+  abi_linalg_has_blas="unknown"
+  abi_linalg_has_lapack="unknown"
+  abi_linalg_has_lapacke="unknown"
+  abi_linalg_has_blacs="unknown"
+  abi_linalg_has_scalapack="unknown"
+  abi_linalg_has_elpa="unknown"
+  abi_linalg_has_elpa_2013="unknown"
+  abi_linalg_has_elpa_2014="unknown"
+  abi_linalg_has_elpa_2015="unknown"
+  abi_linalg_has_elpa_2016="unknown"
+  abi_linalg_has_plasma="unknown"
+  abi_linalg_has_magma="unknown"
+  abi_linalg_gpu="unknown"
+  abi_linalg_mpi="unknown"
+  abi_linalg_provided=""
+
+  # Init build flags
+  abi_linalg_cppflags=""
+  abi_linalg_cflags=""
+  abi_linalg_cxxflags=""
+  abi_linalg_fcflags=""
+  abi_linalg_ldflags=""
+  abi_linalg_libdirs=""
+  abi_linalg_libs=""
+  case "${abi_linalg_init}" in
+    dir)
+      abi_linalg_cppflags="-I${abi_linalg_prefix}/include"
+      abi_linalg_fcflags="-I${abi_linalg_prefix}/include"
+      abi_linalg_libdirs="-L${abi_linalg_prefix}/lib"
+      ;;
+    env)
+      abi_linalg_cppflags="${LINALG_CPPFLAGS}"
+      abi_linalg_cflags="${LINALG_CFLAGS}"
+      abi_linalg_fcflags="${LINALG_FCFLAGS}"
+      abi_linalg_ldflags="${LINALG_LDFLAGS}"
+      abi_linalg_libs="${LINALG_LIBS}"
+      ;;
+  esac
+
+  # Make sure a flavor is selected
+  if test "${abi_linalg_flavor}" = ""; then
+    abi_linalg_flavor="auto"
+  fi
+
+  # Check that the specified flavor is consistent
+  if test "${abi_linalg_flavor}" != "auto"; then
+
+    # Reformat flavor
+    abi_linalg_iter=`echo "${abi_linalg_flavor}" | tr '+' '\n' | sort -u | awk '{printf " %s",[$]1}'`
+
+    # Check serial and parallel flavor unicity
+    for tmp_linalg_flavor in ${abi_linalg_iter}; do
+      case "${tmp_linalg_flavor}" in
+        magma)
+          if test "${abi_linalg_chk_gpu}" != ""; then
+            AC_MSG_ERROR([only one GPU linear algebra flavor is permitted])
+          fi
+          abi_linalg_chk_gpu="${tmp_linalg_flavor}"
+          ;;
+        scalapack|plasma)
+          if test "${abi_linalg_chk_mpi}" != ""; then
+            AC_MSG_ERROR([only one MPI linear algebra flavor is permitted])
+          fi
+          abi_linalg_chk_mpi="${tmp_linalg_flavor}"
+          ;;
+        elpa)
+          abi_linalg_chk_mpiext="${tmp_linalg_flavor}"
+          ;;
+        *)
+          if test "${abi_linalg_chk_serial}" != ""; then
+            AC_MSG_ERROR([only one serial linear algebra flavor is permitted])
+          fi
+          abi_linalg_chk_serial="${tmp_linalg_flavor}"
+          ;;
+      esac
+      _ABI_LINALG_SET_VENDOR_FLAGS([${tmp_linalg_flavor}])
+    done
+    if test "${abi_linalg_chk_serial}" = ""; then
+      AC_MSG_ERROR([you must choose a serial linear algebra flavor])
+    fi
+
+  fi   # abi_linalg_flavor != auto
+
+  # Init specific flavors
+  AC_MSG_CHECKING([for the requested linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_flavor}])
+  case "${abi_linalg_flavor}" in
+
+    auto)
+      # Set generic flavors first
+      abi_linalg_chk_serial="netlib"
+      if test "${abi_mpi_enable}" = "yes"; then
+        abi_linalg_chk_mpi="elpa scalapack"
+      fi
+      if test "${abi_gpu_enable}" = "yes"; then
+        abi_linalg_chk_gpu="magma"
+      fi
+
+      # Refine with vendor-specific flavors
+      case "${abi_fc_vendor}" in
+        gnu)
+          abi_linalg_chk_serial="atlas netlib"
+          ;;
+        intel)
+          abi_linalg_chk_serial="mkl atlas netlib"
+          ;;
+        *)
+          abi_linalg_chk_serial="netlib"
+          ;;
+      esac
+      ;;
+
+    none)
+      AC_MSG_WARN([bypassing linear algebra tests])
+      abi_linalg_has_blas="yes"
+      abi_linalg_has_lapack="yes"
+      abi_linalg_serial="yes"
+      abi_linalg_mpi="no"
+      abi_linalg_gpu="no"
+      ;;
+
+  esac
+
+  # Display detection sequences
+  AC_MSG_CHECKING([for the serial linear algebra detection sequence])
+  if test "${abi_linalg_chk_serial}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${abi_linalg_chk_serial}])
+  fi
+  AC_MSG_CHECKING([for the MPI linear algebra detection sequence])
+  if test "${abi_linalg_chk_mpi}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${abi_linalg_chk_mpi}])
+  fi
+  AC_MSG_CHECKING([for the GPU linear algebra detection sequence])
+  if test "${abi_linalg_chk_gpu}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${abi_linalg_chk_gpu}])
+  fi
+
+  # Substitute variables needed for the use of the library
+  AC_SUBST(abi_linalg_flavor)
+  AC_SUBST(abi_linalg_cppflags)
+  AC_SUBST(abi_linalg_cflags)
+  AC_SUBST(abi_linalg_cxxflags)
+  AC_SUBST(abi_linalg_fcflags)
+  AC_SUBST(abi_linalg_ldflags)
+  AC_SUBST(abi_linalg_libs)
+]) # ABI_LINALG_INIT
+
+
+# ABI_LINALG_DETECT()
+# -------------------
+#
+# Sets all variables needed to handle the optimized linear algebra
+# libraries.
+#
+AC_DEFUN([ABI_LINALG_DETECT], [
+  # Explore the system for if the user did not specify anything
+  if test "${abi_linalg_cppflags}${abi_linalg_cflags}${abi_linalg_fcflags}${abi_linalg_ldflags}${abi_linalg_libs}" = ""; then
+    _ABI_LINALG_EXPLORE
+  else
+    _ABI_LINALG_CHECK_LIBS
+  fi
+]) # ABI_LINALG_DETECT
+
+
+# ABI_LINALG_DETECT_OLD()
+# -------------------
+#
+# Sets all variables needed to handle the optimized linear algebra
+# libraries.
+#
+AC_DEFUN([ABI_LINALG_DETECT_OLD], [
+  # Prepare environment
+  ABI_ENV_BACKUP
+  LDFLAGS="${FC_LDFLAGS}"
+  abi_saved_FCFLAGS="${FCFLAGS}"
+  abi_saved_LDFLAGS="${LDFLAGS}"
+  abi_saved_LIBS="${LIBS}"
+  CPPFLAGS="${CPPFLAGS} ${abi_linalg_cppflags}"
+  FCFLAGS="${FCFLAGS} ${abi_linalg_fcflags}"
+  LIBS="${abi_linalg_libs} ${LIBS}"
+
+  # Look for linear algebra libraries
+  if test "${abi_linalg_libs}" != "" -o \
+          "${abi_linalg_flavor}" = "custom"; then
+
+    _ABI_LINALG_CHECK_LIBS
+
+  elif test "${abi_linalg_flavor}" != "none"; then
+
+    # BLAS extension?
+    _ABI_LINALG_CHECK_BLAS_EXTS()
+
+    # MKL extensions?
+    if test "${abi_linalg_chk_serial}" = "mkl"; then
+      _ABI_LINALG_CHECK_BLAS_MKL_EXTS()
+    fi
+
+    # Look for the selected libraries
+    if test "${abi_linalg_fallback}" = "no"; then
+      FCFLAGS="${abi_saved_FCFLAGS} ${abi_linalg_fcflags}"
+      LDFLAGS="${abi_saved_LDFLAGS} ${abi_linalg_ldflags}"
+      _ABI_LINALG_SEARCH_BLAS([${abi_linalg_blas_libs}],
+        [${abi_linalg_blas_prqs}])
+      _ABI_LINALG_SEARCH_LAPACK([${abi_linalg_lapack_libs}],
+        [${abi_linalg_lapack_prqs}])
+
+      # MPI libraries
+      case "${abi_linalg_chk_mpi}" in
+        scalapack)
+          if test "${abi_mpi_enable}" != "yes"; then
+            AC_MSG_ERROR([ScaLAPACK support requires MPI])
+          fi
+          _ABI_LINALG_SEARCH_BLACS([${abi_linalg_blacs_libs}],
+            [${abi_linalg_blacs_prqs}])
+          _ABI_LINALG_SEARCH_SCALAPACK([${abi_linalg_scalapack_libs}],
+            [${abi_linalg_scalapack_prqs}])
+          ;;
+        plasma)
+          if test "${abi_mpi_enable}" != "yes"; then
+            AC_MSG_ERROR([PLASMA support requires MPI])
+          fi
+          if test "${abi_openmp_enable}" != "yes"; then
+            AC_MSG_ERROR([PLASMA support requires openMP])
+          fi
+          if test "${fc_has_iso_c_binding}" != "yes"; then
+            AC_MSG_ERROR([PLASMA support requires Fortran 2003 ISO C bindings])
+          fi
+          _ABI_LINALG_SEARCH_LAPACKE([${abi_linalg_lapacke_libs}],[${abi_linalg_lapacke_prqs}])
+          if test "${abi_linalg_has_lapacke}" != ""; then
+            _ABI_LINALG_SEARCH_PLASMA([${abi_linalg_plasma_libs}],[${abi_linalg_plasma_prqs}])
+          fi
+          ;;
+        *)
+          if test "${abi_linalg_chk_mpi}" != ""; then
+            AC_MSG_ERROR([library search for ${abi_linalg_chk_mpi} not implemented])
+          fi
+          ;;
+      esac
+
+      # MPI extension libraries
+      case "${abi_linalg_chk_mpiext}" in
+        elpa)
+          if test "${abi_mpi_enable}" != "yes"; then
+            AC_MSG_ERROR([ELPA support requires MPI])
+          fi
+          if test "${abi_linalg_has_scalapack}" != "yes"; then
+            AC_MSG_ERROR([ELPA support requires ScaLAPACK])
+          fi
+          _ABI_LINALG_SEARCH_ELPA([${abi_linalg_elpa_libs}],
+            [${abi_linalg_elpa_prqs}])
+          ;;
+        *)
+          if test "${abi_linalg_chk_mpiext}" != ""; then
+            AC_MSG_ERROR([library search for ${abi_linalg_chk_mpiext} not implemented])
+          fi
+          ;;
+      esac
+
+      # GPU extension libraries
+      case "${abi_linalg_chk_gpu}" in
+        magma)
+          if test "${abi_gpu_enable}" != "yes"; then
+            AC_MSG_ERROR([MAGMA requires GPU support])
+          fi
+          _ABI_LINALG_SEARCH_MAGMA([${abi_linalg_magma_libs}],
+            [${abi_linalg_magma_prqs}])
+          ;;
+        *)
+          if test "${abi_linalg_chk_gpu}" != ""; then
+            AC_MSG_ERROR([library search for ${abi_linalg_chk_gpu} not implemented])
+          fi
+          ;;
+      esac
+    fi
+  fi
+
+  # Set serial, MPI and GPU status
+  if test "${abi_linalg_has_blas}" = "yes" -a \
+          "${abi_linalg_has_lapack}" = "yes"; then
+    abi_linalg_serial="yes"
+    if test "${abi_linalg_has_blacs}" = "yes" -a \
+            "${abi_linalg_has_scalapack}" = "yes"; then
+      abi_linalg_mpi="yes"
+    fi
+    if test "${abi_linalg_has_plasma}" = "yes"; then
+      abi_linalg_mpi="yes"
+    fi
+    if test "${abi_linalg_has_magma}" = "yes"; then
+      abi_linalg_gpu="yes"
+    fi
+  fi
+
+  # Transmit serial status to the source code
+  AC_MSG_CHECKING([whether we have a serial linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_serial}])
+  if test "${abi_linalg_serial}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG], 1,
+      [Define to 1 if you have an optimized linear algebra library.])
+    AC_DEFINE([HAVE_LINALG_SERIAL], 1,
+      [Define to 1 if you have an optimized serial linear algebra library.])
+
+    case "${abi_linalg_chk_serial}" in
+      asl)
+        AC_DEFINE([HAVE_LINALG_ASL], 1,
+          [Define to 1 if you have the ASL linear algebra library.])
+        ;;
+      essl)
+        AC_DEFINE([HAVE_LINALG_ESSL], 1,
+          [Define to 1 if you have the ESSL linear algebra library.])
+        ;;
+    esac
+  else
+    abi_linalg_flavor="broken"
+    AC_MSG_WARN([falling back to internal linear algebra libraries])
+    abi_fallbacks="${abi_fallbacks} linalg"
+    abi_linalg_flavor="netlib-fallback"
+    abi_dft_linalg_fallback="yes"
+  fi
+
+  # Transmit MPI status to the source code
+  AC_MSG_CHECKING([whether we have a MPI linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_mpi}])
+  if test "${abi_linalg_mpi}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MPI], 1,
+      [Define to 1 if you have an optimized MPI-parallel linear algebra library.])
+    case "${abi_linalg_chk_mpi}" in
+      plasma)
+        AC_DEFINE([HAVE_LINALG_PLASMA], 1,
+          [Define to 1 if you have an optimized PLASMA linear algebra library.])
+        ;;
+      scalapack)
+        AC_DEFINE([HAVE_LINALG_SCALAPACK], 1,
+          [Define to 1 if you have an optimized ScaLAPACK linear algebra library.])
+        ;;
+    esac
+    case "${abi_linalg_chk_mpiext}" in
+      elpa)
+        AC_DEFINE([HAVE_LINALG_ELPA], 1,
+          [Define to 1 if you have an optimized ELPA linear algebra library.])
+        ;;
+    esac
+  elif test "${abi_linalg_chk_mpi}" != ""; then
+    abi_linalg_flavor="broken"
+  fi
+
+  # Transmit GPU status to the source code
+  AC_MSG_CHECKING([whether we have a GPU linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_gpu}])
+  if test "${abi_linalg_gpu}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_GPU], 1,
+      [Define to 1 if you have an optimized GPU-compatible linear algebra library.])
+    case "${abi_linalg_chk_gpu}" in
+      magma)
+        AC_DEFINE([HAVE_LINALG_MAGMA], 1,
+          [Define to 1 if you have the MAGMA linear algebra library.])
+        ;;
+    esac
+  elif test "${abi_linalg_chk_gpu}" != ""; then
+    abi_linalg_flavor="broken"
+  fi
+
+  # Restore build environment
+  FCFLAGS="${abi_saved_FCFLAGS}"
+  LDFLAGS="${abi_saved_LDFLAGS}"
+  LIBS="${abi_saved_LIBS}"
+  ABI_ENV_RESTORE
+
+  # Output final flavor
+  AC_MSG_CHECKING([for the actual linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_flavor}])
+  if test "${abi_linalg_flavor}" = "broken"; then
+    ABI_MSG_NOTICE([connectors-failure],[Linear algebra detection failure])
+    AC_MSG_ERROR([the requested ${abi_linalg_flavor} linear algebra flavor is not supported in this environment])
+  fi
+]) # ABI_LINALG_DETECT_OLD
+
+
+                    # ------------------------------------ #
+
+
+#
+# Private macros
+#
+
+
 # _ABI_LINALG_CHECK_LIBS()
 # ------------------------
 #
@@ -23,6 +425,7 @@ AC_DEFUN([_ABI_LINALG_CHECK_LIBS], [
   abi_linalg_has_blas="no"
   abi_linalg_has_lapack="no"
   abi_linalg_has_lapacke="no"
+  abi_linalg_has_blacs="no"
   abi_linalg_has_scalapack="no"
   abi_linalg_has_elpa="no"
   abi_linalg_has_elpa_2013="no"
@@ -49,7 +452,7 @@ AC_DEFUN([_ABI_LINALG_CHECK_LIBS], [
     ]])], [abi_linalg_has_blas="yes"], [abi_linalg_has_blas="no"])
   AC_MSG_RESULT([${abi_linalg_has_blas}])
 
-  # BLAS extension?
+  # BLAS extensions?
   _ABI_LINALG_CHECK_BLAS_EXTS()
 
   # MKL BLAS extensions?
@@ -167,7 +570,7 @@ AC_DEFUN([_ABI_LINALG_CHECK_BLAS], [
 #
 AC_DEFUN([_ABI_LINALG_CHECK_BLAS_EXTS], [
   # AXPBY family?
-  AC_MSG_CHECKING([for AXPBY support in specified BLAS libraries])
+  AC_MSG_CHECKING([for AXPBY support in the BLAS libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call saxpby
@@ -183,7 +586,7 @@ AC_DEFUN([_ABI_LINALG_CHECK_BLAS_EXTS], [
   fi
 
   # gemm3m family
-  AC_MSG_CHECKING([for gemm3m in specified libraries])
+  AC_MSG_CHECKING([for GEMM3M in the BLAS libraries])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call cgemm3m
@@ -829,7 +1232,6 @@ AC_DEFUN([_ABI_LINALG_EXPLORE], [
       fi
       _ABI_LINALG_CHECK_BLAS
       if test "${abi_linalg_has_blas}" = "yes"; then
- 
          #abi_linalg_blas_cppflags="${abi_linalg_vendor_blas_cppflags}"
          #abi_linalg_blas_cflags="${abi_linalg_vendor_blas_cflags}"
          #abi_linalg_blas_fcflags="${abi_linalg_vendor_blas_fcflags}"
@@ -837,6 +1239,10 @@ AC_DEFUN([_ABI_LINALG_EXPLORE], [
          abi_linalg_blas_libs="${abi_linalg_vendor_blas_libs} ${abi_linalg_vendor_blas_prqs}"
          abi_linalg_blas_vendor="${tmp_linalg_vendor}"
          abi_linalg_provided="${abi_linalg_provided} blas"
+         _ABI_LINALG_CHECK_BLAS_EXTS
+         if test "${tmp_linalg_vendor}" = "mkl"; then
+           _ABI_LINALG_CHECK_BLAS_MKL_EXTS
+         fi
       fi
     fi
 
@@ -864,400 +1270,19 @@ AC_DEFUN([_ABI_LINALG_EXPLORE], [
   done
 
   # FIXME: Look for MPI linear algebra support
+  if test "${abi_mpi_enable}" = "yes"; then
+    for tmp_linalg_vendor in ${abi_linalg_chk_mpi}; do
+      AC_MSG_WARN([MPI linear algebra exploration not implemented!])
+    done
+  fi
 
   # FIXME: Look for GPU linear algebra support
+  if test "${abi_gpu_enable}" = "yes"; then
+    for tmp_linalg_vendor in ${abi_linalg_chk_gpu}; do
+      AC_MSG_WARN([GPU linear algebra exploration not implemented!])
+    done
+  fi
 
   ABI_ENV_RESTORE
   LIBS="${abi_saved_LIBS}"
 ]) # ABI_LINALG_EXPLORE
-
-
-# ABI_LINALG_DETECT()
-# -------------------
-#
-# Sets all variables needed to handle the optimized linear algebra
-# libraries.
-#
-AC_DEFUN([ABI_LINALG_DETECT], [
-  # Explore the system for if the user did not specify anything
-  if test "${abi_linalg_cppflags}${abi_linalg_cflags}${abi_linalg_fcflags}${abi_linalg_ldflags}${abi_linalg_libs}" = ""; then
-    _ABI_LINALG_EXPLORE
-  else
-    AC_MSG_ERROR([NOT IMPLEMENTED])
-  fi
-  AC_MSG_ERROR([BREAKPOINT])
-]) # ABI_LINALG_SEARCH_LIBS
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ABI_LINALG_DETECT_OLD()
-# -------------------
-#
-# Sets all variables needed to handle the optimized linear algebra
-# libraries.
-#
-AC_DEFUN([ABI_LINALG_DETECT_OLD], [
-  # Prepare environment
-  ABI_ENV_BACKUP
-  LDFLAGS="${FC_LDFLAGS}"
-  abi_saved_FCFLAGS="${FCFLAGS}"
-  abi_saved_LDFLAGS="${LDFLAGS}"
-  abi_saved_LIBS="${LIBS}"
-  CPPFLAGS="${CPPFLAGS} ${abi_linalg_cppflags}"
-  FCFLAGS="${FCFLAGS} ${abi_linalg_fcflags}"
-  LIBS="${abi_linalg_libs} ${LIBS}"
-
-  # Look for linear algebra libraries
-  if test "${abi_linalg_libs}" != "" -o \
-          "${abi_linalg_flavor}" = "custom"; then
-
-    _ABI_LINALG_CHECK_LIBS
-
-  elif test "${abi_linalg_flavor}" != "none"; then
-
-    # BLAS extension?
-    _ABI_LINALG_CHECK_BLAS_EXTS()
-
-    # MKL extensions?
-    if test "${abi_linalg_chk_serial}" = "mkl"; then
-      _ABI_LINALG_CHECK_BLAS_MKL_EXTS()
-    fi
-
-    # Look for the selected libraries
-    if test "${abi_linalg_fallback}" = "no"; then
-      FCFLAGS="${abi_saved_FCFLAGS} ${abi_linalg_fcflags}"
-      LDFLAGS="${abi_saved_LDFLAGS} ${abi_linalg_ldflags}"
-      _ABI_LINALG_SEARCH_BLAS([${abi_linalg_blas_libs}],
-        [${abi_linalg_blas_prqs}])
-      _ABI_LINALG_SEARCH_LAPACK([${abi_linalg_lapack_libs}],
-        [${abi_linalg_lapack_prqs}])
-
-      # MPI libraries
-      case "${abi_linalg_chk_mpi}" in
-        scalapack)
-          if test "${abi_mpi_enable}" != "yes"; then
-            AC_MSG_ERROR([ScaLAPACK support requires MPI])
-          fi
-          _ABI_LINALG_SEARCH_BLACS([${abi_linalg_blacs_libs}],
-            [${abi_linalg_blacs_prqs}])
-          _ABI_LINALG_SEARCH_SCALAPACK([${abi_linalg_scalapack_libs}],
-            [${abi_linalg_scalapack_prqs}])
-          ;;
-        plasma)
-          if test "${abi_mpi_enable}" != "yes"; then
-            AC_MSG_ERROR([PLASMA support requires MPI])
-          fi
-          if test "${abi_openmp_enable}" != "yes"; then
-            AC_MSG_ERROR([PLASMA support requires openMP])
-          fi
-          if test "${fc_has_iso_c_binding}" != "yes"; then
-            AC_MSG_ERROR([PLASMA support requires Fortran 2003 ISO C bindings])
-          fi
-          _ABI_LINALG_SEARCH_LAPACKE([${abi_linalg_lapacke_libs}],[${abi_linalg_lapacke_prqs}])
-          if test "${abi_linalg_has_lapacke}" != ""; then
-            _ABI_LINALG_SEARCH_PLASMA([${abi_linalg_plasma_libs}],[${abi_linalg_plasma_prqs}])
-          fi
-          ;;
-        *)
-          if test "${abi_linalg_chk_mpi}" != ""; then
-            AC_MSG_ERROR([library search for ${abi_linalg_chk_mpi} not implemented])
-          fi
-          ;;
-      esac
-
-      # MPI extension libraries
-      case "${abi_linalg_chk_mpiext}" in
-        elpa)
-          if test "${abi_mpi_enable}" != "yes"; then
-            AC_MSG_ERROR([ELPA support requires MPI])
-          fi
-          if test "${abi_linalg_has_scalapack}" != "yes"; then
-            AC_MSG_ERROR([ELPA support requires ScaLAPACK])
-          fi
-          _ABI_LINALG_SEARCH_ELPA([${abi_linalg_elpa_libs}],
-            [${abi_linalg_elpa_prqs}])
-          ;;
-        *)
-          if test "${abi_linalg_chk_mpiext}" != ""; then
-            AC_MSG_ERROR([library search for ${abi_linalg_chk_mpiext} not implemented])
-          fi
-          ;;
-      esac
-
-      # GPU extension libraries
-      case "${abi_linalg_chk_gpu}" in
-        magma)
-          if test "${abi_gpu_enable}" != "yes"; then
-            AC_MSG_ERROR([MAGMA requires GPU support])
-          fi
-          _ABI_LINALG_SEARCH_MAGMA([${abi_linalg_magma_libs}],
-            [${abi_linalg_magma_prqs}])
-          ;;
-        *)
-          if test "${abi_linalg_chk_gpu}" != ""; then
-            AC_MSG_ERROR([library search for ${abi_linalg_chk_gpu} not implemented])
-          fi
-          ;;
-      esac
-    fi
-  fi
-
-  # Set serial, MPI and GPU status
-  if test "${abi_linalg_has_blas}" = "yes" -a \
-          "${abi_linalg_has_lapack}" = "yes"; then
-    abi_linalg_serial="yes"
-    if test "${abi_linalg_has_blacs}" = "yes" -a \
-            "${abi_linalg_has_scalapack}" = "yes"; then
-      abi_linalg_mpi="yes"
-    fi
-    if test "${abi_linalg_has_plasma}" = "yes"; then
-      abi_linalg_mpi="yes"
-    fi
-    if test "${abi_linalg_has_magma}" = "yes"; then
-      abi_linalg_gpu="yes"
-    fi
-  fi
-
-  # Transmit serial status to the source code
-  AC_MSG_CHECKING([whether we have a serial linear algebra support])
-  AC_MSG_RESULT([${abi_linalg_serial}])
-  if test "${abi_linalg_serial}" = "yes"; then
-    AC_DEFINE([HAVE_LINALG], 1,
-      [Define to 1 if you have an optimized linear algebra library.])
-    AC_DEFINE([HAVE_LINALG_SERIAL], 1,
-      [Define to 1 if you have an optimized serial linear algebra library.])
-
-    case "${abi_linalg_chk_serial}" in
-      asl)
-        AC_DEFINE([HAVE_LINALG_ASL], 1,
-          [Define to 1 if you have the ASL linear algebra library.])
-        ;;
-      essl)
-        AC_DEFINE([HAVE_LINALG_ESSL], 1,
-          [Define to 1 if you have the ESSL linear algebra library.])
-        ;;
-    esac
-  else
-    abi_linalg_flavor="broken"
-    AC_MSG_WARN([falling back to internal linear algebra libraries])
-    abi_fallbacks="${abi_fallbacks} linalg"
-    abi_linalg_flavor="netlib-fallback"
-    abi_dft_linalg_fallback="yes"
-  fi
-
-  # Transmit MPI status to the source code
-  AC_MSG_CHECKING([whether we have a MPI linear algebra support])
-  AC_MSG_RESULT([${abi_linalg_mpi}])
-  if test "${abi_linalg_mpi}" = "yes"; then
-    AC_DEFINE([HAVE_LINALG_MPI], 1,
-      [Define to 1 if you have an optimized MPI-parallel linear algebra library.])
-    case "${abi_linalg_chk_mpi}" in
-      plasma)
-        AC_DEFINE([HAVE_LINALG_PLASMA], 1,
-          [Define to 1 if you have an optimized PLASMA linear algebra library.])
-        ;;
-      scalapack)
-        AC_DEFINE([HAVE_LINALG_SCALAPACK], 1,
-          [Define to 1 if you have an optimized ScaLAPACK linear algebra library.])
-        ;;
-    esac
-    case "${abi_linalg_chk_mpiext}" in
-      elpa)
-        AC_DEFINE([HAVE_LINALG_ELPA], 1,
-          [Define to 1 if you have an optimized ELPA linear algebra library.])
-        ;;
-    esac
-  elif test "${abi_linalg_chk_mpi}" != ""; then
-    abi_linalg_flavor="broken"
-  fi
-
-  # Transmit GPU status to the source code
-  AC_MSG_CHECKING([whether we have a GPU linear algebra support])
-  AC_MSG_RESULT([${abi_linalg_gpu}])
-  if test "${abi_linalg_gpu}" = "yes"; then
-    AC_DEFINE([HAVE_LINALG_GPU], 1,
-      [Define to 1 if you have an optimized GPU-compatible linear algebra library.])
-    case "${abi_linalg_chk_gpu}" in
-      magma)
-        AC_DEFINE([HAVE_LINALG_MAGMA], 1,
-          [Define to 1 if you have the MAGMA linear algebra library.])
-        ;;
-    esac
-  elif test "${abi_linalg_chk_gpu}" != ""; then
-    abi_linalg_flavor="broken"
-  fi
-
-  # Restore build environment
-  FCFLAGS="${abi_saved_FCFLAGS}"
-  LDFLAGS="${abi_saved_LDFLAGS}"
-  LIBS="${abi_saved_LIBS}"
-  ABI_ENV_RESTORE
-
-  # Output final flavor
-  AC_MSG_CHECKING([for the actual linear algebra support])
-  AC_MSG_RESULT([${abi_linalg_flavor}])
-  if test "${abi_linalg_flavor}" = "broken"; then
-    ABI_MSG_NOTICE([connectors-failure],[Linear algebra detection failure])
-    AC_MSG_ERROR([the requested ${abi_linalg_flavor} linear algebra flavor is not supported in this environment])
-  fi
-]) # ABI_LINALG_DETECT_OLD
-
-
-# ABI_LINALG_INIT()
-# -----------------
-#
-# Select a linear algebra flavor according to the available system information.
-#
-AC_DEFUN([ABI_LINALG_INIT],[
-  # Init internal variables
-  abi_linalg_chk_gpu=""
-  abi_linalg_chk_mpi=""
-  abi_linalg_chk_mpiext=""
-  abi_linalg_chk_serial=""
-  abi_linalg_has_blas="unknown"
-  abi_linalg_has_lapack="unknown"
-  abi_linalg_has_lapacke="unknown"
-  abi_linalg_has_scalapack="unknown"
-  abi_linalg_has_elpa="unknown"
-  abi_linalg_has_elpa_2013="unknown"
-  abi_linalg_has_elpa_2014="unknown"
-  abi_linalg_has_elpa_2015="unknown"
-  abi_linalg_has_elpa_2016="unknown"
-  abi_linalg_has_plasma="unknown"
-  abi_linalg_has_magma="unknown"
-  abi_linalg_gpu="unknown"
-  abi_linalg_mpi="unknown"
-  abi_linalg_provided=""
-  abi_linalg_serial="unknown"
-
-  # Init build flags
-  abi_linalg_incs="${LINALG_CPPFLAGS}"
-  abi_linalg_libs="${LINALG_LIBS}"
-  abi_linalg_fcflags="${LINALG_FCFLAGS}"
-  abi_linalg_ldflags="${LINALG_LDFLAGS}"
-  abi_linalg_libs="${LINALG_LIBS}"
-
-  # Make sure a flavor is selected
-  if test "${abi_linalg_flavor}" = ""; then
-    abi_linalg_flavor="auto"
-  fi
-
-  # Check that the specified flavor is consistent
-  if test "${abi_linalg_flavor}" != "auto"; then
-
-    # Reformat flavor
-    abi_linalg_iter=`echo "${abi_linalg_flavor}" | tr '+' '\n' | sort -u | awk '{printf " %s",[$]1}'`
-
-    # Check serial and parallel flavor unicity
-    for tmp_linalg_flavor in ${abi_linalg_iter}; do
-      case "${tmp_linalg_flavor}" in
-        magma)
-          if test "${abi_linalg_chk_gpu}" != ""; then
-            AC_MSG_ERROR([only one GPU linear algebra flavor is permitted])
-          fi
-          abi_linalg_chk_gpu="${tmp_linalg_flavor}"
-          ;;
-        scalapack|plasma)
-          if test "${abi_linalg_chk_mpi}" != ""; then
-            AC_MSG_ERROR([only one MPI linear algebra flavor is permitted])
-          fi
-          abi_linalg_chk_mpi="${tmp_linalg_flavor}"
-          ;;
-        elpa)
-          abi_linalg_chk_mpiext="${tmp_linalg_flavor}"
-          ;;
-        *)
-          if test "${abi_linalg_chk_serial}" != ""; then
-            AC_MSG_ERROR([only one serial linear algebra flavor is permitted])
-          fi
-          abi_linalg_chk_serial="${tmp_linalg_flavor}"
-          ;;
-      esac
-      _ABI_LINALG_SET_VENDOR_FLAGS([${tmp_linalg_flavor}])
-    done
-    if test "${abi_linalg_chk_serial}" = ""; then
-      AC_MSG_ERROR([you must choose a serial linear algebra flavor])
-    fi
-
-  fi   # abi_linalg_flavor != auto
-
-  # Init specific flavors
-  AC_MSG_CHECKING([for the requested linear algebra support])
-  AC_MSG_RESULT([${abi_linalg_flavor}])
-  case "${abi_linalg_flavor}" in
-
-    auto)
-      # Set generic flavors first
-      abi_linalg_chk_serial="netlib"
-      if test "${abi_mpi_enable}" = "yes"; then
-        abi_linalg_chk_mpi="elpa scalapack"
-      fi
-      if test "${abi_gpu_enable}" = "yes"; then
-        abi_linalg_chk_gpu="magma"
-      fi
-
-      # Refine with vendor-specific flavors
-      case "${abi_fc_vendor}" in
-        gnu)
-          abi_linalg_chk_serial="atlas netlib"
-          ;;
-        intel)
-          abi_linalg_chk_serial="mkl atlas netlib"
-          ;;
-        *)
-          abi_linalg_chk_serial="netlib"
-          ;;
-      esac
-      ;;
-
-    none)
-      AC_MSG_WARN([bypassing linear algebra tests])
-      abi_linalg_has_blas="yes"
-      abi_linalg_has_lapack="yes"
-      abi_linalg_serial="yes"
-      abi_linalg_mpi="no"
-      abi_linalg_gpu="no"
-      ;;
-
-  esac
-
-  # Display detection sequences
-  AC_MSG_CHECKING([for the serial linear algebra detection sequence])
-  if test "${abi_linalg_chk_serial}" = ""; then
-    AC_MSG_RESULT([none])
-  else
-    AC_MSG_RESULT([${abi_linalg_chk_serial}])
-  fi
-  AC_MSG_CHECKING([for the MPI linear algebra detection sequence])
-  if test "${abi_linalg_chk_mpi}" = ""; then
-    AC_MSG_RESULT([none])
-  else
-    AC_MSG_RESULT([${abi_linalg_chk_mpi}])
-  fi
-  AC_MSG_CHECKING([for the GPU linear algebra detection sequence])
-  if test "${abi_linalg_chk_gpu}" = ""; then
-    AC_MSG_RESULT([none])
-  else
-    AC_MSG_RESULT([${abi_linalg_chk_gpu}])
-  fi
-
-  # Substitute variables needed for the use of the library
-  AC_SUBST(abi_linalg_flavor)
-  AC_SUBST(abi_linalg_fcflags)
-  AC_SUBST(abi_linalg_ldflags)
-  AC_SUBST(abi_linalg_incs)
-  AC_SUBST(abi_linalg_libs)
-]) # ABI_LINALG_INIT
