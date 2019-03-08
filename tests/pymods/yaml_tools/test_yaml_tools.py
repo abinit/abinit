@@ -1,7 +1,7 @@
 from __future__ import print_function, division, unicode_literals
 import pytest
 from .errors import (EmptySetError, NotOrderedOverlappingSetError)
-from .abinit_iterators import IterStateFilter, iter_state_cmp
+from .abinit_iterators import IterStateFilter
 from .conf_parser import conf_parser
 from .meta_conf_parser import ConfTree, ConfParser, SpecKey
 
@@ -79,12 +79,12 @@ class TestStateFilter(object):
             'image': [1, 2, 5],
         })
 
-        assert iter_state_cmp(f1, f2) == -1
-        assert iter_state_cmp(f2, f1) == 1
-        assert iter_state_cmp(f1, f3) == -1
-        assert iter_state_cmp(f3, f1) == 1
+        assert f1 > f2
+        assert f2 < f1
+        assert f1 > f3
+        assert f3 < f1
         with pytest.raises(NotOrderedOverlappingSetError):
-            iter_state_cmp(f2, f3)
+            f2 < f3
 
     def test_sort(self):
         f1 = IterStateFilter({
@@ -108,9 +108,9 @@ class TestStateFilter(object):
             'time': {'from': 2, 'to': 5}
         })
 
-        assert sorted([f4, f1, f2], key=IterStateFilter.key) == [f1, f2, f4]
+        assert sorted([f4, f1, f2], reverse=True) == [f1, f2, f4]
         with pytest.raises(NotOrderedOverlappingSetError):
-            sorted([f4, f3, f1, f2], key=IterStateFilter.key)
+            sorted([f4, f3, f1, f2])
 
 
 class TestMetaConfParser(object):

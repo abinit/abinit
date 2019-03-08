@@ -5,7 +5,7 @@ from yaml import YAMLError
 from .conf_parser import conf_parser
 from . import yaml_parse
 from .errors import ConfigContextError
-from .abinit_iterators import ITERATORS, IterStateFilter
+from .abinit_iterators import ITERATORS
 
 
 THIS_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -162,12 +162,12 @@ class DriverTestConf:
         else:
             # Order filters from the most general to the most specific
             filters = sorted(
-                [name for name, filt in self.filters.items()
-                 if filt.match(state)], key=IterStateFilter.key
+                (filt, name) for name, filt in self.filters.items()
+                if filt.match(state)
             )
 
             # Apply filtered trees, filters may be []
-            for name in filters:
+            for filt, name in filters:
                 self.tree.update(self.trees[name])
 
             self.__tree_cache[state_hash(state)] = self.tree

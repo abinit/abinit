@@ -1,5 +1,4 @@
 from __future__ import print_function, division, unicode_literals
-import functools
 from .errors import EmptySetError, NotOrderedOverlappingSetError
 ITERATORS = [  # order matter
     'dtset',
@@ -131,25 +130,10 @@ class IntSet(object):
             return 'IntSet("all")'
 
 
-def iter_state_cmp(filt1, filt2):
-    '''
-        Return 1 or -1 if their is a relation of order between the two
-        members. Else raise an error.
-    '''
-    if filt1.include(filt2):
-        return -1
-    elif filt2.include(filt1):
-        return 1
-    else:
-        raise NotOrderedOverlappingSetError(filt1, filt2)
-
-
 class IterStateFilter(object):
     '''
         Represent a set of conditions on the iterator state of a document.
     '''
-    key = functools.cmp_to_key(iter_state_cmp)
-
     def __init__(self, d):
         self.filters = {}
         for it in ITERATORS:
@@ -181,6 +165,24 @@ class IterStateFilter(object):
                             for n, s in self.filters.items())
                 + '})')
 
+    def cmp(self, other):
+        '''
+            Return 1 or -1 if their is a relation of order between the two
+            members. Else raise an error.
+        '''
+        assert isinstance(other, IterStateFilter), (
+            "IterStateFilter cannot be compared with {}".format(other)
+        )
+        if self.include(other):
+            if other.include(self):
+                return 0
+            else:
+                return -1
+        elif other.include(self):
+            return 1
+        else:
+            raise NotOrderedOverlappingSetError(self, other)
+
     def __eq__(self, other):
         if not isinstance(other, IterStateFilter):
             return False
@@ -196,3 +198,18 @@ class IterStateFilter(object):
                     return False
 
         return True
+
+    def __neq__(self, other):
+        return not (self == other)
+
+    def __lt__(self, other):
+        return self.cmp(other) == 1
+
+    def __le__(self, other):
+        return self.cmp(other) >= 0
+
+    def __gt__(self, other):
+        return self.cmp(other) == -1
+
+    def __ge__(self, other):
+        return self.cmp(other) <= 0
