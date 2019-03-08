@@ -157,8 +157,8 @@ class IterStateFilter(object):
                 self.filters[it] = IntSet(d[it])
 
     def match(self, state):
-        for f, s in self.filters.items():
-            if state[f] not in s:
+        for it, int_set in self.filters.items():
+            if it in state and state[it] not in int_set:
                 return False
         return True
 

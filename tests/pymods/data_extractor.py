@@ -41,7 +41,8 @@ class DataExtractor:
 
     def __get_metachar(self, line):
         '''
-            Return a metacharacter wich give the behaviour of the line independently from options.
+            Return a metacharacter wich give the behaviour of the line
+            independently from options.
         '''
         if not line or line.isspace():  # blank line
             c = '-'
@@ -69,34 +70,38 @@ class DataExtractor:
         '''
             Extract formated documents and significant lines for the source.
         '''
-        lines, documents, ignored = [], [], []
+        lines, docs, ignored = [], [], []
 
-        current_document = None
+        current_doc = None
         for i, line in enumerate(src_lines):
-            if current_document is not None:
-                current_document['lines'].append(line)  # accumulate source lines
-                if doc_end_re.match(line):  # reached the end of the document
-                    current_document['end'] = i
+            if current_doc is not None:
+                # accumulate source lines
+                current_doc['lines'].append(line)
+                if doc_end_re.match(line):  # reached the end of the doc
+                    current_doc['end'] = i
                     # parse source
-                    parse_doc(current_document)
+                    parse_doc(current_doc)
 
                     # special case of IterStart
-                    if isinstance(current_document['obj'], IterStart):
+                    if isinstance(current_doc['obj'], IterStart):
                         for iterator in self.iterators_state:
-                            if ITERATOR_RANKS[current_document['obj'].iterator] < ITERATOR_RANKS[iterator]:
+                            if ITERATOR_RANKS[current_doc['obj'].iterator] \
+                               < ITERATOR_RANKS[iterator]:
                                 del self.iterators_state[iterator]
 
-                        self.iterators_state[current_document['obj'].iterator] = current_document['obj'].iteration
+                        self.iterators_state[current_doc['obj'].iterator] = \
+                            current_doc['obj'].iteration
                     else:
-                        documents.append(current_document)
+                        docs.append(current_doc)
 
-                    current_document = None  # go back to normal mode
+                    current_doc = None  # go back to normal mode
             else:
                 if self.__get_metachar(line) == '-':
-                    if doc_start_re.match(line):  # starting a yaml document
-                        current_document = {
+                    if doc_start_re.match(line):  # starting a yaml doc
+                        current_doc = {
                             'type': 'yaml',
-                            'iterators': self.iterators_state.copy(),  # save iterations states
+                            # save iterations states
+                            'iterators': self.iterators_state.copy(),
                             'start': i,
                             'end': -1,
                             'lines': [line],
@@ -104,7 +109,7 @@ class DataExtractor:
                         }
                     else:
                         ignored.append((i, line))
-                else:  # significant line not in a document
+                else:  # significant line not in a doc
                     lines.append((i, self.__get_metachar(line), line))
 
-        return lines, documents, ignored
+        return lines, docs, ignored
