@@ -93,7 +93,7 @@ class DataExtractor:
                         self.iterators_state[current_doc['obj'].iterator] = \
                             current_doc['obj'].iteration
                     else:
-                        if not docs['iterators_state']:
+                        if not current_doc['iterators']:
                             # This is not normal !
                             raise NoIteratorDefinedError(current_doc.start)
                         docs.append(current_doc)
