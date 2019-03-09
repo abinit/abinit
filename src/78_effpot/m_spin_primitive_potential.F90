@@ -100,7 +100,7 @@ contains
 
   subroutine set_atoms(self, primcell)
     class(spin_primitive_potential_t), intent(inout) :: self
-    class(unitcell_t), target, intent(inout) :: primcell
+    type(unitcell_t), target, intent(inout) :: primcell
     self%primcell=>primcell
   end subroutine set_atoms
 

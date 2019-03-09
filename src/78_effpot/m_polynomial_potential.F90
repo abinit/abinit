@@ -37,7 +37,7 @@ module m_polynomail_potential
   use m_errors
   use m_xmpi
 
-  use m_math_func, only: find_int
+  use m_mathfuncs, only: find_int
   use m_abstract_potential, only : abstract_potential_t
   use m_supercell_maker, only: supercell_maker_t
   use m_spmat_ndcoo, only: NDCOO_mat_t
@@ -59,10 +59,10 @@ module m_polynomail_potential
    contains
      procedure :: initialize
      procedure :: finalize
+     procedure :: calculate
   end type polynomial_potential_t
 
 contains
-
 
   subroutine initialize(self, nature, order, shape)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
@@ -86,10 +86,9 @@ contains
     end if
     call self%coeff%finalize()
     self%order=0
-    call self%abstrac_potential%finalize()
+    call self%abstract_potential_t%finalize()
   end subroutine finalize
 
-  
   subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
 

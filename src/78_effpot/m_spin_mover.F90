@@ -689,10 +689,9 @@ contains
   !!
   !!
   !! SOURCE
-  subroutine  run_MvT(self, pot, T_start, T_end, T_nstep, ncfile_prefix)
+  subroutine  run_MvT(self, pot, ncfile_prefix)
     class(spin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: pot
-
     character(fnlen), intent(inout) :: ncfile_prefix
     real(dp) :: T_start, T_end
     integer :: T_nstep
@@ -704,9 +703,9 @@ contains
     character(len=4200) :: Tmsg ! to write to var T file
     character(len=150) :: iomsg
     character(fnlen) :: Tfname ! file name for output various T calculation
-    real(dp) :: Tlist(T_nstep), chi_list(T_nstep), Cv_list(T_nstep), binderU4_list(T_nstep)
-    real(dp) :: Mst_sub_norm_list(self%spin_ob%nsublatt, T_nstep)
-    real(dp) ::  Mst_norm_total_list(T_nstep)
+    real(dp), allocatable :: Tlist(:), chi_list(:), Cv_list(:), binderU4_list(:)
+    real(dp), allocatable :: Mst_sub_norm_list(:, :)
+    real(dp), allocatable ::  Mst_norm_total_list(:)
     if (iam_master) then
        T_start=self%params%spin_temperature_start
        T_end=self%params%spin_temperature_end
@@ -720,6 +719,13 @@ contains
             & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out, msg, "COLL")
+
+       ABI_ALLOCATE(Tlist, (T_nstep))
+       ABI_ALLOCATE(chi_list, (T_nstep))
+       ABI_ALLOCATE(Cv_list, (T_nstep))
+       ABI_ALLOCATE(binderU4_list, (T_nstep))
+       ABI_ALLOCATE(Mst_sub_norm_list, (self%spin_ob%nsublatt, T_nstep))
+       ABI_ALLOCATE( Mst_norm_total_list, (T_nstep))
     end if
 
     call xmpi_bcast(T_nstep, 0, comm, ierr)
@@ -753,7 +759,7 @@ contains
           endif
 
           write(post_fname, "(I4.4)") i
-          call spin_model_t_prepare_ncfile(self, spin_ncfile, & 
+          call self%prepare_ncfile( self%params, &
                & trim(ncfile_prefix)//'_T'//post_fname//'_spinhist.nc')
           call spin_ncfile%write_one_step(self%hist)
        endif
@@ -814,6 +820,14 @@ contains
           call wrtout(Tfile, Tmsg, "COLL")
        end do
        iostat= close_unit(unit=Tfile, iomsg=iomsg)
+
+       ABI_DEALLOCATE(Tlist)
+       ABI_DEALLOCATE(chi_list)
+       ABI_DEALLOCATE(Cv_list)
+       ABI_DEALLOCATE(binderU4_list)
+       ABI_DEALLOCATE(Mst_sub_norm_list)
+       ABI_DEALLOCATE( Mst_norm_total_list)
+
     endif
   end subroutine run_MvT
   !!***

@@ -8,7 +8,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (AM)
+!! Copyright (C) 1999-2019 ABINIT group (AM, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,6 +72,26 @@ module m_multibinit_main
   implicit none
 !!***
 contains
+  !!****f* m_multbinit_main/multibinit_main
+  !!
+  !! NAME
+  !! multibinit_main
+  !!
+  !! FUNCTION
+  !! The main function of multibinit
+  !!
+  !! INPUTS
+  !! filnam: The filenames from the files file. 17 files in total.
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !!
+  !! CHILDREN
+  !!
+  !!
+  !! SOURCE
   subroutine multibinit_main(filnam )
     character(len=fnlen), intent(inout) :: filnam(17)
     type(multibinit_dtset_type), target :: inp
@@ -376,6 +396,7 @@ contains
   call spin_model%finalize()
 
 end subroutine multibinit_main
+!!***
 
 end module m_multibinit_main
 
