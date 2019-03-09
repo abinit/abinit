@@ -347,7 +347,6 @@ contains
 
 
   subroutine finalize(self)
-
     class(spin_potential_t), intent(inout):: self
     if (allocated(self%Htmp)) then
        ABI_DEALLOCATE(self%Htmp)

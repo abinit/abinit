@@ -173,7 +173,6 @@ contains
     ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
 
     self%gamma_l_calculated=.False.
-
     call self%mps%initialize(nspin, comm)
 
 
@@ -376,12 +375,9 @@ contains
     real(dp) :: dSdt(3), Htmp(3), Ri(3)
 
     ! predict
-    S_out(:,:)=0.0_dp
     etot=0.0
+    self%Heff_tmp(:,:)=0.0
     call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
-    ! print *, "Heff:", self%Heff_tmp
-    ! print *, "gamma_L:", self%gamma_L
-    ! print *, "damping:", self%damping
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
@@ -396,7 +392,7 @@ contains
     call xmpi_bcast(S_out, master, comm, ierr)
     ! correction
 
-    S_out(:,:)=0.0_dp
+    self%Htmp(:,:)=0.0
     etot=0.0
     call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
