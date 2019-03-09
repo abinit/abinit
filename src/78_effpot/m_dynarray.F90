@@ -75,9 +75,9 @@ module m_dynamic_array
   end type int_array_type
 !!***
 
-  !!****t* defs_abitypes/int_array_type
+  !!****t* defs_abitypes/int2d_array_type
   !! NAME
-  !! int_array_type
+  !! int2d_array_type
   !!
   !! FUNCTION
   !! datatype of integer array which the dim=2 can be dynamically allocated

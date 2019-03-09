@@ -42,6 +42,7 @@ module m_primitive_potential_list
   use m_primitive_potential, only: primitive_potential_t
   implicit none
   private
+!!***
 
   !-------------------------------------------------------------------!
   ! primitve_potential_pointer_t
@@ -65,7 +66,7 @@ module m_primitive_potential_list
      procedure :: load_from_files
      procedure :: fill_supercell
      procedure :: fill_supercell_list
-     final:: finalize
+     procedure:: finalize
   end type primitive_potential_list_t
 contains
 
@@ -109,10 +110,11 @@ contains
   !-------------------------------------------------------------------!
   subroutine initialize(self)
     class(primitive_potential_list_t), intent(inout):: self
+    self%label="ListPotential"
   end subroutine initialize
 
   subroutine finalize(self)
-    type(primitive_potential_list_t), intent(inout):: self
+    class(primitive_potential_list_t), intent(inout):: self
     integer :: i
     do i=1, self%size
        call self%data(i)%obj%finalize()

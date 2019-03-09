@@ -42,6 +42,9 @@ module m_primitive_potential
   use m_potential_list, only: potential_list_t
   implicit none
   private
+!!***
+
+
   type ,public :: primitive_potential_t
      ! This is the abstract class of primitive potential
      ! It do the following things:

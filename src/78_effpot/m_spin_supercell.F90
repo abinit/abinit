@@ -34,6 +34,7 @@ module m_spin_supercell
   use m_multibinit_global
   implicit none
   private
+!!***
 
   type, public :: spin_supercell_t
      integer :: nspin

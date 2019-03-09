@@ -1,16 +1,16 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_supercell
+!!****m* ABINIT/m_multibinit_supercell
 !! NAME
-!! m_supercell
+!! m_multibinit_supercell
 !!
 !! FUNCTION
 !! This module define the supercell_t type, which contains all the information of the supercell.
 !!
 !! Datatypes:
-!!  supercell_t
+!!  mb_supercell_t
 !!
 !! Subroutines:
-!! 
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2019 ABINIT group (hexu)
@@ -33,6 +33,8 @@ module m_multibinit_supercell
   use m_errors
   use m_supercell
   implicit none
+  private
+!!***
 
   type ,public :: mb_supercell_t
      integer :: sc_matrix(3,3)

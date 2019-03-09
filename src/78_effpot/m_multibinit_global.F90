@@ -1,14 +1,14 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_mpi_scheduler
+!!****m* ABINIT/m_mpi_global
 !! NAME
-!! m_mpi_scheduler
+!! m_mpi_global
 !!
 !! FUNCTION
 !! This module contains global variables for multibinit
 !!
 !! Datatypes:
 !!
-!! * mpi_scheduler_t
+!! * mpi_global_t
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.

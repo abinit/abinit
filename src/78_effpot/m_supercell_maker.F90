@@ -39,6 +39,7 @@ module m_supercell_maker
   use m_supercell
   implicit none
   private
+!!***
 
   type ,public :: supercell_maker_t
      integer :: scmat(3,3)

@@ -82,6 +82,7 @@ module m_potential_list
      procedure :: append
      procedure :: calculate
   end type potential_list_t
+  !!***
 
 contains
 

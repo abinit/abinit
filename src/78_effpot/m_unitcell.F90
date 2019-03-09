@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_atoms
+!!****m* ABINIT/m_unitcell
 !! NAME
 !! m_unitcell
 !!
@@ -10,7 +10,7 @@
 !!  unitcell_t
 !!
 !! Subroutines:
-!! 
+!!
 !! !! COPYRIGHT !! Copyright (C) 2001-2019 ABINIT group (hexu) !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,6 +24,7 @@
 #endif
 #include "abi_common.h"
 
+
 module m_unitcell
   use defs_basis
   use m_abicore
@@ -34,6 +35,7 @@ module m_unitcell
 
   implicit none
 
+!!***
   private
   ! TODO: use crystal_t
   type, public :: unitcell_lattice_t
