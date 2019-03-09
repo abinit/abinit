@@ -1,3 +1,35 @@
+
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_multibinit_main
+!! NAME
+!! m_multibinit_main
+!!
+!! FUNCTION
+!! Main routine MULTIBINIT.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1999-2019 ABINIT group (AM)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  (main routine)
+!!
+!! OUTPUT
+!!  (main routine)
+!! NOTES
+!! Should be
+!! 1 moved to somewhere else
+!! 2 be replaced with the new implementation multibinit_main2.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -37,8 +69,8 @@ module m_multibinit_main
   use m_parser,     only : instrng
   use m_fstrings,   only : replace, inupper
   use m_dtset,      only : chkvars
-
   implicit none
+!!***
 contains
   subroutine multibinit_main(filnam )
     character(len=fnlen), intent(inout) :: filnam(17)
