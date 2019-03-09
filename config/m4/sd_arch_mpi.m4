@@ -17,6 +17,7 @@
 AC_DEFUN([SD_MPI_INIT], [
   # Init
   sd_mpi_enable=""
+  sd_mpi_enable_def=""
   sd_mpi_cppflags=""
   sd_mpi_cflags=""
   sd_mpi_fcflags=""
@@ -37,13 +38,12 @@ AC_DEFUN([SD_MPI_INIT], [
 
   # Set adjustable parameters
   sd_mpi_options="$1"
-  sd_mpi_libs_defs="$2"
+  sd_mpi_libs_def="$2"
   sd_mpi_cppflags_def="$3"
   sd_mpi_cflags_def="$4"
   sd_mpi_cxxflags_def="$5"
   sd_mpi_fcflags_def="$6"
   sd_mpi_ldflags_def="$7"
-  sd_mpi_enable_def=""
 
   # Process options
   for kwd in ${sd_mpi_options}; do
@@ -298,7 +298,7 @@ AC_DEFUN([_SD_MPI_INIT_CC], [
         if test -z "${tmp_cc_has_path}"; then
           sd_mpi_cc="${with_mpi}/bin/${CC}"
         else
-          sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_defs}"
+          sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_def}"
           AC_MSG_NOTICE([user-defined MPI library flags: ${sd_mpi_libs}])
         fi
       fi
@@ -404,7 +404,7 @@ AC_DEFUN([_SD_MPI_INIT_CXX], [
         if test -z "${tmp_cxx_has_path}"; then
           sd_mpi_cxx="${with_mpi}/bin/${CXX}"
         else
-          sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_defs}"
+          sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_def}"
           AC_MSG_NOTICE([user-defined MPI library flags: ${sd_mpi_libs}])
         fi
       fi
@@ -508,7 +508,7 @@ AC_DEFUN([_SD_MPI_INIT_FC], [
         if test -z "${tmp_fc_has_path}"; then
           sd_mpi_fc="${with_mpi}/bin/${FC}"
         else
-          sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_defs}"
+          sd_mpi_libs="-L${with_mpi}/lib ${sd_mpi_libs_def}"
           AC_MSG_NOTICE([user-defined MPI library flags: ${sd_mpi_libs}])
         fi
       fi
