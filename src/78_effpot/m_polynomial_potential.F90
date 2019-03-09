@@ -37,19 +37,25 @@ module m_polynomail_potential
   use m_errors
   use m_xmpi
 
+  use m_math_func, only: find_int
   use m_abstract_potential, only : abstract_potential_t
   use m_supercell_maker, only: supercell_maker_t
+  use m_spmat_ndcoo, only: NDCOO_mat_t
 
   implicit none
 !!***
 
-  integer, parameter :: displacement = 0, strain=1, spin=2, lwf=3, electron=4
+  !integer, parameter :: displacement = 0, strain=1, spin=2, lwf=3, electron=4
+  enum, bind(c)
+     enumerator :: null_nature=0, displacement=1, strain=2, spin=3, lwf=4, electron=5
+  endenum
 
   private
   type ,public, extends(abstract_potential_t) :: polynomial_potential_t
-     integer, allocatable :: nature(:)
-     integer :: order=-1
+     integer(kind(null_nature)), allocatable :: nature(:)
+     integer :: order=0
      ! abstract_matrix :: coeff ! TODO : add this after abstract matrix is made.
+     type(NDCOO_mat_t) :: coeff
    contains
      procedure :: initialize
      procedure :: finalize
@@ -57,13 +63,20 @@ module m_polynomail_potential
 
 contains
 
-  subroutine initialize(self, nature, order)
+
+  subroutine initialize(self, nature, order, shape)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
     integer, intent(in) :: order
-    integer, intent(in) :: nature(order)
+    integer, intent(in) :: nature(order), shape(order)
     ABI_ALLOCATE(self%nature, (order))
     self%nature(:)=nature(:)
     self%order=order
+    if (find_int(nature, displacement)/=0) self%has_displacement=.True.
+    if (find_int(nature, strain)/=0) self%has_strain=.True.
+    if (find_int(nature, spin)/=0) self%has_spin=.True.
+    if (find_int(nature, lwf)/=0) self%has_lwf=.True.
+    call self%coeff%initialize(shape=shape)
+    self%label="PolynomialPotential"
   end subroutine initialize
 
   subroutine finalize(self)
@@ -71,8 +84,19 @@ contains
     if (allocated(self%nature)) then
        ABI_DEALLOCATE(self%nature)
     end if
-    self%order=-1
+    call self%coeff%finalize()
+    self%order=0
+    call self%abstrac_potential%finalize()
   end subroutine finalize
+
+  
+  subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+    class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
+
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
+    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+    MSG_ERROR("calculate not implemented for this effpot.")
+  end subroutine calculate
 
 
 end module m_polynomail_potential

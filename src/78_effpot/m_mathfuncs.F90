@@ -83,6 +83,17 @@ contains
     end do
   end function array_morethan
 
+  function find_int(a, x) result(ix)
+    integer, intent(in):: a(:), x
+    integer :: ix, i
+    ix=0
+    do i=1, size(a)
+       if( a(i)==x ) then
+          ix=i
+       endif
+    end do
+  end function find_int
+
   function binsearch_left_integer(a, x) result(ix)
     integer, intent(in):: a(:), x
     integer :: n,ix, ub, lb

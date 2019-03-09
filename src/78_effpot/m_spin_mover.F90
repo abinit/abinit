@@ -38,6 +38,7 @@ module m_spin_mover
   use m_errors
   use m_abicore
   use m_xmpi
+  use m_io_tools, only : get_unit, open_file, close_unit
   use m_multibinit_global
   use m_mpi_scheduler, only: mpi_scheduler_t
   use m_mathfuncs, only : cross
@@ -84,6 +85,7 @@ module m_spin_mover
      type(mpi_scheduler_t) :: mps
      type(spin_observable_t) :: spin_ob
      type(spin_ncfile_t) :: spin_ncfile
+     type(multibinit_dtset_type), pointer :: params
    CONTAINS
      procedure :: initialize
      procedure :: finalize
@@ -93,6 +95,7 @@ module m_spin_mover
      procedure, private :: run_one_step_MC=> spin_mover_t_run_one_step_MC
      procedure :: run_one_step => spin_mover_t_run_one_step
      procedure :: run_time => spin_mover_t_run_time
+     procedure :: run_MvT
      procedure :: set_Langevin_params
      procedure :: prepare_ncfile
      procedure, private ::get_Langevin_Heff
@@ -123,11 +126,12 @@ contains
   !! SOURCE
   subroutine initialize(self, params, supercell)
     class(spin_mover_t), intent(inout) :: self
-    type(multibinit_dtset_type) :: params
+    type(multibinit_dtset_type), target :: params
     type(mb_supercell_t), target :: supercell
     !real(dp):: damping(self%supercell%nspin)
     integer :: i, nspin
     if (iam_master) then
+       self%params=>params
        self%supercell=>supercell
        nspin=supercell%nspin
        self%nspin=nspin
@@ -662,6 +666,160 @@ contains
   !!***
 
 
+
+
+  !!****f* m_spin_mover/run_MvT
+  !!
+  !! NAME
+  !! run_MvT
+  !!
+  !! FUNCTION
+  !! run M vs Temperature
+  !!
+  !! INPUTS
+  !! pot: potential
+  !! T_start, Tend, T_nstep
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !!
+  !! CHILDREN
+  !!
+  !!
+  !! SOURCE
+  subroutine  run_MvT(self, pot, T_start, T_end, T_nstep, ncfile_prefix)
+    class(spin_mover_t), intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: pot
+
+    character(fnlen), intent(inout) :: ncfile_prefix
+    real(dp) :: T_start, T_end
+    integer :: T_nstep
+    type(spin_ncfile_t) :: spin_ncfile
+    character(len=4) :: post_fname
+    real(dp) :: T, T_step
+    integer :: i, ii, Tfile, iostat
+    character(len=90) :: msg
+    character(len=4200) :: Tmsg ! to write to var T file
+    character(len=150) :: iomsg
+    character(fnlen) :: Tfname ! file name for output various T calculation
+    real(dp) :: Tlist(T_nstep), chi_list(T_nstep), Cv_list(T_nstep), binderU4_list(T_nstep)
+    real(dp) :: Mst_sub_norm_list(self%spin_ob%nsublatt, T_nstep)
+    real(dp) ::  Mst_norm_total_list(T_nstep)
+    if (iam_master) then
+       T_start=self%params%spin_temperature_start
+       T_end=self%params%spin_temperature_end
+       T_nstep=self%params%spin_temperature_nstep
+       Tfile=get_unit()
+       Tfname = trim(ncfile_prefix)//'.varT'
+       iostat=open_file(file=Tfname, unit=Tfile, iomsg=iomsg )
+       T_step=(T_end-T_start)/(T_nstep-1)
+       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
+            & "Starting temperature dependent calculations. T from ", &
+            & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+    end if
+
+    call xmpi_bcast(T_nstep, 0, comm, ierr)
+    do i=1, T_nstep
+       if(iam_master) then
+          T=T_start+(i-1)*T_step
+
+          msg=repeat("=", 79)
+          call wrtout(std_out, msg, "COLL")
+          call wrtout(ab_out, msg, "COLL")
+
+          write(msg, "(A13, 5X, ES13.5, A3)") "Temperature: ", T*Ha_K, " K."
+          call wrtout(std_out, msg, "COLL")
+          call wrtout(ab_out,  msg, "COLL")
+
+          call self%hist%reset(array_to_zero=.False.)
+          ! set temperature
+          ! TODO make this into a subroutine set_params
+          self%params%spin_temperature=T
+        endif
+        call self%set_Langevin_params(temperature=T)
+        if(iam_master) then
+          call self%hist%set_params(spin_nctime=self%params%spin_nctime, &
+               &     spin_temperature=T)
+          call self%spin_ob%reset(self%params)
+          ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
+          if(i==0) then
+             call self%set_initial_state()
+          else
+             call self%hist%inc1()
+          endif
+
+          write(post_fname, "(I4.4)") i
+          call spin_model_t_prepare_ncfile(self, spin_ncfile, & 
+               & trim(ncfile_prefix)//'_T'//post_fname//'_spinhist.nc')
+          call spin_ncfile%write_one_step(self%hist)
+       endif
+
+       ! run in parallel
+       call self%run_time(pot)
+
+       if(iam_master) then
+          call spin_ncfile%close()
+          ! save observables
+          Tlist(i)=T
+          chi_list(i)=self%spin_ob%chi
+          Cv_list(i)=self%spin_ob%Cv
+          binderU4_list(i)=self%spin_ob%binderU4
+          !Mst_sub_list(:,:,i)=self%spin_ob%Mst_sub(:,:)  ! not useful
+          Mst_sub_norm_list(:,i)=self%spin_ob%Avg_Mst_sub_norm(:)
+          Mst_norm_total_list(i)=self%spin_ob%Avg_Mst_norm_total
+       endif
+    end do
+
+
+    if(iam_master) then
+       ! write summary of MvT run
+       msg=repeat("=", 79)
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+
+       write(msg, *) "Summary of various T run: "
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+
+       write(msg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13)" ) &
+            "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst"
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out,  msg, "COLL")
+
+       do i = 1, T_nstep
+          write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5 )" ) &
+               Tlist(i)*Ha_K, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total
+          call wrtout(std_out, msg, "COLL")
+          call wrtout(ab_out, msg, "COLL")
+       end do
+
+       msg=repeat("=", 79)
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+
+
+       ! write to .varT file
+       write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, *(I13, 3X) )" ) &
+            "#", "Temperature (K)", "Cv (1)", "chi (1)",  "BinderU4 (1)", "Mst/Ms(1)", (ii, ii=1, self%spin_ob%nsublatt)
+       call wrtout(Tfile, Tmsg, "COLL")
+
+       do i = 1, T_nstep
+          write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(ES13.5, 3X) )" ) &
+               Tlist(i)*Ha_K, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
+               & (Mst_sub_norm_list(ii,i)/mu_B, ii=1, self%spin_ob%nsublatt)
+          call wrtout(Tfile, Tmsg, "COLL")
+       end do
+       iostat= close_unit(unit=Tfile, iomsg=iomsg)
+    endif
+  end subroutine run_MvT
+  !!***
+
+
+
   !!****f* m_spin_mover/finalize
   !!
   !! NAME
@@ -727,6 +885,7 @@ contains
     end if
 
     nullify(self%supercell)
+    nullify(self%params)
     call self%mps%finalize()
     call self%hist%finalize()
     call self%spin_ob%finalize()

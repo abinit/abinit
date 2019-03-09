@@ -90,6 +90,7 @@ module m_multibinit_manager
      procedure :: fill_supercell
      procedure :: set_movers
      procedure :: run_dynamics
+     procedure :: run_MvT
      procedure :: run
      procedure :: run_all
   end type mb_manager_t
@@ -226,25 +227,13 @@ contains
     integer :: i
     ! unitcell
     call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
-    ! print *, "sc_nspin",  self%supercell%nspin
-    ! print *, "sc_ms",  self%supercell%ms
-    ! print *, "sc_gyro",  self%supercell%gyro_ratio
-    ! print *, "sc_damping",  self%supercell%gilbert_damping
-    ! print *, "ispin_prim",  self%supercell%ispin_prim
-    ! print *, "sc_rvec",  self%supercell%rvec
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
     call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
     call self%pots%set_supercell(self%supercell)
-
     do i=1, self%pots%size
        q=>self%pots%data(i)%obj
     end do
-    !select type (t=>self%prim_pots%data(1)%obj)
-    !    type is(spin_primitive_potential_t)
-    !       print *, "fill spin pot supercell", t%nspin
-    !       call t%fill_supercell(self%sc_maker, q)
-    !end select
   end subroutine fill_supercell
 
   !-------------------------------------------------------------------!
@@ -262,7 +251,6 @@ contains
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
     if (self%params%spin_dynamics>0) then
-
        call self%spin_mover%initialize(self%params, supercell=self%supercell)
     end if
 
@@ -288,6 +276,17 @@ contains
     call self%spin_mover%run_time(self%pots)
   end subroutine run_dynamics
 
+  subroutine run_MvT(self)
+    class(mb_manager_t), intent(inout) :: self
+    call self%prim_pots%initialize()
+    call self%sc_maker%initialize(diag(self%params%ncell))
+    ! read params
+    call self%read_potentials()
+    call self%fill_supercell()
+    call self%set_movers()
+    call self%spin_mover%run_MvT(self%pots, self%filenames(2))
+  end subroutine run_MvT
+
   !-------------------------------------------------------------------!
   ! Run all jobs
   !-------------------------------------------------------------------!
@@ -296,9 +295,16 @@ contains
     ! if ... fit lattice model
     ! if ... fit lwf model
     ! if ... run dynamics...
-    call self%run_dynamics()
+    if(self%params%spin_dynamics>0) then
+       if (self%params%spin_var_temperature==0) then
+          call self%run_dynamics()
+       elseif (self%params%spin_var_temperature==1) then
+          call self%run_MvT()
+       end if
+    end if
     ! if ...
   end subroutine run
+
 
 
   !-------------------------------------------------------------------!
