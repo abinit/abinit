@@ -815,25 +815,25 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)
 
- write(std_out,"(a)")sjoin("DVDB version:", itoa(db%version))
- write(std_out,"(a)")sjoin("File path:", db%path)
- write(std_out,"(a)")sjoin("Number of v1scf potentials:", itoa(db%numv1))
- write(std_out,"(a)")sjoin("Number of q-points in DVDB: ", itoa(db%nqpt))
+ write(std_out,"(a)")sjoin(" DVDB version:", itoa(db%version))
+ write(std_out,"(a)")sjoin(" File path:", db%path)
+ write(std_out,"(a)")sjoin(" Number of v1scf potentials:", itoa(db%numv1))
+ write(std_out,"(a)")sjoin(" Number of q-points in DVDB: ", itoa(db%nqpt))
  write(std_out,"(a)")sjoin("-P Number of CPUs for parallelism over perturbations:", itoa(db%nprocs_pert))
  write(std_out,"(a)")sjoin("-P Number of perturbations treated by this CPU:", itoa(db%my_npert))
- write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
- write(std_out,"(a)")sjoin("Use internal cache for Vscf(q):", yesno(db%qcache_size > 0))
+ write(std_out,"(a)")sjoin(" Activate symmetrization of v1scf(r):", yesno(db%symv1))
+ write(std_out,"(a)")sjoin(" Use internal cache for Vscf(q):", yesno(db%qcache_size > 0))
  if (db%qcache_size > 0) then
    cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%my_npert * QCACHE_KIND)
-   write(std_out,'(a,f12.1,a)')'Max memory needed for cache: ', cache_size * b2Mb,' [Mb]'
+   write(std_out,'(a,f12.1,a)')' Max memory needed for cache: ', cache_size * b2Mb,' [Mb]'
  end if
- write(std_out,"(a)")"List of q-points: min(10, nqpt)"
+ write(std_out,"(a)")" List of q-points: min(10, nqpt)"
  do iq=1,min(db%nqpt, 10)
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
  end do
  if (db%nqpt > 10) write(std_out,"(a)")"..."
 
- write(std_out,"(a)")sjoin("Have dielectric tensor and Born effective charges:", yesno(db%has_dielt_zeff))
+ write(std_out,"(a)")sjoin(" Have dielectric tensor and Born effective charges:", yesno(db%has_dielt_zeff))
  if (db%has_dielt_zeff) then
    write(std_out, '(a,3(/,3es16.6))') ' Dielectric Tensor:', &
      db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
@@ -1619,13 +1619,13 @@ subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
  call xmpi_sum(qselect, comm, ierr)
  qcnt = count(qselect > 0)
  if (qcnt == 0) then
-   call wrtout(std_out, "All qpts in Vscf(q) already in cache. No need to perform IO", do_flush=.True.)
+   call wrtout(std_out, " All qpts in Vscf(q) already in cache. No need to perform IO.", do_flush=.True.)
    return
  end if
 
  call timab(1807, 1, tsec)
 
- call wrtout(std_out, sjoin("Need to update Vscf(q) cache. Master node will read ", itoa(qcnt), "q-points..."), do_flush=.True.)
+ call wrtout(std_out, sjoin(" Need to update Vscf(q) cache. Master node will read ", itoa(qcnt), "q-points..."), do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  do db_iqpt=1,db%nqpt
@@ -1658,7 +1658,7 @@ subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
    if (allocated(db%qcache(db_iqpt)%v1scf)) qcnt = qcnt + 1
  end do
  onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
- call wrtout(std_out, sjoin("Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
 
  call cwtime_report("Qcache update", cpu_all, wall_all, gflops_all)
  call timab(1807, 2, tsec)

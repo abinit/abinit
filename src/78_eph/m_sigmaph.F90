@@ -526,7 +526,7 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc,&
+subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -641,8 +641,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
  restart = 0; ierr = 1
  if (my_rank == master .and. dtset%eph_restart == 1) then
- !if (my_rank == master .and. .not. file_exists("__EPH_NORESTART__")) then
-    sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr)
+   sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr)
  end if
 
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
@@ -753,8 +752,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
  if (.False.) call wfd%test_ortho(cryst, pawtab, unit=std_out, mode_paral="PERS")
 
-! if PAW, one has to solve a generalized eigenproblem
-! BE careful here because I will need sij_opt == -1
+ ! if PAW, one has to solve a generalized eigenproblem
+ ! BE careful here because I will need sij_opt == -1
  usecprj = 0
  gen_eigenpb = psps%usepaw == 1
  sij_opt = 0; if (gen_eigenpb) sij_opt = 1
@@ -1430,7 +1429,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(cg1s_kq)
          ABI_FREE(h1kets_kq_allperts)
          ABI_FREE(stern_ppb)
-       end if
+       end if ! eph_stern == 1
 
        ! ==============
        ! Sum over bands
