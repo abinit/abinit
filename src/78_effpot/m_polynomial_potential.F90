@@ -89,11 +89,11 @@ contains
     call self%abstract_potential_t%finalize()
   end subroutine finalize
 
-  subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
 
-    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
-    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     MSG_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 

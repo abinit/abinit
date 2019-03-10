@@ -54,10 +54,10 @@ module m_lwf_mover
   end type lwf_mover_t
 
 contains
-  subroutine run_one_step(self, effpot)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
     ! run one step. (For MC also?)
     class(lwf_mover_t), intent(inout) :: self
-    ! should we use array of effective potentials so that there can be multiple of them?
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     class(abstract_potential_t), intent(inout) :: effpot
     MSG_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step

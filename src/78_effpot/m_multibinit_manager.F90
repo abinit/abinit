@@ -89,7 +89,7 @@ module m_multibinit_manager
      procedure :: read_potentials ! read primitve cell and potential
      procedure :: fill_supercell
      procedure :: set_movers
-     procedure :: run_dynamics
+     procedure :: run_spin_dynamics
      procedure :: run_MvT
      procedure :: run
      procedure :: run_all
@@ -265,7 +265,7 @@ contains
   !-------------------------------------------------------------------!
   ! Run dynamics
   !-------------------------------------------------------------------!
-  subroutine run_dynamics(self)
+  subroutine run_spin_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%sc_maker%initialize(diag(self%params%ncell))
@@ -274,7 +274,7 @@ contains
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%run_time(self%pots)
-  end subroutine run_dynamics
+  end subroutine run_spin_dynamics
 
   subroutine run_MvT(self)
     class(mb_manager_t), intent(inout) :: self
@@ -297,7 +297,7 @@ contains
     ! if ... run dynamics...
     if(self%params%spin_dynamics>0) then
        if (self%params%spin_var_temperature==0) then
-          call self%run_dynamics()
+          call self%run_spin_dynamics()
        elseif (self%params%spin_var_temperature==1) then
           call self%run_MvT()
        end if

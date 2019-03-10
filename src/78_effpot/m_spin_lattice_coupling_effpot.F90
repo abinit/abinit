@@ -105,10 +105,10 @@ contains
    real(dp), intent(out) :: force(:,:)
  end subroutine Oiju_get_stress
 
- subroutine Oiju_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+ subroutine Oiju_calculate(self, displacement, strain, spin, lwf, force, stress, bfield,lwf_force, energy)
      class(slc_Oiju_t), intent(inout) :: self  ! the effpot may save the states.
-     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
-     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
      ! if present in input
      ! calculate if required
    end subroutine Oiju_calculate
@@ -133,10 +133,10 @@ contains
    real(dp), intent(out) :: force(:,:)
  end subroutine Tijuv_get_force
 
- subroutine Tijuv_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+ subroutine Tijuv_calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
    class(slc_Tijuv_t), intent(inout) :: self  ! the effpot may save the states.
-   real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
-   real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+   real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+   real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
  end subroutine Tijuv_calculate
 
 
@@ -169,10 +169,10 @@ contains
 
  end subroutine slc_finalize
 
- subroutine slc_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+ subroutine slc_calculate(self, displacement, strain, spin, lwf, force, stress, bfield,lwf_force, energy)
    class(spin_lattice_coupling_effpot_t), intent(inout) :: self  ! the effpot may save the states.
-   real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
-   real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+   real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+   real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
  end subroutine slc_calculate
 
 

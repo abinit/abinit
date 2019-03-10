@@ -147,20 +147,25 @@ contains
     self%has_strain= (self%has_strain.or. effpot%has_strain)
   end subroutine append
 
-  subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+  subroutine calculate(self, displacement, strain, spin, lwf,  force, stress, bfield, lwf_force, energy)
     ! calculate energy and its first derivatives.
     class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
     ! inputs
-    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     ! outputs
-    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     integer :: i
     ! Note
     ! calculate force and strain if asked to
-       do i=1, self%size
-          call self%data(i)%obj%calculate(displacement=displacement, strain=strain, &
-               & spin=spin, force=force, stress=stress, bfield=bfield, energy=energy)
-       end do
+    if(present(force)) force(:,:)=0.0d0
+    if(present(strain)) strain(:,:)=0.0d0
+    if(present(spin)) spin(:,:)=0.0d0
+    if(present(lwf)) lwf(:)=0.0d0
+    do i=1, self%size
+       call self%data(i)%obj%calculate(displacement=displacement, strain=strain, &
+            & spin=spin, lwf=lwf, force=force, stress=stress, bfield=bfield, &
+            lwf_force=lwf_force, energy=energy)
+    end do
   end subroutine calculate
 
 end module m_potential_list

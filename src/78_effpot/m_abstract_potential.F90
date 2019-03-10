@@ -109,15 +109,15 @@ contains
   !   MSG_ERROR("set_spin not implemented.")
   ! end subroutine set_spin
 
-  subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
     ! This function calculate the energy and its first derivative
     ! the inputs and outputs are optional so that each effpot can adapt to its
     ! own.
     ! In principle, the 1st derivatives are only calculated if asked to (present). However, they can be computed if it is simply convinient to do.
     class(abstract_potential_t), intent(inout) :: self  ! the effpot may save the states.
 
-    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
-    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     ! if present in input
     ! calculate if required
     MSG_ERROR("calculate not implemented for this effpot.")

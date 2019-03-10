@@ -84,10 +84,10 @@ contains
     MSG_ERROR("set_initial_state not implemented for this mover")
   end subroutine set_initial_state
 
-  subroutine run_one_step(self, effpot)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
     ! run one step. (For MC also?)
     class(abstract_mover_t), intent(inout) :: self
-    ! should we use array of effective potentials so that there can be multiple of them?
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     class(abstract_potential_t), intent(inout) :: effpot
     MSG_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step

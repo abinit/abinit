@@ -57,11 +57,15 @@ contains
     integer, optional, intent(in) :: mode
   end subroutine set_initial_state
 
-  subroutine run_one_step(self, effpot)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
     ! run one step. (For MC also?)
     class(lattice_mover_t), intent(inout) :: self
     ! array of effective potentials so that there can be multiple of them.
     class(abstract_potential_t), intent(inout) :: effpot
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    if(present(displacement) .or. present(strain)) then
+       MSG_ERROR("displacement and strain should not be input for lattice mover")
+    end if
   end subroutine run_one_step
 
   subroutine reset(self)

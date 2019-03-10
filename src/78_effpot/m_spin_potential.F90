@@ -227,10 +227,10 @@ contains
     end do
   end subroutine calc_bilinear_term_Heff
 
-  subroutine spin_potential_t_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+  subroutine spin_potential_t_calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
     class(spin_potential_t), intent(inout) :: self
-    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
-    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     ! if present in input
     ! calculate if required
     if (present(bfield) .and. present(energy)) then

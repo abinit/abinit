@@ -365,10 +365,13 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, S_out, etot)
+  subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, S_out, etot, displacement, strain, lwf)
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
     class(abstract_potential_t), intent(inout) :: effpot
+
+    real(dp), optional, intent(inout):: displacement(:,:), &
+         strain(:,:), lwf(:)
     real(dp), intent(inout) :: S_in(3,self%nspin)
     real(dp), intent(out) :: S_out(3,self%nspin), etot
     integer :: i
@@ -377,7 +380,7 @@ contains
     ! predict
     etot=0.0
     self%Heff_tmp(:,:)=0.0
-    call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
+    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf, spin=S_in, bfield=self%Heff_tmp, energy=etot)
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
@@ -394,7 +397,7 @@ contains
 
     self%Htmp(:,:)=0.0
     etot=0.0
-    call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
+    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_out, bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
 
     do i=self%mps%istart, self%mps%iend
@@ -435,11 +438,12 @@ contains
     S_out=matmul(R, S_in)
   end function rotate_S_DM
 
-  subroutine spin_mover_t_run_one_step_DM(self, effpot, S_in, S_out, etot)
+  subroutine spin_mover_t_run_one_step_DM(self, effpot, S_in, S_out, etot, displacement, strain, lwf)
     ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
     class(abstract_potential_t), intent(inout) :: effpot
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:)
     real(dp), intent(inout) :: S_in(3,self%nspin)
     real(dp), intent(out) :: S_out(3,self%nspin), etot
     real(dp) :: Htmp(3)
@@ -449,7 +453,7 @@ contains
     S_out(:,:)=0.0_dp
     etot=0.0
     self%Heff_tmp(:,:)=0.0_dp
-    call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
+    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_in, bfield=self%Heff_tmp, energy=etot)
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
@@ -464,7 +468,7 @@ contains
     ! correction
     self%Htmp(:,:)=0.0_dp
     etot=0.0
-    call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
+    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf, spin=S_out, bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
 
     do i=self%mps%istart, self%mps%iend
@@ -476,24 +480,32 @@ contains
     call xmpi_bcast(S_out, master, comm, ierr)
   end subroutine spin_mover_t_run_one_step_DM
 
-  subroutine spin_mover_t_run_one_step_MC(self, effpot, S_in, S_out, etot)
+  subroutine spin_mover_t_run_one_step_MC(self, effpot, S_in, S_out, etot, displacement, strain,  lwf)
     class(spin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
+    real(dp), optional, intent(inout) :: displacement(:, :), strain(:,:), lwf(:)
     real(dp), intent(inout) :: S_in(3,self%nspin)
     real(dp), intent(out) :: S_out(3,self%nspin), etot
     call self%spin_mc%run_MC(self%rng, effpot, S_in, S_out, etot)
   end subroutine spin_mover_t_run_one_step_MC
 
-  subroutine spin_mover_t_run_one_step(self, effpot)
+  subroutine spin_mover_t_run_one_step(self, effpot, displacement, strain, spin, lwf)
     class(spin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp) :: S_out(3,self%nspin), etot
+    if(present(spin)) MSG_ERROR("spin should not be input for spin mover.")
     if(iam_master) self%Stmp=self%hist%get_S()
     if(self%method==1) then
-       call self%run_one_step_HeunP(effpot, self%Stmp, S_out, etot)
+       call self%run_one_step_HeunP(effpot=effpot, S_in=self%Stmp, S_out=S_out, etot=etot, &
+            displacement=displacement, strain=strain, lwf=lwf)
     else if (self%method==2) then
-       call self%run_one_step_DM(effpot, self%Stmp, S_out, etot)
+       call self%run_one_step_DM(effpot=effpot, S_in=self%Stmp, S_out=S_out, etot=etot,&
+            displacement=displacement, strain=strain, lwf=lwf)
     else if (self%method==3) then
+       if(present(displacement) .or. present(strain) .or. present(lwf)) then
+          MSG_ERROR("Monte carlo not implemented for lattice and lwf yet.")
+       endif
        call self%run_one_step_MC(effpot, self%Stmp, S_out, etot)
     end if
     ! do not inc until time is set to hist.
@@ -522,10 +534,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_run_time(self, calculator) !, hist, ncfile, ob)
+  subroutine spin_mover_t_run_time(self, calculator, displacement, strain, spin, lwf)
 
     class(spin_mover_t), intent(inout):: self
     class(abstract_potential_t), intent(inout) :: calculator
+
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
     !type(spin_hist_t), intent(inout) :: hist
     !type(spin_ncfile_t), intent(inout) :: ncfile
     !type(spin_observable_t), intent(inout) :: ob
@@ -567,7 +581,7 @@ contains
 
        do while(t<self%pre_time)
           counter=counter+1
-          call self%run_one_step(effpot=calculator)
+          call self%run_one_step(effpot=calculator, displacement=displacement, strain=strain, lwf=lwf)
           if (iam_master) then
              call self%hist%set_vars( time=t,  inc=.True.)
              if(mod(counter, self%hist%spin_nctime)==0) then
@@ -599,7 +613,7 @@ contains
 
     do while(t<self%total_time)
        counter=counter+1
-       call self%run_one_step(effpot=calculator)
+       call self%run_one_step(effpot=calculator, displacement=displacement, strain=strain, spin=spin, lwf=lwf)
        if (iam_master) then
           call self%hist%set_vars(time=t,  inc=.True.)
           call self%spin_ob%get_observables(self%hist%S(:,:, self%hist%ihist_prev), &
@@ -685,9 +699,10 @@ contains
   !!
   !!
   !! SOURCE
-  subroutine  run_MvT(self, pot, ncfile_prefix)
+  subroutine  run_MvT(self, pot, ncfile_prefix, displacement, strain, spin, lwf)
     class(spin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: pot
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
     character(fnlen), intent(inout) :: ncfile_prefix
     real(dp) :: T_start, T_end
     integer :: T_nstep
@@ -761,7 +776,7 @@ contains
        endif
 
        ! run in parallel
-       call self%run_time(pot)
+       call self%run_time(pot, displacement=displacement, strain=strain, spin=spin, lwf=lwf)
 
        if(iam_master) then
           call spin_ncfile%close()
