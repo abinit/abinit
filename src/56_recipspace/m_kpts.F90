@@ -542,13 +542,13 @@ end function symkchk
 !! SOURCE
 
 subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
-                  use_symrec) ! optional
+                  exit_loop, use_symrec) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt1,nkpt2,nsym,sppoldbl,timrev,comm
  real(dp),intent(out) :: dksqmax
- logical,optional,intent(in) :: use_symrec
+ logical,optional,intent(in) :: use_symrec, exit_loop
 !arrays
  integer,intent(in) :: symafm(nsym),symmat(3,3,nsym)
  integer,intent(out) :: indkk(nkpt2*sppoldbl,6)
@@ -766,7 +766,11 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
                if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done = 1
 
                ! This line leads to a significant speedup for dense meshes but ~30 tests fail after this change.
-               !if (dksq < tol12) ikpt2_done = 1
+               if (present(exit_loop)) then
+                 if (exit_loop) then
+                   if (dksq < tol12) ikpt2_done = 1
+                 end if
+               end if
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,

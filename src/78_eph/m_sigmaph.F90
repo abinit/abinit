@@ -5031,6 +5031,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
  integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
  real(dp) :: eig0nk, eig0mkq, dksqmax, ediff
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  type(kptrank_type) :: kptrank
 !arrays
@@ -5042,11 +5043,13 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ call cwtime(cpu, wall, gflops, "start")
  call wrtout(std_out, sjoin("qpoints_oracle: predicting no. q-points for tau with winfact:", ftoa(sigma%winfact)))
 
  ! Get full BZ associated to ebands
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
    nkibz, kibz, wtk, nkbz, kbz)
+ call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  ABI_FREE(wtk)
  ABI_FREE(kibz)
@@ -5055,12 +5058,13 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  ! Build BZ --> IBZ mapping using symrec.
  ABI_MALLOC(bz2ibz, (nkbz, 6))
  call listkk(dksqmax, cryst%gmet, bz2ibz, ebands%kptns, kbz, ebands%nkpt, nkbz, cryst%nsym, &
-      1, cryst%symafm, cryst%symrec, sigma%timrev, comm, use_symrec=.True.)
+      1, cryst%symafm, cryst%symrec, sigma%timrev, comm, exit_loop=.True., use_symrec=.True.)
  if (dksqmax > tol12) then
    write(msg, '(a, es16.6)' ) &
     "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
    MSG_ERROR(msg)
  end if
+ call cwtime_report(" listkk1", cpu, wall, gflops)
 
  ! Make full k-point rank arrays
  call mkkptrank(kbz, nkbz, kptrank)
@@ -5103,17 +5107,19 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  call destroy_kptrank(kptrank)
 
  call xmpi_sum(qbz_count, comm, ierr)
+ call cwtime_report(" qbz_count", cpu, wall, gflops)
 
  ! Get mapping QBZ --> DVDB q-points.
  ABI_MALLOC(qbz2dvdb, (nqbz, 6))
  call listkk(dksqmax, cryst%gmet, qbz2dvdb, qpts, qbz, nqpt, nqbz, cryst%nsym, &
-      1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
+      1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6,2a)' )&
      "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
      'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
    MSG_ERROR(msg)
  end if
+ call cwtime_report(" listkk2", cpu, wall, gflops)
 
  ! Compute qselect using qbz2dvdb.
  qselect = 0
