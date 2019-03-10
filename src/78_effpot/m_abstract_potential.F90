@@ -129,7 +129,7 @@ contains
     class(abstract_potential_t), intent(inout) :: self  ! the effpot may save the states.
     real(dp), intent(inout) :: S(:,:),  Snew(:)
     integer, intent(in) :: ispin
-    real(dp), intent(out) :: deltaE
+    real(dp), intent(inout) :: deltaE
     MSG_ERROR("get_delta_E not implemented for this effpot.")
   end subroutine get_delta_E
 

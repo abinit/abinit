@@ -142,6 +142,7 @@
      ! choose one site
      self%imove = rng%rand_choice(self%nspin)
      self%Sold(:)= self%S(:,self%imove)
+     self%deltaE=0.0
      call move_hinzke_nowak(rng, self%Sold, self%Snew, self%angle)
      call effpot%get_delta_E( self%S, self%imove, self%Snew, self%deltaE)
      r=exp(-self%deltaE *self%beta)
@@ -151,7 +152,6 @@
      type(rng_t) :: rng
      real(dp), intent(in) :: Sold(3), angle
      real(dp), intent(out) :: Snew(3)
-     real(dp) :: m
      call rng%rand_normal_array(Snew, 3)
      Snew(:)=Sold(:) + Snew(:)*angle
      Snew(:)=Snew(:)/sqrt(Snew(1)*Snew(1)+Snew(2)*Snew(2)+Snew(3)*Snew(3))

@@ -311,7 +311,7 @@ contains
     class(spin_potential_t), intent(inout) :: self
     real(dp), intent(inout):: S(:,:), Snew(:)
     integer, intent(in) :: ispin
-    real(dp), intent(out) ::deltaE
+    real(dp), intent(inout) ::deltaE
     !real(dp) ::  Eold, Enew
     real(dp) :: tmp(3), dS(3)
     ! naive implementation, for test only
@@ -341,6 +341,7 @@ contains
        deltaE=deltaE - dot_product(self%external_hfield(:, ispin), dS)*self%supercell%ms(ispin)
     end if
     S(:, ispin)=S(:,ispin)-dS
+    !print*, deltaE
   end subroutine spin_potential_t_get_delta_E
 
 

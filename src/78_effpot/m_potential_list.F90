@@ -175,12 +175,11 @@ contains
     class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
     real(dp), intent(inout) :: S(:,:),  Snew(:)
     integer, intent(in) :: ispin
-    real(dp), intent(out) :: deltaE
+    real(dp), intent(inout) :: deltaE
     integer :: i
     do i=1, self%size
        call self%data(i)%obj%get_delta_E(S=S, ispin=ispin, Snew=Snew, deltaE=deltaE)
     end do
     end subroutine get_delta_E
-
 
 end module m_potential_list
