@@ -700,7 +700,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do
 
  if (sigma%imag_only .and. sigma%qint_method == 1) then
-   call wrtout(std_out, "Including restricted set of states within energy window around bdgw states")
+   call wrtout(std_out, " Including restricted set of states within energy window around bdgw states.")
    do spin=1,sigma%nsppol
      do ik_ibz=1,ebands%nkpt
        do band=sigma%my_bstart, sigma%my_bstop
@@ -712,7 +712,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end do
      end do
    end do
-   !MSG_WARNING("Storing all bands between my_bstart and my_bstop.")
+   !call wrtout(std_out, "Storing all bands between my_bstart and my_bstop.")
    !bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  else
    bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
@@ -720,7 +720,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  !bks_mask = .True. ! Uncomment this line to have all states on each MPI rank.
 
- ! This table is needed when computing tau
+ ! This table is needed when computing tau:
+ ! k+q states outside energy window are not read hence their contribution won't be included.
+ ! Error is small provided calculation is close to convergence.
  ABI_MALLOC(ihave_ikibz_spin, (nkpt, nsppol))
  ihave_ikibz_spin = .False.
  do spin=1,sigma%nsppol
@@ -2543,7 +2545,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    " bsum_bstop:", itoa(new%bsum_stop)))
  call wrtout(std_out, sjoin(" Allocating and treating bands from my_bstart: ", itoa(new%my_bstart), &
    " up to my_bstop:", itoa(new%my_bstop)))
- !if (dtset%eph_stern == 1) call wrtout(" Treating high-energy bands with Sternheimer and static self-energy")
 
  ! ================================================================
  ! Allocate arrays used to store final results and set them to zero
@@ -3613,7 +3614,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  ! Prepare weights for BZ(k) integration
  if (self%qint_method > 0) then
    if (self%use_doublegrid) then
-     call self%ephwg%double_grid_setup_kpoint(self%eph_doublegrid, kk, prtvol)
+     call self%ephwg%double_grid_setup_kpoint(self%eph_doublegrid, kk, prtvol, comm)
    else
      call self%ephwg%setup_kpoint(kk, prtvol, comm)
    end if
@@ -4330,6 +4331,10 @@ subroutine sigmaph_print(self, dtset, unt)
  !    self%elow * Ha_eV, self%ehigh * Ha_eV, "[eV]"
  write(unt,"(a)")sjoin("Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
  write(unt,"(a)")sjoin("From bmin:", itoa(self%bsum_start), "to bmax:", itoa(self%bsum_stop))
+ if (dtset%eph_stern == 1 .and. .not. self%imag_only) then
+   write(unt, "(a)")" Treating high-energy bands with Sternheimer and static self-energy."
+   write(unt, "(a, es16.6, a, i0)")" Tolwfr:", dtset%tolwfr, ", nline:", dtset%nline
+ end if
  write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:", itoa(self%timrev))
  write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
  msg = "Standard quadrature"; if (self%qint_method == 1) msg = "tetrahedron method"

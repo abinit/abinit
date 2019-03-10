@@ -777,11 +777,8 @@ subroutine thmeig(inp, ddb, crystal, &
 
 !  test if qlatt generates all Q points  TO DO
 
-
-
 !  Get tetrahedra, ie indexes of the full kpoints at their summits
-   call init_tetra(indqpt,gprimd,qlatt,qpt_full,nqpt,&
-&   tetrahedra, ierr, errstr)
+   call init_tetra(indqpt,gprimd,qlatt,qpt_full,nqpt, tetrahedra, ierr, errstr, xmpi_comm_self)
    ABI_CHECK(ierr==0,errstr)
 
    rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &

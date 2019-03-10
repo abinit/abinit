@@ -310,7 +310,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
 
  ! Compute k points from input file closest to the output file
  call listkk(dksqmax,cryst%gmet,indkk,kibz,kfull,nkibz,nkfull,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrec,timrev,comm,use_symrec=.True.)
+    sppoldbl,cryst%symafm,cryst%symrec,timrev,comm, exit_loop=.True., use_symrec=.True.)
 
  if (dksqmax > tol12) then
    write(msg, '(3a,es16.6,6a)' )&
@@ -323,7 +323,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
 
  rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
 
- call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
+ call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring, comm)
  if (ierr /= 0) msg = errorstring
 
  10 continue

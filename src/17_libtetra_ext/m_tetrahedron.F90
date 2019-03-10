@@ -36,11 +36,12 @@ module m_tetrahedron
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
  use m_kptrank
+#ifdef HAVE_MPI2
+ use mpi
+#endif
 #ifdef HAVE_LIBTETRA_ABINIT
  use m_io_tools, only : open_file
-#endif
-#if defined HAVE_MPI2
- use mpi
+ use m_xmpi
 #endif
 
 implicit none
@@ -193,11 +194,11 @@ end subroutine destroy_tetra
 !!
 !! SOURCE
 
-subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ierr, errorstring)
+subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ierr, errorstring, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nkpt_fullbz !, comm
+ integer,intent(in) :: nkpt_fullbz, comm
  integer, intent(out) :: ierr
  character(len=80), intent(out) :: errorstring
  type(t_tetrahedron),intent(out) :: tetra
@@ -208,13 +209,13 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
 !Local variables-------------------------------
 !scalars
  integer :: ialltetra,ikpt2,ikpt_full,isummit,itetra,jalltetra,jsummit
- integer :: ii,jj,maxibz,ind_ibz(4),ikibz,nkpt_ibz
+ integer :: ii,jj,maxibz,ikibz,nkpt_ibz, my_rank, nprocs
  integer :: symrankkpt,mtetra,itmp,ntetra_irred
  real(dp) :: shift1,shift2,shift3, rcvol,hashfactor
  !real :: cpu_start, cpu_stop
  type(kptrank_type) :: kptrank_t
 !arrays
- integer :: tetra_shifts(3,4,6)  ! 3 dimensions, 4 summits, and 6 tetrahedra / kpoint box
+ integer :: ind_ibz(4), tetra_shifts(3,4,6)  ! 3 dimensions, 4 summits, and 6 tetrahedra / kpoint box
  real(dp)  :: k1(3),k2(3),k3(3)
  integer,allocatable :: tetra_full_(:,:,:)
  integer,allocatable :: tetra_mult_(:)
@@ -227,7 +228,11 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
 
  !call cpu_time(cpu_start)
 
- ! TODO: Pass comm to parallelize this part
+ my_rank = 0; nprocs = 1
+#ifdef HAVE_LIBTETRA_ABINIT
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+#endif
+
  ierr = 0
  errorstring = ""
 !jmb
@@ -305,6 +310,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
  do ikpt_full=1,nkpt_fullbz
    do itetra=1,6
      !ialltetra = itetra + (ikpt_full -1) * 6
+     !if (mod(ialltetra, nprocs) /= my_rank) cycle ! MPI parallelism.
      do isummit=1,4
        k1(:) = kpt_fullbz(:,ikpt_full) &
 &       + tetra_shifts(1,isummit,itetra)*klatt(:,1) &
