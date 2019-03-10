@@ -405,7 +405,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     timrev = kpts_timrev_from_kptopt(ebands%kptopt)
     ABI_MALLOC(indkk, (tmp_nkpt,  6))
     call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, tmp_kcalc, ebands%nkpt, tmp_nkpt, cryst%nsym, &
-         1, cryst%symafm, cryst%symrec, timrev, comm, use_symrec=.True.)
+         1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
     if (dksqmax > tol12) then
       write(msg, '(a,es16.6,2a)' )&
         "At least one of the k-points could not be generated from a symmetrical one in the WFK. dksqmax: ",dksqmax, ch10,&
@@ -515,11 +515,18 @@ end subroutine sigtk_kcalc_from_erange
 !!  sigtk_kpts_in_erange
 !!
 !! FUNCTION
-
+!!  Use SKW star functions to interpolate energies onto fine dense,
+!!  find k-points inside (electron/hole) pockets computed from sigma_erange.
+!!  Write KERANGE.nc file storing tables used in EPH code to compute electron lifetimes.
+!!
 !! INPUTS
 !!  dtset <dataset_type>=all input variables for this dataset
+!!  cryst<crystal_t>=Crystalline structure
+!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !!  psps <pseudopotential_type>=all the information about psps
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  prefix=Prefix for output file.
+!!  comm: MPI communicator.
 !!
 !! PARENTS
 !!
@@ -542,8 +549,8 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, pertcase0 = 0, fform_kerange = 6001
- integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, ierr, onkpt, gap_err, unt, ncid, cnt, ncerr, image
+ integer,parameter :: master = 0, pertcase0 = 0, fform_kerange = 6001, image1 = 1
+ integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, ierr, onkpt, gap_err, unt, ncid, cnt, ncerr
  real(dp) :: ee, cmin, vmax
  character(len=500) :: msg
  character(len=fnlen) :: path
@@ -562,14 +569,14 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  if (my_rank == master) then
    write(std_out, "(2a)")ch10, repeat("=", 92)
-   write(std_out, "(a)") " Finding k-points inside pockets."
-   write(std_out, "(2a)") " Interpolating eigenvalues onto K-mesh with sigma_nktp: ", trim(ltoa(dtset%sigma_ngkpt))
+   write(std_out, "(a)") " Finding k-points inside (electron/hole) pockets."
+   write(std_out, "(2a)") " Interpolating eigenvalues onto dense K-mesh with sigma_ngkpt: ", trim(ltoa(dtset%sigma_ngkpt))
    write(std_out, "(2a)") " and sigma_shiftk:"
    do ii=1,dtset%nshiftk
      write(std_out, "(a, 3(f2.1, 1x))")"   sigma_shiftk:", dtset%sigma_shiftk(:, ii)
    end do
-   !call ebands_print(ebands, header, unit, prtvol, mode_paral)
    write(std_out, "(2a)")repeat("=", 92),ch10
+   !call ebands_print(ebands, header, unit, prtvol, mode_paral)
 
    ! Consistency check.
    if (.not. any(dtset%sigma_erange > zero)) then
@@ -599,12 +606,11 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
                                    dtset%sigma_nshiftk, dtset%sigma_shiftk, band_block, comm)
 
  ! Build new header with fine k-mesh
- image = 1
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, ABINIT_VERSION, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
    dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &
-   dtset%amu_orig(:, image), dtset%icoulomb,&
+   dtset%amu_orig(:, image1), dtset%icoulomb,&
    ! TODO _origin
    dtset%kptopt, dtset%nelect, dtset%charge, fine_kptrlatt, fine_kptrlatt,&
    dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
@@ -648,12 +654,12 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  end do
 
  ! Find points in the BZ?
+ ! Compute tetra and q-points for EPH calculation?
 
  ! Write output files with k-point list.
  if (my_rank == master .and. len_trim(prefix) /= 0) then
    write(std_out, "(a,i0,a,f5.1,a)")"Found: ",  onkpt, " kpoints in erange. (nkeff / nkibz): ", &
        (100.0_dp * onkpt) / fine_ebands%nkpt, " [%]"
-
    path = strcat(prefix, "_KERANGE")
    if (open_file(path, msg, newunit=unt, form="formatted") /= 0) then
      MSG_ERROR(msg)
@@ -685,7 +691,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
      nctkarr_t("einterp", "dp", "four") &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
-   ! Write extra arrays
+   ! Write extra arrays.
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), params))

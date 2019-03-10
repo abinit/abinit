@@ -509,6 +509,8 @@ end function symkchk
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
 !!  comm=MPI communicator.
+!!  [exit_loop]: if present and True, exit the loop over k-points in the sphere as soon as the lenght**2 of the
+!!    difference vector is smaller than tol12. Default: False
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT

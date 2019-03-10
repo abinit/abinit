@@ -700,23 +700,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do
 
  if (sigma%imag_only .and. sigma%qint_method == 1) then
-   ! TODO: Still under testing
-   if (dtset%userie == 123) then
-      MSG_WARNING("Including limited set of states within energy window around bdgw states")
-      do spin=1,sigma%nsppol
-        do ik_ibz=1,ebands%nkpt
-          do band=sigma%my_bstart, sigma%my_bstop
-            eig0mk = ebands%eig(band, ik_ibz, spin)
-            if (eig0mk >= sigma%elow  - sigma%winfact * sigma%wmax .and. &
-                eig0mk <= sigma%ehigh + sigma%winfact * sigma%wmax) then
-               bks_mask(band, ik_ibz ,spin) = .True.
-            end if
-          end do
-        end do
-      end do
-   else
-      bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
-   end if
+   call wrtout(std_out, "Including restricted set of states within energy window around bdgw states")
+   do spin=1,sigma%nsppol
+     do ik_ibz=1,ebands%nkpt
+       do band=sigma%my_bstart, sigma%my_bstop
+         eig0mk = ebands%eig(band, ik_ibz, spin)
+         if (eig0mk >= sigma%elow  - sigma%winfact * sigma%wmax .and. &
+             eig0mk <= sigma%ehigh + sigma%winfact * sigma%wmax) then
+            bks_mask(band, ik_ibz ,spin) = .True.
+         end if
+       end do
+     end do
+   end do
+   !MSG_WARNING("Storing all bands between my_bstart and my_bstop.")
+   !bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  else
    bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  endif
@@ -957,7 +954,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_CALLOC(qselect, (dvdb%nqpt))
    qselect = 1
    ! Try to predict the q-points required to compute tau.
-   if (sigma%imag_only .and. sigma%qint_method == 1 .and. dtset%userie == 123) then
+   !if (sigma%imag_only .and. sigma%qint_method == 1 .and. dtset%userie == 123) then
+   if (sigma%imag_only .and. sigma%qint_method == 1) then
      call qpoints_oracle(sigma, cryst, ebands, dvdb%qpts, dvdb%nqpt, sigma%nqbz, sigma%qbz, qselect, comm)
    end if
  end if
@@ -1484,7 +1482,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end if
 
          ! Accumulate contribution to self-energy
-         eig0mkq = ebands%eig(ibsum_kq,ikq_ibz,spin)
+         eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
          ! q-weight for naive integration
          weight_q = sigma%wtq_k(iq_ibz)
 
@@ -1495,7 +1493,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            do ib_k=1,nbcalc_ks
              vk(1,:) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
              vkk_norm2 = dot_product(vk(1,:), vk(1,:))
-             !vkk_norm2 = norm2(vk(1,:)) * norm2(vkq(1,:))
              alpha_mrta(ib_k) = zero
              if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2**2
            end do
@@ -2141,6 +2138,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
 
+ ! TODO: Activate by default?
  ! Compute lifetimes in the MRTA approximation
  new%calc_mrta = .False.; if (dtset%userib == 11) new%calc_mrta = .True.
 
@@ -2334,7 +2332,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end if
    kk = new%kcalc(:,ikcalc)
    call listkk(dksqmax,cryst%gmet,indkk_k,ebands%kptns,kk,ebands%nkpt,1,cryst%nsym,&
-      sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,xmpi_comm_self,use_symrec=.False.)
+      sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,xmpi_comm_self,exit_loop=.True., use_symrec=.False.)
 
    if (dksqmax > tol12) then
       write(msg, '(4a,es16.6,7a)' )&
@@ -2389,7 +2387,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      end do
    end if ! symsigma
  end do ! ikcalc
- ABI_CHECK(ierr == 0, "Fatal error, kptgw list must be in the IBZ")
+ ABI_CHECK(ierr == 0, "Fatal error, kptgw list must be in the IBZ.")
 
  ! Collect data
  call xmpi_sum(new%kcalc2ibz, comm, ierr)
@@ -3296,7 +3294,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
  ABI_MALLOC(indkk,(nkcalc,6))
  ! map ebands kpoints to sigmaph
  call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, nkcalc, cryst%nsym, &
-             sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
+             sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
 
  if (dksqmax > tol12) then
     write(msg, '(3a,es16.6,a)' ) &
@@ -3665,7 +3663,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
  iqk2dvdb = -1
  call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, self%qibz_k, dvdb%nqpt, self%nqibz_k, cryst%nsym, &
-      1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
+      1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
  if (dtset%useria /= 1999) then
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6,2a)' )&
@@ -3694,7 +3692,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 
  ! Use iqk2dvdb as workspace array.
  call listkk(dksqmax, cryst%gmet, iqk2dvdb, ebands%kptns, kq_list, ebands%nkpt, self%nqibz_k, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
  if (dksqmax > tol12) then
    write(msg, '(4a,es16.6,7a)' )&
     "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
@@ -3799,7 +3797,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
      call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
      qfilter = any(dtset%eph_tols_idelta >= zero)
-     !qfilter = .True.; if (dtset%userib == 124) qfilter = .False.
      if (qfilter) then
        ! Two-pass algorithm:
        ! Select q-points with significant contribution, recompute my_nqibz_k and myq2ibz_k.
@@ -3847,9 +3844,8 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ! Recompute weights with new q-point distribution.
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
-       ! TODO: make sure each node has the q-points we need.
-       ! Perform collective IO inside comm if needed.
-       if (self%imag_only .and. self%qint_method == 1 .and. dtset%userie == 123) then
+       ! Make sure each node has the q-points we need. Perform collective IO inside comm if needed.
+       if (self%imag_only .and. self%qint_method == 1) then
          ! Find q-points needed by this MPI rank.
          ABI_ICALLOC(ineed_qpt, (dvdb%nqpt))
          do imyq=1,self%my_nqibz_k

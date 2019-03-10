@@ -61,7 +61,6 @@ MODULE m_wfk
 #endif
  use m_xmpi
  use m_mpiotk
- use m_kptrank
  use m_hdr
  use m_sort
  use m_crystal
@@ -4939,7 +4938,7 @@ end subroutine wfk_diff
 !!
 !! INPUTS
 !!  in_wfkpath = Input WFK file with k-point list.
-!!  kerange_path = KERANGE
+!!  kerange_path = path to KERANGE.nc file.
 !!  dtset <dataset_type>=all input variables for this dataset
 !!  psps <pseudopotential_type>=all the information about psps
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -4947,7 +4946,7 @@ end subroutine wfk_diff
 !!  comm = MPI communicator.
 !!
 !! OUTPUT
-!!  Output is written to file out_wfkpath
+!!  Output is written to file out_wfkpath.
 !!
 !! NOTES
 !!  - Only GS WFK files are supported (formeig==0)
@@ -4985,7 +4984,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
  type(hdr_type),pointer :: ihdr
  type(ebands_t) :: iwfk_ebands, fine_ebands
  type(wvl_internal_type) :: dummy_wvl
- type(kptrank_type) :: kptrank
 !arrays
  !integer :: fine_kptrlatt(3,3) !, band_block(2)
  integer,allocatable :: kf2kin(:), kg_k(:,:), kshe_mask(:,:,:)  ! ok2ibz(:)
@@ -5005,7 +5003,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
    write(std_out, "(a, 3(f5.2, 1x))")"   sigma_shiftk: ", dtset%sigma_shiftk(:, ii)
  end do
  write(std_out, "(2a)")" Take wavefunctions with k-point lists from: ", trim(in_wfkpath)
- write(std_out, "(2a)")" Take eigenvalues and kpt tables from KERAGE file: ", trim(kerange_path)
+ write(std_out, "(2a)")" Take eigenvalues and kpt tables from KERANGE file: ", trim(kerange_path)
  write(std_out, "(2a)")repeat("=", 92), ch10
  if (all(dtset%sigma_ngkpt == 0)) then
    write(msg,"(3a)") &
@@ -5065,7 +5063,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
  ABI_MALLOC(kf2kin, (fine_ebands%nkpt))
  kf2kin = -1
 
-#if 1
+ !TODO: Write specialized routine wrapping listkk to find mapping without O(N2) scaling.
  do ikf=1,fine_ebands%nkpt
    do ii=1,iwfk_ebands%nkpt
      if (all(abs(fine_ebands%kptns(:, ikf) - iwfk_ebands%kptns(:, ii)) < tol12)) then
@@ -5074,25 +5072,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
      end if
    end do
  end do
-
-#else
- call mkkptrank(iwfk_ebands%kptns, iwfk_ebands%nkpt, kptrank)
- do ikf=1,fine_ebands%nkpt
-   call get_rank_1kpt(fine_ebands%kptns(:, ikf), kf_rank, kptrank)
-   ii = kptrank%invrank(kf_rank)
-   if (ii > 0) then
-     !write(std_out, *)trim(ktoa(fine_ebands%kptns(:, ikf))), " --> ", trim(ktoa(iwfk_ebands%kptns(:, ii)))
-     ! FIXME This does not work as expected!
-     if (all(abs(fine_ebands%kptns(:, ikf) - iwfk_ebands%kptns(:, ii)) < tol12)) then
-       kf2kin(ikf) = ii
-     end if
-   end if
-   !else
-   !  MSG_WARNING(sjoin("Cannot find kpt: ", ktoa(fine_ebands%kptns(:, ikf))))
-   !end if
- end do
- call destroy_kptrank(kptrank)
-#endif
 
  if (count(kf2kin /= -1) /= iwfk_ebands%nkpt) then
    write(msg, "(2a, 2(a,i0))")"Something wrong in the computation of fine_mesh --> input_mesh table.",ch10, &
