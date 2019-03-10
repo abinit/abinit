@@ -99,11 +99,18 @@ contains
   !-------------------------------------------------------------------!
   ! initialize
   !-------------------------------------------------------------------!
-  subroutine initialize(self, filenames)
+  subroutine initialize(self, filenames,params)
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen), intent(inout) :: filenames(17)
+    type(multibinit_dtset_type), optional, intent(in) :: params
+    !TODO: remove params as argument. It is here because the params are read
+    ! in the multibinit_main function. Once we use multibinit_main2, remove it.
+    if (present(params)) then
+       self%params=params
+    else
+       call self%read_params()
+    endif
     self%filenames=filenames
-    call self%read_params()
     call self%prepare_params()
     ! read potentials from
   end subroutine initialize
@@ -311,10 +318,11 @@ contains
   !run_all: THE function which does everything
   !         from the very begining to end.
   !-------------------------------------------------------------------!
-  subroutine run_all(self, filenames)
+  subroutine run_all(self, filenames, params)
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen), intent(inout) :: filenames(17)
-    call self%initialize(filenames)
+    type(multibinit_dtset_type), optional, intent(in) :: params
+    call self%initialize(filenames, params=params)
     call self%run()
     call self%finalize()
   end subroutine run_all

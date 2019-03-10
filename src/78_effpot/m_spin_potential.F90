@@ -325,7 +325,6 @@ contains
     !deltaE=Enew-Eold
 
     ! test
-    deltaE=0.0_dp
     dS(:)=Snew(:)-S(:, ispin)
     S(:, ispin)= S(:, ispin)+ dS
 

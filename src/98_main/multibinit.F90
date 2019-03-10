@@ -99,7 +99,8 @@ contains
     type(abihist) :: hist
 
     ! data for spin
-    type(spin_model_t) :: spin_model
+    !type(spin_model_t) :: spin_model
+    type(mb_manager_t) :: manager
     character(len=strlen) :: string
     character(len=500) :: message
     character(len=fnlen) :: name
@@ -151,7 +152,8 @@ contains
         write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
              &     'reading spin terms.'
      end if
-     call spin_model%initialize( filnam, inp )
+     !call spin_model%initialize( filnam, inp )
+     call  manager%initialize(filnam, params=inp)
   else
      !  Read the model (from DDB or XML)
      call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
@@ -383,7 +385,8 @@ contains
   ! Run spin dynamics
   !****************************************************************************************
   if(inp%spin_dynamics>0) then
-     call spin_model%run()
+     !call spin_model%run()
+     call manager%run()
   end if
   !****************************************************************************************
 
@@ -393,7 +396,7 @@ contains
   call effective_potential_free(reference_effective_potential)
   call multibinit_dtset_free(inp)
   call abihist_free(hist)
-  call spin_model%finalize()
+  call manager%finalize()
 
 end subroutine multibinit_main
 !!***

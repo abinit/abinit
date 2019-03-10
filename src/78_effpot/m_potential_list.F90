@@ -81,6 +81,7 @@ module m_potential_list
      procedure :: finalize
      procedure :: append
      procedure :: calculate
+     procedure :: get_delta_E
   end type potential_list_t
   !!***
 
@@ -158,14 +159,28 @@ contains
     ! Note
     ! calculate force and strain if asked to
     if(present(force)) force(:,:)=0.0d0
-    if(present(strain)) strain(:,:)=0.0d0
-    if(present(spin)) spin(:,:)=0.0d0
-    if(present(lwf)) lwf(:)=0.0d0
+    if(present(stress)) stress(:,:)=0.0d0
+    if(present(bfield)) bfield(:,:)=0.0d0
+    if(present(lwf_force)) lwf_force(:)=0.0d0
     do i=1, self%size
        call self%data(i)%obj%calculate(displacement=displacement, strain=strain, &
             & spin=spin, lwf=lwf, force=force, stress=stress, bfield=bfield, &
             lwf_force=lwf_force, energy=energy)
     end do
   end subroutine calculate
+
+  subroutine get_delta_E(self, S, ispin, Snew, deltaE)
+    ! for spin monte carlo
+    ! calculate energy difference if one spin is moved.
+    class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
+    real(dp), intent(inout) :: S(:,:),  Snew(:)
+    integer, intent(in) :: ispin
+    real(dp), intent(out) :: deltaE
+    integer :: i
+    do i=1, self%size
+       call self%data(i)%obj%get_delta_E(S=S, ispin=ispin, Snew=Snew, deltaE=deltaE)
+    end do
+    end subroutine get_delta_E
+
 
 end module m_potential_list

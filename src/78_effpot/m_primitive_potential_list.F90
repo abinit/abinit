@@ -61,8 +61,8 @@ module m_primitive_potential_list
      integer :: size=0
      integer :: capacity=0
    contains
-     procedure :: initialize => initialize
-     procedure :: append => append
+     procedure :: initialize
+     procedure :: append
      procedure :: load_from_files
      procedure :: fill_supercell
      procedure :: fill_supercell_list

@@ -100,6 +100,7 @@ module m_spin_mover
      procedure :: prepare_ncfile
      procedure, private ::get_Langevin_Heff
      procedure, private :: get_dSdt
+     procedure :: current_spin
   end type spin_mover_t
   !!***
 
@@ -842,6 +843,36 @@ contains
     endif
   end subroutine run_MvT
   !!***
+
+ !!****f* m_spin_mover/current_spin
+  !!
+  !! NAME
+  !! current_spin
+  !!
+  !! FUNCTION
+  !! return the current spin state
+  !!
+  !! INPUTS
+  !! 
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !!
+  !! CHILDREN
+  !!
+  !!
+  !! SOURCE
+  function current_spin(self) result(ret)
+    class(spin_mover_t), target, intent(inout) :: self
+    real(dp), pointer :: ret(:,:)
+    integer :: i
+    i=self%hist%findIndex(step=0)
+    ret => self%hist%S(:,:,i)
+  end function current_spin
+!!***
+
 
 
 
