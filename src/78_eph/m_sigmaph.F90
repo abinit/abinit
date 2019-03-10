@@ -712,8 +712,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end do
      end do
    end do
+   ! Uncomment these lines to disable energy window trick and allocate all bands.
    !call wrtout(std_out, "Storing all bands between my_bstart and my_bstop.")
-   !bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+   bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  else
    bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  endif
