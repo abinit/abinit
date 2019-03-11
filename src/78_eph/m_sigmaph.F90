@@ -1923,6 +1923,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
 
+ ! Enforce semiconductor occupations before calling get_gaps
+ !call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol))
+
  gap_err = get_gaps(ebands, gaps)
  call gaps%print(unit=std_out)
  val_indeces = get_valence_idx(ebands)
@@ -4503,10 +4506,10 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  type(sigmaph_t),intent(in) :: sigma
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- real(dp), intent(in) :: qpts(3,nqpt), qbz(3,nqbz)
  integer,intent(in) :: nqpt, nqbz
  integer,intent(out) :: qselect(nqpt)
  integer,intent(in) :: comm
+ real(dp), intent(in) :: qpts(3,nqpt), qbz(3,nqbz)
 
 !Local variables ------------------------------
 !scalars
