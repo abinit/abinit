@@ -33,7 +33,7 @@ module m_invars1
  use m_atomdata
 
  use defs_abitypes,  only : dataset_type, ab_dimensions
- use m_fstrings, only : inupper
+ use m_fstrings, only : inupper, itoa
  use m_geometry, only : mkrdim
  use m_parser,   only : intagm, chkint_ge
  use m_inkpts,   only : inkpts, inqpt
@@ -118,56 +118,52 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
 !******************************************************************
 
-!Set ii to avoid warning of uninitialised variable
- ii = 0
-
  marr=max(9,ndtset_alloc,2)
  ABI_ALLOCATE(dprarr,(marr))
  ABI_ALLOCATE(intarr,(marr))
 
-!Set up jdtset
- if(ndtset/=0)then
-
-!  Default values
+ ! Set up jdtset
+ if (ndtset/=0) then
+   ! Default values
    dtsets(0)%jdtset = -1 ! unused value
    dtsets(1:ndtset_alloc)%jdtset=(/ (ii,ii=1,ndtset_alloc) /)
 
-!  Read explicitly the jdtset array
+   ! Read explicitly the jdtset array
    call intagm(dprarr,intarr,0,marr,ndtset,string(1:lenstr),'jdtset',tjdtset,'INT')
    if(tjdtset==1) dtsets(1:ndtset)%jdtset=intarr(1:ndtset)
 
-!  Read the udtset array
+   ! Read the udtset array
    call intagm(dprarr,intarr,0,marr,2,string(1:lenstr),'udtset',tread,'INT')
 
-!  jdtset and udtset cannot be defined together
+   ! jdtset and udtset cannot be defined together
    if(tjdtset==1 .and. tread==1)then
      write(message, '(3a)' )&
-&     'jdtset and udtset cannot be defined both in the input file.',ch10,&
-&     'Action: remove one of them from your input file.'
+     'jdtset and udtset cannot be defined both in the input file.',ch10,&
+     'Action: remove one of them from your input file.'
      MSG_ERROR(message)
    end if
 
-!  Check values of udtset
+   ! Check values of udtset
    if(tread==1)then
      if(intarr(1)<1 .or. intarr(1)>999)then
        write(message, '(a,i0,3a)' )&
-&       'udtset(1) must be between 1 and 999, but it is ',intarr(1),'.',ch10,&
-&       'Action: change the value of udtset(1) in your input file.'
+       'udtset(1) must be between 1 and 999, but it is ',intarr(1),'.',ch10,&
+       'Action: change the value of udtset(1) in your input file.'
        MSG_ERROR(message)
      end if
      if(intarr(2)<1 .or. intarr(2)>9)then
        write(message, '(a,i0,3a)' )&
-&       'udtset(2) must be between 1 and 9, but it is ',intarr(2),'.',ch10,&
-&       'Action: change the value of udtset(2) in your input file.'
+       'udtset(2) must be between 1 and 9, but it is ',intarr(2),'.',ch10,&
+       'Action: change the value of udtset(2) in your input file.'
        MSG_ERROR(message)
      end if
      if(intarr(1)*intarr(2) /= ndtset)then
        write(message, '(3a,i0,3a,i0,a,i0,3a,i0,3a)' )&
-&       'udtset(1)*udtset(2) must be equal to ndtset,',ch10,&
-&       'but it is observed that udtset(1) = ',intarr(1),',',ch10,&
-&       'and udtset(2) = ',intarr(2),' so that their product is ',intarr(1)*intarr(2),',',ch10,&
-&       'while ndtset is ',ndtset,'.',ch10,&
-&       'Action: change udtset or ndtset in your input file.'
+       'udtset(1)*udtset(2) must be equal to ndtset,',ch10,&
+       'but it is observed that udtset(1) = ',intarr(1),',',ch10,&
+       'and udtset(2) = ',intarr(2),' so that their product is ',intarr(1)*intarr(2),',',ch10,&
+       'while ndtset is ',ndtset,'.',ch10,&
+       'Action: change udtset or ndtset in your input file.'
        MSG_ERROR(message)
      end if
      idtset=0
@@ -179,13 +175,13 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
      end do
    end if
 
-!  Final check on the jdtset values
+   ! Final check on the jdtset values
    do idtset=1,ndtset
      if(dtsets(idtset)%jdtset<1 .or. dtsets(idtset)%jdtset>9999)then
        write(message, '(3a,i0,a,i0,a,a)' )&
-&       'The components of jdtset must be between 1 and 9999.',ch10,&
-&       'However, the input value of the component ',idtset,' of jdtset is ',dtsets(idtset)%jdtset,ch10,&
-&       'Action: correct jdtset in your input file.'
+       'The components of jdtset must be between 1 and 9999.',ch10,&
+       'However, the input value of the component ',idtset,' of jdtset is ',dtsets(idtset)%jdtset,ch10,&
+       'Action: correct jdtset in your input file.'
        MSG_ERROR(message)
      end if
    end do
@@ -198,7 +194,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  call intagm(dprarr,intarr,0,1,1,string(1:lenstr),'papiopt',tread,'INT')
  if(tread==1) papiopt=intarr(1)
 
-!Read timopt and pass it to timab
+ ! Read timopt and pass it to timab
  call intagm(dprarr,intarr,0,1,1,string(1:lenstr),'timopt',tread,'INT')
  if(tread==1) timopt=intarr(1)
 
@@ -224,14 +220,14 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  if(treadh==1) cpus=dprarr(1)*3600.0_dp
  if(treads+treadm+treadh>1)then
    write(message, '(5a)' )&
-&   'More than one input variable is used to defined the CPU time limit.',ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: in the input file, suppress either cpus, cpum or cpuh.'
+   'More than one input variable is used to defined the CPU time limit.',ch10,&
+   'This is not allowed.',ch10,&
+   'Action: in the input file, suppress either cpus, cpum or cpuh.'
    MSG_ERROR(message)
  end if
  dtsets(:)%cpus=cpus
 
-!Default for natom, nimage, ntypat, useri and userr
+ ! Default for natom, nimage, ntypat, useri and userr
  dtsets(:)%natom=1
  dtsets(:)%nimage=1
  dtsets(:)%ntypat=1 ; dtsets(0)%ntypat=0    ! Will always echo ntypat
@@ -250,7 +246,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  dtsets(:)%usewvl = 0
  dtsets(:)%plowan_compute=0
 
-!Loop on datasets, to find natom and mxnatom, as well as useri and userr
+ ! Loop on datasets, to find natom and mxnatom, as well as useri and userr
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
 
@@ -349,11 +345,11 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
      MSG_ERROR(message)
    end if
 
-! Read plowan_compute
+   ! Read plowan_compute
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
 
-! Read user* variables
+   ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
    if(tread==1) dtsets(idtset)%useria=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'userib',tread,'INT')
@@ -550,7 +546,7 @@ end subroutine invars0
 !! invars1m
 !!
 !! FUNCTION
-!! Initialisation phase : prepare the main input subroutine call by
+!! Initialisation phase: prepare the main input subroutine call by
 !! reading all the NO MULTI variables, as well as the dimensions
 !! needed for allocating the input arrays in abinit.
 !!
@@ -606,7 +602,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 
 !******************************************************************
 
-!Here, allocation of the arrays that depend on msym.
+ ! Here, allocation of the arrays that depend on msym.
  ABI_ALLOCATE(symrel_,(3,3,msym,0:ndtset_alloc))
  ABI_ALLOCATE(symafm_,(msym,0:ndtset_alloc))
  ABI_ALLOCATE(tnons_,(3,msym,0:ndtset_alloc))
@@ -614,13 +610,12 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  ABI_ALLOCATE(symrel,(3,3,msym))
  ABI_ALLOCATE(tnons,(3,msym))
 
-!Set up default values (note that the default acell, amu mkmem, mkmem1,mkqmem, and nkpt must be overcome
-
+ ! Set up default values (note that the default acell, amu mkmem, mkmem1,mkqmem, and nkpt must be overcome
  do idtset=0,ndtset_alloc
    call indefo1(dtsets(idtset))
  end do
 
-!natom and nimage are already initialized in invars0
+ ! natom and nimage are already initialized in invars0
  dtsets(0)%natom=-1
  dtsets(0)%nimage=1
 
@@ -794,7 +789,6 @@ subroutine indefo1(dtset)
 
 !Arguments ------------------------------------
 !scalars
-!arrays
  type(dataset_type),intent(inout) :: dtset
 
 !Local variables -------------------------------
@@ -802,7 +796,7 @@ subroutine indefo1(dtset)
  integer :: ii
 
 !******************************************************************
-!
+
 !Set up default values. All variables to be output in outvars.f
 !should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
 
@@ -1037,19 +1031,18 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
 
-
 !************************************************************************
 
  ! This counter is incremented when we find a non-critical error.
  ! The code outputs a warning and stops at end.
  leave = 0
 
-!Some initialisations
+ ! Some initialisations
  ierr=0
  cond_string(1:4)=' '
  cond_values(1:4)=(/0,0,0,0/)
 
-!Read parameters
+ ! Read parameters
  marr=dtset%npsp;if (dtset%npsp<3) marr=3
  marr=max(marr,dtset%nimage)
  ABI_ALLOCATE(intarr,(marr))
@@ -1082,7 +1075,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (tread==1) then
    dtset%optdriver=intarr(1)
  else
-!  If optdriver was not read, while response=1, set optdriver to 1
+   ! If optdriver was not read, while response=1, set optdriver to 1
    if(response==1)dtset%optdriver=1
  end if
 
@@ -1092,8 +1085,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%tfkinfunc=intarr(1)
 
 !---------------------------------------------------------------------------
-! wvl_bigdft_comp, done here since default values of nline, nwfshist and iscf
-! depend on its value (see indefo)
+! wvl_bigdft_comp, done here since default values of nline, nwfshist and iscf depend on its value (see indefo)
  if(dtset%usewvl==1) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
    if(tread==1) dtset%wvl_bigdft_comp=intarr(1)
@@ -1112,8 +1104,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
  if(tread/=1)then
    write(message, '(3a)' )&
-&   'The array znucl MUST be initialized in the input file while this is not done.',ch10,&
-&   'Action: initialize znucl in your input file.'
+   'The array znucl MUST be initialized in the input file while this is not done.',ch10,&
+   'Action: initialize znucl in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1155,10 +1147,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        symbol = atom%symbol
        call inupper(symbol)
        call inupper(string2)
-
 !      write(std_out,'(a)')' invars1 : before test, trim(adjustl(symbol)),trim(adjustl(string2))'
 !      write(std_out,'(5a)' )'"',trim(adjustl(symbol)),'","',trim(adjustl(string2)),'"'
-
        if(trim(adjustl(symbol))==trim(adjustl(string2)))then
          found=1
          index_upper=index_blank+1
@@ -1264,7 +1254,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        write(message, '(4a)' ) ch10,&
 &       ' invars1: COMMENT -',ch10,&
 &       '  With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.'
-       call wrtout(iout,  message,'COLL')
+       call wrtout(iout, message,'COLL')
      end if
    end if
  end if
@@ -1374,6 +1364,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
 &   string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
 &   typat,vel,vel_cell,xred,znucl)
+
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
    dtset%nucdipmom(1:3,1:natom)=nucdipmom(1:3,1:natom)
    dtset%spinat(1:3,1:natom)=spinat(1:3,1:natom)
@@ -1392,13 +1383,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%xred_orig(1:3,1:natom,iimage)=xred
    call mkrdim(dtset%acell_orig(1:3,iimage),dtset%rprim_orig(1:3,1:3,iimage),dtset%rprimd_orig(1:3,1:3,iimage))
  end do
+
  ABI_DEALLOCATE(amu)
  ABI_DEALLOCATE(mixalch)
  ABI_DEALLOCATE(vel)
  ABI_DEALLOCATE(vel_cell)
  ABI_DEALLOCATE(xred)
 
-!Examine whether there is some vacuum space in the unit cell
+ ! Examine whether there is some vacuum space in the unit cell
  call invacuum(jdtset,lenstr,natom,dtset%rprimd_orig(1:3,1:3,intimage),string,vacuum,&
 & dtset%xred_orig(1:3,1:natom,intimage))
 
@@ -1445,8 +1437,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    MSG_ERROR(message)
  end if
 
-!Number of points for long wavelength limit.
-!Default is dtset%gw_nqlwl=0
+ ! Number of points for long wavelength limit. Default is dtset%gw_nqlwl=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_nqlwl',tread,'INT')
  if(tread==1) dtset%gw_nqlwl=intarr(1)
  if (dtset%gw_nqlwl<0) then
@@ -1456,7 +1447,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    MSG_ERROR(message)
  end if
 
-!Read number of k-points (if specified)
+ ! Read number of k-points (if specified)
  nkpt=0
  if(dtset%kptopt==0)nkpt=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkpt',tread,'INT')
@@ -1472,9 +1463,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  nkpthf=nkpt
  dtset%nkpthf=nkpt
 
-!Will compute the actual value of nkpt, if needed. Otherwise,
-!test that the value of nkpt is OK, if kptopt/=0
-!Set up dummy arrays istwfk, kpt, wtk
+ ! Will compute the actual value of nkpt, if needed. Otherwise,
+ ! test that the value of nkpt is OK, if kptopt/=0
+ ! Set up dummy arrays istwfk, kpt, wtk
 
  if(nkpt/=0 .or. dtset%kptopt/=0)then
    ABI_ALLOCATE(istwfk,(nkpt))
@@ -1613,7 +1604,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !Check that nspinor and nsppol are not 2 together
  if (nsppol==2 .and. nspinor==2) then
-   MSG_ERROR_NOSTOP('nspinor and nsappol cannot be 2 together!', leave)
+   MSG_ERROR_NOSTOP('nspinor and nsppol cannot be 2 together!', leave)
  end if
 
 !Here, leave if an error has been detected earlier
@@ -1666,7 +1657,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
-!  Note : mband_upper is initialized, not nband
+!  Note: mband_upper is initialized, not nband
    if(tnband==1) mband_upper=intarr(1)
 
    if(tfband==1 .and. tnband==1)then
@@ -1926,9 +1917,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  Special case of use_gpu_cuda (can be undertermined at this point)
 !  use_gpu_cuda=-1 means undetermined ; here impose its value due to some restrictions
    if (dtsets(idtset)%use_gpu_cuda==-1) then
-     if (dtsets(idtset)%optdriver/=0.or.&
-&     dtsets(idtset)%tfkinfunc/=0.or.&
-&     dtsets(idtset)%nspinor/=1) then
+     if (dtsets(idtset)%optdriver/=0.or. dtsets(idtset)%tfkinfunc/=0.or. dtsets(idtset)%nspinor/=1) then
        dtsets(idtset)%use_gpu_cuda=0
      else
        dtsets(idtset)%use_gpu_cuda=1
@@ -2619,6 +2608,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  Z
    dtsets(idtset)%zcut=3.67493260d-03  ! = 0.1eV
    if(dtsets(idtset)%optdriver == RUNL_GWLS) dtsets(idtset)%zcut=zero
+   !if(dtsets(idtset)%optdriver == RUNL_EPH) dtsets(idtset)%zcut = 0.01 * eV_Ha
    dtsets(idtset)%ziontypat(:)=zero
 
 !  BEGIN VARIABLES FOR @Bethe-Salpeter

@@ -714,7 +714,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    end do
    ! Uncomment these lines to disable energy window trick and allocate all bands.
    !call wrtout(std_out, "Storing all bands between my_bstart and my_bstop.")
-   bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+   !bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  else
    bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  endif
@@ -1328,8 +1328,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                MSG_ERROR(sjoin(" out_resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
              else
                if (my_rank == master .and. dtset%prtvol > 10) then
-                 write(std_out, *)"Converged with out_resid: ", out_resid, " after ", nlines_done, " iterations."
-                 write(std_out,*)"|psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
+                 write(std_out, *)" Converged with out_resid: ", out_resid, " after ", nlines_done, " iterations."
+                 write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
                end if
              end if
 
@@ -2605,7 +2605,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
      MSG_ERROR(msg)
    end if
-   call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense))
+   call wrtout(std_out," EPH Interpolation: will read energies from: "//trim(wfk_fname_dense))
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
    !TODO add a check for consistency
@@ -2615,7 +2615,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  else if (any(dtset%bs_interp_kmult /= 0)) then
    ! Read bs_interpmult
-   call wrtout(std_out,"EPH Interpolation: will use star functions interpolation")
+   call wrtout(std_out," EPH Interpolation: will use star functions interpolation")
    ! Interpolate band energies with star-functions
    params = 0; params(1) = 1; params(2) = 5
    if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
@@ -2859,7 +2859,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
    if (dtset%prtdos == 1) edos_intmeth = 1
    !if (dtset%prtdos == -2) edos_intmeth = 3
    edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
-   call wrtout(std_out, "Computing electron dos. Use prtdos 0 to disable this part...", do_flush=.True.)
+   call wrtout(std_out, " Computing electron dos. Use prtdos 0 to disable this part...", do_flush=.True.)
    edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_EDOS")
@@ -5046,7 +5046,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, sjoin("qpoints_oracle: predicting no. q-points for tau with winfact:", ftoa(sigma%winfact)))
+ call wrtout(std_out, sjoin(" qpoints_oracle: predicting no. q-points for tau with winfact:", ftoa(sigma%winfact)))
 
  ! Get full BZ associated to ebands
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
@@ -5136,7 +5136,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  ABI_FREE(bz2ibz)
 
  cnt = count(qselect /= 0)
- write(std_out, "(a, i0, a, f5.1, a)")"qpoints_oracle: calculation of tau_eph will need: ", cnt, &
+ write(std_out, "(a, i0, a, f5.1, a)")" qpoints_oracle: calculation of tau_eph will need: ", cnt, &
    " q-points in the IBZ. (nqibz_eff / nqibz): ", (100.0_dp * cnt) / sigma%nqibz, " [%]"
  !qselect = 0
 

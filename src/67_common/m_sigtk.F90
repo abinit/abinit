@@ -480,9 +480,9 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  ABI_MALLOC(nbcalc_ks, (nkcalc, nsppol))
 
  do ic=1,nkcalc
-   ! index in ib_work array
+   ! Index in ib_work array
    ii = kpos(ic)
-   ! index in ebands.
+   ! Index in ebands.
    ik = sigmak2ebands(ii)
    kcalc(:,ic) = ebands%kptns(:,ik)
    do spin=1,nsppol
@@ -611,7 +611,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
    dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &
    dtset%amu_orig(:, image1), dtset%icoulomb,&
-   ! TODO _origin
+   ! TODO kptrlatt_origin
    dtset%kptopt, dtset%nelect, dtset%charge, fine_kptrlatt, fine_kptrlatt,&
    dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
 
@@ -619,13 +619,13 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  ABI_ICALLOC(kshe_mask, (fine_ebands%nkpt, ebands%nsppol, 2))
 
  do spin=1,ebands%nsppol
-   ! Get CBM and VBM with some tolerance
+   ! Get CBM and VBM with some tolerance.
    vmax = gaps%vb_max(spin) + tol2 * eV_Ha
    cmin = gaps%cb_min(spin) - tol2 * eV_Ha
    do ikf_ibz=1,fine_ebands%nkpt
      do band=1,ebands%mband
        ee = fine_ebands%eig(band, ikf_ibz, spin)
-       ! Check whether the interpolated eigenvalue is inside the energy regions.
+       ! Check whether the interpolated eigenvalue is inside the sigma_erange energy regions.
        if (dtset%sigma_erange(1) > zero) then
          if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
            kshe_mask(ikf_ibz, spin, 1) = kshe_mask(ikf_ibz, spin, 1)  + 1
@@ -653,12 +653,13 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    end if
  end do
 
- ! Find points in the BZ?
- ! Compute tetra and q-points for EPH calculation?
+ ! Find image points in the BZ?
+ ! Compute tetra and q-points for EPH calculation or use +/- wmax window and heuristic approach in sigmaph at runtime?
+ ! Compute SKW 1st and 2dn derivates needed to treat Frohlich?
 
  ! Write output files with k-point list.
  if (my_rank == master .and. len_trim(prefix) /= 0) then
-   write(std_out, "(a,i0,a,f5.1,a)")"Found: ",  onkpt, " kpoints in erange. (nkeff / nkibz): ", &
+   write(std_out, "(a,i0,a,f5.1,a)")" Found: ",  onkpt, " kpoints in sigma_erange energy windows. (nkeff / nkibz): ", &
        (100.0_dp * onkpt) / fine_ebands%nkpt, " [%]"
    path = strcat(prefix, "_KERANGE")
    if (open_file(path, msg, newunit=unt, form="formatted") /= 0) then
@@ -679,7 +680,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    path = strcat(prefix, "_KERANGE.nc")
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-   ! Write crystalline structure and bands in fine k-mesh.
+   ! Write crystalline structure and bands on the fine k-mesh.
    NCF_CHECK(hdr_ncwrite(fine_hdr, ncid, fform_kerange, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
