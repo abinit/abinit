@@ -218,14 +218,14 @@ type, public :: plowannier_type
   ! energy band maximum considered
 
   integer :: natom_wan
-  ! number of atoms in a cell
+  ! number of atoms (used to compute Wannier functions)
 
   integer :: size_wan
   ! sum of all the m possible for every atom considered
 
   integer, allocatable :: iatom_wan(:)
-  ! array of each atom's type
-
+  ! array of each atom (used to compute Wannier functions)
+ 
   integer, allocatable :: nbl_atom_wan(:)
   ! array of the number of l considered for each atom
 
@@ -326,7 +326,6 @@ subroutine init_plowannier(dtset,wan)
 
  !! for this case
  wan%natom_wan = dtset%plowan_natom
-
 
  !! generally
  ABI_ALLOCATE(wan%kpt,(3,size(dtset%kpt,2)))
@@ -2146,7 +2145,7 @@ end subroutine compute_coeff_plowannier
 !!  print the wannier weight (psichi) on a forlb.ovlp file
 !!
 !! INPUTS
-!!  wan
+!! dtset%ntypat,dtset%typat,wan
 !!
 !! OUTPUT
 !!
@@ -2159,7 +2158,7 @@ end subroutine compute_coeff_plowannier
 
 
 
- subroutine print_plowannier(wan)
+ subroutine print_plowannier(ntypat,typat,wan)
 
  use m_abicore
  use m_io_tools,  only : open_file
@@ -2168,6 +2167,8 @@ end subroutine compute_coeff_plowannier
 
  !Arguments-------------------------
  type(plowannier_type),intent(in) :: wan
+ integer,intent(in) :: ntypat
+ integer,allocatable,intent(in) :: typat(:)
  !Local variables-------------------
  character(len=500) :: msg
  integer :: unt,iatom,spin,ikpt,iband,ibandc,il,ispinor,im
@@ -2177,19 +2178,20 @@ end subroutine compute_coeff_plowannier
   MSG_ERROR(msg)
  end if
  rewind(unt)
- 
 
-
+ write(msg,'(2a)') ch10,' Print the psichi coefficients in forlb.ovlp'
+ call wrtout(std_out,msg,'COLL') ; call wrtout(ab_out,msg,'COLL')
  
  !Header of the file forlb.ovlp
  write(unt,'(a,2x,i2)') "Total number of orbitals =", sum(wan%nbl_atom_wan(:))
  write(unt,'(a,2i6)')"Bands =",wan%bandi_wan,wan%bandf_wan
+
  do spin=1,wan%nsppol
 	do iatom=1,wan%natom_wan
 	 !Header for each atom
 	 write(unt,'(a)')"*****************************************************************"
-	 write(unt,'(2x,a,2x,i2,3x,a,3x,i2)')"Atom : ",iatom,"type =",wan%iatom_wan(iatom)
-	 write(unt,*)"orbital(s) to consider on this atom",wan%latom_wan(iatom)%lcalc(:)
+	 write(unt,'(2x,a,2x,i2,3x,a,3x,i2)')"Atom =",wan%iatom_wan(iatom),"type =",typat(wan%iatom_wan(iatom))
+	 write(unt,*)"orbital(s) to consider on this atom",wan%nbl_atom_wan(iatom)
 	 do il=1,wan%nbl_atom_wan(iatom)
 		!Header for each orbital
 		write(unt,'(a)')"-----------------------------------------------------------------"
