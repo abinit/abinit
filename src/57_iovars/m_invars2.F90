@@ -70,8 +70,8 @@ contains
 !! Initialisation phase - main input routine.
 !! Big loop on the datasets :
 !! - for each of the datasets, write one line about the crystallographic data
-!! - call invars2, that read the eventual single dataset input values ;
-!! - compute mgfft,mpw,nfft,... for this data set ;
+!! - call invars2, that read the eventual single dataset input values;
+!! - compute mgfft,mpw,nfft,... for this data set;
 !! - compute quantities for the susceptibility computation
 !! - compute the memory needs for this data set.
 !!
@@ -89,6 +89,7 @@ contains
 !!   pseudopotential file header, as well as the psp file name
 !!  string*(*)=character string containing all the input data.
 !!   Initialized previously in instrng.
+!! comm=MPI communicator
 !!
 !! OUTPUT
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
@@ -108,11 +109,11 @@ contains
 !!
 !! SOURCE
 
-subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
+subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iout,lenstr,msym,ndtset,ndtset_alloc,npsp
+ integer,intent(in) :: iout,lenstr,msym,ndtset,ndtset_alloc,npsp, comm
  character(len=*),intent(in) :: string
 !arrays
  integer,intent(in) :: mband_upper_(0:ndtset_alloc)
@@ -140,7 +141,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
    zionpsp(:)=pspheads(1:npsp)%zionpsp
 
 !  Here, nearly all the remaining input variables are initialized
-   call invars2(bravais,dtsets(idtset),iout,jdtset,lenstr,mband_upper,msym,npsp,string,usepaw,zionpsp)
+   call invars2(bravais,dtsets(idtset),iout,jdtset,lenstr,mband_upper,msym,npsp,string,usepaw,zionpsp, comm)
 
    ABI_DEALLOCATE(zionpsp)
 
@@ -207,6 +208,7 @@ end subroutine invars2m
 !!  Initialized previously in instrng.
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! zionpsp(npsp)=valence charge of each type of atom (coming from the psp files)
+!! comm=MPI communicator
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -223,8 +225,6 @@ end subroutine invars2m
 !! in a compressed, standardized, format
 !! At the input, they already contain a default value.
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      invars2m,m_ab7_invars_f90
 !!
@@ -236,11 +236,11 @@ end subroutine invars2m
 !!
 !! SOURCE
 
-subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepaw,zionpsp)
+subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepaw,zionpsp, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iout,jdtset,lenstr,mband,msym,npsp,usepaw
+ integer,intent(in) :: iout,jdtset,lenstr,mband,msym,npsp,usepaw, comm
  character(len=*),intent(in) :: string
  type(dataset_type),intent(inout) :: dtset
 !arrays
@@ -274,7 +274,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call timab(191,1,tsec)
 
-!Compute the maximum size of arrays intarr and dprarr
+ ! Compute the maximum size of arrays intarr and dprarr
  natom=dtset%natom
  nimage=dtset%nimage
  nkpt=dtset%nkpt
@@ -463,8 +463,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%nfreqim=intarr(1)
  if (dtset%cd_customnimfrqs/=0) then
    write(message, '(3a)' )&
-&   'cd_customnimfrqs not equal to zero and not equal to nfreqim',ch10,&
-&   'setting nfreqim = cd_customnimfrqs'
+   'cd_customnimfrqs not equal to zero and not equal to nfreqim',ch10,&
+   'setting nfreqim = cd_customnimfrqs'
    MSG_WARNING(message)
    dtset%nfreqim = dtset%cd_customnimfrqs
  end if
@@ -519,8 +519,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      do ifreq=1,dtset%cd_customnimfrqs-1
        if (dtset%cd_imfrqs(ifreq+1)<dtset%cd_imfrqs(ifreq)) then
          write(message, '(3a)' )&
-&         'The frequencies specified in cd_imfrqs must be strictly increasing',ch10,&
-&         'Action: Correct this in your input file'
+         'The frequencies specified in cd_imfrqs must be strictly increasing',ch10,&
+         'Action: Correct this in your input file'
          MSG_ERROR(message)
        end if
      end do
@@ -534,8 +534,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      do ifreq=1,dtset%gw_customnfreqsp-1
        if (dtset%gw_freqsp(ifreq+1)<dtset%gw_freqsp(ifreq)) then
          write(message, '(a,a,a)' )&
-&         'The frequencies specified in gw_freqsp must be strictly increasing',ch10,&
-&         'Action: Correct this in your input file'
+         'The frequencies specified in gw_freqsp must be strictly increasing',ch10,&
+         'Action: Correct this in your input file'
          MSG_ERROR(message)
        end if
      end do

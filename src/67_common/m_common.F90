@@ -159,8 +159,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  vxcavg,wtk,xred,conv_retcode,&
 &  electronpositron, fock) ! optional arguments)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,initGS,iscf,istep,istep_fock_outer,istep_mix
@@ -989,7 +987,6 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
  use m_geometry,   only : mkrdim, metric
  use m_kg,         only : getcut
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1138,7 +1135,6 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 &  nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
 
  use m_io_tools,  only : open_file
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1433,8 +1429,6 @@ end subroutine prteigrs
 !! SOURCE
 
 subroutine prtene(dtset,energies,iout,usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1752,8 +1746,6 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  use defs_datatypes, only : pspheader_type
  use m_pspheads,     only : inpspheads, pspheads_comm
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(out) :: lenstr, ndtset
@@ -1794,7 +1786,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
  ! Continue to analyze the input string, get upper dimensions, and allocate the remaining arrays.
  call invars0(dtsets, istatr, istatshft, lenstr, msym, mx%natom, mx%nimage, mx%ntypat, &
-              ndtset, ndtset_alloc, npsp, papiopt, timopt, string)
+              ndtset, ndtset_alloc, npsp, papiopt, timopt, string, comm)
 
  ! Enable PAPI timers
  call time_set_papiopt(papiopt)
@@ -1882,7 +1874,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
  ! Get MAX dimension over datasets
  call invars1m(dmatpuflag, dtsets, ab_out, lenstr, mband_upper_, mx,&
-               msym, ndtset, ndtset_alloc, string, npsp, zionpsp)
+               msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
  ABI_FREE(zionpsp)
  call timab(42,2,tsec)
@@ -1901,7 +1893,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  end if
 
  ! Call the main input routine.
- call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
+ call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string, comm)
 
  call macroin2(dtsets, ndtset_alloc)
 

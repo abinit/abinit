@@ -73,6 +73,7 @@ contains
 !!  ndtset= number of datasets to be read; if 0, no multi-dataset mode
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
 !!  string*(*)=string of characters containing all input variables and data
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
@@ -95,11 +96,11 @@ contains
 !! SOURCE
 
 subroutine invars0(dtsets,istatr,istatshft,lenstr,&
-& msym,mxnatom,mxnimage,mxntypat,ndtset,ndtset_alloc,npsp,papiopt,timopt,string)
+& msym,mxnatom,mxnimage,mxntypat,ndtset,ndtset_alloc,npsp,papiopt,timopt,string, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: lenstr,ndtset,ndtset_alloc
+ integer,intent(in) :: lenstr,ndtset,ndtset_alloc, comm
  integer,intent(out) :: istatr,istatshft,msym,mxnatom,mxnimage,mxntypat,npsp,papiopt
  integer,intent(inout) :: timopt
  character(len=*),intent(in) :: string
@@ -111,7 +112,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
  integer :: treads,use_gpu_cuda
  real(dp) :: cpus
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
@@ -137,34 +138,34 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
    ! jdtset and udtset cannot be defined together
    if(tjdtset==1 .and. tread==1)then
-     write(message, '(3a)' )&
+     write(msg, '(3a)' )&
      'jdtset and udtset cannot be defined both in the input file.',ch10,&
      'Action: remove one of them from your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    ! Check values of udtset
    if(tread==1)then
      if(intarr(1)<1 .or. intarr(1)>999)then
-       write(message, '(a,i0,3a)' )&
+       write(msg, '(a,i0,3a)' )&
        'udtset(1) must be between 1 and 999, but it is ',intarr(1),'.',ch10,&
        'Action: change the value of udtset(1) in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
      if(intarr(2)<1 .or. intarr(2)>9)then
-       write(message, '(a,i0,3a)' )&
+       write(msg, '(a,i0,3a)' )&
        'udtset(2) must be between 1 and 9, but it is ',intarr(2),'.',ch10,&
        'Action: change the value of udtset(2) in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
      if(intarr(1)*intarr(2) /= ndtset)then
-       write(message, '(3a,i0,3a,i0,a,i0,3a,i0,3a)' )&
+       write(msg, '(3a,i0,3a,i0,a,i0,3a,i0,3a)' )&
        'udtset(1)*udtset(2) must be equal to ndtset,',ch10,&
        'but it is observed that udtset(1) = ',intarr(1),',',ch10,&
        'and udtset(2) = ',intarr(2),' so that their product is ',intarr(1)*intarr(2),',',ch10,&
        'while ndtset is ',ndtset,'.',ch10,&
        'Action: change udtset or ndtset in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
      idtset=0
      do i1=1,intarr(1)
@@ -178,11 +179,11 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ! Final check on the jdtset values
    do idtset=1,ndtset
      if(dtsets(idtset)%jdtset<1 .or. dtsets(idtset)%jdtset>9999)then
-       write(message, '(3a,i0,a,i0,a,a)' )&
+       write(msg, '(3a,i0,a,i0,a,a)' )&
        'The components of jdtset must be between 1 and 9999.',ch10,&
        'However, the input value of the component ',idtset,' of jdtset is ',dtsets(idtset)%jdtset,ch10,&
        'Action: correct jdtset in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end do
 
@@ -219,11 +220,11 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
  if(treadh==1) cpus=dprarr(1)*3600.0_dp
  if(treads+treadm+treadh>1)then
-   write(message, '(5a)' )&
+   write(msg, '(5a)' )&
    'More than one input variable is used to defined the CPU time limit.',ch10,&
    'This is not allowed.',ch10,&
    'Action: in the input file, suppress either cpus, cpum or cpuh.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
  dtsets(:)%cpus=cpus
 
@@ -273,11 +274,11 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 &   (dtsets(idtset)%supercell_latt(1,1) < tol10 .or.&
 &   dtsets(idtset)%supercell_latt(2,2) <tol10  .or.&
 &   dtsets(idtset)%supercell_latt(3,3) < tol10 )) then
-     write(message, '(5a)' )&
+     write(msg, '(5a)' )&
 &     'supercell_latt must have positive parameters and diagonal part',ch10,&
 &     'This is not allowed.  ',ch10,&
 &     'Action: modify supercell_latt in the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 !  Compute the multiplicity of the supercell
    call mati3det(dtsets(idtset)%supercell_latt,multiplicity)
@@ -292,18 +293,18 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if(tread==1)then
      dtsets(idtset)%natom=intarr(1)
    else
-     write(message, '(a,i0,2a)' )&
+     write(msg, '(a,i0,2a)' )&
 &     'Input natom must be defined, but was absent for dataset ',jdtset,ch10,&
 &     'Action: check the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 !  Check that natom is greater than 0
    if (dtsets(idtset)%natom<=0) then
-     write(message, '(a,i0,2a,i0,3a)' )&
+     write(msg, '(a,i0,2a,i0,3a)' )&
 &     'Input natom must be > 0, but was ',dtsets(idtset)%natom,ch10,&
 &     'for dataset ',jdtset,'. This is not allowed.',ch10,&
 &     'Action: check the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    if(multiplicity > 1)then
@@ -315,22 +316,22 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
 !  Check that nimage is greater than 0
    if (dtsets(idtset)%nimage<=0) then
-     write(message, '(a,i0,4a)' )&
+     write(msg, '(a,i0,4a)' )&
 &     'nimage must be > 0, but was ',dtsets(idtset)%nimage,ch10,&
 &     'This is not allowed.',ch10,&
 &     'Action: check the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntypat',tread,'INT')
    if(tread==1)dtsets(idtset)%ntypat=intarr(1)
 !  Check that ntypat is greater than 0
    if (dtsets(idtset)%ntypat<=0) then
-     write(message, '(a,i0,2a,i0,3a)' )&
+     write(msg, '(a,i0,2a,i0,3a)' )&
 &     'Input ntypat must be > 0, but was ',dtsets(idtset)%ntypat,ch10,&
 &     'for dataset ',jdtset,'. This is not allowed.',ch10,&
 &     'Action: check the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
 !  Read msym from string
@@ -338,11 +339,11 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if(tread==1)dtsets(idtset)%maxnsym=intarr(1)
 !  Check that maxnsym is greater than 1
    if (dtsets(idtset)%maxnsym<1) then
-     write(message, '(a,i0,2a,i0,3a)' )&
+     write(msg, '(a,i0,2a,i0,3a)' )&
 &     'Input maxnsym must be > 1, but was ',dtsets(idtset)%maxnsym,ch10,&
 &     'for dataset ',jdtset,'. This is not allowed.',ch10,&
 &     'Action: check the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    ! Read plowan_compute
@@ -395,14 +396,14 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  if(mxnimage>1)then
    do idtset=2,ndtset_alloc
      if(mxnatom/=dtsets(idtset)%natom)then
-       write(message,'(5a,i0,a,i0,3a,i0,a)')&
+       write(msg,'(5a,i0,a,i0,3a,i0,a)')&
 &       'When there exist one dataset with more than one image,',ch10,&
 &       'the number of atoms in each dataset must be the same.',ch10,&
 &       'However, it has been found that for dataset= ',idtset,ch10,&
 &       'natom= ',dtsets(idtset)%natom,' differs from the maximum number',ch10,&
 &       'of atoms, mxnatom= ',mxnatom,&
 &       'Action: check the input variables natom for different datasets.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end do
  end if
@@ -416,13 +417,13 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if(ndtset_alloc>1)then
      do idtset=1,ndtset_alloc
        if(dtsets(idtset)%ntypat/=mxntypat)then
-         write(message, '(5a,i0,a,i0,2a,i0,2a)' )&
+         write(msg, '(5a,i0,a,i0,2a,i0,2a)' )&
 &         'When npsp is not defined, the input variable ntypat must be',ch10,&
 &         'the same for all datasets. However, it has been found that for',ch10,&
 &         'jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
 &         'differs from the maximum value of ntypat= ',mxntypat,ch10,&
 &         'Action: check the input variables npsp and ntypat.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
    end if
@@ -438,11 +439,11 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if(tread==1)dtsets(idtset)%paral_kgb=intarr(1)
 
    if (dtsets(idtset)%paral_kgb<0 .or. dtsets(idtset)%paral_kgb>1) then
-     write(message,'(a,i0,2a,i0,3a)')&
+     write(msg,'(a,i0,2a,i0,3a)')&
 &     'Input paral_kgb must be 0 or 1, but was ',dtsets(idtset)%paral_kgb,ch10,&
 &     'for dataset',jdtset,'. This is not allowed.',ch10,&
 &     'Action: check the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end do
 
@@ -466,19 +467,19 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  if (use_gpu_cuda==1) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
-     write(message,'(3a)')&
+     write(msg,'(3a)')&
 &     'Input variables use_gpu_cuda is on',ch10,&
 &     'but no available GPU device has been detected !',ch10,&
 &     'Action: change the input variable use_gpu_cuda.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 #else
-   write(message,'(7a)')&
+   write(msg,'(7a)')&
 &   'Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
 &   'with (double precision) gpu mode enabled !',ch10,&
 &   'Action: change the input variable use_gpu_cuda',ch10,&
 &   '        or re-compile ABINIT with double-precision Cuda enabled.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
 #endif
  end if
 
@@ -561,6 +562,7 @@ end subroutine invars0
 !!  npsp= number of pseudopotential files
 !!  string*(*)=string of characters containing all input variables and data
 !!  zionpsp(npsp)= valence charge over all psps
+!!  comm=MPI communicator
 !!
 !! OUTPUT
 !!  dmatpuflag=flag controlling the use of an initial density matrix in PAW+U (max. value over datasets)
@@ -579,11 +581,11 @@ end subroutine invars0
 !! SOURCE
 
 subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
-& msym, ndtset, ndtset_alloc, string, npsp, zionpsp)
+& msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iout,lenstr,msym,ndtset,ndtset_alloc,npsp
+ integer,intent(in) :: iout,lenstr,msym,ndtset,ndtset_alloc,npsp, comm
  integer,intent(out) :: dmatpuflag
  character(len=*),intent(inout) :: string
  type(ab_dimensions),intent(inout) :: mx
@@ -645,7 +647,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
    tnons(:,:)=tnons_(:,:,0)
 
    call invars1(dtsets(idtset)%bravais,dtsets(idtset),iout,jdtset,lenstr,&
-&   mband_upper,msym,npsp,string,symafm,symrel,tnons,zionpsp)
+&   mband_upper,msym,npsp,string,symafm,symrel,tnons,zionpsp, comm)
 
    mband_upper_ (idtset)=mband_upper
    symafm_(:,idtset)=symafm(:)
@@ -951,6 +953,7 @@ end subroutine indefo1
 !!  msym=default maximal number of symmetries
 !!  npsp1= number of pseudopotential files
 !!  zionpsp(npsp1)= valence charge over all psps
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  mband_upper=estimation of the maximum number of bands for any k-point
@@ -961,29 +964,29 @@ end subroutine indefo1
 !!   some of which are initialized here, while other were already
 !!   initialized, while some others will still be initialized later.
 !!   The list of records of dtset initialized in the present routine is:
-!!   acell_orig,densty,iatfix,kptopt,kptrlatt,
-!!   mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkpt,nkptgw,nkpthf,
-!!   nqptdm,nshiftk,nucdipmom,nzchempot,optdriver,
-!!   rprim_orig,rprimd_orig,shiftk,
-!!   spgroup,spinat,typat,vel_orig,vel_cell_orig,xred_orig
+!!
+!!       acell_orig,densty,iatfix,kptopt,kptrlatt,
+!!       mkmem,mkqmem,mk1mem,natsph,natvshift,nconeq,nkpt,nkptgw,nkpthf,
+!!       nqptdm,nshiftk,nucdipmom,nzchempot,optdriver,
+!!       rprim_orig,rprimd_orig,shiftk,
+!!       spgroup,spinat,typat,vel_orig,vel_cell_orig,xred_orig
+!!
 !!  bravais(11)=characteristics of Bravais lattice (see symlatt.F90)
 !!  symafm(1:msym)=(anti)ferromagnetic part of symmetry operations
-!!  symrel(3,3,1:msym)=symmetry operations in real space in terms
-!!   of primitive translations
+!!  symrel(3,3,1:msym)=symmetry operations in real space in terms of primitive translations
 !!  tnons(3,1:msym)=nonsymmorphic translations for symmetry operations
 !!  string*(*)=string of characters containing all input variables and data
 !!
 !! NOTES
-!! Must set up the geometry of the system, needed to compute
-!! k point grids in an automatic fashion.
-!! Treat separately mband_upper, since
-!! fband, charge and zionpsp must be known for being able to initialize it.
+!! Must set up the geometry of the system, needed to compute k point grids in an automatic fashion.
+!! Treat separately mband_upper, since fband, charge and zionpsp must be known for being able to initialize it.
 !!
 !! Defaults are provided in the calling routine.
-!! Defaults are also provided here for the following variables :
-!! mband_upper, occopt, fband, charge
-!! They should be kept consistent with defaults of the same variables
-!! provided to the invars routines.
+!! Defaults are also provided here for the following variables:
+!!
+!!      mband_upper, occopt, fband, charge
+!!
+!! They should be kept consistent with defaults of the same variables provided to the invars routines.
 !!
 !! PARENTS
 !!      invars1m
@@ -995,11 +998,11 @@ end subroutine indefo1
 !! SOURCE
 
 subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
-& string,symafm,symrel,tnons,zionpsp)
+& string,symafm,symrel,tnons,zionpsp, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iout,jdtset,lenstr,msym,npsp1
+ integer,intent(in) :: iout,jdtset,lenstr,msym,npsp1, comm
  integer,intent(out) :: mband_upper
  character(len=*),intent(inout) :: string
  type(dataset_type),intent(inout) :: dtset
@@ -1019,7 +1022,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: tfband,tnband,tread,tread_alt
  real(dp) :: charge,fband,kptnrm,kptrlen,zelect,zval
  character(len=2) :: string2,symbol
- character(len=500) :: message
+ character(len=500) :: msg
  type(atomdata_t) :: atom
 !arrays
  integer :: cond_values(4),vacuum(3)
@@ -1103,10 +1106,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%znucl(1:dtset%npsp)=dprarr(1:dtset%npsp)
  end if
  if(tread/=1)then
-   write(message, '(3a)' )&
+   write(msg, '(3a)' )&
    'The array znucl MUST be initialized in the input file while this is not done.',ch10,&
    'Action: initialize znucl in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
 !The default for ratsph has already been initialized
@@ -1152,12 +1155,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        if(trim(adjustl(symbol))==trim(adjustl(string2)))then
          found=1
          index_upper=index_blank+1
-!        Cannot deal properly with more that 9 psps
+         ! Cannot deal properly with more that 9 psps
          if(ipsp>=10)then
            MSG_ERROR('Need to use a pseudopotential with number larger than 9. Not allowed yet.')
          end if
 
-!        write(std_out,*)' invars1 : found ipsp=',ipsp
+         ! write(std_out,*)' invars1 : found ipsp=',ipsp
          write(string1,'(i1)')ipsp
          string(index_lower:index_lower+1)=blank//string1
          index_lower=index_lower+2
@@ -1165,11 +1168,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      end do ! ipsp
 !    if not found ...
      if(found==0)then
-       write(message,'(6a)' )&
+       write(msg,'(6a)' )&
 &       'Did not find matching pseudopotential for XYZ atomic symbol,',ch10,&
 &       'with value ',string2,ch10,&
 &       'Action: check that the atoms required by the XYZ file correspond to one psp file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end do ! Loop on atoms
 !  One should find blanks after the last significant type value
@@ -1178,14 +1181,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !---------------------------------------------------------------------------
 
-!Here, set up quantities that are related to geometrical description
-!of the system (acell,rprim,xred), as well as
-!initial velocity(vel), and spin of atoms (spinat), nuclear dipole moments
-! of atoms (nucdipmom),
-!the symmetries (symrel,symafm, and tnons)
-!and the list of fixed atoms (iatfix,iatfixx,iatfixy,iatfixz).
-!Arrays have already been
-!dimensioned thanks to the knowledge of msym and mx%natom
+! Here, set up quantities that are related to geometrical description of the system (acell,rprim,xred), as well as
+! initial velocity(vel), and spin of atoms (spinat), nuclear dipole moments of atoms (nucdipmom),
+! the symmetries (symrel,symafm, and tnons) and the list of fixed atoms (iatfix,iatfixx,iatfixy,iatfixz).
+! Arrays have already been dimensioned thanks to the knowledge of msym and mx%natom
 
 !ji: We need to read the electric field before calling ingeo
 !****** Temporary ******
@@ -1217,7 +1216,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'jfielddir',tread,'INT')
  if(tread==1) dtset%jfielddir(1:3)=intarr(1:3)
 
-!We need to know nsppol/nspinor/nspden before calling ingeo
+ ! We need to know nsppol/nspinor/nspden before calling ingeo
  nsppol=dtset%nsppol
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsppol',tread,'INT')
  if(tread==1) nsppol=intarr(1)
@@ -1226,8 +1225,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'SpinPolarized',tread_alt,'LOG')
  if(tread_alt==1)then
    if(tread==1)then
-     message = 'nsppol and SpinPolarized cannot be specified simultaneously for the same dataset.'
-     MSG_ERROR_NOSTOP(message, leave)
+     msg = 'nsppol and SpinPolarized cannot be specified simultaneously for the same dataset.'
+     MSG_ERROR_NOSTOP(msg, leave)
    else
 !    Note that SpinPolarized is a logical input variable
      nsppol=1
@@ -1251,10 +1250,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      if(dtset%pawspnorb>0) dtset%nspinor=2
    else
      if(dtset%nspinor==2)then
-       write(message, '(4a)' ) ch10,&
+       write(msg, '(4a)' ) ch10,&
 &       ' invars1: COMMENT -',ch10,&
 &       '  With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.'
-       call wrtout(iout, message,'COLL')
+       call wrtout(iout, msg,'COLL')
      end if
    end if
  end if
@@ -1275,11 +1274,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  ntypalch=dtset%ntypalch
  if(ntypalch>ntypat)then
-   write(message, '(3a,i0,a,i0,a,a)' )&
+   write(msg, '(3a,i0,a,i0,a,a)' )&
 &   'The input variable ntypalch must be smaller than ntypat, while it is',ch10,&
 &   'ntypalch=',dtset%ntypalch,', and ntypat=',ntypat,ch10,&
 &   'Action: check ntypalch vs ntypat in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  ntyppure=ntypat-ntypalch
@@ -1287,11 +1286,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  npspalch=npsp-ntyppure
  dtset%npspalch=npspalch
  if(npspalch<0)then
-   write(message, '(a,i0,2a,i0,a,a)' )&
+   write(msg, '(a,i0,2a,i0,a,a)' )&
 &   'The number of available pseudopotentials, npsp=',npsp,ch10,&
 &   'is smaller than the requested number of types of pure atoms, ntyppure=',ntyppure,ch10,&
 &   'Action: check ntypalch versus ntypat and npsp in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if(ntypalch>0)then
@@ -1303,20 +1302,19 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
  if(tread==1) then
    if(dtset%nspden == 2)then
-     write(message,'(7a)')&
+     write(msg,'(7a)')&
 &     'A Zeeman field has been specified without noncollinear spins.',ch10,&
 &     'Only the z-component of the magnetic field will be used.'
-     MSG_WARNING(message)
+     MSG_WARNING(msg)
    else if (dtset%nspden == 1)then
-     write(message, '(a,a,a)' )&
+     write(msg, '(a,a,a)' )&
 &     'A Zeeman field has been specified for a non-spin-polarized calculation.',ch10,&
 &     'Action: check the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    dtset%zeemanfield(1:3) = dprarr(1:3)
  end if
-
 
  ABI_ALLOCATE(amu,(ntypat))
  ABI_ALLOCATE(mixalch,(npspalch,ntypalch))
@@ -1332,8 +1330,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    if(dtset%nimage>=2 .and. ii==dtset%nimage+1)iimage=intimage
 
    if (dtset%nimage /= 1) then
-     write(message,'(a,i0)')' invars1: treat image number: ',iimage
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(a,i0)')' invars1: treat image number: ',iimage
+     call wrtout(std_out,msg,'COLL')
    end if
 
 !  Need to reset nsym to default value for each image
@@ -1431,20 +1429,20 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkptgw',tread,'INT')
  if(tread==1) dtset%nkptgw=intarr(1)
  if (dtset%nkptgw<0) then
-   write(message, '(a,i0,4a)' )&
-&   'Input nkptgw must be >= 0, but was ',dtset%nkptgw,ch10,&
-&   'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,4a)' )&
+   'Input nkptgw must be >= 0, but was ',dtset%nkptgw,ch10,&
+   'This is not allowed.',ch10,'Action: check the input file.'
+   MSG_ERROR(msg)
  end if
 
  ! Number of points for long wavelength limit. Default is dtset%gw_nqlwl=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_nqlwl',tread,'INT')
  if(tread==1) dtset%gw_nqlwl=intarr(1)
  if (dtset%gw_nqlwl<0) then
-   write(message, '(a,i12,a,a,a,a)' )&
-&   'Input gw_nqlwl must be > 0, but was ',dtset%gw_nqlwl,ch10,&
-&   'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,4a)' )&
+   'Input gw_nqlwl must be > 0, but was ',dtset%gw_nqlwl,ch10,&
+   'This is not allowed.',ch10,'Action: check the input file.'
+   MSG_ERROR(msg)
  end if
 
  ! Read number of k-points (if specified)
@@ -1452,6 +1450,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(dtset%kptopt==0)nkpt=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkpt',tread,'INT')
  if(tread==1) nkpt=intarr(1)
+
+!#ifdef HAVE_NETCDF
+! if (len(dtset%kerange_path) > 0 ) then
+!   if (my_rank == master) then
+!     NCF_CHECK(nctk_open_read(ncid, dtset%kerange_path, xmpi_comm_self))
+      !NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt, datamode=.True.))
+!     NCF_CHECK(nf90_close(ncid))
+!   end if
+! call xmpi_bcast(nkpt, master, comm, ierr)
+!#endif
+
  dtset%nkpt=nkpt
 
  call chkint_ge(0,0,cond_string,cond_values,ierr,'nkpt',nkpt,0,iout)
@@ -1472,7 +1481,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_ALLOCATE(kpt,(3,nkpt))
    ABI_ALLOCATE(kpthf,(3,nkpthf))
    ABI_ALLOCATE(wtk,(nkpt))
-!  Here, occopt is also a dummy argument
+   ! Here, occopt is also a dummy argument
    occopt=1 ; dtset%nshiftk=1 ; dtset%kptrlatt(:,:)=0
 
    kptrlen=20.0_dp ; wtk(:)=1.0_dp
@@ -1486,29 +1495,29 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
    if(tread==1) chksymbreak=intarr(1)
 
-!  Use the first image to predict k and/or q points,
-!  except if an intermediate image is available
+   ! Use the first image to predict k and/or q points,
+   ! except if an intermediate image is available
    intimage=1 ; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
-!  Find the q-point, if any.
+   ! Find the q-point, if any.
    if(nqpt==1)then
      call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,dtset%qptn,dtset%wtq,&
-&     dtset%rprimd_orig(1:3,1:3,intimage),dtset%spinat,string,dtset%typat,&
-&     vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
+       dtset%rprimd_orig(1:3,1:3,intimage),dtset%spinat,string,dtset%typat,&
+       vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
    end if
 
-!  Find the k point grid
+   ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
-&   kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
-&   nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
-&   occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
-&   string,symafm,symrel,vacuum,wtk)
+     kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
+     nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
+     occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
+     string,symafm,symrel,vacuum,wtk)
 
    ABI_DEALLOCATE(istwfk)
    ABI_DEALLOCATE(kpt)
    ABI_DEALLOCATE(kpthf)
    ABI_DEALLOCATE(wtk)
-!  nkpt and nkpthf have been computed, as well as the k point grid, if needed
+   !  nkpt and nkpthf have been computed, as well as the k point grid, if needed
    dtset%nkpt=nkpt
    dtset%nkpthf=nkpthf
  end if
@@ -1517,10 +1526,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%nqptdm=intarr(1)
 
  if (dtset%nqptdm<-1) then
-   write(message, '(a,i12,a,a,a,a)' )&
-&   'Input nqptdm must be >= 0, but was ',dtset%nqptdm,ch10,&
-&   'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,4a)' )&
+    'Input nqptdm must be >= 0, but was ',dtset%nqptdm,ch10,&
+    'This is not allowed.',ch10,'Action: check the input file.'
+   MSG_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nzchempot',tread,'INT')
@@ -1530,50 +1539,50 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%cd_customnimfrqs=intarr(1)
 
  if (dtset%cd_customnimfrqs<0) then
-   write(message, '(a,i0,a,a,a,a)' )&
-&   'Input cd_customnimfrqs must be >= 0, but was ',dtset%cd_customnimfrqs,ch10,&
-&   'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,4a)' )&
+    'Input cd_customnimfrqs must be >= 0, but was ',dtset%cd_customnimfrqs,ch10,&
+    'This is not allowed.',ch10,'Action: check the input file.'
+   MSG_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_customnfreqsp',tread,'INT')
  if(tread==1) dtset%gw_customnfreqsp=intarr(1)
 
  if (dtset%gw_customnfreqsp<0) then
-   write(message, '(a,i0,a,a,a,a)' )&
-&   'Input gw_customnfreqsp must be >= 0, but was ',dtset%gw_customnfreqsp,ch10,&
-&   'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,4a)' )&
+    'Input gw_customnfreqsp must be >= 0, but was ',dtset%gw_customnfreqsp,ch10,&
+    'This is not allowed.',ch10,'Action: check the input file.'
+   MSG_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_n_proj_freq',tread,'INT')
  if(tread==1) dtset%gwls_n_proj_freq=intarr(1)
 
  if (dtset%gwls_n_proj_freq<0) then
-   write(message, '(a,i0,a,a,a,a)' )&
-&   'Input gwls_n_proj_freq must be >= 0, but was ',dtset%gwls_n_proj_freq,ch10,&
-&   'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,4a)' )&
+   'Input gwls_n_proj_freq must be >= 0, but was ',dtset%gwls_n_proj_freq,ch10,&
+   'This is not allowed.',ch10,'Action: check the input file.'
+   MSG_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'efmas_calc_dirs',tread,'INT')
  if(tread==1) dtset%efmas_calc_dirs=intarr(1)
 
  if (ABS(dtset%efmas_calc_dirs)>3) then
-   write(message, '(a,i0,a,a,a,a)' )&
-&   'Input efmas_calc_dirs must be between -3 and 3, but was ',dtset%efmas_calc_dirs,ch10,&
-&   'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,4a)' )&
+   'Input efmas_calc_dirs must be between -3 and 3, but was ',dtset%efmas_calc_dirs,ch10,&
+   'This is not allowed.',ch10,'Action: check the input file.'
+   MSG_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'efmas_n_dirs',tread,'INT')
  if(tread==1) dtset%efmas_n_dirs=intarr(1)
 
  if (dtset%efmas_n_dirs<0) then
-   write(message, '(a,i0,a,a,a,a)' )&
-&   'Input efmas_n_dirs must be >= 0, but was ',dtset%efmas_n_dirs,ch10,&
-&   'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,4a)' )&
+   'Input efmas_n_dirs must be >= 0, but was ',dtset%efmas_n_dirs,ch10,&
+   'This is not allowed.',ch10,'Action: check the input file.'
+   MSG_ERROR(msg)
  end if
 !---------------------------------------------------------------------------
 
@@ -1583,36 +1592,36 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ga_n_rules',tread,'INT')
  if(tread==1) dtset%ga_n_rules=intarr(1)
 
-!Perform the first checks
-!Check that nkpt is greater than 0
+ ! Perform the first checks
+ ! Check that nkpt is greater than 0
  if (nkpt<=0) then
-   write(message, '(a,i0)' )'After inkpts, nkpt must be > 0, but was ',nkpt
-   MSG_ERROR_NOSTOP(message, leave)
+   write(msg, '(a,i0)' )'After inkpts, nkpt must be > 0, but was ',nkpt
+   MSG_ERROR_NOSTOP(msg, leave)
  end if
 
-!Check that nsppol is 1 or 2
+ ! Check that nsppol is 1 or 2
  if (nsppol/=1 .and. nsppol/=2) then
-   write(message, '(a,i0)' )'Input nsppol must be 1 or 2, but was ',nsppol
-   MSG_ERROR_NOSTOP(message, leave)
+   write(msg, '(a,i0)' )'Input nsppol must be 1 or 2, but was ',nsppol
+   MSG_ERROR_NOSTOP(msg, leave)
  end if
 
-!Check that nspinor is 1 or 2
+ ! Check that nspinor is 1 or 2
  if (nspinor/=1 .and. nspinor/=2) then
-   write(message, '(a,i0)' )'Input nspinor must be 1 or 2, but was ',nspinor
-   MSG_ERROR_NOSTOP(message, leave)
+   write(msg, '(a,i0)' )'Input nspinor must be 1 or 2, but was ',nspinor
+   MSG_ERROR_NOSTOP(msg, leave)
  end if
 
-!Check that nspinor and nsppol are not 2 together
+ ! Check that nspinor and nsppol are not 2 together
  if (nsppol==2 .and. nspinor==2) then
    MSG_ERROR_NOSTOP('nspinor and nsppol cannot be 2 together!', leave)
  end if
 
-!Here, leave if an error has been detected earlier
+ ! Here, leave if an error has been detected earlier
  if (leave /= 0) then
-   MSG_ERROR('Errors are present in the input file. See above messages')
+   MSG_ERROR('Errors are present in the input file. See ABOVE messages')
  end if
 
-!Now, take care of mband_upper
+ ! Now, take care of mband_upper
  mband_upper=1
  occopt=1
  fband=0.5_dp
@@ -1620,31 +1629,32 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'occopt',tread,'INT')
  if(tread==1) occopt=intarr(1)
 
-!Also read fband, that is an alternative to nband. The default
-!is different for occopt==1 and for metallic occupations.
+ ! Also read fband, that is an alternative to nband. The default
+ ! is different for occopt==1 and for metallic occupations.
  if(occopt==1)fband=0.125_dp
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fband',tfband,'DPR')
  if(tfband==1)fband=dprarr(1)
 
-!fband cannot be used when occopt==0 or occopt==2
+ ! fband cannot be used when occopt==0 or occopt==2
  if(tfband==1 .and. (occopt==0 .or. occopt==2) )then
-   write(message, '(3a)' )&
-&   'fband cannot be used if occopt==0 or occopt==2 ',ch10,&
-&   'Action: correct your input file, suppress fband, or change occopt.'
-   MSG_ERROR(message)
+   write(msg, '(3a)' )&
+   'fband cannot be used if occopt==0 or occopt==2 ',ch10,&
+   'Action: correct your input file, suppress fband, or change occopt.'
+   MSG_ERROR(msg)
  end if
 
  ABI_ALLOCATE(nband,(nkpt*nsppol))
  tnband=0
 
-!Compute ziontypat
-!When the pseudo-atom is pure, simple copy
+ ! Compute ziontypat
+ ! When the pseudo-atom is pure, simple copy
  if(ntyppure>0)then
    do itypat=1,ntyppure
      dtset%ziontypat(itypat)=zionpsp(itypat)
    end do
  end if
-!When the pseudo-atom is alchemical, must make mixing
+
+ ! When the pseudo-atom is alchemical, must make mixing
  if(ntypalch>0)then
    do itypat=ntyppure+1,ntypat
      dtset%ziontypat(itypat)=zero
@@ -1657,25 +1667,25 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
-!  Note: mband_upper is initialized, not nband
+   ! Note: mband_upper is initialized, not nband
    if(tnband==1) mband_upper=intarr(1)
 
    if(tfband==1 .and. tnband==1)then
-     write(message, '(3a)' )&
-&     'fband and nband cannot be used together. ',ch10,&
-&     'Action: correct your input file, suppress either fband or nband.'
-     MSG_ERROR(message)
+     write(msg, '(3a)' )&
+     'fband and nband cannot be used together. ',ch10,&
+     'Action: correct your input file, suppress either fband or nband.'
+     MSG_ERROR(msg)
    end if
 
-!  In case nband was not read, use fband, either read, or the default,
-!  to provide an upper limit for mband_upper
+   ! In case nband was not read, use fband, either read, or the default,
+   ! to provide an upper limit for mband_upper
    if(tnband==0)then
 
      charge=0.0_dp
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
      if(tread==1) charge=dprarr(1)
 
-!    Only take into account negative charge, to compute maximum number of bands
+     ! Only take into account negative charge, to compute maximum number of bands
      if(charge > 0.0_dp)charge=0.0_dp
 
 !     mband_upper=nspinor*((nint(zion_max)*natom+1)/2 - floor(charge/2.0_dp)&
@@ -1705,19 +1715,19 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
    ABI_DEALLOCATE(reaalloc)
  else
-   write(message, '(a,i0,3a)' )'occopt=',occopt,' is not an allowed value.',ch10,'Action: correct your input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,3a)' )'occopt=',occopt,' is not an allowed value.',ch10,'Action: correct your input file.'
+   MSG_ERROR(msg)
  end if
 
-!Check that mband_upper is greater than 0
+ ! Check that mband_upper is greater than 0
  if (mband_upper<=0) then
-   write(message, '(a,i0,4a)' )&
-&   'Maximal nband must be > 0, but was ',mband_upper,ch10,&
-&   'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(message)
+   write(msg, '(a,i0,4a)' )&
+   'Maximal nband must be > 0, but was ',mband_upper,ch10,&
+   'This is not allowed.',ch10,'Action: check the input file.'
+   MSG_ERROR(msg)
  end if
 
-!The following 3 values are needed to dimension the parallelism over images
+ ! The following 3 values are needed to dimension the parallelism over images
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'imgmov',tread,'INT')
  if(tread==1) dtset%imgmov=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntimimage',tread,'INT')
@@ -1753,12 +1763,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%ucrpa=intarr(1)
 
  if (dtset%ucrpa > 0 .and. dtset%usedmft > 0) then
-   write(message, '(7a)' )&
-&   'usedmft and ucrpa are both activated in the input file ',ch10,&
-&   'In the following, abinit assume you are doing a ucrpa calculation and ',ch10,&
-&   'you define Wannier functions as in DFT+DMFT calculation',ch10,&
-&   'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0'
-   MSG_WARNING(message)
+   write(msg, '(7a)' )&
+   'usedmft and ucrpa are both activated in the input file ',ch10,&
+   'In the following, abinit assume you are doing a ucrpa calculation and ',ch10,&
+   'you define Wannier functions as in DFT+DMFT calculation',ch10,&
+   'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0'
+   MSG_WARNING(msg)
  end if
 
 !Some PAW+U keywords
@@ -1768,12 +1778,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
 
  if (dtset%usepawu > 0 ) then
-   write(message, '(7a)' )&
-&   'usedmft and usepawu are both activated ',ch10,&
-&   'This is not an usual calculation:',ch10,&
-&   'usepawu will be put to a value >= 10:',ch10,&
-&   'LDA+U potential and energy will be put to zero'
-   MSG_WARNING(message)
+   write(msg, '(7a)' )&
+   'usedmft and usepawu are both activated ',ch10,&
+   'This is not an usual calculation:',ch10,&
+   'usepawu will be put to a value >= 10:',ch10,&
+   'LDA+U potential and energy will be put to zero'
+   MSG_WARNING(msg)
  end if
 
  dtset%usedmatpu=0
@@ -1808,7 +1818,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%plowan_nt=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_nt',tread,'INT')
  if(tread==1) dtset%plowan_natom=intarr(1)
-
 
 !PAW potential zero keyword
  dtset%usepotzero=0

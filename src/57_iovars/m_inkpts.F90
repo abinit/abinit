@@ -150,7 +150,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 !Local variables-------------------------------
 !scalars
  integer :: dkpt,ii,ikpt,jkpt,marr,ndiv_small,nkpt_computed
- integer :: nsegment,prtkpt,tread,tread_kptrlatt,tread_ngkpt ! tread_ngkpt_fine
+ integer :: nsegment,prtkpt,tread,tread_kptrlatt,tread_ngkpt
  real(dp) :: fraction,norm,ucvol,wtksum
  character(len=500) :: msg
 !arrays
@@ -199,10 +199,10 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptnrm',tread,'DPR')
    if(tread==1) kptnrm=dprarr(1)
 
-   !  Only read wtk when iscf >0 or iscf=-1 or iscf=-3 or (iscf=-2 and response=1)
-   !  (this last option is for Zach Levine)
-   !  Normalize the k-point weights when occopt/=2
-   !  Check that k point weights add to 1 when occopt==2
+   ! Only read wtk when iscf >0 or iscf=-1 or iscf=-3 or (iscf=-2 and response=1)
+   ! (this last option is for Zach Levine)
+   ! Normalize the k-point weights when occopt/=2
+   ! Check that k point weights add to 1 when occopt==2
    if  (iscf>0.or.iscf==-1.or.iscf==-3.or.(iscf==-2.and.response==1))  then
      call intagm(dprarr,intarr,jdtset,marr,nkpt,string(1:lenstr),'wtk',tread,'DPR')
      if(tread==1) wtk(1:nkpt)=dprarr(1:nkpt)
