@@ -24,7 +24,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1181
 message: |
-    Renaming old t03_x.out to t03_x.out0069
+    Renaming old t03_x.out to t03_x.out0002
 ...
 
 
@@ -43,8 +43,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  8 Mar 2019.
-- ( at 16h37 )
+.Starting date : Mon 11 Mar 2019.
+- ( at 16h57 )
   
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -52,7 +52,7 @@ message: |
  === Build Information === 
   Version       : 8.9.4
   Build target  : x86_64_linux_gnu7.3
-  Build date    : 20190307
+  Build date    : 20190311
 
  === Compiler Suite === 
   C compiler       : gnu7.3
@@ -766,7 +766,7 @@ Simple mixing update:
   residual square of the potential :   2.6326097387300122
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 34 [s]
+ scfcv_core: previous iteration took 36 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1369,7 +1369,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=  0.461E-01  0.828      0.200     -0.746E-01
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 13 [s]
+ scfcv_core: previous iteration took 14 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -3034,7 +3034,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=   1.46      0.201E-01  0.668      0.528E-01  -1.79
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 13 [s]
+ scfcv_core: previous iteration took 14 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -5994,7 +5994,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=   1.33      0.976E-01 -0.251     -0.477      0.491
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 13 [s]
+ scfcv_core: previous iteration took 14 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -6549,7 +6549,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=  0.851E-02 -0.227       1.21      0.368E-01  0.139
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 14 [s]
+ scfcv_core: previous iteration took 13 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -8325,10 +8325,10 @@ P           mkmem           1
 --- !FinalSummary
 program: abinit
 version: 8.9.4
-start_datetime: Fri Mar 08 16:37:37 2019
-end_datetime: Fri Mar 08 16:47:08 2019
-overall_cpu_time:        1078.7
-overall_wall_time:         571.4
+start_datetime: Mon Mar 11 16:57:37 2019
+end_datetime: Mon Mar 11 17:07:13 2019
+overall_cpu_time:        1152.1
+overall_wall_time:         576.0
 exit_requested_by_user: no 
 timelimit: 0
 pseudos: 

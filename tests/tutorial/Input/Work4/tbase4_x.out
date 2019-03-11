@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Feb 2019.
-- ( at 17h24 )
+.Starting date : Mon 11 Mar 2019.
+- ( at 15h55 )
   
 - input  file    -> tbase4_1.in
 - output file    -> tbase4_x.out
@@ -344,18 +344,18 @@ P           mkmem           2
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- pspini                         0.655  39.7      0.202  50.1              1      -1.00        3.24       3.24
-- invars2                        0.313  19.0      0.028   6.9              1      -1.00       11.19      11.19
-- timing timab                   0.116   7.0      0.039   9.7              6      -1.00        2.97       2.97
-- abinit(2)                      0.099   6.0      0.009   2.2              1      -1.00       11.04      11.04
-- fourwf%(pot)                   0.060   3.7      0.020   5.0             80      -1.00        3.02       3.02
-- stress                         0.041   2.5      0.014   3.5              1      -1.00        2.95       2.95
-- ewald2 (+vdw_dftd)             0.041   2.5      0.014   3.5              1      -1.00        2.90       2.90
-- ewald                          0.012   0.8      0.013   3.2              1      -1.00        0.95       0.95
-- others (105)                   0.041   2.5      0.014   3.5             -1      -1.00        2.93       2.93
+- pspini                         0.654  39.7      0.195  48.9              1      -1.00        3.35       3.35
+- invars2                        0.314  19.1      0.030   7.5              1      -1.00       10.46      10.46
+- timing timab                   0.120   7.3      0.039   9.8              6      -1.00        3.09       3.09
+- abinit(2)                      0.094   5.7      0.009   2.3              1      -1.00       10.40      10.40
+- fourwf%(pot)                   0.062   3.8      0.021   5.3             80      -1.00        2.94       2.94
+- stress                         0.042   2.5      0.014   3.5              1      -1.00        2.98       2.98
+- ewald2 (+vdw_dftd)             0.041   2.5      0.014   3.5              1      -1.00        2.92       2.92
+- ewald                          0.012   0.8      0.012   3.0              1      -1.00        1.03       1.03
+- others (105)                   0.042   2.5      0.017   4.3             -1      -1.00        2.45       2.45
 -<END_TIMER>
 -
-- subtotal                       1.379  83.6      0.353  87.6                                  3.91       3.91
+- subtotal                       1.380  83.9      0.351  88.0                                  3.93       3.93
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -365,18 +365,18 @@ P           mkmem           2
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- pspini                         0.655  39.7      0.202  50.1              1      -1.00        3.24       3.24
-- invars2                        0.313  19.0      0.028   6.9              1      -1.00       11.19      11.19
-- timing timab                   0.116   7.0      0.039   9.7              6      -1.00        2.97       2.97
-- abinit(2)                      0.099   6.0      0.009   2.2              1      -1.00       11.04      11.04
-- fourwf%(pot)                   0.060   3.7      0.020   5.0             80      -1.00        3.02       3.02
-- stress                         0.041   2.5      0.014   3.5              1      -1.00        2.95       2.95
-- ewald2 (+vdw_dftd)             0.041   2.5      0.014   3.5              1      -1.00        2.90       2.90
-- ewald                          0.012   0.8      0.013   3.2              1      -1.00        0.95       0.95
-- others (105)                   0.041   2.5      0.014   3.5             -1      -1.00        2.93       2.93
+- pspini                         0.654  39.7      0.195  48.9              1      -1.00        3.35       3.35
+- invars2                        0.314  19.1      0.030   7.5              1      -1.00       10.46      10.46
+- timing timab                   0.120   7.3      0.039   9.8              6      -1.00        3.09       3.09
+- abinit(2)                      0.094   5.7      0.009   2.3              1      -1.00       10.40      10.40
+- fourwf%(pot)                   0.062   3.8      0.021   5.3             80      -1.00        2.94       2.94
+- stress                         0.042   2.5      0.014   3.5              1      -1.00        2.98       2.98
+- ewald2 (+vdw_dftd)             0.041   2.5      0.014   3.5              1      -1.00        2.92       2.92
+- ewald                          0.012   0.8      0.012   3.0              1      -1.00        1.03       1.03
+- others (105)                   0.042   2.5      0.017   4.3             -1      -1.00        2.45       2.45
 -<END_TIMER>
 
-- subtotal                       1.379  83.6      0.353  87.6                                  3.91       3.91
+- subtotal                       1.380  83.9      0.351  88.0                                  3.93       3.93
 
 ================================================================================
 
@@ -449,10 +449,10 @@ P           mkmem           2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          0.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          0.4
++Overall time at end (sec) : cpu=          1.6  wall=          0.4

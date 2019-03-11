@@ -242,7 +242,7 @@ module m_chebfiwf
      
   ! Run chebfi
   call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu) 
- 
+
   ! Free preconditionning since not needed anymore
   ABI_FREE(l_pcon)
     
