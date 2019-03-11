@@ -30,6 +30,8 @@
 module m_spmat_COO
   use defs_basis  
   use m_xmpi
+  use m_errors
+  use m_abicore
   use m_spmat_base
   use m_spmat_ndcoo, only: ndcoo_mat_t
   implicit none

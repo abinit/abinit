@@ -32,6 +32,7 @@ module m_spmat_csr
   use defs_basis  
   use m_abicore
   use m_xmpi
+  use m_errors
   use m_spmat_base, only: base_mat2d_t
   use m_multibinit_global
   use m_mpi_scheduler

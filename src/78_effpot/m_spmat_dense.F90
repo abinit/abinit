@@ -30,8 +30,10 @@
 
 
 module m_spmat_dense
-  use m_errors
   use defs_basis
+  use m_abicore
+  use m_xmpi
+  use m_errors
   use m_spmat_base, only: base_mat2d_t
   implicit none
 !!***

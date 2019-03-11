@@ -32,6 +32,9 @@
 
 module m_spmat_convert
   use defs_basis
+  use m_xmpi
+  use m_abicore
+  use m_errors
   use m_spmat_dense
   use m_linked_list
   use m_spmat_lil

@@ -34,6 +34,7 @@
     module m_spin_mc_mover
     use defs_basis
     use m_abicore
+    use m_errors
     use m_abstract_potential, only: abstract_potential_t
     use m_random_xoroshiro128plus, only: rng_t
     implicit none

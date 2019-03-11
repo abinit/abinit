@@ -71,6 +71,7 @@
 module m_sparse_matrix
   use defs_basis
   use m_errors
+  use m_xmpi
   use m_abicore
   implicit none
 

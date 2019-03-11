@@ -30,6 +30,9 @@
 
 module m_spmat_lil
   use defs_basis
+  use m_abicore
+  use m_errors
+  use m_xmpi
   use m_spmat_base, only: base_mat2d_t
   use m_abicore
   use m_linked_list

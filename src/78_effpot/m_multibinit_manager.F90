@@ -34,7 +34,7 @@
 
 module m_multibinit_manager
   use defs_basis
-  !use m_abicore
+  use m_abicore
   use m_errors
   use m_xmpi
 

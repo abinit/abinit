@@ -30,6 +30,9 @@
 
 module m_spmat_base
   use defs_basis
+  use m_errors
+  use m_abicore
+  use m_xmpi
   implicit none
   private
 !!***

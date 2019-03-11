@@ -34,6 +34,9 @@
 module m_mpi_scheduler
   use defs_basis
   use m_xmpi
+  use m_errors
+  use m_abicore
+ 
   implicit none
 !!***
 

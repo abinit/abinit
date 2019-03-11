@@ -28,6 +28,8 @@
 
 module m_spmat_NDCOO
   use defs_basis
+  use m_abicore
+  use m_errors
   use m_xmpi
   use m_spmat_base
   use m_dynamic_array, only: int2d_array_type, real_array_type, int_array_type
