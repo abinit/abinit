@@ -32,7 +32,7 @@ spin_sia_k1dir = 1.0 0.0 0.0    ! direction of SIA, easy axis along x.
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
-#%% system_xml = tmulti5_2.xml
+#%% system_xml = tmulti5_3.xml
 #%% exclude_hosts = nag@abiref
 #%% coeff_xml = no
 #%% [files]
