@@ -353,7 +353,7 @@ contains
           uexc=use_exchange
        end if
 
-       if(uexc) then
+       if(uexc .and. exc_nnz>0) then
           write(*,'(A23)') "Setting exchange terms"
           call self%set_exchange(exc_nnz,exc_ilist,exc_jlist,&
                reshape(exc_Rlist, (/3, exc_nnz /)), &
@@ -367,7 +367,7 @@ contains
        else
           udmi=use_dmi
        end if
-       if (udmi) then
+       if (udmi .and. dmi_nnz>0) then
           write(*,'(A18)') "Setting DMI terms"
           call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
                Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
@@ -382,7 +382,7 @@ contains
        else
           usia=use_sia
        end if
-       if (usia) then
+       if (usia .and. uni_nnz>0) then
           write(*,'(A18)') "Setting SIA terms"
           call self%set_sia(uni_nnz, uni_ilist, uni_amplitude_list, &
                reshape(uni_direction_list, [3, uni_nnz]) )
@@ -394,7 +394,7 @@ contains
        else
           ubi=use_bi
        endif
-       if (ubi) then
+       if (ubi .and. bi_nnz>0) then
           write(*,'(A23)') "Setting bilinear terms"
           call self%set_bilinear(bi_nnz, bi_ilist, bi_jlist,  &
                Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &

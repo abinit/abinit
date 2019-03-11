@@ -291,15 +291,13 @@ contains
   subroutine set_temperature(self, temperature)
     class(spin_mover_t), intent(inout) :: self
     real(dp), optional, intent(in) ::  temperature
-    if(present(temperature)) then
-       self%temperature=temperature
-       call xmpi_bcast(self%temperature, master, comm, ierr)
-       if(self%method==3) then
-          if(iam_master) self%spin_mc%temperature = temperature
-          if(iam_master) self%spin_mc%beta=1.0_dp/temperature
-          call xmpi_bcast(self%spin_mc%temperature, master, comm, ierr)
-          call xmpi_bcast(self%spin_mc%beta, master, comm, ierr)
-       end if
+    if(present(temperature)) self%temperature=temperature
+    call xmpi_bcast(self%temperature, master, comm, ierr)
+    if(self%method==3) then
+       if(iam_master) self%spin_mc%temperature = temperature
+       if(iam_master) self%spin_mc%beta=1.0_dp/temperature
+       call xmpi_bcast(self%spin_mc%temperature, master, comm, ierr)
+       call xmpi_bcast(self%spin_mc%beta, master, comm, ierr)
     end if
     self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%damping(:)**2)
     self%gamma_l_calculated=.True.
