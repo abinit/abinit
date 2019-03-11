@@ -30,7 +30,6 @@
     use defs_basis
     use m_random_xoroshiro128plus, only: rng_t
     use m_xmpi
-    use mpi
     implicit none
 !!****m*
     integer, parameter :: master =0
