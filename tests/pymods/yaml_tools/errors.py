@@ -10,7 +10,7 @@ class ConfigContextError(YAMLTestError):
         spath = '.'.join(path)
         msg = ('Tried to enter a None context in the config tree at {}'
                .format(spath))
-        super(ConfigContextError, self).__init__(msg)
+        super(ConfigContextError, self).__init__(self, msg)
 
 
 ###############################################################################
@@ -22,7 +22,7 @@ class UnknownParamError(ConfigParserError):
     def __init__(self, cons, param):
         msg = ('Encounterd an unknown parameter name "{}"'
                ' when registering constraint "{}".')
-        super(UnknownParamError, self).__init__(msg.format(param, cons))
+        super(UnknownParamError, self).__init__(self, msg.format(param, cons))
 
 
 ###############################################################################
@@ -77,6 +77,6 @@ class InputFileError(YAMLTestError):
 
 class NoIteratorDefinedError(InputFileError):
     def __init__(self, doc):
-        msg = 'No iterator have been found before the first document {}.'
-        msg.format(doc['obj'])
+        msg = ('No iterator have been found before the first document {}.'
+               .format(doc['obj']))
         super(InputFileError, self).__init__(self, doc['start']+1, msg)
