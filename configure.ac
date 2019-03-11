@@ -208,10 +208,6 @@ ABI_MSG_SECTION([Feature triggers and architecture startup])
 # Do we want to use fallbacks? (must be first)
 ABI_FALLBACKS_INIT
 
-# Init triggers parameters (must be call after we know about fallbacks)
-# Note: MPI and GPU must be initialised after feature triggers
-ABI_TRIGGERS_INIT
-
 # Prepare MPI support
 ABI_MPI_INIT
 
@@ -228,6 +224,13 @@ fi
 # Prepare GPU support
 # Note: must be done after MPI
 ABI_GPU_INIT
+
+# Init triggers parameters (must be call after we know about fallbacks)
+# Note: MPI and GPU must be initialised after feature triggers
+ABI_TRIGGERS_INIT
+
+# Init LibXC
+SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
 
 # ---------------------------------------------------------------------------- #
 
@@ -272,7 +275,7 @@ ABI_FC_EXTENSIONS
 ABI_FC_MOD_CASE
 
 # Determine Fortran-C name mangling scheme
-#AC_FC_WRAPPERS
+AC_FC_WRAPPERS
 
 # The IBM Fortran compiler crashes if the mpi module is included
 # more than once
@@ -287,6 +290,9 @@ fi
 if test "${enable_fc_wrapper}" = "yes"; then
   abi_fc_wrap="yes"
 fi
+
+# FIXME: obsolete mechanism
+AC_SUBST(fc_mod_fcflags)
 
 # ---------------------------------------------------------------------------- #
 
@@ -498,9 +504,9 @@ ABI_OPTIM_INIT([${abi_optim_flavor}])
 
 # FIXME: 20_datashare does not support optimisations
 if test "${abi_optim_flavor}" != "none"; then
-  AC_MSG_NOTICE([disabling optimisations for src/20_datashare/])
+  AC_MSG_NOTICE([disabling optimizations for src/20_datashare/])
   fcflags_opt_20_datashare="-O0"
-  AC_MSG_NOTICE([disabling optimisations for src/43_ptgroups/])
+  AC_MSG_NOTICE([disabling optimizations for src/43_ptgroups/])
   fcflags_opt_43_ptgroups="-O0"
 fi
 
@@ -765,9 +771,10 @@ fi
                        # ------------------------------ #
 
 # LibXC library support
-ABI_LIBXC_DETECT(2, 2)
+#ABI_LIBXC_DETECT(2, 2)
+SD_LIBXC_DETECT
 AM_CONDITIONAL([DO_BUILD_01_LIBXC_EXT],
-  [test "${abi_libxc_ok}" = "yes"])
+  [test "${sd_libxc_ok}" = "yes"])
 
 # TRIQS support
 AC_MSG_CHECKING([whether to enable TRIQS support])
