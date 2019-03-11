@@ -913,6 +913,7 @@ subroutine transport_rta_free(self)
  ABI_SFREE(self%vvdos_mesh)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%eminmax_spin)
+ ABI_SFREE(self%eph_mu_e)
  ABI_SFREE(self%transport_mu_e)
  ABI_SFREE(self%velocity)
  ABI_SFREE(self%linewidth_mrta)
@@ -927,6 +928,11 @@ subroutine transport_rta_free(self)
  ABI_SFREE(self%seebeck)
  ABI_SFREE(self%kappa)
  ABI_SFREE(self%pi)
+
+ ABI_SFREE(self%mobility_mu)
+ ABI_SFREE(self%nh)
+ ABI_SFREE(self%ne)
+ ABI_SFREE(self%n)
 
 end subroutine transport_rta_free
 !!***
