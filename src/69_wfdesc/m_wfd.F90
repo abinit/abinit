@@ -4890,7 +4890,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
  integer :: mcg,nband_wfd,nband_disk,band,mband_disk,bcount,istwfk_disk
  integer :: spinor,cg_spad,gw_spad,icg,igw,cg_bpad,ib
  logical :: change_gsphere
- real(dp) :: cpu,wall,gflops
+ real(dp) :: cpu, wall, gflops, cpu_ks, wall_ks, gflops_ks
  character(len=500) :: msg
  type(Wfk_t) :: Wfk
  type(Hdr_type) :: Hdr
@@ -5026,6 +5026,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
 
   do spin=1,Wfd%nsppol
     do ik_ibz=1,Wfd%nkibz
+      call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
       !write(std_out,*)"about to read ik_ibz: ",ik_ibz,", spin: ",spin
       npw_disk   = Hdr%npwarr(ik_ibz)
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
@@ -5121,11 +5122,16 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
       ABI_FREE(gf2wfd)
       ABI_SFREE(work)
       ABI_SFREE(out_cg)
+
+      if (ik_ibz <= 20 .or. mod(ik_ibz, 50) == 0) then
+        write(msg,'(4(a,i0),a)') " Reading k-point [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
+        call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
+      end if
     end do !ik_ibz
   end do !spin
 
  else
-   MSG_ERROR("Wrong method")
+   MSG_ERROR(sjoin("Wrong method: ", itoa(method)))
  end if
 
  call wfk_close(Wfk)

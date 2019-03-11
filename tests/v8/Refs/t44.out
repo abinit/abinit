@@ -197,11 +197,7 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
-        prteliash1          1
-        prteliash2          1
-        prteliash3          1
-        prteliash4          1
-        prteliash5          0
+        prteliash           1
            prtvol           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -839,37 +835,11 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
@@ -935,20 +905,20 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:1
-   0.003     0.000    -2.746     0.335
-   0.003     0.000    -3.182     0.388
+   0.003     0.000    -2.652     0.328
+   0.003     0.000    -2.854     0.351
 For band:2
-   0.003     0.000    -5.059     5.501
-   0.003     0.000    -5.862     6.375
+   0.003     0.000    -4.974     5.400
+   0.003     0.000    -5.320     5.779
 For band:3
-   0.003     0.000    -5.059     5.501
-   0.003     0.000    -5.862     6.375
+   0.003     0.000    -4.974     5.400
+   0.003     0.000    -5.320     5.779
 For band:4
-   0.003     0.000    -5.059     5.501
-   0.003     0.000    -5.862     6.375
+   0.003     0.000    -4.974     5.400
+   0.003     0.000    -5.320     5.779
 For band:5
-   0.003     0.000    -5.234     4.743
-   0.003     0.000    -6.066     5.496
+   0.003     0.004    -5.161     4.655
+   0.003     0.003    -5.515     4.982
 
 
 
@@ -1071,37 +1041,11 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
@@ -1118,7 +1062,7 @@ Method for q-space integration: tetrahedron method
 Tolerance for integration weights <     1.000000E-12     1.000000E-12
 Both Real and Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 0
+Number of frequency in generalized Eliashberg functions: 1749
 Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
@@ -1165,6 +1109,24 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
 ============================================================================================
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
+
+omega and Eliashberg function gf_{nk}(omega) for testing purposes:
+For band:1
+   0.003     0.000    -0.411     0.378
+   0.003     0.000    -0.410     0.377
+For band:2
+   0.003     0.000    -6.075     6.232
+   0.003     0.000    -6.050     6.209
+For band:3
+   0.003     0.000    -6.075     6.232
+   0.003     0.000    -6.050     6.209
+For band:4
+   0.003     0.000    -6.075     6.232
+   0.003     0.000    -6.050     6.209
+For band:5
+   0.003     0.082    -6.228     5.364
+   0.003     0.082    -6.201     5.344
+
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -1281,11 +1243,7 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
-        prteliash1          1
-        prteliash2          1
-        prteliash3          1
-        prteliash4          1
-        prteliash5          0
+        prteliash           1
            prtvol           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01

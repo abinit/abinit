@@ -729,7 +729,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 
  ! Parameters defining the gaussian approximant.
  if (prtdos == 1) then
-   ! TODO: use dirac_delta and update reference files.
+   ! TODO: use gaussian and update reference files.
    gaussprefactor = one / (dossmear * sqrt(two_pi))
    gaussfactor = one / (sqrt2 * dossmear)
    write(msg, '(4a,f8.5,2a,f8.5)') ch10, &
@@ -765,7 +765,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
        nkpt_fullbz, size(new_shiftq, dim=2), crystal%nsym, new_shiftq, crystal%symrel)
 
    ! Init tetrahedra, i.e. indexes of the full q-points at their summits
-   call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr)
+   call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr, comm)
    ABI_CHECK(ierr == 0, errstr)
 
    ABI_FREE(bz2ibz)

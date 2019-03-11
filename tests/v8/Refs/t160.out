@@ -680,6 +680,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -687,33 +688,6 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     3)  idir= 3, ipert=   1, type=symmetric, found=No
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
 All the independent perturbations are available
@@ -904,6 +878,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -911,33 +886,6 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     3)  idir= 3, ipert=   1, type=symmetric, found=No
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
 All the independent perturbations are available
@@ -988,9 +936,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    3  -0.193    0.000 999999.0    0.000
    4  -0.193    0.000 999999.0    0.000
    5   8.342    0.000 999999.0    8.536
-   6  22.864    0.105      3.1   14.521
-   7  22.864    0.105      3.1    0.000
-   8  22.864    0.105      3.1    0.000
+   6  22.864    0.061      5.4   14.521
+   7  22.864    0.061      5.4    0.000
+   8  22.864    0.061      5.4    0.000
  
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
  
@@ -1123,6 +1071,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1130,33 +1079,6 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     3)  idir= 3, ipert=   1, type=symmetric, found=No
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
 All the independent perturbations are available
@@ -1265,6 +1187,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1272,33 +1195,6 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     3)  idir= 3, ipert=   1, type=symmetric, found=No
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
 All the independent perturbations are available
@@ -1357,8 +1253,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.415    0.156      2.1    0.000
-   4  -0.415    0.156      2.1    0.000
+   3  -0.415    0.155      2.1    0.000
+   4  -0.415    0.155      2.1    0.000
 ============================================================================================
 
 == END DATASET(S) ==============================================================
@@ -1602,10 +1498,10 @@ P           mkmem           8
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         10.1  wall=         11.2
+- Proc.   0 individual time (sec): cpu=         13.3  wall=         13.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.1  wall=         11.2
+.Delivered   9 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.3  wall=         13.5

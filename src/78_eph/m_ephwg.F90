@@ -362,6 +362,9 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
  call cwtime_report(" lgroup_new", cpu, wall, gflops)
 
+ ! TODO: Use symrec conventions although this means that we cannot reuse these tables
+ ! to symmetrize wavefunctions and potentials that require S-1 i.e. the symrel convention.
+
  ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
@@ -428,7 +431,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call destroy_tetra(self%tetra_k)
- call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring, comm)
  !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
  ABI_FREE(indkk)
@@ -450,6 +453,7 @@ end subroutine ephwg_setup_kpoint
 !! INPUTS
 !!  kpoint(3): k-point in reduced coordinates.
 !!  prtvol: Verbosity level
+!!  comm: MPI communicator
 !!
 !! OUTPUT
 !!
@@ -459,13 +463,13 @@ end subroutine ephwg_setup_kpoint
 !!
 !! SOURCE
 
-subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
+subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, comm)
 
 !Arguments ------------------------------------
 !scalars
  class(ephwg_t),target,intent(inout) :: self
  type(eph_double_grid_t),intent(inout) :: eph_doublegrid
- integer,intent(in) :: prtvol
+ integer,intent(in) :: prtvol, comm
 !arrays
  real(dp),intent(in) :: kpoint(3)
 
@@ -686,7 +690,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call destroy_tetra(self%tetra_k)
- call init_tetra(bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ call init_tetra(bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring, comm)
  if (ierr /= 0) then
    MSG_ERROR(errorstring)
  end if

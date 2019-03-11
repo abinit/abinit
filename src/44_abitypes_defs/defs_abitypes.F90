@@ -939,6 +939,7 @@ type dataset_type
 
  integer :: eph_ngqpt_fine(3)
 
+ integer :: eph_stern = 0
  integer :: eph_transport
 
  integer :: ph_intmeth

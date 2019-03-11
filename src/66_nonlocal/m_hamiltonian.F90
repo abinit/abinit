@@ -72,12 +72,12 @@ module m_hamiltonian
 !!
 !! FUNCTION
 !! This datastructure contains the information about one Hamiltonian,
-!! needed in the "getghc" routine, that apply the Hamiltonian
-!! on a wavefunction.
+!! needed in the "getghc" routine, that apply the Hamiltonian on a wavefunction.
 !! The Hamiltonian is expressed in reciprocal space:
+!!
 !!       H_k^prime,k = exp(-i.k^prime.r^prime) H exp(i.k.r)
-!! In most cases k=k^prime and the k^prime objects are simply pointers
-!! to k objects.
+!!
+!! In most cases k = k^prime and the k^prime objects are simply pointers to k objects.
 !!
 !! SOURCE
 

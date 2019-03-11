@@ -2647,7 +2647,7 @@ The ABINIT/CT Hyb implementation is discussed in [[cite:Gonze2016]].
 The TRIQS/CT Hyb implementation is described in [[cite:Seth2016]].
 Before using it, it has to be installed following instructions available [here](https://triqs.github.io/triqs/2.1.x).
 Until release 8.10 included, the
-interface was valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. It has then been upgraded to TRIQS 2.1 afterwards. 
+interface was valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. It has then been upgraded to TRIQS 2.1 afterwards.
 An example of a config.ac file to compile ABINIT with TRIQS can be found in [[ac:higgs_gnu_7.3_triqs2.ac]].
 See the useful variables for CT-QMC solver: [[dmftctqmc_basis]],
 [[dmftctqmc_check]], [[dmftctqmc_correl]], [[dmftctqmc_gmove]],
@@ -6764,7 +6764,7 @@ you want to produce netcdf files in parallel with [[paral_kgb]] = 1 (i.e.
 netcdf4 + hdf5 + MPI-IO). At present, the internal fallbacks provided by
 Abinit do not support netcdf4 so you have to link against an external netcdf
 library that supports hdf5+MPI-IO and is compatible with the mpif90 used to
-compile Abinit. See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
+compile Abinit. See ~abinit/doc/build/config-examples/ubu_intel_17.0_openmpi.ac for a typical configuration file.
 
 Additional note: The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
 The ETSF_IO library was indeed not maintained anymore.
@@ -19623,6 +19623,37 @@ This variable can be used to restart an EPH calculation.
 At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4).
 In this case, the code will look for a pre-existing SIGEPH.nc file and will compute the remaining k-points
 provided that the metadata found in the netcdf file is compatible with the input variables specified in the input file.
+""",
+),
+
+Variable(
+    abivarname="eph_stern",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Electron-PHonon: use STERNheimer approach to replace explicit sum empty states ",
+    requires="[[tolwfr]] > 0",
+    text=r"""
+NB - this does not work yet.
+
+This variable activates the Sternheimer method in the calculation of the e-ph self-energy ([[eph_task]] == 4)
+This technique replaces the explicit sum over empty states above [[nband]].
+with the nscf computation of the first order variation of the KS wavefunctions (actually
+the projection in the subspace orthogonal to the nband states).
+
+The Sternheimer approach requires an external file with
+the KS potential produced by setting [[prtpot]] = 1 in the GS run.
+and the specification of [[tolwfr]] in the input file.
+The number of line minimations for the Sternheimer solver is defined by [[nline]].
+
+!!! important
+
+    The Sternheimer approach approximates the e-ph self-energy with the adiabatic expression
+    in which phonon frequencies are neglected and the frequency dependence of $\Sigma_{n\kk}(\omega)$ is neglected.
+    and replaced by $\Sigma_{n\kk}(\ee_{n\kk}$.
+    This approximation is valid provided that enough bands above the states of interest are explicitly included.
 """,
 ),
 

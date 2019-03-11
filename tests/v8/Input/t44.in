@@ -93,7 +93,6 @@ getdvdb5 3
 eph_ngqpt_fine5  4 4 4 
 symsigma5 1
 eph_intmeth5 2
-prteliash5 0
 nfreqsp5 0
 
 #########
@@ -116,7 +115,7 @@ znucl 6
 #%% test_chain = t41.in, t42.in, t43.in, t44.in
 #%% [files]
 #%% files_to_test = 
-#%%   t44.out, tolnlines = 10, tolabs = 0.003, tolrel = 1.5e-1
+#%%   t44.out, tolnlines = 20, tolabs = 0.003, tolrel = 1.5e-1
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10

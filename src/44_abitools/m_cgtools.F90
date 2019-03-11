@@ -583,7 +583,7 @@ end function cg_dznrm2
 !!
 !! SOURCE
 
-function cg_zdotc(n,x,y) result(res)
+function cg_zdotc(n, x, y) result(res)
 
 !Arguments ------------------------------------
 !scalars
@@ -3562,7 +3562,7 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
  if(ek0<1.0d-10)then
    write(message,'(3a)')&
 &   'The mean kinetic energy of a wavefunction vanishes.',ch10,&
-&   'It is reset to 0.1Ha.'
+&   'It is reset to 0.1 Ha.'
    MSG_WARNING(message)
    ek0=0.1_dp
  end if
