@@ -24,7 +24,7 @@ doc_end_re = re.compile(r'\.\.\.')
 
 
 def parse_doc(doc):
-    if has_yaml and doc['type'] == 'yaml':
+    if doc['type'] == 'yaml':
         obj = yaml_parse(''.join(doc['lines']))
         doc['obj'] = obj
     return doc
@@ -84,32 +84,37 @@ class DataExtractor:
                 # accumulate source lines
                 current_doc['lines'].append(line)
                 if doc_end_re.match(line):  # reached the end of the doc
-                    current_doc['end'] = i
-                    # parse source
-                    parse_doc(current_doc)
-
-                    # special case of IterStart
-                    if isinstance(current_doc['obj'], IterStart):
-                        for iterator in self.iterators_state:
-                            if ITERATOR_RANKS[current_doc['obj'].iterator] \
-                               < ITERATOR_RANKS[iterator]:
-                                del self.iterators_state[iterator]
-
-                        self.iterators_state[current_doc['obj'].iterator] = \
-                            current_doc['obj'].iteration
-                    elif isinstance(current_doc['obj'], CorruptedDocument):
-                        self.has_corrupted_doc = True
+                    if not has_yaml:
+                        # ignore the document
+                        pass
                     else:
-                        if not current_doc['iterators']:
-                            # This is not normal !
-                            raise NoIteratorDefinedError(
-                                current_doc['start']+1,
-                                current_doc['obj'],
-                                type(current_doc['obj'])
-                            )
-                        docs.append(current_doc)
+                        current_doc['end'] = i
+                        # parse source
+                        parse_doc(current_doc)
 
+                        if isinstance(current_doc['obj'], IterStart):
+                            # special case of IterStart
+                            curr_it = current_doc['obj'].iterator
+
+                            # Update current iterators state
+                            for iterator in self.iterators_state:
+                                if ITERATOR_RANKS[curr_it] \
+                                   < ITERATOR_RANKS[iterator]:
+                                    del self.iterators_state[iterator]
+                            self.iterators_state[curr_it] = \
+                                current_doc['obj'].iteration
+
+                        elif isinstance(current_doc['obj'], CorruptedDocument):
+                            # Signal corruption but ignore the document
+                            self.has_corrupted_doc = True
+
+                        elif current_doc['obj'] is not None:
+                            if not current_doc['iterators']:
+                                # This is not normal !
+                                raise NoIteratorDefinedError(current_doc)
+                            docs.append(current_doc)
                     current_doc = None  # go back to normal mode
+
             else:
                 if self.__get_metachar(line) == '-':
                     if doc_start_re.match(line):  # starting a yaml doc

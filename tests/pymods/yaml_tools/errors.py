@@ -76,6 +76,7 @@ class InputFileError(YAMLTestError):
 
 
 class NoIteratorDefinedError(InputFileError):
-    def __init__(self, line):
-        msg = 'No iterator have been set before reaching the first document.'
-        super(InputFileError, self).__init__(self, line, msg)
+    def __init__(self, doc):
+        msg = 'No iterator have been found before the first document {}.'
+        msg.format(doc['obj'])
+        super(InputFileError, self).__init__(self, doc['start']+1, msg)
