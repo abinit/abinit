@@ -5,6 +5,7 @@
 from __future__ import print_function, division, unicode_literals
 import re
 from .yaml_tools import is_available as has_yaml
+from .yaml_tools import CorruptedDocument
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
 from .yaml_tools.errors import NoIteratorDefinedError
 if has_yaml:
@@ -39,6 +40,7 @@ class DataExtractor:
         self.ignoreP = ignoreP
         self.iterators_state = {}
         self.xml_mode = xml_mode
+        self.has_corrupted_doc = False
 
     def __get_metachar(self, line):
         '''
@@ -71,6 +73,9 @@ class DataExtractor:
         '''
             Extract formated documents and significant lines for the source.
         '''
+        # Reset those states to allow several extract with the same instance
+        self.iterators_state = {}
+        self.has_corrupted_doc = False
         lines, docs, ignored = [], [], []
 
         current_doc = None
@@ -92,10 +97,16 @@ class DataExtractor:
 
                         self.iterators_state[current_doc['obj'].iterator] = \
                             current_doc['obj'].iteration
+                    elif isinstance(current_doc['obj'], CorruptedDocument):
+                        self.has_corrupted_doc = True
                     else:
                         if not current_doc['iterators']:
                             # This is not normal !
-                            raise NoIteratorDefinedError(current_doc['start'])
+                            raise NoIteratorDefinedError(
+                                current_doc['start']+1,
+                                current_doc['obj'],
+                                type(current_doc['obj'])
+                            )
                         docs.append(current_doc)
 
                     current_doc = None  # go back to normal mode

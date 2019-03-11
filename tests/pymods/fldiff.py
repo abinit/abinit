@@ -261,7 +261,6 @@ class Result(object):
         details = []
         error_lines = set()
 
-
         if self.yaml_diff:
             details.append('# Start YAML based comparison report\n')
             self.yaml_error = True
@@ -456,7 +455,9 @@ class Differ(object):
                              ignore=self.options['ignore'],
                              ignoreP=self.options['ignoreP'])
         lines1, documents1, _ = dext.extract(lines1)
+        doc1_has_corrupted_document = dext.has_corrupted_doc
         lines2, documents2, _ = dext.extract(lines2)
+        doc2_has_corrupted_document = dext.has_corrupted_doc
 
         if self.use_fl:
             lines_differences = self.__diff_lines(lines1, lines2)
@@ -464,7 +465,12 @@ class Differ(object):
             lines_differences = []
 
         if self.use_yaml:
-            doc_differences, _ = self.__test_doc(documents1, documents2)
+            if doc1_has_corrupted_document:
+                doc_differences = ["Reference has corrupted YAML documents."]
+            elif doc2_has_corrupted_document:
+                doc_differences = ["Tested file has corrupted YAML documents."]
+            else:
+                doc_differences, _ = self.__test_doc(documents1, documents2)
         else:
             doc_differences = []
 

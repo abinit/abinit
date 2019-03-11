@@ -43,16 +43,17 @@ class Mock(object):
         return Mock()
 
 
+class CorruptedDocument(object):
+    def __init__(self, error, context=''):
+        self.error = error
+        self.context = context
+
+    def __repr__(self):
+        return "<Corrupted document {}: {}>".format(
+            self.error.__class__.__name__, str(self.error))
+
+
 if is_available:
-
-    class CorruptedDocument(object):
-        def __init__(self, error, context=''):
-            self.error = error
-            self.context = context
-
-        def __repr__(self):
-            return "<Corrupted document {}: {}>".format(
-                self.error.__class__.__name__, str(self.error))
 
     def yaml_parse(content, catch=True, *args, **kwargs):
         from . import structures
