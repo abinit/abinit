@@ -56,7 +56,7 @@ module m_multibinit_main
   use m_multibinit_dataset
   use m_multibinit_global
   use m_effective_potential_file
-  use m_spin_model, only: spin_model_t
+  !use m_spin_model, only: spin_model_t
   use m_abihist
 
   use m_multibinit_manager, only: mb_manager_t
@@ -393,10 +393,12 @@ contains
 
   !Free the effective_potential and dataset
   !****************************************************************************************
+  if(inp%spin_dynamics>0) then
+     call manager%finalize()
+  end if
   call effective_potential_free(reference_effective_potential)
   call multibinit_dtset_free(inp)
   call abihist_free(hist)
-  call manager%finalize()
 
 end subroutine multibinit_main
 !!***

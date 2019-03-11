@@ -180,9 +180,11 @@ contains
     call xmpi_bcast(params%spin_damping, master, comm, ierr)
     if (params%spin_damping >=0) then
        self%damping(:)= params%spin_damping
+    else
+       self%damping(:)=supercell%gilbert_damping(:)
     end if
     call self%set_langevin_params(temperature=params%spin_temperature, &
-         & damping=self%damping, ms=self%supercell%ms, gyro_ratio=self%supercell%gyro_ratio)
+         & damping=self%supercell%gilbert_damping, ms=self%supercell%ms, gyro_ratio=self%supercell%gyro_ratio)
 
 
     ! Hist and set initial spin state

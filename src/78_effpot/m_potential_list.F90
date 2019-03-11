@@ -132,8 +132,6 @@ contains
     self%size=self%size + 1
     if(self%size==1) then
        self%capacity=8
-       if(allocated(self%data)) then
-       endif
        ABI_ALLOCATE(self%data, (self%capacity))
     else if ( self%size>self%capacity ) then
        self%capacity = self%size + self%size / 4 + 8
@@ -146,6 +144,7 @@ contains
     self%has_spin= (self%has_spin .or. effpot%has_spin)
     self%has_displacement= (self%has_displacement .or. effpot%has_displacement)
     self%has_strain= (self%has_strain.or. effpot%has_strain)
+    self%has_lwf =(self%has_lwf.or. effpot%has_lwf)
   end subroutine append
 
   subroutine calculate(self, displacement, strain, spin, lwf,  force, stress, bfield, lwf_force, energy)

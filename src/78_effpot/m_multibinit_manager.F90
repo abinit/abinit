@@ -207,14 +207,12 @@ contains
     type(spin_primitive_potential_t), pointer :: spin_pot
     !class(primitive_potential_t), pointer :: t
     call self%unitcell%initialize()
-
     ! latt : TODO
 
     ! spin
     if(self%params%spin_dynamics>0) then
        allocate(spin_pot)
-       call spin_pot%initialize()
-       call spin_pot%set_atoms(self%unitcell)
+       call spin_pot%initialize(self%unitcell)
        call spin_pot%load_from_files(self%params, self%filenames)
        call self%prim_pots%append(spin_pot)
     end if

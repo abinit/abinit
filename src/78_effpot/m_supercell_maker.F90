@@ -83,10 +83,9 @@ contains
     self%scmat(:,:)=sc_matrix
     self%ncells=abs(mat33det(self%scmat))
     ABI_ALLOCATE(self%rvecs, (3, self%ncells))
-    ! for inv
-    tmp(:,:)=self%scmat(:,:)
     ! Why transpose?
-    call matr3inv(transpose(tmp), self%inv_scmat)
+    tmp(:,:)=transpose(self%scmat)
+    call matr3inv(tmp, self%inv_scmat)
     call self%build_rvec()
   end subroutine initialize
 

@@ -60,7 +60,6 @@ module m_spin_primitive_potential
    contains
      procedure:: initialize
      procedure:: finalize
-     procedure:: set_atoms
      procedure :: set_spin_primcell
      procedure :: set_bilinear_1term
      procedure:: set_bilinear
@@ -76,14 +75,16 @@ module m_spin_primitive_potential
 
 contains
 
-  subroutine initialize(self)
+  subroutine initialize(self, primcell)
     class(spin_primitive_potential_t), intent(inout) :: self
+    type(unitcell_t), target, intent(inout) :: primcell
     !integer, intent(in) :: nspin
     self%label="Spin_primitive_potential"
     self%has_spin=.True.
     self%has_displacement=.False.
     self%has_strain=.False.
     self%has_lwf=.False.
+    self%primcell=>primcell
   end subroutine initialize
 
 
@@ -98,12 +99,6 @@ contains
     call self%primitive_potential_t%finalize()
   end subroutine finalize
 
-  subroutine set_atoms(self, primcell)
-    class(spin_primitive_potential_t), intent(inout) :: self
-    type(unitcell_t), target, intent(inout) :: primcell
-    self%primcell=>primcell
-  end subroutine set_atoms
-
 
   subroutine set_spin_primcell(self, natoms, unitcell, positions, &
        nspin, index_spin, spinat, gyroratios, damping_factors )
@@ -117,12 +112,12 @@ contains
     call self%coeff%initialize(shape=[-1, nspin*3, nspin*3])
     do iatom=1, natoms
        ispin=index_spin(iatom)
-       if(iatom>0) then
+       if(ispin>0) then
           spin_positions(:,ispin)= positions(:, iatom)
           ms(ispin) = sqrt(sum(spinat(:,iatom)**2, dim=1))* mu_B
        end if
-       call self%primcell%set_spin(nspin, ms, spin_positions, gyroratios, damping_factors)
     end do
+    call self%primcell%set_spin(nspin, ms, spin_positions, gyroratios, damping_factors)
   end subroutine set_spin_primcell
 
 
@@ -245,7 +240,7 @@ contains
 
     write(*,'(A28)') "Adding SIA terms from input"
     do i =1, self%nspin
-       in_sia_ind=i
+       in_sia_ind(i)=i
        in_sia_k1amp(i)=input_sia_k1amp
        in_sia_k1dir(:,i)=input_sia_k1dir
     end do

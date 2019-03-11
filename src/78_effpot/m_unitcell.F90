@@ -164,7 +164,7 @@ contains
     class(unitcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
     real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), damping_factor(nspin)
-
+    print *, "initilazing spin unitcell"
     self%nspin=nspin
     ABI_ALLOCATE(self%spin_positions, (3, nspin))
     ABI_ALLOCATE(self%ms, (nspin))
