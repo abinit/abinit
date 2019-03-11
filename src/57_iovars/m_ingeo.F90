@@ -148,8 +148,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 & ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
 & symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
@@ -1202,8 +1200,6 @@ end subroutine ingeo
 
 subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,jdtset,lenstr,natom,natrd,nobj
@@ -1855,8 +1851,6 @@ end subroutine ingeobld
 
 subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,natrd,nsym
@@ -2004,8 +1998,6 @@ end subroutine fillcell
 !! SOURCE
 
 subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

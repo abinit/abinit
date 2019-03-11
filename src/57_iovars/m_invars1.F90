@@ -31,9 +31,13 @@ module m_invars1
  use m_xmpi
  use m_errors
  use m_atomdata
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use defs_abitypes,  only : dataset_type, ab_dimensions
- use m_fstrings, only : inupper, itoa
+ use m_fstrings, only : inupper, itoa, rmquotes
  use m_geometry, only : mkrdim
  use m_parser,   only : intagm, chkint_ge
  use m_inkpts,   only : inkpts, inqpt
@@ -942,8 +946,7 @@ end subroutine indefo1
 !!
 !! FUNCTION
 !! Initialize the dimensions needed to allocate the input arrays
-!! for one dataset characterized by jdtset, by
-!! taking from string the necessary data.
+!! for one dataset characterized by jdtset, by taking from string the necessary data.
 !! Perform some preliminary checks and echo these dimensions.
 !!
 !! INPUTS
@@ -1012,15 +1015,16 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  real(dp),intent(in) :: zionpsp(npsp1)
 
 !Local variables-------------------------------
- character :: blank=' ',string1
 !scalars
+ integer,parameter :: master = 0
  integer :: chksymbreak,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
- integer :: natom,nkpt,nkpthf,npsp,npspalch
+ integer :: natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
- integer :: tfband,tnband,tread,tread_alt
+ integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
  real(dp) :: charge,fband,kptnrm,kptrlen,zelect,zval
+ character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
  type(atomdata_t) :: atom
@@ -1033,8 +1037,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
+ character(len=fnlen) :: key_value
 
 !************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  ! This counter is incremented when we find a non-critical error.
  ! The code outputs a warning and stops at end.
@@ -1445,21 +1452,25 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    MSG_ERROR(msg)
  end if
 
- ! Read number of k-points (if specified)
+ ! Read number of k-points from input file (if specified)
  nkpt=0
  if(dtset%kptopt==0)nkpt=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkpt',tread,'INT')
  if(tread==1) nkpt=intarr(1)
 
-!#ifdef HAVE_NETCDF
-! if (len(dtset%kerange_path) > 0 ) then
-!   if (my_rank == master) then
-!     NCF_CHECK(nctk_open_read(ncid, dtset%kerange_path, xmpi_comm_self))
-      !NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt, datamode=.True.))
-!     NCF_CHECK(nf90_close(ncid))
-!   end if
-! call xmpi_bcast(nkpt, master, comm, ierr)
-!#endif
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"kerange_path",tread,'KEY',key_value=key_value)
+ if (tread==1) dtset%kerange_path = rmquotes(key_value)
+
+#ifdef HAVE_NETCDF
+ if (dtset%kerange_path /= ABI_NOFILE) then
+   if (my_rank == master) then
+     NCF_CHECK(nctk_open_read(ncid, dtset%kerange_path, xmpi_comm_self))
+     NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt, datamode=.True.))
+     NCF_CHECK(nf90_close(ncid))
+   end if
+   call xmpi_bcast(nkpt, master, comm, ierr)
+ end if
+#endif
 
  dtset%nkpt=nkpt
 
@@ -1517,7 +1528,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_DEALLOCATE(kpt)
    ABI_DEALLOCATE(kpthf)
    ABI_DEALLOCATE(wtk)
-   !  nkpt and nkpthf have been computed, as well as the k point grid, if needed
+   ! nkpt and nkpthf have been computed, as well as the k point grid, if needed
    dtset%nkpt=nkpt
    dtset%nkpthf=nkpthf
  end if

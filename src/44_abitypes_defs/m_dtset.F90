@@ -1220,13 +1220,14 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%znucl, dtout%znucl)
 
- DBG_EXIT("COLL")
-
  dtout%ndivsm = dtin%ndivsm
  dtout%nkpath = dtin%nkpath
  dtout%einterp = dtin%einterp
  call alloc_copy(dtin%kptbounds, dtout%kptbounds)
  dtout%tmesh = dtin%tmesh
+ dtout%kerange_path = dtin%kerange_path
+
+ DBG_EXIT("COLL")
 
 end subroutine dtset_copy
 !!***
