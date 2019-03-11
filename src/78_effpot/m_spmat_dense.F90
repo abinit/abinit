@@ -30,6 +30,7 @@
 
 
 module m_spmat_dense
+  use m_errors
   use defs_basis
   use m_spmat_base, only: base_mat2d_t
   implicit none
@@ -44,12 +45,12 @@ module m_spmat_dense
   end type dense_mat_t
 
 contains
-  subroutine dense_mat_t_initialize(self,  shape)
+  subroutine dense_mat_t_initialize(self,  mshape)
     class(dense_mat_t), intent(inout) :: self
-    integer, intent(in)::shape(:)
-    if(size(shape)/=2) call quit("shape should be size 2.")
-    self%nrow=shape(1)
-    self%ncol=shape(2)
+    integer, intent(in)::mshape(:)
+    if(size(mshape)/=2) MSG_ERROR("mshape should be size 2 for dense_mat_t")
+    self%nrow=mshape(1)
+    self%ncol=mshape(2)
     ABI_ALLOCATE(self%mat, (self%nrow, self%ncol))
     self%mat(:,:)=0.0d0
   end subroutine dense_mat_t_initialize
@@ -57,7 +58,7 @@ contains
   subroutine dense_mat_t_finalize(self)
     class(dense_mat_t), intent(inout) :: self
     if (allocated(self%mat))  ABI_DEALLOCATE(self%mat)
-    if (allocated(self%shape)) ABI_DEALLOCATE(self%mat)
+    if (allocated(self%mshape)) ABI_DEALLOCATE(self%mat)
     self%ncol=0
     self%nrow=0
     self%ndim=0

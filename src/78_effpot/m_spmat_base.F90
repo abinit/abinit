@@ -35,7 +35,7 @@ module m_spmat_base
 !!***
   type, public :: base_mat_t
      integer :: ndim
-     integer, allocatable:: shape(:)
+     integer, allocatable:: mshape(:)
    contains
      procedure :: initialize
      procedure :: finalize
@@ -51,18 +51,18 @@ module m_spmat_base
 
 contains
 
-  subroutine initialize(self, shape)
+  subroutine initialize(self, mshape)
     class(base_mat_t), intent(inout) :: self
-    integer, intent(in) :: shape(:)
-    self%shape=shape
-    self%ndim=size(shape)
+    integer, intent(in) :: mshape(:)
+    self%mshape=mshape
+    self%ndim=size(mshape)
   end subroutine initialize
 
   subroutine finalize(self)
     class(base_mat_t), intent(inout) :: self
     self%ndim=0
-    if (allocated(self%shape)) then
-       ABI_DEALLOCATE(self%shape)
+    if (allocated(self%mshape)) then
+       ABI_DEALLOCATE(self%mshape)
     endif
   end subroutine finalize
 
@@ -72,12 +72,12 @@ contains
     real(dp), intent(in) :: val
   end subroutine add_entry
 
-  subroutine base_mat2d_t_initialize(self,shape)
+  subroutine base_mat2d_t_initialize(self,mshape)
     class(base_mat2d_t), intent(inout) :: self
-    integer, intent(in) :: shape(:)
-    call self%base_mat_t%initialize(shape)
-    self%nrow=shape(1)
-    self%ncol=shape(2)
+    integer, intent(in) :: mshape(:)
+    call self%base_mat_t%initialize(mshape)
+    self%nrow=mshape(1)
+    self%ncol=mshape(2)
   end subroutine base_mat2d_t_initialize
 
   subroutine base_mat2d_t_mv(self, x, b)

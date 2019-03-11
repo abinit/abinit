@@ -38,7 +38,7 @@ module m_spmat_NDCOO
   type, public :: ndcoo_mat_t
      integer :: ndim=0
      integer :: nnz=0
-     integer, allocatable :: shape(:)
+     integer, allocatable :: mshape(:)
      type(int2d_array_type) :: ind
      type(real_array_type) :: val
      logical :: is_sorted = .False.
@@ -60,12 +60,12 @@ module m_spmat_NDCOO
   public:: test_ndcoo
 contains
 
-  subroutine initialize(self, shape)
+  subroutine initialize(self, mshape)
     class(ndcoo_mat_t), intent(inout) :: self
-    integer, intent(in) :: shape(:)
-    self%ndim=size(shape)
-    ABI_ALLOCATE(self%shape, (self%ndim))
-    self%shape=shape
+    integer, intent(in) :: mshape(:)
+    self%ndim=size(mshape)
+    ABI_ALLOCATE(self%mshape, (self%ndim))
+    self%mshape=mshape
     self%nnz=0
     self%is_sorted=.False.
     self%is_unique=.False.
@@ -77,8 +77,8 @@ contains
     self%nnz=0
     self%is_sorted=.False.
     self%is_unique=.False.
-    if (allocated(self%shape)) then
-       ABI_DEALLOCATE(self%shape)
+    if (allocated(self%mshape)) then
+       ABI_DEALLOCATE(self%mshape)
     endif
     call self%ind%finalize()
     call self%val%finalize()
@@ -251,7 +251,7 @@ contains
     type(ndcoo_mat_t) :: m
     integer :: ngroup
     integer, allocatable :: i1list(:), ise(:)
-    call m%initialize(shape=[3,3,3])
+    call m%initialize(mshape=[3,3,3])
     call m%add_entry(ind=[3, 2,1], val=0.3d0)
     call m%add_entry(ind=[1, 2,1], val=0.3d0)
     call m%add_entry(ind=[1, 2,1], val=0.4d0)

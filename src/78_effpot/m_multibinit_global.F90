@@ -30,6 +30,7 @@
     use defs_basis
     use m_random_xoroshiro128plus, only: rng_t
     use m_xmpi
+    use mpi
     implicit none
 !!****m*
     integer, parameter :: master =0
@@ -42,5 +43,14 @@
       my_rank = xmpi_comm_rank(comm)
       iam_master = (my_rank == master)
     end subroutine init_multibinit_global
+
+    subroutine debug_mpi(msg)
+      character(len=*), intent(in) ::msg
+      integer :: i 
+      i=0
+      print *, "ierr", ierr
+      print *, "rank: ", my_rank,  msg
+      call xmpi_bcast(i, master, comm, ierr)
+    end subroutine debug_mpi
 
   end module m_multibinit_global

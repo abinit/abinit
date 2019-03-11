@@ -53,13 +53,13 @@ module m_spmat_lil
 
   contains
   !------------------ LIL ---------------------
-  subroutine LIL_mat_t_initialize(self, shape)
+  subroutine LIL_mat_t_initialize(self, mshape)
     class(LIL_mat_t) , intent(inout):: self
-    integer, intent(in):: shape(:)
-    if (size(shape)/=2) stop 1
+    integer, intent(in):: mshape(:)
+    if (size(mshape)/=2) stop 1
     self%ndim=2
-    self%nrow=shape(1)
-    self%ncol=shape(2)
+    self%nrow=mshape(1)
+    self%ncol=mshape(2)
     ABI_ALLOCATE(self%rows, (self%nrow))
   end subroutine LIL_mat_t_initialize
 
@@ -74,7 +74,7 @@ module m_spmat_lil
     endif
     self%ncol=0
     self%nrow=0
-    if(allocated(self%shape)) ABI_DEALLOCATE(self%shape)
+    if(allocated(self%mshape)) ABI_DEALLOCATE(self%mshape)
   end subroutine LIL_mat_t_finalize
 
   subroutine LIL_mat_t_insert(self, irow, icol, val, mode)

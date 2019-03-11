@@ -49,18 +49,18 @@ module m_spmat_COO
 
 contains
 
-  subroutine initialize(self, shape)
+  subroutine initialize(self, mshape)
     class(coo_mat_t), intent(inout) :: self
-    integer, intent(in) :: shape(:)
-    if (size(shape)/=2) stop 1
-    call self%ndcoo_mat_t%initialize(shape)
+    integer, intent(in) :: mshape(:)
+    if (size(mshape)/=2) stop 1
+    call self%ndcoo_mat_t%initialize(mshape)
   end subroutine initialize
 
   ! COO sparse matrix-vector multiplication. naive implementation.
   subroutine mv(self, x, b)
     class(COO_mat_t), intent(in) :: self
-    real(dp), intent(in):: x(self%shape(1))
-    real(dp), intent(out):: b(self%shape(2))
+    real(dp), intent(in) :: x(self%mshape(1))
+    real(dp), intent(out) :: b(self%mshape(2))
     integer:: ind, ind_i, ind_j
     b(:)=0.0D0
     do ind = 1, self%nnz, 1

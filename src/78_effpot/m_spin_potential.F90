@@ -53,7 +53,6 @@ module  m_spin_potential
   private
 
   type, public, extends(abstract_potential_t) :: spin_potential_t
-     real(dp) :: etot=0.0
      integer :: nspin=0
      logical :: has_external_hfield, has_uniaxial_anistropy, has_exchange, &
           has_DMI, has_dipdip, has_bilinear
@@ -70,19 +69,23 @@ module  m_spin_potential
 
      ! vector for calculating effective field
      real(dp), allocatable :: Htmp(:, :)
+     real(dp), allocatable :: ms(:)
    CONTAINS
      procedure, non_overridable :: initialize
      procedure, non_overridable :: finalize
      procedure :: set_params
+     procedure :: set_supercell
      procedure, non_overridable :: get_Heff => spin_potential_t_total_Heff
      procedure :: set_external_hfield
      procedure, non_overridable :: calc_bilinear_term_Heff
+     procedure, non_overridable :: calc_external_Heff
      procedure, non_overridable :: calculate => spin_potential_t_calculate
      procedure, non_overridable :: get_energy => spin_potential_t_get_energy
      procedure, non_overridable :: get_delta_E => spin_potential_t_get_delta_E
      procedure :: add_bilinear_term
      procedure :: add_bilinear_term_spin_block
      procedure :: set_bilinear_term
+     procedure, private :: prepare_csr_matrix
      procedure :: set_terms
   end type spin_potential_t
 
@@ -100,7 +103,11 @@ contains
     self%is_null=.False.
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
-    call self%coeff_coo%initialize([self%nspin*3, self%nspin*3])
+
+    ABI_ALLOCATE( self%ms, (self%nspin))
+    if(iam_master) then
+       call self%coeff_coo%initialize([self%nspin*3, self%nspin*3])
+    endif
     ABI_ALLOCATE(self%external_hfield, (3,self%nspin))
     self%external_hfield=0.0_dp
     ABI_ALLOCATE( self%Htmp, (3, self%nspin))
@@ -111,6 +118,8 @@ contains
     class(spin_potential_t), intent(inout) :: self
     type(mb_supercell_t), target, intent(inout) :: supercell
     self%supercell=>supercell
+    self%ms(:)=supercell%ms(:)
+    call xmpi_bcast(self%ms, master, comm, ierr)
   end subroutine set_supercell
 
   subroutine set_terms(self, &
@@ -150,9 +159,11 @@ contains
     type(multibinit_dtset_type) :: params
     real(dp) :: tmp(3, self%nspin)
     integer :: i
-    do i=1, self%nspin
-       tmp(:, i)=params%spin_mag_field(:)
-    end do
+    if(iam_master) then
+       do i=1, self%nspin
+          tmp(:, i)=params%spin_mag_field(:)
+       end do
+    endif
     call self%set_external_hfield(tmp)
   end subroutine set_params
 
@@ -162,31 +173,36 @@ contains
     real(dp), intent(in) :: external_hfield(:,:)
     self%has_external_hfield = .true.
     self%external_hfield = external_hfield
+    call xmpi_bcast(self%has_external_hfield, master, comm, ierr)
+    call xmpi_bcast(self%external_hfield, master, comm, ierr)
   end subroutine set_external_hfield
 
-  subroutine spin_potential_t_calc_external_Heff(self, Heff)
-    type(spin_potential_t), intent(inout) :: self
+  subroutine calc_external_Heff(self, Heff)
+    class(spin_potential_t), intent(inout) :: self
     real(dp), intent(out) :: Heff(:,:)
     Heff(:,:)= Heff(:,:) +self%external_hfield(:,:)
-  end subroutine spin_potential_t_calc_external_Heff
+  end subroutine calc_external_Heff
 
   subroutine add_bilinear_term(self, i,j, val)
     class(spin_potential_t), intent(inout) :: self
     integer, intent(in) :: i, j
     real(dp), intent(in) :: val
-    call self%coeff_coo%add_entry(ind=[i,j],val=val)
-    self%has_bilinear=.True.
+    if(iam_master) then
+       call self%coeff_coo%add_entry(ind=[i,j],val=val)
+       self%has_bilinear=.True.
+    endif
   end subroutine add_bilinear_term
 
-  
   subroutine set_bilinear_term(self, ilist,jlist, vallist)
     class(spin_potential_t), intent(inout) :: self
     integer, intent(in) :: ilist(:), jlist(:)
     real(dp), intent(in) :: vallist(:)
     integer :: i
-    do i = 1, size(ilist)
-       call self%coeff_coo%add_entry(ind=[ilist(i),jlist(i)],val=vallist(i))
-    end do
+    if (iam_master) then
+       do i = 1, size(ilist)
+          call self%coeff_coo%add_entry(ind=[ilist(i),jlist(i)],val=vallist(i))
+       end do
+    endif
     self%has_bilinear=.True.
   end subroutine set_bilinear_term
 
@@ -198,13 +214,27 @@ contains
     real(dp), intent(in) :: val(:,:)
     integer :: ia, ib
     self%has_bilinear=.True.
-    do ia = 1, 3, 1
-       do ib=1, 3, 1
-          call self%coeff_coo%add_entry([(ispin-1)*3+ia, &
-               (jspin-1)*3+ib], val=val(ia,ib))
+    if(iam_master) then
+       do ia = 1, 3, 1
+          do ib=1, 3, 1
+             call self%coeff_coo%add_entry([(ispin-1)*3+ia, &
+                  (jspin-1)*3+ib], val=val(ia,ib))
+          end do
        end do
-    end do
+    endif
   end subroutine add_bilinear_term_spin_block
+
+  subroutine prepare_csr_matrix(self)
+    class(spin_potential_t), intent(inout) :: self
+    if (.not. self%csr_mat_ready) then
+       if(iam_master) then
+          call coo_to_csr(self%coeff_coo, self%bilinear_csr_mat)
+          call self%coeff_coo%finalize()
+       endif
+       call self%bilinear_csr_mat%sync()
+       self%csr_mat_ready=.True.
+    endif
+  end subroutine prepare_csr_matrix
 
 
   subroutine calc_bilinear_term_Heff(self, S, Heff)
@@ -212,22 +242,16 @@ contains
     real(dp), intent(inout) :: S(:,:)
     real(dp), intent(out) :: Heff(3,self%nspin)
     integer :: i
-    call xmpi_bcast(self%csr_mat_ready, master, comm, ierr)
-    if (.not. self%csr_mat_ready) then
-       if(iam_master) then
-          call coo_to_csr(self%coeff_coo, self%bilinear_csr_mat)
-       endif
-       call self%bilinear_csr_mat%sync()
-       self%csr_mat_ready=.True.
-    endif
-    call self%bilinear_csr_mat%mv(S ,Heff)
-    !call self%bilinear_csr_mat%mv_mpi(S ,Heff)
+    !call self%bilinear_csr_mat%mv(S ,Heff)
+    call self%prepare_csr_matrix()
+    call self%bilinear_csr_mat%mv_mpi(S ,Heff)
     do i =1, self%nspin
-       Heff(:, i)=Heff(:,i)/self%supercell%ms(i)*2.0_dp
+       Heff(:, i)=Heff(:,i)/self%ms(i)*2.0_dp
     end do
   end subroutine calc_bilinear_term_Heff
 
-  subroutine spin_potential_t_calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
+  subroutine spin_potential_t_calculate(self, displacement, strain, spin, lwf, &
+       force, stress, bfield, lwf_force, energy)
     class(spin_potential_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
@@ -262,15 +286,15 @@ contains
        ! calculate energy from bilinear terms (all the above ones)
        do i=1, self%nspin
           do j=1, 3
-             energy=energy-(Heff(j, i)*S(j,i)*self%supercell%ms(i))*0.5_dp
+             energy=energy-(Heff(j, i)*S(j,i)*self%ms(i))*0.5_dp
           end do
        end do
        if (self%has_external_hfield) then
-          call spin_potential_t_calc_external_Heff(self,self%Htmp)
+          call self%calc_external_Heff(self%Htmp)
           Heff = Heff+self%Htmp
           do i=1, self%nspin
              do j=1, 3
-                energy= energy- self%Htmp(j, i)*S(j, i)*self%supercell%ms(i)
+                energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
              end do
           end do
        endif
@@ -296,10 +320,10 @@ contains
     end if
     if(iam_master) then
        if (self%has_external_hfield) then
-          call spin_potential_t_calc_external_Heff(self,self%Htmp)
+          call self%calc_external_Heff(self%Htmp)
           do i=1, self%nspin
              do j=1, 3
-                energy= energy- self%Htmp(j, i)*S(j, i)*self%supercell%ms(i)
+                energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
              end do
           end do
        endif
@@ -338,7 +362,7 @@ contains
     end if
 
     if(self%has_external_hfield) then
-       deltaE=deltaE - dot_product(self%external_hfield(:, ispin), dS)*self%supercell%ms(ispin)
+       deltaE=deltaE - dot_product(self%external_hfield(:, ispin), dS)*self%ms(ispin)
     end if
     S(:, ispin)=S(:,ispin)-dS
     !print*, deltaE
@@ -348,6 +372,10 @@ contains
 
   subroutine finalize(self)
     class(spin_potential_t), intent(inout):: self
+    if (allocated(self%ms)) then
+       ABI_DEALLOCATE(self%ms)
+    end if
+
     if (allocated(self%Htmp)) then
        ABI_DEALLOCATE(self%Htmp)
     endif
@@ -359,7 +387,9 @@ contains
     self%has_bilinear=.False.
     ! destroy LIL an CSR
     call self%bilinear_csr_mat%finalize()
-    call self%coeff_coo%finalize()
+    if (.not. self%csr_mat_ready) then
+       call self%coeff_coo%finalize()
+    end if
 
   end subroutine finalize
 

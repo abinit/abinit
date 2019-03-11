@@ -76,7 +76,7 @@ contains
     class(LIL_mat_t) , intent(inout):: ll
     class(COO_mat_t), intent(out):: COO
     integer ::  counter, irow
-    call  COO%initialize(shape=ll%shape)
+    call  COO%initialize(mshape=ll%mshape)
     do irow=1, ll%nrow
        call llist_iter_restart(ll%rows(irow))
        do while(associated(ll%rows(irow)%iter))
@@ -159,10 +159,10 @@ contains
     type(CSR_mat_t), intent(inout) :: csr
     integer :: ngroup
     integer, allocatable :: i1_list(:), istartend(:)
-    integer :: row_nz(coo%shape(1))
+    integer :: row_nz(coo%mshape(1))
     integer :: i, irow
     call coo%group_by_1dim(ngroup, i1_list, istartend)
-    call csr%initialize(coo%shape)
+    call csr%initialize(coo%mshape)
     call csr%set(nnz=coo%nnz)
     csr%icol(:)=coo%ind%data(2,1:coo%nnz)
     csr%val(:) = coo%val%data(1:coo%nnz)

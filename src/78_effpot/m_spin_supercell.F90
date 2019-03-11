@@ -53,13 +53,13 @@ contains
     if (iam_master) self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
 
-    ABI_ALLOCATE(self%iatoms, (nspin))
-    ABI_ALLOCATE(self%pos, (3,nspin) )
-    ABI_ALLOCATE(self%ms, (nspin))
-    ABI_ALLOCATE(self%ispin_prim, (nspin))
-    ABI_ALLOCATE(self%rvec, (3, nspin))
-    ABI_ALLOCATE(self%gyro_ratio, (nspin))
-    ABI_ALLOCATE(self%gilbert_damping, (nspin) )
+    ABI_ALLOCATE(self%iatoms, (self%nspin))
+    ABI_ALLOCATE(self%pos, (3,self%nspin) )
+    ABI_ALLOCATE(self%ms, (self%nspin))
+    ABI_ALLOCATE(self%ispin_prim, (self%nspin))
+    ABI_ALLOCATE(self%rvec, (3, self%nspin))
+    ABI_ALLOCATE(self%gyro_ratio, (self%nspin))
+    ABI_ALLOCATE(self%gilbert_damping, (self%nspin) )
   end subroutine initialize
 
   subroutine set(self, ispin_prim, rvec, iatoms, pos, ms, gyro_ratio, damping)
@@ -96,6 +96,7 @@ contains
 
   subroutine finalize(self)
     class(spin_supercell_t), intent(inout) :: self
+    self%nspin=0
     if (allocated(self%ms))  then
        ABI_DEALLOCATE(self%ms)
     endif

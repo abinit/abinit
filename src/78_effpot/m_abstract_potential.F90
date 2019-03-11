@@ -70,7 +70,7 @@ contains
   subroutine set_supercell(self, supercell)
     class(abstract_potential_t), intent(inout) :: self
     type(mb_supercell_t), target, intent(inout) :: supercell
-    self%supercell=>supercell
+    MSG_ERROR("Every potential should override this set_supercell method to avoid mistake.")
   end subroutine set_supercell
 
   subroutine finalize(self)
@@ -83,6 +83,7 @@ contains
   subroutine set_params(self, params)
     class(abstract_potential_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+    MSG_ERROR("Every potential should override this method set_params to avoid mistakes")
   end subroutine set_params
 
   ! hexu comment : which one is better, more general variables,

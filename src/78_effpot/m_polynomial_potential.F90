@@ -64,10 +64,10 @@ module m_polynomail_potential
 
 contains
 
-  subroutine initialize(self, nature, order, shape)
+  subroutine initialize(self, nature, order, mshape)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
     integer, intent(in) :: order
-    integer, intent(in) :: nature(order), shape(order)
+    integer, intent(in) :: nature(order), mshape(order)
     ABI_ALLOCATE(self%nature, (order))
     self%nature(:)=nature(:)
     self%order=order
@@ -75,7 +75,7 @@ contains
     if (find_int(nature, strain)/=0) self%has_strain=.True.
     if (find_int(nature, spin)/=0) self%has_spin=.True.
     if (find_int(nature, lwf)/=0) self%has_lwf=.True.
-    call self%coeff%initialize(shape=shape)
+    call self%coeff%initialize(mshape=mshape)
     self%label="PolynomialPotential"
   end subroutine initialize
 

@@ -96,7 +96,7 @@ module m_spin_mover
      procedure :: run_one_step => spin_mover_t_run_one_step
      procedure :: run_time => spin_mover_t_run_time
      procedure :: run_MvT
-     procedure :: set_Langevin_params
+     procedure :: set_temperature
      procedure :: prepare_ncfile
      procedure, private ::get_Langevin_Heff
      procedure, private :: get_dSdt
@@ -178,14 +178,23 @@ contains
 
 
     call xmpi_bcast(params%spin_damping, master, comm, ierr)
-    if (params%spin_damping >=0) then
-       self%damping(:)= params%spin_damping
-    else
-       self%damping(:)=supercell%gilbert_damping(:)
-    end if
-    call self%set_langevin_params(temperature=params%spin_temperature, &
-         & damping=self%supercell%gilbert_damping, ms=self%supercell%ms, gyro_ratio=self%supercell%gyro_ratio)
 
+    if (iam_master) then
+       if (params%spin_damping >=0) then
+          self%damping(:)= params%spin_damping
+       else
+          self%damping(:)=supercell%gilbert_damping(:)
+       end if
+
+       self%gyro_ratio(:)=supercell%gyro_ratio(:)
+       self%ms(:)=supercell%ms(:)
+    endif
+
+    
+    call xmpi_bcast(self%damping, master, comm, ierr)
+    call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
+    call xmpi_bcast(self%ms, master, comm, ierr)
+    call self%set_temperature(temperature=params%spin_temperature)
 
     ! Hist and set initial spin state
     if(iam_master) then
@@ -279,26 +288,9 @@ contains
 
 
 
-  subroutine set_Langevin_params(self, gyro_ratio, damping, temperature, ms)
+  subroutine set_temperature(self, temperature)
     class(spin_mover_t), intent(inout) :: self
-    real(dp), optional, intent(in) :: damping(self%nspin), temperature, &
-         &    gyro_ratio(self%nspin), ms(self%nspin)
-
-    if(present(damping)) then
-       self%damping(:)=damping(:)
-       call xmpi_bcast(self%damping, master, comm, ierr)
-    endif
-
-    if(present(gyro_ratio)) then
-       self%gyro_ratio(:)=gyro_ratio(:)
-       call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
-    endif
-
-    if(present(ms)) then
-       self%ms(:)=ms(:)
-       call xmpi_bcast(self%ms, master, comm, ierr)
-    endif
-
+    real(dp), optional, intent(in) ::  temperature
     if(present(temperature)) then
        self%temperature=temperature
        call xmpi_bcast(self%temperature, master, comm, ierr)
@@ -309,13 +301,11 @@ contains
           call xmpi_bcast(self%spin_mc%beta, master, comm, ierr)
        end if
     end if
-
     self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%damping(:)**2)
     self%gamma_l_calculated=.True.
-
     self%H_lang_coeff(:)=sqrt(2.0*self%damping(:)* self%temperature &
          &  /(self%gyro_ratio(:)* self%dt *self%ms(:)))
-  end subroutine set_Langevin_params
+  end subroutine set_temperature
 
 
   subroutine get_Langevin_Heff(self, H_lang)
@@ -760,7 +750,7 @@ contains
           ! TODO make this into a subroutine set_params
           self%params%spin_temperature=T
         endif
-        call self%set_Langevin_params(temperature=T)
+        call self%set_temperature(temperature=T)
         if(iam_master) then
           call self%hist%set_params(spin_nctime=self%params%spin_nctime, &
                &     spin_temperature=T)

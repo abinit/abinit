@@ -29,10 +29,11 @@ module m_unitcell
   use defs_basis
   use m_abicore
   use m_errors
+  use m_xmpi
+  use m_multibinit_global
   use m_multibinit_supercell, only: mb_supercell_t
   use m_supercell_maker , only: supercell_maker_t
   use m_multibinit_dataset, only : multibinit_dtset_type
-
   implicit none
 
 !!***
@@ -100,6 +101,7 @@ contains
     integer, intent(in) :: nspin
     real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), damping_factor(nspin)
     self%has_spin=.True.
+    call xmpi_bcast(self%has_spin,master, comm, ierr)
     call self%spin%initialize(nspin, ms, spin_positions, gyro_ratio, damping_factor)
   end subroutine set_spin
 
@@ -164,17 +166,22 @@ contains
     class(unitcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
     real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), damping_factor(nspin)
-    print *, "initilazing spin unitcell"
     self%nspin=nspin
-    ABI_ALLOCATE(self%spin_positions, (3, nspin))
-    ABI_ALLOCATE(self%ms, (nspin))
-    ABI_ALLOCATE(self%gyro_ratio, (nspin))
-    ABI_ALLOCATE(self%damping_factor, (nspin))
-
-    self%ms(:) = ms(:)
-    self%spin_positions(:,:)=spin_positions(:,:)
-    self%gyro_ratio(:)=gyro_ratio(:)
-    self%damping_factor(:)=damping_factor(:)
+    call xmpi_bcast(self%nspin, master, comm, ierr)
+    ABI_ALLOCATE(self%spin_positions, (3, self%nspin))
+    ABI_ALLOCATE(self%ms, (self%nspin))
+    ABI_ALLOCATE(self%gyro_ratio, (self%nspin))
+    ABI_ALLOCATE(self%damping_factor, (self%nspin))
+    if (iam_master) then
+       self%ms(:) = ms(:)
+       self%spin_positions(:,:)=spin_positions(:,:)
+       self%gyro_ratio(:)=gyro_ratio(:)
+       self%damping_factor(:)=damping_factor(:)
+    endif
+    call xmpi_bcast(self%spin_positions, master, comm, ierr)
+    call xmpi_bcast(self%ms, master, comm, ierr)
+    call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
+    call xmpi_bcast(self%damping_factor, master, comm, ierr)
   end subroutine spin_initialize
 
   subroutine spin_finalize(self)
@@ -195,17 +202,27 @@ contains
   end subroutine spin_finalize
 
   subroutine spin_fill_supercell(self, sc_maker, supercell)
-    class(unitcell_spin_t) :: self
-    type(supercell_maker_t):: sc_maker
-    type(mb_supercell_t) :: supercell
-    integer :: i
-    supercell%nspin=sc_maker%ncells*self%nspin
-    call sc_maker%repeat(self%ms, supercell%ms)
-    call sc_maker%repeat(self%gyro_ratio, supercell%gyro_ratio)
-    call sc_maker%repeat(self%damping_factor, supercell%gilbert_damping)
-    call sc_maker%repeat([(i ,i=1, self%nspin)], supercell%ispin_prim)
-    call sc_maker%trans_xred(self%spin_positions, supercell%spin_positions)
-    call sc_maker%rvec_for_each(self%nspin, supercell%rvec)
+    class(unitcell_spin_t),intent(inout) :: self
+    type(supercell_maker_t), intent(inout):: sc_maker
+    type(mb_supercell_t), intent(inout) :: supercell
+    integer :: i, nspin
+    nspin=sc_maker%ncells*self%nspin
+    call supercell%initialize(nspin=nspin)
+    if(iam_master) then
+       call sc_maker%repeat(self%ms, supercell%ms)
+       call sc_maker%repeat(self%gyro_ratio, supercell%gyro_ratio)
+       call sc_maker%repeat(self%damping_factor, supercell%gilbert_damping)
+       call sc_maker%repeat([(i ,i=1, self%nspin)], supercell%ispin_prim)
+       call sc_maker%trans_xred(self%spin_positions, supercell%spin_positions)
+       call sc_maker%rvec_for_each(self%nspin, supercell%rvec)
+    end if
+    call xmpi_bcast(supercell%nspin, master, comm, ierr)
+    call xmpi_bcast(supercell%ms, master, comm, ierr)
+    call xmpi_bcast(supercell%gyro_ratio, master, comm, ierr)
+    call xmpi_bcast(supercell%gilbert_damping, master, comm, ierr)
+    call xmpi_bcast(supercell%ispin_prim, master, comm, ierr)
+    call xmpi_bcast(supercell%spin_positions, master, comm, ierr)
+    call xmpi_bcast(supercell%rvec, master, comm, ierr)
   end subroutine spin_fill_supercell
 
 

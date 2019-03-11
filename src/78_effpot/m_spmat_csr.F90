@@ -63,13 +63,13 @@ module m_spmat_csr
   end type CSR_mat_t
 contains
 
-  subroutine initialize(self, shape)
+  subroutine initialize(self, mshape)
     class(csr_mat_t), intent(inout) :: self
-    integer, intent(in) :: shape(:)
-    if (size(shape)/=2) stop "shape should be size 2"
-    call self%base_mat_t%initialize(shape)
-    self%nrow=shape(1)
-    self%ncol=shape(2)
+    integer, intent(in) :: mshape(:)
+    if (size(mshape)/=2) stop "mshape should be size 2"
+    call self%base_mat_t%initialize(mshape)
+    self%nrow=mshape(1)
+    self%ncol=mshape(2)
   end subroutine initialize
 
   ! COO matrix
@@ -167,7 +167,7 @@ contains
     if(allocated(self%val)) then
        ABI_DEALLOCATE(self%val)
     endif
-    if(allocated(self%shape)) ABI_DEALLOCATE(self%shape)
+    if(allocated(self%mshape)) ABI_DEALLOCATE(self%mshape)
   end subroutine CSR_mat_t_finalize
 
 

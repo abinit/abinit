@@ -34,8 +34,10 @@ module m_supercell_maker
   use defs_basis
   use m_abicore
   use m_errors
+  use m_xmpi
   use m_symtk,    only : matr3inv
   use m_mathfuncs , only: mat33det, binsearch_left_integerlist
+  use m_multibinit_global
   use m_supercell
   implicit none
   private
@@ -81,12 +83,19 @@ contains
     integer, intent(in) :: sc_matrix(3, 3)
     real(dp) :: tmp(3,3)
     self%scmat(:,:)=sc_matrix
+    call xmpi_bcast(self%scmat, master, comm, ierr)
     self%ncells=abs(mat33det(self%scmat))
+    call xmpi_bcast(self%ncells, master, comm, ierr)
     ABI_ALLOCATE(self%rvecs, (3, self%ncells))
     ! Why transpose?
-    tmp(:,:)=transpose(self%scmat)
-    call matr3inv(tmp, self%inv_scmat)
-    call self%build_rvec()
+    !if(iam_master) then
+       tmp(:,:)=transpose(self%scmat)
+       call matr3inv(tmp, self%inv_scmat)
+       call self%build_rvec()
+    !end if
+    call xmpi_bcast(self%inv_scmat, master, comm, ierr)
+    call xmpi_bcast(self%ncells, master, comm, ierr)
+    call xmpi_bcast(self%rvecs, master, comm, ierr)
   end subroutine initialize
 
   subroutine finalize(self)
@@ -153,7 +162,9 @@ contains
     real(dp), allocatable, intent(inout) :: scxred(:, :)
     integer :: npos, icell, ipos, counter=0
     npos=size(xred, dim=2)
-    ABI_ALLOCATE(scxred, (3,size(xred, dim=2)*self%ncells))
+    if (.not. allocated(scxred)) then
+       ABI_ALLOCATE(scxred, (3,size(xred, dim=2)*self%ncells))
+    end if
     do icell = 1, self%ncells
        do ipos=1 , npos
           counter=counter+1

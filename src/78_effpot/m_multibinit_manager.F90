@@ -41,7 +41,8 @@ module m_multibinit_manager
   use m_init10, only: init10
   use m_mathfuncs, only: diag
   use m_multibinit_global
-  use m_multibinit_dataset, only: multibinit_dtset_type, invars10, outvars_multibinit
+  use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
+       outvars_multibinit, multibinit_dtset_free
   use m_unitcell, only : unitcell_t
   use m_supercell_maker, only: supercell_maker_t
   use m_multibinit_supercell, only: mb_supercell_t
@@ -111,6 +112,7 @@ contains
        call self%read_params()
     endif
     self%filenames=filenames
+    call xmpi_bcast(self%filenames, master, comm, ierr)
     call self%prepare_params()
     ! read potentials from
   end subroutine initialize
@@ -121,7 +123,6 @@ contains
   !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(mb_manager_t), intent(inout) :: self
-    !call self%params%finalize()
     call self%sc_maker%finalize()
     call self%unitcell%finalize()
     call self%supercell%finalize()
@@ -129,6 +130,7 @@ contains
     call self%pots%finalize()
     call self%spin_mover%finalize()
     call self%lattice_mover%finalize()
+    call multibinit_dtset_free(self%params)
     !call self%lwf_mover%finalize()
   end subroutine finalize
 
@@ -151,10 +153,12 @@ contains
     !To automate a maximum calculation, multibinit reads the number of atoms
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
     !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
-    write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-         & '-',trim(self%filenames(3)),ch10,' to initialize the multibinit input'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
+    if(iam_master) then
+       write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
+            & '-',trim(self%filenames(3)),ch10,' to initialize the multibinit input'
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+    end if
 
     call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
 
@@ -198,7 +202,6 @@ contains
   end subroutine prepare_params
 
 
-
   !-------------------------------------------------------------------!
   ! Read potentials from file, if needed by dynamics
   !-------------------------------------------------------------------!
@@ -210,6 +213,7 @@ contains
     ! latt : TODO
 
     ! spin
+    call xmpi_bcast(self%params%spin_dynamics, master, comm, ierr)
     if(self%params%spin_dynamics>0) then
        allocate(spin_pot)
        call spin_pot%initialize(self%unitcell)
@@ -228,17 +232,13 @@ contains
   !-------------------------------------------------------------------!
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
-    class(abstract_potential_t), pointer :: q
-    integer :: i
+    !class(abstract_potential_t), pointer :: q
     ! unitcell
     call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
     call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
     call self%pots%set_supercell(self%supercell)
-    do i=1, self%pots%size
-       q=>self%pots%data(i)%obj
-    end do
   end subroutine fill_supercell
 
   !-------------------------------------------------------------------!
@@ -273,9 +273,8 @@ contains
   subroutine run_spin_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
-    call self%sc_maker%initialize(diag(self%params%ncell))
-    ! read params
     call self%read_potentials()
+    call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%run_time(self%pots)

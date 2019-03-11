@@ -34,6 +34,9 @@ module m_primitive_potential_list
   use defs_basis
   use m_abicore
   use m_errors
+  use m_xmpi
+  use m_multibinit_global
+
   use m_multibinit_dataset , only: multibinit_dtset_type
   use m_unitcell, only: unitcell_t
   use m_supercell_maker, only: supercell_maker_t
@@ -111,11 +114,14 @@ contains
   subroutine initialize(self)
     class(primitive_potential_list_t), intent(inout):: self
     self%label="ListPotential"
+    self%size=0
+    self%capacity=0
   end subroutine initialize
 
   subroutine finalize(self)
     class(primitive_potential_list_t), intent(inout):: self
     integer :: i
+    call xmpi_bcast(self%size, master, comm, ierr)
     do i=1, self%size
        call self%data(i)%obj%finalize()
        nullify(self%data(i)%obj)
@@ -150,11 +156,20 @@ contains
        temp(1:self%size-1) = self%data(:)
        call move_alloc(temp, self%data) !temp gets deallocated
     end if
+
+    call xmpi_barrier(comm)
     self%data(self%size)%obj=>pot
     self%has_spin= (self%has_spin .or. pot%has_spin)
     self%has_displacement= (self%has_displacement .or. pot%has_displacement)
     self%has_strain= (self%has_strain.or. pot%has_strain)
     self%has_lwf= (self%has_lwf.or. pot%has_lwf)
+    call xmpi_bcast(self%size, master, comm, ierr)
+    call xmpi_bcast(self%capacity, master, comm, ierr)
+    call xmpi_bcast(self%has_spin, master, comm, ierr)
+    call xmpi_bcast(self%has_displacement, master, comm, ierr)
+    call xmpi_bcast(self%has_strain, master, comm, ierr)
+    call xmpi_bcast(self%has_lwf, master, comm, ierr)
+
   end subroutine append
 
 

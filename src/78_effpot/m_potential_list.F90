@@ -38,7 +38,7 @@ module m_potential_list
   use m_abicore
   use m_errors
   use m_xmpi
-
+  use m_multibinit_global
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_multibinit_supercell, only: mb_supercell_t
@@ -92,6 +92,9 @@ contains
     self%size=0
     self%capacity=0
     self%label="ListPotential"
+    call xmpi_bcast(self%size, master, comm, ierr)
+    call xmpi_bcast(self%capacity, master, comm, ierr)
+    call xmpi_bcast(self%label, master, comm, ierr)
   end subroutine initialize
 
   subroutine set_supercell(self, supercell)
