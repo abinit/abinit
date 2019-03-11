@@ -2183,7 +2183,7 @@ end subroutine compute_coeff_plowannier
  call wrtout(std_out,msg,'COLL') ; call wrtout(ab_out,msg,'COLL')
  
  !Header of the file forlb.ovlp
- write(unt,'(a,2x,i2)') "Total number of orbitals =", sum(wan%nbl_atom_wan(:))
+ write(unt,'(a,2x,i2)') "Total number of orbitals = ", sum(wan%nbl_atom_wan(:))
  write(unt,'(a,2i6)')"Bands =",wan%bandi_wan,wan%bandf_wan
 
  do spin=1,wan%nsppol

@@ -48,6 +48,7 @@ sources = [
  "m_dyson_solver.F90",
  "m_fft_prof.F90",
  "m_model_screening.F90",
+ "m_plowannier.F90",
  "m_ppmodel.F90",
  "m_prep_calc_ucrpa.F90",
  "m_qparticles.F90",
