@@ -59,7 +59,7 @@ eph_ngqpt_fine2 4 4 4
 eph_task3 4
 gw_qprange3 4
 sigma_bsum_range3 2 4
-# Use interpolate DVDB produced in dataset 2
+# Use interpolated DVDB produced in dataset 2
 getdvdb3  2
 eph_ngqpt_fine3 4 4 4
 
@@ -70,7 +70,7 @@ eph_task4 -4
 gw_qprange4 4
 #sigma_bsum_range4 1 7
 eph_intmeth4 2  # Tetra are more stable when bands are selected. No long-range Lorentzian.
-# Use interpolate DVDB produced in dataset 2
+# Use interpolated DVDB produced in dataset 2
 getdvdb4   2
 eph_ngqpt_fine4 4 4 4
 

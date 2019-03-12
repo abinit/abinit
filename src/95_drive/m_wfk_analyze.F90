@@ -414,9 +414,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    end if
    call xmpi_barrier(comm)
 
- case (WFK_TASK_KLIST2MESH)
-    wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-    call wfk_klist2mesh(wfk0_path, "Tmp/o_DS2_KERANGE.nc", dtset, psps, pawtab, wfkfull_path, comm)
+ !case (WFK_TASK_KLIST2MESH)
+ !   wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+ !   call wfk_klist2mesh(wfk0_path, "Tmp/o_DS2_KERANGE.nc", dtset, psps, pawtab, wfkfull_path, comm)
 
  case (WFK_TASK_KPTS_ERANGE)
    call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)

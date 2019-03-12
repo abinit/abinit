@@ -1108,7 +1108,7 @@ subroutine isfile(filnam, status)
      if ( found .eqv. .true. ) then
        write(msg,'(4a)') 'Renaming old ',trim(filnam),' to ',trim(trialnam)
        MSG_COMMENT(msg)
-       call clib_rename(filnam,trialnam,ioserr)
+       ioserr = clib_rename(filnam, trialnam)
        if ( ioserr /= 0 ) then
          write(msg,'(4a)') 'Failed to rename file: ', trim(filnam),' to: ',trim(trialnam)
          MSG_ERROR(msg)

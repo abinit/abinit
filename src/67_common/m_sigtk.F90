@@ -515,7 +515,7 @@ end subroutine sigtk_kcalc_from_erange
 !!  sigtk_kpts_in_erange
 !!
 !! FUNCTION
-!!  Use SKW star functions to interpolate electron energies onto fine dense defined by sigma_ngkpt and sigma_shiftk.
+!!  Use star functions to interpolate electron energies onto fine dense defined by sigma_ngkpt and sigma_shiftk.
 !!  Find k-points inside (electron/hole) pockets according to sigma_erange.
 !!  Write KERANGE.nc file storing tables used to perform NSCF band structure calculation
 !!  and electron lifetime computation in EPH code.
@@ -572,7 +572,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    write(std_out, "(2a)")ch10, repeat("=", 92)
    write(std_out, "(a)") " Finding k-points inside (electron/hole) pockets."
    write(std_out, "(2a)") " Interpolating eigenvalues onto dense K-mesh with sigma_ngkpt: ", trim(ltoa(dtset%sigma_ngkpt))
-   write(std_out, "(2a)") " and sigma_shiftk:"
+   write(std_out, "(2a)") " and sigma_shiftk shifts:"
    do ii=1,dtset%nshiftk
      write(std_out, "(a, 3(f2.1, 1x))")"   sigma_shiftk:", dtset%sigma_shiftk(:, ii)
    end do
@@ -596,7 +596,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  call gaps%print(unit=std_out)
 
  ! Interpolate band energies with star-functions.
- ! We need eigens in the IBZ to compute efermi not just inside pockets.
+ ! In EPH, we will need eigens in the IBZ to compute efermi not just energies inside pockets.
  fine_kptrlatt = 0
  do ii=1,3
    fine_kptrlatt(ii, ii) = dtset%sigma_ngkpt(ii)
@@ -617,7 +617,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
 
  ! Find k-points inside energy window.
- ! Set entry to 1 if (ikpt, spin) is inside the pocket (last index is to discern between hole and electron pockets)
+ ! Set entry to 1 if (ikpt, spin) is inside the pocket (last index discerns between hole and electron pockets)
  ABI_ICALLOC(kshe_mask, (fine_ebands%nkpt, ebands%nsppol, 2))
 
  do spin=1,ebands%nsppol

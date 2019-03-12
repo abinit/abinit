@@ -72,6 +72,7 @@ MODULE m_wfk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
+ use m_clib
 
  use defs_abitypes,  only : hdr_type, dataset_type, MPI_type
  use defs_datatypes, only : pseudopotential_type, ebands_t
@@ -4992,11 +4993,11 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! IO section executed by master only, all other procs wait for new WFK before returning.
+ ! IO section are executed by master only, all other procs wait for new WFK before returning to caller.
  my_rank = xmpi_comm_rank(comm); if (my_rank /= master) goto 100
 
  write(std_out, "(2a)")ch10, repeat("=", 92)
- write(std_out, "(a)")" Will produce WKF file with dense k-mesh:"
+ write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
  write(std_out, "(a, 3(i0, 1x))")"   sigma_ngkpt: ", dtset%sigma_ngkpt
  do ii=1,dtset%sigma_nshiftk
    write(std_out, "(a, 3(f5.2, 1x))")"   sigma_shiftk: ", dtset%sigma_shiftk(:, ii)
@@ -5026,9 +5027,9 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
  fine_mband = maxval(fine_hdr%nband)
  ABI_MALLOC(fine_eigen, (fine_mband, fine_hdr%nkpt, fine_hdr%nsppol))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), fine_eigen))
+ !NCF_CHECK(nctk_get_dim(ncid, "nkpt_inerange", nkpt_inerage))
  ABI_MALLOC(kshe_mask, (fine_ebands%nkpt, fine_hdr%nsppol, 2))
  !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "kshe_mask"), kshe_mask))
- !NCF_CHECK(nctk_get_dim(ncid, "nkpt_inerange", nkpt_inerage))
  !ABI_MALLOC(krange2ibz, (nkpt_inerange))
  !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
  !ABI_FREE(krange2ibz)
@@ -5039,10 +5040,10 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
  ABI_FREE(fine_eigen)
  !call hdr_vs_dtset(wfk0_hdr, dtset)
 #else
- MSG_ERROR("wfk_klist2mesh requires NETCDF support")
+ MSG_ERROR("wfk_klist2mesh requires NETCDF support.")
 #endif
 
- ! Open WFK with k-point list, extract dimensions and allocate workspace arrays.
+ ! Open WFK file with k-point list, extract dimensions and allocate workspace arrays.
  my_inpath = in_wfkpath
  if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
    MSG_ERROR(msg)
@@ -5162,6 +5163,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
    end do
  end do
 
+ ! Free memory
  ABI_FREE(kg_k)
  ABI_FREE(cg_k)
  ABI_FREE(eig_k)
@@ -5175,10 +5177,12 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
  call wfk_close(iwfk)
  call wfk_close(owfk)
 
-100 call xmpi_barrier(comm)
+ !ABI_CHECK(clib_rename(in_wfkpath, strcat(in_wfkpath, ".bkp")) == 0, "Failed to rename WFK file")
+ !ABI_CHECK(clib_rename(out_wfkpath, in_wfkpath) == 0, "Failed to rename WFK file")
+
  call cwtime_report(" WFK with fine k-mesh written to file.", cpu, wall, gflops)
 
- !call clib_rename(filnam, trialnam, ioserr)
+100 call xmpi_barrier(comm)
 
 end subroutine wfk_klist2mesh
 !!***

@@ -128,6 +128,23 @@ P This job should need less than                      41.776 Mbytes of memory.
 _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
+
+ DATASET    7 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  7.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      27  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          10        mffmem =           1         mkmem =           8
+       mpw =        1131          nfft =       19683          nkpt =           8
+================================================================================
+P This job should need less than                       7.802 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      1.383 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
+================================================================================
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -143,6 +160,20 @@ _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.70000000E+00
              ecut      3.50000000E+01 Hartree
+          einterp1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp4     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp5     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp6     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp7     1.00000000E+00  5.00000000E+00  0.00000000E+00
+                       0.00000000E+00
 -          fftalg         312
            getddk1          0
            getddk2          0
@@ -150,24 +181,28 @@ _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
            getddk4          3
            getddk5          0
            getddk6          0
+           getddk7          0
            getden1          0
            getden2          1
            getden3          0
            getden4          0
            getden5          0
            getden6          0
+           getden7          0
            getwfk1          0
            getwfk2          0
            getwfk3          1
            getwfk4          1
            getwfk5          1
            getwfk6          1
+           getwfk7          1
              iscf1          7
              iscf2         -2
              iscf3         -3
              iscf4          7
              iscf5          7
              iscf6          7
+             iscf7          7
            istwfk1       2    0    3    0    0    0    7    0
            istwfk2       2    0    3    0    0    0    7    0
            istwfk3       1    0    1    0    0    0    0    0    1    0
@@ -190,8 +225,9 @@ _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
                          0    0    0    0    0    0    0    0    0    0
                          0    0    1    0    1    0    0    0    0    0
                          1    0    1    0    0    0    0    0    0    0
+           istwfk7       2    0    3    0    0    0    7    0
                        outvar_i_n : Printing only first  50 k-points.
-           jdtset        1    2    3    4    5    6
+           jdtset        1    2    3    4    5    6    7
               kpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -408,6 +444,14 @@ _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
                       -2.50000000E-01 -2.50000000E-01  5.00000000E-01
                        0.00000000E+00  0.00000000E+00 -2.50000000E-01
                        2.50000000E-01  0.00000000E+00 -2.50000000E-01
+              kpt7     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
                        outvar_i_n : Printing only first  50 k-points.
            kptopt1          1
            kptopt2          1
@@ -415,6 +459,7 @@ _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
            kptopt4          3
            kptopt5          3
            kptopt6          3
+           kptopt7          1
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.17873965E+01
 P           mkmem1          8
@@ -423,18 +468,21 @@ P           mkmem3         64
 P           mkmem4         64
 P           mkmem5         64
 P           mkmem6         64
+P           mkmem7          8
 P          mkqmem1          8
 P          mkqmem2          8
 P          mkqmem3         64
 P          mkqmem4         64
 P          mkqmem5         64
 P          mkqmem6         64
+P          mkqmem7          8
 P          mk1mem1          8
 P          mk1mem2          8
 P          mk1mem3         64
 P          mk1mem4         64
 P          mk1mem5         64
 P          mk1mem6         64
+P          mk1mem7          8
             natom           2
             nband1         10
             nband2         28
@@ -442,13 +490,15 @@ P          mk1mem6         64
             nband4         10
             nband5         10
             nband6         10
+            nband7         10
            nbdbuf1          4
            nbdbuf2          8
            nbdbuf3          4
            nbdbuf4          4
            nbdbuf5          4
            nbdbuf6          4
-           ndtset           6
+           nbdbuf7          4
+           ndtset           7
             ngfft          27      27      27
              nkpt1          8
              nkpt2          8
@@ -456,12 +506,14 @@ P          mk1mem6         64
              nkpt4         64
              nkpt5         64
              nkpt6         64
+             nkpt7          8
              nqpt1          0
              nqpt2          0
              nqpt3          1
              nqpt4          1
              nqpt5          1
              nqpt6          1
+             nqpt7          0
              nsym          48
            ntypat           2
               occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
@@ -474,12 +526,15 @@ P          mk1mem6         64
                        0.000000  0.000000  0.000000  0.000000
               occ6     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000
+              occ7     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          0
         optdriver3          1
         optdriver4          1
         optdriver5          1
         optdriver6          1
+        optdriver7          8
          prtphdos           0
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -487,6 +542,7 @@ P          mk1mem6         64
               qpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt5     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt6     5.00000000E-01  5.00000000E-01  0.00000000E+00
+              qpt7     0.00000000E+00  0.00000000E+00  0.00000000E+00
           rfatpol           1       2
             rfdir           1       1       1
            rfelfd1          0
@@ -495,15 +551,31 @@ P          mk1mem6         64
            rfelfd4          3
            rfelfd5          0
            rfelfd6          0
+           rfelfd7          0
            rfphon1          0
            rfphon2          0
            rfphon3          0
            rfphon4          1
            rfphon5          1
            rfphon6          1
+           rfphon7          0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
                        3.8515039575E+00  0.0000000000E+00  3.8515039575E+00
                        3.8515039575E+00  3.8515039575E+00  0.0000000000E+00
+     sigma_erange1    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange2    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange3    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange4    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange5    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange6    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange7     7.34986508E-03  7.34986508E-03 Hartree
+      sigma_ngkpt1       0    0    0
+      sigma_ngkpt2       0    0    0
+      sigma_ngkpt3       0    0    0
+      sigma_ngkpt4       0    0    0
+      sigma_ngkpt5       0    0    0
+      sigma_ngkpt6       0    0    0
+      sigma_ngkpt7       8    8    8
           spgroup         225
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -536,13 +608,22 @@ P          mk1mem6         64
            tolvrs4     1.00000000E-12
            tolvrs5     1.00000000E-12
            tolvrs6     1.00000000E-12
+           tolvrs7     1.00000000E-12
            tolwfr1     1.00000000E-20
            tolwfr2     1.00000000E-16
            tolwfr3     1.00000000E-16
            tolwfr4     0.00000000E+00
            tolwfr5     0.00000000E+00
            tolwfr6     0.00000000E+00
+           tolwfr7     0.00000000E+00
             typat      1  2
+         wfk_task1          0
+         wfk_task2          0
+         wfk_task3          0
+         wfk_task4          0
+         wfk_task5          0
+         wfk_task6          0
+         wfk_task7          8
               wtk1       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
               wtk2       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
@@ -583,6 +664,8 @@ P          mk1mem6         64
                          0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
                          0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
                          0.01563    0.01563
+              wtk7       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
+                         0.04688    0.09375
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.0381281131E+00  2.0381281131E+00  2.0381281131E+00
@@ -605,6 +688,8 @@ P          mk1mem6         64
  chkinp: Checking input parameters for consistency, jdtset=   5.
 
  chkinp: Checking input parameters for consistency, jdtset=   6.
+
+ chkinp: Checking input parameters for consistency, jdtset=   7.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -2283,6 +2368,53 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
 -  2.218169E+02  2.218169E+02  3.587263E+02  4.069068E+02  4.069068E+02
 -  4.809310E+02
 
+================================================================================
+== DATASET  7 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+- Reading GS states from WFK file: t157o_DS1_WFK
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
+-  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
+-  3.00000   1.00000    940714                znucl, zion, pspdat
+    1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   2.534   6.726    1   2.4315963        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1   3.283   5.836    0   2.4315963        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    2.44451305764117    0.01373030920382    0.17502673260160   rchrg,fchrg,qchrg
+  pspatm : epsatm=   -1.77437869
+         --- l  ekb(1:nproj) -->
+             0    1.242797
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
+-  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
+-  9.00000   7.00000    940714                znucl, zion, pspdat
+    1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   6.771  17.439    1   1.3876018        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1  24.372  32.350    0   1.3876018        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    0.49406148701180    6.36128955091623    0.66947621353748   rchrg,fchrg,qchrg
+  pspatm : epsatm=    1.80528525
+         --- l  ekb(1:nproj) -->
+             0    6.310228
+ pspatm: atomic psp has been read  and splines computed
+
+--------------------------------------------------------------------------------
+
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -2291,11 +2423,26 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.70000000E+00
              ecut      3.50000000E+01 Hartree
+          einterp1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp4     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp5     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp6     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00
+          einterp7     1.00000000E+00  5.00000000E+00  0.00000000E+00
+                       0.00000000E+00
            etotal1    -2.5202628678E+01
            etotal3    -1.5941232833E+01
            etotal4    -1.9135191825E+01
            etotal5     1.1274621420E+00
            etotal6     2.1571038137E+00
+           etotal7     0.0000000000E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2304,6 +2451,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
            getddk1          0
            getddk2          0
@@ -2311,24 +2460,28 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
            getddk4          3
            getddk5          0
            getddk6          0
+           getddk7          0
            getden1          0
            getden2          1
            getden3          0
            getden4          0
            getden5          0
            getden6          0
+           getden7          0
            getwfk1          0
            getwfk2          0
            getwfk3          1
            getwfk4          1
            getwfk5          1
            getwfk6          1
+           getwfk7          1
              iscf1          7
              iscf2         -2
              iscf3         -3
              iscf4          7
              iscf5          7
              iscf6          7
+             iscf7          7
            istwfk1       2    0    3    0    0    0    7    0
            istwfk2       2    0    3    0    0    0    7    0
            istwfk3       1    0    1    0    0    0    0    0    1    0
@@ -2351,8 +2504,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
                          0    0    0    0    0    0    0    0    0    0
                          0    0    1    0    1    0    0    0    0    0
                          1    0    1    0    0    0    0    0    0    0
+           istwfk7       2    0    3    0    0    0    7    0
                        outvar_i_n : Printing only first  50 k-points.
-           jdtset        1    2    3    4    5    6
+           jdtset        1    2    3    4    5    6    7
               kpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -2569,6 +2723,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
                       -2.50000000E-01 -2.50000000E-01  5.00000000E-01
                        0.00000000E+00  0.00000000E+00 -2.50000000E-01
                        2.50000000E-01  0.00000000E+00 -2.50000000E-01
+              kpt7     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
                        outvar_i_n : Printing only first  50 k-points.
            kptopt1          1
            kptopt2          1
@@ -2576,6 +2738,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
            kptopt4          3
            kptopt5          3
            kptopt6          3
+           kptopt7          1
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.17873965E+01
 P           mkmem1          8
@@ -2584,18 +2747,21 @@ P           mkmem3         64
 P           mkmem4         64
 P           mkmem5         64
 P           mkmem6         64
+P           mkmem7          8
 P          mkqmem1          8
 P          mkqmem2          8
 P          mkqmem3         64
 P          mkqmem4         64
 P          mkqmem5         64
 P          mkqmem6         64
+P          mkqmem7          8
 P          mk1mem1          8
 P          mk1mem2          8
 P          mk1mem3         64
 P          mk1mem4         64
 P          mk1mem5         64
 P          mk1mem6         64
+P          mk1mem7          8
             natom           2
             nband1         10
             nband2         28
@@ -2603,13 +2769,15 @@ P          mk1mem6         64
             nband4         10
             nband5         10
             nband6         10
+            nband7         10
            nbdbuf1          4
            nbdbuf2          8
            nbdbuf3          4
            nbdbuf4          4
            nbdbuf5          4
            nbdbuf6          4
-           ndtset           6
+           nbdbuf7          4
+           ndtset           7
             ngfft          27      27      27
              nkpt1          8
              nkpt2          8
@@ -2617,12 +2785,14 @@ P          mk1mem6         64
              nkpt4         64
              nkpt5         64
              nkpt6         64
+             nkpt7          8
              nqpt1          0
              nqpt2          0
              nqpt3          1
              nqpt4          1
              nqpt5          1
              nqpt6          1
+             nqpt7          0
              nsym          48
            ntypat           2
               occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
@@ -2635,12 +2805,15 @@ P          mk1mem6         64
                        0.000000  0.000000  0.000000  0.000000
               occ6     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000
+              occ7     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          0
         optdriver3          1
         optdriver4          1
         optdriver5          1
         optdriver6          1
+        optdriver7          8
          prtphdos           0
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2648,6 +2821,7 @@ P          mk1mem6         64
               qpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt5     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt6     5.00000000E-01  5.00000000E-01  0.00000000E+00
+              qpt7     0.00000000E+00  0.00000000E+00  0.00000000E+00
           rfatpol           1       2
             rfdir           1       1       1
            rfelfd1          0
@@ -2656,15 +2830,31 @@ P          mk1mem6         64
            rfelfd4          3
            rfelfd5          0
            rfelfd6          0
+           rfelfd7          0
            rfphon1          0
            rfphon2          0
            rfphon3          0
            rfphon4          1
            rfphon5          1
            rfphon6          1
+           rfphon7          0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
                        3.8515039575E+00  0.0000000000E+00  3.8515039575E+00
                        3.8515039575E+00  3.8515039575E+00  0.0000000000E+00
+     sigma_erange1    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange2    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange3    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange4    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange5    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange6    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange7     7.34986508E-03  7.34986508E-03 Hartree
+      sigma_ngkpt1       0    0    0
+      sigma_ngkpt2       0    0    0
+      sigma_ngkpt3       0    0    0
+      sigma_ngkpt4       0    0    0
+      sigma_ngkpt5       0    0    0
+      sigma_ngkpt6       0    0    0
+      sigma_ngkpt7       8    8    8
           spgroup         225
            strten1     3.8161945055E-04  3.8161945055E-04  3.8161945055E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2673,6 +2863,8 @@ P          mk1mem6         64
            strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -2705,13 +2897,22 @@ P          mk1mem6         64
            tolvrs4     1.00000000E-12
            tolvrs5     1.00000000E-12
            tolvrs6     1.00000000E-12
+           tolvrs7     1.00000000E-12
            tolwfr1     1.00000000E-20
            tolwfr2     1.00000000E-16
            tolwfr3     1.00000000E-16
            tolwfr4     0.00000000E+00
            tolwfr5     0.00000000E+00
            tolwfr6     0.00000000E+00
+           tolwfr7     0.00000000E+00
             typat      1  2
+         wfk_task1          0
+         wfk_task2          0
+         wfk_task3          0
+         wfk_task4          0
+         wfk_task5          0
+         wfk_task6          0
+         wfk_task7          8
               wtk1       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
               wtk2       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
@@ -2752,6 +2953,8 @@ P          mk1mem6         64
                          0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
                          0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
                          0.01563    0.01563
+              wtk7       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
+                         0.04688    0.09375
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.0381281131E+00  2.0381281131E+00  2.0381281131E+00

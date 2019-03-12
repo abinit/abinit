@@ -283,7 +283,6 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_EINTERP   = 4
  integer,public,parameter :: WFK_TASK_DDK       = 5
  integer,public,parameter :: WFK_TASK_DDK_DIAGO = 6
- integer,public,parameter :: WFK_TASK_KLIST2MESH= 7
  integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
 
 ! Flags defining the method used for performing IO (input variable iomode)
@@ -545,8 +544,6 @@ end subroutine print_kinds
    wfk_task = WFK_TASK_DDK
  case ("wfk_ddk_diago")
    wfk_task = WFK_TASK_DDK_DIAGO
- case ("wfk_klist2mesh")
-   wfk_task = WFK_TASK_KLIST2MESH
  case ("wfk_kpts_erange")
    wfk_task = WFK_TASK_KPTS_ERANGE
  case default
