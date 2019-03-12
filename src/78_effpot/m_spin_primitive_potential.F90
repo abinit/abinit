@@ -359,7 +359,7 @@ contains
                reshape(exc_Rlist, (/3, exc_nnz /)), &
                reshape(exc_vallist, (/3, exc_nnz/)))
        else
-          write(*, '(A38)') " Exchange term from xml file not used."
+        if (.not. uexc)  write(*, '(A38)') " Exchange term from xml file not used."
        endif
 
        if(.not. present(use_dmi))  then
@@ -374,7 +374,7 @@ contains
                vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
           write(*,'(A27)') " Setting uniaxial SIA terms"
        else
-          print *, " DMI term from xml file not used"
+          if (.not. udmi) print *, " DMI term from xml file not used"
        end if
 
        if(.not. present(use_sia)) then
@@ -387,7 +387,7 @@ contains
           call self%set_sia(uni_nnz, uni_ilist, uni_amplitude_list, &
                reshape(uni_direction_list, [3, uni_nnz]) )
        else
-          print *, " SIA term in xml file not used"
+         if(.not. usia) print *, " SIA term in xml file not used"
        end if
        if(.not. present(use_bi)) then
           ubi=.True.
@@ -400,7 +400,7 @@ contains
                Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
                vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
        else
-          print *, " Bilinear term in xml file not used"
+          if(.not. ubi) print *, " Bilinear term in xml file not used"
        endif
     endif
 

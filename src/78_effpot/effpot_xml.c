@@ -1180,7 +1180,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
       } else {
         ind_spin = -1;
       }
-
+      xmlFree(key);
       //printf("index_spin: %d\n", ind_spin);
 
       if (ind_spin>0){
@@ -1221,6 +1221,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
           for (i = 0; i < size; ++i) {
             insertArray(&position_array, pos[i]);
           }
+          free(pos);
           xmlFree(key);
         }
 
@@ -1238,6 +1239,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
           for (i = 0; i < size; ++i) {
             insertArray(&spinat_array, spinat_tmp[i]);
           }
+          free(spinat_tmp);
           xmlFree(key);
         }
 
@@ -1285,6 +1287,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
   freeArray(&spinat_array);
   fflush(stdout);
   fflush(stderr);
+  xmlFreeDoc(doc);
   return 0;
 }
 
@@ -1343,6 +1346,7 @@ int xml_read_spin_exchange( char * fname, int *exc_nnz, int *exc_ilist[],
               (*exc_Rlist)[counter*3]=itmp[2];
               (*exc_Rlist)[counter*3+1]=itmp[3];
               (*exc_Rlist)[counter*3+2]=itmp[4];
+              free(itmp);
               xmlFree(key);
             }
             if (!xmlStrcmp(cur3->name, BAD_CAST"data")) {
@@ -1355,6 +1359,7 @@ int xml_read_spin_exchange( char * fname, int *exc_nnz, int *exc_ilist[],
                 {
                   (*exc_vallist)[counter*3+i]=dtmp[i];
                 }
+              free(dtmp);
             }
 
             cur3=cur3->next;
@@ -1366,6 +1371,7 @@ int xml_read_spin_exchange( char * fname, int *exc_nnz, int *exc_ilist[],
     }
     cur=cur->next;
   }
+  xmlFreeDoc(doc);
   return 0;
 }
 
@@ -1448,6 +1454,7 @@ int xml_read_spin_dmi( char * fname, int *dmi_nnz, int *dmi_ilist[],
     }
     cur=cur->next;
   }
+  xmlFreeDoc(doc);
   return 0;
 }
 
@@ -1536,6 +1543,7 @@ int xml_read_spin_uni(char * fname, int *uni_nnz, int *uni_ilist[],
     }
     cur=cur->next;
   }
+  xmlFreeDoc(doc);
   return 0;
 }
 
@@ -1619,6 +1627,7 @@ int xml_read_spin_bilinear( char * fname, int *bi_nnz, int *bi_ilist[],
     }
     cur=cur->next;
   }
+  xmlFreeDoc(doc);
   return 0;
 }
 

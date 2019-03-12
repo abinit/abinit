@@ -54,8 +54,7 @@ module  m_spin_potential
 
   type, public, extends(abstract_potential_t) :: spin_potential_t
      integer :: nspin=0
-     logical :: has_external_hfield, has_uniaxial_anistropy, has_exchange, &
-          has_DMI, has_dipdip, has_bilinear
+     logical :: has_external_hfield, has_dipdip, has_bilinear
 
 
      ! Array or scalar?
@@ -112,6 +111,10 @@ contains
     self%external_hfield=0.0_dp
     ABI_ALLOCATE( self%Htmp, (3, self%nspin))
     self%Htmp(:,:)=0.0_dp
+
+    self%has_external_hfield=.False.
+    self%has_dipdip=.False.
+    self%has_bilinear=.False.
   end subroutine initialize
 
   subroutine set_supercell(self, supercell)
@@ -272,9 +275,8 @@ contains
     real(dp), intent(inout) :: energy
     integer :: i, j
 
-    call xmpi_bcast(self%has_bilinear, master, comm, ierr)
     if(self%has_bilinear) then
-       self%Htmp=0.0_dp
+       self%Htmp(:,:)=0.0_dp
        call self%calc_bilinear_term_Heff(S,self%Htmp)
        Heff=Heff+self%Htmp
     endif

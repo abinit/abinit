@@ -184,29 +184,32 @@ contains
     i=self%ntask_list(r+1)
   end function get_ntask
 
-  subroutine gatherv_dp1d(self, data)
+  subroutine gatherv_dp1d(self, data, buffer)
     class(mpi_scheduler_t), intent(inout) :: self
     real(dp), intent(inout) :: data(self%ntasks)
+    real(dp), intent(inout) :: buffer(self%ntasks)
     integer :: ierr
     call xmpi_gatherv(data(self%istart: self%iend), &
          & self%ntask, &
-         & data ,&
+         & buffer,&
          & self%ntask_list, &
          & self%istart_list-1, &
          & 0, self%comm, ierr )
+    data(:)=buffer(:)
   end subroutine gatherv_dp1d
 
-  subroutine gatherv_dp2d(self, data, nrow)
+  subroutine gatherv_dp2d(self, data, nrow, buffer)
     class(mpi_scheduler_t), intent(inout) :: self
     integer, intent(in) :: nrow
-    real(dp), intent(inout) :: data(nrow,self%ntasks)
+    real(dp), intent(inout) :: data(nrow,self%ntasks), buffer(nrow, self%ntasks)
     integer :: ierr
     call xmpi_gatherv(data(:,self%istart:self%iend), &
          & self%ntask*nrow, &
-         & data, &
+         & buffer, &
          & self%ntask_list*nrow, &
          & (self%istart_list-1)*nrow, &
          & 0, self%comm, ierr)
+    data(:,:)=buffer(:,:)
   end subroutine gatherv_dp2d
 
 

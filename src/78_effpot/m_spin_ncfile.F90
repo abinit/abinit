@@ -73,7 +73,7 @@ module m_spin_ncfile
      integer :: ihist_g_id
 
      integer :: itime
-     integer :: write_traj
+     integer :: write_traj=1
      character(len=fnlen) :: filename
    contains
      procedure :: initialize
@@ -94,10 +94,10 @@ contains
     character(len=*),intent(in) :: filename
     integer, intent(in) :: write_traj
     integer :: ncerr
-
     self%itime=0
     self%write_traj=write_traj
     self%filename=trim(filename)
+    self%isopen=.False.
 
 #if defined HAVE_NETCDF
     write(std_out,*) "Write iteration in spin history file "//trim(self%filename)//"."
@@ -213,8 +213,8 @@ end subroutine def_observable_var
          &       [hist%itime(hist%ihist_prev)], start=[itime], count=[1])
     ncerr=nf90_put_var(self%ncid, self%time_id, &
          & [hist%time(hist%ihist_prev)], start=[itime], count=[1])
-    ncerr=nf90_put_var(self%ncid, self%entropy_id, &
-         & [hist%entropy(hist%ihist_prev)], start=[itime], count=[1])
+    !ncerr=nf90_put_var(self%ncid, self%entropy_id, &
+    !     & [hist%entropy(hist%ihist_prev)], start=[itime], count=[1])
     ncerr=nf90_put_var(self%ncid, self%etotal_id,  &
          & [hist%etot(hist%ihist_prev)], start=[itime], count=[1])
     self%itime=itime

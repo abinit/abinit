@@ -124,6 +124,7 @@ contains
     call xmpi_bcast(self%size, master, comm, ierr)
     do i=1, self%size
        call self%data(i)%obj%finalize()
+       if(associated(self%data(i)%obj)) deallocate(self%data(i)%obj)
        nullify(self%data(i)%obj)
     end do
     if(allocated(self%data)) then

@@ -77,7 +77,7 @@ module m_spin_mover
      integer :: nspin, method
      real(dp) :: dt, total_time, temperature, pre_time
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:)
-     real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:)
+     real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:), buffer(:,:)
      type(rng_t) :: rng
      type(spin_hist_t) :: hist
      logical :: gamma_l_calculated
@@ -99,7 +99,6 @@ module m_spin_mover
      procedure :: set_temperature
      procedure :: prepare_ncfile
      procedure, private ::get_Langevin_Heff
-     procedure, private :: get_dSdt
      procedure :: current_spin
   end type spin_mover_t
   !!***
@@ -171,6 +170,7 @@ contains
     ABI_ALLOCATE(self%Htmp, (3,self%nspin) )
     ABI_ALLOCATE(self%Hrotate, (3,self%nspin) )
     ABI_ALLOCATE(self%Stmp, (3,self%nspin) )
+    ABI_ALLOCATE(self%buffer, (3,self%nspin) )
     ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
 
     self%gamma_l_calculated=.False.
@@ -190,7 +190,6 @@ contains
        self%ms(:)=supercell%ms(:)
     endif
 
-    
     call xmpi_bcast(self%damping, master, comm, ierr)
     call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
     call xmpi_bcast(self%ms, master, comm, ierr)
@@ -309,7 +308,7 @@ contains
   subroutine get_Langevin_Heff(self, H_lang)
     class(spin_mover_t), intent(inout) :: self
     real(dp), intent(inout):: H_lang(3,self%nspin)
-    integer :: i, istart, iend, ntask
+    integer :: i
     if ( self%temperature .gt. 1d-7) then
        call rand_normal_array(self%rng, H_lang(:, self%mps%istart:self%mps%iend), 3*self%mps%ntask)
        do i = self%mps%istart, self%mps%iend
@@ -319,20 +318,6 @@ contains
        H_lang(:,:)=0.0_dp
     end if
   end subroutine get_Langevin_Heff
-
-  subroutine get_dSdt(self, S, Heff, dSdt)
-    class(spin_mover_t), intent(inout) :: self
-    real(dp), intent(in) :: Heff(3,self%nspin), S(3,self%nspin)
-    real(dp), intent(out) :: dSdt(3, self%nspin)
-    integer :: i
-    real(dp) :: Ri(3)
-    !$OMP PARALLEL DO private(Ri, i)
-    do i=1,self%nspin
-       Ri = cross(S(:,i),Heff(:,i))
-       dSdt(:,i) = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S(:,i), Ri))
-    end do
-    !$OMP END PARALLEL DO
-  end subroutine get_dSdt
 
 
   !!****f* m_spin_mover/spin_mover_t_run_one_step_HeunP
@@ -382,7 +367,7 @@ contains
        Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
        S_out(:,i)=Ri
     end do
-    call self%mps%gatherv_dp2d(S_out, 3)
+    call self%mps%gatherv_dp2d(S_out, 3, buffer=self%buffer)
     call xmpi_bcast(S_out, master, comm, ierr)
     ! correction
 
@@ -390,7 +375,6 @@ contains
     etot=0.0
     call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_out, bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
-
     do i=self%mps%istart, self%mps%iend
        Htmp=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp+self%H_lang(:,i)
        Ri = cross(S_in(:,i),Htmp)
@@ -399,7 +383,7 @@ contains
        Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
        S_out(:,i)=Ri
     end do
-    call self%mps%gatherv_dp2d(S_out, 3)
+    call self%mps%gatherv_dp2d(S_out, 3, buffer=self%buffer)
     call xmpi_bcast(S_out, master, comm, ierr)
   end subroutine spin_mover_t_run_one_step_HeunP
 !!***
@@ -444,7 +428,8 @@ contains
     S_out(:,:)=0.0_dp
     etot=0.0
     self%Heff_tmp(:,:)=0.0_dp
-    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_in, bfield=self%Heff_tmp, energy=etot)
+    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_in, &
+         bfield=self%Heff_tmp, energy=etot)
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
@@ -453,13 +438,14 @@ contains
        self%Hrotate(:,i) = self%gamma_L(i) * (Htmp + self%damping(i)* cross(S_in(:,i), Htmp))
        S_out(:,i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
-    call self%mps%gatherv_dp2d(S_out, 3)
+    call self%mps%gatherv_dp2d(S_out, 3, self%buffer)
     call xmpi_bcast(S_out, master, comm, ierr)
 
     ! correction
     self%Htmp(:,:)=0.0_dp
     etot=0.0
-    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf, spin=S_out, bfield=self%Htmp, energy=etot)
+    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf, spin=S_out, &
+         bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
 
     do i=self%mps%istart, self%mps%iend
@@ -467,7 +453,7 @@ contains
        self%Hrotate(:,i) = self%gamma_L(i) * (Htmp + self%damping(i)* cross(S_in(:,i), Htmp))
        S_out(:, i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
-    call self%mps%gatherv_dp2d(S_out, 3)
+    call self%mps%gatherv_dp2d(S_out, 3, self%buffer)
     call xmpi_bcast(S_out, master, comm, ierr)
   end subroutine spin_mover_t_run_one_step_DM
 
@@ -756,6 +742,7 @@ contains
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
           if(i==0) then
              call self%set_initial_state()
+             call self%hist%inc1()
           else
              call self%hist%inc1()
           endif
@@ -929,6 +916,11 @@ contains
     if(allocated(self%H_lang)) then
        ABI_DEALLOCATE(self%H_lang)
     end if
+
+    if(allocated(self%buffer)) then
+       ABI_DEALLOCATE(self%buffer)
+    end if
+
 
     nullify(self%supercell)
     nullify(self%params)
