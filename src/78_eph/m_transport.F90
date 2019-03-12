@@ -613,8 +613,13 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
      mu = self%vvdos_mesh(imu)
      do iw=1,self%nw
        ee = self%vvdos_mesh(iw)
-       kernel(iw,:,:,:) = fact * self%vvdos(iw,1,1:,:,:,1+itemp) * &
-                                 (mu - ee)**order * occ_dfd(ee,kT,mu)
+       if (order > 0) then
+         kernel(iw,:,:,:) = fact * self%vvdos(iw,1,1:,:,:,1+itemp) * &
+                            (mu - ee)**order * occ_dfd(ee,kT,mu)
+       else
+         kernel(iw,:,:,:) = fact * self%vvdos(iw,1,1:,:,:,1+itemp) * &
+                            occ_dfd(ee,kT,mu)
+       end if
      end do
      do ispin=1,self%nsppol
        do ii=1,3
