@@ -67,7 +67,7 @@ class Tester(object):
                         self.failures.append(Failure(self.conf, msg,
                                                      ref, tested))
 
-            if isinstance(ref, BaseDictWrapper):  # have children
+            if hasattr(ref, '_is_dict_wrapper'):  # have children
                 for child in ref:
                     if child not in tested:
                         msg = '{} was not present'.format(child)

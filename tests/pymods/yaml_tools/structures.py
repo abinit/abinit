@@ -16,6 +16,9 @@ class IterStart(object):
     '''
         Mark the begining of a iteration of a given iterator.
     '''
+    # Don't do this at home, trick to workaround the custom sys.path
+    _is_iter_start = True
+
     def __init__(self, iterator, iteration):
         self.iterator = iterator
         self.iteration = iteration
@@ -246,14 +249,18 @@ class WhiteSpaceSeparated(object):
             ]
 
 
+class AbinitMessage(object):
+    _is_abinit_message = True
+
+
 @yaml_auto_map
-class AbinitError(object):
+class AbinitError(AbinitMessage):
     __yaml_tag = 'ERROR'
     pass
 
 
 @yaml_auto_map
-class AbinitWarning(object):
+class AbinitWarning(AbinitMessage):
     __yaml_tag = 'WARNING'
     pass
 
@@ -265,6 +272,6 @@ class AbinitInfo(object):
 
 
 @yaml_auto_map
-class AbinitComment(object):
+class AbinitComment(AbinitMessage):
     __yaml_tag = 'COMMENT'
     pass

@@ -5,17 +5,11 @@
 from __future__ import print_function, division, unicode_literals
 import re
 from .yaml_tools import is_available as has_yaml
-from .yaml_tools import CorruptedDocument
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
 from .yaml_tools.errors import NoIteratorDefinedError
 if has_yaml:
-    from .yaml_tools.structures import IterStart
     from .yaml_tools import yaml_parse
 else:
-    class IterStart(object):
-        # dummy class
-        pass
-
     def yaml_parse(x):
         pass
 
@@ -41,6 +35,7 @@ class DataExtractor:
         self.iterators_state = {}
         self.xml_mode = xml_mode
         self.has_corrupted_doc = False
+        self.abinit_messages = []
 
     def __get_metachar(self, line):
         '''
@@ -92,7 +87,7 @@ class DataExtractor:
                         # parse source
                         parse_doc(current_doc)
 
-                        if isinstance(current_doc['obj'], IterStart):
+                        if hasattr(current_doc['obj'], '_is_iter_start'):
                             # special case of IterStart
                             curr_it = current_doc['obj'].iterator
 
@@ -104,9 +99,14 @@ class DataExtractor:
                             self.iterators_state[curr_it] = \
                                 current_doc['obj'].iteration
 
-                        elif isinstance(current_doc['obj'], CorruptedDocument):
+                        elif hasattr(current_doc['obj'], '_is_corrupted_doc'):
                             # Signal corruption but ignore the document
                             self.has_corrupted_doc = True
+
+                        elif hasattr(current_doc['obj'], '_is_abinit_message'):
+                            # Special case of Warning, Error etc..
+                            # store it for later use
+                            self.abinit_messages.append(current_doc)
 
                         elif current_doc['obj'] is not None:
                             if not current_doc['iterators']:

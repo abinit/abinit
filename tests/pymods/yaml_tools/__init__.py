@@ -44,6 +44,9 @@ class Mock(object):
 
 
 class CorruptedDocument(object):
+    # trick to workaround the custom sys.path
+    _is_corrupted_doc = True
+
     def __init__(self, error, context=''):
         self.error = error
         self.context = context
