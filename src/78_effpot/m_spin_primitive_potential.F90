@@ -420,33 +420,35 @@ contains
     class(spin_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t), intent(inout):: scmaker
     class(abstract_potential_t), pointer, intent(inout) :: scpot
-    type(spin_potential_t), pointer:: tpot
+    !type(spin_potential_t), pointer:: tpot
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
     integer, allocatable :: i_sc(:), j_sc(:), R_sc(:, :)
     real(dp) :: val_sc(scmaker%ncells)
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
     call xmpi_bcast(sc_nspin, master, comm, ierr)
-    allocate(spin_potential_t::tpot)
-    call tpot%initialize(sc_nspin)
-    if (iam_master) then
-       call self%coeff%sum_duplicates()
-       do inz=1, self%coeff%nnz
-          ind_Rij=self%coeff%get_ind_inz(inz)
-          iR=ind_Rij(1)
-          ii=ind_Rij(2)
-          ij=ind_Rij(3)
-          R=self%Rlist%data(:,iR)
-          call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
-          call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=R_sc)
-          val_sc(:)= self%coeff%val%data(inz)
-          do i=1, scmaker%ncells
-             ! this subroutine can be run on only master node.
-             call tpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
+    allocate(spin_potential_t::scpot)
+    select type(scpot)
+    type is (spin_potential_t)
+       call scpot%initialize(sc_nspin)
+       if (iam_master) then
+          call self%coeff%sum_duplicates()
+          do inz=1, self%coeff%nnz
+             ind_Rij=self%coeff%get_ind_inz(inz)
+             iR=ind_Rij(1)
+             ii=ind_Rij(2)
+             ij=ind_Rij(3)
+             R=self%Rlist%data(:,iR)
+             call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
+             call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=R_sc)
+             val_sc(:)= self%coeff%val%data(inz)
+             do i=1, scmaker%ncells
+                ! this subroutine can be run on only master node.
+                call scpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
+             end do
           end do
-       end do
-    endif
-    scpot=>tpot
+       endif
+    end select
   end subroutine fill_supercell
 
   subroutine print_terms(self)
