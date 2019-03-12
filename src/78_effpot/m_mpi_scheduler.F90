@@ -195,7 +195,7 @@ contains
          & self%ntask_list, &
          & self%istart_list-1, &
          & 0, self%comm, ierr )
-    data(:)=buffer(:)
+  data(:)=buffer(:)
   end subroutine gatherv_dp1d
 
   subroutine gatherv_dp2d(self, data, nrow, buffer)

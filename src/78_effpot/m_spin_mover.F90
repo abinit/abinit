@@ -130,9 +130,9 @@ contains
     type(mb_supercell_t), target :: supercell
     !real(dp):: damping(self%supercell%nspin)
     integer :: i, nspin
+    self%params=>params
+    self%supercell=>supercell
     if (iam_master) then
-       self%params=>params
-       self%supercell=>supercell
        nspin=supercell%nspin
        self%nspin=nspin
        self%dt= params%spin_dt
@@ -152,7 +152,6 @@ contains
     call xmpi_bcast(self%total_time, master, comm, ierr)
     call xmpi_bcast(self%temperature, master, comm, ierr)
     call xmpi_bcast(self%method, master, comm, ierr)
-
     call set_seed(self%rng, [111111_dp, 2_dp])
     if(my_rank>0) then
        do i =1,my_rank
@@ -720,7 +719,6 @@ contains
     do i=1, T_nstep
        if(iam_master) then
           T=T_start+(i-1)*T_step
-
           msg=repeat("=", 79)
           call wrtout(std_out, msg, "COLL")
           call wrtout(ab_out, msg, "COLL")
@@ -742,7 +740,7 @@ contains
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
           if(i==0) then
              call self%set_initial_state()
-             call self%hist%inc1()
+             !call self%hist%inc1()
           else
              call self%hist%inc1()
           endif

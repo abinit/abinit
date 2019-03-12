@@ -100,8 +100,8 @@ contains
   subroutine set_spin_primcell(self, natoms, unitcell, positions, &
        nspin, index_spin, spinat, gyroratios, damping_factors )
     class(spin_primitive_potential_t), intent(inout) :: self
-    integer, intent(in):: natoms, nspin, index_spin(:)
-    real(dp), intent(in):: unitcell(3, 3),  positions(3,natoms), &
+    integer, intent(inout):: natoms, nspin, index_spin(:)
+    real(dp), intent(inout):: unitcell(3, 3),  positions(3,natoms), &
          spinat(3,natoms), gyroratios(nspin), damping_factors(nspin)
     integer :: iatom, ispin
     real(dp) :: ms(nspin), spin_positions(3, nspin)
@@ -343,7 +343,7 @@ contains
     endif
 
     ! (MPI) Only this runs on non-master node
-    call self%set_spin_primcell(natoms, unitcell, positions, &
+    call self%set_spin_primcell(natoms, uc, positions, &
          nspin, index_spin, spinat, gyroratios, damping_factors )
 
     if (iam_master) then

@@ -274,8 +274,11 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
+
     call self%sc_maker%initialize(diag(self%params%ncell))
+
     call self%fill_supercell()
+
     call self%set_movers()
     call self%spin_mover%run_time(self%pots)
   end subroutine run_spin_dynamics

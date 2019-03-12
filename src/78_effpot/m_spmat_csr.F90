@@ -159,6 +159,7 @@ contains
     self%nrow=0
     self%nnz=0
     self%ndim=0
+    call self%mps%finalize()
     if(allocated(self%icol)) then
        ABI_DEALLOCATE(self%icol)
     endif
