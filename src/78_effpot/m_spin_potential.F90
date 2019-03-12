@@ -70,17 +70,17 @@ module  m_spin_potential
      real(dp), allocatable :: Htmp(:, :)
      real(dp), allocatable :: ms(:)
    CONTAINS
-     procedure, non_overridable :: initialize
-     procedure, non_overridable :: finalize
+     procedure :: initialize
+     procedure :: finalize
      procedure :: set_params
      procedure :: set_supercell
-     procedure, non_overridable :: get_Heff => spin_potential_t_total_Heff
+     procedure :: get_Heff => spin_potential_t_total_Heff
      procedure :: set_external_hfield
-     procedure, non_overridable :: calc_bilinear_term_Heff
-     procedure, non_overridable :: calc_external_Heff
-     procedure, non_overridable :: calculate => spin_potential_t_calculate
-     procedure, non_overridable :: get_energy => spin_potential_t_get_energy
-     procedure, non_overridable :: get_delta_E => spin_potential_t_get_delta_E
+     procedure :: calc_bilinear_term_Heff
+     procedure :: calc_external_Heff
+     procedure :: calculate => spin_potential_t_calculate
+     procedure :: get_energy => spin_potential_t_get_energy
+     procedure :: get_delta_E => spin_potential_t_get_delta_E
      procedure :: add_bilinear_term
      procedure :: add_bilinear_term_spin_block
      procedure :: set_bilinear_term
