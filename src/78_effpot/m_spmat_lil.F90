@@ -64,6 +64,8 @@ module m_spmat_lil
     self%nrow=mshape(1)
     self%ncol=mshape(2)
     ABI_ALLOCATE(self%rows, (self%nrow))
+    ABI_ALLOCATE(self%mshape, (2))
+    self%mshape(:)=mshape(:)
   end subroutine LIL_mat_t_initialize
 
   subroutine LIL_mat_t_finalize(self)

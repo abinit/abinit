@@ -124,12 +124,12 @@ contains
     call xmpi_bcast(self%size, master, comm, ierr)
     do i=1, self%size
        call self%data(i)%obj%finalize()
-       if(associated(self%data(i)%obj)) deallocate(self%data(i)%obj)
+       !if(associated(self%data(i)%obj)) deallocate(self%data(i)%obj)
        nullify(self%data(i)%obj)
     end do
     if(allocated(self%data)) then
-      ABI_DEALLOCATE(self%data)
-     end if
+       ABI_DEALLOCATE(self%data)
+    end if
     nullify(self%primcell)
     self%size=0
     self%capacity=0

@@ -28,10 +28,10 @@ spin_write_traj = 0
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
 #%% exclude_hosts = nag@abiref
-#%% system_xml = t16.xml
+#%% system_xml = t23.xml
 #%% [files]
 #%% files_to_test = 
-#%%   t16.out, tolnlines = 0, tolabs = 0.01, tolrel = 0.02, fld_options = -medium;
+#%%   t23.out, tolnlines = 0, tolabs = 0.01, tolrel = 0.02, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
