@@ -445,7 +445,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if (dtsets(idtset)%paral_kgb<0 .or. dtsets(idtset)%paral_kgb>1) then
      write(msg,'(a,i0,2a,i0,3a)')&
 &     'Input paral_kgb must be 0 or 1, but was ',dtsets(idtset)%paral_kgb,ch10,&
-&     'for dataset',jdtset,'. This is not allowed.',ch10,&
+&     'for dataset ',jdtset,'. This is not allowed.',ch10,&
 &     'Action: check the input file.'
      MSG_ERROR(msg)
    end if
@@ -639,12 +639,12 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  symrel_(1,1,:,0)=1 ; symrel_(2,2,:,0)=1 ; symrel_(3,3,:,0)=1
  tnons_(:,:,0)=0.0_dp
 
-!Loop on datasets
+ ! Loop on datasets
  do idtset=1,ndtset_alloc
    !write(std_out,'(2a,i0)') ch10,' invars1m : enter jdtset= ',jdtset
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
 
-!  Input default values
+   ! Input default values
    dtsets(idtset)%bravais(:)=0
    symafm(:)=symafm_(:,0)
    symrel(:,:,:)=symrel_(:,:,:,0)
@@ -683,7 +683,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  mx%nzchempot = dtsets(1)%nzchempot
  mx%nberry = 20   ! This is presently a fixed value. Should be changed.
 
-!Get MAX dimension over datasets
+ ! Get MAX dimension over datasets
  do ii=1,ndtset_alloc
    mx%natsph = max(dtsets(ii)%natsph, mx%natsph)
    mx%natsph_extra=max(dtsets(ii)%natsph_extra, mx%natsph_extra)
@@ -1459,23 +1459,28 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) nkpt=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"kerange_path",tread,'KEY',key_value=key_value)
- if (tread==1) dtset%kerange_path = rmquotes(key_value)
+ if (tread==1) then
+   dtset%kerange_path = rmquotes(key_value)
+   write(std_out, *)"keragen_path:", trim(dtset%kerange_path)
+ end if
 
 #ifdef HAVE_NETCDF
  if (dtset%kerange_path /= ABI_NOFILE) then
+   ! Get number of k-points from kerange_path.
+   !dtset%kptopt = 0
    if (my_rank == master) then
      NCF_CHECK(nctk_open_read(ncid, dtset%kerange_path, xmpi_comm_self))
-     NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt, datamode=.True.))
+     NCF_CHECK(nctk_get_dim(ncid, "nkpt_inerange", nkpt, datamode=.True.))
      NCF_CHECK(nf90_close(ncid))
    end if
    call xmpi_bcast(nkpt, master, comm, ierr)
  end if
 #endif
 
- dtset%nkpt=nkpt
+ dtset%nkpt = nkpt
 
  call chkint_ge(0,0,cond_string,cond_values,ierr,'nkpt',nkpt,0,iout)
- if(dtset%kptopt==0)then
+ if (dtset%kptopt==0) then
    cond_string(1)='kptopt'; cond_values(1)=0
    call chkint_ge(1,1,cond_string,cond_values,ierr,'nkpt',nkpt,1,iout)
  end if
@@ -1493,7 +1498,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_ALLOCATE(kpthf,(3,nkpthf))
    ABI_ALLOCATE(wtk,(nkpt))
    ! Here, occopt is also a dummy argument
-   occopt=1 ; dtset%nshiftk=1 ; dtset%kptrlatt(:,:)=0
+   occopt=1; dtset%nshiftk=1; dtset%kptrlatt(:,:)=0
 
    kptrlen=20.0_dp ; wtk(:)=1.0_dp
    dtset%shiftk(:,:)=half
@@ -1506,9 +1511,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
    if(tread==1) chksymbreak=intarr(1)
 
-   ! Use the first image to predict k and/or q points,
-   ! except if an intermediate image is available
-   intimage=1 ; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
+   ! Use the first image to predict k and/or q points, except if an intermediate image is available
+   intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
    ! Find the q-point, if any.
    if(nqpt==1)then
@@ -1519,15 +1523,16 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
-     kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym,&
+     kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%kerange_path, &
      nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
      occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
-     string,symafm,symrel,vacuum,wtk)
+     string,symafm,symrel,vacuum,wtk,comm)
 
    ABI_DEALLOCATE(istwfk)
    ABI_DEALLOCATE(kpt)
    ABI_DEALLOCATE(kpthf)
    ABI_DEALLOCATE(wtk)
+
    ! nkpt and nkpthf have been computed, as well as the k point grid, if needed
    dtset%nkpt=nkpt
    dtset%nkpthf=nkpthf
@@ -1595,6 +1600,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(msg)
  end if
+
 !---------------------------------------------------------------------------
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnos',tread,'INT')

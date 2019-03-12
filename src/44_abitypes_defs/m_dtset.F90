@@ -2403,7 +2403,7 @@ subroutine chkvars (string)
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
 !K
- list_vars=trim(list_vars)//' kberry kpt kptbounds kptgw'
+ list_vars=trim(list_vars)//' kberry kerange_path kpt kptbounds kptgw'
  list_vars=trim(list_vars)//' kptnrm kptopt kptrlatt kptrlen kssform'
 !L
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'

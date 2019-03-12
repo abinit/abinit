@@ -1778,7 +1778,6 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  ! Read the file, stringify it and return the number of datasets.
  call parsefile(path, lenstr, ndtset, string, comm)
 
- !subroutine ab7_invars_load(dtsetsId, string, lenstr, ndtset, with_psp, with_mem, pspfilnam)
  ndtset_alloc = ndtset; if (ndtset == 0) ndtset_alloc=1
  ABI_DATATYPE_ALLOCATE(dtsets, (0:ndtset_alloc))
 
@@ -1814,26 +1813,26 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  pspheads(:)%usewvl = dtsets(1)%usewvl
  if (me == 0) then
     !if (.not. present(pspfilnam)) then
-       ! Read the name of the psp file
-       ABI_MALLOC(pspfilnam_,(npsp))
-       do ipsp=1,npsp
-         write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
-         read (std_in, '(a)' , iostat=ios ) filpsp
-         ! It might be that a file name is missing
-         if (ios/=0) then
-           write(msg, '(7a)' )&
-           'There are not enough names of pseudopotentials',ch10,&
-           'provided in the files file.',ch10,&
-           'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
-           'if they are correct, complete your files file.'
-           MSG_ERROR(msg)
-         end if
-         pspfilnam_(ipsp) = trim(filpsp)
-         write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
-       end do ! ipsp=1,npsp
+    ! Read the name of the psp file
+    ABI_MALLOC(pspfilnam_,(npsp))
+    do ipsp=1,npsp
+      write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
+      read (std_in, '(a)' , iostat=ios ) filpsp
+      ! It might be that a file name is missing
+      if (ios/=0) then
+        write(msg, '(7a)' )&
+        'There are not enough names of pseudopotentials',ch10,&
+        'provided in the files file.',ch10,&
+        'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
+        'if they are correct, complete your files file.'
+        MSG_ERROR(msg)
+      end if
+      pspfilnam_(ipsp) = trim(filpsp)
+      write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
+    end do ! ipsp=1,npsp
 
-       call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
-       ABI_FREE(pspfilnam_)
+    call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
+    ABI_FREE(pspfilnam_)
     !else
     !   call inpspheads(pspfilnam, npsp, pspheads, ecut_tmp)
     !end if

@@ -182,7 +182,12 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
           getdvdb5          2
           getdvdb6          2
            getwfk          20
-       gw_qprange           4
+       gw_qprange1          4
+       gw_qprange2          0
+       gw_qprange3          4
+       gw_qprange4          4
+       gw_qprange5          0
+       gw_qprange6          0
            istwfk        2    0    3    0    0    0    7    0
            jdtset        1    2    3    4    5    6
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1326,7 +1331,12 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
           getdvdb5          2
           getdvdb6          2
            getwfk          20
-       gw_qprange           4
+       gw_qprange1          4
+       gw_qprange2          0
+       gw_qprange3          4
+       gw_qprange4          4
+       gw_qprange5          0
+       gw_qprange6          0
            istwfk        2    0    3    0    0    0    7    0
            jdtset        1    2    3    4    5    6
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00

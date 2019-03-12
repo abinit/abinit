@@ -974,7 +974,8 @@ type dataset_type
  real(dp),allocatable :: kptbounds(:,:)
  real(dp) :: tmesh(3) ! = [10._dp, 300._dp, 5._dp] This triggers a bug in the bindings
 
- character(len=fnlen) :: kerange_path
+ character(len=fnlen) :: kerange_path = ABI_NOFILE
+ !character(len=fnlen) :: getpot_path = ABI_NOFILE
 
  end type dataset_type
 !!***

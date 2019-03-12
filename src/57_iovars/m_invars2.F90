@@ -136,11 +136,11 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
    bravais(:)=dtsets(idtset)%bravais(:)
    mband_upper  =mband_upper_(idtset)
    usepaw=dtsets(idtset)%usepaw
-!  Allocate arrays
+   ! Allocate arrays
    ABI_ALLOCATE(zionpsp,(npsp))
    zionpsp(:)=pspheads(1:npsp)%zionpsp
 
-!  Here, nearly all the remaining input variables are initialized
+   ! Here, nearly all the remaining input variables are initialized
    call invars2(bravais,dtsets(idtset),iout,jdtset,lenstr,mband_upper,msym,npsp,string,usepaw,zionpsp, comm)
 
    ABI_DEALLOCATE(zionpsp)
@@ -148,33 +148,31 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
    call mkrdim(dtsets(idtset)%acell_orig(1:3,1),dtsets(idtset)%rprim_orig(1:3,1:3,1),rprimd)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-!  For GW or BSE calculations, we only use (npwwfn|ecutwfn) G-vectors read from the KSS file,
-!  therefore the FFT box for the density should be defined according to ecut=ecutwfn.
    if (ANY(dtsets(idtset)%optdriver == [RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE])) then
+    ! For GW or BSE calculations, we only use (npwwfn|ecutwfn) G-vectors read from the KSS file,
+    ! therefore the FFT box for the density should be defined according to ecut=ecutwfn.
 
      nshwfn=0
      call setshells(dtsets(idtset)%ecutwfn,dtsets(idtset)%npwwfn,nshwfn,&
-&     dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'wfn',ucvol)
+       dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'wfn',ucvol)
 
-!    MG: Hack to avoid portability problems under gfortran and g95:
-!    getng and getmpw are indeed quite sensitive if ecut is small
-!    and, in the GW tests, mpw and ngfft might depend on the compiler used.
-!    the problem shows up if we use npwwfn instead of ecutwfn, a good
-!    reason for removing npwwfn!
+     ! MG: Hack to avoid portability problems under gfortran and g95:
+     ! getng and getmpw are indeed quite sensitive if ecut is small
+     ! and, in the GW tests, mpw and ngfft might depend on the compiler used.
+     ! the problem shows up if we use npwwfn instead of ecutwfn, a good reason for removing npwwfn!
      dtsets(idtset)%ecutwfn=dtsets(idtset)%ecutwfn-tol14
-!    MG: This is a kind of a hack, but the problem is ecutwfn that is too much redundant!
+     ! MG: This is a kind of a hack, but the problem is ecutwfn that is too much redundant!
      dtsets(idtset)%ecut=dtsets(idtset)%ecutwfn
 
-!    Close the shell for (W|chi0)
+     ! Close the shell for (W|chi0)
      nsheps=0
      call setshells(dtsets(idtset)%ecuteps,dtsets(idtset)%npweps,nsheps,&
-&     dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'eps',ucvol)
+      dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'eps',ucvol)
 
-!    Close the shell for the exchange term.
+     ! Close the shell for the exchange term.
      nshsigx=0
      call setshells(dtsets(idtset)%ecutsigx,dtsets(idtset)%npwsigx,nshsigx,&
-&     dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'sigx',ucvol)
-
+      dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'sigx',ucvol)
    end if ! (SIGMA|SCREENING|SCGW|BSE)
 
  end do
@@ -2909,10 +2907,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call inkpts(bravais,dtset%chksymbreak,dtset%fockdownsampling,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
 & dtset%kpt(:,1:nkpt),dtset%kptns_hf(:,1:nkpthf),kptopt,dtset%kptnrm,&
-& dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&
+& dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym, dtset%kerange_path, &
 & nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,nsym,&
 & occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,string,&
-& dtset%symafm(1:nsym),dtset%symrel(:,:,1:nsym),vacuum,dtset%wtk(1:nkpt),&
+& dtset%symafm(1:nsym),dtset%symrel(:,:,1:nsym),vacuum,dtset%wtk(1:nkpt), comm, &
 & impose_istwf_1=ii)
 
  dtset%kptrlen=kptrlen
@@ -2957,7 +2955,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ABI_MALLOC(dtset%kptbounds, (0,0))
  end if
 
-!if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
+ ! if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
  if (tread == 1 .and. intarr(1) == -2) then
 #ifdef HAVE_NETCDF

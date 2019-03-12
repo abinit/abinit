@@ -515,9 +515,10 @@ end subroutine sigtk_kcalc_from_erange
 !!  sigtk_kpts_in_erange
 !!
 !! FUNCTION
-!!  Use SKW star functions to interpolate energies onto fine dense,
-!!  find k-points inside (electron/hole) pockets computed from sigma_erange.
-!!  Write KERANGE.nc file storing tables used in EPH code to compute electron lifetimes.
+!!  Use SKW star functions to interpolate electron energies onto fine dense defined by sigma_ngkpt and sigma_shiftk.
+!!  Find k-points inside (electron/hole) pockets according to sigma_erange.
+!!  Write KERANGE.nc file storing tables used to perform NSCF band structure calculation
+!!  and electron lifetime computation in EPH code.
 !!
 !! INPUTS
 !!  dtset <dataset_type>=all input variables for this dataset
@@ -550,7 +551,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0, pertcase0 = 0, fform_kerange = 6001, image1 = 1
- integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, ierr, onkpt, gap_err, unt, ncid, cnt, ncerr
+ integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, ierr, nkpt_inerange, gap_err, unt, ncid, cnt, ncerr
  real(dp) :: ee, cmin, vmax
  character(len=500) :: msg
  character(len=fnlen) :: path
@@ -560,7 +561,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  type(hdr_type) :: fine_hdr
 !arrays
  integer :: fine_kptrlatt(3,3), band_block(2)
- integer,allocatable :: kshe_mask(:,:,:), ok2ibz(:)
+ integer,allocatable :: kshe_mask(:,:,:), krange2ibz(:)
  real(dp) :: params(4)
 
 ! *************************************************************************
@@ -595,6 +596,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  call gaps%print(unit=std_out)
 
  ! Interpolate band energies with star-functions.
+ ! We need eigens in the IBZ to compute efermi not just inside pockets.
  fine_kptrlatt = 0
  do ii=1,3
    fine_kptrlatt(ii, ii) = dtset%sigma_ngkpt(ii)
@@ -605,17 +607,17 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  fine_ebands = ebands_interp_kmesh(ebands, cryst, params, fine_kptrlatt, &
                                    dtset%sigma_nshiftk, dtset%sigma_shiftk, band_block, comm)
 
- ! Build new header with fine k-mesh
+ ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, ABINIT_VERSION, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
    dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &
-   dtset%amu_orig(:, image1), dtset%icoulomb,&
-   ! TODO kptrlatt_origin
-   dtset%kptopt, dtset%nelect, dtset%charge, fine_kptrlatt, fine_kptrlatt,&
+   dtset%amu_orig(:, image1), dtset%icoulomb, &
+   dtset%kptopt, dtset%nelect, dtset%charge, fine_kptrlatt, fine_kptrlatt, &
    dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
 
- ! Find k-points inside energy region.
+ ! Find k-points inside energy window.
+ ! Set entry to 1 if (ikpt, spin) is inside the pocket (last index is to discern between hole and electron pockets)
  ABI_ICALLOC(kshe_mask, (fine_ebands%nkpt, ebands%nsppol, 2))
 
  do spin=1,ebands%nsppol
@@ -625,7 +627,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    do ikf_ibz=1,fine_ebands%nkpt
      do band=1,ebands%mband
        ee = fine_ebands%eig(band, ikf_ibz, spin)
-       ! Check whether the interpolated eigenvalue is inside the sigma_erange energy regions.
+       ! Check whether the interpolated eigenvalue is inside the sigma_erange window.
        if (dtset%sigma_erange(1) > zero) then
          if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
            kshe_mask(ikf_ibz, spin, 1) = kshe_mask(ikf_ibz, spin, 1)  + 1
@@ -643,66 +645,71 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  end do
 
  ! Build list of k-points inside pockets.
- onkpt = count(kshe_mask /= 0)
- ABI_MALLOC(ok2ibz, (onkpt))
+ nkpt_inerange = count(kshe_mask /= 0)
+ ABI_MALLOC(krange2ibz, (nkpt_inerange))
  cnt = 0
  do ikf_ibz=1,fine_ebands%nkpt
    if (any(kshe_mask(ikf_ibz,:,:) /= 0)) then
      cnt = cnt + 1
-     ok2ibz(cnt) = ikf_ibz
+     krange2ibz(cnt) = ikf_ibz
    end if
  end do
 
- ! Find image points in the BZ?
- ! Compute tetra and q-points for EPH calculation or use +/- wmax window and heuristic approach in sigmaph at runtime?
- ! Compute SKW 1st and 2dn derivates needed to treat Frohlich?
+ ! Possible extensions that may be implemented at this level:
+ !     Find image points in the BZ?
+ !     Compute tetra and q-points for EPH calculation or use +/- wmax window and heuristic approach in sigmaph at runtime?
+ !     Compute SKW 1st and 2dn derivates needed to treat Frohlich?
 
  ! Write output files with k-point list.
  if (my_rank == master .and. len_trim(prefix) /= 0) then
-   write(std_out, "(a,i0,a,f5.1,a)")" Found: ",  onkpt, " kpoints in sigma_erange energy windows. (nkeff / nkibz): ", &
-       (100.0_dp * onkpt) / fine_ebands%nkpt, " [%]"
+   write(std_out, "(a,i0,a,f5.1,a)")" Found: ",  nkpt_inerange, " kpoints in sigma_erange energy windows. (nkeff / nkibz): ", &
+       (100.0_dp * nkpt_inerange) / fine_ebands%nkpt, " [%]"
    path = strcat(prefix, "_KERANGE")
    if (open_file(path, msg, newunit=unt, form="formatted") /= 0) then
      MSG_ERROR(msg)
    end if
    write(unt, "(a)")"kptopt 0"
-   write(unt, "(a, i0)")"nkpt ", onkpt
+   write(unt, "(a, i0)")"nkpt ", nkpt_inerange
    write(unt, "(a)")"kpt"
-   do ii=1,onkpt
-     write(unt, "(3(es16.8,1x))")fine_ebands%kptns(:, ok2ibz(ii))
+   do ii=1,nkpt_inerange
+     write(unt, "(3(es16.8,1x))")fine_ebands%kptns(:, krange2ibz(ii))
    end do
    write(unt, "(a, i0)")"wtk"
-   do ii=1,onkpt
-     write(unt, "(es16.8)")fine_ebands%wtk(ok2ibz(ii))
+   do ii=1,nkpt_inerange
+     write(unt, "(es16.8)")fine_ebands%wtk(krange2ibz(ii))
    end do
    close(unt)
 
+   ! Write netcdf files used to perform NSCF run and EPH calculations with eph_task = -4
    path = strcat(prefix, "_KERANGE.nc")
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-   ! Write crystalline structure and bands on the fine k-mesh.
+   ! Write crystalline structure, hdr and ebands on the fine k-mesh.
    NCF_CHECK(hdr_ncwrite(fine_hdr, ncid, fform_kerange, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
-   NCF_CHECK(nctk_set_datamode(ncid))
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("nkpt_inerange", nkpt_inerange)], defmode=.True.)
+   NCF_CHECK(ncerr)
    ! Define extra arrays.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("kshe_mask", "int", "number_of_kpoints, number_of_spins, two"), &
+     nctkarr_t("krange2ibz", "int", "nkpt_inerange"), &
      nctkarr_t("sigma_erange", "dp", "two"), &
      nctkarr_t("einterp", "dp", "four") &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
    ! Write extra arrays.
    NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kshe_mask"), kshe_mask))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), params))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kshe_mask"), kshe_mask))
    NCF_CHECK(nf90_close(ncid))
 #endif
  end if
 
  ABI_FREE(kshe_mask)
- ABI_FREE(ok2ibz)
+ ABI_FREE(krange2ibz)
 
  call gaps%free()
  call ebands_free(fine_ebands)
