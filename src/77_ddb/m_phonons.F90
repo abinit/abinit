@@ -43,7 +43,7 @@ module m_phonons
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_symtk,           only : matr3inv
- use m_time,            only : cwtime
+ use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type
  use m_geometry,        only : mkrdim, symredcart
@@ -750,6 +750,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft, dos_qshift, &
    phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq)
+ call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  if (prtdos == 2) then
    ! Prepare tetrahedron method including workspace arrays.
@@ -763,9 +764,11 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    ! Make full kpoint grid and get equivalence to irred kpoints.
    call get_full_kgrid(bz2ibz, qibz, kpt_fullbz, new_qptrlatt, phdos%nqibz, &
        nkpt_fullbz, size(new_shiftq, dim=2), crystal%nsym, new_shiftq, crystal%symrel)
+   call cwtime_report(" get_full_kgrid", cpu, wall, gflops)
 
    ! Init tetrahedra, i.e. indexes of the full q-points at their summits
    call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr, comm)
+   call cwtime_report(" init_tetra", cpu, wall, gflops)
    ABI_CHECK(ierr == 0, errstr)
 
    ABI_FREE(bz2ibz)
@@ -894,6 +897,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  call xmpi_sum_master(nsmallq, master, comm, ierr)
  call xmpi_sum_master(speedofsound, master, comm, ierr)
 
+ call cwtime_report(" phdos", cpu, wall, gflops)
+
  if (my_rank == master .and. nsmallq > tol10) then
    ! Write info about speed of sound
    speedofsound = speedofsound / nsmallq
@@ -934,6 +939,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
      ! Parallelize weights computation inside comm, then distribute nqibz
      call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,phdos%nomega,&
         phdos%nqibz,bcorr0,tweight,dtweightde,comm)
+     call cwtime_report(" tetra_blochl_weights", cpu, wall, gflops)
 
      !if (mod(imode, nprocs) /= my_rank) cycle ! mpi-parallelism
      !call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,phdos%nomega,&
