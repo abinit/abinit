@@ -2299,11 +2299,12 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   logical,intent(in),optional :: verbose,compute_anharmonic
 !Local variables-------------------------------
 !scalar
-  integer :: alpha,ii,ia,mu,ncell,comm
+  integer :: alpha,ii,ia,mu,ncell,comm,natom_for_scup
   real(dp):: energy_part,ucvol
   logical :: has_strain = .FALSE.,need_verbose
   logical :: iam_master,need_anharmonic
   logical :: err_eng, err_for
+  logical*1 :: update_dens=.TRUE.
   integer, parameter:: master = 0
 !array
   type(strain_type) :: strain_t
@@ -2328,6 +2329,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   do ii = 1, 3
     sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
   end do
+
+  natom_for_scup = natom
 
 
   need_verbose = .TRUE.
@@ -2659,8 +2662,14 @@ energy_part = 0
 fcart_part = 0 
 
 #if defined DEV_MS_SCALEUP
-   err_eng = global_calculate_energy(energy_part,strain_tmp,disp_tmp,eff_pot%supercell%natom)
-   err_for = global_calculate_forces(fcart_part,strain_tmp,disp_tmp,eff_pot%supercell%natom,update_dens=.TRUE.)
+   write(msg,'(a)') ' wohoo i was here and call scale-up now!---STILL WOHOOO!---'
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL') 
+   err_eng = global_calculate_energy(energy_part,strain_tmp,disp_tmp,natom_for_scup)
+   err_for = global_calculate_forces(fcart_part,strain_tmp,disp_tmp,natom_for_scup,update_dens)
+   write(msg,'(a,1ES24.16,a)') 'The Energy of the electronic model is: ', energy_part,' unit?'
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL') 
 #endif 
 
 energy = energy + energy_part 

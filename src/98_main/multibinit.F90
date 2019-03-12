@@ -68,7 +68,7 @@ program multibinit
  use m_dtfil,      only : isfile
  use m_mover_effpot, only : mover_effpot
 #if defined DEV_MS_SCALEUP 
- use scup_global, only : global_init_model
+ use scup_global,  only : global_init_model
 #endif 
  !use m_generate_training_set, only : generate_training_set
  use m_compute_anharmonics, only : compute_anharmonics
@@ -97,6 +97,18 @@ program multibinit
  type(abihist) :: hist, hist_tes ! TODO MARCUS: test set implementation hist_tes: hist_TestSet
  type(args_t) :: args
 
+! MS
+! temporary variables for testing SCALE-UP with Multibinit
+#if defined DEV_MS_SCALEUP 
+  logical*1 :: needlattice = .FALSE.
+  logical*1 :: needelectrons = .TRUE. 
+  logical*1 :: didi = .FALSE. 
+  logical*1 :: harm_der = .FALSE.  
+  logical*1 :: ismagnetic = .FALSE. 
+  logical*1 :: istddft = .FALSE.  
+  integer :: ksamp(3) 
+  real*8 :: tcharge
+#endif 
 !TODO hexu: add types for spin here.
  type(spin_model_t) :: spin_model
 !TEST_AM
@@ -104,6 +116,12 @@ program multibinit
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)
 !TEST_AM
 !******************************************************************
+
+!TEST MS SCALE-up with Multibinit 
+#if defined DEV_MS_SCALEUP 
+ ksamp = (/2,2,2/)
+ tcharge = 0 
+#endif 
 
 !Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
@@ -254,9 +272,17 @@ program multibinit
    end if
  end if
 
- !Initialized the electronic model (If scale-up is available)
-#if defined DEV_MS_SCALEUP 
-  err_init_elec = global_init_model(filnam(4),inp%ncell,needlattice=.FALSE.,needelectrons=.TRUE.,didi=.FALSE.,harm_der=.FALSE.,tcharge=0,ismagnetic=.FALSE.,istddft=.FALSE.) 
+!****************************************************************************************
+!Initialized the electronic model (If scale-up is available)
+!****************************************************************************************
+
+#if defined DEV_MS_SCALEUP
+  write(message,'(a,(80a),4a)') ch10,('=',ii=1,80),ch10,ch10,&
+       ' Initializing Electronic Model with SCALE-UP',ch10
+  call wrtout(ab_out,message,'COLL')
+  call wrtout(std_out,message,'COLL')
+
+  err_init_elec = global_init_model(filnam(3),inp%ncell,needlattice,needelectrons,didi,harm_der,tcharge,ksamp,ismagnetic,istddft) 
 #endif 
 
 !****************************************************************************************
