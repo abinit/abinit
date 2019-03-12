@@ -5,6 +5,7 @@ from numpy import ndarray
 from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
                      AlreadySetKeyError, IllegalFilterNameError)
 from .abinit_iterators import IterStateFilter
+from .tricks import cstm_isinstance
 
 
 def empty_tree():
@@ -46,7 +47,7 @@ def make_apply_to(type_):
 
     elif isclass(type_):
         def apply_to(self, obj):
-            return isinstance(obj, type_)
+            return cstm_isinstance(obj, type_)
 
     else:  # dummy
         def apply_to(self, obj):
@@ -314,7 +315,7 @@ class ConfParser(object):
                     tree['constraints'][key] = \
                             self.constraints[key].with_value(val, self.ctx())
                 elif key in self.parameters:  # add parameter
-                    if not isinstance(val, self.parameters[key]['type']):
+                    if not cstm_isinstance(val, self.parameters[key]['type']):
                         raise ValueTypeError(key, self.parameters[key]['type'],
                                              val)
                     tree['parameters'][key] = val
