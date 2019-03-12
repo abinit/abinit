@@ -29,13 +29,22 @@ module m_inkpts
  use defs_basis
  use m_abicore
  use m_errors
+ use m_xmpi
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_hdr
 
  use m_time,      only : timab
+ use m_fstrings,  only : sjoin
+ use m_numeric_tools, only : isdiagmat
  use m_geometry,  only : metric
  use m_symfind,   only : symfind, symlatt
  use m_cgtools,   only : set_istwfk
  use m_parser,    only : intagm
  use m_kpts,      only : getkgrid, testkgrid, mknormpath
+ use defs_abitypes, only : hdr_type
 
  implicit none
 
@@ -74,6 +83,7 @@ contains
 !! lenstr=actual length of the string
 !! kptopt=option for the generation of k points
 !! msym=default maximal number of symmetries
+!! kerange_path= Path of KERANGE.nc file used to initialize k-point sampling if kptopt == 0.
 !! nqpt=number of q points (0 or 1)
 !! nsym=number of symetries
 !! occopt=option for occupation numbers
@@ -85,6 +95,7 @@ contains
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym)=symmetry operations in real space in terms of primitive translations
 !! vacuum(3)=for each direction, 0 if no vacuum, 1 if vacuum
+!! comm= MPI communicator
 !!
 !! OUTPUT
 !! fockdownsampling(3)=echo of input variable fockdownsampling(3)
@@ -126,21 +137,22 @@ contains
 !! SOURCE
 
 subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
-& kpt,kpthf,kptopt,kptnrm,kptrlatt_orig,kptrlatt,kptrlen,lenstr,msym,&
+& kpt,kpthf,kptopt,kptnrm,kptrlatt_orig,kptrlatt,kptrlen,lenstr,msym, kerange_path, &
 & nkpt,nkpthf,nqpt,ngkpt,nshiftk,nshiftk_orig,shiftk_orig,nsym,&
-& occopt,qptn,response,rprimd,shiftk,string,symafm,symrel,vacuum,wtk,&
+& occopt,qptn,response,rprimd,shiftk,string,symafm,symrel,vacuum,wtk,comm,&
 & impose_istwf_1) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: chksymbreak,iout,iscf,jdtset,kptopt,lenstr,msym,nqpt,nsym,occopt
- integer,intent(in) :: response
+ integer,intent(in) :: response, comm
  integer,intent(in),optional :: impose_istwf_1
  integer,intent(inout) :: nkpt,nkpthf
  integer,intent(out) :: nshiftk,nshiftk_orig
  integer,intent(out) :: fockdownsampling(3)
  real(dp),intent(out) :: kptnrm,kptrlen
  character(len=*),intent(in) :: string
+ character(len=*),intent(in) :: kerange_path
 !arrays
  integer,intent(in) :: bravais(11),symafm(msym),symrel(3,3,msym),vacuum(3)
  integer,intent(out) :: istwfk(nkpt),kptrlatt(3,3),kptrlatt_orig(3,3),ngkpt(3)
@@ -149,18 +161,22 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
 !Local variables-------------------------------
 !scalars
- integer :: dkpt,ii,ikpt,jkpt,marr,ndiv_small,nkpt_computed
- integer :: nsegment,prtkpt,tread,tread_kptrlatt,tread_ngkpt
+ integer,parameter :: master = 0
+ integer :: dkpt,ii,ikpt,jkpt,marr,ndiv_small,nkpt_computed,my_rank,nprocs
+ integer :: nsegment,prtkpt,tread,tread_kptrlatt,tread_ngkpt, ncid, fform, ierr
  real(dp) :: fraction,norm,ucvol,wtksum
  character(len=500) :: msg
+ type(hdr_type) :: hdr
 !arrays
- integer,allocatable :: ndivk(:),intarr(:)
+ integer,allocatable :: ndivk(:),intarr(:), krange2ibz(:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),rmet(3,3),tsec(2)
  real(dp),allocatable :: kptbounds(:,:),dprarr(:)
 
 ! *************************************************************************
 
  call timab(192,1,tsec)
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  ! Compute the maximum size of arrays intarr and dprarr
  marr = max(3*nkpt,3*MAX_NSHIFTK)
@@ -172,6 +188,10 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  shiftk_orig = zero
  kptrlatt_orig = 0; kptrlatt = 0
  nshiftk_orig = 1; nshiftk = 1
+
+ !fockdownsampling(:)=1
+ !kptnrm = one
+ !kpthf = zero
 
  ! MG: FIXME These values should be initialized because they are intent(out)
  ! but several tests fails. So we keep this bug to avoid problems somewhere else
@@ -189,7 +209,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  if(tread==1)kptrlen=dprarr(1)
 
  ! Initialize kpt, kptnrm and wtk according to kptopt.
- if (kptopt==0) then
+ if (kptopt == 0 .and. kerange_path == ABI_NOFILE) then
    ! For kptopt==0, one must have nkpt defined.
    kpt(:,:)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*nkpt,string(1:lenstr),'kpt',tread,'DPR')
@@ -231,6 +251,35 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
        end if
      end if
    end if
+
+ else if (kptopt == 0 .and. kerange_path /= ABI_NOFILE) then
+   ! Initialize kpts from kerange_path file.
+   ABI_MALLOC(krange2ibz, (nkpt))
+   if (my_rank == master) then
+     NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
+     call hdr_ncread(hdr, ncid, fform)
+     ABI_CHECK(fform /= 0, sjoin("Error while reading:", kerange_path))
+     ! TODO Consistency check
+     !kptopt, nsym, occopt
+     !ABI_CHECK(nkpt == hdr%nkpt, "nkpt from kerange != nkpt")
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
+     NCF_CHECK(nf90_close(ncid))
+   end if
+   call xmpi_bcast(krange2ibz, master, comm, ierr)
+   call hdr_bcast(hdr, master, my_rank, comm)
+   ! Hdr contains kpts in the IBZ. Extract data corresponding to pockets via krange2ibz.
+   nshiftk = hdr%nshiftk; nshiftk_orig = hdr%nshiftk_orig
+   istwfk = hdr%istwfk(krange2ibz)
+   kptrlatt = hdr%kptrlatt; kptrlatt_orig = hdr%kptrlatt_orig
+   ABI_CHECK(isdiagmat(hdr%kptrlatt), "kptrlatt is not diagonal!")
+   ngkpt(1) = hdr%kptrlatt(1, 1); ngkpt(2) = hdr%kptrlatt(2, 2); ngkpt(3) = hdr%kptrlatt(3, 3)
+   kpt = hdr%kptns(:, krange2ibz)
+   !; kpthf(3,nkpthf)
+   shiftk(:,1:nshiftk) = hdr%shiftk; shiftk_orig(:, 1:nshiftk_orig) = hdr%shiftk_orig
+   wtk = hdr%wtk(krange2ibz)
+   call hdr_free(hdr)
+   ABI_FREE(krange2ibz)
+   kptnrm = one
 
  else if (kptopt < 0) then
    ! Band structure calculation
@@ -433,12 +482,12 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  else
    write(msg,  '(3a,i0,3a)' ) &
    'The only values of kptopt allowed are smaller than 4.',ch10,&
-   'The input value of kptopt is',kptopt,'.',ch10,&
+   'The input value of kptopt is: ',kptopt,'.',ch10,&
    'Action: change kptopt in your input file.'
    MSG_ERROR(msg)
  end if
 
- if(kptnrm<tol10)then
+ if (kptnrm < tol10) then
    write(msg, '(5a)' )&
    'The input variable kptnrm is lower than 1.0d-10,',ch10,&
    'while it must be a positive, non-zero number.   ',ch10,&

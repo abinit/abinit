@@ -4425,7 +4425,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  if (ierr/=0) then
    write(msg,'(3a)')&
    'Cannot continue, basic dimensions reported in the header do not agree with input file. ',ch10,&
-   'Check consistency between the content of the external file and the input file. '
+   'Check consistency between the content of the external file and the input file.'
    MSG_ERROR(msg)
  end if
 
@@ -4673,7 +4673,7 @@ type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
    ABI_CHECK(ANY(hdr%symafm==-1),"Wrong nspden, nsppol, symafm.")
  end if
 
- space_group=0 !FIXME not known at this level.
+ space_group = 0 !FIXME not known at this level.
 
  call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
 & hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&

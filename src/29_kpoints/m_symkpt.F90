@@ -100,8 +100,7 @@ contains
 !!
 !! SOURCE
 
-subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,wtk,wtk_folded, &
-                  bz2ibz_smap, comm) ! Optional
+subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,wtk,wtk_folded, bz2ibz_smap, comm)
 
  use defs_basis
  use m_abicore
@@ -166,13 +165,11 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  end do
 
  ! Initialize bz2ibz_smap
- !if (present(bz2ibz_smap)) then
-   bz2ibz_smap = 0
-   do ikpt=1,nkbz
-     bz2ibz_smap(1, ikpt) = ikpt
-     bz2ibz_smap(2, ikpt) = 1
-   end do
- !end if
+ bz2ibz_smap = 0
+ do ikpt=1,nkbz
+   bz2ibz_smap(1, ikpt) = ikpt
+   bz2ibz_smap(2, ikpt) = 1
+ end do
 
  ! Here begins the serious business
 
@@ -367,27 +364,24 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    end if
  end do
 
- !if (present(bz2ibz_smap)) then
-   ! bz2ibz_smap stores the index in the BZ. Here we replace the BZ index with the IBZ index.
-   ierr = 0
-   do ikpt=1,nkbz
-     ind_ikpt = bz2ibz_idx(bz2ibz_smap(1, ikpt))
-     if (ind_ikpt /= 0) then
-       bz2ibz_smap(1, ikpt) = ind_ikpt
-     else
-       ierr = ierr + 1
-     end if
-   end do
-   ABI_CHECK(ierr == 0, "Error while remapping bz2ibz_smap array")
- !end if
+ ! bz2ibz_smap stores the index in the BZ. Here we replace the BZ index with the IBZ index.
+ ierr = 0
+ do ikpt=1,nkbz
+   ind_ikpt = bz2ibz_idx(bz2ibz_smap(1, ikpt))
+   if (ind_ikpt /= 0) then
+     bz2ibz_smap(1, ikpt) = ind_ikpt
+   else
+     ierr = ierr + 1
+   end if
+ end do
+ ABI_CHECK(ierr == 0, "Error while remapping bz2ibz_smap array")
 
  ABI_FREE(bz2ibz_idx)
 
  if(iout/=0)then
    if(nkbz/=nkibz)then
      write(message, '(a,a,a,i6,a)' )&
-     ' symkpt : the number of k-points, thanks to the symmetries,',ch10,&
-     ' is reduced to',nkibz,' .'
+     ' symkpt : the number of k-points, thanks to the symmetries,',ch10,' is reduced to',nkibz,' .'
      call wrtout(iout,message,'COLL')
      if(iout/=std_out) call wrtout(std_out,message,'COLL')
 

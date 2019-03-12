@@ -828,7 +828,6 @@ end function get_diag_cdp
 
 pure logical function isdiagmat_int(mat) result(ans)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mat(:,:)

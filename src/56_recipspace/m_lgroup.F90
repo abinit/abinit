@@ -161,8 +161,8 @@ contains  !=====================================================
 !!  kbz(3,nkbz)=K-points in the BZ.
 !!  nkibz=Number of k-points in the IBZ
 !!  kibz(3,nkibz)=Irreducible zone.
-!!  sord=Defines how to order the points in %ibz.
-!!   ">" for increasing norm. "<" decreasing. Default: ">"
+!!  comm= MPI communicator.
+!!  sord=Defines how to order the points in %ibz. ">" for increasing norm. "<" decreasing. Default: ">"
 !!
 !! PARENTS
 !!
@@ -170,11 +170,11 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, sord) result(new)
+type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, comm, sord) result(new)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: timrev,nkibz,nkbz
+ integer,intent(in) :: timrev,nkibz,nkbz,comm
  type(crystal_t),intent(in) :: cryst
  character(len=1),optional,intent(in) :: sord
 !arrays
@@ -237,7 +237,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 
  ! TODO: In principle here we would like to have a set that contains the initial IBZ.
  call symkpt(chksymbreak0, cryst%gmet, ibz2bz, iout0, kbz, nkbz, new%nibz,&
-   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded, new%bz2ibz_smap, xmpi_comm_self)
+   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded, new%bz2ibz_smap, comm)
 
  ABI_MALLOC(new%ibz, (3, new%nibz))
  ABI_MALLOC(new%weights, (new%nibz))

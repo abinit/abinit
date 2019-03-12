@@ -356,7 +356,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
  ! Get little group of the (external) kpoint.
  call self%lgk%free()
- self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz)
+ self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
@@ -491,7 +491,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 
  ! Get little group of the (external) kpoint.
  call self%lgk%free()
- self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz)
+ self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
