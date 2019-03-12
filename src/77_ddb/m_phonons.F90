@@ -651,7 +651,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  type(t_tetrahedron) :: tetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
- integer,allocatable :: bz2ibz(:)
+ integer,allocatable :: bz2ibz(:,:)
  real(dp) :: speedofsound(3),speedofsound_(3)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
@@ -749,7 +749,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  in_qptrlatt = 0; in_qptrlatt(1, 1) = dos_ngqpt(1); in_qptrlatt(2, 2) = dos_ngqpt(2); in_qptrlatt(3, 3) = dos_ngqpt(3)
 
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft, dos_qshift, &
-   phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq)
+   phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, bz2ibz=bz2ibz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  if (prtdos == 2) then
@@ -758,21 +758,22 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
 
    nkpt_fullbz = nqbz
-   ABI_MALLOC(bz2ibz, (nkpt_fullbz))
-   ABI_MALLOC(kpt_fullbz, (3, nkpt_fullbz))
+   !ABI_MALLOC(bz2ibz, (nkpt_fullbz))
+   !ABI_MALLOC(kpt_fullbz, (3, nkpt_fullbz))
 
    ! Make full kpoint grid and get equivalence to irred kpoints.
-   call get_full_kgrid(bz2ibz, qibz, kpt_fullbz, new_qptrlatt, phdos%nqibz, &
-       nkpt_fullbz, size(new_shiftq, dim=2), crystal%nsym, new_shiftq, crystal%symrel)
-   call cwtime_report(" get_full_kgrid", cpu, wall, gflops)
+   !call get_full_kgrid(bz2ibz, qibz, kpt_fullbz, new_qptrlatt, phdos%nqibz, &
+   !    nkpt_fullbz, size(new_shiftq, dim=2), crystal%nsym, new_shiftq, crystal%symrel)
+   !call cwtime_report(" get_full_kgrid", cpu, wall, gflops)
 
    ! Init tetrahedra, i.e. indexes of the full q-points at their summits
-   call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr, comm)
+   !call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr, comm)
+   call init_tetra(bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
    call cwtime_report(" init_tetra", cpu, wall, gflops)
    ABI_CHECK(ierr == 0, errstr)
 
    ABI_FREE(bz2ibz)
-   ABI_FREE(kpt_fullbz)
+   !ABI_FREE(kpt_fullbz)
 
    ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
    ! this may change in the future if Matteo refactorizes the tetra weights as sums over k instead of sums over bands
@@ -1004,8 +1005,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
          end do
        end do ! iat
 
-     end do ! imode
-   end do ! iq_ibz
+     end do ! iq_ibz
+     call cwtime_report(" accumulate", cpu, wall, gflops)
+   end do ! imode
 
    ABI_FREE(wdt)
 

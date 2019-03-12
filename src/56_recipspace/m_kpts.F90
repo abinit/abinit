@@ -35,6 +35,7 @@ module m_kpts
 
  use m_time,           only : timab
  use m_time,           only : cwtime, cwtime_report
+ use m_copy,           only : alloc_copy
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
  use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : wrap2_pmhalf
@@ -138,7 +139,7 @@ end function kpts_timrev_from_kptopt
 !! SOURCE
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-  new_kptrlatt, new_shiftk)  ! Optional
+  bz2ibz, new_kptrlatt, new_shiftk)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -147,6 +148,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
+ integer,optional,allocatable,intent(out) :: bz2ibz(:,:)
  integer,optional,intent(out) :: new_kptrlatt(3,3)
  real(dp),intent(in) :: shiftk(3,nshiftk)
  real(dp),allocatable,intent(out) :: wtk(:),kibz(:,:),kbz(:,:)
@@ -173,11 +175,14 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
  my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
  my_kptrlatt = kptrlatt
 
- call cwtime(cpu, wall, gflops, "start")
  call getkgrid_low(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
    cryst%nsym,-1,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,cryst%symrel,vacuum0,wtk,&
    indkpt,bz2ibz_smap,fullbz=kbz)
- call cwtime_report(" getkgrid_low", cpu, wall, gflops)
+
+ if (present(bz2ibz)) then
+   call alloc_copy(bz2ibz_smap,bz2ibz)
+ endif
+
  ABI_SFREE(indkpt)
  ABI_SFREE(bz2ibz_smap)
 #else
@@ -1103,7 +1108,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
  if (kptopt==1.or.kptopt==4) then
    ! Cannot use antiferromagnetic symmetry operations to decrease the number of k points
    nsym_used=0
@@ -1390,7 +1395,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  option=0
  if(iout/=0)option=1
 
- call cwtime_report(' shifts', cpu, wall, gflops)
+ !call cwtime_report(' shifts', cpu, wall, gflops)
 
  if (PRESENT(downsampling))then
    call smpbz(brav,iout,kptrlatt2,mkpt,nkpthf_computed,nshiftk2,option,shiftk2,spkpt,downsampling=downsampling)
@@ -1402,7 +1407,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  end if
 
  call smpbz(brav,iout,kptrlatt2,mkpt,nkpt_fullbz,nshiftk2,option,shiftk2,spkpt)
- call cwtime_report(' smpbz', cpu, wall, gflops)
+ !call cwtime_report(' smpbz', cpu, wall, gflops)
 
  if (PRESENT(fullbz)) then
    ! Returns list of k-points in the Full BZ.
@@ -1432,7 +1437,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  else if(kptopt==3)then
    nkpt_computed=nkpt_fullbz
  end if
- call cwtime_report(' symkpt', cpu, wall, gflops)
+ !call cwtime_report(' symkpt', cpu, wall, gflops)
 
 !The number of k points has been computed from kptopt, kptrlatt, nshiftk, shiftk,
 !and the eventual symmetries, it is presently called nkpt_computed.
