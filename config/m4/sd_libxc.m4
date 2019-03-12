@@ -114,7 +114,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
   # Adjust configuration depending on init type
   if test "${sd_libxc_enable}" = "yes" -o "${sd_libxc_enable}" = "auto"; then
 
-    # Set LIBXC-specific flags
+    # Set LibXC-specific flags
     case "${sd_libxc_init}" in
 
       def|yon)
@@ -161,7 +161,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
         ;;
 
       *)
-        AC_MSG_ERROR([invalid init type for LIBXC: '${sd_libxc_init}'])
+        AC_MSG_ERROR([invalid init type for LibXC: '${sd_libxc_init}'])
         ;;
 
     esac
@@ -212,7 +212,7 @@ AC_DEFUN([SD_LIBXC_DETECT], [
 
   # Check whether we can compile and link a simple program
   # and update build flags if successful
-  if test "${sd_libxc_enable}" = "yes"; then
+  if test "${sd_libxc_enable}" = "auto" -o "${sd_libxc_enable}" = "yes"; then
     _SD_LIBXC_CHECK_USE
 
     if test "${sd_libxc_ok}" = "yes"; then
@@ -224,7 +224,18 @@ AC_DEFUN([SD_LIBXC_DETECT], [
       fi
       LDFLAGS="${LDFLAGS} ${sd_libxc_ldflags}"
     else
-      AC_MSG_FAILURE([invalid LibXC configuration])
+      if test "${sd_libxc_status}" = "optional" -a \
+              "${sd_libxc_init}" = "def"; then
+        sd_libxc_enable="no"
+        sd_libxc_cppflags=""
+        sd_libxc_cflags=""
+        sd_libxc_cxxflags=""
+        sd_libxc_fcflags=""
+        sd_libxc_ldflags=""
+        sd_libxc_libs=""
+      else
+        AC_MSG_FAILURE([invalid LibXC configuration])
+      fi
     fi
   fi
 ])
@@ -427,26 +438,50 @@ AC_DEFUN([_SD_LIBXC_CHECK_CONFIG], [
 
 
 AC_DEFUN([_SD_LIBXC_DUMP_CONFIG], [
-  AC_MSG_CHECKING([whether to enable LIBXC])
+  AC_MSG_CHECKING([whether to enable LibXC])
   AC_MSG_RESULT([${sd_libxc_enable}])
   if test "${sd_libxc_enable}" != "no"; then
-    AC_MSG_CHECKING([how LIBXC parameters have been set])
+    AC_MSG_CHECKING([how LibXC parameters have been set])
     AC_MSG_RESULT([${sd_libxc_init}])
-    AC_MSG_CHECKING([for LIBXC C preprocessing flags])
-    AC_MSG_RESULT([${sd_libxc_cppflags}])
-    AC_MSG_CHECKING([for LIBXC C flags])
-    AC_MSG_RESULT([${sd_libxc_cflags}])
+    AC_MSG_CHECKING([for LibXC C preprocessing flags])
+    if test "${sd_libxc_cppflags}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_libxc_cppflags}])
+    fi
+    AC_MSG_CHECKING([for LibXC C flags])
+    if test "${sd_libxc_cflags}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_libxc_cflags}])
+    fi
     if test "${sd_libxc_enable_cxx}" = "yes"; then
-      AC_MSG_CHECKING([for LIBXC C++ flags])
-      AC_MSG_RESULT([${sd_libxc_cxxflags}])
+      AC_MSG_CHECKING([for LibXC C++ flags])
+      if test "${sd_libxc_cxxflags}" = ""; then
+        AC_MSG_RESULT([none])
+      else
+        AC_MSG_RESULT([${sd_libxc_cxxflags}])
+      fi
     fi
     if test "${sd_libxc_enable_fc}" = "yes"; then
-      AC_MSG_CHECKING([for LIBXC Fortran flags])
-      AC_MSG_RESULT([${sd_libxc_fcflags}])
+      AC_MSG_CHECKING([for LibXC Fortran flags])
+      if test "${sd_libxc_fcflags}" = ""; then
+        AC_MSG_RESULT([none])
+      else
+        AC_MSG_RESULT([${sd_libxc_fcflags}])
+      fi
     fi
-    AC_MSG_CHECKING([for LIBXC linker flags])
-    AC_MSG_RESULT([${sd_libxc_ldflags}])
-    AC_MSG_CHECKING([for LIBXC library flags])
-    AC_MSG_RESULT([${sd_libxc_libs}])
+    AC_MSG_CHECKING([for LibXC linker flags])
+    if test "${sd_libxc_ldflags}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_libxc_ldflags}])
+    fi
+    AC_MSG_CHECKING([for LibXC library flags])
+    if test "${sd_libxc_libs}" = ""; then
+      AC_MSG_RESULT([none])
+    else
+      AC_MSG_RESULT([${sd_libxc_libs}])
+    fi
   fi
 ]) # _SD_LIBXC_DUMP_CONFIG
