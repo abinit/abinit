@@ -4896,7 +4896,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
  type(Hdr_type) :: Hdr
 !arrays
  integer,allocatable :: gf2wfd(:),kg_k(:,:)
- integer :: work_ngfft(18),gmax_wfd(3),gmax_disk(3),gmax(3)
+ integer :: work_ngfft(18),gmax_wfd(3),gmax_disk(3),gmax(3), all_countks(wfd%nkibz, wfd%nsppol)
  real(dp),allocatable :: eig_k(:),cg_k(:,:) !occ_k(:),
  real(dp),allocatable :: out_cg(:,:), work(:,:,:,:)
  logical,allocatable :: my_readmask(:,:,:)
@@ -4921,7 +4921,6 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
 
  ! TODO: Perform consistency check btw Hdr and Wfd.
  ! Output the header of the GS wavefunction file.
- !if (Wfd%prtvol>0)
  fform = 0
  if (wfd%prtvol /= 0 .and. wfd%my_rank == 0) call hdr_echo(hdr, fform, 4, unit=std_out)
 
@@ -4929,13 +4928,16 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
  ABI_CHECK(Wfd%mband <= mband_disk,"Not enough bands stored on file")
 
  ! Each node will read the waves whose status if (WFD_ALLOCATED|WFD_STORED).
+ ! all_countks is a global array used to skip (ik_ibz, spin) if all MPI procs do not need bands for this (k, s)
  ABI_MALLOC(my_readmask,(mband_disk,Wfd%nkibz,Wfd%nsppol))
  my_readmask=.FALSE.
+ all_countks = 0
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
      do band=1,Wfd%nband(ik_ibz,spin)
        if (wfd%ihave_ug(band,ik_ibz,spin)) then
          my_readmask(band,ik_ibz,spin) = .TRUE.
+         all_countks(ik_ibz, spin) = 1
          if (wfd%ihave_ug(band,ik_ibz,spin,"Stored")) then
            MSG_WARNING("Wavefunction is already stored!")
          end if
@@ -4943,6 +4945,9 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
      end do
    end do
  end do
+
+ ! All procs must agree when skipping (k, s)
+ call xmpi_sum(all_countks, wfd%comm, ierr)
 
  write(msg,'(a,i0,a)')" Reading ",COUNT(my_readmask)," (b,k,s) states ..."
  call wrtout(std_out, msg)
@@ -4952,6 +4957,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
  if (method == 1) then
   do spin=1,Wfd%nsppol
     do ik_ibz=1,Wfd%nkibz
+      if (all_countks(ik_ibz, spin) == 0) cycle
       npw_disk   = Hdr%npwarr(ik_ibz)
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
       istwfk_disk = hdr%istwfk(ik_ibz)
@@ -5026,6 +5032,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
 
   do spin=1,Wfd%nsppol
     do ik_ibz=1,Wfd%nkibz
+      if (all_countks(ik_ibz, spin) == 0) cycle
       call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
       !write(std_out,*)"about to read ik_ibz: ",ik_ibz,", spin: ",spin
       npw_disk   = Hdr%npwarr(ik_ibz)
@@ -5137,7 +5144,6 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
  call wfk_close(Wfk)
  call hdr_free(Hdr)
 
- ! Free local memory.
  ABI_FREE(my_readmask)
 
  ! Update the kbs table storing the distribution of the ug and set the MPI communicators.
