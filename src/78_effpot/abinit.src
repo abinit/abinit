@@ -67,12 +67,12 @@ sources = [
     "m_spmat_coo.F90",
     "m_spmat_csr.F90",
     "m_spmat_dense.F90",
+    "m_spmat_lco.F90",
     "m_spmat_lil.F90",
     "m_spmat_NDCOO.F90",
     "m_supercell_maker.F90",
     "m_tightbinding.F90",
     "m_unitcell.F90"
-
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -420,7 +420,6 @@ contains
     class(spin_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t), intent(inout):: scmaker
     class(abstract_potential_t), pointer, intent(inout) :: scpot
-    !type(spin_potential_t), pointer:: tpot
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
     integer, allocatable :: i_sc(:), j_sc(:), Rj_sc(:, :)
     real(dp) :: val_sc(scmaker%ncells)

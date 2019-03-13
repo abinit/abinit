@@ -31,6 +31,7 @@ module m_spmat_NDCOO
   use m_abicore
   use m_errors
   use m_xmpi
+  use m_multibinit_global
   use m_spmat_base
   use m_dynamic_array, only: int2d_array_type, real_array_type, int_array_type
   implicit none
@@ -195,9 +196,11 @@ contains
     integer, allocatable, intent(inout) :: i1_list(:), istartend(:)
     integer :: i, ii
     type(int_array_type) :: j1, jstartend
+    call timer%tic()
     if (.not. (self%is_unique))  then
        call self%sum_duplicates()
     end if
+    call timer%toc()
     if (self%nnz<1) then
        ngroup=0
     else if (self%nnz==1) then
