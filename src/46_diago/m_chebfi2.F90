@@ -60,12 +60,12 @@ module m_chebfi2
     type(xg_t) :: BX  
 
     type(xgBlock_t) :: eigenvalues
-
+    
     !SWAP POINTERS
     type(xgBlock_t) :: X_swap
     type(xgBlock_t) :: AX_swap   
     type(xgBlock_t) :: BX_swap   
-    type(xgBlock_t) :: X_next_swap
+    !type(xgBlock_t) :: XXX  
 
   end type chebfi_t
 
@@ -317,11 +317,11 @@ module m_chebfi2
       call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
                                            
     end do
-                          
+
     call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)    !ampfactor
-            
+
     call chebfi_rayleightRitz(chebfi, nline)
-        
+
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
                         
     deallocate(nline_bands)
@@ -413,36 +413,40 @@ module m_chebfi2
 
     !B-1 * A * ψ    
     if (chebfi%paw) then
-      !call xgBlock_setBlock(chebfi%X_next, chebfi%X_next_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !X_next = *X_swap;
       call getBm1X(chebfi%AX%self, chebfi%X_next) 
+      !call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !AX_swap = X_next;
     else
-      !call xgBlock_setBlock(chebfi%X_next, chebfi%X_next_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !X_next = *X_swap;
       call xgBlock_copy(chebfi%AX%self,chebfi%X_next, 1, 1)
-      !call xgBlock_setBlock(chebfi%AX%self, chebfi%X_next_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !X_next = *X_swap;
+      !!TODO try to swap buffers in a way that last copy is avoided
+      !call xgBlock_setBlock(chebfi%AX%self, chebfi%AX_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !AX_swap = AX;
+      !call xgBlock_setBlock(chebfi%X_next, chebfi%XXX, 1, chebfi%spacedim, chebfi%neigenpairs) !AX_swap = AX;
     end if   
             
     !ψi-1 = c * ψi-1   
     call xgBlock_scale(chebfi%X, center, 1) !scale by c
-    !call xgBlock_scale(chebfi%X_next_swap, center, 1) !scale by c
             
     !(B-1 * A * ψi-1 - c * ψi-1)
     call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X)
-    !call xgBlock_saxpy(chebfi%X_next_swap, dble(-1.0), chebfi%X)
+    !call xgBlock_saxpy(chebfi%AX_swap, dble(-1.0), chebfi%X)
+    !call xgBlock_saxpy(chebfi%XXX, dble(-1.0), chebfi%X)
         
     !ψi-1  = 1/c * ψi-1 
     call xgBlock_scale(chebfi%X, 1/center, 1) !counter scale by c
     
     if (iline == 0) then  
-      call xgBlock_scale(chebfi%X_next, one_over_r, 1) !scale by one_over_r
-      !call xgBlock_scale(chebfi%X_next_swap, one_over_r, 1) !scale by one_over_r
+      call xgBlock_scale(chebfi%X_next, one_over_r, 1) 
+      !call xgBlock_scale(chebfi%AX_swap, one_over_r, 1) !scale by one_over_r
+      !call xgBlock_scale(chebfi%XXX, one_over_r, 1) !scale by one_over_r
     else
-      call xgBlock_scale(chebfi%X_next, two_over_r, 1) !scale by two_over_r
-      !call xgBlock_scale(chebfi%X_next_swap, two_over_r, 1) !scale by one_over_r
+      call xgBlock_scale(chebfi%X_next, two_over_r, 1) 
+      !call xgBlock_scale(chebfi%AX_swap, two_over_r, 1) !scale by one_over_r
+      !call xgBlock_scale(chebfi%XXX, two_over_r, 1) !scale by one_over_r
       
       call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev)
-      !call xgBlock_saxpy(chebfi%X_next_swap, dble(-1.0), chebfi%X_prev)
+      !call xgBlock_saxpy(chebfi%AX_swap, dble(-1.0), chebfi%X_prev)
+      !call xgBlock_saxpy(chebfi%XXX, dble(-1.0), chebfi%X_prev)
     end if
-        
+
   end subroutine chebfi_computeNextOrderChebfiPolynom
 
   subroutine chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
@@ -458,23 +462,35 @@ module m_chebfi2
     type(integer) , intent(in) :: spacedim
     type(integer) , intent(in) :: neigenpairs
     
+     !WORKING
+    call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !X_swap = X_prev	!      
+    call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X
+    call xgBlock_setBlock(chebfi%X_next, chebfi%X, 1, spacedim, neigenpairs) !X = X_next
+    call xgBlock_setBlock(chebfi%X_swap, chebfi%X_next, 1, spacedim, neigenpairs) !X_next = X_swap
+    
+    !!TODO try to swap buffers in a way that last copy is avoided
     !swap buffers
-    if (chebfi%paw) then
-      call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !*X_swap = X_prev;	
-      call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X;   !OK
-      call xgBlock_setBlock(chebfi%X_next, chebfi%X, 1, spacedim, neigenpairs) !X = X_next; !OK
-      call xgBlock_setBlock(chebfi%X_swap, chebfi%X_next, 1, spacedim, neigenpairs) !X_next = *X_swap;
-    else 
-      call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !*X_swap = X_prev;	
-      call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X;   !OK
-      call xgBlock_setBlock(chebfi%X_next, chebfi%X, 1, spacedim, neigenpairs) !X = X_next; !OK
-      call xgBlock_setBlock(chebfi%X_swap, chebfi%X_next, 1, spacedim, neigenpairs) !X_next = *X_swap;
-      !call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !*X_swap = X_prev;	
-      !call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X;   !OK
-      !call xgBlock_setBlock(chebfi%X_next_swap, chebfi%X, 1, spacedim, neigenpairs) !X = X_next_swap; !OK
-      !call xgBlock_setBlock(chebfi%X_swap, chebfi%X_next, 1, spacedim, neigenpairs) !X_next = *X_swap;
-      !call xgBlock_setBlock(chebfi%X_swap, chebfi%AX%self, 1, spacedim, neigenpairs) !X_next = *X_swap;
-    end if
+!    if (chebfi%paw) then
+!      call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !X_swap = X_prev	
+!      call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X
+!      call xgBlock_setBlock(chebfi%AX_swap, chebfi%X, 1, spacedim, neigenpairs) !X = AX_swap = X_next
+!      call xgBlock_setBlock(chebfi%X_swap, chebfi%AX_swap, 1, spacedim, neigenpairs) !AX_swap = X_next = X_swap
+!    else 
+!      if (mod(chebfi%nline, 3) == 1) then
+!        call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !*X_swap = X_prev
+!      else !if ((mod(chebfi%nline, 3) == 2) .or. (mod(chebfi%nline, 3) == 0)) 
+!        call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap, 1, spacedim, neigenpairs) !*X_swap = X_prev
+!      end if
+!      
+!      call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X 
+!      call xgBlock_setBlock(chebfi%AX_swap, chebfi%X, 1, spacedim, neigenpairs) !X = AX_swap = AX
+!      
+!      if (mod(chebfi%nline, 3) == 1) then
+!        call xgBlock_setBlock(chebfi%X_swap, chebfi%AX%self, 1, spacedim, neigenpairs) !X = AX_swap = AX
+!      else !if (mod(chebfi%nline, 3) == 2 .or. mod(chebfi%nline, 3) == 0) 
+!        call xgBlock_setBlock(chebfi%X_swap, chebfi%AX%self, 1, spacedim, neigenpairs) !*X_swap = X_prev
+!      end if     
+!    end if
 
   end subroutine chebfi_swapInnerBuffers
     
@@ -590,7 +606,7 @@ module m_chebfi2
       call xgBlock_setBlock(chebfi%X, chebfi%X_swap, 1, spacedim, neigenpairs)
     
       call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, & 
-                      chebfi%X, A_und_X%self, 0.d0, chebfi%X_next)   
+                      chebfi%X, A_und_X%self, 0.d0, chebfi%X_next)   !put X into expected buffer directly
     
       call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap, 1, spacedim, neigenpairs) 
     end if

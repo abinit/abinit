@@ -13,8 +13,8 @@
 @with g0
 @world xmin 0.00
 @world xmax 2
-@world ymin  -9.13442174E+00
-@world ymax   1.14634248E+01
+@world ymin  -9.13440449E+00
+@world ymax   1.14607651E+01
 @default linewidth 1.5
 @xaxis  tick on
 @xaxis  tick major 1
@@ -33,16 +33,16 @@
 @    s2 line color 1
 @target G0.S0
 @type xy
-0  -4.69860147E+00
-1  -9.13442174E+00
+0  -4.69858818E+00
+1  -9.13440449E+00
 &
 @target G0.S1
 @type xy
-0  -3.83375690E-01
-1   3.83438577E+00
+0  -3.83375285E-01
+1   3.83437534E+00
 &
 @target G0.S2
 @type xy
-0   4.18509452E+00
-1   1.14634248E+01
+0   4.18375609E+00
+1   1.14607651E+01
 &

@@ -56,6 +56,7 @@ toldfe 1.0d-6     # Will stop when, twice in a row, the difference
                   # between two consecutive evaluations of total energy
                   # differ by less than toldfe (in Hartree)
                   # This value is way too large for most realistic studies of materials
+#nline 4
 
 wfoptalg 111
 #istwfk 2

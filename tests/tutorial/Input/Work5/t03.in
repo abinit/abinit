@@ -15,7 +15,7 @@ pawecutdg 10.
 
 #Self-consistent cycle parameters
 toldfe 1.d-5
-nstep 60
+nstep 40
 nline 4
 
 #K-points and symetries
@@ -47,7 +47,7 @@ typat 31*1
 znucl 56.
 chkprim 0
 
-wfoptalg 111
+wfoptalg 1
 istwfk 2
 
 #Atomic positions
