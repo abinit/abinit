@@ -48,7 +48,7 @@ from .yaml_tools import is_available as has_yaml
 
 if has_yaml:
     from .yaml_tools.driver_test_conf import DriverTestConf as YDriverConf
-    from .yaml_tools.tester import Tester as YTester
+    from .yaml_tools.tester import Tester as YTester, Failure as YFailure
 else:
     from .yaml_tools import Mock
 
@@ -225,7 +225,8 @@ class Result(object):
     '''
         Analyse and summarize the set of differences found by a diff.
     '''
-    def __init__(self, fl_diff, yaml_diff, extra_info=[], label=None):
+    def __init__(self, fl_diff, yaml_diff, extra_info=[], label=None,
+                 verbose=False):
         '''
             differences is expected to be a list of Difference instances
         '''
@@ -241,6 +242,7 @@ class Result(object):
         self.max_rel_ln = 0
         self.ndiff_lines = 0
         self.label = label
+        self.verbose = verbose
 
         self.details = self.__analyse()
 
@@ -263,10 +265,13 @@ class Result(object):
 
         if self.yaml_diff:
             details.append('# Start YAML based comparison report\n')
-            self.yaml_error = True
         for diff in self.yaml_diff:
-            self.success = False
-            details.append(repr(diff) + '\n\n')
+            if diff.is_fail():
+                self.success = False
+                self.yaml_error = True
+                details.append(repr(diff) + '\n\n')
+            elif self.verbose:
+                details.append(repr(diff) + '\n\n')
 
         if self.fl_diff:
             details.append('# Start legacy fldiff comparision report\n')
@@ -359,7 +364,11 @@ class Result(object):
         '''
         if self.yaml_error:
             status = 'failed'
-            msg = 'yaml_test errors. First is:\n{}\n'.format(self.yaml_diff[0])
+            for diff in self.yaml_diff:
+                if diff.is_fail():
+                    first_fail = diff
+                    break
+            msg = 'yaml_test errors. First is:\n{}\n'.format(first_fail)
         elif self.fatal_error:
             status = 'failed'
             msg = 'fldiff fatal error:\n' + self.details
@@ -419,17 +428,17 @@ class Differ(object):
             self.options['tolerance_rel'] = options['tolerance']
 
         self.use_fl = self.options['use_fl']
-        self.yaml_test = YDriverConf()
+        self.yaml_conf = YDriverConf()
         self.use_yaml = False
         if has_yaml:
             self.use_yaml = self.options['use_yaml']
             if self.use_yaml:
                 if yaml_test and 'file' in yaml_test and yaml_test['file']:
-                    self.yaml_test = YDriverConf.from_file(yaml_test['file'])
+                    self.yaml_conf = YDriverConf.from_file(yaml_test['file'])
                 elif yaml_test and 'yaml' in yaml_test and yaml_test['yaml']:
-                    self.yaml_test = YDriverConf(yaml_test['yaml'])
+                    self.yaml_conf = YDriverConf(yaml_test['yaml'])
                 else:
-                    self.yaml_test = YDriverConf()
+                    self.yaml_conf = YDriverConf()
 
     def diff(self, file1, file2):
         '''
@@ -446,7 +455,7 @@ class Differ(object):
             lines2 = f.readlines()
 
         return Result(*self.diff_lines(lines1, lines2),
-                      extra_info=(self.yaml_test.extra_info() if self.use_yaml
+                      extra_info=(self.yaml_conf.extra_info() if self.use_yaml
                                   else ()),
                       label=self.options['label'])
 
@@ -466,11 +475,16 @@ class Differ(object):
 
         if self.use_yaml:
             if doc1_has_corrupted_document:
-                doc_differences = ["Reference has corrupted YAML documents."]
+                doc_differences = [YFailure(
+                    self.yaml_conf, "Reference has corrupted YAML documents."
+                )]
             elif doc2_has_corrupted_document:
-                doc_differences = ["Tested file has corrupted YAML documents."]
+                doc_differences = [YFailure(
+                    self.yaml_conf,
+                    "Tested file has corrupted YAML documents."
+                )]
             else:
-                doc_differences, _ = self.__test_doc(documents1, documents2)
+                doc_differences = self.__test_doc(documents1, documents2)
         else:
             doc_differences = []
 
@@ -480,7 +494,7 @@ class Differ(object):
         '''
             Compare docs2 to docs1 and apply tests on docs2.
         '''
-        return YTester(docs1, docs2, self.yaml_test).run()
+        return YTester(docs1, docs2, self.yaml_conf).run()
 
     def __diff_lines(self, lines1, lines2):
         '''

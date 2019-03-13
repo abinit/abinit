@@ -13,6 +13,9 @@ class Issue(object):
         sstate = ', '.join('{}={}'.format(*it) for it in self.state.items())
         return 'At {}({}): {}'.format(spath, sstate, self.message)
 
+    def is_fail(self):
+        return False
+
 
 class Failure(Issue):
     def __init__(self, conf, msg, ref=None, tested=None):
@@ -28,6 +31,9 @@ class Failure(Issue):
         else:
             return Issue.__repr__(self)
 
+    def is_fail(self):
+        return True
+
 
 class Success(Issue):
     pass
@@ -38,8 +44,8 @@ class Tester(object):
         self.ref = reference_docs
         self.tested = tested_docs
         self.conf = config
-        self.failures = []
-        self.success = []
+        self.issues = []
+        self.issues = []
 
     def check_this(self, name, ref, tested):
         if type(ref) is dict:
@@ -57,21 +63,21 @@ class Tester(object):
                     msg = ('Exception while checking {}:\n'
                            '{}: {}').format(cons.name, e.__class__.__name__,
                                             str(e))
-                    self.failures.append(Failure(self.conf, msg))
+                    self.issues.append(Failure(self.conf, msg))
                 else:
                     if success:
                         msg = '{} ok'.format(cons.name)
-                        self.success.append(Success(self.conf, msg))
+                        self.issues.append(Success(self.conf, msg))
                     else:
                         msg = '{} ({}) failed'.format(cons.name, cons.value)
-                        self.failures.append(Failure(self.conf, msg,
-                                                     ref, tested))
+                        self.issues.append(Failure(self.conf, msg,
+                                                   ref, tested))
 
             if hasattr(ref, '_is_dict_wrapper'):  # have children
                 for child in ref:
                     if child not in tested:
                         msg = '{} was not present'.format(child)
-                        self.failures.append(Failure(self.conf, msg))
+                        self.issues.append(Failure(self.conf, msg))
                     else:
                         self.check_this(child, ref[child], tested[child])
 
@@ -84,14 +90,14 @@ class Tester(object):
                 success = top_cons[cons].check(ref, tested, self.conf)
                 if success:
                     msg = '{} ok'.format(cons.name)
-                    self.success.append(Success(self.conf, msg))
+                    self.issues.append(Success(self.conf, msg))
                 else:
                     msg = '{} ({}) failed'.format(cons.name, cons.value)
-                    self.failures.append(Failure(self.conf, msg))
+                    self.issues.append(Failure(self.conf, msg))
 
         if len(self.ref) != len(self.tested):
             msg = 'there is not the same number of documents in both side'
-            self.failures.append(Failure(self.conf, msg))
+            self.issues.append(Failure(self.conf, msg))
         else:
             # FIXME Use a non linear matching of documents ?
             # ref_doc['iterators'] could be of some use here
@@ -100,4 +106,4 @@ class Tester(object):
                     self.check_this(ref_doc['obj']['label'], ref_doc['obj'],
                                     tested_doc['obj'])
 
-        return self.failures, self.success
+        return self.issues
