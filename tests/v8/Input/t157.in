@@ -30,6 +30,7 @@
  nqpt1     0
  rfphon1   0
  kptopt1   1
+ prtpot1   1
 
 ##################################################
 # Dataset 2 (NSCF run to get WFK with empty states
@@ -113,7 +114,7 @@ nqpt7     0; rfphon7   0; kptopt7   1
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = .*_intel_1[89].0_.*
-#%% test_chain = t157.in, t158.in, t159.in, t160.in
+#%% test_chain = t157.in, t158.in, t159.in, t160.in, t161.in
 #%% [files]
 #%% files_to_test = 
 #%%   t157.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
@@ -122,7 +123,10 @@ nqpt7     0; rfphon7   0; kptopt7   1
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]
-#%% post_commands = ww_mv t157o_DS2_WFK t160o_DS20_WFK
+#%% post_commands = 
+#%%  ww_cp t157o_DS2_WFK t160o_DS20_WFK;
+#%%  ww_cp t157o_DS2_WFK t161o_DS20_WFK;
+#%%  ww_cp t157o_DS1_DEN t161o_DS20_DEN;
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

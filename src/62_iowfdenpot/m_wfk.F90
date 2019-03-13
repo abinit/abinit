@@ -4996,27 +4996,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
  ! IO section are executed by master only, all other procs wait for new WFK before returning to caller.
  my_rank = xmpi_comm_rank(comm); if (my_rank /= master) goto 100
 
- write(std_out, "(2a)")ch10, repeat("=", 92)
- write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
- write(std_out, "(a, 3(i0, 1x))")"   sigma_ngkpt: ", dtset%sigma_ngkpt
- do ii=1,dtset%sigma_nshiftk
-   write(std_out, "(a, 3(f5.2, 1x))")"   sigma_shiftk: ", dtset%sigma_shiftk(:, ii)
- end do
- write(std_out, "(2a)")" Take wavefunctions with k-point lists from: ", trim(in_wfkpath)
- write(std_out, "(2a)")" Take eigenvalues and kpt tables from KERANGE file: ", trim(kerange_path)
- write(std_out, "(2a)")repeat("=", 92), ch10
- if (all(dtset%sigma_ngkpt == 0)) then
-   write(msg,"(3a)") &
-     "Cannot produce fine WFK file because sigma_ngkpt == 0.",ch10,&
-     "Use sigma_nkgpt, sigma_nshiftk and sigma_shiftk to define the homogeneous k-mesh for the fine WFK file."
-   MSG_ERROR(msg)
- end if
-
- !fine_kptrlatt = 0
- !do ii=1,3
- !  fine_kptrlatt(ii,ii) = dtset%sigma_ngkpt(ii)
- !end do
-
  ! Read interpolated ebands and kshe_mask from KERANGE file, build fine_ebands object.
 #ifdef HAVE_NETCDF
  NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
@@ -5043,6 +5022,26 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
  MSG_ERROR("wfk_klist2mesh requires NETCDF support.")
 #endif
 
+ write(std_out, "(2a)")ch10, repeat("=", 92)
+ write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
+ write(std_out, "(2a)")" Take wavefunctions with k-point lists from: ", trim(in_wfkpath)
+ write(std_out, "(2a)")" Take eigenvalues and kpt tables from KERANGE file: ", trim(kerange_path)
+ write(std_out, "(a, 9(i0, 1x))")"   fine_kptrlatt: ", fine_hdr%kptrlatt
+ do ii=1,fine_hdr%nshiftk
+   write(std_out, "(a, 3(f5.2, 1x))")"   fine_shiftk: ", fine_hdr%shiftk(:, ii)
+ end do
+ write(std_out, "(2a)")repeat("=", 92), ch10
+ !if (all(dtset%sigma_ngkpt == 0)) then
+ !  write(msg,"(3a)") &
+ !    "Cannot produce fine WFK file because sigma_ngkpt == 0.",ch10,&
+ !    "Use sigma_nkgpt, sigma_nshiftk and sigma_shiftk to define the homogeneous k-mesh for the fine WFK file."
+ !  MSG_ERROR(msg)
+ !end if
+ !fine_kptrlatt = 0
+ !do ii=1,3
+ !  fine_kptrlatt(ii,ii) = dtset%sigma_ngkpt(ii)
+ !end do
+
  ! Open WFK file with k-point list, extract dimensions and allocate workspace arrays.
  my_inpath = in_wfkpath
  if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
@@ -5051,11 +5050,13 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
  iwfk_ebands = wfk_read_ebands(my_inpath, xmpi_comm_self)
  call wfk_open_read(iwfk, my_inpath, formeig0, iomode_from_fname(my_inpath), get_unit(), xmpi_comm_self)
 
- fform = 0
- write(std_out, "(a)")" Header of iwfk file"
- call hdr_echo(iwfk%hdr, fform, 3, unit=std_out)
- write(std_out, "(a)")" Header of fine_hdr"
- call hdr_echo(fine_hdr, fform, 3, unit=std_out)
+ if (dtset%prtvol > 0 .and. my_rank == master) then
+   fform = 0
+   write(std_out, "(a)")" Header of iwfk file"
+   call hdr_echo(iwfk%hdr, fform, 3, unit=std_out)
+   write(std_out, "(a)")" Header of fine_hdr"
+   call hdr_echo(fine_hdr, fform, 3, unit=std_out)
+ end if
 
  ihdr => iwfk%hdr
  mband = iwfk%mband; nsppol = iwfk%nsppol; nspinor = iwfk%nspinor

@@ -524,7 +524,7 @@ end subroutine print_kinds
 !!
 !! SOURCE
 
- integer pure function str2wfktask(str) result(wfk_task)
+integer pure function str2wfktask(str) result(wfk_task)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: str
@@ -550,7 +550,7 @@ end subroutine print_kinds
    wfk_task = WFK_TASK_NONE
  end select
 
- end function str2wfktask
+end function str2wfktask
 !!***
 
 !----------------------------------------------------------------------

@@ -571,8 +571,9 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  if (my_rank == master) then
    write(std_out, "(2a)")ch10, repeat("=", 92)
    write(std_out, "(a)") " Finding k-points inside (electron/hole) pockets."
-   write(std_out, "(2a)") " Interpolating eigenvalues onto dense K-mesh with sigma_ngkpt: ", trim(ltoa(dtset%sigma_ngkpt))
+   write(std_out, "(2a)") " Interpolating eigenvalues onto dense K-mesh using sigma_ngkpt: ", trim(ltoa(dtset%sigma_ngkpt))
    write(std_out, "(2a)") " and sigma_shiftk shifts:"
+   ABI_CHECK(allocated(dtset%sigma_shiftk), "sigma_shiftk and sigma_nshiftk must be specified in input.")
    do ii=1,dtset%nshiftk
      write(std_out, "(a, 3(f2.1, 1x))")"   sigma_shiftk:", dtset%sigma_shiftk(:, ii)
    end do
@@ -596,7 +597,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  call gaps%print(unit=std_out)
 
  ! Interpolate band energies with star-functions.
- ! In EPH, we will need eigens in the IBZ to compute efermi not just energies inside pockets.
+ ! In the EPH code, we will need eigens in the IBZ to compute efermi not just energies inside pockets.
  fine_kptrlatt = 0
  do ii=1,3
    fine_kptrlatt(ii, ii) = dtset%sigma_ngkpt(ii)
@@ -664,6 +665,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  if (my_rank == master .and. len_trim(prefix) /= 0) then
    write(std_out, "(a,i0,a,f5.1,a)")" Found: ",  nkpt_inerange, " kpoints in sigma_erange energy windows. (nkeff / nkibz): ", &
        (100.0_dp * nkpt_inerange) / fine_ebands%nkpt, " [%]"
+   ! Write text file with Abinit input variables (mainly for testing purposes).
    path = strcat(prefix, "_KERANGE")
    if (open_file(path, msg, newunit=unt, form="formatted") /= 0) then
      MSG_ERROR(msg)
@@ -680,7 +682,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    end do
    close(unt)
 
-   ! Write netcdf files used to perform NSCF run and EPH calculations with eph_task = -4
+   ! Write netcdf file used to perform NSCF run and EPH calculations with eph_task = -4.
    path = strcat(prefix, "_KERANGE.nc")
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))

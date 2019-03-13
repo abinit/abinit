@@ -560,7 +560,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      if (dtset%useria==9) dvdb%add_lr_part = .False.
      if (dtset%dipdip /= 0) then
        dvdb%has_dielt_zeff = .True.
-       call wrtout(std_out, "Setting has_dielt_zeff to True. Long-range term will be substracted in Fourier interpolation.")
+       call wrtout(std_out, " Setting has_dielt_zeff to True. Long-range term will be substracted in Fourier interpolation.")
      end if
    end if
 

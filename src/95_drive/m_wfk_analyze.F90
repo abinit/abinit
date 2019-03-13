@@ -211,9 +211,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  ! Costruct crystal and ebands from the GS WFK file.
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
- if (dtset%wfk_task /= WFK_TASK_KLIST2MESH) then
-   call hdr_vs_dtset(wfk0_hdr, dtset)
- end if
+ call hdr_vs_dtset(wfk0_hdr, dtset)
 
  cryst = hdr_get_crystal(wfk0_hdr, timrev2)
  call crystal_print(cryst,header="crystal structure from WFK file")

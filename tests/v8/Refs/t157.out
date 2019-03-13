@@ -536,6 +536,13 @@ P          mk1mem7          8
         optdriver6          1
         optdriver7          8
          prtphdos           0
+           prtpot1          1
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          0
+           prtpot7          0
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2815,6 +2822,13 @@ P          mk1mem7          8
         optdriver6          1
         optdriver7          8
          prtphdos           0
+           prtpot1          1
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          0
+           prtpot7          0
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00

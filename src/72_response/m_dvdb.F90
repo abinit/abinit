@@ -1512,7 +1512,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
 
  call timab(1801, 1, tsec)
 
- call wrtout(std_out, "Loading Vscf(q) in cache...", do_flush=.True.)
+ call wrtout(std_out, " Loading Vscf(q) in cache...", do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  do db_iqpt=1,db%nqpt
@@ -1548,7 +1548,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
    ! Print progress.
    if (db_iqpt <= 50 .or. mod(db_iqpt, 50) == 0) then
      call cwtime(cpu, wall, gflops, "stop")
-     write(msg,'(2(a,i0),2(a,f8.2))') "Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
+     write(msg,'(2(a,i0),2(a,f8.2))') " Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg)
    end if
  end do
@@ -1559,9 +1559,9 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
    if (allocated(db%qcache(db_iqpt)%v1scf)) qcnt = qcnt + 1
  end do
  onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
- call wrtout(std_out, sjoin("Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
 
- call cwtime_report("Qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" Qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
  call timab(1801, 2, tsec)
 
 end subroutine dvdb_qcache_read
@@ -1660,7 +1660,7 @@ subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
  onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
 
- call cwtime_report("Qcache update", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" Qcache update", cpu_all, wall_all, gflops_all)
  call timab(1807, 2, tsec)
 
 end subroutine dvdb_qcache_update
@@ -2448,7 +2448,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 ! *************************************************************************
 
  if (allocated(db%v1scf_rpt)) then
-   if (db%debug) call wrtout(std_out, "v1scf_rpt is already computed. Returning")
+   if (db%debug) call wrtout(std_out, " v1scf_rpt is already computed. Returning")
    return
  end if
 
@@ -3393,7 +3393,7 @@ subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
  ABI_CHECK(ierr == 0, "out of memory in v1scf_rpt")
 
  do ipert=1,db%natom3
-   write(std_out, "(a,i4,a,i4,a)") "Interpolating potential for perturbation ", ipert, " / ", db%natom3, ch10
+   write(std_out, "(a,i4,a,i4,a)") " Interpolating potential for perturbation ", ipert, " / ", db%natom3, ch10
 
    ! FIXME I think this should be ngfftf and not ngfft
    !       Also, other calls to dvdb_ftinterp_setup should use ngfftf.
@@ -3848,12 +3848,12 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
  end do ! iq_ibz
 
  if (tot_miss /= 0) then
-    call wrtout(unt, sjoin(ch10, "There are ",itoa(tot_miss), "independent perturbations missing!"))
+   call wrtout(unt, sjoin(ch10, "There are ",itoa(tot_miss), "independent perturbations missing!"))
  else
-    call wrtout(unt, "All the independent perturbations are available")
-    if (tot_weird /= 0) then
-      call wrtout(unt, "Note however that the DVDB is overcomplete as symmetric perturbations are present.")
-    end if
+   call wrtout(unt, "All the independent perturbations are available")
+   if (tot_weird /= 0) then
+     call wrtout(unt, "Note however that the DVDB is overcomplete as symmetric perturbations are present.")
+   end if
  end if
 
  ABI_FREE(qibz)
@@ -3944,6 +3944,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  ! TODO: Should perform consistency check on the headers
  ! rearrange them in blocks of q-points for efficiency reason.
  ! ignore POT1 files that do not correspond to atomic perturbations.
+ ! Add POT file from GS run to support Sternheimer in eph_task = 4
 
  do ii=1,nfiles
    write(std_out,"(a,i0,2a)")"- Reading header of file [",ii,"]: ",trim(v1files(ii))
@@ -4039,7 +4040,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  ! List available perturbations.
  dvdb = dvdb_new(dvdb_path, xmpi_comm_self)
  call dvdb%print()
- call dvdb%list_perts([-1,-1,-1])
+ call dvdb%list_perts([-1, -1, -1])
  call dvdb%free()
 
  return
@@ -5032,7 +5033,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
      ! Entry set to -1 for perturbations that can be found from basis perturbations.
      if (sum(pertsy(:,idir,iat)) == -nqpt_interpolate) cycle
 
-     call wrtout(std_out, sjoin("Interpolating perturbation iat, idir = ",itoa(iat), itoa(idir)), do_flush=.True.)
+     call wrtout(std_out, sjoin(" Interpolating perturbation iat, idir = ",itoa(iat), itoa(idir)), do_flush=.True.)
      call cwtime(cpu, wall, gflops, "start")
 
      ! TODO: This part is slow.
@@ -5041,7 +5042,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
                              qshift_coarse, nfftf, ngfftf, &
                              dvdb%nrpt, dvdb%nspden, ipert, v1scf_rpt, comm)
 
-     call cwtime_report("v1scf_rpt built", cpu, wall, gflops)
+     call cwtime_report(" v1scf_rpt built", cpu, wall, gflops)
 
      do iq=1,nqpt_interpolate
        if (pertsy(iq,idir,iat) == -1) cycle

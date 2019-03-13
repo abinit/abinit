@@ -1937,8 +1937,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end if
 
      if (my_rank == master) then
-       if (ignore_kq /= 0) write(std_out, "(a, 1x, i0)")"Number of ignored k+q points:", ignore_kq
-       if (ignore_ibsum_kq /= 0) write(std_out, "(a, 1x, i0)")"Number of ignored (k+q, m) states:", ignore_ibsum_kq
+       if (ignore_kq /= 0) write(std_out, "(a, 1x, i0)")" Number of ignored k+q points:", ignore_kq
+       if (ignore_ibsum_kq /= 0) write(std_out, "(a, 1x, i0)")" Number of ignored (k+q, m) states:", ignore_ibsum_kq
      end if
 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.

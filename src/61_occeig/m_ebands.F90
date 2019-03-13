@@ -501,19 +501,18 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
 
 ! *********************************************************************
 
- my_unt =std_out; if (present(unit)) my_unt =unit
+ my_unt =std_out; if (present(unit)) my_unt = unit
  my_mode='COLL'; if (present(mode_paral)) my_mode=mode_paral
 
  do spin=1,gaps%nsppol
-
    if (spin == 1) then
      msg = ch10
      if (present(header)) msg = ch10//' === '//trim(adjustl(header))//' === '
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(my_unt, msg, my_mode)
    end if
 
    if (gaps%ierr(spin) /= 0) then
-     call wrtout(my_unt,gaps%errmsg_spin(spin), my_mode)
+     call wrtout(my_unt, gaps%errmsg_spin(spin), my_mode)
      continue
    end if
 
@@ -530,20 +529,20 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
    ick = gaps%fo_kpos(2,spin)
    ikopt = gaps%fo_kpos(3,spin)
 
-   write(msg,'(a,i2,a,2(a,f8.4,a,3f8.4,a),33x,a,3f8.4)')&
+   write(msg,'(a,i2,a,2(a,f8.4,a,3f8.4,a),33x,a,3f8.4)') &
     '  >>>> For spin ', spin, ch10, &
     '   Minimum direct gap = ',opt_gap*Ha_eV,' (eV), located at k-point     : ',gaps%kpoints(:,ikopt),ch10,&
     '   Fundamental gap    = ',fun_gap*Ha_eV,' (eV), Top of valence bands at: ',gaps%kpoints(:,ivk),ch10,  &
                                              '      Bottom of conduction at: ',gaps%kpoints(:,ick)
    call wrtout(my_unt,msg,my_mode)
 
-   write(msg, "((a, f8.4, a))") " Valence MAX:", gaps%vb_max(spin) * Ha_eV, " (eV)"
+   write(msg, "((a, f8.4, a))") " Valence Maximum:", gaps%vb_max(spin) * Ha_eV, " (eV)"
    call wrtout(my_unt,msg,my_mode)
-   write(msg, "((a, f8.4, a))") " Conduction min:", gaps%cb_min(spin) * Ha_eV, " (eV)"
+   write(msg, "((a, f8.4, a))") " Conduction minimum:", gaps%cb_min(spin) * Ha_eV, " (eV)"
    call wrtout(my_unt,msg,my_mode)
    write(msg, "((a, f8.4, a))") " Fermi level:", gaps%fermie * Ha_eV, " (eV)"
    call wrtout(my_unt,msg,my_mode)
- end do !spin
+ end do ! spin
 
 end subroutine gaps_print
 !!***

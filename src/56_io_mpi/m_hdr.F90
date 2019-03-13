@@ -3985,29 +3985,29 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
 !NEW_HDR
  if (any(hdr%kptrlatt /= hdr0%kptrlatt)) then
-    write(msg,"(2(a,9(i0,1x)))")"input kptrlatt= ",hdr%kptrlatt," /= disk file kptrlatt=",hdr0%kptrlatt
+    write(msg,"(2(a,9(i0,1x)))")"input kptrlatt = ",hdr%kptrlatt," /= disk file kptrlatt = ",hdr0%kptrlatt
     MSG_COMMENT(msg)
  end if
  if (hdr%kptopt /= hdr0%kptopt) then
-    MSG_COMMENT(sjoin("input kptopt=",itoa(hdr%kptopt)," /= disk file kptopt=",itoa(hdr0%kptopt)))
+    MSG_COMMENT(sjoin("input kptopt = ", itoa(hdr%kptopt)," /= disk file kptopt = ", itoa(hdr0%kptopt)))
  end if
  if (hdr%pawcpxocc /= hdr0%pawcpxocc) then
-    MSG_WARNING(sjoin("input pawcpxocc=",itoa(hdr%pawcpxocc)," /= disk file pawcpxocc=",itoa(hdr0%pawcpxocc)))
+    MSG_WARNING(sjoin("input pawcpxocc = ", itoa(hdr%pawcpxocc)," /= disk file pawcpxocc = ", itoa(hdr0%pawcpxocc)))
  end if
  if (hdr%icoulomb /= hdr0%icoulomb) then
-    MSG_WARNING(sjoin("input icoulomb=",itoa(hdr%icoulomb)," /= disk file icoulomb=",itoa(hdr0%icoulomb)))
+    MSG_WARNING(sjoin("input icoulomb = ", itoa(hdr%icoulomb)," /= disk file icoulomb = ", itoa(hdr0%icoulomb)))
  end if
 
  if (abs(hdr%nelect - hdr0%nelect) > tol6) then
-    MSG_WARNING(sjoin("input nelect=",ftoa(hdr%nelect)," /= disk file nelect=",ftoa(hdr0%nelect)))
+    MSG_WARNING(sjoin("input nelect = ", ftoa(hdr%nelect)," /= disk file nelect = ",ftoa(hdr0%nelect)))
  end if
  if (abs(hdr%charge - hdr0%charge) > tol6) then
-    MSG_WARNING(sjoin("input charge=",ftoa(hdr%charge)," /= disk file charge=",ftoa(hdr0%charge)))
+    MSG_WARNING(sjoin("input charge = ", ftoa(hdr%charge)," /= disk file charge = ", ftoa(hdr0%charge)))
  end if
 
  if (hdr%ntypat==hdr0%ntypat) then
    if (any(abs(hdr%amu - hdr0%amu) > tol6)) then
-      MSG_WARNING(sjoin("input amu=",ltoa(hdr%amu)," /= disk file amu=",ltoa(hdr0%amu)))
+      MSG_WARNING(sjoin("input amu = ",ltoa(hdr%amu)," /= disk file amu = ",ltoa(hdr0%amu)))
    end if
  end if
 !end NEW_HDR
