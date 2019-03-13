@@ -55,9 +55,6 @@ else:
     class YDriverConf(Mock):
         pass
 
-    class YTester(Mock):
-        pass
-
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
