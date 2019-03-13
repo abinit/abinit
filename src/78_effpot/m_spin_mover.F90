@@ -890,6 +890,12 @@ contains
        ABI_DEALLOCATE(self%H_lang_coeff)
     end if
 
+    if(allocated(self%ms) ) then
+       ABI_DEALLOCATE(self%ms)
+    end if
+
+
+
     if(self%method==3) then
        call self%spin_mc%finalize()
     end if
@@ -926,6 +932,7 @@ contains
     call self%hist%finalize()
     call self%spin_ob%finalize()
     call self%spin_ncfile%close()
+    call self%spin_ob%finalize()
   end subroutine finalize
   !!***
 

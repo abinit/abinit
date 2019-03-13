@@ -53,6 +53,8 @@ contains
     if(size(mshape)/=2) MSG_ERROR("mshape should be size 2 for dense_mat_t")
     self%nrow=mshape(1)
     self%ncol=mshape(2)
+    ABI_ALLOCATE(self%mshape, (2))
+    self%mshape(:)=mshape(:)
     ABI_ALLOCATE(self%mat, (self%nrow, self%ncol))
     self%mat(:,:)=0.0d0
   end subroutine dense_mat_t_initialize
