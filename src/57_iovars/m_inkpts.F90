@@ -256,6 +256,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    ! Initialize kpts from kerange_path file.
    ABI_MALLOC(krange2ibz, (nkpt))
    if (my_rank == master) then
+#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
      call hdr_ncread(hdr, ncid, fform)
      ABI_CHECK(fform /= 0, sjoin("Error while reading:", kerange_path))
@@ -264,6 +265,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      !ABI_CHECK(nkpt == hdr%nkpt, "nkpt from kerange != nkpt")
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
      NCF_CHECK(nf90_close(ncid))
+#else
+     MSG_ERROR("kerange_path requires NETCDF support")
+#endif
    end if
    call xmpi_bcast(krange2ibz, master, comm, ierr)
    call hdr_bcast(hdr, master, my_rank, comm)

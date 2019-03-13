@@ -90,9 +90,10 @@ sigma_nshiftk7 1
 sigma_shiftk7 0 0 0
 einterp7 1 5 0 0           # Parameters for star-functions interpolation
 sigma_erange7 0.2 0.2 eV   # Select kpts in fine mesh within this energy window.
-
 # Cancel default values
-nqpt7     0; rfphon7   0; kptopt7   1
+nqpt7     0 
+rfphon7   0 
+kptopt7   1
 
 ############################################################################################
 #                                         STRUCTURE

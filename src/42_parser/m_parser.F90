@@ -1614,24 +1614,18 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !end if
 
  if(errcod/=0)then
-
-   write(message, '(8a,i0,a)' ) ch10,&
-&   ' inarray : ',ch10,&
-&   '  An error occurred reading data for keyword "',trim(cs),'",',ch10,&
-&   '  looking for ',narr,' array elements.'
-   call wrtout(std_out,message,do_flush=.true.)
-
-   write(message,'(8a)')&
-&   'There is a problem with the input file : maybe  ',ch10,&
-&   'a disagreement between the declared dimension of the array,',ch10,&
-&   'and the number of data actually provided. ',ch10,&
-&   'Action: correct your input file, and especially the keywork', trim(cs)
+   write(message, '(5a,i0,10a)' ) &
+   'An error occurred reading data for keyword "',trim(cs),'",',ch10,&
+   'looking for ',narr,' array elements.', ch10, &
+   'There is a problem with the input file: maybe  ',ch10,&
+   'a disagreement between the declared dimension of the array,',ch10,&
+   'and the number of data actually provided. ',ch10,&
+   'Action: correct your input file, and especially the keyword', trim(cs)
    MSG_ERROR(message)
  end if
 
 !In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
-if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' &
-&    .or. typevarphys=='TIM')then
+if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM')then
    do
 
 !    Relative location of next blank after data

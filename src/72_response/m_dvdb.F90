@@ -3287,6 +3287,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
  end if
 
  ! TODO: If high-symmetry q-points, one could save flops by FFT interpolating the independent
+ ! TODO: Use ZGEMM with MPI
  ! perturbations and then rotate ...
  v1scf_qpt = zero; cnt = 0
  do ispden=1,db%nspden
