@@ -841,7 +841,6 @@ module m_yaml_out
       call string_clear(key)
       call string_clear(vs)
       call pl%iter(key, type_code, vi, vr, vs)
-      write(*,*) key, type_code
 
       call yaml_start_field(interm, trim(key), width=width)
       call interm%write(' ')
