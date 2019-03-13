@@ -262,7 +262,6 @@ contains
     end if
     call self%hist%set_vars(S=S, Snorm=self%supercell%ms, &
          &  time=0.0_dp, ihist_latt=0, inc=.True.)
-
    endif
  end subroutine set_initial_state
 
@@ -594,7 +593,7 @@ contains
           call self%hist%set_vars(time=t,  inc=.True.)
           call self%spin_ob%get_observables(self%hist%S(:,:, self%hist%ihist_prev), &
                self%hist%Snorm(:,self%hist%ihist_prev), self%hist%etot(self%hist%ihist_prev))
-          if(mod(counter, self%hist%spin_nctime)==0) then
+          if(modulo(counter, self%hist%spin_nctime)==0) then
              call self%spin_ncfile%write_one_step(self%hist)
              write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                   & self%spin_ob%Mst_norm_total/self%spin_ob%Snorm_total, &

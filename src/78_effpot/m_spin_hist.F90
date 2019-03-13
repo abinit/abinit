@@ -226,10 +226,10 @@ contains
     !self%acell(:)=zero
     !self%rprimd(:, :)=zero
     !self%xred(:,:) =zero
-    self%heff(:,:,1)=zero
-    self%S(:,:,1)=zero
-    self%dSdt(:,:,1)=zero
-    self%snorm(:,1)=zero
+    self%heff(:,:,:)=zero
+    self%S(:,:,:)=zero
+    self%dSdt(:,:,:)=zero
+    self%snorm(:,:)=zero
     !print *, "Initialization spin hist finished"
   end subroutine initialize
 !!***
@@ -554,8 +554,10 @@ contains
     integer :: ihist
     ihist=self%ihist
     !print *, "set spin hist vars: ihist=", ihist
-    if(present(inc) .and. inc) then
-       call self%inc1()
+    if(present(inc)) then
+       if (inc) then
+          call self%inc1()
+       end if
     end if
     if(present(S)) then
        self%S(:, :, ihist)=S(:,:)
