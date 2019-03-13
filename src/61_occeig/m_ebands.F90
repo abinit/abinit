@@ -4276,6 +4276,7 @@ select case (intmeth)
      end do !ikpt
    end do !spin
    ABI_FREE(wme0)
+   call xmpi_sum(edos%dos, comm, ierr)
    if (nvals > 0) call xmpi_sum(out_valsdos, comm, ierr)
    if (nvecs > 0) call xmpi_sum(out_vecsdos, comm, ierr)
    if (ntens > 0) call xmpi_sum(out_tensdos, comm, ierr)
