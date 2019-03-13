@@ -173,7 +173,6 @@ contains
     row_nz(:)=0
     do i=1, ngroup
        irow=i1_list(i)
-       !csr%row_shift(irow)=istartend(i)
        row_nz(irow) = istartend(i+1)-istartend(i)
     end do
 

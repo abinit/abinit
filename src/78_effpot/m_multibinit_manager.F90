@@ -70,7 +70,7 @@ module m_multibinit_manager
   !-------------------------------------------------------------------!
   type, public :: mb_manager_t
      character(len=fnlen) :: filenames(17)
-     type(multibinit_dtset_type) :: params
+     type(multibinit_dtset_type), pointer :: params
      type(supercell_maker_t) :: sc_maker
      type(unitcell_t) :: unitcell
      type(mb_supercell_t) :: supercell
@@ -80,8 +80,10 @@ module m_multibinit_manager
      type(lattice_mover_t) :: lattice_mover
      type(spin_mover_t) :: spin_mover
      ! type(lwf_mover_t) :: lwf_mover
-
      type(spin_ncfile_t) :: spin_ncfile
+
+     ! TODO: this is temporary. Remove after moving to multibinit_main2
+     logical :: use_external_params=.True.
    contains
      procedure :: initialize
      procedure :: finalize
@@ -103,12 +105,14 @@ contains
   subroutine initialize(self, filenames,params)
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen), intent(inout) :: filenames(17)
-    type(multibinit_dtset_type), optional, intent(in) :: params
+    type(multibinit_dtset_type), target, optional, intent(in) :: params
     !TODO: remove params as argument. It is here because the params are read
     ! in the multibinit_main function. Once we use multibinit_main2, remove it.
     if (present(params)) then
-       self%params=params
+       self%params=>params
     else
+       self%use_external_params=.False.
+       allocate(self%params)
        call self%read_params()
     endif
     self%filenames=filenames
@@ -130,7 +134,12 @@ contains
     call self%pots%finalize()
     call self%spin_mover%finalize()
     call self%lattice_mover%finalize()
-    call multibinit_dtset_free(self%params)
+    if(.not. self%use_external_params) then
+       call multibinit_dtset_free(self%params)
+       ! TODO: Intel compilers complains but it should not. Uncomment when know why.
+       !deallocate(self%params)
+    endif
+    nullify(self%params)
     !call self%lwf_mover%finalize()
   end subroutine finalize
 

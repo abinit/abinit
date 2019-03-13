@@ -128,7 +128,7 @@ contains
     end if
     counter=0
     do i=1, self%nnz
-       if (abs(self%val%data(i))> epsilon(1.0_dp)) then
+       if (abs(self%val%data(i))> epsilon(1.0)) then
           counter=counter+1
           self%ind%data(:,counter) =self%ind%data(:, i)
           self%val%data(counter) = self%val%data(i)

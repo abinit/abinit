@@ -128,11 +128,9 @@ subroutine real_array_type_push(self, val)
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ABI_ALLOCATE(self%data, (self%capacity))
-      !ALLOCATE(self%data(self%capacity), stat=err)
+      ALLOCATE(self%data(self%capacity), stat=err)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      !ABI_ALLOCATE(temp,(self%capacity))
       ALLOCATE(temp(self%capacity), stat=err)
       temp(:self%size-1) = self%data
       call move_alloc(temp, self%data) !temp gets deallocated
@@ -142,7 +140,7 @@ subroutine real_array_type_push(self, val)
 end subroutine real_array_type_push
 !!***
 
-!****f* m_dynarray/real_array_type_finalize
+!****f* m_disarray/real_array_type_finalize
 !!
 !! NAME
 !! real_array_type_finalize
@@ -164,7 +162,7 @@ subroutine real_array_type_finalize(self)
 
   class(real_array_type), intent(inout):: self
   if ( allocated(self%data) ) then
-      ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data)
   end if
   self%size=0
   self%capacity=0
@@ -199,10 +197,9 @@ subroutine int_array_type_push(self, val)
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ABI_ALLOCATE(self%data, (self%capacity))
+      ALLOCATE(self%data(self%capacity), stat=err)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      !ABI_ALLOCATE(temp,(self%capacity))
       ALLOCATE(temp(self%capacity), stat=err)
       temp(:self%size-1) = self%data
       call move_alloc(temp, self%data) !temp gets deallocated
@@ -285,7 +282,7 @@ subroutine int_array_type_finalize(self)
 
   class(int_array_type), intent(inout):: self
   if ( allocated(self%data) ) then
-      ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data)
   end if
   self%size=0
   self%capacity=0
@@ -322,7 +319,7 @@ subroutine int2d_array_type_push(self, val)
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ABI_ALLOCATE(self%data, (size(val), self%capacity))
+      ALLOCATE(self%data(size(val), self%capacity), stat=err)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
       ALLOCATE(temp(size(val), self%capacity), stat=err)
@@ -400,7 +397,7 @@ subroutine int2d_array_type_finalize(self)
 
   class(int2d_array_type), intent(inout):: self
   if ( allocated(self%data) ) then
-      ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data)
   end if
   self%size=0
   self%capacity=0

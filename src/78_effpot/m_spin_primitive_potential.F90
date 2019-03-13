@@ -422,7 +422,7 @@ contains
     class(abstract_potential_t), pointer, intent(inout) :: scpot
     !type(spin_potential_t), pointer:: tpot
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
-    integer, allocatable :: i_sc(:), j_sc(:), R_sc(:, :)
+    integer, allocatable :: i_sc(:), j_sc(:), Rj_sc(:, :)
     real(dp) :: val_sc(scmaker%ncells)
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
@@ -440,12 +440,15 @@ contains
              ij=ind_Rij(3)
              R=self%Rlist%data(:,iR)
              call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
-             call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=R_sc)
+             call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=Rj_sc)
              val_sc(:)= self%coeff%val%data(inz)
              do i=1, scmaker%ncells
                 ! this subroutine can be run on only master node.
                 call scpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
              end do
+             if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
+             if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
+             if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
           end do
        endif
     end select

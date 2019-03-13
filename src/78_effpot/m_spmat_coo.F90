@@ -78,9 +78,7 @@ contains
     real(dp), intent(out) :: b(:)
     !real(dp):: my_b(self%nrow)
     integer :: ierr, irow, icol
-    !call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
     call xmpi_bcast(x, 0, xmpi_world, ierr)
-    !my_b(:)=0.0_dp
     b(:)=0.0_dp
 
     ! TODO implement

@@ -159,9 +159,9 @@ contains
      call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 
      !Read the coefficient from fit
+     !FIXME: hexu: on test farm, it is not no but $path/no
      if(filnam(4)/=''.and.filnam(4)/='no')then
         call effective_potential_file_getType(filnam(4),filetype)
-        ! TODO hexu: filetype==(33?)
         if(filetype==3.or.filetype==23) then
            call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
         else

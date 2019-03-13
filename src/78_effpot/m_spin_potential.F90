@@ -376,7 +376,6 @@ contains
        ABI_DEALLOCATE(self%external_hfield)
     endif
 
-    ! destroy LIL an CSR
     call self%bilinear_csr_mat%finalize()
     if (.not. self%csr_mat_ready) then
        call self%coeff_coo%finalize()
