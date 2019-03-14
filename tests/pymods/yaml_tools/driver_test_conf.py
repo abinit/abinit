@@ -111,22 +111,23 @@ class DriverTestConf:
         already_defined = set()
 
         cursor = len(self.param_stack) - 1
-        top = cursor
+        top = cursor  # top of the stack, bottom of the hierarchy
 
         while cursor >= 0:  # loop from bottom to top
             for name, cons in self.constraints_stack[cursor].items():
-                if cursor < top and not cons.inherited:
-                    # pass if we are no longer on
-                    # the same level as the caller
-                    continue
-                elif name in exclude or name in already_defined:
-                    continue
-                else:
-                    if cons.apply_to(obj):
-                        exclude.update(cons.exclude)
-                        constraints.append(cons)
-                        already_defined.add(name)
-            cursor -= 1
+                if (cursor < top and not cons.inherited) \
+                   or name in exclude \
+                   or name in already_defined:
+                    # continue if we are no longer on the same level as the
+                    # caller and the constraints cannot be inherited
+                    # or constraint have been either already overridden or
+                    # excluded
+                    pass
+                elif cons.apply_to(obj):
+                    exclude.update(cons.exclude)
+                    constraints.append(cons)
+                    already_defined.add(name)
+            cursor -= 1  # next level
 
         return constraints
 

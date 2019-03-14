@@ -436,6 +436,10 @@ class TestMetaConfParser(object):
         assert test == ref
 
 
-class TestConfParser(object):
+class TestDriverTestConf(object):
     def test_conf_parser(self):
         assert conf_parser
+
+
+class TestTester(object):
+    pass

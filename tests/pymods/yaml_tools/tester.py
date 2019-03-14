@@ -48,6 +48,11 @@ class Tester(object):
         self.issues = []
 
     def check_this(self, name, ref, tested):
+        '''
+            Check constraints applying to the 'tested' node (of name 'name')
+            against 'ref'
+        '''
+        # we want to detect only dictionaries, not classes that inherit from it
         if type(ref) is dict:
             ref = BaseDictWrapper(ref)
         if type(tested) is dict:
