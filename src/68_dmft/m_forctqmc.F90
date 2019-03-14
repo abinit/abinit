@@ -1732,7 +1732,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
         call nf_check(nf90_close(ncid))
 
         ! Invoking python to execute the script
-        call Invoke_python_triqs (paw_dmft%spacecomm)
+        call Invoke_python_triqs (paw_dmft%spacecomm, trim(paw_dmft%filapp_in)//c_null_char)
 
         ! Allocating the fortran variables for the results
         ABI_ALLOCATE(new_re_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))

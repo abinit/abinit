@@ -248,6 +248,8 @@ MODULE m_paw_dmft
 
   character(len=fnlen) :: filapp
 
+  character(len=fnlen) :: filapp_in
+
   real(dp) :: temp
 
   integer, allocatable :: lpawu(:)
@@ -544,7 +546,7 @@ end subroutine init_sc_dmft
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 !!
 
-subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmft, pawtab, psps, typat)
+subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnametmp_app_in, nspinor, paw_dmft, pawtab, psps, typat)
 
  use defs_abitypes
  use m_splines
@@ -561,6 +563,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  type(pawtab_type),intent(in)  :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type),intent(inout) :: paw_dmft
  character(len=fnlen), intent(in) :: fnametmp_app
+ character(len=fnlen), intent(in) :: fnametmp_app_in
 !arrays
  integer,intent(in) :: typat(dtset%natom)
  real(dp),intent(in),target :: dmatpawu(:,:,:,:)
@@ -616,7 +619,8 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  else if (nspinor==2) then
    paw_dmft%nelectval= dtset%nelect-float(paw_dmft%dmftbandi-1)*paw_dmft%nsppol
  endif
- paw_dmft%filapp= fnametmp_app
+ paw_dmft%filapp = fnametmp_app
+ paw_dmft%filapp_in = fnametmp_app_in
  paw_dmft%natpawu=dtset%natpawu
  paw_dmft%natom=dtset%natom
  paw_dmft%temp=dtset%tsmear!*unit_e
@@ -735,8 +739,8 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  do ikpt=1,paw_dmft%nkpt
    sumwtk=sumwtk+paw_dmft%wtk(ikpt)
  enddo
- if(abs(sumwtk-1_dp)>tol13.and.dtset%iscf>=0) then
-   write(message, '(a,f15.13)' )' sum of k-point is incorrect',sumwtk
+ if(abs(sumwtk-1_dp)>tol11.and.dtset%iscf>=0) then
+   write(message, '(a,f15.11)' )' sum of k-point is incorrect',sumwtk
    MSG_ERROR(message)
  endif
  ABI_ALLOCATE(paw_dmft%lpawu,(paw_dmft%natom))

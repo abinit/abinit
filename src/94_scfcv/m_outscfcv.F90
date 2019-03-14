@@ -1067,7 +1067,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      write(message,'(2a,i3)') ch10,&
 &     '  Warning: Psichi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
      call wrtout(std_out,message,'COLL')
-     call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app,dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+     call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app, dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute psichi

@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <complex>
+#include <string>
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/utility/real_or_complex.hpp>  //ADDED for compatibility with TRIQS 1.4
 
@@ -16,7 +17,7 @@ using triqs::operators::many_body_operator_generic; //ADDED Instead
 
 extern "C"{
 
-    void invoke_python_triqs(MPI_Fint *mpi_comm);
+    void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in);
   
     void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool hist, bool wrt_files, bool tot_not,
                           int n_orbitals, int n_freq, int n_tau, int n_l, int n_cycles_, int cycle_length, int ntherm, int verbo,int seed,  

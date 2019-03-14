@@ -429,6 +429,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_hes=trim(dtfil%filnam_ds(3))//'_HES'
  dtfil%fnameabi_phfrq=trim(dtfil%filnam_ds(3))//'_PHFRQ'
  dtfil%fnameabi_phvec=trim(dtfil%filnam_ds(3))//'_PHVEC'
+ dtfil%fnameabi_app=trim(dtfil%filnam_ds(3))
 
 !-------------------------------------------------------------------------------------------
 !Build name of files from dtfil%filnam_ds(4)

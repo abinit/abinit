@@ -9,6 +9,8 @@
 #include <triqs/gfs.hpp>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdexcept>
+#include <string>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -37,7 +39,7 @@ using triqs::operators::n;
 
 
 // Function to invoke python and run the script
-void invoke_python_triqs(MPI_Fint *mpi_comm) {
+void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in) {
     MPI_Comm comm;
     comm << MPI_Comm_f2c(*mpi_comm);
 
@@ -52,8 +54,21 @@ void invoke_python_triqs(MPI_Fint *mpi_comm) {
     init_python_interpreter("/home/gingras1/miniconda/envs/env2/lib/libpython2.7.so");
     if (rank == 0) fprintf(stdout, "invoke_python_triqs: interpreter initialized\n");
 
+    // Path to the TRIQS impurity solver script
+    string triqs_filename = string(filapp_in);
+    triqs_filename += "_TRIQS.py";
+
     // Execute script
-    execute_python_file("/RQexec/gingras1/NetCDF+execute_python/DFT+DMFT/Python/impurity.py");
+    fprintf(stdout, "Reading python script: %s\n", triqs_filename.c_str());
+    fprintf(stdout, "The _TRIQS.py file does not exist! TRIQS cannot be called.");
+
+    // Check whether the file exists
+    if (!ifstream(triqs_filename.c_str())) {
+        throw invalid_argument("The _TRIQS.py file does not exist! TRIQS cannot be called.");
+        exit(0);
+    }
+
+    execute_python_file(triqs_filename.c_str());
     if (rank == 0) fprintf(stdout, "invoke_python_triqs: script runned\n");
 
     int final;
