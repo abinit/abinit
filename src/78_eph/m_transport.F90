@@ -536,7 +536,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  ifermi = bisect(self%vvdos_mesh,self%ebands%fermie)
 
  ! Handle out of range condition.
- if (iw == 0 .or. iw == self%nw) then
+ if (ifermi == 0 .or. ifermi == self%nw) then
    write(msg,"(a)")&
     "Bisection could not find energy index of the Fermi level!"
    MSG_ERROR(msg)
