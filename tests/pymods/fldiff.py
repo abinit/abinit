@@ -457,7 +457,8 @@ class Differ(object):
         return Result(*self.diff_lines(lines1, lines2),
                       extra_info=(self.yaml_conf.extra_info() if self.use_yaml
                                   else ()),
-                      label=self.options['label'], verbose=self.verbose)
+                      label=self.options['label'],
+                      verbose=self.options['verbose'])
 
     def diff_lines(self, lines1, lines2):
         dext = DataExtractor(xml_mode=self.xml_mode,
