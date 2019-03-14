@@ -106,7 +106,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  use m_abicore
  use m_errors
  use m_sort
- !use m_time
+ use m_time
 
 !Arguments -------------------------------
 !scalars
@@ -125,10 +125,11 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  integer :: ikpt_current_length,isym,itim,jj,nkpout,quit,tident
  real(dp) :: difk,difk1,difk2,difk3,length2trial,reduce,reduce1,reduce2,reduce3
  real(dp) :: cpu,wall,gflops
+ real(dp) :: length1
  character(len=500) :: message
 !arrays
  integer,allocatable :: list(:),bz2ibz_idx(:)
- real(dp) :: gmetkpt(3),ksym(3)
+ real(dp) :: gmetkpt(3),ksym(3),kpt1(3),kpt2(3)
  real(dp),allocatable :: length2(:)
 
 ! *********************************************************************
@@ -175,20 +176,21 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
  ! If there is some possibility for a change (otherwise, wtk_folded is correctly initialized to give no change)
  if(nkbz/=1 .and. (nsym/=1 .or. timrev==1) )then
-   !call cwtime(cpu, wall, gflops, "start")
+   call cwtime(cpu, wall, gflops, "start")
 
    ! Store the length of vectors, but take into account umklapp
    ! processes by selecting the smallest length of all symmetric vectors
    ABI_ALLOCATE(length2,(nkbz))
 
    do ikpt=1,nkbz
+     kpt1 = kbz(:,ikpt)
      do isym=1,nsym
        do itim=1,(1-2*timrev),-2
          ! Get the symmetric of the vector
          do ii=1,3
-           ksym(ii)=itim*( kbz(1,ikpt)*symrec(ii,1,isym)&
-            +kbz(2,ikpt)*symrec(ii,2,isym)&
-            +kbz(3,ikpt)*symrec(ii,3,isym) )
+           ksym(ii)=itim*( kpt1(1)*symrec(ii,1,isym)&
+                          +kpt1(2)*symrec(ii,2,isym)&
+                          +kpt1(3)*symrec(ii,3,isym) )
            ksym(ii)=ksym(ii)-anint(ksym(ii)+tol8*half)
          end do
          gmetkpt(:)=gmet(:,1)*ksym(1)+gmet(:,2)*ksym(2)+gmet(:,3)*ksym(3)
@@ -202,7 +204,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      end do
    end do
 
-   !call cwtime_report("symkpt: length", cpu, wall, gflops)
+   call cwtime_report("symkpt: length", cpu, wall, gflops)
 
    ! Sort the lengths
    ABI_ALLOCATE(list,(nkbz))
@@ -210,7 +212,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    call sort_dp(nkbz,length2,list,tol14)
    ! do ikpt=1,nkbz; write(std_out,*)ikpt,length2(ikpt),list(ikpt),kbz(1:3,list(ikpt)); end do
 
-   !call cwtime_report("symkpt: sort", cpu, wall, gflops)
+   call cwtime_report("symkpt: sort", cpu, wall, gflops)
 
    ! Examine whether the k point grid is symmetric or not
    ! This check scales badly with nkbz hence it's disabled for dense meshes.
@@ -271,7 +273,12 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      end do ! ikpt
    end if ! chksymbreak==1
 
-   ! Eliminate the k points that are symmetric of another one
+   ! More efficient algorithm
+   ! all k-points are undone
+   ! loop over undone kpoints
+   !   apply symmetry transformations
+   !   check if transformed point is in list and mark as done
+
    do ikpt=1,nkbz-1
      ! Ordered index
      ind_ikpt=list(ikpt)
@@ -280,13 +287,16 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      ! which is the case if its weight has been set to 0 by previous folding
      if (wtk_folded(ind_ikpt) < tol16) cycle
 
+     kpt1 = kbz(:,ind_ikpt)
+     length1 = length2(ikpt)
+
      ! Loop on the remaining k-points
      do ikpt2=ikpt+1,nkbz
 
        ! The next line eliminates pairs of vectors that differs by their length.
        ! Moreover, since the list is ordered according to the length,
        ! one can skip all other ikpt2 vectors, as soon as one becomes larger than length2(ikpt)
-       if (length2(ikpt2) - length2(ikpt) > tol8) exit
+       if (length2(ikpt2) - length1 > tol8) exit
 
        ! Ordered index
        ind_ikpt2=list(ikpt2)
@@ -294,62 +304,60 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
        ! If the second vector is already empty, no interest to treat it
        if (wtk_folded(ind_ikpt2) < tol16) cycle
 
-       quit = 0
+       kpt2 = kbz(:,ind_ikpt2)
        ! MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
        ! Should always use this convention when applying symmetry operations in k-space.
        ! TODO: Postponed to v9 because it won't be possible to read old WFK files.
-       do isym=1,nsym
+       isym_loop: do isym=1,nsym
          do itim=1,(1-2*timrev),-2
-           if (isym/=identi .or. itim/=1) then
-             ! Get the symmetric of the vector
-             do ii=1,3
-               ksym(ii)=itim*( kbz(1,ind_ikpt)*symrec(ii,1,isym) &
-               +kbz(2,ind_ikpt)*symrec(ii,2,isym)&
-               +kbz(3,ind_ikpt)*symrec(ii,3,isym) )
-             end do
+           ! Skip non-identity symmetry
+           if (isym==identi .and. itim==1) cycle
 
-             ! The do-loop was expanded to speed up the execution
-             difk= ksym(1)-kbz(1,ind_ikpt2)
-             reduce=difk-anint(difk)
-             if (abs(reduce)>tol8) cycle
-             difk= ksym(2)-kbz(2,ind_ikpt2)
-             reduce=difk-anint(difk)
-             if (abs(reduce)>tol8) cycle
-             difk= ksym(3)-kbz(3,ind_ikpt2)
-             reduce=difk-anint(difk)
-             if (abs(reduce)>tol8) cycle
+           ! Get the symmetric of the vector
+           do ii=1,3
+             ksym(ii)=itim*( kpt1(1)*symrec(ii,1,isym)&
+                            +kpt1(2)*symrec(ii,2,isym)&
+                            +kpt1(3)*symrec(ii,3,isym) )
+           end do
 
-             ! Here, have successfully found a symmetrical k-vector
-             ! Assign all the weight of the k-vector to its symmetrical
-             wtk_folded(ind_ikpt) = wtk_folded(ind_ikpt) + wtk_folded(ind_ikpt2)
-             wtk_folded(ind_ikpt2) = zero
+           ! The do-loop was expanded to speed up the execution
+           difk= ksym(1)-kpt2(1)
+           reduce=difk-anint(difk)
+           if (abs(reduce)>tol8) cycle
+           difk= ksym(2)-kpt2(2)
+           reduce=difk-anint(difk)
+           if (abs(reduce)>tol8) cycle
+           difk= ksym(3)-kpt2(3)
+           reduce=difk-anint(difk)
+           if (abs(reduce)>tol8) cycle
 
-             !if (present(bz2ibz_smap)) then
-               ! Fill entries following listkk convention.
-               bz2ibz_smap(1, ind_ikpt2) = ind_ikpt
-               bz2ibz_smap(2, ind_ikpt2) = isym
-               ! Compute difference with respect to kpt2, modulo a lattice vector
-               ! TODO
-               !dk(:) = kptns2(:,ikpt2) - kpt1a(:)
-               !dkint(:) = nint(dk(:) + tol12)
-               !bz2ibz_smap(3:5, ind_ikpt2) = g0
-               ii = 0; if (itim == -1) ii = 1
-               bz2ibz_smap(6, ind_ikpt2) = ii
-             !end if
+           ! Here, have successfully found a symmetrical k-vector
+           ! Assign all the weight of the k-vector to its symmetrical
+           wtk_folded(ind_ikpt) = wtk_folded(ind_ikpt) + wtk_folded(ind_ikpt2)
+           wtk_folded(ind_ikpt2) = zero
 
-             ! Go to the next ikpt2 if the symmetric was found
-             quit = 1; exit
-           end if ! End condition of non-identity symmetry
-         end do ! isym
-         if (quit == 1) exit
-       end do ! itim
+           ! Fill entries following listkk convention.
+           bz2ibz_smap(1, ind_ikpt2) = ind_ikpt
+           bz2ibz_smap(2, ind_ikpt2) = isym
+           ! Compute difference with respect to kpt2, modulo a lattice vector
+           ! TODO
+           !dk(:) = kptns2(:,ikpt2) - kpt1a(:)
+           !dkint(:) = nint(dk(:) + tol12)
+           !bz2ibz_smap(3:5, ind_ikpt2) = g0
+           ii = 0; if (itim == -1) ii = 1
+           bz2ibz_smap(6, ind_ikpt2) = ii
+
+           ! Go to the next ikpt2 if the symmetric was found
+           exit isym_loop
+         end do ! itim
+       end do isym_loop ! isym
 
      end do ! ikpt2
    end do ! ikpt
 
    ABI_DEALLOCATE(length2)
    ABI_DEALLOCATE(list)
-   !call cwtime_report("symkpt: loop", cpu, wall, gflops)
+   call cwtime_report("symkpt: loop", cpu, wall, gflops)
  end if ! End check on possibility of change
 
  ! Create the indexing array ibz2bz
