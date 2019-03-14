@@ -71,7 +71,7 @@ class DriverTestConf:
             self.filters = {}
 
         self.trees['__default'] = self.tree.copy()
-        self.__tree_cache = {}
+        self._tree_cache = {}
 
     @classmethod
     def from_file(cls, filename):
@@ -157,8 +157,8 @@ class DriverTestConf:
             Start using filtered configurations if available.
         '''
         self.current_state = state
-        if state_hash(state) in self.__tree_cache:
-            self.tree = self.__tree_cache[state_hash(state)]
+        if state_hash(state) in self._tree_cache:
+            self.tree = self._tree_cache[state_hash(state)]
         else:
             # Order filters from the most general to the most specific
             filters = sorted(
@@ -170,7 +170,7 @@ class DriverTestConf:
             for filt, name in filters:
                 self.tree.update(self.trees[name])
 
-            self.__tree_cache[state_hash(state)] = self.tree
+            self._tree_cache[state_hash(state)] = self.tree
 
         # Rebuild stacks with the new tree
         self.rebuild_stacks()

@@ -71,7 +71,7 @@ class Constraint(object):
         self.value = value
         self.metadata = metadata
 
-        self.__apply_to = make_apply_to(apply_to)
+        self._apply_to = make_apply_to(apply_to)
 
     def __repr__(self):
         return 'Constraint({})'.format(', '.join((
@@ -94,9 +94,9 @@ class Constraint(object):
 
     def apply_to(self, obj):
         '''
-            __apply_to is not a method so we have to pass self explicitly
+            _apply_to is not a method so we have to pass self explicitly
         '''
-        return self.__apply_to(self, obj)
+        return self._apply_to(self, obj)
 
     def copy(self):
         '''
@@ -104,7 +104,7 @@ class Constraint(object):
         '''
         cp = Constraint(self.name, self.test, self.type, self.inherited,
                         self.use_params, self.exclude, 'dummy')
-        cp.__apply_to = self.__apply_to
+        cp._apply_to = self._apply_to
         return cp
 
     def with_value(self, val, metadata={}):
@@ -180,9 +180,9 @@ class ConfTree(object):
         '''
             Update self with values found in tree.
         '''
-        self.__update(self.dict, tree.dict)
+        self._update(self.dict, tree.dict)
 
-    def __update(self, old_d, new_d):
+    def _update(self, old_d, new_d):
         '''
             Recursively update the content of old_d with new_d.
         '''
@@ -198,7 +198,7 @@ class ConfTree(object):
             if spec.hardreset:  # simply override
                 old_d['spec'][spec] = deepcopy(spec_d)
             else:  # recursively override individual items
-                self.__update(old_d['spec'][spec], spec_d)
+                self._update(old_d['spec'][spec], spec_d)
 
     def get_spec_at(self, path):
         '''
@@ -304,7 +304,7 @@ class ConfParser(object):
     def ctx(self):
         return self.metadata.copy()
 
-    def __make_tree(self, parsed_src):
+    def _make_tree(self, parsed_src):
         '''
             Recursively build the configuration tree
         '''
@@ -320,7 +320,7 @@ class ConfParser(object):
                                              val)
                     tree['parameters'][key] = val
                 elif isinstance(val, dict):  # add specialization
-                    tree['spec'][SpecKey.parse(key)] = self.__make_tree(val)
+                    tree['spec'][SpecKey.parse(key)] = self._make_tree(val)
                 else:  # unknown key
                     raise InvalidNodeError(key, val)
         return tree
@@ -347,7 +347,7 @@ class ConfParser(object):
                 # Parse each filtered tree then remove it from the source tree
                 if name in parsed_src:
                     self.metadata['tree'] = name
-                    trees[name] = ConfTree(self.__make_tree(parsed_src[name]))
+                    trees[name] = ConfTree(self._make_tree(parsed_src[name]))
                     del parsed_src[name]
                 else:
                     pass  # Should we raise an error ?
@@ -357,6 +357,6 @@ class ConfParser(object):
 
         # Parse the fields remaining as the default tree
         self.metadata['tree'] = 'default tree'
-        trees['__default'] = ConfTree(self.__make_tree(parsed_src))
+        trees['__default'] = ConfTree(self._make_tree(parsed_src))
 
         return trees, filters

@@ -102,15 +102,15 @@ class ConstDict(object):
     '''
     def __init__(self, d=None):
         if d:
-            self.__d = dict(d)
+            self._d = dict(d)
         else:
-            self.__d = {}
+            self._d = {}
 
     def __getitem__(self, key):
-        return self.__d[key]
+        return self._d[key]
 
     def get_dict(self):
-        return self.__d.copy()
+        return self._d.copy()
 
 
 default_options = ConstDict({
@@ -241,9 +241,9 @@ class Result(object):
         self.label = label
         self.verbose = verbose
 
-        self.details = self.__analyse()
+        self.details = self._analyse()
 
-    def __analyse(self):
+    def _analyse(self):
         '''
             Analyse a difference list and extract summary informations and
             details.  Sumary informations are
@@ -453,12 +453,12 @@ class Differ(object):
         with open(file2, 'rt') as f:
             lines2 = f.readlines()
 
-        return Result(*self.diff_lines(lines1, lines2),
+        return Result(*self._diff_lines(lines1, lines2),
                       extra_info=self.yaml_conf.extra_info(),
                       label=self.options['label'],
                       verbose=self.options['verbose'])
 
-    def diff_lines(self, lines1, lines2):
+    def _diff_lines(self, lines1, lines2):
         dext = DataExtractor(xml_mode=self.xml_mode,
                              ignore=self.options['ignore'],
                              ignoreP=self.options['ignoreP'])
@@ -468,7 +468,7 @@ class Differ(object):
         doc2_has_corrupted_document = dext.has_corrupted_doc
 
         if self.use_fl:
-            lines_differences = self.__diff_lines(lines1, lines2)
+            lines_differences = self._fldiff(lines1, lines2)
         else:
             lines_differences = []
 
@@ -483,19 +483,19 @@ class Differ(object):
                     "Tested file has corrupted YAML documents."
                 )]
             else:
-                doc_differences = self.__test_doc(documents1, documents2)
+                doc_differences = self._test_doc(documents1, documents2)
         else:
             doc_differences = []
 
         return lines_differences, doc_differences
 
-    def __test_doc(self, docs1, docs2):
+    def _test_doc(self, docs1, docs2):
         '''
             Compare docs2 to docs1 and apply tests on docs2.
         '''
         return YTester(docs1, docs2, self.yaml_conf).run()
 
-    def __diff_lines(self, lines1, lines2):
+    def _fldiff(self, lines1, lines2):
         '''
             Compute the effective comparision between two set of lines.
             LineCountDifference and MetaCharDifference are both fatal so

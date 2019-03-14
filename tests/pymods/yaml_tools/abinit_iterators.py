@@ -103,10 +103,10 @@ class IntSet(object):
         else:
             raise TypeError('Unknown input for IntSet: {}'.format(obj))
 
-        self.__test = test
+        self._test = test
 
     def __contains__(self, v):
-        return self.__test(v)
+        return self._test(v)
 
     def __eq__(self, other):
         return isinstance(other, IntSet) and self in other and other in self
