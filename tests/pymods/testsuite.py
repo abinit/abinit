@@ -296,6 +296,7 @@ class FileToTest(object):
         ("hdiff_fname","",str),
         ("diff_fname","",str),
         ("use_yaml","no",str),
+        ("verbose_report","no",str),
         #("pydiff_fname","",str),
     ]
 
@@ -353,16 +354,19 @@ class FileToTest(object):
         if '-includeP' in self.fld_options:
             opts['ignoreP'] = False
 
-        if self.use_yaml not in ("yes", "no", "only"):
+        if self.verbose_report == 'yes':
+            opts['verbose'] = True
+
+        if self.use_yaml not in ('yes', 'no', 'only'):
             # raise ParameterError
             pass
-        if self.use_yaml == "yes":
+        if self.use_yaml == 'yes':
             opts['use_yaml'] = True
             opts['use_fl'] = True
-        elif self.use_yaml == "only":
+        elif self.use_yaml == 'only':
             opts['use_yaml'] = True
             opts['use_fl'] = False
-        else:  # self.use_yaml == "no":
+        else:  # self.use_yaml == 'no':
             opts['use_yaml'] = False
             opts['use_fl'] = True
 

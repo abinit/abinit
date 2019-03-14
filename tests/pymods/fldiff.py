@@ -121,7 +121,8 @@ default_options = ConstDict({
     'tolerance_rel': 1.01e-10,
     'label': None,
     'use_fl': True,
-    'use_yaml': True
+    'use_yaml': True,
+    'verbose': False
 })
 
 
@@ -416,6 +417,8 @@ class Differ(object):
                 - label: str (default None)
                 - use_yaml: bool (default True)
                 - use_fl: bool (default True)
+                - verbose: bool (default False) enable report of successful
+                           yaml tests too
         '''
         self.xml_mode = False  # this is the first dirty fix.
         self.options = default_options.get_dict()
@@ -454,7 +457,7 @@ class Differ(object):
         return Result(*self.diff_lines(lines1, lines2),
                       extra_info=(self.yaml_conf.extra_info() if self.use_yaml
                                   else ()),
-                      label=self.options['label'])
+                      label=self.options['label'], verbose=self.verbose)
 
     def diff_lines(self, lines1, lines2):
         dext = DataExtractor(xml_mode=self.xml_mode,
