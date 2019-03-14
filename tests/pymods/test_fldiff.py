@@ -1,14 +1,16 @@
 from __future__ import print_function, division, unicode_literals
 import pytest
-from .fldiff import Differ, Result
 from .fldiff import (
+    Differ,
     LineCountDifference,
-    MetaCharDifference,
+    # MetaCharDifference,
     FloatDifference,
     TextDifference,
     ForcedDifference,
 )
 from .data_extractor import DataExtractor
+from .yaml_tools.errors import NoIteratorDefinedError
+
 
 class TestDiffer:
     lines1 = [
@@ -16,9 +18,9 @@ class TestDiffer:
         ' 5.8787 44.537e+056\n',
         ' .7856 5.0\n',
         '- This lines should be ignored\n',
-        '+ This line should always appear in the output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as errorneous\n',
         ': This line is always compared as characters 0.457896321545\n',
-        '. This one too but it will never be counted a errorneous 2.3735435434354364\n',
+        '. This one too but it will never be counted a errorneous 2.4354364\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043643 5.5473684\n',
         'P P and , lines are handled according to parameters as + or - lines\n'
     ]
@@ -28,9 +30,9 @@ class TestDiffer:
         ' 5.8707 44.535e+056\n',
         ' .7856 8.0\n',
         '- This lines should be ignored\n',
-        '+ This line should always appear in the output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as errorneous\n',
         ': This line is always compared as characters 0.457896321545\n',
-        '. This one too but it will never be counted a errorneous 2.3735435434354364\n',
+        '. This one too but it will never be counted a errorneous 2.4354364\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043644 5.5\n',
         'P P and , lines are handled according to parameters as + or - lines\n'
     ]
@@ -40,9 +42,9 @@ class TestDiffer:
         ' 5.8787 44.537e+056\n',
         ' .7856 5.0\n',
         '- Should this line be ignored ?\n',
-        '+ This line should always appear in the output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as errorneous\n',
         ': This line is always compared as characters 0.457896321546\n',
-        '. This one too but it will never be counted a errorneous 2.3735435434354360\n',
+        '. This one too but it will never be counted a errorneous 2.4354360\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043643 5.5473684\n',
         'P , and P lines are handled according to parameters as + or - lines\n'
     ]
@@ -54,10 +56,10 @@ class TestDiffer:
         ' 5.8787 44.537e+056\n',
         ' .7856 5.0\n',
         '- This lines should be ignored\n',
-        '+ This line should always appear in the output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as errorneous\n',
         '- Ignored lines are everywhere\n',
         ': This line is always compared as characters 0.457896321545\n',
-        '. This one too but it will never be counted a errorneous 2.3735435434354364\n',
+        '. This one too but it will never be counted a errorneous 2.4354364\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043643 5.5473684\n',
         'P P and , lines are handled according to parameters as + or - lines\n'
     ]
@@ -68,9 +70,9 @@ class TestDiffer:
         ' 5.8787 44.537e+056\n',
         ' .7856 5.0\n',
         '- This lines should be ignored\n',
-        '+ This line should always appear in the output but is not counted as errorneous\n',
+        '+ This line appears in output but is not counted as errorneous\n',
         ': This line is always compared as characters 0.457896321545\n',
-        '. This one too but it will never be counted a errorneous 2.3735435434354364\n',
+        '. This one too but it will never be counted a errorneous 2.4354364\n',
         '% This line have a fixed tolerance of 1.01e-2: 2.043643 5.5473684\n',
         'P P and , lines are handled according to parameters as + or - lines\n'
     ]
@@ -84,13 +86,13 @@ class TestDiffer:
 
     def test_diff_lines_same(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines1)[0]
+        differences = diff._diff_lines(self.lines1, self.lines1)[0]
         assert len(differences) == 1
         assert isinstance(differences[0], ForcedDifference)
 
     def test_diff_lines_float(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines2)[0]
+        differences = diff._diff_lines(self.lines1, self.lines2)[0]
         assert len(differences) == 5
         d3 = differences.pop(3)
 
@@ -99,7 +101,7 @@ class TestDiffer:
 
     def test_diff_lines_text(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines3)[0]
+        differences = diff._diff_lines(self.lines1, self.lines3)[0]
         assert len(differences) == 4
 
         d2 = differences.pop(1)
@@ -114,20 +116,20 @@ class TestDiffer:
 
     def test_diff_lines_number_not_significant(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines4)[0]
+        differences = diff._diff_lines(self.lines1, self.lines4)[0]
         assert len(differences) == 1
         assert isinstance(differences[0], ForcedDifference)
 
     def test_diff_lines_number_significant(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines5)[0]
+        differences = diff._diff_lines(self.lines1, self.lines5)[0]
         assert len(differences) == 1
         assert isinstance(differences[0], LineCountDifference)
         assert differences[0].more == 'file 2'
 
     def test_diff_lines_float_format(self):
         diff = Differ()
-        differences = diff.diff_lines(
+        differences = diff._diff_lines(
             [' .0007  564.5e-3  7000.0\n'],
             [' 7.0e-4  5.645D-1  7.0f3\n']
         )[0]
@@ -135,7 +137,7 @@ class TestDiffer:
 
     def test_diff_ignore_blanks(self):
         diff = Differ()
-        differences = diff.diff_lines(
+        differences = diff._diff_lines(
             [
                 ' One normal line\n',
                 '.One messy dot   \t line\n',
@@ -164,9 +166,9 @@ class TestResult:
 class TestDataExtractor:
     def test_default(self):
         dext = DataExtractor()
-        assert dext.ignore == True
-        assert dext.ignoreP == True
-        assert dext.xml_mode == False
+        assert dext.ignore
+        assert dext.ignoreP
+        assert not dext.xml_mode
 
     def test_get_metachar(self):
         dext = DataExtractor()
@@ -221,9 +223,33 @@ class TestDataExtractor:
         ]
         assert ignored == []
 
+    def test_extract_require_iterstart(self):
+
+        dext = DataExtractor()
+        dext.iterators_state = {'dtset': 1}
+        lines = '''\
+---
+a field: 58
+another: 78
+a list of strings:
+- "a string"
+- "two strings"
+- "..."
+...'''
+        lines = [line+'\n' for line in lines.split('\n')]
+        with pytest.raises(NoIteratorDefinedError):
+            _, documents, _ = dext.extract(lines)
+
     def test_extract_find_yaml_doc(self):
         dext = DataExtractor()
+        dext.iterators_state = {'dtset': 1}
         lines = '''\
+--- !IterStart
+dtset: 1
+...
+
+ Garbage here
+
 ---
 a field: 58
 another: 78
@@ -235,12 +261,15 @@ a list of strings:
 
         lines = [line+'\n' for line in lines.split('\n')]
         _, documents, _ = dext.extract(lines)
+        print(documents)
+
+        # IterStart documents should not be in the document list
         assert len(documents) == 1
         assert documents[0]['type'] == 'yaml'
-        assert documents[0]['iterators'] == {}
-        assert documents[0]['start'] == 0
-        assert documents[0]['end'] == 7
-        assert documents[0]['lines'] == lines
+        assert documents[0]['iterators'] == {'dtset': 1}
+        assert documents[0]['start'] == 6
+        assert documents[0]['end'] == 13
+        assert documents[0]['lines'] == lines[6:]
         assert documents[0]['obj'] == {
             'a field': 58,
             'another': 78,
