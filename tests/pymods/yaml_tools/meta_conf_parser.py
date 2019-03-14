@@ -296,10 +296,12 @@ class ConfParser(object):
                     raise UnknownParamError(nname, param)
 
             if apply_to == 'this':
-                inherited = False
+                inherited_ = False
+            else:
+                inherited_ = inherited
 
             self.constraints[nname] = Constraint(
-                nname, fun, value_type, inherited, use_params,
+                nname, fun, value_type, inherited_, use_params,
                 set(exclude), apply_to
             )
             return fun
