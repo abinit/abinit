@@ -89,16 +89,20 @@ class Tester(object):
     def run(self):
         top_cons = self.conf.get_top_level_constraints()
         for cons in top_cons:
-            if top_cons[cons].apply_to == 'this':
-                ref = [doc['obj'] for doc in self.ref]
-                tested = [doc['obj'] for doc in self.tested]
-                success = top_cons[cons].check(ref, tested, self.conf)
-                if success:
-                    msg = '{} ok'.format(cons.name)
-                    self.issues.append(Success(self.conf, msg))
-                else:
-                    msg = '{} ({}) failed'.format(cons.name, cons.value)
-                    self.issues.append(Failure(self.conf, msg))
+            if top_cons[cons].apply_to('this'):
+                # ref = [doc['obj'] for doc in self.ref]
+                # tested = [doc['obj'] for doc in self.tested]
+                # success = top_cons[cons].check(ref, tested, self.conf)
+                # if success:
+                #     msg = '{} ok'.format(cons.name)
+                #     self.issues.append(Success(self.conf, msg))
+                # else:
+                #     msg = '{} ({}) failed'.format(cons.name, cons.value)
+                #     self.issues.append(Failure(self.conf, msg))
+                # FIXME How to define and use top level constraints applying on
+                # this like equations ?
+                raise NotImplementedError('Top level constraints are not yet'
+                                          ' implemented')
 
         if len(self.ref) != len(self.tested):
             msg = 'there is not the same number of documents in both side'
