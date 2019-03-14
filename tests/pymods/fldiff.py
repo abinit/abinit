@@ -50,10 +50,9 @@ if has_yaml:
     from .yaml_tools.driver_test_conf import DriverTestConf as YDriverConf
     from .yaml_tools.tester import Tester as YTester, Failure as YFailure
 else:
-    from .yaml_tools import Mock
-
-    class YDriverConf(Mock):
-        pass
+    class YDriverConf(object):
+        def extra_info(self):
+            return ()
 
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
@@ -455,8 +454,7 @@ class Differ(object):
             lines2 = f.readlines()
 
         return Result(*self.diff_lines(lines1, lines2),
-                      extra_info=(self.yaml_conf.extra_info() if self.use_yaml
-                                  else ()),
+                      extra_info=self.yaml_conf.extra_info(),
                       label=self.options['label'],
                       verbose=self.options['verbose'])
 
