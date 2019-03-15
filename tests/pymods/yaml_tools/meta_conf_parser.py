@@ -5,6 +5,7 @@ from numpy import ndarray
 from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
                      AlreadySetKeyError, IllegalFilterNameError)
 from .abinit_iterators import IterStateFilter
+from .register_tag import normalize_attr
 from .tricks import cstm_isinstance
 
 
@@ -25,19 +26,19 @@ def make_apply_to(type_):
     if type_ == 'number':
         def apply_to(self, obj):
             return isinstance(obj, (int, float, complex))
-    elif type_ == 'real' or type_ == float:
+    elif type_ == 'real' or issubclass(type_, float):
         def apply_to(self, obj):
             return isinstance(obj, float)
 
-    elif type_ == 'integer' or type_ == int:
+    elif type_ == 'integer' or issubclass(type_, int):
         def apply_to(self, obj):
             return isinstance(obj, int)
 
-    elif type_ == 'complex' or type_ == complex:
+    elif type_ == 'complex' or issubclass(type_, complex):
         def apply_to(self, obj):
             return isinstance(obj, complex)
 
-    elif type_ == 'Array' or type_ == ndarray:
+    elif type_ == 'Array' or issubclass(type_, ndarray):
         def apply_to(self, obj):
             return isinstance(obj, ndarray)
 
@@ -103,7 +104,7 @@ class Constraint(object):
             Create a copy of self.
         '''
         cp = Constraint(self.name, self.test, self.type, self.inherited,
-                        self.use_params, self.exclude, 'dummy')
+                        self.use_params, self.exclude, 'copying')
         cp._apply_to = self._apply_to
         return cp
 
@@ -120,7 +121,8 @@ class Constraint(object):
 
     def __eq__(self, other):
         return (
-            self.name == other.name
+            isinstance(other, Constraint)
+            and self.name == other.name
             and self.type == other.type
             and self.inherited == other.inherited
             and self.use_params == other.use_params
@@ -134,7 +136,7 @@ class Constraint(object):
 
 class SpecKey(object):
     def __init__(self, name, hardreset=False):
-        self.name = name
+        self.name = normalize_attr(name)
         self.hardreset = hardreset
 
     @classmethod
@@ -150,13 +152,13 @@ class SpecKey(object):
         return hash(self.name)
 
     def __eq__(self, other):
-        return self.name == other.name
+        return isinstance(other, SpecKey) and self.name == other.name
 
     def __neq__(self, other):
-        return self.name != other.name
+        return not isinstance(other, SpecKey) or self.name != other.name
 
     def __repr__(self):
-        return self.name + ('!' if self.hardreset else '')
+        return '"' + self.name + ('!' if self.hardreset else '') + '"'
 
 
 class ConfTree(object):
