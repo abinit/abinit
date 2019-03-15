@@ -115,25 +115,8 @@ class ExtendedTestConf(DriverTestConf):
         '''
             return a dict of the constraints in the current scope.
         '''
-        constraints = {}
-
-        cursor = 0
-        top = len(self.param_stack) - 1
-
-        # traverse from top to bottom to overwrite if needed
-        while cursor <= top:
-            for name, cons in self.constraints_stack[cursor].items():
-                if cursor < top and not cons.inherited:
-                    # pass if we are no longer on
-                    # the same level as the caller
-                    continue
-                else:
-                    for name in cons.exclude:
-                        if name in constraints:
-                            del constraints[name]
-                    constraints[cons.name] = cons
-            cursor += 1
-
+        cons_list = self.get_all_constraints_for('any')
+        constraints = {cons.name: cons for cons in cons_list}
         return constraints
 
     def get_all_parameters_here(self):
@@ -143,19 +126,21 @@ class ExtendedTestConf(DriverTestConf):
         parameters = {}
 
         cursor = 0
-        top = len(self.param_stack) - 1
+        top = len(self.param_stack) - 1  # top of the stack bottom of the tree
 
         # traverse from top to bottom to overwrite if needed
-        while cursor <= top:
-            for name, value in self.param_stack[cursor].items():
-                if cursor < top and not self.known_params[name]['inherited']:
-                    # pass if we are no longer on
-                    # the same level as the caller
-                    continue
-                else:
+        def look_in(param_dict, caller_lvl):
+            for name, value in param_dict.items():
+                if caller_lvl or self.known_params[name]['inherited']:
+                    # use known_params to get the dict structure
                     parameters[name] = self.known_params[name].copy()
                     parameters[name]['value'] = value
+
+        while cursor <= top:
+            look_in(self.param_stack[cursor], cursor == top)
             cursor += 1
+
+        look_in(self.get_top_level_params(), False)
 
         return parameters
 

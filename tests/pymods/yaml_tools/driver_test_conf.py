@@ -101,6 +101,13 @@ class DriverTestConf:
         '''
         return self.tree.get_new_constraints_at(())
 
+    def get_top_level_params(self):
+        '''
+            Return a dict of the parameters defined at the tol level
+            of configuration
+        '''
+        return self.tree.get_new_params_at(())
+
     def get_constraints_for(self, obj):
         '''
             Return a list of the constraints in the current scope that
@@ -113,27 +120,23 @@ class DriverTestConf:
         cursor = len(self.param_stack) - 1
         top = cursor  # top of the stack, bottom of the hierarchy
 
-        def look_in(cons_dict):
+        def look_in(cons_dict, at_top):
             for name, cons in cons_dict.items():
-                if (cursor < top and not cons.inherited) \
-                   or name in exclude \
-                   or name in already_defined:
-                    # continue if we are no longer on the same level as the
-                    # caller and the constraints cannot be inherited
-                    # or constraint have been either already overridden or
-                    # excluded
+                if name in exclude or name in already_defined:
+                    # pass of the constraint have been either already
+                    # overridden or excluded
                     pass
-                elif cons.apply_to(obj):
+                elif (at_top or cons.inherited) and cons.apply_to(obj):
                     exclude.update(cons.exclude)
                     constraints.append(cons)
                     already_defined.add(name)
 
         while cursor >= 0:  # loop from bottom to top
-            look_in(self.constraints_stack[cursor])
+            look_in(self.constraints_stack[cursor], cursor == top)
             cursor -= 1  # next level
 
         # finish with top level
-        look_in(self.get_top_level_constraints())
+        look_in(self.get_top_level_constraints(), False)
 
         return constraints
 
