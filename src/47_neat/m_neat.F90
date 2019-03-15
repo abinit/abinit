@@ -1,0 +1,194 @@
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+    
+module m_neat
+  use defs_basis
+  use m_abicore
+  use m_pair_list
+  use m_stream_string
+  use m_yaml_out
+  use m_results_gs, only: results_gs_type
+  use m_crystal, only: crystal_t
+
+  implicit none
+
+  private
+  public :: neat_energies, neat_results_gs, neat_crystal, neat_start_dataset
+  contains
+
+  subroutine wrtout_stream(stream, iout)
+    type(stream_string),intent(inout) :: stream
+    integer,intent(in) :: iout
+
+    character(len=stream%length) :: s
+
+    call stream%to_string(s)
+    call wrtout(iout, s, 'COLL')
+  end subroutine wrtout_stream
+
+  subroutine neat_start_dataset(n, iout)
+    integer,intent(in) :: n, iout
+    type(stream_string) :: stream
+
+    call yaml_iterstart('dtset', n, stream=stream);
+    call wrtout_stream(stream, iout);
+  end subroutine neat_start_dataset
+  
+!!****f* m_neat/neat_energies
+!!
+!! NAME
+!! neat_energies
+!!
+!! FUNCTION
+!! Write components of total energies in a structured way
+!!
+!! INPUTS
+!!  energies <type(pair_list)>=values of parts of total energy
+!!  iout= unit of output file
+!!  label= optional label to distinct the main from Etot document from secondary Etot(DC) for example
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!    Print a YAML document to output file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+  subroutine neat_energies(energies, iout, label)
+    type(pair_list),intent(inout) :: energies
+    integer,intent(in) :: iout
+    character(len=*),intent(in),optional :: label
+!Local variables-------------------------------
+    type(stream_string) :: stream
+
+    if(present(label)) then
+      call yaml_single_dict(label, '', energies, 35, 500, tag='ETOT', width=20, stream=stream, real_fmt='(ES25.18)')
+    else
+      call yaml_single_dict('Etot', '', energies, 35, 500, tag='ETOT', width=20, stream=stream, real_fmt='(ES25.18)')
+    end if
+
+    call wrtout_stream(stream, iout)
+  end subroutine neat_energies
+!!*** m_neat/neat_energies
+
+!!****f* m_neat/neat_results_gs
+!!
+!! NAME
+!! neat_results_gs
+!!
+!! FUNCTION
+!! Write neat_results_gs
+!!
+!! INPUTS
+!!  results <type(results_gs_type)>=miscellaneous informations about the system after ground state computation
+!!  iout= unit of output file
+!!  ecut= cut energy
+!!  pawecutdg= PAW cut energy
+!!  comment= optional comment for the final docuemtn
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!    Print a YAML document to output file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+  subroutine neat_results_gs(results, iout, ecut, pawecutdg, comment)
+    type(results_gs_type),intent(in) :: results
+    integer,intent(in) :: iout
+    real(dp),intent(in) :: ecut, pawecutdg
+    character(len=*),intent(in),optional :: comment
+
+    type(stream_string) :: stream
+    type(pair_list) :: dict
+    real(dp) :: strten(3,3)
+    real(dp) :: forces(results%natom, 3)
+    integer :: j
+
+    if(present(comment)) then
+      call yaml_open_doc('results_gs', comment, width=10, stream=stream)
+    else
+      call yaml_open_doc('results_gs', '', width=10, stream=stream)
+    end if
+
+    call yaml_add_intfield('natom', results%natom, width=10, stream=stream)
+    call yaml_add_intfield('nsppol', results%nsppol, width=10, stream=stream)
+
+    call dict%set('ecut', r=ecut)
+    call dict%set('pawecutdg', r=pawecutdg)
+    call yaml_add_dict('cut', dict, width=10, stream=stream)
+    call dict%free()
+
+    call dict%set('deltae', r=results%deltae)
+    call dict%set('res2', r=results%res2)
+    call dict%set('residm', r=results%residm)
+    call dict%set('diffor', r=results%diffor)
+    call yaml_add_dict('convergence', dict, width=10, multiline_trig=2, stream=stream)
+    call dict%free()
+
+    call yaml_add_realfield('etotal', results%etotal, width=10, stream=stream)
+    call yaml_add_realfield('entropy', results%entropy, width=10, stream=stream)
+    call yaml_add_realfield('fermie', results%fermie, width=10, stream=stream)
+
+    strten(1,1) = results%strten(1)
+    strten(2,2) = results%strten(2)
+    strten(3,3) = results%strten(3)
+
+    strten(2,3) = results%strten(4)
+    strten(3,2) = results%strten(4)
+    strten(1,3) = results%strten(5)
+    strten(3,1) = results%strten(5)
+    strten(1,2) = results%strten(6)
+    strten(2,1) = results%strten(6)
+    call yaml_add_real2d('stress tensor', 3, 3, strten, width=10, stream=stream, tag='Tensor')    
+    call stream%write(ch10)
+
+    do j=1,3
+      forces(:,j) = results%fcart(j,:)
+    end do
+    call yaml_add_real2d('cartesian forces', results%natom, 3, forces, width=10, stream=stream, tag='CartForces')    
+
+    call yaml_close_doc(stream=stream)
+
+    call wrtout_stream(stream, iout)
+  end subroutine neat_results_gs
+!!*** m_neat/neat_results_gs
+
+!!****f* m_neat/neat_crystal
+!!
+!! NAME
+!! neat_crystal
+!!
+!! FUNCTION
+!! Write neat_crystal
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!    Print a YAML document to output file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+  subroutine neat_crystal(crystal, iout, comment)
+    type(crystal_t),intent(in) :: crystal
+    integer,intent(in) :: iout
+    character(len=*),intent(in),optional :: comment
+
+    
+  end subroutine neat_crystal
+!!*** m_neat/neat_crystal
+end module m_neat

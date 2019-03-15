@@ -1,0 +1,42 @@
+tol_eq: 1.0e-6
+equation:
+    "Etot.Etotal - Etot_DC.Etotal_DC"
+
+lda:
+    # tolvrs 1.0e-7
+    tol_abs: 5.0e-7
+    tol_rel: 5.0e-7
+    results_gs!:
+        convergence:
+            ceil: 1.0e-6
+            diffor:
+                ignore: true
+        stress tensor:
+            tensor_is_symetric: true
+    Etot!: {}
+
+dmft:
+    tol_abs: 1.0e-10
+    tol_rel: 1.0e-10
+    results_gs!:  # hard reset result_gs
+        convergence:
+            ceil: 1.0e-6
+            deltae:
+                ceil: 2.0e-3
+            diffor:
+                ignore: true
+            res2:
+                ignore: true
+        fermie:
+            tol_abs: 1.0e-7
+        stress tensor:
+            ignore: true
+    Etot:
+        tol_rel: 1.0e-8
+        tol_abs: 1.0
+
+filters:
+    lda:
+        dtset: 1
+    dmft:
+        dtset: 2
