@@ -120,13 +120,14 @@ class DriverTestConf:
         cursor = len(self.param_stack) - 1
         top = cursor  # top of the stack, bottom of the hierarchy
 
-        def look_in(cons_dict, at_top):
+        def look_in(cons_dict, caller_lvl):
             for name, cons in cons_dict.items():
                 if name in exclude or name in already_defined:
                     # pass of the constraint have been either already
                     # overridden or excluded
                     pass
-                elif (at_top or cons.inherited) and cons.apply_to(obj):
+                elif (caller_lvl or cons.inherited) \
+                        and (obj == 'any' or cons.apply_to(obj)):
                     exclude.update(cons.exclude)
                     constraints.append(cons)
                     already_defined.add(name)
