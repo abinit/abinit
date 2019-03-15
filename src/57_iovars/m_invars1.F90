@@ -1459,14 +1459,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) nkpt=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"kerange_path",tread,'KEY',key_value=key_value)
- if (tread==1) then
-   dtset%kerange_path = rmquotes(key_value)
-   write(std_out, *)"keragen_path:", trim(dtset%kerange_path)
- end if
+ if (tread==1) dtset%kerange_path = rmquotes(key_value)
 
 #ifdef HAVE_NETCDF
  if (dtset%kerange_path /= ABI_NOFILE) then
-   ! Get number of k-points from kerange_path.
+   ! Get number of k-points in sigma_erange energy windows.
    !dtset%kptopt = 0
    if (my_rank == master) then
      NCF_CHECK(nctk_open_read(ncid, dtset%kerange_path, xmpi_comm_self))

@@ -83,7 +83,7 @@ contains
 !! lenstr=actual length of the string
 !! kptopt=option for the generation of k points
 !! msym=default maximal number of symmetries
-!! kerange_path= Path of KERANGE.nc file used to initialize k-point sampling if kptopt == 0.
+!! kerange_path= Path of KERANGE.nc file used to initialize k-point sampling if kptopt == 0 and string != ABI_NOFILE
 !! nqpt=number of q points (0 or 1)
 !! nsym=number of symetries
 !! occopt=option for occupation numbers

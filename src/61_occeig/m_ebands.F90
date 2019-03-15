@@ -376,23 +376,23 @@ function get_gaps(ebands, gaps, kmask) result(retcode)
    ismetal = ANY(val_idx(:,spin) /= val_idx(1,spin))
    if (ismetal) then
      gaps%ierr(spin) = 1
-     write(gaps%errmsg_spin(spin), "(a,i0)")"Metallic system for spin channel ",spin
-     CYCLE
+     write(gaps%errmsg_spin(spin), "(a,i0)")"Metallic system for spin channel ", spin
+     cycle
    endif
 
-   ivb=val_idx(1,spin)
-   icb=ivb+1
+   ivb = val_idx(1, spin)
+   icb = ivb + 1
 
    do ikibz=1,ebands%nkpt
-     if (.not.my_kmask(ikibz)) CYCLE
-     nband_k=ebands%nband(ikibz+(spin-1)*ebands%nkpt)
-     top_valence(ikibz)=ebands%eig(ivb,ikibz,spin)
-     if (icb>nband_k) then
+     if (.not. my_kmask(ikibz)) cycle
+     nband_k = ebands%nband(ikibz + (spin-1)*ebands%nkpt)
+     top_valence(ikibz) = ebands%eig(ivb, ikibz, spin)
+     if (icb > nband_k) then
        gaps%ierr(spin) = 2
        gaps%errmsg_spin(spin) = "Not enough states to calculate the band gap."
-       CYCLE spin_loop
-     endif
-     bot_conduct(ikibz)=ebands%eig(icb,ikibz,spin)
+       cycle spin_loop
+     end if
+     bot_conduct(ikibz) = ebands%eig(icb, ikibz, spin)
    end do
 
    ! Minimum of the direct Gaps
@@ -406,11 +406,11 @@ function get_gaps(ebands, gaps, kmask) result(retcode)
    gaps%vb_max(spin) = ebands%eig(ivb, ivk, spin)
    gaps%cb_min(spin) = ebands%eig(icb, ick, spin)
    fun_gap = ebands%eig(icb, ick, spin) - ebands%eig(ivb, ivk, spin)
-   gaps%fo_values(:,spin) = [fun_gap, opt_gap]
-   gaps%fo_kpos(:,spin) = [ivk, ick, ikopt]
+   gaps%fo_values(:, spin) = [fun_gap, opt_gap]
+   gaps%fo_kpos(:, spin) = [ivk, ick, ikopt]
  end do spin_loop
 
- retcode = MAXVAL(gaps%ierr)
+ retcode = maxval(gaps%ierr)
 
 end function get_gaps
 !!***
@@ -521,12 +521,12 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
    opt_gap = gaps%fo_values(2,spin)
 
    if (any(gaps%fo_kpos(:,spin) == 0)) then
-     call wrtout(my_unt,sjoin("Cannot detect gap for spin: ", itoa(spin)))
+     call wrtout(my_unt, sjoin("Cannot detect gap for spin: ", itoa(spin)))
      cycle
    end if
 
-   ivk = gaps%fo_kpos(1,spin)
-   ick = gaps%fo_kpos(2,spin)
+   ivk = gaps%fo_kpos(1, spin)
+   ick = gaps%fo_kpos(2, spin)
    ikopt = gaps%fo_kpos(3,spin)
 
    write(msg,'(a,i2,a,2(a,f8.4,a,3f8.4,a),33x,a,3f8.4)') &
@@ -536,11 +536,11 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
                                              '      Bottom of conduction at: ',gaps%kpoints(:,ick)
    call wrtout(my_unt,msg,my_mode)
 
-   write(msg, "((a, f8.4, a))") " Valence Maximum:", gaps%vb_max(spin) * Ha_eV, " (eV)"
+   write(msg, "((a,f8.4,2a))") " Valence Maximum: ", gaps%vb_max(spin) * Ha_eV, " (eV) at: ", trim(ktoa(gaps%kpoints(:, ivk)))
    call wrtout(my_unt,msg,my_mode)
-   write(msg, "((a, f8.4, a))") " Conduction minimum:", gaps%cb_min(spin) * Ha_eV, " (eV)"
+   write(msg, "((a,f8.4,2a))") " Conduction minimum: ", gaps%cb_min(spin) * Ha_eV, " (eV) at: ", trim(ktoa(gaps%kpoints(:, ick)))
    call wrtout(my_unt,msg,my_mode)
-   write(msg, "((a, f8.4, a))") " Fermi level:", gaps%fermie * Ha_eV, " (eV)"
+   write(msg, "((a,f8.4,a))") " Fermi level:", gaps%fermie * Ha_eV, " (eV)"
    call wrtout(my_unt,msg,my_mode)
  end do ! spin
 
@@ -999,7 +999,7 @@ subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
  call wrtout(my_unt,msg,my_mode)
 
  if (my_prtvol > 10) then
-   if (ebands%nsppol==1)then
+   if (ebands%nsppol == 1)then
      write(msg,'(a,i0,a)')' New occ. numbers for occopt= ',ebands%occopt,' , spin-unpolarized case. '
      call wrtout(my_unt,msg,my_mode)
    end if
@@ -1011,11 +1011,12 @@ subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
      end if
 
      do ikpt=1,ebands%nkpt
-       write(msg,'(2a,i4,a,3f12.6,a,f6.3)')ch10,&
-         ' k-point number ',ikpt,') ',ebands%kptns(:,ikpt),'; weight: ',ebands%wtk(ikpt)
+       write(msg,'(2a,i4,a,3f12.6,a,f6.3,2a)')ch10,&
+         ' k-point number ',ikpt,') ',ebands%kptns(:,ikpt),'; weight: ',ebands%wtk(ikpt), ch10, &
+         " eig (Ha), occ, doccde"
        call wrtout(my_unt,msg,my_mode)
        do ii=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
-         write(msg,'(3(f7.3,1x))')ebands%eig(ii,ikpt,spin)*Ha_eV,ebands%occ(ii,ikpt,spin),ebands%doccde(ii,ikpt,spin)
+         write(msg,'(3(f7.3,1x))')ebands%eig(ii,ikpt,spin), ebands%occ(ii,ikpt,spin), ebands%doccde(ii,ikpt,spin)
          call wrtout(my_unt,msg,my_mode)
        end do
      end do !ikpt
@@ -1326,8 +1327,8 @@ end function get_bandenergy
 !!
 !! FUNCTION
 !!  For each k-point and spin polarisation, report:
-!!   the index of the valence in case of Semiconductors.
-!!   the index of the band at the Fermi energy+toldfe
+!!    the index of the valence in case of Semiconductors.
+!!    the index of the band at the Fermi energy+toldfe
 !!
 !! INPUTS
 !!  ebands<ebands_t>=The object describing the band structure.
@@ -2204,36 +2205,36 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
    !
    ! occupation factors MUST be initialized
    if (ALL(ABS(ebands%occ) < tol6)) then
-     MSG_ERROR("occupation factors are not initialized, likely due to the use of iscf=-2")
+     MSG_ERROR("Occupation factors are not initialized, likely due to the use of iscf=-2")
    end if
 
-   maxocc=two/(ebands%nsppol*ebands%nspinor)
+   maxocc = two / (ebands%nsppol*ebands%nspinor)
 
    ! Calculate the valence index for each spin channel.
    do spin=1,ebands%nsppol
-     valencetop(spin)= smallest_real
-     condbottom(spin)= greatest_real
+     valencetop(spin) = smallest_real
+     condbottom(spin) = greatest_real
 
      do ikibz=1,ebands%nkpt
-       nband_k=ebands%nband(ikibz+(spin-1)*ebands%nkpt)
+       nband_k = ebands%nband(ikibz+(spin-1)*ebands%nkpt)
        do band=1,nband_k
-         if (ebands%occ(band,ikibz,spin)/maxocc> one-tol6 .and. valencetop(spin) < ebands%eig(band,ikibz,spin)) then
-           valencetop(spin)=ebands%eig(band,ikibz,spin)
+         if (ebands%occ(band,ikibz,spin)/maxocc > one-tol6 .and. valencetop(spin) < ebands%eig(band,ikibz,spin)) then
+           valencetop(spin) = ebands%eig(band,ikibz,spin)
          end if
          if (ebands%occ(band,ikibz,spin)/maxocc < tol6 .and. condbottom(spin) > ebands%eig(band,ikibz,spin)) then
-           condbottom(spin)=ebands%eig(band,ikibz,spin)
+           condbottom(spin) = ebands%eig(band,ikibz,spin)
          end if
        end do
      end do
 
    end do
 
-   vtop=MAXVAL(valencetop)
-   cbot=MINVAL(condbottom)
+   vtop = MAXVAL(valencetop)
+   cbot = MINVAL(condbottom)
 
    write(msg,'(a,f6.2,2a,f6.2)')&
-&    ' top of valence       [eV] ',vtop*Ha_eV,ch10,&
-&    ' bottom of conduction [eV] ',cbot*Ha_eV
+    ' top of valence       [eV] ', vtop*Ha_eV,ch10,&
+    ' bottom of conduction [eV] ', cbot*Ha_eV
    call wrtout(std_out,msg,'COLL')
    if (ebands%nsppol==2) then
      if (ABS(vtop-MINVAL(valencetop))>tol6) then
@@ -2246,17 +2247,17 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
      end if
    end if
 
-   ! === Save output ===
+   ! Save output
    ! Here I dont know if it is better to be consistent with the abinit convention i.e fermi=vtop
-   ebands%entropy=zero
-   ebands%fermie=(vtop+cbot)/2
-   if (ABS(cbot-vtop)<1.d-4) ebands%fermie=vtop ! To avoid error on the last digit
+   ebands%entropy = zero
+   ebands%fermie = (vtop+cbot) / 2
+   if (ABS(cbot-vtop) < tol4) ebands%fermie=vtop ! To avoid error on the last digit
  end if
 
  write(msg,'(a,f6.2,a)')' Fermi energy         [eV] ',ebands%fermie*Ha_eV,ch10
  call wrtout(std_out,msg,'COLL')
- !
- ! === Compute number of electrons for each spin channel ===
+
+ ! Compute number of electrons for each spin channel.
  nelect_spin(:)=zero
  do spin=1,ebands%nsppol
    do ikibz=1,ebands%nkpt
@@ -2268,8 +2269,8 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
  ndiff=ebands%nelect-SUM(nelect_spin)
  if (my_prtvol>0) then
    write(msg,'(2a,f6.2,2a,f7.4)')ch10,&
-&    ' total number of electrons = ',SUM(nelect_spin),ch10,&
-&    ' input and calculated no. of electrons differ by ',ndiff
+    ' Total number of electrons = ',SUM(nelect_spin),ch10,&
+    ' Input and calculated no. of electrons differ by ',ndiff
    call wrtout(std_out,msg,'COLL')
  end if
 
@@ -3941,6 +3942,8 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  end do
  call xmpi_sum(new%eig, comm, ierr)
  if (itype == 2) call xmpi_sum(new%velocity, comm, ierr)
+
+ !call ebands_update_occ(new, dtset%spinmagntarget, prtvol=dtset%prtvol)
 
  if (my_rank == master .and. itype == 1 .and. present(out_prefix)) then
    ! Write ESKW file with crystal and (interpolated) band structure energies.

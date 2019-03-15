@@ -19657,4 +19657,23 @@ The number of line minimations for the Sternheimer solver is defined by [[nline]
 """,
 ),
 
+Variable(
+    abivarname="kerange_path",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="KERANGE PATH",
+    text=r"""
+This variable gives the path of the external KERANGE.nc file with the list of k-points
+in the electron/hole pockets.
+This file can be used for the calculation of the imaginary part of the e-ph self-energy ([[eph_task]] == -4)
+
+!!! important
+
+    This approximation is valid provided that enough bands above the states of interest are explicitly included.
+""",
+),
+
 ]

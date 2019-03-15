@@ -381,7 +381,7 @@ end subroutine getnel
 !!  occopt=option for occupancies
 !!  prtvol=control print volume and debugging output
 !!  stmbias=if non-zero, compute occupation numbers for STM (non-zero around the Fermi energy)
-!!   NOTE : in this case, only fermie and occ are meaningful outputs.
+!!   NOTE: in this case, only fermie and occ are meaningful outputs.
 !!  tphysel="physical" electronic temperature with FD occupations
 !!  tsmear=smearing width (or temperature)
 !!  wtk(nkpt)=k point weights
@@ -456,7 +456,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  if(nelect<=zero)then
    write(msg,'(3a,es16.8,a)')&
 &   'nelect must be a positive number, while ',ch10,&
-&   'the calling routine ask nelect=',nelect,'.'
+&   'the calling routine asks nelect= ',nelect,'.'
    MSG_BUG(msg)
  end if
 

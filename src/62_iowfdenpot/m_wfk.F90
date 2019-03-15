@@ -4958,11 +4958,11 @@ end subroutine wfk_diff
 !!
 !! SOURCE
 
-subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfkpath, comm)
+subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: in_wfkpath, kerange_path, out_wfkpath
+ character(len=*),intent(in) :: in_wfkpath, kerange_path
  type(pseudopotential_type),intent(in) :: psps
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm
@@ -4973,10 +4973,10 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
 !scalars
  integer,parameter :: formeig0 = 0, master = 0, fform_kerange = 6001
  integer :: spin, ikf, ikin, nband_k, mpw, mband, nspinor, ierr, fine_mband
- integer :: nsppol, out_iomode, kf_rank, npw_k, ii, my_rank, ncid, fform
+ integer :: nsppol, iomode, kf_rank, npw_k, ii, my_rank, ncid, fform
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
- character(len=fnlen) :: my_inpath
+ character(len=fnlen) :: my_inpath, out_wfkpath
  type(wfk_t),target :: iwfk
  type(wfk_t) :: owfk
  type(crystal_t) :: cryst
@@ -5048,7 +5048,8 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
    MSG_ERROR(msg)
  end if
  iwfk_ebands = wfk_read_ebands(my_inpath, xmpi_comm_self)
- call wfk_open_read(iwfk, my_inpath, formeig0, iomode_from_fname(my_inpath), get_unit(), xmpi_comm_self)
+ iomode = iomode_from_fname(my_inpath)
+ call wfk_open_read(iwfk, my_inpath, formeig0, iomode, get_unit(), xmpi_comm_self)
 
  if (dtset%prtvol > 0 .and. my_rank == master) then
    fform = 0
@@ -5120,9 +5121,11 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
    end if
  end do
 
- out_iomode = iomode_from_fname(out_wfkpath)
- call wfk_open_write(owfk, fine_hdr, out_wfkpath, iwfk%formeig, out_iomode, get_unit(), xmpi_comm_self)
- if (out_iomode == IO_MODE_ETSF) then
+ out_wfkpath = strcat(in_wfkpath, ".tmp")
+ if (iomode == IO_MODE_ETSF) out_wfkpath = strcat(out_wfkpath, ".nc")
+ call wfk_open_write(owfk, fine_hdr, out_wfkpath, iwfk%formeig, iomode, get_unit(), xmpi_comm_self)
+
+ if (iomode == IO_MODE_ETSF) then
   ! Add crystal structure and ebands if netcdf output.
 #ifdef HAVE_NETCDF
    NCF_CHECK(cryst%ncwrite(owfk%fh))
@@ -5178,11 +5181,13 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
  call wfk_close(iwfk)
  call wfk_close(owfk)
 
- !ABI_CHECK(clib_rename(in_wfkpath, strcat(in_wfkpath, ".bkp")) == 0, "Failed to rename WFK file")
- !ABI_CHECK(clib_rename(out_wfkpath, in_wfkpath) == 0, "Failed to rename WFK file")
+ ! Rename files, keep backup copy of input WFK file.
+ ABI_CHECK(clib_rename(my_inpath, strcat(my_inpath, ".bkp")) == 0, "Failed to rename input WFK file.")
+ ABI_CHECK(clib_rename(out_wfkpath, my_inpath) == 0, "Failed to rename output WFK file.")
 
  call cwtime_report(" WFK with fine k-mesh written to file.", cpu, wall, gflops)
 
+ ! All procs wait here.
 100 call xmpi_barrier(comm)
 
 end subroutine wfk_klist2mesh
