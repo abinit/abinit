@@ -7,7 +7,7 @@
 !! This module produces inputs for the DMFT calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ contains
 !!  Compute psichi (and print some data for check)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1015,7 +1015,7 @@ end subroutine datafordmft
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1133,7 +1133,7 @@ end subroutine datafordmft
 !! Renormalize psichi.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1562,7 +1562,7 @@ end subroutine psichi_renormalization
 !! Compute some components for the limit of hybridization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

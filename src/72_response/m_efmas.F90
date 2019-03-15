@@ -7,7 +7,7 @@
 !! This module contains datatypes for efmas functionalities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (JLJ)
+!! Copyright (C) 2001-2019 ABINIT group (JLJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -737,12 +737,7 @@ end subroutine print_efmas
      write(tmpstr,'(6a)') ch10,'are not band extrema, but saddle points;',ch10, &
 &                       'the transport equivalent formalism breaks down in these conditions.',ch10, &
 &                       'The associated tensor(s) will therefore not be printed.'
-     msg = TRIM(msg)//TRIM(tmpstr)
-     if(io_unit==std_out) then
-       MSG_WARNING(msg)
-     else
-       write(io_unit,'(7a)') ch10,'--- !WARNING',ch10,TRIM(msg),ch10,'---'
-     end if
+     MSG_WARNING_UNIT(TRIM(msg)//TRIM(tmpstr), io_unit)
    end if
 
    if(deg_dim>1 .and. mdim>1) then
@@ -958,7 +953,7 @@ end subroutine print_efmas
   if(dtset%efmas_deg==0) then
     write(msg,'(a)') 'efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.'
     MSG_WARNING(msg)
-    write(ab_out,'(6a)') ch10,'--- !WARNING',ch10,TRIM(msg),ch10,'---'
+    MSG_WARNING_UNIT(msg, ab_out)
   end if
 
   ipert = dtset%natom+1

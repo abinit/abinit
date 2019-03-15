@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2018 ABINIT group (LB)
+!!  Copyright (C) 2018-2019 ABINIT group (LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,7 +44,7 @@ contains
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (LB)
+!! Copyright (C) 2018-2019 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -367,7 +367,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    call paw_ij_nullify(paw_ij1_i2pert)
 
    has_dijfr=1
-   has_diju=0; if(dtset%usepawu==5.or.dtset%usepaw==6) has_diju=1
+   has_diju=0; if(dtset%usepawu==5.or.dtset%usepawu==6) has_diju=1
 
    call paw_an_init(paw_an1_i2pert,dtset%natom,dtset%ntypat,0,0,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,&
