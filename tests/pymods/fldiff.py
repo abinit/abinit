@@ -52,7 +52,8 @@ if has_yaml:
 else:
     class YDriverConf(object):
         def extra_info(self):
-            return ()
+            return ('# YAML support is not available, YAML based tests will'
+                    ' be ignored')
 
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
