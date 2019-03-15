@@ -41,6 +41,8 @@ MODULE m_plowannier
  public :: compute_coeff_plowannier
  public :: destroy_plowannier
  public :: print_plowannier
+ public :: get_plowannier
+ public :: fullbz_plowannier
  public :: initialize_operwan
  public :: destroy_operwan
  public :: compute_oper_ks2wan
@@ -2145,7 +2147,7 @@ end subroutine compute_coeff_plowannier
 !!  print the wannier weight (psichi) on a forlb.ovlp file
 !!
 !! INPUTS
-!! dtset%ntypat,dtset%typat,wan
+!! dtset%typat,wan
 !!
 !! OUTPUT
 !!
@@ -2153,12 +2155,12 @@ end subroutine compute_coeff_plowannier
 !! outscfcv
 !!
 !! CHILDREN
-!!
+!! open_file, wrtout
 !! SOURCE
 
 
 
- subroutine print_plowannier(ntypat,typat,wan)
+ subroutine print_plowannier(wan)
 
  use m_abicore
  use m_io_tools,  only : open_file
@@ -2167,56 +2169,210 @@ end subroutine compute_coeff_plowannier
 
  !Arguments-------------------------
  type(plowannier_type),intent(in) :: wan
- integer,intent(in) :: ntypat
- integer,allocatable,intent(in) :: typat(:)
  !Local variables-------------------
  character(len=500) :: msg
  integer :: unt,iatom,spin,ikpt,iband,ibandc,il,ispinor,im
 
- !Creation of the forlb.ovlp file
- if (open_file('forlb.ovlp',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
+ !Creation of the data.plowann file
+ if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
   MSG_ERROR(msg)
  end if
  rewind(unt)
 
- write(msg,'(2a)') ch10,' Print the psichi coefficients in forlb.ovlp'
+ write(msg,'(2a)') ch10,' Print the psichi coefficients in data.plowann'
  call wrtout(std_out,msg,'COLL') ; call wrtout(ab_out,msg,'COLL')
  
- !Header of the file forlb.ovlp
- write(unt,'(a,2x,i2)') "Total number of orbitals = ", sum(wan%nbl_atom_wan(:))
- write(unt,'(a,2i6)')"Bands =",wan%bandi_wan,wan%bandf_wan
-
- do spin=1,wan%nsppol
-	do iatom=1,wan%natom_wan
-	 !Header for each atom
-	 write(unt,'(a)')"*****************************************************************"
-	 write(unt,'(2x,a,2x,i2,3x,a,3x,i2)')"Atom =",wan%iatom_wan(iatom),"type =",typat(wan%iatom_wan(iatom))
-	 write(unt,*)"orbital(s) to consider on this atom",wan%nbl_atom_wan(iatom)
-	 do il=1,wan%nbl_atom_wan(iatom)
-		!Header for each orbital
-		write(unt,'(a)')"-----------------------------------------------------------------"
-		write(unt,'(4x,a,2x,i2)')"l=",wan%latom_wan(iatom)%lcalc(il)
-		do ikpt=1,wan%nkpt
-		 write(unt,'(6x,a,2x,i3)')"ikpt=",ikpt
-		 do iband=wan%bandi_wan,wan%bandf_wan
-			ibandc=iband-wan%bandi_wan+1
-			 write(unt,'(8x,a,2x,i3)')"iband=",iband
-			 do ispinor=1,wan%nspinor
-				do im=1,2*wan%latom_wan(iatom)%lcalc(il)+1
-				 write(unt,'(12x,3i6,2x,2f23.15)')spin,ispinor,im,&
-				 &real(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))&
-				 &,aimag(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))
-				enddo!m
-			 enddo!spinor
-		 enddo!bands
-		enddo!k points
-	 enddo!orbitals
-	enddo!atom
- enddo!spin
+ !Header of the file data.plowann
+ write(unt,'(a22,i2)')"Total number of atom =", wan%natom_wan
+ write(unt,'(a7,2i4)')"Bands =",wan%bandi_wan,wan%bandf_wan
+ write(unt,'(a26,i2)')"Total number of orbitals =",sum(wan%nbl_atom_wan(:))
+ write(unt,'(a16,i2)')"Number of spin =",wan%nsppol
+ write(unt,'(a19,i3)')"Number of k-points=",wan%nkpt
+ do ikpt=1,wan%nkpt
+   write(unt,'(a,2x,i2)')"ikpt =",ikpt
+    do spin=1,wan%nsppol
+      do ispinor=1,wan%nspinor
+        do iband=wan%bandi_wan,wan%bandf_wan
+          ibandc=iband-wan%bandi_wan+1
+          write(unt,'(2x,a,2x,i2,2x,i2)')"iband =",iband
+          do iatom=1,wan%natom_wan
+            do il=1,wan%nbl_atom_wan(iatom)
+              do im=1,2*wan%latom_wan(iatom)%lcalc(il)+1
+                !atom, l, m , real(psichi), imag(psichi)
+                write(unt,'(8x,3i3,2x,2f23.15)')iatom,wan%latom_wan(iatom)%lcalc(il),im,&
+                &real(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))&
+                &,aimag(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))
+              enddo!m
+            enddo!l
+          enddo!atom
+        enddo!band
+      enddo!spinor
+    enddo!spin
+  enddo!k-point
  close(unt)
  end subroutine print_plowannier
 !!***
 
+
+!!****f* m_plowannier/get_plowannier
+!! NAME
+!!  get_plowannier
+!!
+!! FUNCTION
+!!  get the psichies (Wannier weights) from a data.plowann file
+!!
+!! INPUTS
+!! wan
+!!
+!! OUTPUT
+!! wan 
+!! 
+!! PARENTS
+!! outscfcv
+!!
+!! CHILDREN
+!! cchi0, cchi0q0, prep_calc_ucrpa
+!! SOURCE
+
+ subroutine get_plowannier(wan)
+
+ use m_abicore
+ use m_io_tools,  only : open_file
+ use m_specialmsg, only : wrtout
+ implicit none
+
+ !Arguments-------------------------
+ type(plowannier_type),intent(inout) :: wan
+ !Local variables-------------------
+ character(len=500) :: msg
+ integer :: unt,iatom,spin,ikpt,iband,ibandc,il,ispinor,im,dummy,natom,bandi,bandf,nbl,nspin,nkpt
+ real(dp) ::xx,yy
+
+ !Opening of the data.plowann file
+ if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
+  MSG_ERROR(msg)
+ end if
+ rewind(unt)
+
+ 
+ !Reading of the header of data.plowann
+ read(unt,'(a22,i2)') msg, natom
+ read(unt,'(a7,2i4)') msg, bandi,bandf
+ read(unt,'(a26,i2)') msg, nbl
+ read(unt,'(a16,i2)') msg, nspin
+ read(unt,'(a19,i3)') msg, nkpt
+ !Testing the header
+ if (natom /= wan%natom_wan .OR. bandi /=wan%bandi_wan .OR. bandf /=wan%bandf_wan .OR.&
+& nbl/= sum(wan%nbl_atom_wan(:)) .OR. nspin /= wan%nsppol .OR. nkpt/=wan%nkpt ) then
+   write(msg,'(a,3i3)')"Not the same atoms or bands in both datasets",natom,bandi,bandf
+   MSG_ERROR(msg)
+ endif
+
+ write(msg,'(a)')"Reading of the Wannier weights from data.plowann"
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ !Reading of the psichis 
+ do ikpt=1,wan%nkpt
+   read(unt,*)
+    do spin=1,wan%nsppol
+      do ispinor=1,wan%nspinor
+        do iband=wan%bandi_wan,wan%bandf_wan
+          ibandc=iband-wan%bandi_wan+1
+          read(unt,*)
+          do iatom=1,wan%natom_wan
+            do il=1,wan%nbl_atom_wan(iatom)
+              do im=1,2*wan%latom_wan(iatom)%lcalc(il)+1
+                read(unt,'(8x,3i3,2x,2f23.15)')dummy,dummy,dummy,xx,yy
+                wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=cmplx(xx,yy)
+              enddo!m
+            enddo!l
+          enddo!atom
+        enddo!band
+      enddo!spinor
+    enddo!spin
+  enddo!k-point
+ close(unt)
+end subroutine get_plowannier
+!!***
+
+
+!!****f* m_plowannier/get_plowannier
+!! NAME
+!!  get_plowannier
+!!
+!! FUNCTION
+!!  get the psichies (Wannier weights) from a data.plowann file
+!!
+!! INPUTS
+!! wan
+!!
+!! OUTPUT
+!! wan 
+!! 
+!! PARENTS
+!! outscfcv
+!!
+!! CHILDREN
+!! cchi0, cchi0q0, prep_calc_ucrpa
+!! SOURCE
+
+ subroutine fullbz_plowannier(dtset,kmesh,cryst,wanibz,wanbz)
+   
+   use m_abicore
+   use m_specialmsg, only : wrtout
+   use defs_abitypes
+   use m_bz_mesh, only : kmesh_t, get_BZ_item
+   use m_crystal, only : crystal_t
+   implicit none
+
+!Arguments-------------------------
+   type(plowannier_type),intent(inout) :: wanibz
+   type(plowannier_type),intent(out) :: wanbz
+   type(dataset_type),intent(in) :: dtset
+   type(kmesh_t),intent(in) :: kmesh
+   type(crystal_t),intent(in) :: cryst
+!Local variables-------------------
+   type(dataset_type) :: dtset_sym
+   character(len=500) :: msg
+   integer :: unt,sym,iatom,spin,ik_bz,iband,ibandc,il,ispinor,im,dummy,natom,bandi,bandf
+!*****************************************************************************************
+  
+
+   sym=kmesh%nbz/kmesh%nibz
+   dtset_sym=dtset
+   dtset_sym%nkpt=dtset%nkpt*sym
+   call init_plowannier(dtset_sym,wanbz)
+  
+   write(msg,'(a)')"Reconstruction of the full Brillouin Zone"
+   call wrtout(std_out,msg,'COLL');call wrtout(ab_out,msg,'COLL')
+   if (sym==1) then 
+     wanbz=wanibz
+   else if (cryst%nsym==1) then
+     do ik_bz=1,kmesh%nbz
+       do iband=wanbz%bandi_wan,wanbz%bandf_wan
+         ibandc=iband-wanbz%bandi_wan+1
+         do iatom=1,wanbz%natom_wan
+           do il=1,wanbz%nbl_atom_wan(iatom)
+             do im=1,2*wanbz%latom_wan(iatom)%lcalc(il)+1
+               do spin=1,wanbz%nsppol
+                 do ispinor=1,wanbz%nspinor
+                   if (kmesh%tabi(ik_bz)==1) then 
+                     wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=&
+                     &wanibz%psichi(kmesh%tab(ik_bz),ibandc,iatom)%atom(il)%matl(im,spin,ispinor)
+                   else if (kmesh%tabi(ik_bz)==-1) then
+                     wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=&
+                      &conjg(wanibz%psichi(kmesh%tab(ik_bz),ibandc,iatom)%atom(il)%matl(im,spin,ispinor))
+                   endif
+                 enddo
+               enddo
+             enddo
+           enddo
+         enddo
+       enddo
+     enddo
+   endif
+   call destroy_plowannier(wanibz)
+ end subroutine fullbz_plowannier
 
 
 !!****f* m_plowannier/destroy_plowannier

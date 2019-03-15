@@ -2434,7 +2434,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  plowan_compute
    cond_string(1)='usepaw' ; cond_values(1)=1
-   call chkint_eq(1,1,cond_string,cond_values,ierr,'plowan_compute',dt%plowan_compute,3,(/0,1,2/),iout)
+   call chkint_eq(1,1,cond_string,cond_values,ierr,'plowan_compute',dt%plowan_compute,4,(/0,1,2,10/),iout)
    if(dt%plowan_compute>0) then
 !    plowan_bandi/plowan_bandf
      call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandi,              1,iout)

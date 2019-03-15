@@ -1057,7 +1057,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call init_plowannier(dtset,wan)
    call compute_coeff_plowannier(crystal,cprj,dimcprj,dtset,eigen,e_fermie,&
 &   mpi_enreg,occ,wan,pawtab,psps,usecprj,dtfil%unpaw,pawrad,dtfil)
-   call print_plowannier(dtset%ntypat,dtset%typat,wan)
+   if (dtset%ucrpa>=1) then 
+     call print_plowannier(wan)
+   endif
    call destroy_plowannier(wan)
  end if
 

@@ -93,6 +93,8 @@ module m_screening_driver
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
+ use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier,&
+                             &fullbz_plowannier,destroy_plowannier 
 
  implicit none
 
@@ -258,6 +260,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:),prev_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
+ type(plowannier_type) :: wanbz,wanibz
 
 !************************************************************************
 
@@ -1080,6 +1083,12 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call timab(321,2,tsec) ! screening(2)
 
  iqcalc = 0
+ if(Dtset%plowan_compute >= 10) then
+   call init_plowannier(Dtset,wanibz)
+  ! call init_plowannier(Dtset,wanbz)
+   call get_plowannier(wanibz)
+   call fullbz_plowannier(Dtset,Kmesh,Cryst,wanibz,wanbz)
+ endif
  do iqibz=1,Qmesh%nibz
    call timab(306,1,tsec)
    is_first_qcalc=(iqibz==1)
@@ -1117,9 +1126,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(chi0_uwing,(Ep%npwe*Ep%nJ,Ep%nomega,3))
      ABI_MALLOC(chi0_head,(3,3,Ep%nomega))
 
+
      call cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &     Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
-&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
 
      chihw = chi_new(ep%npwe, ep%nomega)
      chihw%head = chi0_head
@@ -1136,7 +1146,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ABI_MALLOC(chi0intra_lwing,(Ep%npwe*Ep%nI,Ep%nomega,3))
        ABI_MALLOC(chi0intra_uwing,(Ep%npwe*Ep%nJ,Ep%nomega,3))
        ABI_MALLOC(chi0intra_head,(3,3,Ep%nomega))
-
+       
+       
        call chi0q0_intraband(Wfd,Cryst,Ep,Psps,QP_BSt,Gsph_epsG0,Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,use_tr,Dtset%usepawu,&
        ngfft_gw,chi0intra,chi0intra_head,chi0intra_lwing,chi0intra_uwing)
 
@@ -1170,7 +1181,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0(use_tr,Dtset,Cryst,Qmesh%ibz(:,iqibz),Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftgw,ngfftf,nfftf_tot,chi0,ktabr,ktabrf,&
-&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
+
 
      call timab(308,2,tsec)
    end if
@@ -1462,8 +1474,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    call timab(310,2,tsec)
  end do ! Loop over q-points
-
- !----------------------------- END OF THE CALCULATION ------------------------
+ if (Dtset%plowan_compute >=10)then
+   call destroy_plowannier(wanbz)
+ endif
+!----------------------------- END OF THE CALCULATION ------------------------
 
  ! Close Files.
  if (my_rank==master) then
