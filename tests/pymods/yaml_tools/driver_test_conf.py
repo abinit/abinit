@@ -113,8 +113,8 @@ class DriverTestConf:
         cursor = len(self.param_stack) - 1
         top = cursor  # top of the stack, bottom of the hierarchy
 
-        while cursor >= 0:  # loop from bottom to top
-            for name, cons in self.constraints_stack[cursor].items():
+        def look_in(cons_dict):
+            for name, cons in cons_dict.items():
                 if (cursor < top and not cons.inherited) \
                    or name in exclude \
                    or name in already_defined:
@@ -127,7 +127,13 @@ class DriverTestConf:
                     exclude.update(cons.exclude)
                     constraints.append(cons)
                     already_defined.add(name)
+
+        while cursor >= 0:  # loop from bottom to top
+            look_in(self.constraints_stack[cursor])
             cursor -= 1  # next level
+
+        # finish with top level
+        look_in(self.get_top_level_constraints())
 
         return constraints
 
@@ -151,7 +157,11 @@ class DriverTestConf:
             else:
                 cursor -= 1
 
-        return default
+        top_params = self.get_top_level_params()
+        if name in top_params:
+            return top_params[name]
+        else:
+            return default
 
     def use_filter(self, state):
         '''
@@ -217,12 +227,10 @@ class DriverTestConf:
         '''
             Go back to a higher level of the tree.
         '''
-        try:
+        if self.current_path:  # if not already at top
             self.current_path.pop()
             self.param_stack.pop()
             self.constraints_stack.pop()
-        except IndexError:
-            pass
 
     def __enter__(self):
         '''
