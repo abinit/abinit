@@ -101,7 +101,7 @@ class Matrix33(AutoNumpy):
 
     @classmethod
     def from_seq(cls, s):
-        new = AutoNumpy.from_seq(s)
+        new = super(Matrix33, cls).from_seq(s)
         assert new.shape == (3, 3)
         return new
 
