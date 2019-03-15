@@ -1,6 +1,4 @@
 tol_eq: 1.0e-6
-equation:
-    "Etot.Etotal - Etot_DC.Etotal_DC"
 
 lda:
     # tolvrs 1.0e-7
