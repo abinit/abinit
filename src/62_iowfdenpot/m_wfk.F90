@@ -4985,7 +4985,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  type(ebands_t) :: iwfk_ebands, fine_ebands
  type(wvl_internal_type) :: dummy_wvl
 !arrays
- !integer :: fine_kptrlatt(3,3) !, band_block(2)
  integer,allocatable :: kf2kin(:), kg_k(:,:), kshe_mask(:,:,:)
  real(dp),allocatable :: cg_k(:,:), eig_k(:), occ_k(:), fine_eigen(:,:,:)
 
@@ -5031,16 +5030,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
    write(std_out, "(a, 3(f5.2, 1x))")"   fine_shiftk: ", fine_hdr%shiftk(:, ii)
  end do
  write(std_out, "(2a)")repeat("=", 92), ch10
- !if (all(dtset%sigma_ngkpt == 0)) then
- !  write(msg,"(3a)") &
- !    "Cannot produce fine WFK file because sigma_ngkpt == 0.",ch10,&
- !    "Use sigma_nkgpt, sigma_nshiftk and sigma_shiftk to define the homogeneous k-mesh for the fine WFK file."
- !  MSG_ERROR(msg)
- !end if
- !fine_kptrlatt = 0
- !do ii=1,3
- !  fine_kptrlatt(ii,ii) = dtset%sigma_ngkpt(ii)
- !end do
 
  ! Open WFK file with k-point list, extract dimensions and allocate workspace arrays.
  my_inpath = in_wfkpath
@@ -5073,7 +5062,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  do ikf=1,fine_ebands%nkpt
    do ii=1,iwfk_ebands%nkpt
      if (all(abs(fine_ebands%kptns(:, ikf) - iwfk_ebands%kptns(:, ii)) < tol12)) then
-       !write(std_out, *)trim(ktoa(fine_ebands%kptns(:, ikf))), " --> ", trim(ktoa(iwfk_ebands%kptns(:, ii)))
        kf2kin(ikf) = ii; exit
      end if
    end do
@@ -5115,7 +5103,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
      fine_hdr%npwarr(ikf) = iwfk_ebands%npwarr(ikin)
      ! Insert ab-initio eigenvalues in the (SKW-interpolated) fine k-mesh.
      do spin=1,nsppol
-       nband_k = iwfk_ebands%nband(ikin + (spin-1) * iwfk_ebands%nkpt)
+       nband_k = iwfk_ebands%nband(ikin + (spin - 1) * iwfk_ebands%nkpt)
        fine_ebands%eig(1:nband_k, ikf, spin) = iwfk_ebands%eig(1:nband_k, ikin, spin)
      end do
    end if

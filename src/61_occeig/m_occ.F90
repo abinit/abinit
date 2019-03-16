@@ -436,8 +436,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
  ! Here treat the case where occopt does not correspond to a metallic occupation scheme
  if (occopt<3 .or. occopt>8) then
-   write(msg,'(a,i0,a)')' occopt= ',occopt,', a value not allowed in newocc.'
-   MSG_BUG(msg)
+   MSG_BUG(sjoin(' occopt= ',itoa(occopt),', a value not allowed in newocc.'))
  end if
 
  ! Check whether nband is a constant for all k point and spin-pol
@@ -445,15 +444,15 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    do ikpt=1,nkpt
      if(nband(ikpt+(isppol-1)*nkpt)/=nband(1))then
        write(msg,'(3a,i0,a,i0,a,i0,a)')&
-&       'The number of bands must be the same for all k-points ',ch10,&
-&       'but nband(1)= ',nband(1),' is different of nband(',ikpt+(isppol-1)*nkpt,') = ',nband(ikpt+(isppol-1)*nkpt),'.'
+        'The number of bands must be the same for all k-points ',ch10,&
+        'but nband(1)= ',nband(1),' is different of nband(',ikpt+(isppol-1)*nkpt,') = ',nband(ikpt+(isppol-1)*nkpt),'.'
        MSG_BUG(msg)
      end if
    end do
  end do
 
  ! Check whether nelect is strictly positive
- if(nelect<=zero)then
+ if(nelect <= zero)then
    write(msg,'(3a,es16.8,a)')&
 &   'nelect must be a positive number, while ',ch10,&
 &   'the calling routine asks nelect= ',nelect,'.'
@@ -463,10 +462,10 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  maxocc=two/(nsppol*nspinor)
 !Check whether nelect is coherent with nband (nband(1) is enough,
 !since it was checked that nband is independent of k-point and spin-pol
- if( nelect > nband(1)*nsppol*maxocc )then
+ if (nelect > nband(1)*nsppol*maxocc) then
    write(msg,'(3a,es16.8,a,i0,a,es16.8,a)' )&
-&   'nelect must be smaller than nband*maxocc, while ',ch10,&
-&   'the calling routine gives nelect= ',nelect,', nband= ',nband(1),' and maxocc= ',maxocc,'.'
+   'nelect must be smaller than nband*maxocc, while ',ch10,&
+   'the calling routine gives nelect= ',nelect,', nband= ',nband(1),' and maxocc= ',maxocc,'.'
    MSG_BUG(msg)
  end if
 

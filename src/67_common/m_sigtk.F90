@@ -571,6 +571,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  if (my_rank == master) then
    write(std_out, "(2a)")ch10, repeat("=", 92)
    write(std_out, "(a)") " Finding k-points inside (electron/hole) pockets."
+   write(std_out, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
    write(std_out, "(2a)") "  Interpolating eigenvalues onto dense K-mesh using sigma_ngkpt: ", trim(ltoa(dtset%sigma_ngkpt))
    write(std_out, "(2a)") "  and sigma_shiftk shifts:"
    ABI_CHECK(allocated(dtset%sigma_shiftk), "sigma_shiftk and sigma_nshiftk must be specified in input.")
@@ -608,19 +609,19 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  fine_ebands = ebands_interp_kmesh(ebands, cryst, params, fine_kptrlatt, &
                                    dtset%sigma_nshiftk, dtset%sigma_shiftk, band_block, comm)
 
- !call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
  call ebands_print(fine_ebands, header="FINE EBANDS", unit=std_out, prtvol=dtset%prtvol)
 
  ! Interpolate bands on k-path.
  !call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
 
  ! Compute gaps using fine_ebands.
- !gap_err = get_gaps(fine_ebands, fine_gaps)
- !if (gap_err /= 0) then
- !  MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
- !end if
- !call fine_gaps%print(header="gaps from interpolated eigenvalues", unit=std_out)
- !call fine_gaps%free()
+ gap_err = get_gaps(fine_ebands, fine_gaps)
+ if (gap_err /= 0) then
+   MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
+ end if
+ call fine_gaps%print(header="gaps from interpolated eigenvalues", unit=std_out)
+ call fine_gaps%free()
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, ABINIT_VERSION, pertcase0, &

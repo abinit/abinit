@@ -1599,7 +1599,7 @@ subroutine apply_scissor(ebands,scissor_energy)
  ! Recalculate the fermi level and occ. factors.
  ! For Semiconductors only the Fermi level is changed (in the middle of the new gap)
  spinmagntarget_=-99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
- call ebands_update_occ(ebands,spinmagntarget_)
+ call ebands_update_occ(ebands, spinmagntarget_)
 
 end subroutine apply_scissor
 !!***
@@ -2141,7 +2141,7 @@ end function ebands_write_bxsf
 !!
 !! SOURCE
 
-subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
+subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -2189,26 +2189,29 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
    ! Save output in ebands%.
    ebands%entropy = entropy
    ebands%fermie  = fermie
-   call put_eneocc_vect(ebands,'occ'   ,occ)
-   call put_eneocc_vect(ebands,'doccde',doccde)
+   call put_eneocc_vect(ebands, 'occ', occ)
+   call put_eneocc_vect(ebands, 'doccde', doccde)
    ABI_FREE(eigen)
    ABI_FREE(occ)
    ABI_FREE(doccde)
 
  else
-   !  Semiconductor or Insulator.
+   !  Semiconductor or Insulator (non magnetic case)
+   maxocc = two / (ebands%nsppol*ebands%nspinor)
    !
    ! FIXME here there is an inconsistency btw GW and Abinit
    ! In abinit Fermi is set to HOMO while in GW fermi is in the middle
    ! of Gap. In case of crystal systems, the later convention should be preferable.
    ! Anyway we have to decide and follow a unique convention to avoid problems.
    !
-   ! occupation factors MUST be initialized
+   ! Occupation factors MUST be initialized
    if (ALL(ABS(ebands%occ) < tol6)) then
-     MSG_ERROR("Occupation factors are not initialized, likely due to the use of iscf=-2")
+     ABI_CHECK(ebands%nelect == nint(ebands%nelect), "nelect should be integer")
+     mband = nint((ebands%nelect * ebands%nspinor) / 2)
+     ebands%occ = zero
+     ebands%occ(1:mband,:,:) = maxocc
+     !MSG_ERROR("Occupation factors are not initialized, likely due to scf = -2")
    end if
-
-   maxocc = two / (ebands%nsppol*ebands%nspinor)
 
    ! Calculate the valence index for each spin channel.
    do spin=1,ebands%nsppol
@@ -2218,10 +2221,10 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
      do ikibz=1,ebands%nkpt
        nband_k = ebands%nband(ikibz+(spin-1)*ebands%nkpt)
        do band=1,nband_k
-         if (ebands%occ(band,ikibz,spin)/maxocc > one-tol6 .and. valencetop(spin) < ebands%eig(band,ikibz,spin)) then
+         if (ebands%occ(band,ikibz,spin) / maxocc > one-tol6 .and. valencetop(spin) < ebands%eig(band,ikibz,spin)) then
            valencetop(spin) = ebands%eig(band,ikibz,spin)
          end if
-         if (ebands%occ(band,ikibz,spin)/maxocc < tol6 .and. condbottom(spin) > ebands%eig(band,ikibz,spin)) then
+         if (ebands%occ(band,ikibz,spin) / maxocc < tol6 .and. condbottom(spin) > ebands%eig(band,ikibz,spin)) then
            condbottom(spin) = ebands%eig(band,ikibz,spin)
          end if
        end do
@@ -2232,16 +2235,16 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
    vtop = MAXVAL(valencetop)
    cbot = MINVAL(condbottom)
 
-   write(msg,'(a,f6.2,2a,f6.2)')&
-    ' top of valence       [eV] ', vtop*Ha_eV,ch10,&
+   write(msg,'(a,f6.2,2a,f6.2)') &
+    ' top of valence       [eV] ', vtop*Ha_eV,ch10, &
     ' bottom of conduction [eV] ', cbot*Ha_eV
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    if (ebands%nsppol==2) then
-     if (ABS(vtop-MINVAL(valencetop))>tol6) then
+     if (ABS(vtop - MINVAL(valencetop)) > tol6) then
        write(msg,'(a,i2)')' top of valence is spin ',MAXLOC(valencetop)
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out, msg)
      end if
-     if (ABS(cbot-MAXVAL(condbottom))>tol6) then
+     if (ABS(cbot - MAXVAL(condbottom)) > tol6) then
        write(msg,'(a,i2)')' bottom of conduction is spin ',MINLOC(condbottom)
        call wrtout(std_out,msg,'COLL')
      end if
@@ -2250,12 +2253,12 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
    ! Save output
    ! Here I dont know if it is better to be consistent with the abinit convention i.e fermi=vtop
    ebands%entropy = zero
-   ebands%fermie = (vtop+cbot) / 2
-   if (ABS(cbot-vtop) < tol4) ebands%fermie=vtop ! To avoid error on the last digit
+   ebands%fermie = (vtop + cbot) / 2
+   if (ABS(cbot - vtop) < tol4) ebands%fermie = vtop ! To avoid error on the last digit
  end if
 
  write(msg,'(a,f6.2,a)')' Fermi energy         [eV] ',ebands%fermie*Ha_eV,ch10
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  ! Compute number of electrons for each spin channel.
  nelect_spin(:)=zero
@@ -2266,18 +2269,18 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
    end do
  end do
 
- ndiff=ebands%nelect-SUM(nelect_spin)
+ ndiff = ebands%nelect - SUM(nelect_spin)
  if (my_prtvol>0) then
    write(msg,'(2a,f6.2,2a,f7.4)')ch10,&
     ' Total number of electrons = ',SUM(nelect_spin),ch10,&
     ' Input and calculated no. of electrons differ by ',ndiff
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
  end if
 
- if (ABS(ndiff)>5.d-2*ebands%nelect) then
+ if (ABS(ndiff) > 5.d-2*ebands%nelect) then
    write(msg,'(2a,2(a,es12.4))')&
     'Too large difference in no. of electrons:,',ch10,&
-    'Expected= ',ebands%nelect,' Calculated= ',sum(nelect_spin)
+    'Expected = ',ebands%nelect,' Calculated = ',sum(nelect_spin)
    MSG_ERROR(msg)
  end if
 
@@ -2337,7 +2340,7 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
    call wrtout(std_out, sjoin("tsmear:", ftoa(ebands%tsmear), " ==> ", ftoa(tsmear)))
  end if
 
- call ebands_update_occ(ebands,spinmagntarget,stmbias0,prtvol=my_prtvol)
+ call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=my_prtvol)
 
  if (prtvol > 10) then
    call wrtout(std_out, sjoin('Fermi level is now:', ftoa(ebands%fermie)))
@@ -2487,7 +2490,7 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
  ebands%nelect = nelect
- call ebands_update_occ(ebands,spinmagntarget,prtvol=my_prtvol)
+ call ebands_update_occ(ebands, spinmagntarget, prtvol=my_prtvol)
 
  write(msg,"(2(a,es16.6),a,2(a,es16.6))")&
    " Old fermi level: ",prev_fermie,", with nelect: ",prev_nelect,ch10,&
@@ -3895,6 +3898,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    ebands%occopt,new_occ,new_wtk,&
    ebands%charge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
 
+ ! Get fermi level from input ebands.
  new%fermie = ebands%fermie
 
  ABI_FREE(new_kibz)
