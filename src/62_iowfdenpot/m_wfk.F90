@@ -4971,9 +4971,9 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: formeig0 = 0, master = 0, fform_kerange = 6001
+ integer,parameter :: formeig0 = 0, master = 0
  integer :: spin, ikf, ikin, nband_k, mpw, mband, nspinor, ierr, fine_mband
- integer :: nsppol, iomode, kf_rank, npw_k, ii, my_rank, ncid, fform
+ integer :: nsppol, iomode, kf_rank, npw_k, ii, my_rank, ncid, fform, fform_kerange
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  character(len=fnlen) :: my_inpath, out_wfkpath
@@ -4992,7 +4992,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! IO section are executed by master only, all other procs wait for new WFK before returning to caller.
+ ! IO section are executed by master only, all other procs wait for the new WFK before returning.
  my_rank = xmpi_comm_rank(comm); if (my_rank /= master) goto 100
 
  ! Read interpolated ebands and kshe_mask from KERANGE file, build fine_ebands object.
@@ -5000,6 +5000,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
  ! Read header associated to fine k-mesh
  call hdr_ncread(fine_hdr, ncid, fform)
+ fform_kerange = fform_from_ext("KERANGE.nc")
  ABI_CHECK(fform == fform_kerange, sjoin("Wrong fform. Got: ", itoa(fform), ", Expecting: ", itoa(fform_kerange)))
  ! Read eigenvalues and kmask
  fine_mband = maxval(fine_hdr%nband)
@@ -5023,7 +5024,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  write(std_out, "(2a)")ch10, repeat("=", 92)
  write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
  write(std_out, "(2a)")" Take wavefunctions with k-point lists from: ", trim(in_wfkpath)
- write(std_out, "(2a)")" Take eigenvalues and kpt tables from KERANGE file: ", trim(kerange_path)
+ write(std_out, "(2a)")" Take eigenvalues and k-point tables from KERANGE file: ", trim(kerange_path)
  write(std_out, "(a, 9(i0, 1x))")"   fine_kptrlatt: ", fine_hdr%kptrlatt
  do ii=1,fine_hdr%nshiftk
    write(std_out, "(a, 3(f5.2, 1x))")"   fine_shiftk: ", fine_hdr%shiftk(:, ii)
@@ -5056,11 +5057,10 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  cryst = hdr_get_crystal(iwfk%hdr, 2)
 
  ! Find correspondence fine kmesh --> input WFK and handle possible mismatch
- !call kpts_map(iwfk_ebands%nkpt, iwfk_ebands%kptns, fine_ebands%nkpt, fine_ebands%kptns, kf2kin, xmpi_comm_self)
+ !TODO: Write specialized routine wrapping listkk to find mapping without O(N2) scaling.
  ABI_MALLOC(kf2kin, (fine_ebands%nkpt))
  kf2kin = -1
-
- !TODO: Write specialized routine wrapping listkk to find mapping without O(N2) scaling.
+ !call kpts_map(iwfk_ebands%nkpt, iwfk_ebands%kptns, fine_ebands%nkpt, fine_ebands%kptns, kf2kin, xmpi_comm_self)
  do ikf=1,fine_ebands%nkpt
    do ii=1,iwfk_ebands%nkpt
      if (all(abs(fine_ebands%kptns(:, ikf) - iwfk_ebands%kptns(:, ii)) < tol12)) then
@@ -5104,7 +5104,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
      fine_ebands%npwarr(ikf) = iwfk_ebands%npwarr(ikin)
      fine_hdr%npwarr(ikf) = iwfk_ebands%npwarr(ikin)
 
-     ! Insert ab-initio eigenvalues in the (SKW-interpolated) fine k-mesh.
+     ! Insert ab-initio eigenvalues in the SKW-interpolated fine k-mesh.
      do spin=1,nsppol
        nband_k = iwfk_ebands%nband(ikin + (spin - 1) * iwfk_ebands%nkpt)
        fine_ebands%eig(1:nband_k, ikf, spin) = iwfk_ebands%eig(1:nband_k, ikin, spin)
@@ -5140,7 +5140,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  ABI_MALLOC(eig_k, ((2*mband)**iwfk%formeig * mband) )
  ABI_MALLOC(occ_k, (mband))
 
- !write(std_out, *)"mpw:", mpw
  do spin=1,nsppol
    do ikf=1,fine_ebands%nkpt
      ikin = kf2kin(ikf)

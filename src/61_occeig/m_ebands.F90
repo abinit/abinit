@@ -5588,9 +5588,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  type(ebands_t) :: ebands_kmesh
  type(gaps_t) :: gaps
  integer,parameter :: master=0,intp_nshiftk1=1
- integer :: my_rank,ndivsm,nbounds,itype
- integer :: nb,spin,ik,ib,ii,jj
- integer :: edos_intmeth, ierr
+ integer :: my_rank,ndivsm,nbounds,itype, nb,spin,ik,ib,ii,jj, edos_intmeth, ierr
  real(dp) :: edos_step,edos_broad,emin,emax
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
@@ -5603,8 +5601,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  integer :: intp_kptrlatt(3,3)
  real(dp) :: vr(3),intp_shiftk(3),params(4)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
- real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
- real(dp),allocatable :: bounds(:,:)
+ real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:), bounds(:,:)
  real(dp),allocatable :: dummy_vals(:,:,:,:), dummy_vecs(:,:,:,:,:), vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: vvdos_mesh(:), vvdos_tens(:,:,:,:,:,:)
 

@@ -53,10 +53,10 @@ module m_specialmsg
 
  public :: wrtout
 
- !interface wrtout
- !  module procedure wrtout_unit
- !  module procedure wrtout_units
- !end interface wrtout
+ interface wrtout
+   module procedure wrtout_unit
+   module procedure wrtout_units
+ end interface wrtout
 
 CONTAINS  !===========================================================
 !!***
@@ -229,7 +229,7 @@ subroutine herald(code_name,code_version,iout)
  character(len=500) :: msg
  character(len=3),parameter :: day_names(7)=(/'Mon','Tue','Wed','Thu','Fri','Sat','Sun'/)
  character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
-&                                                'Jul','Aug','Sep','Oct','Nov','Dec'/)
+                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
 
 ! *************************************************************************
 
@@ -319,9 +319,9 @@ subroutine herald(code_name,code_version,iout)
 end subroutine herald
 !!***
 
-!!****f* ABINIT/wrtout
+!!****f* m_specialmsg/wrtout_unit
 !! NAME
-!!  wrtout
+!!  wrtout_unit
 !!
 !! FUNCTION
 !!  Organizes the sequential or parallel version of the write intrinsic
@@ -424,7 +424,7 @@ end subroutine herald
 !!
 !! SOURCE
 
-subroutine wrtout(unit, msg, mode_paral, do_flush)
+subroutine wrtout_unit(unit, msg, mode_paral, do_flush)
 
 !Arguments ------------------------------------
  integer,intent(in) :: unit
@@ -470,21 +470,21 @@ subroutine wrtout(unit, msg, mode_paral, do_flush)
 
  else
    write(string,'(7a)')ch10,&
-   'wrtout: ERROR -',ch10,&
+   'wrtout_unit: ERROR -',ch10,&
    '  Unknown write mode: ',my_mode_paral,ch10,&
    '  Continuing anyway ...'
    write(unit, '(A)' ) trim(string)
  end if
 
-end subroutine wrtout
+end subroutine wrtout_unit
 !!***
 
-!!****f* ABINIT/wrtout_units
+!!****f* m_specialmsg/wrtout_units
 !! NAME
 !!  wrtout_units
 !!
 !! FUNCTION
-!!  Write string to multiple units. Wraps wrtout
+!!  Write string to multiple units. Wraps wrtout_unit
 !!
 !! INPUTS
 !!  msg=(character(len=*)) message to be written
@@ -535,7 +535,7 @@ subroutine wrtout_units(units, msg, mode_paral, do_flush)
  end do
 
  do ii=1,cnt
-   call wrtout(my_units(ii), msg, mode_paral=my_mode_paral, do_flush=my_flush)
+   call wrtout_unit(my_units(ii), msg, mode_paral=my_mode_paral, do_flush=my_flush)
  end do
 
 end subroutine wrtout_units
@@ -543,7 +543,7 @@ end subroutine wrtout_units
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/wrtout_myproc
+!!****f* m_specialmsg/wrtout_myproc
 !! NAME
 !!  wrtout_myproc
 !!
@@ -553,26 +553,26 @@ end subroutine wrtout_units
 !!
 !! INPUTS
 !!  unit=unit number for writing
-!!  message=(character(len=*)) message to be written
+!!  msg=(character(len=*)) message to be written
 !!  [do_flush]=True to flush the unit. Defaults to .False.
 !!
 !! OUTPUT
 !!  (only writing)
 !!
 !! PARENTS
-!!      wrtout
+!!      wrtout_unit
 !!
 !! CHILDREN
 !!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
-subroutine wrtout_myproc(unit, message, do_flush) ! optional argument
+subroutine wrtout_myproc(unit, msg, do_flush) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: unit
- character(len=*),intent(in) :: message
+ character(len=*),intent(in) :: msg
  logical,optional,intent(in) :: do_flush
 
 !Local variables-------------------------------
@@ -583,14 +583,14 @@ subroutine wrtout_myproc(unit, message, do_flush) ! optional argument
 !******************************************************************
 
  print_std_err = (unit == std_out .and. std_out /= std_err .and. &
-   (index(trim(message),'BUG')/=0.or.index(trim(message),'ERROR')/=0))
+   (index(trim(msg),'BUG')/=0.or.index(trim(msg),'ERROR')/=0))
 
  ! Print message
- call write_lines(unit,message)
- if (print_std_err) call write_lines(std_err,message)
+ call write_lines(unit, msg)
+ if (print_std_err) call write_lines(std_err, msg)
 
  ! Append "Contact Abinit group" to BUG messages
- if (index(trim(message),'BUG') /= 0 )then
+ if (index(trim(msg), 'BUG') /= 0 )then
    write(unit, '(a)' ) '  Action: contact ABINIT group (please attach the output of `abinit -b`)'
    write(unit,*)
    if (print_std_err) then
@@ -601,9 +601,9 @@ subroutine wrtout_myproc(unit, message, do_flush) ! optional argument
 
  ! Count the number of warnings and comments. Only take into
  ! account unit std_out, in order not to duplicate these numbers.
- if (index(trim(message),'WARNING') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_warning=i_one)
- if (index(trim(message),'COMMENT') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_comment=i_one)
- if (index(trim(message),'Exit') /= 0 ) call specialmsg_setcount(n_add_exit=i_one)
+ if (index(trim(msg), 'WARNING') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_warning=i_one)
+ if (index(trim(msg), 'COMMENT') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_comment=i_one)
+ if (index(trim(msg), 'Exit') /= 0 ) call specialmsg_setcount(n_add_exit=i_one)
 
  ! Flush unit
  if (present(do_flush)) then

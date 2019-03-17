@@ -614,7 +614,9 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  call ebands_print(fine_ebands, header="FINE EBANDS", unit=std_out, prtvol=dtset%prtvol)
 
  ! Interpolate bands on k-path.
+ !if (nint(dtset%einterp(1)) == 0)
  !call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
+ !end do
 
  ! Compute gaps using fine_ebands.
  gap_err = get_gaps(fine_ebands, fine_gaps)

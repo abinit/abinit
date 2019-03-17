@@ -65,8 +65,7 @@ contains
 !! FUNCTION
 !! Initialize k points (list of k points, weights, storage)
 !! for one particular dataset, characterized by jdtset.
-!! Note that nkpt (and nkpthf) can be computed by calling this routine with
-!! input value of nkpt=0, provided kptopt/=0.
+!! Note that nkpt (and nkpthf) can be computed by calling this routine with input value of nkpt=0, provided kptopt /= 0.
 !!
 !! INPUTS
 !! bravais(11): bravais(1)=iholohedry
@@ -361,7 +360,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    end if
 
    if (nkpt/=0) then
-     ! the array kpt has the right dimension and we can generate the k-path
+     ! The array kpt has the right dimension and we can generate the k-path
      call intagm(dprarr,intarr,jdtset,marr,3*nsegment+3,string(1:lenstr),'kptbounds',tread,'DPR')
      if(tread==1)then
        kptbounds(:,:)=reshape( dprarr(1:3*nsegment+3), [3,nsegment+1])
@@ -467,7 +466,6 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      do ii=1,3
        kptrlatt_orig(ii,ii) = ngkpt(ii)
      end do
-
      ! The parameters of the k lattice are not known, compute kptrlatt, nshiftk, shiftk.
      call testkgrid(bravais,iout,kptrlatt,kptrlen, msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
    end if
@@ -483,7 +481,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    kptnrm=one
 
  else
-   write(msg,  '(3a,i0,3a)' ) &
+   write(msg,'(3a,i0,3a)' ) &
    'The only values of kptopt allowed are smaller than 4.',ch10,&
    'The input value of kptopt is: ',kptopt,'.',ch10,&
    'Action: change kptopt in your input file.'
@@ -498,10 +496,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    MSG_ERROR(msg)
  end if
 
-!The k point number has been computed, and, if nkpt/=0, also the list of k points.
-!Also nkpthf has been computed, and, if nkpt/=0, also the list kpthf.
-
-!Now, determine istwfk, and eventually shift the k points by the value of qptn.
+ ! The k point number has been computed, and, if nkpt/=0, also the list of k points.
+ ! Also nkpthf has been computed, and, if nkpt/=0, also the list kpthf.
+ ! Now, determine istwfk, and eventually shift the k points by the value of qptn.
  if(nkpt/=0)then
 
    istwfk(1:nkpt)=0
@@ -560,8 +557,7 @@ end subroutine inkpts
 !!  natom=number of atoms
 !!  rprimd(3,3)=dimensional real space primitive translations (bohr)
 !!  spinat(3,1:natom)=spin-magnetization of the atoms
-!!  string*(*)=character string containing all the input data.
-!!             Initialized previously in instrng.
+!!  string*(*)=character string containing all the input data. Initialized previously in instrng.
 !!  typat(natom)=type for each atom
 !!  vacuum(3)=for each direction, 0 if no vacuum, 1 if vacuum
 !!  xred(3,natom,nimage) =reduced coordinates of atoms
@@ -570,8 +566,6 @@ end subroutine inkpts
 !!  qptn(3)=reduced coordinates of eventual q point (normalisation is already included)
 !!  kptrlatt(3,3)=q-point lattice specification (if kptopt/=0)
 !!  wtqc=weigth of the eventual current q point
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!      invars1
@@ -603,30 +597,25 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
  real(dp) :: qptnrm,qptrlen,tolsym,ucvol
  character(len=500) :: msg
 !arrays
- integer :: bravais(11)
- integer :: ngqpt(3)
- integer, allocatable :: symafm_new(:)
- integer, allocatable :: ptsymrel(:,:,:),symrel_new(:,:,:)
- integer,allocatable :: intarr(:)
+ integer :: bravais(11), ngqpt(3)
+ integer, allocatable :: symafm_new(:), ptsymrel(:,:,:),symrel_new(:,:,:), intarr(:)
  real(dp) :: gmet(3,3),gprimd(3,3),qpt(3),rmet(3,3),shiftq(3,MAX_NSHIFTK)
- real(dp),allocatable :: qpts(:,:),tnons_new(:,:),wtq(:)
- real(dp),allocatable :: dprarr(:)
+ real(dp),allocatable :: qpts(:,:),tnons_new(:,:),wtq(:), dprarr(:)
 
 ! *************************************************************************
 
-!Compute the maximum size of arrays intarr and dprarr (nshiftq is MAX_NSHIFTK at maximum)
+ ! Compute the maximum size of arrays intarr and dprarr (nshiftq is MAX_NSHIFTK at maximum)
  marr=630
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
-!Find the method to generate the k points
+ ! Find the method to generate the q-points
  qptopt=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qptopt',tread,'INT')
  if(tread==1)qptopt=intarr(1)
 
  if(qptopt==0)then
-
-!  Read qpt and qptnrm
+   ! Read qpt and qptnrm
    qpt=zero
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'qpt',tread,'DPR')
    if(tread==1) qpt(1:3)=dprarr(1:3)
@@ -637,21 +626,20 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    if(tread==1) qptnrm=dprarr(1)
    if(qptnrm<tol10)then
      write(msg, '(5a)' )&
-&     'The input variable qptnrm is lower than 1.0d-10,',ch10,&
-&     'while it must be a positive, non-zero number.   ',ch10,&
-&     'Action: correct the qptnrm in the input file.'
+     'The input variable qptnrm is lower than 1.0d-10,',ch10,&
+     'while it must be a positive, non-zero number.   ',ch10,&
+     'Action: correct the qptnrm in the input file.'
      MSG_ERROR(msg)
    end if
 
    qptn(:)=qpt(:)/qptnrm
 
-!  DBSP: one could want ot define wtq in order to reproduce what is obtained
-!  with ngqpt but without having to do initialize the qgrid (extremly slow in case of large grid > 50x50x50
+   ! DBSP: one could want ot define wtq in order to reproduce what is obtained
+   ! with ngqpt but without having to do initialize the qgrid (extremly slow in case of large grid > 50x50x50
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wtq',tread,'DPR')
    if(tread==1) wtqc=dprarr(1)
 
- else if(qptopt>=1 .and. qptopt<=4)then
-
+ else if (qptopt>=1 .and. qptopt<=4) then
    ngqpt(:)=0
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ngqpt',tread_ngqpt,'INT')
 
@@ -660,9 +648,9 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      do ii=1,3
        if(ngqpt(ii)<1)then
          write(msg,  '(a,i0,a,a,a,i0,a,a,a)' ) &
-&         'The input variable ngqpt(',ii,') must be strictly positive,',ch10,&
-&         'while it is found to be',ngqpt(ii),'.',ch10,&
-&         'Action: change it in your input file, or change qptopt.'
+         'The input variable ngqpt(',ii,') must be strictly positive,',ch10,&
+         'while it is found to be',ngqpt(ii),'.',ch10,&
+         'Action: change it in your input file, or change qptopt.'
          MSG_ERROR(msg)
        end if
      end do
@@ -673,9 +661,9 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
    if(tread_ngqpt==1 .and. tread_qptrlatt==1)then
      write(msg, '(5a)' ) &
-&     'The input variables ngqpt and qptrlatt cannot both ',ch10,&
-&     'be defined in the input file.',ch10,&
-&     'Action: change one of ngqpt or qptrlatt in your input file.'
+     'The input variables ngqpt and qptrlatt cannot both ',ch10,&
+     'be defined in the input file.',ch10,&
+     'Action: change one of ngqpt or qptrlatt in your input file.'
      MSG_ERROR(msg)
    else if(tread_ngqpt==1)then
      qptrlatt(:,:)=0
@@ -690,9 +678,9 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
    if(nshiftq<1 .or. nshiftq>MAX_NSHIFTK )then
      write(msg,  '(a,i0,2a,i0,3a)' )&
-&     'The only allowed values of nshiftq are between 1 and,',MAX_NSHIFTK,ch10,&
-&     'while it is found to be',nshiftq,'.',ch10,&
-&     'Action: change the value of nshiftq in your input file, or change qptopt.'
+     'The only allowed values of nshiftq are between 1 and,',MAX_NSHIFTK,ch10,&
+     'while it is found to be',nshiftq,'.',ch10,&
+     'Action: change the value of nshiftq in your input file, or change qptopt.'
      MSG_ERROR(msg)
    end if
 
@@ -704,15 +692,15 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    else
      if(nshiftq/=1)then
        write(msg,  '(3a,i0,2a)' )&
-&       'When nshiftq is not equal to 1, shiftq must be defined in the input file.',ch10,&
-&       'However, shiftq is not defined, while nshiftq=',nshiftq,ch10,&
-&       'Action: change the value of nshiftq in your input file, or define shiftq.'
+       'When nshiftq is not equal to 1, shiftq must be defined in the input file.',ch10,&
+       'However, shiftq is not defined, while nshiftq=',nshiftq,ch10,&
+       'Action: change the value of nshiftq in your input file, or define shiftq.'
        MSG_ERROR(msg)
      end if
    end if
 
-!  Re-generate symmetry operations from the lattice and atomic coordinates
-!  This is a fundamental difference with respect to the k point generation.
+   ! Re-generate symmetry operations from the lattice and atomic coordinates
+   ! This is a fundamental difference with respect to the k point generation.
    tolsym=tol8
    ABI_ALLOCATE(ptsymrel,(3,3,msym))
    ABI_ALLOCATE(symafm_new,(msym))
@@ -722,54 +710,55 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
    call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,0,&
-&   ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
+    ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
 
-!  Prepare to compute the q-point grid in the ZB or IZB
+   ! Prepare to compute the q-point grid in the ZB or IZB
    iscf_fake=0 ! Do not need the weights
 
-!  Compute the maximum number of q points
+   ! Compute the maximum number of q points
    nqpt=0
    ABI_ALLOCATE(qpts,(3,nqpt))
    ABI_ALLOCATE(wtq,(nqpt))
    call getkgrid(chksymbreak,0,iscf_fake,qpts,qptopt,qptrlatt,qptrlen,&
-&   msym,nqpt,nqpt_computed,nshiftq,nsym_new,rprimd,&
-&   shiftq,symafm_new,symrel_new,vacuum,wtq)
+     msym,nqpt,nqpt_computed,nshiftq,nsym_new,rprimd,&
+     shiftq,symafm_new,symrel_new,vacuum,wtq)
+
    nqpt=nqpt_computed
    ABI_DEALLOCATE(qpts)
    ABI_DEALLOCATE(wtq)
 
-!  Find the index of the q point within the set of q points that will be generated
+   ! Find the index of the q point within the set of q points that will be generated
    iqpt=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iqpt',tread,'INT')
    if(tread==1)iqpt=intarr(1)
 
-!  Checks that iqpt is among the computed q points
+   ! Checks that iqpt is among the computed q points
    if(iqpt<0)then
      write(msg, '(a,i0,3a)' )&
-&     'The input variable iqpt,',iqpt,' is negative, while it should be 0 or positive.',ch10,&
-&     'Action: correct iqpt in the input file.'
+      'The input variable iqpt,',iqpt,' is negative, while it should be 0 or positive.',ch10,&
+      'Action: correct iqpt in the input file.'
      MSG_ERROR(msg)
    end if
 
    if(iqpt>nqpt_computed)then
      write(msg, '(a,i0,3a,i0,7a)' )&
-&     'The input variable iqpt,',iqpt,' is bigger than the computed number of q-points in the grid,',ch10,&
-&     'which is ',nqpt,'.',ch10,&
-&     'The latter has been computed from the input variables qptrlatt, ngqpt, nshiftq,',ch10,&
-&     'shiftq, as well as qptopt, the symmetries of the lattice, and spinat.',ch10,&
-&     'Action: correct iqpt in the input file, or correct the computed q-point grid.'
+      'The input variable iqpt,',iqpt,' is bigger than the computed number of q-points in the grid,',ch10,&
+      'which is ',nqpt,'.',ch10,&
+      'The latter has been computed from the input variables qptrlatt, ngqpt, nshiftq,',ch10,&
+      'shiftq, as well as qptopt, the symmetries of the lattice, and spinat.',ch10,&
+      'Action: correct iqpt in the input file, or correct the computed q-point grid.'
      MSG_ERROR(msg)
    end if
 
-!  Compute the q-point grid in the BZ or the IBZ
+   ! Compute the q-point grid in the BZ or the IBZ
    ABI_ALLOCATE(qpts,(3,nqpt))
    ABI_ALLOCATE(wtq,(nqpt))
 
    call getkgrid(chksymbreak,iout,iscf_fake,qpts,qptopt,qptrlatt,qptrlen,&
-&   msym,nqpt,nqpt_computed,nshiftq,nsym_new,rprimd,&
-&   shiftq,symafm_new,symrel_new,vacuum,wtq)
+    msym,nqpt,nqpt_computed,nshiftq,nsym_new,rprimd,&
+    shiftq,symafm_new,symrel_new,vacuum,wtq)
 
-!  Transfer to qptn, and deallocate
+   ! Transfer to qptn, and deallocate
    qptn(:)=zero
    if(iqpt/=0)then
      qptn(:)=qpts(:,iqpt)
@@ -784,11 +773,10 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    ABI_DEALLOCATE(wtq)
 
  else
-
    write(msg, '(3a,i0,3a)' ) &
-&   'The only values of qptopt allowed are smaller than 4.',ch10,&
-&   'The input value of qptopt is',qptopt,'.',ch10,&
-&   'Action: change qptopt in your input file.'
+    'The only values of qptopt allowed are smaller than 4.',ch10,&
+    'The input value of qptopt is',qptopt,'.',ch10,&
+    'Action: change qptopt in your input file.'
    MSG_ERROR(msg)
  end if
 
