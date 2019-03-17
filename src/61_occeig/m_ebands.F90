@@ -44,6 +44,7 @@ MODULE m_ebands
  use m_kptrank
  use m_skw
  use m_kpts
+ use m_sort
 
  use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : hdr_type, dataset_type
@@ -262,10 +263,10 @@ MODULE m_ebands
     ! Fermi energy taken from ebands.
 
    integer,allocatable :: ierr(:)
-     ! The third index corresponds to a "status":
-     !   0.0dp if gaps were not computed (because there are only valence bands);
-     !  -1.0dp if the system (or spin-channel) is metallic;
-     !   1.0dp if the gap was computed
+    ! ierr(nsppol
+    !   0 if the gap has been computed.
+    !   1 if the system (or spin-channel) is metallic.
+    !   2 if gaps were not computed (because there are only valence bands).
 
    real(dp),allocatable :: fo_values(:,:)
      ! fo_values(2,nsppol)]
@@ -1011,12 +1012,13 @@ subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
      end if
 
      do ikpt=1,ebands%nkpt
-       write(msg,'(2a,i4,a,3f12.6,a,f6.3,2a)')ch10,&
-         ' k-point number ',ikpt,') ',ebands%kptns(:,ikpt),'; weight: ',ebands%wtk(ikpt), ch10, &
-         " eig (Ha), occ, doccde"
+       write(msg,'(2a,i4,3a,f6.3,2a)')ch10,&
+         ' k-point number ',ikpt,') ',trim(ktoa(ebands%kptns(:,ikpt))),'; weight: ',ebands%wtk(ikpt), ch10, &
+         " eig (Ha), eig (eV), occ, doccde"
        call wrtout(my_unt,msg,my_mode)
        do ii=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
-         write(msg,'(3(f7.3,1x))')ebands%eig(ii,ikpt,spin), ebands%occ(ii,ikpt,spin), ebands%doccde(ii,ikpt,spin)
+         write(msg,'(4(f7.3,1x))')ebands%eig(ii,ikpt,spin), ebands%eig(ii,ikpt,spin) * Ha_eV, &
+             ebands%occ(ii,ikpt,spin), ebands%doccde(ii,ikpt,spin)
          call wrtout(my_unt,msg,my_mode)
        end do
      end do !ikpt
@@ -1328,7 +1330,7 @@ end function get_bandenergy
 !! FUNCTION
 !!  For each k-point and spin polarisation, report:
 !!    the index of the valence in case of Semiconductors.
-!!    the index of the band at the Fermi energy+toldfe
+!!    the index of the band at the Fermi energy + toldfe
 !!
 !! INPUTS
 !!  ebands<ebands_t>=The object describing the band structure.
@@ -2205,7 +2207,8 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    ! Anyway we have to decide and follow a unique convention to avoid problems.
    !
    ! Occupation factors MUST be initialized
-   if (ALL(ABS(ebands%occ) < tol6)) then
+   !if (ALL(ABS(ebands%occ) < tol6)) then
+   if (ebands%occopt /= 2) then
      ABI_CHECK(ebands%nelect == nint(ebands%nelect), "nelect should be integer")
      mband = nint((ebands%nelect * ebands%nspinor) / 2)
      ebands%occ = zero
@@ -2217,9 +2220,8 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    do spin=1,ebands%nsppol
      valencetop(spin) = smallest_real
      condbottom(spin) = greatest_real
-
      do ikibz=1,ebands%nkpt
-       nband_k = ebands%nband(ikibz+(spin-1)*ebands%nkpt)
+       nband_k = ebands%nband(ikibz + (spin-1)*ebands%nkpt)
        do band=1,nband_k
          if (ebands%occ(band,ikibz,spin) / maxocc > one-tol6 .and. valencetop(spin) < ebands%eig(band,ikibz,spin)) then
            valencetop(spin) = ebands%eig(band,ikibz,spin)
@@ -2229,43 +2231,39 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
          end if
        end do
      end do
-
    end do
 
    vtop = MAXVAL(valencetop)
    cbot = MINVAL(condbottom)
 
-   write(msg,'(a,f6.2,2a,f6.2)') &
-    ' top of valence       [eV] ', vtop*Ha_eV,ch10, &
-    ' bottom of conduction [eV] ', cbot*Ha_eV
+   write(msg,'(a,f8.4,3a,f8.4,a)') &
+    ' Top of valence: ', vtop*Ha_eV," (eV)", ch10, &
+    ' Bottom of conduction: ', cbot*Ha_eV, " (eV)"
    call wrtout(std_out, msg)
-   if (ebands%nsppol==2) then
+   if (ebands%nsppol == 2) then
      if (ABS(vtop - MINVAL(valencetop)) > tol6) then
-       write(msg,'(a,i2)')' top of valence is spin ',MAXLOC(valencetop)
-       call wrtout(std_out, msg)
+       call wrtout(std_out, sjoin(' Top of valence is spin: ', itoa(imax_loc(valencetop))))
      end if
      if (ABS(cbot - MAXVAL(condbottom)) > tol6) then
-       write(msg,'(a,i2)')' bottom of conduction is spin ',MINLOC(condbottom)
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out, ' Bottom of conduction is spin: ', itoa(imin_loc(condbottom)))
      end if
    end if
 
-   ! Save output
-   ! Here I dont know if it is better to be consistent with the abinit convention i.e fermi=vtop
+   ! Save results. Here I dont know if it is better to be consistent with the abinit convention i.e fermi=vtop
    ebands%entropy = zero
    ebands%fermie = (vtop + cbot) / 2
    if (ABS(cbot - vtop) < tol4) ebands%fermie = vtop ! To avoid error on the last digit
  end if
 
- write(msg,'(a,f6.2,a)')' Fermi energy         [eV] ',ebands%fermie*Ha_eV,ch10
+ write(msg,'(a,f8.4,2a)')' Fermi level: ',ebands%fermie*Ha_eV, " (eV)", ch10
  call wrtout(std_out, msg)
 
  ! Compute number of electrons for each spin channel.
  nelect_spin(:)=zero
  do spin=1,ebands%nsppol
    do ikibz=1,ebands%nkpt
-     nband_k=ebands%nband(ikibz+(spin-1)*ebands%nkpt)
-     nelect_spin(spin)= nelect_spin(spin) + ebands%wtk(ikibz)*SUM(ebands%occ(1:nband_k,ikibz,spin))
+     nband_k = ebands%nband(ikibz+(spin-1)*ebands%nkpt)
+     nelect_spin(spin)= nelect_spin(spin) + ebands%wtk(ikibz) * sum(ebands%occ(1:nband_k,ikibz,spin))
    end do
  end do
 
@@ -2279,7 +2277,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
 
  if (ABS(ndiff) > 5.d-2*ebands%nelect) then
    write(msg,'(2a,2(a,es12.4))')&
-    'Too large difference in no. of electrons:,',ch10,&
+    'Too large difference in number of electrons:,',ch10,&
     'Expected = ',ebands%nelect,' Calculated = ',sum(nelect_spin)
    MSG_ERROR(msg)
  end if
@@ -2335,15 +2333,15 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
  ebands%occopt = occopt; ebands%tsmear = tsmear
 
  if (prtvol > 10) then
-   call wrtout(std_out, "Changing occupation scheme in electron bands")
-   call wrtout(std_out, sjoin("occopt:", itoa(ebands%occopt), " ==> ", itoa(occopt)))
-   call wrtout(std_out, sjoin("tsmear:", ftoa(ebands%tsmear), " ==> ", ftoa(tsmear)))
+   call wrtout(std_out, " Changing occupation scheme in electron bands")
+   call wrtout(std_out, sjoin(" occopt:", itoa(ebands%occopt), " ==> ", itoa(occopt)))
+   call wrtout(std_out, sjoin(" tsmear:", ftoa(ebands%tsmear), " ==> ", ftoa(tsmear)))
  end if
 
  call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=my_prtvol)
 
  if (prtvol > 10) then
-   call wrtout(std_out, sjoin('Fermi level is now:', ftoa(ebands%fermie)))
+   call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
  end if
 
 end subroutine ebands_set_scheme
@@ -3801,6 +3799,57 @@ end function ebands_chop
 
 !----------------------------------------------------------------------
 
+!!****f* m_ebands/ebands_sort
+!! NAME
+!! ebands_sort
+!!
+!! FUNCTION
+!!  Sort eigvalues_k in ascending order and reorder arrays depending on nband_k
+!!  Mainly used when interpolating band energies as the interpolator may not produce ordered eigenvalues
+!!  and there are routines whose implementation assumes eig(b) <= eig(b+1)
+!!
+!! SIDE EFFECTS
+!!  ebands<ebands_t> = Object with input energies sorted in output.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_sort(self)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(inout) :: self
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin, ik_ibz, band, nband_k
+!arrays
+ integer :: iperm_k(self%mband)
+
+! *********************************************************************
+
+ do spin=1,self%nsppol
+   do ik_ibz=1,self%nkpt
+     nband_k = self%nband(ik_ibz + (spin - 1) * self%nkpt)
+     iperm_k = [(band, band=1,nband_k)]
+     call sort_dp(nband_k, self%eig(:, ik_ibz, spin), iperm_k, tol12)
+     ! Shuffle other arrays depending on nband_k
+     self%occ(1:nband_k, ik_ibz, spin) = self%occ(iperm_k(1:nband_k), ik_ibz, spin)
+     self%doccde(1:nband_k, ik_ibz, spin) = self%doccde(iperm_k(1:nband_k), ik_ibz, spin)
+     if (allocated(self%velocity)) then
+       self%velocity(:, 1:nband_k, ik_ibz, spin) = self%velocity(:, iperm_k(1:nband_k), ik_ibz, spin)
+     end if
+   end do
+ end do
+
+end subroutine ebands_sort
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ebands/ebands_interp_kmesh
 !! NAME
 !! ebands_interp_kmesh
@@ -3829,9 +3878,8 @@ end function ebands_chop
 !!  New ebands_t object with interpolated energies.
 !!
 !! NOTES
-!!  Fermi level and occupation factors are not recomputed by this routine.
+!!  Fermi level and occupation factors of the interpolate bands are not recomputed by this routine.
 !!  This operation is delegated to the caller.
-!!  Strictly speaking these quantities should be recomputed only for metals or semi-metals.
 !!
 !! PARENTS
 !!
@@ -3857,7 +3905,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype,nb,ib
+ integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype,nb,ib,nband_k
  integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
 #ifdef HAVE_NETCDF
  integer :: ncid
@@ -3884,6 +3932,9 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  ! Initialize new ebands_t in new IBZ
  ABI_MALLOC(new_istwfk, (new_nkibz))
  new_istwfk = 1
+ !do ik_ibz=1,new_nkibz
+ !  new_istwfk(ik_ibz) = set_istwfk(new%kptns(:, ik_ibz))
+ !end do
  ABI_MALLOC(new_nband, (new_nkibz, ebands%nsppol))
  new_nband = nb
  ABI_MALLOC(new_npwarr, (new_nkibz))
@@ -3947,6 +3998,8 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  call xmpi_sum(new%eig, comm, ierr)
  if (itype == 2) call xmpi_sum(new%velocity, comm, ierr)
 
+ ! Sort eigvalues_k in ascending order to be compatible with other ebands routines.
+ call ebands_sort(new)
  !call ebands_update_occ(new, dtset%spinmagntarget, prtvol=dtset%prtvol)
 
  if (my_rank == master .and. itype == 1 .and. present(out_prefix)) then
@@ -4104,6 +4157,9 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
    end do
  end do
  call xmpi_sum(new%eig, comm, ierr)
+
+ ! Sort eigvalues_k in ascending order to be compatible with other ebands routines.
+ call ebands_sort(new)
 
  call skw%free()
 
@@ -5642,7 +5698,6 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
    call gaps%free()
    call ebands_free(ebands_kmesh)
  end if
-
 
  if (my_rank == master) then
    call wrtout(ab_out, sjoin("- Writing interpolated bands to file:", strcat(prefix, tag)))

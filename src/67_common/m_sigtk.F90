@@ -550,7 +550,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, pertcase0 = 0, fform_kerange = 6001, image1 = 1
+ integer,parameter :: master = 0, pertcase0 = 0, image1 = 1
  integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, ierr, nkpt_inerange, gap_err, unt, ncid, cnt, ncerr
  real(dp) :: ee, cmin, vmax
  character(len=500) :: msg
@@ -596,6 +596,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
  end if
  call gaps%print(header="Gaps from input ebands", unit=std_out)
+ call gaps%free()
 
  ! Interpolate band energies with star-functions.
  ! In the EPH code, we will need eigens in the IBZ to compute efermi not just energies inside pockets.
@@ -621,7 +622,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
  end if
  call fine_gaps%print(header="gaps from interpolated eigenvalues", unit=std_out)
- call fine_gaps%free()
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, ABINIT_VERSION, pertcase0, &
@@ -638,8 +638,8 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  do spin=1,ebands%nsppol
    ! Get CBM and VBM with some tolerance.
-   vmax = gaps%vb_max(spin) + tol2 * eV_Ha
-   cmin = gaps%cb_min(spin) - tol2 * eV_Ha
+   vmax = fine_gaps%vb_max(spin) + tol2 * eV_Ha
+   cmin = fine_gaps%cb_min(spin) - tol2 * eV_Ha
    do ikf_ibz=1,fine_ebands%nkpt
      do band=1,ebands%mband
        ee = fine_ebands%eig(band, ikf_ibz, spin)
@@ -702,7 +702,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    ! Write crystalline structure, fine_hdr and fine_ebands defined on the fine k-mesh.
-   NCF_CHECK(hdr_ncwrite(fine_hdr, ncid, fform_kerange, nc_define=.True.))
+   NCF_CHECK(hdr_ncwrite(fine_hdr, ncid, fform_from_ext("KERANGE.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
    ncerr = nctk_def_dims(ncid, [nctkdim_t("nkpt_inerange", nkpt_inerange)], defmode=.True.)
@@ -728,7 +728,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  ABI_FREE(kshe_mask)
  ABI_FREE(krange2ibz)
 
- call gaps%free()
+ call fine_gaps%free()
  call ebands_free(fine_ebands)
  call hdr_free(fine_hdr)
 

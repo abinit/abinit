@@ -4949,7 +4949,7 @@ end subroutine wfk_diff
 !!  Output is written to file out_wfkpath.
 !!
 !! NOTES
-!!  - Only GS WFK files are supported (formeig==0)
+!!  Only GS WFK files are supported (formeig==0)
 !!
 !! PARENTS
 !!      wfk_analyze
@@ -5016,7 +5016,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  fine_ebands = ebands_from_hdr(fine_hdr, fine_mband, fine_eigen)
  !call ebands_print(fine_ebands, header="SKW interpolated energies", prtvol=dtset%prtvol)
  ABI_FREE(fine_eigen)
- !call hdr_vs_dtset(wfk0_hdr, dtset)
 #else
  MSG_ERROR("wfk_klist2mesh requires NETCDF support.")
 #endif
@@ -5037,15 +5036,18 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
    MSG_ERROR(msg)
  end if
  iwfk_ebands = wfk_read_ebands(my_inpath, xmpi_comm_self)
+ !call ebands_print(iwfk_ebands, header="iwfk_ebands", unit=std_out, prtvol=dtset%prtvol)
+ !if (iwfk_ebands%kptopt == 0) then
+ !  call ebands_update_occ(iwfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ !end if
+
  iomode = iomode_from_fname(my_inpath)
  call wfk_open_read(iwfk, my_inpath, formeig0, iomode, get_unit(), xmpi_comm_self)
 
  if (dtset%prtvol > 0 .and. my_rank == master) then
    fform = 0
-   write(std_out, "(a)")" Header of iwfk file"
-   call hdr_echo(iwfk%hdr, fform, 3, unit=std_out)
-   write(std_out, "(a)")" Header of fine_hdr"
-   call hdr_echo(fine_hdr, fform, 3, unit=std_out)
+   call hdr_echo(iwfk%hdr, fform, 3, unit=std_out, header="Header of iwfk file")
+   call hdr_echo(fine_hdr, fform, 3, unit=std_out, header="Header of fine_hdr")
  end if
 
  ihdr => iwfk%hdr
@@ -5101,13 +5103,21 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
    else
      fine_ebands%npwarr(ikf) = iwfk_ebands%npwarr(ikin)
      fine_hdr%npwarr(ikf) = iwfk_ebands%npwarr(ikin)
+
      ! Insert ab-initio eigenvalues in the (SKW-interpolated) fine k-mesh.
      do spin=1,nsppol
        nband_k = iwfk_ebands%nband(ikin + (spin - 1) * iwfk_ebands%nkpt)
        fine_ebands%eig(1:nband_k, ikf, spin) = iwfk_ebands%eig(1:nband_k, ikin, spin)
+       fine_ebands%occ(1:nband_k, ikf, spin) = iwfk_ebands%occ(1:nband_k, ikin, spin)
      end do
    end if
  end do
+
+ call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
+
+ !call pack_eneocc(nkpt, nsppol, mband, nband, bantot, array3d, vect)
+ !fine_hdr%occ = reshape(fine_ebands%occ, fine_ebands%mband (1:nband_k, ikin, spin)
+ call ebands_print(fine_ebands, header="fine_ebands", unit=std_out, prtvol=dtset%prtvol)
 
  out_wfkpath = strcat(in_wfkpath, ".tmp")
  if (iomode == IO_MODE_ETSF) out_wfkpath = strcat(out_wfkpath, ".nc")
@@ -5141,16 +5151,16 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
        ! Read wavefunctions from input WFK file.
        ABI_CHECK(npw_k == iwfk%hdr%npwarr(ikin), "Mismatch in npw_k")
        ABI_CHECK(nband_k == iwfk%nband(ikin, spin), "Mismatch in nband_k")
-       call wfk_read_band_block(iwfk, [1, nband_k], ikin, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k, occ_k=occ_k)
+       call wfk_read_band_block(iwfk, [1, nband_k], ikin, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k) !, eig_k=eig_k, occ_k=occ_k)
      else
        ! Fill wavefunctions with fake data (npw_k == 1)
        kg_k = 0
        cg_k = zero
-       eig_k(1:nband_k) = fine_ebands%eig(1:nband_k, ikf, spin)
-       occ_k(1:nband_k) = fine_ebands%occ(1:nband_k, ikf, spin)
      end if
+
      ! Write (kpt, spin) block
-     !write(std_out,*)"npw_k:", npw_k, ", ikf:", ikf, ", ikin:", ikin
+     eig_k(1:nband_k) = fine_ebands%eig(1:nband_k, ikf, spin)
+     occ_k(1:nband_k) = fine_ebands%occ(1:nband_k, ikf, spin)
      call wfk_write_band_block(owfk, [1, nband_k], ikf, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k, occ_k=occ_k)
    end do
  end do

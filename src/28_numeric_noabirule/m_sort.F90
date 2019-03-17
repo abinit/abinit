@@ -42,8 +42,7 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Sort double precision array list(n) into ascending numerical order using Heapsort
 !!  algorithm, while making corresponding rearrangement of the integer
-!!  array iperm. Consider that two double precision numbers
-!!  within tolerance tol are equal.
+!!  array iperm. Consider that two double precision numbers within tolerance tol are equal.
 !!
 !! INPUTS
 !!  n        intent(in)    dimension of the list
@@ -53,7 +52,8 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  list(n)  sorted list
-!!  iperm(n) index of permutation given the right ascending order
+!!  iperm(n) index of permutation giving the right ascending order:
+!!      the i-th element of the ouput ordered list had index iperm(i) in the input list.
 !!
 !! PARENTS
 !!      atomden,cpdrv,critics,denfgr,finddistrproc,invacuum,listkk,m_bz_mesh
@@ -159,8 +159,7 @@ end subroutine sort_dp
 !!
 !! FUNCTION
 !!   Sort integer array list(n) into ascending numerical order using Heapsort
-!!   algorithm, while making corresponding rearrangement of the integer
-!!   array iperm.
+!!   algorithm, while making corresponding rearrangement of the integer array iperm.
 !!
 !! INPUTS
 !!  n        intent(in)    dimension of the list
@@ -170,6 +169,7 @@ end subroutine sort_dp
 !! OUTPUT
 !!  list(n)  sorted list
 !!  iperm(n) index of permutation given the right ascending order
+!!      the i-th element of the ouput ordered list had index iperm(i) in the input list.
 !!
 !! PARENTS
 !!      getng,getngrec,initmpi_img,invars2,irrzg,m_dvdb,m_hdr,m_nesting,m_wfk

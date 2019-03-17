@@ -37,7 +37,7 @@ module m_inkpts
  use m_hdr
 
  use m_time,      only : timab
- use m_fstrings,  only : sjoin
+ use m_fstrings,  only : sjoin, itoa
  use m_numeric_tools, only : isdiagmat
  use m_geometry,  only : metric
  use m_symfind,   only : symfind, symlatt
@@ -259,8 +259,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 #ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
      call hdr_ncread(hdr, ncid, fform)
-     ABI_CHECK(fform /= 0, sjoin("Error while reading:", kerange_path))
-     ! TODO Consistency check
+     ABI_CHECK(fform == fform_from_ext("KERANGE.nc"), sjoin("Error while reading:", kerange_path, ", fform:", itoa(fform)))
+     ! TODO Add code for consistency check
      !kptopt, nsym, occopt
      !ABI_CHECK(nkpt == hdr%nkpt, "nkpt from kerange != nkpt")
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
@@ -273,17 +273,16 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    call hdr_bcast(hdr, master, my_rank, comm)
    ! Hdr contains kpts in the IBZ. Extract data corresponding to pockets via krange2ibz.
    nshiftk = hdr%nshiftk; nshiftk_orig = hdr%nshiftk_orig
-   istwfk = hdr%istwfk(krange2ibz)
+   istwfk = hdr%istwfk(krange2ibz(:))
    kptrlatt = hdr%kptrlatt; kptrlatt_orig = hdr%kptrlatt_orig
    ABI_CHECK(isdiagmat(hdr%kptrlatt), "kptrlatt is not diagonal!")
    ngkpt(1) = hdr%kptrlatt(1, 1); ngkpt(2) = hdr%kptrlatt(2, 2); ngkpt(3) = hdr%kptrlatt(3, 3)
-   kpt = hdr%kptns(:, krange2ibz)
-   !; kpthf(3,nkpthf)
+   kpt = hdr%kptns(:, krange2ibz(:)) !; kpthf(3,nkpthf)
    shiftk(:,1:nshiftk) = hdr%shiftk; shiftk_orig(:, 1:nshiftk_orig) = hdr%shiftk_orig
-   wtk = hdr%wtk(krange2ibz)
+   wtk = hdr%wtk(krange2ibz(:))
    call hdr_free(hdr)
-   ABI_FREE(krange2ibz)
    kptnrm = one
+   ABI_FREE(krange2ibz)
 
  else if (kptopt < 0) then
    ! Band structure calculation

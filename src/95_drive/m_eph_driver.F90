@@ -68,7 +68,6 @@ module m_eph_driver
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
- !use m_ephwg,           only : ephwg_test
  use m_pspini,          only : pspini
 
  implicit none
@@ -371,13 +370,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Here we change the GS bands (fermi level, scissors operator ...)
  ! All the modifications to ebands should be done here.
  if (use_wfk) then
-
    if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
      write(msg,"(2a,2(a,i0,a,f14.6,a))")&
      " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
      "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
      "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
-     call wrtout(ab_out,msg)
+     call wrtout(ab_out, msg)
      call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
      if (use_wfq) then
        call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
@@ -389,20 +387,20 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
      call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
      call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
-     call wrtout(ab_out,msg)
+     call wrtout(ab_out, msg)
      if (use_wfq) then
        call ebands_set_fermie(ebands_kq, dtset%eph_fermie, msg)
-       call wrtout(ab_out,msg)
+       call wrtout(ab_out, msg)
      end if
 
    else if (abs(dtset%eph_extrael) > tol12) then
      call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
      call ebands_set_nelect(ebands, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
-     call wrtout(ab_out,msg)
+     call wrtout(ab_out, msg)
      if (use_wfq) then
        call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
        call ebands_set_nelect(ebands_kq, ebands%nelect+dtset%eph_extrael, dtset%spinmagntarget, msg)
-       call wrtout(ab_out,msg)
+       call wrtout(ab_out, msg)
      end if
    end if
 
@@ -416,8 +414,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
        call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
      end if
    end if
-
- end if
+ end if ! use_wfk
 
  call cwtime_report(" eph%init", cpu, wall, gflops)
 
