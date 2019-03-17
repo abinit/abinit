@@ -406,22 +406,22 @@ All the independent perturbations are available
    2.47252491E-01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 20
-From bmin: 1 to bmax: 20
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Both Real and Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
-Number of frequency in generalized Eliashberg functions: 841
-Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 3
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 20
+ From bmin: 1 to bmax: 20
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Both Real and Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 3
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
@@ -698,22 +698,22 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 3
-From bmin: 2 to bmax: 4
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Both Real and Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
-Number of frequency in generalized Eliashberg functions: 841
-Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
-Number of q-points in the IBZ: 8
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 3
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 3
+ From bmin: 2 to bmax: 4
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Both Real and Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Number of q-points in the IBZ: 8
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 3
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
@@ -896,23 +896,23 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 9
-From bmin: 1 to bmax: 9
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: tetrahedron method
-Tolerance for integration weights <     1.000000E-12     1.000000E-12
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
-Number of frequency in generalized Eliashberg functions: 841
-Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
-Number of q-points in the IBZ: 8
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 3
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 9
+ From bmin: 1 to bmax: 9
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Number of q-points in the IBZ: 8
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 3
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
@@ -1205,24 +1205,24 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 4
-From bmin: 2 to bmax: 5
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: tetrahedron method
-Tolerance for integration weights <     1.000000E-06     1.000000E-06
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
-Number of frequency in generalized Eliashberg functions: 841
-Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
-Number of q-points in the IBZ: 8
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 2
-sigma_erange:  0.500  0.500  (eV)
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 4
+ From bmin: 2 to bmax: 5
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-06     1.000000E-06
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Number of q-points in the IBZ: 8
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 2
+ sigma_erange:  0.500  0.500  (eV)
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    5
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   3    4
  === MPI parallelism ===

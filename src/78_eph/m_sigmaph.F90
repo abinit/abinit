@@ -4330,52 +4330,52 @@ subroutine sigmaph_print(self, dtset, unt)
  ! Write dimensions
  !write(unt,"(a, 2(f5.3, 1x), a)")"Computing self-energy corrections for states in energy window:", &
  !    self%elow * Ha_eV, self%ehigh * Ha_eV, "[eV]"
- write(unt,"(a)")sjoin("Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
- write(unt,"(a)")sjoin("From bmin:", itoa(self%bsum_start), "to bmax:", itoa(self%bsum_stop))
+ write(unt,"(a)")sjoin(" Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
+ write(unt,"(a)")sjoin(" From bmin:", itoa(self%bsum_start), "to bmax:", itoa(self%bsum_stop))
  if (dtset%eph_stern == 1 .and. .not. self%imag_only) then
    write(unt, "(a)")" Treating high-energy bands with Sternheimer and static self-energy."
    write(unt, "(a, es16.6, a, i0)")" Tolwfr:", dtset%tolwfr, ", nline:", dtset%nline
  end if
- write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:", itoa(self%timrev))
- write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
- msg = "Standard quadrature"; if (self%qint_method == 1) msg = "tetrahedron method"
- write(unt, "(2a)")sjoin("Method for q-space integration:", msg)
+ write(unt,"(a)")sjoin(" Symsigma: ",itoa(self%symsigma), "Timrev:", itoa(self%timrev))
+ write(unt,"(a)")sjoin(" Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
+ msg = " Standard quadrature"; if (self%qint_method == 1) msg = " Tetrahedron method"
+ write(unt, "(2a)")sjoin(" Method for q-space integration:", msg)
  if (self%qint_method == 1) then
    ndiv = 1; if (self%use_doublegrid) ndiv = self%eph_doublegrid%ndiv
-   write(unt, "(a, 2(es16.6,1x))")"Tolerance for integration weights < ", dtset%eph_tols_idelta(:) / ndiv
+   write(unt, "(a, 2(es16.6,1x))")" Tolerance for integration weights < ", dtset%eph_tols_idelta(:) / ndiv
  end if
- if (self%use_doublegrid) write(unt, "(a, i0)")"Using double grid technique with ndiv: ", self%eph_doublegrid%ndiv
- if (self%imag_only) write(unt, "(a)")"Only the Imaginary part of Sigma will be computed."
- if (.not. self%imag_only) write(unt, "(a)")"Both Real and Imaginary part of Sigma will be computed."
- write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), &
+ if (self%use_doublegrid) write(unt, "(a, i0)")" Using double grid technique with ndiv: ", self%eph_doublegrid%ndiv
+ if (self%imag_only) write(unt, "(a)")" Only the Imaginary part of Sigma will be computed."
+ if (.not. self%imag_only) write(unt, "(a)")" Both Real and Imaginary part of Sigma will be computed."
+ write(unt,"(a)")sjoin(" Number of frequencies along the real axis:", itoa(self%nwr), &
     ", Step:", ftoa(self%wr_step * Ha_eV, fmt="f5.3"), "[eV]")
- write(unt, "(a)")sjoin("Number of frequency in generalized Eliashberg functions:", itoa(self%gfw_nomega))
- write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
+ write(unt, "(a)")sjoin(" Number of frequency in generalized Eliashberg functions:", itoa(self%gfw_nomega))
+ write(unt,"(a)")sjoin(" Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
- write(unt,"(a)")sjoin("Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))
- write(unt,"(a)")sjoin("Q-mesh used for self-energy integration [ngqpt]:", ltoa(self%ngqpt))
- write(unt,"(a)")sjoin("Number of q-points in the IBZ:", itoa(self%nqibz))
- write(unt,"(a)")sjoin("asr:", itoa(dtset%asr), "dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
+ write(unt,"(a)")sjoin(" Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))
+ write(unt,"(a)")sjoin(" Q-mesh used for self-energy integration [ngqpt]:", ltoa(self%ngqpt))
+ write(unt,"(a)")sjoin(" Number of q-points in the IBZ:", itoa(self%nqibz))
+ write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
  if (self%frohl_model == 0) then
-   write(unt,"(a)")"No special treatment of Frohlich divergence in gkq for q --> 0"
+   write(unt,"(a)")" No special treatment of Frohlich divergence in gkq for q --> 0"
  else if (self%frohl_model == 1) then
-   write(unt,"(a)")"Integrating Frohlich model in small sphere around Gamma to accelerate qpt convergence"
-   write(unt,"(2(a,i0,1x))")"Sperical integration performed with: ntheta: ", self%ntheta, ", nphi: ", self%nphi
+   write(unt,"(a)")" Integrating Frohlich model in small sphere around Gamma to accelerate qpt convergence"
+   write(unt,"(2(a,i0,1x))")" Sperical integration performed with: ntheta: ", self%ntheta, ", nphi: ", self%nphi
  else if (self%frohl_model == 2) then
    !write(unt,"((a,i0,1x,a,f5.3,1x,a))")"nr points:", self%nqr, "qrad:", self%qrad, "[Bohr^-1]"
  end if
- write(unt,"(a, i0)")"Number of k-points for self-energy corrections: ", self%nkcalc
+ write(unt,"(a, i0)")" Number of k-points for self-energy corrections: ", self%nkcalc
  if (all(dtset%sigma_erange /= -one)) then
-   write(unt, "(a, 2(f6.3, 1x), a)")"sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+   write(unt, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
  end if
- write(unt,"(a)")"List of K-points for self-energy corrections:"
+ write(unt,"(a)")" List of K-points for self-energy corrections:"
  do ikc=1,self%nkcalc
    if (ikc > 10) then
-     write(unt, "(2a)")"nkcalc > 10. Stop printing more k-point information.",ch10
+     write(unt, "(2a)")" nkcalc > 10. Stop printing more k-point information.",ch10
      exit
    end if
    do is=1,self%nsppol
-     if (self%nsppol == 2) write(unt,"(a,i1)")"... For spin: ",is
+     if (self%nsppol == 2) write(unt,"(a,i1)")" For spin: ",is
      write(unt, "(2(i4,2x),a,2(i4,1x))") &
        ikc, is, trim(ktoa(self%kcalc(:,ikc))), self%bstart_ks(ikc,is), self%bstart_ks(ikc,is) + self%nbcalc_ks(ikc,is) - 1
      end do
@@ -4736,7 +4736,7 @@ subroutine eval_sigfrohl2(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  real(dp) :: qrmesh(sigma%nqr), gmod2r(sigma%nqr), hmod2r(sigma%nqr), rfactr(sigma%nqr), nqr(sigma%nqr)
  real(dp) :: phfrq(cryst%natom*3)
  real(dp),allocatable :: displ_cart(:,:,:,:), eigs_kq(:), eigs_kqr(:,:), wqr(:,:)
- real(dp),allocatable ::  f_mkqr(:), eig0mkqr(:), gkqr2(:,:)
+ real(dp),allocatable :: f_mkqr(:), eig0mkqr(:), gkqr2(:,:)
  complex(dpc) :: cdd(3), cfqr(sigma%nqr)
  complex(dpc),allocatable :: cfact_wr(:)
 
@@ -5018,8 +5018,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nqpt, nqbz
- integer,intent(in) :: comm
+ integer,intent(in) :: nqpt, nqbz, comm
  type(sigmaph_t),intent(in) :: sigma
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
@@ -5032,8 +5031,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  integer,parameter :: timrev1=1
  integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
  integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
- real(dp) :: eig0nk, eig0mkq, dksqmax, ediff
- real(dp) :: cpu, wall, gflops
+ real(dp) :: eig0nk, eig0mkq, dksqmax, ediff, cpu, wall, gflops
  character(len=500) :: msg
  type(kptrank_type) :: kptrank
 !arrays
@@ -5046,7 +5044,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, sjoin(" qpoints_oracle: predicting no. q-points for tau with winfact:", ftoa(sigma%winfact)))
+ call wrtout(std_out, sjoin(" qpoints_oracle: predicting number q-points for tau with winfact:", ftoa(sigma%winfact)))
 
  ! Get full BZ associated to ebands
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &

@@ -359,23 +359,23 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 7
-From bmin: 1 to bmax: 7
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: tetrahedron method
-Tolerance for integration weights <     1.000000E-12     1.000000E-12
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 0
-Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
-Number of q-points in the IBZ: 8
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 8
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 7
+ From bmin: 1 to bmax: 7
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Number of q-points in the IBZ: 8
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 8
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    7
    2     1  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]   2    6
    3     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   2    6

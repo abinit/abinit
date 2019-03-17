@@ -3836,6 +3836,7 @@ subroutine ebands_sort(self)
      nband_k = self%nband(ik_ibz + (spin - 1) * self%nkpt)
      iperm_k = [(band, band=1,nband_k)]
      call sort_dp(nband_k, self%eig(:, ik_ibz, spin), iperm_k, tol12)
+
      ! Shuffle other arrays depending on nband_k
      self%occ(1:nband_k, ik_ibz, spin) = self%occ(iperm_k(1:nband_k), ik_ibz, spin)
      self%doccde(1:nband_k, ik_ibz, spin) = self%doccde(iperm_k(1:nband_k), ik_ibz, spin)
@@ -4363,8 +4364,12 @@ select case (intmeth)
        ! For each band get its contribution
        tmp_eigen = ebands%eig(band,:,spin)
 
-       if (present(emin) .and. all(tmp_eigen<emin)) cycle
-       if (present(emax) .and. all(tmp_eigen>emax)) cycle
+       if (present(emin)) then
+         if (all(tmp_eigen < emin)) cycle
+       end if
+       if (present(emax)) then
+         if (all(tmp_eigen > emax)) cycle
+       end if
 
        call tetra_blochl_weights(tetra, tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
          bcorr, wdt(:,:,2), wdt(:,:,1), comm)
@@ -5720,8 +5725,8 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), dtset%einterp))
    if (dtset%useria == 9) then
      NCF_CHECK(edos%ncwrite(ncid))
-     NCF_CHECK(nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.))
-     NCF_CHECK(nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")]))
+     NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.))
+     NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")]))
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_tens(:,1,:,:,:,1)))
