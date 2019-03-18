@@ -296,14 +296,14 @@ class TestMetaConfParser(object):
 
     def test_make_tree_empty(self):
         cp = ConfParser()
-        trees, _ = cp.make_trees({})
-        assert trees['__default'] == ConfTree({'spec': {}, 'constraints': {},
-                                              'parameters': {}})
+        tree = ConfTree.make_tree({}, cp)
+        assert tree == ConfTree({'spec': {}, 'constraints': {},
+                                             'parameters': {}})
 
     def test_make_tree_specs(self):
         cp = ConfParser()
-        trees, _ = cp.make_trees(self.src1)
-        assert trees['__default'] == ConfTree(self.tree1)
+        tree = ConfTree.make_tree(self.src1, cp)
+        assert tree == ConfTree(self.tree1)
 
     def test_make_tree_constraints(self):
         cp = ConfParser()
@@ -320,7 +320,7 @@ class TestMetaConfParser(object):
         def ceil(tol, ref, test):
             pass
 
-        trees, _ = cp.make_trees(self.src2)
+        tree = ConfTree.make_tree(self.src2, cp)
         ref = ConfTree({
             'spec': {
                 SpecKey('doc1'): {
@@ -361,7 +361,7 @@ class TestMetaConfParser(object):
             'constraints': {},
             'parameters': {}
         })
-        assert trees['__default'] == ref
+        assert tree == ref
 
     def test_make_tree_filters(self):
         cp = ConfParser()
@@ -406,10 +406,9 @@ class TestMetaConfParser(object):
         def ceil(tol, ref, test):
             pass
 
-        ref = cp.make_trees(self.src23)[0]['__default']
-
-        test = cp.make_trees(self.src2)[0]['__default']
-        test.update(cp.make_trees(self.src3)[0]['__default'])
+        ref = ConfTree.make_tree(self.src23, cp)
+        test = ConfTree.make_tree(self.src2, cp)
+        test.update(ConfTree.make_tree(self.src3, cp))
 
         assert test == ref
 
@@ -428,10 +427,9 @@ class TestMetaConfParser(object):
         def ceil(tol, ref, test):
             pass
 
-        ref = cp.make_trees(self.src25)[0]['__default']
-
-        test = cp.make_trees(self.src2)[0]['__default']
-        test.update(cp.make_trees(self.src5)[0]['__default'])
+        ref = ConfTree.make_tree(self.src25, cp)
+        test = ConfTree.make_tree(self.src2, cp)
+        test.update(ConfTree.make_tree(self.src5, cp))
 
         assert test == ref
 

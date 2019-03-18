@@ -9,7 +9,6 @@ from .register_tag import normalize_attr
 from .tricks import cstm_isinstance
 
 
-
 def make_apply_to(type_):
     '''
         Return a function that take in argument the constraint and
