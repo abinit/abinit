@@ -3,6 +3,9 @@ from .register_tag import BaseDictWrapper
 
 
 class Issue(object):
+    '''
+        Represent the result of a test.
+    '''
     def __init__(self, conf, msg):
         self.path = conf.path if conf.path else ('top level',)
         self.state = conf.current_state
@@ -18,6 +21,9 @@ class Issue(object):
 
 
 class Failure(Issue):
+    '''
+        Represent the fail of a test.
+    '''
     def __init__(self, conf, msg, ref=None, tested=None):
         self.ref = ref
         self.tested = tested
@@ -40,6 +46,9 @@ class Success(Issue):
 
 
 class Tester(object):
+    '''
+        Drive the testing process.
+    '''
     def __init__(self, reference_docs, tested_docs, config):
         self.ref = reference_docs
         self.tested = tested_docs
@@ -87,6 +96,9 @@ class Tester(object):
                         self.check_this(child, ref[child], tested[child])
 
     def run(self):
+        '''
+            Main entry point for testing.
+        '''
         top_cons = self.conf.get_top_level_constraints()
         for cons in top_cons:
             if top_cons[cons].apply_to('this'):

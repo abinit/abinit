@@ -28,47 +28,9 @@ Type help or ? to get the list of commands.
 
 try:
     import readline
-    # remove / and ~ from delimiters to avoid problem with file path completion
-    # readline.set_completer_delims(' \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
-    readline.set_completer_delims(' \n\t')
+    readline.set_completer_delims(' \n\t')  # keep only the minimum
 except ImportError:
     pass
-
-
-def show_cons(cons, used=False):
-    print('Constraint', cons.name)
-    print(' Value type:', cons.type)
-    print(' Inherited:', 'yes' if cons.inherited else 'no')
-    print(' Parameters:')
-    for param in cons.use_params:
-        print(' -', param)
-    print(' Exclude:')
-    for name in cons.exclude:
-        print(' -', name)
-    print(' Current value:', cons.value if used else 'not defined here')
-    if cons.metadata:
-        if 'file name' in cons.metadata:
-            print(' Defined in file:', cons.metadata['file name'])
-        if 'tree' in cons.metadata:
-            print(' Defined in tree:', cons.metadata['tree'])
-    print(' Description:')
-    print(cons.test.__doc__)
-
-
-def show_param(name, dic, used=False):
-    print('Parameter', name)
-    print(' Value type:', dic['type'])
-    print(' Inherited:', 'yes' if dic['inherited'] else 'no')
-    print(' Default value:', dic['default'])
-    print(' Current value:', dic['value'] if used else 'default value')
-
-
-def short_path(path):
-    if len('.'.join(path)) > 50:
-        shpath = path[:2] + '...' + '.'.join(path[-2:])
-    else:
-        shpath = '.'.join(path)
-    return shpath
 
 
 def print_iter(it):
@@ -183,6 +145,13 @@ class Explorer(cmd.Cmd):
         if self.tree is None:
             self.prompt = '[no file loaded]> '
         else:
+            def short_path(path):
+                if len('.'.join(path)) > 50:
+                    shpath = path[:2] + '...' + '.'.join(path[-2:])
+                else:
+                    shpath = '.'.join(path)
+                return shpath
+
             self.prompt = template.format(
                 filename=self.filename,
                 path=short_path(self.tree.path)
@@ -344,7 +313,33 @@ class Explorer(cmd.Cmd):
             parameters and constraints known.  If argument is ARG, show all
             informations about ARG.
         '''
-        name = arg
+        def show_cons(cons, used=False):
+            print('Constraint', cons.name)
+            print(' Value type:', cons.type)
+            print(' Inherited:', 'yes' if cons.inherited else 'no')
+            print(' Parameters:')
+            for param in cons.use_params:
+                print(' -', param)
+            print(' Exclude:')
+            for name in cons.exclude:
+                print(' -', name)
+            print(' Current value:', cons.value if used else
+                  'not defined here')
+            if cons.metadata:
+                if 'file name' in cons.metadata:
+                    print(' Defined in file:', cons.metadata['file name'])
+                if 'tree' in cons.metadata:
+                    print(' Defined in tree:', cons.metadata['tree'])
+            print(' Description:')
+            print(cons.test.__doc__)
+
+        def show_param(name, dic, used=False):
+            print('Parameter', name)
+            print(' Value type:', dic['type'])
+            print(' Inherited:', 'yes' if dic['inherited'] else 'no')
+            print(' Default value:', dic['default'])
+            print(' Current value:', dic['value'] if used else 'default value')
+
         if self.tree:
             cons_scope = self.tree.get_all_constraints_here()
             param_scope = self.tree.get_all_parameters_here()
@@ -356,14 +351,14 @@ class Explorer(cmd.Cmd):
             cons_known = conf_parser.constraints.copy()
             param_known = conf_parser.parameters.copy()
 
-        if not name:
+        if not arg:
             print('Current scope')
             print('Constraints:')
             print_iter(cons_scope)
             print('\nParameters:')
             print_iter(param_scope)
             print()
-        elif name == '*':
+        elif arg == '*':
             print('Everything known')
             print('Constraints:')
             print_iter(cons_known)
@@ -371,6 +366,7 @@ class Explorer(cmd.Cmd):
             print_iter(param_known)
             print()
         else:
+            name = arg
             if name in cons_scope:
                 show_cons(cons_scope[name], used=True)
             elif name in cons_known:

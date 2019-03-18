@@ -44,12 +44,6 @@ class InvalidNodeError(ConfigError):
         ConfigError.__init__(self, msg.format(name, value))
 
 
-class AlreadySetKeyError(ConfigError):
-    def __init__(self, key):
-        msg = 'The {} key have already been set in this tree.'
-        ConfigError.__init__(self, msg.format(key))
-
-
 class EmptySetError(ConfigError):
     def __init__(self, obj):
         msg = 'User tried to create an empty set with {}.'

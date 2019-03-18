@@ -23,14 +23,6 @@ def get_default_conf(filename):
             return {}
 
 
-def state_hash(d):
-    st = []
-    for it in ITERATORS:
-        if it in d:
-            st.append(it + str(d[it]))
-    return hash(''.join(st))
-
-
 class DriverTestConf:
     '''
         Interface to access parameters and constraints defined by the
@@ -171,6 +163,13 @@ class DriverTestConf:
         '''
             Start using filtered configurations if available.
         '''
+        def state_hash(d):
+            st = []
+            for it in ITERATORS:
+                if it in d:
+                    st.append(it + str(d[it]))
+            return hash(''.join(st))
+
         self.current_state = state
         if state_hash(state) in self._tree_cache:
             self.tree = self._tree_cache[state_hash(state)]

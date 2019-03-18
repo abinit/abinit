@@ -4,6 +4,7 @@ from .errors import (EmptySetError, NotOrderedOverlappingSetError)
 from .abinit_iterators import IterStateFilter
 from .meta_conf_parser import ConfTree, ConfParser, SpecKey
 from .driver_test_conf import DriverTestConf
+from .structures import Tensor
 
 
 class TestStateFilter(object):
@@ -461,32 +462,6 @@ filters:
         image: 1
 '''
 
-    src2 = '''\
-tol_abs: 1.2e-7
-sp1:
-    sp3:
-        tol_abs: 1.8e-9
-
-dt1:
-    tol_abs: 1.3e-6
-    tol_rel: 1.4e-8
-    sp1:
-        sp2:
-            ceil: 1.0e-8
-
-im1:
-    sp1!:
-        ceil: 1.5e-8
-
-filters:
-    dt1:
-        dtset: 1
-        image: {from: 1, to: 8}
-    im1:
-        dtset: 1
-        image: 1
-'''
-
     def test_get_constraints(self):
         DriverTestConf.default_conf = '/dev/null'
         driver = DriverTestConf(src=self.src1)
@@ -517,7 +492,6 @@ filters:
                     assert constraints[0].value == 1.0e-8
                 with driver.go_down('sp3'):
                     constraints = driver.get_constraints_for(1.0)
-                    print(constraints)
                     assert len(constraints) == 1
                     assert constraints[0].name == 'tol_abs'
                     assert constraints[0].value == 1.8e-9
@@ -526,6 +500,32 @@ filters:
                     assert len(constraints) == 1
                     assert constraints[0].name == 'ceil'
                     assert constraints[0].value == 1.5e-8
+
+    src2 = '''\
+tol_abs: 1.2e-7
+sp1:
+    sp3:
+        tol_abs: 1.8e-9
+
+dt1:
+    tol_abs: 1.3e-6
+    tol_rel: 1.4e-8
+    sp1:
+        sp2:
+            ceil: 1.0e-8
+
+im1:
+    sp1!:
+        ceil: 1.5e-8
+
+filters:
+    dt1:
+        dtset: 1
+        image: {from: 1, to: 8}
+    im1:
+        dtset: 1
+        image: 1
+'''
 
     def test_get_constraints_hardreset(self):
         DriverTestConf.default_conf = '/dev/null'
@@ -540,7 +540,6 @@ filters:
                     assert constraints[0].value == 1.5e-8
                 with driver.go_down('sp3'):
                     constraints = driver.get_constraints_for(1.0)
-                    print(constraints)
                     assert len(constraints) == 1
                     assert constraints[0].name == 'ceil'
                     assert constraints[0].value == 1.5e-8
@@ -549,6 +548,25 @@ filters:
                     assert len(constraints) == 1
                     assert constraints[0].name == 'ceil'
                     assert constraints[0].value == 1.5e-8
+
+    src3 = '''\
+sp1:
+    stress tensor:
+        tensor_is_symetric: true
+'''
+
+    def test_get_constraints_other_types(self):
+        DriverTestConf.default_conf = '/dev/null'
+        driver = DriverTestConf(src=self.src3)
+
+        ten = Tensor.from_seq([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+
+        with driver.use_filter({'dtset': 1}):
+            with driver.go_down('sp1').go_down('stress tensor'):
+                constraints = driver.get_constraints_for(ten)
+                assert len(constraints) == 1
+                assert constraints[0].name == 'tensor_is_symetric'
+                assert constraints[0].value is True
 
 
 class TestTester(object):

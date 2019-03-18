@@ -133,6 +133,11 @@ class IntSet(object):
 class IterStateFilter(object):
     '''
         Represent a set of conditions on the iterator state of a document.
+        Alternatively it can be seen as a cartesian product of subsets of
+        the natural integers. The implicit subset for each component is Z*
+        ({1, 2, 3, 4...}).
+        For example IterStateFilter({'dtset': 4, 'image': {1, 5}}) is
+        {4} x Z* x {1, 2, 3, 4, 5} x Z* x Z*
     '''
     def __init__(self, d):
         self.filters = {}
@@ -141,12 +146,20 @@ class IterStateFilter(object):
                 self.filters[it] = IntSet(d[it])
 
     def match(self, state):
+        '''
+            Does a given state match this filter ?
+            Is a given tuple in this set ?
+        '''
         for it, int_set in self.filters.items():
             if it in state and state[it] not in int_set:
                 return False
         return True
 
     def include(self, filt):
+        '''
+            Return True if filt is included (see the set interpretation
+            in class docstring) in self, False otherwise.
+        '''
         for it in ITERATORS:
             if it in self.filters:
                 if it not in filt.filters:
@@ -174,7 +187,7 @@ class IterStateFilter(object):
             "IterStateFilter cannot be compared with {}".format(other)
         )
         if self.include(other):
-            if other.include(self):
+            if other.include(self):  # A c B & B c A => A = B
                 return 0
             else:
                 return -1
