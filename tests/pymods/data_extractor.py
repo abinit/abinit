@@ -1,12 +1,14 @@
 '''
     Implement the steps to extract data from an Abinit output file.
+    Extract lines associated with their "metacharacter" (that make sense in
+    fldiff), and valid YAML documents associated with there iteration context.
 '''
-
 from __future__ import print_function, division, unicode_literals
 import re
 from .yaml_tools import is_available as has_yaml
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
 from .yaml_tools.errors import NoIteratorDefinedError
+
 if has_yaml:
     from .yaml_tools import yaml_parse
 else:
@@ -15,13 +17,6 @@ else:
 
 doc_start_re = re.compile(r'---( !.*)?\n?$')
 doc_end_re = re.compile(r'\.\.\.')
-
-
-def parse_doc(doc):
-    if doc['type'] == 'yaml':
-        obj = yaml_parse(''.join(doc['lines']))
-        doc['obj'] = obj
-    return doc
 
 
 class DataExtractor:
@@ -37,7 +32,7 @@ class DataExtractor:
         self.has_corrupted_doc = False
         self.abinit_messages = []
 
-    def __get_metachar(self, line):
+    def _get_metachar(self, line):
         '''
             Return a metacharacter wich give the behaviour of the line
             independently from options.
@@ -68,6 +63,13 @@ class DataExtractor:
         '''
             Extract formated documents and significant lines for the source.
         '''
+
+        def parse_doc(doc):
+            if doc['type'] == 'yaml':
+                obj = yaml_parse(''.join(doc['lines']))
+                doc['obj'] = obj
+            return doc
+
         # Reset those states to allow several extract with the same instance
         self.iterators_state = {}
         self.has_corrupted_doc = False
@@ -115,21 +117,20 @@ class DataExtractor:
                             docs.append(current_doc)
                     current_doc = None  # go back to normal mode
 
-            else:
-                if self.__get_metachar(line) == '-':
-                    if doc_start_re.match(line):  # starting a yaml doc
-                        current_doc = {
-                            'type': 'yaml',
-                            # save iterations states
-                            'iterators': self.iterators_state.copy(),
-                            'start': i,
-                            'end': -1,
-                            'lines': [line],
-                            'obj': None
-                        }
-                    else:
-                        ignored.append((i, line))
-                else:  # significant line not in a doc
-                    lines.append((i, self.__get_metachar(line), line))
+            elif self._get_metachar(line) == '-':
+                if doc_start_re.match(line):  # starting a yaml doc
+                    current_doc = {
+                        'type': 'yaml',
+                        # save iterations states
+                        'iterators': self.iterators_state.copy(),
+                        'start': i,
+                        'end': -1,
+                        'lines': [line],
+                        'obj': None
+                    }
+                else:
+                    ignored.append((i, line))
+            else:  # significant line not in a doc
+                lines.append((i, self._get_metachar(line), line))
 
         return lines, docs, ignored

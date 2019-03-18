@@ -97,35 +97,6 @@ def relative_truncate(f, n):
         return floor(f * fact) / fact
 
 
-class ConstDict(object):
-    '''
-        Represent an immutable dict.
-    '''
-    def __init__(self, d=None):
-        if d:
-            self._d = dict(d)
-        else:
-            self._d = {}
-
-    def __getitem__(self, key):
-        return self._d[key]
-
-    def get_dict(self):
-        return self._d.copy()
-
-
-default_options = ConstDict({
-    'ignore': True,
-    'ignoreP': True,
-    'tolerance_abs': 1.01e-10,
-    'tolerance_rel': 1.01e-10,
-    'label': None,
-    'use_fl': True,
-    'use_yaml': True,
-    'verbose': False
-})
-
-
 class LineDifference(object):
     '''
         Base class for representing a difference.
@@ -273,6 +244,7 @@ class Result(object):
 
         if self.fl_diff:
             details.append('# Start legacy fldiff comparision report\n')
+
         for diff in self.fl_diff:
             if isinstance(diff, LineCountDifference) \
                or isinstance(diff, MetaCharDifference):
@@ -421,8 +393,20 @@ class Differ(object):
                            yaml tests too
         '''
         self.xml_mode = False  # this is the first dirty fix.
-        self.options = default_options.get_dict()
+
+        self.options = {
+            'ignore': True,
+            'ignoreP': True,
+            'tolerance_abs': 1.01e-10,
+            'tolerance_rel': 1.01e-10,
+            'label': None,
+            'use_fl': True,
+            'use_yaml': True,
+            'verbose': False
+        }
+
         self.options.update(options)
+
         if 'tolerance' in options:
             self.options['tolerance_abs'] = options['tolerance']
             self.options['tolerance_rel'] = options['tolerance']
@@ -463,8 +447,10 @@ class Differ(object):
         dext = DataExtractor(xml_mode=self.xml_mode,
                              ignore=self.options['ignore'],
                              ignoreP=self.options['ignoreP'])
+
         lines1, documents1, _ = dext.extract(lines1)
         doc1_has_corrupted_document = dext.has_corrupted_doc
+
         lines2, documents2, _ = dext.extract(lines2)
         doc2_has_corrupted_document = dext.has_corrupted_doc
 
@@ -476,13 +462,16 @@ class Differ(object):
         if self.use_yaml:
             if doc1_has_corrupted_document:
                 doc_differences = [YFailure(
-                    self.yaml_conf, "Reference has corrupted YAML documents."
+                    self.yaml_conf,
+                    "Reference has corrupted YAML documents."
                 )]
+
             elif doc2_has_corrupted_document:
                 doc_differences = [YFailure(
                     self.yaml_conf,
                     "Tested file has corrupted YAML documents."
                 )]
+
             else:
                 doc_differences = self._test_doc(documents1, documents2)
         else:
@@ -523,20 +512,13 @@ class Differ(object):
                             i1, i2, line1, line2
                         ))
 
-                    elif meta1 == ':':  # do a character comparison
+                    elif meta1 in {':', '.'}:  # do a character comparison
                         if norm_spaces(line1) != norm_spaces(line2):
                             differences.append(TextDifference(
-                                i1, i2, line1, line2
-                            ))
-
-                    elif meta1 == '.':  # do a silent character comparison
-                        if norm_spaces(line1) != norm_spaces(line2):
-                            differences.append(TextDifference(
-                                i1, i2, line1, line2, silent=True
+                                i1, i2, line1, line2, silent=(meta1 == '.')
                             ))
 
                     else:  # compare numerical values
-                        is_float = False
                         splitted1 = float_re.split(line1)
                         splitted2 = float_re.split(line2)
 
@@ -545,28 +527,49 @@ class Differ(object):
                             differences.append(TextDifference(i1, i2,
                                                               line1, line2))
                         else:
-                            for v1, v2 in zip(splitted1, splitted2):
-                                if is_float:
-                                    tol = self.options['tolerance_abs']
-                                    tolrel = self.options['tolerance_rel']
-                                    f1 = float(v1.lower().replace('d', 'e')
-                                               .replace('f', 'e'))
-                                    f2 = float(v2.lower().replace('d', 'e')
-                                               .replace('f', 'e'))
+                            if meta1 == '%':  # force tolerance
+                                tol = 1.01e-2
+                                tolrel = tol
+                            else:
+                                tol = self.options['tolerance_abs']
+                                tolrel = self.options['tolerance_rel']
+
+                            def to_float(f):
+                                return float(f.lower().replace('d', 'e')
+                                             .replace('f', 'e'))
+
+                            def pairs(seq1, seq2):
+                                i = 0
+                                n = len(seq1)
+                                while i + 1 < n:
+                                    yield (seq1[i], seq1[i+1],
+                                           seq2[i], seq2[i+1])
+                                    i += 2
+
+                                if i < n:
+                                    yield (seq1[i], None, seq2[i], None)
+
+                            # si -> plain text separators
+                            # fi -> floats
+                            for s1, f1, s2, f2 in pairs(splitted1, splitted2):
+
+                                if norm_spaces(s1) != norm_spaces(s2):
+                                    differences.append(TextDifference(
+                                        i1, i2, line1, line2
+                                    ))
+                                if f1 is not None:  # reached the end
+                                    f1 = to_float(f1)
+                                    f2 = to_float(f2)
 
                                     if meta1 == ';':  # compare absolute values
                                         f1, f2 = abs(f1), abs(f2)
-                                    elif meta1 == '%':  # force tolerance
-                                        tol = 1.01e-2
 
+                                    abs_sum = abs(f1) + abs(f2)
                                     diff = abs(f1 - f2)
-                                    if abs(f1 + f2) == 0.0:
-                                        if diff > 0:
-                                            diffrel = 1
-                                        else:
-                                            diffrel = 0.0
+                                    if abs_sum == 0.0:
+                                        diffrel = 0.0
                                     else:
-                                        diffrel = diff / (abs(f1) + abs(f2))
+                                        diffrel = diff / abs_sum
 
                                     if diff > tol and diffrel > tolrel:
                                         differences.append(
@@ -576,12 +579,4 @@ class Differ(object):
                                             )
                                         )
 
-                                else:
-                                    if norm_spaces(v1) != norm_spaces(v2):
-                                        differences.append(TextDifference(
-                                            i1, i2, line1, line2)
-                                        )
-                                # re.split always altern between separator and
-                                # match (here floats)
-                                is_float = not is_float
         return differences
