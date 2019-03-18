@@ -24,7 +24,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1181
 message: |
-    Renaming old t03_x.out to t03_x.out0020
+    Renaming old t03_x.out to t03_x.out0026
 ...
  
 
@@ -43,8 +43,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 13 Mar 2019.
-- ( at 13h18 )
+.Starting date : Thu 14 Mar 2019.
+- ( at 14h19 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -773,7 +773,7 @@ Simple mixing update:
   residual square of the potential :   3.63719880111068
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 04 [s]
+ scfcv_core: previous iteration took 03 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1006,7 +1006,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=   1.15     -0.154
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 03 [s]
+ scfcv_core: previous iteration took 02 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1191,7 +1191,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=   1.40     -0.454      0.493E-01
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 02 [s]
+ scfcv_core: previous iteration took 01 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1376,7 +1376,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=  0.393       1.06     -0.533      0.766E-01
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 02 [s]
+ scfcv_core: previous iteration took 01 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1561,7 +1561,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=   1.70     -0.869      0.162     -0.441E-02  0.128E-01
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 02 [s]
+ scfcv_core: previous iteration took 01 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1746,7 +1746,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=  0.496       1.41      -1.16      0.241      0.449E-03
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 02 [s]
+ scfcv_core: previous iteration took 01 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -2486,7 +2486,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=  0.237      0.768     -0.233      0.381     -0.584E-01
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 02 [s]
+ scfcv_core: previous iteration took 01 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -4521,7 +4521,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=   1.33     -0.245     -0.140     -0.404      0.603
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 02 [s]
+ scfcv_core: previous iteration took 01 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -5559,10 +5559,10 @@ P           mkmem           1
 --- !FinalSummary
 program: abinit
 version: 8.9.4
-start_datetime: Wed Mar 13 13:18:52 2019
-end_datetime: Wed Mar 13 13:19:45 2019
-overall_cpu_time:         588.3
-overall_wall_time:          52.7
+start_datetime: Thu Mar 14 14:19:14 2019
+end_datetime: Thu Mar 14 14:19:53 2019
+overall_cpu_time:         440.9
+overall_wall_time:          38.4
 exit_requested_by_user: no 
 timelimit: 0
 pseudos: 

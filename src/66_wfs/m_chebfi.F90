@@ -576,10 +576,10 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    end if
 
    ! precondition resid_vec
-   do ispinor = 1,nspinor
-     resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) * pcon
-     resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) * pcon
-   end do
+!   do ispinor = 1,nspinor
+!     resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) * pcon
+!     resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) * pcon
+!   end do
 
    call dotprod_g(resid(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,resid_vec,&
 &   resid_vec,mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)

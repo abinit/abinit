@@ -16,7 +16,7 @@ pawecutdg 10.
 #Self-consistent cycle parameters
 toldfe 1.d-5
 nstep 40
-nline 4
+nline 8
 
 #K-points and symetries
 nkpt 1
@@ -36,7 +36,7 @@ optstress 1
 prtwf 0
 prtden 0
 prteig 0
-timopt 0
+timopt -3
 
 #Simulation cell
 acell  3*15.34

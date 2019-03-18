@@ -122,7 +122,7 @@ module m_chebfiwf
   double precision :: chebfiMem(2)
   double precision :: localmem
  
-  integer, parameter :: tim_chebfiwf2 = 1651 
+  integer, parameter :: tim_chebfiwf2 = 1750
   double precision :: cputime, walltime
   double precision :: tsec(2)
  

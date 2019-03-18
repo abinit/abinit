@@ -35,6 +35,20 @@ module m_chebfi2
   integer, save :: eigenSolver = EIGENV     ! Type of eigen solver to use
 #endif
 
+  integer, parameter :: tim_init     = 1751
+  integer, parameter :: tim_free     = 1752
+  integer, parameter :: tim_run      = 1753
+  integer, parameter :: tim_getAX_BX = 1754
+  integer, parameter :: tim_invovl   = 1755
+  integer, parameter :: tim_residu   = 1756
+  integer, parameter :: tim_RR       = 1757
+  integer, parameter :: tim_pcond    = 1758
+  integer, parameter :: tim_RR_q     = 1759
+  integer, parameter :: tim_next_p   = 1760
+  integer, parameter :: tim_swap     = 1761
+  integer, parameter :: tim_amp_f    = 1762
+  integer, parameter :: tim_alltoall = 1763
+
   type, public :: chebfi_t
     integer :: space
     integer :: spacedim                      ! Space dimension for one vector
@@ -97,8 +111,12 @@ module m_chebfi2
     integer         , intent(in   ) :: spacecom
     integer         , intent(in   ) :: me_g0
     logical         , intent(in   ) :: paw
+    double precision :: tsec(2)
     !integer :: nthread
 
+
+    call timab(tim_init,1,tsec)
+    
     chebfi%space = space
     chebfi%neigenpairs = neigenpairs
     chebfi%spacedim    = spacedim
@@ -114,7 +132,9 @@ module m_chebfi2
     !SHOULD HERE I DO ADVICE TARGET AND BLOCK CALCULATIONS???
 
     call chebfi_allocateAll(chebfi)
-
+    
+    call timab(tim_init,2,tsec)
+    
   end subroutine chebfi_init
 
   subroutine chebfi_allocateAll(chebfi)
@@ -245,6 +265,8 @@ module m_chebfi2
     double precision :: radius
     
     integer :: info
+    
+    double precision :: tsec(2)
                     
     interface
       subroutine getAX_BX(X,AX,BX)
@@ -267,6 +289,8 @@ module m_chebfi2
         type(xgBlock_t), intent(inout) :: W
       end subroutine pcond
     end interface
+    
+    call timab(tim_run,1,tsec)
 
     spacedim = chebfi%spacedim
     neigenpairs = chebfi%neigenpairs
@@ -280,11 +304,15 @@ module m_chebfi2
     tolerance = chebfi%tolerance
     lambda_plus = chebfi%ecut
     chebfi%X = X0
-            
+   
+    call timab(tim_getAX_BX,1,tsec)         
     call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
+    call timab(tim_getAX_BX,2,tsec)
                
     !********************* Compute Rayleigh quotients for every band, and set λ − equal to the largest one *****!
+    call timab(tim_RR_q, 1, tsec)
     call chebfi_rayleighRitzQuotiens(chebfi, neigenpairs, maxeig, mineig, DivResults%self) !OK
+    call timab(tim_RR_q, 2, tsec)
                 
     lambda_minus = maxeig
         
@@ -308,25 +336,38 @@ module m_chebfi2
     two_over_r = 2/radius
         
     do iline = 0, nline - 1 
-    
-      call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
-            
-      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
       
-      !A * ψ      
+      call timab(tim_next_p,1,tsec)         
+      call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
+      call timab(tim_next_p,2,tsec)         
+        
+      call timab(tim_swap,1,tsec)               
+      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
+      call timab(tim_swap,2,tsec)   
+             
+      !A * ψ  
+      call timab(tim_getAX_BX,1,tsec)             
       call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
-                                           
+      call timab(tim_getAX_BX,2,tsec)                                     
     end do
 
+    call timab(tim_amp_f,1,tsec)
     call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)    !ampfactor
+    call timab(tim_amp_f,2,tsec)
 
+    call timab(tim_RR, 1, tsec)
     call chebfi_rayleightRitz(chebfi, nline)
+    call timab(tim_RR, 2, tsec) 
 
+    call timab(tim_residu, 1, tsec)
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
+    call timab(tim_residu, 2, tsec)
                         
     deallocate(nline_bands)
     
     call xg_free(DivResults)
+    
+    call timab(tim_run,2,tsec)
      
   end subroutine chebfi_run
 
@@ -402,7 +443,9 @@ module m_chebfi2
     type(double precision ) , intent(in) :: center
     type(double precision ) , intent(in) :: one_over_r
     type(double precision ) , intent(in) :: two_over_r
-                
+    
+    double precision :: tsec(2)   
+             
     interface
       subroutine getBm1X(X,Bm1X)
         use m_xg, only : xgBlock_t
@@ -413,8 +456,10 @@ module m_chebfi2
 
     !B-1 * A * ψ    
     if (chebfi%paw) then
+      call timab(tim_invovl, 1, tsec)
       call getBm1X(chebfi%AX%self, chebfi%X_next) 
       !call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !AX_swap = X_next;
+      call timab(tim_invovl, 1, tsec)
     else
       call xgBlock_copy(chebfi%AX%self,chebfi%X_next, 1, 1)
       !!TODO try to swap buffers in a way that last copy is avoided
@@ -640,6 +685,8 @@ module m_chebfi2
     double precision :: maxResidu, minResidu
     integer :: eigResiduMax, eigResiduMin
     
+    double precision :: tsec(2)
+    
     interface
       subroutine pcond(W)
         use m_xg, only : xgBlock_t
@@ -655,7 +702,9 @@ module m_chebfi2
     end if
     
     !pcond call
+    call timab(tim_pcond,1,tsec)
     call pcond(chebfi%AX%self)
+    call timab(tim_pcond,2,tsec)
   
     call xgBlock_colwiseNorm2(chebfi%AX_swap, residu, max_val=maxResidu, max_elt=eigResiduMax,&
                                                       min_val=minResidu, min_elt=eigResiduMin) 

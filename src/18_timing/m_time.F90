@@ -899,7 +899,7 @@ subroutine timab(nn,option,tottim)
    ! Check that nn lies in sensible bounds
    if (nn<1.or.nn>TIMER_SIZE) then
      write(message,'(a,i0,a,i0)')'  TIMER_SIZE = ',TIMER_SIZE,' but input nn = ',nn
-     MSG_BUG(message) !TODO OVDE
+     MSG_BUG(message) 
    end if
 
 #ifdef HAVE_PAPI
