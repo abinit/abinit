@@ -3,18 +3,11 @@ from inspect import isclass
 from copy import deepcopy
 from numpy import ndarray
 from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
-                     AlreadySetKeyError, IllegalFilterNameError)
+                     IllegalFilterNameError)
 from .abinit_iterators import IterStateFilter
 from .register_tag import normalize_attr
 from .tricks import cstm_isinstance
 
-
-def empty_tree():
-    return {
-        'spec': {},
-        'constraints': {},
-        'parameters': {}
-    }
 
 
 def make_apply_to(type_):
@@ -163,17 +156,51 @@ class SpecKey(object):
 
 class ConfTree(object):
     '''
-        Configuration tree accessor. The actual tree is a dictionary.
+        Configuration tree wrapper. Give access to constraints and parameters
+        defined at in any node.
     '''
     def __init__(self, dict_tree):
         self.dict = dict_tree
 
-    def add_spec(self, key, d):
-        if not isinstance(key, SpecKey):
-            key = SpecKey.parse(key)
-        if key in self.dict:
-            raise AlreadySetKeyError(key)
-        self.dict['spec'][key] = d
+    @staticmethod
+    def _empy_tree():
+        return {
+            'spec': {},
+            'constraints': {},
+            'parameters': {}
+        }
+
+    @classmethod
+    def make_tree(cls, src, parser):
+        '''
+            Create a new instance tree instance from a valid dictionary
+        '''
+        params, cons, ctx = parser.parameters, parser.constraints, parser.ctx()
+
+        def mk(src):
+            '''
+                Recursively build the configuration tree
+            '''
+            tree = cls._empty_tree()
+            if src:
+                for key, val in src.items():
+                    if key in cons:  # add constraint
+                        tree['constraints'][key] = cons[key].with_value(val,
+                                                                        ctx)
+                    elif key in params:  # add parameter
+                        if not cstm_isinstance(val, params[key]['type']):
+                            raise ValueTypeError(key, params[key]['type'], val)
+
+                        tree['parameters'][key] = val
+
+                    elif isinstance(val, dict):  # add specialization
+                        tree['spec'][SpecKey.parse(key)] = mk(val)
+
+                    else:  # unknown key
+                        raise InvalidNodeError(key, val)
+            return tree
+
+        return cls(mk(src))
 
     def copy(self):
         return ConfTree(deepcopy(self.dict))
@@ -182,25 +209,25 @@ class ConfTree(object):
         '''
             Update self with values found in tree.
         '''
-        self._update(self.dict, tree.dict)
+        def up(old_d, new_d):
+            '''
+                Recursively update the content of old_d with new_d.
+            '''
+            for key, cons in new_d['constraints'].items():
+                old_d['constraints'][key] = cons
 
-    def _update(self, old_d, new_d):
-        '''
-            Recursively update the content of old_d with new_d.
-        '''
-        for key, cons in new_d['constraints'].items():
-            old_d['constraints'][key] = cons
+            for param, value in new_d['parameters'].items():
+                old_d['parameters'][param] = value
 
-        for param, value in new_d['parameters'].items():
-            old_d['parameters'][param] = value
+            for spec, spec_d in new_d['spec'].items():
+                if spec not in old_d['spec']:
+                    old_d['spec'][spec] = self._empty_tree()
+                if spec.hardreset:  # simply override
+                    old_d['spec'][spec] = deepcopy(spec_d)
+                else:  # recursively override individual items
+                    up(old_d['spec'][spec], spec_d)
 
-        for spec, spec_d in new_d['spec'].items():
-            if spec not in old_d['spec']:
-                old_d['spec'][spec] = empty_tree()
-            if spec.hardreset:  # simply override
-                old_d['spec'][spec] = deepcopy(spec_d)
-            else:  # recursively override individual items
-                self._update(old_d['spec'][spec], spec_d)
+        up(self.dict, tree.dict)
 
     def get_spec_at(self, path):
         '''
@@ -313,27 +340,6 @@ class ConfParser(object):
     def ctx(self):
         return self.metadata.copy()
 
-    def _make_tree(self, parsed_src):
-        '''
-            Recursively build the configuration tree
-        '''
-        tree = empty_tree()
-        if parsed_src:
-            for key, val in parsed_src.items():
-                if key in self.constraints:  # add constraint
-                    tree['constraints'][key] = \
-                            self.constraints[key].with_value(val, self.ctx())
-                elif key in self.parameters:  # add parameter
-                    if not cstm_isinstance(val, self.parameters[key]['type']):
-                        raise ValueTypeError(key, self.parameters[key]['type'],
-                                             val)
-                    tree['parameters'][key] = val
-                elif isinstance(val, dict):  # add specialization
-                    tree['spec'][SpecKey.parse(key)] = self._make_tree(val)
-                else:  # unknown key
-                    raise InvalidNodeError(key, val)
-        return tree
-
     def make_trees(self, parsed_src, metadata={}):
         '''
             Create a ConfTree instance from the yaml parser output.
@@ -356,7 +362,7 @@ class ConfParser(object):
                 # Parse each filtered tree then remove it from the source tree
                 if name in parsed_src:
                     self.metadata['tree'] = name
-                    trees[name] = ConfTree(self._make_tree(parsed_src[name]))
+                    trees[name] = ConfTree.make_tree(parsed_src[name], self)
                     del parsed_src[name]
                 else:
                     pass  # Should we raise an error ?
@@ -366,6 +372,6 @@ class ConfParser(object):
 
         # Parse the fields remaining as the default tree
         self.metadata['tree'] = 'default tree'
-        trees['__default'] = ConfTree(self._make_tree(parsed_src))
+        trees['__default'] = ConfTree.make_tree(parsed_src, self)
 
         return trees, filters
