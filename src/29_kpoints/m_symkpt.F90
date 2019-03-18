@@ -205,57 +205,64 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    ! Examine whether the k point grid is symmetric or not
    ! This check scales badly with nkbz hence it's disabled for dense meshes.
    if (chksymbreak == 1 .and. nkbz < 40**3) then
-     ikpt_current_length=1
      ! Loop on all k points
      do ikpt=1,nkbz
        ind_ikpt=list(ikpt)
-       ! Keep track of the current length, to avoid doing needless comparisons
-       if(length2(ikpt)-length2(ikpt_current_length)>tol8) ikpt_current_length=ikpt
+       kpt1 = kbz(:,ind_ikpt)
 
        do isym=1,nsym
-         do itim=1,(1-2*timrev),-2
-           if(isym/=identi .or. itim/=1 )then
-             ! Get the symmetric of the vector
-             do ii=1,3
-               ksym(ii)=itim*( kbz(1,ind_ikpt)*symrec(ii,1,isym)&
-                 +kbz(2,ind_ikpt)*symrec(ii,2,isym)&
-                 +kbz(3,ind_ikpt)*symrec(ii,3,isym) )
-             end do
+         itim_loop: do itim=1,(1-2*timrev),-2
+           if(isym==identi .and. itim==1 ) cycle
 
-             ! Search over k-points with the same length, to find whether there is a connecting symmetry operation
-             quit=0
-             do ikpt2=ikpt_current_length,nkbz
-               ! The next line skip all ikpt2 vectors, as soon as one becomes larger than length2(ikpt)
-               ! Indeed, one is already supposed to have found a symmetric k point before this happens ...
-               if(length2(ikpt2)-length2(ikpt)>tol8)exit
-               ! Ordered index
-               ind_ikpt2=list(ikpt2)
-               difk1= ksym(1)-kbz(1,ind_ikpt2)
-               reduce1=difk1-anint(difk1)
-               difk2= ksym(2)-kbz(2,ind_ikpt2)
-               reduce2=difk2-anint(difk2)
-               difk3= ksym(3)-kbz(3,ind_ikpt2)
-               reduce3=difk3-anint(difk3)
-               if (abs(reduce1)+abs(reduce2)+abs(reduce3) < tol8) then
-                 ! The symmetric was found
-                 quit=1; exit
-               end if
-             end do
+           ! Get the symmetric of the vector
+           do ii=1,3
+             ksym(ii)=itim*( kpt1(1)*symrec(ii,1,isym)&
+                            +kpt1(2)*symrec(ii,2,isym)&
+                            +kpt1(3)*symrec(ii,3,isym) )
+           end do
 
-             if (quit==0) then
-               write(message,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
-               'Chksymbreak=1. It has been observed that the k point grid is not symmetric:',ch10,&
-               'for the symmetry number: ',isym,ch10,&
-               'with symrec= ',symrec(1:3,1:3,isym),ch10,&
-               'the symmetric of the k point number: ',ind_ikpt2,' with components: ', kbz(1:3,ind_ikpt2),ch10,&
-               'does not belong to the k point grid.',ch10,&
-               'Read the description of the input variable chksymbreak,',ch10,&
-               'You might switch it to zero, or change your k point grid to one that is symmetric.'
-               MSG_ERROR(message)
-             end if
+           kpt2=ksym-nint(ksym+tol12)
+           length_sym=sqrt(gmet(1,1)*kpt2(1)**2+gmet(2,2)*kpt2(2)**2 + &
+                           gmet(3,3)*kpt2(3)**2+two*(gmet(2,1)*kpt2(2)*kpt2(1) + &
+                           gmet(3,2)*kpt2(3)*kpt2(2)+gmet(3,1)*kpt2(3)*kpt2(1)))
 
-           end if ! End condition of non-identity symmetry
-         end do ! itim
+           ! Search over k-points with the same length,
+           ! to find whether there is a connecting symmetry operation
+           istart = bisect(length2,length_sym-tol8)
+           istop  = bisect(length2,length_sym+tol8)
+           if (istart<1)   istart = 1
+           if (istop>nkbz) istop  = nkbz
+
+           do ikpt2=istart,istop
+             ! Ordered index
+             ind_ikpt2=list(ikpt2)
+             kpt2 = kbz(:,ind_ikpt2)
+
+             ! The do-loop was expanded to speed up the execution
+             difk= ksym(1)-kpt2(1)
+             reduce=difk-anint(difk)
+             if (abs(reduce)>tol8) cycle
+             difk= ksym(2)-kpt2(2)
+             reduce=difk-anint(difk)
+             if (abs(reduce)>tol8) cycle
+             difk= ksym(3)-kpt2(3)
+             reduce=difk-anint(difk)
+             if (abs(reduce)>tol8) cycle
+
+             cycle itim_loop
+           end do
+
+           write(message,'(3a,i4,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
+           'Chksymbreak=1. It has been observed that the k point grid is not symmetric:',ch10,&
+           'for the symmetry number: ',isym,itim,ch10,&
+           'with symrec= ',symrec(1:3,1:3,isym),ch10,&
+           'the symmetric of the k point number: ',ind_ikpt2,' with components: ', kpt2,ch10,&
+           'does not belong to the k point grid.',ch10,&
+           'Read the description of the input variable chksymbreak,',ch10,&
+           'You might switch it to zero, or change your k point grid to one that is symmetric.'
+           MSG_ERROR(message)
+
+         end do itim_loop ! itim
        end do ! isym
 
      end do ! ikpt
@@ -281,7 +288,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      ! MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
      ! Should always use this convention when applying symmetry operations in k-space.
      ! TODO: Postponed to v9 because it won't be possible to read old WFK files.
-     isym_loop: do isym=1,nsym
+     do isym=1,nsym
        do itim=1,(1-2*timrev),-2
          ! Skip non-identity symmetry
          if (isym==identi .and. itim==1) cycle
@@ -340,7 +347,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
            exit
          end do ! ikpt2
        end do ! itim
-     end do isym_loop ! isym
+     end do ! isym
    end do ! ikpt
 
    ABI_DEALLOCATE(length2)
