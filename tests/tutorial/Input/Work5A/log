@@ -24,7 +24,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1181
 message: |
-    Renaming old t03_x.out to t03_x.out0026
+    Renaming old t03_x.out to t03_x.out0027
 ...
  
 
@@ -44,7 +44,7 @@ message: |
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 14 Mar 2019.
-- ( at 14h19 )
+- ( at 16h45 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -323,7 +323,7 @@ P           mkmem           1
                        0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
                        0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
                        0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
-           timopt           0
+           timopt          -3
            toldfe      1.00000000E-05 Hartree
            tsmear      2.00000000E-03 Hartree
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
@@ -3041,7 +3041,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=   1.11     -0.600      0.748     -0.140     -0.332E-01
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 01 [s]
+ scfcv_core: previous iteration took 02 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -5375,7 +5375,7 @@ P           mkmem           1
                        0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
                        0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
                        0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
-           timopt           0
+           timopt          -3
            toldfe      1.00000000E-05 Hartree
            tsmear      2.00000000E-03 Hartree
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
@@ -5559,10 +5559,10 @@ P           mkmem           1
 --- !FinalSummary
 program: abinit
 version: 8.9.4
-start_datetime: Thu Mar 14 14:19:14 2019
-end_datetime: Thu Mar 14 14:19:53 2019
-overall_cpu_time:         440.9
-overall_wall_time:          38.4
+start_datetime: Thu Mar 14 16:45:00 2019
+end_datetime: Thu Mar 14 16:45:41 2019
+overall_cpu_time:         470.9
+overall_wall_time:          41.1
 exit_requested_by_user: no 
 timelimit: 0
 pseudos: 

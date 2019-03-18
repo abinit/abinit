@@ -1,0 +1,4 @@
+git remote add trunk git@gitlab.abinit.org:trunk/abinit.git (opciono)
+git merge trunk/develop 
+git mergetool --tool meld
+

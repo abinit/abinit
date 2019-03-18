@@ -696,9 +696,9 @@ module m_chebfi2
     
     !PAW
     if (chebfi%paw) then
-      call xgBlock_colwiseCaxmy(chebfi%AX_swap,chebfi%eigenvalues,chebfi%BX_swap,chebfi%AX_swap)
+      call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%BX_swap,chebfi%AX_swap)
     else
-      call xgBlock_colwiseCaxmy(chebfi%AX_swap,chebfi%eigenvalues,chebfi%X_swap,chebfi%AX_swap)
+      call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%X_swap,chebfi%AX_swap)
     end if
     
     !pcond call
