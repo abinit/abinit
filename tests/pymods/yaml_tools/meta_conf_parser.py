@@ -163,7 +163,7 @@ class ConfTree(object):
         self.dict = dict_tree
 
     @staticmethod
-    def _empy_tree():
+    def _empty_tree():
         return {
             'spec': {},
             'constraints': {},
