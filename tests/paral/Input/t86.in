@@ -85,6 +85,7 @@ bandpp2 8
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = ubu_intel_13.1_openmpi
 #%% [files]
 #%% psp_files = 23v.paw, 38sr.paw, 8o.paw
 #%% [paral_info]
@@ -92,7 +93,7 @@ bandpp2 8
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t86_MPI4.out, use_yaml = only;
+#%%   t86_MPI4.out, use_yaml = yes, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -easy;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, FAILS_IFMPI
