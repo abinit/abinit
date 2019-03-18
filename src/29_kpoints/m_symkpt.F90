@@ -106,6 +106,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  use m_abicore
  use m_errors
  use m_sort
+ use m_numeric_tools
  use m_time
 
 !Arguments -------------------------------
@@ -123,9 +124,10 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 !scalars
  integer :: identi,ii,ikpt,ikpt2,ind_ikpt,ind_ikpt2,ierr
  integer :: ikpt_current_length,isym,itim,jj,nkpout,quit,tident
+ integer :: istart, istop
  real(dp) :: difk,difk1,difk2,difk3,length2trial,reduce,reduce1,reduce2,reduce3
  real(dp) :: cpu,wall,gflops
- real(dp) :: length1
+ real(dp) :: length1, length_sym
  character(len=500) :: message
 !arrays
  integer,allocatable :: list(:),bz2ibz_idx(:)
@@ -184,24 +186,10 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
    do ikpt=1,nkbz
      kpt1 = kbz(:,ikpt)
-     do isym=1,nsym
-       do itim=1,(1-2*timrev),-2
-         ! Get the symmetric of the vector
-         do ii=1,3
-           ksym(ii)=itim*( kpt1(1)*symrec(ii,1,isym)&
-                          +kpt1(2)*symrec(ii,2,isym)&
-                          +kpt1(3)*symrec(ii,3,isym) )
-           ksym(ii)=ksym(ii)-anint(ksym(ii)+tol8*half)
-         end do
-         gmetkpt(:)=gmet(:,1)*ksym(1)+gmet(:,2)*ksym(2)+gmet(:,3)*ksym(3)
-         length2trial=ksym(1)*gmetkpt(1)+ksym(2)*gmetkpt(2)+ksym(3)*gmetkpt(3)
-         if(isym==1 .and. itim==1)then
-           length2(ikpt)=length2trial
-         else
-           if(length2(ikpt)>length2trial)length2(ikpt)=length2trial
-         end if
-       end do
-     end do
+     kpt1 = kpt1 - nint(kpt1+tol12)
+     length2(ikpt)=sqrt(gmet(1,1)*kpt1(1)**2+gmet(2,2)*kpt1(2)**2 + &
+                        gmet(3,3)*kpt1(3)**2+two*(gmet(2,1)*kpt1(2)*kpt1(1) + &
+                        gmet(3,2)*kpt1(3)*kpt1(2)+gmet(3,1)*kpt1(3)*kpt1(1)))
    end do
 
    call cwtime_report("symkpt: length", cpu, wall, gflops)
@@ -290,35 +278,36 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      kpt1 = kbz(:,ind_ikpt)
      length1 = length2(ikpt)
 
-     ! Loop on the remaining k-points
-     do ikpt2=ikpt+1,nkbz
+     ! MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
+     ! Should always use this convention when applying symmetry operations in k-space.
+     ! TODO: Postponed to v9 because it won't be possible to read old WFK files.
+     isym_loop: do isym=1,nsym
+       do itim=1,(1-2*timrev),-2
+         ! Skip non-identity symmetry
+         if (isym==identi .and. itim==1) cycle
 
-       ! The next line eliminates pairs of vectors that differs by their length.
-       ! Moreover, since the list is ordered according to the length,
-       ! one can skip all other ikpt2 vectors, as soon as one becomes larger than length2(ikpt)
-       if (length2(ikpt2) - length1 > tol8) exit
+         ! Get the symmetric of the vector
+         do ii=1,3
+           ksym(ii)=itim*( kpt1(1)*symrec(ii,1,isym)&
+                          +kpt1(2)*symrec(ii,2,isym)&
+                          +kpt1(3)*symrec(ii,3,isym) )
+         end do
 
-       ! Ordered index
-       ind_ikpt2=list(ikpt2)
+         kpt2=ksym-nint(ksym+tol12)
+         length_sym=sqrt(gmet(1,1)*kpt2(1)**2+gmet(2,2)*kpt2(2)**2 + &
+                         gmet(3,3)*kpt2(3)**2+two*(gmet(2,1)*kpt2(2)*kpt2(1) + &
+                         gmet(3,2)*kpt2(3)*kpt2(2)+gmet(3,1)*kpt2(3)*kpt2(1)))
 
-       ! If the second vector is already empty, no interest to treat it
-       if (wtk_folded(ind_ikpt2) < tol16) cycle
+         istart = bisect(length2,length_sym-tol8)
+         istop  = bisect(length2,length_sym+tol8)
+         if (istart<ikpt+1) istart = ikpt+1
+         if (istop>=nkbz)   istop = nkbz
 
-       kpt2 = kbz(:,ind_ikpt2)
-       ! MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
-       ! Should always use this convention when applying symmetry operations in k-space.
-       ! TODO: Postponed to v9 because it won't be possible to read old WFK files.
-       isym_loop: do isym=1,nsym
-         do itim=1,(1-2*timrev),-2
-           ! Skip non-identity symmetry
-           if (isym==identi .and. itim==1) cycle
-
-           ! Get the symmetric of the vector
-           do ii=1,3
-             ksym(ii)=itim*( kpt1(1)*symrec(ii,1,isym)&
-                            +kpt1(2)*symrec(ii,2,isym)&
-                            +kpt1(3)*symrec(ii,3,isym) )
-           end do
+         do ikpt2=istart,istop
+           ind_ikpt2 = list(ikpt2)
+           ! If the second vector is already empty, no interest to treat it
+           if (wtk_folded(ind_ikpt2) < tol16) cycle
+           kpt2 = kbz(:,ind_ikpt2)
 
            ! The do-loop was expanded to speed up the execution
            difk= ksym(1)-kpt2(1)
@@ -348,11 +337,10 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
            bz2ibz_smap(6, ind_ikpt2) = ii
 
            ! Go to the next ikpt2 if the symmetric was found
-           exit isym_loop
-         end do ! itim
-       end do isym_loop ! isym
-
-     end do ! ikpt2
+           exit
+         end do ! ikpt2
+       end do ! itim
+     end do isym_loop ! isym
    end do ! ikpt
 
    ABI_DEALLOCATE(length2)
