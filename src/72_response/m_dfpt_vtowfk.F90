@@ -599,20 +599,19 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !###################################################################
 
-!Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers)
- if(iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max))then
+ ! Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers)
+ if (iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) then
    write(message,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
    call wrtout(std_out,message,'PERS')
  end if
 
- if(prtvol<=2 .and. ikpt==nkpt_max+1)then
+ if (prtvol<=2 .and. ikpt==nkpt_max+1) then
    write(message,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
    call wrtout(std_out,message,'PERS')
  end if
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
-   write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,&
-&   ikpt,' max resid=',residk
+   write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
    MSG_WARNING(message)
  end if
 

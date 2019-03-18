@@ -1329,8 +1329,11 @@ end function get_bandenergy
 !!
 !! FUNCTION
 !!  For each k-point and spin polarisation, report:
-!!    the index of the valence in case of Semiconductors.
-!!    the index of the band at the Fermi energy + toldfe
+!!
+!!    1) the index of the valence in case of Semiconductors.
+!!    2) the index of the band at the Fermi energy + toldfe
+!!
+!!  using the value of the Fermi level.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=The object describing the band structure.
@@ -1364,7 +1367,6 @@ pure function get_valence_idx(ebands,tol_fermi) result(val_idx)
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
      nband_k = ebands%nband(ikpt+(spin-1)*ebands%nkpt)
-
      idx = 0
      do band=1,nband_k
        if (ebands%eig(band,ikpt,spin) > ebands%fermie + abs(tol_)) then
@@ -1374,7 +1376,6 @@ pure function get_valence_idx(ebands,tol_fermi) result(val_idx)
      val_idx(ikpt,spin) = idx - 1
      if (idx==1) val_idx(ikpt,spin) = idx
      if (idx==0) val_idx(ikpt,spin) = nband_k
-
    end do
  end do
 
@@ -1552,7 +1553,7 @@ end function ebands_vcbm_range_from_gaps
 !!
 !! SOURCE
 
-subroutine apply_scissor(ebands,scissor_energy)
+subroutine apply_scissor(ebands, scissor_energy)
 
 !Arguments ------------------------------------
 !scalars
@@ -1567,11 +1568,11 @@ subroutine apply_scissor(ebands,scissor_energy)
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
 ! *************************************************************************
 
- ! === Get the valence band index for each k and spin ===
+ ! Get the valence band index for each k and spin
  val_idx(:,:) = get_valence_idx(ebands)
 
  do spin=1,ebands%nsppol
-   if (ANY(val_idx(:,spin)/=val_idx(1,spin))) then
+   if (any(val_idx(:, spin) /= val_idx(1, spin))) then
      write(msg,'(a,i0,a)')&
       'Trying to apply a scissor operator on a metallic band structure for spin: ',spin,&
       'Assuming you know what you are doing, continuing anyway! '
@@ -1583,10 +1584,10 @@ subroutine apply_scissor(ebands,scissor_energy)
  ! Apply the scissor
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
-     nband_k=ebands%nband(ikpt+(spin-1)*ebands%nkpt)
-     ival=val_idx(ikpt,spin)
+     nband_k = ebands%nband(ikpt+(spin-1)*ebands%nkpt)
+     ival = val_idx(ikpt,spin)
 
-     if (nband_k>=ival+1) then
+     if (nband_k >= ival+1) then
        ebands%eig(ival+1:,ikpt,spin) = ebands%eig(ival+1:,ikpt,spin)+scissor_energy
      else
        write(msg,'(2a,4(a,i0))')&
@@ -1632,7 +1633,7 @@ end subroutine apply_scissor
 !!
 !! SOURCE
 
-pure function get_occupied(ebands,tol_occ) result(occ_idx)
+pure function get_occupied(ebands, tol_occ) result(occ_idx)
 
 !Arguments ------------------------------------
 !scalars
@@ -1651,11 +1652,11 @@ pure function get_occupied(ebands,tol_occ) result(occ_idx)
 
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
-     nband_k=ebands%nband(ikpt+(spin-1)*ebands%nkpt)
+     nband_k = ebands%nband(ikpt+(spin-1)*ebands%nkpt)
 
      idx=0
      do band=1,nband_k
-       if (ebands%occ(band,ikpt,spin)<ABS(tol_)) then
+       if (ebands%occ(band,ikpt,spin) < ABS(tol_)) then
          idx=band; EXIT
        end if
      end do
@@ -1722,14 +1723,13 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,deg
  integer :: ib,ibmin_bkp,ibmax_bkp,ndeg
  real(dp) :: emin,emax
 
-
 ! *************************************************************************
 
  ibmin_bkp = ibmin; ibmax_bkp = ibmax
 
  emin = ebands%eig(ibmin,ikibz,spin)
  do ib=ibmin-1,1,-1
-   if ( ABS(ebands%eig(ib,ikibz,spin) - emin) > tol_enedif) then
+   if (ABS(ebands%eig(ib,ikibz,spin) - emin) > tol_enedif) then
      ibmin = ib +1
      EXIT
    else
@@ -2051,7 +2051,7 @@ pure logical function ebands_has_metal_scheme(ebands) result(ans)
 
 ! *************************************************************************
 
- ans = (any(ebands%occopt == [3,4,5,6,7,8]))
+ ans = (any(ebands%occopt == [3, 4, 5, 6, 7, 8]))
 
 end function ebands_has_metal_scheme
 !!***
@@ -2167,16 +2167,14 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
  stmbias_local=zero; if (PRESENT(stmbias)) stmbias_local=stmbias
 
  if (ebands_has_metal_scheme(ebands)) then
-   ! If occupation is metallic have to compute new occupation numbers.
+   ! compute new occupation numbers if metallic occupation.
    if (my_prtvol > 10) then
      write(msg,'(a,f9.5)')' metallic scheme, calling newocc with spinmagntarget = ',spinmagntarget
      call wrtout(std_out,msg,'COLL')
    end if
 
    ! newocc assumes eigenvalues and occupations packed in 1d-vector!!
-   mband  = ebands%mband
-   nkpt   = ebands%nkpt
-   nsppol = ebands%nsppol
+   mband = ebands%mband; nkpt = ebands%nkpt; nsppol = ebands%nsppol
 
    ABI_MALLOC(eigen,(mband*nkpt*nsppol))
    call get_eneocc_vect(ebands,'eig',eigen)
@@ -2198,7 +2196,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    ABI_FREE(doccde)
 
  else
-   !  Semiconductor or Insulator (non magnetic case)
+   !  Semiconductor (non magnetic case)
    maxocc = two / (ebands%nsppol*ebands%nspinor)
    !
    ! FIXME here there is an inconsistency btw GW and Abinit
@@ -2268,7 +2266,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
  end do
 
  ndiff = ebands%nelect - SUM(nelect_spin)
- if (my_prtvol>0) then
+ if (my_prtvol > 0) then
    write(msg,'(2a,f6.2,2a,f7.4)')ch10,&
     ' Total number of electrons = ',SUM(nelect_spin),ch10,&
     ' Input and calculated no. of electrons differ by ',ndiff
@@ -2397,8 +2395,7 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 ! *************************************************************************
 
  if (.not.ebands_has_metal_scheme(ebands)) then
-   msg = "set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_fermie!"
-   MSG_ERROR(msg)
+   MSG_ERROR("set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_fermie!")
  end if
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
@@ -2535,7 +2532,7 @@ real(dp) pure function ebands_calc_nelect(self, kt, fermie) result(nelect)
  nelect = zero
  do spin=1,self%nsppol
    do ik=1,self%nkpt
-     do ib=1,self%nband(ik)
+     do ib=1,self%nband(ik + (spin-1)*self%nkpt)
        nelect = nelect + ofact * self%wtk(ik) * occ_fd(self%eig(ib,ik,spin), kt, fermie)
      end do
    end do

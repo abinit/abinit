@@ -1458,6 +1458,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkpt',tread,'INT')
  if(tread==1) nkpt=intarr(1)
 
+ ! or from KERANGE file.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"kerange_path",tread,'KEY',key_value=key_value)
  if (tread==1) dtset%kerange_path = rmquotes(key_value)
 

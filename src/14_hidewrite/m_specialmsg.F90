@@ -457,21 +457,21 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush)
  ! Determine who I am in COMM_WORLD
  me = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- if( (my_mode_paral=='COLL') .or. (nproc==1) ) then
+ if (my_mode_paral == 'COLL' .or. nproc == 1) then
    if (me == master) call wrtout_myproc(unit, msg, do_flush=my_flush)
 
- else if (my_mode_paral=='PERS') then
+ else if (my_mode_paral == 'PERS') then
    call write_lines(unit,msg)
    ! Flush unit
    if (my_flush) call flush_unit(unit)
 
- else if (my_mode_paral=='INIT') then
+ else if (my_mode_paral == 'INIT') then
    master = unit
 
  else
    write(string,'(7a)')ch10,&
    'wrtout_unit: ERROR -',ch10,&
-   '  Unknown write mode: ',my_mode_paral,ch10,&
+   '  Unknown write mode: ',trim(my_mode_paral),ch10,&
    '  Continuing anyway ...'
    write(unit, '(A)' ) trim(string)
  end if

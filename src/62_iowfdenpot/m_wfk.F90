@@ -553,15 +553,11 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
    else
      MSG_ERROR("hdr_offset <=0")
    end if
-
-   call cwtime(cpu,wall,gflops,"stop")
-   write(msg,"(2(a,f8.2))")" FILE_OPEN cpu: ",cpu,", wall:",wall
-   call wrtout(std_out,msg,"PERS")
+   call cwtime_report(" FILE_OPEN", cpu, wall, gflops)
 
    ! Write Fortran record markers.
-   !if (.FALSE.) then
    if (do_write_frm) then
-     call cwtime(cpu,wall,gflops,"start")
+     call cwtime(cpu, wall, gflops, "start")
      call hdr_bsize_frecords(Wfk%Hdr,Wfk%formeig,nfrec,bsize_frecords)
 
      sc_mode = xmpio_collective
@@ -575,21 +571,18 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
          call xmpio_write_frmarkers(Wfk%fh,offset,xmpio_single,nfrec,bsize_frecords,ierr)
        end if
      end if
-     ABI_CHECK(ierr==0,"xmpio_write_frmarkers returned ierr!=0")
+     ABI_CHECK(ierr == 0, "xmpio_write_frmarkers returned ierr!=0")
 
      !call MPI_FILE_SYNC(Wfk%fh,mpierr)
      !ABI_CHECK_MPI(mpierr,"FILE_SYNC")
 
      if (Wfk%debug) then
        call xmpio_check_frmarkers(Wfk%fh,offset,sc_mode,nfrec,bsize_frecords,ierr)
-       ABI_CHECK(ierr==0,"xmpio_check_frmarkers returned ierr!=0")
+       ABI_CHECK(ierr == 0, "xmpio_check_frmarkers returned ierr!=0")
      end if
 
      ABI_FREE(bsize_frecords)
-
-     call cwtime(cpu,wall,gflops,"stop")
-     write(msg,"(2(a,f8.2))")" write_frmarkers cpu: ",cpu,", wall:",wall
-     call wrtout(std_out,msg,"PERS")
+     call cwtime_report(" write_frmarkers", cpu, wall, gflops)
    end if
 #endif
 
@@ -3859,8 +3852,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
    return
  end if
 
- call cwtime(cpu,wall,gflops,"start")
-
+ call cwtime(cpu, wall, gflops, "start")
  my_inpath = in_path
 
  if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
@@ -4073,8 +4065,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
    ABI_FREE(bz2ibz_sort)
  end if
 
- call cwtime(cpu,wall,gflops,"stop")
- write(std_out,"(2(a,f8.2))")" FULL_WFK written to file. cpu: ",cpu,", wall:",wall
+ call cwtime_report(" FULL_WFK written to file. ", cpu, wall, gflops)
 
  ABI_FREE(kg_ki)
  ABI_FREE(cg_ki)
@@ -4360,6 +4351,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
      write(msg,'(3(a,i2),2(a,f8.2))')&
        " iomode: ",iomode,", nproc: ",nproc,", option: ",option,", cpu: ",cpu,", wall:",wall
      call wrtout(std_out,msg,"COLL")
+     !call cwtime_report(" FULL_WFK written to file. ", cpu, wall, gflops)
    end do
  end do
 
@@ -4923,9 +4915,9 @@ end subroutine wfk_diff
 !!  wfk_klist2mesh
 !!
 !! FUNCTION
-!! This routine receives a WFK file with wavefunctions given on a subset of k-points
-!! Generate new WFK file on a dense K-mesh starting from an input WFK file containing
-!! included in the dense k-mesh.
+!! This routine receives a WFK file with wavefunctions given on a subset of k-points belonging to a k-mesh and
+!! generates a new WFK file with the complete list of k-points in the IBZ by filling the missing k-points with zeros.
+!!
 !! This routine is mainly used to prepare the computation of electron mobilities
 !! whose convergence with the k-point sampling is notoriously slow.
 !! Since only the electron/hole states close to the band edges contribute (say ~0.5 eV),
@@ -4934,7 +4926,6 @@ end subroutine wfk_diff
 !! instead of computing all the k-points of the dense IBZ.
 !! Unfortunately, the EPH code expects a WFK on a k-mesh so we need to "convert" the initial WFK
 !! with the list of k-points to a new WFK file with k-points on the dense kmesh.
-!! Eigenvalues are interpolated with star-functions using the IBZ provided by another WFK file.
 !!
 !! INPUTS
 !!  in_wfkpath = Input WFK file with k-point list.
@@ -5004,6 +4995,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  ABI_CHECK(fform == fform_kerange, sjoin("Wrong fform. Got: ", itoa(fform), ", Expecting: ", itoa(fform_kerange)))
  ! Read eigenvalues and kmask
  fine_mband = maxval(fine_hdr%nband)
+ _IBM6("This to prevent xlf from miscompiling this code")
  ABI_MALLOC(fine_eigen, (fine_mband, fine_hdr%nkpt, fine_hdr%nsppol))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), fine_eigen))
  !NCF_CHECK(nctk_get_dim(ncid, "nkpt_inerange", nkpt_inerage))
@@ -5021,15 +5013,17 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  MSG_ERROR("wfk_klist2mesh requires NETCDF support.")
 #endif
 
- write(std_out, "(2a)")ch10, repeat("=", 92)
- write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
- write(std_out, "(2a)")" Take wavefunctions with k-point lists from: ", trim(in_wfkpath)
- write(std_out, "(2a)")" Take eigenvalues and k-point tables from KERANGE file: ", trim(kerange_path)
- write(std_out, "(a, 9(i0, 1x))")"   fine_kptrlatt: ", fine_hdr%kptrlatt
- do ii=1,fine_hdr%nshiftk
-   write(std_out, "(a, 3(f5.2, 1x))")"   fine_shiftk: ", fine_hdr%shiftk(:, ii)
- end do
- write(std_out, "(2a)")repeat("=", 92), ch10
+ if (my_rank == master) then
+   write(std_out, "(2a)")ch10, repeat("=", 92)
+   write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
+   write(std_out, "(2a)")" Take wavefunctions with k-point lists from: ", trim(in_wfkpath)
+   write(std_out, "(2a)")" Take eigenvalues and k-point tables from KERANGE file: ", trim(kerange_path)
+   write(std_out, "(a, 9(i0, 1x))")"   fine_kptrlatt: ", fine_hdr%kptrlatt
+   do ii=1,fine_hdr%nshiftk
+     write(std_out, "(a, 3(f5.2, 1x))")"   fine_shiftk: ", fine_hdr%shiftk(:, ii)
+   end do
+   write(std_out, "(2a)")repeat("=", 92), ch10
+ end if
 
  ! Open WFK file with k-point list, extract dimensions and allocate workspace arrays.
  my_inpath = in_wfkpath
@@ -5045,7 +5039,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  iomode = iomode_from_fname(my_inpath)
  call wfk_open_read(iwfk, my_inpath, formeig0, iomode, get_unit(), xmpi_comm_self)
 
- if (dtset%prtvol > 0 .and. my_rank == master) then
+ if (my_rank == master .and. dtset%prtvol > 0) then
    fform = 0
    call hdr_echo(iwfk%hdr, fform, 3, unit=std_out, header="Header of iwfk file")
    call hdr_echo(fine_hdr, fform, 3, unit=std_out, header="Header of fine_hdr")
@@ -5135,6 +5129,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
 
  ! Allocate workspace arrays for wavefunction block.
  mpw = maxval(fine_ebands%npwarr)
+ _IBM6("This to prevent xlf from miscompiling this code")
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(cg_k, (2, mpw * nspinor * mband))
  ABI_MALLOC(eig_k, ((2*mband)**iwfk%formeig * mband) )
