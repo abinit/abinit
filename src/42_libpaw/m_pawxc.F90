@@ -7,7 +7,7 @@
 !!  XC+PAW related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (MT, FJ, TR, GJ, TD)
+!!  Copyright (C) 2013-2019 ABINIT group (MT, FJ, TR, GJ, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ module m_pawxc
 #ifdef HAVE_LIBPAW_ABINIT
  use m_xcpositron,  only : xcpositron
  use m_drivexc,     only : drivexc_main, size_dvxc, xcmult, mkdenpos
+ use m_xc_noncoll,  only : rotate_mag,rotate_back_mag,rotate_back_mag_dfpt
 #endif
 
  use m_libpaw_libxc
@@ -926,7 +927,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      if (nspden/=4) then
        vxc_updn => vxc
      else
-       LIBPAW_ALLOCATE(vxc_updn,(nrad,npts,nspden_updn))
+       LIBPAW_POINTER_ALLOCATE(vxc_updn,(nrad,npts,nspden_updn))
        LIBPAW_ALLOCATE(mag,(nrad,npts,3))
      end if
    end if
@@ -1276,7 +1277,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      LIBPAW_DEALLOCATE(mag_)
      LIBPAW_DEALLOCATE(vxc_nc)
 #endif
-     LIBPAW_DEALLOCATE(vxc_updn)
+     LIBPAW_POINTER_DEALLOCATE(vxc_updn)
      LIBPAW_DEALLOCATE(mag)
    end if
 
@@ -1885,10 +1886,10 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
      rho1_updn => rho1arr
      vxc1_updn => vxc1_
    else
-     LIBPAW_ALLOCATE(rho1_updn,(cplex_den*nrad,nspden_updn))
-     LIBPAW_ALLOCATE(vxc1_updn,(cplex_vxc*nrad,npts,nspden_updn))
-     LIBPAW_ALLOCATE(rho1_nc,(cplex_den*nrad*npts,nspden))
-     LIBPAW_ALLOCATE(mag,(nrad,3))
+     LIBPAW_POINTER_ALLOCATE(rho1_updn,(cplex_den*nrad,nspden_updn))
+     LIBPAW_POINTER_ALLOCATE(vxc1_updn,(cplex_vxc*nrad,npts,nspden_updn))
+     LIBPAW_POINTER_ALLOCATE(rho1_nc,(cplex_den*nrad*npts,nspden))
+     LIBPAW_POINTER_ALLOCATE(mag,(nrad,3))
    end if
 
 !  Do loop on the angular part (theta,phi)
@@ -2232,8 +2233,8 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
      LIBPAW_DEALLOCATE(drho1core)
    end if
    if (nspden==4) then
-     LIBPAW_DEALLOCATE(rho1_updn)
-     LIBPAW_DEALLOCATE(mag)
+     LIBPAW_POINTER_DEALLOCATE(rho1_updn)
+     LIBPAW_POINTER_DEALLOCATE(mag)
    end if
 
  end if ! option/=3
@@ -2336,8 +2337,8 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
    LIBPAW_DEALLOCATE(kxc_)
    LIBPAW_DEALLOCATE(mag)
 #endif
-   LIBPAW_DEALLOCATE(rho1_nc)
-   LIBPAW_DEALLOCATE(vxc1_updn)
+   LIBPAW_POINTER_DEALLOCATE(rho1_nc)
+   LIBPAW_POINTER_DEALLOCATE(vxc1_updn)
  end if
 
 !----------------------------------------------------------------------
@@ -3979,7 +3980,7 @@ end subroutine pawxcsphpositron
 
 !  Non-collinear magnetism: replace rho_dn by (m_0.dot.m)/|m_0|
    if (nspden==4) then
-     LIBPAW_ALLOCATE(rho_dn,(nrad,lm_size))
+     LIBPAW_POINTER_ALLOCATE(rho_dn,(nrad,lm_size))
      rho_dn(:,1)=zero
      do ilm=2,lm_size
        rho_dn(1:nrad,ilm)=m_norm_inv(1:nrad) &
@@ -4321,7 +4322,7 @@ end subroutine pawxcsphpositron
  LIBPAW_DEALLOCATE(exci)
  LIBPAW_DEALLOCATE(vxci)
  if (nspden==4.and.option/=4.and.option/=5)  then
-   LIBPAW_DEALLOCATE(rho_dn)
+   LIBPAW_POINTER_DEALLOCATE(rho_dn)
  end if
  if (allocated(v1sum))  then
    LIBPAW_DEALLOCATE(v1sum)
@@ -5547,9 +5548,6 @@ end subroutine pawxc_drivexc_wrapper
 
  subroutine pawxc_rotate_mag(rho_in,rho_out,mag,vectsize,mag_norm_out,rho_out_format)
 
-#if defined HAVE_LIBPAW_ABINIT
- use m_xc_noncoll, only : rotate_mag
-#endif
  implicit none
 
 !Arguments ------------------------------------
@@ -5642,9 +5640,6 @@ end subroutine pawxc_rotate_mag
 
  subroutine pawxc_rotate_back_mag(vxc_in,vxc_out,mag,vectsize)
 
-#if defined HAVE_LIBPAW_ABINIT
- use m_xc_noncoll, only : rotate_back_mag
-#endif
  implicit none
 
 !Arguments ------------------------------------
@@ -5720,9 +5715,6 @@ end subroutine pawxc_rotate_back_mag
 
  subroutine pawxc_rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize)
 
-#if defined HAVE_LIBPAW_ABINIT
- use m_xc_noncoll, only : rotate_back_mag_dfpt
-#endif
  implicit none
 
 !Arguments ------------------------------------

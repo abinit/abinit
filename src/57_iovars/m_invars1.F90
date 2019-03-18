@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -910,10 +910,6 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
- dtset%supercell_latt(:,:) = 0
- do ii=1,3
-   dtset%supercell_latt(ii,ii) = 1
- end do
  dtset%symmorphi=1
 !T
  dtset%tfkinfunc=0

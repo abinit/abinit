@@ -711,21 +711,21 @@ with_trio_flavor="netcdf+psml"
 
 # Include flags for the psml library (default is unset)
 #
-with_psml_incs="-I${FALLBACKS_PATH}/xmlf90/1.5.0/include -I${FALLBACKS_PATH}/libpsml/1.1.5/include"
+with_psml_incs="-I${FALLBACKS_PATH}/xmlf90/1.5.3.1/include -I${FALLBACKS_PATH}/libpsml/1.1.7/include"
 
 # Link flags for the psml library (default is unset)
 #
-with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.5/lib -lpsml -L${FALLBACKS_PATH}/xmlf90/1.5.0/lib -lxmlf90"
+with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.7/lib -lpsml -L${FALLBACKS_PATH}/xmlf90/1.5.3.1/lib -lxmlf90"
 
                        # ------------------------------ #
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/netcdf4411/include -I/usr/local/hdf5-1.8.18_openmpi2/include"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/netcdf4411/lib -lnetcdff -lnetcdf -L/usr/local/hdf5-1.8.18_openmpi2/lib -lhdf5_hl -lhdf5"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf -L/usr/local/hdf5-1.8.18_openmpi2/lib -lhdf5 -lhdf5_hl"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -929,15 +929,15 @@ with_dft_flavor="atompaw+libxc+wannier90"
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="${FALLBACKS_PATH}/atompaw/bin"
+with_atompaw_bins="${FALLBACKS_PATH}/atompaw/4.1.0.5/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/include"
+with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/4.1.0.5/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/lib -latompaw"
+with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.1.0.5/lib -latompaw"
 
                        # ------------------------------ #
 
@@ -947,31 +947,31 @@ with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/lib -latompaw"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-with_wannier90_bins="${FALLBACKS_PATH}/wannier90/bin"
+with_wannier90_bins="${FALLBACKS_PATH}/wannier90/2.0.1.1/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-with_wannier90_incs="-I${FALLBACKS_PATH}/wannier90/include"
+with_wannier90_incs="-I${FALLBACKS_PATH}/wannier90/2.0.1.1/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/lib -lwannier90"
+with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/2.0.1.1/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #

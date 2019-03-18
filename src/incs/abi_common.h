@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2018 ABINIT Group (MG)
+ * Copyright (C) 2008-2019 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -209,6 +209,8 @@
 /* Macro for basic messages */
 #define MSG_COMMENT(msg) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_)
 #define MSG_WARNING(msg) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_)
+#define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
 #define MSG_ERROR(msg)   call msg_hndl(msg,"ERROR", "PERS" _FILE_LINE_ARGS_)
 #define MSG_ERROR_CLASS(msg, cls)  call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
 #define MSG_BUG(msg)     call msg_hndl(msg,"BUG", "PERS" _FILE_LINE_ARGS_)
