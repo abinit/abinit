@@ -7,7 +7,7 @@
 !! Compute electron-positron correlation potentials and energy density.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (GJ,MT)
+!!  Copyright (C) 1998-2019 ABINIT group (GJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -101,13 +101,6 @@ contains
 
 subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rhopr,vxce,vxcegr,vxcp,&
 &                     dvxce,dvxcp) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcpositron'
-!End of the abilint section
 
  implicit none
 

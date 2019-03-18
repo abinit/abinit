@@ -10,7 +10,7 @@
 !!  xmpi_send is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group
+!!  Copyright (C) 2001-2019 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,14 +40,6 @@
 !! SOURCE
 
 subroutine xmpi_send_char(xval,dest,tag,spaceComm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_send_char'
-!End of the abilint section
 
  implicit none
 
@@ -97,14 +89,6 @@ end subroutine xmpi_send_char
 
 subroutine xmpi_send_intv(xval,dest,tag,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_send_intv'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -153,14 +137,6 @@ subroutine xmpi_send_intv(xval,dest,tag,spaceComm,ier)
 !! SOURCE
 
 subroutine xmpi_send_int1d(xval,dest,tag,spaceComm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_send_int1d'
-!End of the abilint section
 
  implicit none
 
@@ -220,12 +196,6 @@ subroutine xmpi_send_int2d(xval,dest,tag,spaceComm,ier)
 #if defined HAVE_MPI2 && ! defined HAVE_MPI_INCLUDED_ONCE
  use mpi
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_send_int2d'
-!End of the abilint section
 
  implicit none
 
@@ -291,12 +261,6 @@ subroutine xmpi_send_int3d(xval,dest,tag,spaceComm,ier)
  use mpi
 #endif
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_send_int3d'
-!End of the abilint section
-
  implicit none
 
 #if defined HAVE_MPI1
@@ -353,13 +317,6 @@ end subroutine xmpi_send_int3d
 subroutine xmpi_send_dp(xval,dest,tag,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_send_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -408,14 +365,6 @@ end subroutine xmpi_send_dp
 
 subroutine xmpi_send_dp1d(xval,dest,tag,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_send_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -463,14 +412,6 @@ end subroutine xmpi_send_dp1d
 !!
 !! SOURCE
 subroutine xmpi_send_dp2d(xval,dest,tag,spaceComm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_send_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -522,13 +463,6 @@ end subroutine xmpi_send_dp2d
 
 subroutine xmpi_send_dp3d(xval,dest,tag,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_send_dp3d'
-!End of the abilint section
 
  implicit none
 

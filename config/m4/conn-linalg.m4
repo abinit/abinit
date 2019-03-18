@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -401,7 +401,7 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
   abi_linalg_elpa_version="none"
   AC_MSG_CHECKING([for ELPA library version])
 
-# Check for ELPA 2017
+# Check for ELPA 2017+
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
     [
     use elpa
@@ -412,7 +412,7 @@ AC_DEFUN([_ABI_LINALG_FIND_ELPA_VERSION],[
     call e%cholesky(a,err)
     ])], [abi_linalg_has_elpa_2017="yes"], [abi_linalg_has_elpa_2017="no"])
   if test "${abi_linalg_has_elpa_2017}" = "yes"; then
-    abi_linalg_elpa_version="2017"
+    abi_linalg_elpa_version="2017+"
     AC_DEFINE([HAVE_LINALG_ELPA_2017],1,[Define to 1 if you have ELPA 2017 API support])
     AC_DEFINE([HAVE_ELPA_FORTRAN2008],1,[Define to 1 if you have ELPA Fortran 2008 API support])
   else

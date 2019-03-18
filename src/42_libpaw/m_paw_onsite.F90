@@ -8,7 +8,7 @@
 !!  i.e. quantities expressed with <Phi_i|...|Phi_j> and/or <tild_Phi_i|...|tild_Phi_j>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2019 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -87,13 +87,6 @@ CONTAINS
 !! SOURCE
 
 subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawnabla_init'
-!End of the abilint section
 
  implicit none
 
@@ -263,13 +256,6 @@ end subroutine pawnabla_init
 
 subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawnabla_core_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -284,12 +270,12 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
 !Local variables-------------------------------
 !scalars
  integer :: nln,nln_cor,il,ilm,ilmn,iln,itypat
- integer :: jl,jlm,jlmn,jln,lmn_size,lmncmax,mesh_size,mesh_size_cor
+ integer :: jl,jlm,jlmn,jln,lmn_size,lmcmax,lmncmax,mesh_size,mesh_size_cor
  real(dp) :: intg
  character(len=500) :: msg
 !arrays
  integer, LIBPAW_CONTIGUOUS pointer :: indlmn(:,:)
- real(dp) :: ang_phipphj(mpsang**2,mpsang**2,8)
+ real(dp) , allocatable:: ang_phipphj(:,:,:)
  real(dp),allocatable :: dphi(:),ff(:),int1(:,:),int2(:,:),rad(:)
 
 ! *************************************************************************
@@ -297,6 +283,8 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
  mesh_size_cor=size(phi_cor,1)
  nln_cor=size(phi_cor,2)
  lmncmax=size(indlmn_cor,2)
+ lmcmax=indlmn_cor(4,lmncmax)
+ LIBPAW_ALLOCATE(ang_phipphj,(lmcmax,lmcmax,8))
 
  if (mpsang>4)then
    write(msg,'(3a)')&
@@ -396,6 +384,7 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
    LIBPAW_DEALLOCATE(dphi)
 
  end do !itypat
+ LIBPAW_DEALLOCATE(ang_phipphj)
 
 end subroutine pawnabla_core_init
 !!***

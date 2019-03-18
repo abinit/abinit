@@ -9,7 +9,7 @@
 !!  as needed by the specific SCF algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (MT)
+!! Copyright (C) 2011-2019 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -224,13 +224,6 @@ CONTAINS !===========================================================
 
 subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scf_history_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -358,13 +351,6 @@ end subroutine scf_history_init
 
 subroutine scf_history_free(scf_history)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scf_history_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -457,13 +443,6 @@ end subroutine scf_history_free
 !! SOURCE
 
 subroutine scf_history_nullify(scf_history)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scf_history_nullify'
-!End of the abilint section
 
  implicit none
 

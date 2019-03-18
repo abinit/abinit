@@ -8,7 +8,7 @@
 !! Uses a conjugate-gradient algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XG,DRH,XW,FJ,MT,LB)
+!!  Copyright (C) 1999-2019 ABINIT group (XG,DRH,XW,FJ,MT,LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,7 +93,7 @@ contains
 !!  npw=number of planewaves in basis sphere at given k.
 !!  npw1=number of planewaves in basis sphere at k+Q
 !!  nspinor=number of spinorial components of the wavefunctions
-!!  opt_gvnl1=option controlling the use of gvnl1 array:
+!!  opt_gvnlx1=option controlling the use of gvnlx1 array:
 !!            0: used as an output
 !!            1: used as an input:    - used only for ipert=natom+2
 !!                 NCPP: contains the ddk 1-st order WF
@@ -117,8 +117,8 @@ contains
 !!                     eig1(:,ii,jj)=<C0 ii|H1|C0 jj> for norm-conserving psps
 !!                     eig1(:,ii,jj)=<C0 ii|H1-(eig0_k+eig0_k+q)/2.S(1)|C0 jj> for PAW
 !!  ghc(2,npw1*nspinor)=<G|H0-eig0_k.I|C1 band,k> (NCPP) or <G|H0-eig0_k.S0|C1 band,k> (PAW)
-!!  gvnlc(2,npw1*nspinor)=<G|Vnl|C1 band,k>
-!!  gvnl1(2,npw1*nspinor)=  part of <G|K1+Vnl1|C0 band,k> not depending on VHxc1           (NCPP)
+!!  gvnlxc(2,npw1*nspinor)=<G|Vnl+VFockACE|C1 band,k>
+!!  gvnlx1(2,npw1*nspinor)=  part of <G|K1+Vnl1|C0 band,k> not depending on VHxc1           (NCPP)
 !!                       or part of <G|K1+Vnl1-eig0k.S1|C0 band,k> not depending on VHxc1 (PAW)
 !!  resid=wf residual for current band
 !!  gh1c_n= <G|H1|C0 band,k> (NCPP) or <G|H1-eig0k.S1|C0 band,k> (PAW).
@@ -149,17 +149,10 @@ contains
 
 subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwavef,&
 & eig0nk,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
-& gs_hamkq,gvnlc,gvnl1,icgq,idir,ipert,igscq,&
+& gs_hamkq,gvnlxc,gvnlx1,icgq,idir,ipert,igscq,&
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nbdbuf,nline_in,npw,npw1,nspinor,&
-& opt_gvnl1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
+& opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_cgwf'
-!End of the abilint section
 
  implicit none
 
@@ -167,7 +160,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !scalars
  integer,intent(in) :: band,berryopt
  integer,intent(in) :: icgq,idir,igscq,ipert,mcgq,mgscq,mpw1,natom,nband
- integer,intent(in) :: nbdbuf,nline_in,npw,npw1,nspinor,opt_gvnl1
+ integer,intent(in) :: nbdbuf,nline_in,npw,npw1,nspinor,opt_gvnlx1
  integer,intent(in) :: prtvol,quit,usedcwavef,wfoptalg
  integer,intent(inout) :: nlines_done
  real(dp),intent(in) :: eig0nk,dfpt_sciss,tolrde,tolwfr
@@ -185,7 +178,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  real(dp),intent(out) :: gh1c_n(2,npw1*nspinor)
  real(dp),intent(out) :: ghc(2,npw1*nspinor)
  real(dp),intent(out) :: gsc(2,npw1*nspinor*gs_hamkq%usepaw)
- real(dp),intent(inout) :: gvnl1(2,npw1*nspinor),gvnlc(2,npw1*nspinor)
+ real(dp),intent(inout) :: gvnlx1(2,npw1*nspinor),gvnlxc(2,npw1*nspinor)
  type(pawcprj_type),intent(inout) :: cwaveprj(natom,nspinor)
  type(pawcprj_type),intent(inout) :: cwaveprj0(natom,nspinor*gs_hamkq%usecprj)
 
@@ -204,8 +197,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !arrays
  real(dp) :: dummy(0,0),tsec(2)
  real(dp),allocatable :: conjgr(:,:),cwaveq(:,:),cwwork(:,:),direc(:,:)
- real(dp),allocatable :: gberry(:,:),gh1c(:,:),gh_direc(:,:),gresid(:,:),gvnl1_saved(:,:)
- real(dp),allocatable :: gs1c(:,:),gvnl_direc(:,:),pcon(:),sconjgr(:,:)
+ real(dp),allocatable :: gberry(:,:),gh1c(:,:),gh_direc(:,:),gresid(:,:),gvnlx1_saved(:,:)
+ real(dp),allocatable :: gs1c(:,:),gvnlx_direc(:,:),pcon(:),sconjgr(:,:)
  real(dp),allocatable :: scprod(:,:),work(:,:),work1(:,:),work2(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: conjgrprj(:,:)
@@ -372,11 +365,11 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    end if
    usevnl=1; optlocal=1; optnl=2
    if (prtvol==-level.or.prtvol==-19) then
-     ABI_ALLOCATE(gvnl1_saved,(2,npw1*nspinor))
-     gvnl1_saved(:,:) = gvnl1(:,:)
+     ABI_ALLOCATE(gvnlx1_saved,(2,npw1*nspinor))
+     gvnlx1_saved(:,:) = gvnlx1(:,:)
    end if
-   call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,&
-&   mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+   call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,&
+&   mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
    if (gen_eigenpb) then
      if (ipert/=natom+2) then  ! S^(1) is zero for ipert=natom+2
@@ -386,10 +379,10 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
          gh1c (1:2,ipw)=gh1c (1:2,ipw)-eshift*gs1c(1:2,ipw)
        end do
 !$OMP END DO NOWAIT
-       if (opt_gvnl1/=1) then
+       if (opt_gvnlx1/=1) then
 !$OMP DO
          do ipw=1,npw1*nspinor
-           gvnl1(1:2,ipw)=gvnl1(1:2,ipw)-eshift*gs1c(1:2,ipw)
+           gvnlx1(1:2,ipw)=gvnlx1(1:2,ipw)-eshift*gs1c(1:2,ipw)
          end do
 !$OMP END DO NOWAIT
        end if
@@ -518,7 +511,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  if(band>max(1,nband-nbdbuf))then
    cwavef=zero
    ghc   =zero
-   gvnlc =zero
+   gvnlxc =zero
    if (gen_eigenpb) gsc=zero
    if (usedcwavef==2) dcwavef=zero
    if (usepaw==1) then
@@ -550,7 +543,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !  Here apply H(0) at k+q to input orthogonalized 1st-order wfs
    sij_opt=0;if (gen_eigenpb) sij_opt=1
    cpopt=-1+usepaw
-   call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamkq,gvnlc,eshift,mpi_enreg,1,&
+   call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamkq,gvnlxc,eshift,mpi_enreg,1,&
 &   prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
 
 !  ghc also includes the eigenvalue shift
@@ -577,7 +570,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or.&
 &     berryopt==14.or.berryopt==16.or.berryopt==17) then
        if (ipert==natom+2) then
-         if (opt_gvnl1/=1) gvnl1=zero
+         if (opt_gvnlx1/=1) gvnlx1=zero
 !$OMP PARALLEL DO
          do ipw=1,npw1*nspinor
            gresid(1:2,ipw)=-ghc(1:2,ipw)-gh1c(1:2,ipw)
@@ -653,7 +646,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end if
        cwavef =zero
        ghc    =zero
-       gvnlc  =zero
+       gvnlxc  =zero
        if (gen_eigenpb) gsc(:,:)=zero
        if (usepaw==1) then
          call pawcprj_set_zero(cwaveprj)
@@ -797,7 +790,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        write(msg,'(a)') '  CGWF3_WARNING : dedt>0'
        call wrtout(std_out,msg,'PERS')
      end if
-     ABI_ALLOCATE(gvnl_direc,(2,npw1*nspinor))
+     ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
      ABI_ALLOCATE(gh_direc,(2,npw1*nspinor))
      if (gen_eigenpb)  then
        ABI_ALLOCATE(sconjgr,(2,npw1*nspinor))
@@ -806,7 +799,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      end if
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1+usepaw
-     call getghc(cpopt,conjgr,conjgrprj,gh_direc,sconjgr,gs_hamkq,gvnl_direc,&
+     call getghc(cpopt,conjgr,conjgrprj,gh_direc,sconjgr,gs_hamkq,gvnlx_direc,&
 &     eshift,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
 
 !    ghc also includes the eigenvalue shift
@@ -848,7 +841,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
        cwavef=zero
        ghc   =zero
-       gvnlc =zero
+       gvnlxc =zero
        if (gen_eigenpb) gsc=zero
        if (usepaw==1) then
          call pawcprj_set_zero(cwaveprj)
@@ -878,7 +871,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
      call cg_zaxpy(npw1*nspinor,(/theta,zero/),conjgr,cwavef)
      call cg_zaxpy(npw1*nspinor,(/theta,zero/),gh_direc,ghc)
-     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gvnl_direc,gvnlc)
+     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gvnlx_direc,gvnlxc)
 
      if (gen_eigenpb) then
        call cg_zaxpy(npw1*nspinor,(/theta,zero/),sconjgr,gsc)
@@ -888,7 +881,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      end if
 
      ABI_DEALLOCATE(gh_direc)
-     ABI_DEALLOCATE(gvnl_direc)
+     ABI_DEALLOCATE(gvnlx_direc)
      ABI_DEALLOCATE(sconjgr)
 
 !    ======================================================================
@@ -938,8 +931,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
        if (ipert/=natom+10.and.ipert/=natom+11) then
          if (gen_eigenpb) then
-           call getgh1c(berryopt,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,gvnl1_saved,idir,ipert,eshift,&
-&           mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+           call getgh1c(berryopt,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,gvnlx1_saved,idir,ipert,eshift,&
+&           mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            work(:,:)=cgq(:,1+npw1*nspinor*(iband-1)+icgq:npw1*nspinor*iband+icgq)
            call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,2,work,work2,me_g0,mpi_enreg%comm_spinorfft)
          else
@@ -969,7 +962,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work2)
      if (ipert/=natom+10.and.ipert/=natom+11) then
-       ABI_DEALLOCATE(gvnl1_saved)
+       ABI_DEALLOCATE(gvnlx1_saved)
      end if
    end if
 
@@ -1095,8 +1088,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    if (allocated(gh_direc))  then
      ABI_DEALLOCATE(gh_direc)
    end if
-   if (allocated(gvnl_direc))  then
-     ABI_DEALLOCATE(gvnl_direc)
+   if (allocated(gvnlx_direc))  then
+     ABI_DEALLOCATE(gvnlx_direc)
    end if
    ABI_DEALLOCATE(conjgr)
    ABI_DEALLOCATE(cwaveq)

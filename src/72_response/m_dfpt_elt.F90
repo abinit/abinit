@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GM, AR, MB)
+!! Copyright (C) 1998-2019 ABINIT group (DRH, DCA, XG, GM, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,13 +138,6 @@ contains
 subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 & nattyp,nfft,ngfft,ngfftf,nhat,nkxc,n3xccc,pawtab,ph1d,psps,rhor,rprimd,&
 & usexcnhat,vxc,xccc3d,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_eltfrxc'
-!End of the abilint section
 
  implicit none
 
@@ -527,9 +520,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
 
 !      Fourier transform of Vxc_core/vxc10_core to use in atm2fft (reciprocal space calculation)
-       call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-       call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-       call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+       call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,1, ngfft,0)
+       call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,1, ngfft, 0)
+       call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,1, ngfft, 0)
 
        call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_tmp2,dummy_in,gmet,gprimd,&
 &       dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
@@ -588,9 +581,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
          ABI_ALLOCATE(vxc_coreg,(2,nfft))
          ABI_ALLOCATE(vxc1is_coreg,(2,nfft))
          vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
-         call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-         call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-         call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+         call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,1, ngfft, 0)
+         call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,1, ngfft,0)
+         call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,1, ngfft, 0)
          optatm=0;optdyfr=0;optgr=0;optstr=0;optv=0;optn=1;optn2=1;opteltfr=1;corstr=zero
          call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_test2,dummy_in,gmet,gprimd,&
 &         dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
@@ -671,7 +664,7 @@ end subroutine dfpt_eltfrxc
 !! over the second strain and over all atomic displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2019 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -720,13 +713,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 & n1,n1xccc,n2,n3,rprimd,typat,ucvol,vxc_core,vxc10_core,vxc1is_core,&
 & xcccrc,xccc1d,xred, &
 & mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eltxccore'
-!End of the abilint section
 
  implicit none
 
@@ -1018,13 +1004,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 
    function cross_elt(xx,yy,zz,aa,bb,cc)
 !Define magnitude of cross product of two vectors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross_elt'
-!End of the abilint section
-
    real(dp) :: cross_elt
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_elt=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
@@ -1075,13 +1054,6 @@ end subroutine eltxccore
 
 subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,ph1d,qgrid,rhog,vlspl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_eltfrloc'
-!End of the abilint section
 
  implicit none
 
@@ -1297,38 +1269,17 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 !Real and imaginary parts of phase.
    function phr_elt(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phr_elt'
-!End of the abilint section
-
    real(dp) :: phr_elt,x1,x2,x3,y1,y2,y3
    phr_elt=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
  end function phr_elt
 
    function phi_elt(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phi_elt'
-!End of the abilint section
-
    real(dp):: phi_elt,x1,x2,x3,y1,y2,y3
    phi_elt=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
  end function phi_elt
 
    function ph1_elt(nri,ig1,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph1_elt'
-!End of the abilint section
 
    real(dp):: ph1_elt
    integer :: nri,ig1,ia
@@ -1337,13 +1288,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 
    function ph2_elt(nri,ig2,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph2_elt'
-!End of the abilint section
-
    real(dp):: ph2_elt
    integer :: nri,ig2,ia
    ph2_elt=ph1d(nri,ig2+1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1))
@@ -1351,26 +1295,12 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 
    function ph3_elt(nri,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph3_elt'
-!End of the abilint section
-
    real(dp):: ph3_elt
    integer :: nri,ig3,ia
    ph3_elt=ph1d(nri,ig3+1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
  end function ph3_elt
 
    function phre_elt(ig1,ig2,ig3,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phre_elt'
-!End of the abilint section
 
    real(dp):: phre_elt
    integer :: ig1,ig2,ig3,ia
@@ -1380,13 +1310,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 
    function phimag_elt(ig1,ig2,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phimag_elt'
-!End of the abilint section
-
    real(dp) :: phimag_elt
    integer :: ig1,ig2,ig3,ia
    phimag_elt=phi_elt(ph1_elt(re,ig1,ia),ph1_elt(im,ig1,ia),&
@@ -1394,13 +1317,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  end function phimag_elt
 
    function gsq_elt(i1,i2,i3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsq_elt'
-!End of the abilint section
 
    real(dp) :: gsq_elt
    integer :: i1,i2,i3
@@ -1411,13 +1327,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  end function gsq_elt
 
    function dgsqds_elt(i1,i2,i3,is)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dgsqds_elt'
-!End of the abilint section
 
    real(dp) :: dgsqds_elt
    integer :: i1,i2,i3,is
@@ -1430,13 +1339,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  end function dgsqds_elt
 
    function d2gsqds_elt(i1,i2,i3,is1,is2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2gsqds_elt'
-!End of the abilint section
 
    real(dp) :: d2gsqds_elt
    integer :: i1,i2,i3,is1,is2
@@ -1500,13 +1402,6 @@ end subroutine dfpt_eltfrloc
 subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 &  istwfk,kg,kptns,mband,mgfft,mkmem,mpi_enreg,&
 &  mpw,nband,nkpt,ngfft,npwarr,nspinor,nsppol,occ,rprimd,wtk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_eltfrkin'
-!End of the abilint section
 
  implicit none
 
@@ -1694,13 +1589,6 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 &            istwfk,kg_k,kpt,npw,nspinor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2kindstr2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1866,13 +1754,6 @@ end subroutine dfpt_eltfrkin
 !! SOURCE
 
 subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_eltfrhar'
-!End of the abilint section
 
  implicit none
 
@@ -2087,13 +1968,6 @@ end subroutine dfpt_eltfrhar
 subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 &                 typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elt_ewald'
-!End of the abilint section
 
  implicit none
 
@@ -2515,13 +2389,6 @@ end subroutine elt_ewald
 
 subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_ewald'
-!End of the abilint section
 
  implicit none
 

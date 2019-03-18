@@ -9,7 +9,7 @@
 !!  xmpi_min is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2001-2019 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,12 +23,6 @@
 
 subroutine xmpi_min_intv(xval,xmin,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_min_intv'
-!End of the abilint section
 
  implicit none
 
@@ -86,12 +80,6 @@ end subroutine xmpi_min_intv
 !! SOURCE
 subroutine xmpi_min_dpv(xval,xmin,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_min_dpv'
-!End of the abilint section
 
  implicit none
 

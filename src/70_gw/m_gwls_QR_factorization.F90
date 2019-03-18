@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,13 +104,6 @@ subroutine extract_QR(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 ! Thus, in that case, this routine implements some old school Gram-Schmidt
 ! algorithm.
 !--------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extract_QR'
-!End of the abilint section
-
 implicit none
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator
@@ -174,13 +167,6 @@ subroutine extract_SVD(mpi_communicator, Hsize,lsolutions_max,svd_matrix,svd_val
 ! 
 ! different algorithms are used, depending on parallelisation scheme.
 !--------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extract_SVD'
-!End of the abilint section
-
 implicit none
 
 integer,      intent(in)    :: mpi_communicator
@@ -274,13 +260,6 @@ subroutine extract_SVD_lapack(Hsize,lsolutions_max,svd_matrix,svd_values)
 ! 
 ! 
 !--------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extract_SVD_lapack'
-!End of the abilint section
-
 implicit none
 
 
@@ -438,13 +417,6 @@ subroutine extract_QR_Householder(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 ! distributed across processors and MPI communication is necessary.
 ! 
 !--------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extract_QR_Householder'
-!End of the abilint section
-
 implicit none
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator

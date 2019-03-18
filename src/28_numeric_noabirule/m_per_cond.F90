@@ -7,7 +7,7 @@
 !!  This module contains basic tools for periodic conditions traitement.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MM)
+!! Copyright (C) 2008-2019 ABINIT group (MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,13 +81,6 @@ function per_cond_re(nb,initial,dim_grid,metric)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_cond_re'
-!End of the abilint section
-
  integer,intent(in) :: nb
  integer,intent(in) :: dim_grid(3)
  integer :: per_cond_re(3,0:nb-1)
@@ -133,13 +126,6 @@ function per_cond_int(nb,initial,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_cond_int'
-!End of the abilint section
-
  integer,intent(in) :: nb
  integer,intent(in) :: dim_grid(3)
  integer :: per_cond_int(3,0:nb-1)
@@ -184,13 +170,6 @@ function per_cond_int3(initial,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_cond_int3'
-!End of the abilint section
-
  integer,intent(in) :: dim_grid(3)
  integer :: per_cond_int3(3)
  integer,intent(in) :: initial(3)
@@ -234,13 +213,6 @@ function per_dist_int(nb,initA,initB,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_dist_int'
-!End of the abilint section
-
  integer,intent(in) :: nb
  integer,intent(in) :: dim_grid(3)
  integer :: per_dist_int(3,0:nb-1)
@@ -288,13 +260,6 @@ function per_dist_int1(initA,initB,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_dist_int1'
-!End of the abilint section
-
  integer,intent(in) :: dim_grid,initA,initB
  integer :: per_dist_int1
 
@@ -335,13 +300,6 @@ function per_dist_int3(initA,initB,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_dist_int3'
-!End of the abilint section
-
  integer,intent(in) :: dim_grid(3)
  integer :: per_dist_int3(3)
  integer,intent(in) :: initA(3),initB(3)

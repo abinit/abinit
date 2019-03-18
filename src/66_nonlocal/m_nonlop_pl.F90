@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -188,13 +188,6 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
 &                     ucvol,vectin,vectout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop_pl'
-!End of the abilint section
 
  implicit none
 
@@ -1322,13 +1315,6 @@ contains
 
 subroutine trace2(gxa,gmet,trace)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trace2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1395,13 +1381,6 @@ end subroutine trace2
 !! SOURCE
 
 subroutine strsocv(red,gprimd,cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strsocv'
-!End of the abilint section
 
  implicit none
 
@@ -1487,13 +1466,6 @@ end subroutine strsocv
 !! SOURCE
 
 subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scalewf_nonlop'
-!End of the abilint section
 
  implicit none
 
@@ -1606,13 +1578,6 @@ end subroutine scalewf_nonlop
 !! SOURCE
 
 subroutine ddkten(compact,idir,rank,temp,tmpfac)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddkten'
-!End of the abilint section
 
  implicit none
 

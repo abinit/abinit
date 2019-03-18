@@ -12,7 +12,7 @@
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DRH)
+!! Copyright (C) 1998-2019 ABINIT group (DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,13 +62,6 @@ subroutine contstr25(istr1,istr2,rank,gm,gprimd,e2nl,aa,bb)
 
  use defs_basis
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'contstr25'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

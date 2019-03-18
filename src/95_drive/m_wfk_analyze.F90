@@ -7,7 +7,7 @@
 !!  Post-processing tools for WFK file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,8 +27,45 @@
 module m_wfk_analyze
 
  use defs_basis
- use m_errors
+ use defs_datatypes
+ use defs_abitypes
  use m_abicore
+ use m_xmpi
+ use m_errors
+ use m_hdr
+ use m_crystal
+ use m_ebands
+ use m_tetrahedron
+ use m_nctk
+ use m_wfk
+ use m_wfd
+
+ use m_time,            only : timab
+ use m_fstrings,        only : strcat, sjoin, itoa, ftoa
+ use m_fftcore,         only : print_ngfft
+ use m_kpts,            only : tetra_from_kptrlatt
+ use m_bz_mesh,         only : kpath_t, kpath_new, kpath_free
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
+ use m_esymm,           only : esymm_t, esymm_free
+ use m_ddk,             only : ddk_compute
+ use m_pawang,          only : pawang_type
+ use m_pawrad,          only : pawrad_type
+ use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
+ use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
+ use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
+ use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init, pawfgrtab_print
+ use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
+                               pawrhoij_inquire_dim
+ use m_pawdij,          only : pawdij, symdij
+ use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_paw_sphharm,     only : setsym_ylm
+ use m_paw_init,        only : pawinit, paw_gencond
+ use m_paw_nhat,        only : nhatgrid
+ use m_paw_tools,       only : chkpawovlp
+ use m_paw_correlations,only : pawpuxinit
+ use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
+ use m_classify_bands,  only : classify_bands
+ use m_pspini,          only : pspini
 
  implicit none
 
@@ -98,55 +135,6 @@ contains
 
 subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_xmpi
- use m_errors
- use m_hdr
- use m_crystal
- use m_crystal_io
- use m_ebands
- use m_tetrahedron
- use m_nctk
- use m_wfk
- use m_wfd
-
- use m_time,            only : timab
- use m_fstrings,        only : strcat, sjoin, itoa, ftoa
- use m_fftcore,         only : print_ngfft
- use m_kpts,            only : tetra_from_kptrlatt
- use m_bz_mesh,         only : kpath_t, kpath_new, kpath_free
- use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
- use m_esymm,           only : esymm_t, esymm_free, esymm_failed
- use m_ddk,             only : eph_ddk
- use m_pawang,          only : pawang_type
- use m_pawrad,          only : pawrad_type
- use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
- use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
- use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
- use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init, pawfgrtab_print
- use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij
- use m_pawdij,          only : pawdij, symdij
- use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_paw_sphharm,     only : setsym_ylm
- use m_paw_init,        only : pawinit,paw_gencond
- use m_paw_nhat,        only : nhatgrid
- use m_paw_tools,       only : chkpawovlp
- use m_paw_correlations,only : pawpuxinit
- !use m_pawpwij,        only : pawpwff_t, pawpwff_init, pawpwff_free
- !use m_paw_dmft,       only : paw_dmft_type
- use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
- use m_classify_bands,  only : classify_bands
- use m_pspini,          only : pspini
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_analyze'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -169,7 +157,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !integer :: option,option_test,option_dij,optrhoij
  integer :: band,ik_ibz,spin,first_band,last_band
  integer :: ierr,usexcnhat !,edos_intmeth
- integer :: cplex_dij,cplex,ndij,nspden_rhoij,gnt_option
+ integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp
  !real(dp) :: edos_step,edos_broad
@@ -228,7 +216,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
  call hdr_vs_dtset(wfk0_hdr,dtset)
 
- call crystal_from_hdr(cryst,wfk0_hdr,timrev2)
+ cryst = hdr_get_crystal(wfk0_hdr, timrev2)
  call crystal_print(cryst,header="crystal structure from WFK file")
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
@@ -327,8 +315,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    cplex_dij=dtset%nspinor; cplex=1; ndij=1
 
    ABI_DT_MALLOC(pawrhoij,(cryst%natom))
-   nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
-   call pawrhoij_alloc(pawrhoij,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
 
    ! Initialize values for several basic arrays
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
@@ -411,7 +400,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  case (WFK_TASK_FULLBZ)
    ! Read wfk0_path and build WFK in full BZ.
    if (my_rank == master) then
-
      wfkfull_path = dtfil%fnameabo_wfk
      if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
      call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
@@ -429,11 +417,16 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    end if
    call xmpi_barrier(comm)
 
- !case ("pjdos")
+ !case (WFK_TASK_PJDOS)
+ !case (WFK_TASK_LDOS)
 
  case (WFK_TASK_DDK)
-    ! calculate the DDK matrix elements using a WFK file
-    call eph_ddk(wfk0_path,dtfil,dtset,psps,pawtab,dtset%inclvkb,ngfftc,mpi_enreg,comm) 
+   ! Calculate the DDK matrix elements from the WFK file
+   call ddk_compute(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+
+ case (WFK_TASK_EINTERP)
+   ! Band structure interpolation from eigenvalues computed on the k-mesh.
+   call ebands_interpolate_kpath(ebands, dtset, cryst, [0, 0], dtfil%filnam_ds(4), comm)
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
@@ -458,7 +451,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !  ! plot KSS wavefunctions. Change bks_mask to select particular states.
  !  ABI_MALLOC(bks_mask,(Wfd%mband,Wfd%nkibz,Wfd%nsppol))
  !  bks_mask=.False.; bks_mask(1:4,1,1)=.True.
- !  call wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
+ !  call wfd%plot_ur(Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
  !  ABI_FREE(bks_mask)
 
  case (WFK_TASK_PAW_AEPSI)
@@ -471,29 +464,26 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    cryst%rprimd,cryst%xcart,pawtab,pawrad,pawfgrtab)
 
    ! Use dense FFT mesh
-   call wfd_change_ngfft(wfd,cryst,psps,ngfftf)
+   call wfd%change_ngfft(cryst,psps,ngfftf)
    band = 1; spin = 1; ik_ibz = 1
 
    ABI_MALLOC(ur_ae, (wfd%nfft*wfd%nspinor))
-   call wfd_paw_get_aeur(wfd,band,ik_ibz,spin,cryst,paw_onsite,psps,pawtab,pawfgrtab,ur_ae)
+   call wfd%paw_get_aeur(band,ik_ibz,spin,cryst,paw_onsite,psps,pawtab,pawfgrtab,ur_ae)
    ABI_FREE(ur_ae)
 
    call paw_pwaves_lmn_free(paw_onsite)
    ABI_DT_FREE(paw_onsite)
 
  !case ("paw_aeden")
- !case ("outqmc")
 
  case default
-   MSG_ERROR(sjoin("Wrong task:",itoa(dtset%wfk_task)))
+   MSG_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
  end select
 
- !=====================
- !==== Free memory ====
- !=====================
- call crystal_free(cryst)
+ ! Free memory
+ call cryst%free()
  call ebands_free(ebands)
- call wfd_free(wfd)
+ call wfd%free()
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
  call hdr_free(wfk0_hdr)
@@ -532,18 +522,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
 subroutine read_wfd()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_wfd'
-!End of the abilint section
-
  implicit none
-
-!Arguments ------------------------------------
-
-!Local variables-------------------------------
 
 ! *************************************************************************
 
@@ -559,8 +538,8 @@ subroutine read_wfd()
    ABI_FREE(keep_ur)
    ABI_FREE(bks_mask)
 
-   call wfd_read_wfk(wfd,wfk0_path,IO_MODE_MPI)
-   call wfd_test_ortho(wfd,cryst,pawtab)
+   call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+   call wfd%test_ortho(cryst,pawtab)
 
  end subroutine read_wfd
 

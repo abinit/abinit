@@ -7,7 +7,7 @@
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2019 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,15 +138,6 @@ contains
 !! SOURCE
 
 subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'timana'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -903,6 +894,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1661) = 'lobpcg_RayleighRitz@hegv       '
 
  ! xg_t
+ names(1662) = 'xgTransposer_transpose@ColsRows'
+ names(1663) = 'xgTransposer_transpose@Linalg  '
+ names(1664) = 'xgTransposer_*@all2all         '
+ names(1665) = 'xgTransposer_*@gatherv         '
+ names(1666) = 'xgTransposer_@reorganize       '
+ names(1667) = 'xgTransposer_init              '
+ names(1668) = 'xgTransposer_free              '
+ names(1669) = 'xgTransposer_transpose         '
  names(1670) = 'xgBlock_potrf                  '
  names(1671) = 'xgBlock_trsm                   '
  names(1672) = 'xgBlock_gemm                   '
@@ -1616,10 +1615,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          message='low-level xgBlock type '
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/)
-         message='low-level xgScalapack type '  
+         message='low-level xgScalapack type '
        case(78)
-         list(:5)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/)
-         message='chebfiwf2 core engine '
+         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
+         message='low-level xgTransposer type '
        case default
          cycle ! This allows to disable temporarily some partitionings
 

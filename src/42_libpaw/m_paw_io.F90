@@ -7,7 +7,7 @@
 !!  PAW I/O related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (MT, TR)
+!!  Copyright (C) 2012-2019 ABINIT group (MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,13 +94,6 @@ CONTAINS !===========================================================
 subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
 &                         opt_pack,opt_prtvol,pack2ij,test_value,Ha_or_eV, &
 &                         mode_paral,opt_sym,asym_ij) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawio_print_ij'
-!End of the abilint section
 
  implicit none
 

@@ -20,7 +20,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! Copyright (C) 2001-2019 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@ module m_spin_model_primitive
   interface
      ! C function:
      ! void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
-     ! int *natoms, double *masses[], int *nmatoms,
+     ! int *natoms, double *masses[], int *nspins,
      ! int *index_spin[], double *gyroratios[], double *damping_factors[],
      ! double *positions[], double *spinat[],
      ! // exchange
@@ -70,14 +70,14 @@ module m_spin_model_primitive
      ! double *bi_vallist[])
 
      subroutine xml_read_spin(xml_fname, ref_energy, unitcell,                 &
-          natoms, masses, nmatoms, index_spin, gyroratios, damping_factors, positions, spinat, &
+          natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat, &
           exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
           dmi_nnz, dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
           uni_nnz, uni_ilist, uni_amplitude_list, uni_direction_list, &
           bi_nnz, bi_ilist, bi_jilst, bi_Rlist, bi_vallist) bind(C, name="xml_read_spin")
        import
-       character(len=1), dimension(*), intent(in) :: xml_fname
-       integer (c_int), intent(out):: natoms, nmatoms, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+       character(c_char), intent(in) :: xml_fname(*)
+       integer (c_int), intent(out):: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
        real  (c_double), intent(out) :: ref_energy
        type(c_ptr)::  unitcell,  &
             masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
@@ -86,10 +86,30 @@ module m_spin_model_primitive
             uni_ilist, uni_amplitude_list, uni_direction_list, &
             bi_ilist, bi_jilst, bi_Rlist, bi_vallist
      end subroutine xml_read_spin
+ end interface
+
+ interface
+     subroutine xml_free_spin(xml_fname, ref_energy, unitcell,                 &
+          natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat, &
+          exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
+          dmi_nnz, dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
+          uni_nnz, uni_ilist, uni_amplitude_list, uni_direction_list, &
+          bi_nnz, bi_ilist, bi_jilst, bi_Rlist, bi_vallist) bind(C, name="xml_free_spin")
+       import
+       character(c_char), intent(in) :: xml_fname(*)
+       integer (c_int), intent(out):: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+       real  (c_double), intent(out) :: ref_energy
+       type(c_ptr)::  unitcell,  &
+            masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
+            exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
+            dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
+            uni_ilist, uni_amplitude_list, uni_direction_list, &
+            bi_ilist, bi_jilst, bi_Rlist, bi_vallist
+     end subroutine xml_free_spin
   end interface
 
   type spin_model_primitive_t
-     integer :: natoms, nmatoms, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+     integer :: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
      real (dp) :: ref_energy, unitcell(3,3)
      ! integer, allocatable :: masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
      !exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
@@ -129,48 +149,34 @@ contains
 
   subroutine spin_model_primitive_t_initialize(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_initialize'
-!End of the abilint section
-
     class(spin_model_primitive_t), intent(inout) :: self
    !TODO should something  be done here?
   end subroutine spin_model_primitive_t_initialize
 
   subroutine spin_model_primitive_t_set_atoms(self, natoms, unitcell, positions, &
-       nmatoms, index_spin, spinat, gyroratios, damping_factors )
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_atoms'
-!End of the abilint section
+       nspins, index_spin, spinat, gyroratios, damping_factors )
 
     class(spin_model_primitive_t), intent(inout) :: self
-    integer, intent(in):: natoms, nmatoms, index_spin(:)
+    integer, intent(in):: natoms, nspins, index_spin(:)
     real(dp), intent(in):: unitcell(3, 3),  positions(3,natoms), &
-         spinat(3,nmatoms), gyroratios(nmatoms), damping_factors(nmatoms)
+         spinat(3,natoms), gyroratios(nspins), damping_factors(nspins)
 
     !print *, "natoms",natoms
-    !print *, "nmatoms", nmatoms
+    !print *, "nspins", nspins
     !print *, "positions", positions
     !print *, "spinat", spinat
     !print *, "gyroratios", gyroratios
     !print *, "damping_factors", damping_factors
     ABI_ALLOCATE(self%positions, (3, natoms))
     ABI_ALLOCATE(self%index_spin, (natoms))
-    ABI_ALLOCATE(self%spinat, (3, nmatoms))
-    ABI_ALLOCATE(self%gyroratios, (nmatoms))
-    ABI_ALLOCATE(self%damping_factors, (nmatoms))
+    ABI_ALLOCATE(self%spinat, (3, natoms))
+    ABI_ALLOCATE(self%gyroratios, (nspins))
+    ABI_ALLOCATE(self%damping_factors, (nspins))
 
     self%natoms=natoms
     self%unitcell(:,:)=unitcell(:,:)
     self%positions(:,:)=positions(:,:)
-    self%nmatoms=nmatoms
+    self%nspins=nspins
     self%index_spin(:)=index_spin(:)
     self%spinat(:,:)=spinat(:,:)
     self%gyroratios(:)=gyroratios(:)
@@ -180,13 +186,6 @@ contains
 
 
   subroutine  spin_model_primitive_t_set_bilinear(self, n, ilist, jlist, Rlist, vallist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_bilinear'
-!End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
@@ -213,13 +212,6 @@ contains
 
   subroutine spin_model_primitive_t_set_exchange(self, n, ilist, jlist, Rlist, vallist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_exchange'
-!End of the abilint section
-
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
@@ -237,13 +229,6 @@ contains
 
 
   subroutine spin_model_primitive_t_set_dmi(self, n, ilist, jlist, Rlist, vallist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_dmi'
-!End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
@@ -267,13 +252,6 @@ contains
 
   subroutine spin_model_primitive_t_set_uni(self, n, ilist, k1list, k1dirlist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_uni'
-!End of the abilint section
-
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:)
     real(dp), intent(in) :: k1list(:), k1dirlist(:, :)
@@ -291,18 +269,13 @@ contains
     call  spin_model_primitive_t_set_bilinear(self,n,ilist,ilist,Rlist,bivallist)
   end subroutine spin_model_primitive_t_set_uni
 
-  subroutine spin_model_primitive_t_read_xml(self, xml_fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_read_xml'
-!End of the abilint section
+  subroutine spin_model_primitive_t_read_xml(self, xml_fname, use_exchange, use_dmi, use_sia, use_bi)
 
     class(spin_model_primitive_t), intent(inout) :: self
-    character(len=*), intent(in):: xml_fname
-    integer :: natoms, nmatoms, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+    character(kind=C_CHAR) :: xml_fname(*)
+    integer :: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+    logical, optional, intent(in) :: use_exchange, use_dmi, use_sia, use_bi
+    logical :: uexc, udmi, usia, ubi
     real(dp) :: ref_energy
     type(c_ptr) ::  p_unitcell,         &
          p_masses,  p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
@@ -324,8 +297,10 @@ contains
          uni_amplitude_list(:)=>null(), uni_direction_list(:)=>null(), &
          bi_vallist(:)=>null()
 
-    call xml_read_spin(trim(xml_fname)//C_NULL_CHAR, ref_energy, p_unitcell,                 &
-         natoms, p_masses, nmatoms, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
+    real(dp) :: uc(3,3)
+
+    call xml_read_spin(xml_fname, ref_energy, p_unitcell,                 &
+         natoms, p_masses, nspins, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
          exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
          dmi_nnz, p_dmi_ilist, p_dmi_jlist, p_dmi_Rlist, p_dmi_vallist, &
          uni_nnz, p_uni_ilist, p_uni_amplitude_list, p_uni_direction_list, &
@@ -334,10 +309,10 @@ contains
     call c_f_pointer(p_unitcell, unitcell, [9])
     call c_f_pointer(p_masses, masses, [natoms])
     call c_f_pointer(p_index_spin, index_spin, [natoms])
-    call c_f_pointer(p_gyroratios, gyroratios, [nmatoms])
-    call c_f_pointer(p_damping_factors, damping_factors, [nmatoms])
+    call c_f_pointer(p_gyroratios, gyroratios, [nspins])
+    call c_f_pointer(p_damping_factors, damping_factors, [nspins])
     call c_f_pointer(p_positions, positions, [natoms*3])
-    call c_f_pointer(p_spinat, spinat, [nmatoms*3])
+    call c_f_pointer(p_spinat, spinat, [natoms*3])
     call c_f_pointer(p_exc_ilist, exc_ilist, [exc_nnz])
     call c_f_pointer(p_exc_jlist, exc_jlist, [exc_nnz])
     call c_f_pointer(p_exc_Rlist, exc_Rlist, [exc_nnz*3])
@@ -355,185 +330,99 @@ contains
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
 
     print *, "Spin model: setting structure."
-    !print *, "natoms", natoms
-    !print *, "nmatoms", nmatoms
-    !print *, "positions", positions
-    !print *, "unitcell: ", unitcell
-    !print *, "spinat", spinat
-    !print *, "index_spin", index_spin
-    call spin_model_primitive_t_set_atoms(self,natoms,reshape(unitcell, [3,3]), & 
+    uc(:,:)=transpose(reshape(unitcell, [3,3]))
+    call spin_model_primitive_t_set_atoms(self,natoms,uc, & 
             & reshape(positions, [3, natoms]), &
-            & nmatoms, &
+            & nspins, &
             & index_spin, &
-            & reshape(spinat, [3, nmatoms]), &
+            & reshape(spinat, [3, natoms]), &
             & gyroratios,damping_factors)
 
-    print *, "Spin model: setting exchange terms."
     ! call self%set_exchange(exc_nnz,exc_ilist,exc_jlist,&
     !      reshape(exc_Rlist, (/3, exc_nnz /)), &
     !      reshape(exc_vallist, (/3, exc_nnz/)) )
-    call spin_model_primitive_t_set_exchange(self, exc_nnz,exc_ilist,exc_jlist,&
-         reshape(exc_Rlist, (/3, exc_nnz /)), &
-         reshape(exc_vallist, (/3, exc_nnz/)))
 
-    print *, "Spin model: setting dmi terms."
-    ! call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
-    !    Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
-    !     vallist = reshape(dmi_vallist, (/3, dmi_nnz/)) )
-    call spin_model_primitive_t_set_dmi(self, n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
-         Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
-         vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
-    print *, "Spin model: setting uniaxial SIA terms."
+    if(.not. present(use_exchange))  then
+       uexc=.True.
+    else
+       uexc=use_exchange
+    end if
 
+    if(uexc) then
+       print *, "Spin model: setting exchange terms."
+       call spin_model_primitive_t_set_exchange(self, exc_nnz,exc_ilist,exc_jlist,&
+            reshape(exc_Rlist, (/3, exc_nnz /)), &
+            reshape(exc_vallist, (/3, exc_nnz/)))
+    else
+       print *, "Spin model: exchange term from xml file not used."
+    endif
+
+    if(.not. present(use_dmi))  then
+       udmi=.True.
+    else
+       udmi=use_dmi
+    end if
+    if (udmi) then
+       print *, "Spin model: setting dmi terms."
+       ! call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
+       !    Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
+       !     vallist = reshape(dmi_vallist, (/3, dmi_nnz/)) )
+       call spin_model_primitive_t_set_dmi(self, n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
+            Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
+            vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
+       print *, "Spin model: setting uniaxial SIA terms."
+    else
+       print *, "Spin model: DMI term from xml file not used."
+    end if
     !call self%set_uni(uni_nnz, uni_ilist, uni_amplitude_list, &
     !     reshape(uni_direction_list, [3, uni_nnz]) )
-    call spin_model_primitive_t_set_uni(self, uni_nnz, uni_ilist, uni_amplitude_list, &
-         reshape(uni_direction_list, [3, uni_nnz]) )
 
-    print *, "Spin model: setting bilinear terms."
+    if(.not. present(use_sia)) then
+       usia=.True.
+    else
+       usia=use_sia
+    end if
+    if (usia) then
+       print *, "Spin model: setting SIA terms."
+       call spin_model_primitive_t_set_uni(self, uni_nnz, uni_ilist, uni_amplitude_list, &
+            reshape(uni_direction_list, [3, uni_nnz]) )
     !call self%set_bilinear(bi_nnz, bi_ilist, bi_jlist,  &
     !     Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
     !     vallist = reshape(bi_vallist, (/3,3, bi_nnz/)) )
-    call spin_model_primitive_t_set_bilinear(self, bi_nnz, bi_ilist, bi_jlist,  &
-         Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
-         vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
-
-
-    ! TODO hexu: should use free in C code, not here.
-    if(associated(unitcell))  then
-       ABI_DEALLOCATE(unitcell)
+    else
+       print *, "Spin model: SIA term in xml file not used."
     end if
-    nullify(unitcell)
 
-    if(associated(masses))  then
-       ABI_DEALLOCATE(masses)
-    end if
-    nullify(masses)
-
-    if(associated(index_spin))  then
-       ABI_DEALLOCATE(index_spin)
-    end if
-    nullify(index_spin)
-
-    if(associated(gyroratios))  then
-       ABI_DEALLOCATE(gyroratios)
-    end if
-    nullify(gyroratios)
-
-    if(associated(damping_factors))  then
-       ABI_DEALLOCATE(damping_factors)
-    end if
-    nullify(damping_factors)
-    if(associated(positions))  then
-       ABI_DEALLOCATE(positions)
-    end if
-    nullify(positions)
-
-    if(associated(spinat))  then
-       ABI_DEALLOCATE(spinat)
-    end if
-    nullify(spinat)
-
-    if(exc_nnz /=0) then
-       if(associated(exc_ilist))  then
-          ABI_DEALLOCATE(exc_ilist)
-       end if
-       nullify(exc_ilist)
-
-
-       if(associated(exc_jlist))  then
-          ABI_DEALLOCATE(exc_jlist)
-       end if
-       nullify(exc_jlist)
-
-       if(associated(exc_Rlist))  then
-          ABI_DEALLOCATE(exc_Rlist)
-       end if
-       nullify(exc_Rlist)
-
-       if(associated(exc_vallist))  then
-          ABI_DEALLOCATE(exc_vallist)
-       end if
-       nullify(exc_vallist)
+    if(.not. present(use_bi)) then
+       ubi=.True.
+    else
+       ubi=use_bi
     endif
 
-    if(dmi_nnz/=0) then
-       if(associated(dmi_ilist))  then
-          ABI_DEALLOCATE(dmi_ilist)
-       end if
-       nullify(dmi_ilist)
-
-       if(associated(dmi_jlist))  then
-          ABI_DEALLOCATE(dmi_jlist)
-       end if
-       nullify(dmi_jlist)
-
-       if(associated(dmi_Rlist))  then
-          ABI_DEALLOCATE(dmi_Rlist)
-       end if
-       nullify(dmi_Rlist)
-
-       if(associated(dmi_vallist))  then
-          ABI_DEALLOCATE(dmi_vallist)
-       end if
-       nullify(dmi_vallist)
-    end if
-
-    if(uni_nnz/=0) then
-       if(associated(uni_ilist))  then
-          ABI_DEALLOCATE(uni_ilist)
-       end if
-       nullify(uni_ilist)
-
-       if(associated(uni_amplitude_list))  then
-          ABI_DEALLOCATE(uni_amplitude_list)
-       end if
-       nullify(uni_amplitude_list)
-
-       if(associated(uni_direction_list))  then
-          ABI_DEALLOCATE(uni_direction_list)
-       end if
-       nullify(uni_direction_list)
-    end if
-
-    if(bi_nnz/=0) then
-       if(associated(bi_ilist))  then
-          ABI_DEALLOCATE(bi_ilist)
-       end if
-       nullify(bi_ilist)
-
-       if(associated(bi_jlist))  then
-          ABI_DEALLOCATE(bi_jlist)
-       end if
-       nullify(bi_jlist)
-
-       if(associated(bi_Rlist))  then
-          ABI_DEALLOCATE(bi_Rlist)
-       end if
-       nullify(bi_Rlist)
-
-       if(associated(bi_vallist))  then
-          ABI_DEALLOCATE(bi_vallist)
-       end if
-       nullify(bi_vallist)
+    if (ubi) then
+       print *, "Spin model: setting bilinear terms."
+       call spin_model_primitive_t_set_bilinear(self, bi_nnz, bi_ilist, bi_jlist,  &
+            Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
+            vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
+    else
+       print *, "Spin model: Bilinear term in xml file not used."
     endif
+
+    call xml_free_spin(xml_fname, ref_energy, p_unitcell,                 &
+         natoms, p_masses, nspins, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
+         exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
+         dmi_nnz, p_dmi_ilist, p_dmi_jlist, p_dmi_Rlist, p_dmi_vallist, &
+         uni_nnz, p_uni_ilist, p_uni_amplitude_list, p_uni_direction_list, &
+         bi_nnz, p_bi_ilist, p_bi_jlist, p_bi_Rlist, p_bi_vallist)
+
   end subroutine spin_model_primitive_t_read_xml
 
   subroutine spin_model_primitive_t_finalize(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_finalize'
-!End of the abilint section
-
     class(spin_model_primitive_t), intent(inout) :: self
     integer :: i, j
 
-    !if(allocated(self%masses))  then
-    !    ABI_DEALLOCATE(self%masses)
-    !  end if
+
     if(allocated(self%index_spin))  then
        ABI_DEALLOCATE(self%index_spin)
     end if
@@ -635,13 +524,6 @@ contains
 
   subroutine spin_ham_set_exchange(self, nnz,  ilist, jlist, Rlist, vallist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_ham_set_exchange'
-!End of the abilint section
-
     type(spin_model_primitive_t) , intent(inout) :: self
     integer, intent(in) :: nnz,  ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
@@ -659,13 +541,6 @@ contains
 
   ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
   subroutine find_R_PBC(scell, R, R_sc, R_prim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_R_PBC'
-!End of the abilint section
 
     type(supercell_type) , intent(in):: scell
     integer, intent(in):: R(3)
@@ -701,13 +576,6 @@ contains
   ! find the spercelll atom index from index of atom in primitive cell and R vector
   function find_supercell_index(scell, iatom_prim, rvec) result(iatom_supercell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_supercell_index'
-!End of the abilint section
-
     type(supercell_type) , intent(in):: scell
     integer, intent(in) :: iatom_prim, rvec(3)
     integer  :: iatom_supercell
@@ -726,13 +594,6 @@ contains
   !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic
   subroutine find_supercell_ijR(scell, i0, j0, R0, R, i1, j1, R1, R_sc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_supercell_ijR'
-!End of the abilint section
-
     type(supercell_type) , intent(in):: scell
     integer, intent(in) :: i0, j0, R0(3), R(3)
     integer, intent(out) :: i1, j1, R1(3), R_sc(3)
@@ -743,21 +604,14 @@ contains
 
   subroutine spin_model_primitive_t_make_supercell(self, sc_matrix, sc_ham)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_make_supercell'
-!End of the abilint section
-
     class(spin_model_primitive_t) , intent(in) :: self
     type(spin_terms_t) , intent(inout) :: sc_ham
-    integer :: sc_matrix(3,3), atom_index(self%nmatoms)
+    integer :: sc_matrix(3,3), iatoms(self%nspins)
 
-    integer ::  typat_primcell(self%natoms), sc_nmatoms,  i, counter, icell
+    integer ::  typat_primcell(self%natoms), sc_nspins,  i, counter, icell
     real(dp) :: znucl(self%natoms), tmp(3,3)
     type(supercell_type) :: scell
-    integer, allocatable ::sc_index_spin(:), sc_znucl(:)
+    integer, allocatable ::sc_index_spin(:), sc_znucl(:), sc_iatoms(:)
     integer, allocatable :: sc_ispin_prim(:), sc_rvec(:, :)
     real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
     integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom
@@ -773,7 +627,7 @@ contains
     do i=1, self%natoms
       if(self%index_spin(i)>0) then
           counter=counter+1
-          atom_index(counter)=i
+          iatoms(counter)=i
       endif
     enddo 
 
@@ -782,16 +636,17 @@ contains
     ! cell, positions
     !scell%rprimd
     !scell%xcart
-    !nmatoms
-    sc_nmatoms=scell%ncells*self%nmatoms
+    !nspins
+    sc_nspins=scell%ncells*self%nspins
     ABI_ALLOCATE(sc_index_spin, (self%natoms*scell%ncells))
-    ABI_ALLOCATE(sc_ispin_prim, (sc_nmatoms) )
-    ABI_ALLOCATE(sc_rvec, (3, sc_nmatoms) )
-    ABI_ALLOCATE(sc_spinat, (3, sc_nmatoms) )
-    ABI_ALLOCATE(sc_spinpos, (3, sc_nmatoms) )
-    ABI_ALLOCATE(sc_gyroratios, (sc_nmatoms))
-    ABI_ALLOCATE(sc_damping_factors, (sc_nmatoms))
-    ABI_ALLOCATE(sc_znucl, (sc_nmatoms))
+    ABI_ALLOCATE(sc_ispin_prim, (sc_nspins) )
+    ABI_ALLOCATE(sc_rvec, (3, sc_nspins) )
+    ABI_ALLOCATE(sc_spinat, (3, sc_nspins) )
+    ABI_ALLOCATE(sc_spinpos, (3, sc_nspins) )
+    ABI_ALLOCATE(sc_gyroratios, (sc_nspins))
+    ABI_ALLOCATE(sc_damping_factors, (sc_nspins))
+    !ABI_ALLOCATE(sc_znucl, (sc_nspins))
+    ABI_ALLOCATE(sc_iatoms, (sc_nspins))
     ! sc_index_spin
     counter=0
     do i = 1, scell%natom, 1
@@ -799,58 +654,64 @@ contains
        !if(scell%atom_indexing(i)>0) then
        if(self%index_spin(iatom)>0) then
           counter=counter+1
+          !map from spin to atom and atom to spin.
           sc_index_spin(i)=counter
-          sc_spinpos(:, counter)=scell%xcart(:,counter)
-          sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
+          ! variables which every atom have in primitive cell
+          sc_iatoms(counter)=iatom
+          sc_spinpos(:, counter)=scell%xcart(:,i)
+          sc_spinat(:, counter)=self%spinat(:,iatom)
+
+          sc_ispin_prim(counter) = self%index_spin(iatom)
+
+          ! variables only atoms with spin have.
           sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
-          sc_ispin_prim(counter) = self%index_spin(iatom)
+
+          ! Rvec
           sc_rvec(:,counter)=scell%uc_indexing(:,i)
        else
           sc_index_spin(i)=-1
        endif
     end do
-    !print *, sc_index_spin
 
-    do i=1, sc_nmatoms
-       sc_znucl(i)=1
-    enddo
+    !!do i=1, sc_nspins
+    !   sc_znucl(i)=1
+    !enddo
 
-    !call spin_terms_t_initialize(sc_ham,)
-    !call sc_ham%initialize( cell=scell%rprimd, pos=sc_spinpos, &
-    !     spinat=sc_spinat, zion=sc_znucl)
     call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &
-         spinat=sc_spinat, zion=sc_znucl, spin_index=sc_index_spin, ispin_prim=sc_ispin_prim, rvec=sc_rvec)
-    sc_ham%gyro_ratio(:)=sc_gyroratios(:)
-    sc_ham%gilbert_damping(:)=sc_damping_factors(:)
+         spinat=sc_spinat, iatoms=sc_iatoms, ispin_prim=sc_ispin_prim, rvec=sc_rvec)
+    
+    !sc_ham%gyro_ratio(:)=sc_gyroratios(:)
+    !sc_ham%gilbert_damping(:)=sc_damping_factors(:)
+    call spin_terms_t_set_params(sc_ham, gyro_ratio=sc_gyroratios, gilbert_damping=sc_damping_factors)
 
-    !print *, "The total number of terms in primitive cell: ", self%total_nnz
     do i =1, self%total_nnz, 1
        do icell=1, scell%ncells, 1
           ! Note i0 and j0 are in spin index, while find_supercell_ijR work in atom index
-          call find_supercell_ijR(scell=scell, i0=atom_index(self%total_ilist%data(i)), &
-               j0=atom_index(self%total_jlist%data(i)), &
+          call find_supercell_ijR(scell=scell, i0=iatoms(self%total_ilist%data(i)), &
+               j0=iatoms(self%total_jlist%data(i)), &
                R0=[self%total_Rlist(1)%data(i),  &
                self%total_Rlist(2)%data(i),  &
                self%total_Rlist(3)%data(i)], &
                R=scell%rvecs(:,icell), &
                i1=ii,j1=jj,R1=rr,R_sc=R_sc)
-          ! ii is the index in atom supercell not in spin supercell 
-          !scell%rvecs(icell)
           do irow = 1, 3
              do icol=1, 3
                 tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)
              end do
           end do
-          !print *, "i0", self%total_ilist%data(i)
-          !print *, "ii", ii, sc_index_spin(ii)
-          !print *, "jj", jj, sc_index_spin(jj)
           call spin_terms_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp)
        enddo
     enddo
 
     if (allocated(sc_ispin_prim)) then
        ABI_DEALLOCATE(sc_ispin_prim)
+    endif
+    if (allocated(sc_iatoms)) then
+        ABI_DEALLOCATE(sc_iatoms)
+    endif
+    if (allocated(sc_spinpos)) then
+        ABI_DEALLOCATE(sc_spinpos)
     endif
     if (allocated(sc_rvec)) then
        ABI_DEALLOCATE(sc_rvec)
@@ -868,18 +729,10 @@ contains
     if (allocated(sc_spinat)) then
        ABI_DEALLOCATE(sc_spinat)
     endif
-    ! TODO hexu: should it be destroyed here? or do all magnetic moment should be stored there?
     call destroy_supercell(scell)
   end subroutine spin_model_primitive_t_make_supercell
 
   subroutine spin_model_primitive_t_print_terms(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_print_terms'
-!End of the abilint section
 
     class(spin_model_primitive_t) :: self
     integer :: i, ii, jj,  R(3)

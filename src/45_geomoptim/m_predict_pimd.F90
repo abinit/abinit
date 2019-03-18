@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (GG)
+!!  Copyright (C) 2010-2019 ABINIT group (GG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -108,13 +108,6 @@ contains
 
 subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,nimage_tot,&
 &                       ntimimage_stored,pimd_param,prtvolimg,results_img)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predict_pimd'
-!End of the abilint section
 
  implicit none
 

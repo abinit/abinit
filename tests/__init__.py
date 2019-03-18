@@ -155,6 +155,7 @@ _tsuite_dirs = [
     "hpc",
     #"physics",
     "seq",
+    "tutomultibinit",
     "tutoparal",
     "tutoplugs",
     "tutorespfn",

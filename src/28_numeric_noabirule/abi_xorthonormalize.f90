@@ -9,7 +9,7 @@
 !!  and orthonormalizes it:
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS), FBottin, GZ, AR, MT)
+!!  Copyright (C) 2001-2019 ABINIT group (LNguyen,FDahm (CS), FBottin, GZ, AR, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,12 +58,6 @@
 subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize,&
 &                          x_cplx,timopt,tim_xortho) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xorthonormalize'
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------
@@ -160,12 +154,6 @@ end subroutine xorthonormalize
 
 subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ortho_reim'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -241,12 +229,6 @@ end subroutine ortho_reim
 !!
 !! SOURCE
 subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zorthonormalize'
-!End of the abilint section
 
  implicit none
 

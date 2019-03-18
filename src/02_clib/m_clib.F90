@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
+!! Copyright (C) 2009-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,47 +21,40 @@
 
 MODULE m_clib
 
-#ifdef HAVE_FC_ISO_C_BINDING
-#define USE_MODULE 
-#else
-#define USE_MODULE use m_iso_c_binding
-#endif
-
  use iso_c_binding
 
  implicit none
 
- private 
+ private
 
  integer, parameter :: dp=kind(1.0d0)
  integer, parameter :: dpc=kind((1.0_dp,1.0_dp))  ! Complex should not be used presently
 
  type,public :: Mallinfo_t
-   integer(C_LONG) :: arena 
-   integer(C_LONG) :: hblkhd 
-   integer(C_LONG) :: usmblks 
-   integer(C_LONG) :: fsmblks 
-   integer(C_LONG) :: uordblks 
+   integer(C_LONG) :: arena
+   integer(C_LONG) :: hblkhd
+   integer(C_LONG) :: usmblks
+   integer(C_LONG) :: fsmblks
+   integer(C_LONG) :: uordblks
    integer(C_LONG) :: fordblks
  end type Mallinfo_t
 
  public :: clib_rename
 
 !FIXME the interfaces below have been commented out since abilint
-! crashes during the analysis of the file (maybe due to the macro USE_MODULE!)      
-! JB : No, it is because interface must have a name in abilint
+! JB : because interface must have a name in abilint
 
 ! ===================================================
 ! ==== Fortran-bindings declared in intrinsics.c ====
 ! ===================================================
-! interface 
+! interface
 !   subroutine clib_fflush()
-!     import 
+!     import
 !     implicit none
 !   end subroutine clib_fflush
 ! end interface
 !
-! interface 
+! interface
 !   subroutine clib_getenv(ierr,fname)
 !     import
 !     implicit none
@@ -73,7 +66,7 @@ MODULE m_clib
 !! ===================================================
 !! ==== Fortran-bindings declared in fsi_posix.c ====
 !! ===================================================
-! interface 
+! interface
 !   subroutine clib_mkdir(ierr,fname)
 !     import
 !     implicit none
@@ -82,7 +75,7 @@ MODULE m_clib
 !   end subroutine clib_mkdir
 ! end interface
 !
-! interface 
+! interface
 !   subroutine clib_chdir(ierr,fname)
 !     import
 !     implicit none
@@ -100,25 +93,25 @@ interface c_rename
     end function rename
  end interface c_rename
 !
-! interface 
+! interface
 !   subroutine clib_remove(ierr,fname)
-!     import 
+!     import
 !     implicit none
 !     integer(C_INT),intent(out) :: ierr
 !     character(len=*),intent(in) :: fname
 !   end subroutine clib_remove
 ! end interface
 !
-! interface 
+! interface
 !   subroutine clib_getcwd(ierr,fname)
-!     import 
+!     import
 !     implicit none
 !     integer(C_INT),intent(out) :: ierr
 !     character(len=*),intent(in) :: fname
 !   end subroutine clib_getcwd
 ! end interface
 !
-! interface 
+! interface
 !   subroutine clib_gethname(ierr,fname)
 !     import
 !     implicit none
@@ -228,20 +221,13 @@ CONTAINS  !===========================================================
 subroutine fmallinfo(Minfo)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fmallinfo'
-!End of the abilint section
-
  type(Mallinfo_t),intent(out) :: Minfo
 
 !Local variables-------------------------------
  integer(C_LONG) :: arena,hblkhd,usmblks,fsmblks,uordblks,fordblks
 ! *********************************************************************
 
-  call clib_mallinfo(arena,hblkhd,usmblks,fsmblks,uordblks,fordblks) 
+  call clib_mallinfo(arena,hblkhd,usmblks,fsmblks,uordblks,fordblks)
 
   Minfo%arena    = arena
   Minfo%hblkhd   = hblkhd
@@ -250,7 +236,7 @@ subroutine fmallinfo(Minfo)
   Minfo%uordblks = uordblks
   Minfo%fordblks = fordblks
 
-end subroutine fmallinfo 
+end subroutine fmallinfo
 !!***
 
 !!****f* m_clib/clib_print_mallinfo
@@ -276,13 +262,6 @@ end subroutine fmallinfo
 subroutine clib_print_mallinfo(Minfo,unt)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clib_print_mallinfo'
-!End of the abilint section
-
  integer,intent(in) :: unt
  type(Mallinfo_t),intent(in) :: Minfo
 ! *********************************************************************
@@ -323,13 +302,6 @@ end subroutine clib_print_mallinfo
 
 subroutine clib_show_fc_alignment(unt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clib_show_fc_alignment'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -361,7 +333,7 @@ end subroutine clib_show_fc_alignment
 !!  Rename a file with a new name
 !!  It uses the C rename function from stdlib
 !!
-!! INPUTS 
+!! INPUTS
 !!
 !! OUTPUT
 !!
@@ -375,13 +347,6 @@ end subroutine clib_show_fc_alignment
 subroutine clib_rename(old_fname, new_fname, ierr)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clib_rename'
-!End of the abilint section
-
  character(len=*),intent(in) :: old_fname, new_fname
  integer, optional, intent(out) :: ierr
  integer :: ier
@@ -395,6 +360,6 @@ subroutine clib_rename(old_fname, new_fname, ierr)
 
 end subroutine clib_rename
 !!***
+
 END MODULE m_clib
 !!***
-

@@ -7,7 +7,7 @@
 !! Tool for frofiling and and testing the IO routines used in abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MG)
+!! Copyright (C) 2004-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,13 +50,6 @@ program ioprof
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_fstrings,       only : lower, sjoin, itoa
  use m_io_tools,       only : delete_file, file_exists, iomode_from_fname, get_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioprof'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------

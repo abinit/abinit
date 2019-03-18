@@ -7,7 +7,7 @@
 !!  Direct diagonalization of the KS Hamiltonian H_k(G,G')
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -255,13 +255,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 & Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_k,comm,ierr,&
 & Electronpositron) ! Optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ksdiago'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -310,7 +303,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  real(dp),allocatable :: ph3d(:,:,:),pwave(:,:)
  real(dp),allocatable :: ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:),vlocal_tmp(:,:,:)
- real(dp),allocatable :: ghc(:,:),gvnlc(:,:),gsc(:,:)
+ real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:)
  real(dp),allocatable :: ghg_mat(:,:,:),gtg_mat(:,:,:)
  real(dp),allocatable :: cgrvtrial(:,:)
  real(dp),pointer :: cwavef(:,:)
@@ -523,7 +516,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  end if
 
  ABI_MALLOC(ghc  ,(2,npw_k*nspinor*ndat))
- ABI_MALLOC(gvnlc,(2,npw_k*nspinor*ndat))
+ ABI_MALLOC(gvnlxc,(2,npw_k*nspinor*ndat))
  ABI_MALLOC(gsc  ,(2,npw_k*nspinor*ndat*(sij_opt+1)/2))
 
  cplex_ghg=2
@@ -556,7 +549,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 
    pwave(1,igsp2)=one      ! Get <:|H|beta,G''> and <:|T_{PAW}|beta,G''>
 
-   call getghc(cpopt,pwave,Cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,MPI_enreg_seq,ndat,&
+   call getghc(cpopt,pwave,Cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,MPI_enreg_seq,ndat,&
 &   prtvol,sij_opt,tim_getghc,type_calc)
 
 !  Fill the upper triangle.
@@ -571,7 +564,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  ABI_FREE(kinpw)
  ABI_FREE(vlocal)
  ABI_FREE(ghc)
- ABI_FREE(gvnlc)
+ ABI_FREE(gvnlxc)
  ABI_FREE(gsc)
 
  if (Psps%usepaw==1.and.cpopt==0) then
@@ -710,13 +703,6 @@ end subroutine ksdiago
 
 subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 & nband_k,istwf_k,ecutsm,effmass_free,abstol,range,ilu,vlu,use_scalapack,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_ddiago_ctl'
-!End of the abilint section
 
  implicit none
 

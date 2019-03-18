@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,13 +103,6 @@ subroutine generate_degeneracy_table_for_poles(debug)
 ! degenerate eigenstates. This will be useful to compute the poles
 !
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'generate_degeneracy_table_for_poles'
-!End of the abilint section
-
 implicit none
 
 
@@ -295,13 +288,6 @@ end subroutine generate_degeneracy_table_for_poles
 
 subroutine clean_degeneracy_table_for_poles()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clean_degeneracy_table_for_poles'
-!End of the abilint section
-
 implicit none
 ! *************************************************************************
 
@@ -345,13 +331,6 @@ function compute_Poles(external_omega,kmax_poles,debug)
 ! This function will take in explicit arguments, as it is simpler
 ! to do this than to define global arrays.
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_Poles'
-!End of the abilint section
-
 implicit none
 real(dp) :: compute_Poles
 
@@ -661,13 +640,6 @@ function compute_pole_contribution(epsilon_matrix_function,nseeds,kmax,seeds,deb
 ! This routine computes the contribution to the  poles energy
 ! coming from the states in the seeds.
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_pole_contribution'
-!End of the abilint section
-
 implicit none
 interface
   subroutine epsilon_matrix_function(v_out,v_in,l)

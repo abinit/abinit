@@ -24,7 +24,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (XG)
+!! Copyright (C) 2001-2019 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -120,13 +120,6 @@ contains
 
 subroutine abiimages_ini(images,nimages,natom,nrecord)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abiimages_ini'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -181,13 +174,6 @@ end subroutine abiimages_ini
 !! SOURCE
 
 subroutine abiimages_fin(images)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abiimages_fin'
-!End of the abilint section
 
  implicit none
 

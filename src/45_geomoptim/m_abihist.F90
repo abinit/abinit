@@ -22,7 +22,7 @@
 !! * vel2hist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2019 ABINIT group (XG, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -195,13 +195,6 @@ contains  !=============================================================
 
 subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_init_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -277,13 +270,6 @@ end subroutine abihist_init_0D
 
 subroutine abihist_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_init_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -329,13 +315,6 @@ end subroutine abihist_init_1D
 !! SOURCE
 
 subroutine abihist_free_0D(hist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_free_0D'
-!End of the abilint section
 
  implicit none
 
@@ -418,13 +397,6 @@ end subroutine abihist_free_0D
 
 subroutine abihist_free_1D(hist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_free_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -470,13 +442,6 @@ end subroutine abihist_free_1D
 !! SOURCE
 
 subroutine abihist_bcast_0D(hist,master,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_bcast_0D'
-!End of the abilint section
 
  implicit none
 
@@ -680,13 +645,6 @@ end subroutine abihist_bcast_0D
 
 subroutine abihist_bcast_1D(hist,master,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_bcast_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -742,13 +700,6 @@ end subroutine abihist_bcast_1D
 !! SOURCE
 
 subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'var2hist'
-!End of the abilint section
 
  implicit none
 
@@ -814,13 +765,6 @@ end subroutine var2hist
 !! SOURCE
 
 function abihist_findIndex(hist,step) result(index)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_findIndex'
-!End of the abilint section
 
  implicit none
 
@@ -895,13 +839,6 @@ end function abihist_findIndex
 
 subroutine hist2var(acell,hist,natom,rprimd,xred,zDEBUG)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hist2var'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -973,13 +910,6 @@ end subroutine hist2var
 
 subroutine vel2hist(amass,hist,vel,vel_cell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vel2hist'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1050,13 +980,6 @@ end subroutine vel2hist
 
 subroutine abihist_copy(hist_in,hist_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_copy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1126,13 +1049,6 @@ end subroutine abihist_copy
 !! SOURCE
 
 subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,store_all)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_compare_and_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1266,13 +1182,6 @@ end subroutine abihist_compare_and_copy
 
 subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 &                        typat,amu,znucl,dtion,mdtemp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_md_hist'
-!End of the abilint section
 
  implicit none
 
@@ -1411,13 +1320,6 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
 &                            typat,amu,znucl,dtion,&
 &                            nimage,imgmov,mdtemp,comm_img,imgtab) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_md_hist_img'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1555,13 +1457,6 @@ end subroutine write_md_hist_img
 
 subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_md_hist'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -1662,13 +1557,6 @@ end subroutine read_md_hist
 !! SOURCE
 
 subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_md_hist_img'
-!End of the abilint section
 
 implicit none
 
@@ -1784,13 +1672,6 @@ end subroutine read_md_hist_img
 !! SOURCE
 
 subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'def_file_hist'
-!End of the abilint section
 
 implicit none
 
@@ -1998,13 +1879,6 @@ end subroutine def_file_hist
 subroutine get_dims_hist(ncid,natom,ntypat,nimage,time,&
 &          natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_dims_hist'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -2088,13 +1962,6 @@ end subroutine get_dims_hist
 
 subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
 &          rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_varid_hist'
-!End of the abilint section
 
 implicit none
 
@@ -2183,13 +2050,6 @@ end subroutine get_varid_hist
 
 subroutine read_csts_hist(ncid,dtion,typat,znucl,amu)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_csts_hist'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -2263,13 +2123,6 @@ end subroutine read_csts_hist
 !! SOURCE
 
 subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_csts_hist'
-!End of the abilint section
 
 implicit none
 
@@ -2359,13 +2212,6 @@ end subroutine write_csts_hist
 subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
 &          xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,rprimd_id,&
 &          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_vars_hist'
-!End of the abilint section
 
 implicit none
 
@@ -2532,13 +2378,6 @@ end subroutine write_vars_hist
 subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,start_time,&
 &          xred_id,fcart_id,vel_id,vel_cell_id,rprimd_id,acell_id,&
 &          strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_vars_hist'
-!End of the abilint section
 
 implicit none
 

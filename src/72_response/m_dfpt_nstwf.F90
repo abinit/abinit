@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ contains
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2019 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -218,7 +218,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, pawrhoij_nullify, &
-&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_get_nspden
+&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
@@ -238,13 +238,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,           only : getcprj
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_nstpaw'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -314,7 +307,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,my_nsppol,nband_k,nband_kocc,need_ylmgr1
  integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
- integer :: option,opt_gvnl1,sij_opt,spaceworld,usevnl,use_rhoijim,wfcorr,ik_ddk
+ integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -339,7 +332,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: d2nl_k(:,:),d2ovl_drho(:,:,:,:,:),d2ovl_k(:,:)
  real(dp),allocatable :: eig_k(:),eig_kq(:),eig1_k(:)
  real(dp),allocatable,target :: e1kbfr_spin(:,:,:,:,:,:),ffnlk(:,:,:,:),ffnl1(:,:,:,:)
- real(dp),allocatable :: gh1(:,:),gs1(:,:),gvnl1(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
+ real(dp),allocatable :: gh1(:,:),gs1(:,:),gvnlx1(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
  real(dp),allocatable :: occ_k(:),occ_kq(:),ph3d(:,:,:),ph3d1(:,:,:),rhotmp(:,:),rocceig(:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:)
  real(dp),allocatable,target :: work(:,:,:),e1kb_work(:,:,:,:)
@@ -649,9 +642,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &         mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
          if (ipert/=ipert1.or.idir/=idir1.or.force_recompute) then
            option=0
-           call pawdijfr(cplex,gprimd,idir1,ipert1,my_natom,dtset%natom,nfftf,ngfftf,&
+           call pawdijfr(gprimd,idir1,ipert1,my_natom,dtset%natom,nfftf,ngfftf,&
 &           nspden,nsppol,dtset%ntypat,option,paw_ij10(:,idir1),pawang,pawfgrtab,pawrad,&
-&           pawtab,dtset%qptn,rprimd,ucvol,vpsp1_idir1,vtrial,vxc,xred,&
+&           pawtab,cplex,dtset%qptn,rprimd,ucvol,vpsp1_idir1,vtrial,vxc,xred,&
 &           mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
          else
            do iatom=1,my_natom
@@ -764,16 +757,15 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      do kdir1=1,mdir1
        idir1=jdir1(kdir1)
        drho1wfr(:,:,idir1)=zero
-       cplex_rhoij=max(cplex,dtset%pawcpxocc)
-       nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
-       use_rhoijim = 1
-!      use_rhoijim = 0 ; if (sum(dtset%qptn(1:3)**2)>1.d-14) use_rhoijim = 1
+       call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
        call pawrhoij_alloc(pawdrhoij1(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,use_rhoijim=use_rhoijim,&
+&       dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=my_atmtab)
        if (paral_atom) then
          call pawrhoij_alloc(pawdrhoij1_unsym(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&         dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1,use_rhoijim=use_rhoijim)
+&         dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
+&         use_rhoijp=0,use_rhoij_=1)
        else
          call pawrhoij_init_unpacked(pawdrhoij1_unsym(:,idir1))
        end if
@@ -1177,40 +1169,40 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          Read DDK wave function (if ipert1=electric field)
            if (ipert1==dtset%natom+2) then
              usevnl=1
-             ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor*usevnl))
+             ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor*usevnl))
              if (need_ddk_file) then
                if (ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
                  ik_ddk = indkpt1(ikpt)
-                 call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnl1)
+                 call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1)
                else
-                 gvnl1=zero
+                 gvnlx1=zero
                end if
                if (ipert1==dtset%natom+2) then
                  do ii=1,npw1_k*nspinor ! Multiply ddk by +i (to be consistent with getgh1c)
-                   arg=gvnl1(1,ii)
-                   gvnl1(1,ii)=-gvnl1(2,ii)
-                   gvnl1(2,ii)=arg
+                   arg=gvnlx1(1,ii)
+                   gvnlx1(1,ii)=-gvnlx1(2,ii)
+                   gvnlx1(2,ii)=arg
                  end do
                end if
              else
-               gvnl1=zero
+               gvnlx1=zero
              end if
            else
              usevnl=0
-             ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor*usevnl))
+             ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor*usevnl))
            end if
 
 !          Get |H^(j2)-Eps_k_i.S^(j2)|u0_k_i> (VHxc-dependent part not taken into account) and S^(j2)|u0>
            lambda=eig_k(iband);berryopt=0;optlocal=0
            optnl=0;if (ipert1/=dtset%natom+1.or.idir==idir1) optnl=1
-           opt_gvnl1=0;if (ipert1==dtset%natom+2) opt_gvnl1=2
+           opt_gvnlx1=0;if (ipert1==dtset%natom+2) opt_gvnlx1=2
            sij_opt=-1;if (has_dcwf) sij_opt=1
            if (usepaw==0) sij_opt=0
-           call getgh1c(berryopt,cwave0,cwaveprj0_idir1,gh1,dum1,gs1,gs_hamkq,gvnl1,idir1,ipert1,&
-&           lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+           call getgh1c(berryopt,cwave0,cwaveprj0_idir1,gh1,dum1,gs1,gs_hamkq,gvnlx1,idir1,ipert1,&
+&           lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            if (sij_opt==1.and.optnl==1) gh1=gh1-lambda*gs1
-           ABI_DEALLOCATE(gvnl1)
+           ABI_DEALLOCATE(gvnlx1)
 
 !          If needed, compute here <delta_u^(j1)_k_i|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>
 !          with delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
@@ -1221,22 +1213,22 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          At first call (when j1=j2), ch1c=<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i> is stored
 !          For the next calls, it is re-used.
            if (has_dcwf.or.(ipert==ipert1.and.idir==idir1.and.usepaw==1)) then
-!            note: gvnl1 used as temporary space
-             ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor))
+!            note: gvnlx1 used as temporary space
+             ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
              if (ipert==ipert1.and.idir==idir1) then
-               option=0;gvnl1=gh1
+               option=0;gvnlx1=gh1
              else
-               option=1;gvnl1=zero
+               option=1;gvnlx1=zero
              end if
 !            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
-             call projbd(cgq,gvnl1,-1,icgq,0,istwf_k,mcgq,0,nband_k,npw1_k,nspinor,&
+             call projbd(cgq,gvnlx1,-1,icgq,0,istwf_k,mcgq,0,nband_k,npw1_k,nspinor,&
 &             dum1,ch1c(:,1:nband_k,iband,ikpt_me),option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
              if (has_dcwf) then
-               if (ipert==ipert1.and.idir==idir1) gvnl1=gvnl1-gh1
+               if (ipert==ipert1.and.idir==idir1) gvnlx1=gvnlx1-gh1
                dotr=zero;doti=zero
                if (abs(occ_k(iband))>tol8) then
 !                Compute: -<u0_k_i|S^(j1)| Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
-                 call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,gs1,gvnl1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                 call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,gs1,gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 !                Add contribution to DDB
 !                Note: factor 2 (from d2E/dj1dj2=2E^(j1j2)) eliminated by factor 1/2
 !                (-1) factor already present
@@ -1244,7 +1236,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                  d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband)*elfd_fact*doti
                end if
              end if
-             ABI_DEALLOCATE(gvnl1)
+             ABI_DEALLOCATE(gvnlx1)
            end if
 
 !          If needed, compute here <delta_u^(j1)_k_i|H-Eps_k_i.S|u^(j2)_k_i>
@@ -1259,14 +1251,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          At first call (when j1=j2), cs1c=<u0_k_i|S^(j1)|u0_k+q_j> is stored
 !          For the next calls, it is re-used.
            if (has_dcwf.and.is_metal_or_qne0) then
-             ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor))
+             ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
              dotr=zero;doti=zero
              invocc=zero ; if (abs(occ_k(iband))>tol8) invocc=two/occ_k(iband)
              do jband=1,nband_k
 !              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
                if ((ipert==ipert1.and.idir==idir1).or.(abs(occ_k(iband))>tol8)) then
-                 gvnl1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband-1)+icgq:npw1_k*nspinor*jband+icgq)
-                 call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,gs1,gvnl1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                 gvnlx1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband-1)+icgq:npw1_k*nspinor*jband+icgq)
+                 call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,gs1,gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
                  if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
                    cs1c(1,jband,iband,ikpt_me)=dot1r
                    cs1c(2,jband,iband,ikpt_me)=dot1i
@@ -1297,7 +1289,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !            Note: factor 2 (from d2E/dj1dj2=2E^(j1j2))
              d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*dotr
              d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*doti
-             ABI_DEALLOCATE(gvnl1)
+             ABI_DEALLOCATE(gvnlx1)
            end if
 
 !          Build the matrix element <u0_k_i|H^(j1)-Eps_k_i.S^(j1)|u^(j2)_k,q_i>
@@ -1745,7 +1737,7 @@ end subroutine dfpt_nstpaw
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
+!! Copyright (C) 1999-2019 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1829,13 +1821,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  use m_kg,      only : mkkpg
  use m_mkffnl,  only : mkffnl
  use m_getgh1c, only : getgh1c
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_nstwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1865,17 +1850,17 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !scalars
  integer :: berryopt,dimffnl,dimffnl1,dimph3d
  integer :: iband,ider,idir1,ipert1,ipw,jband,nband_kocc,nkpg,nkpg1 !ierr,ii
- integer :: npw_disk,nsp,optlocal,optnl,opt_gvnl1,sij_opt,tim_getgh1c,usevnl
+ integer :: npw_disk,nsp,optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
  logical :: ddk
  real(dp) :: aa,dot1i,dot1r,dot2i,dot2r,dot_ndiagi,dot_ndiagr,doti,dotr,lambda
  character(len=500) :: msg
  type(rf_hamiltonian_type) :: rf_hamkq
 !arrays
  integer :: ik_ddks(3)
- real(dp) :: dum_grad_berry(1,1),dum_gvnl1(1,1),dum_gs1(1,1),dum_ylmgr(1,3,1),tsec(2)
+ real(dp) :: dum_grad_berry(1,1),dum_gvnlx1(1,1),dum_gs1(1,1),dum_ylmgr(1,3,1),tsec(2)
  real(dp),allocatable :: cg_k(:,:),cwave0(:,:),cwavef(:,:),cwavef_da(:,:)
  real(dp),allocatable :: cwavef_db(:,:),dkinpw(:),eig2_k(:),ffnl1(:,:,:,:),ffnlk(:,:,:,:)
- real(dp),allocatable :: gvnl1(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),ph3d(:,:,:)
+ real(dp),allocatable :: gvnlx1(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),ph3d(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
 ! *********************************************************************
@@ -1905,7 +1890,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    ABI_ALLOCATE(dkinpw,(0))
    ABI_ALLOCATE(kinpw1,(0))
  end if
- ABI_ALLOCATE(gvnl1,(2,npw1_k*dtset%nspinor))
+ ABI_ALLOCATE(gvnlx1,(2,npw1_k*dtset%nspinor))
  ABI_ALLOCATE(eig2_k,(2*nsppol*dtset%mband**2))
  ABI_ALLOCATE(cwave0,(2,npw_k*dtset%nspinor))
  ABI_ALLOCATE(cwavef,(2,npw1_k*dtset%nspinor))
@@ -2045,36 +2030,36 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !            ==== Atomic displ. perturbation
              if( ipert1<=dtset%natom )then
                lambda=eig_k((isppol-1)*nband_k+iband)
-               berryopt=1;optlocal=0;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
-               call getgh1c(berryopt,cwave0,dum_cwaveprj,gvnl1,dum_grad_berry,&
-&               dum_gs1,gs_hamkq,dum_gvnl1,idir1,ipert1,lambda,mpi_enreg,optlocal,&
-&               optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+               berryopt=1;optlocal=0;optnl=1;usevnl=0;opt_gvnlx1=0;sij_opt=0
+               call getgh1c(berryopt,cwave0,dum_cwaveprj,gvnlx1,dum_grad_berry,&
+&               dum_gs1,gs_hamkq,dum_gvnlx1,idir1,ipert1,lambda,mpi_enreg,optlocal,&
+&               optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
 !              ==== Electric field perturbation
              else if( ipert1==dtset%natom+2 )then
                ! TODO: Several tests fail here ifdef HAVE_MPI_IO_DEFAULT
                ! The problem is somehow related to the use of MPI-IO file views!.
-               call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnl1, &
+               call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
                eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
                  !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
-               !write(777,*)"eig2_k, gvnl1 for band: ",iband,", ikpt: ",ikpt
+               !write(777,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
                !do ii=1,2*nband_k
                !  write(777,*)eig2_k(ii+(iband-1))
                !end do
-               !write(777,*)gvnl1
+               !write(777,*)gvnlx1
 
 !              In case of band-by-band,
 !              construct the first-order wavefunctions in the diagonal gauge
                if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)).and.(dtset%prtbbb==1)) then
-                 call gaugetransfo(cg_k,gvnl1,cwavef_da,eig_k,eig2_k,iband,nband_k, &
+                 call gaugetransfo(cg_k,gvnlx1,cwavef_da,eig_k,eig2_k,iband,nband_k, &
 &                 dtset%mband,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k)
-                 gvnl1(:,:) = cwavef_da(:,:)
+                 gvnlx1(:,:) = cwavef_da(:,:)
                end if
 !              Multiplication by -i
                do ipw=1,npw1_k*dtset%nspinor
-                 aa=gvnl1(1,ipw)
-                 gvnl1(1,ipw)=gvnl1(2,ipw)
-                 gvnl1(2,ipw)=-aa
+                 aa=gvnlx1(1,ipw)
+                 gvnlx1(1,ipw)=gvnlx1(2,ipw)
+                 gvnlx1(2,ipw)=-aa
                end do
              end if
 
@@ -2086,11 +2071,11 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !            2) Case ipert1 = natom + 2 and ipert < natom:
 !            the computation of the Born effective charge tensor uses
 !            the operator $-i \frac{d}{dk}.
-             if (ipert==dtset%natom+2) gvnl1(:,:) = -gvnl1(:,:)
+             if (ipert==dtset%natom+2) gvnlx1(:,:) = -gvnlx1(:,:)
 
-!            <G|Vnl1|Cnk> is contained in gvnl1
+!            <G|Vnl1|Cnk> is contained in gvnlx1
 !            construct the matrix element (<uj2|vj1|u0>)complex conjug and add it to the 2nd-order matrix
-             call dotprod_g(dotr,doti,istwf_k,npw1_k*dtset%nspinor,2,cwavef,gvnl1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+             call dotprod_g(dotr,doti,istwf_k,npw1_k*dtset%nspinor,2,cwavef,gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              d2nl_k(1,idir1,ipert1)=d2nl_k(1,idir1,ipert1)+wtk_k*occ_k(iband)*two*dotr
              d2nl_k(2,idir1,ipert1)=d2nl_k(2,idir1,ipert1)-wtk_k*occ_k(iband)*two*doti
 
@@ -2122,37 +2107,37 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
      do idir1 = 1,3
        eig2_k(:) = zero
-       gvnl1(:,:) = zero
+       gvnlx1(:,:) = zero
        if (idir == idir1) then
-         gvnl1(:,:) = cwavef(:,:)
+         gvnlx1(:,:) = cwavef(:,:)
          eig2_k(:) = eig1_k(:)
        else
          if (ddkfil(idir1) /= 0) then
-           call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnl1, &
+           call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
            eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
              !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
-           !write(778,*)"eig2_k, gvnl1 for band: ",iband,", ikpt: ",ikpt
+           !write(778,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
            !do ii=1,2*nband_k
            !  write(778,*)eig2_k(ii+(iband-1))
            !end do
-           !write(778,*)gvnl1
+           !write(778,*)gvnlx1
 
            if(dtset%prtbbb==1)then
-             call gaugetransfo(cg_k,gvnl1,cwavef_da,eig_k,eig2_k,iband,nband_k, &
+             call gaugetransfo(cg_k,gvnlx1,cwavef_da,eig_k,eig2_k,iband,nband_k, &
 &             dtset%mband,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k)
-             gvnl1(:,:) = cwavef_da(:,:)
+             gvnlx1(:,:) = cwavef_da(:,:)
            end if
 
          end if    !ddkfil(idir1)
        end if    !idir == idir1
 
-!      <G|du/dqa> is contained in gvnl1 and <G|du/dqb> in cwavef
+!      <G|du/dqa> is contained in gvnlx1 and <G|du/dqb> in cwavef
 !      construct the matrix elements <du/dqa|du/dqb> -> dot
 !      <u|du/dqa> -> dot1
 !      <du/dqb|u> -> dot2
 !      and add them to the 2nd-order matrix
 
-       call dotprod_g(dotr,doti,istwf_k,npw1_k*dtset%nspinor,2,gvnl1,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+       call dotprod_g(dotr,doti,istwf_k,npw1_k*dtset%nspinor,2,gvnlx1,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
        d2nl_k(1,idir1,ipert1)=d2nl_k(1,idir1,ipert1)+wtk_k*occ_k(iband)*dotr/(nband_kocc*two)
        d2nl_k(2,idir1,ipert1)=d2nl_k(2,idir1,ipert1)+wtk_k*occ_k(iband)*doti/(nband_kocc*two)
 
@@ -2169,7 +2154,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              dot2r=zero ; dot2i=zero
              cwave0(:,:)=cg_k(:,1+(jband-1)*npw_k*dtset%nspinor:jband*npw_k*dtset%nspinor)
 
-             call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*dtset%nspinor,2,cwave0,gvnl1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+             call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*dtset%nspinor,2,cwave0,gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              call dotprod_g(dot2r,dot2i,istwf_k,npw1_k*dtset%nspinor,2,cwavef,cwave0,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
              dot_ndiagr = dot_ndiagr + dot1r*dot2r - dot1i*dot2i
@@ -2197,7 +2182,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  ABI_DEALLOCATE(cwave0)
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(eig2_k)
- ABI_DEALLOCATE(gvnl1)
+ ABI_DEALLOCATE(gvnlx1)
  ABI_DEALLOCATE(ffnlk)
  ABI_DEALLOCATE(ffnl1)
  ABI_DEALLOCATE(dkinpw)
@@ -2256,13 +2241,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
 &                      mband,npw_k,npw1_k,nspinor,nsppol,occ_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaugetransfo'
-!End of the abilint section
 
  implicit none
 

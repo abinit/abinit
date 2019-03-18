@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,13 +84,6 @@ subroutine setup_timing_log()
 ! This routine opens the timing log file.
 !--------------------------------------------------------------------------------
 use m_gwls_hamiltonian, only: mpi_enreg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_timing_log'
-!End of the abilint section
-
 implicit none
 
 
@@ -156,13 +149,6 @@ subroutine close_timing_log()
 !--------------------------------------------------------------------------------
 ! This routine closes the timing log file.
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'close_timing_log'
-!End of the abilint section
-
 implicit none
 ! *************************************************************************
 
@@ -193,13 +179,6 @@ subroutine write_text_block_in_Timing_log(string)
 !--------------------------------------------------------------------------------
 ! This routine opens the timing log file.
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_text_block_in_Timing_log'
-!End of the abilint section
-
 implicit none
 
 character(256):: string
@@ -237,13 +216,6 @@ subroutine write_timing_log(string,time)
 !--------------------------------------------------------------------------------
 ! This routine opens the timing log file.
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_timing_log'
-!End of the abilint section
-
 implicit none
 
 
@@ -287,13 +259,6 @@ subroutine write_block_lanczos_timing_log(list_time,ntime)
 ! This routine writes the timing for the block lanczos routine.
 !--------------------------------------------------------------------------------
 use m_gwls_hamiltonian, only: mpi_enreg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_block_lanczos_timing_log'
-!End of the abilint section
-
 implicit none
 
 

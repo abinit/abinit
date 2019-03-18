@@ -12,7 +12,7 @@
 !!  Please use CtqmcoffdiagInterface
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,7 +94,7 @@ MODULE m_Ctqmcoffdiag
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -300,7 +300,7 @@ CONTAINS
 !!  Allocate all the non optional variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -328,13 +328,6 @@ CONTAINS
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_init(op, ostream, istream, bFile, MY_COMM, iBuffer)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_init'
-!End of the abilint section
 
 
 #ifdef HAVE_MPI1
@@ -470,7 +463,7 @@ END SUBROUTINE Ctqmcoffdiag_init
 !!  set all parameters and operators
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -496,13 +489,6 @@ END SUBROUTINE Ctqmcoffdiag_init
 SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setParameters'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                         :: op
   DOUBLE PRECISION, DIMENSION(1:10), INTENT(IN   ) :: buffer
 
@@ -547,7 +533,7 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 !!  set the number of sweeps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -573,13 +559,6 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 SUBROUTINE Ctqmcoffdiag_setSweeps(op,sweeps)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setSweeps'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)         , INTENT(INOUT) :: op
   DOUBLE PRECISION  , INTENT(IN   ) :: sweeps
 
@@ -615,7 +594,7 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 !!  initialize random number generator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -641,13 +620,6 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 SUBROUTINE Ctqmcoffdiag_setSeed(op,iseed)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setSeed'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)           :: op
   INTEGER  , INTENT(IN   )           :: iseed
 !Local variables ------------------------------
@@ -677,7 +649,7 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 !!  Allocate all non option variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -702,13 +674,6 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 SUBROUTINE Ctqmcoffdiag_allocateAll(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_allocateAll'
-!End of the abilint section
-
   implicit none
 
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
@@ -749,7 +714,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 !!  allocate all option variables 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -774,13 +739,6 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_allocateOpt'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER :: i
@@ -914,7 +872,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!  Set Gow from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -941,13 +899,6 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setG0wTab'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                      :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN ) :: Gomega
   INTEGER                         , INTENT(IN ) :: opt_fk
@@ -1008,7 +959,7 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !!  set the interaction matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1034,13 +985,6 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 SUBROUTINE Ctqmcoffdiag_setU(op,matU)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setU'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) ::op
 !Local variables ------------------------------
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: matU
@@ -1061,7 +1005,7 @@ END SUBROUTINE Ctqmcoffdiag_setU
 !!  clear a ctqmc run
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1086,13 +1030,6 @@ END SUBROUTINE Ctqmcoffdiag_setU
 SUBROUTINE Ctqmcoffdiag_clear(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_clear'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER :: i
@@ -1154,7 +1091,7 @@ END SUBROUTINE Ctqmcoffdiag_clear
 !!  reset a ctqmc simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1179,13 +1116,6 @@ END SUBROUTINE Ctqmcoffdiag_clear
 SUBROUTINE Ctqmcoffdiag_reset(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_reset'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: iflavor
@@ -1226,7 +1156,7 @@ END SUBROUTINE Ctqmcoffdiag_reset
 !!  impose energy levels
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1253,13 +1183,6 @@ END SUBROUTINE Ctqmcoffdiag_reset
 SUBROUTINE Ctqmcoffdiag_setMu(op, levels)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setMu'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN   ) :: levels
 
@@ -1280,7 +1203,7 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 !!  use coefficient A such that F=-A/(iwn) given by DMFT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1307,13 +1230,6 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 SUBROUTINE Ctqmcoffdiag_sethybri_limit(op, hybri_limit)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_sethybri_limit'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   COMPLEX(KIND=8) , DIMENSION(:,:),  INTENT(IN ) :: hybri_limit
 
@@ -1332,7 +1248,7 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !!  Compute the hybridization function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1361,13 +1277,6 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
 
  use m_hide_lapack,  only : xginv
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_computeF'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                       , INTENT(INOUT) :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN   ) :: Gomega
   !INTEGER                         , INTENT(IN   ) :: Wmax
@@ -1840,7 +1749,7 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !!  set all options and run a simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1870,13 +1779,6 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_run(op,opt_order,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_run'
-!End of the abilint section
 
 
 #ifdef HAVE_MPI1
@@ -2023,7 +1925,7 @@ END SUBROUTINE Ctqmcoffdiag_run
 !!  Definition the main loop of the CT-QMC
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2050,13 +1952,6 @@ END SUBROUTINE Ctqmcoffdiag_run
 SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_loop'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)         :: op
   INTEGER    , INTENT(IN   )         :: itotal
   INTEGER    , INTENT(IN   )         :: ilatex
@@ -2282,7 +2177,7 @@ END SUBROUTINE Ctqmcoffdiag_loop
 !!  Try to add or remove a segment and an anti-segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2308,13 +2203,6 @@ END SUBROUTINE Ctqmcoffdiag_loop
 SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_tryAddRemove'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT) :: op
 !  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
 !  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
@@ -2733,7 +2621,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  try a global move (swap to flavors)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2760,13 +2648,6 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_trySwap'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)           , INTENT(INOUT) :: op
 !  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
 !  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
@@ -2913,7 +2794,7 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 !!  with the correct weight.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2940,13 +2821,6 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_measN'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
   !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
@@ -2988,7 +2862,7 @@ END SUBROUTINE Ctqmcoffdiag_measN
 !!  measure all correlations in times for a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3014,13 +2888,6 @@ END SUBROUTINE Ctqmcoffdiag_measN
 SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_measCorrelation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)       :: op
   !TYPE(ImpurityOperator), INTENT(IN   )       :: impurity
   INTEGER               , INTENT(IN   )       :: iflavor
@@ -3087,7 +2954,7 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 !!  measure perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3113,13 +2980,6 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 SUBROUTINE Ctqmcoffdiag_measPerturbation(op, iflavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_measPerturbation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
   !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
@@ -3152,7 +3012,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!  reduce everything to get the result of the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3175,13 +3035,6 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_getResult(op)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getResult'
-!End of the abilint section
 
 
 #ifdef HAVE_MPI1
@@ -3671,7 +3524,7 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 !!  optionnaly symmetrize the green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3698,13 +3551,6 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_symmetrizeGreen'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: syms
 !Local variables ------------------------------
@@ -3749,7 +3595,7 @@ END SUBROUTINE Ctqmcoffdiag_symmetrizeGreen
 !!  Get the full green functions in time and/or frequency
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3777,13 +3623,6 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 
 !Arguments ------------------------------------
  USE m_GreenHyboffdiag
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getGreen'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(INOUT)    :: op
   DOUBLE PRECISION, DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gtau
   COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gw
@@ -4034,7 +3873,7 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 !!  get double occupation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4060,13 +3899,6 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 SUBROUTINE Ctqmcoffdiag_getD(op, D)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getD'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)       , INTENT(IN ) :: op
   DOUBLE PRECISION, INTENT(OUT) :: D
 !Local variables ------------------------------
@@ -4101,7 +3933,7 @@ END SUBROUTINE Ctqmcoffdiag_getD
 !!  get interaction energy and noise on it
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4128,13 +3960,6 @@ END SUBROUTINE Ctqmcoffdiag_getD
 SUBROUTINE Ctqmcoffdiag_getE(op,E,noise)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getE'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)       , INTENT(IN ) :: op
   DOUBLE PRECISION, INTENT(OUT) :: E
   DOUBLE PRECISION, INTENT(OUT) :: Noise
@@ -4152,7 +3977,7 @@ END SUBROUTINE Ctqmcoffdiag_getE
 !!  print different functions computed during the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4177,13 +4002,6 @@ END SUBROUTINE Ctqmcoffdiag_getE
 SUBROUTINE Ctqmcoffdiag_printAll(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printAll'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 
   IF ( .NOT. op%done ) &
@@ -4217,7 +4035,7 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 !!  print ctqmc statistics
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4242,13 +4060,6 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 SUBROUTINE Ctqmcoffdiag_printQMC(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printQMC'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: ostream
@@ -4385,7 +4196,7 @@ END SUBROUTINE Ctqmcoffdiag_printQMC
 !!  print green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4412,13 +4223,6 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
 
 !Arguments ------------------------------------
   use m_io_tools, only : flush_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printGreen'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)        , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
@@ -4517,7 +4321,7 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 !!  print individual double occupancy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4543,13 +4347,6 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 SUBROUTINE Ctqmcoffdiag_printD(op,oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printD'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
@@ -4586,7 +4383,7 @@ END SUBROUTINE Ctqmcoffdiag_printD
 !!  print energy and noise 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4612,13 +4409,6 @@ END SUBROUTINE Ctqmcoffdiag_printD
 SUBROUTINE Ctqmcoffdiag_printE(op,oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printE'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
@@ -4654,7 +4444,7 @@ END SUBROUTINE Ctqmcoffdiag_printE
 !!  print perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4681,13 +4471,6 @@ END SUBROUTINE Ctqmcoffdiag_printE
 SUBROUTINE Ctqmcoffdiag_printPerturbation(op, oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printPerturbation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)           :: op
   INTEGER  , OPTIONAL,  INTENT(IN)          :: oFileIn
 !Local variables-------------------------------
@@ -4732,7 +4515,7 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 !!  print correlation fonctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4758,13 +4541,6 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 SUBROUTINE Ctqmcoffdiag_printCorrelation(op, oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printCorrelation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)             :: op
   INTEGER  , OPTIONAL, INTENT(IN)             :: oFileIn
 !Local variables ------------------------------
@@ -4819,7 +4595,7 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 !!  print fourier transform of time evolution of number of electrons
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4845,13 +4621,6 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 SUBROUTINE Ctqmcoffdiag_printSpectra(op, oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printSpectra'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)             :: op
   INTEGER  , OPTIONAL, INTENT(IN)             :: oFileIn
 !Local variables ------------------------------
@@ -4901,7 +4670,7 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 !!  destroy and deallocate all variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4926,13 +4695,6 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 SUBROUTINE Ctqmcoffdiag_destroy(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_destroy'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: iflavor

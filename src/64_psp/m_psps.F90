@@ -8,7 +8,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2019 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -97,15 +97,6 @@ contains
 
 subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_xml_xmlpaw_upf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
@@ -182,15 +173,6 @@ end subroutine test_xml_xmlpaw_upf
 !! SOURCE
 
 subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_init_global'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -278,15 +260,6 @@ end subroutine psps_init_global
 !! SOURCE
 
 subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_init_from_dtset'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -553,15 +526,6 @@ end subroutine psps_init_from_dtset
 
 subroutine psps_free(psps)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pseudopotential_type),intent(inout) :: psps
@@ -573,72 +537,28 @@ subroutine psps_free(psps)
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
- if (allocated(psps%filpsp))  then
-   ABI_DEALLOCATE(psps%filpsp)
- end if
- if (allocated(psps%pspcod))  then
-   ABI_DEALLOCATE(psps%pspcod)
- end if
- if (allocated(psps%pspdat))  then
-   ABI_DEALLOCATE(psps%pspdat)
- end if
- if (allocated(psps%pspso))  then
-   ABI_DEALLOCATE(psps%pspso)
- end if
- if (allocated(psps%pspxc))  then
-   ABI_DEALLOCATE(psps%pspxc)
- end if
- if (allocated(psps%title))  then
-   ABI_DEALLOCATE(psps%title)
- end if
- if (allocated(psps%zionpsp))  then
-   ABI_DEALLOCATE(psps%zionpsp)
- end if
- if (allocated(psps%znuclpsp))  then
-   ABI_DEALLOCATE(psps%znuclpsp)
- end if
- if (allocated(psps%algalch))  then
-   ABI_DEALLOCATE(psps%algalch)
- end if
- if (allocated(psps%mixalch))  then
-   ABI_DEALLOCATE(psps%mixalch)
- end if
- if (allocated(psps%ekb))  then
-   ABI_DEALLOCATE(psps%ekb)
- end if
- if (allocated(psps%indlmn))  then
-   ABI_DEALLOCATE(psps%indlmn)
- end if
- if (allocated(psps%ffspl))  then
-   ABI_DEALLOCATE(psps%ffspl)
- end if
- if (allocated(psps%qgrid_ff))  then
-   ABI_DEALLOCATE(psps%qgrid_ff)
- end if
- if (allocated(psps%qgrid_vl))  then
-   ABI_DEALLOCATE(psps%qgrid_vl)
- end if
- if (allocated(psps%vlspl))  then
-   ABI_DEALLOCATE(psps%vlspl)
- end if
- if (allocated(psps%dvlspl))  then
-   ABI_DEALLOCATE(psps%dvlspl)
- end if
- if (allocated(psps%xccc1d))  then
-   ABI_DEALLOCATE(psps%xccc1d)
- end if
- if (allocated(psps%xcccrc))  then
-   ABI_DEALLOCATE(psps%xcccrc)
- end if
- if (allocated(psps%ziontypat))  then
-   ABI_DEALLOCATE(psps%ziontypat)
- end if
- if (allocated(psps%znucltypat))  then
-   ABI_DEALLOCATE(psps%znucltypat)
- end if
- if (allocated(psps%md5_pseudos))  then
-   ABI_DEALLOCATE(psps%md5_pseudos)
- end if
+ ABI_SFREE(psps%filpsp)
+ ABI_SFREE(psps%pspcod)
+ ABI_SFREE(psps%pspdat)
+ ABI_SFREE(psps%pspso)
+ ABI_SFREE(psps%pspxc)
+ ABI_SFREE(psps%title)
+ ABI_SFREE(psps%zionpsp)
+ ABI_SFREE(psps%znuclpsp)
+ ABI_SFREE(psps%algalch)
+ ABI_SFREE(psps%mixalch)
+ ABI_SFREE(psps%ekb)
+ ABI_SFREE(psps%indlmn)
+ ABI_SFREE(psps%ffspl)
+ ABI_SFREE(psps%qgrid_ff)
+ ABI_SFREE(psps%qgrid_vl)
+ ABI_SFREE(psps%vlspl)
+ ABI_SFREE(psps%dvlspl)
+ ABI_SFREE(psps%xccc1d)
+ ABI_SFREE(psps%xcccrc)
+ ABI_SFREE(psps%ziontypat)
+ ABI_SFREE(psps%znucltypat)
+ ABI_SFREE(psps%md5_pseudos)
 
  ! Free types.
  call psp2params_free(psps%gth_params)
@@ -675,15 +595,6 @@ end subroutine psps_free
 !! SOURCE
 
 subroutine psps_copy(pspsin, pspsout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_copy'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -834,15 +745,6 @@ end subroutine psps_copy
 !! SOURCE
 
 subroutine psps_print(psps,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1051,15 +953,6 @@ end subroutine psps_print
 
 subroutine psps_ncwrite(psps, path)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_ncwrite'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
@@ -1171,14 +1064,6 @@ subroutine psps_ncwrite(psps, path)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -1215,15 +1100,6 @@ end subroutine psps_ncwrite
 !! SOURCE
 
 subroutine psp2params_init(gth_params, npsp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1276,15 +1152,6 @@ end subroutine psp2params_init
 
 subroutine psp2params_copy(gth_paramsin, gth_paramsout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_copy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pseudopotential_gth_type),intent(in) :: gth_paramsin
@@ -1334,15 +1201,6 @@ end subroutine psp2params_copy
 !! SOURCE
 
 subroutine psp2params_free(gth_params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1398,15 +1256,6 @@ end subroutine psp2params_free
 
 subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mqgrid_vl
@@ -1451,15 +1300,6 @@ end subroutine nctab_init
 
 subroutine nctab_free(nctab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(nctab_t),intent(inout) :: nctab
@@ -1496,15 +1336,6 @@ end subroutine nctab_free
 !! SOURCE
 
 subroutine nctab_copy(nctabin, nctabout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_copy'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1557,15 +1388,6 @@ end subroutine nctab_copy
 !! SOURCE
 
 subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_eval_tvalespl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1637,15 +1459,6 @@ end subroutine nctab_eval_tvalespl
 !! SOURCE
 
 subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_vl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_eval_tcorespl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1719,15 +1532,6 @@ end subroutine nctab_eval_tcorespl
 !! SOURCE
 
 subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_mixalch'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

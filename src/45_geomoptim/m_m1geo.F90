@@ -8,7 +8,7 @@
 !! and its related init and destroy routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018 ABINIT group (XG)
+!! Copyright (C) 2018-2019 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,13 +99,6 @@ contains  !=============================================================
 !! SOURCE
 
  subroutine m1geo_init(dtfil,dtset,m1geo_param)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'm1geo_init'
-!End of the abilint section
 
  implicit none
 
@@ -223,13 +216,6 @@ contains  !=============================================================
 !! SOURCE
 
  subroutine m1geo_destroy(m1geo_param)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'm1geo_destroy'
-!End of the abilint section
 
  implicit none
 

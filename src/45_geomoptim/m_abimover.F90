@@ -8,7 +8,7 @@
 !! and their related ini and free routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
+!! Copyright (C) 2001-2019 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,7 +84,7 @@ integer  :: natom
 integer  :: nconeq
 ! Option to add strain when FREEZe DISPlacement
 integer :: ph_freez_disp_addStrain
-! Option for the PHonon FREEZe DISPlacement AMPLitude 
+! Option for the PHonon FREEZe DISPlacement AMPLitude
 integer :: ph_freez_disp_option
 ! Number of PHonon FREEZe DISPlacement AMPLitude
 integer :: ph_freez_disp_nampl
@@ -138,10 +138,10 @@ integer,pointer  :: ph_ngqpt(:)         ! ph_ngqpt(3)
 ! List of PHonon FREEZe DISPlacement AMPLitude
 real(dp),pointer :: ph_freez_disp_ampl(:,:)
 ! shift of the Qpoint Grid (used for ionmov 26 and 27)
-real(dp),pointer :: ph_qshift(:,:)       ! 
+real(dp),pointer :: ph_qshift(:,:)       !
 ! amu input var for the current image
 real(dp), pointer :: amu_curr(:)     ! amu_curr(ntypat)
-! Mass of each atom 
+! Mass of each atom
 real(dp),pointer :: amass(:)            ! amass(natom)
 ! Geometry Optimization Preconditioner PaRaMeters
 real(dp),pointer :: goprecprm(:)
@@ -429,14 +429,7 @@ contains  !=============================================================
 subroutine abimover_ini(ab_mover,amu_curr,dtfil,dtset,specs)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimover_ini'
-!End of the abilint section
-
-real(dp),target, intent(in) :: amu_curr(:)            ! amu_curr(ntype)  
+real(dp),target, intent(in) :: amu_curr(:)            ! amu_curr(ntype)
 type(abimover),intent(out) :: ab_mover
 type(datafiles_type),target,intent(in) :: dtfil
 type(dataset_type),target,intent(in) :: dtset
@@ -828,13 +821,6 @@ end subroutine abimover_ini
 subroutine abimover_destroy(ab_mover)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimover_destroy'
-!End of the abilint section
-
  type(abimover),intent(inout) :: ab_mover
 
 ! ***************************************************************
@@ -893,13 +879,6 @@ end subroutine abimover_destroy
 !! SOURCE
 
 subroutine abimover_print(ab_mover,iout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimover_print'
-!End of the abilint section
 
  implicit none
 
@@ -977,20 +956,7 @@ end subroutine abimover_print
 
 subroutine mttk_ini(mttk_vars,nnos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mttk_ini'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mttk_ini'
-!End of the abilint section
 
  integer,intent(in)  :: nnos
  type(mttk_type), intent(out) :: mttk_vars
@@ -1026,13 +992,6 @@ end subroutine mttk_ini
 !! SOURCE
 
 subroutine mttk_fin(mttk_vars)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mttk_fin'
-!End of the abilint section
 
  implicit none
 
@@ -1076,13 +1035,6 @@ end subroutine mttk_fin
 
 subroutine abiforstr_ini(forstr,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abiforstr_ini'
-!End of the abilint section
-
  integer,intent(in)  :: natom
  type(abiforstr), intent(out) :: forstr
 
@@ -1116,13 +1068,6 @@ end subroutine abiforstr_ini
 !! SOURCE
 
 subroutine abiforstr_fin(forstr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abiforstr_fin'
-!End of the abilint section
 
  type(abiforstr), intent(inout) :: forstr
 
@@ -1159,7 +1104,7 @@ end subroutine abiforstr_fin
 !! SIDE EFFECTS
 !!   deloc <type(delocint)>=Important variables for
 !!   |                           pred_delocint
-!!   ! icenter  = Index of the center of the number of shifts 
+!!   ! icenter  = Index of the center of the number of shifts
 !!   | nang     = Number of angles
 !!   | nbond    = Number of bonds
 !!   | ncart    = Number of cartesian directions
@@ -1198,13 +1143,6 @@ end subroutine abiforstr_fin
 !! SOURCE
 
 subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_prim_internals'
-!End of the abilint section
 
  implicit none
 
@@ -1374,13 +1312,6 @@ end subroutine make_prim_internals
 
 subroutine make_angles(deloc,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_angles'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1483,13 +1414,6 @@ end subroutine make_angles
 !! SOURCE
 
 subroutine make_dihedrals(badangles,deloc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_dihedrals'
-!End of the abilint section
 
  implicit none
 
@@ -1640,13 +1564,6 @@ end subroutine make_dihedrals
 
 subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_bonds'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1783,13 +1700,6 @@ end subroutine make_bonds
 
 subroutine calc_prim_int(deloc,natom,rprimd,xcart,prim_int)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_prim_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1917,13 +1827,6 @@ end subroutine calc_prim_int
 
 pure function bond_length(r1,r2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_length'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1956,13 +1859,6 @@ end function bond_length
 !! SOURCE
 
 pure function angle_ang(r1,r2,r3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'angle_ang'
-!End of the abilint section
 
  implicit none
 
@@ -2011,13 +1907,6 @@ end function angle_ang
 !! SOURCE
 
  function angle_dihedral(r1,r2,r3,r4)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'angle_dihedral'
-!End of the abilint section
 
  implicit none
 
@@ -2120,13 +2009,6 @@ end function angle_dihedral
 !! SOURCE
 
 subroutine make_bonds_new(bonds,natom,ntypat,rprimd,typat,xcart,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_bonds_new'
-!End of the abilint section
 
 implicit none
 
@@ -2367,13 +2249,6 @@ end subroutine make_bonds_new
 
 subroutine bonds_free(bonds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bonds_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2435,13 +2310,6 @@ end subroutine bonds_free
 !! SOURCE
 
 subroutine print_bonds(amu,bonds,natom,ntypat,symbol,typat,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_bonds'
-!End of the abilint section
 
  implicit none
 
@@ -2518,13 +2386,6 @@ end subroutine print_bonds
 
 subroutine delocint_ini(deloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'delocint_ini'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -2579,13 +2440,6 @@ end subroutine delocint_ini
 !! SOURCE
 
 subroutine delocint_fin(deloc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'delocint_fin'
-!End of the abilint section
 
  type(delocint), intent(inout) :: deloc
 
@@ -2660,13 +2514,6 @@ end subroutine delocint_fin
 #if 0
 
 subroutine make_angles_new(angles,bonds,natom,ntypat,rprimd,typat,xcart,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_angles_new'
-!End of the abilint section
 
  implicit none
 

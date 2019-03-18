@@ -8,7 +8,7 @@
 !!  (sqrt root)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (BA)
+!! Copyright (C) 2009-2019 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,13 +68,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine invsqrt_matrix(matrix,tndim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invsqrt_matrix'
-!End of the abilint section
 
  implicit none
 
@@ -227,13 +220,6 @@ end subroutine invsqrt_matrix
 !! SOURCE
 
 subroutine blockdiago_fordsyev(matrix,tndim,eig)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'blockdiago_fordsyev'
-!End of the abilint section
 
  implicit none
 
@@ -596,13 +582,6 @@ end subroutine blockdiago_fordsyev
 !! SOURCE
 
 subroutine blockdiago_forzheev(matrix,tndim,eig)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'blockdiago_forzheev'
-!End of the abilint section
 
  implicit none
 

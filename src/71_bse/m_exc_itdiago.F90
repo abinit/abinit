@@ -7,7 +7,7 @@
 !!  Iterative diagonalization of the BSE Hamiltonian with band-by-band conjugate gradient method
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -114,13 +114,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_iterative_diago'
-!End of the abilint section
 
  implicit none
 
@@ -668,13 +661,6 @@ CONTAINS  !===========================================================
 
 subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_init_phi_block'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -836,13 +822,6 @@ end subroutine exc_init_phi_block
 !! SOURCE
 
 subroutine exc_write_phi_block(oeig_fname,use_mpio)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_phi_block'
-!End of the abilint section
 
  implicit none
 
@@ -1007,13 +986,6 @@ end subroutine exc_write_phi_block
 
 subroutine exc_subspace_rotation()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_subspace_rotation'
-!End of the abilint section
-
  implicit none
 
 !Local variables ------------------------------
@@ -1119,13 +1091,6 @@ end subroutine exc_subspace_rotation
 
 subroutine exc_cholesky_ortho()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_cholesky_ortho'
-!End of the abilint section
-
  implicit none
 
 !Local variables ------------------------------
@@ -1226,13 +1191,6 @@ end subroutine exc_cholesky_ortho
 
 function convergence_degree(resid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'convergence_degree'
-!End of the abilint section
-
  implicit none
 
 !Arguments
@@ -1273,13 +1231,6 @@ end function convergence_degree
 !! SOURCE
 
 subroutine exc_check_phi_block(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_check_phi_block'
-!End of the abilint section
 
  implicit none
 

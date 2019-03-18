@@ -7,7 +7,7 @@
 !!  This subroutine calculate the exponential of a  matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (XG)
+!! Copyright (C) 2002-2019 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,13 +70,6 @@ CONTAINS  !===========================================================
  !! SOURCE
 
  subroutine exp_mat_cx(mat_a,mat_a_size,factor)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exp_mat_cx'
-!End of the abilint section
 
   implicit none
   !Arguments ------------------------------------

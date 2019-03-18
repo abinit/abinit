@@ -6,7 +6,7 @@
 !!  Dummy module, to detect unused values
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (XG)
+!!  Copyright (C) 2017-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +48,7 @@
 !!  Dummy subroutine, to test unused arguments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (XG)
+!!  Copyright (C) 2017-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,13 +76,6 @@
 
  subroutine test_unused_arg(used_arg,unused_arg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_unused_arg'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -105,7 +98,7 @@
 !!  Dummy subroutine, to detect when the calling subroutine attributes to one variable results from two different arguments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (XG)
+!!  Copyright (C) 2017-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,13 +121,6 @@
 !! SOURCE
 
  subroutine test_same_actual_arg(dummy_out1,dummy_out2,used_arg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_same_actual_arg'
-!End of the abilint section
 
  implicit none
 
@@ -159,7 +145,7 @@
 !!  Dummy subroutine
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (XG)
+!!  Copyright (C) 2017-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -178,13 +164,6 @@
 !! SOURCE
 
  subroutine test_dummy(dummy_out1,used_arg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_dummy'
-!End of the abilint section
 
  implicit none
 

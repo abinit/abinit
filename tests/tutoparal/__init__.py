@@ -17,7 +17,7 @@ subsuites = [
 "gspw",
 #"gswvl",
 "mbt",
-#"dfmt",
+#"dmft",
 #"moldyn",
 "string",
 ]

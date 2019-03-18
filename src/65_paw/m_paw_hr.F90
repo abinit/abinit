@@ -13,7 +13,7 @@
 !!  matrix elements of [H.r].
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,13 +109,6 @@ CONTAINS  !=====================================================================
 
 subroutine pawhur_free(Hur)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawhur_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -177,13 +170,6 @@ end subroutine pawhur_free
 !! SOURCE
 
 function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj_kb1,Cprj_kb2,HUr) result(ihr_comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ihr'
-!End of the abilint section
 
  implicit none
 
@@ -351,13 +337,6 @@ end function paw_ihr
 subroutine paw_cross_ihr_comm(ihr_comm,nspinor,nr,Cryst,Pawfgrtab,Paw_onsite,&
 & ur_ae1,ur_ae2,ur_ae_onsite1,ur_ae_onsite2,Cprj_kb1,Cprj_kb2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_cross_ihr_comm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -448,13 +427,6 @@ end subroutine paw_cross_ihr_comm
 !! SOURCE
 
 subroutine pawhur_init(hur,nsppol,pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawhur_init'
-!End of the abilint section
 
  implicit none
 
@@ -639,13 +611,6 @@ end subroutine pawhur_init
 !! SOURCE
 
 subroutine pawr(Pawtab,Pawrad,Pawang,natom,ntypat,typat,xcart,lmn2_size_max,rcart_onsite)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawr'
-!End of the abilint section
 
  implicit none
 

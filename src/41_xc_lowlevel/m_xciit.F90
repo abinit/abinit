@@ -8,7 +8,7 @@
 !! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) [[cite:Ichimaru1987]]
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2018 ABINIT group (JFD,LK)
+!!  Copyright (C) 2002-2019 ABINIT group (JFD,LK)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,13 +71,6 @@ contains
 
 subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 &                dvxc)!Optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xciit'
-!End of the abilint section
 
  implicit none
 
@@ -155,13 +148,6 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 
  function fexsGamma(Gamma,t)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fexsGamma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -215,13 +201,6 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 
  function Fxc_iit(rs,t,deltavxc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Fxc_iit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -258,13 +237,6 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 !! SOURCE
 
  function tdexcsdtiit(rs,t)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdexcsdtiit'
-!End of the abilint section
 
  implicit none
 

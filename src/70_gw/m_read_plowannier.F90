@@ -8,7 +8,7 @@
 !!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,7 +50,7 @@ contains
 !!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,13 +110,6 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
  use m_crystal,       only : crystal_t
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
  use m_pawang,        only : pawang_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_plowannier'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !types and arrays

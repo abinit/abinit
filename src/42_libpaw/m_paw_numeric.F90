@@ -7,7 +7,7 @@
 !!  Wrappers for various numeric operations (spline, sort, ...)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (MT,TR)
+!!  Copyright (C) 2012-2019 ABINIT group (MT,TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -134,13 +134,6 @@ subroutine paw_spline(t,y,n,ybcbeg,ybcend,ypp)
 !
 !  Author:
 !    John Burkardt, modified by Xavier Gonze
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_spline'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -257,13 +250,6 @@ end subroutine paw_spline
 
 subroutine paw_splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_splint'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -350,13 +336,6 @@ end subroutine paw_splint
 !! SOURCE
 
 subroutine paw_splint_der(nspline,xspline,yspline,ysplin2,nfit,xfit,dydxfit,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_splint_der'
-!End of the abilint section
 
  implicit none
 
@@ -453,13 +432,6 @@ end subroutine paw_splint_der
 !! SOURCE
 
 subroutine paw_uniform_splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_uniform_splfit'
-!End of the abilint section
 
  implicit none
 
@@ -591,13 +563,6 @@ end subroutine paw_uniform_splfit
 
 subroutine paw_smooth(a,mesh,it)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_smooth'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -671,13 +636,6 @@ end subroutine paw_smooth
 !! SOURCE
 
 subroutine paw_sort_dp(n,list,iperm,tol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_sort_dp'
-!End of the abilint section
 
  implicit none
 
@@ -780,13 +738,6 @@ end subroutine paw_sort_dp
 !! SOURCE
 
 subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_jbessel'
-!End of the abilint section
 
  implicit none
 
@@ -919,13 +870,6 @@ end subroutine paw_jbessel
 
  subroutine paw_solvbes(root,alpha,beta,ll,nq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_solvbes'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1012,20 +956,7 @@ end subroutine paw_solvbes
 
 subroutine paw_jbessel_4spline(bes,besp,ll,order,xx,tol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_jbessel_4spline'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_jbessel_4spline'
-!End of the abilint section
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1141,13 +1072,6 @@ end subroutine paw_jbessel_4spline
 !! SOURCE
 
 elemental function paw_derfc(yy) result(derfc_yy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_derfc'
-!End of the abilint section
 
  implicit none
 

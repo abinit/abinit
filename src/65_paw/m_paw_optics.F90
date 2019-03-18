@@ -8,7 +8,7 @@
 !!    optical conductivity, X spectroscopy, linear susceptibility, ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (SM,VR,FJ,MT,PGhosh)
+!! Copyright (C) 2018-2019 ABINIT group (SM,VR,FJ,MT,PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,13 +110,6 @@ CONTAINS  !=====================================================================
  subroutine optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen0,gprimd,hdr,kg,&
 &               mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,&
 &               pawrad,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'optics_paw'
-!End of the abilint section
 
  implicit none
 
@@ -487,7 +480,7 @@ CONTAINS  !=====================================================================
 !!  Matrix elements = <Phi_core|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (SM,MT)
+!! Copyright (C) 2005-2019 ABINIT group (SM,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -525,13 +518,6 @@ CONTAINS  !=====================================================================
 
  subroutine optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen0,filpsp,hdr,&
 &               mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawrad,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'optics_paw_core'
-!End of the abilint section
 
  implicit none
 
@@ -854,13 +840,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine linear_optics_paw(filnam,filnam_out,mpi_enreg_seq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linear_optics_paw'
-!End of the abilint section
 
  implicit none
 

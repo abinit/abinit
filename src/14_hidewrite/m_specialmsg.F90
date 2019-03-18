@@ -8,7 +8,7 @@
 !!  Special messages= WARNING, COMMENT, EXIT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MT)
+!! Copyright (C) 2008-2019 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,13 +81,6 @@ CONTAINS  !===========================================================
 
 subroutine specialmsg_setcount(n_add_comment,n_add_warning,n_add_exit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'specialmsg_setcount'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -133,13 +126,6 @@ end subroutine specialmsg_setcount
 
 subroutine specialmsg_getcount(ncomment,nwarning,nexit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'specialmsg_getcount'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -180,13 +166,6 @@ end subroutine specialmsg_getcount
 !! SOURCE
 
 subroutine specialmsg_mpisum(mpicomm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'specialmsg_mpisum'
-!End of the abilint section
 
  implicit none
 
@@ -240,13 +219,6 @@ end subroutine specialmsg_mpisum
 
 subroutine herald(code_name,code_version,iout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'herald'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -268,8 +240,8 @@ subroutine herald(code_name,code_version,iout)
 ! *************************************************************************
 
 !RELEASE TIME FROM ABIRULES
- year_rel=2018
- mm_rel=9
+ year_rel=2019
+ mm_rel=02
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -283,7 +255,7 @@ subroutine herald(code_name,code_version,iout)
 
 !GNU GPL license
  write(iout, '(a,/,a,a,a,/,a,/,a,/,a,/)' ) &
-& '.Copyright (C) 1998-2018 ABINIT group . ',&
+& '.Copyright (C) 1998-2019 ABINIT group . ',&
 & ' ',trim(code_name),' comes with ABSOLUTELY NO WARRANTY.',&
 & ' It is free software, and you are welcome to redistribute it',&
 & ' under certain conditions (GNU General Public License,',&
@@ -364,7 +336,7 @@ end subroutine herald
 !!  Also allows to treat correctly the write operations for Unix (+DOS) and MacOS.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -383,11 +355,6 @@ end subroutine herald
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! NOTES
-!!   The routine uses optional arguments, therefore the interface must be explicit.
-!!   Be careful when writing CPP macros that use wrtout since abilint won't see the call
-!!   and no interface will be added to the source file.
 !!
 !! PARENTS
 !!      abinit,afterscfloop,anaddb,append_xyz,atm2fft,atomden,berryphase
@@ -477,13 +444,6 @@ subroutine wrtout(unit,msg,mode_paral,do_flush)
 
  use m_xmpi,      only : xmpi_world, xmpi_comm_rank, xmpi_comm_size
  use m_io_tools,  only : flush_unit, write_lines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrtout'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -555,7 +515,7 @@ end subroutine wrtout
 !!  Do the output for one proc. For parallel or sequential output use wrtout()
 !!  instead. Also allows to treat correctly the write operations for Unix (+DOS) and MacOS.
 !!
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR)
 !! INPUTS
 !!  unit=unit number for writing
 !!  message=(character(len=*)) message to be written
@@ -580,13 +540,6 @@ subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
  use m_xmpi,       only : xmpi_sum
  !use m_specialmsg, only : specialmsg_setcount
  use m_io_tools,   only : flush_unit, write_lines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrtout_myproc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

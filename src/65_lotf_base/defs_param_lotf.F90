@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MMancini)
+!! Copyright (C) 2005-2019 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,13 +76,6 @@ CONTAINS !===========================================================
 
  subroutine lotfparam_init(natom,version,nstart,nitex,neeigx,&
    &                    classic,me,nproc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lotfparam_init'
-!End of the abilint section
 
   implicit none
 

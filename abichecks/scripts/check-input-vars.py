@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2009-2018 ABINIT Group (Damien Caliste)
+# Copyright (C) 2009-2019 ABINIT Group (Damien Caliste)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -30,7 +30,7 @@ src_dir        = os.path.join(top_dir,"src")
 
 # The dtset resource:
 bindings_dir        = os.path.join(top_dir,"bindings")
-parserdir = os.path.join(bindings_dir, "parser")
+parserdir = os.path.join(src_dir, "57_iovars")
 
 with open(os.path.join(parserdir, "dtset.pickle", "rb")) as fh:
     ab_dtset = cPickle.load(fh,"r")

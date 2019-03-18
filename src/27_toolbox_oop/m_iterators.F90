@@ -8,7 +8,7 @@
 !!  iteration over the elements of an ensemble e.g. set of transitions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
+!! Copyright (C) 2009-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -208,13 +208,6 @@ CONTAINS  !===========================================================
 subroutine indices_free(Ids)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indices_free'
-!End of the abilint section
-
  type(indices_t),intent(inout) :: Ids
 
 ! *************************************************************************
@@ -248,15 +241,6 @@ end subroutine indices_free
 
 subroutine iter2_alloc(Iter2,sizes,starts)
 
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_alloc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -311,16 +295,6 @@ end subroutine iter2_alloc
 
 subroutine iter2_push(Iter2,i1,i2,list)
 
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_push'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2
@@ -368,16 +342,6 @@ end subroutine iter2_push
 
 subroutine iter2_free(Iter2)
 
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(iter2_t),intent(inout) :: Iter2
@@ -416,13 +380,6 @@ end subroutine iter2_free
 function iter2_len(Iter2,i1,i2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_len'
-!End of the abilint section
-
  integer,intent(in) :: i1,i2
  integer :: iter2_len
  type(iter2_t),intent(in) :: Iter2
@@ -449,16 +406,6 @@ end function iter2_len
 !! SOURCE
 
 function iter2_lbound(Iter2,dim)
-
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_lbound'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -489,16 +436,6 @@ end function iter2_lbound
 
 function iter2_ubound(Iter2,dim)
 
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_ubound'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dim
@@ -527,16 +464,6 @@ end function iter2_ubound
 !! SOURCE
 
 function iter2_size(Iter2,dim)
-
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_size'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -568,13 +495,6 @@ end function iter2_size
 function iter2_yield(Iter2,idx,i1,i2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_yield'
-!End of the abilint section
-
  integer,intent(in) :: idx,i1,i2
  integer :: iter2_yield
  type(iter2_t),intent(in) :: Iter2
@@ -606,15 +526,6 @@ end function iter2_yield
 !! SOURCE
 
 subroutine iter2_print(Iter2,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

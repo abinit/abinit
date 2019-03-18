@@ -8,7 +8,7 @@
 !!  recursion
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (XG)
+!! Copyright (C) 2002-2019 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,13 +71,6 @@ CONTAINS  !===========================================================
 
 subroutine prtworksim(work_now)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtworksim'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 ! scalars
@@ -118,13 +111,6 @@ end subroutine prtworksim
 !! SOURCE
 
 subroutine prtworksiRe(work_now)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtworksiRe'
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------
@@ -167,13 +153,6 @@ end subroutine prtworksiRe
 !! SOURCE
 
 subroutine prtworkadv(work_now,adv)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtworkadv'
-!End of the abilint section
 
  implicit none
 

@@ -8,7 +8,7 @@
 !!  of PAW data over atomic sites
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (MT, MD)
+!! Copyright (C) 2012-2019 ABINIT group (MT, MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,13 +69,6 @@ CONTAINS
 
 
 subroutine get_my_natom(comm_atom,my_natom,natom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_my_natom'
-!End of the abilint section
 
  implicit none
 
@@ -142,13 +135,6 @@ end subroutine get_my_natom
 
 subroutine get_my_atmtab(comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,&
 &                        my_natom_ref) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_my_atmtab'
-!End of the abilint section
 
  implicit none
 
@@ -247,13 +233,6 @@ end subroutine get_my_atmtab
 
 subroutine free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'free_my_atmtab'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -306,13 +285,6 @@ end subroutine free_my_atmtab
 !! SOURCE
 
  subroutine get_proc_atmtab(iproc,atmtab,natom_out,natom,comm_atom_size)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_proc_atmtab'
-!End of the abilint section
 
  implicit none
 
@@ -369,7 +341,7 @@ end subroutine get_proc_atmtab
 !!  containing the corresponding processor indexes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (MD)
+!! Copyright (C) 2012-2019 ABINIT group (MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -400,13 +372,6 @@ end subroutine get_proc_atmtab
 
 !Arguments ---------------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_atm_proc'
-!End of the abilint section
-
  integer, intent(in) :: natom,nproc
 !arrays
  integer, intent(in) :: atom_list(:)

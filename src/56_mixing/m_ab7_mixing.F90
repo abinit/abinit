@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (XG, DC, GMR)
+!!  Copyright (C) 2008-2019 ABINIT group (XG, DC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,13 +105,6 @@ contains
 
 subroutine init_(mix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -150,13 +143,6 @@ end subroutine init_
 !! SOURCE
 
 subroutine nullify_(mix)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nullify_'
-!End of the abilint section
 
  implicit none
 
@@ -199,13 +185,6 @@ end subroutine nullify_
 
 subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 &  npawmix, errid, errmess, npulayit, useprec)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_mixing_new'
-!End of the abilint section
 
  implicit none
 
@@ -392,13 +371,6 @@ end subroutine ab7_mixing_new
 
 subroutine ab7_mixing_use_disk_cache(mix, fnametmp_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_mixing_use_disk_cache'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -444,13 +416,6 @@ subroutine ab7_mixing_use_moving_atoms(mix, natom, xred, dtn_pc)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_mixing_use_moving_atoms'
-!End of the abilint section
-
  type(ab7_mixing_object), intent(inout) :: mix
  integer, intent(in) :: natom
  real(dp), intent(in), target :: dtn_pc(3, natom)
@@ -492,13 +457,6 @@ subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_mixing_copy_current_step'
-!End of the abilint section
-
  type(ab7_mixing_object), intent(inout) :: mix
  real(dp), intent(in) :: arr_resid(mix%space * mix%nfft, mix%nspden)
  integer, intent(out) :: errid
@@ -550,13 +508,6 @@ end subroutine ab7_mixing_copy_current_step
 !! SOURCE
 
 subroutine ab7_mixing_eval_allocate(mix, istep)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_mixing_eval_allocate'
-!End of the abilint section
 
  implicit none
 
@@ -643,13 +594,6 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 
  subroutine ab7_mixing_eval_deallocate(mix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_mixing_eval_deallocate'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -717,13 +661,6 @@ end subroutine ab7_mixing_eval_deallocate
 & mpi_comm, mpi_summarize, errid, errmess, &
 & reset, isecur, pawarr, pawopt, response, etotal, potden, &
 & resnrm, comm_atom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_mixing_eval'
-!End of the abilint section
 
  implicit none
 
@@ -878,13 +815,6 @@ end subroutine ab7_mixing_eval
 
 subroutine ab7_mixing_deallocate(mix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_mixing_deallocate'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1018,13 +948,6 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 & f_fftgr,initialized,iscf,isecur,istep,&
 & i_rhor,i_vresid,i_vrespc,moved_atm_inside,mpicomm,mpi_summarize,&
 & natom,nfft,nfftot,nspden,n_fftgr,n_index,opt_denpot,response,rhor,ucvol,vtrial,xred,errid,errmess)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcge'
-!End of the abilint section
 
  implicit none
 
@@ -1825,13 +1748,6 @@ end subroutine scfcge
 
 subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfeig'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1856,7 +1772,7 @@ subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
 
  if(nspden==4)then
    errid = AB7_ERROR_MIXING_ARG
-   write(errmess, *) ' scfeig : does not work yet for nspden=4'
+   write(errmess, *) ' scfeig: does not work yet for nspden=4'
    return
  end if
 
@@ -1867,7 +1783,7 @@ subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
  if(istep==1)then
 
    write(message, '(a,es12.4,a,a,a,a,a,a,a)' )&
-&   ' scfeig : fixed PC_residual square =',fix_resid,ch10,&
+&   ' scfeig: fixed PC_residual square =',fix_resid,ch10,&
 &   '    Note that fixed resid should always be much larger',ch10,&
 &   '    than initial PC resid square, still sufficiently',ch10,&
 &   '    small to reduce anharmonic effects ',ch10
@@ -1880,8 +1796,7 @@ subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
        resid_old=resid_old+vrespc(ifft,isp)**2
      end do
    end do
-   write(message, '(a,es12.4)' )&
-&   ' scfeig : initial PC_residual square =',resid_old
+   write(message, '(a,es12.4)' )' scfeig: initial PC_residual square =',resid_old
    call wrtout(std_out,message,'COLL')
    if(resid_old>1.0d-8)then
      errid = AB7_ERROR_MIXING_ARG
@@ -2029,13 +1944,6 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 & n_index,opt_denpot,pawoptmix,usepaw,vpaw,vresid,vtrial,errid,errmess, &
 & comm_atom) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfopt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2101,22 +2009,21 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 !_______________________________________________________________
 !Here use only the preconditioning, or initialize the other algorithms
 
- if(istep==1 .or. iscf==2)then
-
-   write(message,'(2a)') ch10,'Simple mixing update:'
+ if (istep==1 .or. iscf==2) then
+   write(message,'(2a)') ch10,' Simple mixing update:'
    call wrtout(std_out,message,'COLL')
 
-   write(message,*)' residual square of the potential :',resid_new(1)
+   write(message,*)' residual square of the potential: ',resid_new(1)
    call wrtout(std_out,message,'COLL')
 
-!  Store information for later use
+   ! Store information for later use
    if (iscf==3.or.iscf==4) resid_old=resid_new(1)
    if (iscf==7) then
      amat(:,:)=zero
      amat(1,1)=resid_new(1)
    end if
 
-!  Compute new vtrial (and new rhoij if PAW)
+   ! Compute new vtrial (and new rhoij if PAW)
    if (iscf/=2) f_fftgr(:,:,i_vstore)=vtrial(:,:)
    vtrial(:,:)=vtrial(:,:)+f_fftgr(:,:,i_vrespc(1))
    if (usepaw==1) then
@@ -2128,7 +2035,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 !  Here Anderson algorithm using one previous iteration
  else if((istep==2 .or. iscf==3).and.iscf/=7)then
 
-   write(message,'(2a)') ch10,'Anderson update:'
+   write(message,'(2a)') ch10,' Anderson update:'
    call wrtout(std_out,message,'COLL')
 
    write(message,*)' residual square of the potential: ',resid_new(1)
@@ -2146,7 +2053,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 
 !  Compute mixing factor
    lambda=(resid_new(1)-prod_resid(1))/(resid_new(1)+resid_old-2*prod_resid(1))
-   write(message,*)' mixing of old trial potential    :',lambda
+   write(message,*)' mixing of old trial potential: ',lambda
    call wrtout(std_out,message,'COLL')
 
 !  Evaluate best residual square on the line
@@ -2185,10 +2092,10 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 !  Here Anderson algorithm using two previous iterations
  else if(iscf==4.and.iscf/=7)then
 
-   write(message,'(2a)') ch10,'Anderson (order 2) update:'
+   write(message,'(2a)') ch10,' Anderson (order 2) update:'
    call wrtout(std_out,message,'COLL')
 
-   write(message,*)' residual square of the potential :',resid_new(1)
+   write(message,*)' residual square of the potential: ',resid_new(1)
    call wrtout(std_out,message,'COLL')
 
 !  Compute prod_resid from f_fftgr/f_paw(:,:,i_vrespc(1)) and f_fftgr/f_paw(:,:,i_vrespc(2))
@@ -2222,7 +2129,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
    det=aa1*aa2-bb*bb
    lambda =(aa2*cc1-bb*cc2)/det
    lambda2=(aa1*cc2-bb*cc1)/det
-   write(message,*)' mixing of old trial potentials   :',lambda,lambda2
+   write(message,*)' mixing of old trial potentials: ',lambda,lambda2
    call wrtout(std_out,message,'COLL')
 
 !  Store information for later use
@@ -2264,8 +2171,8 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
    if (npulay>npulaymax) then
      errid = AB7_ERROR_MIXING_CONVERGENCE
      write(errmess, '(4a)' ) ch10,&
-&     ' scfopt : ERROR - ',ch10,&
-&     '  Too much iterations required for Pulay algorithm (<50) !'
+&     ' scfopt: ERROR - ',ch10,&
+&     '  Too many iterations required for Pulay algorithm (<50) !'
      return
    end if
 
@@ -2319,7 +2226,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
    end do
    alpha(:)=alpha(:)/det
    ABI_DEALLOCATE(amatinv)
-   write(message,'(a,5(1x,g10.3))')' mixing of old trial potential : alpha(m:m-4)=',(alpha(ii),ii=niter,max(1,niter-4),-1)
+   write(message,'(a,5(1x,g10.3))')' mixing of old trial potential: alpha(m:m-4)=',(alpha(ii),ii=niter,max(1,niter-4),-1)
    call wrtout(std_out,message,'COLL')
 
 !  Save latest trial potential and compute new trial potential
@@ -2419,13 +2326,6 @@ subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
 & d2edv2_1,d2edv2_2,d2edv2_predict,&
 & etotal_1,etotal_2,etotal_predict,&
 & lambda_1,lambda_2,lambda_predict,errid,errmess)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findminscf'
-!End of the abilint section
 
  implicit none
 
@@ -2571,13 +2471,6 @@ end subroutine findminscf
 
 subroutine dotprodm_v(cplex,cpldot,dot,index1,index2,mpicomm,mpi_summarize,&
 &   mult1,mult2,nfft,npot1,npot2,nspden,opt_storage,potarr1,potarr2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dotprodm_v'
-!End of the abilint section
 
  implicit none
 
@@ -2755,13 +2648,6 @@ end subroutine dotprodm_v
 
 subroutine dotprodm_vn(cplex,cpldot,denarr,dot,id,ip,mpicomm, mpi_summarize,multd,multp,&
 & nden,nfft,nfftot,npot,nspden,potarr,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dotprodm_vn'
-!End of the abilint section
 
  implicit none
 
@@ -3052,13 +2938,6 @@ end subroutine dotprodm_vn
 
 subroutine sqnormm_v(cplex,index,mpicomm, mpi_summarize,mult,nfft,norm2,npot,nspden,opt_storage,potarr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqnormm_v'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3183,13 +3062,6 @@ end subroutine sqnormm_v
 subroutine aprxdr(cplex,choice,dedv_mix,dedv_new,dedv_old,&
 &  f_atm,f_fftgr,i_rhor2,i_vresid,moved_atm_inside,&
 &  mpicomm,mpi_summarize,natom,nfft,nfftot,nspden,n_fftgr,rhor,ucvol,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'aprxdr'
-!End of the abilint section
 
  implicit none
 

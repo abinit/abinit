@@ -7,7 +7,7 @@
 !! Compute the susceptibility matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (XG, AR, MB)
+!!  Copyright (C) 2008-2019 ABINIT group (XG, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -166,13 +166,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 &  pawang,pawtab,phnonsdiel,ph1ddiel,rprimd,&
 &  susmat,symafm,symrel,tnons,typat,ucvol,unpaw,usecprj,usepaw,usetimerev,&
 &  wtk,ylmdiel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'suscep_stat'
-!End of the abilint section
 
  implicit none
 
@@ -911,13 +904,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'susk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1149,7 +1135,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
      cwavef(:,1:npw_k)=cg(:,1+iwf:npw_k+iwf)
      call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &     istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,npw_k,1,ndiel4,ndiel5,ndiel6,&
-&     0,mpi_enreg_diel%paral_kgb,tim_fourwf,weight,weight)
+&     0,tim_fourwf,weight,weight)
 
      wfrspa(:,:,:,:,ispinor,iband)=wfraug(:,:,:,:)
 
@@ -1193,7 +1179,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
        tim_fourwf=9
        call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &       1,kg_diel,kg_diel,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,&
-&       ndiel4,ndiel5,ndiel6,3,mpi_enreg_diel%paral_kgb,tim_fourwf,weight,weight)
+&       ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 !      In case of PAW, add compensation charge contribution if not already done
        if (usepaw==1.and.extrap==0.and.neglect_pawhat==0) then
          call pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,ibd1,ibd2,ispinor,ispinor,1,kg_diel,&
@@ -1324,7 +1310,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
            tim_fourwf=19
            call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &           1,kg_diel,kg_diel,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,&
-&           ndiel4,ndiel5,ndiel6,3,mpi_enreg_diel%paral_kgb,tim_fourwf,weight,weight)
+&           ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 
 !          In case of PAW, add compensation charge contribution
            if (usepaw==1.and.neglect_pawhat==0) then
@@ -1512,13 +1498,6 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'suskmm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1651,7 +1630,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
          cwavef(:,1:npw_k)=cg(:,1+iwf:npw_k+iwf)
          call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &         istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,npw_k,1,ndiel4,ndiel5,ndiel6,&
-&         0,paral_kgb,tim_fourwf,weight,weight)
+&         0,tim_fourwf,weight,weight)
          wfrspa1(:,:,:,:,ispinor,iband)=wfraug(:,:,:,:)
        end do
      end do
@@ -1711,7 +1690,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
          tim_fourwf=31
          call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &         1,kg_diel,kg_diel,&
-&         mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,ndiel4,ndiel5,ndiel6,3,paral_kgb,tim_fourwf,weight,weight)
+&         mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 !        In case of PAW, add compensation charge contribution if not already done
          if (usepaw==1.and.extrap==0.and.neglect_pawhat==0) then
            call pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband,iband,1,1,1,kg_diel,&
@@ -1814,7 +1793,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
              tim_fourwf=32
              call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &             1,kg_diel,kg_diel, mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,&
-&             ndiel4,ndiel5,ndiel6,3,paral_kgb,tim_fourwf,weight,weight)
+&             ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 
 !            In case of PAW, add compensation charge contribution
              if (usepaw==1.and.neglect_pawhat==0) then
@@ -1876,7 +1855,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
            cwavef(:,1:npw_k)=cg(:,1+iwf:npw_k+iwf)
            call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &           istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,npw_k,1,&
-&           ndiel4,ndiel5,ndiel6,0,paral_kgb,tim_fourwf,weight,weight)
+&           ndiel4,ndiel5,ndiel6,0,tim_fourwf,weight,weight)
            wfrspa2(:,:,:,:,ispinor,iband)=wfraug(:,:,:,:)
          end do
        end do
@@ -1917,7 +1896,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
                tim_fourwf=32
                call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &               1,kg_diel,kg_diel,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,&
-&               ndiel4,ndiel5,ndiel6,3,paral_kgb,tim_fourwf,weight,weight)
+&               ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 
 !              In case of PAW, add compensation charge contribution
                if (usepaw==1.and.neglect_pawhat==0) then

@@ -199,6 +199,11 @@ def main():
 
     os.chdir(os.path.dirname(__file__))
 
+    if sys.version_info[0] < 3 and options.jobs > 1:
+        cprint("py2.x CANNOT USE jobs > 1. Setting jobs to 1. Use py3k", "yellow")
+        options.jobs = 1
+
+    #if sys.version_info[0] >= 3 and options.jobs > 1:
     #from tests.pymods.devtools import number_of_cpus
     #ncpus_detected = max(1, number_of_cpus())
     #import multiprocessing
@@ -207,10 +212,6 @@ def main():
     #except NotImplementedError
     #    ncpus = 1
     #processes = max(1, ncpus // 2)
-
-    if sys.version_info[0] < 3 and options.jobs > 1:
-        cprint("py2.x CANNOT USE jobs > 1. Setting jobs to 1. Use py3k", "yellow")
-        options.jobs = 1
 
     #if options.command == "robodoc":
     #    from fkiss.mkrobodoc_dirs import mkrobodoc_files
@@ -250,7 +251,7 @@ def main():
     # After this point I operate an AbinitProject instance.
     # Load the object from pickle first and then check if we need to parse the source files again.
     needs_reload = True
-    if not options.regenerate and os.path.exists(AbinitProject.DEFAULT_PICKLE_FILE):
+    if not options.regenerate and os.path.exists(AbinitProject.get_default_pickle_file()):
         proj = AbinitProject.pickle_load()
         needs_reload = proj.needs_reload()
         if needs_reload:

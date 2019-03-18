@@ -11,7 +11,7 @@
 !!  Should be modify and merge with uniformrandom and zbq
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +51,7 @@ CONTAINS
 !!  Efficient on GPU and MIC
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,13 +78,6 @@ SUBROUTINE OurRng(xn,rng)
   ! returns a value between 0. and 1. with a period of 2**31
   ! implements the Marsaglia serie:
   !   xn+1 = (69069 * xn) mod 2^31
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'OurRng'
-!End of the abilint section
-
   implicit none
 !Arguments ------------------------------------
   DOUBLE PRECISION, INTENT(  OUT) :: rng

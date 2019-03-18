@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (AB)
+!! Copyright (C) 2008-2019 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,13 +63,6 @@ CONTAINS  !===========================================================
 
 
  subroutine SortC(FX, FY, FZ, Vector, CoefC, NV, Weights)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'SortC'
-!End of the abilint section
 
  implicit none
 
@@ -177,13 +170,6 @@ CONTAINS  !===========================================================
 
  subroutine NewK(XX, YY, ZZ, FX, FY, FZ, NKVal)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'NewK'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -271,13 +257,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine getargs(folds, fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getargs'
-!End of the abilint section
 
  implicit none
 
@@ -406,13 +385,6 @@ end subroutine getargs
 !! SOURCE
 
  subroutine progress(ikpt, nkpt, kpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'progress'
-!End of the abilint section
 
  implicit none
 

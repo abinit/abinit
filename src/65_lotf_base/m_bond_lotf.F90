@@ -8,7 +8,7 @@
 !!  set them.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MMancini)
+!! Copyright (C) 2005-2019 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,13 +73,6 @@ contains
 
  subroutine bond_tafit_init(nax)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_tafit_init'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -111,13 +104,6 @@ contains
 !! SOURCE
 
  subroutine bond_atom_init(nneigx,nneig,neighl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_atom_init'
-!End of the abilint section
 
   implicit none
 
@@ -208,13 +194,6 @@ contains
 
  subroutine bond_matrix_alloc(nax,nneigx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_matrix_alloc'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -246,13 +225,6 @@ contains
 !! SOURCE
 
  subroutine bond_matrix_set(nneig,neighl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_matrix_set'
-!End of the abilint section
 
   implicit none
 
@@ -318,13 +290,6 @@ contains
 !! SOURCE
 
  subroutine bond_compute(nneig,neighl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_compute'
-!End of the abilint section
 
   implicit none
 
@@ -401,13 +366,6 @@ contains
 
  subroutine bond_fit_set(nax,nfitdum)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_fit_set'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -458,13 +416,6 @@ contains
  subroutine  bond_dealloc()
 
 ! *************************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_dealloc'
-!End of the abilint section
-
    ABI_DEALLOCATE(ibnd_mat)
    ABI_DEALLOCATE(tafit)
    ABI_DEALLOCATE(ifit)

@@ -8,7 +8,7 @@
 !! different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2019 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,13 +64,6 @@ program mrggkk
  use m_fstrings,        only : endswith, sjoin
  use m_io_tools,        only : flush_unit, open_file, file_exists
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mrggkk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

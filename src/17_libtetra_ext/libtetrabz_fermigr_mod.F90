@@ -5,7 +5,7 @@
 
 #include "abi_common.h"
 !
-! Copyright (c) 2014 Mitsuaki Kawamura
+! Copyright (C) 2014 Mitsuaki Kawamura
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a
 ! copy of this software and associated documentation files (the
@@ -41,13 +41,6 @@ SUBROUTINE libtetrabz_fermigr(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0,comm)
   !
   USE ISO_C_BINDING
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_fermigr'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3), ne
@@ -105,13 +98,6 @@ SUBROUTINE libtetrabz_fermigr_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig1
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_fermigr_main'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, ne, &
@@ -264,13 +250,6 @@ SUBROUTINE libtetrabz_fermigr2(nb,ne,e0,ei1,ej1,w1)
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_fermigr2'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nb, ne
@@ -388,13 +367,6 @@ SUBROUTINE libtetrabz_fermigr3(ne,e0,de,w1)
   USE libtetrabz_common, ONLY : libtetrabz_sort, &
   &                             libtetrabz_triangle_a1, libtetrabz_triangle_b1, &
   &                             libtetrabz_triangle_b2, libtetrabz_triangle_c1
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_fermigr3'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: ne

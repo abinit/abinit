@@ -8,7 +8,7 @@
 !! thermodynamical properties, Debye-Waller factor, and atomic mean square velocity
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (CL, XG)
+!!  Copyright (C) 2008-2019 ABINIT group (CL, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,13 +93,6 @@ contains
 !! SOURCE
 
 subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,thmflag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonic_thermo'
-!End of the abilint section
 
  implicit none
 

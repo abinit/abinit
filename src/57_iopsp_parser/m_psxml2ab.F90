@@ -8,7 +8,7 @@
 !!  convert to abinit internal datastructures for pspheader.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MJV).
+!! Copyright (C) 2005-2019 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,13 +59,6 @@ public :: psxml2abheader
 CONTAINS
 
 subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psxml2abheader'
-!End of the abilint section
 
  implicit none
 
@@ -396,7 +389,7 @@ end module m_psxml2ab
 !!  allows calling software to decide how fatal the PSML die call actually is.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MJV).
+!! Copyright (C) 2005-2019 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -416,13 +409,6 @@ end module m_psxml2ab
 subroutine psml_die(str)
 
   use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psml_die'
-!End of the abilint section
-
   implicit none
 
   character(len=*), intent(in) :: str

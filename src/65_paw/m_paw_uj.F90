@@ -8,7 +8,7 @@
 !!    in PAW+U context (linear response method according to Phys. Rev. B 71, 035105)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (DJA)
+!! Copyright (C) 2018-2019 ABINIT group (DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,13 +86,6 @@ CONTAINS  !=====================================================================
 
 subroutine pawuj_ini(dtpawuj,ndtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawuj_ini'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -165,13 +158,6 @@ end subroutine pawuj_ini
 
 subroutine pawuj_free(dtpawuj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawuj_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -231,13 +217,6 @@ end subroutine pawuj_free
 !! SOURCE
 
 subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawuj_det'
-!End of the abilint section
 
  implicit none
 
@@ -775,13 +754,6 @@ end subroutine pawuj_det
 subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad,pawtab,ndtpawuj,&
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawuj_red'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1026,13 +998,6 @@ end subroutine pawuj_red
 subroutine chiscwrt(chi_org,disv_org,nat_org,sdisv_org,smult_org,nsh_org,chi_sc,&
 & disv_sc,nat_sc,smult_sc,nsh_sc,opt,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chiscwrt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1134,13 +1099,6 @@ end subroutine chiscwrt
 !! SOURCE
 
 subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linvmat'
-!End of the abilint section
 
  implicit none
 
@@ -1253,13 +1211,6 @@ end subroutine linvmat
 
 subroutine lprtmat(commnt,chan,prtvol,mmat,nat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lprtmat'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1336,13 +1287,6 @@ end subroutine lprtmat
 !! SOURCE
 
 subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lcalcu'
-!End of the abilint section
 
  implicit none
 
@@ -1439,13 +1383,6 @@ end subroutine lcalcu
 !! SOURCE
 
 subroutine blow_pawuj(mat,nj,matt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'blow_pawuj'
-!End of the abilint section
 
  implicit none
 

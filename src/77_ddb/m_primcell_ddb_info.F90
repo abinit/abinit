@@ -9,7 +9,7 @@
 !! Container type is defined, and destruction
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2019 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +77,7 @@ contains
 !!  init and fill primcell_ddb_info
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2019 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,13 +100,6 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 &    acell,amu,dielt,dyewq0,gmet,gprim,rcan,rmet,rprim,rpt,trans,wghatm,xred,zeff)
  
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_primcell_ddb_info'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -208,7 +201,7 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 !!  read in and fill primcell_ddb_info from the file name given in input
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2019 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -230,13 +223,6 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 subroutine read_primcell_ddb_info (filename,pcell)
  
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_primcell_ddb_info'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -344,7 +330,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !!  write out primcell_ddb_info to the file name given in input
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2019 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -367,13 +353,6 @@ subroutine read_primcell_ddb_info (filename,pcell)
 subroutine write_primcell_ddb_info (filename,pcell)
  
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_primcell_ddb_info'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -458,7 +437,7 @@ subroutine write_primcell_ddb_info (filename,pcell)
 !!  deallocate stuoff in primcell_ddb_info
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2019 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -478,13 +457,6 @@ subroutine write_primcell_ddb_info (filename,pcell)
 subroutine destroy_primcell_ddb_info (pcell)
  
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_primcell_ddb_info'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

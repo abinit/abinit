@@ -7,7 +7,7 @@
 !!  This module provides routines to read the Bethe-Salpeter Hamiltonian from file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,15 +103,6 @@ CONTAINS  !====================================================================
 
 subroutine exc_write_bshdr(funt,Bsp,Hdr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_bshdr'
-!End of the abilint section
-
- implicit none
-
  !Arguments ------------------------------------
  integer,intent(in) :: funt
  type(excparam),intent(in) :: BSp
@@ -165,15 +156,6 @@ end subroutine exc_write_bshdr
 !! SOURCE
 
 subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_bshdr'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  integer,intent(in) :: funt
@@ -241,15 +223,6 @@ end subroutine exc_read_bshdr
 
 subroutine exc_skip_bshdr(funt,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_skip_bshdr'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: funt
  integer,intent(out) :: ierr
@@ -297,15 +270,6 @@ end subroutine exc_skip_bshdr
 !! SOURCE
 
 subroutine exc_skip_bshdr_mpio(mpifh,at_option,ehdr_offset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_skip_bshdr_mpio'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  integer,intent(in) :: mpifh,at_option
@@ -363,15 +327,6 @@ end subroutine exc_skip_bshdr_mpio
 !! SOURCE
 
 subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_eigen'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -481,15 +436,6 @@ end subroutine exc_read_eigen
 !! SOURCE
 
 subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsize,my_t1,my_t2,hmat,use_mpio,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_rcblock'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -828,15 +774,6 @@ end subroutine exc_read_rcblock
 
 subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,nreh,exc_size,exc_ham)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_fullh_from_blocks'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: funt,exc_size,nsppol,row_sign
@@ -1088,15 +1025,6 @@ end subroutine exc_fullh_from_blocks
 
 pure function rrs_of_glob(row_glob,col_glob,size_glob)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rrs_of_glob'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer :: rrs_of_glob
  integer,intent(in) :: row_glob,col_glob
@@ -1140,15 +1068,6 @@ end function rrs_of_glob
 !! SOURCE
 
 pure function ccs_of_glob(row_glob,col_glob,size_glob)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ccs_of_glob'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: ccs_of_glob
@@ -1196,15 +1115,6 @@ end function ccs_of_glob
 !! SOURCE
 
 function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm,bsize_frm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'offset_in_file'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  integer(XMPI_OFFSET_KIND) :: offset_in_file
@@ -1269,15 +1179,6 @@ end function offset_in_file
 !! SOURCE
 
 subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_rblock_fio'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1399,15 +1300,6 @@ end subroutine exc_read_rblock_fio
 !! SOURCE
 
 subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_amplitude'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1551,15 +1443,6 @@ end subroutine exc_amplitude
 
 subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_optme'
-!End of the abilint section
-
- implicit none
-
  !Arguments ------------------------------------
  integer,intent(in) :: minb,maxb,nkbz,nsppol,nq
  character(len=fnlen),intent(in) :: filname
@@ -1671,14 +1554,6 @@ end subroutine exc_write_optme
 
 subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_ham_ncwrite'
-!End of the abilint section
-
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1748,13 +1623,6 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
 
 contains
  integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid

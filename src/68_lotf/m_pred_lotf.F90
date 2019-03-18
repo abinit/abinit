@@ -7,7 +7,7 @@
 !! Contains the predictor for LOTF (ionmov==23)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,7 +54,7 @@ CONTAINS !===========================================================
  !! Lotf ensemble molecular dynamics.
  !!
  !! COPYRIGHT
- !! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+ !! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
  !! This file is distributed under the terms of the
  !! GNU General Public License, see ~abinit/COPYING
  !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,13 +88,6 @@ CONTAINS !===========================================================
  subroutine pred_lotf(ab_mover,hist,itime,icycle,zDEBUG,iexit)
 
  use m_geometry,       only : xred2xcart
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_lotf'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------

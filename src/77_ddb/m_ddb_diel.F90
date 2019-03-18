@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XG,XW, MVeithen)
+!!  Copyright (C) 1999-2019 ABINIT group (XG,XW, MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -107,15 +107,6 @@ contains
 
 subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
 & iout,lst,mpert,natom,nph2l,phfrq,comm,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_diel'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -564,15 +555,6 @@ end subroutine ddb_diel
 !! SOURCE
 
 subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alignph'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MMancini)
+!! Copyright (C) 2005-2019 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,13 +65,6 @@ contains
 
  subroutine vecp(a,b,c)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vecp'
-!End of the abilint section
-
   real(dp),intent(in) :: a(3),b(3)
   real(dp),intent(out) :: c(3)
 
@@ -99,13 +92,6 @@ contains
 !! SOURCE
 
  subroutine pbc_init(rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pbc_init'
-!End of the abilint section
 
   implicit none
 
@@ -139,13 +125,6 @@ contains
 
  function pbc_aa_contract()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pbc_aa_contract'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -168,13 +147,6 @@ contains
 !! SOURCE
 
  function pbc_bb_contract()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pbc_bb_contract'
-!End of the abilint section
 
   implicit none
 
@@ -202,13 +174,6 @@ contains
 !! SOURCE
 
  function pbc_bb_proj(vi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pbc_bb_proj'
-!End of the abilint section
 
   implicit none
 
@@ -238,13 +203,6 @@ contains
 
  subroutine dist_pbc_ext(RI,RJ,r2,RD)
   ! ONLY aa AND bb MATRICES ARE USED IN THIS VERSION
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dist_pbc_ext'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -292,13 +250,6 @@ contains
 
  subroutine dist_pbc_int(RI,RJ)
   ! ONLY aa AND bb MATRICES ARE USED IN THIS VERSION
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dist_pbc_int'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------

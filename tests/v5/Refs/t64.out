@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -1046,9 +1046,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.1180 [eV], located at k-point      :   0.0000  0.0000  0.2500
-   Fundamental gap     =   1.9909 [eV], Top of valence bands at :   0.0000  0.3333  0.2500
-                                        Bottom of conduction at :   0.0000  0.0000  0.2500
+   Minimum direct gap =   2.1180 [eV], located at k-point      :   0.0000  0.0000  0.2500
+   Fundamental gap    =   1.9909 [eV], Top of valence bands at :   0.0000  0.3333  0.2500
+                                       Bottom of conduction at :   0.0000  0.0000  0.2500
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  563
@@ -1607,9 +1607,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.1180 [eV], located at k-point      :   0.0000  0.0000  0.2500
-   Fundamental gap     =   1.9909 [eV], Top of valence bands at :  -0.3333  0.0000  0.2500
-                                        Bottom of conduction at :   0.0000  0.0000  0.2500
+   Minimum direct gap =   2.1180 [eV], located at k-point      :   0.0000  0.0000  0.2500
+   Fundamental gap    =   1.9909 [eV], Top of valence bands at :  -0.3333  0.0000  0.2500
+                                       Bottom of conduction at :   0.0000  0.0000  0.2500
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  563

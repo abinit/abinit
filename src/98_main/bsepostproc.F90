@@ -7,7 +7,7 @@
 !!  Utility for post-processing Bethe-Salpeter results
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (YG)
+!! Copyright (C) 2013-2019 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,13 +45,6 @@
  use m_specialmsg,only : specialmsg_getcount, herald
  use m_io_tools,  only : get_unit, flush_unit
  use m_mpinfo,    only : destroy_mpi_enreg, nullify_mpi_enreg, initmpi_seq
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bsepostproc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ----------------------------

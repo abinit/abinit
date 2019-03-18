@@ -8,7 +8,7 @@
 !!  used for kgb parallelization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (FJ, FB, MT)
+!! Copyright (C) 2011-2019 ABINIT group (FJ, FB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -202,13 +202,6 @@ CONTAINS
 !! SOURCE
 
 subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,nband,nkpt,npwarr,nsppol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_init1'
-!End of the abilint section
 
  implicit none
 
@@ -665,13 +658,6 @@ end subroutine bandfft_kpt_init1
 subroutine bandfft_kpt_init2(bandfft_kpt_in,dimffnl,ffnl_gather,ikpt_this_proc,kinpw_gather,&
 &                            kpg_k_gather,lmnmax,matblk,mkmem,ndatarecv,nkpg,ntypat,ph3d_gather)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_init2'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -753,13 +739,6 @@ end subroutine bandfft_kpt_init2
 
 subroutine bandfft_kpt_reset(bandfft_kpt_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_reset'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -800,13 +779,6 @@ end subroutine bandfft_kpt_reset
 !! SOURCE
 
 subroutine bandfft_kpt_destroy(bandfft_kpt_in)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_destroy'
-!End of the abilint section
 
  implicit none
 
@@ -923,13 +895,6 @@ end subroutine bandfft_kpt_destroy
 
 subroutine bandfft_kpt_destroy_array(bandfft_kpt_in,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_destroy_array'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -998,13 +963,6 @@ end subroutine bandfft_kpt_destroy_array
 !! SOURCE
 
 subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandfft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1218,13 +1176,6 @@ end subroutine bandfft_kpt_copy
 !! SOURCE
 
 subroutine bandfft_kpt_mpi_send(input,receiver,tag,spaceComm,ierr,profile)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_mpi_send'
-!End of the abilint section
 
  implicit none
 
@@ -1522,13 +1473,6 @@ end subroutine bandfft_kpt_mpi_send
 !! SOURCE
 
 subroutine bandfft_kpt_mpi_recv(output,sender,tag,spaceComm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_mpi_recv'
-!End of the abilint section
 
  implicit none
 
@@ -1879,13 +1823,6 @@ end subroutine bandfft_kpt_mpi_recv
 
 subroutine bandfft_kpt_savetabs(bandfft_kpt_in,ffnl,ph3d,kpg,kinpw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_savetabs'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1975,13 +1912,6 @@ end subroutine bandfft_kpt_savetabs
 !! SOURCE
 
 subroutine bandfft_kpt_restoretabs(bandfft_kpt_out,ffnl,ph3d,kpg,kinpw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_restoretabs'
-!End of the abilint section
 
  implicit none
 
@@ -2076,13 +2006,6 @@ end subroutine bandfft_kpt_restoretabs
 
 subroutine bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_set_ikpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2126,13 +2049,6 @@ end subroutine bandfft_kpt_set_ikpt
 
 function bandfft_kpt_get_ikpt()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bandfft_kpt_get_ikpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2171,13 +2087,6 @@ end function bandfft_kpt_get_ikpt
 
 
 subroutine prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_bandfft_tabs'
-!End of the abilint section
 
  implicit none
 

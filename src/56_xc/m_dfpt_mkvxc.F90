@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (XG, DRH, FR, EB, SPr)
+!!  Copyright (C) 2001-2019 ABINIT group (XG, DRH, FR, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,13 +136,6 @@ contains
 
 subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
 &          nkxc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkvxc'
-!End of the abilint section
 
  implicit none
 
@@ -487,13 +480,6 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 &                    nhat1,nhat1dim,nhat1gr,nhat1grdim,nkxc,&
 &                    nspden,paral_kgb,qphon,rhor1,usexcnhat,vxc1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkvxcgga'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -772,13 +758,6 @@ end subroutine dfpt_mkvxcgga
 subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
 &          nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,&
 &          rprimd,usexcnhat,vxc,vxc1,xccc3d1,ixcrot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkvxc_noncoll'
-!End of the abilint section
 
  implicit none
 

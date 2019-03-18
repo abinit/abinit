@@ -8,7 +8,7 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (MT)
+!! Copyright (C) 2011-2019 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,6 +72,9 @@ MODULE m_results_gs
   integer :: ngrvdw
    ! Size of grvdw array
    ! Can be 0 (not allocated) or natom
+
+  integer :: berryopt
+   ! Store the Berry phase option to know whether to use pel and pion (0 means no, otherwise yes)
 
 ! Real (real(dp)) scalars
 
@@ -166,6 +169,9 @@ MODULE m_results_gs
   real(dp) :: pel(3)
    ! ucvol times the electronic polarization in reduced coordinates
 
+  real(dp) :: pion(3)
+   ! ucvol times the ionic polarization in reduced coordinates
+
   real(dp) :: strten(6)
    ! Stress tensor in cartesian coordinates (Hartree/Bohr^3)
    ! 6 unique components of this symmetric 3x3 tensor:
@@ -223,13 +229,6 @@ CONTAINS
 
 subroutine init_results_gs(natom,nsppol,results_gs,only_part)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_gs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -252,6 +251,7 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
  results_gs%natom  =natom
  results_gs%ngrvdw =0
  results_gs%nsppol =nsppol
+ results_gs%berryopt=zero
  results_gs%deltae =zero
  results_gs%diffor =zero
  results_gs%entropy=zero
@@ -272,6 +272,7 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
  results_gs%gaps =zero
  if (full_init) then
    results_gs%pel=zero
+   results_gs%pion=zero
    ABI_ALLOCATE(results_gs%gresid,(3,natom))
    results_gs%gresid=zero
    ABI_ALLOCATE(results_gs%grewtn,(3,natom))
@@ -318,13 +319,6 @@ end subroutine init_results_gs
 
 subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_gs_array'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -355,6 +349,7 @@ subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
        results_gs(jj,ii)%natom  =natom
        results_gs(jj,ii)%ngrvdw =0
        results_gs(jj,ii)%nsppol =nsppol
+       results_gs(jj,ii)%berryopt=zero
        results_gs(jj,ii)%deltae =zero
        results_gs(jj,ii)%diffor =zero
        results_gs(jj,ii)%entropy=zero
@@ -375,6 +370,7 @@ subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
        results_gs(jj,ii)%gaps =zero
        if (full_init) then
          results_gs(jj,ii)%pel=zero
+         results_gs(jj,ii)%pion=zero
          ABI_ALLOCATE(results_gs(jj,ii)%gresid,(3,natom))
          results_gs(jj,ii)%gresid=zero
          ABI_ALLOCATE(results_gs(jj,ii)%grewtn,(3,natom))
@@ -421,13 +417,6 @@ end subroutine init_results_gs_array
 
 subroutine destroy_results_gs(results_gs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_gs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -442,6 +431,7 @@ subroutine destroy_results_gs(results_gs)
  results_gs%natom =0
  results_gs%ngrvdw=0
  results_gs%nsppol=0
+ results_gs%berryopt=0
  if (allocated(results_gs%fcart))   then
    ABI_DEALLOCATE(results_gs%fcart)
  end if
@@ -498,13 +488,6 @@ end subroutine destroy_results_gs
 
 subroutine destroy_results_gs_array(results_gs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_gs_array'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -527,6 +510,7 @@ subroutine destroy_results_gs_array(results_gs)
        results_gs(jj,ii)%natom =0
        results_gs(jj,ii)%ngrvdw=0
        results_gs(jj,ii)%nsppol=0
+       results_gs(jj,ii)%berryopt=0
        if (allocated(results_gs(jj,ii)%fcart))   then
          ABI_DEALLOCATE(results_gs(jj,ii)%fcart)
        end if
@@ -585,13 +569,6 @@ end subroutine destroy_results_gs_array
 !! SOURCE
 
 subroutine copy_results_gs(results_gs_in,results_gs_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_results_gs'
-!End of the abilint section
 
  implicit none
 
@@ -679,6 +656,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%natom  =results_gs_in%natom
  results_gs_out%ngrvdw =results_gs_in%ngrvdw
  results_gs_out%nsppol =results_gs_in%nsppol
+ results_gs_out%berryopt=results_gs_in%berryopt
  results_gs_out%deltae =results_gs_in%deltae
  results_gs_out%diffor =results_gs_in%diffor
  results_gs_out%entropy=results_gs_in%entropy
@@ -691,6 +669,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  call energies_copy(results_gs_in%energies,results_gs_out%energies)
 
  results_gs_out%pel(:)=results_gs_in%pel(:)
+ results_gs_out%pion(:)=results_gs_in%pion(:)
  results_gs_out%strten(:)=results_gs_in%strten(:)
 
  if (allocated(results_gs_in%fcart))  results_gs_out%fcart(:,1:natom_in) =results_gs_in%fcart(:,1:natom_in)
@@ -733,13 +712,6 @@ end subroutine copy_results_gs
 
 integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'results_gs_ncwrite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -778,6 +750,14 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
    nctkarr_t('cartesian_stress_tensor', "dp", 'six')])
  NCF_CHECK(ncerr)
 
+ ! In case of a Berry phase calculation output the polarization
+ if (res%berryopt/=0) then
+   ncerr = nctk_def_arrays(ncid, [&
+     nctkarr_t('reduced_electronic_polarization', "dp", "number_of_cartesian_dimensions"),&
+     nctkarr_t('reduced_ionic_polarization', "dp", "number_of_cartesian_dimensions")])
+   NCF_CHECK(ncerr)
+ end if
+
 ! Write data.
 ! Write variables
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
@@ -790,6 +770,11 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("cartesian_forces"), res%fcart))
  NCF_CHECK(nf90_put_var(ncid, vid("cartesian_stress_tensor"), res%strten))
 
+ if (res%berryopt/=0) then
+   NCF_CHECK(nf90_put_var(ncid, vid("reduced_electronic_polarization"), res%pel))
+   NCF_CHECK(nf90_put_var(ncid, vid("reduced_ionic_polarization"), res%pion))
+ end if
+
 ! Add energies
  call energies_ncwrite(res%energies, ncid)
 
@@ -799,13 +784,6 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
 
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)

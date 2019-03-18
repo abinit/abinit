@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2019 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,13 +109,6 @@ contains
 subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 & mpert,msize,natfix,natom,nstrfix,pel,red_ptot,relaxat,relaxstr,&
 & strten,targetpol,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'relaxpol'
-!End of the abilint section
 
  implicit none
 

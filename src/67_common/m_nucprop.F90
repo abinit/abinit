@@ -8,7 +8,7 @@
 !!  electric field gradient and Fermi contact
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MT, JWZ)
+!! Copyright (C) 1998-2019 ABINIT group (MT, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,7 +69,7 @@ contains
 !! calculation and output of electric field gradient tensor at each atomic site
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (JZ,MT)
+!! Copyright (C) 2005-2019 ABINIT group (JZ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -125,13 +125,6 @@ contains
        &                    paw_an,pawang,pawrad,pawrhoij,pawtab,&
        &                    ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
        &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_efg'
-!End of the abilint section
 
     implicit none
 
@@ -362,7 +355,7 @@ contains
 !! calculation and output of Fermi-contact term at each atomic site
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JWZ,MT)
+!! Copyright (C) 2009-2019 ABINIT group (JWZ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -398,13 +391,6 @@ contains
 
   subroutine calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,typat,usepaw,&
        &                  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_fc'
-!End of the abilint section
 
     implicit none
 
@@ -493,7 +479,7 @@ contains
 !! compute the electric field gradient due to ionic cores
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (JWZ)
+!! Copyright (C) 2005-2019 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -537,13 +523,6 @@ contains
 !! SOURCE
 
 subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_efg_ion'
-!End of the abilint section
 
   implicit none
 
@@ -735,7 +714,7 @@ end subroutine make_efg_ion
 !! compute the electric field gradient due to electron density
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (JWZ)
+!! Copyright (C) 2005-2019 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -780,13 +759,6 @@ end subroutine make_efg_ion
 !! SOURCE
 
 subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor,rprimd,symrel,tnons,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_efg_el'
-!End of the abilint section
 
   implicit none
 
@@ -843,7 +815,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
   call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
-  call fourdp(cplex,fofg,fofr,fftdir,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourdp) ! construct charge density in G space
+  call fourdp(cplex,fofg,fofr,fftdir,mpi_enreg,nfft,1,ngfft,tim_fourdp) ! construct charge density in G space
 
   ! the following loops over G vectors has been copied from hartre.F90 in order to be compatible with
   ! possible FFT parallelism

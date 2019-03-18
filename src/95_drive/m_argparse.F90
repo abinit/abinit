@@ -7,7 +7,7 @@
 !!   Simple argument parser used in main programs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,13 +93,6 @@ contains
 !! SOURCE
 
 type(args_t) function args_parser() result(args)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'args_parser'
-!End of the abilint section
 
  implicit none
 
@@ -279,13 +272,6 @@ end function args_parser
 
 subroutine args_print(args)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'args_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -312,13 +298,6 @@ end subroutine args_print
 
 pure logical function begins_with(arg, string) result(bool)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'begins_with'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -344,13 +323,6 @@ end function begins_with
 !! SOURCE
 
 logical function parse_yesno(arg, optname, default) result(bool)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'parse_yesno'
-!End of the abilint section
 
  implicit none
 

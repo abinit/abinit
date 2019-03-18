@@ -9,7 +9,7 @@
 !!  xmpi_allgatherv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (AR,XG)
+!!  Copyright (C) 2001-2019 ABINIT group (AR,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,13 +24,6 @@
 !! SOURCE
 
 subroutine xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_int2d'
-!End of the abilint section
 
  implicit none
 
@@ -91,13 +84,6 @@ end subroutine xmpi_allgatherv_int2d
 !!
 !! SOURCE
 subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_int'
-!End of the abilint section
 
  implicit none
 
@@ -160,12 +146,6 @@ end subroutine xmpi_allgatherv_int
 subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
 &       buf_int_all,buf_int_size_all,buf_dp_all,buf_dp_size_all,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_int1_dp1'
-!End of the abilint section
 
  implicit none
 
@@ -369,12 +349,6 @@ end subroutine xmpi_allgatherv_int1_dp1
 subroutine xmpi_allgatherv_dp(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -434,12 +408,6 @@ end subroutine xmpi_allgatherv_dp
 !! SOURCE
 subroutine xmpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -501,13 +469,6 @@ end subroutine xmpi_allgatherv_dp2d
 !! SOURCE
 subroutine xmpi_allgatherv_dp3d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_dp3d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -568,13 +529,6 @@ end subroutine xmpi_allgatherv_dp3d
 !! SOURCE
 subroutine xmpi_allgatherv_dp4d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_dp4d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -634,13 +588,6 @@ end subroutine xmpi_allgatherv_dp4d
 !!
 !! SOURCE
 subroutine xmpi_allgatherv_dp5d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_dp5d'
-!End of the abilint section
 
  implicit none
 
@@ -703,13 +650,6 @@ end subroutine xmpi_allgatherv_dp5d
 !! SOURCE
 subroutine xmpi_allgatherv_dp6d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_dp6d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -767,13 +707,6 @@ end subroutine xmpi_allgatherv_dp6d
 !! SOURCE
 
 subroutine xmpi_allgatherv_coeff2d(xval_in,xval_out,spaceComm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_coeff2d'
-!End of the abilint section
 
  implicit none
 
@@ -927,13 +860,6 @@ end subroutine xmpi_allgatherv_coeff2d
 !! SOURCE
 
 subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,spaceComm,indx,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgatherv_coeff2d_indx'
-!End of the abilint section
 
  implicit none
 

@@ -7,7 +7,7 @@
 !!  Initialize MPI parameters and datastructures for parallel execution
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (FJ, MT, FD)
+!!  Copyright (C) 1999-2019 ABINIT group (FJ, MT, FD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,20 +96,13 @@ contains
 
 subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpi_setup'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lenstr,ndtset,ndtset_alloc
  type(MPI_type),intent(inout) :: mpi_enregs(0:ndtset_alloc)
- character(len=*),intent(inout) :: string
+ character(len=*),intent(in) :: string
 !arrays
  character(len=fnlen),intent(in) :: filnam(5)
  type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
@@ -177,7 +170,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      write(message, '(5a)' ) &
 &     'When ABINIT is compiled without MPI flag,',ch10,&
 &     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
-&     'Action : modify compilation option or paral_kgb in the input file.'
+&     'Action: modify compilation option or paral_kgb in the input file.'
      MSG_WARNING(message)
    end if
 
@@ -244,7 +237,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'autoparal',tread0,'INT')
    if(tread0==1) dtsets(idtset)%autoparal=intarr(1)
 
-
    ! Dump the list of irreducible perturbations and exit.
    if (dtsets(idtset)%paral_rf==-1.and.optdriver/=RUNL_NONLINEAR) then
      call get_npert_rbz(dtsets(idtset),nband_rbz,nkpt_rbz,npert)
@@ -265,8 +257,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%npkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
      dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1  ; dtsets(idtset)%nphf=1
      dtsets(idtset)%paral_kgb=0
-     message = 'For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1'
-     MSG_WARNING(message)
+     MSG_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1')
    end if
 
 !  Read again some input data to take into account a possible change of paral_kgb
@@ -628,6 +619,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    do ii=1,3
 
 !    Read in mkmem here if it is in the input file
+!    TODO: mkmem is not supported any longer. These variables can be removed.
      if(ii==1)then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mkmem',tread0,'INT')
      else if(ii==2)then
@@ -651,10 +643,10 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
      else
 
-!      mkmem was not set in the input file so default to incore solution
-       write(message,'(6a)') &
-&       'mpi_setup: ',nm_mkmem(ii),' undefined in the input file.','Use default ',nm_mkmem(ii),' = nkpt'
-       call wrtout(std_out,message,'COLL')
+       !  mkmem was not set in the input file so default to incore solution
+       !write(message,'(6a)') &
+       !'mpi_setup: ',nm_mkmem(ii),' undefined in the input file.','Use default ',nm_mkmem(ii),' = nkpt'
+       !call wrtout(std_out,message,'COLL')
        mkmem=nkpt
      end if
 
@@ -696,7 +688,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if(dtsets(idtset)%paral_kgb==1) mpi_enregs(idtset)%paralbd=0
 
 !  Check if some MPI processes are empty (MBPT code uses a complete different MPI algorithm)
-   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE])
+   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])
    if (dtsets(idtset)%usewvl == 0 .and. do_check) then
      if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),mband_upper,&
 &     dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=message)) then
@@ -1016,13 +1008,6 @@ end subroutine mpi_setup
 
  subroutine finddistrproc(dtsets,filnam,idtset,iexit,mband,mpi_enreg,ndtset_alloc,tread)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'finddistrproc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1080,7 +1065,6 @@ end subroutine mpi_setup
 !Is automatic parallelization activated?
  autoparal = dtset%autoparal
  if (autoparal==0) return
-
 
  ! Handy local variables
  iam_master = (mpi_enreg%me==0)
@@ -1840,13 +1824,6 @@ end subroutine mpi_setup
 
    function speedup_fdp(nn,mm)
    !Expected linear speedup for a nn-sized problem and mm processes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'speedup_fdp'
-!End of the abilint section
-
    real(dp) :: speedup_fdp
    integer,intent(in) :: nn,mm
    speedup_fdp=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
@@ -1896,13 +1873,6 @@ end subroutine finddistrproc
 subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,npslk,uselinalggpu)
 
  use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_kgb_indicator'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

@@ -7,7 +7,7 @@
 !!   It should be "contained" in multibinit but abilint does not accept "contains" in programs.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,16 +77,9 @@ subroutine init10(filnam,comm)
  use defs_basis
  use m_xmpi
  use m_errors
- use m_ab7_invars
 
  use m_fstrings,     only : int2char4
  use m_io_tools,     only : open_file
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init10'
-!End of the abilint section
 
  implicit none
 
@@ -94,14 +87,13 @@ subroutine init10(filnam,comm)
 !scalars
  integer,intent(in) :: comm
 !arrays
- character(len=*),intent(out) :: filnam(17)
+ character(len=fnlen),intent(out) :: filnam(17)
 
 !Local variables--------------------------
 !scalars
  integer,parameter :: master=0
  integer :: me,nproc,ierr
  integer :: ii,io
-!arrays
 ! *********************************************************************
 
 !Determine who I am in comm

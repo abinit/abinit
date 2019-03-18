@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT  group (NSAI,XG,MKV)
+!! Copyright (C) 2000-2019 ABINIT  group (NSAI,XG,MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -161,13 +161,6 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 &  kptopt,kptrlatt,mband,mcg,&
 &  mkmem,mpw,natom,nattyp,nband,nberry,npwarr,nspinor,nsppol,ntypat,&
 &  nkpt_,rprimd,ucvol,xred,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'berryphase'
-!End of the abilint section
 
  implicit none
 

@@ -7,7 +7,7 @@
 !!  Low-level tools related to symmetries
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (RC, XG, GMR, MG, JWZ)
+!!  Copyright (C) 1998-2019 ABINIT group (RC, XG, GMR, MG, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,15 +96,6 @@ contains
 
 subroutine mati3inv(mm, mit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mati3inv'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  integer,intent(in) :: mm(3,3)
@@ -171,15 +162,6 @@ end subroutine mati3inv
 
 subroutine mati3det(mm, det)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mati3det'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  integer,intent(in) :: mm(3,3)
@@ -225,15 +207,6 @@ end subroutine mati3det
 !! SOURCE
 
 subroutine matr3inv(aa, ait)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matr3inv'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -299,15 +272,6 @@ end subroutine matr3inv
 
 subroutine symdet(determinant, nsym, sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdet'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -363,15 +327,6 @@ end subroutine symdet
 !! SOURCE
 
 subroutine chkgrp(nsym,symafm,symrel,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkgrp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -499,15 +454,6 @@ end subroutine chkgrp
 !! SOURCE
 
 subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_multable'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -639,15 +585,6 @@ end subroutine sg_multable
 
 subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkorthsy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -774,15 +711,6 @@ end subroutine chkorthsy
 
 subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkprimit'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: chkprim,nsym
@@ -867,15 +795,6 @@ end subroutine chkprimit
 
 subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symrelrot'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -957,7 +876,7 @@ end subroutine symrelrot
 !!
 !! OUTPUT
 !! symq(4,2,nsym)= three first numbers define the G vector;
-!!     fourth number is zero if the q-vector is not preserved, is 1 otherwise
+!!     fourth number is zero if the q-vector is not preserved, 1 otherwise
 !!     second index is one without time-reversal symmetry, two with time-reversal symmetry
 !! timrev=1 if the time-reversal symmetry preserves the wavevector,
 !!   modulo a reciprocal lattice vector (in principle, see below).
@@ -985,15 +904,6 @@ end subroutine symrelrot
 !! SOURCE
 
 subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_q'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1131,14 +1041,6 @@ subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
 
  use m_linalg_interfaces
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matpointsym'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iatom,natom,nsym
@@ -1263,15 +1165,6 @@ end subroutine matpointsym
 !! SOURCE
 
 subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'holocell'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1468,15 +1361,6 @@ end subroutine holocell
 
 subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetrize_rprimd'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -1586,15 +1470,6 @@ end subroutine symmetrize_rprimd
 !! SOURCE
 
 subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetrize_xred'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1731,15 +1606,6 @@ end subroutine symmetrize_xred
 
 subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symchk'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,trtypat
@@ -1848,7 +1714,7 @@ end subroutine symchk
 !! Equivalent to $S*t(b)+tnons-x(a)=another$ $integer$ for $x(b)=x(inv(S))$.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1885,15 +1751,6 @@ end subroutine symchk
 
 
 subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symatm'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2037,15 +1894,6 @@ end subroutine symatm
 !! SOURCE
 
 subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons, type_axis)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symcharac'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2309,15 +2157,6 @@ end subroutine symcharac
 
 subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order,trialt,type_axis)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symaxes'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: center,iholohedry,isym,ordersym,tnons_order
@@ -2579,15 +2418,6 @@ end subroutine symaxes
 !! SOURCE
 
 subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_axis)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symplanes'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2904,15 +2734,6 @@ end subroutine symplanes
 
 subroutine smallprim(metmin,minim,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smallprim'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: rprimd(3,3)
@@ -3134,15 +2955,6 @@ end subroutine smallprim
 !! SOURCE
 
 subroutine print_symmetries(nsym, symrel, tnons, symafm, unit, mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_symmetries'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

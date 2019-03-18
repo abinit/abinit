@@ -7,7 +7,7 @@
 !!  Module to read PAW atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
+!!  Copyright (C) 2012-2019 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -139,13 +139,6 @@ CONTAINS
 !! SOURCE
 
 subroutine pawpsp_nl(ffspl,indlmn,lmnmax,lnmax,mqgrid,qgrid,radmesh,wfll)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_nl'
-!End of the abilint section
 
  implicit none
 
@@ -313,13 +306,6 @@ end subroutine pawpsp_nl
 !! SOURCE
 
 subroutine pawpsp_lo(epsatm,mqgrid,qgrid,q2vq,radmesh,vloc,yp1,ypn,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_lo'
-!End of the abilint section
 
  implicit none
 
@@ -490,13 +476,6 @@ end subroutine pawpsp_lo
 !! SOURCE
 
 subroutine pawpsp_cg(dnqdq0,d2nqdq0,mqgrid,qgrid,nq,radmesh,nr,yp1,ypn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_cg'
-!End of the abilint section
 
  implicit none
 
@@ -773,13 +752,6 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
 & ncore,nmesh,pawrad,pawtab,pspversion,radmesh,save_core_msz,&
 & tncore,tnvale,tproj,tproj_mesh,usexcnhat_in,usexcnhat_out,vale_mesh,&
 & vlocopt,vlocr,vloc_mesh,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_read'
-!End of the abilint section
 
  implicit none
 
@@ -1392,13 +1364,6 @@ end subroutine pawpsp_read
 subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,radmesh,phi_cor,&
 &                             filename) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_read_corewf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1415,7 +1380,9 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
  logical :: ex,oldformat,usexml
  character(len=8) :: dum,dum1,dum2,dum3,dum4
  character(len=80) :: fline
- character(len=500) :: filename_,msg
+ character(len=500) :: msg
+ character(len=fnlen) :: filename_
+
 !arrays
  integer,allocatable :: meshtp(:),meshsz(:)
  real(dp),allocatable :: rad(:),radstp(:),work(:)
@@ -1482,7 +1449,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
 
 !Core WF file is in new XML format
  if ((.not.oldformat).and.(usexml)) then
-   call rdpawpsxml_core(energy_cor,trim(filename_),lcor,ncor,nphicor,radmesh,phi_cor)
+   call rdpawpsxml_core(energy_cor,filename_,lcor,ncor,nphicor,radmesh,phi_cor)
  endif
 
 !Core WF file is in new (proprietary) format
@@ -1626,13 +1593,6 @@ end subroutine pawpsp_read_corewf
 
 subroutine pawpsp_rw_atompaw(basis_size,filpsp,wvl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_rw_atompaw'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1758,13 +1718,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &          mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &          qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &          vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_calc'
-!End of the abilint section
 
  implicit none
 
@@ -2623,13 +2576,6 @@ end subroutine pawpsp_calc
 
 subroutine pawpsp_calc_d5(mesh,mesh_size,tcoredens)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_calc_d5'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2713,13 +2659,6 @@ end subroutine pawpsp_calc_d5
 
 subroutine pawpsp_vhar2rho(radmesh,rho,vv)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_vhar2rho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2784,13 +2723,6 @@ end subroutine pawpsp_vhar2rho
 !! SOURCE
 
 subroutine pawpsp_wvl_calc(pawtab,tnvale,usewvl,vale_mesh,vloc_mesh,vlocr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_wvl_calc'
-!End of the abilint section
 
  implicit none
 
@@ -2952,13 +2884,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 & lnmax,mmax,mqgrid_ff,mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 & pawxcdev, qgrid_ff,qgrid_vl,usewvl,usexcnhat_in,vlspl,xcccrc,&
 & xclevel,xc_denpos,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_17in'
-!End of the abilint section
 
  implicit none
 
@@ -3283,7 +3208,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 & ' mmax= ',mmax
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,  msg,'COLL')
-
+ pawtab%mesh_size=pawrad%mesh_size
 !---------------------------------
 !Read pseudo wave-functions (tphi)
 
@@ -3494,12 +3419,12 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      end if
    end do
    ivlocmesh=iread1
-   vloc_mesh%mesh_type=radmesh(ivlocmesh)%mesh_type
-   vloc_mesh%rstep=radmesh(ivlocmesh)%rstep
-   vloc_mesh%lstep=radmesh(ivlocmesh)%lstep
-   vloc_mesh%mesh_size=pawrad_ifromr(radmesh(ivlocmesh),rmax_vloc)
-   call pawrad_init(vloc_mesh)
-!   call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
+!   vloc_mesh%mesh_type=radmesh(ivlocmesh)%mesh_type
+!   vloc_mesh%rstep=radmesh(ivlocmesh)%rstep
+!   vloc_mesh%lstep=radmesh(ivlocmesh)%lstep
+!   vloc_mesh%mesh_size=radmesh(ivlocmesh)%mesh_size
+!   vloc_mesh%mesh_size=pawrad_ifromr(radmesh(ivlocmesh),rmax_vloc)
+   call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
    LIBPAW_ALLOCATE(vlocr,(vloc_mesh%mesh_size))
    vlocr=zero
    shft=mesh_shift(ivlocmesh)
@@ -3801,13 +3726,6 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,ixc,&
 & pawrad,pawtab,pawxcdev,qgrid_ff,qgrid_vl,&
 & usewvl,usexcnhat_in,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_7in'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3927,13 +3845,6 @@ end subroutine pawpsp_7in
 
  subroutine pawpsp_wvl_sin2gauss(basis_size,mparam,nparam,&
 & param,wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_wvl_sin2gauss'
-!End of the abilint section
 
   implicit none
   !
@@ -4088,13 +3999,6 @@ end subroutine pawpsp_7in
 
 subroutine pawpsp_read_header(funit,lloc,lmax,mmax,pspcod,pspxc,r2well,zion,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_read_header'
-!End of the abilint section
-
 implicit none
 !Arguments ------------------------------------
 !scalars
@@ -4165,13 +4069,6 @@ end subroutine pawpsp_read_header
 
 subroutine pawpsp_read_header_2(funit,pspversion,basis_size,lmn_size)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_read_header_2'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -4235,13 +4132,6 @@ end subroutine pawpsp_read_header_2
 
 
 subroutine pawpsp_wvl(filpsp,pawrad, pawtab,usewvl, wvl_ngauss, comm_mpi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_wvl'
-!End of the abilint section
 
 implicit none
 
@@ -4361,13 +4251,6 @@ end subroutine pawpsp_wvl
 
 subroutine pawpsp_read_header_xml(lloc,lmax,pspcod,pspxc,&
 & psxml,r2well,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_read_header_xml'
-!End of the abilint section
 
 implicit none
 !Arguments ------------------------------------
@@ -4553,13 +4436,6 @@ end subroutine pawpsp_read_header_xml
 subroutine pawpsp_read_pawheader(basis_size,lmax,lmn_size,&
 & l_size,mesh_size,pspversion,psxml,rpaw,rshp,shape_type)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_read_pawheader'
-!End of the abilint section
-
 implicit none
 !Arguments ------------------------------------
 !scalars
@@ -4652,13 +4528,6 @@ end subroutine pawpsp_read_pawheader
 !! SOURCE
 
 subroutine pawpsp_bcast(comm_mpi,epsatm,ffspl,pawrad,pawtab,vlspl,xcccrc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_bcast'
-!End of the abilint section
 
  implicit none
 
@@ -4787,13 +4656,6 @@ subroutine pawpsp_main( &
 & filpsp,usewvl,icoulomb,ixc,xclevel,pawxcdev,usexcnhat,&
 & qgrid_ff,qgrid_vl,ffspl,vlspl,epsatm,xcccrc,zionpsp,znuclpsp,&
 & wvl_ngauss,psxml,comm_mpi,xc_denpos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_main'
-!End of the abilint section
 
  implicit none
 
@@ -4962,13 +4824,6 @@ contains
 
 subroutine pawpsp_check_xml_upf(filpsp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_check_xml_upf'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -5038,13 +4893,6 @@ end subroutine pawpsp_check_xml_upf
 
 
 subroutine pawpsp_consistency()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsp_consistency'
-!End of the abilint section
 
 implicit none
 

@@ -1,1 +1,0 @@
-scripts/configure/nag_config/post_configure_nag.sh

@@ -10,7 +10,7 @@
 !! as well as the central init_supercell
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MJV, DJA)
+!! Copyright (C) 2010-2019 ABINIT group (MJV, DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,13 +117,6 @@ CONTAINS  !=====================================================================
 subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
 &    typat_primcell, xcart_primcell, znucl, scell, ordering)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_supercell_for_qpt'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -213,13 +206,6 @@ end subroutine init_supercell_for_qpt
 !! SOURCE
 
 subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl, scell, ordering)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_supercell'
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------
@@ -324,13 +310,6 @@ end subroutine init_supercell
 
 subroutine order_supercell_typat (scell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'order_supercell_typat'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -387,13 +366,6 @@ end subroutine order_supercell_typat
 !! SOURCE
 
 subroutine freeze_displ_supercell (displ,freeze_displ,scell)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'freeze_displ_supercell'
-!End of the abilint section
 
  implicit none
 
@@ -471,13 +443,6 @@ end subroutine freeze_displ_supercell
 
 subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_supercell_for_qpt'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -538,13 +503,6 @@ end subroutine prt_supercell_for_qpt
 !! SOURCE
 
 subroutine prt_supercell (filename, scell, title1, title2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_supercell'
-!End of the abilint section
 
   implicit none
 
@@ -645,13 +603,6 @@ end subroutine prt_supercell
 
 subroutine copy_supercell (scell_in,scell_copy)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_supercell'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -695,13 +646,6 @@ end subroutine copy_supercell
 !! SOURCE
 
 subroutine getPBCIndexes_supercell(index,ncell)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getPBCIndexes_supercell'
-!End of the abilint section
 
  implicit none
 
@@ -749,13 +693,6 @@ end subroutine getPBCIndexes_supercell
 
 subroutine findBound_supercell(min,max,ncell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findBound_supercell'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -796,13 +733,6 @@ function distance_supercell(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
 !Arguments ------------------------------------
 !scalar
 !array
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'distance_supercell'
-!End of the abilint section
-
   real(dp),intent(in):: rprimd(3,3)
   real(dp),intent(in):: xcart1(3),xcart2(3)
   integer,intent(in) :: cell1(3),cell2(3)
@@ -845,13 +775,6 @@ end function distance_supercell
 !! SOURCE
 
 subroutine destroy_supercell (scell)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_supercell'
-!End of the abilint section
 
   implicit none
 
@@ -916,13 +839,6 @@ end subroutine destroy_supercell
 !! SOURCE
 
 subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_sc,rprimd_sc,ext,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mksupercell'
-!End of the abilint section
 
  implicit none
 

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2018 ABINIT group (MT, FDahm)
+!!  Copyright (C) 2000-2019 ABINIT group (MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,13 +78,6 @@ contains
 !! SOURCE
 
 subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,psps,use_gpu_cuda)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_hamilt_gpu'
-!End of the abilint section
 
  implicit none
 
@@ -186,13 +179,6 @@ end subroutine alloc_hamilt_gpu
 !! SOURCE
 
 subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dealloc_hamilt_gpu'
-!End of the abilint section
 
  implicit none
 

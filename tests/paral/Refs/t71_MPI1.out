@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -1227,9 +1227,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     122.688     122.646
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5433 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.6179 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :  -0.3750 -0.3750  0.0000
+   Minimum direct gap =   2.5433 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6179 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :  -0.3750 -0.3750  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27

@@ -13,7 +13,7 @@
 !! * wvl_data : container for all required wavelets data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (DC)
+!! Copyright (C) 2001-2019 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -233,7 +233,7 @@ CONTAINS
 !!  Nullify all wvl pointers
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2019 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -260,13 +260,6 @@ CONTAINS
 !! SOURCE
 
 subroutine nullify_wvl_data(wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nullify_wvl_data'
-!End of the abilint section
 
  implicit none
 
@@ -343,13 +336,6 @@ subroutine nullify_wvl_data(wvl)
 !!  Nullify comms
 
 pure function comms_cubic_null() result(comms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'comms_cubic_null'
-!End of the abilint section
 
   implicit none
   type(comms_cubic) :: comms

@@ -7,7 +7,7 @@
 !!  This module contains procedures to solve the Dyson equation to find QP energies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -113,15 +113,6 @@ CONTAINS  !====================================================================
 !! SOURCE
 
 subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp_ene,Sr,prtvol,Dtfil,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'solve_dyson'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -529,15 +520,6 @@ end subroutine solve_dyson
 !! SOURCE
 
 subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,prefil)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_sigma_melems'
-!End of the abilint section
-
- implicit none
 
 ! Arguments ------------------------------------
  !scalars

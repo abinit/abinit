@@ -8,7 +8,7 @@
 !!  spherical harmonics Ylm (resp. Slm) (and gradients).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT, FJ, NH, TRangel)
+!! Copyright (C) 2013-2019 ABINIT group (MT, FJ, NH, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,13 +91,6 @@ CONTAINS
 !! SOURCE
 
 function ylmc(il,im,kcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmc'
-!End of the abilint section
 
  implicit none
 
@@ -255,18 +248,10 @@ end function ylmc
 !!      m_vkbr
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine ylmcd(il,im,kcart,dth,dphi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmcd'
-!End of the abilint section
 
  implicit none
 
@@ -404,21 +389,13 @@ end subroutine ylmcd
 !!  We are supressing the so-called Condon-Shortley phase
 !!
 !! PARENTS
-!!      mlwfovlp_proj,mlwfovlp_ylmfac
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine ylm_cmplx(lx,ylm,xx,yy,zz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylm_cmplx'
-!End of the abilint section
 
  implicit none
 
@@ -562,22 +539,14 @@ end subroutine ylm_cmplx
 !! $Yr_{l-m}(%theta ,%phi)=(Im{Y_{l-m}}-(-1)^m Im{Y_{lm}})/sqrt{2}
 !!
 !! PARENTS
-!!      debug_tools,denfgr,m_paw_finegrid,m_paw_pwaves_lmn,m_pawang
-!!      mlwfovlp_ylmfar,posdoppler,pspnl_operat_rec,qijb_kk,smatrix_pawinit
+!!      m_mlwfovlp,m_paw_finegrid,m_paw_mkrho,m_paw_overlap,m_paw_pwaves_lmn
+!!      m_pawang,m_positron,m_rec
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initylmr'
-!End of the abilint section
 
  implicit none
 
@@ -782,18 +751,10 @@ end subroutine initylmr
 !!      m_epjdos,m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine ys(lp,mp,ll,mm,ys_val)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ys'
-!End of the abilint section
 
  implicit none
 
@@ -803,34 +764,43 @@ subroutine ys(lp,mp,ll,mm,ys_val)
  complex(dpc),intent(out) :: ys_val
 
 !Local variables ---------------------------------------
-!scalars
- complex(dpc) :: dmpmm,dmpmmm,m1mm
+ !scalars
+ real(dp) :: d_lp_ll,d_mp_mm,d_mp_mbar,d_mp_am,d_mp_ambar,powm,powam
 
 ! *********************************************************************
 
 
  ys_val = czero
 
- if(lp==ll .AND. (mp==mm .OR. mp==-mm) ) then
-  ! (-1)**mm
-   m1mm=cone; if(abs(mod(mm,2))==1) m1mm=-m1mm
+ d_lp_ll = zero
+ if (lp .EQ. ll) d_lp_ll = one
 
-  ! delta(mp,mm)
-   dmpmm=czero; if(mp==mm) dmpmm=cone
+ d_mp_mm = zero
+ if (mp .EQ. mm) d_mp_mm = one
 
-  ! delta(mp,-mm)
-   dmpmmm=czero; if(mp==-mm) dmpmmm=cone
+ d_mp_mbar = zero
+ if (mp .EQ. -mm) d_mp_mbar = one
 
-   select case (mm)
-       case (0) ! case for S_l0
-         ys_val = dmpmm
-       case (:-1) ! case for S_lm with m < 0
-         ys_val = -(zero,one)*m1mm*sqrthalf*(dmpmmm-m1mm*dmpmm)
-       case (1:) ! case for S_lm with m > 0
-         ys_val = m1mm*sqrthalf*(dmpmm+m1mm*dmpmmm)
-   end select
+ d_mp_am = zero
+ if (mp .EQ. abs(mm)) d_mp_am = one
 
- end if
+ d_mp_ambar = zero
+ if (mp .EQ. -abs(mm)) d_mp_ambar = one
+
+ powm=-one
+ if (mod(mm,2) .EQ. 0) powm = one
+
+ powam=-one
+ if (mod(abs(mm),2) .EQ. 0) powam = one
+
+ select case (mm)
+ case (0) ! case for S_l0
+    ys_val = cone*d_lp_ll*d_mp_mm
+ case (:-1) ! case for S_lm with m < 0
+    ys_val = (zero,one)*sqrthalf*powm*d_lp_ll*(-d_mp_am+powam*d_mp_ambar)
+ case (1:) ! case for S_lm with m > 0
+    ys_val = cone*sqrthalf*d_lp_ll*(powm*d_mp_mm+d_mp_mbar)
+ end select
 
 end subroutine ys
 !!***
@@ -858,18 +828,10 @@ end subroutine ys
 !!      m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine lxyz(lp,mp,idir,ll,mm,lidir)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lxyz'
-!End of the abilint section
 
  implicit none
 
@@ -926,21 +888,13 @@ end subroutine lxyz
 !! The subroutine computes <S_l'm'|L_idir|S_lm>
 !!
 !! PARENTS
-!!      m_pawdij
+!!      m_orbmag,m_paw_nmr,m_pawdij
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slxyzs'
-!End of the abilint section
 
  implicit none
 
@@ -992,21 +946,13 @@ end subroutine slxyzs
 !!  blm(5,mpsang*mpsang)=coefficients depending on Plm and its derivatives where P_lm is a legendre polynome
 !!
 !! PARENTS
-!!      initylmg,m_paw_sphharm
+!!      m_initylmg,m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine plm_coeff(blm,mpsang,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_coeff'
-!End of the abilint section
 
  implicit none
 
@@ -1115,13 +1061,6 @@ end subroutine plm_coeff
 
 function ass_leg_pol(l,m,xarg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ass_leg_pol'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1194,18 +1133,10 @@ end function ass_leg_pol
 !!      m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine plm_d2theta(mpsang,plm_d2t,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_d2theta'
-!End of the abilint section
 
  implicit none
 
@@ -1291,13 +1222,6 @@ end subroutine plm_d2theta
 !! SOURCE
 
 function plm_dphi(ll,mm,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_dphi'
-!End of the abilint section
 
  implicit none
 
@@ -1387,13 +1311,6 @@ end function plm_dphi
 
 function plm_dtheta(ll,mm,xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_dtheta'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1479,18 +1396,10 @@ end function plm_dtheta
 !!      m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine pl_deriv(mpsang,pl_d2,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pl_deriv'
-!End of the abilint section
 
  implicit none
 
@@ -1565,13 +1474,6 @@ end subroutine pl_deriv
 !! SOURCE
 
 subroutine mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkeuler'
-!End of the abilint section
 
  implicit none
 
@@ -1665,13 +1567,6 @@ end subroutine mkeuler
 
 elemental function dble_factorial(nn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dble_factorial'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1727,13 +1622,6 @@ end function dble_factorial
 !! SOURCE
 
 function dbeta(cosbeta,ll,mp,mm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbeta'
-!End of the abilint section
 
  implicit none
 
@@ -1821,13 +1709,6 @@ end function dbeta
 
 pure function phim(costheta,sintheta,mm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phim'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1882,21 +1763,13 @@ pure function phim(costheta,sintheta,mm)
 !!  usefull only in ndij==4
 !!
 !! PARENTS
-!!      m_pawang,pawprt,setnoccmmp
+!!      m_paw_correlations,m_paw_tools,m_pawang
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,wrt_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mat_mlms2jmj'
-!End of the abilint section
 
  implicit none
 
@@ -2157,21 +2030,13 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
 !!  usefull only in ndij==4
 !!
 !! PARENTS
-!!      m_pawang,pawprt,setnoccmmp
+!!      m_paw_correlations,m_paw_tools,m_pawang
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitfi,wrt_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mat_slm2ylm'
-!End of the abilint section
 
  implicit none
 
@@ -2323,20 +2188,12 @@ end subroutine mat_slm2ylm
 !!  useful only in ndij==4
 !!
 !! PARENTS
-!!      m_paw_sphharm
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine create_slm2ylm(lcor,slmtwoylm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_slm2ylm'
-!End of the abilint section
 
  implicit none
 
@@ -2392,20 +2249,12 @@ end subroutine create_slm2ylm
 !!  mlms2jmj= rotation matrix
 !!
 !! PARENTS
-!!      m_paw_sphharm
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine create_mlms2jmj(lcor,mlmstwojmj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_mlms2jmj'
-!End of the abilint section
 
  implicit none
 
@@ -2429,7 +2278,7 @@ subroutine create_mlms2jmj(lcor,mlmstwojmj)
 !--------------- Built indices + allocations
  ll=lcor
  mlmstwojmj=czero
- LIBPAW_ALLOCATE(ind_msml,(2,-ll:ll))
+ LIBPAW_BOUND2_ALLOCATE(ind_msml,BOUNDS(1,2),BOUNDS(-ll,ll))
  LIBPAW_ALLOCATE(mat_mlms2,(2*(2*lcor+1),2*(2*lcor+1)))
  mlmstwojmj=czero
  jc1=0
@@ -2519,19 +2368,15 @@ end subroutine create_mlms2jmj
 !!  http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
 !!
 !! PARENTS
+!!      m_berryphase_new,m_bethe_salpeter,m_dfpt_looppert,m_gstate,m_nonlinear
+!!      m_orbmag,m_respfn_driver,m_screening_driver,m_sigma_driver
+!!      m_wfk_analyze
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setsym_ylm'
-!End of the abilint section
 
  implicit none
 
@@ -2679,19 +2524,13 @@ end subroutine setsym_ylm
 !!   See : Mazevet, S., Torrent, M., Recoules, V. and Jollet, F., High Energy Density Physics, 6, 84-88 (2010)
 !!         Calculations of the Transport Properties within the PAW Formalism
 !! PARENTS
+!!      m_paw_onsite
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
  subroutine setnabla_ylm(ang_phipphj,mpsang)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setnabla_ylm'
-!End of the abilint section
 
  implicit none
 

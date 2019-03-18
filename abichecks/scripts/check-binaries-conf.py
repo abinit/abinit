@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 "Check binaries configuration"
 #
-# Copyright (C) 2012-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2012-2019 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -45,7 +45,8 @@ dep_levels = {
   "netcdf":1,
   "timer":1,
   "triqs":0, 
-  "wannier90":3
+  "wannier90":3,
+  "xml":0  # Comment hexu: Please check. 
 }
 
 # ---------------------------------------------------------------------------- #

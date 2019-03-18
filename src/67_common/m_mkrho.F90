@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,6 +49,7 @@ module m_mkrho
  use m_sort,         only : sort_dp
  use m_prep_kgb,     only : prep_fourwf
  use m_wvl_rho,      only : wvl_mkrho
+ use m_rot_cg,       only : rot_cg
 
  implicit none
 
@@ -130,20 +131,13 @@ contains
 !!
 !! CHILDREN
 !!      bandfft_kpt_set_ikpt,fftpac,fourwf,prep_fourwf,prtrhomxmn
-!!      sphereboundary,symrhg,timab,wrtout,wvl_mkrho,xmpi_sum
+!!      sphereboundary,symrhg,timab,wrtout,wvl_mkrho,xmpi_sum,diag_occ_rot_cg
 !!
 !! SOURCE
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
 &                option) !optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkrho'
-!End of the abilint section
 
  implicit none
 
@@ -191,6 +185,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(dp),allocatable :: occ_k(:),rhoaug(:,:,:),rhoaug_down(:,:,:)
  real(dp),allocatable :: rhoaug_mx(:,:,:),rhoaug_my(:,:,:),rhoaug_up(:,:,:)
  real(dp),allocatable :: taur_alphabeta(:,:,:,:),wfraug(:,:,:,:)
+ real(dp),allocatable :: occ_diag(:)
+! real(dp),allocatable :: occ_nd(2, :, :)
+ real(dp),allocatable :: cwavef_rot(:,:,:,:)
 
 ! *************************************************************************
 
@@ -391,8 +388,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    cwavefb(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
                    if (my_nspinor==2) cwavefb(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
                    weight  =paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
-                   if(dtset%nspinor==1) weight_i=zero
-                   if(dtset%nspinor==2) weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
+                   weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
 
                  else
                    weight=occ(iband+bdtot_index)*dtset%wtk(ikpt)/ucvol
@@ -406,7 +402,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
                  call fourwf(1,rhoaug,cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
 &                 istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                 npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                 npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                 use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
 &                 use_gpu_cuda=dtset%use_gpu_cuda)
 
@@ -422,22 +418,22 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
                      call fourwf(1,rhoaug,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda)
 
 
                    else if(dtset%nspden==4) then
-!                    Build the four components of rho. We use only norm quantities and, so fourwf.
-!$\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
-!$\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
-!$\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
+                     ! Build the four components of rho. We use only norm quantities and, so fourwf.
+                     ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
+                     ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
+                     ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
                      ABI_ALLOCATE(cwavef_x,(2,npw_k))
                      ABI_ALLOCATE(cwavef_y,(2,npw_k))
                      ABI_ALLOCATE(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
                      ABI_ALLOCATE(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
-!$(\Psi^{1}+\Psi^{2})$
+                     ! $(\Psi^{1}+\Psi^{2})$
                      cwavef_x(:,:)=cwavef(:,1:npw_k,1)+cwavef(:,1:npw_k,2)
-!$(\Psi^{1}-i \Psi^{2})$
+                     ! $(\Psi^{1}-i \Psi^{2})$
                      cwavef_y(1,:)=cwavef(1,1:npw_k,1)+cwavef(2,1:npw_k,2)
                      cwavef_y(2,:)=cwavef(2,1:npw_k,1)-cwavef(1,1:npw_k,2)
                      if(use_nondiag_occup_dmft==1) then
@@ -449,17 +445,17 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
                      call fourwf(1,rhoaug_down,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda)
 
                      call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,use_gpu_cuda=dtset%use_gpu_cuda)
 
                      call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,use_gpu_cuda=dtset%use_gpu_cuda)
 
                      ABI_DEALLOCATE(cwavef_x)
@@ -495,6 +491,20 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            ABI_ALLOCATE(occ_k,(nband_k))
            occ_k(:)=occ(bdtot_index+1:bdtot_index+nband_k)
 
+! ---------- DMFT
+           if(allocated(cwavef_rot))  then
+             ABI_DEALLOCATE(cwavef_rot)
+             ABI_DEALLOCATE(occ_diag)
+             ! ABI_DEALLOCATE(occ_nd)
+           end if
+           if(paw_dmft%use_sc_dmft==1) then
+             ! Allocation of DMFT temporaries arrays
+             ABI_ALLOCATE(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
+             ABI_ALLOCATE(occ_diag,(blocksize))
+             ! ABI_ALLOCATE(occ_nd,(2, blocksize, blocksize, dtset%nspinor))
+           end if
+! ---------- END DMFT
+
            do iblock=1,nbdblock
              if (dtset%nspinor==1) then
                cwavef(:,1:npw_k*blocksize,1)=cg(:,1+(iblock-1)*npw_k*blocksize+icg:iblock*npw_k*blocksize+icg)
@@ -515,6 +525,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  call xmpi_sum(cwavef,mpi_enreg%comm_spinor,ierr)
                end if
              end if
+
              if(ioption==1)then
 !              Multiplication by 2pi i (k+G)_alpha
                gp2pi1=gprimd(alpha,1)*two_pi ; gp2pi2=gprimd(alpha,2)*two_pi ; gp2pi3=gprimd(alpha,3)*two_pi
@@ -535,6 +546,27 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              else if(ioption==2)then
                MSG_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
              end if
+
+! ---------- DMFT
+             if(paw_dmft%use_sc_dmft==1) then
+               ! initialisation of DMFT arrays
+               cwavef_rot(:,:,:,:) = zero
+               occ_diag(:) = zero
+               ! occ_nd(:,:,:,:) = paw_dmft%occnd(:,:,:,ikpt,:)
+
+               do ib=1,blocksize
+                 cwavef_rot(:, :, ib, :) = cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :)
+               end do
+
+               call rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_rot, npw_k, nband_k, blocksize,&
+&                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag)
+               do ib=1,blocksize
+                 cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
+               end do
+
+               occ_k(:) = occ_diag(:)
+             end if
+! ---------- END DMFT
 
              call timab(538,1,tsec)
              if (nspinor1TreatedByThisProc) then
@@ -643,6 +675,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      ABI_DEALLOCATE(rhoaug)
      ABI_DEALLOCATE(wfraug)
 
+     if(allocated(cwavef_rot))  then
+       ABI_DEALLOCATE(cwavef_rot)
+       ABI_DEALLOCATE(occ_diag)
+       ! ABI_DEALLOCATE(occ_nd)
+     end if
+
 !    Recreate full rhor on all proc.
      call timab(48,1,tsec)
      call timab(71,1,tsec)
@@ -722,7 +760,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
 !Find and print minimum and maximum total electron density
 !(or total kinetic energy density, or total element of kinetic energy density tensor) and locations
- call wrtout(std_out,'mkrho: echo density (plane-wave part only)','COLL')
+ call wrtout(std_out,' mkrho: echo density (plane-wave part only)','COLL')
  call prtrhomxmn(std_out,mpi_enreg,dtset%nfft,dtset%ngfft,dtset%nspden,1,rhor,optrhor=ioption,ucvol=ucvol)
 
  call timab(799,2,tsec)
@@ -783,13 +821,6 @@ end subroutine mkrho
 
 subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
 &  nfft,ngfft,nspden,ntypat,paral_kgb,psps,pawtab,ph1d,qgrid,rhog,rhor,spinat,ucvol,usepaw,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initro'
-!End of the abilint section
 
  implicit none
 
@@ -1014,7 +1045,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
 !    Note, we end with ispden=1, so that rhog contains the total density
-     call fourdp(1,rhog,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
    end do ! End loop on spins
 
@@ -1119,7 +1150,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
 !    Note, we end with ispden=1, so that rhog contains the total density
-     call fourdp(1,rhog,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
 
    end do ! End loop on spins
@@ -1140,26 +1171,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 !Real and imaginary parts of phase.
    function phr_ini(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phr_ini'
-!End of the abilint section
-
    real(dp) :: phr_ini
    real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
    phr_ini=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
  end function phr_ini
 
    function phi_ini(x1,y1,x2,y2,x3,y3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phi_ini'
-!End of the abilint section
 
    real(dp) :: phi_ini
    real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
@@ -1168,26 +1185,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
    function ph1_ini(nri,ig1,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph1_ini'
-!End of the abilint section
-
    real(dp) :: ph1_ini
    integer,intent(in) :: nri,ig1,ia
    ph1_ini=ph1d(nri,ig1+1+n1+(ia-1)*(2*n1+1))
  end function ph1_ini
 
    function ph2_ini(nri,ig2,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph2_ini'
-!End of the abilint section
 
    real(dp) :: ph2_ini
    integer,intent(in) :: nri,ig2,ia
@@ -1196,26 +1199,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
    function ph3_ini(nri,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph3_ini'
-!End of the abilint section
-
    real(dp) :: ph3_ini
    integer,intent(in) :: nri,ig3,ia
    ph3_ini=ph1d(nri,ig3+1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
  end function ph3_ini
 
    function phre_ini(ig1,ig2,ig3,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phre_ini'
-!End of the abilint section
 
    real(dp) :: phre_ini
    integer,intent(in) :: ig1,ig2,ig3,ia
@@ -1224,13 +1213,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  end function phre_ini
 
    function phimag_ini(ig1,ig2,ig3,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phimag_ini'
-!End of the abilint section
 
    real(dp) :: phimag_ini
    integer,intent(in) :: ig1,ig2,ig3,ia
@@ -1281,13 +1263,6 @@ end subroutine initro
 !! SOURCE
 
 subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtrhomxmn'
-!End of the abilint section
 
  implicit none
 
@@ -1903,7 +1878,7 @@ end subroutine prtrhomxmn
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2019 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1933,13 +1908,6 @@ end subroutine prtrhomxmn
 
 subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 &                       rhor_atm,typat,rprimd,xred,prtvol,file_prefix)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_atomden'
-!End of the abilint section
 
  implicit none
 
@@ -2123,7 +2091,7 @@ end subroutine read_atomden
 !! Units are atomic.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2019 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2178,13 +2146,6 @@ end subroutine read_atomden
 
 subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_pos, &
 &                  natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atomden'
-!End of the abilint section
 
  implicit none
 

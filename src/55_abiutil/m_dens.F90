@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MT,ILuk,MVer,EB,SPr)
+!! Copyright (C) 1998-2019 ABINIT group (MT,ILuk,MVer,EB,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ MODULE m_dens
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
+ use m_numeric_tools, only : wrap2_zero_one
  use m_io_tools,    only : open_file
  use m_geometry,    only : xcart2xred, metric
  use m_mpinfo,      only : ptabs_fourdp
@@ -87,13 +88,6 @@ contains
 
 subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
   natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,prtcharge,hcharge,hden,hweight)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dens_hirsh'
-!End of the abilint section
 
  implicit none
 
@@ -438,13 +432,6 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
                       mpi_enreg,nfft,ngfft,ntypat,ratsph,rhor, &
                       typat,Vmagconstr,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mag_constr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -689,13 +676,6 @@ end subroutine mag_constr
 
 subroutine mag_constr_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsph,rhor,rprimd,spinat,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mag_constr_e'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -863,13 +843,6 @@ end subroutine mag_constr_e
 subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph,rhor,rprimd,typat,ucvol,xred,&
 &    prtopt,cplex,intgden,dentot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calcdensph'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -906,13 +879,17 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
  character(len=500) :: message
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: intgden_(nspden,natom),tsec(2)
+ real(dp) :: intgden_(nspden,natom),tsec(2), my_xred(3, natom), xshift(3, natom)
 
 ! *************************************************************************
 
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3);nd3=n3/mpi_enreg%nproc_fft
  nfftot=n1*n2*n3
  intgden_=zero
+
+ ! This routine is not able to handle xred positions that are "far" from the
+ ! first unit cell so wrap xred into [0, 1[ interval here.
+ call wrap2_zero_one(xred, my_xred, xshift)
 
  ratsm = zero
  if(present(intgden)) then
@@ -970,12 +947,12 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
    rr2=sqrt(r2atsph*gmet(2,2))
    rr3=sqrt(r2atsph*gmet(3,3))
 
-   n1a=int((xred(1,iatom)-rr1+ishift)*n1+delta)-ishift*n1
-   n1b=int((xred(1,iatom)+rr1+ishift)*n1      )-ishift*n1
-   n2a=int((xred(2,iatom)-rr2+ishift)*n2+delta)-ishift*n2
-   n2b=int((xred(2,iatom)+rr2+ishift)*n2      )-ishift*n2
-   n3a=int((xred(3,iatom)-rr3+ishift)*n3+delta)-ishift*n3
-   n3b=int((xred(3,iatom)+rr3+ishift)*n3      )-ishift*n3
+   n1a=int((my_xred(1,iatom)-rr1+ishift)*n1+delta)-ishift*n1
+   n1b=int((my_xred(1,iatom)+rr1+ishift)*n1      )-ishift*n1
+   n2a=int((my_xred(2,iatom)-rr2+ishift)*n2+delta)-ishift*n2
+   n2b=int((my_xred(2,iatom)+rr2+ishift)*n2      )-ishift*n2
+   n3a=int((my_xred(3,iatom)-rr3+ishift)*n3+delta)-ishift*n3
+   n3b=int((my_xred(3,iatom)+rr3+ishift)*n3      )-ishift*n3
 
    ratsm2 = (2*ratsph(typat(iatom))-ratsm)*ratsm
 
@@ -985,14 +962,14 @@ subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph
      if(fftn3_distrib(iz+1)==mpi_enreg%me_fft) then
 
        izloc = ffti3_local(iz+1) - 1
-       difz=dble(i3)/dble(n3)-xred(3,iatom)
+       difz=dble(i3)/dble(n3)-my_xred(3,iatom)
        do i2=n2a,n2b
          iy=mod(i2+ishift*n2,n2)
-         dify=dble(i2)/dble(n2)-xred(2,iatom)
+         dify=dble(i2)/dble(n2)-my_xred(2,iatom)
          do i1=n1a,n1b
            ix=mod(i1+ishift*n1,n1)
 
-           difx=dble(i1)/dble(n1)-xred(1,iatom)
+           difx=dble(i1)/dble(n1)-my_xred(1,iatom)
            rx=difx*rprimd(1,1)+dify*rprimd(1,2)+difz*rprimd(1,3)
            ry=difx*rprimd(2,1)+dify*rprimd(2,2)+difz*rprimd(2,3)
            rz=difx*rprimd(3,1)+dify*rprimd(3,2)+difz*rprimd(3,3)
@@ -1359,13 +1336,6 @@ end subroutine calcdensph
 
 function radsmear(r, rsph, rsm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'radsmear'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1429,13 +1399,6 @@ end function radsmear
 !! SOURCE
 
 subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'printmagvtk'
-!End of the abilint section
 
  implicit none
 

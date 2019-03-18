@@ -9,7 +9,7 @@
 !!  as methods to operate on it.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -228,13 +228,6 @@ CONTAINS  !=====================================================================
 
 subroutine destroy_atomorb(Atm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_atomorb'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -310,13 +303,6 @@ end subroutine destroy_atomorb
 !! SOURCE
 
 subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_atomorb'
-!End of the abilint section
 
  implicit none
 
@@ -681,13 +667,6 @@ end subroutine init_atomorb
 
 subroutine get_atomorb_charge(Atm,Radmesh,nele,radens)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_atomorb_charge'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -765,13 +744,6 @@ end subroutine get_atomorb_charge
 !! SOURCE
 
 subroutine get_overlap(Atm,Atmesh,Radmesh2,isppol,nphi,phi,phi_indln,overlap)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_overlap'
-!End of the abilint section
 
  implicit none
 
@@ -881,13 +853,6 @@ end subroutine get_overlap
 
 subroutine print_atomorb(Atm,header,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_atomorb'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -974,13 +939,6 @@ end subroutine print_atomorb
 !! SOURCE
 
 function my_mode2str(mode) result(str)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'my_mode2str'
-!End of the abilint section
 
  implicit none
 

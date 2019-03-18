@@ -7,7 +7,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (JB)
+!!  Copyright (C) 2014-2019 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,7 +73,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (JB)
+!!  Copyright (C) 2014-2019 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -188,13 +188,6 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_init'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  integer,intent(in),target :: mcg,mcprj,my_natom,ndtpawuj,pwind_alloc
  integer,intent(in),target :: initialized,nfftf
@@ -385,13 +378,6 @@ end subroutine scfcv_init
 subroutine scfcv_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_destroy'
-!End of the abilint section
-
 type(scfcv_t), intent(inout) :: this
 
 !Local variables-------------------------------
@@ -501,13 +487,6 @@ end subroutine scfcv_destroy
 subroutine scfcv_run(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_run'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  type(electronpositron_type),pointer:: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
@@ -630,13 +609,6 @@ subroutine scfcv_runWEntropyDMFT(this,electronpositron,rhog,rhor,rprimd,xred,xre
 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_runWEntropyDMFT'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  type(electronpositron_type),pointer :: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
@@ -718,13 +690,6 @@ end subroutine scfcv_runWEntropyDMFT
 !! SOURCE
 
 subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_scfcv'
-!End of the abilint section
 
  type(scfcv_t), intent(inout) :: this
  type(electronpositron_type),pointer :: electronpositron

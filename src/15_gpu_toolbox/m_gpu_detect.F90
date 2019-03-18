@@ -8,7 +8,7 @@
 !! possible, to any proc
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (MMancini)
+!!  Copyright (C) 2010-2019 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,13 +68,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
  subroutine find_set_gpu(nproc,commcart,gpu_map,ngpu)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_set_gpu'
-!End of the abilint section
 
   implicit none
 
@@ -183,13 +176,6 @@ end subroutine find_set_gpu
 !! SOURCE
 
  subroutine get_topo(nproc,ngpu,topo)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_topo'
-!End of the abilint section
 
   implicit none
 

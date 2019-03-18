@@ -7,7 +7,7 @@
 !!   Routines related to the local part of the pseudopotentials.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM, DRH)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -134,13 +134,6 @@ contains
 subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,natom,nattyp,nfft,ngfft,nspden,ntypat,option,pawtab,ph1d,psps,qprtrb,&
 &  rhog,rhor,rprimd,ucvol,vprtrb,vpsp,wvl,wvl_den,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mklocl'
-!End of the abilint section
 
  implicit none
 
@@ -292,13 +285,6 @@ end subroutine mklocl
 subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,qprtrb,&
 &  rhog,ucvol,vlspl,vprtrb,vpsp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mklocl_recipspace'
-!End of the abilint section
 
  implicit none
 
@@ -598,7 +584,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    end if
 
 !  Transform back to real space
-   call fourdp(1,work1,vpsp,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(1,work1,vpsp,1,mpi_enreg,nfft,1,ngfft,0)
 
 !  Divide by unit cell volume
    xnorm=1.0_dp/ucvol
@@ -651,38 +637,17 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 !Real and imaginary parts of phase--statment functions:
    function phr_mk(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phr_mk'
-!End of the abilint section
-
    real(dp) :: phr_mk,x1,x2,x3,y1,y2,y3
    phr_mk=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
  end function phr_mk
 
    function phi_mk(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phi_mk'
-!End of the abilint section
-
    real(dp):: phi_mk,x1,x2,x3,y1,y2,y3
    phi_mk=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
  end function phi_mk
 
    function ph1_mk(nri,ig1,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph1_mk'
-!End of the abilint section
 
    real(dp):: ph1_mk
    integer :: nri,ig1,ia
@@ -691,13 +656,6 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
    function ph2_mk(nri,ig2,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph2_mk'
-!End of the abilint section
-
    real(dp):: ph2_mk
    integer :: nri,ig2,ia
    ph2_mk=ph1d(nri,ig2+1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1))
@@ -705,26 +663,12 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
    function ph3_mk(nri,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph3_mk'
-!End of the abilint section
-
    real(dp):: ph3_mk
    integer :: nri,ig3,ia
    ph3_mk=ph1d(nri,ig3+1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
  end function ph3_mk
 
    function phre_mk(ig1,ig2,ig3,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phre_mk'
-!End of the abilint section
 
    real(dp):: phre_mk
    integer :: ig1,ig2,ig3,ia
@@ -734,13 +678,6 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
    function phimag_mk(ig1,ig2,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phimag_mk'
-!End of the abilint section
-
    real(dp) :: phimag_mk
    integer :: ig1,ig2,ig3,ia
    phimag_mk=phi_mk(ph1_mk(re,ig1,ia),ph1_mk(im,ig1,ia),&
@@ -748,13 +685,6 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  end function phimag_mk
 
    function gsq_mk(i1,i2,i3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsq_mk'
-!End of the abilint section
 
    real(dp) :: gsq_mk
    integer :: i1,i2,i3
@@ -815,13 +745,6 @@ end subroutine mklocl_recipspace
 subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
 & ntypat,n1,n2,n3,paral_kgb,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_vlocal'
-!End of the abilint section
 
  implicit none
 
@@ -958,7 +881,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
    end do
 
 !  Transform back to real space
-   call fourdp(cplex,work1,vpsp1,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(cplex,work1,vpsp1,1,mpi_enreg,nfft,1,ngfft,0)
 
    xnorm=1.0_dp/ucvol
    vpsp1(1:cplex*nfft)=vpsp1(1:cplex*nfft)*xnorm
@@ -973,26 +896,12 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !Real and imaginary parts of phase.
    function phr_vl3(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phr_vl3'
-!End of the abilint section
-
    real(dp) :: phr_vl3
    real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
    phr_vl3=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
  end function phr_vl3
 
    function phi_vl3(x1,y1,x2,y2,x3,y3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phi_vl3'
-!End of the abilint section
 
    real(dp) :: phi_vl3
    real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
@@ -1002,13 +911,6 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
    function ph1_vl3(nri,ig1,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph1_vl3'
-!End of the abilint section
-
    real(dp) :: ph1_vl3
    integer,intent(in) :: nri,ig1,ia
    ph1_vl3=ph1d(nri,ig1+1+n1+(atindx(ia)-1)*(2*n1+1))
@@ -1016,13 +918,6 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
 !  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
    function ph2_vl3(nri,ig2,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph2_vl3'
-!End of the abilint section
 
    real(dp) :: ph2_vl3
    integer,intent(in) :: nri,ig2,ia
@@ -1032,26 +927,12 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !  Warning : this function differ from similar ones for ground-state calculations : note the atindx !!
    function ph3_vl3(nri,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph3_vl3'
-!End of the abilint section
-
    real(dp) :: ph3_vl3
    integer,intent(in) :: nri,ig3,ia
    ph3_vl3=ph1d(nri,ig3+1+n3+(atindx(ia)-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
  end function ph3_vl3
 
    function phre_vl3(ig1,ig2,ig3,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phre_vl3'
-!End of the abilint section
 
    real(dp) :: phre_vl3
    integer,intent(in) :: ig1,ig2,ig3,ia
@@ -1061,13 +942,6 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
    function phimag_vl3(ig1,ig2,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phimag_vl3'
-!End of the abilint section
-
    real(dp) :: phimag_vl3
    integer,intent(in) :: ig1,ig2,ig3,ia
    phimag_vl3=phi_vl3(ph1_vl3(re,ig1,ia),ph1_vl3(im,ig1,ia),&
@@ -1075,13 +949,6 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  end function phimag_vl3
 
    function gsq_vl3(g1,g2,g3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsq_vl3'
-!End of the abilint section
 
    real(dp) :: gsq_vl3
    real(dp),intent(in) :: g1,g2,g3 ! Note that they are real, unlike in other similar function definitions
@@ -1143,13 +1010,6 @@ end subroutine dfpt_vlocal
 subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 &  mqgrid,natom,nattyp,nfft,ngfft,ntypat,paral_kgb,ph1d,qgrid,&
 &  ucvol,vlspl,vpsp1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vlocalstr'
-!End of the abilint section
 
  implicit none
 
@@ -1333,7 +1193,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 
 
 !Transform back to real space
- call fourdp(1,work1,vpsp1,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,work1,vpsp1,1,mpi_enreg,nfft,1,ngfft,0)
 
 !Divide by unit cell volume
  xnorm=1.0_dp/ucvol
@@ -1346,38 +1206,17 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 !Real and imaginary parts of phase.
    function phr_vl(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phr_vl'
-!End of the abilint section
-
    real(dp) :: phr_vl,x1,x2,x3,y1,y2,y3
    phr_vl=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
  end function phr_vl
 
    function phi_vl(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phi_vl'
-!End of the abilint section
-
    real(dp):: phi_vl,x1,x2,x3,y1,y2,y3
    phi_vl=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
  end function phi_vl
 
    function ph1_vl(nri,ig1,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph1_vl'
-!End of the abilint section
 
    real(dp):: ph1_vl
    integer :: nri,ig1,ia
@@ -1386,13 +1225,6 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 
    function ph2_vl(nri,ig2,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph2_vl'
-!End of the abilint section
-
    real(dp):: ph2_vl
    integer :: nri,ig2,ia
    ph2_vl=ph1d(nri,ig2+1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1))
@@ -1400,26 +1232,12 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 
    function ph3_vl(nri,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph3_vl'
-!End of the abilint section
-
    real(dp):: ph3_vl
    integer :: nri,ig3,ia
    ph3_vl=ph1d(nri,ig3+1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
  end function ph3_vl
 
    function phre_vl(ig1,ig2,ig3,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phre_vl'
-!End of the abilint section
 
    real(dp):: phre_vl
    integer :: ig1,ig2,ig3,ia
@@ -1429,13 +1247,6 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 
    function phimag_vl(ig1,ig2,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phimag_vl'
-!End of the abilint section
-
    real(dp) :: phimag_vl
    integer :: ig1,ig2,ig3,ia
    phimag_vl=phi_vl(ph1_vl(re,ig1,ia),ph1_vl(im,ig1,ia),&
@@ -1443,13 +1254,6 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  end function phimag_vl
 
    function gsq_vl(i1,i2,i3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsq_vl'
-!End of the abilint section
 
    real(dp) :: gsq_vl
    integer :: i1,i2,i3
@@ -1460,13 +1264,6 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  end function gsq_vl
 
    function dgsqds_vl(i1,i2,i3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dgsqds_vl'
-!End of the abilint section
 
    real(dp) :: dgsqds_vl
    integer :: i1,i2,i3

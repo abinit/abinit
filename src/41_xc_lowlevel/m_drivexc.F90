@@ -8,7 +8,7 @@
 !! of the XC kernel (the third derivative of the XC energy)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (MT, MJV, CE, TD, XG)
+!!  Copyright (C) 2012-2019 ABINIT group (MT, MJV, CE, TD, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -176,13 +176,6 @@ contains
 subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel, &
 &                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,& ! Optional arguments
 &                       hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_funcs,xc_tb09_c) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'drivexc_main'
-!End of the abilint section
 
  implicit none
 
@@ -432,13 +425,6 @@ end subroutine drivexc_main
 
 subroutine echo_xc_name (ixc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'echo_xc_name'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -609,13 +595,6 @@ end subroutine echo_xc_name
 
 subroutine check_kxc(ixc,optdriver)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_kxc'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -701,13 +680,6 @@ end subroutine check_kxc
 
 subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
 & add_tfw,xc_funcs) ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'size_dvxc'
-!End of the abilint section
 
  implicit none
 
@@ -867,13 +839,6 @@ end subroutine size_dvxc
 
 subroutine xcmult (depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcmult'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -966,13 +931,6 @@ end subroutine xcmult
 !! SOURCE
 
 subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkdenpos'
-!End of the abilint section
 
  implicit none
 
@@ -1208,13 +1166,6 @@ end subroutine mkdenpos
 subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,& !Optional arguments
 &   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_funcs,xc_tb09_c)  !Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'drivexc'
-!End of the abilint section
 
  implicit none
 

@@ -9,7 +9,7 @@
 !! with some residuals and a real space dielectric function
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,13 +76,6 @@ contains
 
 subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,dielng_in,deltaW_in,gprimd_in,mat_in,g2cart_in )
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker1__init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -139,13 +132,6 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
 
 subroutine frskerker1__end()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker1__end'
-!End of the abilint section
-
   implicit none
 
 ! *************************************************************************
@@ -183,13 +169,6 @@ subroutine frskerker1__end()
 
 subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker1__newvres'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -224,13 +203,6 @@ end subroutine frskerker1__newvres
 !! SOURCE
 
 function frskerker1__pf(nv1,nv2,vrespc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker1__pf'
-!End of the abilint section
 
  implicit none
 
@@ -278,13 +250,6 @@ function frskerker1__pf(nv1,nv2,vrespc)
 !! SOURCE
 
 function frskerker1__dpf(nv1,nv2,vrespc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker1__dpf'
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------

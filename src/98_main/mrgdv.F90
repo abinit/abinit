@@ -7,7 +7,7 @@
 !! This program merges DFPT potentials for different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MG)
+!! Copyright (C) 2004-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,12 +51,6 @@ program mrgdv
  use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print
  use m_io_tools,        only : file_exists, prompt
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mrgdv'
-!End of the abilint section
 
  implicit none
 
@@ -128,6 +122,7 @@ program mrgdv
        write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (prep_gkk)."
        write(std_out,*)"test_v1rsym                Test symmetries of DFPT potentials in real space."
        write(std_out,*)"test_ftinterp [n1,n2,n3]   Test Fourier interpolation of DFPT potentials."
+       write(std_out,*)"downsample in_DVDB out_DVDB [n1,n2,n3] Produce new DVDB with q-subsmesh"
        goto 100
      end if
    end do
@@ -158,10 +153,10 @@ program mrgdv
      ABI_CHECK(nargs > 1, "Additional arguments are missing")
      call get_command_argument(2, db_path)
 
-     call dvdb_init(db, db_path, comm)
-     call dvdb_print(db, prtvol=prtvol)
-     call dvdb_list_perts(db, [-1,-1,-1])
-     call dvdb_free(db)
+     db = dvdb_new(db_path, comm)
+     call db%print(prtvol=prtvol)
+     call db%list_perts([-1,-1,-1])
+     call db%free()
 
    case ("test_v1comp", "test_v1complete")
      call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB, pass extra argument to dump v1(r)) to file")
@@ -185,6 +180,14 @@ program mrgdv
 
      write(std_out,"(a)")sjoin("Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(ngqpt))
      call dvdb_test_ftinterp(db_path, ngqpt, comm)
+
+   case ("downsample")
+     call get_command_argument(2, db_path)
+     call get_command_argument(3, dump_file)
+     !ngqpt = [2,2,2]
+     read(arg, *, iostat=ierr, iomsg=msg)ngqpt
+     ABI_CHECK(ierr == 0, msg)
+     call dvdb_qdownsample(db_path, dump_file, ngqpt, comm)
 
    case default
      MSG_ERROR(sjoin("Unknown command:", command))

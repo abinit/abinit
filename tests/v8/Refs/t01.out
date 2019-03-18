@@ -2,7 +2,7 @@
 .Version 8.1.7 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.9 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -84,6 +84,8 @@ _ WF disk file :      8.291 Mbytes ; DEN or POT disk file :      2.405 Mbytes.
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2        100
+   dmft_occnd_imag1          1
+   dmft_occnd_imag2          0
         dmft_solv1          5
         dmft_solv2          7
      dmft_tolfreq1     1.0000000000E-04
@@ -1626,6 +1628,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2        100
+   dmft_occnd_imag1          1
+   dmft_occnd_imag2          0
         dmft_solv1          5
         dmft_solv2          7
      dmft_tolfreq1     1.0000000000E-04

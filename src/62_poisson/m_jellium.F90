@@ -7,7 +7,7 @@
 !!  Routines related to jellium
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2018 ABINIT group (SC)
+!! Copyright (C) 2007-2019 ABINIT group (SC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,13 +85,6 @@ contains
 
 subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 &  option,paral_kgb,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jellium'
-!End of the abilint section
 
  implicit none
 
@@ -203,9 +196,9 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
  rhjg(:,:)=rhjg(:,:)/zcellength
  if(option==1) vjelg(:,:)=vjelg(:,:)/zcellength
 
- call fourdp(1,rhjg,rhjr,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,rhjg,rhjr,1,mpi_enreg,nfft,1,ngfft,0)
  if(option==1) then
-   call fourdp(1,vjelg,vjell,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(1,vjelg,vjell,1,mpi_enreg,nfft,1,ngfft,0)
    rhog(:,:)=rhjg(:,:)
    rhor(:,1)=rhjr(:)
  else
@@ -230,13 +223,6 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
  contains
 
    function gsq_jel(i1,i2,i3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsq_jel'
-!End of the abilint section
 
    real(dp) :: gsq_jel
    integer,intent(in) :: i1,i2,i3

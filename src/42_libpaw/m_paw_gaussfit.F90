@@ -7,7 +7,7 @@
 !!  Module to fit PAW related data to sums of gaussians
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2019 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -114,13 +114,6 @@ CONTAINS
 
  subroutine gaussfit_main(mparam,nparam_out,nterm_bounds,nr,&
 &           param_out,pawrad,option,outfile,rpaw,y,comm_mpi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_main'
-!End of the abilint section
 
  implicit none
 
@@ -414,13 +407,6 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_set_weight(f,x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_mpi_set_weight'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -471,13 +457,6 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_remove_item(iterm,pload)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_mpi_remove_item'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -518,13 +497,6 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_add_item(iterm,pload)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_mpi_add_item'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -564,13 +536,6 @@ end subroutine gaussfit_main
 !! SOURCE
 
  subroutine gaussfit_mpi_calc_deviation(deviation,nproc,proc_load)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_mpi_calc_deviation'
-!End of the abilint section
 
  implicit none
 
@@ -624,13 +589,6 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_swap(iterm,jterm,&
 &           nproc,nterm_bounds,proc_dist,proc_load)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_mpi_swap'
-!End of the abilint section
 
  implicit none
 
@@ -696,13 +654,6 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_assign(iterm,nproc,nterm_bounds,&
 & proc_dist,proc_load)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_mpi_assign'
-!End of the abilint section
 
  implicit none
 
@@ -771,13 +722,6 @@ end subroutine gaussfit_main
 !! SOURCE
 
  subroutine gaussfit_mpi_main(nproc,nterm_bounds,proc_dist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_mpi_main'
-!End of the abilint section
 
  implicit none
 
@@ -897,13 +841,6 @@ subroutine gaussfit_fit(chisq,constrains,&
 & limit,maxiter,nparam,nterm,nx,option,outfile,param,&
 & verbosity,weight,x,y,y_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_fit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -987,13 +924,6 @@ end subroutine gaussfit_fit
 
 subroutine gaussfit_calc_deriv_r(nterm,nparam,nx,opt,param,x,y_out,&
 & deriv) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_calc_deriv_r'
-!End of the abilint section
 
  implicit none
 
@@ -1109,13 +1039,6 @@ end subroutine gaussfit_calc_deriv_r
 subroutine gaussfit_calc_deriv_c3(nparam,nterm,nx,opt,param,x,y_out,&
 & deriv) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_calc_deriv_c3'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1218,13 +1141,6 @@ end subroutine gaussfit_calc_deriv_c3
 
 subroutine gaussfit_calc_deriv_c2(nparam,nterm,nx,opt,param,x,y_out,&
 & deriv) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_calc_deriv_c2'
-!End of the abilint section
 
  implicit none
 
@@ -1348,13 +1264,6 @@ end subroutine gaussfit_calc_deriv_c2
 
 subroutine gaussfit_calc_deriv_c(nparam,nterm,nx,opt,param,x,y_out,&
 & deriv) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_calc_deriv_c'
-!End of the abilint section
 
  implicit none
 
@@ -1507,13 +1416,6 @@ end subroutine gaussfit_calc_deriv_c
 subroutine gaussfit_calc_deriv_c4(nparam,nterm,nx,opt,param,x,y_out,&
 & deriv) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_calc_deriv_c4'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1632,7 +1534,7 @@ end subroutine gaussfit_calc_deriv_c4
 !!  Uses the Levenberg-Marquardt algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2019 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1665,13 +1567,6 @@ subroutine gaussfit_rlsf(&
 &chisq,constrains,limit,maxiter,&
 &nterm,nparam,nx,option,parameters,&
 &verbosity,weight,x,y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_rlsf'
-!End of the abilint section
 
  implicit none
 
@@ -1823,7 +1718,7 @@ end subroutine gaussfit_rlsf
 !!  Finds chisq, alpha and beta parameters for LSF using the Levenberg-Marquardt algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2019 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1846,13 +1741,6 @@ end subroutine gaussfit_rlsf
 
 subroutine gaussfit_chisq_alpha_beta(alpha,beta,chisq,&
 & nparam,nterm,nx,option,parameters,x,y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_chisq_alpha_beta'
-!End of the abilint section
 
  implicit none
 
@@ -1936,13 +1824,6 @@ end subroutine gaussfit_chisq_alpha_beta
 
 subroutine gaussfit_set_param1(nterm,nparam,nx,param,sep,x,y)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_set_param1'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2016,13 +1897,6 @@ end subroutine gaussfit_set_param1
 
 subroutine gaussfit_set_param2(nterm,nparam,nx,param,rpaw,x,y)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_set_param2'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2085,13 +1959,6 @@ subroutine gaussfit_set_param2(nterm,nparam,nx,param,rpaw,x,y)
 
 !Arguments -------------------------------
 !Local variables-------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_param2_findsign'
-!End of the abilint section
-
  integer::ix,minx
  real(dp)::dist,mindist,xx,yy
 
@@ -2136,13 +2003,6 @@ end subroutine gaussfit_set_param2
 !! SOURCE
 
 subroutine gaussfit_set_param3(nterm,nparam,param,sep)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_set_param3'
-!End of the abilint section
 
  implicit none
 
@@ -2198,13 +2058,6 @@ end subroutine gaussfit_set_param3
 
 subroutine gaussfit_set_param4(nparam,param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_set_param4'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2243,13 +2096,6 @@ end subroutine gaussfit_set_param4
 !! SOURCE
 
 subroutine gaussfit_set_param5(nterm,nparam,nx,param,rpaw,y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_set_param5'
-!End of the abilint section
 
  implicit none
 
@@ -2312,13 +2158,6 @@ end subroutine gaussfit_set_param5
 !! SOURCE
 
 subroutine gaussfit_constrains_init(cons1,cons2,limit,nparam,nterm,nx,option,rpaw,y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_constrains_init'
-!End of the abilint section
 
  implicit none
 
@@ -2398,13 +2237,6 @@ end subroutine gaussfit_constrains_init
 
 subroutine gaussfit_apply_constrains(const,limit,nparam,ioparams)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_apply_constrains'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2466,13 +2298,6 @@ end subroutine gaussfit_apply_constrains
 
 subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbitals,param,pawrad,&
 & rpaw,tproj,comm_mpi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussfit_projector'
-!End of the abilint section
 
  implicit none
 

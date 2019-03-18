@@ -7,7 +7,7 @@
 !!  Helper functions to compute integrals
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Camilo Espejo)
+!!  Copyright (C) 2010-2019 ABINIT group (Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,13 +76,6 @@ contains
 !! SOURCE
 
 subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'radsintr'
-!End of the abilint section
 
  implicit none
 

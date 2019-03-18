@@ -7,7 +7,7 @@
 !!  Functions used to read the pseudopotential header of each psp file, in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,13 +88,6 @@ contains
 !! SOURCE
 
 subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inpspheads'
-!End of the abilint section
 
  implicit none
 
@@ -564,13 +557,6 @@ end subroutine inpspheads
 
 subroutine pspheads_comm(npsp,pspheads,test_paw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pspheads_comm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -745,13 +731,6 @@ end subroutine pspheads_comm
 
 subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsxml2ab'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -843,13 +822,6 @@ end subroutine pawpsxml2ab
 
 subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upfheader2abi'
-!End of the abilint section
-
   implicit none
 
 !Arguments -------------------------------
@@ -929,13 +901,6 @@ end subroutine upfheader2abi
 !! SOURCE
 
 subroutine upfxc2abi(dft, pspxc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upfxc2abi'
-!End of the abilint section
 
   implicit none
 

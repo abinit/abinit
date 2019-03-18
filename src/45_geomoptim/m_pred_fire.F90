@@ -10,7 +10,7 @@
 !! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201 [[cite:Bitzek2006]]
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (hexu)
+!!  Copyright (C) 1998-2019 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,13 +98,6 @@ subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_fire'
-!End of the abilint section
-
  type(abimover),intent(in) :: ab_mover
  type(ab_xfh_type),intent(inout)    :: ab_xfh
  type(abiforstr),intent(in) :: forstr

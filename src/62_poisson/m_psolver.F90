@@ -7,7 +7,7 @@
 !!  Poisson solver
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR,TRangel).
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR,TRangel).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,13 +103,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  use BigDFT_API, only : XC_potential,ELECTRONIC_DENSITY,coulomb_operator
  use poisson_solver, only : H_potential
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psolver_rhohxc'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -566,13 +559,6 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
  use BigDFT_API,     only : coulomb_operator
  use poisson_solver, only : H_potential
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psolver_hartree'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -706,13 +692,6 @@ subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
 #else
  use defs_wvltypes,  only : coulomb_operator
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psolver_kernel'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------

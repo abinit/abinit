@@ -7,7 +7,7 @@
 !! This module contains the description of the variables used in the ScaLAPACK routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (CS,GZ,FB,MG)
+!! Copyright (C) 2004-2019 ABINIT group (CS,GZ,FB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -244,15 +244,6 @@ CONTAINS  !=====================================================================
 
 subroutine build_grid_scalapack(grid,nbprocs,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_grid_scalapack'
-!End of the abilint section
-
-  implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nbprocs,comm
  type(grid_scalapack),intent(out) :: grid
@@ -311,15 +302,6 @@ end subroutine build_grid_scalapack
 
 subroutine build_processor_scalapack(processor,grid,myproc,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_processor_scalapack'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: myproc,comm
  type(processor_scalapack),intent(inout) :: processor
@@ -374,15 +356,6 @@ end subroutine build_processor_scalapack
 
 subroutine init_scalapack(processor,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_scalapack'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: comm
  type(processor_scalapack),intent(out) :: processor
@@ -434,15 +407,6 @@ end subroutine init_scalapack
 
 subroutine end_scalapack(processor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'end_scalapack'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(processor_scalapack),intent(inout)    :: processor
 
@@ -482,15 +446,6 @@ end subroutine end_scalapack
 !! SOURCE
 
 subroutine init_matrix_scalapack(matrix,nbli_global,nbco_global,processor,istwf_k,tbloc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_matrix_scalapack'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nbli_global,nbco_global,istwf_k
@@ -584,15 +539,6 @@ end subroutine init_matrix_scalapack
 
 subroutine destruction_matrix_scalapack(matrix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destruction_matrix_scalapack'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(matrix_scalapack),intent(inout)    :: matrix
 
@@ -647,15 +593,6 @@ end subroutine destruction_matrix_scalapack
 
 pure function matrix_get_local_cplx(matrix,i,j)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_get_local_cplx'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
  complex(dp) :: matrix_get_local_cplx
@@ -687,15 +624,6 @@ end function matrix_get_local_cplx
 !! SOURCE
 
 pure function matrix_get_local_real(matrix,i,j)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_get_local_real'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
@@ -736,15 +664,6 @@ end function matrix_get_local_real
 
 pure subroutine matrix_set_local_cplx(matrix,i,j,value)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_set_local_cplx'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
  complex(dp), intent(in) :: value
@@ -780,15 +699,6 @@ end subroutine matrix_set_local_cplx
 !! SOURCE
 
 pure subroutine matrix_set_local_real(matrix,i,j,value)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_set_local_real'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
@@ -830,15 +740,6 @@ end subroutine matrix_set_local_real
 
 subroutine idx_loc(matrix,i,j,iloc,jloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'idx_loc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
  integer, intent(out) :: iloc,jloc
@@ -871,15 +772,6 @@ end subroutine idx_loc
 !! SOURCE
 
 function glob_loc(matrix,idx,lico)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'glob_loc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: idx, lico
@@ -926,15 +818,6 @@ end function glob_loc
 
 pure subroutine idx_glob(matrix,iloc,jloc,i,j)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'idx_glob'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: iloc,jloc
  integer, intent(out) :: i,j
@@ -969,15 +852,6 @@ end subroutine idx_glob
 !! SOURCE
 
 pure function loc_glob(matrix,proc,idx,lico)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'loc_glob'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: idx,lico
@@ -1022,15 +896,6 @@ end function loc_glob
 !! SOURCE
 
 subroutine matrix_from_global(matrix,reference,istwf_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_from_global'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
@@ -1106,15 +971,6 @@ end subroutine matrix_from_global
 !! SOURCE
 
 subroutine matrix_from_global_sym(matrix,reference,istwf_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_from_global_sym'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
@@ -1198,15 +1054,6 @@ end subroutine matrix_from_global_sym
 
 subroutine matrix_from_realmatrix(matrix,reference,istwf_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_from_realmatrix'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
  type(matrix_scalapack),intent(inout) :: matrix
@@ -1265,15 +1112,6 @@ end subroutine matrix_from_realmatrix
 !! SOURCE
 
 subroutine matrix_from_complexmatrix(matrix,reference,istwf_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_from_complexmatrix'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
@@ -1334,15 +1172,6 @@ end subroutine matrix_from_complexmatrix
 !! SOURCE
 
 subroutine matrix_to_global(matrix,reference,istwf_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_to_global'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k          !,nband_k
@@ -1409,15 +1238,6 @@ end subroutine matrix_to_global
 
 subroutine matrix_to_realmatrix(matrix,reference,istwf_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_to_realmatrix'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
  type(matrix_scalapack),intent(in) :: matrix
@@ -1476,15 +1296,6 @@ end subroutine matrix_to_realmatrix
 
 subroutine matrix_to_complexmatrix(matrix,reference,istwf_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_to_complexmatrix'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
  type(matrix_scalapack),intent(in) :: matrix
@@ -1540,15 +1351,6 @@ end subroutine matrix_to_complexmatrix
 !! SOURCE
 
 subroutine matrix_to_reference(matrix,reference,istwf_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_to_reference'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
@@ -1620,15 +1422,6 @@ end subroutine matrix_to_reference
 !! SOURCE
 
 subroutine slk_matrix_from_global_dpc_2D(Slk_mat,uplo,glob_mat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_matrix_from_global_dpc_2D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1717,15 +1510,6 @@ end subroutine slk_matrix_from_global_dpc_2D
 !! SOURCE
 
 subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_matrix_from_global_dpc_1Dp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1819,15 +1603,6 @@ end subroutine slk_matrix_from_global_dpc_1Dp
 
 subroutine slk_matrix_to_global_dpc_2D(Slk_mat,uplo,glob_mat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_matrix_to_global_dpc_2D'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalaras
  character(len=*),intent(in) :: uplo
@@ -1907,15 +1682,6 @@ end subroutine slk_matrix_to_global_dpc_2D
 
 function my_locr(Slk_mat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'my_locr'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: my_locr
@@ -1971,15 +1737,6 @@ end function my_locr
 !! SOURCE
 
 function my_locc(Slk_mat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'my_locc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2040,15 +1797,6 @@ end function my_locc
 
 subroutine slk_pzgemm(transa,transb,matrix1,alpha,matrix2,beta,results)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_pzgemm'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: transa,transb
  type(matrix_scalapack),intent(in) :: matrix1,matrix2
@@ -2098,15 +1846,6 @@ end subroutine slk_pzgemm
 !! SOURCE
 
 subroutine compute_eigen_problem(processor,matrix,results,eigen,comm,istwf_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_eigen_problem'
-!End of the abilint section
-
-  implicit none
 
 #ifdef HAVE_LINALG_ELPA
   !Arguments ------------------------------------
@@ -2317,15 +2056,6 @@ end subroutine compute_eigen_problem
 subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
                               my_prow,my_pcol,np_rows,np_cols,sc_desc,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'solve_gevp_complex'
-!End of the abilint section
-
-  implicit none
-
   !-Arguments
   integer,intent(in) :: na
   integer,intent(in) :: nev
@@ -2388,15 +2118,6 @@ end subroutine solve_gevp_complex
 subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
                            my_prow,my_pcol,np_rows,np_cols,sc_desc,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'solve_gevp_real'
-!End of the abilint section
-
-  implicit none
-
   !-Arguments
   integer,intent(in) :: na
   integer,intent(in) :: nev
@@ -2455,15 +2176,6 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 #endif
 
 subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_generalized_eigen_problem'
-!End of the abilint section
-
-  implicit none
 
 #ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
@@ -2688,15 +2400,6 @@ end subroutine compute_generalized_eigen_problem
 
 subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,vector,istwf_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_eigen1'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalaras
  integer,intent(in) :: comm
@@ -2823,15 +2526,6 @@ end subroutine compute_eigen1
 !! SOURCE
 
 subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_eigen2'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2968,15 +2662,6 @@ end subroutine compute_eigen2
 !! SOURCE
 
 subroutine slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_pzheev'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3119,15 +2804,6 @@ end subroutine slk_pzheev
 !! SOURCE
 
 subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_found,eigen)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_pzheevx'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: il,iu
@@ -3410,15 +3086,6 @@ end subroutine slk_pzheevx
 
 subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abstol,Slk_vec,mene_found,eigen)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_pzhegvx'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: il,iu,ibtype
  integer,intent(out) :: mene_found
@@ -3642,15 +3309,6 @@ end subroutine slk_pzhegvx
 
 subroutine slk_zinvert(Slk_mat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_zinvert'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(matrix_scalapack),intent(inout) :: Slk_mat
@@ -3752,15 +3410,6 @@ end subroutine slk_zinvert
 
 subroutine slk_zdhp_invert(Slk_mat,uplo)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_zdhp_invert'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3845,15 +3494,6 @@ end subroutine slk_zdhp_invert
 !! SOURCE
 
 subroutine slk_write(Slk_mat,uplo,is_fortran_file,fname,mpi_fh,offset,flags,glob_subarray)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_write'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4067,15 +3707,6 @@ end subroutine slk_write
 
 subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,flags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_read'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: flags,mpi_fh
@@ -4265,15 +3896,6 @@ end subroutine slk_read
 subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsblocks,sub_block,&
 & my_nel,myel2loc,etype,slk_type,offset_err,is_fortran_file)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_single_fview_read_mask'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsblocks
@@ -4430,15 +4052,6 @@ end subroutine slk_single_fview_read_mask
 
 subroutine slk_symmetrize(Slk_mat,uplo,symtype)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_symmetrize'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: symtype
@@ -4573,15 +4186,6 @@ end subroutine slk_symmetrize
 !! SOURCE
 
 subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortran_file)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_single_fview_read'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4784,15 +4388,6 @@ end subroutine slk_single_fview_read
 
 subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offset_err,is_fortran_file,glob_subarray)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_single_fview_write'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: offset_err,slk_type,etype,nelw
@@ -4984,15 +4579,6 @@ end subroutine slk_single_fview_write
 
 subroutine slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_bsize_and_type'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(matrix_scalapack),intent(in) :: Slk_mat
@@ -5059,15 +4645,6 @@ end subroutine slk_bsize_and_type
 !! SOURCE
 
 subroutine slk_my_rclist(Slk_mat,rc_str,how_many,rc_list)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slk_my_rclist'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5170,13 +4747,6 @@ end subroutine slk_my_rclist
 #else
 
 subroutine no_scalapack()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'no_scalapack'
-!End of the abilint section
 
  implicit none
 

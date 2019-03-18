@@ -72,11 +72,10 @@ freqremin4   21 eV
 freqremax4   31 eV
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_intel_18.0_openmpi
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t37.in, t38.in, t39.in
 #%% [files]
 #%% files_to_test = 

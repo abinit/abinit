@@ -2,7 +2,7 @@
 .Version 8.9.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -723,9 +723,9 @@ P           mkmem           1
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -773,9 +773,9 @@ P           mkmem           1
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.1164 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   3.1164 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1164 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1164 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -945,9 +945,9 @@ P           mkmem           1
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -995,9 +995,9 @@ P           mkmem           1
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.1146 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   3.1146 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1146 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1146 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
 == DATASET 31 ==================================================================
@@ -1167,9 +1167,9 @@ P           mkmem           1
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -1217,9 +1217,9 @@ P           mkmem           1
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.1121 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   3.1121 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1121 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1121 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
 == DATASET 41 ==================================================================
@@ -1389,9 +1389,9 @@ P           mkmem           1
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -1439,9 +1439,9 @@ P           mkmem           1
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.1126 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   3.1126 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1126 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1126 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
 == DATASET 51 ==================================================================
@@ -1611,9 +1611,9 @@ P           mkmem           1
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -1661,9 +1661,9 @@ P           mkmem           1
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.1137 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   3.1137 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1137 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1137 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 == END DATASET(S) ==============================================================
 ================================================================================

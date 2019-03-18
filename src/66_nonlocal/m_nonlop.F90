@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (MT)
+!!  Copyright (C) 1998-2019 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,7 +152,7 @@ contains
 !!     | use_gpu_cuda=governs wheter we do the hamiltonian calculation on gpu or not
 !!     | useylm=how the NL operator is to be applied: 1=using Ylm, 0=using Legendre polynomials
 !!  [iatom_only]=optional. If present (and >0), only projectors related to atom of index iatom_only
-!!          will be applied. (used fi to apply derivative of NL operator wrt an atomic displacement)
+!!          will be applied. (used to apply derivative of NL operator wrt an atomic displacement)
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
 !!                        - k point direction in the case (choice=5,51,or 52)
 !!                          for choice 53 signs=2, cross derivatives are in idir-1 and idir+1 directions
@@ -320,13 +320,6 @@ contains
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
 &                 enl,iatom_only,only_SO,select_k) !optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop'
-!End of the abilint section
 
  implicit none
 
@@ -651,10 +644,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !A specific version of nonlop based on BLAS3 can be used
 !But there are several restrictions
+
+! use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
+!& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
+!& cpopt < 3 .and. hamk%useylm /= 0 .and. &
+!& (choice < 2 .or. choice == 7) )
+
  use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
-& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
+& signs == 2 .and. paw_opt /= 2 .and. &
 & cpopt < 3 .and. hamk%useylm /= 0 .and. &
 & (choice < 2 .or. choice == 7) )
+
  if(use_gemm_nonlop) then
    call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
 &   dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
@@ -791,7 +791,7 @@ end subroutine nonlop
 !!  This routine is an interface to Cuda Kernel gpu_nonlop.cu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (FDahm, MT)
+!! Copyright (C) 2011-2019 ABINIT group (FDahm, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -936,13 +936,6 @@ end subroutine nonlop
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop_gpu'
-!End of the abilint section
 
  implicit none
 

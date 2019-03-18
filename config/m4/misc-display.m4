@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -94,6 +94,7 @@ Summary of important options:
   * MPI    enabled  : ${enable_mpi}
   * MPI-IO enabled  : ${enable_mpi_io}
   * GPU    enabled  : ${enable_gpu} (flavor: ${lib_gpu_flavor})
+  * XML    enabled  : ${enable_xml}
 
   * TRIO   flavor = ${lib_trio_flavor}
   * TIMER  flavor = ${lib_timer_flavor} (libs: ${tmp_rep_timer_libs})

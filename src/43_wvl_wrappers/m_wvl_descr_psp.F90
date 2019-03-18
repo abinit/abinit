@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (DC)
+!!  Copyright (C) 2008-2019 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,13 +85,6 @@ subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
  use BigDFT_API, only: psp_data_merge_to_dict, psp_dict_fill_all, atomic_info, &
 &                psp_dict_analyse, atomic_data_set_from_dict, merge_input_file_to_dict
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_descr_psp_set'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -187,13 +180,6 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: atomic_info, UNINITIALIZED, psp_from_data
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_descr_psp_fill'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -343,13 +329,6 @@ subroutine wvl_descr_free(wvl)
  use BigDFT_API, only : deallocate_atoms_data
  use dynamic_memory
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_descr_free'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -417,13 +396,6 @@ subroutine wvl_descr_atoms_set(acell, icoulomb, natom, ntypat, typat, wvl)
 &                      astruct_set_n_atoms,astruct_set_n_types,&
 &                      allocate_atoms_nat,allocate_atoms_ntypes
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_descr_atoms_set'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -444,7 +416,7 @@ subroutine wvl_descr_atoms_set(acell, icoulomb, natom, ntypat, typat, wvl)
 
 #if defined HAVE_BIGDFT
 
- call f_routine(ABI_FUNC)
+ call f_routine('wvl_descr_atoms_set')
 
  wvl%atoms=atoms_data_null()
 
@@ -524,13 +496,6 @@ subroutine wvl_descr_atoms_set_sym(wvl, efield, irrzon, nsppol, nsym, phnons, &
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: astruct_set_symmetries
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_descr_atoms_set_sym'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------

@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2018 ABINIT group (RC, XG)
+!!  Copyright (C) 2000-2019 ABINIT group (RC, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,15 +76,6 @@ contains
 !! SOURCE
 
 subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtspgroup'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -401,15 +392,6 @@ end subroutine prtspgroup
 
 
 subroutine spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spgdata'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2158,15 +2140,6 @@ end subroutine spgdata
 
 subroutine ptgmadata(ptgroupma,ptgrpmasb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ptgmadata'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ptgroupma
@@ -2328,15 +2301,6 @@ end subroutine ptgmadata
 
 subroutine getptgroupma(ptgroup,ptgroupha,ptgroupma)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getptgroupma'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: ptgroupma
@@ -2474,15 +2438,6 @@ end subroutine getptgroupma
 !! SOURCE
 
 subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symptgroup'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

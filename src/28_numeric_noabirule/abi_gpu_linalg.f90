@@ -7,7 +7,7 @@
 !!  Interfaces of GPU subroutines wrapper
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (FDahm ))
+!!  Copyright (C) 2011-2019 ABINIT group (FDahm ))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,13 +42,6 @@
 #ifndef HAVE_GPU_CUDA
 
 subroutine alloc_on_gpu(gpu_ptr,size)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_on_gpu'
-!End of the abilint section
 
  implicit none
 
@@ -92,12 +85,6 @@ end subroutine alloc_on_gpu
 !! SOURCE
 
 subroutine copy_from_gpu(dtab,gpu_ptr,size)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_from_gpu'
-!End of the abilint section
 
  implicit none
 
@@ -143,12 +130,6 @@ end subroutine copy_from_gpu
 
 subroutine copy_on_gpu(dtab,gpu_ptr,size)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_on_gpu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -190,13 +171,6 @@ end subroutine copy_on_gpu
 
 subroutine dealloc_on_gpu(gpu_ptr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dealloc_on_gpu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -234,13 +208,6 @@ end subroutine dealloc_on_gpu
 
 subroutine gpu_linalg_init()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpu_linalg_init'
-!End of the abilint section
-
  implicit none
 
 end subroutine gpu_linalg_init
@@ -268,13 +235,6 @@ end subroutine gpu_linalg_init
 !!
 !! SOURCE
 subroutine gpu_linalg_shutdown()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpu_linalg_shutdown'
-!End of the abilint section
 
  implicit none
 
@@ -321,12 +281,6 @@ end subroutine gpu_linalg_shutdown
 !! SOURCE
 
 subroutine gpu_xgemm(cplx,transa,transb,m,n,k,alpha,a_gpu,lda,b_gpu,ldb,beta,c_gpu,ldc)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpu_xgemm'
-!End of the abilint section
 
  implicit none
 
@@ -407,12 +361,6 @@ end subroutine gpu_xgemm
 !! SOURCE
 subroutine gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a_gpu,lda,b_gpu,ldb)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpu_xtrsm'
-!End of the abilint section
-
  implicit none
 
 ! !Arguments ------------------------------------
@@ -476,12 +424,6 @@ end subroutine gpu_xtrsm
 subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spaceComm,&
 &                              sqgram_gpu,vectsize,&
 &                              x_cplx,timopt,tim_xortho) ! optional arguments
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpu_xorthonormalize'
-!End of the abilint section
 
  implicit none
 

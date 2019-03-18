@@ -9,7 +9,7 @@
 !!  pawtab_type variables define TABulated data for PAW (from pseudopotential)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT)
+!! Copyright (C) 2013-2019 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -604,13 +604,6 @@ CONTAINS !===========================================================
 
 subroutine pawtab_nullify_0D(Pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_nullify_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -685,13 +678,6 @@ end subroutine pawtab_nullify_0D
 
 subroutine pawtab_nullify_1D(Pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_nullify_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -735,13 +721,6 @@ end subroutine pawtab_nullify_1D
 !! SOURCE
 
 subroutine pawtab_free_0D(Pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_free_0D'
-!End of the abilint section
 
  implicit none
 
@@ -954,13 +933,6 @@ end subroutine pawtab_free_0D
 
 subroutine pawtab_free_1D(Pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_free_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1000,13 +972,6 @@ end subroutine pawtab_free_1D
 
 subroutine pawtab_set_flags_0D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
 &                              has_vhtnzc,has_nabla,has_shapefncg,has_wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_set_flags_0D'
-!End of the abilint section
 
  implicit none
 
@@ -1060,13 +1025,6 @@ end subroutine pawtab_set_flags_0D
 
 subroutine pawtab_set_flags_1D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
 &                              has_vhtnzc,has_nabla,has_shapefncg,has_wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_set_flags_1D'
-!End of the abilint section
 
  implicit none
 
@@ -1132,13 +1090,6 @@ end subroutine pawtab_set_flags_1D
 !! SOURCE
 
 subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_print'
-!End of the abilint section
 
  implicit none
 
@@ -1343,13 +1294,6 @@ end subroutine pawtab_print
 subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
 &                           mpi_atmtab) ! Optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_get_lsize'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1369,7 +1313,7 @@ subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
 
  !@pawtab_type
 
- natom_typat=size(typat)
+ natom_typat=count(typat>0)
  if (size(pawtab)<maxval(typat)) then
    msg='error on pawtab size!'
    MSG_BUG(msg)
@@ -1435,13 +1379,6 @@ end subroutine pawtab_get_lsize
 !! SOURCE
 
 subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_bcast'
-!End of the abilint section
 
  implicit none
 
@@ -2827,13 +2764,6 @@ end subroutine pawtab_bcast
 
 subroutine wvlpaw_allocate(wvlpaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_allocate'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2874,13 +2804,6 @@ end subroutine wvlpaw_allocate
 !! SOURCE
 
 subroutine wvlpaw_free(wvlpaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_free'
-!End of the abilint section
 
  implicit none
 
@@ -2934,13 +2857,6 @@ end subroutine wvlpaw_free
 
 subroutine wvlpaw_nullify(wvlpaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2980,13 +2896,6 @@ end subroutine wvlpaw_nullify
 !! SOURCE
 
 subroutine wvlpaw_rholoc_free(wvlpaw_rholoc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_rholoc_free'
-!End of the abilint section
 
  implicit none
 
@@ -3029,13 +2938,6 @@ end subroutine wvlpaw_rholoc_free
 !! SOURCE
 
 subroutine wvlpaw_rholoc_nullify(wvlpaw_rholoc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_rholoc_nullify'
-!End of the abilint section
 
  implicit none
 

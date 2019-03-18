@@ -8,7 +8,7 @@
 !!  They permit to hide the complex/real form of the WFs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (FBottin,CS,FDahm,MT)
+!! Copyright (C) 2009-2019 ABINIT group (FBottin,CS,FDahm,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,7 +60,7 @@ CONTAINS
 !!  for a block of band (band-FFT parallelisation)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FBottin,CS)
+!! Copyright (C) 1998-2019 ABINIT group (FBottin,CS)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,13 +99,6 @@ CONTAINS
 subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
 &  mpi_enreg,npw,nspinor,optekin,optpcon,pcon,ghc,vect,vectsize,&
 &  timopt,tim_xprecon) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xprecon'
-!End of the abilint section
 
  implicit none
 

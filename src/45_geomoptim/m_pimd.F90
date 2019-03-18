@@ -8,7 +8,7 @@
 !!  Path-Integral Molecular Dynamics (PIMD) implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (GG,MT)
+!! Copyright (C) 2010-2019 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -144,13 +144,6 @@ CONTAINS !===========================================================
 
 subroutine pimd_init(dtset,pimd_param,is_master)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -240,13 +233,6 @@ end subroutine pimd_init
 
 subroutine pimd_nullify(pimd_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -307,13 +293,6 @@ end subroutine pimd_nullify
 !! SOURCE
 
 subroutine pimd_destroy(pimd_param)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_destroy'
-!End of the abilint section
 
  implicit none
 
@@ -384,13 +363,6 @@ end subroutine pimd_destroy
 !! SOURCE
 
 subroutine pimd_init_qtb(dtset,qtb_file_unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_init_qtb'
-!End of the abilint section
 
  implicit none
 
@@ -463,13 +435,6 @@ end subroutine pimd_init_qtb
 
 subroutine pimd_skip_qtb(pimd_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_skip_qtb'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -523,13 +488,6 @@ end subroutine pimd_skip_qtb
 
 function pimd_is_restart(mass,vel,vel_cell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_is_restart'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -579,13 +537,6 @@ end function pimd_is_restart
 !! SOURCE
 
 function pimd_temperature(mass,vel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_temperature'
-!End of the abilint section
 
  implicit none
 
@@ -680,13 +631,6 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 &          forces,inertmass,irestart,itimimage,kt,natom,optcell,prtstress,&
 &          prtvolimg,rprimd,stress,temperature1,temperature2,traj_unit,&
 &          trotter,vel,vel_cell,xcart,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_print'
-!End of the abilint section
 
  implicit none
 
@@ -954,13 +898,6 @@ end subroutine pimd_print
 
 subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtatcon)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_initvel'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1086,13 +1023,6 @@ end subroutine pimd_initvel
 
 subroutine pimd_langevin_random(alea,irandom,iseed,langev,mass,natom,trotter,zeroforce)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_langevin_random'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1203,13 +1133,6 @@ end subroutine pimd_langevin_random
 
 subroutine pimd_langevin_random_qtb(alea,langev,mass,natom,qtb_file_unit,trotter,zeroforce)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_langevin_random_qtb'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1306,13 +1229,6 @@ end subroutine pimd_langevin_random_qtb
 
 subroutine pimd_langevin_random_bar(alea_bar,irandom,iseed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_langevin_random_bar'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1387,13 +1303,6 @@ end subroutine pimd_langevin_random_bar
 
 subroutine pimd_langevin_random_init(irandom,iseed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_langevin_random_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1446,13 +1355,6 @@ end subroutine pimd_langevin_random_init
 !! SOURCE
 
 subroutine pimd_energies(eharm,eharm_virial,epot,etotal_img,forces,natom,spring,trotter,xcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_energies'
-!End of the abilint section
 
  implicit none
 
@@ -1550,13 +1452,6 @@ end subroutine pimd_energies
 
 subroutine pimd_forces(forces,natom,spring,transform,trotter,xcart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_forces'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1647,13 +1542,6 @@ end subroutine pimd_forces
 subroutine pimd_langevin_forces(alea,forces,forces_langevin,friction,&
 &                               langev,mass,natom,trotter,vel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_langevin_forces'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1726,13 +1614,6 @@ end subroutine pimd_langevin_forces
 
 subroutine pimd_nosehoover_forces(dzeta,forces,forces_nosehoover,mass,natom,&
 &                                 nnos,trotter,vel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_nosehoover_forces'
-!End of the abilint section
 
  implicit none
 
@@ -1809,13 +1690,6 @@ end subroutine pimd_nosehoover_forces
 
 subroutine pimd_stresses(mass,natom,quantummass,stress_pimd,stressin,&
 &                        temperature,temperature_therm,trotter,vel,volume,xcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_stresses'
-!End of the abilint section
 
  implicit none
 
@@ -1953,13 +1827,6 @@ end subroutine pimd_stresses
 
 function pimd_diff_stress(stress_pimd,stress_target)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_diff_stress'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2027,13 +1894,6 @@ end function pimd_diff_stress
 !! SOURCE
 
 subroutine pimd_predict_taylor(dtion,forces,mass,natom,trotter,vel,xcart,xcart_next)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_predict_taylor'
-!End of the abilint section
 
  implicit none
 
@@ -2104,13 +1964,6 @@ end subroutine pimd_predict_taylor
 !! SOURCE
 
 subroutine pimd_predict_verlet(dtion,forces,mass,natom,trotter,xcart,xcart_next,xcart_prev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_predict_verlet'
-!End of the abilint section
 
  implicit none
 
@@ -2195,13 +2048,6 @@ end subroutine pimd_predict_verlet
 
 subroutine pimd_nosehoover_propagate(dtion,dzeta,mass,natom,nnos,qmass,temperature,&
 &                                    trotter,vel,zeta,zeta_next,zeta_prev,itimimage,transform)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_nosehoover_propagate'
-!End of the abilint section
 
  implicit none
 
@@ -2376,13 +2222,6 @@ end subroutine pimd_nosehoover_propagate
 !! SOURCE
 
 subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_coord_transform'
-!End of the abilint section
 
  implicit none
 
@@ -2574,13 +2413,6 @@ end subroutine pimd_coord_transform
 
 subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_force_transform'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2708,13 +2540,6 @@ end subroutine pimd_force_transform
 
 subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,&
 &                                trotter,wtatcon,xcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_apply_constraint'
-!End of the abilint section
 
  implicit none
 
@@ -2847,13 +2672,6 @@ end subroutine pimd_apply_constraint
 !! SOURCE
 
 subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform,trotter)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_mass_spring'
-!End of the abilint section
 
  implicit none
 

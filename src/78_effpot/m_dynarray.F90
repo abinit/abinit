@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (hexu)
+!! Copyright (C) 2010-2019 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,9 +28,11 @@
 #include "abi_common.h"
 
 module m_dynmaic_array
+
   use defs_basis
   use m_abicore
   use m_errors
+
   implicit none
 !!***
 
@@ -91,23 +93,19 @@ CONTAINS
 !! SOURCE
 subroutine real_array_type_push(self, val)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'real_array_type_push'
-!End of the abilint section
-
     class(real_array_type), intent(inout):: self
     real(dp) :: val
     real(dp), allocatable :: temp(:)
+    integer :: err
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ABI_ALLOCATE(self%data, (self%capacity))
+      !ABI_ALLOCATE(self%data, (self%capacity))
+      ALLOCATE(self%data(self%capacity), stat=err)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ABI_ALLOCATE(temp,(self%capacity))
+      !ABI_ALLOCATE(temp,(self%capacity))
+      ALLOCATE(temp(self%capacity), stat=err)
       temp(:self%size-1) = self%data
       call move_alloc(temp, self%data) !temp gets deallocated
     end if
@@ -136,16 +134,11 @@ end subroutine real_array_type_push
 !! SOURCE
 subroutine real_array_type_finalize(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'real_array_type_finalize'
-!End of the abilint section
-
   class(real_array_type), intent(inout):: self
+  integer :: err
   if ( allocated(self%data) ) then
-      ABI_DEALLOCATE(self%data)
+      !ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data, stat=err)
   end if
   self%size=0
   self%capacity=0
@@ -174,23 +167,18 @@ end subroutine real_array_type_finalize
 !! SOURCE
 subroutine int_array_type_push(self, val)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_array_type_push'
-!End of the abilint section
-
     class(int_array_type), intent(inout):: self
-    integer :: val
+    integer :: val, err
     integer, allocatable :: temp(:)
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ABI_ALLOCATE(self%data, (self%capacity))
+      !ABI_ALLOCATE(self%data, (self%capacity))
+      ALLOCATE(self%data(self%capacity), stat=err)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ABI_ALLOCATE(temp,(self%capacity))
+      !ABI_ALLOCATE(temp,(self%capacity))
+      ALLOCATE(temp(self%capacity), stat=err)
       temp(:self%size-1) = self%data
       call move_alloc(temp, self%data) !temp gets deallocated
     end if
@@ -219,16 +207,11 @@ end subroutine int_array_type_push
 !! SOURCE
 subroutine int_array_type_finalize(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_array_type_finalize'
-!End of the abilint section
-
   class(int_array_type), intent(inout):: self
+  integer:: err
   if ( allocated(self%data) ) then
-      ABI_DEALLOCATE(self%data)
+      !ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data, stat=err)
   end if
   self%size=0
   self%capacity=0

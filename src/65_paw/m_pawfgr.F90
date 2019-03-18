@@ -9,7 +9,7 @@
 !!  pawfgr_type variables define Fine rectangular GRid parameters and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2019 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -168,13 +168,6 @@ CONTAINS
 subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
 &                      gsqcutc_eff,gsqcutf_eff,gmet,k0) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgr_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -309,13 +302,6 @@ end subroutine pawfgr_init
 
 subroutine pawfgr_destroy(Pawfgr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgr_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -365,13 +351,6 @@ end subroutine pawfgr_destroy
 
 subroutine pawfgr_nullify(Pawfgr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgr_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -403,7 +382,7 @@ end subroutine pawfgr_nullify
 !! Calculate the correspondance between the coarse grid and the fine grid
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2019 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -431,13 +410,6 @@ end subroutine pawfgr_nullify
 !! SOURCE
 
 subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indgrid'
-!End of the abilint section
 
  implicit none
 

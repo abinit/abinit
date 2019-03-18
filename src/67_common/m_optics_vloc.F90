@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (SM,VR,FJ,MT)
+!!  Copyright (C) 2010-2019 ABINIT group (SM,VR,FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,13 +91,6 @@ contains
  use m_time,         only : timab
  use m_io_tools,     only : get_unit
  use m_mpinfo,       only : proc_distrb_cycle
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'optics_vloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

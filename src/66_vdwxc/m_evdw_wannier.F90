@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (CE, TR, AR)
+!!  Copyright (C) 2010-2019 ABINIT group (CE, TR, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,13 +84,6 @@ contains
 
  subroutine evdw_wannier(csix,corrvdw,origmwan,natom,nsppol,orignwan,tdocc_wan,vdw_nfrag,&
 & vdw_supercell,vdw_typfrag,vdw_xc,rprimd,wann_centres,wann_spreads,xcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'evdw_wannier'
-!End of the abilint section
 
  implicit none
 
@@ -1071,13 +1064,6 @@ end subroutine evdw_wannier
 
  subroutine getFu(sn,sl,rn,rl,occn,occl,fu) ! sn-->spread(n), sl-->spread(l), rn --> rc(n), rl --> rc(l)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getFu'
-!End of the abilint section
-
  implicit none
  real(dp),intent(in)::sn,sl,rn,rl,occn,occl
  real(dp),intent(out)::fu
@@ -1149,13 +1135,6 @@ end subroutine getFu
 !! SOURCE
  subroutine order_wannier(mwan,natom,nwan,nsppol,ord,vdw_typfrag,wanncent,xcart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'order_wannier'
-!End of the abilint section
-
    implicit none
 !Arguments
    integer, intent(in)    :: mwan,natom,nsppol,nwan(nsppol),vdw_typfrag(natom) !vz_d
@@ -1213,13 +1192,6 @@ end subroutine getFu
 !!
 !! SOURCE
  subroutine ovlp_wann(mwan,nwan,nsppol,ord,wanncent,wannspr,xi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ovlp_wann'
-!End of the abilint section
 
    implicit none
 !Arguments
@@ -1375,13 +1347,6 @@ end subroutine getFu
 
  subroutine vv10limit(sn,sl,rn,rl,fu) ! sn-->spread(n), sl-->spread(l), rn --> rc(n), rl --> rc(l)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vv10limit'
-!End of the abilint section
-
  implicit none
  real(dp),intent(in)::sn,sl,rn,rl
  real(dp),intent(out)::fu
@@ -1468,13 +1433,6 @@ end subroutine vv10limit
 !! SOURCE
 
  subroutine amalgam(amagr,ngr,nsppol,nw,mwan,ord,nwan,vdw_nfrag,wanncent,wannspr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'amalgam'
-!End of the abilint section
 
  implicit none
  !Arguments

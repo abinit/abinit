@@ -8,7 +8,7 @@
 !! See http://elpa.mpcdf.mpg.de
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2018 ABINIT group (MT)
+!! Copyright (C) 2016-2019 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -127,13 +127,6 @@ CONTAINS  !=====================================================================
 
 subroutine elpa_func_init()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -189,13 +182,6 @@ end subroutine elpa_func_init
 
 subroutine elpa_func_uninit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_uninit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -245,13 +231,6 @@ end subroutine elpa_func_uninit
 !! SOURCE
 
 subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,gpu)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_allocate'
-!End of the abilint section
 
  implicit none
 
@@ -305,13 +284,6 @@ end subroutine elpa_func_allocate
 
 subroutine elpa_func_deallocate(elpa_hdl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_deallocate'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -361,13 +333,6 @@ end subroutine elpa_func_deallocate
 !! SOURCE
 
 subroutine elpa_func_error_handler(err_code,err_msg,err_varname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_error_handler'
-!End of the abilint section
 
  implicit none
 
@@ -435,13 +400,6 @@ end subroutine elpa_func_error_handler
 !! SOURCE
 
 subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,process_col)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_get_communicators'
-!End of the abilint section
 
  implicit none
 
@@ -529,13 +487,6 @@ end subroutine elpa_func_get_communicators
 
 subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_set_matrix'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -622,13 +573,6 @@ end subroutine elpa_func_set_matrix
 !! SOURCE
 
 subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_solve_evp_1stage_real'
-!End of the abilint section
 
  implicit none
 
@@ -725,13 +669,6 @@ end subroutine elpa_func_solve_evp_1stage_real
 
 subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_solve_evp_1stage_complex'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -821,13 +758,6 @@ end subroutine elpa_func_solve_evp_1stage_complex
 
 subroutine elpa_func_cholesky_real(elpa_hdl,aa)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_cholesky_real'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -909,13 +839,6 @@ end subroutine elpa_func_cholesky_real
 !! SOURCE
 
 subroutine elpa_func_cholesky_complex(elpa_hdl,aa)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_cholesky_complex'
-!End of the abilint section
 
  implicit none
 
@@ -999,13 +922,6 @@ end subroutine elpa_func_cholesky_complex
 
 subroutine elpa_func_invert_triangular_real(elpa_hdl,aa)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_invert_triangular_real'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1088,13 +1004,6 @@ end subroutine elpa_func_invert_triangular_real
 !! SOURCE
 
 subroutine elpa_func_invert_triangular_complex(elpa_hdl,aa)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_invert_triangular_complex'
-!End of the abilint section
 
  implicit none
 
@@ -1199,13 +1108,6 @@ end subroutine elpa_func_invert_triangular_complex
 subroutine elpa_func_hermitian_multiply_real(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
 &                                            cc,local_nrows_c,local_ncols_c)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_hermitian_multiply_real'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1309,13 +1211,6 @@ end subroutine elpa_func_hermitian_multiply_real
 
 subroutine elpa_func_hermitian_multiply_complex(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
 &                                               cc,local_nrows_c,local_ncols_c)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpa_func_hermitian_multiply_complex'
-!End of the abilint section
 
  implicit none
 

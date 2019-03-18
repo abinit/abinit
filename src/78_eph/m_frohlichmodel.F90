@@ -5,10 +5,10 @@
 !!
 !! FUNCTION
 !!  Compute ZPR, temperature-dependent electronic structure, and other properties
-!!  using the Frohlich model 
+!!  using the Frohlich model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (XG)
+!!  Copyright (C) 2018-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +28,16 @@
 module m_frohlichmodel
 
  use defs_basis
- use m_errors
+ use defs_datatypes
+ use defs_abitypes
  use m_abicore
+ use m_errors
+ use m_crystal
+ use m_ebands
+ use m_efmas_defs
+ use m_ifc
+
+ use m_gaussian_quadrature, only : cgqf
 
  implicit none
 
@@ -65,28 +73,6 @@ contains
 !! SOURCE
 
 subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
-!use m_xmpi
-!use m_xomp
- use m_errors
-!use m_hdr
- use m_crystal
- use m_crystal_io
- use m_ebands
- use m_efmas_defs
- use m_ifc
-
- use m_gaussian_quadrature, only : cgqf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frohlichmodel'
-!End of the abilint section
 
  implicit none
 
@@ -130,7 +116,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
 !************************************************************************
 
- !!! Initialization of integrals 
+ !!! Initialization of integrals
  ntheta   = dtset%efmas_ntheta
  nphi     = 2*ntheta
  nqdir     = nphi*ntheta
@@ -205,7 +191,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 &    weight_qdir(iqdir)*zpr_q0_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
  enddo
  zpr_q0_avg=zpr_q0_avg*quarter*piinv
- zpr_q0_fact=zpr_q0_avg*two*pi*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
+ zpr_q0_fact=zpr_q0_avg*eight*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
 
 !DEBUG
 ! do iqdir=1,nqdir,513
@@ -256,7 +242,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
      m_avg_frohlich=zero
      saddle_warn=.false.
 
-     !Initializations for the diagonalization routine 
+     !Initializations for the diagonalization routine
      if(deg_dim>1)then
 
        ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
@@ -278,7 +264,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
            f3d(iband,jband)=DOT_PRODUCT(unit_qdir(:,iqdir),MATMUL(eig2_diag_cart(:,:,iband,jband),unit_qdir(:,iqdir)))
          enddo
        enddo
- 
+
        if(deg_dim==1)then
          eigenval(1)=f3d(1,1)
        else
@@ -355,7 +341,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
        write(ab_out,'(a,es16.6,a,es16.6,a)') &
 &       ' ZPR from Frohlich model      = ',zpr_frohlich,' Ha=',zpr_frohlich*Ha_eV,' eV'
      else
-       write(ab_out,'(a)')& 
+       write(ab_out,'(a)')&
 &        ' Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.'
      endif
 

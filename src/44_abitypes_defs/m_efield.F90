@@ -9,7 +9,7 @@
 !!  Imported object from defs_datatypes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (MJV)
+!! Copyright (C) 2011-2019 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -250,13 +250,6 @@ contains
 !! SOURCE
 
 subroutine destroy_efield(dtefield)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_efield'
-!End of the abilint section
 
  implicit none
 

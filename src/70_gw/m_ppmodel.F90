@@ -8,7 +8,7 @@
 !!  the plasmonpole technique. Methods to operate on the object are also provided.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,8 +57,8 @@ MODULE m_ppmodel
  integer,public,parameter :: PPM_ENGEL_FARID     = 4
 
  ! Flags giving the status of the pointers defined in ppmodel_t
- integer,private,parameter :: PPM_ISPOINTER  =1 ! The pointer is used to store the address in memory.
- integer,private,parameter :: PPM_ISALLOCATED=2 ! The pointer is used as an allocable array.
+ integer,private,parameter :: PPM_ISPOINTER   = 1 ! The pointer is used to store the address in memory.
+ integer,private,parameter :: PPM_ISALLOCATED = 2 ! The pointer is used as an allocable array.
 
  ! Flags giving the status of the plasmon-pole tables
  integer,private,parameter :: PPM_NOTAB         = 0
@@ -160,7 +160,6 @@ MODULE m_ppmodel
 
  end type ppmodel_t
 
-
  public :: ppm_get_qbz              ! Symmetrize the PPm parameters in the BZ.
  public :: ppm_nullify              ! Nullify all pointers
  public :: ppm_init                 ! Initialize dimensions and pointers
@@ -226,15 +225,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_get_qbz'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -353,15 +343,6 @@ end subroutine ppm_get_qbz
 
 subroutine ppm_nullify(PPm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_nullify'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(ppmodel_t),intent(inout) :: PPm
 ! *********************************************************************
@@ -395,15 +376,6 @@ end subroutine ppm_nullify
 !! SOURCE
 
 subroutine ppm_free(PPm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(ppmodel_t),intent(inout) :: PPm
@@ -478,12 +450,8 @@ subroutine ppm_free(PPm)
 #endif
 
  ! logical flags must be deallocated here.
- if (allocated(PPm%keep_q)) then
-   ABI_FREE(PPm%keep_q)
- end if
- if (allocated(PPm%has_q)) then
-   ABI_FREE(PPm%has_q)
- end if
+ ABI_SFREE(PPm%keep_q)
+ ABI_SFREE(PPm%has_q)
 
 end subroutine ppm_free
 !!***
@@ -511,15 +479,6 @@ end subroutine ppm_free
 !! SOURCE
 
 subroutine ppm_mallocq(PPm,iq_ibz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_mallocq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: iq_ibz
@@ -563,15 +522,6 @@ end subroutine ppm_mallocq
 
 subroutine ppm_table_free(PPm,iq_ibz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_table_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: iq_ibz
  type(ppmodel_t),intent(inout) :: PPm
@@ -579,17 +529,9 @@ subroutine ppm_table_free(PPm,iq_ibz)
 ! *********************************************************************
 
  !@ppmodel_t
- if (allocated(PPm%bigomegatwsq)) then
-   call array_free(PPm%bigomegatwsq(iq_ibz))
- end if
-
- if (allocated(PPm%omegatw)) then
-   call array_free(PPm%omegatw(iq_ibz))
- end if
-
- if (allocated(PPm%eigpot)) then
-   call array_free(PPm%eigpot(iq_ibz))
- end if
+ if (allocated(PPm%bigomegatwsq)) call array_free(PPm%bigomegatwsq(iq_ibz))
+ if (allocated(PPm%omegatw)) call array_free(PPm%omegatw(iq_ibz))
+ if (allocated(PPm%eigpot)) call array_free(PPm%eigpot(iq_ibz))
 
  PPm%has_q(iq_ibz) = PPM_NOTAB
 
@@ -621,15 +563,6 @@ end subroutine ppm_table_free
 !! SOURCE
 
 subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mqmem,nqibz,npwe,ppmodel,invalid_freq
@@ -779,15 +712,6 @@ end subroutine ppm_init
 subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngfftf,rhor_tot,&
 & iqiA) !Optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_ppmodel'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwe,nomega
@@ -908,15 +832,6 @@ end subroutine setup_ppmodel
 !! SOURCE
 
 subroutine getem1_from_ppm(PPm,mpwc,iqibz,zcut,nomega,omega,Vcp,em1q,only_ig1,only_ig2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getem1_from_ppm'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1061,15 +976,6 @@ end subroutine getem1_from_ppm
 
 subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getem1_from_ppm_one_ggp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nomega
@@ -1184,15 +1090,6 @@ end subroutine getem1_from_ppm_one_ggp
 !! SOURCE
 
 subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_ppm_eigenvalues'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1338,15 +1235,6 @@ end subroutine get_ppm_eigenvalues
 
 subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm1par'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nomega,npwc
@@ -1478,15 +1366,6 @@ end subroutine cppm1par
 
 subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatwsq,omegatw,invalid_freq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm2par'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwc,nfftf,invalid_freq
@@ -1532,7 +1411,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
 
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
- call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,ngfftf,paral_kgb0,0)
+ call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
@@ -1609,21 +1488,21 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
        nimwp=nimwp+1
 
        if ( invalid_freq == 1 ) then
-       ! set omegatwsq to 1 hartree
+        ! set omegatwsq to 1 hartree
          omegatwsq(ig,igp)=cone
          AA = epsm1(ig,igp)
          if ( ig == igp ) AA = AA - one
          omegatw(ig,igp)=SQRT(REAL(omegatwsq(ig,igp)))
          bigomegatwsq(ig,igp)=-AA*omegatw(ig,igp)**2
        elseif ( invalid_freq == 2 ) then
-       ! set omegatwsq to infinity
+         ! set omegatwsq to infinity
          omegatwsq(ig,igp)=cone/tol6
          AA = epsm1(ig,igp)
          if ( ig == igp ) AA = AA - one
          omegatw(ig,igp)=SQRT(REAL(omegatwsq(ig,igp)))
          bigomegatwsq(ig,igp)=-AA*omegatw(ig,igp)**2
        else
-       ! simply ignore all cases of omegatw with imaginary values
+         ! simply ignore all cases of omegatw with imaginary values
          bigomegatwsq(ig,igp)=(0.,0.)
          omegatw(ig,igp)=(ten,0.)
        end if
@@ -1702,15 +1581,6 @@ end subroutine cppm2par
 
 subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,omegatw,eigtot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm3par'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwc
@@ -1764,7 +1634,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
- call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,ngfftf,paral_kgb0,0)
+ call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
@@ -1975,15 +1845,6 @@ end subroutine cppm3par
 
 subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,omegatw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm4par'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwc
@@ -2032,7 +1893,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ! FIXME this has to be fixed, rho(G) should be passed instead of doing FFT for each q
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
- call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,ngfftf,paral_kgb0,0)
+ call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
@@ -2244,15 +2105,6 @@ end subroutine cppm4par
 
 subroutine cqratio(npwc,gvec,q,gmet,gprimd,qratio)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cqratio'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwc
@@ -2360,15 +2212,6 @@ end subroutine cqratio
 
 subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
 & omegame0i,zcut,theta_mu_minus_e0i,eig,npwx,ket,sigcme)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_sig_ppm'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2553,15 +2396,6 @@ end subroutine calc_sig_ppm
 
 subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_ggw,nfftf,ngfftf,rhor_tot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_symmetrizer'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwe,nomega,iq_bz
@@ -2718,15 +2552,6 @@ end subroutine ppm_symmetrizer
 
 subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,nfftf,gvec,ngfftf,rhor_tot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'new_setup_ppmodel'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwe,nomega,iq_ibz
@@ -2853,15 +2678,6 @@ end subroutine new_setup_ppmodel
 !! SOURCE
 
 subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu_minus_e0i,npwx,ket,sigcme)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_times_ket'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

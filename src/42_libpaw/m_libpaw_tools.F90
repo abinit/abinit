@@ -7,7 +7,7 @@
 !!  Several libPAW tools: message printing, error handling, string handling...
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (MT, MG, ...)
+!!  Copyright (C) 2014-2019 ABINIT group (MT, MG, ...)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,13 +116,6 @@ CONTAINS !===========================================================
 
 subroutine libpaw_wrtout(unit,msg,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_wrtout'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -196,13 +189,6 @@ end subroutine libpaw_wrtout
 
 subroutine libpaw_wrtout_myproc(unit,msg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_wrtout_myproc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -271,13 +257,6 @@ end subroutine libpaw_wrtout_myproc
 !! SOURCE
 
 subroutine libpaw_write_lines(unit,msg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_write_lines'
-!End of the abilint section
 
  implicit none
 
@@ -377,13 +356,6 @@ end subroutine libpaw_write_lines
 
 subroutine libpaw_msg_hndl(msg,level,mode_paral,file,line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_msg_hndl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -461,13 +433,6 @@ end subroutine libpaw_msg_hndl
 
 subroutine libpaw_spmsg_getcount(ncomment,nwarning,nexit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_spmsg_getcount'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -511,13 +476,6 @@ end subroutine libpaw_spmsg_getcount
 !! SOURCE
 
 subroutine libpaw_spmsg_mpisum(mpicomm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_spmsg_mpisum'
-!End of the abilint section
 
  implicit none
 
@@ -565,13 +523,6 @@ end subroutine libpaw_spmsg_mpisum
 
 subroutine libpaw_write_comm_set(new_write_comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_write_comm_set'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -610,13 +561,6 @@ end subroutine libpaw_write_comm_set
 !! SOURCE
 
 subroutine libpaw_log_flag_set(log_flag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_log_flag_set'
-!End of the abilint section
 
  implicit none
 
@@ -658,13 +602,6 @@ end subroutine libpaw_log_flag_set
 !! SOURCE
 
 subroutine libpaw_netcdf_check(ncerr,msg,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_netcdf_check'
-!End of the abilint section
 
  implicit none
 
@@ -741,13 +678,6 @@ end subroutine libpaw_netcdf_check
 
 subroutine libpaw_leave(mode_paral,exit_status)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_leave'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -802,13 +732,6 @@ end subroutine libpaw_leave
 !! SOURCE
 
 subroutine libpaw_die(message,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_die'
-!End of the abilint section
 
  implicit none
 
@@ -865,13 +788,6 @@ end subroutine libpaw_die
 
 subroutine libpaw_lock_and_write(filename,string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_lock_and_write'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -922,13 +838,6 @@ end subroutine libpaw_lock_and_write
 
 integer function libpaw_get_free_unit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_get_free_unit'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -972,7 +881,6 @@ end function libpaw_get_free_unit
 !!  This routine comes directly from the FLUSH_UNIT routine delivered with ABINIT.
 !!
 !! PARENTS
-!!      m_pawrhoij
 !!
 !! CHILDREN
 !!      flush,flush_
@@ -980,13 +888,6 @@ end function libpaw_get_free_unit
 !! SOURCE
 
 subroutine libpaw_flush(unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_flush'
-!End of the abilint section
 
  implicit none
 
@@ -1037,13 +938,6 @@ end subroutine libpaw_flush
 
 pure function libpaw_basename(istr) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_basename'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1092,13 +986,6 @@ end function libpaw_basename
 
 pure function libpaw_to_upper(istr) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_to_upper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1140,13 +1027,6 @@ end function libpaw_to_upper
 !! SOURCE
 
 pure function libpaw_lstrip(istr) result(ostr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_lstrip'
-!End of the abilint section
 
  implicit none
 
@@ -1192,13 +1072,6 @@ end function libpaw_lstrip
 !! SOURCE
 
 pure function libpaw_indent(istr) result(ostr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_indent'
-!End of the abilint section
 
  implicit none
 

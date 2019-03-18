@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,13 +99,6 @@ contains
  !
  !
  !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussian_quadrature_gegenbauer'
-!End of the abilint section
-
   implicit none
 
 
@@ -202,13 +195,6 @@ contains
  !
  !
  !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussian_quadrature_legendre'
-!End of the abilint section
-
   implicit none
 
 
@@ -310,13 +296,6 @@ contains
  !
  !
  !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_frequencies_and_weights_legendre'
-!End of the abilint section
-
   implicit none
   ! input and output variables
   integer,   intent(in)   :: order
@@ -439,13 +418,6 @@ subroutine cdgqf ( nt, gaussian_kind, alpha, beta, t, wts )
 !
 !    Output, real ( dp ) WTS(NT), the weights.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cdgqf'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) nt
@@ -555,13 +527,6 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
 !
 !    Output, real ( dp ) WTS(NT), the weights.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgqf'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) nt
@@ -647,13 +612,6 @@ subroutine ch_cap ( c )
 !
 !    Input/output, character C, the character to capitalize.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ch_cap'
-!End of the abilint section
-
   implicit none
 
   character              c
@@ -718,13 +676,6 @@ function ch_eqi ( c1, c2 )
 !
 !    Output, logical CH_EQI, the result of the comparison.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ch_eqi'
-!End of the abilint section
-
   implicit none
 
   logical ch_eqi
@@ -807,13 +758,6 @@ subroutine ch_to_digit ( c, digit )
 !    Output, integer ( kind = 4 ) DIGIT, the corresponding integer value.
 !    If C was 'illegal', then DIGIT is -1.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ch_to_digit'
-!End of the abilint section
-
   implicit none
 
   character c
@@ -921,13 +865,6 @@ subroutine class_matrix ( gaussian_kind, m, alpha, beta, aj, bj, zemu )
 !
 !    Output, real ( dp ) ZEMU, the zero-th moment.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'class_matrix'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) m
@@ -1163,13 +1100,6 @@ subroutine imtqlx ( n, d, e, z )
 !    the value of Q' * Z, where Q is the matrix that diagonalizes the
 !    input symmetric tridiagonal matrix.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'imtqlx'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) n
@@ -1380,13 +1310,6 @@ subroutine parchk ( gaussian_kind, m, alpha, beta )
 !    Input, real ( dp ) ALPHA, BETA, the parameters, if required
 !    by the value of KIND.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'parchk'
-!End of the abilint section
-
   implicit none
 
   real ( dp ) alpha
@@ -1497,13 +1420,6 @@ function r8_gamma_gq ( x )
 !
 !    Output, real ( dp ) R8_GAMMA, the value of the function.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'r8_gamma_gq'
-!End of the abilint section
-
   implicit none
 
   real ( dp ), dimension ( 7 ) :: c = (/ &
@@ -1739,13 +1655,6 @@ subroutine r8mat_write ( output_filename, m, n, table )
 !
 !    Input, real ( dp ) TABLE(M,N), the table data.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'r8mat_write'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) m
@@ -1844,13 +1753,6 @@ subroutine rule_write ( order, x, w, r, filename )
 !    'filename_w.txt', 'filename_x.txt', 'filename_r.txt' defining weights,
 !    abscissas, and region.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rule_write'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) order
@@ -1937,13 +1839,6 @@ subroutine s_to_i4 ( s, ival, ierror, length )
 !    Output, integer ( kind = 4 ) LENGTH, the number of characters of S
 !    used to make IVAL.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 's_to_i4'
-!End of the abilint section
-
   implicit none
 
   character c
@@ -2131,13 +2026,6 @@ subroutine s_to_r8 ( s, dval, ierror, length )
 !    to form the number, including any terminating
 !    characters such as a trailing comma or blanks.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 's_to_r8'
-!End of the abilint section
-
   implicit none
 
   character c
@@ -2423,13 +2311,6 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
 !
 !    Input, real ( dp ) A, B, the interval endpoints.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scqf'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) nt
@@ -2659,13 +2540,6 @@ subroutine sgqf ( nt, aj, bj, zemu, t, wts )
 !
 !    Output, real ( dp ) WTS(NT), the weights.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sgqf'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) nt
