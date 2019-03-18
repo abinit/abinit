@@ -12,8 +12,6 @@
  #nstep 150
 
  nbdbuf 4
- #diemac 9.0
- #paral_kgb 0
 
  # Kpoints
  ngkpt 4 4 4
@@ -26,6 +24,7 @@
 ########################################
  tolwfr1   1e-20
  # Cancel default values
+ # nband1 10
  getwfk1   0
  nqpt1     0
  rfphon1   0
@@ -94,6 +93,7 @@ sigma_erange7 0.2 0.2 eV   # Select kpts in fine mesh within this energy window.
 nqpt7     0 
 rfphon7   0 
 kptopt7   1
+#nband7   7
 
 ############################################################################################
 #                                         STRUCTURE

@@ -21,6 +21,7 @@ ph_qpath
 
 # Global variables
 nband     10
+#nband     7
 symsigma  1
 tmesh 0 300 2
 prteliash 1
@@ -61,17 +62,6 @@ sigma_erange3 0.2 0.2 eV   # Select kpts in fine mesh within this energy window.
 ngkpt3    8 8 8
 nshiftk3  1
 shiftk3   0.0 0.0 0.0
-
-############
-# DATASET 4
-############
-#eph_task4 -4
-#gw_qprange4 4
-##sigma_bsum_range4 1 7
-#eph_intmeth4 2  # Tetra are more stable when bands are selected. No long-range Lorentzian.
-## Use interpolated DVDB produced in dataset 2
-#getdvdb4   2
-#eph_ngqpt_fine4 4 4 4
 
 ############################################################################################
 #                                         STRUCTURE

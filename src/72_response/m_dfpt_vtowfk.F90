@@ -5,7 +5,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 1999-2019 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
@@ -57,16 +56,6 @@ module m_dfpt_vtowfk
 contains
 !!***
 
-
-
-
-
-
-
-
-
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/dfpt_vtowfk
 !! NAME
 !! dfpt_vtowfk
@@ -187,8 +176,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & nnsclo_now,npw_k,npw1_k,nspinor,nsppol,&
 & n4,n5,n6,occ_k,pawrhoij1,prtvol,psps,resid_k,rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,&
 & ddk_f,wtk_k,nlines_done,cg1_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -678,8 +665,6 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 &               iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,&
 &               nspinor,timcount,usepaw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iband,ibgq,icgq,mcgq,mcprjq,natom,nband,npw1,nspinor,timcount,usepaw
@@ -817,8 +802,6 @@ end subroutine full_active_wf1
 subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fermie1,ghc,iband, &
 &          ibgq,icgq,istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,nspinor,occ,rocceig,timcount,&
 &          usepaw,wf_corrected)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

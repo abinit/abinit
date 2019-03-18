@@ -623,7 +623,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  if (gap_err /= 0) then
    MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
  end if
- call fine_gaps%print(header="gaps from interpolated eigenvalues", unit=std_out)
+ call fine_gaps%print(header="Gaps from interpolated eigenvalues", unit=std_out)
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, ABINIT_VERSION, pertcase0, &
@@ -704,6 +704,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    ! Write crystalline structure, fine_hdr and fine_ebands defined on the fine k-mesh.
+   ! fine_ebands will be used to compare with the ab-initio NSCF eigenvalues.
    NCF_CHECK(hdr_ncwrite(fine_hdr, ncid, fform_from_ext("KERANGE.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))

@@ -50,7 +50,7 @@
 
 #include "abi_common.h"
 
-MODULE m_wfk
+module m_wfk
 
  use defs_basis
  use m_abicore
@@ -4965,7 +4965,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  integer,parameter :: formeig0 = 0, master = 0
  integer :: spin, ikf, ikin, nband_k, mpw, mband, nspinor, ierr, fine_mband
  integer :: nsppol, iomode, kf_rank, npw_k, ii, my_rank, ncid, fform, fform_kerange
- real(dp) :: cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops, mae_meV, merr
  character(len=500) :: msg
  character(len=fnlen) :: my_inpath, out_wfkpath
  type(wfk_t),target :: iwfk
@@ -5016,7 +5016,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  if (my_rank == master) then
    write(std_out, "(2a)")ch10, repeat("=", 92)
    write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
-   write(std_out, "(2a)")" Take wavefunctions with k-point lists from: ", trim(in_wfkpath)
+   write(std_out, "(2a)")" Take wavefunctions with k-point list from WFK file: ", trim(in_wfkpath)
    write(std_out, "(2a)")" Take eigenvalues and k-point tables from KERANGE file: ", trim(kerange_path)
    write(std_out, "(a, 9(i0, 1x))")"   fine_kptrlatt: ", fine_hdr%kptrlatt
    do ii=1,fine_hdr%nshiftk
@@ -5032,9 +5032,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  end if
  iwfk_ebands = wfk_read_ebands(my_inpath, xmpi_comm_self)
  !call ebands_print(iwfk_ebands, header="iwfk_ebands", unit=std_out, prtvol=dtset%prtvol)
- !if (iwfk_ebands%kptopt == 0) then
- !  call ebands_update_occ(iwfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
- !end if
 
  iomode = iomode_from_fname(my_inpath)
  call wfk_open_read(iwfk, my_inpath, formeig0, iomode, get_unit(), xmpi_comm_self)
@@ -5088,6 +5085,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
 
  ! Build new header for output WFK. This is the most delicate part since all the arrays in fine_hdr
  ! that depend on k-points must be consistent with the fine k-mesh.
+ mae_meV = zero
  do ikf=1,fine_ebands%nkpt
    ikin = kf2kin(ikf)
    if (ikin == -1) then
@@ -5101,14 +5099,30 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
      ! Insert ab-initio eigenvalues in the SKW-interpolated fine k-mesh.
      do spin=1,nsppol
        nband_k = iwfk_ebands%nband(ikin + (spin - 1) * iwfk_ebands%nkpt)
+       merr = Ha_meV * maxval(abs(fine_ebands%eig(1:nband_k, ikf, spin) - iwfk_ebands%eig(1:nband_k, ikin, spin)))
+       write(std_out, "(a, es12.4,a)")" MERR: ", merr, " (meV)"
+       !if merr >
+       !write(std_out, *)fine_ebands%eig(1:nband_k, ikf, spin) * Ha_eV
+       !write(std_out, *)iwfk_ebands%eig(1:nband_k, ikin, spin) * Ha_eV
+       write(std_out, *)Ha_meV * (fine_ebands%eig(1:nband_k, ikf, spin) - iwfk_ebands%eig(1:nband_k, ikin, spin))
+       !end if
+       mae_meV = max(mae_meV, merr)
        fine_ebands%eig(1:nband_k, ikf, spin) = iwfk_ebands%eig(1:nband_k, ikin, spin)
        fine_ebands%occ(1:nband_k, ikf, spin) = iwfk_ebands%occ(1:nband_k, ikin, spin)
      end do
    end if
  end do
+ write(std_out, "(a, es12.4,a)") &
+    " Max error between SKW interpolated energies and ab-initio quantities:", mae_meV, " (meV)"
+
+ !if (mae_meV > ten) then
+ !  write(msg,"(2a,2(a,es12.4),a)") &
+ !    "Large error in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, " (meV)"
+ !  call wrtout(ab_out, msg)
+ !  MSG_WARNING(msg)
+ !end if
 
  call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
-
  !call pack_eneocc(nkpt, nsppol, mband, nband, bantot, array3d, vect)
  !fine_hdr%occ = reshape(fine_ebands%occ, fine_ebands%mband (1:nband_k, ikin, spin)
  call ebands_print(fine_ebands, header="fine_ebands", unit=std_out, prtvol=dtset%prtvol)
