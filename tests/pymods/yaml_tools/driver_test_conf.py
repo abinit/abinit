@@ -123,9 +123,9 @@ class DriverTestConf:
         def look_in(cons_dict, caller_lvl):
             for name, cons in cons_dict.items():
                 if name in exclude or name in already_defined:
-                    # pass of the constraint have been either already
-                    # overridden or excluded
-                    pass
+                    # if the constraint have been either already
+                    # overridden or excluded only apply its exlusion
+                    exclude.update(cons.exclude)
                 elif (caller_lvl or cons.inherited) \
                         and (obj == 'any' or cons.apply_to(obj)):
                     exclude.update(cons.exclude)
@@ -177,8 +177,11 @@ class DriverTestConf:
         else:
             # Order filters from the most general to the most specific
             filters = sorted(
-                (filt, name) for name, filt in self.filters.items()
-                if filt.match(state)
+                ((filt, name) for name, filt in self.filters.items()
+                 if filt.match(state)),
+                reverse=True  # sort from the more specific/restrictive to the
+                              # more general. In case of equality, sort using
+                              # the reversed lexicographic order of the name
             )
 
             # Apply filtered trees, filters may be []

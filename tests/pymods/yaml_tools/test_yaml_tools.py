@@ -2,8 +2,8 @@ from __future__ import print_function, division, unicode_literals
 import pytest
 from .errors import (EmptySetError, NotOrderedOverlappingSetError)
 from .abinit_iterators import IterStateFilter
-from .conf_parser import conf_parser
 from .meta_conf_parser import ConfTree, ConfParser, SpecKey
+from .driver_test_conf import DriverTestConf
 
 
 class TestStateFilter(object):
@@ -437,8 +437,120 @@ class TestMetaConfParser(object):
 
 
 class TestDriverTestConf(object):
-    def test_conf_parser(self):
-        assert conf_parser
+    src1 = '''\
+tol_abs: 1.2e-7
+sp1:
+    sp3:
+        tol_abs: 1.8e-9
+
+dt1:
+    tol_abs: 1.3e-6
+    tol_rel: 1.4e-8
+    sp1:
+        sp2 with spaces:
+            ceil: 1.0e-8
+
+im1:
+    sp1:
+        ceil: 1.5e-8
+
+filters:
+    dt1:
+        dtset: 1
+        image: {from: 1, to: 8}
+    im1:
+        dtset: 1
+        image: 1
+'''
+
+    src2 = '''\
+tol_abs: 1.2e-7
+sp1:
+    sp3:
+        tol_abs: 1.8e-9
+
+dt1:
+    tol_abs: 1.3e-6
+    tol_rel: 1.4e-8
+    sp1:
+        sp2:
+            ceil: 1.0e-8
+
+im1:
+    sp1!:
+        ceil: 1.5e-8
+
+filters:
+    dt1:
+        dtset: 1
+        image: {from: 1, to: 8}
+    im1:
+        dtset: 1
+        image: 1
+'''
+
+    def test_get_constraints(self):
+        DriverTestConf.default_conf = '/dev/null'
+        driver = DriverTestConf(src=self.src1)
+
+        with driver.use_filter({'dtset': 1, 'image': 4}):
+            with driver.go_down('sp1'):
+                with driver.go_down('sp2 with spaces'):
+                    constraints = driver.get_constraints_for(1.0)
+                    assert len(constraints) == 1
+                    assert constraints[0].name == 'ceil'
+                    assert constraints[0].value == 1.0e-8
+                with driver.go_down('sp3'):
+                    constraints = driver.get_constraints_for(1.0)
+                    assert len(constraints) == 2
+                    for c in constraints:
+                        assert c.name in ('tol_abs', 'tol_rel')
+                        if c.name == 'tol_abs':
+                            assert c.value == 1.8e-9
+                        elif c.name == 'tol_rel':
+                            assert c.value == 1.4e-8
+
+        with driver.use_filter({'dtset': 1, 'image': 1}):
+            with driver.go_down('sp1'):
+                with driver.go_down('sp2 with spaces'):
+                    constraints = driver.get_constraints_for(1.0)
+                    assert len(constraints) == 1
+                    assert constraints[0].name == 'ceil'
+                    assert constraints[0].value == 1.0e-8
+                with driver.go_down('sp3'):
+                    constraints = driver.get_constraints_for(1.0)
+                    print(constraints)
+                    assert len(constraints) == 1
+                    assert constraints[0].name == 'tol_abs'
+                    assert constraints[0].value == 1.8e-9
+                with driver.go_down('sp4'):
+                    constraints = driver.get_constraints_for(1.0)
+                    assert len(constraints) == 1
+                    assert constraints[0].name == 'ceil'
+                    assert constraints[0].value == 1.5e-8
+
+    def test_get_constraints_hardreset(self):
+        DriverTestConf.default_conf = '/dev/null'
+        driver = DriverTestConf(src=self.src2)
+
+        with driver.use_filter({'dtset': 1, 'image': 1}):
+            with driver.go_down('sp1'):
+                with driver.go_down('sp2'):
+                    constraints = driver.get_constraints_for(1.0)
+                    assert len(constraints) == 1
+                    assert constraints[0].name == 'ceil'
+                    assert constraints[0].value == 1.5e-8
+                with driver.go_down('sp3'):
+                    constraints = driver.get_constraints_for(1.0)
+                    print(constraints)
+                    assert len(constraints) == 1
+                    assert constraints[0].name == 'ceil'
+                    assert constraints[0].value == 1.5e-8
+                with driver.go_down('sp4'):
+                    constraints = driver.get_constraints_for(1.0)
+                    assert len(constraints) == 1
+                    assert constraints[0].name == 'ceil'
+                    assert constraints[0].value == 1.5e-8
 
 
 class TestTester(object):
