@@ -104,7 +104,7 @@ class BaseDictWrapper(object):
         Allow attribute access and key access to the values of dictionary to
         keep a consistent behaviour with AutoMap structures.
     '''
-    _is_dict_wrapper = True
+    _is_dict_like = True
 
     def __init__(self, d={}):
         for attr in d:

@@ -89,7 +89,8 @@ class DataExtractor:
                         # parse source
                         parse_doc(current_doc)
 
-                        if hasattr(current_doc['obj'], '_is_iter_start'):
+                        if getattr(current_doc['obj'], '_is_iter_start',
+                                   False):
                             # special case of IterStart
                             curr_it = current_doc['obj'].iterator
 
@@ -101,11 +102,13 @@ class DataExtractor:
                             self.iterators_state[curr_it] = \
                                 current_doc['obj'].iteration
 
-                        elif hasattr(current_doc['obj'], '_is_corrupted_doc'):
+                        elif getattr(current_doc['obj'], '_is_corrupted_doc',
+                                     False):
                             # Signal corruption but ignore the document
                             self.has_corrupted_doc = True
 
-                        elif hasattr(current_doc['obj'], '_is_abinit_message'):
+                        elif getattr(current_doc['obj'], '_is_abinit_message',
+                                     False):
                             # Special case of Warning, Error etc..
                             # store it for later use
                             self.abinit_messages.append(current_doc)

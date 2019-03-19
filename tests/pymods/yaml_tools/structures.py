@@ -9,6 +9,8 @@ from .register_tag import (
     yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar,
 )
 import numpy as np
+from pandas import read_table, DataFrame
+from pandas.compat import StringIO
 
 
 @yaml_map
@@ -68,6 +70,10 @@ class AutoNumpy(np.ndarray):
     '''
     __yaml_tag = 'Array'
 
+    # by default we want to treat this as a coherent object and do not check
+    # values individualy
+    _has_no_child = True
+
     @classmethod
     def from_seq(cls, s):
         return np.array(s).view(cls)
@@ -84,7 +90,12 @@ class AutoNumpy(np.ndarray):
 
 
 @yaml_seq
-class CartForces(AutoNumpy):
+class Atoms3D(AutoNumpy):
+    pass
+
+
+@yaml_seq
+class CartForces(Atoms3D):
     pass
 
 
@@ -188,67 +199,6 @@ class YAMLComplex(complex):
         return repr(self)[1:-1]  # remove paranthesis
 
 
-@yaml_scalar
-class WhiteSpaceSeparated(object):
-    __yaml_tag = 'WSS'
-
-    def __init__(self, column_labels, data):
-        self.columns = column_labels
-        self.data = data
-
-    @classmethod
-    def from_scalar(cls, scal):
-        header, lines = scal.split('\n')
-        data = []
-        for line in lines:
-            data.append([])
-            for v in line.split():
-                if v.isdigit():
-                    data[-1].append(int(v))
-                else:
-                    try:
-                        data[-1].append(float(v))
-                    except ValueError:
-                        data[-1].append(v)
-        return cls(header, data)
-
-    def to_scalar(self):
-        length = max(1 + max(self.header, key=lambda x: len(x)), 8)
-        line_fmt = ("{:>" + str(length) + "}") * len(self.header)
-        scal = line_fmt.format(*self.header) + '\n'
-        for line in self.data:
-            scal += line_fmt.format(*line) + '\n'
-        return scal
-
-    # TODO create a practical interface compatible with python 2 and 3
-    # def __getitem__(self, key):
-    #     if isinstance(key, int):
-    #         return WhiteSpaceSeparated(self.columns,
-    #                                    self.data[slice(key, key + 1)])
-    #     if isinstance(key, str):
-    #         j = self.columns.index(str)
-    #         return [
-    #             line[j] for line in self.data
-    #         ]
-    #     if isinstance(key, slice):
-    #         if isinstance(key.start, int):
-    #             return WhiteSpaceSeparated(self.columns, self.data[key])
-    #         elif isinstance(key.start, str):
-    #             j = self.columns.index(key.start)
-    #             k = self.columns.index(key.stop)
-    #             hview = self.columns[j:k]
-    #             view = [
-    #                 line[j:k] for line in self.data
-    #             ]
-    #             return WhiteSpaceSeparated(hview, view)
-
-    def __iter__(self):
-        for i, column in self.columns:
-            yield column, [
-                line[i] for line in self.data
-            ]
-
-
 class AbinitMessage(object):
     _is_abinit_message = True
 
@@ -256,22 +206,36 @@ class AbinitMessage(object):
 @yaml_auto_map
 class AbinitError(AbinitMessage):
     __yaml_tag = 'ERROR'
-    pass
 
 
 @yaml_auto_map
 class AbinitWarning(AbinitMessage):
     __yaml_tag = 'WARNING'
-    pass
 
 
 @yaml_auto_map
 class AbinitInfo(object):
     __yaml_tag = 'INFO'
-    pass
 
 
 @yaml_auto_map
 class AbinitComment(AbinitMessage):
     __yaml_tag = 'COMMENT'
-    pass
+
+
+@yaml_scalar
+class Table(DataFrame):
+    _is_dict_like = True
+    table_sep = r'\s+'
+
+    @classmethod
+    def from_scalar(cls, scal):
+        return cls(read_table(StringIO(scal), sep=cls.table_sep))
+
+    def to_scalar(self):
+        return self.to_string()
+
+
+@yaml_scalar
+class CommaTable(Table):
+    table_sep = ','

@@ -87,13 +87,18 @@ class Tester(object):
                         self.issues.append(Failure(self.conf, msg,
                                                    ref, tested))
 
-            if hasattr(ref, '_is_dict_wrapper'):  # have children
+            if getattr(ref, '_is_dict_like', False):  # have children
                 for child in ref:
                     if child not in tested:
                         msg = '{} was not present'.format(child)
                         self.issues.append(Failure(self.conf, msg))
                     else:
                         self.check_this(child, ref[child], tested[child])
+
+            elif hasattr(ref, '__iter__') and not getattr(ref, '_has_no_child',
+                                                          False):
+                for index, vref, vtest in enumerate(zip(ref, tested)):
+                    self.check_this(index, vref, vtest)
 
     def run(self):
         '''
