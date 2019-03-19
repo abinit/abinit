@@ -1,0 +1,1 @@
+maqao oneview --create-report=one --with-scalability --config=config.lua

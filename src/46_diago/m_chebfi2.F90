@@ -645,15 +645,17 @@ module m_chebfi2
       
       call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, & 
                       chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap)     !put X into expected buffer directly
+     
     else if (remainder == 0) then  
       call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X_next, chebfi%BX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X, chebfi%X_swap, 1, spacedim, neigenpairs)
-    
+      
       call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, & 
                       chebfi%X, A_und_X%self, 0.d0, chebfi%X_next)   !put X into expected buffer directly
-    
-      call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap, 1, spacedim, neigenpairs) 
+            
+      call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1)    !copy cannot be avoided :(
+            
     end if
                           
     call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, & 
