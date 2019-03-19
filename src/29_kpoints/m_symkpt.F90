@@ -178,7 +178,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
  ! If there is some possibility for a change (otherwise, wtk_folded is correctly initialized to give no change)
  if(nkbz/=1 .and. (nsym/=1 .or. timrev==1) )then
-   call cwtime(cpu, wall, gflops, "start")
+   !call cwtime(cpu, wall, gflops, "start")
 
    ! Store the length of vectors, but take into account umklapp
    ! processes by selecting the smallest length of all symmetric vectors
@@ -186,13 +186,10 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
    do ikpt=1,nkbz
      kpt1 = kbz(:,ikpt)
-     kpt1 = kpt1 - nint(kpt1+tol12)
-     length2(ikpt)=sqrt(gmet(1,1)*kpt1(1)**2+gmet(2,2)*kpt1(2)**2 + &
-                        gmet(3,3)*kpt1(3)**2+two*(gmet(2,1)*kpt1(2)*kpt1(1) + &
-                        gmet(3,2)*kpt1(3)*kpt1(2)+gmet(3,1)*kpt1(3)*kpt1(1)))
+     length2(ikpt) = get_length(kpt1,gmet)
    end do
 
-   call cwtime_report("symkpt: length", cpu, wall, gflops)
+   !call cwtime_report("symkpt: length", cpu, wall, gflops)
 
    ! Sort the lengths
    ABI_ALLOCATE(list,(nkbz))
@@ -200,7 +197,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    call sort_dp(nkbz,length2,list,tol14)
    ! do ikpt=1,nkbz; write(std_out,*)ikpt,length2(ikpt),list(ikpt),kbz(1:3,list(ikpt)); end do
 
-   call cwtime_report("symkpt: sort", cpu, wall, gflops)
+   !call cwtime_report("symkpt: sort", cpu, wall, gflops)
 
    ! Examine whether the k point grid is symmetric or not
    ! This check scales badly with nkbz hence it's disabled for dense meshes.
@@ -220,16 +217,12 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
                             +kpt1(2)*symrec(ii,2,isym)&
                             +kpt1(3)*symrec(ii,3,isym) )
            end do
-
-           kpt2=ksym-nint(ksym+tol12)
-           length_sym=sqrt(gmet(1,1)*kpt2(1)**2+gmet(2,2)*kpt2(2)**2 + &
-                           gmet(3,3)*kpt2(3)**2+two*(gmet(2,1)*kpt2(2)*kpt2(1) + &
-                           gmet(3,2)*kpt2(3)*kpt2(2)+gmet(3,1)*kpt2(3)*kpt2(1)))
+           length_sym=get_length(ksym,gmet)
 
            ! Search over k-points with the same length,
            ! to find whether there is a connecting symmetry operation
-           istart = bisect(length2,length_sym-tol8)
-           istop  = bisect(length2,length_sym+tol8)
+           istart = bisect(length2,length_sym-tol6)
+           istop  = bisect(length2,length_sym+tol6)
            if (istart<1)   istart = 1
            if (istop>nkbz) istop  = nkbz
 
@@ -299,16 +292,17 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
                           +kpt1(2)*symrec(ii,2,isym)&
                           +kpt1(3)*symrec(ii,3,isym) )
          end do
+         length_sym=get_length(ksym,gmet)
 
-         kpt2=ksym-nint(ksym+tol12)
-         length_sym=sqrt(gmet(1,1)*kpt2(1)**2+gmet(2,2)*kpt2(2)**2 + &
-                         gmet(3,3)*kpt2(3)**2+two*(gmet(2,1)*kpt2(2)*kpt2(1) + &
-                         gmet(3,2)*kpt2(3)*kpt2(2)+gmet(3,1)*kpt2(3)*kpt2(1)))
-
-         istart = bisect(length2,length_sym-tol8)
-         istop  = bisect(length2,length_sym+tol8)
+#if 1
+         istart = bisect(length2,length_sym-tol6)
+         istop  = bisect(length2,length_sym+tol6)
          if (istart<ikpt+1) istart = ikpt+1
          if (istop>=nkbz)   istop = nkbz
+#else
+         istart = ikpt+1
+         istop = nkbz
+#endif
 
          do ikpt2=istart,istop
            ind_ikpt2 = list(ikpt2)
@@ -352,7 +346,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
    ABI_DEALLOCATE(length2)
    ABI_DEALLOCATE(list)
-   call cwtime_report("symkpt: loop", cpu, wall, gflops)
+   !call cwtime_report("symkpt: loop", cpu, wall, gflops)
  end if ! End check on possibility of change
 
  ! Create the indexing array ibz2bz
@@ -366,6 +360,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      bz2ibz_idx(ikpt) = nkibz
    end if
  end do
+ !write(*,*) nkibz
 
  ! bz2ibz_smap stores the index in the BZ. Here we replace the BZ index with the IBZ index.
  ierr = 0
@@ -411,6 +406,27 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      if (iout/=std_out) call wrtout(std_out,message,'COLL')
    end if
  end if
+
+ contains
+ pure real function get_length(kpt,gmet) result(length)
+   real(dp),intent(in) :: kpt(3),gmet(3,3)
+   real(dp) :: ksym(3), gmetkpt(3), shift(3)
+#if 0
+   kpt=kpt-anint(kpt+tol8*half)
+   !call wrap2_pmhalf(ksym(1),ksym(1),shift)
+   !call wrap2_pmhalf(ksym(2),ksym(2),shift)
+   !call wrap2_pmhalf(ksym(3),ksym(3),shift)
+   length=sqrt(gmet(1,1)*ksym(1)**2+gmet(2,2)*ksym(2)**2 + &
+               gmet(3,3)*ksym(3)**2+two*(gmet(2,1)*ksym(2)*ksym(1) + &
+               gmet(3,2)*ksym(3)*ksym(2)+gmet(3,1)*ksym(3)*ksym(1)))
+#else
+   !ksym=kpt-anint(kpt+tol8*half)
+   ksym=kpt-nint(kpt+tol12)
+   call wrap2_pmhalf(kpt,ksym,shift)
+   gmetkpt(:)=gmet(:,1)*ksym(1)+gmet(:,2)*ksym(2)+gmet(:,3)*ksym(3)
+   length=ksym(1)*gmetkpt(1)+ksym(2)*gmetkpt(2)+ksym(3)*gmetkpt(3)
+#endif
+ end function get_length
 
 end subroutine symkpt
 !!***

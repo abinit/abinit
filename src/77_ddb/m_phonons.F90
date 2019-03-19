@@ -749,8 +749,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  in_qptrlatt = 0; in_qptrlatt(1, 1) = dos_ngqpt(1); in_qptrlatt(2, 2) = dos_ngqpt(2); in_qptrlatt(3, 3) = dos_ngqpt(3)
 
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft, dos_qshift, &
-   phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, bz2ibz=bz2ibz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq)
- call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
+   phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq, bz2ibz=bz2ibz)
+ !call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
+ !call exit(0)
 
  if (prtdos == 2) then
    ! Prepare tetrahedron method including workspace arrays.
@@ -772,7 +773,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    call cwtime_report(" init_tetra", cpu, wall, gflops)
    ABI_CHECK(ierr == 0, errstr)
 
-   ABI_FREE(bz2ibz)
    !ABI_FREE(kpt_fullbz)
 
    ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
@@ -782,6 +782,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    ABI_CHECK(ierr == 0, 'out-of-memory in full_eigvec')
    full_eigvec = zero
  end if ! tetra
+ ABI_SFREE(bz2ibz)
  ABI_FREE(new_shiftq)
 
  ! MPI Sum over irreducible q-points then sync the following integrals:

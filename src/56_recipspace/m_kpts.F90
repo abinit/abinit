@@ -139,7 +139,7 @@ end function kpts_timrev_from_kptopt
 !! SOURCE
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-  bz2ibz, new_kptrlatt, new_shiftk)  ! Optional
+  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -180,7 +180,8 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
    indkpt,bz2ibz_smap,fullbz=kbz)
 
  if (present(bz2ibz)) then
-   call alloc_copy(bz2ibz_smap,bz2ibz)
+   ABI_MALLOC(bz2ibz,(6,nkbz))
+   bz2ibz = bz2ibz_smap
  endif
 
  ABI_SFREE(indkpt)
