@@ -102,8 +102,9 @@ class DriverTestConf:
 
     def get_constraints_for(self, obj):
         '''
-            Return a list of the constraints in the current scope that
-            apply to obj.
+            Return a list of the constraints in the current scope that apply
+            to obj. If obj is None, return all available constraints in the
+            scope.
         '''
         constraints = []
         exclude = set()
@@ -119,7 +120,7 @@ class DriverTestConf:
                     # overridden or excluded only apply its exlusion
                     exclude.update(cons.exclude)
                 elif (caller_lvl or cons.inherited) \
-                        and (obj == 'any' or cons.apply_to(obj)):
+                        and (obj is None or cons.apply_to(obj)):
                     exclude.update(cons.exclude)
                     constraints.append(cons)
                     already_defined.add(name)

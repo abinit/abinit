@@ -77,7 +77,7 @@ class ExtendedTestConf(DriverTestConf):
         '''
             return a dict of the constraints in the current scope.
         '''
-        cons_list = self.get_constraints_for('any')
+        cons_list = self.get_constraints_for(None)
         constraints = {cons.name: cons for cons in cons_list}
         return constraints
 
