@@ -9,7 +9,7 @@ from .register_tag import (
     yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar,
 )
 import numpy as np
-from pandas import read_table, DataFrame
+from pandas import read_csv, DataFrame
 from pandas.compat import StringIO
 
 
@@ -230,12 +230,17 @@ class Table(DataFrame):
 
     @classmethod
     def from_scalar(cls, scal):
-        return cls(read_table(StringIO(scal), sep=cls.table_sep))
+        return cls(read_csv(StringIO(scal), sep=cls.table_sep))
 
     def to_scalar(self):
         return self.to_string()
 
 
 @yaml_scalar
-class CommaTable(Table):
-    table_sep = ','
+class GwSigmaData(object):
+    pass
+
+
+@yaml_auto_map
+class GwSigma(object):
+    pass
