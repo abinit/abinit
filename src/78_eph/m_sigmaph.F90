@@ -930,11 +930,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      cnt = cnt + 1
    end do
    call dvdb%close()
+   ABI_SFREE(qibz)
+   ABI_SFREE(wtq)
+   ABI_SFREE(qbz)
    ! Interpolate and write on those qpoints
    if (.not.file_exists(dtfil%fnameabo_dvdb)) then
      call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfft, ngfftf, cryst, &
                                      ifc%ngqpt, ifc%nqshft, ifc%qshft, comm, custom_qpt)
    end if
+   call dvdb%free()
    dvdb = dvdb_new(dtfil%fnameabo_dvdb, comm)
    ! Naive q-point check
    do iq_ibz=1,cnt-1
@@ -947,6 +951,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end do
      ABI_CHECK(found,'Wrong q-points found in dvdb file')
    end do
+   ABI_SFREE(custom_qpt)
    call dvdb%open_read(ngfftf, xmpi_comm_self)
    if (dtset%prtvol > 10) dvdb%debug = .True.
    ! This to symmetrize the DFPT potentials.
@@ -2241,6 +2246,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_CHECK(new%ntemp > 0, "ntemp <= 0")
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
+
+ ! Enforce semiconductor occupations before calling get_gaps
+ !call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol))
 
  gap_err = get_gaps(ebands, gaps)
  call gaps%print(unit=std_out)

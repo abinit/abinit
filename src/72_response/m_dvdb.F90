@@ -4840,9 +4840,9 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  ! of the response function driver.
  !write(std_out,*)hdr_ref%nsym, cryst%nsym
  !ABI_CHECK(hdr_ref%nsym == cryst%nsym, "Diff nsym")
- if (allocated(hdr_ref%symrel)) ABI_FREE(hdr_ref%symrel)
- if (allocated(hdr_ref%tnons)) ABI_FREE(hdr_ref%tnons)
- if (allocated(hdr_ref%symafm)) ABI_FREE(hdr_ref%symafm)
+ ABI_SFREE(hdr_ref%symrel)
+ ABI_SFREE(hdr_ref%tnons)
+ ABI_SFREE(hdr_ref%symafm)
  hdr_ref%nsym = cryst%nsym
  ABI_MALLOC(hdr_ref%symrel, (3,3,hdr_ref%nsym))
  ABI_MALLOC(hdr_ref%tnons, (3,hdr_ref%nsym))

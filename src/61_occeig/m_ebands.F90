@@ -4335,6 +4335,7 @@ select case (intmeth)
      end do !ikpt
    end do !spin
    ABI_FREE(wme0)
+   call xmpi_sum(edos%dos, comm, ierr)
    if (nvals > 0) call xmpi_sum(out_valsdos, comm, ierr)
    if (nvecs > 0) call xmpi_sum(out_vecsdos, comm, ierr)
    if (ntens > 0) call xmpi_sum(out_tensdos, comm, ierr)
@@ -4371,6 +4372,7 @@ select case (intmeth)
          bcorr, wdt(:,:,2), wdt(:,:,1), comm)
 
        do ikpt=1,ebands%nkpt
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
 
          edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, ikpt, 1)
          !scalar
@@ -4412,6 +4414,7 @@ select case (intmeth)
      end do ! band
    end do ! spin
 
+   call xmpi_sum(edos%dos, comm, ierr)
    if (nvals > 0) call xmpi_sum(out_valsdos, comm, ierr)
    if (nvecs > 0) call xmpi_sum(out_vecsdos, comm, ierr)
    if (ntens > 0) call xmpi_sum(out_tensdos, comm, ierr)
