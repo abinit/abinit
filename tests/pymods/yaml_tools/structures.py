@@ -237,7 +237,7 @@ class Table(DataFrame):
 
 
 @yaml_scalar
-class GwSigmaData(object):
+class GwSigmaData(Table):
     pass
 
 
