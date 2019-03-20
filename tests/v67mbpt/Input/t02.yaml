@@ -1,1 +1,5 @@
 tol_abs: 1.0e-8
+results_gs:
+    convergence:
+        diffor:
+            ignore: true
