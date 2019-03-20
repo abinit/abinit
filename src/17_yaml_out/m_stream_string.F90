@@ -18,6 +18,7 @@ module m_stream_string
   public :: stream_write, stream_get_chunk, stream_free, stream_string
   public :: stream_to_string, stream_copy, stream_transfer, stream_to_file
   public :: stream_debug, stream_chunk
+  public :: chunk_size
 
   type stream_chunk
     type(stream_chunk), pointer :: next => NULL()

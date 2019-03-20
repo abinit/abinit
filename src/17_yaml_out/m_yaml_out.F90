@@ -34,6 +34,8 @@ module m_yaml_out
   public :: yaml_add_real1d, yaml_add_real2d
   public :: yaml_add_dict,  yaml_add_dictlist
   public :: yaml_add_int1d, yaml_add_int2d
+  public :: yaml_add_tabular
+  public :: yaml_open_tabular, yaml_add_tabular_line
 
   contains
 
@@ -42,6 +44,34 @@ module m_yaml_out
     character(len=*),intent(inout) :: string
     string = repeat(' ', len(string))
   end subroutine string_clear
+
+  subroutine write_indent(input, output, n)
+    class(stream_string),intent(inout) :: input, output
+    integer,intent(in) :: n
+    
+    integer :: buffstart, buffstop, length
+    character(len=chunk_size) :: buffer
+    
+
+    do while (input%length > 0)
+      length = input%length
+      call input%get_chunk(buffer)
+
+      buffstart = 1
+      buffstop = 1
+      do while (buffstart < min(length, chunk_size))
+        buffstop = index(buffer(buffstart:), eol)
+        if (buffstop > 0) then
+          call output%write(buffer(buffstart:buffstop))
+          call output%write(repeat(' ', n))
+          buffstart = buffstop+1
+        else if(buffstart < min(length, chunk_size)) then
+          call output%write(buffer(buffstart:min(length, chunk_size)))
+          buffstart = chunk_size
+        end if
+      end do
+    end do
+  end subroutine write_indent
 
   pure function yaml_quote_string(string) result(quoted)
     character(len=*),intent(in) :: string
@@ -784,6 +814,120 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_dictlist
+
+  subroutine yaml_open_tabular(label, tag, file_d, string, stream, newline)
+    character(len=*),intent(in) :: label
+    character(len=*),intent(in),optional :: tag
+    integer,intent(in),optional :: file_d
+    type(stream_string),intent(inout),optional :: stream
+    character(len=*),intent(out),optional :: string
+    logical,intent(in),optional :: newline
+
+    integer :: n
+    type(stream_string) :: interm
+    logical :: nl
+
+    SET_DEFAULT(nl, newline, .true.)
+  
+    ASSERT(doclock == 1, "No document is opened yet.")
+    
+    if(n > 4) then
+      call interm%write(repeat(' ', n-4))
+    end if
+
+    if(present(tag)) then
+      call yaml_start_field(interm, label, tag=tag)
+    else
+      call yaml_start_field(interm, label, tag='Tabular')
+    end if
+    call interm%write(' |'//eol)
+
+    if(present(stream)) then
+      call interm%transfer(stream)
+    else if(present(string)) then
+      call interm%to_string(string)
+    else if(present(file_d)) then
+      call interm%to_file(file_d)
+    else
+      ERROR_NO_OUT
+    end if
+  end subroutine yaml_open_tabular
+
+  subroutine yaml_add_tabular_line(line, file_d, string, stream, newline, indent)
+    character(len=*),intent(in) :: line
+    integer,intent(in),optional :: file_d
+    type(stream_string),intent(inout),optional :: stream
+    character(len=*),intent(out),optional :: string
+    logical,intent(in),optional :: newline
+    integer,intent(in),optional :: indent
+
+    integer :: n
+    type(stream_string) :: interm
+    logical :: nl
+
+    SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(n, indent, 4)
+  
+    ASSERT(doclock == 1, "No document is opened yet.")
+
+    call interm%write(repeat(' ', n)//trim(line))
+
+    if(nl) then
+      call interm%write(eol)
+    end if
+
+    if(present(stream)) then
+      call interm%transfer(stream)
+    else if(present(string)) then
+      call interm%to_string(string)
+    else if(present(file_d)) then
+      call interm%to_file(file_d)
+    else
+      ERROR_NO_OUT
+    end if
+  end subroutine yaml_add_tabular_line
+
+  subroutine yaml_add_tabular(label, input, tag, file_d, string, stream, newline, indent)
+    character(len=*),intent(in) :: label
+    type(stream_string),intent(inout) :: input
+    character(len=*),intent(in),optional :: tag
+    integer,intent(in),optional :: file_d
+    type(stream_string),intent(inout),optional :: stream
+    character(len=*),intent(out),optional :: string
+    logical,intent(in),optional :: newline
+    integer,intent(in),optional :: indent
+
+    integer :: n
+    type(stream_string) :: interm
+    character(len=100) :: t
+    logical :: nl
+
+    SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(n, indent, 4)
+    SET_DEFAULT(t, tag, 'Tabular')
+  
+    call yaml_open_tabular(label, tag=t, stream=interm, newline=nl)
+    
+    if(n > 4) then
+      call interm%write(repeat(' ', n-4))
+    end if
+
+    call write_indent(input, interm, n)
+
+    if(nl) then
+      call interm%write(eol)
+    end if
+
+    if(present(stream)) then
+      call interm%transfer(stream)
+    else if(present(string)) then
+      call interm%to_string(string)
+    else if(present(file_d)) then
+      call interm%to_file(file_d)
+    else
+      ERROR_NO_OUT
+    end if
+  end subroutine yaml_add_tabular
 
   subroutine yaml_single_dict(label, comment, pl, key_size, string_size, file_d, string, stream, tag, &
 &                             int_fmt, real_fmt, string_fmt, newline, width)
