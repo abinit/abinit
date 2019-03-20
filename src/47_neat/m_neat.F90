@@ -17,6 +17,7 @@ module m_neat
 
   private
   public :: neat_energies, neat_results_gs, neat_crystal, neat_start_dataset
+  public :: neat_open_gw_sigma_pert, neat_gw_sigma_pert_add_line, neat_finish_gw_sigma_pert
   contains
 
   subroutine wrtout_stream(stream, iout)
@@ -191,4 +192,106 @@ module m_neat
     
   end subroutine neat_crystal
 !!*** m_neat/neat_crystal
+
+!!****f* m_neat/neat_open_gw_sigma_pert
+!!
+!! NAME
+!! neat_open_gw_sigma_pert
+!!
+!! FUNCTION
+!! Open a document for GW Sigma_perturbative
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!    Write the beginning of the document to stream
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+  subroutine neat_open_gw_sigma_pert(stream, comment, k, e0, egw, degw, header, tag)
+    type(stream_string),intent(inout) :: stream
+    real(kind=dp),intent(in) :: k(3), e0, egw, degw
+    character(len=*),intent(in) :: header, comment
+    character(len=*),intent(in),optional :: tag
+
+    if(present(tag)) then
+      call yaml_open_doc('GW Sigma perturbative', comment, tag=tag, stream=stream)
+    else
+      call yaml_open_doc('GW Sigma perturbative', comment, stream=stream)
+    end if
+
+    call yaml_add_real1d('k point', 3, k, stream=stream, real_fmt='(3f8.3)')
+    call yaml_add_realfield('E^0_gap', e0, stream=stream)
+    call yaml_add_realfield('E^GW_gap', egw, stream=stream)
+    call yaml_add_realfield('DeltaE^DW_gap', degw, stream=stream)
+
+    call yaml_open_tabular('data', stream=stream, tag='GwSigmaData')
+    call yaml_add_tabular_line(header, stream=stream)
+    
+  end subroutine neat_open_gw_sigma_pert
+!!*** m_neat/neat_open_gw_sigma_pert
+
+!!****f* m_neat/neat_gw_sigma_pert_add_line
+!!
+!! NAME
+!! neat_gw_sigma_pert_add_line
+!!
+!! FUNCTION
+!! Add a line to GW Sigma_perturbative document
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!    Print a YAML document to output file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+  subroutine neat_gw_sigma_pert_add_line(stream, line)
+    type(stream_string),intent(inout) :: stream
+    character(len=*),intent(in) :: line
+
+    call yaml_add_tabular_line(line, stream=stream)
+  end subroutine neat_gw_sigma_pert_add_line
+!!*** m_neat/neat_gw_sigma_pert_add_line
+
+!!****f* m_neat/neat_finish_gw_sigma_pert
+!!
+!! NAME
+!! neat_finish_gw_sigma_pert
+!!
+!! FUNCTION
+!! Add a line to GW Sigma_perturbative document
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!    Print a YAML document to output file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+  subroutine neat_finish_gw_sigma_pert(stream, iout)
+    type(stream_string),intent(inout) :: stream
+    integer,intent(in) :: iout
+
+    call yaml_close_doc(stream=stream)
+
+    call wrtout_stream(stream, iout)
+  end subroutine neat_finish_gw_sigma_pert
+!!*** m_neat/neat_finish_gw_sigma_pert
+
 end module m_neat
