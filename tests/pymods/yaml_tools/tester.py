@@ -97,7 +97,7 @@ class Tester(object):
 
             elif hasattr(ref, '__iter__') and not getattr(ref, '_has_no_child',
                                                           False):
-                for index, vref, vtest in enumerate(zip(ref, tested)):
+                for index, (vref, vtest) in enumerate(zip(ref, tested)):
                     self.check_this(index, vref, vtest)
 
     def run(self):
