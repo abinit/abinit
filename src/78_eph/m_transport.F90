@@ -890,14 +890,21 @@ subroutine transport_rta_write(self,cryst)
 
 !Local variables --------------------------------
  integer :: itemp, ispin
+ character(len=500) :: msg
 
- write(std_out,"(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+
+ call wrtout(ab_out,'Transport calculation results')
+ write(msg,"(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+ call wrtout(std_out,msg)
+ call wrtout(ab_out,msg)
  do ispin=1,self%nsppol
    do itemp=1,self%ntemp
-     write(std_out,"(f16.2,2e16.2,2f16.2)") self%kTmesh(itemp) / kb_HaK, &
+     write(msg,"(f16.2,2e16.2,2f16.2)") self%kTmesh(itemp) / kb_HaK, &
                             self%ne(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-8)**3, &
                             self%nh(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-8)**3, &
                             self%mobility_mu(1,ispin,1,1,itemp), self%mobility_mu(2,ispin,1,1,itemp)
+     call wrtout(std_out,msg)
+     call wrtout(ab_out,msg)
    end do !temp
  end do !spin
 
