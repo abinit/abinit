@@ -2134,7 +2134,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call prep_calc_ucrpa(ik_ibz,ikcalc,itypatcor,ib1,ib2,Cryst,QP_bst,Sigp,Gsph_x,Vcp,&
 &       Kmesh,Qmesh,lcor,M1_q_m,Pawtab,Pawang,Paw_pwff,&
 &       Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,gwx_ngfft,&
-&       ngfftf,Dtset%prtvol,Dtset%pawcross,rhot1_q_m)
+&       ngfftf,Dtset%prtvol,Dtset%pawcross,Dtset%plowan_compute,rhot1_q_m)
      end if
    end do
 

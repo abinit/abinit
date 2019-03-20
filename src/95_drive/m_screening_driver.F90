@@ -1084,7 +1084,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  iqcalc = 0
  if(Dtset%plowan_compute >= 10) then
-   call init_plowannier(Dtset,wanibz)
+   call init_plowannier(Dtset%plowan_bandf,Dtset%plowan_bandi,Dtset%plowan_compute,&
+&Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
+&Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
+&Dtset%kpt,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,wanibz)
   ! call init_plowannier(Dtset,wanbz)
    call get_plowannier(wanibz)
    call fullbz_plowannier(Dtset,Kmesh,Cryst,wanibz,wanbz)

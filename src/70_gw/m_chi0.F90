@@ -222,7 +222,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 !scalars
  integer,parameter :: tim_fourdp=1,enough=10,two_poles=2,one_pole=1,ndat1=1
  integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c
- integer :: band1,band2,iat,ig,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il
+ integer :: band1,band2,iat,ig,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il1,il2
  integer :: itypatcor,m1,m2,nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,use_padfftf,mgfftf
  integer :: my_nbbp,my_nbbpks,spin,nsppol !ig1,ig2,
  integer :: comm,ierr,my_wl,my_wr,iomegal,iomegar,gw_mgfft,dummy
@@ -768,26 +768,28 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
                    band2c=band2-wan%bandi_wan+1
                    do iat=1,wan%natom_wan
                      do ispinor1=1,wan%nspinor
-                       do il=1,wan%nbl_atom_wan(iat)
-                         do m1=1,2*(wan%latom_wan(iat)%lcalc(il))+1
-                           fac1=fac1 + real(wan%psichi(ik_bz,band1c,iat)%atom(il)%matl(m1,spin,ispinor1))*&
-                                       &conjg(wan%psichi(ik_bz,band1c,iat)%atom(il)%matl(m1,spin,ispinor1))
-                           fac2=fac2 + real(wan%psichi(ik_bz,band2c,iat)%atom(il)%matl(m1,spin,ispinor1))*&
-                                       &conjg(wan%psichi(ik_bz,band2c,iat)%atom(il)%matl(m1,spin,ispinor1))
+                       do il1=1,wan%nbl_atom_wan(iat)
+                         do m1=1,2*(wan%latom_wan(iat)%lcalc(il1))+1
+!                           fac1=fac1 + real(wan%psichi(ik_bz,band1c,iat)%atom(il1)%matl(m1,spin,ispinor1))*&
+!                                       &conjg(wan%psichi(ik_bz,band1c,iat)%atom(il1)%matl(m1,spin,ispinor1))
+!                           fac2=fac2 + real(wan%psichi(ik_bz,band2c,iat)%atom(il1)%matl(m1,spin,ispinor1))*&
+!                                       &conjg(wan%psichi(ik_bz,band2c,iat)%atom(il1)%matl(m1,spin,ispinor1))
                            do ispinor2=1,wan%nspinor
-                             do m2=1,2*(wan%latom_wan(iat)%lcalc(il))+1
-                               fac=fac - real(wan%psichi(ik_bz,band1c,iat)%atom(il)%matl(m1,spin,ispinor1))*&
-                                         &conjg(wan%psichi(ik_bz,band1c,iat)%atom(il)%matl(m1,spin,ispinor1))*&
-                                         &wan%psichi(ik_bz,band2c,iat)%atom(il)%matl(m2,spin,ispinor2)*&
-                                         &conjg(wan%psichi(ik_bz,band2c,iat)%atom(il)%matl(m2,spin,ispinor2))
-                               fac3=fac3+ real(wan%psichi(ik_bz,band1c,iat)%atom(il)%matl(m1,spin,ispinor1))*&
-                                          &conjg(wan%psichi(ik_bz,band1c,iat)%atom(il)%matl(m1,spin,ispinor1))*&
-                                          &wan%psichi(ik_bz,band2c,iat)%atom(il)%matl(m2,spin,ispinor2)*&
-                                          &conjg(wan%psichi(ik_bz,band2c,iat)%atom(il)%matl(m2,spin,ispinor2))
-                             enddo !m2
+                             do il2=1,wan%nbl_atom_wan(iat)
+                               do m2=1,2*(wan%latom_wan(iat)%lcalc(il2))+1
+                                 fac=fac - real(wan%psichi(ik_bz,band1c,iat)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                           &conjg(wan%psichi(ik_bz,band1c,iat)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                           &wan%psichi(ik_bz,band2c,iat)%atom(il2)%matl(m2,spin,ispinor2)*&
+                                           &conjg(wan%psichi(ik_bz,band2c,iat)%atom(il2)%matl(m2,spin,ispinor2))
+!                                 fac3=fac3+ real(wan%psichi(ik_bz,band1c,iat)%atom(il1)%matl(m1,spin,ispinor1))*&
+!                                            &conjg(wan%psichi(ik_bz,band1c,iat)%atom(il1)%matl(m1,spin,ispinor1))*&
+!                                            &wan%psichi(ik_bz,band2c,iat)%atom(il2)%matl(m2,spin,ispinor2)*&
+!                                            &conjg(wan%psichi(ik_bz,band2c,iat)%atom(il2)%matl(m2,spin,ispinor2))
+                               enddo !m2
+                             enddo !il2
                            enddo !ispinor2
                          enddo !m1
-                       enddo !il
+                       enddo !il1
                      enddo !ispinor1
                    enddo !iat
                  else !plowan_compute
@@ -1197,7 +1199,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  integer,parameter :: tim_fourdp1=1,two_poles=2,one_pole=1,ndat1=1
  integer :: bandinf,bandsup,dim_rtwg,band1,band2,ierr,band1c,band2c
  integer :: ig1,ig2,iat,ik_bz,ik_ibz,ikmq_bz,ikmq_ibz
- integer :: io,iomegal,iomegar,ispinor1,ispinor2,isym_k,itypatcor,nfft,il
+ integer :: io,iomegal,iomegar,ispinor1,ispinor2,isym_k,itypatcor,nfft,il1,il2
  integer :: isym_kmq,itim_k,itim_kmq,m1,m2,my_wl,my_wr,size_chi0
  integer :: nfound,nkpt_summed,nspinor,nsppol,mband
  integer :: comm,gw_mgfft,use_padfft,gw_fftalga,lcor,mgfftf,use_padfftf
@@ -1719,35 +1721,37 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
                    do iat=1, wan%natom_wan
                      do ispinor1=1,wan%nsppol
                        do ispinor2=1,wan%nsppol
-                         do il=1,wan%nbl_atom_wan(iat)
-                           do m1=1,2*wan%latom_wan(iat)%lcalc(il)+1
-                             do m2=1,2*wan%latom_wan(iat)%lcalc(il)+1
-                               fac=fac - real(wan%psichi(ik_bz,band1c,iat)%atom(il)%matl(m1,spin,ispinor1))*&
-                                         &conjg(wan%psichi(ik_bz,band1c,iat)%atom(il)%matl(m1,spin,ispinor1))*&
-                                         &wan%psichi(ik_bz,band2c,iat)%atom(il)%matl(m2,spin,ispinor2)*&
-                                         &conjg(wan%psichi(ik_bz,band2c,iat)%atom(il)%matl(m2,spin,ispinor2))
-                           enddo !m2
-                         enddo !m1
-                       enddo !il
-                     enddo !ispinor2
-                   enddo !isspinor1
-                 enddo !iat
-               else !plowan_compute>=10
-                 do iat=1, cryst%nattyp(itypatcor)
-                   do ispinor1=1,nspinor
-                     do ispinor2=1,nspinor
-                       do m1=1,2*lcor+10
-                         do m2=1,2*lcor+1
-                           fac=fac - real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
-&                                    conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
-&                                    coeffW_BZ(iat,spin,band2,ikmq_bz,ispinor2,m2)*&
-&                                    conjg(coeffW_BZ(iat,spin,band2,ikmq_bz,ispinor2,m2)))
-                         enddo !m2
-                       enddo !m1
-                     enddo !ispinor2
-                   enddo !ispinor1
-                 enddo !iat
-               endif !plowan_compute>=10
+                         do il1=1,wan%nbl_atom_wan(iat)
+                          do il2=1,wan%nbl_atom_wan(iat) 
+                            do m1=1,2*wan%latom_wan(iat)%lcalc(il1)+1
+                              do m2=1,2*wan%latom_wan(iat)%lcalc(il2)+1
+                                fac=fac - real(wan%psichi(ik_bz,band1c,iat)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                           &conjg(wan%psichi(ik_bz,band1c,iat)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                           &wan%psichi(ikmq_bz,band2c,iat)%atom(il2)%matl(m2,spin,ispinor2)*&
+                                           &conjg(wan%psichi(ikmq_bz,band2c,iat)%atom(il2)%matl(m2,spin,ispinor2))
+                              enddo !m2
+                            enddo !m1
+                          enddo !il2
+                        enddo !il1
+                      enddo !ispinor2
+                    enddo !isspinor1
+                  enddo !iat
+                else !plowan_compute>=10
+                  do iat=1, cryst%nattyp(itypatcor)
+                    do ispinor1=1,nspinor
+                      do ispinor2=1,nspinor
+                        do m1=1,2*lcor+1
+                          do m2=1,2*lcor+1
+                            fac=fac - real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+&                                     conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
+&                                     coeffW_BZ(iat,spin,band2,ikmq_bz,ispinor2,m2)*&
+&                                     conjg(coeffW_BZ(iat,spin,band2,ikmq_bz,ispinor2,m2)))
+                          enddo !m2
+                        enddo !m1
+                      enddo !ispinor2
+                    enddo !ispinor1
+                  enddo !iat
+                endif !plowan_compute>=10
                  if(dtset%ucrpa==1) fac=zero
                endif
              else if (dtset%ucrpa>=3) then

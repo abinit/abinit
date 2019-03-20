@@ -59,6 +59,7 @@ MODULE m_prep_calc_ucrpa
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_failed
  use m_read_plowannier, only : read_plowannier
+ use m_plowannier, only : plowannier_type,get_plowannier
 
  implicit none
 
@@ -164,11 +165,11 @@ contains
 subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Gsph_x,Vcp,Kmesh,Qmesh,lpawu,&
 & M1_q_m,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,&
 & Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
-& prtvol,pawcross,rhot1_q_m)
+& prtvol,pawcross,plowan_compute,rhot1_q_m)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: sigmak_ibz,ikcalc,itypatcor,prtvol,lpawu,minbnd,maxbnd,pawcross
+ integer,intent(in) :: sigmak_ibz,ikcalc,itypatcor,prtvol,lpawu,minbnd,maxbnd,pawcross,plowan_compute
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),target,intent(in) :: QP_BSt
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -228,6 +229,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
  type(esymm_t),pointer :: QP_sym(:)
+ type(plowannier_type) :: wan
  logical     :: ecriture=.FALSE.
  logical     :: l_ucrpa,luwindow
  integer     :: g0_dump(3),iq_ibz_dump,dumint(2)
@@ -270,12 +272,15 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  dumint=0
  luwindow=.true.
 ! write(6,*) "cc",allocated(coeffW_BZ)
- call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
-& nspinor,nsppol,pawang,prtvol,dumint)
-
- if(lcor/=lpawu) then
+ if (plowan_compute>=10) then
+   call get_plowannier(wan)
+ else
+   call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
+     & nspinor,nsppol,pawang,prtvol,dumint)
+   if(lcor/=lpawu) then
      msg = "lcor and lpawu differ in prep_calc_ucrpa"
      MSG_ERROR(msg)
+   endif
  endif
 
  ! === End of read Wannier function coefficients for Ucrpa

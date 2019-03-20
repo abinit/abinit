@@ -280,7 +280,24 @@ CONTAINS  !=====================================================================
 !!  initialize the variables useful for the computation
 !!
 !! INPUTS
-!! dtset : gives every information needed
+!! INPUTS
+!! plowan_bandf  = max index of band for Wannier construction
+!! plowan_bandi  = min index of band for Wannier construction
+!! plowan_compute = keyword to activate Wannier calculation
+!! plowan_iatom(plowan_natom) = index of atoms to use for Wannier
+!! plowan_it(plowan_nt)= index of atoms for real space calculation
+!! plowan_lcalc(sum_plowan_natom Plowan_nbl()) = index of l value for Wannier construction
+!! plowan_natom = nb of atoms for Wannier
+!! plowan_nbl(plowan_natom) = nb of l values for Wannier for each atoms.
+!! plowan_nt = nb of atoms for real space calculation
+!! plowan_projcalc(sum_plowan_natom Plowan_nbl()) = index of projectors for Wannier construction
+!! acell_orig(3,nimage) = cell parameters
+!! kpt(3,nkpt)  = k-points
+!! nkpt = nb of k-points
+!! nimage
+!! nspinor = nb of spinors
+!! nsppol = nb of polarization of wfc. 
+!! wtk = weight of k-points 
 !!
 !! OUTPUT
 !!  wan : plowannier type
@@ -290,14 +307,16 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!! outscfcv,screening_driver,fullbz_plowannier
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 
-subroutine init_plowannier(dtset,wan)
+subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom,plowan_it,&
+&plowan_lcalc,plowan_natom,plowan_nbl,plowan_nt,plowan_projcalc,acell_orig,kpt,nimage,nkpt,&
+&nspinor,nsppol,wtk,wan)
 
   use defs_basis
   use defs_datatypes
@@ -311,7 +330,17 @@ subroutine init_plowannier(dtset,wan)
 
 !Arguments ----------------------------------
 !scalars
- type(dataset_type), intent(in) :: dtset
+! type(dataset_type), intent(in) :: dtset
+ integer,intent(in) ::plowan_bandi,plowan_bandf,plowan_natom,plowan_nt,plowan_compute
+ integer,intent(in) ::nkpt,nsppol,nspinor,nimage
+ integer,intent(in) ::plowan_iatom(plowan_natom)
+ integer,intent(in) ::plowan_nbl(plowan_natom)
+ integer,intent(in) ::plowan_lcalc(sum(plowan_nbl(:)))
+ integer,intent(in) ::plowan_projcalc(sum(plowan_nbl(:)))
+ integer,intent(in) ::plowan_it(plowan_nt*3)
+ real(dp),intent(in) :: kpt(3,nkpt)
+ real(dp),intent(in) :: wtk(nkpt)
+ real(dp),intent(in) :: acell_orig(3,nimage)
  type(plowannier_type), intent(inout) :: wan
 
 !Local --------------------------------------
@@ -320,18 +349,18 @@ subroutine init_plowannier(dtset,wan)
 !************************************************************************
 
  !! generally
- wan%nkpt = dtset%nkpt
- wan%bandi_wan = dtset%plowan_bandi
- wan%bandf_wan = dtset%plowan_bandf
- wan%nsppol = dtset%nsppol
- wan%nspinor = dtset%nspinor
+ wan%nkpt = nkpt
+ wan%bandi_wan = plowan_bandi
+ wan%bandf_wan = plowan_bandf
+ wan%nsppol = nsppol
+ wan%nspinor = nspinor
 
  !! for this case
- wan%natom_wan = dtset%plowan_natom
+ wan%natom_wan = plowan_natom
 
  !! generally
- ABI_ALLOCATE(wan%kpt,(3,size(dtset%kpt,2)))
- wan%kpt = dtset%kpt
+ ABI_ALLOCATE(wan%kpt,(3,size(kpt,2)))
+ wan%kpt = kpt
  ABI_ALLOCATE(wan%iatom_wan,(wan%natom_wan))
  ABI_ALLOCATE(wan%nbl_atom_wan,(wan%natom_wan))
  wan%nbl_atom_wan = 0
@@ -341,12 +370,12 @@ subroutine init_plowannier(dtset,wan)
  ABI_DATATYPE_ALLOCATE(wan%projector_wan,(wan%natom_wan))
  ABI_ALLOCATE(wan%position,(wan%natom_wan,3))
  wan%position = 0
- ABI_ALLOCATE(wan%wtk,(size(dtset%wtk,1)))
- wan%wtk(:) = dtset%wtk(:)
+ ABI_ALLOCATE(wan%wtk,(size(wtk,1)))
+ wan%wtk(:) = wtk(:)
  ABI_ALLOCATE(wan%acell,(3))
- wan%acell(1) = dtset%acell_orig(1,1)
- wan%acell(2) = dtset%acell_orig(2,1)
- wan%acell(3) = dtset%acell_orig(3,1)
+ wan%acell(1) = acell_orig(1,1)
+ wan%acell(2) = acell_orig(2,1)
+ wan%acell(3) = acell_orig(3,1)
 
  ! If we want to study twice the same atom (but at different positions), use the same iatom and modify the positions below.
  ! In this case, the Wannier functions will be orthonormalized for one atom.
@@ -360,28 +389,28 @@ subroutine init_plowannier(dtset,wan)
  iltot=0
  do iatom=1,wan%natom_wan
 
-   wan%iatom_wan(iatom)       = dtset%plowan_iatom(iatom)
-   wan%nbl_atom_wan(iatom)    = dtset%plowan_nbl  (iatom)
-   wan%nbproj_atom_wan(iatom) = dtset%plowan_nbl  (iatom)
+   wan%iatom_wan(iatom)       = plowan_iatom(iatom)
+   wan%nbl_atom_wan(iatom)    = plowan_nbl  (iatom)
+   wan%nbproj_atom_wan(iatom) = plowan_nbl  (iatom)
 
   ! Now we define for each atom the selected orbital moments.
    ABI_ALLOCATE(wan%latom_wan(iatom)%lcalc,(wan%nbl_atom_wan(iatom)))
    ABI_ALLOCATE(wan%projector_wan(iatom)%lproj,(wan%nbproj_atom_wan(iatom)))
    do il=1,wan%nbl_atom_wan(iatom)
      iltot=iltot+1
-     wan%latom_wan(iatom)%lcalc(il)=dtset%plowan_lcalc(iltot)
-     wan%projector_wan(iatom)%lproj(il)=dtset%plowan_projcalc(iltot)
+     wan%latom_wan(iatom)%lcalc(il)=plowan_lcalc(iltot)
+     wan%projector_wan(iatom)%lproj(il)=plowan_projcalc(iltot)
    enddo
 
   !For each iatom , pos is an array of two dimensions. The first one is
   !the number of lattice translation and the second one is ist
   !coordinates.
-   ABI_ALLOCATE(wan%nposition(iatom)%pos,(dtset%plowan_nt,3))
+   ABI_ALLOCATE(wan%nposition(iatom)%pos,(plowan_nt,3))
    ittot=0
-   do it=1,dtset%plowan_nt
-     wan%nposition(iatom)%pos(it,1) = dtset%plowan_it(ittot+1)
-     wan%nposition(iatom)%pos(it,2) = dtset%plowan_it(ittot+2)
-     wan%nposition(iatom)%pos(it,3) = dtset%plowan_it(ittot+3)
+   do it=1,plowan_nt
+     wan%nposition(iatom)%pos(it,1) = plowan_it(ittot+1)
+     wan%nposition(iatom)%pos(it,2) = plowan_it(ittot+2)
+     wan%nposition(iatom)%pos(it,3) = plowan_it(ittot+3)
      !write(std_out,*)  "position",wan%nposition(iatom)%pos(it,:)
      ittot=ittot+3
    enddo
@@ -446,7 +475,7 @@ subroutine init_plowannier(dtset,wan)
      &" or increase the number of bands ",norbtot,wan%bandf_wan-wan%bandi_wan+1
      MSG_ERROR(message)
    endif
-   if(dtset%plowan_compute==2) then
+   if(plowan_compute==2) then
      write(message,'(3a)')  ch10,' == plowan_compute=2 => off diag blocks in the k-space Wannier Hamiltonian matrix',&
     &                          'is put to zero before diagonalisation'
      call wrtout(std_out,message,'COLL') ; call wrtout(ab_out,message,'COLL')
@@ -1085,17 +1114,12 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 
 
- call normalization_plowannier(wan)
-
-
-
-
  !! -------------------------------------------------------------
- !! COMPUTATION OF THE OCCUPATION MATRIX
+ !! COMPUTATION OF THE OCCUPATION MATRIX BEFORE NORMALIZATION
  !! -------------------------------------------------------------
  !! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
- if (prtocc .eq. 1) then
+ if (dtset%prtvol >= 5) then
    !Inialize an empty Wannier operator
    ABI_DATATYPE_ALLOCATE(operwan,(wan%nkpt,wan%natom_wan,wan%natom_wan))
    call initialize_operwan(wan,operwan)
@@ -1112,62 +1136,65 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      end do
    end do
 
-   !compute the occupation in wannier basis
+   !compute the occupation in wannier basis and print it
+  write(message,*)char(10),&
+&"Print the occupation levels (not normalized) for 1 atom, 1 orbital and for 5 k-points"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    do ikpt = 1,wan%nkpt
      call compute_oper_ks2wan(wan,operks,operwan,ikpt)
+     if (ikpt<=5)then
+       write(message,*)char(10),"For ikpt=",ikpt,"the occupation matrix is :"
+       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
+         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+       enddo
+     endif
    end do
+ endif
+
+ !!-------------------------------------------------------------
+ !!NORMALIZATION
+ !!--------------------------------------------------------------
+ call normalization_plowannier(wan)
+
+ !! -------------------------------------------------------------
+ !! COMPUTATION OF THE OCCUPATION MATRIX AFTER NORMALIZATION
+ !! -------------------------------------------------------------
+ !! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+ !compute the occupation in wannier basis and print it
+
+ if (dtset%prtvol >= 5) then  
+   write(message,*)char(10),&
+     &"Print the occupation levels (normalized) for 1 atom, 1 orbital and for 5 k-points"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   do ikpt = 1,wan%nkpt
+     call compute_oper_ks2wan(wan,operks,operwan,ikpt)
+     if (ikpt<=5)then
+       write(message,*)char(10),"For ikpt=",ikpt,"the occupation matrix is :"
+       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
+         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+       enddo
+     endif
+   end do
+ ! destroy the operator and the occupation matrix
    ABI_DEALLOCATE(operks)
-
-   !To diagonalize the block matrix for each orbital
-!! do iatom1 = 1,wan%natom_wan
- !!  do il1 = 1,wan%nbl_atom_wan(iatom1)
-  !!   do isppol = 1,wan%nsppol
-   !!    count = 2*wan%latom_wan(iatom1)%lcalc(il1)+1
-    !!   ABI_ALLOCATE(matrix_to_diag,(count,count))
-     !!  ABI_ALLOCATE(eig,(count))
-     !!  ABI_ALLOCATE(rwork,(3*count-2))
-    !!   lwork = 65*count !Value to optimize the diagonalization
-   !!    ABI_ALLOCATE(zwork,(lwork))
-  !!     do ikpt = 1,wan%nkpt
- !!        matrix_to_diag(:,:) = operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(:,:,isppol,1,1)
-!!         call zheev('v','u',count,matrix_to_diag,count,eig,zwork,lwork,rwork,info)
- !!        if (info .eq. 0) then !!Correct diagonalization
-  !!         matrix_to_diag = czero
-   !!        do im1 = 1,count
-    !!         matrix_to_diag(im1,im1) = eig(im1)
-     !!      end do
-      !!     operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(:,:,isppol,1,1) = matrix_to_diag(:,:)
-       !!  else
-      !!     write(message,'(a)') "Error in the normalization of the Wannier eigenvalues"
-     !!      MSG_ERROR(message)
-    !!     end if
-   !!    end do
-  !!     ABI_DEALLOCATE(matrix_to_diag)
-   !!    ABI_DEALLOCATE(eig)
-    !!   ABI_DEALLOCATE(rwork)
-   !!    ABI_DEALLOCATE(zwork)
-  !!   end do
- !!  end do
-!! end do
-
-
-
-
-
-   mat_writing = ""
-
-   if (me.eq.0) then
-     !print operwan in the real space, in a file
-     mat_writing = trim(dtfil%filnam_ds(4))//"_wannierocc"
-     convert = 1
-     call print_operwan(wan,operwan,trim(mat_writing),convert)
-   end if
    call destroy_operwan(wan,operwan) !!Destroy the occupation matrix
    ABI_DATATYPE_DEALLOCATE(operwan)
-
- end if
-
+ endif
 !! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+
+
 
 
  !! -------------------------------------------------------------
@@ -2184,8 +2211,12 @@ end subroutine compute_coeff_plowannier
  
  !Header of the file data.plowann
  write(unt,'(a22,i2)')"Total number of atom =", wan%natom_wan
+ write(unt,*)"List of atoms", wan%iatom_wan(:)
  write(unt,'(a7,2i4)')"Bands =",wan%bandi_wan,wan%bandf_wan
  write(unt,'(a26,i2)')"Total number of orbitals =",sum(wan%nbl_atom_wan(:))
+ do iatom=1,wan%natom_wan
+   write(unt,*)"Orbitals for atom",wan%iatom_wan(iatom)," = ",wan%latom_wan(iatom)%lcalc(:)
+ enddo
  write(unt,'(a16,i2)')"Number of spin =",wan%nsppol
  write(unt,'(a19,i3)')"Number of k-points=",wan%nkpt
  do ikpt=1,wan%nkpt
@@ -2257,8 +2288,12 @@ end subroutine compute_coeff_plowannier
  
  !Reading of the header of data.plowann
  read(unt,'(a22,i2)') msg, natom
+ read(unt,*)
  read(unt,'(a7,2i4)') msg, bandi,bandf
  read(unt,'(a26,i2)') msg, nbl
+ do iatom=1,wan%natom_wan
+   read(unt,*)
+ enddo
  read(unt,'(a16,i2)') msg, nspin
  read(unt,'(a19,i3)') msg, nkpt
  !Testing the header
@@ -2296,24 +2331,24 @@ end subroutine get_plowannier
 !!***
 
 
-!!****f* m_plowannier/get_plowannier
+!!****f* m_plowannier/fullbz_plowannier
 !! NAME
-!!  get_plowannier
+!!  fullbz_plowannier
 !!
 !! FUNCTION
-!!  get the psichies (Wannier weights) from a data.plowann file
+!!  Reconstruct the pischis on the full BZ 
 !!
 !! INPUTS
-!! wan
+!! dtset,kmesh,cryst,wanibz
 !!
 !! OUTPUT
-!! wan 
+!! wanbz 
 !! 
 !! PARENTS
-!! outscfcv
+!! screening_driver
 !!
 !! CHILDREN
-!! cchi0, cchi0q0, prep_calc_ucrpa
+!! 
 !! SOURCE
 
  subroutine fullbz_plowannier(dtset,kmesh,cryst,wanibz,wanbz)
@@ -2331,19 +2366,20 @@ end subroutine get_plowannier
    type(dataset_type),intent(in) :: dtset
    type(kmesh_t),intent(in) :: kmesh
    type(crystal_t),intent(in) :: cryst
-!Local variables-------------------
-   type(dataset_type) :: dtset_sym
+!Local variables----------------------
    character(len=500) :: msg
-   integer :: unt,sym,iatom,spin,ik_bz,iband,ibandc,il,ispinor,im,dummy,natom,bandi,bandf
+   integer :: unt,sym,iatom,spin,ik_bz,iband,ibandc,il,ispinor,im,dummy,natom,bandi,bandf,ik_ibz,isym,itim
+   real(dp) :: kbz(3)
 !*****************************************************************************************
   
 
    sym=kmesh%nbz/kmesh%nibz
-   dtset_sym=dtset
-   dtset_sym%nkpt=dtset%nkpt*sym
-   call init_plowannier(dtset_sym,wanbz)
+   call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,&
+     &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
+     &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
+     &dtset%kpt,dtset%nimage,dtset%nkpt*sym,dtset%nspinor,dtset%nsppol,dtset%wtk,wanbz)
   
-   write(msg,'(a)')"Reconstruction of the full Brillouin Zone"
+   write(msg,'(a)')"Reconstruction of the full Brillouin Zone using data.plowann in the IBZ"
    call wrtout(std_out,msg,'COLL');call wrtout(ab_out,msg,'COLL')
    if (sym==1) then 
      wanbz=wanibz
@@ -2370,9 +2406,33 @@ end subroutine get_plowannier
          enddo
        enddo
      enddo
-   endif
-   call destroy_plowannier(wanibz)
- end subroutine fullbz_plowannier
+   else if (cryst%nsym>1) then
+!     do ik_bz=1,kmesh%nbz
+!       call get_BZ_item(kmesh,ik_bz,kbz,ik_ibz,isym,itim)
+!       do iatom=1,wanibz%natom_wan
+!         at_indx=cryst%indsym(4,isym,wanibz%iatom_wan(iatom))
+!         do spin=1,wanibz%nspppol
+!           do ispinor=1,wanibz%nspinor
+!             do il1=1,wanibz%nbl_atom_wan(iatom)
+!                do il2=1,wanibz%nbl_atom_wan(iatom)
+!                  do im1=1,wanibz%2*latom_wan(iatom)%lcalc(l1)
+!                    do im2=1,wanibz%2*latom_wan(iatom)%lcalc(l2)
+!                      do iband=wanibz%bandi_wan,wanibz%bandf_wan
+!                        ibandc=iband-wanibz%bandi_wan+1
+!                        wanbz%psichi(ik_bz,ibandc,iatom)%atom(il1)%matl(im1,spin,ispinor)=&
+!                          &
+!                          enddo
+!                      enddo
+!                    enddo
+!                  enddo
+!                enddo
+!              enddo
+!            enddo
+!          enddo
+!        enddo
+      endif
+      call destroy_plowannier(wanibz)
+    end subroutine fullbz_plowannier
 
 
 !!****f* m_plowannier/destroy_plowannier
