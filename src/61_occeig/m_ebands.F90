@@ -536,7 +536,6 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
     '   Fundamental gap    = ',fun_gap*Ha_eV,' (eV), Top of valence bands at: ',gaps%kpoints(:,ivk),ch10,  &
                                              '      Bottom of conduction at: ',gaps%kpoints(:,ick)
    call wrtout(my_unt,msg,my_mode)
-
    write(msg, "((a,f8.4,2a))") " Valence Maximum: ", gaps%vb_max(spin) * Ha_eV, " (eV) at: ", trim(ktoa(gaps%kpoints(:, ivk)))
    call wrtout(my_unt,msg,my_mode)
    write(msg, "((a,f8.4,2a))") " Conduction minimum: ", gaps%cb_min(spin) * Ha_eV, " (eV) at: ", trim(ktoa(gaps%kpoints(:, ick)))
@@ -721,6 +720,7 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
  real(dp) :: my_nelect
 !arrays
  real(dp),allocatable :: ugly_doccde(:),ugly_ene(:)
+
 ! *************************************************************************
 
  my_nelect = hdr%nelect; if (present(nelect)) my_nelect = nelect
@@ -1001,8 +1001,7 @@ subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
 
  if (my_prtvol > 10) then
    if (ebands%nsppol == 1)then
-     write(msg,'(a,i0,a)')' New occ. numbers for occopt= ',ebands%occopt,' , spin-unpolarized case. '
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(my_unt, sjoin(' New occ. numbers for occopt= ', itoa(ebands%occopt),' , spin-unpolarized case.'), my_mode)
    end if
 
    do spin=1,ebands%nsppol
@@ -1516,7 +1515,7 @@ integer function ebands_vcbm_range_from_gaps(ebands, gaps, erange, e_lowhigh, ba
  if (present(ks_range)) ks_range = ib_work
  ABI_FREE(ib_work)
 
- ! Set exit status and msg. Caller will Handle it.
+ ! Set exit status and msg. Caller will handle it.
  ierr = 0; msg = ""
  if (elow > ehigh) then
    ierr = 1
@@ -2167,10 +2166,9 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
  stmbias_local=zero; if (PRESENT(stmbias)) stmbias_local=stmbias
 
  if (ebands_has_metal_scheme(ebands)) then
-   ! compute new occupation numbers if metallic occupation.
+   ! Compute new occupation numbers if metallic occupation.
    if (my_prtvol > 10) then
-     write(msg,'(a,f9.5)')' metallic scheme, calling newocc with spinmagntarget = ',spinmagntarget
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, sjoin(' metallic scheme: calling newocc with spinmagntarget:', ftoa(spinmagntarget, fmt="f9.5")))
    end if
 
    ! newocc assumes eigenvalues and occupations packed in 1d-vector!!
@@ -2196,7 +2194,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    ABI_FREE(doccde)
 
  else
-   !  Semiconductor (non magnetic case)
+   ! Semiconductor (non magnetic case)
    maxocc = two / (ebands%nsppol*ebands%nspinor)
    !
    ! FIXME here there is an inconsistency btw GW and Abinit
@@ -2235,8 +2233,8 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    cbot = MINVAL(condbottom)
 
    write(msg,'(a,f8.4,3a,f8.4,a)') &
-    ' Top of valence: ', vtop*Ha_eV," (eV)", ch10, &
-    ' Bottom of conduction: ', cbot*Ha_eV, " (eV)"
+    ' Top of valence: ', vtop * Ha_eV," (eV)", ch10, &
+    ' Bottom of conduction: ', cbot * Ha_eV, " (eV)"
    call wrtout(std_out, msg)
    if (ebands%nsppol == 2) then
      if (ABS(vtop - MINVAL(valencetop)) > tol6) then
@@ -2253,8 +2251,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    if (ABS(cbot - vtop) < tol4) ebands%fermie = vtop ! To avoid error on the last digit
  end if
 
- write(msg,'(a,f8.4,2a)')' Fermi level: ',ebands%fermie*Ha_eV, " (eV)", ch10
- call wrtout(std_out, msg)
+ call wrtout(std_out, sjoin(' Fermi level: ', ftoa(ebands%fermie * Ha_eV, fmt="f8.4"), " (eV)", ch10))
 
  ! Compute number of electrons for each spin channel.
  nelect_spin(:)=zero
@@ -2268,7 +2265,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
  ndiff = ebands%nelect - SUM(nelect_spin)
  if (my_prtvol > 0) then
    write(msg,'(2a,f6.2,2a,f7.4)')ch10,&
-    ' Total number of electrons = ',SUM(nelect_spin),ch10,&
+    ' Total number of electrons = ', sum(nelect_spin),ch10,&
     ' Input and calculated no. of electrons differ by ',ndiff
    call wrtout(std_out, msg)
  end if
@@ -2394,7 +2391,7 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 
 ! *************************************************************************
 
- if (.not.ebands_has_metal_scheme(ebands)) then
+ if (.not. ebands_has_metal_scheme(ebands)) then
    MSG_ERROR("set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_fermie!")
  end if
 
@@ -2423,8 +2420,8 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
  ABI_FREE(occ)
  ABI_FREE(doccde)
 
- write(msg,"(2(a,es16.6),a,2(a,es16.6))")&
-   " Old fermi level: ",prev_fermie,", with nelect: ",prev_nelect,ch10,&
+ write(msg,"(2(a,es16.6),a,2(a,es16.6))") &
+   " Old fermi level: ",prev_fermie,", with nelect: ",prev_nelect,ch10, &
    " New fermi level: ",ebands%fermie,", with nelect: ",ebands%nelect
 
 end subroutine ebands_set_fermie
@@ -3573,8 +3570,8 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
    do ikf=1,nkfull
      ik_ibz = bz2ibz(ikf,1)
      doccde_3d(:,ikf,spin) = inb%doccde(:,ik_ibz,spin)
-     eig_3d(:,ikf,spin) = inb%eig   (:,ik_ibz,spin)
-     occ_3d(:,ikf,spin) = inb%occ   (:,ik_ibz,spin)
+     eig_3d(:,ikf,spin) = inb%eig(:,ik_ibz,spin)
+     occ_3d(:,ikf,spin) = inb%occ(:,ik_ibz,spin)
    end do
  end do
 
@@ -3765,10 +3762,12 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(in)  :: self
- integer :: bstart, bstop
+ integer,intent(in) :: bstart, bstop
 
 !Local variables ------------------------------
  integer :: mband, nkpt, nsppol
+
+! *********************************************************************
 
 ! First copy the bands
  call ebands_copy(self,new)

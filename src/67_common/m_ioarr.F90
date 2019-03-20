@@ -631,9 +631,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
    MSG_BUG(message)
  end if
 
- call cwtime(cputime, walltime, gflops, "stop")
- write(message,'(2(a,f9.1),a)')" IO operation completed. cpu_time: ",cputime," [s], walltime: ",walltime," [s]"
- call wrtout(std_out, message, "COLL", do_flush=.True.)
+ call cwtime_report(" IO operation", cputime, walltime, gflops)
 
  DBG_EXIT("COLL")
 
@@ -747,7 +745,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  if (my_iomode /= IO_MODE_ETSF .and. nproc_fft == 1) my_iomode = IO_MODE_FORTRAN
  if (nproc_fft > 1 .and. my_iomode == IO_MODE_FORTRAN) my_iomode = IO_MODE_MPI
 
- call wrtout(std_out, sjoin(" fftdatar_write: About to write data to:", path, "with iomode", iomode2str(my_iomode)))
+ call wrtout(std_out, sjoin(ch10, "  fftdatar_write: About to write data to:", path, "with iomode:",iomode2str(my_iomode)))
  call cwtime(cputime, walltime, gflops, "start")
 
  ! Get MPI-FFT tables from input ngfft
@@ -863,9 +861,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    MSG_ERROR(sjoin("Wrong iomode:",itoa(my_iomode)))
  end select
 
- call cwtime(cputime, walltime, gflops, "stop")
- write(msg,'(2(a,f9.1),a)')" IO operation completed. cpu_time: ",cputime," [s], walltime: ",walltime," [s]"
- call wrtout(std_out, msg, "COLL", do_flush=.True.)
+ call cwtime_report(" IO operation", cputime, walltime, gflops)
 
  return
 

@@ -1547,9 +1547,8 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
 
    ! Print progress.
    if (db_iqpt <= 50 .or. mod(db_iqpt, 50) == 0) then
-     call cwtime(cpu, wall, gflops, "stop")
-     write(msg,'(2(a,i0),2(a,f8.2))') " Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
-     call wrtout(std_out, msg)
+     write(msg,'(2(a,i0),a)') " Reading q-point [",db_iqpt,"/",db%nqpt, "]"
+     call cwtime_report(msg, cpu, wall, gflops)
    end if
  end do
 
@@ -1660,7 +1659,7 @@ subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
  onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
 
- call cwtime_report(" Qcache update", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" dvdb_qcache update", cpu_all, wall_all, gflops_all)
  call timab(1807, 2, tsec)
 
 end subroutine dvdb_qcache_update
@@ -4743,7 +4742,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  integer :: ncid, ncerr
 #endif
  logical :: use_netcdf
- real(dp) :: cpu,wall,gflops
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
  character(len=fnlen) :: tmp_fname
  type(hdr_type) :: hdr_ref
@@ -4762,6 +4761,8 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
  write(msg, '(2a)') " Interpolation of the electron-phonon coupling potential", ch10
  call wrtout(ab_out, msg, do_flush=.True.); call wrtout(std_out, msg, do_flush=.True.)
+
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  if (dtset%eph_task == 5 .or. present(custom_qpt)) then
    msg = sjoin(" From coarse q-mesh:", ltoa(ngqpt_coarse), "to:", ltoa(dtset%eph_ngqpt_fine))
@@ -5079,7 +5080,6 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
      end do
 
      call cwtime_report(" q-points interpolated and written to new DVDB file.", cpu, wall, gflops)
-
      ABI_FREE(dvdb%rpt)
    end do
  end do
@@ -5135,6 +5135,8 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  write(msg, '(2a)') "Interpolation of the electron-phonon coupling potential completed", ch10
  call wrtout(ab_out, msg, do_flush=.True.)
  call wrtout(std_out, msg, do_flush=.True.)
+
+ call cwtime_report(" Overall time:", cpu_all, wall_all, gflops_all)
 
  return
 

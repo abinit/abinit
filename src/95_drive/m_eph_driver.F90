@@ -628,7 +628,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (4, -4)
    ! Compute electron self-energy (phonon contribution)
    call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
    if (dtset%eph_task == -4) then
      !call wrtout(std_out, "Calling transport routine after sigmaph run...", do_flush=.True.)
