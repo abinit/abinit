@@ -2102,7 +2102,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1,istwfk1=1
+ integer,parameter :: master=0,occopt1=1,occopt3=3,qptopt1=1,sppoldbl1=1,istwfk1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,qprange_,bstop
  integer :: jj,bstart,natom3
@@ -2247,10 +2247,17 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
 
- ! Enforce semiconductor occupations before calling get_gaps
- !call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol))
-
  gap_err = get_gaps(ebands, gaps)
+ if (gap_err/=0) then
+   ! In case of error try to enforce semiconductor occupations before calling get_gaps
+   ! This might still fail though...
+   call gaps%free()
+   call ebands_copy(ebands,tmp_ebands)
+   call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect-dtset%eph_extrael, dtset%spinmagntarget, msg)
+   gap_err = get_gaps(tmp_ebands,gaps)
+   call ebands_free(tmp_ebands)
+ end if
  call gaps%print(unit=std_out)
  val_indeces = get_valence_idx(ebands)
 
