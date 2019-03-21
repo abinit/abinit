@@ -3395,7 +3395,7 @@ end subroutine dfpt_flexoout
 !scalars
  integer :: iatdir,iatom,iatpert,ii,iq1dir,iq1grad,iq1pert,jatdir,jatom,jatpert
  integer, parameter :: im=2,re=1
- real(dp) :: tmpim,tmpre
+ real(dp) :: piezofrim,piezofrre,tmpim,tmpre
  character(len=500) :: msg
 
 !arrays
@@ -3636,6 +3636,36 @@ end subroutine dfpt_flexoout
            end if
 
          end do
+       end do
+     end do
+   end do
+   write(ab_out,*)' '
+ end do
+ write(ab_out,'(80a)')('=',ii=1,80)
+
+!Write the piezoelectric force-response tensor
+ write(ab_out,*)' '
+ write(ab_out,*)' Piezoelectric force-response tensor, in cartesian coordinates '
+ write(ab_out,*)' (from q-gradient of dnamical matrix),'
+ write(ab_out,*)' iatom   iatddir  jatddir   qgrdir           real part          imaginary part'
+ do iq1dir=1,3
+   do iatdir=1,3
+     do iatom=1,matom
+       do jatdir=1,3
+         piezofrre=zero
+         piezofrim=zero
+         do jatom=1,matom
+
+           if (cartflg(iatom,iatdir,jatom,jatdir,iq1dir)==1) then
+             piezofrre=piezofrre+ddmdq_cart(1,iatom,iatdir,jatom,jatdir,iq1dir)
+             piezofrim=piezofrim+ddmdq_cart(2,iatom,iatdir,jatom,jatdir,iq1dir)
+           end if
+
+         end do
+
+         write(ab_out,'(4(i5,4x),2(1x,f20.10))') iatom, iatdir, jatdir, iq1dir,       &
+       & piezofrre, piezofrim
+
        end do
      end do
    end do
