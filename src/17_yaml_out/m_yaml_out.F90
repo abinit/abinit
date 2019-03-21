@@ -8,10 +8,12 @@
 #define ERROR_NO_OUT ERROR("No output medium have been provided.")
 #define ASSERT(cond, msg) if(.not. cond) then; ERROR(msg); end if
 
-#define MAGIC_NAN 9.9999999999D99
+#define MAGIC_NAN 9.9999999999D+99
 
 module m_yaml_out
 
+
+  use ieee_arithmetic
 
   use m_pair_list
   use m_stream_string
@@ -53,7 +55,7 @@ module m_yaml_out
     character(len=*),intent(out) :: dest
     character(len=*),intent(in) :: formt
 
-    if(val /= val) then  ! NaN
+    if(ieee_is_nan(val)) then  ! NaN
       write(dest, '(a)') '.nan'
     else if (val == MAGIC_NAN) then
       write(dest, '(a)') '.null'
@@ -68,7 +70,6 @@ module m_yaml_out
     
     integer :: buffstart, buffstop, length
     character(len=chunk_size) :: buffer
-    9.9999999999D99
 
     do while (input%length > 0)
       length = input%length
