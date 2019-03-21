@@ -7,8 +7,6 @@ lda:
     results_gs!:
         convergence:
             ceil: 1.0e-6
-            diffor:
-                ignore: true
         stress tensor:
             tensor_is_symetric: true
 
@@ -20,8 +18,6 @@ dmft:
             ceil: 1.0e-6
             deltae:
                 ceil: 2.0e-3
-            diffor:
-                ignore: true
             res2:
                 ignore: true
         fermie:

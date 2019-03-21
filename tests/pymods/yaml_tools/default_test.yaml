@@ -1,4 +1,4 @@
-allow_nan: false
+allow_null: false
 tol_abs: 1.0e-10
 tol_rel: 1.0e-10
 
@@ -6,7 +6,7 @@ Etot:
     tol_abs: 1.0e-7
 
 results_gs:
-    allow_nan: true
+    allow_null: true
     tol_rel: 1.0e-12
     convergence:
         ceil: 1.0e-6

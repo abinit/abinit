@@ -110,11 +110,13 @@ def equations(eqs, ref, tested, tol_eq):
 
 
 @conf_parser.constraint(value_type=bool, inherited=True, apply_to='number')
-def allow_nan(yes, ref, tested):
+def allow_null(yes, ref, tested):
     '''
-        If value is true, fail if a NaN value is encountered.
+        If value is true, fail if reference is a number and tested is YAML null
+        (which is used by Abinit to replace the 9.9999999D99 magic number
+        meaning that the given value is not relevant).
     '''
-    return yes or not isnan(tested)
+    return yes or tested is not None
 
 
 @conf_parser.constraint(value_type=bool, inherited=False, apply_to=Tensor)
