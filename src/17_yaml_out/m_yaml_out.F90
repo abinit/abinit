@@ -7,6 +7,9 @@
 #define ERROR(msg) write(0,*) msg; stop
 #define ERROR_NO_OUT ERROR("No output medium have been provided.")
 #define ASSERT(cond, msg) if(.not. cond) then; ERROR(msg); end if
+
+#define MAGIC_NAN 9.9999999999D99
+
 module m_yaml_out
 
 
@@ -45,13 +48,27 @@ module m_yaml_out
     string = repeat(' ', len(string))
   end subroutine string_clear
 
+  subroutine format_real(val, dest, formt)
+    real(kind=dp),intent(in) :: val
+    character(len=*),intent(out) :: dest
+    character(len=*),intent(in) :: formt
+
+    if(val /= val) then  ! NaN
+      write(dest, '(a)') '.nan'
+    else if (val == MAGIC_NAN) then
+      write(dest, '(a)') '.null'
+    else
+      write(dest, trim(formt)) val
+    end if
+  end subroutine
+
   subroutine write_indent(input, output, n)
     class(stream_string),intent(inout) :: input, output
     integer,intent(in) :: n
     
     integer :: buffstart, buffstop, length
     character(len=chunk_size) :: buffer
-    
+    9.9999999999D99
 
     do while (input%length > 0)
       length = input%length
@@ -150,7 +167,7 @@ module m_yaml_out
 
     do i=1,length
       call string_clear(tmp_r)
-      write(tmp_r, rfmt) arr(i)
+      call format_real(arr(i), tmp_r, rfmt)
       call stream%write(trim(tmp_r))
       if (i > 0 .and. mod(i, vmax) == 0 .and. i /= length) then
         call stream%write(', '//eol//'    ')
@@ -231,7 +248,7 @@ module m_yaml_out
         call stream%write(trim(tmp_i))
       else if(type_code == TC_REAL) then
         call string_clear(tmp_r)
-        write(tmp_r, rfmt) vr
+        call format_real(vr, tmp_r, rfmt)
         call stream%write(trim(tmp_r))
       else if(type_code == TC_STRING) then
         call string_clear(tmp_s)
@@ -396,7 +413,7 @@ module m_yaml_out
     end if
 
     call interm%write(' ')
-    write(tmp_r, trim(rfmt)) val
+    call format_real(val, tmp_r, trim(rfmt))
     call interm%write(trim(tmp_r))
     if(nl) call interm%write(eol)
 
@@ -994,7 +1011,7 @@ module m_yaml_out
         call interm%write(trim(tmp_i))
       else if(type_code == TC_REAL) then
         call string_clear(tmp_r)
-        write(tmp_r, rfmt) vr
+        call format_real(vr, tmp_r, rfmt)
         call interm%write(trim(tmp_r))
       else if(type_code == TC_STRING) then
         call string_clear(tmp_s)
