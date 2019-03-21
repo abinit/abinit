@@ -62,7 +62,7 @@ module m_yaml_out
     else
       write(dest, trim(formt)) val
     end if
-  end subroutine
+  end subroutine format_real
 
   subroutine write_indent(input, output, n)
     class(stream_string),intent(inout) :: input, output
