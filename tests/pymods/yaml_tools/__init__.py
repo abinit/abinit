@@ -37,10 +37,10 @@ if is_available:
         from . import structures
         if catch:
             try:
-                return yaml.load(content, *args, **kwargs)
+                return yaml.load(content, *args, Loader=yaml.Loader, **kwargs)
             except yaml.YAMLError as e:
                 return CorruptedDocument(e, context=content)
         else:
-            return yaml.load(content, *args, **kwargs)
+            return yaml.load(content, *args, Loader=yaml.Loader, **kwargs)
 
     yaml_print = yaml.dump
