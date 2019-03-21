@@ -707,7 +707,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
    has_dijnd=0; if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
-   has_diju=0; if(dtset%usepawu==5.or.dtset%usepaw==6) has_diju=1
+   has_diju=0; if(dtset%usepawu==5.or.dtset%usepawu==6) has_diju=1
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
      has_kxc=1
      call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)

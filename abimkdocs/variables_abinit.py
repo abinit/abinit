@@ -2644,11 +2644,11 @@ discussion of density-density approximation with respect with the
 rotationnally invariant formulation, see e.g. [[cite:Antipov2012]].
 The ABINIT/CT Hyb implementation is discussed in [[cite:Gonze2016]].
 The TRIQS/CT Hyb implementation is described in [[cite:Seth2016]].
-Before using it, it has to be installed following instructions available [here](https://triqs.ipht.cnrs.fr/1.x/install.html).
-Starting from release 8.6.0, the
-interface is valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. An example of a
-config.ac file to compile ABINIT with TRIQS can be found in
-~/doc/build/config-examples/ubu_gnu_4.9_triqs.ac.
+Before using it, it has to be installed following instructions available [here](https://triqs.github.io/triqs/2.1.x).
+Until release 8.10 included, the
+interface was valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. It has then been upgraded to TRIQS 2.1 afterwards. 
+An example of a config.ac file to compile ABINIT with TRIQS can be found in
+~/doc/build/config-examples/higgs_gnu_7.3_triqs2.ac.
 See the useful variables for CT-QMC solver: [[dmftctqmc_basis]],
 [[dmftctqmc_check]], [[dmftctqmc_correl]], [[dmftctqmc_gmove]],
 [[dmftctqmc_grnns]], [[dmftctqmc_meas]], [[dmftctqmc_mrka]],
@@ -6767,7 +6767,7 @@ you want to produce netcdf files in parallel with [[paral_kgb]] = 1 (i.e.
 netcdf4 + hdf5 + MPI-IO). At present, the internal fallbacks provided by
 Abinit do not support netcdf4 so you have to link against an external netcdf
 library that supports hdf5+MPI-IO and is compatible with the mpif90 used to
-compile Abinit. See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
+compile Abinit. See ~abinit/doc/build/config-examples/ubu_intel_17.0_openmpi.ac for a typical configuration file.
 
 Additional note: The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
 The ETSF_IO library was indeed not maintained anymore.
