@@ -449,10 +449,10 @@ class Differ(object):
                              ignoreP=self.options['ignoreP'])
 
         lines1, documents1, _ = dext.extract(lines1)
-        doc1_has_corrupted_document = dext.has_corrupted_doc
+        doc1_corrupted_documents = dext.corrupted_docs
 
         lines2, documents2, _ = dext.extract(lines2)
-        doc2_has_corrupted_document = dext.has_corrupted_doc
+        doc2_corrupted_documents = dext.corrupted_docs
 
         if self.use_fl:
             lines_differences = self._fldiff(lines1, lines2)
@@ -460,16 +460,18 @@ class Differ(object):
             lines_differences = []
 
         if self.use_yaml:
-            if doc1_has_corrupted_document:
+            if doc1_corrupted_documents:
                 doc_differences = [YFailure(
                     self.yaml_conf,
-                    "Reference has corrupted YAML documents."
+                    'Reference has corrupted YAML documents at lines {}.'
+                    .format(doc1_corrupted_documents)
                 )]
 
-            elif doc2_has_corrupted_document:
+            elif doc2_corrupted_documents:
                 doc_differences = [YFailure(
                     self.yaml_conf,
-                    "Tested file has corrupted YAML documents."
+                    'Tested file has corrupted YAML documents at lines {}'
+                    .format(doc1_corrupted_documents)
                 )]
 
             else:

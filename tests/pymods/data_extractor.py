@@ -29,7 +29,7 @@ class DataExtractor:
         self.ignoreP = ignoreP
         self.iterators_state = {}
         self.xml_mode = xml_mode
-        self.has_corrupted_doc = False
+        self.corrupted_docs = []
         self.abinit_messages = []
 
     def _get_metachar(self, line):
@@ -72,7 +72,7 @@ class DataExtractor:
 
         # Reset those states to allow several extract with the same instance
         self.iterators_state = {}
-        self.has_corrupted_doc = False
+        self.corrupted_docs = []
         lines, docs, ignored = [], [], []
 
         current_doc = None
@@ -105,7 +105,7 @@ class DataExtractor:
                         elif getattr(current_doc['obj'], '_is_corrupted_doc',
                                      False):
                             # Signal corruption but ignore the document
-                            self.has_corrupted_doc = True
+                            self.corrupted_docs.append(current_doc['start']+1)
 
                         elif getattr(current_doc['obj'], '_is_abinit_message',
                                      False):
