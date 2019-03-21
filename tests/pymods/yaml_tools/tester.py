@@ -1,4 +1,5 @@
 from __future__ import print_function, division, unicode_literals
+from .tricks import string
 from .register_tag import BaseDictWrapper
 
 
@@ -95,8 +96,9 @@ class Tester(object):
                     else:
                         self.check_this(child, ref[child], tested[child])
 
-            elif hasattr(ref, '__iter__') and not getattr(ref, '_has_no_child',
-                                                          False):
+            elif hasattr(ref, '__iter__') \
+                    and not getattr(ref, '_has_no_child', False) \
+                    and not isinstance(ref, string):
                 for index, (vref, vtest) in enumerate(zip(ref, tested)):
                     self.check_this(index, vref, vtest)
 
