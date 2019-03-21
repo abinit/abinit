@@ -75,8 +75,9 @@ class Tester(object):
                 try:
                     success = cons.check(ref, tested, self.conf)
                 except Exception as e:
-                    msg = ('Exception while checking {}:\n'
-                           '{}: {}').format(cons.name, e.__class__.__name__,
+                    msg = ('Exception while checking {} ({}/{}):\n'
+                           '{}: {}').format(cons.name, ref, tested,
+                                            e.__class__.__name__,
                                             str(e))
                     self.issues.append(Failure(self.conf, msg))
                 else:

@@ -13,12 +13,13 @@ from __future__ import print_function, division, unicode_literals
 from numpy import ndarray, isnan
 from numpy.linalg import norm
 from .meta_conf_parser import ConfParser
-from .structures import Tensor
+from .structures import Tensor, Undef
 
 conf_parser = ConfParser()
 
 # Parameters
-conf_parser.parameter('tol_eq', default=1e-8, inherited=False)
+conf_parser.parameter('tol_eq', default=1e-8, inherited=True)
+
 
 tol_group = {
     'tol_rel', 'tol_abs', 'tol'
@@ -28,6 +29,7 @@ tol_group = {
 # Constraints
 # default parameters for constraints are:
 # value_type=float, inherited=True, apply_to='number' use_params=[], exclude={}
+# handle_undef = True
 @conf_parser.constraint(exclude={'tol', 'ceil', 'ignore'})
 def tol_rel(tol, ref, tested):
     '''
@@ -107,16 +109,6 @@ def equations(eqs, ref, tested, tol_eq):
         else:
             if abs(res) >= tol_eq:
                 return False
-
-
-@conf_parser.constraint(value_type=bool, inherited=True, apply_to='number')
-def allow_null(yes, ref, tested):
-    '''
-        If value is true, fail if reference is a number and tested is YAML null
-        (which is used by Abinit to replace the 9.9999999D99 magic number
-        meaning that the given value is not relevant).
-    '''
-    return yes or tested is not None
 
 
 @conf_parser.constraint(value_type=bool, inherited=False, apply_to=Tensor)
