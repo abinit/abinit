@@ -9,9 +9,11 @@ import re
 from inspect import ismethod
 import yaml
 
+re_word = re.compile(r'[a-zA-Z0-9_]+')
+
 
 def normalize_attr(string):
-    return '_'.join(re.findall(r'[a-zA-Z0-9_]+', string))  # .lower()
+    return '_'.join(re_word.findall(string))  # .lower()
 
 
 def yaml_tag_mangle(Cls):
