@@ -1031,7 +1031,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
      ! Compute the weights for this q-point using tetrahedron
      do imode=1,3*natom
        tmp_phfrq(:) = full_phfrq(imode,:)
-       call htetra_get_onewk(htetraq,iq_ibz,bcorr0,phdos%nomega,phdos%nqibz,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,wdt)
+       !call htetra_get_onewk(htetraq,iq_ibz,bcorr0,phdos%nomega,phdos%nqibz,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,wdt)
+       call htetra_get_onewk_wvals(htetraq,iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
 
        ! Accumulate DOS/IDOS
        phdos%phdos(:) = phdos%phdos(:) + wdt(:, 1)*wtq_ibz(iq_ibz)
