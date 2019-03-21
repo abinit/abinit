@@ -790,12 +790,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
  - Associated theta integrals calculated with ntheta=    100 points.
 
 --- !WARNING
+src_file: m_efmas.F90
+src_line: 0
+message: |
+    
+    Band(s)     7,     8,
+    are not band extrema, but saddle points;
+    the transport equivalent formalism breaks down in these conditions.
+    The associated tensor(s) will therefore not be printed.
+...
 
-Band(s)     7,     8,
-are not band extrema, but saddle points;
-the transport equivalent formalism breaks down in these conditions.
-The associated tensor(s) will therefore not be printed.
----
 
  K-point ( 0.000, 0.500, 0.500) | band =     7
  Transport equivalent effective mass tensor:
@@ -1040,6 +1044,7 @@ P          mk1mem3          2
 - J. Laflamme Janssen, Y. Gillet, S. Ponce, A. Martin, M. Torrent, and X. Gonze. Phys. Rev. B 93, 205147 (2016)
 - Comment : in case the DFPT prediction of effective masses is used.
 - Strong suggestion to cite this paper in your publications.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#laflamme2016
 -
 - [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -1057,19 +1062,23 @@ P          mk1mem3          2
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
 - Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
 - [4] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
 - Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
 - [5] Optimized norm-conserving Vanderbilt pseudopotentials.
 - D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
 - [6] ABINIT : First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
@@ -1082,6 +1091,7 @@ P          mk1mem3          2
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [7] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
@@ -1094,6 +1104,7 @@ P          mk1mem3          2
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - Proc.   0 individual time (sec): cpu=         19.7  wall=         20.1
 
