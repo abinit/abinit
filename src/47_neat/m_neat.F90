@@ -228,7 +228,7 @@ module m_neat
     call yaml_add_real1d('k point', 3, k, stream=stream, real_fmt='(3f8.3)')
     call yaml_add_realfield('E^0_gap', e0, stream=stream)
     call yaml_add_realfield('E^GW_gap', egw, stream=stream)
-    call yaml_add_realfield('DeltaE^DW_gap', degw, stream=stream)
+    call yaml_add_realfield('DeltaE^GW_gap', degw, stream=stream)
 
     call yaml_open_tabular('data', stream=stream, tag='GwSigmaData')
     call yaml_add_tabular_line(header, stream=stream)
