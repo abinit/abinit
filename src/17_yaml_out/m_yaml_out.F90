@@ -58,7 +58,7 @@ module m_yaml_out
     if(ieee_is_nan(val)) then  ! NaN
       write(dest, '(a)') '.nan'
     else if (val == MAGIC_NAN) then
-      write(dest, '(a)') '.null'
+      write(dest, '(a)') 'null'
     else
       write(dest, trim(formt)) val
     end if
