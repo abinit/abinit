@@ -7,6 +7,7 @@ from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
 from .abinit_iterators import IterStateFilter
 from .register_tag import normalize_attr
 from .tricks import cstm_isinstance
+from .structures import Undef
 
 
 def make_apply_to(type_):
@@ -18,6 +19,7 @@ def make_apply_to(type_):
     if type_ == 'number':
         def apply_to(self, obj):
             return isinstance(obj, (int, float, complex))
+
     elif type_ == 'real' or (isclass(type_) and issubclass(type_, float)):
         def apply_to(self, obj):
             return isinstance(obj, float)
@@ -54,7 +56,7 @@ class Constraint(object):
         Represent a constraint to be applied to some piece of data.
     '''
     def __init__(self, name, test, val_type, inherited, use_params, exclude,
-                 apply_to, value=None, metadata={}):
+                 apply_to, handle_undef, value=None, metadata={}):
         self.name = name
         self.test = test
         self.type = val_type
@@ -63,6 +65,7 @@ class Constraint(object):
         self.exclude = exclude
         self.value = value
         self.metadata = metadata
+        self.handle_undef = handle_undef
 
         self._apply_to = make_apply_to(apply_to)
 
@@ -82,6 +85,16 @@ class Constraint(object):
         '''
             Return True if the constraint is verified.
         '''
+        # apply to floats at least
+        if self._apply_to(self, 1.0) and self.handle_undef:
+            if conf.get_param('allow_undef'):
+                if ref == Undef():
+                    print('left undef')
+                    return True
+            elif ref == Undef() or tested == Undef():
+                print('left or right undef')
+                return False
+
         params = [conf.get_param(p) for p in self.use_params]
         return self.test(self.value, ref, tested, *params)
 
@@ -96,7 +109,8 @@ class Constraint(object):
             Create a copy of self.
         '''
         cp = Constraint(self.name, self.test, self.type, self.inherited,
-                        self.use_params, self.exclude, 'copying')
+                        self.use_params, self.exclude, 'copying',
+                        self.handle_undef)
         cp._apply_to = self._apply_to
         return cp
 
@@ -120,6 +134,7 @@ class Constraint(object):
             and self.use_params == other.use_params
             and self.exclude == other.exclude
             and self.value == other.value
+            and self.handle_undef == other.handle_undef
         )
 
     def __ne__(self, other):
@@ -286,7 +301,13 @@ class ConfParser(object):
         and build the actual configuration tree.
     '''
     def __init__(self):
-        self.parameters = {}
+        self.parameters = {
+            'allow_undef': {
+                 'type': bool,
+                 'inherited': True,
+                 'default': True
+            }
+        }
         self.constraints = {}
         self.metadata = {}
 
@@ -310,7 +331,8 @@ class ConfParser(object):
         }
 
     def constraint(self, name=None, value_type=float, inherited=True,
-                   apply_to='number', use_params=[], exclude=set()):
+                   apply_to='number', use_params=[], exclude=set(),
+                   handle_undef=True):
         '''
             Register a constraints to be recognised while parsing config.
         '''
@@ -331,7 +353,7 @@ class ConfParser(object):
 
             self.constraints[name_] = Constraint(
                 name_, fun, value_type, inherited_, use_params,
-                set(exclude), apply_to
+                set(exclude), apply_to, handle_undef
             )
             return fun
         return register

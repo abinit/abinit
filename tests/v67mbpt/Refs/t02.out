@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Mar 2019.
-- ( at 14h15 )
+.Starting date : Thu 21 Mar 2019.
+- ( at 16h19 )
   
 - input  file    -> t02.in
 - output file    -> t02.out
@@ -451,7 +451,7 @@ nsppol    :        1
 cut       : {"ecut":   8.00000000000000000E+00, "pawecutdg":  -1.00000000000000000E+00, }
 convergence: {
     "deltae":  -9.53903622757934500E-13, "res2":   2.13135145196609473E-11, 
-    "residm":   8.96759867517499773E-11, "diffor":   9.99999999989999934E+99, 
+    "residm":   8.96759867517499773E-11, "diffor": undef, 
 }
 etotal    :  -8.87168809125275004E+00
 entropy   :   0.00000000000000000E+00
@@ -1184,7 +1184,7 @@ label: GW Sigma perturbative
 k point: [   0.000,    0.000,    0.000, ]
 E^0_gap:   2.52645830621329992E+00
 E^GW_gap:   3.10415465048926276E+00
-DeltaE^DW_gap:   5.77696344275962725E-01
+DeltaE^GW_gap:   5.77696344275962725E-01
 data: !GwSigmaData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
@@ -1340,7 +1340,7 @@ label: GW Sigma perturbative
 k point: [   0.000,    0.000,    0.000, ]
 E^0_gap:   2.52645830621329992E+00
 E^GW_gap:   3.10415465048926276E+00
-DeltaE^DW_gap:   5.77696344275962725E-01
+DeltaE^GW_gap:   5.77696344275962725E-01
 data: !GwSigmaData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
@@ -1496,7 +1496,7 @@ label: GW Sigma perturbative
 k point: [   0.000,    0.000,    0.000, ]
 E^0_gap:   2.52645830621329992E+00
 E^GW_gap:   3.10415465048926276E+00
-DeltaE^DW_gap:   5.77696344275962725E-01
+DeltaE^GW_gap:   5.77696344275962725E-01
 data: !GwSigmaData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
@@ -1855,10 +1855,10 @@ P           mkmem          16
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         65.3  wall=         66.3
+- Proc.   0 individual time (sec): cpu=         57.2  wall=         57.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         65.3  wall=         66.3
++Overall time at end (sec) : cpu=         57.2  wall=         57.3

@@ -8,9 +8,36 @@ from .abinit_iterators import ITERATOR_RANKS
 from .register_tag import (
     yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar,
 )
+import re
 import numpy as np
 from pandas import read_csv, DataFrame
 from pandas.compat import StringIO
+
+
+@yaml_implicit_scalar
+class Undef(float):
+    '''
+        Represent the magic number undef.
+    '''
+    _is_undef = True
+    yaml_pattern = re.compile('undef')
+
+    @staticmethod
+    def __new__(cls):
+        return super(Undef, cls).__new__(cls, 'nan')
+
+    def __eq__(self, other):
+        return getattr(other, '_is_undef', False)
+
+    def __repr__(self):
+        return 'undef'
+
+    @classmethod
+    def from_scalar(cls, scal):
+        return cls()
+
+    def to_scalar(self):
+        return 'undef'
 
 
 @yaml_map
