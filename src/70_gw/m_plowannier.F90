@@ -45,6 +45,7 @@ MODULE m_plowannier
  public :: fullbz_plowannier
  public :: initialize_operwan
  public :: destroy_operwan
+ public :: zero_operwan
  public :: compute_oper_ks2wan
  public :: normalization_plowannier
  public :: print_operwan
@@ -772,7 +773,9 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  type(operwan_type), allocatable :: operwan(:,:,:)
  type(operwan_realspace_type), allocatable :: operwan_realspace(:,:)
+ complex(dpc), allocatable :: eigenks(:,:,:,:)
  complex(dpc), allocatable :: operks(:,:,:,:)
+ complex(dpc), allocatable :: identityks(:,:,:,:)
  real(dp), allocatable :: ff(:)
  complex(dpc), allocatable :: operwansquare(:,:,:,:)
  complex(dpc), allocatable :: operwansquarereal(:,:,:)
@@ -785,6 +788,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  real(dp), allocatable :: eig(:), rwork(:)
  complex(dpc), allocatable :: zwork(:)
  integer :: lwork,info,whole_diag
+ complex(dpc), allocatable :: densmat(:,:)
 !************************************************************************
 
 ! Internal variables (could be put one day as input variables of ABINIT).
@@ -1125,13 +1129,16 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    call initialize_operwan(wan,operwan)
 
    !Creation of the KS occupation operator
-   ABI_ALLOCATE(operks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
-   operks = czero
+   ABI_ALLOCATE(eigenks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
+   ABI_ALLOCATE(identityks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
+   eigenks = czero
+   identityks=czero
    do isppol = 1,wan%nsppol
      do iband1 = 1,wan%bandf_wan-wan%bandi_wan+1
        ibandc = iband1 + wan%bandi_wan - 1
        do ikpt = 1,wan%nkpt
-         operks(ikpt,iband1,iband1,isppol) = occ(((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband))
+         eigenks(ikpt,iband1,iband1,isppol) = occ(((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband))
+         ! write(6,*) 'eigenks', ikpt,iband1,isppol, eigenks(ikpt,iband1,iband1,isppol)
        end do
      end do
    end do
@@ -1142,23 +1149,75 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   ABI_ALLOCATE(densmat,(5,5))
+   densmat=czero
    do ikpt = 1,wan%nkpt
-     call compute_oper_ks2wan(wan,operks,operwan,ikpt)
-     if (ikpt<=5)then
-       write(message,*)char(10),"For ikpt=",ikpt,"the occupation matrix is :"
-       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
-         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
-         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     call compute_oper_ks2wan(wan,eigenks,operwan,ikpt)
+     do im1=1,5
+       do im2=1,5
+         densmat(im1,im2)=densmat(im1,im2)+operwan(ikpt,1,1)%atom(1,1)%matl(im1,im2,1,1,1)*wan%wtk(ikpt)
        enddo
-     endif
+     enddo
+!     if (ikpt<=5)then write(message,*)char(10),"For ikpt=",ikpt,"the occupation matrix is :"
+!       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+!       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+!         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
+!         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+!       enddo
+!     endif
    end do
+         write(6,*) "DENSITY MATRIX"
+     do im1=1,5
+         write(6,*) (densmat(im1,im2),im2=1,5)
+     enddo
+!     if (ikpt<=5)then write(message,*)char(10),"For ikpt=",ikpt,"the occupation matrix is :"
+   ABI_DEALLOCATE(densmat)
  endif
 
  !!-------------------------------------------------------------
  !!NORMALIZATION
  !!--------------------------------------------------------------
+
+ do isppol = 1,wan%nsppol
+   do iband1 = 1,wan%bandf_wan-wan%bandi_wan+1
+     ibandc = iband1 + wan%bandi_wan - 1
+     do ikpt = 1,wan%nkpt
+       identityks(ikpt,iband1,iband1,isppol) = one
+       write(6,*) "idks", identityks(ikpt,iband1,iband1,isppol) 
+     end do
+   end do
+ end do
+ call zero_operwan(wan,operwan)
+ do ikpt = 1,wan%nkpt
+   call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
+ enddo
+ do ikpt = 1,wan%nkpt
+   if (ikpt<=5)then
+     write(message,*)char(10),"For ikpt=",ikpt,"the normalization matrix is before normalization :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+       write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   endif
+ end do
+
  call normalization_plowannier(wan)
+
+ call zero_operwan(wan,operwan)
+ do ikpt = 1,wan%nkpt
+   call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
+ enddo
+ do ikpt = 1,wan%nkpt
+   if (ikpt<=5)then
+     write(message,*)char(10),"For ikpt=",ikpt,"the normalization matrix is after normalization :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+       write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   endif
+ end do
 
  !! -------------------------------------------------------------
  !! COMPUTATION OF THE OCCUPATION MATRIX AFTER NORMALIZATION
@@ -1172,8 +1231,9 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   call zero_operwan(wan,operwan)
    do ikpt = 1,wan%nkpt
-     call compute_oper_ks2wan(wan,operks,operwan,ikpt)
+     call compute_oper_ks2wan(wan,eigenks,operwan,ikpt)
      if (ikpt<=5)then
        write(message,*)char(10),"For ikpt=",ikpt,"the occupation matrix is :"
        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
@@ -1184,7 +1244,8 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      endif
    end do
  ! destroy the operator and the occupation matrix
-   ABI_DEALLOCATE(operks)
+   ABI_DEALLOCATE(eigenks)
+   ABI_DEALLOCATE(identityks)
    call destroy_operwan(wan,operwan) !!Destroy the occupation matrix
    ABI_DATATYPE_DEALLOCATE(operwan)
  endif
@@ -2625,6 +2686,62 @@ end subroutine get_plowannier
  end subroutine destroy_operwan
 !!***
 
+!!****f* m_plowannier/zero_operwan
+!! NAME
+!!  zero_operwan
+!!
+!! FUNCTION
+!!  zero operwan
+!!
+!! INPUTS
+!!  wan
+!!
+!! OUTPUT
+!!  operwan
+!!
+!! PARENTS
+!!      m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine zero_operwan(wan,operwan)
+
+   implicit none
+
+   !Arguments----------------------------------
+   type(plowannier_type), intent(in) :: wan
+   type(operwan_type), intent(inout) :: operwan(wan%nkpt,wan%natom_wan,wan%natom_wan)
+
+   !Local variables----------------------------
+   integer :: ikpt,  iatom1, iatom2, il1, il2, isppol, ispinor1, ispinor2,  im1, im2
+
+
+   do ikpt = 1,wan%nkpt
+     do isppol = 1,wan%nsppol
+       do iatom1 = 1,wan%natom_wan
+         do iatom2 = 1,wan%natom_wan
+           do il1 = 1,wan%nbl_atom_wan(iatom1)
+             do il2 = 1,wan%nbl_atom_wan(iatom2)
+               do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+                 do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+                   do ispinor1 = 1,wan%nspinor
+                     do ispinor2 = 1,wan%nspinor
+                       operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)=czero
+                     end do
+                   end do
+                 end do
+               end do
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ end subroutine zero_operwan
+!!***
 
 !!****f* m_plowannier/compute_oper_ks2wan
 !! NAME
@@ -2686,6 +2803,7 @@ end subroutine get_plowannier
                    *operks(option,iband1,iband2,isppol)*wan%psichi(option,iband1,iatom1)%atom(il1)%matl(im1,isppol,ispinor1)
                        end do
                      end do
+                    ! write(6,*) "operwan",im1,im2,operwan(option,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)
                    end do
                  end do
                end do
