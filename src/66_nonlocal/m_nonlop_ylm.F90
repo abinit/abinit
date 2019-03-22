@@ -38,6 +38,9 @@ module m_nonlop_ylm
  use m_opernlb_ylm, only : opernlb_ylm
  use m_opernlc_ylm, only : opernlc_ylm
  use m_opernld_ylm, only : opernld_ylm
+#ifdef MR_DEV
+ use m_kg,          only : mkkpgcart
+#endif
 
  implicit none
 
@@ -403,9 +406,6 @@ contains
  real(dp),allocatable :: sij_typ(:),strnlk(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: ffnlin_typ(:,:,:),ffnlout_typ(:,:,:),kpgin_(:,:),kpgout_(:,:)
-#ifdef MR_DEV
- real(dp),allocatable,target :: kpgincar(:,:),kpgoutcar(:,:)
-#endif
 
 ! **********************************************************************
 
@@ -641,44 +641,37 @@ contains
  end if
  if (nkpgin<nkpgin_) then
    ABI_ALLOCATE(kpgin_,(npwin,nkpgin_))
-   call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
 
 #ifdef MR_DEV
    !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
-     ABI_ALLOCATE(kpgincar,(npwin,nkpgin_))
-     do ipw=1,npwin
-       kpgincar(ipw,1)=kpgin_(ipw,1)*gprimd(1,1)+kpgin_(ipw,2)*gprimd(1,2)+kpgin_(ipw,3)*gprimd(1,3)
-       kpgincar(ipw,2)=kpgin_(ipw,1)*gprimd(2,1)+kpgin_(ipw,2)*gprimd(2,2)+kpgin_(ipw,3)*gprimd(2,3)
-       kpgincar(ipw,3)=kpgin_(ipw,1)*gprimd(3,1)+kpgin_(ipw,2)*gprimd(3,2)+kpgin_(ipw,3)*gprimd(3,3)
-     end do
-     nullify(kpgin_)
-     kpgin_ => kpgincar
-   end if
+     call mkkpgcart(gprimd,kgin,kpgin_,kptin,nkpgin_,npwin)
+   else
+     call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
+   end if 
+#else
+   call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
 #endif
 
  else
    nkpgin_ = nkpgin
    kpgin_  => kpgin
  end if
+
  nkpgout_=0
  if ((choice==2.or.choice==22.or.choice==3.or.choice==33.or.choice==54).and.signs==2) nkpgout_=3
  if (nkpgout<nkpgout_) then
    ABI_ALLOCATE(kpgout_,(npwout,nkpgout_))
-   call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
 
 #ifdef MR_DEV
    !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
-     ABI_ALLOCATE(kpgoutcar,(npwin,nkpgin_))
-     do ipw=1,npwout
-       kpgoutcar(ipw,1)=kpgout_(ipw,1)*gprimd(1,1)+kpgout_(ipw,2)*gprimd(1,2)+kpgout_(ipw,3)*gprimd(1,3)
-       kpgoutcar(ipw,2)=kpgout_(ipw,1)*gprimd(2,1)+kpgout_(ipw,2)*gprimd(2,2)+kpgout_(ipw,3)*gprimd(2,3)
-       kpgoutcar(ipw,3)=kpgout_(ipw,1)*gprimd(3,1)+kpgout_(ipw,2)*gprimd(3,2)+kpgout_(ipw,3)*gprimd(3,3)
-     end do
-     nullify(kpgout_)
-     kpgout_ => kpgoutcar
-   end if
+     call mkkpgcart(gprimd,kgout,kpgout_,kptout,nkpgout_,npwout)
+   else
+     call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
+   end if 
+#else
+   call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
 #endif
 
  else
@@ -1265,13 +1258,12 @@ contains
    ABI_DEALLOCATE(ddkk)
    ABI_DEALLOCATE(strnlk)
  end if
- if (choice/=33) then
-   if (nkpgin<nkpgin_) then
-     ABI_DEALLOCATE(kpgin_)
-   end if
-   if (nkpgout<nkpgout_) then
-     ABI_DEALLOCATE(kpgout_)
-   end if
+
+ if (nkpgin<nkpgin_) then
+   ABI_DEALLOCATE(kpgin_)
+ end if
+ if (nkpgout<nkpgout_) then
+   ABI_DEALLOCATE(kpgout_)
  end if
 
  DBG_EXIT("COLL")

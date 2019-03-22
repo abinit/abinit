@@ -52,8 +52,8 @@ MODULE m_kg
  public :: mkkpg        ! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point
  public :: mkpwind_k    ! Make plane wave index at k point for basis at second k point
 #ifdef MR_DEV
+ public :: mkkpgcart    ! Compute all (k+G) vectors (dp, in cartesian coordinates) for given k point
  public :: mkkin_metdqdq ! Compute the second q-gradient of the derivative of the kinetic energy operator w.r.t a metric
-                             ! perturbation
 #endif
 
 contains
@@ -1332,6 +1332,83 @@ end subroutine mknucdipmom_k
 !!***
 
 #ifdef MR_DEV
+
+!!****f* m_kg/mkkpgcart
+!! NAME
+!! mkkpgcart
+!!
+!! FUNCTION
+!! Compute all (k+G) vectors (dp, in cartesian coordinates) for given k point,
+!! from integer coordinates of G vectors.
+!!
+!! INPUTS
+!!  gprimd(3,3)=dimensional reciprocal space primitive translations
+!!  kg(3,npw)=integer coords of planewaves in basis sphere
+!!  kpt(3)=k point in terms of recip. translations
+!!  nkpg=second dimension of array kpg
+!!  npw=number of plane waves in reciprocal space
+!!
+!! OUTPUT
+!!  kpg(npw,3)= (k+G) components
+!!
+!! PARENTS
+!!  nonlop_ylm  
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpg,npw
+!arrays
+ real(dp),intent(in) :: gprimd(3,3)
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: kpt(3)
+ real(dp),intent(out) :: kpgcar(npw,nkpg)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ipw,mu,mua,mub
+ character(len=500) :: message
+!arrays
+ real(dp),allocatable :: kpg(:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ if (nkpg==0) return
+
+!-- Test nkpg --
+ if (nkpg/=3) then
+   write(message, '(a,i0)' )' Bad value for nkpg !',nkpg
+   MSG_BUG(message)
+ end if
+
+!-- Compute (k+G) --
+ ABI_ALLOCATE(kpg,(npw,nkpg))
+!$OMP PARALLEL DO COLLAPSE(2) &
+!$OMP PRIVATE(mu,ipw)
+ do ipw=1,npw
+   do mu=1,3
+     kpg(ipw,mu)=kpt(mu)+dble(kg(mu,ipw))
+   end do
+     kpgcar(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
+     kpgcar(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
+     kpgcar(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
+ end do
+!$OMP END PARALLEL DO
+ ABI_DEALLOCATE(kpg)
+
+ DBG_EXIT("COLL")
+
+end subroutine mkkpgcart
+!!***
+
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/mkkin_metdqdq
 !! NAME
