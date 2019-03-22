@@ -8,8 +8,3 @@ results_gs:
     tol_rel: 1.0e-12
     convergence:
         ceil: 1.0e-6
-
-    tol_eq: 1.0e-10
-    equation: 'this.cartesian_forces.sum(axis=0)'  # Newton's first
-    stress tensor:
-        tensor_is_symetric: true
