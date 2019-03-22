@@ -2,7 +2,7 @@
 .Version 8.11.0 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin16.7.0_gnu4.8 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -371,7 +371,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t160o_DS1_EDOS
-Number of bands in e-ph self-energy: 20
+Number of bands in e-ph self-energy sum: 20
+From bmin: 1 to bmax: 20
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -713,7 +714,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t160o_DS3_EDOS
-Number of bands in e-ph self-energy: 20
+Number of bands in e-ph self-energy sum: 20
+From bmin: 1 to bmax: 20
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -946,7 +948,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t160o_DS4_EDOS
-Number of bands in e-ph self-energy: 20
+Number of bands in e-ph self-energy sum: 20
+From bmin: 1 to bmax: 20
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature

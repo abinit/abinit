@@ -12,7 +12,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +57,7 @@ MODULE m_bz_mesh
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
  use m_kpts,           only : getkgrid
- use m_symkpt,     only : symkpt
+ use m_symkpt,         only : symkpt
 
  implicit none
 
@@ -393,8 +393,6 @@ CONTAINS  !=====================================================================
 
 subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symmetry)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkibz,kptopt
@@ -559,8 +557,6 @@ end subroutine kmesh_init
 
 subroutine kmesh_free(Kmesh)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(inout) :: Kmesh
@@ -638,8 +634,6 @@ end subroutine kmesh_free
 !! SOURCE
 
 subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -753,8 +747,6 @@ end subroutine kmesh_print
 !! SOURCE
 
 subroutine setup_k_rotation(nsym,timrev,symrec,nbz,kbz,gmet,krottb,krottbm1)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -912,8 +904,6 @@ end subroutine setup_k_rotation
 
 subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_bz
@@ -978,8 +968,6 @@ end subroutine get_bz_item
 
 subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz
@@ -1028,8 +1016,6 @@ end subroutine get_IBZ_item
 !! SOURCE
 
 subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1112,8 +1098,6 @@ end subroutine get_BZ_diff
 
 logical function isamek(k1,k2,g0)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  integer,intent(out) :: g0(3)
@@ -1153,8 +1137,6 @@ end function isamek
 !! SOURCE
 
 logical function isequalk(q1,q2)
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: q1(3),q2(3)
@@ -1199,8 +1181,6 @@ end function isequalk
 !! SOURCE
 
 logical function has_BZ_item(Kmesh,item,ikbz,g0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1262,8 +1242,6 @@ end function has_BZ_item
 
 logical function has_IBZ_item(Kmesh,item,ikibz,g0)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: ikibz
@@ -1322,8 +1300,6 @@ end function has_IBZ_item
 
 pure logical function bz_mesh_isirred(Kmesh,ik_bz)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_bz
@@ -1375,8 +1351,6 @@ end function bz_mesh_isirred
 
 subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
 &  vacuum,break_symmetry)  ! Optional
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1522,8 +1496,6 @@ end subroutine make_mesh
 !! SOURCE
 
 subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,ktabo,nkbz,wtk,ref_bz)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1714,8 +1686,6 @@ end subroutine identk
 !! SOURCE
 
 subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1910,8 +1880,6 @@ end subroutine getkptnorm_bycomponent
 
 subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbounds,ndivsm
@@ -2022,8 +1990,6 @@ end subroutine make_path
 
 subroutine find_qmesh(Qmesh,Cryst,Kmesh)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(in) :: Kmesh
@@ -2084,8 +2050,6 @@ end subroutine find_qmesh
 !! SOURCE
 
 subroutine findnq(nkbz,kbz,nsym,symrec,symafm,nqibz,timrev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2185,8 +2149,6 @@ end subroutine findnq
 
 subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkbz,nqibz,nsym,timrev
@@ -2285,8 +2247,6 @@ end subroutine findq
 
 
 subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2467,8 +2427,6 @@ end subroutine findqg0
 !! SOURCE
 
 subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2794,8 +2752,6 @@ end subroutine littlegroup_init
 
 subroutine littlegroup_free_0D(Ltg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(littlegroup_t),intent(inout) :: Ltg
@@ -2862,8 +2818,6 @@ end subroutine littlegroup_free_0D
 
 subroutine littlegroup_free_1D(Ltg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(littlegroup_t),intent(inout) :: Ltg(:)
@@ -2906,8 +2860,6 @@ end subroutine littlegroup_free_1D
 !! SOURCE
 
 subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2981,8 +2933,6 @@ end subroutine littlegroup_print
 !! SOURCE
 
 function box_len(qpt,gprimd)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3074,8 +3024,6 @@ end function box_len
 
 type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndivsm
@@ -3143,8 +3091,6 @@ end function kpath_new
 
 subroutine kpath_free(Kpath)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kpath_t),intent(inout) :: Kpath
@@ -3200,8 +3146,6 @@ end subroutine kpath_free
 !! SOURCE
 
 subroutine kpath_print(kpath, header, unit, prtvol, pre)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

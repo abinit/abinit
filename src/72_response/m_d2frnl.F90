@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -118,7 +118,7 @@ contains
 !!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
 !!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,symrhoij
+!!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,pawrhoij_symrhoij
 !!      timab,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
 !!
 !! SOURCE
@@ -150,7 +150,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawtab,   only : pawtab_type,pawtab_get_lsize
  use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify, symrhoij
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, &
+&                       pawrhoij_nullify, pawrhoij_symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
  use m_paw_dfpt, only : pawgrnl
@@ -203,7 +204,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer :: choice_bec2,choice_bec54,choice_efmas,choice_phon,choice_strs,choice_piez3,choice_piez55
  integer :: cplex,cplx,cpopt,cpopt_bec,ddkcase,deg_dim
  integer :: dimffnl,dimffnl_str,dimnhat,ia,iatom,iashift,iband,jband,ibg,icg,icplx,ideg,ider,idir
- integer :: ider_str,idir_ffnl,idir_str,ielt,ieltx,ierr,ii,ikg,ikpt,ilm,ipw
+ integer :: ider_str,idir_ffnl,idir_str,ielt,ieltx,ierr,ii,ikg,ikpt,ilm,ipw,iq,iq0
  integer :: ispinor,isppol,istwf_k,isub,itypat,jj,jsub,klmn,master,me,mu
  integer :: my_comm_atom,n1,n2,n3,nband_k,ncpgr,nfftot,ngrhoij,nkpg,nnlout_bec1,nnlout_bec2,nnlout_efmas
  integer :: nnlout_piez1,nnlout_piez2,nnlout_phon,nnlout_strs,npw_,npw_k,nsp,nsploop,nu
@@ -416,8 +417,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_DEALLOCATE(l_size_atm)
      do ii=1,3 ! Loop over direction of electric field
        call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
-       call pawdijfr(cplex,gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
-&       0,paw_ij_tmp,pawang,pawfgrtab_tmp,pawrad,pawtab,&
+       call pawdijfr(gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
+&       0,paw_ij_tmp,pawang,pawfgrtab_tmp,pawrad,pawtab,cplex,&
 &       (/zero,zero,zero/),rprimd,ucvol,vtrial,vtrial,vxc,xred,&
 &       comm_atom=my_comm_atom, mpi_atmtab=my_atmtab ) ! vtrial not used here
        do isppol=1,dtset%nspinor**2
@@ -443,7 +444,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,dtset%nspinor))
    call pawcprj_alloc(cwaveprj,ncpgr,gs_ham%dimcprj)
    do iatom=1,natom
-     sz2=pawrhoij_tot(iatom)%cplex*pawrhoij_tot(iatom)%lmn2_size
+     sz2=pawrhoij_tot(iatom)%cplex_rhoij*pawrhoij_tot(iatom)%qphase*pawrhoij_tot(iatom)%lmn2_size
      sz3=pawrhoij_tot(iatom)%nspden
      ABI_ALLOCATE(pawrhoij_tot(iatom)%grhoij,(ngrhoij,sz2,sz3))
      pawrhoij_tot(iatom)%ngrhoij=ngrhoij
@@ -922,7 +923,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  PAW: accumulate gradients of rhoij
    if (psps%usepaw==1) then
      ABI_ALLOCATE(dimlmn,(natom))
-     dimlmn(1:natom)=pawrhoij_tot(1:natom)%cplex*pawrhoij_tot(1:natom)%lmn2_size
+     dimlmn(1:natom)=pawrhoij_tot(1:natom)%cplex_rhoij*pawrhoij_tot(1:natom)%qphase*pawrhoij_tot(1:natom)%lmn2_size
      bufdim=ncpgr*sum(dimlmn)*nsploop
      ABI_ALLOCATE(mpibuf,(bufdim))
      ii=0;mpibuf=zero
@@ -957,33 +958,37 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  This symetrization is necessary in the antiferromagnetic case...
    if (rfphon==1.and.rfstrs==0) then
      option_rhoij=2;option=0
-     call symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
+     call pawrhoij_symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
 &     psps%ntypat,option,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,dtset%typat,&
 &     comm_atom=my_comm_atom, mpi_atmtab=my_atmtab)
    else if (rfphon==1.and.rfstrs==1) then
      option_rhoij=23;option=0
-     call symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
+     call pawrhoij_symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
 &     psps%ntypat,option,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,dtset%typat,&
 &     comm_atom=my_comm_atom, mpi_atmtab=my_atmtab)
    end if
 
 !  Translate coordinates
+   ABI_CHECK(nsploop/=4,'d2frnl: should we mix mx/my/mz when translating coordinates?')
    do iatom=1,natom
-     cplx=pawrhoij_tot(iatom)%cplex
-     do isppol=1,nsploop
-       do klmn=1,pawrhoij_tot(iatom)%lmn2_size
-         do ii=1,cplx
-           if(rfphon==1.or.rfstrs/=0)then
-             grhoij(1:3)=pawrhoij_tot(iatom)%grhoij(shift_rhoij+1:shift_rhoij+3,cplx*(klmn-1)+ii,isppol)
-             do mu=1,3
-               pawrhoij_tot(iatom)%grhoij(shift_rhoij+mu,cplx*(klmn-1)+ii,isppol)=gprimd(mu,1)*grhoij(1)&
-&               +gprimd(mu,2)*grhoij(2)+gprimd(mu,3)*grhoij(3)
-             end do
-           end if
-           if(rfstrs/=0)then
-             call strconv(pawrhoij_tot(iatom)%grhoij(1:6,cplx*(klmn-1)+ii,isppol),gprimd,&
-&             pawrhoij_tot(iatom)%grhoij(1:6,cplx*(klmn-1)+ii,isppol))
-           end if
+     cplx=pawrhoij_tot(iatom)%cplex_rhoij
+     do iq=1,pawrhoij_tot(iatom)%qphase
+       iq0=0;if (iq==2) iq0=cplx*pawrhoij_tot(iatom)%lmn2_size
+       do isppol=1,nsploop
+         do klmn=1,pawrhoij_tot(iatom)%lmn2_size
+           do ii=1,cplx
+             if(rfphon==1.or.rfstrs/=0)then
+               grhoij(1:3)=pawrhoij_tot(iatom)%grhoij(shift_rhoij+1:shift_rhoij+3,iq0+cplx*(klmn-1)+ii,isppol)
+               do mu=1,3
+                 pawrhoij_tot(iatom)%grhoij(shift_rhoij+mu,iq0+cplx*(klmn-1)+ii,isppol)=gprimd(mu,1)*grhoij(1)&
+&                  +gprimd(mu,2)*grhoij(2)+gprimd(mu,3)*grhoij(3)
+               end do
+             end if
+             if(rfstrs/=0)then
+               call strconv(pawrhoij_tot(iatom)%grhoij(1:6,iq0+cplx*(klmn-1)+ii,isppol),gprimd,&
+&                           pawrhoij_tot(iatom)%grhoij(1:6,iq0+cplx*(klmn-1)+ii,isppol))
+             end if
+           end do
          end do
        end do
      end do
@@ -993,14 +998,17 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !     -delta_{alphabeta} rhoi_{ij} to drhoij/d_eps
    if(rfstrs/=0)then
      do iatom=1,natom
-       cplx=pawrhoij_tot(iatom)%cplex
-       do isppol=1,nsploop
-         do nu=1,pawrhoij_tot(iatom)%nrhoijsel
-           klmn=pawrhoij_tot(iatom)%rhoijselect(nu)
-           do ii=1,cplx
-             pawrhoij_tot(iatom)%grhoij(1:3,cplx*(klmn-1)+ii,isppol)= &
-&             pawrhoij_tot(iatom)%grhoij(1:3,cplx*(klmn-1)+ii,isppol)&
-&             -pawrhoij_tot(iatom)%rhoijp(cplx*(nu-1)+ii,isppol)
+       cplx=pawrhoij_tot(iatom)%cplex_rhoij
+       do iq=1,pawrhoij_tot(iatom)%qphase
+         iq0=0;if (iq==2) iq0=cplx*pawrhoij_tot(iatom)%lmn2_size
+         do isppol=1,nsploop
+           do nu=1,pawrhoij_tot(iatom)%nrhoijsel
+             klmn=pawrhoij_tot(iatom)%rhoijselect(nu)
+             do ii=1,cplx
+               pawrhoij_tot(iatom)%grhoij(1:3,iq0+cplx*(klmn-1)+ii,isppol)= &
+&               pawrhoij_tot(iatom)%grhoij(1:3,iq0+cplx*(klmn-1)+ii,isppol)&
+&               -pawrhoij_tot(iatom)%rhoijp(iq0+cplx*(nu-1)+ii,isppol)
+             end do
            end do
          end do
        end do

@@ -7,7 +7,7 @@
 !!  Thin wrapper for the PAPI library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG,DC)
+!! Copyright (C) 2009-2019 ABINIT group (MG,DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,8 +62,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine xpapi_init()
-
- implicit none
 
 #ifdef HAVE_PAPI
 !Local variables-------------------------------
@@ -125,8 +123,6 @@ end subroutine xpapi_init
 !! SOURCE
 
 subroutine xpapi_show_info(unit,mode_paral)
-
- implicit none
 
 !Arguments-------------------------
  integer,optional,intent(in) :: unit
@@ -214,8 +210,6 @@ end subroutine xpapi_show_info
 
 subroutine xpapi_flops(real_time,proc_time,flops,mflops,check)
 
- implicit none
-
 !Arguments-------------------------
  integer(C_INT),intent(out) :: check
  integer(C_LONG_LONG),intent(out) :: flops
@@ -249,8 +243,6 @@ end subroutine xpapi_flops
 
 subroutine xpapi_shutdown()
 
- implicit none
-
 ! *************************************************************************
 
 #ifdef HAVE_PAPI
@@ -276,8 +268,6 @@ end subroutine xpapi_shutdown
 !! SOURCE
 
 subroutine xpapi_handle_error(check,err_msg,file,line)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -7,7 +7,7 @@
 !!  Routines related to non-linear core correction.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, TRangel, MT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, TRangel, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,8 +110,6 @@ contains
 
 subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xccc,&
 & n2,n3,option,rprimd,typat,ucvol,vxc,xcccrc,xccc1d,xccc3d,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -630,8 +628,6 @@ end subroutine mkcore
 subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,nspden,&
 &          nattyp,ntypat,n1,n1xccc,n2,n3,option,rprimd,ucvol,vxc,xcccrc,xccc1d,&
 &          xccc3d,xred,pawrad,pawtab,usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1168,8 +1164,6 @@ end subroutine mkcore_alt
 
 subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 & n2,n3,qphon,rprimd,typat,ucvol,xcccrc,xccc1d,xccc3d1,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

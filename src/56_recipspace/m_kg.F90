@@ -7,7 +7,7 @@
 !!  Low-level functions to operate of G-vectors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
+!!  Copyright (C) 2008-2019 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 
 MODULE m_kg
 
- use defs_abitypes, only : dataset_type
+ use defs_abitypes, only : dataset_type, MPI_type
  use defs_basis
  use m_errors
  use m_abicore
@@ -34,9 +34,7 @@ MODULE m_kg
  use m_xmpi
 
  use m_fftcore,     only : kpgsph, bound
- use defs_abitypes, only : MPI_type
  use m_mpinfo,      only : proc_distrb_cycle
-
 
  implicit none
 
@@ -107,8 +105,6 @@ contains
 !! SOURCE
 
 subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -243,8 +239,6 @@ end subroutine getcut
 
 subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,nkpt
@@ -346,8 +340,6 @@ end subroutine getmpw
 !! SOURCE
 
 subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -505,8 +497,6 @@ end subroutine mkkin
 subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 & mode_paral,mpi_enreg,mpw,npwarr,npwtot,nsppol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,mkmem,mpw,nkpt,nsppol
@@ -653,8 +643,6 @@ end subroutine kpgio
 
 subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iatom,jatom,matblk,n1,n2,n3,natom,npw_k
@@ -765,8 +753,6 @@ end subroutine ph1d3d
 
 subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n2,n3,natom
@@ -858,8 +844,6 @@ end subroutine getph
 !! SOURCE
 
 subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -975,8 +959,6 @@ end subroutine kpgstr
 
 subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpg,npw
@@ -1043,7 +1025,7 @@ end subroutine mkkpg
 !! as appear in Berry phase derived quantities
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2019 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1058,8 +1040,6 @@ end subroutine mkkpg
 !! indkk_f2ibz(fnkpt,6)=information on folding from FBZ to IBZ (see initberry or initorbmag)
 !! ikpt=index of bra k pt in FBZ
 !! ikpt1=index of neighbour ket k pt in FBZ
-!! kg(3,dtset%mpw*dtset%mkmem)=planewave basis data
-!! kgindex(dtset%nkpt)= index of kg per kpt
 !! mpi_enreg=information about MPI parallelization
 !! npwarr(dtset%nkpt)=npw at each kpt
 !! symrec(3,3,nsym) = symmetries in reciprocal space in terms of
@@ -1083,16 +1063,7 @@ end subroutine mkkpg
 !! SOURCE
 
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
-& kg,kgindex,mpi_enreg,npwarr,pwind_k1,symrec)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkpwind_k'
-!End of the abilint section
-
-  implicit none
+& mpi_enreg,npwarr,pwind_k1,symrec)
 
   !Arguments ------------------------------------
   !scalars
@@ -1101,7 +1072,7 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   type(MPI_type), intent(inout) :: mpi_enreg
 
   !arrays
-  integer,intent(in) :: indkk_f2ibz(fnkpt,6),kg(3,dtset%mpw*dtset%mkmem),kgindex(dtset%nkpt)
+  integer,intent(in) :: indkk_f2ibz(fnkpt,6)
   integer,intent(in) :: npwarr(dtset%nkpt)
   integer,intent(in) :: symrec(3,3,dtset%nsym)
   integer,intent(out) :: pwind_k1(dtset%mpw)
@@ -1113,26 +1084,31 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   real(dp) :: ecut_eff
 
   !arrays
-  integer,allocatable :: kg1_k(:,:)
-  real(dp) :: dg(3),dum33(3,3),kpt1(3),iadum(3),iadum1(3)
+  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
+  real(dp) :: dg(3),dum33(3,3),kpt(3),kpt1(3),iadum(3),iadum1(3)
 
   ! ***********************************************************************
 
   ikpti = indkk_f2ibz(ikpt,1)
   ikpt1i = indkk_f2ibz(ikpt1,1)
 
-  ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
 
   ecut_eff = dtset%ecut*(dtset%dilatmx)**2
   exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
 
-  ! Build basis sphere of plane waves for the nearest neighbour of the k-point
+  ! Build basis sphere of plane waves for the k-point
+  ! we avoid using the global kg data because of difficulties in parallel-ism
+  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
+  kg_k(:,:) = 0
+  kpt(:) = dtset%kptns(:,ikpti)
+  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
 
+  ! Build basis sphere of plane waves for the nearest neighbour of the k-point
+  ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
   kg1_k(:,:) = 0
   kpt1(:) = dtset%kptns(:,ikpt1i)
   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
 
-  !
   !        Deal with symmetry transformations
   !
 
@@ -1171,7 +1147,11 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 
      !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
      !          not for the FBZ k point
-     iadum(:) = kg(:,kgindex(ikpti) + ipw)
+
+     ! original code from initberry
+     ! iadum(:) = kg(:,kgindex(ikpti) + ipw)
+     
+     iadum(:) = kg_k(:,ipw)
 
      !          to determine r.l.v. matchings, we transformed the bra vector
      !          Rotation
@@ -1194,6 +1174,7 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
      end do
   end do
 
+  ABI_DEALLOCATE(kg_k)
   ABI_DEALLOCATE(kg1_k)
 
 end subroutine mkpwind_k
@@ -1209,7 +1190,7 @@ end subroutine mkpwind_k
 !! dipole moments, at a given k point
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group
+!! Copyright (C) 1998-2019 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1252,8 +1233,6 @@ end subroutine mkpwind_k
 
 subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvol,xred)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: natom,npw
@@ -1282,7 +1261,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
   ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
   ! 4\pi i comes from series expansion of plane waves, and ucvol comes from integration over space
   cscale_conversion = CMPLX(zero,four_pi*scale_conversion/ucvol)
-  
+
   ! make list of atoms with non-zero nuclear magnetic dipoles
   atom_nd_tot = 0
   do iatom = 1, natom

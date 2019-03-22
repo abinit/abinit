@@ -7,7 +7,7 @@
 !!  This module collects low-level procedures used by the other psp modules
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
+!!  Copyright (C) 1998-2019 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -97,8 +97,6 @@ contains
 !! SOURCE
 
 subroutine psp1cc(fchrg,n1xccc,xccc1d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -230,8 +228,6 @@ end subroutine psp1cc
 
 subroutine gg1cc(gg1cc_xx,xx)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: xx
@@ -296,8 +292,6 @@ end subroutine gg1cc
 !! SOURCE
 
 subroutine gp1cc(gp1cc_xx,xx)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -369,8 +363,6 @@ end subroutine gp1cc
 !! SOURCE
 
 subroutine gpp1cc(gpp1cc_xx,xx)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -519,8 +511,6 @@ end subroutine gpp1cc
 
 subroutine psp5lo(al,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 &                  vloc,yp1,ypn,zion)
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -698,8 +688,6 @@ end subroutine psp5lo
 !! SOURCE
 
 subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfll)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1204,8 +1192,6 @@ end subroutine psp5nl
 
 subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
 
- implicit none
-
 !Arguments----------------------------------------------------------
 !scalars
  integer,intent(in) :: mmax,mqgrid
@@ -1381,8 +1367,6 @@ end subroutine psp8lo
 !! SOURCE
 
 subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vpspll)
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -1589,8 +1573,6 @@ end subroutine psp8nl
 !! SOURCE
 
 subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
-
- implicit none
 
 !Arguments ------------------------------------
 ! scalars

@@ -16,7 +16,7 @@
 !!  See notes below for more info.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
+!! Copyright (C) 2009-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2680,6 +2680,7 @@ end subroutine wfk_read_bmask
 !!
 !! OUTPUTS
 !!  ebands<ebands_t>=GS band-structure.
+!!  [out_hdr]=Abinit header.
 !!
 !! PARENTS
 !!
@@ -2687,12 +2688,13 @@ end subroutine wfk_read_bmask
 !!
 !! SOURCE
 
-type(ebands_t) function wfk_read_ebands(path, comm) result(ebands)
+type(ebands_t) function wfk_read_ebands(path, comm, out_hdr) result(ebands)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
  integer,intent(in) :: comm
+ type(hdr_type),optional,intent(out) :: out_hdr
 
 !Local variables-------------------------------
 !scalars
@@ -2704,6 +2706,7 @@ type(ebands_t) function wfk_read_ebands(path, comm) result(ebands)
 
  call wfk_read_eigenvalues(path, eigen, hdr, comm)
  ebands = ebands_from_hdr(hdr,maxval(hdr%nband),eigen)
+ if (present(out_hdr)) call hdr_copy(hdr, out_hdr)
 
  ABI_FREE(eigen)
  call hdr_free(hdr)

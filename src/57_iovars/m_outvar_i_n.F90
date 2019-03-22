@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,8 +111,6 @@ contains
 subroutine outvar_i_n (dtsets,iout,&
 & jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
 & response_,results_out,strimg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

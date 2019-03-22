@@ -8,7 +8,7 @@
 !!    (in the DFPT approach) of PAW on-site quantities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (MT,AM,FJ,JWZ)
+!! Copyright (C) 2018-2019 ABINIT group (MT,AM,FJ,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ MODULE m_paw_dfpt
  use m_pawfgrtab,    only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_nullify, pawfgrtab_gather
  use m_paw_finegrid, only : pawgylm, pawrfgd_fft, pawexpiqr
  use m_pawxc,        only : pawxc_dfpt, pawxcm_dfpt
- use m_paw_denpot,   only : pawdensities
+ use m_paw_denpot,   only : pawdensities,pawaccenergy,pawaccenergy_nospin
  use m_paral_atom,   only : get_my_atmtab,free_my_atmtab
 
  use m_atm2fft,      only : dfpt_atm2fft
@@ -146,9 +146,9 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nzlmopt_a,nzlmopt_b,&
-&                    paw_an0,paw_an1,paw_ij1,pawang,pawprtvol,pawrad,pawrhoij_a,pawrhoij_b,&
-&                    pawtab,pawxcdev,xclevel, &
-&                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+&                        paw_an0,paw_an1,paw_ij1,pawang,pawprtvol,pawrad,pawrhoij_a,pawrhoij_b,&
+&                        pawtab,pawxcdev,xclevel, &
+&                        mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
  implicit none
 
@@ -170,17 +170,17 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex_a,cplex_b,cplex_dijh1,cplex_diju1,cplex_vxc1,iatom,iatom_tot,ierr,irhoij,ispden,itypat,jrhoij
- integer :: klmn,lm_size_a,lm_size_b,nlmn2_dij1,mesh_size,my_comm_atom,nspden,nspdiag
- integer :: opt_compch,optexc,optvxc,usecore,usepawu,usetcore,usexcnhat
+ integer :: cplex_a,cplex_b,cplex_vxc1,iatom,iatom_tot,ierr,itypat,lm_size_a,lm_size_b,mesh_size
+ integer :: my_comm_atom,nspden,opt_compch,optexc,optvxc,qphase_dijh1,qphase_diju1
+ integer :: usecore,usepawu,usetcore,usexcnhat
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: compch,eexc,dij_im,eexc_im,ro_im
+ real(dp) :: compch,eexc,eexc_im
  character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_a(:),lmselect_b(:),lmselect_tmp(:)
- real(dp) :: dij(2),delta_energy_h(2),delta_energy_u(2),delta_energy_xc(2),ro(2),tsec(2)
- real(dp),allocatable :: diju_im(:,:),kxc_dum(:,:,:),nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+ real(dp) :: delta_energy_h(2),delta_energy_u(2),delta_energy_xc(2),tsec(2)
+ real(dp),allocatable :: kxc_dum(:,:,:),nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
 
 ! *************************************************************************
 
@@ -222,12 +222,12 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
        msg='XC kernels for ground state must be in memory!'
        MSG_BUG(msg)
      end if
-     if (paw_ij1(1)%cplex_rf/=paw_an1(1)%cplex) then
-       msg='paw_ij1()%cplex and paw_an1()%cplex must be equal!'
+     if (paw_ij1(1)%qphase/=paw_an1(1)%cplex) then
+       msg='paw_ij1()%qphase and paw_an1()%cplex must be equal!'
        MSG_BUG(msg)
      end if
-     if (pawrhoij_a(1)%cplex<paw_an1(1)%cplex.or.pawrhoij_b(1)%cplex<paw_an1(1)%cplex) then
-       msg='pawrhoij()%cplex must be >=paw_an1()%cplex!'
+     if (pawrhoij_a(1)%qphase<paw_an1(1)%cplex.or.pawrhoij_b(1)%qphase<paw_an1(1)%cplex) then
+       msg='pawrhoij()%qphase must be >=paw_an1()%cplex!'
        MSG_BUG(msg)
      end if
      if (paw_ij1(1)%nspden/=paw_an1(1)%nspden) then
@@ -252,14 +252,15 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
 !For some perturbations, nothing else to do
  if (ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11 .or. &
-& ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11) return
+&    ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11) return
 
 !Various inits
  opt_compch=0;optvxc=1;optexc=3
  usecore=0;usetcore=0  ! This is true for phonons and Efield pert.
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
- delta_energy_xc(1:2)=zero;delta_energy_h(1:2)=zero;delta_energy_u(1:2)=zero
- dij(1:2)=zero;ro(1:2)=zero
+ delta_energy_xc(1:2)=zero
+ delta_energy_h(1:2)=zero
+ delta_energy_u(1:2)=zero
 
 
 !================ Loop on atomic sites =======================
@@ -269,12 +270,11 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    itypat=pawrhoij_a(iatom)%itypat
    mesh_size=pawtab(itypat)%mesh_size
    nspden=paw_an1(iatom)%nspden
-   cplex_a=pawrhoij_a(iatom)%cplex
-   cplex_b=pawrhoij_b(iatom)%cplex
-   cplex_dijh1=paw_ij1(iatom)%cplex_rf
-   cplex_diju1=paw_ij1(iatom)%cplex_rf
+   cplex_a=pawrhoij_a(iatom)%qphase
+   cplex_b=pawrhoij_b(iatom)%qphase
    cplex_vxc1=paw_an1(iatom)%cplex
-   nlmn2_dij1=paw_ij1(iatom)%lmn2_size
+   qphase_dijh1=paw_ij1(iatom)%qphase
+   qphase_diju1=paw_ij1(iatom)%qphase
    lm_size_a=paw_an1(iatom)%lm_size
    if (ipert2<=0) lm_size_b=paw_an0(iatom)%lm_size
    if (ipert2> 0) lm_size_b=paw_an1(iatom)%lm_size
@@ -323,13 +323,6 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      ABI_DEALLOCATE(trho1)
      ABI_DEALLOCATE(nhat1)
    end if ! has_vxc
-
-!  If Dij_hartree are not in memory, compute them
-   if (paw_ij1(iatom)%has_dijhartree/=2) then
-     call pawdijhartree(cplex_dijh1,paw_ij1(iatom)%dijhartree,paw_ij1(iatom)%nspden,&
-&     pawrhoij_a(iatom),pawtab(itypat))
-     paw_ij1(iatom)%has_dijhartree=2
-   end if
 
 !  Compute contribution to 1st-order (or 2nd-order) energy from 1st-order XC potential
    ABI_ALLOCATE(rho1 ,(cplex_b*mesh_size,lm_size_b,nspden))
@@ -384,98 +377,28 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    ABI_DEALLOCATE(trho1)
    ABI_DEALLOCATE(nhat1)
 
+!  If Dij_hartree are not in memory, compute them
+   if (paw_ij1(iatom)%has_dijhartree/=2) then
+     call pawdijhartree(paw_ij1(iatom)%dijhartree,qphase_dijh1,paw_ij1(iatom)%nspden,&
+&     pawrhoij_a(iatom),pawtab(itypat))
+     paw_ij1(iatom)%has_dijhartree=2
+   end if
+
 !  Compute contribution to 1st-order(or 2nd-order) energy from 1st-order Hartree potential
-   nspdiag=1;if (nspden==2) nspdiag=2
-   do ispden=1,nspdiag
-     if (cplex_dijh1==1) then
-       jrhoij=1
-       do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
-         klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
-         dij(1)=paw_ij1(iatom)%dijhartree(klmn)
-         ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
-         delta_energy_h(1)=delta_energy_h(1)+ro(1)*dij(1)
-         if (cplex_b==2) then
-           ro(2)=pawrhoij_b(iatom)%rhoijp(jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
-           delta_energy_h(2)=delta_energy_h(2)+ro(2)*dij(1)
-         end if
-         jrhoij=jrhoij+cplex_b
-       end do
-     else ! cplex_dijh1==2
-       jrhoij=1
-       do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
-         klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
-         dij(1)=paw_ij1(iatom)%dijhartree(klmn)
-         dij(2)=paw_ij1(iatom)%dijhartree(klmn+nlmn2_dij1)
-         ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
-         delta_energy_h(1)=delta_energy_h(1)+ro(1)*dij(1)
-         delta_energy_h(2)=delta_energy_h(2)-ro(1)*dij(2)
-         if (cplex_b==2) then
-           ro(2)=pawrhoij_b(iatom)%rhoijp(jrhoij+1,ispden)*pawtab(itypat)%dltij(klmn)
-           delta_energy_h(1)=delta_energy_h(1)+ro(2)*dij(2)
-           delta_energy_h(2)=delta_energy_h(2)+ro(2)*dij(1)
-         end if
-         jrhoij=jrhoij+cplex_b
-       end do
-     end if
-   end do
+   call pawaccenergy_nospin(delta_energy_h(1),pawrhoij_b(iatom),paw_ij1(iatom)%dijhartree, &
+&                           1,qphase_dijh1,pawtab(itypat),epaw_im=delta_energy_h(2))
 
 !  Compute contribution to 1st-order(or 2nd-order) energy from 1st-order PAW+U potential
    if (usepawu==5.or.usepawu==6) then
-     ABI_CHECK(paw_ij1(iatom)%cplex_dij==1,'cplex_dij not yet available!')
-     ABI_CHECK(paw_ij1(iatom)%ndij/=4,'ndij not yet available!')
 !    If DijU are not in memory, compute them
-     if (paw_ij1(iatom)%has_dijU/=2.or.cplex_diju1/=1) then ! We force the recomputation of dijU in when cplex=2 to get diju_im
-       if (cplex_diju1==1) then
-         call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,&
-&             paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat))
-       else
-         ABI_ALLOCATE(diju_im,(pawtab(itypat)%lmn2_size,paw_ij1(iatom)%ndij))
-         call pawdiju_euijkl(cplex_diju1,paw_ij1(iatom)%cplex_dij,paw_ij1(iatom)%dijU,&
-&             paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat),diju_im=diju_im)
-       end if
+     if (paw_ij1(iatom)%has_dijU/=2) then ! We force the recomputation of dijU in when cplex=2 to get diju_im
+       call pawdiju_euijkl(paw_ij1(iatom)%dijU,paw_ij1(iatom)%cplex_dij,qphase_diju1,&
+&                          paw_ij1(iatom)%ndij,pawrhoij_a(iatom),pawtab(itypat))
        paw_ij1(iatom)%has_dijU=2
      end if
-     if (cplex_diju1==1) then
-       do ispden=1,paw_ij1(iatom)%ndij
-         jrhoij=1
-         do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
-           klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
-           dij(1)=paw_ij1(iatom)%dijU(klmn,ispden)
-           ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
-           delta_energy_u(1)=delta_energy_u(1)+ro(1)*dij(1)
-!          The imaginary part is not implemented (because not used)
-!          if (cplex_b==2) then
-!            ...
-!          end if
-           jrhoij=jrhoij+cplex_b
-         end do
-       end do
-     else ! cplex_diju1==2
-       do ispden=1,paw_ij1(iatom)%ndij
-         jrhoij=1
-         do irhoij=1,pawrhoij_b(iatom)%nrhoijsel
-           klmn=pawrhoij_b(iatom)%rhoijselect(irhoij)
-           dij(1)=paw_ij1(iatom)%dijU(klmn,ispden)
-           dij(2)=paw_ij1(iatom)%dijU(klmn+nlmn2_dij1,ispden)
-           ro(1)=pawrhoij_b(iatom)%rhoijp(jrhoij,ispden)
-           if (cplex_b==1) then
-             delta_energy_u(1)=delta_energy_u(1)+ro(1)*dij(1)*pawtab(itypat)%dltij(klmn)
-           else
-             ro_im = pawrhoij_b(iatom)%rhoijim(klmn,ispden)
-             if (abs(pawtab(itypat)%dltij(klmn)-1)<tol14) then ! case i=j
-               delta_energy_u(1)=delta_energy_u(1)+ro(1)*dij(1)+(ro(2)+ro_im)*dij(2)
-             else ! case i/=j (factor of two for taking into account dltij)
-               dij_im = diju_im(klmn,ispden)
-               delta_energy_u(1)=delta_energy_u(1)+two*ro(1)*dij(1)           ! re  * re
-               delta_energy_u(1)=delta_energy_u(1)+two*ro_im*dij_im           ! ima * ima
-               delta_energy_u(1)=delta_energy_u(1)+two*ro(2)*(dij(2)-dij_im)  ! imb * imb
-             end if
-           end if
-           jrhoij=jrhoij+cplex_b
-         end do
-       end do
-       ABI_DEALLOCATE(diju_im)
-     end if
+!    Compute contribution to 1st-order(or 2nd-order) energy
+     call pawaccenergy(delta_energy_u(1),pawrhoij_b(iatom),paw_ij1(iatom)%dijU,paw_ij1(iatom)%cplex_dij, &
+&                      qphase_diju1,paw_ij1(iatom)%ndij,pawtab(itypat),epaw_im=delta_energy_u(2))
    end if
 
 !  ================ End loop on atomic sites =======================
@@ -656,13 +579,18 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  qne0=0;if (qphon(1)**2+qphon(2)**2+qphon(3)**2>=1.d-15) qne0=1
  if (my_natom>0) then
    if ((optgr2==1.or.optstr2==1).and.pawrhoij(1)%ngrhoij==0) then
-     msg='Inconsistency between variables optgr2/optstr2 and ngrhoij!'
+     msg='pawgrnl: inconsistency between variables optgr2/optstr2 and ngrhoij!'
      MSG_BUG(msg)
    end if
    if (pawfgrtab(1)%rfgd_allocated==0) then
      if ((optgr2==1.and.qne0==1).or.optstr2==1) then
-       MSG_BUG('pawfgrtab()%rfgd array must be allocated!')
+       msg='pawgrnl: pawfgrtab()%rfgd array must be allocated!'
+       MSG_BUG(msg)
      end if
+   end if
+   if (pawrhoij(1)%qphase/=1) then
+     msg='pawgrnl: not supposed to be called with pawrhoij(:)%qphase=2!'
+     MSG_BUG(msg)
    end if
  end if
 
@@ -1465,7 +1393,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
              end if
            end do
          end do
-         jrhoij=jrhoij+pawrhoij_iatom%cplex
+         jrhoij=jrhoij+pawrhoij_iatom%cplex_rhoij
        end do
 
 !      ---- Add additional (diagonal) terms for dynamical matrix
@@ -1490,7 +1418,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                end if
              end do
            end do
-           klmn1=klmn1+pawrhoij_iatom%cplex
+           klmn1=klmn1+pawrhoij_iatom%cplex_rhoij
          end do ! klmn
        end if ! optgr2
 
@@ -1528,7 +1456,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                end if
              end do
            end do
-           klmn1=klmn1+pawrhoij_iatom%cplex
+           klmn1=klmn1+pawrhoij_iatom%cplex_rhoij
          end do
        end if ! optstr2
 
@@ -1563,7 +1491,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                      end if
                    end do
                  end do
-                 jrhoij=jrhoij+pawrhoij_jatom%cplex
+                 jrhoij=jrhoij+pawrhoij_jatom%cplex_rhoij
                end do
              else
                jrhoij=1;mushift=ishift_gr2+9
@@ -1588,7 +1516,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                      end if
                    end do
                  end do
-                 jrhoij=jrhoij+pawrhoij_jatom%cplex
+                 jrhoij=jrhoij+pawrhoij_jatom%cplex_rhoij
                end do
              end if
 
@@ -1614,7 +1542,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                      end if
                    end do
                  end do
-                 klmn1=klmn1+pawrhoij_jatom%cplex
+                 klmn1=klmn1+pawrhoij_jatom%cplex_rhoij
                end do ! klmn
              else ! ngradp_nondiag>=6
                klmn1=1;mushift=ishift_gr2+9
@@ -1640,7 +1568,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                      end if
                    end do
                  end do
-                 klmn1=klmn1+pawrhoij_jatom%cplex
+                 klmn1=klmn1+pawrhoij_jatom%cplex_rhoij
                end do
              end if
            end if ! optgr2
@@ -1669,7 +1597,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                    end if
                  end do
                end do
-               jrhoij=jrhoij+pawrhoij_jatom%cplex
+               jrhoij=jrhoij+pawrhoij_jatom%cplex_rhoij
              end do
 !            Off-diagonal term including rhoij derivative
              klmn1=1
@@ -1694,7 +1622,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                    end if
                  end do
                end do
-               klmn1=klmn1+pawrhoij_jatom%cplex
+               klmn1=klmn1+pawrhoij_jatom%cplex_rhoij
              end do
            end if ! optstr2
 

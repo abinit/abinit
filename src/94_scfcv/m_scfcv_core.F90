@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
+!!  Copyright (C) 1998-2019 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,7 +66,7 @@ module m_scfcv_core
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
 &                               pawcprj_free, pawcprj_axpby, pawcprj_put, pawcprj_getdim, pawcprj_reorder
- use m_pawdij,           only : pawdij, symdij,pawdijhat
+ use m_pawdij,           only : pawdij, symdij
  use m_pawfgr,           only : pawfgr_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_paw_dmft,         only : paw_dmft_type
@@ -571,7 +571,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !Stresses and forces flags
  forces_needed=0;prtfor=0
- if ((dtset%optforces==1.or.dtset%ionmov==4.or.abs(tollist(3))>tiny(0._dp))) then
+ if ((dtset%optforces==1.or.dtset%ionmov==4.or.dtset%ionmov==5.or.abs(tollist(3))>tiny(0._dp))) then
    if (dtset%iscf>0.and.nstep>0) forces_needed=1
    if (nstep==0) forces_needed=2
    prtfor=1
@@ -766,7 +766,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      do iatom=1,my_natom
        itypat=pawrhoij(iatom)%itypat
        pawrhoij(iatom)%use_rhoijres=1
-       sz1=pawrhoij(iatom)%cplex*pawtab(itypat)%lmn2_size
+       sz1=pawrhoij(iatom)%cplex_rhoij*pawtab(itypat)%lmn2_size
        sz2=pawrhoij(iatom)%nspden
        ABI_ALLOCATE(pawrhoij(iatom)%rhoijres,(sz1,sz2))
        do ispden=1,pawrhoij(iatom)%nspden
@@ -775,7 +775,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        ABI_ALLOCATE(pawrhoij(iatom)%kpawmix,(pawtab(itypat)%lmnmix_sz))
        pawrhoij(iatom)%lmnmix_sz=pawtab(itypat)%lmnmix_sz
        pawrhoij(iatom)%kpawmix=pawtab(itypat)%kmix
-       npawmix=npawmix+pawrhoij(iatom)%nspden*pawtab(itypat)%lmnmix_sz*pawrhoij(iatom)%cplex
+       npawmix=npawmix+pawrhoij(iatom)%nspden*pawtab(itypat)%lmnmix_sz &
+&                     *pawrhoij(iatom)%cplex_rhoij*pawrhoij(iatom)%qphase
      end do
    end if
    if (dtset%iscf > 0) then
@@ -1169,8 +1170,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !          2-Compute rhoij
              call pawmkrhoij(atindx,atindx1,cprj,dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
 &             mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&             occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij,dtfil%unpaw,&
-&             dtset%usewvl,dtset%wtk)
+&             occ,dtset%paral_kgb,paw_dmft,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
 
 !          3-Symetrize rhoij, compute nhat and add it to rhor
 !          Note pawrhoij_unsym and pawrhoij are the same, which means that pawrhoij cannot be distributed over different atomic sites.
@@ -2069,6 +2069,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      else if (forces_needed == 0 .and. stress_needed /= 0) then
        ncpgr = 6 ; ctocprj_choice = 3
      end if
+   end if
+   if (dtset%orbmag > 1) then
+      ncpgr=3; ctocprj_choice=5; idir=0
    end if
    call pawcprj_alloc(cprj_local,ncpgr,dimcprj)
    cprj=> cprj_local

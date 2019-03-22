@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2018 ABINIT group (RC, XG)
+!!  Copyright (C) 2000-2019 ABINIT group (RC, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,8 +76,6 @@ contains
 !! SOURCE
 
 subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -394,8 +392,6 @@ end subroutine prtspgroup
 
 
 subroutine spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2144,8 +2140,6 @@ end subroutine spgdata
 
 subroutine ptgmadata(ptgroupma,ptgrpmasb)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ptgroupma
@@ -2307,8 +2301,6 @@ end subroutine ptgmadata
 
 subroutine getptgroupma(ptgroup,ptgroupha,ptgroupma)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: ptgroupma
@@ -2446,8 +2438,6 @@ end subroutine getptgroupma
 !! SOURCE
 
 subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

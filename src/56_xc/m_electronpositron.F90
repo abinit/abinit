@@ -9,7 +9,7 @@
 !!  as methods to operate on it.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MT, GJ)
+!! Copyright (C) 2008-2019 ABINIT group (MT, GJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -281,11 +281,12 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
   if (dtset%usepaw==1) then
    electronpositron%has_pawrhoij_ep=1
    if (mpi_enreg%my_natom>0) then
-    call pawrhoij_alloc(electronpositron%pawrhoij_ep,pawrhoij(1)%cplex,pawrhoij(1)%nspden,&
+    call pawrhoij_alloc(electronpositron%pawrhoij_ep,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &                    pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,dtset%typat,&
 &                    mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
 &                    pawtab=pawtab,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
-&                    use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres)
+&                    qphase=pawrhoij(1)%qphase,use_rhoij_=pawrhoij(1)%use_rhoij_,&
+&                    use_rhoijres=pawrhoij(1)%use_rhoijres)
    end if
    electronpositron%lmmax=0
    do ii=1,dtset%ntypat
@@ -582,10 +583,11 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
         nlmn(iatom)=pawrhoij(iatom)%lmn_size
       end do
 !     Be careful: parallelism over atoms is ignored...
-      call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex,pawrhoij(1)%nspden,&
+      call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &                      pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,typ, &
 &                      lmnsize=nlmn,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
-&                      use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres)
+&                      qphase=pawrhoij(1)%qphase,use_rhoij_=pawrhoij(1)%use_rhoij_,&
+&                      use_rhoijres=pawrhoij(1)%use_rhoijres)
       ABI_DEALLOCATE(typ)
       ABI_DEALLOCATE(nlmn)
       call pawrhoij_copy(pawrhoij,pawrhoij_tmp)
@@ -594,7 +596,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       if (pawrhoij_tmp(1)%ngrhoij>0.and.pawrhoij(1)%ngrhoij==0) then
         do iatom=1,my_natom
           sz1=pawrhoij_tmp(iatom)%ngrhoij
-          sz2=pawrhoij_tmp(iatom)%cplex*pawrhoij_tmp(iatom)%lmn2_size
+          sz2=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz3=pawrhoij_tmp(iatom)%nspden
           ABI_ALLOCATE(pawrhoij(iatom)%grhoij,(sz1,sz2,sz3))
           pawrhoij(iatom)%grhoij(:,:,:)=pawrhoij_tmp(iatom)%grhoij(:,:,:)
@@ -602,7 +604,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       end if
       if (pawrhoij_tmp(1)%use_rhoijres>0.and.pawrhoij(1)%use_rhoijres==0) then
         do iatom=1,my_natom
-          sz1=pawrhoij_tmp(iatom)%cplex*pawrhoij_tmp(iatom)%lmn2_size
+          sz1=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz2=pawrhoij_tmp(iatom)%nspden
           ABI_ALLOCATE(pawrhoij(iatom)%rhoijres,(sz1,sz2))
           pawrhoij(iatom)%rhoijres(:,:)=pawrhoij_tmp(iatom)%rhoijres(:,:)
@@ -610,7 +612,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       end if
       if (pawrhoij_tmp(1)%use_rhoij_>0.and.pawrhoij(1)%use_rhoij_==0) then
         do iatom=1,my_natom
-          sz1=pawrhoij_tmp(iatom)%cplex*pawrhoij_tmp(iatom)%lmn2_size
+          sz1=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz2=pawrhoij_tmp(iatom)%nspden
           ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(sz1,sz2))
           pawrhoij(iatom)%rhoij_(:,:)=pawrhoij_tmp(iatom)%rhoij_(:,:)

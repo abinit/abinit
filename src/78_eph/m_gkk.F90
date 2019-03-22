@@ -6,7 +6,7 @@
 !!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (GKA, MG)
+!!  Copyright (C) 2008-2019 ABINIT group (GKA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -193,7 +193,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
 
  ! Open the DVDB file
- call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+ call dvdb%open_read(ngfftf, xmpi_comm_self)
 
  ! Initialize the wave function descriptors.
  ! For the time being, no memory distribution, each node has the full set of states.
@@ -309,12 +309,12 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  call cwtime(cpu, wall, gflops, "start")
 
  ! Find the index of the q-point in the DVDB.
- db_iqpt = dvdb_findq(dvdb, qpt)
+ db_iqpt = dvdb%findq(qpt)
  if (db_iqpt /= -1) then
    if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found: ",ktoa(qpt)," in DVDB with index ",itoa(db_iqpt)))
    ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-   call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
+   call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
  else
    MSG_ERROR(sjoin("Could not find q-point:", ktoa(qpt), "in DVDB"))
  end if
@@ -631,7 +631,7 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
  comm = xmpi_comm_self
  call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:,1)); nfftf = product(ngfftf(1:3))
 
- call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+ call dvdb%open_read(ngfftf, xmpi_comm_self)
 
  ! Create netcdf file.
 #ifdef HAVE_NETCDF
@@ -665,14 +665,14 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
    call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
    ! Find the index of the q-point in the DVDB.
-   db_iqpt = dvdb_findq(dvdb, qpt)
+   db_iqpt = dvdb%findq(qpt)
 
    ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
    if (db_iqpt /= -1) then
      if (prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
      ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
      ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-     call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
+     call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
    else
      MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
    end if
@@ -710,7 +710,7 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
 #ifdef HAVE_NETCDF
  NCF_CHECK(nf90_close(ncid))
 #endif
- call dvdb_close(dvdb)
+ call dvdb%close()
 
  call wrtout(std_out, "dvqnu file written", do_flush=.True.)
 

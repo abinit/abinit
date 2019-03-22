@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XW, DW)
+!!  Copyright (C) 1999-2019 ABINIT group (XW, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,8 +100,6 @@ contains
 subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &            elast,elast_clamped,elast_stress,iblok,iblok_stress,&
 &            instrain,iout,mpert,natom,nblok,ncid)
-
- implicit none
 
 !Arguments -------------------------------------------
 !scalars

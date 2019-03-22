@@ -1239,8 +1239,7 @@ Here $\omega_p$ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The grid points are then picked by an equidistant grid (number of
 points set by [[nfreqim]]) in the interval  $z \subset [0,1]$. This grid can
 easily be uniquely converged by just increasing [[nfreqim]]. Again the points
-are distributed so that approximately half of them lie below the plasma
-frequency.
+are distributed so that approximately half of them lie below the plasma frequency.
 
   * **User defined** - The user can also define their own grid using the variables [[cd_customnimfrqs]] and [[cd_imfrqs]].
     _With great power comes great responsibility!_
@@ -1250,8 +1249,7 @@ convergence studies. By estimating the densest grid one can afford to
 calculate in the SCR file, and successively removing frequencies from a single
 file (using the utility), one only needs to perform the screening calculation
 **once** on the dense mesh for a given convergence study. One can also use the
-utility to merge independent screening calculations over q-points and
-frequency sections.
+utility to merge independent screening calculations over q-points and frequency sections.
 """,
 ),
 
@@ -1268,8 +1266,7 @@ Variable(
 [[cd_full_grid]] enables the calculation of the screening [both chi0 and
 epsilon^(-1)] on a grid in the first quadrant of the complex plane. The grid
 is determined by the (tensor) product of the grid in real frequency and the
-grid in imaginary frequency. In the SUS and SCR files the grid points are
-stored as follows:
+grid in imaginary frequency. In the SUS and SCR files the grid points are stored as follows:
 
       **Index:**
       1   . . .   nfreqre   nfrqre+1 . . . nfreqre+nfreqim   nfreqre+nfreqim+1 . . . nfreqre*nfreqim
@@ -1641,7 +1638,7 @@ defined in the input file to set up a CPU time limit. When the job reaches
 that limit, it will try to end smoothly. However, note that this might still
 take some time. If the user want a firm CPU time limit, the present parameter
 must be reduced sufficiently. Intuition about the actual margin to be taken
-into account should come with experience...
+into account should come with experience.
 A zero value has no action of the job.
 """,
 ),
@@ -2450,6 +2447,19 @@ Relevant values are:
 ),
 
 Variable(
+    abivarname="dmft_charge_prec",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: charge density precision",
+    text=r"""
+Precision to achieve in determining the charge density in the computation of the fermi level.
+""",
+),
+
+Variable(
     abivarname="dmft_dc",
     varset="dmft",
     vartype="integer",
@@ -2556,6 +2566,20 @@ Number of frequencies in the log mesh.
 ),
 
 Variable(
+    abivarname="dmft_occnd_imag",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: Occupation non-diagonal imaginary part",
+    characteristics=['[[DEVELOP]]'],
+    text=r"""
+When 0 force non-diagonal occupations imaginary parts to be null. Do not use this, it is only for compatibility with old tests.
+""",
+),
+
+Variable(
     abivarname="dmft_read_occnd",
     varset="dev",
     vartype="integer",
@@ -2620,11 +2644,11 @@ discussion of density-density approximation with respect with the
 rotationnally invariant formulation, see e.g. [[cite:Antipov2012]].
 The ABINIT/CT Hyb implementation is discussed in [[cite:Gonze2016]].
 The TRIQS/CT Hyb implementation is described in [[cite:Seth2016]].
-Before using it, it has to be installed following instructions available [here](https://triqs.ipht.cnrs.fr/1.x/install.html).
-Starting from release 8.6.0, the
-interface is valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. An example of a
-config.ac file to compile ABINIT with TRIQS can be found in
-~/doc/build/config-examples/ubu_gnu_4.9_triqs.ac.
+Before using it, it has to be installed following instructions available [here](https://triqs.github.io/triqs/2.1.x).
+Until release 8.10 included, the
+interface was valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. It has then been upgraded to TRIQS 2.1 afterwards. 
+An example of a config.ac file to compile ABINIT with TRIQS can be found in
+~/doc/build/config-examples/higgs_gnu_7.3_triqs2.ac.
 See the useful variables for CT-QMC solver: [[dmftctqmc_basis]],
 [[dmftctqmc_check]], [[dmftctqmc_correl]], [[dmftctqmc_gmove]],
 [[dmftctqmc_grnns]], [[dmftctqmc_meas]], [[dmftctqmc_mrka]],
@@ -3447,8 +3471,7 @@ entries. The first element specificies the interpolation method.
   * 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]
   * 2 --> B-spline interpolation.
 
-The meaning of the other entries depend on the interpolation technique
-selected.
+The meaning of the other entries depend on the interpolation technique selected.
 In the case of star-function interpolation:
 
   * einterp(2): Number of star-functions per ab-initio k-point
@@ -6634,8 +6657,8 @@ Variable(
 Govern the storage of wavefunctions at the level of the loop over images, see [[ntimimage]].
 Possible values of [[imgwfstor]] are 0 or 1.
 If [[imgwfstor]] is 1, the wavefunctions for each image are stored in a big array of
-size [[nimage]] more than the storage needed for one set of wavefunctions..
-When the specific computation (optimization/SCF cycle ...) for this image is started,
+size [[nimage]] more than the storage needed for one set of wavefunctions.
+When the specific computation (optimization/SCF cycle etc) for this image is started,
 the past wavefunctions are used, to speed up the computation. If [[imgwfstor]]==0,
 the wavefunctions are reinitialised, either at random or from the initial wavefunction file (so, without
 any modification to take into account the computations at the previous value of itimimage.
@@ -6698,7 +6721,7 @@ Prior to ABINITv2.3, the choice [[intxc]] = 1 was favoured (it was the default),
 but the continuation of the development of the code lead to prefer the default
 [[intxc]] = 0. Indeed, the benefit of [[intxc]] = 1 is rather small, while making
 it available for all cases is a non-negligible development effort. Other
-targets are prioritary... You will notice that many automatic tests use
+targets are prioritary. You will notice that many automatic tests use
 [[intxc]] = 1. Please, do not follow this historical choice for your production runs.
 """,
 ),
@@ -6744,7 +6767,7 @@ you want to produce netcdf files in parallel with [[paral_kgb]] = 1 (i.e.
 netcdf4 + hdf5 + MPI-IO). At present, the internal fallbacks provided by
 Abinit do not support netcdf4 so you have to link against an external netcdf
 library that supports hdf5+MPI-IO and is compatible with the mpif90 used to
-compile Abinit. See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
+compile Abinit. See ~abinit/doc/build/config-examples/ubu_intel_17.0_openmpi.ac for a typical configuration file.
 
 Additional note: The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
 The ETSF_IO library was indeed not maintained anymore.
@@ -7674,7 +7697,7 @@ Unfortunately, pseudopotential (or PAW) generators for hybrid functionals and
 mGGA are currently under development, so that one usually uses GGA or LDA
 pseudopotentials instead. The error should be limited when GGA or LDA
 pseudopotentials with semi-core states are used. Still this is a non-
-controlled error.. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
+controlled error. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
 same data, from Ceperley-Alder, and are rather similar, at least for spin-
 unpolarized systems.
 The choice between the non-spin-polarized and spin-polarized case is governed
@@ -9267,7 +9290,7 @@ Variable(
     text=r"""
 Maximum number of wavevectors used to sample the local part of the potential,
 in PAW. Actually referred to as mqgrid_vl internally. Should change name to
-the latter... See also [[mqgrid]]
+the latter. See also [[mqgrid]].
 """,
 ),
 
@@ -11280,8 +11303,7 @@ The code tries to read the same number of pseudopotential files. The first
 pseudopotential is assigned type number 1, and so on...
 
 There is an exception in the case of alchemical mixing of potentials, for
-which there is a different number of pseudopotentials atomic types. See
-[[mixalch]].
+which there is a different number of pseudopotentials atomic types. See [[mixalch]].
 """,
 ),
 
@@ -11848,24 +11870,20 @@ Variable(
     defaultval=0,
     mnemonics="OPTions for the DRIVER",
     text=r"""
-For each dataset, choose the task to be done, at the level of the "driver"
-routine.
+For each dataset, choose the task to be done, at the level of the "driver" routine.
 
 The choice is among:
 
-  * [[optdriver]] = 0: ground-state calculation (GS), routine "gstate"
-  * [[optdriver]] = 1: response-function calculation (RF), routine "respfn"
-  * [[optdriver]] = 2: susceptibility calculation (SUS), routine "suscep"
-  * [[optdriver]] = 3: susceptibility and dielectric matrix calculation (SCR), routine "screening"
-    (see the input variables [[ecutwfn]], [[ecuteps]], [[ppmfrq]], [[getwfk]], as
-    well as [[nbandkss]] and [[nband]])
-  * [[optdriver]] = 4: self-energy calculation (SIG), routine "sigma"
-  * [[optdriver]] = 5: non-linear response functions (NONLINEAR), using the 2n+1
-    theorem, routine "nonlinear"
-  * [[optdriver]] =7: electron-phonon coupling (EPH)
-  * [[optdriver]] =66: GW using Lanczos-Sternheimer, see input variables whose
-    name start with gwls_*.
-  * [[optdriver]] = 99: Bethe-Salpeter calculation (BSE), routine "bethe_salpeter"
+  * 0 --> ground-state calculation (GS), routine *gstate*
+  * 1 --> response-function calculation (RF), routine *respfn*
+  * 2 --> susceptibility calculation (SUS), routine *suscep*
+  * 3 --> susceptibility and dielectric matrix calculation (SCR), routine *screening*
+  * 4 --> self-energy calculation (SIG), routine *sigma*.
+  * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
+  * 7 --> electron-phonon coupling (EPH)
+  * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
+  * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
 If one of [[rfphon]], [[rfddk]], [[rfelfd]], or [[rfstrs]] is non-zero, while
 [[optdriver]] is not defined in the input file, ABINIT will set [[optdriver]]
@@ -13261,8 +13279,7 @@ used as input file for the positronic GS calculation.
 The second step is the GS calculation of the positron and subsequently its
 lifetime, with [[positron]] =1. One has to define also [[ixcpositron]].
 Then, it is possible to perform an additional step, computing the GS
-electronic density in presence of the positron, with [[positron]] = 2.
-and so on...
+electronic density in presence of the positron, with [[positron]] = 2 and so on...
 This procedure can be automated (for PAW only) by the use of a negative value
 for [[positron]].
 At the end, a converged value of the positron lifetime (decomposed in several
@@ -13281,8 +13298,7 @@ calculation until convergence (controlled by the use of one of the _tolerance_
 keywords).
 Then will perform a positronic ground state calculation in presence of the
 electrons and ions; then an electronic ground state calculation in presence of
-the positron and the ions...
-and so on... until the total energy is converged.
+the positron and the ions and so on until the total energy is converged.
 The convergence of the total energy of the ions+electrons+positron system is
 controlled by the use of the [[postoldfe]], [[postoldff]] and [[posnstep]]
 input keywords.
@@ -13323,7 +13339,7 @@ points:
 In principle, the positron lifetime should converge with the value of
 [[posocc]] or the size of the supercell.
 
-  * **A positron trapped in a _default_ (vacancy...)**:\n
+  * **A positron trapped in a _default_ (vacancy)**:\n
 In that case, the positron is localized in the default. Its density can be
 localized in the simulation cell (provided that the cell is sufficiently
 large) and influences the electronic density.
@@ -13787,7 +13803,7 @@ calculation are taken into account (occupied and unoccupied). Note that
 Brillouin Zone that is needed to get a converged DOS is usually much finer
 than the sampling needed to converge the total energy or the geometry of the
 system, unless [[tsmear]] is very large (hence the DOS is not obtained
-properly).. A separate convergence study is needed.
+properly). A separate convergence study is needed.
 In order to compute the DOS of an insulator with [[prtdos]] = 1, compute its
 density thanks to a self-consistent calculation (with a non-metallic
 [[occopt]] value, 0, 1 or 2), then use [[prtdos]] = 1, together with
@@ -15139,7 +15155,7 @@ Note that the choice of this radius is however critical for the balance
 between the s, p and d components. Indeed, the integrated charge within a
 given radius, behave as a different power of the radius, for the different
 channels s, p, d. At the limit of very small radii, the s component dominates
-the charge contained in the sphere...
+the charge contained in the sphere.
 
 When [[prtdensph]] = 1:
 
@@ -16208,7 +16224,7 @@ For PAW calculations with SOC, please refer to [[pawspnorb]].
   * If 0: no spin-orbit interaction, even if [[nspinor]] = 2
   * If 1: treat spin-orbit as specified in the pseudopotential file.
   * If 2: treat spin-orbit in the HGH form (usual form, although not allowed for all pseudopotentials)
-  * If 3: treat spin-orbit in the HFN form (Hemstreet-Fong-Nelson) (actually, not implemented...).
+  * If 3: treat spin-orbit in the HFN form (Hemstreet-Fong-Nelson) (actually, not implemented).
 
 For typical usage, the default value is OK. If the spin-orbit needs to be
 turned off for one atom, 0 might be relevant. Note however, that the code will
@@ -18947,7 +18963,7 @@ The different possibilities are:
   where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms.
   By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary.
   For usage with [[tolwfr]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]].
-  For more information, see the [ performance guide ](../../theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
+  For more information, see the [performance guide](../../theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
   Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
 """,
 ),
@@ -19480,6 +19496,63 @@ Variable(
     text=r"""
 The shifts in the k-mesh used for the electron self-energy $\Sigma_{n\kk}$
 See also [[sigma_nshiftk]].
+""",
+),
+
+Variable(
+    abivarname="wfk_task",
+    varset="gstate",
+    topics=['ElecBandStructure_useful'],
+    vartype="string",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] == 8",
+    mnemonics="WFK TASK",
+    text=r"""
+
+This variable defines the quantity to compute starting from a previously generated WFK file.
+Allowed values:
+
+  * "wfk_full" --> Read WFK and produce new WFK file with k-points in the full BZ.
+        Wavefunctions with [[istwfk]] > 2 are automatically converted into the full-gsphere
+        representation. Useful to interface Abinit with external tools requiring k-points in the full BZ.
+
+  * "wfk_einterp" --> Read WFK and interpolate energies using parameters specified by [[einterp]]
+
+  * "wfk_ddk" --> Compute DDK matrix elements for all bands and k-points in the WFK file.
+     The contribution due to the non-local part of the pseudopotential can be ignored
+     with [[inclvkb]] = 0 (not recommended unless you know what you are doing).
+""",
+),
+
+Variable(
+    abivarname="sigma_bsum_range",
+    varset="gw",
+    topics=['SelfEnergy_expert'],
+    vartype="integer",
+    defaultval=[0, 0],
+    dimensions=[2],
+    requires="[[optdriver]] in [7]",
+    mnemonics="SIGMA: Band SUM RANGE",
+    text=r"""
+This variable allows the user to specify the range of bands in the sum over states for the e-ph self-energy $\Sigma_{n\kk}$.
+If not specified, the code includes all the states from 1 to [[nband]] if both the real and imaginary part of the
+self-energy are wanted or all the states in an automatically computed energy window containing those states
+that are supposed to interact with the [[bdgw]] states via phonon scattering.
+""",
+),
+
+Variable(
+    abivarname="frohl_params",
+    varset="gw",
+    topics=['SelfEnergy_expert'],
+    vartype="real",
+    defaultval=[0, 0, 0, 0],
+    dimensions=[4],
+    requires="[[optdriver]] in [7]",
+    mnemonics="FROHLich PARAMeterS",
+    text=r"""
+This variable is still under development.
 """,
 ),
 

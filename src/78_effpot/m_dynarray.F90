@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (hexu)
+!! Copyright (C) 2010-2019 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,9 +28,11 @@
 #include "abi_common.h"
 
 module m_dynmaic_array
+
   use defs_basis
   use m_abicore
   use m_errors
+
   implicit none
 !!***
 

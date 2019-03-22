@@ -7,7 +7,7 @@
 !!  Structure and functions to create a double grid mapping
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (HM)
+!!  Copyright (C) 2008-2019 ABINIT group (HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -169,8 +169,6 @@ contains  !=====================================================
 !! SOURCE
 
 type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrlatt_coarse, kptrlatt_dense) result(eph_dg)
-
- implicit none
 
 !Arguments-------------------------------
  type(crystal_t), intent(in) :: cryst
@@ -345,8 +343,6 @@ end function eph_double_grid_new
 
 subroutine eph_double_grid_free(self)
 
- implicit none
-
  type(eph_double_grid_t) :: self
 
  ABI_SFREE(self%weights_dense)
@@ -385,8 +381,6 @@ end subroutine eph_double_grid_free
 !! SOURCE
 
 integer function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
-
- implicit none
 
  type(eph_double_grid_t),intent(in) :: self
  integer,intent(in) :: opt
@@ -435,8 +429,6 @@ end function eph_double_grid_get_index
 !! SOURCE
 
 subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symrec,nsym,bz2ibz)
-
- implicit none
 
  type(eph_double_grid_t) :: self
  integer,intent(in) :: nibz, nsym
@@ -493,8 +485,6 @@ end subroutine eph_double_grid_bz2ibz
 !! SOURCE
 
 subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
-
- implicit none
 
 !Arguments --------------------------------
  type(eph_double_grid_t) :: self

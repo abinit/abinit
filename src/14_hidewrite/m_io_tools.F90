@@ -7,7 +7,7 @@
 !!  This module contains basic tools to deal with Fortran IO
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -124,8 +124,6 @@ CONTAINS  !===========================================================
 
 integer function get_free_unit()
 
- implicit none
-
 !Local variables-------------------------------
  integer :: iunt
  logical :: isopen
@@ -162,8 +160,6 @@ end function get_free_unit
 !! SOURCE
 
 integer function get_unit_from_fname(fname)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: fname
@@ -886,8 +882,6 @@ end function pick_aname
 
 pure logical function isncfile(fname)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: fname
@@ -933,8 +927,6 @@ end function isncfile
 
 pure function iomode_from_fname(fname) result(iomode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: fname
@@ -970,8 +962,6 @@ end function iomode_from_fname
 !! SOURCE
 
 pure function iomode2str(iomode)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1025,8 +1015,6 @@ end function iomode2str
 !! SOURCE
 
 subroutine mvrecord(funt,nrec,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1082,8 +1070,6 @@ end subroutine mvrecord
 !! SOURCE
 
 function open_file(file,iomsg,unit,newunit,access,form,status,action,recl) result(iostat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1163,8 +1149,6 @@ end function open_file
 
 function close_unit(unit,iomsg,status) result(iostat)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(inout) :: unit
@@ -1227,8 +1211,6 @@ end function close_unit
 !! SOURCE
 
 subroutine write_lines(unit,message)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1351,8 +1333,6 @@ end subroutine lock_and_write
 
 integer function num_opened_units(ignore) result(nn)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: ignore(:)
@@ -1392,8 +1372,6 @@ end function num_opened_units
 !! SOURCE
 
 subroutine show_units(ount)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

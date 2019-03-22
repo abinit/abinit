@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (XG)
+!!  Copyright (C) 2008-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,7 +58,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : chern_number,orbmag,orbmag_type
+ use m_orbmag,           only : chern_number,mpi_chern_number,orbmag,orbmag_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -503,7 +503,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        paw_dmft%use_sc_dmft=0 ; paw_dmft%use_dmft=0 ! dmft not used here
        call pawmkrhoij(atindx,atindx1,cprj,dimcprj_srt,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
 &       mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&       occ,mpi_enreg%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
+&       occ,mpi_enreg%paral_kgb,paw_dmft,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
        ABI_DEALLOCATE(dimcprj_srt)
 !      3-Symetrize rhoij, compute nhat and add it to rhor
        call pawmkrho(1,dum,1,gprimd,0,indsym,0,mpi_enreg,my_natom,dtset%natom,dtset%nspden,dtset%nsym,&
@@ -539,9 +539,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
  if(dtset%orbmag==1 .OR. dtset%orbmag==3) then
-    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
+    ! call chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+    !      &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+    !      &            rprimd,symrec,usecprj,psps%usepaw,xred)
+    call mpi_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
          &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-         &            symrec,usecprj,psps%usepaw,xred)
+         &            rprimd,symrec,usecprj,psps%usepaw,xred)
  end if
  if(dtset%orbmag==2 .OR. dtset%orbmag==3) then
     call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
@@ -1041,7 +1044,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%gresid(:,:)=gresid(:,:)
  results_gs%grewtn(:,:)=grewtn(:,:)
  results_gs%grxc(:,:)  =grxc(:,:)
+ results_gs%berryopt   =dtset%berryopt
  results_gs%pel(1:3)   =pel(1:3)
+ results_gs%pion(1:3)  =pion(1:3)
  results_gs%strten(1:6)=strten(1:6)
  results_gs%synlgr(:,:)=synlgr(:,:)
  results_gs%vxcavg     =vxcavg

@@ -7,7 +7,7 @@
 !!  This module contains the declaration of the wfd_t object and its methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,8 +57,7 @@ MODULE m_wfd
  use m_pawfgrtab,      only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
  use m_pawcprj,        only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
- use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked
- use m_paw_io,         only : pawio_print_ij
+ use m_pawrhoij,       only : pawrhoij_type, pawrhoij_mpisum_unpacked, pawrhoij_print_rhoij
  use m_paw_nhat,       only : nhatgrid
  use m_paw_occupancies,only : pawaccrhoij
  use m_iterators,      only : iter2_t, iter_yield, iter_len, iter_free, iter_push, iter_alloc
@@ -460,7 +459,6 @@ MODULE m_wfd
    procedure :: iam_master => wfd_iam_master
    procedure :: test_ortho => wfd_test_ortho
    ! Test the orthonormalization of the wavefunctions.
-   !procedure :: barrier => wfd_barrier
    procedure :: sym_ur => wfd_sym_ur
    ! Symmetrize a wave function in real space
    procedure :: paw_get_aeur => wfd_paw_get_aeur
@@ -898,7 +896,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,n
  !@wfd_t
  call wfd%nullify()
 
- ! Switch to k-centered G-spheres ff opt_ecut is used,
+ ! Switch to k-centered G-spheres if opt_ecut is used.
  Wfd%gamma_centered=.TRUE.
  if (PRESENT(opt_ecut)) then
    if (opt_ecut > tol6) then
@@ -1012,7 +1010,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,n
      MSG_ERROR("if (ANY(Wfd%istwfk/=1) then Wfd%gamma_centered should be false")
    end if
    MSG_WARNING("istwfk/=1 still under development!")
-   write(std_out,*)Wfd%istwfk
+   !write(std_out,*)Wfd%istwfk
  end if
 
  ! Get the number of planewaves npw_k
@@ -1355,7 +1353,7 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
        pawovlp = paw_overlap(Wfd%Wave(band,ik_ibz,spin)%Cprj,&
 &                            Wfd%Wave(band,ik_ibz,spin)%Cprj,Cryst%typat,Pawtab)
 
-       cdum = cdum + CMPLX(pawovlp(1),pawovlp(2))
+       cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
 
    else
      ! Compute Cproj
@@ -1364,7 +1362,7 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
 
      call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
      pawovlp = paw_overlap(Cp1,Cp1,Cryst%typat,Pawtab)
-     cdum = cdum + CMPLX(pawovlp(1),pawovlp(2))
+     cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
 
      call pawcprj_free(Cp1)
      ABI_DT_FREE(Cp1)
@@ -1442,7 +1440,7 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
        pawovlp = paw_overlap(Wfd%Wave(band1,ik_ibz,spin)%Cprj,&
 &                            Wfd%Wave(band2,ik_ibz,spin)%Cprj,&
 &                            Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-       wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2))
+       wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2), kind=gwpc)
 
    else
      ! Compute Cprj
@@ -1455,7 +1453,7 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
      call wfd%get_cprj(band2,ik_ibz,spin,Cryst,Cp2,sorted=.FALSE.)
 
      pawovlp = paw_overlap(Cp1,Cp2,Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-     wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2))
+     wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2), kind=gwpc)
 
      call pawcprj_free(Cp1)
      ABI_DT_FREE(Cp1)
@@ -1608,12 +1606,12 @@ subroutine wfd_copy_cg(wfd,band,ik_ibz,spin,cg)
  character(len=500) :: msg
 !************************************************************************
 
- if (wfd%debug_level > 0) then
-   if (.not. wfd%ihave_ug(band,ik_ibz,spin,"Stored")) then
-     write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band,ik_ibz,spin," is not stored in memory!"
-     MSG_ERROR(msg)
-   end if
+ !if (wfd%debug_level > 0) then
+ if (.not. wfd%ihave_ug(band,ik_ibz,spin,"Stored")) then
+   write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band,ik_ibz,spin," is not stored in memory!"
+   MSG_ERROR(msg)
  end if
+ !end if
 
  siz = wfd%npwarr(ik_ibz) * wfd%nspinor
 #ifdef HAVE_GW_DPC
@@ -4379,11 +4377,11 @@ subroutine wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cprj_out,sorted)
    ! Get cprj.
    call wfd%ug2cprj(band,ik_ibz,spin,choice1,idir0,Wfd%natom,Cryst,Cprj_out,sorted=sorted)
 
-   if (Wfd%Wave(band,ik_ibz,spin)%has_cprj==WFD_ALLOCATED) then
+   if (Wfd%Wave(band,ik_ibz,spin)%has_cprj == WFD_ALLOCATED) then
      ! Store it.
-     if ( want_order == Wfd%Wave(band,ik_ibz,spin)%cprj_order) then
+     if (want_order == Wfd%Wave(band,ik_ibz,spin)%cprj_order) then
        call pawcprj_copy(Cprj_out,Wfd%Wave(band,ik_ibz,spin)%Cprj)
-       Wfd%Wave(band,ik_ibz,spin)%has_cprj=WFD_STORED
+       Wfd%Wave(band,ik_ibz,spin)%has_cprj = WFD_STORED
 
      else
        ! Have to reorder cprj_out
@@ -4399,7 +4397,7 @@ subroutine wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cprj_out,sorted)
            call pawcprj_copy(Cprj_out(iatom:iatom,:),Wfd%Wave(band,ik_ibz,spin)%Cprj(sidx:sidx,:))
          end do
        case default
-         MSG_ERROR(sjoin(" Wrong value for want_order ", itoa(want_order)))
+         MSG_ERROR(sjoin("Wrong value for want_order:", itoa(want_order)))
        end select
      end if
    end if
@@ -4673,7 +4671,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
        if (Wfd%usepaw==1) then
          call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
          pawovlp = paw_overlap(Cp1,Cp1,Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-         cdum = cdum + CMPLX(pawovlp(1),pawovlp(2))
+         cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
        end if
        !write(std_out,*)"ik_ibz, band, spin, cdum: ",ik_ibz,band,spin,cdum
        if (REAL(cdum)<min_norm2) min_norm2=REAL(cdum)
@@ -4704,7 +4702,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
          end if
          if (Wfd%usepaw==1) then
            pawovlp = paw_overlap(Cp1,Cp2,Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
-           cdum = cdum + CMPLX(pawovlp(1),pawovlp(2))
+           cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
          end if
 
          if (ABS(cdum)<my_cinf) my_cinf=ABS(cdum)
@@ -4752,41 +4750,6 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
  end if
 
 end subroutine wfd_test_ortho
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_wfd/wfd_barrier
-!! NAME
-!!  wfd_barrier
-!!
-!! FUNCTION
-!!  Synch all nodes in Wfd%comm.
-!!
-!! INPUTS
-!!  Wfd<wfd_t>
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
-!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
-!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine wfd_barrier(Wfd)
-
-!Arguments ------------------------------------
-!scalars
- class(wfd_t),intent(in) :: Wfd
-
-!************************************************************************
-
- call xmpi_barrier(Wfd%comm)
-
-end subroutine wfd_barrier
 !!***
 
 !----------------------------------------------------------------------
@@ -5325,7 +5288,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
               icg = ig+cg_spad+cg_bpad
               igw = gf2wfd(ig)+gw_spad
               if (gf2wfd(ig) /= 0) then
-                Wfd%Wave(band,ik_ibz,spin)%ug(igw) = CMPLX(cg_k(1,icg),cg_k(2,icg))
+                Wfd%Wave(band,ik_ibz,spin)%ug(igw) = CMPLX(cg_k(1,icg),cg_k(2,icg), kind=gwpc)
               end if
             end do
           end do
@@ -5415,7 +5378,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
             call cgtk_change_gsphere(wfd%nspinor, &
                npw_disk, istwfk_disk, kg_k, cg_k(:, cg_bpad+1:), &
                wfd%npwarr(ik_ibz), wfd%istwfk(ik_ibz), wfd%kdata(ik_ibz)%kg_k, out_cg, work_ngfft, work)
-            wfd%wave(band,ik_ibz,spin)%ug(:) = CMPLX(out_cg(1, :), out_cg(2, :))
+            wfd%wave(band,ik_ibz,spin)%ug(:) = CMPLX(out_cg(1, :), out_cg(2, :), kind=gwpc)
           else
             do spinor=1,Wfd%nspinor
               cg_spad=(spinor-1)*npw_disk
@@ -5424,7 +5387,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
                 icg = ig+cg_spad+cg_bpad
                 igw = gf2wfd(ig)+gw_spad
                 if (gf2wfd(ig) /= 0) then
-                  Wfd%Wave(band,ik_ibz,spin)%ug(igw) = CMPLX(cg_k(1,icg),cg_k(2,icg))
+                  Wfd%Wave(band,ik_ibz,spin)%ug(igw) = CMPLX(cg_k(1,icg),cg_k(2,icg), kind=gwpc)
                 end if
               end do
             end do
@@ -6519,8 +6482,8 @@ end subroutine test_charge
 !!      paw_qpscgw
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawio_print_ij
-!!      pawrhoij_mpisum_unpacked,wfd_bks_distrb,wfd_get_cprj,wrtout
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free
+!!      pawrhoij_mpisum_unpacked,pawrhoij_print_rhoij,wfd_bks_distrb,wfd_get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -6537,8 +6500,8 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex,iatom,band,ik_ibz
- integer :: spin,natinc,nband_k,nsp2,option,rhoij_cplex,lmn2_size,nspden
+ integer :: cplex,cplex_rhoij,qphase,iatom,band,ik_ibz
+ integer :: spin,natinc,nband_k,option,lmn2_size,nspden
  logical :: usetimerev
  real(dp) :: occup,wtk_k
  character(len=500) :: msg
@@ -6562,10 +6525,11 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  ! Initialize output quantities if not already done.
  do iatom=1,Wfd%natom
    if (pawrhoij(iatom)%use_rhoij_==0) then
-     rhoij_cplex     = pawrhoij(iatom)%cplex
-     lmn2_size = pawrhoij(iatom)%lmn2_size
-     nspden    = pawrhoij(iatom)%nspden
-     ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(rhoij_cplex*lmn2_size,nspden))
+     cplex_rhoij= pawrhoij(iatom)%cplex_rhoij
+     qphase     = pawrhoij(iatom)%qphase
+     lmn2_size  = pawrhoij(iatom)%lmn2_size
+     nspden     = pawrhoij(iatom)%nspden
+     ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(cplex_rhoij*qphase*lmn2_size,nspden))
      pawrhoij(iatom)%use_rhoij_=1
    end if
    pawrhoij(iatom)%rhoij_=zero
@@ -6579,7 +6543,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  else where
    bks_mask=.FALSE.
  end where
- got=zero
+ got = 0
 
  call wfd%bks_distrb(bks_distrb,got,bks_mask)
 
@@ -6623,22 +6587,14 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  ! Print info.
  if (abs(pawprtvol)>=1) then
    natinc=1; if(Wfd%natom>1.and.pawprtvol>=0) natinc=Wfd%natom-1
+   write(msg, '(7a)') ch10," PAW TEST:",ch10,&
+&     ' ========= Values of RHOIJ in wfd_pawrhoij =========',ch10
+   call wrtout(std_out,msg,'COLL')
    do iatom=1,Cryst%natom,natinc
-     nsp2=pawrhoij(iatom)%nsppol;if (pawrhoij(iatom)%nspden==4) nsp2=4
-     write(msg, '(4a,i3,a)') ch10," PAW TEST:",ch10,&
-&     ' ====== Values of RHOIJ in wfd_pawrhoij (iatom=',iatom,') ======'
-     if (pawrhoij(iatom)%nspden==2.and.pawrhoij(iatom)%nsppol==1) write(msg,'(3a)') trim(msg),ch10,&
-&     '      (antiferromagnetism case: only one spin component)'
-     call wrtout(std_out, msg)
-     do spin=1,nsp2
-       if (pawrhoij(iatom)%nspden/=1) then
-         write(msg, '(3a)') '   Component ',trim(dspin(spin+2*(pawrhoij(iatom)%nspden/4))),':'
-         call wrtout(std_out, msg)
-       end if
-       call pawio_print_ij(std_out,pawrhoij(iatom)%rhoij_(:,spin),pawrhoij(iatom)%lmn2_size,&
-&       pawrhoij(iatom)%cplex,pawrhoij(iatom)%lmn_size,-1,idum,0,pawprtvol,idum,-1.d0,1)
-     end do
-   end do
+     call pawrhoij_print_rhoij(pawrhoij(iatom)%rhoij_,pawrhoij(iatom)%cplex_rhoij,&
+&                  pawrhoij(iatom)%qphase,iatom,Cryst%natom,&
+&                  unit=std_out,opt_prtvol=pawprtvol)
+  end do
  end if
 
  DBG_EXIT("COLL")

@@ -12,7 +12,7 @@
 !!   one need the knowledge of several quantities at G-G0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
+!! Copyright (C) 1999-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -172,7 +172,7 @@ MODULE m_gsphere
  public :: gsph_extend        ! Construct a new gsphere_t with a larger cutoff energy
 !!***
 
-CONTAINS  !=========================================================================================================================
+CONTAINS  !=================================================================================
 !!***
 
 !!****f* m_gsphere/setup_G_rotation
@@ -209,8 +209,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,grottbm1)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -299,8 +297,6 @@ end subroutine setup_G_rotation
 !! SOURCE
 
 subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -500,8 +496,6 @@ end subroutine gsph_init
 
 subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft
@@ -594,8 +588,6 @@ end subroutine gsph_fft_tabs
 !! SOURCE
 
 subroutine gsph_in_fftbox(Gsph,Cryst,ngfft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -698,8 +690,6 @@ end subroutine gsph_in_fftbox
 
 subroutine print_gsphere(Gsph,unit,prtvol,mode_paral)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: prtvol,unit
@@ -773,8 +763,6 @@ end subroutine print_gsphere
 
 subroutine gsph_free(Gsph)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(gsphere_t),intent(inout) :: Gsph
@@ -786,36 +774,18 @@ subroutine gsph_free(Gsph)
  !@gsphere_t
 
 ! integer arrays.
- if (allocated(Gsph%g2sh)) then
-   ABI_FREE(Gsph%g2sh)
- end if
- if (allocated(Gsph%gvec)) then
-   ABI_FREE(Gsph%gvec)
- end if
- if (allocated(Gsph%g2mg)) then
-   ABI_FREE(Gsph%g2mg)
- end if
- if (allocated(Gsph%rottb)) then
-   ABI_FREE(Gsph%rottb)
- end if
- if (allocated(Gsph%rottbm1)) then
-   ABI_FREE(Gsph%rottbm1)
- end if
- if (allocated(Gsph%shlim)) then
-   ABI_FREE(Gsph%shlim)
- end if
+ ABI_SFREE(Gsph%g2sh)
+ ABI_SFREE(Gsph%gvec)
+ ABI_SFREE(Gsph%g2mg)
+ ABI_SFREE(Gsph%rottb)
+ ABI_SFREE(Gsph%rottbm1)
+ ABI_SFREE(Gsph%shlim)
 
- if (allocated(Gsph%shlen)) then
-   ABI_FREE(Gsph%shlen)
- end if
+ ABI_SFREE(Gsph%shlen)
 
 ! complex arrays
- if (allocated(Gsph%phmGt)) then
-   ABI_FREE(Gsph%phmGt)
- end if
- if (allocated(Gsph%phmSGt)) then
-   ABI_FREE(Gsph%phmSGt)
- end if
+ ABI_SFREE(Gsph%phmGt)
+ ABI_SFREE(Gsph%phmSGt)
 
  DBG_EXIT("COLL")
 
@@ -843,8 +813,6 @@ end subroutine gsph_free
 !! SOURCE
 
 pure function gsph_g_idx(Gsph,gg) result(g_idx)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -903,8 +871,6 @@ end function gsph_g_idx
 !! SOURCE
 
 pure function gsph_gmg_idx(Gsph,ig1,ig2) result(ig1mg2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -965,8 +931,6 @@ end function gsph_gmg_idx
 !! SOURCE
 
 pure function gsph_gmg_fftidx(Gsph,ig1,ig2,ngfft) result(fft_idx)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1029,8 +993,6 @@ end function gsph_gmg_fftidx
 !! SOURCE
 
 subroutine prune_g1mg2(npw,gvec,ngdiff,g1mg2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1126,8 +1088,6 @@ end subroutine prune_g1mg2
 !! SOURCE
 
 subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtvol,shlim_p)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1403,8 +1363,6 @@ end subroutine merge_and_sort_kg
 
 subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbase,nsym,pinv,sizepw
@@ -1549,8 +1507,6 @@ end subroutine getfullg
 
 subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nsym,pinv
@@ -1647,8 +1603,6 @@ end subroutine get_irredg
 !! SOURCE
 
 subroutine merge_kgirr(nsym,pinv,nkpt,mpw,sizepw,symrec,nbasek,cnormk,gbasek,nbase,gbase,cnorm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1753,8 +1707,6 @@ end subroutine merge_kgirr
 !! SOURCE
 
 subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2026,8 +1978,6 @@ end subroutine setshells
 
 subroutine kg_map(npw1,kg1,npw2,kg2,g2g1,nmiss)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw1,npw2
@@ -2105,8 +2055,6 @@ end subroutine kg_map
 !! SOURCE
 
 subroutine make_istwfk_table(istwf_k,ng1,ng2,ng3,ig1_inver,ig2_inver,ig3_inver)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2212,8 +2160,6 @@ end subroutine make_istwfk_table
 
 pure subroutine table_gbig2kg(npw_k,kg_k,maxpw,gbig,gamma2k,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,maxpw
@@ -2275,8 +2221,6 @@ end subroutine table_gbig2kg
 !! SOURCE
 
 subroutine gsph_extend(in_Gsph,Cryst,new_ecut,new_Gsph)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2371,8 +2315,6 @@ end subroutine gsph_extend
 
 subroutine getkpgnorm(gprimd,kpt,kg_k,kpgnorm,npw_k)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k
@@ -2453,8 +2395,6 @@ end subroutine getkpgnorm
 !! SOURCE
 
 subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

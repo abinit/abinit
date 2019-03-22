@@ -7,7 +7,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2019 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,8 +86,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: filnamin
@@ -186,8 +184,6 @@ end subroutine parsefile
 !! SOURCE
 
 subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -367,8 +363,6 @@ end subroutine inread
 !! SOURCE
 
 recursive subroutine instrng(filnam,lenstr,option,strln,string)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -648,8 +642,6 @@ end subroutine instrng
 
 subroutine inreplsp(string)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(inout) :: string
@@ -722,8 +714,6 @@ end subroutine inreplsp
 !! SOURCE
 
 subroutine incomprs(string,length)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -921,8 +911,6 @@ end subroutine incomprs
 !! SOURCE
 
 subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,ds_input,key_value)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1526,8 +1514,6 @@ end subroutine intagm
 
 subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: marr,narr
@@ -1741,8 +1727,6 @@ end subroutine inarray
 
 subroutine importxyz(lenstr,string_raw,string_upper,strln)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: strln
@@ -1865,8 +1849,6 @@ end subroutine importxyz
 !! SOURCE
 
 subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2047,8 +2029,6 @@ end subroutine append_xyz
 subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minimal_flag,reference_value,unit)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: advice_change_cond,cond_number,minimal_flag,unit
@@ -2205,8 +2185,6 @@ subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: advice_change_cond,cond_number,input_value,list_number
@@ -2293,8 +2271,6 @@ end subroutine chkint
 subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,list_number,list_values,unit)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: advice_change_cond,cond_number,input_value,list_number
@@ -2379,8 +2355,6 @@ end subroutine chkint_eq
 
 subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minmax_value,unit)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2468,8 +2442,6 @@ end subroutine chkint_ge
 subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  minmax_value,unit)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2560,8 +2532,6 @@ end subroutine chkint_le
 subroutine chkint_ne(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,unit)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2674,8 +2644,6 @@ end subroutine chkint_ne
 subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2845,8 +2813,6 @@ end subroutine chkint_prt
 subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 & marr,narr,narrm,ncid,ndtset_alloc,token,typevarphys,use_narrm,&
   firstchar,forceprint)  ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3195,8 +3161,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 & marr,narrm,ncid,ndtset_alloc,token,typevarphys,&
 & mxnimage,nimagem,ndtset,prtimg,strimg,firstchar,forceprint)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,length,marr,ndtset_alloc,ncid
@@ -3379,10 +3343,6 @@ end subroutine prttagm_images
 !! SOURCE
 
 subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, string)
-
- use defs_basis
- use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !scalars

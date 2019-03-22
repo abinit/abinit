@@ -8,7 +8,7 @@
 !!  used for FFT parallelization with MPI and n2 plane sharing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (FD,MT)
+!! Copyright (C) 2011-2019 ABINIT group (FD,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,8 +138,6 @@ CONTAINS !===========================================================
 
 subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: nproc_fft,n2,n3
@@ -266,9 +264,6 @@ end subroutine init_distribfft
 
 subroutine init_distribfft_seq(distribfft_arg,grid_type,n2,n3,type_four)
 
- implicit none
-
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: n2,n3
@@ -394,8 +389,6 @@ end subroutine init_distribfft_seq
 
 subroutine destroy_distribfft(distribfft_arg)
 
- implicit none
-
 !Arguments ------------------------------------
  type(distribfft_type), intent(inout) :: distribfft_arg
 
@@ -472,8 +465,6 @@ end subroutine destroy_distribfft
 !! SOURCE
 
 subroutine copy_distribfft(distribfft_src, distribfft_dst)
-
- implicit none
 
 !Arguments ------------------------------------
  type(distribfft_type),intent(in)   :: distribfft_src

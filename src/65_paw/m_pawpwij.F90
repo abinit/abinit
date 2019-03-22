@@ -10,7 +10,7 @@
 !!    - pawpwij_t: Onsite matrix elements of a plane wave for a given atom type.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG,GKA)
+!! Copyright (C) 2008-2019 ABINIT group (MG,GKA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -375,7 +375,7 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
  ABI_MALLOC(my_qtmp,(3,my_nqpt))
  my_qtmp(:,1)=qpt_in(:)
  !
- ! * dummy_nband and dummy_nsppol are not used in sequential mode.
+ ! dummy_nband and dummy_nsppol are not used in sequential mode.
  dummy_nsppol=1
  ABI_MALLOC(dummy_nband,(my_nqpt*dummy_nsppol))
  dummy_nband=0

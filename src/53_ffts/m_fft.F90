@@ -8,7 +8,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, MM, GZ, MT, MF, XG)
+!! Copyright (C) 2009-2019 ABINIT group (MG, MM, GZ, MT, MF, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -181,7 +181,6 @@ CONTAINS  !===========================================================
 
 subroutine fft_allow_ialltoall(bool)
 
- implicit none
 
 !Arguments ------------------------------------
  logical,intent(in) :: bool
@@ -217,7 +216,6 @@ end subroutine fft_allow_ialltoall
 
 subroutine fftbox_plan3(plan,dims,fftalg,isign)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -259,7 +257,6 @@ end subroutine fftbox_plan3
 
 subroutine fftbox_plan3_many(plan,ndat,dims,embed,fftalg,isign)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -302,7 +299,6 @@ end subroutine fftbox_plan3_many
 
 subroutine fftbox_plan3_init(plan,ndat,dims,embed,fftalg,fftcache,isign)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -355,7 +351,6 @@ end subroutine fftbox_plan3_init
 
 subroutine fftbox_execute_ip_spc(plan,ff)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -398,7 +393,6 @@ end subroutine fftbox_execute_ip_spc
 
 subroutine fftbox_execute_ip_dpc(plan,ff)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -440,7 +434,6 @@ end subroutine fftbox_execute_ip_dpc
 
 subroutine fftbox_execute_op_spc(plan,ff,gg)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -483,7 +476,6 @@ end subroutine fftbox_execute_op_spc
 
 subroutine fftbox_execute_op_dpc(plan,ff,gg)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -535,7 +527,6 @@ end subroutine fftbox_execute_op_dpc
 
 subroutine fft_ug_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -589,7 +580,6 @@ end subroutine fft_ug_dp
 
 subroutine fft_ug_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -640,7 +630,6 @@ end subroutine fft_ug_spc
 
 subroutine fft_ug_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -697,7 +686,6 @@ end subroutine fft_ug_dpc
 
 subroutine fft_ur_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -756,7 +744,6 @@ end subroutine fft_ur_dp
 
 subroutine fft_ur_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -812,7 +799,6 @@ end subroutine fft_ur_spc
 
 subroutine fft_ur_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -863,7 +849,6 @@ end subroutine fft_ur_dpc
 
 subroutine fftpad_spc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -961,7 +946,6 @@ end subroutine fftpad_spc
 
 subroutine fftpad_dpc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1071,7 +1055,6 @@ end subroutine fftpad_dpc
 
 subroutine fft_poisson(ngfft,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1131,7 +1114,6 @@ end subroutine fft_poisson
 
 subroutine fft_use_lib_threads(logvar)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1170,7 +1152,6 @@ end subroutine fft_use_lib_threads
 
 function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
 
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -1412,7 +1393,6 @@ end function fftbox_utests
 
 function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1660,7 +1640,6 @@ end function fftu_utests
 
 function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfailed)
 
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -1835,7 +1814,6 @@ end function fftbox_mpi_utests
 
 function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,unit) result(nfailed)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2229,7 +2207,7 @@ end function fftu_mpi_utests
 !! and for zeroing arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FF)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2312,7 +2290,6 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  tim_fourwf,weight_r,weight_i, &
 &  use_gpu_cuda,use_ndo,fofginb) ! Optional arguments
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2930,7 +2907,7 @@ end subroutine fourwf
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2972,7 +2949,6 @@ end subroutine fourwf
 
 subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3319,7 +3295,7 @@ end subroutine fourdp
 !! Include machine-dependent F90 routines used with fftalg=200.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (PT, XG, FF)
+!! Copyright (C) 2000-2019 ABINIT group (PT, XG, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3380,7 +3356,6 @@ end subroutine fourdp
 
 subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3490,7 +3465,6 @@ end subroutine ccfft
 subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3625,7 +3599,6 @@ subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
 &  gboundin,gboundout,istwf_k,kg_kin,kg_kout,me_g0,mgfft,ngfft,distribfft,n1,n2,n3,&
 &  npwin,npwout,n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft,cplexwf)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4090,7 +4063,6 @@ end subroutine fourwf_mpi
 subroutine fftmpi_u(npw_k,n4,n5,n6,ndat,mgfft,ngfft,&
 &  istwf_k,gbound_k,kg_k,me_g0,distribfft,isign,fofg,fofr,comm_fft,cplexwf)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4162,7 +4134,6 @@ end subroutine fftmpi_u
 subroutine zerosym(array,cplex,n1,n2,n3,&
 &                  ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4343,7 +4314,6 @@ end subroutine zerosym
 
 subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4476,7 +4446,6 @@ end subroutine fourdp_6d
 
 subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,option)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4619,7 +4588,6 @@ end subroutine fftpac
 
 subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,nright,paral_kgb,right,sizeindex)
 
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

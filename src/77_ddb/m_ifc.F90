@@ -8,7 +8,7 @@
 !!  used to handle interatomic force constant sets
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (XG,MJV,EB,MG)
+!! Copyright (C) 2011-2019 ABINIT group (XG,MJV,EB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -255,9 +255,7 @@ subroutine ifc_free(ifc)
  ABI_SFREE(ifc%qbz)
  ABI_SFREE(ifc%zeff)
  ABI_SFREE(ifc%dynmat)
- !if (allocated(ifc%dynmat_lr)) then
- !  ABI_FREE(ifc%dynmat_lr)
- !end if
+ !ABI_SFREE(ifc%dynmat_lr)
 
 end subroutine ifc_free
 !!***
@@ -342,10 +340,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
  integer :: nqbz,option,plus,sumg0,irpt,irpt_new
- integer :: nprocs,my_rank,ierr
+ integer :: nprocs,my_rank,my_ierr,ierr
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops,rcut_min
- real(dp) :: r_inscribed_sphere
+ real(dp) :: r_inscribed_sphere,tolsym
  character(len=500) :: message
  type(ifc_type) :: ifc_tmp
 !arrays
@@ -521,12 +519,39 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call make_bigbox(Ifc%brav,ifc_tmp%cell,ngqpt,nqshft,rprim,ifc_tmp%nrpt,ifc_tmp%rpt)
 
 ! Weights associated to these R points and to atomic pairs
-! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
- call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
-&     ifc_tmp%rpt,rprimd,r_inscribed_sphere,ifc_tmp%wghatm)
 
-! Fourier transformation of the dynamical matrices (q-->R)
+! HM: this tolerance is highly dependent of the compilation/arquitecture
+!     numeric errors in the DDB text file. Try a few tolerances and
+!     check if all the weights are found.
+ tolsym = 1e-8
+ do while (tolsym <= tol6)
+   ! MG FIXME: Why ngqpt is intent(inout)?
+   call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
+&             ifc_tmp%rpt,rprimd,tolsym,r_inscribed_sphere,ifc_tmp%wghatm,my_ierr)
+   call xmpi_max(my_ierr, ierr, comm, ii)
+   if (ierr>0) tolsym = tolsym * 10
+   if (ierr==0) exit
+ end do
+
+ if (ierr>0) then
+   write(message, '(a,a,a,es14.4,a,a,i4)' )&
+&   'The sum of the weight is not equal to nqpt.',ch10,&
+&   'The sum of the weights is : ',sum(ifc_tmp%wghatm),ch10,&
+&   'The number of q points is : ',nqbz
+   call wrtout(std_out,message,'COLL')
+   write(message, '(13a)')&
+&   'This might have several sources.',ch10,&
+&   'If tolsym is larger than 1.0e-8, the atom positions might be loose',ch10,&
+&   'and the q point weights not computed properly.',ch10,&
+&   'Action: make input atomic positions more symmetric.',ch10,&
+&   'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine, and recompile.',ch10,&
+&   'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
+&   'if abs(brav)/=1, in which case you should change brav to 1.'
+   MSG_BUG(message)
+ end if
+
+! Fourier transform of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(3,natom,3,natom,ifc_tmp%nrpt))
  call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,qbz, comm)
 
@@ -857,7 +882,6 @@ end subroutine ifc_print
 !!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
-
 
 subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
                      nanaqdir, out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]

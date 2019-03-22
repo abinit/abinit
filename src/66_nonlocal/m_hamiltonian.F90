@@ -12,7 +12,7 @@
 !!  used in ks_ddiago for performing the direct diagonalization of the KS Hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, MT)
+!! Copyright (C) 2009-2019 ABINIT group (MG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -854,7 +854,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    ham%dimekb2=natom
    ham%dimekbq=1
    if (present(paw_ij)) then
-     if (size(paw_ij)>0) ham%dimekbq=paw_ij(1)%cplex_rf
+     if (size(paw_ij)>0) ham%dimekbq=paw_ij(1)%qphase
    end if
    ABI_ALLOCATE(ham%sij,(ham%dimekb1,psps%ntypat))
    do itypat=1,psps%ntypat
@@ -1891,7 +1891,7 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,dimdij,dimekb1,dimekb3,dimekb4,iatom,iatom_tot,ierr,ii,isp,ispden,my_natom,natom
+ integer :: dimdij,dimekb1,dimekb3,dimekb4,iatom,iatom_tot,ierr,ii,isp,ispden,my_natom,natom,qphase
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -1912,9 +1912,9 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
  if (my_natom>0) then
    if (allocated(paw_ij(1)%dij)) then
      dimekb1=size(ekb,1) ; dimekb3=size(ekb,3) ; dimekb4=size(ekb,4)
-     cplex=paw_ij(1)%cplex_rf
-     ABI_CHECK(cplex<=dimekb4,'paw_ij%cplex_rf>dimekb4!')
-     do ii=1,cplex
+     qphase=paw_ij(1)%qphase
+     ABI_CHECK(qphase<=dimekb4,'paw_ij%qphase>dimekb4!')
+     do ii=1,qphase
        do ispden=1,dimekb3
          isp=isppol; if (dimekb3==4) isp=ispden
          do iatom=1,my_natom
@@ -1977,8 +1977,8 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_rf,dimdij1,dime1kb1,dime1kb3,dime1kb4,iatom,iatom_tot,ierr,isp,ispden
- integer :: my_natom,natom
+ integer :: dimdij1,dime1kb1,dime1kb3,dime1kb4,iatom,iatom_tot,ierr,isp,ispden
+ integer :: my_natom,natom,qphase
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -2004,16 +2004,16 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
  if (my_natom>0.and.present(e1kbfr)) then
    if (allocated(paw_ij1(1)%dijfr)) then
      dime1kb1=size(e1kbfr,1) ; dime1kb3=size(e1kbfr,3) ; dime1kb4=size(e1kbfr,4)
-     ABI_CHECK(paw_ij1(1)%cplex_rf==dime1kb4,'BUG in pawdij2e1kb (1)!')
+     ABI_CHECK(paw_ij1(1)%qphase==dime1kb4,'BUG in pawdij2e1kb (1)!')
      do ispden=1,dime1kb3
        isp=isppol;if (dime1kb3==4) isp=ispden
        do iatom=1,my_natom
          iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
-         cplex_rf=paw_ij1(iatom)%cplex_rf
+         qphase=paw_ij1(iatom)%qphase
          dimdij1=paw_ij1(iatom)%cplex_dij*paw_ij1(iatom)%lmn2_size
          ABI_CHECK(dimdij1<=dime1kb1,'BUG: size of paw_ij1%dij>dime1kb1!')
          e1kbfr(1:dimdij1,iatom_tot,ispden,1)=paw_ij1(iatom)%dijfr(1:dimdij1,isp)
-         if (cplex_rf==2) e1kbfr(1:dimdij1,iatom_tot,ispden,2)=paw_ij1(iatom)%dijfr(dimdij1+1:2*dimdij1,isp)
+         if (qphase==2) e1kbfr(1:dimdij1,iatom_tot,ispden,2)=paw_ij1(iatom)%dijfr(dimdij1+1:2*dimdij1,isp)
        end do
      end do
    end if
@@ -2023,18 +2023,18 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
  if (my_natom>0.and.present(e1kbsc)) then
    if (allocated(paw_ij1(1)%dijfr).and.allocated(paw_ij1(1)%dij)) then
      dime1kb1=size(e1kbsc,1) ; dime1kb3=size(e1kbsc,3) ; dime1kb4=size(e1kbsc,4)
-     ABI_CHECK(paw_ij1(1)%cplex_rf==dime1kb4,'BUG in pawdij2e1kb (1)!')
+     ABI_CHECK(paw_ij1(1)%qphase==dime1kb4,'BUG in pawdij2e1kb (1)!')
      do ispden=1,dime1kb3
        isp=isppol;if (dime1kb3==4) isp=ispden
        do iatom=1,my_natom
          iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
-         cplex_rf=paw_ij1(iatom)%cplex_rf
+         qphase=paw_ij1(iatom)%qphase
          dimdij1=paw_ij1(iatom)%cplex_dij*paw_ij1(iatom)%lmn2_size
          ABI_CHECK(dimdij1<=dime1kb1,'BUG: size of paw_ij1%dij>dime1kb1!')
          e1kbsc(1:dimdij1,iatom_tot,ispden,1)=paw_ij1(iatom)%dij  (1:dimdij1,isp) &
 &                                            -paw_ij1(iatom)%dijfr(1:dimdij1,isp)
-         if (cplex_rf==2) e1kbsc(1:dimdij1,iatom_tot,ispden,2)=paw_ij1(iatom)%dij  (dimdij1+1:2*dimdij1,isp) &
-&                                                             -paw_ij1(iatom)%dijfr(dimdij1+1:2*dimdij1,isp)
+         if (qphase==2) e1kbsc(1:dimdij1,iatom_tot,ispden,2)=paw_ij1(iatom)%dij  (dimdij1+1:2*dimdij1,isp) &
+&                                                           -paw_ij1(iatom)%dijfr(dimdij1+1:2*dimdij1,isp)
        end do
      end do
    end if

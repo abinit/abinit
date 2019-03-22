@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on Fortran strings.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, XG, MT, DC)
+!! Copyright (C) 2008-2019 ABINIT group (MG, XG, MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -671,8 +671,6 @@ end function rmquotes
 
 subroutine write_rdp_0d(rnum,str,fmt)
 
- implicit none
-
 !Arguments ------------------------------------
  real(dp),intent(in) :: rnum
  character(len=*),intent(in) :: fmt
@@ -1091,8 +1089,6 @@ end function strcat_5
 
 character(len=3) pure function yesno(bool)
 
- implicit none
-
 !Arguments ------------------------------------
  logical,intent(in) :: bool
 
@@ -1179,8 +1175,6 @@ end function itoa
 
 pure function ftoa(value,fmt)
 
- implicit none
-
  real(dp),intent(in) :: value
  character(len=*),optional,intent(in) :: fmt
  character(len=MAX_SLEN) :: ftoa
@@ -1244,8 +1238,6 @@ end function ktoa
 
 pure function ltoa_int(list) result(str)
 
- implicit none
-
  integer,intent(in) :: list(:)
  character(len=MAX_SLEN) :: str
 
@@ -1302,8 +1294,6 @@ end function ltoa_int
 !! CHILDREN
 
 pure function ltoa_dp(list, fmt) result(str)
-
- implicit none
 
  real(dp),intent(in) :: list(:)
  character(len=*),optional,intent(in) :: fmt
@@ -1685,8 +1675,6 @@ end function prep_dash
 
 pure subroutine int2char4(iint,string)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iint
@@ -1758,8 +1746,6 @@ end subroutine int2char4
 
 pure subroutine int2char10(iint,string)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iint
@@ -1812,8 +1798,6 @@ end subroutine int2char10
 
 integer pure function char_count(string, char)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: string
@@ -1846,8 +1830,6 @@ end function char_count
 !! SOURCE
 
 integer function next_token(string, start, ostr) result(ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1918,8 +1900,6 @@ end function next_token
 !! SOURCE
 
 subroutine inupper(string)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -2,7 +2,7 @@
 .Version 8.9.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -426,7 +426,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t156o_DS1_EDOS
-Number of bands in e-ph self-energy: 8
+Number of bands in e-ph self-energy sum: 8
+From bmin: 1 to bmax: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -551,7 +552,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t156o_DS2_EDOS
-Number of bands in e-ph self-energy: 8
+Number of bands in e-ph self-energy sum: 8
+From bmin: 1 to bmax: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -680,7 +682,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t156o_DS3_EDOS
-Number of bands in e-ph self-energy: 8
+Number of bands in e-ph self-energy sum: 8
+From bmin: 1 to bmax: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -811,7 +814,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t156o_DS4_EDOS
-Number of bands in e-ph self-energy: 8
+Number of bands in e-ph self-energy sum: 8
+From bmin: 1 to bmax: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -941,7 +945,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t156o_DS5_EDOS
-Number of bands in e-ph self-energy: 8
+Number of bands in e-ph self-energy sum: 8
+From bmin: 1 to bmax: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -1064,7 +1069,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t156o_DS6_EDOS
-Number of bands in e-ph self-energy: 8
+Number of bands in e-ph self-energy sum: 8
+From bmin: 1 to bmax: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature

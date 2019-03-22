@@ -8,7 +8,7 @@
 !! and functions to get cpu and wall time.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, XG, MT, TD)
+!! Copyright (C) 2009-2019 ABINIT group (MG, XG, MT, TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,8 +105,6 @@ CONTAINS
 
 function asctime()
 
- implicit none
-
 !Arguments ------------------------------------
  character(len=24) :: asctime
 
@@ -172,8 +170,6 @@ end function asctime
 !! SOURCE
 
 pure function sec2str(time_s) result(str)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -317,8 +313,6 @@ end function str2sec
 
 function abi_cpu_time() result(cpu)
 
- implicit none
-
 !Arguments ------------------------------------
  real(dp) :: cpu
 
@@ -392,8 +386,6 @@ end function abi_cpu_time
 !! SOURCE
 
 function abi_wtime() result(wall)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -507,8 +499,6 @@ end function abi_wtime
 
 subroutine cwtime(cpu, wall, gflops, start_or_stop, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(inout) :: cpu,wall
@@ -592,8 +582,6 @@ end subroutine cwtime
 
 subroutine timein(cpu,wall)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(out) :: cpu,wall
@@ -632,8 +620,6 @@ end subroutine timein
 !! SOURCE
 
 subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -686,8 +672,6 @@ end subroutine time_accu
 
 subroutine time_set_papiopt(opt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: opt
@@ -715,8 +699,6 @@ end subroutine time_set_papiopt
 !! SOURCE
 
 function time_get_papiopt()
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -800,8 +782,6 @@ end function time_get_papiopt
 !!
 
 subroutine timab(nn,option,tottim)
-
- implicit none
 
 #ifdef HAVE_PAPI
 #include "f90papi.h"

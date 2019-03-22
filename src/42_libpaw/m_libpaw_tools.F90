@@ -7,7 +7,7 @@
 !!  Several libPAW tools: message printing, error handling, string handling...
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (MT, MG, ...)
+!!  Copyright (C) 2014-2019 ABINIT group (MT, MG, ...)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -881,7 +881,6 @@ end function libpaw_get_free_unit
 !!  This routine comes directly from the FLUSH_UNIT routine delivered with ABINIT.
 !!
 !! PARENTS
-!!      m_pawrhoij
 !!
 !! CHILDREN
 !!      flush,flush_

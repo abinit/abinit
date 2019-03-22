@@ -8,7 +8,7 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -255,8 +255,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF_TOL,ene_k,tolsym)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -847,8 +845,6 @@ end subroutine esymm_init
 
 subroutine esymm_print(esymm,unit,mode_paral,prtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: prtvol,unit
@@ -963,8 +959,6 @@ end subroutine esymm_print
 
 subroutine esymm_free_0D(esymm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(esymm_t),intent(inout) :: esymm
@@ -975,33 +969,15 @@ subroutine esymm_free_0D(esymm)
 ! *************************************************************************
 
  !@esymm_t
- if (allocated(esymm%g0)) then
-   ABI_FREE(esymm%g0)
- end if
- if (allocated(esymm%tr_g0))  then
-   ABI_FREE(esymm%tr_g0)
- end if
- if (allocated(esymm%nelements))  then
-   ABI_FREE(esymm%nelements)
- end if
- if (allocated(esymm%sgk2symrec))  then
-   ABI_FREE(esymm%sgk2symrec)
- end if
- if (allocated(esymm%tr_sgk2symrec)) then
-   ABI_FREE(esymm%tr_sgk2symrec)
- end if
- if (allocated(esymm%herring_test)) then
-   ABI_FREE(esymm%herring_test)
- end if
- if (allocated(esymm%b2irrep)) then
-   ABI_FREE(esymm%b2irrep)
- end if
- if (allocated(esymm%degs_bounds))  then
-   ABI_FREE(esymm%degs_bounds)
- end if
- if (allocated(esymm%degs_dim)) then
-   ABI_FREE(esymm%degs_dim)
- end if
+ ABI_SFREE(esymm%g0)
+ ABI_SFREE(esymm%tr_g0)
+ ABI_SFREE(esymm%nelements)
+ ABI_SFREE(esymm%sgk2symrec)
+ ABI_SFREE(esymm%tr_sgk2symrec)
+ ABI_SFREE(esymm%herring_test)
+ ABI_SFREE(esymm%b2irrep)
+ ABI_SFREE(esymm%degs_bounds)
+ ABI_SFREE(esymm%degs_dim)
 
  if (allocated(esymm%irrep2b)) then
    do ii=LBOUND(esymm%irrep2b,DIM=1),UBOUND(esymm%irrep2b,DIM=1)
@@ -1010,17 +986,9 @@ subroutine esymm_free_0D(esymm)
    ABI_DT_FREE(esymm%irrep2b)
  end if
 
- if (allocated(esymm%Calc_irreps)) then
-   call irrep_free(esymm%Calc_irreps)
- end if
-
- if (allocated(esymm%trCalc_irreps)) then
-   call irrep_free(esymm%trCalc_irreps)
- end if
-
- if (allocated(esymm%Ref_irreps)) then
-   call irrep_free(esymm%Ref_irreps)
- end if
+ if (allocated(esymm%Calc_irreps)) call irrep_free(esymm%Calc_irreps)
+ if (allocated(esymm%trCalc_irreps)) call irrep_free(esymm%trCalc_irreps)
+ if (allocated(esymm%Ref_irreps)) call irrep_free(esymm%Ref_irreps)
 
 end subroutine esymm_free_0D
 !!***
@@ -1042,8 +1010,6 @@ end subroutine esymm_free_0D
 !! SOURCE
 
 subroutine esymm_free_2D(esymm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1083,8 +1049,6 @@ end subroutine esymm_free_2D
 !! SOURCE
 
 subroutine esymm_finalize(esymm,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1340,8 +1304,6 @@ end subroutine esymm_finalize
 
 function which_irrep(esymm,trace,tolerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: which_irrep
@@ -1389,8 +1351,6 @@ end function which_irrep
 !! SOURCE
 
 subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1487,8 +1447,6 @@ end subroutine esymm_symmetrize_mels
 
 function esymm_failed(esymm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical :: esymm_failed
@@ -1520,8 +1478,6 @@ end function esymm_failed
 !! SOURCE
 
 subroutine polish_irreps(Irreps)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

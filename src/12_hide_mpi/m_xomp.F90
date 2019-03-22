@@ -7,7 +7,7 @@
 !!  Thin wrappers and tools for OpenMP parallelization.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,8 +74,6 @@ CONTAINS  !=====================================================================
 
 subroutine xomp_show_info(unit)
 
- implicit none
-
 !Arguments-------------------------
  integer,optional,intent(in) :: unit
 
@@ -125,8 +123,6 @@ end subroutine xomp_show_info
 
 function xomp_get_max_threads()
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: xomp_get_max_threads
@@ -162,8 +158,6 @@ end function xomp_get_max_threads
 !! SOURCE
 
 function xomp_get_thread_num()
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -207,8 +201,6 @@ end function xomp_get_thread_num
 !! SOURCE
 
 function xomp_get_num_threads(open_parallel) result(nthreads)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -267,8 +259,6 @@ end function xomp_get_num_threads
 
 subroutine xomp_set_num_threads(nthreads)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nthreads
@@ -299,8 +289,6 @@ end subroutine xomp_set_num_threads
 !! SOURCE
 
 function xomp_in_parallel() result(ans)
-
- implicit none
 
 !Arguments-------------------------
  logical :: ans
@@ -337,8 +325,6 @@ end function xomp_in_parallel
 !! SOURCE
 
 function xomp_get_num_cores_node()
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

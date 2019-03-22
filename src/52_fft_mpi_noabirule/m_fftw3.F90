@@ -7,7 +7,7 @@
 !!  This module provides wrappers for the FFTW3 routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, FD)
+!! Copyright (C) 2009-2019 ABINIT group (MG, FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -298,8 +298,6 @@ CONTAINS  !===========================================================
 
 subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_flags)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -453,8 +451,6 @@ end subroutine fftw3_seqfourdp
 
 subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -793,8 +789,6 @@ end subroutine fftw3_seqfourwf
 subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,ldx,ldy,ldz,npwin,npwout,option
@@ -917,8 +911,6 @@ end subroutine fftw3_fftrisc_sp
 subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,ldx,ldy,ldz,npwin,npwout,option
@@ -976,8 +968,6 @@ end subroutine fftw3_fftrisc_dp
 
 subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1055,8 +1045,6 @@ end subroutine fftw3_fftrisc_mixprec
 
 subroutine fftw3_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1125,8 +1113,6 @@ end subroutine fftw3_fftug_dp
 !! SOURCE
 
 subroutine fftw3_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1197,8 +1183,6 @@ end subroutine fftw3_fftug_spc
 !! SOURCE
 
 subroutine fftw3_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1271,8 +1255,6 @@ end subroutine fftw3_fftug_dpc
 !! SOURCE
 
 subroutine fftw3_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1347,8 +1329,6 @@ end subroutine fftw3_fftur_dp
 
 subroutine fftw3_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1422,8 +1402,6 @@ end subroutine fftw3_fftur_spc
 
 subroutine fftw3_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1490,8 +1468,6 @@ end subroutine fftw3_fftur_dpc
 !! SOURCE
 
 subroutine fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1576,8 +1552,6 @@ end subroutine fftw3_c2c_ip_spc
 
 subroutine fftw3_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
@@ -1634,8 +1608,6 @@ end subroutine fftw3_fftpad_spc
 !! SOURCE
 
 subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1715,8 +1687,6 @@ end subroutine fftw3_c2c_ip_dpc
 !! SOURCE
 
 subroutine fftw3_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1798,8 +1768,6 @@ end subroutine fftw3_c2c_op_spc
 !! SOURCE
 
 subroutine fftw3_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1884,8 +1852,6 @@ end subroutine fftw3_c2c_op_dpc
 !! SOURCE
 
 subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2044,8 +2010,6 @@ end subroutine fftw3_r2c_op
 
 subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
@@ -2163,8 +2127,6 @@ end subroutine fftw3_c2r_op
 
 subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -2250,8 +2212,6 @@ end subroutine fftw3_many_dft_op
 
 subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -2331,8 +2291,6 @@ end subroutine fftw3_many_dft_ip
 
 subroutine fftw3_cleanup()
 
- implicit none
-
 ! *************************************************************************
 
 #ifdef HAVE_FFT_FFTW3_MPI
@@ -2372,8 +2330,6 @@ end subroutine fftw3_cleanup
 !! SOURCE
 
 subroutine fftw3_destroy_plan(plan)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2418,8 +2374,6 @@ end subroutine fftw3_destroy_plan
 !! SOURCE
 
 subroutine fftw3_init_threads()
-
- implicit none
 
 !Local variables ------------------------------
 !scalars
@@ -2480,8 +2434,6 @@ end subroutine fftw3_init_threads
 !! SOURCE
 
 subroutine fftw3_set_nthreads(nthreads)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2566,8 +2518,6 @@ end subroutine fftw3_set_nthreads
 
 subroutine fftw3_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
@@ -2630,8 +2580,6 @@ end subroutine fftw3_fftpad_dp
 
 subroutine fftw3_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
@@ -2677,8 +2625,6 @@ end subroutine fftw3_fftpad_dpc
 !! SOURCE
 
 function dplan_many_dft_1D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2730,8 +2676,6 @@ end function dplan_many_dft_1D
 !! SOURCE
 
 function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2785,8 +2729,6 @@ end function dplan_many_dft_2D
 
 function cplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: rank,howmany,istride,ostride, sign,flags,idist,odist,nthreads
@@ -2838,8 +2780,6 @@ end function cplan_many_dft
 !! FIXME  technically it should be intent(inout) since FFTW3 can destroy the input for particular flags.
 
 function zplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2894,8 +2834,6 @@ end function zplan_many_dft
 
 function dplan_many_dft_r2c(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,flags,nthreads) result(plan)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: rank,howmany,istride,ostride,flags,idist,odist,nthreads
@@ -2946,8 +2884,6 @@ end function dplan_many_dft_r2c
 !! SOURCE
 
 function dplan_many_dft_c2r(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,flags, nthreads) result(plan)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3013,8 +2949,6 @@ end function dplan_many_dft_c2r
 
 subroutine fftw3_execute_dft_dp(plan, in, out)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer(KIND_FFTW_PLAN),intent(in) :: plan
@@ -3047,8 +2981,6 @@ end subroutine fftw3_execute_dft_dp
 
 subroutine fftw3_execute_dft_spc(plan, in, out)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer(KIND_FFTW_PLAN),intent(in) :: plan
@@ -3080,8 +3012,6 @@ end subroutine fftw3_execute_dft_spc
 #ifdef HAVE_FFT_FFTW3
 
 subroutine fftw3_execute_dft_dpc(plan, in, out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3116,8 +3046,6 @@ end subroutine fftw3_execute_dft_dpc
 #ifdef HAVE_FFT_FFTW3
 
 subroutine fftw3_alloc_real1d_dp(size,cptr,fptr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3156,8 +3084,6 @@ end subroutine fftw3_alloc_real1d_dp
 
 subroutine fftw3_alloc_real2d_dp(shape,cptr,fptr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: shape(2)
@@ -3195,8 +3121,6 @@ end subroutine fftw3_alloc_real2d_dp
 
 subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
@@ -3233,8 +3157,6 @@ end subroutine fftw3_alloc_complex1d_spc
 #ifdef HAVE_FFT_FFTW3
 
 subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3276,8 +3198,6 @@ end subroutine fftw3_alloc_complex1d_dpc
 
 function fftw3_spawn_threads_here(ndat,nthreads) result(ans)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndat,nthreads
@@ -3314,8 +3234,6 @@ end function fftw3_spawn_threads_here
 !! SOURCE
 
 subroutine fftw3_use_lib_threads(logvar)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3355,8 +3273,6 @@ end subroutine fftw3_use_lib_threads
 !! SOURCE
 
 subroutine fftwmpi_get_work_array(cdata_f,cdata_r,rank,nx,ny,nz,ndat,comm_fft,n0,offset,n0_tr,offset_tr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3420,8 +3336,6 @@ end subroutine fftwmpi_get_work_array
 
 subroutine fftwmpi_free_work_array(cdata_f,cdata_r)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(C_PTR), intent(inout) :: cdata_f,cdata_r
@@ -3476,8 +3390,6 @@ end subroutine fftwmpi_free_work_array
 !! SOURCE
 
 subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_fft,fftw_flags)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3595,8 +3507,6 @@ end subroutine fftw3mpi_many_dft_ip
 
 subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ndat,isign,comm_fft
@@ -3679,8 +3589,6 @@ end subroutine fftw3mpi_many_dft_tr
 
 subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
   fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3831,8 +3739,6 @@ end subroutine fftw3_mpifourdp_c2r
 subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
   fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,ndat,comm_fft
@@ -3982,8 +3888,6 @@ end subroutine fftw3_mpifourdp_r2c
 subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
   fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,ndat,isign,comm_fft
@@ -4099,8 +4003,6 @@ end subroutine old_fftw3_mpifourdp
 
 subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4282,8 +4184,6 @@ end subroutine fftw3_mpifourdp_c2c
 
 subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zf,zr,comm_fft)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc
@@ -4640,8 +4540,6 @@ end subroutine fftw3_mpiback_wf
 subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &        max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zr,zf,comm_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc
@@ -4992,8 +4890,6 @@ end subroutine fftw3_mpiforw_wf
 
 subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zf,zr,comm_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 ! real space input
  integer,intent(in) :: cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,comm_fft
@@ -5293,8 +5189,6 @@ end subroutine fftw3_mpiback
 
 subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zr,zf,comm_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,comm_fft
@@ -5561,8 +5455,6 @@ end subroutine fftw3_mpiforw
 subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,isign,nfft,ndat,comm_fft
@@ -5681,8 +5573,6 @@ end subroutine fftw3_mpifourdp
 subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
 &  max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
@@ -6154,8 +6044,6 @@ end subroutine fftw3_applypot
 subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft,nproc_fft,me_fft,zf,rho,weight_r,weight_i)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
  integer,intent(in) :: max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft,nproc_fft,me_fft
@@ -6484,8 +6372,6 @@ end subroutine fftw3_accrho
 
 subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zf,zr,comm_fft)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc
@@ -6839,8 +6725,6 @@ end subroutine fftw3_mpiback_manywf
 subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &        max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zr,zf,comm_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc
@@ -7183,8 +7067,6 @@ end subroutine fftw3_mpiforw_manywf
 subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
 &  max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
@@ -7641,8 +7523,6 @@ end subroutine fftw3_applypot_many
 !! SOURCE
 
 subroutine fftw3_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

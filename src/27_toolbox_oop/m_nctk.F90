@@ -7,7 +7,7 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -265,8 +265,6 @@ CONTAINS
 
 integer function nctk_idname(ncid, varname) result(varid)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
  character(len=*),intent(in) :: varname
@@ -497,8 +495,6 @@ end function nctk_try_fort_or_ncfile
 
 subroutine nctk_test_mpiio()
 
- implicit none
-
 !Local variables-------------------------------
 !scalars
 #ifdef HAVE_NETCDF_MPI
@@ -574,8 +570,6 @@ end subroutine nctk_test_mpiio
 
 integer function str2xtype(string) result(xtype)
 
-  implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: string
 
@@ -620,8 +614,6 @@ end function str2xtype
 
 logical function bail_if_ncerr(ncerr, file, line) result(bail)
 
-  implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ncerr
  character(len=*),optional,intent(in) :: file
@@ -660,8 +652,6 @@ end function bail_if_ncerr
 !! SOURCE
 
 integer function nctk_open_read(ncid, path, comm) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(out) :: ncid
@@ -717,8 +707,6 @@ end function nctk_open_read
 !! SOURCE
 
 integer function nctk_open_create(ncid, path, comm) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(out) :: ncid
@@ -781,8 +769,6 @@ end function nctk_open_create
 
 integer function nctk_open_modify(ncid, path, comm) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: ncid
  integer,intent(in) :: comm
@@ -840,8 +826,6 @@ end function nctk_open_modify
 !! SOURCE
 
 integer function nctk_add_etsf_header(ncid, title, history) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
@@ -911,8 +895,6 @@ end function nctk_add_etsf_header
 
 integer function nctk_set_defmode(ncid) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
 
@@ -950,8 +932,6 @@ end function nctk_set_defmode
 !! SOURCE
 
 integer function nctk_set_datamode(ncid, reserve) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
@@ -1007,8 +987,6 @@ end function nctk_set_datamode
 
 integer function nctk_set_collective(ncid, varid) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ncid,varid
 
@@ -1047,8 +1025,6 @@ end function nctk_set_collective
 !! SOURCE
 
 integer function nctk_def_one_dim(ncid, nctkdim, defmode, prefix) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1122,8 +1098,6 @@ end function nctk_def_one_dim
 
 integer function nctk_def_dim_list(ncid, nctkdims, defmode, prefix) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1178,8 +1152,6 @@ end function nctk_def_dim_list
 
 integer function nctk_set_atomic_units(ncid, varname) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
  character(len=*),intent(in) :: varname
@@ -1220,8 +1192,6 @@ end function nctk_set_atomic_units
 !! SOURCE
 
 integer function nctk_def_basedims(ncid, defmode) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
@@ -1283,8 +1253,6 @@ end function nctk_def_basedims
 
 subroutine ab_define_var(ncid, var_dim_id, var_id, var_type, var_name, var_mnemo, var_units)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ncid
@@ -1335,8 +1303,6 @@ end subroutine ab_define_var
 !! SOURCE
 
 integer function nctk_def_scalars_type(ncid, varnames, xtype, defmode, prefix) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1407,8 +1373,6 @@ end function nctk_def_scalars_type
 
 integer function nctk_def_iscalars(ncid, varnames, defmode, prefix) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1452,8 +1416,6 @@ end function nctk_def_iscalars
 !! SOURCE
 
 integer function nctk_def_dpscalars(ncid, varnames, defmode, prefix) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1499,8 +1461,6 @@ end function nctk_def_dpscalars
 
 
 integer function nctk_def_one_array(ncid, nctk_array, defmode, varid, prefix) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1614,8 +1574,6 @@ end function nctk_def_one_array
 
 integer function nctk_def_array_list(ncid, nctk_arrays, defmode, prefix) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1672,8 +1630,6 @@ end function nctk_def_array_list
 
 integer function nctk_write_iscalars(ncid, varnames, values, datamode) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1725,8 +1681,6 @@ end function nctk_write_iscalars
 !! SOURCE
 
 integer function nctk_write_dpscalars(ncid, varnames, values, datamode) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1781,8 +1735,6 @@ end function nctk_write_dpscalars
 
 integer function nctk_defnwrite_ivars(ncid, varnames, values) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1830,8 +1782,6 @@ end function nctk_defnwrite_ivars
 !! SOURCE
 
 integer function nctk_defnwrite_dpvars(ncid, varnames, values) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1886,8 +1836,6 @@ end function nctk_defnwrite_dpvars
 !! SOURCE
 
 integer function nctk_write_ibz(fname, kpoints, weights) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1950,8 +1898,6 @@ end function nctk_write_ibz
 
 integer function nctk_get_dim(ncid, dimname, dimlen, datamode) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -2012,8 +1958,6 @@ end function nctk_get_dim
 
 integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
    comm_fft,fftn3_distrib,ffti3_local,datar,action) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2220,8 +2164,6 @@ end function nctk_write_datar
 integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
    comm_fft,fftn3_distrib,ffti3_local,datar) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,comm_fft
@@ -2349,8 +2291,6 @@ end function nctk_read_datar
 
 subroutine collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_distrib,ffti3_local,rhor_glob,master)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,comm_fft
@@ -2432,8 +2372,6 @@ end subroutine collect_datar
 
 subroutine distrib_datar(ngfft,cplex,nfft,nspden,rhor_glob,master,comm_fft,fftn3_distrib,ffti3_local,rhor)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,comm_fft,master
@@ -2502,8 +2440,6 @@ end subroutine distrib_datar
 
 subroutine var_from_id(ncid, varid, var)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: ncid, varid
  type(nctkvar_t), intent(out) :: var
@@ -2563,8 +2499,6 @@ end subroutine var_from_id
 
 subroutine var_from_name(ncid, name, var)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: ncid
  character(len=*),intent(in) :: name
@@ -2611,8 +2545,6 @@ end subroutine var_from_name
 !! SOURCE
 
 subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, cart_displ, mode)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2686,8 +2618,6 @@ end subroutine nctk_defwrite_nonana_terms
 
 subroutine create_nc_file (filename,ncid)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: ncid
@@ -2744,8 +2674,6 @@ integer :: ncerr
 !! SOURCE
 
 subroutine write_var_netcdf(arr_int,arr_real,marr,narr,ncid,typevar,varname)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2830,8 +2758,6 @@ end subroutine write_var_netcdf
 !! SOURCE
 
 subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars

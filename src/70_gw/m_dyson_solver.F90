@@ -7,7 +7,7 @@
 !!  This module contains procedures to solve the Dyson equation to find QP energies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -113,8 +113,6 @@ CONTAINS  !====================================================================
 !! SOURCE
 
 subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp_ene,Sr,prtvol,Dtfil,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -522,8 +520,6 @@ end subroutine solve_dyson
 !! SOURCE
 
 subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,prefil)
-
- implicit none
 
 ! Arguments ------------------------------------
  !scalars

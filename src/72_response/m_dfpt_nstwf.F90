@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ contains
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2019 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -218,7 +218,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, pawrhoij_nullify, &
-&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_get_nspden
+&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
@@ -307,7 +307,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,my_nsppol,nband_k,nband_kocc,need_ylmgr1
  integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
- integer :: option,opt_gvnlx1,sij_opt,spaceworld,usevnl,use_rhoijim,wfcorr,ik_ddk
+ integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -642,9 +642,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &         mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
          if (ipert/=ipert1.or.idir/=idir1.or.force_recompute) then
            option=0
-           call pawdijfr(cplex,gprimd,idir1,ipert1,my_natom,dtset%natom,nfftf,ngfftf,&
+           call pawdijfr(gprimd,idir1,ipert1,my_natom,dtset%natom,nfftf,ngfftf,&
 &           nspden,nsppol,dtset%ntypat,option,paw_ij10(:,idir1),pawang,pawfgrtab,pawrad,&
-&           pawtab,dtset%qptn,rprimd,ucvol,vpsp1_idir1,vtrial,vxc,xred,&
+&           pawtab,cplex,dtset%qptn,rprimd,ucvol,vpsp1_idir1,vtrial,vxc,xred,&
 &           mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
          else
            do iatom=1,my_natom
@@ -757,16 +757,15 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      do kdir1=1,mdir1
        idir1=jdir1(kdir1)
        drho1wfr(:,:,idir1)=zero
-       cplex_rhoij=max(cplex,dtset%pawcpxocc)
-       nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
-       use_rhoijim = 1
-!      use_rhoijim = 0 ; if (sum(dtset%qptn(1:3)**2)>1.d-14) use_rhoijim = 1
+       call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
        call pawrhoij_alloc(pawdrhoij1(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,use_rhoijim=use_rhoijim,&
+&       dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=my_atmtab)
        if (paral_atom) then
          call pawrhoij_alloc(pawdrhoij1_unsym(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&         dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1,use_rhoijim=use_rhoijim)
+&         dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
+&         use_rhoijp=0,use_rhoij_=1)
        else
          call pawrhoij_init_unpacked(pawdrhoij1_unsym(:,idir1))
        end if
@@ -1738,7 +1737,7 @@ end subroutine dfpt_nstpaw
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
+!! Copyright (C) 1999-2019 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

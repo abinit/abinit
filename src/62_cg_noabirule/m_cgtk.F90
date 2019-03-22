@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,8 +85,6 @@ contains
 
 subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
   npw1,kg1,npw2,kg2,istwf1,istwf2,cg1,cg2,work_ngfft,work)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -239,8 +237,6 @@ end subroutine cgtk_rotate
 !! SOURCE
 
 subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, cg2, work_ngfft, work)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

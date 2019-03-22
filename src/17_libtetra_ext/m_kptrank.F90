@@ -7,7 +7,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MVer)
+!! Copyright (C) 2010-2019 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,8 +93,6 @@ contains
 
 subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt
@@ -160,8 +158,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 ! equivalent to the k-point whose rank is provided
  if (present(symrec)) then
    if(.not. present(nsym)) then
-     write (msg,'(a)')  "need both symrec and nsym arguments together"
-     TETRA_ERROR(msg)
+     TETRA_ERROR("need both symrec and nsym arguments together")
    end if
    do ikpt=1,nkpt
      ! itim == 1 for positive, and itim==2 gives Kramers opposite of k-point
@@ -219,8 +216,6 @@ end subroutine mkkptrank
 !! SOURCE
 
 subroutine get_rank_1kpt(kpt,rank,krank)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -300,8 +295,6 @@ end subroutine get_rank_1kpt
 
 integer function kptrank_index(krank, kpt) result(ikpt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kptrank_type), intent(in) :: krank
@@ -344,8 +337,6 @@ end function kptrank_index
 !! SOURCE
 
 subroutine copy_kptrank (krank_in, krank_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -393,8 +384,6 @@ end subroutine copy_kptrank
 
 subroutine destroy_kptrank (krank)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kptrank_type), intent(inout) :: krank
@@ -435,8 +424,6 @@ end subroutine destroy_kptrank
 !! SOURCE
 
 subroutine dump_kptrank (krank, unout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

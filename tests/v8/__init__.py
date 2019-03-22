@@ -11,6 +11,7 @@ keywords = [
 #: List of input files
 inp_files = [
 "t01.in",
+"t01_triqs2_0.in",
 "t02.in",
 "t03.in",
 "t04.in",
@@ -25,7 +26,7 @@ inp_files = [
 "t13.in",
 "t14.in",
 "t15.in",
-"t16.in", 
+"t16.in",
 "t17.in",
 "t18.in",
 "t19.in",
@@ -52,9 +53,13 @@ inp_files = [
 "t49.in",
 "t50.in",
 "t51.in",
+"t52.in",
+"t53.in",
+"t54.in",
 "t55.in",
 "t56.in",
 "t57.in",
+"t59.in",
 "t61.in",
 "t62.in",
 "t63.in",
@@ -90,6 +95,7 @@ inp_files = [
 "t91.in",
 "t92.in",
 "t93.in",
+"t94.in",
 #Electron-phonon
 "t150.in",
 "t151.in",

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2019 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -225,44 +225,22 @@ contains
 
 subroutine anaddb_dtset_free(anaddb_dtset)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(anaddb_dataset_type), intent(inout) :: anaddb_dtset
 
 ! *************************************************************************
 
- if (allocated(anaddb_dtset%atifc))  then
-   ABI_DEALLOCATE(anaddb_dtset%atifc)
- end if
- if (allocated(anaddb_dtset%iatfix))  then
-   ABI_DEALLOCATE(anaddb_dtset%iatfix)
- end if
- if (allocated(anaddb_dtset%iatprj_bs))  then
-   ABI_DEALLOCATE(anaddb_dtset%iatprj_bs)
- end if
- if (allocated(anaddb_dtset%qnrml1))  then
-   ABI_DEALLOCATE(anaddb_dtset%qnrml1)
- end if
- if (allocated(anaddb_dtset%qnrml2))  then
-   ABI_DEALLOCATE(anaddb_dtset%qnrml2)
- end if
- if (allocated(anaddb_dtset%qpath))  then
-   ABI_DEALLOCATE(anaddb_dtset%qpath)
- end if
- if (allocated(anaddb_dtset%qph1l))  then
-   ABI_DEALLOCATE(anaddb_dtset%qph1l)
- end if
- if (allocated(anaddb_dtset%qph2l))  then
-   ABI_DEALLOCATE(anaddb_dtset%qph2l)
- end if
- if (allocated(anaddb_dtset%ep_qptlist))  then
-   ABI_DEALLOCATE(anaddb_dtset%ep_qptlist)
- end if
- if (allocated(anaddb_dtset%gruns_ddbs))  then
-   ABI_DEALLOCATE(anaddb_dtset%gruns_ddbs)
- end if
+ ABI_SFREE(anaddb_dtset%atifc)
+ ABI_SFREE(anaddb_dtset%iatfix)
+ ABI_SFREE(anaddb_dtset%iatprj_bs)
+ ABI_SFREE(anaddb_dtset%qnrml1)
+ ABI_SFREE(anaddb_dtset%qnrml2)
+ ABI_SFREE(anaddb_dtset%qpath)
+ ABI_SFREE(anaddb_dtset%qph1l)
+ ABI_SFREE(anaddb_dtset%qph2l)
+ ABI_SFREE(anaddb_dtset%ep_qptlist)
+ ABI_SFREE(anaddb_dtset%gruns_ddbs)
 
 end subroutine anaddb_dtset_free
 !!***
@@ -303,8 +281,6 @@ end subroutine anaddb_dtset_free
 !! SOURCE
 
 subroutine invars9 (anaddb_dtset,lenstr,natom,string)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1759,8 +1735,6 @@ end subroutine invars9
 
 subroutine outvars_anaddb (anaddb_dtset,nunit)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nunit
@@ -2082,8 +2056,6 @@ end subroutine outvars_anaddb
 
 subroutine anaddb_init(filnam)
 
- implicit none
-
 !Arguments -------------------------------
 !arrays
  character(len=*),intent(out) :: filnam(7)
@@ -2138,8 +2110,6 @@ end subroutine anaddb_init
 !! SOURCE
 
 subroutine anaddb_chkvars(string)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

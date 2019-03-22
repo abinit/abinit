@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XG)
+!!  Copyright (C) 1999-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,8 +109,6 @@ contains
 !! SOURCE
 
 subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -239,8 +237,6 @@ end subroutine invars2m
 !! SOURCE
 
 subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepaw,zionpsp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -490,6 +486,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freqspmax',tread,'ENE')
  if(tread==1) dtset%freqspmax=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'frohl_params',tread,'DPR')
+ if(tread==1) dtset%frohl_params=dprarr(1:4)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freqspmin',tread,'ENE')
  if(tread==1) then ! If found, set it
@@ -3209,6 +3208,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
    call intagm(dprarr,intarr,jdtset,marr,sumnbl,string(1:lenstr),'plowan_projcalc',tread,'INT')
    if(tread==1) dtset%plowan_projcalc(1:sumnbl)=intarr(1:sumnbl)
+ end if
+
+ ! band range for self-energy sum
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_bsum_range', tread, 'INT')
+ if (tread == 1) then
+    dtset%sigma_bsum_range = intarr(1:2)
+    ABI_CHECK(all(dtset%sigma_bsum_range > 0), "sigma_bsum_range cannot be negative")
+    ABI_CHECK(dtset%sigma_bsum_range(2) >= dtset%sigma_bsum_range(1), "sigma_bsum_range(2) must be >= (1)")
  end if
 
  ! IBZ k-points for electron self-energy given in terms of sigma_ngkpt

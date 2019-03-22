@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (CMartins, FJ, MT, XG)
+!!  Copyright (C) 2013-2019 ABINIT group (CMartins, FJ, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,6 @@ module m_fock_getghc
  use m_hamiltonian,  only : gs_hamiltonian_type,load_kprime_hamiltonian,K_H_KPRIME,load_k_hamiltonian, &
                             init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian
  use m_pawdij,       only : pawdijhat
- use m_pawrhoij,     only : pawrhoij_type, pawrhoij_free, pawrhoij_alloc
  use m_paw_nhat,     only : pawmknhat_psipsi
  use m_spacepar,     only : hartre
  use m_nonlop,       only : nonlop
@@ -118,7 +117,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! Scalars
  integer,parameter :: tim_fourwf0=0,tim_fourdp0=0,ndat1=1
  integer :: bdtot_jindex,choice,cplex_fock,cplex_dij,cpopt,i1,i2,i3,ia,iatom
- integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipert,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
+ integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
  integer :: npw,npwj,nspden_fock,nspinor,paw_opt,signs,tim_nonlop
@@ -433,12 +432,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        ABI_ALLOCATE(dijhat,(cplex_dij*gs_ham%dimekb1,natom,ndij,cplex_fock))
        dijhat=zero
        do iatom=1,natom
-         ipert=iatom
          itypat=gs_ham%typat(iatom)
          lmn2_size=fockcommon%pawtab(itypat)%lmn2_size
          ABI_ALLOCATE(dijhat_tmp,(cplex_fock*cplex_dij*lmn2_size,ndij))
          dijhat_tmp=zero
-         call pawdijhat(cplex_fock,cplex_dij,dijhat_tmp,gs_ham%gprimd,iatom,ipert,&
+         call pawdijhat(dijhat_tmp,cplex_dij,cplex_fock,gs_ham%gprimd,iatom,&
 &         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
 &         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
          do ii=1,cplex_fock

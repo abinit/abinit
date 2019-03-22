@@ -29,7 +29,7 @@
 !! * macro_uj_type: TO BE COMPLETED
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (XG)
+!! Copyright (C) 2001-2019 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -945,11 +945,15 @@ type dataset_type
 
  integer :: mixprec = 0
 
+ integer :: sigma_bsum_range(2) = 0
+
  integer :: sigma_ngkpt(3) = 0
  ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
 
  integer :: sigma_nshiftk = 1
  ! Number of shifts in k-mesh for Sigma_{nk}.
+
+ real(dp) :: frohl_params(4) = zero
 
  real(dp),allocatable :: sigma_shiftk(:,:)
  ! sigma_shiftk(3, sigma_nshiftk)

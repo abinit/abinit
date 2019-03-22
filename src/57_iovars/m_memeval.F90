@@ -7,7 +7,7 @@
 !!  Functions to estimate memory requirements from the calculation parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (XG, DC, DW)
+!!  Copyright (C) 2008-2019 ABINIT group (XG, DC, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,8 +85,6 @@ contains
 !! SOURCE
 
 subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -298,7 +296,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       mpi_enregs(idtset),mpsang,mpssoang,mpw,mqgrid_ff,mqgrid_vl,natom,nband,dtsets(idtset)%nfft,nfftdiel,nfftf,&
 &       dtsets(idtset)%ngfft,ngfftdiel,ngfftf,dtsets(idtset)%nimage,nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,&
 &       nsppol,nsym,ntypat,occopt,optforces,mem_test,optstress,pawcpxocc,pawmixdg,&
-&       pawnhatxc,pawspnorb,pawstgylm,prtvol,pspheads,dtsets(idtset)%tfkinfunc,&
+&       pawnhatxc,pawspnorb,pawstgylm,prtvol,pspheads,qphon,dtsets(idtset)%tfkinfunc,&
 &       dtsets(idtset)%typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
      else if( dtsets(idtset)%usepaw==0) then
        if (mpi_enregs(idtset)%me == 0) then
@@ -494,9 +492,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 & natom,nband,nfft,nfftdiel,nfftf,ngfft,ngfftdiel,ngfftf,nimage,&
 & nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optforces,option,optstress,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,&
-& prtvol,pspheads,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
-
- implicit none
+& prtvol,pspheads,qphon,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
 
 !Arguments ------------------------------------
 !scalars
@@ -513,6 +509,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol),ngfft(18),ngfftdiel(18),ngfftf(18)
  integer,intent(in) :: nloalg(3),typat(natom)
+ real(dp),intent(in) :: qphon(3)
  type(pspheader_type) :: pspheads(npsp)
 
 !Local variables-------------------------------
@@ -539,7 +536,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  integer,parameter :: marrays=150,nchain=10
  integer :: fftalgb,histsz,ii,iscf10,jj,l_max,l_size_max,matblk,mblk,mincat,mu
  integer :: my_natom,n_fftgr,narr_fourdp,nbnd_in_blk,ndiel4,ndiel456,ndiel5,ndiel6
- integer :: ngrad,nprocwf,nspgrad,rhoij_nspden
+ integer :: ngrad,nprocwf,nspgrad,qphase_rhoij,rhoij_nspden
  real(dp) :: mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm
  character(len=500) :: message
 ! character(len=1) :: firstchar
@@ -717,6 +714,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
        my_nattyp(jj)=my_nattyp(jj)+1
      end do
    end if
+   qphase_rhoij=merge(2,1,any(qphon(:)>tol8))
  else
 !  Do the allocation to avoid uninitialised variables.
    ABI_ALLOCATE(my_nattyp,(1))
@@ -731,6 +729,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    rhoij_nspden=nspden
    l_size_max=1
    l_max=1
+   qphase_rhoij=1
  end if
 
  n_fftgr=1;iscf10=mod(iscf,10)
@@ -822,8 +821,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    dttyp(20)=4
    if (usepaw==1) then
      do ii=1,ntypat
-       cadd(19)=cadd(19)+histsz*2*my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc  ! %pawrhoij()%rhoijp
-       cadd(20)=cadd(20)+histsz*2*my_nattyp(ii)*(2+lmn2_size(ii))*nspden              ! %pawrhoij()%rhoijselect
+       cadd(19)=cadd(19)+histsz*2*my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*qphase_rhoij*pawcpxocc ! %pawrhoij()%rhoijp
+       cadd(20)=cadd(20)+histsz*2*my_nattyp(ii)*(2+lmn2_size(ii))*nspden ! %pawrhoij()%rhoijselect
      end do
    end if
    if (extrapwf>0) then
@@ -1053,13 +1052,13 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !(6d) and (6e)           in suscep and dielmt, called by vtorho,
 !see (10) and (11) -------------------------------
 
-!(6f)  in pawmkrhoij or symrhoij called by pawmkrho, called by vtorho--------
+!(6f)  in pawmkrhoij or pawrhoij_symrhoij called by pawmkrho, called by vtorho--------
 !only when paralellim over atoms is activated
  dttyp(63)=8
  if((usepaw==1) .and. ((iscf>0) .or. (iscf == -3) .and. mpi_enreg%nproc_atom>1 ))then
    do ii=1,ntypat
-     cadd(63)=cadd(63)+nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc   ! Rhoij_gather and related data
-     cadd(63)=cadd(63)+nattyp(ii)*(2+lmn2_size(ii))    ! Rhoij_gather (rhoijselect, ...)
+     cadd(63)=cadd(63)+nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc*qphase_rhoij ! Rhoij_gather and related data
+     cadd(63)=cadd(63)+nattyp(ii)*(2+lmn2_size(ii)) ! Rhoij_gather (rhoijselect, ...)
    end do
  end if
 
@@ -1377,8 +1376,6 @@ end subroutine memory
 subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 & marrays,mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm,mffmem,&
 & mpw,natom,nchain,nfft,nfftf,occopt,option,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1953,8 +1950,6 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & nkpt,nloalg,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optddk,optphon,option,optstrs,prtvol,useylm,use_gpu_cuda,xclevel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,getcell,idtset,intxc,iout,iprcel,iscf
@@ -2318,8 +2313,6 @@ end subroutine memorf
 subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalch,&
 & ntypat,ntypalch,pspheads)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nimage,npsp,npspalch,ntypalch,ntypat
@@ -2465,8 +2458,6 @@ end subroutine getdim_nloc
 
 subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 
- implicit none
-
 !Arguments ------------------------------------
  integer , intent(inout)  :: mqgrid,mqgriddg
  integer , intent(in)  :: nptsgvec,usepaw
@@ -2585,7 +2576,6 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  use BigDFT_API, only: MemoryEstimator, createWavefunctionsDescriptors, deallocate_lr, &
       & atomic_info, memory_estimation
 #endif
-  implicit none
 
 !Arguments ------------------------------------
   !scalars

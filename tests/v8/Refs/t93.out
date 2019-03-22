@@ -2,7 +2,7 @@
 .Version 8.9.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 28 Apr 2018.
-- ( at 15h37 )
+.Starting date : Mon 12 Nov 2018.
+- ( at 02h08 )
   
 - input  file    -> t93.in
 - output file    -> t93.out
@@ -333,7 +333,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.6800E-17; max=  9.8234E-17
+ Mean square residual over all n,k,spin=   46.800E-18; max=  98.234E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -499,7 +499,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
  14    1.392857E+01    0.000000E+00
  15    1.500000E+01    0.000000E+00
  16    0.000000E+00    3.271587E+00
- 17    0.000000E+00    8.464907E+00
+ 17    0.000000E+00    8.464908E+00
  18    0.000000E+00    1.670879E+01
  19    0.000000E+00    2.979514E+01
  20    0.000000E+00    5.056842E+01
@@ -1477,15 +1477,17 @@ P           mkmem           3
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
+- B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] Optimized norm-conserving Vanderbilt pseudopotentials.
 - D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
 - [3] ABINIT : First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
@@ -1498,6 +1500,7 @@ P           mkmem           3
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
@@ -1510,6 +1513,7 @@ P           mkmem           3
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
@@ -1518,11 +1522,12 @@ P           mkmem           3
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         19.6  wall=         24.3
+- Proc.   0 individual time (sec): cpu=         19.3  wall=         19.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  23 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.6  wall=         24.3
+.Delivered  20 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.3  wall=         19.5

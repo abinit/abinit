@@ -7,7 +7,7 @@
 !!  This module the predures used by cut3d
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
+!! Copyright (C) 2008-2019 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -102,8 +102,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -218,8 +216,6 @@ end subroutine cut3d_hirsh
 !! SOURCE
 
  subroutine cut3d_lineint(gridtt,gridux,griddy,gridmz,nr1,nr2,nr3,nspden,rprimd)
-
- implicit none
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -420,8 +416,6 @@ end subroutine cut3d_lineint
 
 subroutine normalize(v)
 
- implicit none
-
 !Arguments-------------------------------------------------------------
 !arrays
  real(dp),intent(inout) :: v(3)
@@ -482,8 +476,6 @@ end subroutine normalize
 !! SOURCE
 
 subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,rprimd,tau)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -849,8 +841,6 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 
 subroutine cut3d_pointint(gridt,gridu,gridd,gridm,nr1,nr2,nr3,nspden,rprimd)
 
- implicit none
-
 !Arguments--------------------------------------------------------------
 !scalars
  integer,intent(in) :: nr1,nr2,nr3,nspden
@@ -964,8 +954,6 @@ end subroutine cut3d_pointint
 
 subroutine reduce(r,rcart,rprimd)
 
- implicit none
-
 !Arguments-------------------------------------------------------------
 !arrays
  real(dp),intent(in) :: rcart(3),rprimd(3,3)
@@ -1020,8 +1008,6 @@ end subroutine reduce
 !! SOURCE
 
 subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
-
- implicit none
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -1104,8 +1090,6 @@ end subroutine cut3d_rrho
 
 subroutine vdot(x1,x2,x3)
 
- implicit none
-
 !Arguments-------------------------------------------------------------
 !arrays
  real(dp),intent(in) :: x1(3),x2(3)
@@ -1158,8 +1142,6 @@ end subroutine vdot
 !! SOURCE
 
 subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,rprimd,tau)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1746,8 +1728,6 @@ end subroutine cut3d_volumeint
 
 subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npwarr,&
 &  nr1,nr2,nr3,nspinor,nsppol,ntypat,paral_kgb,rprimd,xcart,typat,znucl)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars

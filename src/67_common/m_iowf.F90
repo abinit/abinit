@@ -7,7 +7,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -118,8 +118,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 &                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
 &                nsppol,occ,resid,response,unwff2,&
 &                wfs,wvl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -731,8 +729,6 @@ end subroutine outwf
 
 subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspinor,mcg,&
                       mkmem,eigen,occ,cg,npwarr,kg,mpi_enreg,done)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1363,8 +1359,6 @@ end subroutine cg_ncwrite
 
 subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,mband,nkpt,nsppol
@@ -1451,8 +1445,6 @@ end subroutine ncwrite_eigen1_occ
 !! SOURCE
 
 subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,count_pwblock,gblock)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1547,8 +1539,6 @@ end subroutine kg2seqblocks
 !! SOURCE
 
 subroutine cg2seqblocks(npwtot_k,npw_k,nband,cg_k,gmpi2seq,comm_bandfft,bstart,bcount,my_cgblock)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

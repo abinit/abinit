@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -274,7 +274,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_CHECK(ierr==0, "out of memory in gsc")
    gsc=zero
  end if
- 
+
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then
    !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
@@ -511,7 +511,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    ! Exit loop over inonsc if converged
    if (residk < dtset%tolwfr) then
-     call wrtout(std_out, sjoin("NSCF loop completed after", itoa(inonsc), "iterations", ch10))
+     if (iscf < 0) call wrtout(std_out, sjoin(" NSCF loop completed after", itoa(inonsc), "iterations"))
      exit
    end if
  end do ! End loop over inonsc (NON SELF-CONSISTENT LOOP)

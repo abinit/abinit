@@ -7,7 +7,7 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -132,7 +132,6 @@ contains
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!  initialized= if 0 the initialisation of the gstate run is not yet finished
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
-!!  pawrhoij(natom*usepaw) <type(pawrhoij_type)>= -PAW only- atomic occupancies
 !!  occ(mband*nkpt*nsppol=occupation number for each band (usually 2) at each k point.
 !!  rhog(2,nfftf)=array for Fourier transform of electron density
 !!  rhor(nfftf,nspden)=array for electron density in electrons/bohr**3.
@@ -1619,7 +1618,7 @@ end subroutine prtxfase
 !!  - POSABIN : values of coordinates and velocities for the next time step
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FLambert,MT)
+!! Copyright (C) 1998-2019 ABINIT group (FLambert,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

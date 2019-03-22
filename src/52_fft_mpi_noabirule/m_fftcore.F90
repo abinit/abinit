@@ -9,7 +9,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2019 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,8 +152,6 @@ contains
 
 integer function fftcore_set_mixprec(wp) result(old_wp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: wp
@@ -192,8 +190,6 @@ end function fftcore_set_mixprec
 !! SOURCE
 
 pure function fftalg_isavailable(fftalg) result(ans)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -241,8 +237,6 @@ end function fftalg_isavailable
 
 pure function fftalg_has_mpi(fftalg) result(ans)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg
@@ -285,8 +279,6 @@ end function fftalg_has_mpi
 !! SOURCE
 
 pure function fftalg_for_npfft(nproc_fft) result(fftalg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -341,8 +333,6 @@ end function fftalg_for_npfft
 
 subroutine fftalg_info(fftalg,library,cplex_mode,padding_mode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg
@@ -388,8 +378,6 @@ end subroutine fftalg_info
 
 pure function get_cache_kb()
 
- implicit none
-
 !Local variables-------------------------------
 !scalars
  integer :: get_cache_kb
@@ -429,8 +417,6 @@ end function get_cache_kb
 !! SOURCE
 
 pure subroutine ngfft_seq(ngfft, n123)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -496,8 +482,6 @@ end subroutine ngfft_seq
 !! SOURCE
 
 subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -577,8 +561,6 @@ end subroutine print_ngfft
 !! SOURCE
 
 subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -776,7 +758,6 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 &                ngfftc,use_gpu_cuda,unit) ! optional
 
  use defs_fftdata,  only : mg
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1219,7 +1200,6 @@ end subroutine getng
 
 subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1508,7 +1488,6 @@ end subroutine sphereboundary
 
 subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,shiftg,symm,xnorm)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1904,7 +1883,6 @@ end subroutine sphere
 
 subroutine sphere_fft(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,kg_k,tab_fftwf2_local,nd2proc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2005,7 +1983,6 @@ end subroutine sphere_fft
 
 subroutine sphere_fft1(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,tab_fftwf2_local)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2074,7 +2051,6 @@ end subroutine sphere_fft1
 
 subroutine change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,n2,n3,ndat,from_cg,to_cg)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2130,7 +2106,6 @@ end subroutine change_istwfk
 
 pure subroutine switch(n1dfft,n2,lot,n1,lzt,zt,zw)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,lot,n1,lzt
@@ -2184,7 +2159,6 @@ end subroutine switch
 
 pure subroutine switch_cent(n1dfft,max2,m2,n2,lot,n1,lzt,zt,zw)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,m2,n2,lot,n1,lzt
@@ -2259,7 +2233,6 @@ end subroutine switch_cent
 
 pure subroutine switchreal(includelast,n1dfft,n2,n2eff,lot,n1zt,lzt,zt,zw)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: includelast,n1dfft,n2,n2eff,lot,n1zt,lzt
@@ -2347,7 +2320,6 @@ end subroutine switchreal
 
 pure subroutine switchreal_cent(includelast,n1dfft,max2,n2,lot,n1zt,lzt,zt,zw)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: includelast,n1dfft,max2,n2,lot,n1zt,lzt
@@ -2449,7 +2421,6 @@ end subroutine switchreal_cent
 
 pure subroutine scramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zw,zmpi2)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3
@@ -2498,7 +2469,6 @@ end subroutine scramble
 
 pure subroutine fill(nd1,nd3,lot,n1dfft,n3,zf,zw)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nd1,nd3,lot,n1dfft,n3
@@ -2550,7 +2520,6 @@ end subroutine fill
 
 pure subroutine fill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zf,zw)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: md1,md3,lot,n1dfft,max3,m3,n3
@@ -2615,7 +2584,6 @@ end subroutine fill_cent
 
 pure subroutine unfill(nd1,nd3,lot,n1dfft,n3,zw,zf)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nd1,nd3,lot,n1dfft,n3
@@ -2664,7 +2632,6 @@ end subroutine unfill
 
 pure subroutine unfill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zw,zf)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: md1,md3,lot,n1dfft,max3,m3,n3
@@ -2716,7 +2683,6 @@ end subroutine unfill_cent
 
 pure subroutine unmpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,ioption,zw,zmpi1)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,n1,nd2proc,nd3proc,nproc,ioption
@@ -2796,7 +2762,6 @@ end subroutine unmpiswitch
 
 pure subroutine unmpiswitch_cent(j3,n1dfft,Jp2stf,J2stf,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption,zw,zmpi1)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption
@@ -2897,7 +2862,6 @@ end subroutine unmpiswitch_cent
 
 pure subroutine unscramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zmpi2,zw)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3
@@ -2945,7 +2909,6 @@ end subroutine unscramble
 
 pure subroutine unswitch(n1dfft,n2,lot,n1,lzt,zw,zt)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,lot,n1,lzt
@@ -2993,7 +2956,6 @@ end subroutine unswitch
 
 pure subroutine unswitch_cent(n1dfft,max2,m2,n2,lot,n1,lzt,zw,zt)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,m2,n2,lot,n1,lzt
@@ -3051,7 +3013,6 @@ end subroutine unswitch_cent
 
 pure subroutine unswitchreal(n1dfft,n2,n2eff,lot,n1zt,lzt,zw,zt)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,n2eff,lot,n1zt,lzt
@@ -3108,7 +3069,6 @@ end subroutine unswitchreal
 
 pure subroutine unswitchreal_cent(n1dfft,max2,n2,lot,n1zt,lzt,zw,zt)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,n2,lot,n1zt,lzt
@@ -3176,7 +3136,6 @@ end subroutine unswitchreal_cent
 
 pure subroutine mpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,ioption,zmpi1,zw)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,n1,nd2proc,nd3proc,nproc,ioption
@@ -3269,7 +3228,6 @@ end subroutine mpiswitch
 pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc,&
 &  nd3proc,nproc,ioption,zmpi1,zw,max2,m2,n2)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption
@@ -3387,7 +3345,6 @@ end subroutine mpiswitch_cent
 
 pure subroutine mpifft_fg2dbox(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3439,7 +3396,6 @@ end subroutine mpifft_fg2dbox
 
 pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3490,7 +3446,6 @@ end subroutine mpifft_fg2dbox_dpc
 
 pure subroutine mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3546,7 +3501,6 @@ end subroutine mpifft_dbox2fg
 
 pure subroutine mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3602,7 +3556,6 @@ end subroutine mpifft_dbox2fg_dpc
 
 pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_local,me_fft,workr,cplex,nfft,fofr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3683,7 +3636,6 @@ end subroutine mpifft_dbox2fr
 
 pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_local,me_fft,workr,cplex,nfft,fofr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3760,7 +3712,6 @@ end subroutine mpifft_dbox2fr_dpc
 
 pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3_distrib,ffti3_local,me_fft,workr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3838,7 +3789,6 @@ end subroutine mpifft_fr2dbox
 
 pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3_distrib,ffti3_local,me_fft,workr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3929,7 +3879,6 @@ end subroutine mpifft_fr2dbox_dpc
 
 subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4064,7 +4013,6 @@ end subroutine indfftrisc
 
 subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mpw,npw)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4458,7 +4406,6 @@ end subroutine kpgsph
 
 subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4565,7 +4512,6 @@ end subroutine kpgcount
 
 subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4630,7 +4576,6 @@ end subroutine get_kg
 
 subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4720,7 +4665,6 @@ end subroutine kgindex
 
 pure subroutine addrho(icplexwf,includelast,nd1,nd2,n2,lot,n1dfft,zw,rhopart,weight_r,weight_i)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,includelast,nd1,nd2,n2,lot,n1dfft
@@ -4800,7 +4744,6 @@ end subroutine addrho
 
 subroutine multpot(icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft,pot,zw)
 
- implicit none
 
  !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft
@@ -4919,7 +4862,6 @@ end subroutine multpot
 
 subroutine mpifft_collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_distrib,ffti3_local,rhor_glob,master)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -7,7 +7,7 @@
 !! Procedures used by AIM code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (PCasek,FF,XG)
+!!  Copyright (C) 2008-2019 ABINIT group (PCasek,FF,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -165,8 +165,6 @@ module m_bader
 
  subroutine aim_shutdown()
 
-  implicit none
-
 !Local variables-------------------------------
  integer :: ii
  logical :: is_open
@@ -220,8 +218,6 @@ end subroutine aim_shutdown
 !! SOURCE
 
 subroutine adini(aim_dtset,inpstr,lenstr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -720,8 +716,6 @@ end subroutine adini
 
 subroutine addout(aim_dtset)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(aim_dataset_type),intent(in) :: aim_dtset
@@ -886,8 +880,6 @@ end subroutine addout
 !! SOURCE
 
 subroutine aim_follow(aim_dtset,vv,npmax,srch,iatinit,iposinit,iat,ipos,nstep)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1235,8 +1227,6 @@ end subroutine aim_follow
 
 subroutine consist(aim_dtset,tstngr,tstvpt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tstngr,tstvpt
@@ -1319,8 +1309,6 @@ end subroutine consist
 !! SOURCE
 
 subroutine cpdrv(aim_dtset)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2102,8 +2090,6 @@ end subroutine cpdrv
 
 subroutine critic(aim_dtset,vv,ev,zz,dmax,ires,sort)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sort
@@ -2423,8 +2409,6 @@ end subroutine critic
 
 subroutine ordr(aa,dd,nn,cff)
 
- implicit none
-
 !Arguments ----------------------------
 !scalars
  integer,intent(in) :: cff,nn
@@ -2501,8 +2485,6 @@ end subroutine ordr
 !! SOURCE
 
 subroutine  critics(aim_dtset,inxat,stwo,sthree,sfour,dstmax)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2846,8 +2828,6 @@ end subroutine critics
 
 subroutine defad(aim_dtset)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(aim_dataset_type),intent(out) :: aim_dtset
@@ -2938,8 +2918,6 @@ end subroutine defad
 !! SOURCE
 
 subroutine drvaim(aim_dtset,tcpui,twalli)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3162,8 +3140,6 @@ end subroutine drvaim
 
 subroutine graph(unts,untg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: untg,unts
@@ -3254,8 +3230,6 @@ end subroutine graph
 !! SOURCE
 
 subroutine initaim(aim_dtset,znucl_batom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3649,8 +3623,6 @@ end subroutine initaim
 
 subroutine inpar(instr,lenstr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: lenstr
@@ -3763,8 +3735,6 @@ end subroutine inpar
 
 subroutine inspln(idir,snn,tnn)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: idir,snn,tnn
@@ -3866,8 +3836,6 @@ end subroutine inspln
 !! SOURCE
 
 subroutine integrho(aim_dtset,znucl_batom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4185,8 +4153,6 @@ end subroutine integrho
 
 subroutine integvol()
 
- implicit none
-
 !Arguments ------------------------------------
 
 !Local variables ------------------------------
@@ -4302,8 +4268,6 @@ end subroutine integvol
 
 subroutine onestep(vv,chg,grho,hh,np,npmax,deltar)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npmax
@@ -4392,8 +4356,6 @@ end subroutine onestep
 !! SOURCE
 
 subroutine plint()
-
- implicit none
 
 !Arguments ------------------------------------
 
@@ -4500,8 +4462,6 @@ end subroutine plint
 !! SOURCE
 
 subroutine rsurf(aim_dtset,rr,grho,theta,phi,rr0,iatinit,npmax,srch)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4678,8 +4638,6 @@ end subroutine rsurf
 !! SOURCE
 
 subroutine surf(aim_dtset)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5273,8 +5231,6 @@ end subroutine surf
 
 subroutine vgh_rho(vv,rho,grho,hrho,rdmin,iat,ipos,chs)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: chs
@@ -5813,8 +5769,6 @@ end subroutine vgh_rho
 
 function vnorm(vv,dir)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dir
@@ -5864,8 +5818,6 @@ end function vnorm
 
 function vec_prod(uu,vv)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp) :: vec_prod(3)
@@ -5898,8 +5850,6 @@ end function vec_prod
 !! SOURCE
 
 subroutine mprod(aa,bb,cc)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -5940,8 +5890,6 @@ end subroutine mprod
 !! SOURCE
 
 subroutine bschg1(vv,dir)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5993,8 +5941,6 @@ end subroutine bschg1
 !! SOURCE
 
 subroutine bschg2(aa,dir)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -6,7 +6,7 @@
 !!  Tools for the computation of phonon linewidths
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3851,10 +3851,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! Store DOS per spin channels
  n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
-   call edos_print(edos, unit=ab_out)
+   call edos%print(unit=ab_out)
    path = strcat(dtfil%filnam_ds(4), "_EDOS")
    call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-   call edos_write(edos, path)
+   call edos%write(path)
  end if
 
  ! Find Fermi surface.
@@ -3890,7 +3890,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_A2F.nc"), xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   NCF_CHECK(edos_ncwrite(edos, ncid))
+   NCF_CHECK(edos%ncwrite(ncid))
 
    ! Add eph dimensions.
    ncerr = nctk_def_dims(ncid, [nctkdim_t("nqibz", gams%nqibz), nctkdim_t("natom3", natom3)], defmode=.True.)
@@ -3943,15 +3943,15 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
  end if
 #endif
- call edos_free(edos)
+ call edos%free()
 
  ! Open the DVDB file
- call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+ call dvdb%open_read(ngfftf, xmpi_comm_self)
 
  do_ftv1q = 0
  do iq_ibz=1,gams%nqibz
    qpt = gams%qibz(:,iq_ibz)
-   if (dvdb_findq(dvdb, qpt) == -1) do_ftv1q = do_ftv1q + 1
+   if (dvdb%findq(qpt) == -1) do_ftv1q = do_ftv1q + 1
 
    do spin=1,nsppol
      fs => fstab(spin)
@@ -3964,6 +3964,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      write(std_out,"((a,i0,2a,a,i0))")"For spin: ",spin,", qpt: ",trim(ktoa(qpt)),", number of (k,q) pairs: ",kqcount
    end do
  end do
+
  call wrtout(std_out, " ", do_flush=.True.)
  if (do_ftv1q /= 0) then
    MSG_ERROR(sjoin("Cannot find", itoa(do_ftv1q), "q-points in DVDB. Use eph_task to interpolate DFPT potentials"))
@@ -4109,10 +4110,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! if (psps%usepaw==1.and.iscf_mod>0) then
  !   if (paral_atom) then
  !     ABI_DATATYPE_ALLOCATE(pawrhoij1_unsym,(natom))
- !     cplex_rhoij=max(cplex,dtset%pawcpxocc)
- !     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
+ !     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+ !&                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
  !     call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,nspinor,&
- !       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+ !       dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
  !   else
  !     pawrhoij1_unsym => pawrhoij1
  !     call pawrhoij_init_unpacked(pawrhoij1_unsym)
@@ -4168,13 +4169,13 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    call cwtime(cpu,wall,gflops,"start")
 
    ! Find the index of the q-point in the DVDB.
-   db_iqpt = dvdb_findq(dvdb, qpt)
+   db_iqpt = dvdb%findq(qpt)
 
    if (db_iqpt /= -1) then
      if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found: ",ktoa(qpt)," in DVDB with index ",itoa(db_iqpt)))
      ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
      ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-     call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
+     call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
    else
      MSG_ERROR(sjoin("Could not find q-point:", ktoa(qpt), "in DVDB"))
    end if

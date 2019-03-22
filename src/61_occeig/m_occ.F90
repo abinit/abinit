@@ -7,7 +7,7 @@
 !!  Low-level functions for occupation factors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (XG, AF)
+!!  Copyright (C) 2008-2019 ABINIT group (XG, AF)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -120,8 +120,6 @@ contains
 
 subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 &  nelect,nkpt,nsppol,occ,occopt,option,tphysel,tsmear,unitdos,wtk)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -402,8 +400,6 @@ end subroutine getnel
 
 subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &  nelect,nkpt,nspinor,nsppol,occ,occopt,prtvol,stmbias,tphysel,tsmear,wtk)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -746,8 +742,6 @@ end subroutine newocc
 !! SOURCE
 
 subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphysel,tsmear,tsmearinv,xgrid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1292,8 +1286,6 @@ end subroutine init_occ_ent
 
 subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,rocceig)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nband_k,occopt
@@ -1389,8 +1381,6 @@ end subroutine occeig
 
 elemental real(dp) function occ_fd(ee, kT, mu)
 
- implicit none
-
 !Arguments ------------------------------------
  real(dp),intent(in) :: ee, kT, mu
 
@@ -1446,8 +1436,6 @@ end function occ_fd
 !! SOURCE
 
 elemental real(dp) function occ_be(ee, kT, mu)
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: ee, kT, mu
@@ -1513,8 +1501,6 @@ end function occ_be
 
 subroutine dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
 &  nkpt,nsppol,occopt,prtdos,tphysel,tsmear,unitdos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1654,8 +1640,6 @@ end subroutine dos_hdr_write
 !! SOURCE
 
 subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,occ,transmit_occ)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

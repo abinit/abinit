@@ -9,7 +9,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2018 ABINIT group (MG, YG)
+!! Copyright (C) 2009-2019 ABINIT group (MG, YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,8 @@ module m_bethe_salpeter
  use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
- use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij
+ use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free,&
+&                              pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init
@@ -202,11 +203,11 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp0=0,level=40,ipert0=0,idir0=0,cplex1=1,master=0,option1=1
- integer :: band,spin,ik_ibz,mqmem,iwarn !ii,
+ integer :: band,cplex_rhoij,spin,ik_ibz,mqmem,iwarn
  integer :: has_dijU,has_dijso,gnt_option,iomode
  integer :: ik_bz,mband
  integer :: choice
- integer :: ider !,ierr
+ integer :: ider
  integer :: usexcnhat,nfft_osc,mgfft_osc
  integer :: isym,izero
  integer :: optcut,optgr0,optgr1,optgr2,option,optrad,optrhoij,psp_gencond
@@ -366,8 +367,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,xred)
 
    ABI_DT_MALLOC(KS_Pawrhoij,(Cryst%natom))
-   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
-   call pawrhoij_alloc(KS_Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(KS_Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays ===
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
@@ -415,12 +417,12 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%pawrhoij,KS_Pawrhoij)
 
-   ! Re-symmetrize symrhoij ===
+   ! Re-symmetrize rhoij ===
    ! this call leads to a SIGFAULT, likely some pointer is not initialized correctly
    choice=1; optrhoij=1
-!  call symrhoij(KS_Pawrhoij,KS_Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert0,&
-!  &  Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
-!  &  Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
+!  call pawrhoij_symrhoij(KS_Pawrhoij,KS_Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert0,&
+!  &             Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
+!  &             Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
 
    ! Evaluate form factor of radial part of phi.phj-tphi.tphj ===
    rhoxsp_method=1 ! Arnaud-Alouani
@@ -1103,6 +1105,8 @@ end subroutine bethe_salpeter
 
 subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
 & Cryst,Kmesh,Qmesh,KS_BSt,QP_bst,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,Wvl)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2054,6 +2058,8 @@ end subroutine setup_bse
 
 subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 & Kmesh_dense,Qmesh_dense,KS_BSt_dense,QP_bst_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars

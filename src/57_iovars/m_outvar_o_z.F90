@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -114,8 +114,6 @@ contains
  subroutine outvar_o_z(choice,dtsets,iout,&
 & jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
 & results_out,strimg,timopt)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -857,6 +855,10 @@ contains
 !  End of test to see whether kptopt/=0 for some dataset
  end if
 
+ intarr(1,:)=dtsets(:)%sigma_bsum_range(1)
+ intarr(2,:)=dtsets(:)%sigma_bsum_range(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'sigma_bsum_range','INT',0)
+
  intarr(1,:)=dtsets(:)%sigma_ngkpt(1)
  intarr(2,:)=dtsets(:)%sigma_ngkpt(2)
  intarr(3,:)=dtsets(:)%sigma_ngkpt(3)
@@ -1561,8 +1563,6 @@ contains
 !! SOURCE
 
 subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,results_out,strimg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

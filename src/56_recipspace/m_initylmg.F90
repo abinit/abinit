@@ -8,7 +8,7 @@
 !! over a set of (reciprocal space) (k+G) vectors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2019 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,15 +56,13 @@ contains
 !! over a set of (reciprocal space) (k+G) vectors
 !!
 !! INPUTS
-!!  gprimd(3,3)=dimensional reciprocal space primitive
-!!              translations (b^-1)
+!!  gprimd(3,3)=dimensional reciprocal space primitive translations (b^-1)
 !!  kg(3,mpw)=integer coordinates of G vectors in basis sphere
 !!  kptns(3,nkpt)=k points in terms of reciprocal translations
 !!  mkmem =number of k points treated by this node
 !!  mpi_enreg=information about MPI parallelization
 !!  mpsang=1+maximum angular momentum for nonlocal pseudopotential
-!!  mpw   =maximum number of planewaves in basis sphere
-!!         (large number)
+!!  mpw   =maximum number of planewaves in basis sphere (large number)
 !!  nband(nkpt*nsppol)=number of bands at each k point
 !!  nkpt  =number of k points
 !!  npwarr(nkpt)=array holding npw for each k point
@@ -73,13 +71,11 @@ contains
 !!          1=compute Ylm(K) and dYlm/dKi
 !!          2=compute Ylm(K), dYlm/dKi and d2Ylm/dKidKj
 !!         -1=compute only dYlm/dKi
-!!  rprimd(3,3)=dimensional primitive translations in real space
-!!              (bohr)
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!
 !! OUTPUT
 !!  if (optder>=0)
-!!    ylm(mpw*mkmem,mpsang*mpsang) = real spherical harmonics
-!!    for each G and k point
+!!    ylm(mpw*mkmem,mpsang*mpsang) = real spherical harmonics for each G and k point
 !!  if (optder>=1 or optder==-1)
 !!    ylm_gr(mpw*mkmem,1:3,mpsang*mpsang)= gradients of real
 !!    spherical harmonics wrt (G+k) in reduced coordinates
@@ -109,8 +105,6 @@ contains
 
 subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 &  nband,nkpt,npwarr,nsppol,optder,rprimd,ylm,ylm_gr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

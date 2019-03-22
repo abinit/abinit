@@ -7,7 +7,7 @@
 !!   Read/Write wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -139,8 +139,6 @@ contains
 subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &               nband,nband_disk,npw,nspinor,occ,option,optkg,tim_rwwf,wff)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,headform,icg,ikpt,isppol,mband,mcg,nband,npw
  integer,intent(inout) :: nband_disk
@@ -228,8 +226,6 @@ end subroutine rwwf
 !! SOURCE
 
 subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -320,8 +316,6 @@ end subroutine WffReadSkipK
 
 subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                 nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,headform,icg,ikpt,isppol,mband,mcg,nband,npw
@@ -805,8 +799,6 @@ end subroutine readwf
 
 subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                  nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,icg,ikpt,isppol,mband,mcg,nband,nband_disk,npw,nspinor,option,optkg

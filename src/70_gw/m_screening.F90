@@ -8,7 +8,7 @@
 !!  with the inverse dielectric matrix as well as related methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@ MODULE m_screening
  use m_splines
  use m_abicore
  use m_lebedev
+ use m_spectra
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -56,7 +57,6 @@ MODULE m_screening
  use m_vcoul,           only : vcoul_t
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
- use m_spectra,         only : spectra_t, spectra_init, spectra_free, spectra_repr
  use m_paw_sphharm,     only : ylmc
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
@@ -282,8 +282,6 @@ CONTAINS  !=====================================================================
 
 subroutine em1results_free(Er)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(Epsilonm1_results),intent(inout) :: Er
@@ -344,8 +342,6 @@ end subroutine em1results_free
 !! SOURCE
 
 subroutine em1results_print(Er,unit,prtvol,mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: unit,prtvol
@@ -529,8 +525,6 @@ end subroutine em1results_print
 
 subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,epsm1_qbz)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_bz,nomega,npwc
@@ -656,8 +650,6 @@ end subroutine Epsm1_symmetrizer
 
 subroutine Epsm1_symmetrizer_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_bz,nomega,npwc
@@ -753,8 +745,6 @@ end subroutine Epsm1_symmetrizer_inplace
 !! SOURCE
 
 subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mqmem,npwe_asked,comm
@@ -890,8 +880,6 @@ end subroutine init_Er_from_file
 subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 &                    ikxc_required,option_test,fname_dump,iomode,&
 &                    nfftot,ngfft,comm,fxc_ADA)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1041,11 +1029,11 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ABI_FREE(dummy_lwing)
 
          if (is_qeq0==1) then
-           call spectra_repr(spectra,msg)
+           call spectra%repr(msg)
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
          end if
-         call spectra_free(spectra)
+         call spectra%free()
 
          call write_screening(out_varname,unt_dump,iomode,npwe,Er%nomega,iqibz,epsm1)
        end do
@@ -1117,12 +1105,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        ABI_FREE(dummy_head)
 
        if (is_qeq0==1) then
-         call spectra_repr(spectra,msg)
+         call spectra%repr(msg)
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
        end if
 
-       call spectra_free(spectra)
+       call spectra%free()
      end do
 
      Er%id = id_required
@@ -1173,8 +1161,6 @@ end subroutine mkdump_Er
 !! SOURCE
 
 subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1252,8 +1238,6 @@ end subroutine get_epsm1
 !! SOURCE
 
 subroutine decompose_epsm1(Er,iqibz,eigs)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1423,8 +1407,6 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,chi0_head,&
   chi0_lwing,chi0_uwing,chi0,spectra,comm,&
   fxc_ADA) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1941,8 +1923,6 @@ end subroutine make_epsm1_driver
 
 subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nI,nJ,npwe,dim_wing,my_nqlwl,comm
@@ -2097,8 +2077,6 @@ end subroutine rpa_symepsm1
 
 subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nqlwl,dim_wing,omega,&
 & chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2318,8 +2296,6 @@ end subroutine atddft_symepsm1
 
 subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_uwing,chi0,eps_head,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwe,nomega,n1,n2,comm
@@ -2441,8 +2417,6 @@ end subroutine mkem1_q0
 
 subroutine lebedev_laikov_int()
 
- implicit none
-
 !Arguments ------------------------------------
 
 !Local variables-------------------------------
@@ -2561,8 +2535,6 @@ end subroutine lebedev_laikov_int
 
 function ylmstar_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: cart_vers(3)
@@ -2622,8 +2594,6 @@ end function ylmstar_over_qTq
 
 function ylmstar_wtq_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: cart_vers(3)
@@ -2679,8 +2649,6 @@ end function ylmstar_wtq_over_qTq
 !! SOURCE
 
 elemental function mdielf_bechstedt(eps_inf,qnrm,rhor) result(mdielf)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2738,8 +2706,6 @@ end function mdielf_bechstedt
 !! SOURCE
 
 subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsph,nspden,nfft,ngfft,rhor,which,w_qbz,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2915,8 +2881,6 @@ end subroutine screen_mdielf
 
 type(chi_t) function chi_new(npwe, nomega) result(chi)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: npwe,nomega
 
@@ -2953,8 +2917,6 @@ end function chi_new
 !! SOURCE
 
 subroutine chi_free(chi)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2998,8 +2960,6 @@ end subroutine chi_free
 !! SOURCE
 
 subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0_lwing, chi0_uwing, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3165,8 +3125,6 @@ end subroutine lwl_write
 
 subroutine lwl_init(lwl, path, method, cryst, vcp, npwe, gvec, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm,method,npwe
@@ -3238,8 +3196,6 @@ end subroutine lwl_init
 !! SOURCE
 
 subroutine lwl_free(lwl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

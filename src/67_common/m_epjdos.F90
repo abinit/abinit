@@ -7,7 +7,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
+!!  Copyright (C) 2008-2019 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -169,8 +169,6 @@ contains  !============================================================
 
 type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
@@ -282,8 +280,6 @@ end function epjdos_new
 
 subroutine epjdos_free(self)
 
- implicit none
-
 !Arguments ------------------------------------
  type(epjdos_t),intent(inout) :: self
 
@@ -353,8 +349,6 @@ end subroutine epjdos_free
 !! SOURCE
 
 subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -906,8 +900,6 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
 &  mpw, natsph, typat_extra, mlang_type, npw_k, nspinor, ph3d, prtsphere, rint, rmax,&
 &  rc_ylm, sum_1ll_1atom, sum_1lm_1atom, ucvol, ylm_k, znucl_sph)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwfk,mlang,mpw,natsph,npw_k,nradintmax
@@ -1248,8 +1240,6 @@ end subroutine recip_ylm
 subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 &                       paral_kgb,ph1d,rmax,ucvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwfk,natom,npw_k,paral_kgb
@@ -1444,8 +1434,6 @@ end subroutine dens_in_sph
 
 subroutine sphericaldens(fofg,gnorm,nfft,rmax,sphfofg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -1513,8 +1501,6 @@ end subroutine sphericaldens
 !! SOURCE
 
 subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1750,8 +1736,6 @@ end subroutine prtfatbands
 
 subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1943,8 +1927,6 @@ end subroutine fatbands_ncwrite
 !! SOURCE
 
 subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,collect,mpi_enreg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2421,8 +2403,6 @@ end subroutine partial_dos_fractions
 !! SOURCE
 
 subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

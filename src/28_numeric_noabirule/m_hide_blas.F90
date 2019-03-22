@@ -13,7 +13,7 @@
 !! example CUBLAS routines for GPU computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2018 ABINIT group (MG)
+!! Copyright (C) 1992-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -621,8 +621,6 @@ end subroutine blas_cholesky_ortho_spc
 
 subroutine blas_cholesky_ortho_dpc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: vec_size,nvec
  logical,optional,intent(in) :: use_gemm
@@ -684,8 +682,6 @@ end subroutine blas_cholesky_ortho_dpc
 
 subroutine sqmat_itranspose_sp(n,mat,alpha)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -741,8 +737,6 @@ end subroutine sqmat_itranspose_sp
 !! SOURCE
 
 subroutine sqmat_itranspose_dp(n,mat,alpha)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -800,8 +794,6 @@ end subroutine sqmat_itranspose_dp
 
 subroutine sqmat_itranspose_spc(n,mat,alpha)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -857,8 +849,6 @@ end subroutine sqmat_itranspose_spc
 !! SOURCE
 
 subroutine sqmat_itranspose_dpc(n,mat,alpha)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -916,8 +906,6 @@ end subroutine sqmat_itranspose_dpc
 !! SOURCE
 
 subroutine sqmat_otranspose_sp(n,imat,omat,alpha)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -977,8 +965,6 @@ end subroutine sqmat_otranspose_sp
 
 subroutine sqmat_otranspose_dp(n,imat,omat,alpha)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -1036,8 +1022,6 @@ end subroutine sqmat_otranspose_dp
 !! SOURCE
 
 subroutine sqmat_otranspose_spc(n,imat,omat,alpha)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1097,8 +1081,6 @@ end subroutine sqmat_otranspose_spc
 
 subroutine sqmat_otranspose_dpc(n,imat,omat,alpha)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -1156,8 +1138,6 @@ end subroutine sqmat_otranspose_dpc
 
 subroutine sqmat_iconjgtrans_spc(n,mat,alpha)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -1213,8 +1193,6 @@ end subroutine sqmat_iconjgtrans_spc
 !! SOURCE
 
 subroutine sqmat_iconjgtrans_dpc(n,mat,alpha)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1273,8 +1251,6 @@ end subroutine sqmat_iconjgtrans_dpc
 
 subroutine sqmat_oconjgtrans_spc(n,imat,omat,alpha)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -1332,8 +1308,6 @@ end subroutine sqmat_oconjgtrans_spc
 !! SOURCE
 
 subroutine sqmat_oconjgtrans_dpc(n,imat,omat,alpha)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

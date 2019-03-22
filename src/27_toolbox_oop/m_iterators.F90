@@ -8,7 +8,7 @@
 !!  iteration over the elements of an ensemble e.g. set of transitions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
+!! Copyright (C) 2009-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -241,8 +241,6 @@ end subroutine indices_free
 
 subroutine iter2_alloc(Iter2,sizes,starts)
 
- use defs_basis
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -297,9 +295,6 @@ end subroutine iter2_alloc
 
 subroutine iter2_push(Iter2,i1,i2,list)
 
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2
@@ -346,9 +341,6 @@ end subroutine iter2_push
 !! SOURCE
 
 subroutine iter2_free(Iter2)
-
- use defs_basis
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -415,9 +407,6 @@ end function iter2_len
 
 function iter2_lbound(Iter2,dim)
 
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dim
@@ -447,9 +436,6 @@ end function iter2_lbound
 
 function iter2_ubound(Iter2,dim)
 
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dim
@@ -478,9 +464,6 @@ end function iter2_ubound
 !! SOURCE
 
 function iter2_size(Iter2,dim)
-
- use defs_basis
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -543,8 +526,6 @@ end function iter2_yield
 !! SOURCE
 
 subroutine iter2_print(Iter2,header,unit,mode_paral,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

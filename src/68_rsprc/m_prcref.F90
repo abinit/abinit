@@ -7,7 +7,7 @@
 !!  Routines to precondition residual potential (or density) and forces.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT, PMA)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, MT, PMA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -232,7 +232,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !Local variables-------------------------------
 !scalars
  integer :: coredens_method,cplex,dielop,iatom,ier,ifft,ii,index,ipw1
- integer :: ipw2,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
+ integer :: ipw2,iq,iq0,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
  integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
  real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
  real(dp) :: mixfac
@@ -483,25 +483,31 @@ subroutine prcref(atindx,dielar,dielinv,&
    else
      mixfac=dielar(4);mixfacmag=abs(dielar(7))
    end if
-   if (pawrhoij(1)%cplex==1) then
+   if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
-       do ispden=1,pawrhoij(iatom)%nspden
-         mixfac_eff=mixfac;if (ispden>1) mixfac_eff=mixfacmag
-         do kmix=1,pawrhoij(iatom)%lmnmix_sz
-           index=index+1;klmn=pawrhoij(iatom)%kpawmix(kmix)
-           rhoijrespc(index)=mixfac_eff*pawrhoij(iatom)%rhoijres(klmn,ispden)
+       do iq=1,pawrhoij(iatom)%qphase
+         iq0=merge(0,pawrhoij(iatom)%lmn2_size,iq==1)
+         do ispden=1,pawrhoij(iatom)%nspden
+           mixfac_eff=mixfac;if (ispden>1) mixfac_eff=mixfacmag
+           do kmix=1,pawrhoij(iatom)%lmnmix_sz
+             index=index+1;klmn=iq0+pawrhoij(iatom)%kpawmix(kmix)
+             rhoijrespc(index)=mixfac_eff*pawrhoij(iatom)%rhoijres(klmn,ispden)
+           end do
          end do
        end do
      end do
    else
      index=-1
      do iatom=1,my_natom
-       do ispden=1,pawrhoij(iatom)%nspden
-         mixfac_eff=mixfac;if (ispden>1) mixfac_eff=mixfacmag
-         do kmix=1,pawrhoij(iatom)%lmnmix_sz
-           index=index+2;klmn=2*pawrhoij(iatom)%kpawmix(kmix)-1
-           rhoijrespc(index:index+1)=mixfac_eff*pawrhoij(iatom)%rhoijres(klmn:klmn+1,ispden)
+       do iq=1,pawrhoij(iatom)%qphase
+         iq0=merge(0,2*pawrhoij(iatom)%lmn2_size,iq==1)
+         do ispden=1,pawrhoij(iatom)%nspden
+           mixfac_eff=mixfac;if (ispden>1) mixfac_eff=mixfacmag
+           do kmix=1,pawrhoij(iatom)%lmnmix_sz
+             index=index+2;klmn=iq0+2*pawrhoij(iatom)%kpawmix(kmix)-1
+             rhoijrespc(index:index+1)=mixfac_eff*pawrhoij(iatom)%rhoijres(klmn:klmn+1,ispden)
+           end do
          end do
        end do
      end do
@@ -1120,7 +1126,7 @@ end subroutine prcref
    else
      mixfac=dielar(4);mixfacmag=abs(dielar(7))
    end if
-   if (pawrhoij(1)%cplex==1) then
+   if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
        do ispden=1,pawrhoij(iatom)%nspden
@@ -3036,7 +3042,7 @@ end subroutine cgpr
 !! first bracket the minimum then perform the minimization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

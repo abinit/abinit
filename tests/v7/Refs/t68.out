@@ -2,7 +2,7 @@
 .Version 8.11.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 15 Oct 2018.
-- ( at 22h47 )
+.Starting date : Mon 12 Nov 2018.
+- ( at 02h08 )
   
 - input  file    -> t68.in
 - output file    -> t68.out
@@ -1115,7 +1115,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
   Number of electrons    =    7.9806
 
   QP Band energy    [Ha] =  1.00056854390747E-01
-  QP Hartree energy [Ha] =  8.34030966114610E-01
+  QP Hartree energy [Ha] =  8.34030968900124E-01
 
 --------------------------------------------------------------------------------
 
@@ -1388,8 +1388,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9806
 
-  QP Band energy    [Ha] = -6.35506031307382E-01
-  QP Hartree energy [Ha] =  8.37105737885659E-01
+  QP Band energy    [Ha] = -6.35506037747558E-01
+  QP Hartree energy [Ha] =  8.37105741172823E-01
 
 --------------------------------------------------------------------------------
 
@@ -1662,8 +1662,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9806
 
-  QP Band energy    [Ha] = -6.34022417005111E-01
-  QP Hartree energy [Ha] =  8.37523574021141E-01
+  QP Band energy    [Ha] = -6.34022423163880E-01
+  QP Hartree energy [Ha] =  8.37523577309881E-01
 
 --------------------------------------------------------------------------------
 
@@ -1840,12 +1840,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (   0.002  -0.000) for band index:  8
-.  kptgw no:  2; Maximum DeltaE = (   0.002  -0.000) for band index:  6
-.  kptgw no:  3; Maximum DeltaE = (   0.001  -0.000) for band index:  8
-.  kptgw no:  4; Maximum DeltaE = (   0.002  -0.000) for band index:  4
+.  kptgw no:  1; Maximum DeltaE = (   0.002   0.000) for band index:  8
+.  kptgw no:  2; Maximum DeltaE = (   0.002   0.000) for band index:  6
+.  kptgw no:  3; Maximum DeltaE = (   0.001   0.000) for band index:  8
+.  kptgw no:  4; Maximum DeltaE = (   0.002   0.000) for band index:  4
 .  kptgw no:  5; Maximum DeltaE = (   0.002  -0.000) for band index:  7
-.  kptgw no:  6; Maximum DeltaE = (   0.003   0.000) for band index:  5
+.  kptgw no:  6; Maximum DeltaE = (   0.003  -0.000) for band index:  5
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1936,8 +1936,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9806
 
-  QP Band energy    [Ha] = -6.33763784818158E-01
-  QP Hartree energy [Ha] =  8.37556964040366E-01
+  QP Band energy    [Ha] = -6.33763790987548E-01
+  QP Hartree energy [Ha] =  8.37556967329672E-01
 
 --------------------------------------------------------------------------------
 
@@ -2114,12 +2114,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (   0.000  -0.000) for band index:  8
+.  kptgw no:  1; Maximum DeltaE = (   0.000   0.000) for band index:  8
 .  kptgw no:  2; Maximum DeltaE = (   0.000  -0.000) for band index:  6
 .  kptgw no:  3; Maximum DeltaE = (   0.000  -0.000) for band index:  8
-.  kptgw no:  4; Maximum DeltaE = (   0.000   0.000) for band index:  4
-.  kptgw no:  5; Maximum DeltaE = (   0.000  -0.000) for band index:  7
-.  kptgw no:  6; Maximum DeltaE = (   0.000  -0.000) for band index:  5
+.  kptgw no:  4; Maximum DeltaE = (   0.000  -0.000) for band index:  4
+.  kptgw no:  5; Maximum DeltaE = (   0.000   0.000) for band index:  7
+.  kptgw no:  6; Maximum DeltaE = (   0.000   0.000) for band index:  5
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -2210,8 +2210,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9806
 
-  QP Band energy    [Ha] = -6.33743477643566E-01
-  QP Hartree energy [Ha] =  8.37559975836827E-01
+  QP Band energy    [Ha] = -6.33743483813811E-01
+  QP Hartree energy [Ha] =  8.37559979126188E-01
 
 --------------------------------------------------------------------------------
 
@@ -2388,12 +2388,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (   0.000  -0.000) for band index:  8
-.  kptgw no:  2; Maximum DeltaE = (   0.000  -0.000) for band index:  6
+.  kptgw no:  1; Maximum DeltaE = (   0.000   0.000) for band index:  8
+.  kptgw no:  2; Maximum DeltaE = (   0.000   0.000) for band index:  6
 .  kptgw no:  3; Maximum DeltaE = (   0.000  -0.000) for band index:  4
 .  kptgw no:  4; Maximum DeltaE = (   0.000  -0.000) for band index:  4
-.  kptgw no:  5; Maximum DeltaE = (   0.000  -0.000) for band index:  7
-.  kptgw no:  6; Maximum DeltaE = (   0.000  -0.000) for band index:  5
+.  kptgw no:  5; Maximum DeltaE = (   0.000   0.000) for band index:  7
+.  kptgw no:  6; Maximum DeltaE = (   0.000   0.000) for band index:  5
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -2457,8 +2457,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  ETOT  3  -11.738804105678    -1.565E-06 5.751E-08 5.230E-06
  ETOT  4  -11.738804142771    -3.709E-08 5.708E-10 5.823E-08
  ETOT  5  -11.738804143013    -2.426E-10 8.199E-12 1.301E-09
- ETOT  6  -11.738804143017    -3.489E-12 1.288E-13 9.697E-11
- ETOT  7  -11.738804143017    -2.132E-14 1.532E-14 1.355E-12
+ ETOT  6  -11.738804143017    -3.487E-12 1.288E-13 9.697E-11
+ ETOT  7  -11.738804143017    -2.309E-14 1.532E-14 1.355E-12
  ETOT  8  -11.738804143017     4.619E-14 9.919E-16 6.741E-15
  ETOT  9  -11.738804143017    -1.421E-14 7.472E-17 2.488E-16
 
@@ -3286,8 +3286,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9806
 
-  QP Band energy    [Ha] = -6.33741644427315E-01
-  QP Hartree energy [Ha] =  8.37560257682565E-01
+  QP Band energy    [Ha] = -6.33741650597668E-01
+  QP Hartree energy [Ha] =  8.37560260971923E-01
 
 --------------------------------------------------------------------------------
 
@@ -3441,7 +3441,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
  k =    0.000   0.000   0.000
  Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1   -12.643   -14.784   -16.908     2.154   -25.978     8.952     0.727    -0.375   -17.582     1.480   -15.428   -14.877
+    1   -12.643   -14.784   -16.908     2.154   -25.979     8.952     0.727    -0.375   -17.582     1.480   -15.428   -14.877
     2    10.782   -16.736     9.494    27.520   -19.326     2.904     0.870    -0.150   -16.631     1.395    10.889    11.086
     3    10.782   -16.736     9.494    27.520   -19.324     2.891     0.870    -0.150   -16.641     1.385    10.879    11.086
     4    10.782   -16.736     9.494    27.520   -19.324     2.891     0.870    -0.150   -16.641     1.385    10.879    11.097

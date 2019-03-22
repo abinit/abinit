@@ -7,7 +7,7 @@
 !! module for excitonic hamiltonian for Haydock
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2019 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,8 +51,8 @@ MODULE m_hexc
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
- use m_bseinterp,            only : interpolator_t, interpolator_init, interpolator_normalize, &
-&                    interpolator_free, int_alloc_work, int_free_work
+ use m_bseinterp,         only : interpolator_t, interpolator_init, interpolator_normalize, &
+&                                interpolator_free, int_alloc_work, int_free_work
 
  implicit none
 
