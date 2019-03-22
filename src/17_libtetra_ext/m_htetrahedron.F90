@@ -93,10 +93,10 @@ type, public :: t_htetrahedron
 
 end type t_htetrahedron
 
-public :: htetra_init               ! Initialize the object
-public :: htetra_free               ! Free memory.
-public :: htetra_get_onewk          ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
-public :: htetra_get_onewk_wvals    ! Similar to tetra_get_onewk_wvalsa but reveives arbitrary list of frequency points.
+public :: htetra_init            ! Initialize the object
+public :: htetra_free            ! Free memory.
+public :: htetra_get_onewk       ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
+public :: htetra_get_onewk_wvals ! Similar to tetra_get_onewk_wvalsa but receives arbitrary list of frequency points.
 !!***
 
 contains
@@ -122,6 +122,8 @@ contains
 subroutine htetra_free(tetra)
 
  type(t_htetrahedron), intent(inout) :: tetra
+ ABI_SFREE(tetra%mapping_ibz)
+ ABI_SFREE(tetra%mapping_bz)
 
 end subroutine htetra_free
 !!***
@@ -144,11 +146,8 @@ end subroutine htetra_free
 !!  comm= MPI communicator
 !!
 !! OUTPUT
-!!  tetra%tetra_full(4,2,ntetra)=for each tetrahedron,
-!!     the different instances of the tetrahedron (fullbz kpoints)
-!!  tetra%tetra_mult(ntetra) = store multiplicity of each irred tetrahedron
-!!  tetra%tetra_wrap(3,4,ntetra) = store flag to wrap tetrahedron summit into IBZ
-!!  tetra%ntetra = final number of irred tetra (dimensions of tetra_* remain larger)
+!!  tetra%mapping_ibz(4,24,nkibz)=for each k-point, the indexes in the IBZ
+!!  tetra%mapping_bz(4,24,nkibz)= for each k-point, the indexes in the BZ
 !!  tetra%vv = tetrahedron volume divided by full BZ volume
 !!
 !! PARENTS
@@ -173,21 +172,14 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
 !Local variables-------------------------------
 !scalars
- integer :: ialltetra,ikpt2,ikpt_full,isummit,itetra,jalltetra,jsummit
- integer :: ii,jj,maxibz,ikibz,my_rank, nprocs
- integer :: symrankkpt,mtetra,itmp,ntetra_irred
- real(dp) :: shift1,shift2,shift3, rcvol,hashfactor
- !real :: cpu_start, cpu_stop
  type(kptrank_type) :: kptrank_t
+ integer :: ikpt2,isummit,itetra
+ integer :: ikibz,my_rank,nprocs
+ integer :: symrankkpt
+ real(dp) :: rcvol
 !arrays
- integer :: ind_ibz(4), tetra_shifts(3,4,24)  ! 3 dimensions, 4 summits, and 24 tetrahedra / kpoint box
+ integer :: tetra_shifts(3,4,24)  ! 3 dimensions, 4 summits, and 24 tetrahedra / kpoint box
  real(dp)  :: k1(3),k2(3),k3(3)
- integer,allocatable :: tetra_full_(:,:,:)
- integer,allocatable :: tetra_mult_(:)
- integer,allocatable :: tetra_wrap_(:,:,:)
- integer, allocatable :: reforder(:)
- integer, allocatable :: irred_itetra(:)
- real(dp), allocatable :: tetra_hash(:)
 
 ! *********************************************************************
 
@@ -396,18 +388,16 @@ pure subroutine get_onetetra_new_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr
  real(dp),intent(in)  :: eigen_1tetra(4)
 
 !Local variables-------------------------------
- integer :: ieps,nn1,nn2,nn3,nn4
+ integer :: ieps
  real(dp) :: cc,cc1,cc2,cc3
- real(dp) :: dcc1de,dcc2de,dcc3de,dccde,deltaene,eps
+ real(dp) :: dcc1de,dcc2de,dcc3de,dccde,eps
  real(dp) :: e21,e31,e32,e41,e42,e43
- real(dp) :: gau_prefactor,gau_width,gau_width2,gval
  real(dp) :: inv_e32,inv_e41,inv_e42,inv_e43,inv_e21,inv_e31
  real(dp) :: deleps1,deleps2,deleps3,deleps4
  real(dp) :: e1,e2,e3,e4
  real(dp) :: invepsum, cc_pre, dccde_pre
  real(dp) :: cc1_pre, cc2_pre, cc3_pre
- real(dp) :: cc_tmp, dccde_tmp
- real(dp) :: dcc1de_pre, dcc2de_pre, dcc3de_pre
+ real(dp) :: dccde_tmp
  real(dp) :: bcorr_fact,volconst
 
 ! *********************************************************************
@@ -980,13 +970,11 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ikpt,itetra,isummit
- real(dp) :: deltaene
+ integer :: itetra,isummit
 !arrays
  integer :: ind_ibz(4)
  real(dp) :: eigen_1tetra(4)
  real(dp) :: tweight_tmp(nene,4),dtweightde_tmp(nene,4)
- real(dp) :: energies(nene)
 
 ! *********************************************************************
 
@@ -1002,7 +990,8 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,&
    end do
 
    ! Sort energies before calling get_onetetra_
-   call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
+   !call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
+   call sort_4tetra(eigen_1tetra, ind_ibz)
    call get_onetetra_(tetra, eigen_1tetra, enemin, enemax, max_occ, nene, bcorr, tweight_tmp, dtweightde_tmp)
 
    ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
@@ -1034,8 +1023,6 @@ end subroutine htetra_get_onewk
 !! nibz=number of irreducible kpoints
 !! wvals(nw)=Frequency points.
 !! eigen_ibz(nkibz)=eigenenergies for each k point
-!! [wtol]: If present, frequency points that differ by less that wtol are treated as equivalent.
-!!  and the tetrahedron integration is performed only once per frequency point.
 !!
 !! OUTPUT
 !!  weights(nw,2) = integration weights for
@@ -1062,12 +1049,9 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
 
 !Local variables-------------------------------
 !scalars
- integer :: itetra,isummit,jj,iw,ie,ikpt
- logical :: samew
- real(dp),parameter :: max_occ1 = one
- real(dp) :: enemin, enemax
+ integer :: itetra,isummit
 !arrays
- integer :: ind_ibz(4)
+ integer  :: ind_ibz(4)
  real(dp) :: eigen_1tetra(4)
  real(dp) :: tweight_tmp(4,nw),dtweightde_tmp(4,nw)
 
@@ -1085,7 +1069,8 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
    end do
 
    ! Sort energies before calling get_onetetra_
-   call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
+   !call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
+   call sort_4tetra(eigen_1tetra, ind_ibz)
    call get_onetetra_new_(tetra, eigen_1tetra, wvals, nw, max_occ, bcorr, tweight_tmp, dtweightde_tmp)
 
    ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
@@ -1188,6 +1173,99 @@ subroutine sort_tetra(n,list,iperm,tol)
  enddo ! End infinite do-loop
 
 end subroutine sort_tetra
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_htetrahedron/sort_4tetra
+!! NAME
+!!  sort_4tetra
+!!
+!! FUNCTION
+!!  Sort double precision array list(4) into ascending numerical order
+!!  while making corresponding rearrangement of the integer
+!!  array iperm.
+!!
+!!  Taken from:
+!!  https://stackoverflow.com/questions/6145364/sort-4-number-with-few-comparisons
+!!
+!! INPUTS
+!!  list(4) intent(inout) list of double precision numbers to be sorted
+!!  perm(4) intent(inout) iperm(i)=i (very important)
+!!
+!! OUTPUT
+!!  list(4) sorted list
+!!  perm(4) index of permutation given the right ascending order
+!!
+!! PARENTS
+!!      m_htetrahedron
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+pure subroutine sort_4tetra(list,perm)
+
+ integer,  intent(inout) :: perm(4)
+ real(dp), intent(inout) :: list(4)
+
+!Local variables-------------------------------
+ integer :: ia,ib,ic,id
+ integer :: ilow1,ilow2,ihigh1,ihigh2
+ integer :: ilowest,ihighest
+ integer :: imiddle1,imiddle2
+ real(dp) :: va,vb,vc,vd
+ real(dp) :: vlow1,vlow2,vhigh1,vhigh2
+ real(dp) :: vlowest,vhighest
+ real(dp) :: vmiddle1,vmiddle2
+
+ va = list(1); ia = perm(1)
+ vb = list(2); ib = perm(2)
+ vc = list(3); ic = perm(3)
+ vd = list(4); id = perm(4)
+
+ if (va < vb) then
+     vlow1 = va; vhigh1 = vb
+     ilow1 = ia; ihigh1 = ib
+ else
+     vlow1 = vb; vhigh1 = va
+     ilow1 = ib; ihigh1 = ia
+ endif
+
+ if (vc < vd) then
+     vlow2 = vc; vhigh2 = vd
+     ilow2 = ic; ihigh2 = id
+ else
+     vlow2 = vd; vhigh2 = vc
+     ilow2 = id; ihigh2 = ic
+ endif
+
+ if (vlow1 < vlow2) then
+     vlowest  = vlow1; vmiddle1 = vlow2
+     ilowest  = ilow1; imiddle1 = ilow2
+ else
+     vlowest  = vlow2; vmiddle1 = vlow1
+     ilowest  = ilow2; imiddle1 = ilow1
+ endif
+
+ if (vhigh1 > vhigh2) then
+     vhighest = vhigh1; vmiddle2 = vhigh2
+     ihighest = ihigh1; imiddle2 = ihigh2
+ else
+     vhighest = vhigh2; vmiddle2 = vhigh1
+     ihighest = ihigh2; imiddle2 = ihigh1
+ endif
+
+ if (vmiddle1 < vmiddle2) then
+     list = [vlowest,vmiddle1,vmiddle2,vhighest]
+     perm = [ilowest,imiddle1,imiddle2,ihighest]
+ else
+     list = [vlowest,vmiddle2,vmiddle1,vhighest]
+     perm = [ilowest,imiddle2,imiddle1,ihighest]
+ endif
+
+end subroutine sort_4tetra
 !!***
 
 !----------------------------------------------------------------------
