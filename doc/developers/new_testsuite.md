@@ -357,3 +357,60 @@ shell like interface where the user can move around the tree of the
 configuration file, seeing what constraints define the test. It also provide
 documentation about constraints and parameters using the show command. Run
 `~abinit/tests/testtools.py explore` to use it.
+
+## Extending the test suite
+
+### Entry points
+There are three main entry points of growing complexity in this system.
+
+The first is the yaml file configuration intended to all Abinit developers. It
+does not expect any Python knowledges, but only comprehension of the conventions
+for writing a test. Being fully declarative (no logic) it should be quiet easy
+to learn from existing examples.
+
+The second is the file *~abinit/tests/pymods/yaml_tests/conf_parser.py*. It
+contains declarations of the available constraints and parameters. A basic
+python understanding is required to modify that file. Comments en docstring
+should help grasping this file.
+
+The third is the file *~abinit/tests/pymods/yaml_tests/structures.py*. It
+defines the structures used by YAML parser when reaching a tag (starting with !)
+of in some cases when reaching a given pattern (__undef__ for example). Even if
+the the abstraction layer on top of _yaml_ module should help, it is better to
+have a good understanding of more "advanced" python concept like _inheritance_
+_decorators_, _classmethod_...
+
+### Code structure
+
+As long as possible, it is better to include any extensions to the existing code
+in these three entry points to keep the system consistent. However this system
+will eventually prove to be limited in some way. Hence here is the general
+structure of the system.
+
+The whole system consists in three main parts:
+- *~abinit/tests/pymods/fldiff.py* is the interface between the yaml specific
+  tools and the legacy test suite tools. It implement the legacy algorithm and
+  the creation of the final report.
+- *~abinit/tests/pymods/data_extractor.py*,
+  *~abinit/tests/pymods/yaml_tools/__init__.py* and
+  *~abinit/tests/pymods/yaml_tools/structures.py* constitute the Abinit output
+  parser. *data_extractor.py* identify and extract the YAML documents from the
+  source, *__init__.py* provide generic tools base on pyyaml to parse the
+  documents and *structures.py* provide the classes that are used by YAML to
+  handle tags. *~abinit/tests/pymods/yaml_tools/register_tag.py* define the
+  abstraction layer used to simplify the code in *structures.py*. It directly
+  deal with PyYaml black magic.
+- the other files in *~abinit/tests/pymods/yaml_tools* are dedicated to the
+  testing procedure. *meta_conf_parser.py* provide the tools to read an
+  interpret the YAML configuration file, namely __ConfParser__ the main parsing
+  class, __ConfTree__ the tree configuration "low-level" interface (only handle
+  a single tree, no access to the inherited properties, etc...) and __Constraint__
+  the representation of a specific test in the tree.  *conf_parser.py* use
+  __ConfParser__ to register actuals constraints and parameters. It is the place
+  to define actual tests. *driver_test_conf.py* define the high level access to
+  the configuration, handling several trees, applying filters etc. Finally
+  *tester.py* is the main test driver. It browse the data tree and use the
+  configuration to run tests on Abinit output. It produces an __Issue__ list that
+  will be used by *fldiff.py* to produce the report.
+ 
+
