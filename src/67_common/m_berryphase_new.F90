@@ -996,10 +996,19 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
            if ((det_inv_smat == 10).or.(det_inv_smat == 11)) then
 
              if (sqrt(dtm_k(1)*dtm_k(1) + dtm_k(2)*dtm_k(2)) < tol12) then
+               ! EB: the MSG_BUG has been replaced here by what is done in 67_common/m_cgwf.F90
+               ! This avoid the code to stop for phonons under E-field too.
+               ! TODO: Since the same is done in m_cgwf.F90 and in m_berryphase_new.F90,
+               ! rationalization should be done with one single module.
                write(message,'(a,i5,a,a,a)')&
 &               '  For k-point #',ikpt1,',',ch10,&
-&               '  the determinant of the overlap matrix is found to be 0.'
-               MSG_BUG(message)
+&               '  the determinant of the overlap matrix is found to be 0. Fixing...'
+                ! Try this:
+                write(std_out,*)message,dtm_k(1:2)
+                if(abs(dtm_k(1))<=1d-12)dtm_k(1)=1d-12
+                if(abs(dtm_k(2))<=1d-12)dtm_k(2)=1d-12
+                write(std_out,*)' Changing to:',dtm_k(1:2)
+!               MSG_BUG(message)
              end if
 
              dtm_mult(1,ikpt1+(isppol-1)*dtefield%fnkpt,istep) = dtm_k(1)
