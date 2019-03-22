@@ -21,11 +21,11 @@ __Current situation__
 In its current state the ABINIT testing system is based on inputs files and
 associated reference output files.  A test consist in comparing the reference
 file with the output file of a fresh run in a pretty linear way, only making
-difference between floating point numbers and other strings.
+difference between floating-point numbers and other strings.
 
-This approach is very strict because it compare every single quantity in the
+This approach is very strict because it compares every single quantity in the
 main output file and report each time a difference exceed a given tolerance.
-Moreover the line number (and therefor the number of iterations in every loops
+Moreover, the line number (and therefor the number of iterations in every loops
 printing in the output file) have to be exactly the same to allow the
 comparison to end properly and mark the test as succeeded.
 
@@ -39,7 +39,7 @@ __Solution concepts__
 The proposal of this project is to allow stricter tests on pertinent
 quantities, ignoring the rest. This can be achieved by creating tests
 specialized for given physical quantities, taking in account there properties
-(Newton's Law, energy conservation, well known equations...).
+(Newton's Law, energy conservation, well-known equations...).
 
 Of course all these tests would have to be designed nearly independently for
 every interesting quantities and that is why this project should focus on
@@ -53,7 +53,7 @@ participation of the ABINIT community.
 
 ## Proof of concept implementation
 
-The output of data should use a machine readable format, preferably human
+The output of data should use a machine-readable format, preferably human
 readable but not necessarily.  This format could be YAML which is already used
 in a few situations in ABINIT, JSON (for its great support) or NetCDF (already
 used in Abipy).  Post processing tools may be available like plotting and
@@ -74,8 +74,8 @@ On the Fortran side:
   because in the practical case the O(n) cost of finding a key is less
   problematic than the overhead in memory usage of hash tables because their
   will never be a lot of elements in the table.  The pair list can dynamically
-  hold either real of integer values. It implement the basic getters and
-  setters and an iterator system allowing to loop over the key-value pairs
+  hold either real of integer values. It implements the basic getters and
+  setters and an iterator system to allow looping over the key-value pairs
   easily in Fortran.
 - a module written in Fortran provides tools to manipulate variable length
   strings with a file like interface.
@@ -104,7 +104,7 @@ On the python side:
   These classes may be used as examples for the creation of further tags.
 - A parser for test configuration have been added and all facilities to do
   tests are in place.
-- A command line tool testtools.py allow to do different manual actions (see
+- A command line tool testtools.py to allow doing different manual actions (see
   Test CLI)
 
 
@@ -112,60 +112,60 @@ On the python side:
 
 ### Declaration from ABINIT input file
 
-ABINIT input files for tests already embed informations for the test suite in a
+ABINIT input files for tests already embed information for the test suite in a
 specific TEST\_INFO section at the end of the file. This section is structured
 with a INI like syntax (the syntax define by the config parser module of
-Python).  The introduction of YAML based test will be done with two
-modifications to the current test specification:
+Python). The introduction of YAML based test will be done with two modifications
+to the current test specification:
 
 - the *files\_to\_test* option will hold a new optional argument *use_yaml*
   that will hold one of "yes" (default, use YAML based test), "no" (do not use
   YAML test) or "only" (use YAML based test but not legacy fldiff algorithm)
 - a new section *[yaml_test]* will optionally be added with two options: *test*
-  whom value is an embed test specification and *file* which would be a path to
+  whom value is an embedded test specification and *file* which would be a path to
   the file containing the test specification
 
 ### Test specification syntax
 
-The test specification will also use YAML syntax. It use three basic concepts:
+The test specification will also use YAML syntax. It uses three basic concepts:
 
 - _constraint_ is an actual check of the data
 - _parameter_ is an arbitrary value passed to some constraint and that can
-  modify there behaviour
+  modify there behavior
 - _specialization_ is a way to override already defines _constraints_ and
   _parameters_ for a specific node of the data tree (and its children)
 
-The test config file consists of a single YAML document structured as a
+The test configuration file consists of a single YAML document structured as a
 mapping. Each element of the mapping can be a constraint, a parameter of a
 specialization. The distinction is made by looking at the list of known
 parameters and constraints. The value of a parameter or a constraint depend on
 its definition. The value of a specialization is itself a mapping filled with
 parameters, constraints and specialization.
 
-The first level of specialisation match the documents label value from tested
-files.  The next levels match the different attributes of the document.
+The first level of specialization match the documents label value from tested
+files. The next levels match the different attributes of the document.
 
 To get the list of constraints and parameters run the program
 `~abinit/tests/testtools.py explore` and type `show *`. You can then type for
-example `show tol_eq` to learn more about a specific constraints or parameter.
+example `show tol_eq` to learn more about a specific constraint or parameter.
 
-Constraints and parameters have several properties that define their behaviour.
+Constraints and parameters have several properties that define their behavior.
 Most of the time constraints and parameters and apply to all children level,
 they are inherited, though some of them apply only at the level where they are
-define. Constraints can have a list of parameters they use. If these parameters
+defined. Constraints can have a list of parameters they use. If these parameters
 are not available at the current level (they are not defined in any higher
-level or they cannot be inherited) the default value of the parameter is used.
+level, or they cannot be inherited) the default value of the parameter is used.
 Constraints can be mutually exclusive which mean that when a constraint is
 defined, all constraints define in higher level this one excludes are hidden to
 the current level and its children.
 
 Here is an example of a possible file:
 ```yaml
-Etot:  # this define rules for the document Etot
+Etot:  # this defines rules for the document Etot
     tol: 1.0e-3  # this say that for all numerical values encountered in
                  # the document Etot we will check a tolerance of 1.0e-3
-                 # both on absolute an relative differences
-    Kinetic energy:  # this override the tol constraints for the Kinetic enrgy
+                 # both on absolute a relative differences
+    Kinetic energy:  # this override the tol constraints for the Kinetic energy
                      # attribute
         tol: 1.0e-10
 
@@ -194,13 +194,13 @@ results_gs:
         tol: 1.0e-8
 ```
 
-In some cases it is important to define different behaviour depending on the
+In some cases it is important to define different behavior depending on the
 state of iterations (dtset, image...).  This is possible thanks to a tool
 called __filters__. Filters allow user to add special constraints and
 parameters when treating documents matching a given set of dtset, image etc. To
-define a filter user use the special node _filters_, each children of this node
+define a filter user use the special node _filters_, each child of this node
 is a filter.  The label of the child define the name of the filter and its
-children define the set it match. See the example below use two filters that
+children define the set it matches. See the example below use two filters that
 simply match one specific dataset.
 
 ```yaml
@@ -229,7 +229,7 @@ time. For each iterator a set of integers can be defined with three methods:
   included) of the integer interval If "from" is omitted the default is 1. If
   "to" is omitted the default is no upper boundary.
 
-Several filters can be used for the same document if they overlap. However it
+Several filters can be used for the same document if they overlap. However, it
 is fundamental that an order of specificity can be determined which means that
 overlapping filters must absolutely be included in each other. Though the first
 example below is fine because _f2_ is included in _f1_ but the second example
@@ -271,10 +271,10 @@ filters:
 ```
 
 When a test is defined, the default tree is overridden by the user defined
-tree. When a filtered tree is used it override the less specific tree. As you
-can see the overriding process is used everywhere. Though it is important to
-know how it work. By default only what is explicitly specified is overridden
-which means that if a constraints is defined at a deeper level on the default
+tree. When a filtered tree is used it overrides the less specific tree. As you
+can see, the overriding process is used everywhere. Though, it is important to
+know how it works. By default, only what is explicitly specified is overridden
+which means that if a constraint is defined at a deeper level on the default
 tree than what is done on the new tree, the original constraints will be kept.
 For example let `f1`  and `f2` two filters such that `f2` is included in `f1`.
 ```yaml
@@ -304,14 +304,14 @@ used will be the following:
 ```yaml
 results_gs:
     tol_abs: 1.0e-6
-    tol_rel: 1.0e-7  # this have been appended without modifying anything else
+    tol_rel: 1.0e-7  # this has been appended without modifying anything else
     convergence:
         ceil: 1.0e-7  # this one have been overridden
         diffor:
             1.0e-4  # this one have been kept
 ```
 
-If this is not the behaviour you need you can you the "hard reset marker".
+If this is not the behavior you need, you can you the "hard reset marker".
 Append `!` to the name of the specialization you want to override to completely
 replace it. Let the `f2` tree be :
 ```yaml
@@ -336,25 +336,25 @@ from other trees and what is overridden.
 ## Test tools
 
 A command line tool `~abinit/tests/testtools.py` provide tools to work on
-writing tests.  It provide help if run without argument.  The available sub
+writing tests.  It provides help if run without argument.  The available sub
 commands are described here.
 
 ### Diff
 
-The __diff__ subcommand provide a command line interface to the fldiff.py
+The __diff__ sub-command provide a command line interface to the fldiff.py
 module. It may be useful to compare output and reference file without running
 ABINIT each time like `runtest.py` would do.
 
-It allow the user to provide the same parameters that are passed by the
+It allows the user to provide the same parameters that are passed by the
 testsuite.py when runtest.py is used.
 
 Use `~abinit/tests/testtools.py diff --help` for more informations.
 
 ### Explore
 
-This tool provide is helpful to explore a test configuration file. It provide a
+This tool provides is helpful to explore a test configuration file. It provides a
 shell like interface where the user can move around the tree of the
-configuration file, seeing what constraints define the test. It also provide
+configuration file, seeing what constraints define the test. It also provides
 documentation about constraints and parameters using the show command. Run
 `~abinit/tests/testtools.py explore` to use it.
 
@@ -365,31 +365,31 @@ There are three main entry points of growing complexity in this system.
 
 The first is the yaml file configuration intended to all Abinit developers. It
 does not expect any Python knowledges, but only comprehension of the conventions
-for writing a test. Being fully declarative (no logic) it should be quiet easy
+for writing a test. Being fully declarative (no logic) it should be quite easy
 to learn from existing examples.
 
 The second is the file *~abinit/tests/pymods/yaml_tests/conf_parser.py*. It
 contains declarations of the available constraints and parameters. A basic
 python understanding is required to modify that file. Comments en docstring
-should help grasping this file.
+should help to grasp this file.
 
 The third is the file *~abinit/tests/pymods/yaml_tests/structures.py*. It
-defines the structures used by YAML parser when reaching a tag (starting with !)
-of in some cases when reaching a given pattern (__undef__ for example). Even if
-the the abstraction layer on top of _yaml_ module should help, it is better to
+defines the structures used by YAML parser when reaching a tag (starting with
+!), or in some cases when reaching a given pattern (__undef__ for example). Even
+if the abstraction layer on top of _yaml_ module should help, it is better to
 have a good understanding of more "advanced" python concept like _inheritance_
 _decorators_, _classmethod_...
 
 ### Code structure
 
 As long as possible, it is better to include any extensions to the existing code
-in these three entry points to keep the system consistent. However this system
-will eventually prove to be limited in some way. Hence here is the general
+in these three entry points to keep the system consistent. However, this system
+will eventually prove to be limited in some way. Hence, here is the general
 structure of the system.
 
 The whole system consists in three main parts:
 - *~abinit/tests/pymods/fldiff.py* is the interface between the yaml specific
-  tools and the legacy test suite tools. It implement the legacy algorithm and
+  tools and the legacy test suite tools. It implements the legacy algorithm and
   the creation of the final report.
 - *~abinit/tests/pymods/data_extractor.py*,
   *~abinit/tests/pymods/yaml_tools/__init__.py* and
@@ -399,17 +399,17 @@ The whole system consists in three main parts:
   documents and *structures.py* provide the classes that are used by YAML to
   handle tags. *~abinit/tests/pymods/yaml_tools/register_tag.py* define the
   abstraction layer used to simplify the code in *structures.py*. It directly
-  deal with PyYaml black magic.
+  deals with PyYaml black magic.
 - the other files in *~abinit/tests/pymods/yaml_tools* are dedicated to the
-  testing procedure. *meta_conf_parser.py* provide the tools to read an
+  testing procedure. *meta_conf_parser.py* provide the tools to read and
   interpret the YAML configuration file, namely __ConfParser__ the main parsing
   class, __ConfTree__ the tree configuration "low-level" interface (only handle
   a single tree, no access to the inherited properties, etc...) and __Constraint__
   the representation of a specific test in the tree.  *conf_parser.py* use
   __ConfParser__ to register actuals constraints and parameters. It is the place
   to define actual tests. *driver_test_conf.py* define the high level access to
-  the configuration, handling several trees, applying filters etc. Finally
-  *tester.py* is the main test driver. It browse the data tree and use the
+  the configuration, handling several trees, applying filters etc. Finally,
+  *tester.py* is the main test driver. It browses the data tree and use the
   configuration to run tests on Abinit output. It produces an __Issue__ list that
   will be used by *fldiff.py* to produce the report.
  
