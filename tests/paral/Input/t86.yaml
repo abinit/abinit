@@ -22,6 +22,7 @@ dmft:
                 ignore: true
         fermie:
             tol_abs: 1.0e-7
+            tol_rel: 1.0e-8
         stress tensor:
             ignore: true
     Etot:
