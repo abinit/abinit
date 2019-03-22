@@ -36,7 +36,6 @@ module m_htetrahedron
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
  use m_kptrank
- use m_numeric_tools
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -82,6 +81,9 @@ type, public :: t_htetrahedron
   real(dp) :: klatt(3, 3)
   ! reciprocal of lattice vectors for full kpoint grid
 
+  real(dp),allocatable :: ibz_weights(:)
+  ! weights for integration
+
   integer,allocatable :: mapping_ibz(:,:,:)
   ! (nkibz,4,24)
   ! For each kpoint in the IBZ store the indexes of the kpoints in the IBZ
@@ -125,6 +127,7 @@ subroutine htetra_free(tetra)
  type(t_htetrahedron), intent(inout) :: tetra
  ABI_SFREE(tetra%mapping_ibz)
  ABI_SFREE(tetra%mapping_bz)
+ ABI_SFREE(tetra%ibz_weights)
 
 end subroutine htetra_free
 !!***
@@ -175,7 +178,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 !scalars
  type(kptrank_type) :: kptrank_t
  integer :: ikpt2,isummit,itetra
- integer :: ikibz,my_rank,nprocs
+ integer :: ikibz,ikbz,my_rank,nprocs
  integer :: symrankkpt
  real(dp) :: rcvol
 !arrays
@@ -577,6 +580,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  TETRA_ALLOCATE(tetra%mapping_bz,(4,24,nkpt_ibz))
  TETRA_ALLOCATE(tetra%mapping_ibz,(4,24,nkpt_ibz))
 
+
  ! HM TODO: Avoid mkkptrank and map the k-point grid to indexes
  ! Make full k-point rank arrays
  call mkkptrank(kpt_fullbz,nkpt_fullbz,kptrank_t)
@@ -603,6 +607,14 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  call destroy_kptrank(kptrank_t)
 
+ ! Compute the weights
+ ABI_CALLOC(tetra%ibz_weights,(nkpt_ibz))
+ do ikbz=1,nkpt_fullbz
+   ikibz = bz2ibz(ikbz)
+   tetra%ibz_weights(ikibz) = tetra%ibz_weights(ikibz) + 1
+ end do
+ tetra%ibz_weights = tetra%ibz_weights / nkpt_fullbz
+
  ! HM TODO: Need to check where this will be used!
  ! Calculate the volume of the tetrahedra
  rcvol = abs(gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3))- &
@@ -617,6 +629,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra%vv = abs(k1(1)*(k2(2)*k3(3)-k2(3)*k3(2))- &
                 k1(2)*(k2(1)*k3(3)-k2(3)*k3(1))+ &
                 k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
+ tetra%vv = 1.d0!/nkpt_fullbz
 
 end subroutine htetra_init
 !!***
@@ -666,7 +679,7 @@ pure subroutine get_onetetra_new_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr
 
 ! *********************************************************************
 
- volconst = max_occ/24.d0 !tetra%vv/4.d0
+ volconst = max_occ*tetra%vv/24.d0
 
  ! This is output
  tweight = zero; dtweightde = zero
@@ -1256,14 +1269,16 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,&
    ! Sort energies before calling get_onetetra_
    !call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
    call sort_4tetra(eigen_1tetra, ind_ibz)
+   ! HM: Here we should only compute what we will use!
    call get_onetetra_(tetra, eigen_1tetra, enemin, enemax, max_occ, nene, bcorr, tweight_tmp, dtweightde_tmp)
 
    ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
    do isummit=1,4
-     if (ind_ibz(isummit) == ik_ibz) then
-       weights(:,1) = weights(:,1) + dtweightde_tmp(:,isummit)
-       weights(:,2) = weights(:,2) + tweight_tmp(:,isummit)
-     end if
+     if (ind_ibz(isummit) /= ik_ibz) cycle
+     weights(:,1) = weights(:,1) + dtweightde_tmp(:,isummit)
+     weights(:,2) = weights(:,2) + tweight_tmp(:,isummit)
+     ! HM: This exit is important, avoids summing the same contribution more than once
+     exit
    end do
  end do ! itetra
 
@@ -1335,14 +1350,16 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
    ! Sort energies before calling get_onetetra_
    !call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
    call sort_4tetra(eigen_1tetra, ind_ibz)
+   ! HM: Here we should only compute what we will use!
    call get_onetetra_new_(tetra, eigen_1tetra, wvals, nw, max_occ, bcorr, tweight_tmp, dtweightde_tmp)
 
    ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
    do isummit=1,4
-     if (ind_ibz(isummit) == ik_ibz) then
-       weights(:,1) = weights(:,1) + dtweightde_tmp(isummit,:)
-       weights(:,2) = weights(:,2) + tweight_tmp(isummit,:)
-     end if
+     if (ind_ibz(isummit) /= ik_ibz) cycle
+     weights(:,1) = weights(:,1) + dtweightde_tmp(isummit,:)
+     weights(:,2) = weights(:,2) + tweight_tmp(isummit,:)
+     ! HM: This exit is important, avoids summing the same contribution more than once
+     exit
    end do
  end do ! itetra
 
