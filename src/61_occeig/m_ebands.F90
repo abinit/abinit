@@ -247,6 +247,10 @@ MODULE m_ebands
 !! FUNCTION
 !! Structure with information on the fundamental and direct gaps returned by ebands_report_gap.
 !!
+!! TODO
+!! Remove gaps_t, move info about CBM, VBM and Fermi energy (i.e. Fermi level for T --> 0) inside
+!! ebands_t and make sure that all the setter methods of ebands_t support the new protocol.
+!!
 !! SOURCE
 
  type,public :: gaps_t

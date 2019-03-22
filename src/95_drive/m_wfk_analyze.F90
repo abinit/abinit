@@ -363,7 +363,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(wfk0_hdr%pawrhoij,pawrhoij)
 
-   ! Variables/arrays related to the fine FFT grid ===
+   ! Variables/arrays related to the fine FFT grid.
    ABI_DT_MALLOC(pawfgrtab,(cryst%natom))
    call pawtab_get_lsize(pawtab,l_size_atm,cryst%natom,cryst%typat)
    cplex=1
@@ -411,10 +411,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      call destroy_tetra(tetra)
    end if
    call xmpi_barrier(comm)
-
- !case (WFK_TASK_KLIST2MESH)
- !   wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
- !   call wfk_klist2mesh(wfk0_path, "Tmp/o_DS2_KERANGE.nc", dtset, psps, pawtab, wfkfull_path, comm)
 
  case (WFK_TASK_KPTS_ERANGE)
    call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)

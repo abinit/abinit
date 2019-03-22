@@ -22,7 +22,7 @@
 
 #include "abi_common.h"
 
-MODULE m_wfd
+module m_wfd
 
  use defs_basis
  use defs_datatypes
@@ -6198,5 +6198,5 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 end subroutine wfd_pawrhoij
 !!***
 
-END MODULE m_wfd
+end module m_wfd
 !!***

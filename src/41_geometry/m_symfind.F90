@@ -79,7 +79,7 @@ contains
 !! spinat(3,natom)=initial spin of each atom, in unit of hbar/2.
 !! tolsym=tolerance for the symmetries
 !! typat(natom)=integer identifying type of atom.
-!! use_inversion=1 if inversion can be included in set of symmetries
+!! use_inversion=1 if inversion and improper rotations can be included in set of symmetries
 !! xred(3,natom)=reduced coordinates of atoms in terms of real space
 !!   primitive translations
 !!
