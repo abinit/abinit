@@ -73,4 +73,11 @@ class NoIteratorDefinedError(InputFileError):
     def __init__(self, doc):
         msg = ('No iterator have been found before the first document {}.'
                .format(doc['obj']))
-        super(InputFileError, self).__init__(self, doc['start']+1, msg)
+        super(NoIteratorDefinedError, self).__init__(self, doc['start']+1, msg)
+
+
+class NotAvailableTagError(InputFileError):
+    def __init__(self, tag, msg):
+        msg = ('Tag {} is not available in this installation : {}'
+               .format(tag, msg))
+        YAMLTestError.__init__(self, msg)

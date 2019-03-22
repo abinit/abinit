@@ -4,14 +4,14 @@
     children have to hinerit from BaseDataStructure
 '''
 from __future__ import print_function, division, unicode_literals
+from . import has_pandas
 from .abinit_iterators import ITERATOR_RANKS
 from .register_tag import (
     yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar,
+    yaml_not_available_tag
 )
 import re
 import numpy as np
-from pandas import read_csv, DataFrame
-from pandas.compat import StringIO
 
 
 @yaml_implicit_scalar
@@ -250,24 +250,30 @@ class AbinitComment(AbinitMessage):
     __yaml_tag = 'COMMENT'
 
 
-@yaml_scalar
-class Table(DataFrame):
-    _is_dict_like = True
-    table_sep = r'\s+'
+if has_pandas:
+    from pandas import read_csv, DataFrame
+    from pandas.compat import StringIO
 
-    @classmethod
-    def from_scalar(cls, scal):
-        return cls(read_csv(StringIO(scal), sep=cls.table_sep))
+    @yaml_scalar
+    class Table(DataFrame):
+        _is_dict_like = True
+        table_sep = r'\s+'
 
-    def to_scalar(self):
-        return self.to_string()
+        @classmethod
+        def from_scalar(cls, scal):
+            return cls(read_csv(StringIO(scal), sep=cls.table_sep))
 
+        def to_scalar(self):
+            return self.to_string()
 
-@yaml_scalar
-class GwSigmaData(Table):
-    pass
+    @yaml_scalar
+    class GwSigmaData(Table):
+        pass
 
-
-@yaml_auto_map
-class GwSigma(object):
-    pass
+    @yaml_auto_map
+    class GwSigma(object):
+        pass
+else:
+    yaml_not_available_tag('Table', 'Pandas module is not available')
+    yaml_not_available_tag('GwSigma', 'Pandas module is not available')
+    yaml_not_available_tag('GwSigmaData', 'Pandas module is not available')

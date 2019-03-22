@@ -9,6 +9,8 @@ import re
 from inspect import ismethod
 import yaml
 
+from .errors import NotAvailableTagError
+
 re_word = re.compile(r'[a-zA-Z0-9_]+')
 
 
@@ -222,3 +224,9 @@ def yaml_implicit_scalar(Cls):
         re_pattern = re.compile(re_pattern)
     yaml.add_implicit_resolver(tag, re_pattern)  # register the mplicit pattern
     return Cls
+
+
+def yaml_not_available_tag(tag, reason):
+    def constructor(loader, node):
+        raise NotAvailableTagError(tag, reason)
+    yaml.add_constructor('!' + tag, constructor)

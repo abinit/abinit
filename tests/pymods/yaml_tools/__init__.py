@@ -7,12 +7,18 @@ from __future__ import print_function, division, unicode_literals
 try:
     import yaml
     import numpy  # numpy is also required
-    import pandas
 
     is_available = True
 
 except ImportError:
     is_available = False
+
+try:
+    import pandas
+    has_pandas = True
+except ImportError:
+    has_pandas = False
+
 
 
 class CorruptedDocument(object):
