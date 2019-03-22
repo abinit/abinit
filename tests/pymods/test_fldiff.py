@@ -33,7 +33,7 @@ class TestDiffer:
         '+ This line appears in output but is not counted as errorneous\n',
         ': This line is always compared as characters 0.457896321545\n',
         '. This one too but it will never be counted a errorneous 2.4354364\n',
-        '% This line have a fixed tolerance of 1.01e-2: 2.043644 5.5\n',
+        '% This line have a fixed tolerance of 1.01e-2: 2.043644 5.4\n',
         'P P and , lines are handled according to parameters as + or - lines\n'
     ]
 
@@ -93,6 +93,7 @@ class TestDiffer:
     def test_diff_lines_float(self):
         diff = Differ()
         differences = diff._diff_lines(self.lines1, self.lines2)[0]
+        print(differences)
         assert len(differences) == 5
         d3 = differences.pop(3)
 
@@ -172,23 +173,23 @@ class TestDataExtractor:
 
     def test_get_metachar(self):
         dext = DataExtractor()
-        assert dext._DataExtractor__get_metachar('-truc') == '-'
-        assert dext._DataExtractor__get_metachar('+truc') == '+'
-        assert dext._DataExtractor__get_metachar(' truc') == ' '
-        assert dext._DataExtractor__get_metachar('.truc') == '.'
+        assert dext._get_metachar('-truc') == '-'
+        assert dext._get_metachar('+truc') == '+'
+        assert dext._get_metachar(' truc') == ' '
+        assert dext._get_metachar('.truc') == '.'
 
         # ignore blank and empty lines
-        assert dext._DataExtractor__get_metachar('  \t\n') == '-'
-        assert dext._DataExtractor__get_metachar('') == '-'
+        assert dext._get_metachar('  \t\n') == '-'
+        assert dext._get_metachar('') == '-'
 
-        assert dext._DataExtractor__get_metachar('Ptruc') == '-'
-        assert dext._DataExtractor__get_metachar(',truc') == '-'
+        assert dext._get_metachar('Ptruc') == '-'
+        assert dext._get_metachar(',truc') == '-'
 
         dext = DataExtractor(ignore=False)
-        assert dext._DataExtractor__get_metachar(',truc') == '+'
+        assert dext._get_metachar(',truc') == '+'
 
         dext = DataExtractor(ignoreP=False)
-        assert dext._DataExtractor__get_metachar('Ptruc') == '+'
+        assert dext._get_metachar('Ptruc') == '+'
 
     def test_extract_ignore_minus_meta(self):
         dext = DataExtractor()
