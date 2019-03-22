@@ -56,10 +56,11 @@ private
 
 integer, parameter :: dp = kind(1.0d0)
 
-real(dp),parameter  :: tol6 = 1.d-14, tol14 = 1.d-14, zero = 0.d0, one = 1.d0
-
-real(dp), parameter :: sqrtpi = 1.7724538509055159d0
-
+real(dp),parameter :: zero = 0.d0, one = 1.d0, two = 2.d0
+real(dp),parameter :: pi=3.141592653589793238462643383279502884197_dp
+real(dp),parameter :: two_pi=two*pi
+real(dp),parameter :: sqrtpi=1.7724538509055159d0
+real(dp),parameter :: tol6 = 1.d-14, tol14 = 1.d-14
 
 !!****t* m_htetrahedron/t_htetrahedron
 !! NAME
@@ -349,10 +350,9 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  k1(:) = gprimd(:,1)*klatt(1,1) +  gprimd(:,2)*klatt(2,1) +  gprimd(:,3)*klatt(3,1)
  k2(:) = gprimd(:,1)*klatt(1,2) +  gprimd(:,2)*klatt(2,2) +  gprimd(:,3)*klatt(3,2)
  k3(:) = gprimd(:,1)*klatt(1,3) +  gprimd(:,2)*klatt(2,3) +  gprimd(:,3)*klatt(3,3)
- tetra%vv  = abs(k1(1)*(k2(2)*k3(3)-k2(3)*k3(2))- &
-                 k1(2)*(k2(1)*k3(3)-k2(3)*k3(1))+ &
-                 k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
-
+ tetra%vv = abs(k1(1)*(k2(2)*k3(3)-k2(3)*k3(2))- &
+                k1(2)*(k2(1)*k3(3)-k2(3)*k3(1))+ &
+                k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
 
 end subroutine htetra_init
 !!***
@@ -402,7 +402,7 @@ pure subroutine get_onetetra_new_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr
 
 ! *********************************************************************
 
- volconst = max_occ*tetra%vv/4.d0
+ volconst = max_occ/24.d0 !tetra%vv/4.d0
 
  ! This is output
  tweight = zero; dtweightde = zero
