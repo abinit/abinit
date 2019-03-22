@@ -1035,7 +1035,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
        call htetra_get_onewk_wvals(htetraq,iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
 
        ! Accumulate DOS/IDOS
-       phdos%phdos(:) = phdos%phdos(:) + wdt(:, 1)*wtq_ibz(iq_ibz)
+       phdos%phdos(:)     = phdos%phdos(:)     + wdt(:, 1)*wtq_ibz(iq_ibz)
        phdos%phdos_int(:) = phdos%phdos_int(:) + wdt(:, 2)*wtq_ibz(iq_ibz)
 
        ! Rotate e(q) to get e(Sq) to account for other q-points in BZ. See notes in gaussian branch
