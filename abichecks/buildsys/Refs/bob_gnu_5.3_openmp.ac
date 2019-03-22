@@ -721,11 +721,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/include -I/usr/lib64/gfortran/modules"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/lib64 -lnetcdf -lnetcdff"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf -L/usr/lib64 -lhdf5 -lhdf5_hl"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -860,7 +860,7 @@ with_linalg_incs="-I/usr/include/atlas"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/lib64 -llapack -L/usr/lib64/atlas -lf77blas -lcblas -latlas"
+with_linalg_libs="-L/usr/lib64/atlas -ltatlas -lsatlas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -923,7 +923,7 @@ with_linalg_libs="-L/usr/lib64 -llapack -L/usr/lib64/atlas -lf77blas -lcblas -la
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="none"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 
@@ -953,11 +953,11 @@ with_dft_flavor="none"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
