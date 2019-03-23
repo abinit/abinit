@@ -1004,7 +1004,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,ikpt,isppol
+ integer :: ikpt,isppol
  real(dp) :: boxcut,boxcutc
  character(len=500) :: message
 !arrays
@@ -1022,9 +1022,9 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
  if(dtset%nqpt>1.or.dtset%nqpt<0) then
    write(message,'(a,i0,5a)')&
-&   'nqpt =',dtset%nqpt,' is not allowed',ch10,&
-&   '(only 0 or 1 are allowed).',ch10,&
-&   'Action: correct your input file.'
+   'nqpt =',dtset%nqpt,' is not allowed',ch10,&
+   '(only 0 or 1 are allowed).',ch10,&
+   'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1760,7 +1760,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
 !Local variables-------------------------------
 !scalars
- integer :: jdtset,ipsp,ios, me, ndtset_alloc, nprocs
+ integer :: ipsp,ios, me, ndtset_alloc, nprocs
  integer :: istatr,istatshft, papiopt, npsp, ii, idtset, msym, usepaw
  character(len=fnlen) :: filpsp
  character(len=500) :: msg

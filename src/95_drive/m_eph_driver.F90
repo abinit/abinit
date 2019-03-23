@@ -367,7 +367,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ABI_FREE(gs_eigen)
  end if
 
- ! Here we change the GS bands (fermi level, scissors operator ...)
+ ! Here we change the GS bands (Fermi level, scissors operator ...)
  ! All the modifications to ebands should be done here.
  if (use_wfk) then
    if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
@@ -408,7 +408,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! since occ are set to zero, and fermie is taken from the previous density.
    if (dtset%kptopt > 0) then
      call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
-     call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
+     call ebands_print(ebands,header="Ground state energies", prtvol=dtset%prtvol)
      if (use_wfq) then
        call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
        call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
@@ -645,7 +645,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call frohlichmodel(cryst, dtfil, dtset, ebands, efmasdeg, efmasval, ifc)
 
  case (7)
-   ! Compute phonon limited transport from WFK and a SIGEPH file
+   ! Compute phonon limited transport from SIGEPH file
    call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
 
  case default

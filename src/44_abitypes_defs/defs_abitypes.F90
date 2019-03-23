@@ -972,10 +972,11 @@ type dataset_type
  integer :: nkpath=0
  real(dp) :: einterp(4)=zero
  real(dp),allocatable :: kptbounds(:,:)
- real(dp) :: tmesh(3) ! = [10._dp, 300._dp, 5._dp] This triggers a bug in the bindings
+ real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
  character(len=fnlen) :: kerange_path = ABI_NOFILE
  !character(len=fnlen) :: getpot_path = ABI_NOFILE
+ !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
 
  end type dataset_type
 !!***
@@ -988,7 +989,7 @@ type dataset_type
 !!
 !! FUNCTION
 !! The MPI_type structured datatype gather different information
-!! about the MPI parallelisation : number of processors,
+!! about the MPI parallelisation: number of processors,
 !! the index of my processor, the different groups of processors, etc ...
 !!
 !! SOURCE

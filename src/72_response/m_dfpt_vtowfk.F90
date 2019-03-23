@@ -220,7 +220,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !scalars
  integer,parameter :: level=14,tim_fourwf=5
  integer,save :: nskip=0
- integer :: counter,iband,idir0,ierr,iexit,igs,igscq,ii,dim_dcwf,inonsc
+ integer :: counter,iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
  integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band

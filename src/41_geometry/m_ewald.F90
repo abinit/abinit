@@ -98,7 +98,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
  real(dp) :: t1,term
- character(len=500) :: message
+ !character(len=500) :: message
 
 ! *************************************************************************
 

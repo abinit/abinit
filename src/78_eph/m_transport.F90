@@ -382,12 +382,12 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands,extr
 
      if (abs(nelect - tmp_ebands%nelect) > tol6) then
        ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
-       ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
+       ! for finite doping it's hard to find nelect that exactly matches ebands%nelect.
        ! in this case we print a warning
        write(msg,'(3(a,f10.6))')&
          'Calculated number of electrons nelect = ',nelect,&
          ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,' for T = ',new%kTmesh(itemp)
-       if (new%kTmesh(itemp) == 0) then
+       if (new%kTmesh(itemp) == zero) then
          MSG_WARNING(msg)
        else
          MSG_ERROR(msg)

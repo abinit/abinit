@@ -156,7 +156,7 @@ program abinit
 ! Declarations
 ! Define "level of the routine", for debugging purposes
  integer,parameter :: level=1
- integer :: choice,dmatpuflag,ierr,iexit,ii,iounit,ios
+ integer :: choice,dmatpuflag,ierr,ii,iounit,ios
  integer :: lenstr,me,print_mem_report
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp

@@ -97,8 +97,10 @@ MODULE m_ebands
  public :: ebands_set_nelect       ! Change the number of electrons (assume metallic scheme).
  public :: ebands_calc_nelect      ! Compute nelect from Fermi level and Temperature.
  public :: ebands_report_gap       ! Print info on the fundamental and direct gap.
- public :: ebands_ncwrite          ! Dump the object into NETCDF file (use ncid)
+ public :: ebands_ncwrite          ! Write object to NETCDF file (use ncid)
  public :: ebands_ncwrite_path     ! Dump the object into NETCDF file (use filepath)
+ !public :: ebands_ncread          ! Read object from NETCDF file handle
+ !public :: ebands_ncread          ! Read object from NETCDF file (use filepath, assume nc file with header)
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
  public :: ebands_downsample       ! Build a new ebands_t with a downsampled IBZ.
@@ -3906,7 +3908,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype,nb,ib,nband_k
+ integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype,nb,ib
  integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
 #ifdef HAVE_NETCDF
  integer :: ncid
@@ -4219,9 +4221,9 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  real(dp),parameter :: max_occ1 = one
  integer :: nproc,my_rank,nw,spin,band,ikpt,cnt,idat,ierr,bcorr
  !integer :: my_nkibz, nkfull, timrev
- integer :: ii, jj, idx, ief
+ integer :: ii, jj, ief
  real(dp) :: max_ene,min_ene,wtk,max_occ
- real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
+ !real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  !real(dp) :: dksqmax
  character(len=500) :: msg
  type(stats_t) :: ediffs
@@ -4229,7 +4231,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
 !arrays
  !integer,allocatable :: bz2ibz(:,:)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
- real(dp) :: v(3), vsum(3), vsym(3), t(3,3), tsum(3,3), tsym(3,3)
+ real(dp) :: v(3), vsum(3), t(3,3), tsum(3,3) !, tsym(3,3), vsym(3), 
  real(dp),allocatable :: wme0(:),wdt(:,:,:),tmp_eigen(:)
 
 ! *********************************************************************
@@ -4539,12 +4541,12 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,ibc,ibv,spin,iw,nw,nband_k,nbv,nproc,my_rank,cnt,mpierr,unt,bcorr
+ integer :: ik_ibz,ibc,ibv,spin,nw,nband_k,nbv,nproc,my_rank,cnt,mpierr,bcorr !iw, unt,
  real(dp) :: wtk,wmax,wstep,wbroad
  type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
  character(len=500) :: msg
- character(len=fnlen) :: path
+ !character(len=fnlen) :: path
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
  real(dp) :: eminmax(2,ebands%nsppol)
@@ -5596,7 +5598,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  type(ebands_t) :: ebands_kmesh
  type(gaps_t) :: gaps
  integer,parameter :: master=0,intp_nshiftk1=1
- integer :: my_rank,ndivsm,nbounds,itype, nb,spin,ik,ib,ii,jj, edos_intmeth, ierr
+ integer :: my_rank,ndivsm,nbounds,itype, spin,ik,ib,ii,jj, edos_intmeth, ierr
  real(dp) :: edos_step,edos_broad,emin,emax
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
@@ -5604,7 +5606,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  type(edos_t) :: edos
  type(ebands_t) :: ebands_kpath
  type(kpath_t) :: kpath
- character(len=500) :: msg,tag
+ character(len=500) :: tag !msg
 !arrays
  integer :: intp_kptrlatt(3,3)
  real(dp) :: vr(3),intp_shiftk(3),params(4)
