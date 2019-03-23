@@ -98,8 +98,8 @@ MODULE m_gruneisen
  end type gruns_t
 
  public :: gruns_new        ! Constructor.
- public :: gruns_qpath      ! Compute Grunesein parameters on a q-path.
- public :: gruns_qmesh      ! Compute Grunesein parameters on a q-mesh.
+ public :: gruns_qpath      ! Compute Gruneisen parameters on a q-path.
+ public :: gruns_qmesh      ! Compute Gruneisen parameters on a q-mesh.
  public :: gruns_free       ! Release memory.
  public :: gruns_anaddb     ! Driver routine called in anaddb.
 !!***
@@ -223,7 +223,7 @@ end function gruns_new
 !!  gruns_fourq
 !!
 !! FUNCTION
-!!  Compute grunesein parameters at an arbitrary q-point.
+!!  Compute gruneisen parameters at an arbitrary q-point.
 !!
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates.
@@ -370,7 +370,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Grunesein parameters along q-path ',ch10
+ write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Gruneisen parameters along q-path ',ch10
  call wrtout(std_out, msg)
  !call wrtout(ab_out, msg)
 
@@ -391,7 +391,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
  call xmpi_sum(dwdq_qpath, comm, ierr)
  call xmpi_sum(phdispl_cart_qpath, comm, ierr)
 
- ! Write text files with phonon frequencies and grunesein on the path.
+ ! Write text files with phonon frequencies and gruneisen on the path.
  if (my_rank == master) then
    if (open_file(strcat(prefix, "_GRUNS_QPATH"), msg, newunit=unt, form="formatted", action="write") /= 0) then
      MSG_ERROR(msg)
@@ -419,7 +419,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    ncerr = nctk_def_arrays(ncid, [ &
      ! q-points of the path
      nctkarr_t("gruns_qpath", "dp", "three, gruns_nqpath"), &
-     ! grunesein parameters on the path
+     ! gruneisen parameters on the path
      nctkarr_t("gruns_gvals_qpath", "dp", "number_of_phonon_modes, gruns_nqpath"), &
      ! phonon frequencies at the different volumes
      nctkarr_t("gruns_wvols_qpath", "dp", "number_of_phonon_modes, gruns_nvols, gruns_nqpath"), &
@@ -510,7 +510,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Grunesein DOSes ',ch10
+ write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Gruneisen DOSes ',ch10
  call wrtout(std_out, msg)
  !call wrtout(ab_out, msg)
 
@@ -591,7 +591,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  if (my_rank == master) then
    call wrtout(ab_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
 
-   ! Write text files with Grunesein and DOSes.
+   ! Write text files with Gruneisen and DOSes.
    if (open_file(strcat(prefix, "_GRUNS_DOS"), msg, newunit=unt, form="formatted", action="write") /= 0) then
      MSG_ERROR(msg)
    end if
@@ -623,7 +623,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
     nctkarr_t("gruns_shiftq", "dp", "three, gruns_nshiftq"), &
     nctkarr_t("gruns_qibz", "dp", "three, gruns_nqibz"), &
     nctkarr_t("gruns_wtq", "dp", "gruns_nqibz"), &
-    ! grunesein parameters in IBZ
+    ! gruneisen parameters in IBZ
     ! phonon frequencies at the different volumes,
     ! group velocities at V0 in Cartesian coordinates.
     nctkarr_t("gruns_gvals_qibz", "dp", "number_of_phonon_modes, gruns_nqibz"), &
@@ -830,20 +830,20 @@ subroutine gruns_anaddb(inp, prefix, comm)
  end if
 #endif
 
- ! Compute grunesein parameters on the q-mesh.
+ ! Compute gruneisen parameters on the q-mesh.
  if (all(inp%ng2qpt /= 0)) then
    call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
-   MSG_WARNING("Cannot compute Grunesein parameters on q-mesh because ng2qpt == 0")
+   MSG_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
  end if
 
- ! Compute grunesein on the q-path.
+ ! Compute gruneisen on the q-path.
  if (inp%nqpath /= 0) then
    qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
    call gruns_qpath(gruns, prefix, qpath, ncid, comm)
    call kpath_free(qpath)
  else
-   MSG_WARNING("Cannot compute Grunesein parameters on q-path because nqpath == 0")
+   MSG_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
  end if
 
  ! Compute speed of sound for V0.
