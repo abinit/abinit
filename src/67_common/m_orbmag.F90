@@ -3967,7 +3967,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  integer :: adir,bdx,gdxstor
  integer :: isppol,istwf_k,my_nspinor
  integer :: nband_k,ncpgr,ncpgrb
- real(dp) :: ucvol
+ real(dp) :: ucvol,finish_time,start_time
  complex(dpc) :: CCI_dir,VVI_dir,VVII_dir,VVIII_dir
  complex(dpc) :: CCIV_dir,onsite_l_dir,s1trace_dir
  character(len=500) :: message
@@ -4008,11 +4008,15 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ! bdir = 1, gdir = 2 or 3 and gdx = 3,4,5,6; if bdir = 2, gdir = 3 or 1 and gdx = 5,6,1,2;
  ! if bdir = 3, gdir = 1 or 2, gdx = 1,2,3,4.
  ! This storage is mapped as gdxstor = mod(gdx+6-2*bdir,6)
+ ! call cpu_time(start_time)
  ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
  call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
       & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
-
+ ! call cpu_time(finish_time)
+ ! write(std_out,'(a,es16.8)')'JWZ debug make_smat time: ',finish_time-start_time
+ 
  ! compute the shifted cprj's <p_k+b|u_k>
+ ! call cpu_time(start_time)
  ABI_DATATYPE_ALLOCATE(cprj_kb_k,(6,0:4,dtset%natom,mcprj))
  ncpgrb = 0 ! no k gradients in <p_k+b|u_k>
  do bdx=1, 6
@@ -4022,27 +4026,39 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  end do
  call ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
       & istwf_k,kg,mcg,mcprj,mpi_enreg,nattyp,ncpgrb,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
+ ! call cpu_time(finish_time)
+ ! write(std_out,'(a,es16.8)')'JWZ debug ctocprjb time: ',finish_time-start_time
 
  ! compute the energies at each k pt
+ ! call cpu_time(start_time)
  ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
  call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
       & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
       & vhartr,vpsp,vxc,ucvol,xred,ylm,ylmgr)
+ ! call cpu_time(finish_time)
+ ! write(std_out,'(a,es16.8)')'JWZ debug make_eeig time: ',finish_time-start_time
 
  ! compute the <u_kg|H_k|u_kb> matrix elements
+ ! call cpu_time(start_time)
  ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
  call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
       & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,ucvol,vhartr,vpsp,vxc,xred)
+ ! call cpu_time(finish_time)
+ ! write(std_out,'(a,es16.8)')'JWZ debug make_eeig123 time: ',finish_time-start_time
 
  ! compute the <u_kg|dS/dk_b|u_k> matrix elements
  ! ABI_ALLOCATE(dsdk_,(2,nband_k,nband_k,dtorbmag%fnkpt,1:3))
+ ! call cpu_time(start_time)
  ABI_ALLOCATE(dsdk,(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4))
  ! call make_dsdk_cprj(atindx1,cprj,dsdk_,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
  call make_dsdk_FD(atindx1,cprj_kb_k,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
  ! call make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
  !     & mcg,mpi_enreg,nattyp,nband_k,nfftf,npwarr,pawfgr,paw_ij,pawtab,psps,pwind,pwind_alloc,&
  !     & rmet,rprimd,ucvol,xred,ylm,ylmgr)
+ ! call cpu_time(finish_time)
+ ! write(std_out,'(a,es16.8)')'JWZ debug make_dsdk_FD time: ',finish_time-start_time
 
+ ! call cpu_time(start_time)
  do adir = 1, 3
 
     call make_onsite_l(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_l_dir,pawrad,pawtab)
@@ -4076,6 +4092,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     VVI(2,adir) = aimag(VVI_dir)
 
  end do ! end loop over adir
+ ! call cpu_time(finish_time)
+ ! write(std_out,'(a,es16.8)')'JWZ debug adir loop time: ',finish_time-start_time
 
  ! convert terms to cartesian coordinates as needed
  ! note that terms like <dv/dk| x |dw/dk> computed in reduced coords,
