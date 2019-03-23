@@ -15744,6 +15744,7 @@ ipert=natom+7, two sets of perturbations that the developpers can define.
   * 3 --> responses with respect to perturbations natom+6 and natom+7 will be computed
 
 !!! important
+
     In order to define and use correctly the new perturbations, the developper
     might have to include code lines or additional routines at the level of the
     following routines: dfpt_cgwf.F90, dfpt_dyout.F90, dfpt_symph.F90,
@@ -18201,7 +18202,7 @@ vcutgeo  0 0 1
 ```
 
 Please note that the method of Ismail-Beigi is implemented only in the case if an
-orthorhombic Bravais lattic. For hexagonal lattices, one has to use the method
+orthorhombic Bravais lattice. For hexagonal lattices, one has to use the method
 of Rozzi [[cite:Rozzi2006]]. In this case, the interaction is truncated
 in a finite cylinder. Contrarily to the first approach, here one has to
 specify both the radius of the cylinder with [[rcut]] as well as the length of
@@ -19455,15 +19456,15 @@ Variable(
     text=r"""
 This variable allows the user to specify the list of k-points in the self-energy $\Sigma_{n\kk}$
 in terms of a homogeneous mesh in the IBZ instead of the traditional approach based
-of [[nkptgw]], [[kptgw]], [[bdgw]].
+on [[nkptgw]], [[kptgw]], [[bdgw]].
 
 The specification in terms of sigma_ngkpt is easier to use in particular when
 the self-energy is needed on a sub-mesh.
-The use of this variables requires a band range specified via [[gw_qprange]].
+The use of this variables requires a range of bands specified via [[gw_qprange]].
 
 !! important
 
-    sigma_ngkpt and [[nkptgw]] are mutually exclusive.
+    sigma_ngkpt and [[nkptgw]] and [[sigma_erange]] are mutually exclusive.
 """,
 ),
 
@@ -19474,7 +19475,7 @@ Variable(
     vartype="integer",
     defaultval=0,
     dimensions="scalar",
-    requires="[[optdriver]] in [4, 7]",
+    requires="[[optdriver]] in [4, 7] and [[sigma_shiftk]]",
     mnemonics="SIGMA: Number of SHIFTs for K point grids",
     text=r"""
 The number of shifts in [[sigma_shiftk]].
@@ -19488,11 +19489,18 @@ Variable(
     vartype="integer",
     defaultval=[0, 0, 0],
     dimensions=[3, '[[sigma_nshiftk]]'],
-    requires="[[optdriver]] in [4, 7]",
+    requires="[[optdriver]] in [4, 7] and [[sigma_nshiftk]]",
     mnemonics="SHIFT for K points",
+    excludes="[[sigma_erange]] or [[nkptgw]]",
     text=r"""
-The shifts in the k-mesh used for the electron self-energy $\Sigma_{n\kk}$
+The shifts of the k-mesh used to define the list of k-points for the computation of the 
+electron self-energy $\Sigma_{n\kk}$.
 See also [[sigma_nshiftk]].
+
+!!! important
+
+
+   This variable is not compatible with [[nkptgw]] and [[sigma_erange]].
 """,
 ),
 
@@ -19508,17 +19516,24 @@ Variable(
     text=r"""
 
 This variable defines the quantity to compute starting from a previously generated WFK file.
-Allowed values:
+Possible values are:
 
-  * "wfk_full" --> Read WFK and produce new WFK file with k-points in the full BZ.
-        Wavefunctions with [[istwfk]] > 2 are automatically converted into the full-gsphere
-        representation. Useful to interface Abinit with external tools requiring k-points in the full BZ.
+  * "wfk_full" --> Read WFK file and produce new WFK file with k-points in the full BZ.
+        Wavefunctions with [[istwfk]] > 2 are automatically converted into the full-gsphere representation. 
+        This option can be used to interface Abinit with external tools requiring k-points in the full BZ.
 
-  * "wfk_einterp" --> Read WFK and interpolate energies using parameters specified by [[einterp]]
+  * "wfk_einterp" --> Read energies from WFK file and interpolate band structure using parameters specified by [[einterp]].
 
   * "wfk_ddk" --> Compute DDK matrix elements for all bands and k-points in the WFK file.
      The contribution due to the non-local part of the pseudopotential can be ignored
-     with [[inclvkb]] = 0 (not recommended unless you know what you are doing).
+     by setting [[inclvkb]] = 0 (not recommended unless you know what you are doing).
+
+  * "wfk_kpts_erange" --> Read WFK file,
+        Use star-function and [[einterp]] parameters to interpolate electron energies onto fine dense 
+        defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
+        Find k-points inside (electron/hole) pockets according to the values specified in [[sigma_erange]].
+        Write KERANGE.nc file with the tables required by the code to automate NSCF band structure calculations
+        inside the pocket(s) and electron lifetime computation in the EPH code ([[eph_task]] = -4).
 """,
 ),
 
@@ -19533,9 +19548,10 @@ Variable(
     mnemonics="SIGMA: Band SUM RANGE",
     text=r"""
 This variable allows the user to specify the range of bands in the sum over states for the e-ph self-energy $\Sigma_{n\kk}$.
-If not specified, the code includes all the states from 1 to [[nband]] if both the real and imaginary part of the
-self-energy are wanted or all the states in an automatically computed energy window containing those states
-that are supposed to interact with the [[bdgw]] states via phonon scattering.
+If not specified, the code includes all the states from 1 up to [[nband]].
+Note that this option can be used only when computing both the real and imaginary part of the self-energy.
+In the calculation of electron linewidths, indeed, the states are automatically selected using an energy window 
+that takes into account the maximum phonon frequency.
 """,
 ),
 
@@ -19578,15 +19594,16 @@ Variable(
     mnemonics="SIGMA Energy-range.",
     characteristics=['[[ENERGY]]'],
     text=r"""
-This variable is used to select the k-points and the bands in the self-energy matrix elements on the basis
-of their position with respect to the band edges (Energy differences are always positive, even for holes).
+This variable selects the k-points and the bands in the self-energy matrix elements on the basis
+of their position with respect to the band edges (energy differences are **always positive**, even for holes).
+
 Only the k-points and the bands whose energy difference if less than this value will be included in the calculation.
 The first entry refers to holes, the second one to electrons.
 A negative entry can be used to exclude either holes or electrons from the calculation.
 
 !!! important
 
-    By default, this variable is in Hartree units. Use
+    By default, this variable is given in Hartree. Use
 
         sigma_erange 1 1 eV
 
@@ -19606,7 +19623,7 @@ Variable(
 This variable can be used to introduce a cutoff on the q-points when computing the imaginary
 part of the electron-phonon self-energy ([[eph_task]] = -4) with the tetrahedron method ([[eph_intmeth]] = 2)
 The first entry refers to phonon absorption while the second one is associated to phonon emission.
-A q-point is considered in the sum if both the tetrahedron weight for phonon absorption
+A q-point is included in the sum if the tetrahedron weights for phonon absorption/emission are larger that these values.
 """,
 ),
 
@@ -19623,6 +19640,7 @@ This variable can be used to restart an EPH calculation.
 At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4).
 In this case, the code will look for a pre-existing SIGEPH.nc file and will compute the remaining k-points
 provided that the metadata found in the netcdf file is compatible with the input variables specified in the input file.
+The code aborts if the metadata reported in the SIGEPH.nc file is not compatible with the input file.
 """,
 ),
 
@@ -19639,19 +19657,18 @@ Variable(
 NB - this does not work yet.
 
 This variable activates the Sternheimer method in the calculation of the e-ph self-energy ([[eph_task]] == 4)
-This technique replaces the explicit sum over empty states above [[nband]].
-with the nscf computation of the first order variation of the KS wavefunctions (actually
+This technique replaces the explicit sum over empty states above [[nband]]
+with the NSCF computation of the first order variation of the KS wavefunctions (actually
 the projection in the subspace orthogonal to the nband states).
 
-The Sternheimer approach requires an external file with
-the KS potential produced by setting [[prtpot]] = 1 in the GS run.
+The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1 in the GS run
 and the specification of [[tolwfr]] in the input file.
-The number of line minimations for the Sternheimer solver is defined by [[nline]].
+The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
 !!! important
 
     The Sternheimer approach approximates the e-ph self-energy with the adiabatic expression
-    in which phonon frequencies are neglected and the frequency dependence of $\Sigma_{n\kk}(\omega)$ is neglected.
+    in which phonon frequencies are neglected and the frequency dependence of $\Sigma_{n\kk}(\omega)$ is neglected
     and replaced by $\Sigma_{n\kk}(\ee_{n\kk}$.
     This approximation is valid provided that enough bands above the states of interest are explicitly included.
 """,
@@ -19666,13 +19683,9 @@ Variable(
     defaultval=None,
     mnemonics="KERANGE PATH",
     text=r"""
-This variable gives the path of the external KERANGE.nc file with the list of k-points
-in the electron/hole pockets.
-This file can be used for the calculation of the imaginary part of the e-ph self-energy ([[eph_task]] == -4)
-
-!!! important
-
-    This approximation is valid provided that enough bands above the states of interest are explicitly included.
+This variable defines the path of the external KERANGE.nc file with the list of k-points in the electron/hole pockets.
+The tables stored in the file are used for the calculation of the imaginary part of the e-ph self-energy ([[eph_task]] == -4)
+This file is generated by running a preliminary step with [[wfk_task]] = "wfk_einterp".
 """,
 ),
 

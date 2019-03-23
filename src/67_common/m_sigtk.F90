@@ -515,10 +515,11 @@ end subroutine sigtk_kcalc_from_erange
 !!  sigtk_kpts_in_erange
 !!
 !! FUNCTION
-!!  Use star functions to interpolate electron energies onto fine dense defined by sigma_ngkpt and sigma_shiftk.
-!!  Find k-points inside (electron/hole) pockets according to values specifed in sigma_erange.
-!!  Write KERANGE.nc file with tables used to perform NSCF band structure calculations
-!!  and electron lifetime computation in EPH code.
+!!  Use star functions and [[einterp]] to interpolate electron energies onto fine dense defined 
+!!  by [[sigma_ngkpt]] and [[sigma_shiftk]].
+!!  Find k-points inside (electron/hole) pockets according to the values specifed in [[sigma_erange]].
+!!  Write KERANGE.nc file with the tables required by the code to automate NSCF band structure calculations
+!!  and electron lifetime computation in the EPH code.
 !!
 !! INPUTS
 !!  dtset <dataset_type>=all input variables for this dataset
