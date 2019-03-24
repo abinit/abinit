@@ -5,10 +5,14 @@
 !!
 !! FUNCTION
 !!  module for tetrahedron interpolation of DOS and similar quantities
-!!  depends on sort_tetra and on m_kpt_rank
+!!  depends on m_kpt_rank.
+!!  Uses some functions from a previous implementation by MJV
+!!  The new implementation if based on spglib and kpclib by Atsushi Togo
+!!  after a discussion with in on the APS 2019 where he provided
+!!  details of his implementation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (MJV)
+!!  Copyright (C) 2010-2019 ABINIT group (HM,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +61,6 @@ integer, parameter :: dp = kind(1.0d0)
 
 real(dp),parameter :: zero = 0.d0, one = 1.d0, two = 2.d0
 real(dp),parameter :: pi=3.141592653589793238462643383279502884197_dp
-real(dp),parameter :: two_pi=two*pi
 real(dp),parameter :: sqrtpi=1.7724538509055159d0
 real(dp),parameter :: tol6 = 1.d-6, tol14 = 1.d-14
 
@@ -178,12 +181,13 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 !scalars
  type(kptrank_type) :: kptrank_t
  integer :: ikpt2,isummit,itetra
- integer :: ikibz,ikbz,my_rank,nprocs
+ integer :: ikibz,ikbz,idiag,min_idiag,my_rank,nprocs
  integer :: symrankkpt
- real(dp) :: rcvol
+ real(dp) :: rcvol,length,min_length
 !arrays
  integer :: tetra_shifts(3,4,24,4)  ! 3 dimensions, 4 summits, 24 tetrahedra, 4 main diagonals
- real(dp)  :: k1(3),k2(3),k3(3)
+ integer :: main_diagonals(3,4)
+ real(dp)  :: k1(3),k2(3),k3(3),diag(3)
 
 ! *********************************************************************
 
@@ -576,10 +580,27 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra_shifts(:, 3,24,4) = [ -1, -1,  0]
  tetra_shifts(:, 4,24,4) = [ -1,  0,  0]
 
+ main_diagonals(:,1) = [ 1, 1, 1] ! 0-7
+ main_diagonals(:,2) = [-1, 1, 1] ! 1-6
+ main_diagonals(:,3) = [ 1,-1, 1] ! 2-5
+ main_diagonals(:,4) = [ 1, 1,-1] ! 3-4
+
  ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
  TETRA_ALLOCATE(tetra%mapping_bz,(4,24,nkpt_ibz))
  TETRA_ALLOCATE(tetra%mapping_ibz,(4,24,nkpt_ibz))
 
+ ! Determine the smallest diagonal in k-space
+ min_length = huge(min_length)
+ do idiag = 1,4
+   diag(:) = gprimd(:,1)*main_diagonals(1,idiag)+&
+             gprimd(:,2)*main_diagonals(2,idiag)+&
+             gprimd(:,3)*main_diagonals(3,idiag)
+   length = sqrt(diag(1)*diag(1) + diag(2)*diag(2) + diag(3)*diag(3))
+   if (length < min_length) then
+     min_length = length
+     min_idiag = idiag
+   end if
+ end do
 
  ! HM TODO: Avoid mkkptrank and map the k-point grid to indexes
  ! Make full k-point rank arrays
@@ -590,9 +611,9 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    do itetra=1,24
      do isummit=1,4
        ! Find the index of the neighbouring k-points in the BZ
-       k1(:) = kpt_ibz(:,ikibz) + tetra_shifts(1,isummit,itetra,1)*klatt(:,1) + &
-                                  tetra_shifts(2,isummit,itetra,1)*klatt(:,2) + &
-                                  tetra_shifts(3,isummit,itetra,1)*klatt(:,3)
+       k1(:) = kpt_ibz(:,ikibz) + tetra_shifts(1,isummit,itetra,min_idiag)*klatt(:,1) + &
+                                  tetra_shifts(2,isummit,itetra,min_idiag)*klatt(:,2) + &
+                                  tetra_shifts(3,isummit,itetra,min_idiag)*klatt(:,3)
        ! Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
        call get_rank_1kpt(k1,symrankkpt,kptrank_t)
        ikpt2 = kptrank_t%invrank(symrankkpt)
