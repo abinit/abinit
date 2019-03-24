@@ -2089,7 +2089,7 @@ end subroutine gkknu_from_atm
 !!
 !! SOURCE
 
-type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
+type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -2617,7 +2617,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
    !TODO add a check for consistency
-   ! number of bands and kpoints (comensurability)
+   ! number of bands and kpoints (commensurability)
    ABI_CHECK(ebands_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
    new%use_doublegrid = .True.
 
@@ -3128,7 +3128,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, 
 
  path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  if (.not. file_exists(path)) then
-    ierr = 1; return
+   ierr = 1; return
  end if
  NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
@@ -4540,7 +4540,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    ABI_CHECK(.not. sigma%use_doublegrid, "double grid for Re-Im not implemented")
 
    ! TODO: This part should be tested.
-   nz = 1;  if (sigma%nwr > 0) nz = 1 + sigma%nwr
+   nz = 1; if (sigma%nwr > 0) nz = 1 + sigma%nwr
    ABI_REMALLOC(sigma%cweights, (nz, 2, nbcalc_ks, sigma%my_npert, sigma%my_bstart:sigma%my_bstop, sigma%my_nqibz_k, ndiv))
    ABI_MALLOC(tmp_cweights, (nz, 2, nbcalc_ks, sigma%nqibz_k))
    ABI_MALLOC(zvals, (nz, nbcalc_ks))
@@ -5144,7 +5144,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  ABI_FREE(bz2ibz)
 
  cnt = count(qselect /= 0)
- write(std_out, "(a, i0, a, f5.1, a)")" qpoints_oracle: calculation of tau_eph will need: ", cnt, &
+ write(std_out, "(a, i0, a, f5.1, a)")" qpoints_oracle: calculation of tau_nk will need: ", cnt, &
    " q-points in the IBZ. (nqibz_eff / nqibz): ", (100.0_dp * cnt) / sigma%nqibz, " [%]"
  !qselect = 0
 
