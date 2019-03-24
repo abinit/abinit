@@ -799,7 +799,7 @@ subroutine indefo1(dtset)
 
 !Local variables -------------------------------
 !scalars
- integer :: ii
+ !integer :: ii
 
 !******************************************************************
 
@@ -1459,15 +1459,15 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) nkpt=intarr(1)
 
  ! or from KERANGE file.
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"kerange_path",tread,'KEY',key_value=key_value)
- if (tread==1) dtset%kerange_path = rmquotes(key_value)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr), "getkerange_path", tread, 'KEY', key_value=key_value)
+ if (tread==1) dtset%getkerange_path = rmquotes(key_value)
 
 #ifdef HAVE_NETCDF
- if (dtset%kerange_path /= ABI_NOFILE) then
+ if (dtset%getkerange_path /= ABI_NOFILE) then
    ! Get number of k-points in sigma_erange energy windows.
    !dtset%kptopt = 0
    if (my_rank == master) then
-     NCF_CHECK(nctk_open_read(ncid, dtset%kerange_path, xmpi_comm_self))
+     NCF_CHECK(nctk_open_read(ncid, dtset%getkerange_path, xmpi_comm_self))
      NCF_CHECK(nctk_get_dim(ncid, "nkpt_inerange", nkpt, datamode=.True.))
      NCF_CHECK(nf90_close(ncid))
    end if
@@ -1521,7 +1521,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
-     kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%kerange_path, &
+     kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%getkerange_path, &
      nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
      occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
      string,symafm,symrel,vacuum,wtk,comm)

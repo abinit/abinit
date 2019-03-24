@@ -694,9 +694,10 @@ function cg_zdotu(n, x, y) result(res)
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ZDOTU_BUG
  integer :: ii
-#endif
+#else
  complex(dpc) :: cres
  complex(dpc),external :: zdotu
+#endif
 
 ! *************************************************************************
 
@@ -751,8 +752,6 @@ subroutine cg_zaxpy(n,alpha,x,y)
  real(dp),intent(in) :: x(2*n)
  real(dp),intent(inout) :: y(2*n)
 
-!local variables
-! integer :: ii
 
 ! *************************************************************************
 

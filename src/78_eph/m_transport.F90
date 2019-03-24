@@ -216,11 +216,11 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
  type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
  type(pawang_type),intent(in) :: pawang
- type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(pawfgr_type),intent(in) :: pawfgr
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
+ type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables ------------------------------
  type(sigmaph_t) :: sigmaph
@@ -236,8 +236,8 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, 'Transport computation driver')
 
- sigmaph = sigmaph_read(dtset,dtfil,xmpi_comm_self,msg,ierr,&
-                        keep_open=.true.,extrael_fermie=extrael_fermie)
+ !path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ sigmaph = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  if (ierr/=0) MSG_ERROR(msg)
 
  ! Intialize transport
@@ -537,10 +537,8 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 
  ! Handle out of range condition.
  if (ifermi == 0 .or. ifermi == self%nw) then
-   write(msg,"(a)")&
-    "Bisection could not find energy index of the Fermi level!"
-   MSG_ERROR(msg)
-   return
+   MSG_ERROR("Bisection could not find energy index of the Fermi level!")
+   !return
  end if
 
  self%mobility = 0
@@ -735,7 +733,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
            vv_tens(ii, jj) = vr(ii) * vr(jj)
          end do
        end do
-       ! Symmtrize tensor
+       ! Symmetrize tensor
        vv_tens = symmetrize_tensor(cryst,vv_tens)
        ! Multiply by the lifetime
        do itemp=1,self%ntemp

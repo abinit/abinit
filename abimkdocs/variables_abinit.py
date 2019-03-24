@@ -19478,7 +19478,7 @@ This variable defines the quantity to compute starting from a previously generat
 Possible values are:
 
   * "wfk_full" --> Read WFK file and produce new WFK file with k-points in the full BZ.
-        Wavefunctions with [[istwfk]] > 2 are automatically converted into the full-gsphere representation. 
+        Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation. 
         This option can be used to interface Abinit with external tools requiring k-points in the full BZ.
 
   * "wfk_einterp" --> Read energies from WFK file and interpolate band structure using the parameters specified by [[einterp]].
@@ -19634,7 +19634,7 @@ The number of line minimisations for the Sternheimer solver is defined by [[nlin
 ),
 
 Variable(
-    abivarname="kerange_path",
+    abivarname="getkerange_path",
     varset="eph",
     vartype="string",
     topics=['ElPhonInt_expert'],

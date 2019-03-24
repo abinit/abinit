@@ -640,6 +640,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
  restart = 0; ierr = 1
  if (my_rank == master .and. dtset%eph_restart == 1) then
+   !path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
    sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr)
  end if
 
@@ -2102,23 +2103,23 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1,istwfk1=1
- integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
+ integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg !iq_ibz,
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,qprange_,bstop
  integer :: jj,bstart,natom3
  integer :: isym_k, trev_k, mband, i1,i2,i3
  integer :: idir, iatom, pertcase
- integer :: ip,npoints,skw_cplex !, edos_intmeth
+ integer :: ip, npoints !,skw_cplex !, edos_intmeth
  logical :: downsample
  character(len=fnlen) :: wfk_fname_dense
  character(len=500) :: msg
  real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect, estep
  real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
- logical :: changed,found,isirr_k
+ logical :: changed, isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
 !arrays
- integer :: intp_kptrlatt(3,3), g0_k(3), skw_band_block(2)
- integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),band_block(2),kptrlatt(3,3)
+ integer :: intp_kptrlatt(3,3), g0_k(3) !, skw_band_block(2)
+ integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),band_block(2) !,kptrlatt(3,3)
  integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
  integer :: all_pinfo(3, cryst%natom * 3)
  integer,allocatable :: gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
@@ -2127,7 +2128,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart
  logical :: reorder
- integer,allocatable :: coords(:), dims(:)
+ integer,allocatable :: dims(:) !coords(:), 
  logical,allocatable :: periods(:), keepdim(:)
 #endif
 
@@ -2848,7 +2849,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr !,varid
 #endif
- character(len=500) :: msg
+ !character(len=500) :: msg
  real(dp) :: edos_broad, edos_step,  cpu_all, wall_all, gflops_all, cpu, wall, gflops
  character(len=fnlen) :: path
  type(edos_t) :: edos
@@ -3103,7 +3104,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, 
  type(datafiles_type),intent(in) :: dtfil
  character(len=500),intent(out) :: msg
  real(dp), optional :: extrael_fermie(2)
- logical,optional :: keep_open
+ logical,optional,intent(in) :: keep_open
 
 !Local variables ------------------------------
 !scalars
@@ -3111,7 +3112,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, 
 #ifdef HAVE_NETCDF
  integer :: ncid,varid,ncerr
 #endif
- real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, wr_step, eph_extrael, eph_fsmear
+ real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, eph_extrael, eph_fsmear
  character(len=fnlen) :: path
 !arrays
  integer :: eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
@@ -3121,6 +3122,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, 
 ! *************************************************************************
 
  ! Open netcdf file
+ msg = "No message"
 #ifdef HAVE_NETCDF
  ierr = 0
 
@@ -3283,14 +3285,14 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
 
 !Local variables -----------------------------------------
  integer,parameter :: sppoldbl1 = 1, timrev1 = 1
- integer :: ii, spin, ikpt, ikcalc, iband, itemp, nkcalc, nsppol, nkpt
+ integer :: spin, ikpt, ikcalc, iband, itemp, nkcalc, nsppol, nkpt
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
  logical :: has_mrta, has_vel, has_car_vel, has_red_vel
 #ifdef HAVE_NETCDF
- integer :: ncerr, ncid, varid
+ integer :: ncerr, varid
 #endif
- character(len=fnlen) :: path
- integer,allocatable :: indkk(:,:), nband(:)
+ !character(len=fnlen) :: path
+ integer,allocatable :: indkk(:,:)
  real(dp) :: dksqmax, vk_red(2,3), vk_car(2,3)
 
 ! *************************************************************************
@@ -3588,7 +3590,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 
 !Local variables-------------------------------
  integer,parameter :: sppoldbl1 = 1, timrev1 = 1, master = 0
- integer :: spin, my_rank, iq_ibz, nprocs, nbcalc_ks, bstart_ks
+ integer :: spin, my_rank, iq_ibz, nprocs !, nbcalc_ks !, bstart_ks
  real(dp) :: dksqmax, cpu, wall, gflops
  character(len=500) :: msg
  logical :: compute_lgk
@@ -3765,8 +3767,8 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
 !Local variables-------------------------------
  integer,parameter :: master = 0
  integer :: my_rank, iq_ibz, ierr, q_start, q_stop, nprocs, imyq, iq_dvdb
- integer :: nbcalc_ks, nqeff, ib_k, ibsum_kq, ik_ibz, ikq_ibz, ndiv
- real(dp) :: weight_q, cpu, wall, gflops
+ integer :: nqeff, ndiv !nbcalc_ks, 
+ real(dp) :: cpu, wall, gflops !weight_q,
  logical :: qfilter
  character(len=500) :: msg
 !arrays
@@ -3854,6 +3856,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
        ! Make sure each node has the q-points we need. Perform collective IO inside comm if needed.
+       ! TODO: Should not break qcache_size_mb contract!
        if (self%imag_only .and. self%qint_method == 1) then
          ! Find q-points needed by this MPI rank.
          ABI_ICALLOC(ineed_qpt, (dvdb%nqpt))
@@ -3916,7 +3919,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau
  complex(dpc) :: sig0c,sig0fr,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
- character(len=500) :: msg
+ !character(len=500) :: msg
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
@@ -4433,7 +4436,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 
 !Local variables ------------------------------
 !scalars
- integer :: nu, band_ks, ibsum_kq, ik_ibz, bstart_ks, nbcalc_ks, my_rank, natom3, ierr
+ integer :: nu, band_ks, ibsum_kq, ik_ibz, bstart_ks, nbcalc_ks, my_rank, natom3 !, ierr
  integer :: nprocs, imyp, imyq, ndiv, bsum_start, bsum_stop, ib_k
  integer :: iq_ibz_fine,iq_bz_fine,iq_ibz,jj, nz
  real(dp) :: eig0nk, weight, cpu,wall, gflops
@@ -4600,7 +4603,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, prtvol,
 !Local variables ------------------------------
 !scalars
  real(dp),parameter :: mytol = tol12
- integer :: nu, nbcalc_ks, it, iatom, my_rank, nprocs
+ integer :: nu, it, iatom, my_rank, nprocs !nbcalc_ks, 
  integer :: ib_k, band_ks, ik_ibz, iang, ierr
  real(dp) :: wqnu, nqnu, eig0nk, f_nk, dfde_nk
  real(dp) :: inv_qepsq, q0rad, vnk_mod, cos_theta_qvnk, qroot, fact_qvers !, den
@@ -4731,15 +4734,15 @@ subroutine eval_sigfrohl2(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
 
 !Local variables ------------------------------
 !scalars
- integer :: my_rank, nprocs, nbcalc_ks, iq_ibz, i1, i2, i3, nu, it, natom3, iatom, bstart_ks
+ integer :: my_rank, nprocs, nbcalc_ks, nu, it, natom3, iatom, bstart_ks !i1, i2, i3,  iq_ibz, 
  integer :: ib_k, band_ks, ik_ibz, iang, iqr, ierr, iw
- real(dp) :: wqnu, nqnu, eig0nk , eig0mkq, f_mkq ,gkq2, qrad2, weight_q, vol_fact
- real(dp) :: inv_qepsq, qstep , gmod2, hmod2, rfact, qmod, fqdamp
+ real(dp) :: wqnu, eig0nk, qrad2 !, weight_q !, vol_fact !eig0mkq, f_mkq , gkq2,  nqnu, 
+ real(dp) :: inv_qepsq, qstep , qmod, fqdamp !gmod2, hmod2,  rfact, 
  real(dp) :: cpu_fr,wall_fr,gflops_fr
  complex(dpc) :: cfact, cnum
 !arrays
- integer :: ndivs(3)
- real(dp) :: q0(3), qpt(3), qpt_cart(3), kq(3), kk(3)
+ !integer :: ndivs(3)
+ real(dp) :: qpt(3), qpt_cart(3), kq(3), kk(3) !q0(3), 
  real(dp) :: qrmesh(sigma%nqr), gmod2r(sigma%nqr), hmod2r(sigma%nqr), rfactr(sigma%nqr), nqr(sigma%nqr)
  real(dp) :: phfrq(cryst%natom*3)
  real(dp),allocatable :: displ_cart(:,:,:,:), eigs_kq(:), eigs_kqr(:,:), wqr(:,:)
