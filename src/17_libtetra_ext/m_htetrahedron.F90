@@ -59,7 +59,7 @@ real(dp),parameter :: zero = 0.d0, one = 1.d0, two = 2.d0
 real(dp),parameter :: pi=3.141592653589793238462643383279502884197_dp
 real(dp),parameter :: two_pi=two*pi
 real(dp),parameter :: sqrtpi=1.7724538509055159d0
-real(dp),parameter :: tol6 = 1.d-14, tol14 = 1.d-14
+real(dp),parameter :: tol6 = 1.d-6, tol14 = 1.d-14
 
 !!****t* m_htetrahedron/t_htetrahedron
 !! NAME
@@ -629,7 +629,6 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra%vv = abs(k1(1)*(k2(2)*k3(3)-k2(3)*k3(2))- &
                 k1(2)*(k2(1)*k3(3)-k2(3)*k3(1))+ &
                 k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
- tetra%vv = 1.d0!/nkpt_fullbz
 
 end subroutine htetra_init
 !!***
@@ -679,7 +678,9 @@ pure subroutine get_onetetra_new_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr
 
 ! *********************************************************************
 
- volconst = max_occ*tetra%vv/24.d0
+ ! Factor of 1/6 from the volume of the tetrahedron
+ ! The rest is accounted for from the kpoint weights
+ volconst = max_occ/4.d0/6.d0
 
  ! This is output
  tweight = zero; dtweightde = zero
@@ -931,7 +932,9 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcor
 
 ! *********************************************************************
 
- volconst = max_occ*tetra%vv/4.d0
+ ! Factor of 1/6 from the volume of the tetrahedron
+ ! The rest is accounted for from the kpoint weights
+ volconst_mult = max_occ/4.d0/6.d0
 
  deltaene = (enemax-enemin) / (nene-1)
 
@@ -945,12 +948,12 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcor
  epsilon32 = eigen_1tetra(3)-eigen_1tetra(2)
  epsilon42 = eigen_1tetra(4)-eigen_1tetra(2)
  epsilon43 = eigen_1tetra(4)-eigen_1tetra(3)
- inv_epsilon21 = zero; if (epsilon21 > tol6) inv_epsilon21 = 1.d0 / epsilon21
- inv_epsilon31 = zero; if (epsilon31 > tol6) inv_epsilon31 = 1.d0 / epsilon31
- inv_epsilon41 = zero; if (epsilon41 > tol6) inv_epsilon41 = 1.d0 / epsilon41
- inv_epsilon32 = zero; if (epsilon32 > tol6) inv_epsilon32 = 1.d0 / epsilon32
- inv_epsilon42 = zero; if (epsilon42 > tol6) inv_epsilon42 = 1.d0 / epsilon42
- inv_epsilon43 = zero; if (epsilon43 > tol6) inv_epsilon43 = 1.d0 / epsilon43
+ inv_epsilon21 = zero; if (epsilon21 > tol14) inv_epsilon21 = 1.d0 / epsilon21
+ inv_epsilon31 = zero; if (epsilon31 > tol14) inv_epsilon31 = 1.d0 / epsilon31
+ inv_epsilon41 = zero; if (epsilon41 > tol14) inv_epsilon41 = 1.d0 / epsilon41
+ inv_epsilon32 = zero; if (epsilon32 > tol14) inv_epsilon32 = 1.d0 / epsilon32
+ inv_epsilon42 = zero; if (epsilon42 > tol14) inv_epsilon42 = 1.d0 / epsilon42
+ inv_epsilon43 = zero; if (epsilon43 > tol14) inv_epsilon43 = 1.d0 / epsilon43
 
  nn1 = int((eigen_1tetra(1)-enemin)/deltaene)+1
  nn2 = int((eigen_1tetra(2)-enemin)/deltaene)+1

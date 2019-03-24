@@ -32,6 +32,7 @@ module m_phonons
  use m_tetrahedron
  use m_htetrahedron
  use m_numeric_tools
+ use m_crystal
  use m_nctk
  use iso_c_binding
  use m_atprj
@@ -161,6 +162,7 @@ module m_phonons
  end type phonon_dos_type
 
  public :: mkphdos
+ public :: phdos_unittests
  public :: phdos_print
  public :: phdos_print_debye
  public :: phdos_print_msqd
@@ -755,7 +757,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft, dos_qshift, &
    phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
- !call exit(0)
 
  if (prtdos == 2) then
    ! Prepare tetrahedron method including workspace arrays.
@@ -1188,6 +1189,214 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  DBG_EXIT("COLL")
 
 end subroutine mkphdos
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_phonons/phdos_unittests
+!! NAME
+!!
+!! FUNCTION
+!!  Unit tests for the tetrahedron routines
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phdos_unittests(comm)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: comm
+
+!Local variables -------------------------
+!scalars
+ type(crystal_t) :: crystal
+ integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
+ integer,parameter :: timrev1=1,npsp1=1,nsym=4
+ logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
+ real(dp),parameter :: max_occ1=1.d0
+ integer :: nqibz,iqbz,iqibz,nqbz,ierr,natom,nomega,nprocs, my_rank, ncid
+ integer :: iw,nw,ntypat
+ real(dp) :: cpu, wall, gflops
+ real(dp) :: dosdeltae, emin, emax
+ character(len=500) :: msg
+ character(len=80) :: errstr
+ type(t_tetrahedron) :: tetraq
+ type(t_htetrahedron) :: htetraq
+!arrays
+ integer :: in_qptrlatt(3,3),new_qptrlatt(3,3),typat(1)
+ integer :: symrel(3,3,nsym),symafm(nsym)
+ integer,allocatable :: bz2ibz(:,:)
+ real(dp) :: dos_qshift(3,nqshft1)
+ real(dp) :: amu(1),qpt(3),xred(3,1),znucl(1),zion(1)
+ real(dp) :: rprimd(3,3),rlatt(3,3),qlatt(3,3),tnons(3,nsym)
+ real(dp),allocatable :: tweight(:,:),dtweightde(:,:)
+ real(dp),allocatable :: qbz(:,:),qibz(:,:)
+ real(dp),allocatable :: wtq_ibz(:), wdt(:,:)
+ real(dp),allocatable :: energies(:),eigen(:)
+ real(dp),allocatable :: dos(:),idos(:)
+
+! *********************************************************************
+
+ call wrtout(std_out,' Unit Tests')
+ call cwtime(cpu, wall, gflops, "start")
+
+ ! Create a regular grid
+ in_qptrlatt(:,1)=[50, 0, 0]
+ in_qptrlatt(:,2)=[ 0,50, 0]
+ in_qptrlatt(:,3)=[ 0, 0,50]
+ dos_qshift(:,1) = [0.5,0.5,0.5]
+
+ amu = 1
+ natom = 1
+ ntypat = 1
+ typat = 1
+ znucl=1
+ zion=1
+ xred(:,1) = [0,0,0]
+ rprimd(:,1) = [ 1.0,          0.0,0.0]
+ rprimd(:,2) = [-0.5,sqrt(3.0)/2.0,0.0]
+ rprimd(:,3) = [ 0.0,          0.0,1.0]
+
+ symafm=1
+ tnons=0
+ !identity
+ symrel(:,1,1) = [ 1,0,0]
+ symrel(:,2,1) = [ 0,1,0]
+ symrel(:,3,1) = [ 0,0,1]
+
+ !reflection x axis
+ symrel(:,1,2) = [-1,0,0]
+ symrel(:,2,2) = [ 0,1,0]
+ symrel(:,3,2) = [ 0,0,1]
+
+ !reflection y axis
+ symrel(:,1,3) = [1, 0,0]
+ symrel(:,2,3) = [0,-1,0]
+ symrel(:,3,3) = [0, 0,1]
+
+ !reflection z axis
+ symrel(:,1,4) = [1,0, 0]
+ symrel(:,2,4) = [0,1, 0]
+ symrel(:,3,4) = [0,0,-1]
+
+ call crystal_init(amu,crystal,space_group0,natom,npsp1,ntypat,nsym,rprimd,typat,xred,&
+                   zion,znucl,timrev1,use_antiferro_true,remove_inv_false,"test",&
+                   symrel=symrel,symafm=symafm,tnons=tnons)
+ call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
+                             nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
+ call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
+
+ ! Initialize old tetrahedra
+ rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
+ call init_tetra(bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
+ call cwtime_report(" init_tetra", cpu, wall, gflops)
+
+ ! Initialize new tetrahedra
+ call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, &
+                  nqibz, ierr, errstr, comm)
+ call cwtime_report(" init_htetra", cpu, wall, gflops)
+
+ ! Prepare DOS calculation
+ emin = 0.d0
+ emax = 5.d0
+ nw = 500
+ dosdeltae = (emax-emin)/(nw-1)
+ ABI_MALLOC(energies,(nw))
+ ABI_MALLOC(dos,(nw))
+ ABI_MALLOC(idos,(nw))
+ ABI_MALLOC(wdt,(nw,2))
+ energies = arth(emin,dosdeltae,nw)
+
+ !
+ ! 1. Compute energies of a parabolic band
+ !
+ ABI_MALLOC(eigen,(nqibz))
+ do iqibz=1,nqibz
+   qpt = qibz(1,iqibz)
+   eigen(iqibz) = 10d0*(qpt(1)*qpt(1) + qpt(2)*qpt(2) + qpt(3)*qpt(3))+0.5
+ end do
+
+ ! Compute DOS using old tetrahedron implementation
+ ABI_MALLOC(tweight,(nw,nqibz))
+ ABI_MALLOC(dtweightde,(nw,nqibz))
+ call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
+                           nqibz,bcorr0,tweight,dtweightde,comm)
+ dos(:)  = sum(dtweightde,2)
+ idos(:) = sum(tweight,2)
+ call cwtime_report(" tetra_blochl", cpu, wall, gflops)
+ call write_file('parabola_tetra.dat', nw, energies(iw), idos(iw), dos(iw))
+
+ ! Compute DOS using new tetrahedron implementation
+ dos = zero; idos = zero
+ do iqibz=1,nqibz
+   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   !call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
+   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
+   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
+ end do
+ call cwtime_report(" htetra_get_onwk", cpu, wall, gflops)
+ call write_file('parabola_htetra.dat', nw, energies(iw), idos(iw), dos(iw))
+
+ !
+ ! 2. Compute energies for a flat band
+ !
+ eigen = 0.5
+
+ ! Compute DOS using old tetrahedron implementation
+ call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
+                           nqibz,bcorr0,tweight,dtweightde,comm)
+ dos(:)  = sum(dtweightde,2)
+ idos(:) = sum(tweight,2)
+ call cwtime_report(" tetra_blochl", cpu, wall, gflops)
+ call write_file('flat_tetra.dat', nw, energies(iw), idos(iw), dos(iw))
+
+ ! Compute DOS using new tetrahedron implementation
+ dos = zero; idos = zero
+ do iqibz=1,nqibz
+   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   !call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
+   dos(:)  = dos(:)  + wdt(:,1)/nqibz!*wtq_ibz(iqibz)
+   idos(:) = idos(:) + wdt(:,2)/nqibz!*wtq_ibz(iqibz)
+ end do
+ call cwtime_report(" htetra_get_onwk", cpu, wall, gflops)
+ call write_file('flat_htetra.dat', nw, energies(iw), idos(iw), dos(iw))
+
+ ! Free memory
+ ABI_SFREE(eigen)
+ ABI_SFREE(wdt)
+ ABI_SFREE(tweight)
+ ABI_SFREE(dtweightde)
+ ABI_SFREE(wtq_ibz)
+ ABI_SFREE(dos)
+ ABI_SFREE(idos)
+
+ contains
+ subroutine write_file(fname,nw,energies,dos,idos)
+
+ integer,intent(in) :: nw
+ character(len=*), intent(in) :: fname
+ real(dp),intent(in) :: energies(nw),dos(nw),idos(nw)
+ integer :: iw
+
+ open(unit=20,file=fname)
+ do iw=1,nw-2
+   write(20,*) energies(iw), idos(iw), dos(iw)
+ end do
+ close(unit=20)
+
+ end subroutine write_file
+
+end subroutine phdos_unittests
 !!***
 
 !----------------------------------------------------------------------
