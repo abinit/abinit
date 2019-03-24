@@ -161,7 +161,7 @@ module m_sigmaph
   integer :: my_npert
    ! Number of atomic perturbations or phonon modes treated by this MPI rank.
 
-  integer :: comm_pert
+  integer :: comm_pert = xmpi_comm_null
    ! MPI communicator for parallelism over atomic perturbations.
 
   integer :: nprocs_pert
@@ -170,13 +170,13 @@ module m_sigmaph
   integer :: me_pert
    ! My rank in comm_pert
 
-  integer :: comm_bq
+  integer :: comm_bq = xmpi_comm_null
    ! MPI communicator used to distribute bsum, q-points (high-level parallelization)
 
   integer :: me_bq
   integer :: nprocs_bq
 
-  !integer :: comm_bqfft
+  !integer :: comm_bqfft = xmpi_comm_null
   !integer :: me_bqfft
   !integer :: nprocs_bqfft
 
