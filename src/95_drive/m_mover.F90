@@ -381,15 +381,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1)then   ! then .and. hist%mxhist > 3 
+ if(specs%nhist/=-1)then   
   nhisttot = specs%nhist! We don't need to store all the history
  endif 
  !MS if for less than three MD steps to restart from single snapshot .nc file
  if(mxhist > 0 .and. mxhist  < 3)then
   nhisttot = mxhist ! Less than three MD-Steps
+ elseif( mxhist == 0)then  
+  nhisttot = 1 
  end if
-
- write(std_out,*) 'nhisttot: ', nhisttot
 
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
@@ -876,7 +876,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if (skipcycle) exit
 
 !DEBUG
-!     write(std_out,*)' m_mover : will call precpred_1geo'
+!    write(std_out,*)' m_mover : will call precpred_1geo'
 !    call flush(std_out)
 !ENDDEBUG
 
