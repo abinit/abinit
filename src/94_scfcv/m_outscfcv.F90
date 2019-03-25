@@ -82,6 +82,9 @@ module m_outscfcv
  use m_mkrho,            only : read_atomden
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
+ use m_green,            only : green_type,compute_green,&
+&                      fourier_green,print_green,init_green,destroy_green,init_green_tau
+ use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self,selfreal2imag_self
 
  implicit none
 

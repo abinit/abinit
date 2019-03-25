@@ -3175,7 +3175,7 @@ end subroutine occup_green_tau
 !======================================================================
 ! Symetrize
 !======================================================================
-   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang)
+   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang,paw_dmft)
  enddo
  write(message,'(a,2x,a,f13.5)') ch10," == Print LDA Green's function for last frequency"
  call wrtout(std_out,message,'COLL')
