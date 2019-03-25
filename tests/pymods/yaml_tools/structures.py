@@ -86,6 +86,7 @@ class Etot(object):
                 'Total energy(eV)'
             ]
         }
+        return new
 
 
 @yaml_seq
