@@ -30,6 +30,9 @@ module m_phonons
  use m_xmpi
  use m_abicore
  use m_tetrahedron
+ use m_htetrahedron
+ use m_numeric_tools
+ use m_crystal
  use m_nctk
  use iso_c_binding
  use m_atprj
@@ -43,7 +46,7 @@ module m_phonons
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_symtk,           only : matr3inv
- use m_time,            only : cwtime
+ use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type
  use m_geometry,        only : mkrdim, symredcart
@@ -159,6 +162,7 @@ module m_phonons
  end type phonon_dos_type
 
  public :: mkphdos
+ public :: phdos_unittests
  public :: phdos_print
  public :: phdos_print_debye
  public :: phdos_print_msqd
@@ -649,9 +653,10 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  character(len=500) :: msg
  character(len=80) :: errstr
  type(t_tetrahedron) :: tetraq
+ type(t_htetrahedron) :: htetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
- integer,allocatable :: bz2ibz(:)
+ integer,allocatable :: bz2ibz(:,:)
  real(dp) :: speedofsound(3),speedofsound_(3)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
@@ -662,6 +667,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:),new_shiftq(:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),tmp_phfrq(:),tweight(:,:)
  real(dp),allocatable :: wtq_ibz(:),xvals(:), gvals_wtq(:), wdt(:,:)
+ real(dp),allocatable :: energies(:)
 
 ! *********************************************************************
 
@@ -749,7 +755,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  in_qptrlatt = 0; in_qptrlatt(1, 1) = dos_ngqpt(1); in_qptrlatt(2, 2) = dos_ngqpt(2); in_qptrlatt(3, 3) = dos_ngqpt(3)
 
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft, dos_qshift, &
-   phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq)
+   phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq, bz2ibz=bz2ibz)
+ call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  if (prtdos == 2) then
    ! Prepare tetrahedron method including workspace arrays.
@@ -757,19 +764,26 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
 
    nkpt_fullbz = nqbz
-   ABI_MALLOC(bz2ibz, (nkpt_fullbz))
-   ABI_MALLOC(kpt_fullbz, (3, nkpt_fullbz))
+   !ABI_MALLOC(bz2ibz, (nkpt_fullbz))
+   !ABI_MALLOC(kpt_fullbz, (3, nkpt_fullbz))
 
    ! Make full kpoint grid and get equivalence to irred kpoints.
-   call get_full_kgrid(bz2ibz, qibz, kpt_fullbz, new_qptrlatt, phdos%nqibz, &
-       nkpt_fullbz, size(new_shiftq, dim=2), crystal%nsym, new_shiftq, crystal%symrel)
+   !call get_full_kgrid(bz2ibz, qibz, kpt_fullbz, new_qptrlatt, phdos%nqibz, &
+   !    nkpt_fullbz, size(new_shiftq, dim=2), crystal%nsym, new_shiftq, crystal%symrel)
+   !call cwtime_report(" get_full_kgrid", cpu, wall, gflops)
 
    ! Init tetrahedra, i.e. indexes of the full q-points at their summits
-   call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr, comm)
+   !call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr, comm)
+#if 0
+   call init_tetra(bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
+   call cwtime_report(" init_tetra", cpu, wall, gflops)
+#else
+   call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
+   call cwtime_report(" init_tetra", cpu, wall, gflops)
+#endif
    ABI_CHECK(ierr == 0, errstr)
 
-   ABI_FREE(bz2ibz)
-   ABI_FREE(kpt_fullbz)
+   !ABI_FREE(kpt_fullbz)
 
    ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
    ! this may change in the future if Matteo refactorizes the tetra weights as sums over k instead of sums over bands
@@ -778,6 +792,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    ABI_CHECK(ierr == 0, 'out-of-memory in full_eigvec')
    full_eigvec = zero
  end if ! tetra
+ ABI_SFREE(bz2ibz)
  ABI_FREE(new_shiftq)
 
  ! MPI Sum over irreducible q-points then sync the following integrals:
@@ -894,6 +909,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  call xmpi_sum_master(nsmallq, master, comm, ierr)
  call xmpi_sum_master(speedofsound, master, comm, ierr)
 
+ call cwtime_report(" phdos", cpu, wall, gflops)
+
  if (my_rank == master .and. nsmallq > tol10) then
    ! Write info about speed of sound
    speedofsound = speedofsound / nsmallq
@@ -923,6 +940,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    call xmpi_sum(full_phfrq, comm, ierr)
    call xmpi_sum(full_eigvec, comm, ierr)
 
+#if 0
    ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
    ABI_MALLOC(wdt, (nomega, 2))
    ABI_MALLOC(tweight, (nomega, phdos%nqibz))
@@ -934,6 +952,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
      ! Parallelize weights computation inside comm, then distribute nqibz
      call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,phdos%nomega,&
         phdos%nqibz,bcorr0,tweight,dtweightde,comm)
+     !call cwtime_report(" tetra_blochl_weights", cpu, wall, gflops)
 
      !if (mod(imode, nprocs) /= my_rank) cycle ! mpi-parallelism
      !call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,phdos%nomega,&
@@ -998,9 +1017,81 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
          end do
        end do ! iat
 
+     end do ! iq_ibz
+   end do ! imode
+   call cwtime_report(" accumulate", cpu, wall, gflops)
+#else
+
+   ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
+   ABI_MALLOC(wdt, (nomega, 2))
+   ABI_MALLOC(energies, (phdos%nomega))
+   energies = arth(phdos%omega_min,phdos%omega_step,phdos%nomega)
+
+   do iq_ibz=1,phdos%nqibz
+
+     ! Compute the weights for this q-point using tetrahedron
+     do imode=1,3*natom
+       tmp_phfrq(:) = full_phfrq(imode,:)
+       !call htetra_get_onewk(htetraq,iq_ibz,bcorr0,phdos%nomega,phdos%nqibz,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,wdt)
+       call htetra_get_onewk_wvals(htetraq,iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
+
+       ! Accumulate DOS/IDOS
+       phdos%phdos(:)     = phdos%phdos(:)     + wdt(:, 1)*wtq_ibz(iq_ibz)
+       phdos%phdos_int(:) = phdos%phdos_int(:) + wdt(:, 2)*wtq_ibz(iq_ibz)
+
+       ! Rotate e(q) to get e(Sq) to account for other q-points in BZ. See notes in gaussian branch
+       syme2_xyza = zero
+       do iat=1,natom
+         do isym=1, crystal%nsym
+           jat = crystal%indsym(4,isym,iat)
+           syme2_xyza(:,jat) = syme2_xyza(:,jat) + &
+             matmul(symcart(:,:,isym), full_eigvec(1,:,iat,imode,iq_ibz)) ** 2 + &
+             matmul(symcart(:,:,isym), full_eigvec(2,:,iat,imode,iq_ibz)) ** 2
+         end do
+       end do
+       !syme2_xyza = syme2_xyza / crystal%nsym
+
+       do iat=1,natom
+         do idir=1,3
+           phdos%pjdos(:,idir,iat) = phdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,1)
+           phdos%pjdos_int(:,idir,iat) = phdos%pjdos_int(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,2)
+         end do
+       end do
+
+       do iat=1,natom
+         ! Accumulate outer product of displacement vectors
+         msqd_atom_tmp = zero
+         do idir=1,3
+           do jdir=1,3
+             msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
+                   full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
+                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) ) !* gvals_wtq
+           end do ! jdie
+         end do
+
+         ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
+         ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
+         ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
+         ! from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
+         ! TODO: need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
+         do isym=1, crystal%nsym
+           temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
+           jat = crystal%indsym(4,isym,iat)
+           do idir=1,3
+             do jdir=1,3
+               phdos%msqd_dos_atom(:,idir,jdir,jat) = phdos%msqd_dos_atom(:,idir,jdir,jat) + &
+                 temp_33(idir, jdir) * wdt(:,1)
+             end do
+           end do
+         end do
+       end do ! iat
+
      end do ! imode
    end do ! iq_ibz
+   call cwtime_report(" accumulate", cpu, wall, gflops)
+   ABI_FREE(energies)
 
+#endif
    ABI_FREE(wdt)
 
    ! Make eigvec into phonon displacements.
@@ -1022,8 +1113,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    ABI_FREE(full_eigvec)
    ABI_FREE(full_phfrq)
    ABI_FREE(tmp_phfrq)
-   ABI_FREE(tweight)
-   ABI_FREE(dtweightde)
+   ABI_SFREE(tweight)
+   ABI_SFREE(dtweightde)
    call destroy_tetra(tetraq)
  else
 #ifdef HAVE_NETCDF
@@ -1098,6 +1189,214 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  DBG_EXIT("COLL")
 
 end subroutine mkphdos
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_phonons/phdos_unittests
+!! NAME
+!!
+!! FUNCTION
+!!  Unit tests for the tetrahedron routines
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phdos_unittests(comm)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: comm
+
+!Local variables -------------------------
+!scalars
+ type(crystal_t) :: crystal
+ integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
+ integer,parameter :: timrev1=1,npsp1=1,nsym=4
+ logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
+ real(dp),parameter :: max_occ1=1.d0
+ integer :: nqibz,iqbz,iqibz,nqbz,ierr,natom,nomega,nprocs, my_rank, ncid
+ integer :: iw,nw,ntypat
+ real(dp) :: cpu, wall, gflops
+ real(dp) :: dosdeltae, emin, emax
+ character(len=500) :: msg
+ character(len=80) :: errstr
+ type(t_tetrahedron) :: tetraq
+ type(t_htetrahedron) :: htetraq
+!arrays
+ integer :: in_qptrlatt(3,3),new_qptrlatt(3,3),typat(1)
+ integer :: symrel(3,3,nsym),symafm(nsym)
+ integer,allocatable :: bz2ibz(:,:)
+ real(dp) :: dos_qshift(3,nqshft1)
+ real(dp) :: amu(1),qpt(3),xred(3,1),znucl(1),zion(1)
+ real(dp) :: rprimd(3,3),rlatt(3,3),qlatt(3,3),tnons(3,nsym)
+ real(dp),allocatable :: tweight(:,:),dtweightde(:,:)
+ real(dp),allocatable :: qbz(:,:),qibz(:,:)
+ real(dp),allocatable :: wtq_ibz(:), wdt(:,:)
+ real(dp),allocatable :: energies(:),eigen(:)
+ real(dp),allocatable :: dos(:),idos(:)
+
+! *********************************************************************
+
+ call wrtout(std_out,' Unit Tests')
+ call cwtime(cpu, wall, gflops, "start")
+
+ ! Create a regular grid
+ in_qptrlatt(:,1)=[50, 0, 0]
+ in_qptrlatt(:,2)=[ 0,50, 0]
+ in_qptrlatt(:,3)=[ 0, 0,50]
+ dos_qshift(:,1) = [0.5,0.5,0.5]
+
+ amu = 1
+ natom = 1
+ ntypat = 1
+ typat = 1
+ znucl=1
+ zion=1
+ xred(:,1) = [0,0,0]
+ rprimd(:,1) = [ 1.0,          0.0,0.0]
+ rprimd(:,2) = [-0.5,sqrt(3.0)/2.0,0.0]
+ rprimd(:,3) = [ 0.0,          0.0,1.0]
+
+ symafm=1
+ tnons=0
+ !identity
+ symrel(:,1,1) = [ 1,0,0]
+ symrel(:,2,1) = [ 0,1,0]
+ symrel(:,3,1) = [ 0,0,1]
+
+ !reflection x axis
+ symrel(:,1,2) = [-1,0,0]
+ symrel(:,2,2) = [ 0,1,0]
+ symrel(:,3,2) = [ 0,0,1]
+
+ !reflection y axis
+ symrel(:,1,3) = [1, 0,0]
+ symrel(:,2,3) = [0,-1,0]
+ symrel(:,3,3) = [0, 0,1]
+
+ !reflection z axis
+ symrel(:,1,4) = [1,0, 0]
+ symrel(:,2,4) = [0,1, 0]
+ symrel(:,3,4) = [0,0,-1]
+
+ call crystal_init(amu,crystal,space_group0,natom,npsp1,ntypat,nsym,rprimd,typat,xred,&
+                   zion,znucl,timrev1,use_antiferro_true,remove_inv_false,"test",&
+                   symrel=symrel,symafm=symafm,tnons=tnons)
+ call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
+                             nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
+ call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
+
+ ! Initialize old tetrahedra
+ rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
+ call init_tetra(bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
+ call cwtime_report(" init_tetra", cpu, wall, gflops)
+
+ ! Initialize new tetrahedra
+ call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, &
+                  nqibz, ierr, errstr, comm)
+ call cwtime_report(" init_htetra", cpu, wall, gflops)
+
+ ! Prepare DOS calculation
+ emin = 0.d0
+ emax = 5.d0
+ nw = 500
+ dosdeltae = (emax-emin)/(nw-1)
+ ABI_MALLOC(energies,(nw))
+ ABI_MALLOC(dos,(nw))
+ ABI_MALLOC(idos,(nw))
+ ABI_MALLOC(wdt,(nw,2))
+ energies = arth(emin,dosdeltae,nw)
+
+ !
+ ! 1. Compute energies of a parabolic band
+ !
+ ABI_MALLOC(eigen,(nqibz))
+ do iqibz=1,nqibz
+   qpt = qibz(1,iqibz)
+   eigen(iqibz) = 10d0*(qpt(1)*qpt(1) + qpt(2)*qpt(2) + qpt(3)*qpt(3))+0.5
+ end do
+
+ ! Compute DOS using old tetrahedron implementation
+ ABI_MALLOC(tweight,(nw,nqibz))
+ ABI_MALLOC(dtweightde,(nw,nqibz))
+ call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
+                           nqibz,bcorr0,tweight,dtweightde,comm)
+ dos(:)  = sum(dtweightde,2)
+ idos(:) = sum(tweight,2)
+ call cwtime_report(" tetra_blochl", cpu, wall, gflops)
+ call write_file('parabola_tetra.dat', nw, energies(iw), idos(iw), dos(iw))
+
+ ! Compute DOS using new tetrahedron implementation
+ dos = zero; idos = zero
+ do iqibz=1,nqibz
+   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   !call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
+   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
+   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
+ end do
+ call cwtime_report(" htetra_get_onwk", cpu, wall, gflops)
+ call write_file('parabola_htetra.dat', nw, energies(iw), idos(iw), dos(iw))
+
+ !
+ ! 2. Compute energies for a flat band
+ !
+ eigen = 0.5
+
+ ! Compute DOS using old tetrahedron implementation
+ call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
+                           nqibz,bcorr0,tweight,dtweightde,comm)
+ dos(:)  = sum(dtweightde,2)
+ idos(:) = sum(tweight,2)
+ call cwtime_report(" tetra_blochl", cpu, wall, gflops)
+ call write_file('flat_tetra.dat', nw, energies(iw), idos(iw), dos(iw))
+
+ ! Compute DOS using new tetrahedron implementation
+ dos = zero; idos = zero
+ do iqibz=1,nqibz
+   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   !call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
+   dos(:)  = dos(:)  + wdt(:,1)/nqibz!*wtq_ibz(iqibz)
+   idos(:) = idos(:) + wdt(:,2)/nqibz!*wtq_ibz(iqibz)
+ end do
+ call cwtime_report(" htetra_get_onwk", cpu, wall, gflops)
+ call write_file('flat_htetra.dat', nw, energies(iw), idos(iw), dos(iw))
+
+ ! Free memory
+ ABI_SFREE(eigen)
+ ABI_SFREE(wdt)
+ ABI_SFREE(tweight)
+ ABI_SFREE(dtweightde)
+ ABI_SFREE(wtq_ibz)
+ ABI_SFREE(dos)
+ ABI_SFREE(idos)
+
+ contains
+ subroutine write_file(fname,nw,energies,dos,idos)
+
+ integer,intent(in) :: nw
+ character(len=*), intent(in) :: fname
+ real(dp),intent(in) :: energies(nw),dos(nw),idos(nw)
+ integer :: iw
+
+ open(unit=20,file=fname)
+ do iw=1,nw-2
+   write(20,*) energies(iw), idos(iw), dos(iw)
+ end do
+ close(unit=20)
+
+ end subroutine write_file
+
+end subroutine phdos_unittests
 !!***
 
 !----------------------------------------------------------------------
