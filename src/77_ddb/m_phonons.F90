@@ -656,7 +656,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  type(t_htetrahedron) :: htetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
- integer,allocatable :: bz2ibz(:,:)
+ integer,allocatable :: bz2ibz_smap(:,:), bz2ibz(:)
  real(dp) :: speedofsound(3),speedofsound_(3)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
@@ -755,7 +755,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  in_qptrlatt = 0; in_qptrlatt(1, 1) = dos_ngqpt(1); in_qptrlatt(2, 2) = dos_ngqpt(2); in_qptrlatt(3, 3) = dos_ngqpt(3)
 
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft, dos_qshift, &
-   phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq, bz2ibz=bz2ibz)
+   phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq, bz2ibz=bz2ibz_smap)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  if (prtdos == 2) then
@@ -764,7 +764,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
 
    nkpt_fullbz = nqbz
-   !ABI_MALLOC(bz2ibz, (nkpt_fullbz))
+   ABI_MALLOC(bz2ibz, (nkpt_fullbz))
+   bz2ibz = bz2ibz_smap(1,:)
    !ABI_MALLOC(kpt_fullbz, (3, nkpt_fullbz))
 
    ! Make full kpoint grid and get equivalence to irred kpoints.
@@ -774,13 +775,15 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 
    ! Init tetrahedra, i.e. indexes of the full q-points at their summits
    !call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr, comm)
-#if 0
-   call init_tetra(bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
+#if 1
+   call init_tetra(bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
    call cwtime_report(" init_tetra", cpu, wall, gflops)
 #else
-   call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
+   call htetra_init(htetraq, bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
    call cwtime_report(" init_tetra", cpu, wall, gflops)
 #endif
+   ABI_SFREE(bz2ibz)
+   ABI_SFREE(bz2ibz_smap)
    ABI_CHECK(ierr == 0, errstr)
 
    !ABI_FREE(kpt_fullbz)
@@ -792,7 +795,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    ABI_CHECK(ierr == 0, 'out-of-memory in full_eigvec')
    full_eigvec = zero
  end if ! tetra
- ABI_SFREE(bz2ibz)
  ABI_FREE(new_shiftq)
 
  ! MPI Sum over irreducible q-points then sync the following integrals:
@@ -940,7 +942,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    call xmpi_sum(full_phfrq, comm, ierr)
    call xmpi_sum(full_eigvec, comm, ierr)
 
-#if 0
+#if 1
    ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
    ABI_MALLOC(wdt, (nomega, 2))
    ABI_MALLOC(tweight, (nomega, phdos%nqibz))
