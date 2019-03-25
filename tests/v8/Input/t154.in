@@ -35,6 +35,8 @@ symsigma  1
 optdriver  7
 nband      8
 tmesh 5 295 2
+eph_extrael 1e-6
+occopt 3
 
 gw_qprange 2
 
