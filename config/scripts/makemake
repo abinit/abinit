@@ -295,10 +295,7 @@ if ( opts.run_clean ):
     "rm -f Makefile.am Makefile.in Makefile")
   cln_dirs = ["."]
   for bsub in bcnf.sections():
-    if ( bcnf.get(bsub, "type") == "master" ):
-      cln_dirs += bcnf.get(bsub, "subdirs").split()
-    elif ( (bcnf.get(bsub, "type") == "subsystem") and \
-           (bcnf.get(bsub, "mode") == "attached") ):
+    if ( bcnf.get(bsub, "type") in ("master", "subsystem") ):
       cln_dirs += bcnf.get(bsub, "subdirs").split()
   for dcln in cln_dirs:
     run_script(my_name, "Removing local data in %s/" % dcln,
