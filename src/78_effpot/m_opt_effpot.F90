@@ -520,7 +520,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
               call opt_filterdisp(term,nterm_of_term,comm)
-
+              !Get new value of symmetry equivalent term nterm_of_term 
+              nterm_of_term = term%nterm
               !Remember if this term had strain
               had_strain = .TRUE.
              !cycle 
@@ -600,10 +601,10 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
               call wrtout(std_out,message,'COLL')
              ! Check if generated term is not already contained in effpot
              ! If yes cycle 
-             do jterm=1,nterm
-                !write(*,*) 'what is jterm here', jterm 
-                exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2))
-             enddo !jterm
+             !do jterm=1,nterm
+             !   !write(*,*) 'what is jterm here', jterm 
+             !   exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2))
+             !enddo !jterm
              !write(*,*) 'exists?', exists 
              if(any(exists))then 
                 write(message,'(3a)' )ch10,&
