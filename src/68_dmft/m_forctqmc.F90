@@ -7,7 +7,7 @@
 !! Prepare CTQMC and call CTQMC
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,6 @@
 #include "config.h"
 #endif
 
-
 #include "abi_common.h"
 
 MODULE m_forctqmc
@@ -35,7 +34,7 @@ MODULE m_forctqmc
 
  implicit none
 
- private 
+ private
 
  public :: qmc_prep_ctqmc
  public :: testcode_ctqmc
@@ -50,7 +49,7 @@ contains
 !! Prepare and call the qmc subroutines
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon,VPlanes)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon,VPlanes)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,12 +85,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,weiss)
 
  use defs_basis
@@ -125,18 +118,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use m_paw_numeric, only : jbessel=>paw_jbessel
  use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
 
-#if defined HAVE_TRIQS
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
 #endif
  use ISO_C_BINDING
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'qmc_prep_ctqmc'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -197,7 +182,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
  logical(kind=1) :: rot_inv = .false.
  logical(kind=1) :: leg_measure = .true.
-#if defined HAVE_TRIQS
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  logical(kind=1) :: hist = .false.
  logical(kind=1) :: wrt_files = .true.
  logical(kind=1) :: tot_not = .true.
@@ -1579,7 +1564,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            levels_ptr     = C_LOC( levels_ctqmc )
 
          !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
-#if defined HAVE_TRIQS
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
            call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,                            &
 &           nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
 &           paw_dmft%dmftctqmc_meas*2*2*nflavor, paw_dmft%dmftqmc_therm,               &
@@ -2302,7 +2287,7 @@ end subroutine qmc_prep_ctqmc
 !! Setup ultra simple hybridization to test CTQMC in simple situations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2321,11 +2306,11 @@ end subroutine qmc_prep_ctqmc
 !! OUTPUT
 !! fw1_nd = non diagonal hybridization
 !! fw1 = hybridization
-!! umod = value of U 
-!!  
+!! umod = value of U
+!!
 !!
 !! SIDE EFFECTS
-!!  gtmp_nd  
+!!  gtmp_nd
 !!  gw_tmp_nd
 !!
 !! NOTES
@@ -2336,12 +2321,6 @@ end subroutine qmc_prep_ctqmc
 !! CHILDREN
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hybri_limit,&
 &   nflavor,opt,temp,testrot,testcode,umod)
@@ -2355,13 +2334,6 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
  use m_greenhyb
  !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
  use m_io_tools, only : flush_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'testcode_ctqmc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2587,7 +2559,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
        write(444,*) real(itau-1)/(temp*real(dmftqmc_l)),real(RR1(1,1)),real(RR1(2,2)),real(RR1(1,2)),real(RR1(2,1))
      end do
 
-   end if 
+   end if
 
    ! Print out rotated Green's function
    !=====================================
@@ -2595,7 +2567,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
      write(555,'(e14.5,4(2e14.5,3x))') real(itau-1)/(temp*real(dmftqmc_l)),gtmp_nd(itau,1,1),&
 &     gtmp_nd(itau,2,2),gtmp_nd(itau,1,2),gtmp_nd(itau,2,1)
    end do
-   
+
    write(message,'(2a)') ch10,' testcode end of test calculation'
    MSG_ERROR(message)
 

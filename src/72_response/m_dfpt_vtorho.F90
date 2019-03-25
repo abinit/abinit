@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_dfpt_vtorho
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_efield
@@ -45,15 +45,17 @@ module m_dfpt_vtorho
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, &
 &                       pawrhoij_init_unpacked, pawrhoij_free_unpacked, &
-&                       pawrhoij_mpisum_unpacked
+&                       pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawfgr,   only : pawfgr_type
+ use m_paw_mkrho,only : pawmkrho
  use m_fft,      only : fftpac
  use m_spacepar, only : symrhg
  use m_getgh1c,  only : rf_transgrid_and_pack, getgh1c_setup
  use m_dfpt_vtowfk, only : dfpt_vtowfk
- use m_dfpt_fef, only : dfptff_gradberry, dfptff_gbefd
-use m_mpinfo,         only : proc_distrb_cycle
+ use m_dfpt_fef,    only : dfptff_gradberry, dfptff_gbefd
+ use m_mpinfo,      only : proc_distrb_cycle
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 
@@ -223,14 +225,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,&
 & usecprj,useylmgr1,ddk_f,vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_vtorho'
- use interfaces_65_paw
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -302,7 +296,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
  integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
- integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,spaceworld,test_dot
+ integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  logical :: paral_atom,qne0
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -436,9 +430,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  if (psps%usepaw==1.and.iscf_mod>0) then
    if (paral_atom) then
      ABI_DATATYPE_ALLOCATE(pawrhoij1_unsym,(natom))
-     cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
+&     use_rhoijp=0,use_rhoij_=1)
    else
      pawrhoij1_unsym => pawrhoij1
      call pawrhoij_init_unpacked(pawrhoij1_unsym)
@@ -673,7 +669,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !    Shift array memory
      if (mkmem/=0) then
-       ibg=ibg+nband_k
+       ibg=ibg+dtset%nspinor*nband_k
        icg=icg+npw_k*dtset%nspinor*nband_k
        ikg=ikg+npw_k
      end if
@@ -682,7 +678,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
        icgq=icgq+npw1_k*dtset%nspinor*nband_k
      end if
      if (mk1mem/=0) then
-       ibg1=ibg1+nband_k
+       ibg1=ibg1+dtset%nspinor*nband_k
        icg1=icg1+npw1_k*dtset%nspinor*nband_k
        ikg1=ikg1+npw1_k
      end if

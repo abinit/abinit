@@ -13,7 +13,7 @@
 !! suscep_stat.F90 .
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TD)
+!! Copyright (C) 1998-2019 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,8 +21,6 @@
 !!
 !! CHILDREN
 !! interfaces_77_suscep.F90
-!! suscep_stat.F90
-!! susk.F90
-!! suskmm.F90
+!! m_suscep_stat.F90
 !!
 !!***

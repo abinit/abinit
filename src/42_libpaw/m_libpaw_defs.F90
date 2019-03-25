@@ -7,7 +7,7 @@
 !! Several definitions used in libPAW: named constants, physical constants, datatypes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group
+!! Copyright (C) 2000-2019 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,18 +103,12 @@ module m_libpaw_defs
   module procedure to_array3
   module procedure to_array4
   module procedure to_array5
+  module procedure to_array6
  end interface to_array
 
  contains
 
  function to_array1(i1) result(arr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array1'
-!End of the abilint section
 
   integer :: i1,arr(1)
   arr=(/i1/)
@@ -122,25 +116,11 @@ module m_libpaw_defs
 
  function to_array2(i1,i2) result(arr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array2'
-!End of the abilint section
-
   integer :: i1,i2,arr(2)
   arr=(/i1,i2/)
  end function to_array2
 
  function to_array3(i1,i2,i3) result(arr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array3'
-!End of the abilint section
 
   integer :: i1,i2,i3,arr(3)
   arr=(/i1,i2,i3/)
@@ -148,29 +128,21 @@ module m_libpaw_defs
 
  function to_array4(i1,i2,i3,i4) result(arr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array4'
-!End of the abilint section
-
   integer :: i1,i2,i3,i4,arr(4)
   arr=(/i1,i2,i3,i4/)
  end function to_array4
 
  function to_array5(i1,i2,i3,i4,i5) result(arr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array5'
-!End of the abilint section
-
   integer :: i1,i2,i3,i4,i5,arr(5)
   arr=(/i1,i2,i3,i4,i5/)
  end function to_array5
+
+ function to_array6(i1,i2,i3,i4,i5,i6) result(arr)
+
+  integer :: i1,i2,i3,i4,i5,i6,arr(6)
+  arr=(/i1,i2,i3,i4,i5,i6/)
+ end function to_array6
 
 end module m_libpaw_defs
 !!***

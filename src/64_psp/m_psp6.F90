@@ -7,7 +7,7 @@
 !! Initialize pspcod=6 (Pseudopotentials from the fhi98pp code):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XG, AF, GJ,FJ,MT, DRH)
+!!  Copyright (C) 1999-2019 ABINIT group (XG, AF, GJ,FJ,MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_psp6
  use defs_basis
  use m_splines
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_numeric_tools,  only : smooth, ctrap
  use m_psptk,          only : psp5lo, psp5nl, cc_derivatives
@@ -105,14 +105,6 @@ contains
 subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mqgrid,nproj,n1xccc,optnlxccc,positron,qchrg,qgrid,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp6in'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -372,13 +364,6 @@ end subroutine psp6in
 subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
 &                 vh_tnzc) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp6cc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -576,13 +561,6 @@ end subroutine psp6cc
 
 subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psden'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -713,13 +691,6 @@ end subroutine psden
 
 subroutine vhtnzc(nc,rc,vh_tnzc,mesh,rad,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vhtnzc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -834,13 +805,6 @@ end subroutine vhtnzc
 !! SOURCE
 
 subroutine psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp6cc_drh'
-!End of the abilint section
 
  implicit none
 

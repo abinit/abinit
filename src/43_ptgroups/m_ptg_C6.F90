@@ -7,7 +7,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MG)
+!! Copyright (C) 2010-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,15 +46,8 @@ contains
 
  subroutine ptg_C6 (nsym,nclass,sym,class_ids,class_names,Irr)
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_defs_ptgroups,  only : irrep_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ptg_C6'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
  integer,intent(out) :: nclass,nsym 

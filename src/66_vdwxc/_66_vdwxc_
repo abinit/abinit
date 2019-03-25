@@ -6,17 +6,17 @@
 !! This directory contains data and routines for vdw
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group
+!! Copyright (C) 1998-2019 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! interfaces_68_vdwxc.F90
+!! interfaces_66_vdwxc.F90
+!! m_evdw_wannier.F90
 !! m_vdw_dftd2.F90
 !! m_vdw_dftd3.F90
-!! vdw_dftd3_data.F90
-!! m_evdw_wannier.F90
+!! m_vdw_dftd3_data.F90
 !!
 !!***

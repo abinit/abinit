@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (Mver)
+!! Copyright (C) 2005-2019 ABINIT group (Mver)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_spin_current
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_splines
 
  use m_io_tools,   only : open_file
@@ -37,6 +37,7 @@ module m_spin_current
  use m_geometry,   only : xred2xcart
  use m_fftcore,    only : sphereboundary
  use m_special_funcs,   only : gamma_function
+ use m_fft,            only : fourwf
 
  implicit none
 
@@ -94,14 +95,6 @@ contains
 !! SOURCE
 
 subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_current'
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -283,28 +276,28 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 &       dpsidr(:,:,:,:,ispinor,1),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,dtset%paral_kgb,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      FT Gpsi_y to real space
        call fourwf(cplex,dummy_denpot,gpsi(:,:,ispinor,2),dummy_fofgout,&
 &       dpsidr(:,:,:,:,ispinor,2),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,dtset%paral_kgb,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      FT Gpsi_z to real space
        call fourwf(cplex,dummy_denpot,gpsi(:,:,ispinor,3),dummy_fofgout,&
 &       dpsidr(:,:,:,:,ispinor,3),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,dtset%paral_kgb,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      FT psi to real space
        call fourwf(cplex,dummy_denpot,psi(:,:,ispinor),dummy_fofgout,&
 &       psi_r(:,:,:,:,ispinor),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,dtset%paral_kgb,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
 
      end do ! ispinor
 
@@ -622,13 +615,6 @@ end subroutine spin_current
 
 subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vso_realspace_local'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -683,7 +669,7 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
 !
 !v_SO^l (r,r)  = sum_ij  p_i^l (r) k_{ij}^l p_j^l(r) sum_m Y_{lm} (\hat{r}) Y^{*}_lm (\hat{r})
 != (2l+1)/4\pi sum_ij  p_i^l (r) k_{ij}^l p_j^l(r) (eq B.17 Patrick Rinke thesis)
-!p are gaussian projectors (from HGH paper prb 58 3641)
+!p are gaussian projectors (from HGH paper prb 58 3641) [[cite:Hartwigsen1998]]
 !sum_l v_SO^l (r,r) is a purely radial quantity (function of |r|), so spline it
 
 !maximum distance needed in unit cell

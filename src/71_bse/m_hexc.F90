@@ -7,7 +7,7 @@
 !! module for excitonic hamiltonian for Haydock
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2019 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 MODULE m_hexc
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
@@ -47,12 +47,12 @@ MODULE m_hexc
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
- use m_wfd,               only : wfd_t,wfd_sym_ur,wfd_get_ur, wfd_change_ngfft
+ use m_wfd,               only : wfd_t
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
- use m_bseinterp,            only : interpolator_t, interpolator_init, interpolator_normalize, &
-&                    interpolator_free, int_alloc_work, int_free_work
+ use m_bseinterp,         only : interpolator_t, interpolator_init, interpolator_normalize, &
+&                                interpolator_free, int_alloc_work, int_free_work
 
  implicit none
 
@@ -246,15 +246,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BSt, QP_BSt, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------
 !scalars
@@ -460,15 +451,6 @@ end subroutine hexc_init
 subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_dense, &
 &    double_grid, Wfd_dense, KS_BSt_dense, QP_BSt_dense, Psps, Pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_interp_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
 !scalars
  integer,intent(in) :: method
@@ -622,16 +604,6 @@ end subroutine hexc_interp_init
 
 subroutine hexc_build_hinterp(hexc,hexc_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_build_hinterp'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_t),intent(inout) :: hexc
  type(hexc_interp_t),intent(inout) :: hexc_i
@@ -712,15 +684,6 @@ end subroutine hexc_build_hinterp
 
 subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
 &  interpolator,kdense2div,work_coeffs,Cmat,ikp_dense,overlaps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_compute_subhinterp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -850,15 +813,6 @@ end subroutine hexc_compute_subhinterp
 subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coarse,&
 &  interpolator,kdense2div,acoeffs,bcoeffs,ccoeffs,Kmesh_dense,Vcp_dense,gmet,hinterp,&
 &  m3_width)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_compute_hinterp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1252,19 +1206,8 @@ end subroutine hexc_compute_hinterp
 
 subroutine hexc_free(hexc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_t),intent(inout) :: hexc
-
-!Local variables ---------------------
 
 !*****************************************************************************
 
@@ -1314,19 +1257,8 @@ end subroutine hexc_free
 
 subroutine hexc_interp_free(hexc_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_interp_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_interp_t),intent(inout) :: hexc_i
-
-!Local variables ---------------------
 
 !*****************************************************************************
 
@@ -1409,15 +1341,6 @@ end subroutine hexc_interp_free
 
 subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 &   nbnd_coarse,interpolator,div2kdense,kdense2div)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_interp_matmul'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1730,15 +1653,6 @@ end subroutine hexc_interp_matmul
 
 subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_matmul_tda'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
@@ -1806,15 +1720,6 @@ end subroutine hexc_matmul_tda
 
 subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_matmul_elphon'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_t),intent(in) :: hexc
  character,intent(in) :: op
@@ -1877,15 +1782,6 @@ end subroutine hexc_matmul_elphon
 !! SOURCE
 
 subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_matmul_full'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------
  integer,intent(in) :: parity

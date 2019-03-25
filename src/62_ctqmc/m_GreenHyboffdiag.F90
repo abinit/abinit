@@ -10,7 +10,7 @@
 !!  Manage a green function for one orbital
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (B.Amadon, J. Denier and J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (B.Amadon, J. Denier and J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,7 +66,7 @@ MODULE m_GreenHyboffdiag
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -172,7 +172,7 @@ CONTAINS
 !!  Initialize and allocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -199,13 +199,6 @@ CONTAINS
 !! SOURCE
 
 SUBROUTINE GreenHyboffdiag_init(op, samples, beta,nflavors,iTech,MY_COMM)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_init'
-!End of the abilint section
 
 
 #ifdef HAVE_MPI1
@@ -312,7 +305,7 @@ END SUBROUTINE GreenHyboffdiag_init
 !!  reset green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -337,13 +330,6 @@ END SUBROUTINE GreenHyboffdiag_init
 SUBROUTINE GreenHyboffdiag_reset(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_reset'
-!End of the abilint section
-
   TYPE(GreenHyboffdiag)     , INTENT(INOUT) :: op
 
   CALL GreenHyboffdiag_clear(op)
@@ -363,7 +349,7 @@ END SUBROUTINE GreenHyboffdiag_reset
 !!  clear green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -388,13 +374,6 @@ END SUBROUTINE GreenHyboffdiag_reset
 SUBROUTINE GreenHyboffdiag_clear(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_clear'
-!End of the abilint section
-
   TYPE(GreenHyboffdiag)     , INTENT(INOUT) :: op
   INTEGER :: iflavor,iflavorbis
 
@@ -428,7 +407,7 @@ END SUBROUTINE GreenHyboffdiag_clear
 !!  set Green function in frequencies
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -454,13 +433,6 @@ END SUBROUTINE GreenHyboffdiag_clear
 SUBROUTINE GreenHyboffdiag_setOperW(op, Gomega)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_setOperW'
-!End of the abilint section
-
   TYPE(GreenHyboffdiag)          , INTENT(INOUT) :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN   ) :: Gomega
 !Loval variables ------------------------------
@@ -491,7 +463,7 @@ END SUBROUTINE GreenHyboffdiag_setOperW
 !!  Measure Green's function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -519,13 +491,6 @@ END SUBROUTINE GreenHyboffdiag_setOperW
 SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalue,activeflavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_measHybrid'
-!End of the abilint section
-
   TYPE(GreenHyboffdiag)    , INTENT(INOUT) :: op
   TYPE(MatrixHyb)   , INTENT(IN   ) :: Mmatrix
   TYPE(ListCdagC)   , INTENT(IN   ) :: ListCdagC_1(op%nflavors)
@@ -855,7 +820,7 @@ END SUBROUTINE GreenHyboffdiag_measHybrid
 !!  reduce green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -880,13 +845,6 @@ END SUBROUTINE GreenHyboffdiag_measHybrid
 SUBROUTINE GreenHyboffdiag_getHybrid(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_getHybrid'
-!End of the abilint section
-
   TYPE(GreenHyboffdiag), INTENT(INOUT) :: op
 
   IF ( op%set .EQV. .FALSE. ) &
@@ -919,7 +877,7 @@ END SUBROUTINE GreenHyboffdiag_getHybrid
 !!  impose number of electrons for this flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -945,13 +903,6 @@ END SUBROUTINE GreenHyboffdiag_getHybrid
 SUBROUTINE GreenHyboffdiag_setN(op,N)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_setN'
-!End of the abilint section
-
   TYPE(GreenHyboffdiag)    , INTENT(INOUT)    :: op
   DOUBLE PRECISION  , INTENT(IN   )    :: N(op%nflavors)
   INTEGER :: iflavor,iflavor2
@@ -996,7 +947,7 @@ END SUBROUTINE GreenHyboffdiag_setN
 !!  Set first moments for G
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1026,13 +977,6 @@ SUBROUTINE GreenHyboffdiag_setMuD1(op,iflavor,iflavor2,mu,d1)
 !Arguments ------------------------------------
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_setMuD1'
-!End of the abilint section
-
   DOUBLE PRECISION, INTENT(IN   ) :: mu
   DOUBLE PRECISION, INTENT(IN   ) :: d1
   INTEGER         , INTENT(IN   ) :: iflavor
@@ -1068,7 +1012,7 @@ END SUBROUTINE GreenHyboffdiag_setMuD1
 !!  Compute full moments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1096,13 +1040,6 @@ END SUBROUTINE GreenHyboffdiag_setMuD1
 SUBROUTINE GreenHyboffdiag_setMoments(op,iflavor1,iflavor1b,u1,u2,u3)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_setMoments'
-!End of the abilint section
-
   TYPE(GreenHyboffdiag)  , INTENT(INOUT) :: op
   DOUBLE PRECISION, INTENT(IN   ) :: u1
   DOUBLE PRECISION, INTENT(IN   ) :: u2
@@ -1142,7 +1079,7 @@ END SUBROUTINE GreenHyboffdiag_setMoments
 !!  perform back fourier transform
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1168,13 +1105,6 @@ END SUBROUTINE GreenHyboffdiag_setMoments
 SUBROUTINE GreenHyboffdiag_backFourier(op,dvgc,func,hybri_limit,opt_hybri_limit)
 
  use m_fstrings,       only : int2char4
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_backFourier'
-!End of the abilint section
-
 
 #ifdef HAVE_MPI1
 include 'mpif.h'
@@ -1499,7 +1429,7 @@ END SUBROUTINE GreenHyboffdiag_backFourier
 !!  perform forward fourier transform
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1526,13 +1456,6 @@ END SUBROUTINE GreenHyboffdiag_backFourier
 
 SUBROUTINE GreenHyboffdiag_forFourier(op, Gomega, omega, Wmax)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_forFourier'
-!End of the abilint section
-
 
 #ifdef HAVE_MPI1
 include 'mpif.h'
@@ -1825,7 +1748,7 @@ END SUBROUTINE GreenHyboffdiag_forFourier
 !!  print Green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1851,13 +1774,6 @@ END SUBROUTINE GreenHyboffdiag_forFourier
 SUBROUTINE GreenHyboffdiag_print(op, ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_print'
-!End of the abilint section
-
   TYPE(GreenHyboffdiag), INTENT(IN) :: op
   INTEGER, OPTIONAL , INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -1903,7 +1819,7 @@ END SUBROUTINE GreenHyboffdiag_print
 !!  destroy green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1928,13 +1844,6 @@ END SUBROUTINE GreenHyboffdiag_print
 SUBROUTINE GreenHyboffdiag_destroy(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyboffdiag_destroy'
-!End of the abilint section
-
   TYPE(GreenHyboffdiag), INTENT(INOUT) :: op
   INTEGER :: iflavor,iflavorbis
 
@@ -1989,13 +1898,6 @@ END SUBROUTINE GreenHyboffdiag_destroy
 !       include 'param.dat'
 !       use defs_basis
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nfourier3'
-!End of the abilint section
-
        integer, intent(in) :: Iwmax,L
        logical, intent(in)  :: lflag
        real*8, intent(in) :: beta,AA,c1,c2,c3

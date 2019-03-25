@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2018 ABINIT group (XG)
+# Copyright (C) 1998-2019 ABINIT group (XG)
 # 
 # The purpose of this script is to change some
 # expression by another in a whole set of files
@@ -8,11 +8,10 @@
 for file in "$@"
 do
  echo "working on $file"
- rm -f tmp.file  tmp.file2
- sed -e 's!53_spacepar!54_spacepar!' $file > tmp.file
- sed -e 's!54_abiutil!55_abiutil!' tmp.file > tmp.file2
+ rm -f tmp.file 
+ sed -e 's!2018 ABINIT!2019 ABINIT!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
- mv tmp.file2 $file
+ mv tmp.file $file
  echo "file $file written "
 done

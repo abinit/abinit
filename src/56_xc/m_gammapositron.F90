@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (MT,GJ)
+!!  Copyright (C) 1998-2019 ABINIT group (MT,GJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@ module m_gammapositron
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_electronpositron
 
@@ -58,10 +58,10 @@ contains
 !!  grhocore2(ngr)=square of the gradient of core electronic density rhocore (needed for GGA)
 !!  grhoe2(ngr)=square of the gradient of valence electronic density rhoer (needed for GGA)
 !!  igamma=type of enhancement factor:
-!!     1:  Boronski and Nieminen [1]
-!!     2:  Boronski and Nieminen, RPA limit [1]
-!!     3:  Sterne and Kaiser [2]
-!!     4:  Puska, Seitsonen and Nieminen [3]
+!!     1:  Boronski and Nieminen [2]
+!!     2:  Boronski and Nieminen, RPA limit [2]
+!!     3:  Sterne and Kaiser [3]
+!!     4:  Puska, Seitsonen and Nieminen [4]
 !!     See references below
 !!  ngr=size of grho2 array (0 if LDA, npt if GGA)
 !!  npt=number of real space points on which density is provided
@@ -77,10 +77,11 @@ contains
 !!
 !! NOTES
 !!   References for electron-positron correlation functionals:
-!!         [1] Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986).
-!!         [2] P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991).
-!!         [3] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994).
-!!         [4] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)
+!!         [1] J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979) [[cite:Arponen1979a]].
+!!         [2] E. Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986) [[cite:Boronski1986]].
+!!         [3] P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991) [[cite:Sterne1991]].
+!!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994) [[cite:Puska1994]].
+!!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
 !!
 !! PARENTS
 !!      gammapositron_fft,poslifetime,posratecore
@@ -91,13 +92,6 @@ contains
 !! SOURCE
 
 subroutine gammapositron(gamma,grhocore2,grhoe2,igamma,ngr,npt,rhocore,rhoer,rhopr,usecore)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gammapositron'
-!End of the abilint section
 
  implicit none
 
@@ -317,13 +311,6 @@ end subroutine gammapositron
 
 subroutine gammapositron_fft(electronpositron,gamma,gprimd,igamma,mpi_enreg,&
 &                            n3xccc,nfft,ngfft,rhor_e,rhor_p,xccc3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gammapositron_fft'
-!End of the abilint section
 
  implicit none
 

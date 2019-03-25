@@ -28,7 +28,6 @@ nstep 20
 tolvrs 1.0d-9
 iscf 17 # Needed for electron-positron
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

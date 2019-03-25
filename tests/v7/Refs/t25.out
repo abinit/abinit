@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -361,6 +361,7 @@ P           mkmem           8
   Number of (i,j) elements for PAW+U or EXX .....    3
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -404,6 +405,7 @@ P           mkmem           8
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -445,6 +447,7 @@ P           mkmem           8
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -805,7 +808,7 @@ P           mkmem           8
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Screened Coulomb interaction calculations: cRPA implementation and applications 
 - to dynamical screening and self-consistency in uranium dioxide and cerium

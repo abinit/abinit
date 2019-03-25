@@ -8,7 +8,7 @@
 !! thermodynamical properties, Debye-Waller factor, and atomic mean square velocity
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (CL, XG)
+!!  Copyright (C) 2008-2019 ABINIT group (CL, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_harmonic_thermo
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_sortph
  use m_xmpi
 
@@ -41,6 +41,7 @@ module m_harmonic_thermo
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_ifc,            only : ifc_type, ifc_fourq
  use m_kpts,           only : smpbz
+ use m_symkpt,     only : symkpt
 
  implicit none
 
@@ -92,15 +93,6 @@ contains
 !! SOURCE
 
 subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,thmflag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonic_thermo'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
-!End of the abilint section
 
  implicit none
 
@@ -571,7 +563,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              factor=dble(3*natom)*phon_dos(iomega)
              factorw=3*natom*gw(iomega,iwchan)
 
-!            This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
+!            This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995) [[cite:Lee1995]]
              free(itemper)=free(itemper) +factor*kb_HaK*tmp*ln2shx
              energy(itemper)=energy(itemper) + factor*kb_HaK*tmp*wovert*cothx
              entropy(itemper)=entropy(itemper) + factor*kb_HaK*(wovert*cothx - ln2shx)

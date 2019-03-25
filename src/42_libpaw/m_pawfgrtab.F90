@@ -10,7 +10,7 @@
 !!  for a given atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2019 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -184,13 +184,6 @@ CONTAINS
 subroutine pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,nspden,typat,&
 &                         mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgrtab_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -283,13 +276,6 @@ end subroutine pawfgrtab_init
 
 subroutine pawfgrtab_free(Pawfgrtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgrtab_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -363,13 +349,6 @@ end subroutine pawfgrtab_free
 
 subroutine pawfgrtab_nullify(Pawfgrtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgrtab_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -384,7 +363,7 @@ subroutine pawfgrtab_nullify(Pawfgrtab)
 
 !@Pawfgrtab_type
 
-! MGPAW: This one could be removed/renamed, 
+! MGPAW: This one could be removed/renamed,
 ! variables can be initialized in the datatype declaration
 ! Do we need to expose this in the public API?
 
@@ -434,13 +413,6 @@ end subroutine pawfgrtab_nullify
 
 subroutine pawfgrtab_copy(pawfgrtab_in,pawfgrtab_cp, &
 &                         mpi_atmtab,comm_atom) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgrtab_copy'
-!End of the abilint section
 
  implicit none
 
@@ -597,14 +569,6 @@ end subroutine pawfgrtab_copy
 
 subroutine pawfgrtab_print(Pawfgrtab,natom,unit,prtvol,mode_paral,mpi_atmtab,comm_atom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgrtab_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -714,13 +678,6 @@ end subroutine pawfgrtab_print
 
 subroutine pawfgrtab_gather(pawfgrtab,pawfgrtab_gathered,comm_atom,istat, &
 &                           mpi_atmtab) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgrtab_gather'
-!End of the abilint section
 
  implicit none
 
@@ -1013,8 +970,6 @@ end subroutine pawfgrtab_gather
 !! pawfgrtab_redistribute
 !!
 !! FUNCTION
-!!
-!! FUNCTION
 !!   Redistribute an array of pawfgrtab datastructures
 !!   Input pawfgrtab is given on a MPI communicator
 !!   Output pawfgrtab is redistributed on another MPI communicator
@@ -1054,13 +1009,6 @@ end subroutine pawfgrtab_gather
 subroutine pawfgrtab_redistribute(pawfgrtab,mpi_comm_in,mpi_comm_out,&
 &                    natom,mpi_atmtab_in,mpi_atmtab_out,pawfgrtab_out,&
 &                    SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgrtab_redistribute'
-!End of the abilint section
 
  implicit none
 
@@ -1402,13 +1350,6 @@ end subroutine pawfgrtab_redistribute
 
 subroutine pawfgrtab_isendreceive_getbuffer(pawfgrtab,npawfgrtab_send,atm_indx_recv,buf_int,buf_dp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgrtab_isendreceive_getbuffer'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -1554,13 +1495,6 @@ end subroutine pawfgrtab_isendreceive_getbuffer
 !!
 subroutine pawfgrtab_isendreceive_fillbuffer(pawfgrtab, atmtab_send,atm_indx_send,npawfgrtab_send,&
 &                                            buf_int,buf_int_size,buf_dp,buf_dp_size)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgrtab_isendreceive_fillbuffer'
-!End of the abilint section
 
 implicit none
 

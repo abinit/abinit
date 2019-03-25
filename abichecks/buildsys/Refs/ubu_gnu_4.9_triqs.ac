@@ -370,7 +370,7 @@ CXXFLAGS="-std=c++1y"
 # Forced Fortran linker libraries
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FC_LIBS="-lsvml"
+FC_LIBS="-L/usr/local/hdf5_mpich/lib -lhdf5 -lhdf5_hl"
 
                        # ------------------------------ #
 
@@ -492,7 +492,7 @@ enable_mpi="yes"
 enable_mpi_io="yes"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
-# change the default values of accesswff)   
+# change the default values of iomode)   
 # Beware that not all the features of Abinit support MPI-IO,
 # This options is mainly used by developers for debugging purposes.
 #
@@ -711,25 +711,25 @@ with_trio_flavor="netcdf"
 
 # Include flags for the psml library (default is unset)
 #
-#with_psml_incs="-I/usr/local/include/psml"
+with_psml_incs="-I${FALLBACKS_PATH}/xmlf90/1.5.3.1/include -I${FALLBACKS_PATH}/libpsml/1.1.7/include"
 
 # Link flags for the psml library (default is unset)
 #
-#with_psml_libs="-L/usr/local/lib/psml -lpsml"
+with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.7/lib -lpsml -L${FALLBACKS_PATH}/xmlf90/1.5.3.1/lib -lxmlf90"
 
                        # ------------------------------ #
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/netcdf/include -I/usr/local/hdf5_mpich/include"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/netcdf/lib -lnetcdff -lnetcdf -L/usr/local/hdf5_mpich/lib -lhdf5_hl -lhdf5"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
-# change the default values of accesswff)   
+# change the default values of iomode)   
 #
 enable_netcdf_default="yes"
 
@@ -947,17 +947,17 @@ with_dft_flavor="libxc"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
@@ -991,8 +991,11 @@ with_libxc_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lxcf90 -lxc"
 
 # Link with TRIQS library (for CTQMC and rotationally invariant interaction)
 #    (default is no)
+#    Different versions of TRIQS have differents API. Choose your installed 
+#    version.
 #
-enable_triqs="yes"
+#enable_triqs_v2_0="no"
+enable_triqs_v1_4="yes"
 #
 # Include flags for the TRIQS library (default is unset)
 #

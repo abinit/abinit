@@ -7,7 +7,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (AM)
+!! Copyright (C) 2010-2019 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@ module m_fit_data
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_geometry,     only : metric
  
@@ -148,7 +148,7 @@ CONTAINS  !=====================================================================
 !! ntime = Number of time (number of snapshot, number of md step...)
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and 
 !!                        fixed part of the model (more often harmonic part)
-!! sqomega(ntime) =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega(ntime) =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !! ucvol(ntime) = Volume of the system for each time
 !! ts<training_set_type> = datatype with the information about the training set
 !!
@@ -166,13 +166,6 @@ subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_data_init'
-!End of the abilint section
-
  integer,intent(in) :: natom,ntime
 !arrays
  real(dp),intent(in) :: energy_diff(ntime),fcart_diff(3,natom,ntime)
@@ -241,13 +234,6 @@ end subroutine fit_data_init
 
 subroutine fit_data_free(fit_data)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_data_free'
-!End of the abilint section
-
  implicit none
   
 !Arguments ------------------------------------
@@ -288,7 +274,7 @@ end subroutine fit_data_free
 !! Compute the displacmeent of each configuration.
 !! Compute the variation of the displacement due to strain of each configuration.
 !! Compute fixed forces and stresse and get the standard deviation.
-!! Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012).
+!! Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !!
 !! INPUTS
 !! eff_pot<type(effective_potential)> = effective potential
@@ -313,13 +299,6 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  use m_effective_potential,only : effective_potential_getDisp
  use m_abihist, only : abihist
  use m_strain,only : strain_type,strain_get
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_data_compute'
-!End of the abilint section
-
  implicit none
   
 !Arguments ------------------------------------
@@ -461,7 +440,7 @@ end subroutine fit_data_compute
 !! natom = number of atoms
 !! ntime = number of time step
 !! strain(6,ntime) = Strain
-!! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !! ucvol(ntime) = Volume of the supercell for each time (Bohr^3)
 !!
 !! OUTPUT
@@ -478,13 +457,6 @@ subroutine training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'training_set_init'
-!End of the abilint section
-
  integer,intent(in) :: natom,ntime
 !arrays
  real(dp),intent(in) :: displacement(3,natom,ntime),du_delta(6,3,natom,ntime)
@@ -541,13 +513,6 @@ end subroutine training_set_init
 !! SOURCE
 
 subroutine training_set_free(ts)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'training_set_free'
-!End of the abilint section
 
  implicit none
   

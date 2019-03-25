@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE, FB)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +26,12 @@
 module m_pred_bfgs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_xfpack
  use m_lbfgs
+ use m_errors
 
  use m_geometry,    only : mkrdim, fcart2fred, metric
  use m_bfgs,        only : hessinit, hessupdt, brdene
@@ -72,7 +73,7 @@ contains
 !! Conduct structural optimization using the Broyden-Fletcher-
 !! Goldfarb-Shanno minimization (BFGS), modified to take into
 !! account the total energy as well as the gradients (as in usual
-!! BFGS). See the paper by Schlegel, J. Comp. Chem. 3, 214 (1982).
+!! BFGS). See the paper by Schlegel, J. Comp. Chem. 3, 214 (1982) [[cite:Schlegel1982]].
 !! Might be better than ionmov=2 for few degrees of freedom (less than 3 or 4)
 !!
 !! INPUTS
@@ -98,13 +99,6 @@ contains
 !! SOURCE
 
 subroutine pred_bfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_bfgs'
-!End of the abilint section
 
 implicit none
 
@@ -603,13 +597,6 @@ end subroutine pred_bfgs
 
 subroutine pred_lbfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_lbfgs'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -622,6 +609,7 @@ integer,intent(in) :: itime
 integer,intent(in) :: ionmov
 integer,intent(in) :: iexit
 logical,intent(in) :: zDEBUG
+character(len=500) :: ionmov22_errmsg
 
 !Local variables-------------------------------
 !scalars
@@ -893,6 +881,13 @@ real(dp) :: strten(6)
  vin_prev(:) = vin
  vout_prev(:) = vout
  info = lbfgs_execute(vin,etotal,vout)
+
+ if (info /= 1) then
+   write (ionmov22_errmsg, '(a,i0,3a)') &
+    'Lbfgs routine failed. Returned value: ', info,ch10, &
+    'Restart your calculation from last step or try a different ionmov'
+   MSG_ERROR_CLASS(ionmov22_errmsg, "Ionmov22Error")
+ end if
 
 !zDEBUG (vin,vout after prediction)
  if(zDEBUG)then

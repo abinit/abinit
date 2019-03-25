@@ -12,25 +12,34 @@ This tutorial aims at showing how to get the following physical properties, for 
   * Frequency dependent second order nonlinear susceptibility tensor
 
 in the simple *Random-Phase Approximation* or *Sum-over-states* approach.
-This tutorial will help you to understand and make use of the [[help:optic]].
+This tutorial will help you to understand and make use of *optic*.
+Before starting, you should first have some theoretical background.
+We strongly suggest that you first read the first two sections of the [[help:optic]].
+
+[TUTORIAL_README]
 
 This tutorial should take about 1 hour.
 
 ## Computing the momentum matrix elements
 
-*Before beginning, you might consider working in a different subdirectory from
-for the other tutorials. Why not create "Work_optic" in ~abinit/tests/tutorespfn/Input?*
+*Before beginning, you might consider working in a different subdirectory.
+Why not create Work_optic?*
 
-In order to use the Optic utility, you should first have some theoretical background.
-We strongly suggest that you first read the first two sections of the [[help:optic]].
+We also need to copy *toptic_1.files* and *toptic_1.in* from 
+*$ABI_TUTORIAL/Input* to *Work_optic*.
+
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_optic
+cd Work_optic
+cp ../toptic_1.files . 
+cp ../toptic_1.in .
+```
 
 Now, you are ready to run Abinit and prepare the files needed for Optic.
-
-Copy the files ~abinit/tests/tutorespfn/Input/toptic_1.files and
-~abinit/tests/tutorespfn/Input/toptic_1.in to "Work_optic".
 Issue:
 
-    abinit < toptic_1.files >& log
+    abinit < toptic_1.files > log 2> err
 
 We now examine the files.
 
@@ -55,7 +64,7 @@ The fourth to sixth datasets correspond to the computation of the ddk matrix ele
 that is, matrix elements of the $\partial/\partial k$ operators.
 Note that the number of bands is the same as for datasets 2 and 3.
 Note also that these are non-self-consistent calculations, moreover,
-restricted to [[nstep]]=1 and [[nline]]=0.
+restricted to [[nstep]] = 1 and [[nline]] = 0.
 Indeed, only the matrix elements between explicitly computed states are required.
 Using a larger nstep would lead to a full computation of the derivative of the wavefunction with respect to
 the wavevector, while in Optic, only the matrix elements are needed.
@@ -69,8 +78,8 @@ Moreover, we emphasize that in general the results of a sum-over-states approach
 typically converges quite slowly with the k point mesh. Thus it is of extra importance to
 test convergence carefully.
 
-The run takes less than one minute on a 2.8 GHz PC. The files toptic_1o_DS3_WFK,
-toptic_1o_DS4_1WF7, toptic_1o_DS5_1WF8 and toptic_1o_DS6_1WF9 are the four
+The run takes less than one minute on a 2.8 GHz PC. The files *toptic_1o_DS3_WFK*,
+*toptic_1o_DS4_1WF7*, *toptic_1o_DS5_1WF8* and *toptic_1o_DS6_1WF9* are the four
 files requested for the Optic run.
 The first file contains the wavefunctions for the filled and empty states in the entire
 Brillouin zone, while the latter three contain the matrix elements of the
@@ -87,19 +96,23 @@ response (up to second order in the current implementation) for the material und
 
 First, read the [[help:optic#input|section 3]] of the Optic help file.
 
-Copy the files ~abinit/tests/tutorespfn/Input/toptic_2.files and
-~abinit/tests/tutorespfn/Input/toptic_2.in in "Work_optic".
+Copy the files *toptic_2.files* and *toptic_2.in* from *$ABI_TUTORIAL/Input* to *Work_optic*:
 
-The toptic_2.in is your input file. You should edit it and read it carefully. For
+```sh
+cp ../toptic_2.files .
+cp ../toptic_2.in .
+```
+
+The *toptic_2.in* is your input file. You should edit it and read it carefully. For
 help on various input parameters in this file, please see the [[help:optic]].
 
 {% dialog tests/tutorespfn/Input/toptic_2.in %}
 
 When you have read the input file, you can run the code, as usual, using the
-following command (assuming optic can be accessed thanks to *optic* - copy the
+following command (assuming optic is in $PATH - copy the
 executable in the current directory if needed):
 
-    optic < toptic_2.files > log &
+    optic < toptic_2.files > log 2> err &
 
 It will take a few seconds to run. You have produced numerous output files.
 Now, you can examine some of these output files.
@@ -140,7 +153,7 @@ and the Real part with:
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `--expose` option to visualize the results stored in the OPTIC.nc file:
 
         abiopen.py toptic_2_OPTIC.nc --expose -sns=paper
@@ -154,28 +167,27 @@ For comparison, we have included in the tutorial, three files that have been
 obtained with a much better k point sampling (still with a low cut-off energy
 and a number of bands that should be larger). You can visualize them as follows:
 
-    xmgrace ~abinit/doc/tutorial/optic_assets/toptic_ref_0001_0001-linopt.out
+    xmgrace $ABI_HOME/doc/tutorial/optic_assets/toptic_ref_0001_0001-linopt.out
 
 for the linear optics, obtained with a 28x28x28 grid (keeping everything else fixed), and
 
-    xmgrace ~abinit/doc/tutorial/optic_assets/toptic_ref_0001_0002_0003-ChiTotIm.out
+    xmgrace $ABI_HOME/doc/tutorial/optic_assets/toptic_ref_0001_0002_0003-ChiTotIm.out
 
 as well as
 
-    xmgrace ~abinit/doc/tutorial/optic_assets/toptic_ref_0001_0002_0003-ChiTotRe.out
+    xmgrace $ABI_HOME/doc/tutorial/optic_assets/toptic_ref_0001_0002_0003-ChiTotRe.out
 
 for the non-linear optics, obtained with a 18x18x18 grid (keeping everything else fixed).
 
 Concerning the linear spectrum, we will now compare this (underconverged)
-result toptic_ref_0001_0001-linopt.out with experimental data and converged
+result *toptic_ref_0001_0001-linopt.out* with experimental data and converged
 theoretical results.  
 
 The book by Cohen M.L. and Chelikowsky [[cite:Cohen1988]] presents a
 comparison of experimental data with the empirical pseudopotential method
 spectrum. If you do not have access to this book, you can see an experimental
 spectrum in [[cite:Philipp1963]],
-and a theoretical spectrum in [[cite:Huang1993]], as well as
-other sources.
+and a theoretical spectrum in [[cite:Huang1993]], as well as other sources.
 
 We discuss first the imaginary spectrum. Prominent experimental features of
 this spectrum are two peaks located close to 3 eV and 5 eV, both with the same
@@ -184,7 +196,7 @@ gap), and decreases with some wiggles beyond 5.5 eV. Converged theoretical
 spectra also show two peaks at about the same location, although their heights
 are markedly different: about 10 for the first one (at 3 eV), and 25 for the
 second one (at 5 eV). Other features are rather similar to the experimental
-ones. In the linear optic spectrum of toptic_ref_0001_0001-linopt.out, we note
+ones. In the linear optic spectrum of *toptic_ref_0001_0001-linopt.out*, we note
 that there is a shoulder at around 3 eV, and a peak at 4.2 eV, with respective
 approximate heights of 7 and 25. Some comments are in order:
 
@@ -234,7 +246,7 @@ several points that make the calculation easier:
 
 We will focus on the energy range from 0 eV to 8 eV, for which only 5 unoccupied bands are needed.
 
-Copy the files toptic_3.files and toptic_3.in in "Work_optic":
+Copy the files *toptic_3.files* and *toptic_3.in* in *Work_optic*:
 
     cp ../toptic_3.files .
     cp ../toptic_3.in .
@@ -243,9 +255,9 @@ Copy the files toptic_3.files and toptic_3.in in "Work_optic":
 
 Issue:
 
-    abinit < toptic_3.files >& log
+    abinit < toptic_3.files > log 2> err &
 
-Now, examine the file toptic_3.in . There are two important changes with respect to the file toptic_1.in:
+Now, examine the file *toptic_3.in*. There are two important changes with respect to the file *toptic_1.in*:
 
   * the number of unoccupied bands has been reduced, so that the total number of bands is 9 instead of 20
   * when applicable, the value of [[kptopt]] 3 in our previous simulation has been changed to 2,
@@ -253,19 +265,21 @@ Now, examine the file toptic_3.in . There are two important changes with respect
 
 When the run is finished (it is only 8 secs on a 2.8 GHz PC), you can process
 the WFK files and obtain the linear optic spectra.
-Copy the files toptic_4.files and toptic_4.in in "Work_optic":
+Copy the files *toptic_4.files* and *toptic_4.in* in *Work_optic*:
 
     cp ../toptic_4.files .
     cp ../toptic_4.in .
 
-Examine the toptic_4.in file: only the linear optic spectra will be built.
+{% dialog tests/tutorespfn/Input/toptic_4.files tests/tutorespfn/Input/toptic_4.in %}
+
+Examine the *toptic_4.in* file: only the linear optic spectra will be built.
 
 When you have read the input file, you can run the code, as usual using the following command
 
-    optic < toptic_4.files > log &
+    optic < toptic_4.files > log 2> err &
 
-Then, you can visualize the files toptic_2_0001_0001-linopt.out and
-toptic_4_0001_0001-linopt.out using xmgrace and compare them. The spectra
+Then, you can visualize the files *toptic_2_0001_0001-linopt.out* and
+*toptic_4_0001_0001-linopt.out* using xmgrace and compare them. The spectra
 looks completely identical. However, a careful look at these files, by editing
 them, show that indeed, the imaginary part is very similar:
 
@@ -289,7 +303,7 @@ But the real parts differ slightly (this is seen at lines 1007 and beyond):
         3.265366E-02    1.186758E+01
       ...
 
-for toptic_2_0001_0001-linopt.out and
+for *toptic_2_0001_0001-linopt.out* and
 
      # Energy(eV)         Re(eps(w))
         8.163415E-03    1.177773E+01
@@ -298,8 +312,9 @@ for toptic_2_0001_0001-linopt.out and
         3.265366E-02    1.177854E+01
       ...
 
-for toptic_4_0001_0001-linopt.out. This small difference is due to the number
-of bands ([[nband]] 20 for toptic_2_0001_0001-linopt.out and [[nband]] 9 for toptic_4_0001_0001-linopt.out).
+for *toptic_4_0001_0001-linopt.out*. 
+This small difference is due to the number
+of bands ([[nband]] 20 for *toptic_2_0001_0001-linopt.out* and [[nband]] 9 for *toptic_4_0001_0001-linopt.out*).
 
 Then, you can increase the number of k points, and watch the change in the
 imaginary part of the spectrum. There will be more and more peaks, until they

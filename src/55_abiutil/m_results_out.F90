@@ -8,7 +8,7 @@
 !!  to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MT)
+!! Copyright (C) 2008-2019 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@ MODULE m_results_out
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  implicit none
@@ -188,13 +188,6 @@ CONTAINS
 subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
 &          mxnatom,mxnband,mxnkpt,mxnpsp,mxnsppol,mxntypat,results_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_out'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -323,7 +316,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
              ABI_DEALLOCATE(tmp)
            end if
            if (nocc_>0) then
-             results_out(ii)%occ(1:nocc_,jj)=dtsets(ii)%occ_orig(1:nocc_)
+             results_out(ii)%occ(1:nocc_,jj)=dtsets(ii)%occ_orig(1:nocc_,kk)
            end if
          end do
        end if
@@ -362,13 +355,6 @@ end subroutine init_results_out
 !! SOURCE
 
 subroutine destroy_results_out(results_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_out'
-!End of the abilint section
 
  implicit none
 
@@ -463,13 +449,6 @@ end subroutine destroy_results_out
 !! SOURCE
 
 subroutine copy_results_out(results_out_in,results_out_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_results_out'
-!End of the abilint section
 
  implicit none
 
@@ -620,13 +599,6 @@ end subroutine copy_results_out
 
 subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all,&
 &                             master,allgather,only_one_per_img) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gather_results_out'
-!End of the abilint section
 
  implicit none
 

@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2019 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 module m_pimd_langevin
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_pimd
  use m_random_zbq
@@ -91,8 +91,8 @@ contains
 !!
 !! NOTES
 !!  Here follows PIMD in the NPT ensemble within the Langevin barostat algorithm
-!!  of Quigley and Probert: J. Chem. Phys. 120, 11432 (2004)
-!!  and Comput. Phys. Comm. 169, 322 (2005)
+!!  of Quigley and Probert: J. Chem. Phys. 120, 11432 (2004) [[cite:Quigley2004]]
+!!  and Comput. Phys. Comm. 169, 322 (2005) [[cite:Quigley2005]]
 !!
 !! PARENTS
 !!      predict_pimd
@@ -108,13 +108,6 @@ contains
 subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_cell,&
 &          volume,xred,xred_next,xred_prev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_langevin_npt'
-!End of the abilint section
 
  implicit none
 
@@ -529,7 +522,7 @@ end subroutine pimd_langevin_npt
 !!    at output, values at time t+dt
 !!
 !! NOTES
-!!   See Quigley,Probert, JCP 120, 11432 (2004), part III
+!!   See Quigley,Probert, JCP 120, 11432 (2004) [[cite:Quigley2004]], part III
 !!
 !! PARENTS
 !!      predict_pimd
@@ -545,13 +538,6 @@ end subroutine pimd_langevin_npt
 
 subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &                            rprimd,stressin,trotter,vel,volume,xred,xred_next,xred_prev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_langevin_nvt'
-!End of the abilint section
 
  implicit none
 

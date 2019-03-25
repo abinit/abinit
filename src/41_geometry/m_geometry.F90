@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
+!! Copyright (C) 2008-2019 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 MODULE m_geometry
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_sort
@@ -116,14 +116,6 @@ CONTAINS  !===========================================================
 function normv_rdp_vector(xv,met,space) result(res)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normv_rdp_vector'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp) :: res
@@ -167,14 +159,6 @@ end function normv_rdp_vector
 
 function normv_int_vector(xv,met,space) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normv_int_vector'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -220,14 +204,6 @@ end function normv_int_vector
 
 function normv_int_vector_array(xv,met,space) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normv_int_vector_array'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -275,14 +251,6 @@ end function normv_int_vector_array
 
 function normv_rdp_vector_array(xv,met,space) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normv_rdp_vector_array'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -338,14 +306,6 @@ end function normv_rdp_vector_array
 
 function vdotw_rr_vector(xv,xw,met,space) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdotw_rr_vector'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -404,14 +364,6 @@ end function vdotw_rr_vector
 function vdotw_rc_vector(xv,xw,met,space) result(res)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdotw_rc_vector'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc) :: res
@@ -467,14 +419,6 @@ end function vdotw_rc_vector
 subroutine acrossb(a,b,c)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'acrossb'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !arrays
  real(dp),intent(in) :: a(3),b(3)
@@ -520,7 +464,7 @@ end subroutine acrossb
 !!  ndegen(npts)=Weigths associated to each point.
 !!
 !! SIDE EFFECTS
-!!  In input irvec and ndegen are NULL pointers. They are allocated with the correct
+!!  irvec and ndegen are are allocated with the correct
 !!  size inside the routine and returned to the caller.
 !!
 !! NOTES
@@ -539,17 +483,8 @@ end subroutine acrossb
 !!
 !! SOURCE
 
-subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
+subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wigner_seitz'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -557,7 +492,7 @@ subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
  integer,intent(out) :: npts
 !arrays
  integer,intent(in) :: kptrlatt(3,3),lmax(3)
- integer,pointer :: irvec(:,:),ndegen(:)
+ integer,allocatable,intent(out) :: irvec(:,:),ndegen(:)
  real(dp),intent(in) :: center(3),rmet(3,3)
 
 !Local variables-------------------------------
@@ -565,16 +500,15 @@ subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
  integer :: in1,in2,in3,l1,l2,l3,ii,icount,n1,n2,n3
  integer :: l0,l1_max,l2_max,l3_max,nl,verbose,mm1,mm2,mm3
  real(dp) :: tot,dist_min
- real(dp),parameter :: TOL_DIST=tol6
+ real(dp),parameter :: TOL_DIST=tol7
  character(len=500) :: msg
 !arrays
  real(dp) :: diff(3)
- real(dp),allocatable :: dist(:)
- real(dp),allocatable :: swap2(:,:),swap1(:)
+ real(dp),allocatable :: dist(:),swap2(:,:),swap1(:)
 
 ! *************************************************************************
 
- verbose=0; if (PRESENT(prtvol)) verbose=prtvol
+ verbose = 0; if (PRESENT(prtvol)) verbose = prtvol
 
  if (kptrlatt(1,2)/=0 .or. kptrlatt(2,1)/=0 .or. &
 &    kptrlatt(1,3)/=0 .or. kptrlatt(3,1)/=0 .or. &
@@ -582,56 +516,56 @@ subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
    MSG_ERROR('Off-diagonal elements of kptrlatt must be zero')
  end if
 
- n1=kptrlatt(1,1)
- n2=kptrlatt(2,2)
- n3=kptrlatt(3,3)
+ n1 = kptrlatt(1,1)
+ n2 = kptrlatt(2,2)
+ n3 = kptrlatt(3,3)
 
- l1_max=lmax(1)
- l2_max=lmax(2)
- l3_max=lmax(3)
+ l1_max = lmax(1)
+ l2_max = lmax(2)
+ l3_max = lmax(3)
 
  nl=(2*l1_max+1)*(2*l2_max+1)*(2*l3_max+1)
  l0=1+l1_max*(1+(2*l2_max+1)**2+(2*l3_max+1)) ! Index of the origin.
  ABI_MALLOC(dist,(nl))
 
  ! Allocate with maximum size
- mm1=2*n1+1
- mm2=2*n2+1
- mm3=2*n3+1
- ABI_MALLOC(irvec,(3,mm1*mm2*mm3))
- ABI_MALLOC(ndegen,(mm1*mm2*mm3))
+ mm1 = 2 * n1 + 1
+ mm2 = 2 * n2 + 1
+ mm3 = 2 * n3 + 1
+ ABI_MALLOC(irvec, (3, mm1*mm2*mm3))
+ ABI_MALLOC(ndegen, (mm1*mm2*mm3))
 
- npts=0
+ npts = 0
  do in1=-n1,n1
    do in2=-n2,n2
      do in3=-n3,n3
-      !
+
       ! Loop over the nl points R. R=0 corresponds to l1=l2=l3=1, or icount=l0
-      icount=0
+      icount = 0
       do l1=-l1_max,l1_max
         do l2=-l2_max,l2_max
           do l3=-l3_max,l3_max
-            ! * Calculate |r-R-r_0|^2.
-            diff(1)= in1 -l1*n1 -center(1)
-            diff(2)= in2 -l2*n2 -center(2)
-            diff(3)= in3 -l3*n3 -center(3)
-            icount=icount+1
-            dist(icount)=DOT_PRODUCT(diff,MATMUL(rmet,diff))
+            ! Calculate |r - R -r0|^2.
+            diff(1) = in1 - l1 * n1 - center(1)
+            diff(2) = in2 - l2 * n2 - center(2)
+            diff(3) = in3 - l3 * n3 - center(3)
+            icount = icount+1
+            dist(icount) = DOT_PRODUCT(diff, MATMUL(rmet, diff))
           end do
         end do
       end do
 
-      dist_min=MINVAL(dist)
+      dist_min = MINVAL(dist)
 
-      if (ABS(dist(l0)-dist_min)<TOL_DIST) then
-        npts=npts+1
-        ndegen(npts)=0
+      if (ABS(dist(l0) - dist_min) < TOL_DIST) then
+        npts = npts + 1
+        ndegen (npts) = 0
         do ii=1,nl
-          if (ABS(dist(ii)-dist_min)<TOL_DIST) ndegen(npts)=ndegen(npts)+1
+          if (ABS(dist(ii) - dist_min) < TOL_DIST) ndegen(npts) = ndegen(npts) + 1
         end do
-        irvec(1,npts)=in1
-        irvec(2,npts)=in2
-        irvec(3,npts)=in3
+        irvec(1, npts) = in1
+        irvec(2, npts) = in2
+        irvec(3, npts) = in3
       end if
      end do !in3
    end do !in2
@@ -646,19 +580,19 @@ subroutine wigner_seitz(center,lmax,kptrlatt,rmet,npts,irvec,ndegen,prtvol)
    end do
  end if
 
- ! === Check the "sum rule" ===
- tot=zero
+ ! Check the "sum rule"
+ tot = zero
  do ii=1,npts
-   tot=tot+one/ndegen(ii)
+   tot = tot + one/ndegen(ii)
  end do
  if (ABS(tot-(n1*n2*n3))>tol8) then
-   write(msg,'(a,es16.8,a,i5)')'Something wrong in the generation of the mesh ',tot,' /= ',n1*n2*n3
+   write(msg,'(a,es16.8,a,i0)')'Something wrong in the generation of WS mesh: tot ',tot,' /= ',n1*n2*n3
    MSG_ERROR(msg)
  end if
 
  ABI_FREE(dist)
 
- ! === Reallocate the output with correct size ===
+ ! Reallocate the output with correct size.
  ABI_MALLOC(swap1,(npts))
  swap1(:)=ndegen(1:npts)
  ABI_FREE(ndegen)
@@ -703,14 +637,6 @@ end subroutine wigner_seitz
 
 subroutine phdispl_cart2red(natom,gprimd,displ_cart,displ_red)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdispl_cart2red'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -797,14 +723,6 @@ end subroutine phdispl_cart2red
 
 subroutine getspinrot(rprimd,spinrot,symrel_conv)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getspinrot'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -983,14 +901,6 @@ end subroutine getspinrot
 pure function spinrot_cmat(spinrot)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spinrot_cmat'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  real(dp),intent(in) :: spinrot(4)
  complex(dpc) :: spinrot_cmat(2,2)
@@ -1047,15 +957,6 @@ end function spinrot_cmat
 
 subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotmat'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1160,14 +1061,6 @@ end subroutine rotmat
 subroutine fixsym(iatfix,indsym,natom,nsym)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fixsym'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsym
@@ -1205,7 +1098,7 @@ end subroutine fixsym
 !!***
 
 !!****f* m_geometry/metric
-!! NAME metric
+!! NAME
 !! metric
 !!
 !! FUNCTION
@@ -1254,15 +1147,6 @@ end subroutine fixsym
 
 subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'metric'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1374,14 +1258,6 @@ end subroutine metric
 subroutine mkradim(acell,rprim,rprimd)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkradim'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(out) :: acell(3),rprim(3,3)
@@ -1425,14 +1301,6 @@ end subroutine mkradim
 
 subroutine chkrprimd(acell,rprim,rprimd,iout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkrprimd'
-!End of the abilint section
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1522,14 +1390,6 @@ end subroutine chkrprimd
 
 subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkdilatmx'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1640,14 +1500,6 @@ end subroutine chkdilatmx
 subroutine mkrdim(acell,rprim,rprimd)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkrdim'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: acell(3),rprim(3,3)
@@ -1706,14 +1558,6 @@ end subroutine mkrdim
 
 subroutine xcart2xred(natom,rprimd,xcart,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcart2xred'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1785,14 +1629,6 @@ end subroutine xcart2xred
 subroutine xred2xcart(natom,rprimd,xcart,xred)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xred2xcart'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -1846,14 +1682,6 @@ end subroutine xred2xcart
 
 subroutine fred2fcart(favg,Favgz_null,fcart,fred,gprimd,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fred2fcart'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1926,14 +1754,6 @@ end subroutine fred2fcart
 subroutine fcart2fred(fcart,fred,rprimd,natom)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fcart2fred'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -2004,15 +1824,6 @@ end subroutine fcart2fred
 
 subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,xred,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bonds_lgth_angles'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2302,13 +2113,6 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
    function rsdot(u1,u2,u3,v1,v2,v3,rmet)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rsdot'
-!End of the abilint section
-
    real(dp) :: rsdot
    real(dp),intent(in) :: u1,u2,u3,v1,v2,v3
    real(dp),intent(in) :: rmet(3,3)
@@ -2362,14 +2166,6 @@ end subroutine bonds_lgth_angles
 
 subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typat,xred,znucl,acell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'randomcellpos'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2590,15 +2386,6 @@ end subroutine randomcellpos
 subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'shellstruct'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)              :: natom
@@ -2739,15 +2526,6 @@ end subroutine shellstruct
 subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioniondist'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)              :: natom,option
@@ -2878,14 +2656,6 @@ end subroutine ioniondist
 function dist2(v1,v2,rprimd,option)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dist2'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: option
@@ -3000,15 +2770,6 @@ end function dist2
 
 subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'remove_inversion'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3133,15 +2894,6 @@ end subroutine remove_inversion
 
 subroutine symredcart(aprim,bprim,symcart,symred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symredcart'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  integer,intent(in) :: symred(3,3)
@@ -3208,14 +2960,6 @@ end subroutine symredcart
 subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strainsym'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3301,14 +3045,6 @@ end subroutine strainsym
 
 subroutine stresssym(gprimd,nsym,stress,sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'stresssym'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3417,14 +3153,6 @@ end subroutine stresssym
 subroutine strconv(frac,gprimd,cart)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strconv'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: frac(6),gprimd(3,3)
@@ -3475,7 +3203,7 @@ end subroutine strconv
 !! littlegroup_pert
 !!
 !! FUNCTION
-!! If syuse==0 and rfmeth==2, determines the set of symmetries that leaves a perturbation invariant.
+!! If syuse==0 and abs(rfmeth)==2, determines the set of symmetries that leaves a perturbation invariant.
 !! (Actually, all symmetries that leaves a q-wavevector invariant should be used to reduce the number
 !! of k-points for all perturbations. Unfortunately, one has to take into account the sign reversal of the
 !! perturbation under the symmetry operations, which makes GS routines not usable for the respfn code.
@@ -3492,9 +3220,10 @@ end subroutine strconv
 !! natom= number of atoms
 !! nsym=number of space group symmetries
 !! rfmeth =
-!!   1 if non-stationary block
-!!   2 if stationary block
-!!   3 if third order derivatives
+!!   1 or -1 if non-stationary block
+!!   2 or -2 if stationary block
+!!   3 or -3 if third order derivatives
+!!   positive if symmetries are used to set elements to zero whenever possible, negative to prevent this to happen.
 !! symq(4,2,nsym)= Table computed by littlegroup_q.
 !!   three first numbers define the G vector;
 !!   fourth number is zero if the q-vector is not preserved, is 1 otherwise
@@ -3528,15 +3257,6 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 &    unit) ! Optional
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_pert'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: idir,iout,ipert,natom,nsym,rfmeth,syuse
@@ -3562,7 +3282,7 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
  ount = std_out; if (present(unit)) ount = unit
 
  nsym1=0
- if((ipert==natom+3 .or. ipert==natom+4) .and. syuse==0 .and. rfmeth==2) then
+ if((ipert==natom+3 .or. ipert==natom+4) .and. syuse==0 .and. abs(rfmeth)==2) then
 !  Strain perturbation section
 !  Use ground state routine which symmetrizes cartesian stress as a quick
 !  and dirty test for the invariance of the strain (ipert,idir) under
@@ -3593,7 +3313,7 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
      end if
    end do
 
- else if(ipert>natom .or. syuse/=0 .or. rfmeth/=2)then
+ else if(ipert>natom .or. syuse/=0 .or. abs(rfmeth)/=2)then
 
 !  Not yet coded for d/dk or electric field perturbations
    nsym1=1
@@ -3643,8 +3363,7 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
  end if
 
  if (nsym1<1) then
-   write(msg,'(a,i0,a)')&
-&   ' The number of selected symmetries should be > 0, while it is nsym=',nsym1,'.'
+   write(msg,'(a,i0,a)')' The number of selected symmetries should be > 0, while it is nsym= ',nsym1,'.'
    MSG_BUG(msg)
  end if
 
@@ -3653,14 +3372,14 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
      write(msg,'(a,i5,a)')' Found ',nsym1,' symmetries that leave the perturbation invariant.'
      call wrtout(iout,msg,'COLL')
    end if
-   write(msg,'(a,i5,a)')' littlegroup_pert : found ',nsym1,' symmetries that leave the perturbation invariant :'
+   write(msg,'(a,i5,a)')' littlegroup_pert: found ',nsym1,' symmetries that leave the perturbation invariant: '
    call wrtout(ount,msg,'COLL')
  else
    if (iout /= ount .and. iout > 0) then
      write(msg,'(a,a)')' The set of symmetries contains',' only one element for this perturbation.'
      call wrtout(iout,msg,'COLL')
    end if
-   write(msg,'(a)')' littlegroup_pert : only one element in the set of symmetries for this perturbation :'
+   write(msg,'(a)')' littlegroup_pert: only one element in the set of symmetries for this perturbation:'
    call wrtout(ount,msg,'COLL')
  end if
 
@@ -3719,14 +3438,6 @@ end subroutine littlegroup_pert
 
 subroutine irreducible_set_pert(indsym,mpert,natom,nsym,pertsy,rfdir,rfpert,symq,symrec,symrel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'irreducible_set_pert'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

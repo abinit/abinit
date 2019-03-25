@@ -14,13 +14,18 @@
  getwfk3   2
  getxred3  2
 
+!For testing purpose, HSE XC functional
+! has to be converged very precisely
+! (because of libXC v3->v4 changes)
+ nstep3 15 tolvrs3 1.d-20
+
 #Common
  acell 5  2*4 Angstrom
  diemac 1.0d0   diemix 0.5d0
  ecut 13   pawecutdg 35
  ionmov 2
  ntime 15 
- tolrff 0.02
+ tolrff 0.005
  tolmxf 5.0d-5
 
  kptopt 1
@@ -33,20 +38,19 @@
  nband 4
  nbdbuf 0
 
- nstep 6
+ nstep 10 
  ntypat  2
  typat  1 2
- xcart -0.562   0 0  0.562  0 0 Angstrom   
+ xcart -0.562   0 0  0.562  0 0 Angstrom
  znucl  6 1
 
  
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t69.out, tolnlines = 3, tolabs = 2.000e-05, tolrel = 5.000e-03, fld_options = -easy
+#%%   t69.out, tolnlines = 65, tolabs = 2.000e-04, tolrel = 3.000e-02, fld_options = -easy
 #%% psp_files = C.xml, H4.GGA_X_PBE+GGA_C_PBE-paw.xml
 #%% [paral_info]
 #%% max_nprocs = 1

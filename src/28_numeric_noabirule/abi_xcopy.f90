@@ -8,7 +8,7 @@
 !! It performs the data copy: dst(1:n:incdst) = src(1:n:incsrc)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2019 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,12 +30,6 @@
 !! SOURCE
 !!
   subroutine abi_zcopy(size,tsrc,incsrc,tdest,incdest)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zcopy'
-!End of the abilint section
 
  implicit none
 
@@ -75,13 +69,6 @@ end subroutine abi_zcopy
 
 subroutine abi_zcopy_1d(size,tsrc,incsrc,tdest,incdest)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zcopy_1d'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------
@@ -109,12 +96,6 @@ end subroutine abi_zcopy_1d
 !! SOURCE
 
   subroutine abi_dcopy(size,tsrc,incsrc,tdest,incdest,x_cplx)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy'
-!End of the abilint section
 
  implicit none
 
@@ -162,13 +143,6 @@ end subroutine abi_dcopy
 
 subroutine abi_dcopy_1d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy_1d'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------
@@ -198,13 +172,6 @@ end subroutine abi_dcopy_1d
 !! SOURCE
 
 subroutine abi_dcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy_2d'
-
-!End of the abilint section
 
  implicit none
 
@@ -237,14 +204,8 @@ end subroutine abi_dcopy_2d
 
 subroutine abi_dcopy_0d_1d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy_0d_1d'
-
-!End of the abilint section
-
  implicit none
+
 !Arguments-------------------------------------
  integer, intent(in) :: size
  integer, intent(in) :: incsrc
@@ -272,12 +233,6 @@ end subroutine abi_dcopy_0d_1d
 
 subroutine abi_dcopy_1d_0d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy_1d_0d'
-
-!End of the abilint section
 
  implicit none
  !Arguments-------------------------------------
@@ -307,11 +262,6 @@ end subroutine abi_dcopy_1d_0d
 
   subroutine abi_d2zcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_d2zcopy_2d'
-!End of the abilint section
 
  implicit none
 
@@ -359,12 +309,6 @@ end subroutine abi_d2zcopy_2d
 !! SOURCE
 
 subroutine abi_z2dcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_z2dcopy_2d'
-!End of the abilint section
 
  implicit none
 

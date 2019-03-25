@@ -10,6 +10,8 @@ This tutorial aims at showing how to compute atomic datasets for the Projector A
 
 You will learn how to generate these atomic datasets and how to control their softness and transferability.
 You already should know how to use ABINIT in the PAW case (see the tutorial [PAW1](paw1) ).
+
+[TUTORIAL_README]
   
 This tutorial should take about 2h00.
 
@@ -79,23 +81,29 @@ correctly the generation of PAW atomic datasets:
 *Before continuing, you might consider to work in a different subdirectory as
 for the other tutorials. Why not `Work_paw2`?*
 
-Provided that ABINIT has been compiled with the `--with-dft-flavor="...+atompaw"` option, the `ATOMPAW` code is directly available from command line.  
-First, just try to type:
+```sh
+cd $ABI_TUTORIAL/Input
+mkdir Work_paw2
+cd Work_paw2
+```
+
+Provided that ABINIT has been compiled with the `--with-dft-flavor="...+atompaw"` option, 
+the `ATOMPAW` code is directly available from command line. Try to type:
 
      atompaw
 
 If `atompaw vx.y.z` message appears, everything is fine.  
 Otherwise, you can try:
 
-    ~abinit_compilation_directory/fallbacks/exports/bin/atompaw*
+    $ABI_HOME/fallbacks/exports/bin/atompaw
 
 !!! Note
-    In the following, we name `atompaw` the `ATOMPAW` executable.
+    In the following, we name *atompaw* the `ATOMPAW` executable.
   
 **How to use `ATOMPAW`?**
 
 1. Edit an input file in a text editor (content of input explained [here](paw2_assets/atompaw-usersguide.pdf))
-2. Run: `atompaw < inputfile`
+2. Run: *atompaw < inputfile*
 
 Partial waves $\phi_i$, PS partial-waves $\tphi_i$ and projectors $\tprj_i$ are given in `wfn.i` files.
 Logarithmic derivatives from atomic Hamiltonian and PAW Hamiltonian
@@ -118,7 +126,7 @@ Resulting PAW dataset is contained in:
 Our test case will be nickel; electronic configuration: $[1s^2 2s^2 2p^6 3s^2 3p^6 3d^8 4s^2 4p^0]$.
 
 In a first stage, copy a simple input file for `ATOMPAW` in your working directory
-(find it in `~abinit/doc/tutorial/paw2/paw2_assets/Ni.atompaw.input1`).
+(find it in *\$\ABI_HOME/doc/tutorial/paw2/paw2_assets/Ni.atompaw.input1*).
 Edit this file.
 
 {% dialog tutorial/paw2_assets/Ni.atompaw.input1 %}
@@ -266,12 +274,12 @@ Finally, partial-waves basis contains two $s$\-, two $p$\-  and two $d$\- partia
 
 At this stage, run `ATOMPAW`. For this purpose, simply enter:
 
-    atompaw <Ni.atompaw.input1  
+    atompaw < Ni.atompaw.input1  
 
 Lot of files are produced. We will examine some of them.
 A summary of the PAW dataset generation process has been written in a file
-named `Ni` (name extracted from first line of input file). Open it.  
-It should look like:
+named `Ni` (name extracted from first line of input file).
+Open it. It should look like:
 
     Atom = Ni Z = 28  
     Perdew \- Burke - Ernzerhof GGA Log grid -- n,r0,rmax = 2000 2.2810899E-04
@@ -308,12 +316,12 @@ It should look like:
       6 999   2   0.0000000E+00  1.3369075E+01 0.0000000E+00  
      evale from matrix elements -1.85182309373359203E+02
 
-This generated PAW dataset (contained in `Ni.atomicdata`, `Ni.GGA-PBE-paw.abinit`
-or `Ni.GGA-PBE.xml` file) is a first draft.
+This generated PAW dataset (contained in *Ni.atomicdata*, *Ni.GGA-PBE-paw.abinit*
+or *Ni.GGA-PBE.xml* file) is a first draft.
 Several parameters have to be adjusted, in order to get accurate results and efficient DFT calculations.
 
 !!! Note
-    Only `Ni.GGA-PBE-paw.abinit` or `Ni.GGA-PBE-paw.xml` files are directly usable by ABINIT.
+    Only *Ni.GGA-PBE-paw.abinit* or *Ni.GGA-PBE-paw.xml* files are directly usable by ABINIT.
 
 ## 4. Checking the sensitivity of results to some parameters
 
@@ -321,17 +329,17 @@ Several parameters have to be adjusted, in order to get accurate results and eff
 
 Try to select 700 points in the logarithmic grid and check if any noticeable
 difference in the results appears.
-You just have to replace `2000` by `700` in the second line of `Ni.atompaw.input1` file.  
+You just have to replace `2000` by `700` in the second line of *Ni.atompaw.input1* file.
 Then run:
 
-    atompaw <Ni.atompaw.input1 
+    atompaw < Ni.atompaw.input1 
     
-again and look at the  Ni file:
+again and look at the Ni file:
 
     evale = -185.182300567432  
     evale from matrix elements -1.85182301887091256E+02
 
-As you see, results obtained with this new grid are very close to previous ones. 
+As you see, results obtained with this new grid are very close to previous ones.
 We can keep the 700 points grid.
 
 You could decrease the size of the grid; by setting 400 points you should obtain:
@@ -362,10 +370,11 @@ If convergence cannot be reached, try a non-relativistic calculation (not recomm
 
 ## 5. Adjusting partial-waves and projectors
 
-Examine the AE partial-waves $\phi_i$, PS partial-waves $\tphi_i$ and projectors $\tprj_i$.  
+Examine the AE partial-waves $\phi_i$, PS partial-waves $\tphi_i$ and projectors $\tprj_i$.
 These are saved in files respectively named `wfni`, where `i` ranges over the number of partial-waves
-used, so 6 in the present example.  
-Each file contains 4 columns: the radius $r$ in column 1, the AE partial-wave $\phi_i(r)$ in column 2, the PS partial-wave $\tphi_i(r)$ in
+used, so 6 in the present example.
+Each file contains 4 columns: the radius $r$ in column 1,
+the AE partial-wave $\phi_i(r)$ in column 2, the PS partial-wave $\tphi_i(r)$ in
 column 3, and the projector $\tprj_i(r)$ in column 4.
 Plot the 3 curves as a function of radius using a plotting tool of your choice.
 
@@ -448,8 +457,7 @@ You should get:
 ![l=0 log derivatives](paw2_assets/log0b.jpg)
   
 Then put $E_{ref}=4~Ry$ for the second $p$\- state (line 21); run `ATOMPAW` again.
-Plot again the `logderiv.1` file.  
-You should get:
+Plot again the `logderiv.1` file. You should get:
 
 ![l=1 log derivatives](paw2_assets/log1b.jpg)
 
@@ -468,7 +476,7 @@ Now, all PAW logarithmic derivatives match with the exact ones in a reasonable i
 **Additional information concerning logarithmic derivatives: ghost states**
 
 Another possible issue could be the presence of a discontinuity in the PAW
-logarithmic derivative curve at an energy where the exact logarithmic derivative is continuous.  
+logarithmic derivative curve at an energy where the exact logarithmic derivative is continuous.
 This generally shows the presence of a _ghost state_.
 
   * First, try to change to value of reference energies; this sometimes can make the ghost state disappear.
@@ -491,37 +499,37 @@ This generally shows the presence of a _ghost state_.
 In most cases (changing pseudopotential or matching radius), one has to restart the procedure from step 5.
 
 To see an example of ghost state, use the
-`~abinit/doc/tutorial/paw2_assets/Ni.ghost.atompaw.input` file and run it with `ATOMPAW`.  
+*\$ABI_HOME/doc/tutorial/paw2_assets/Ni.ghost.atompaw.input* file and run it with `ATOMPAW`.
 Look at the $l=1$ logarithmic derivatives (`logderiv.1` file). They look like:
 
-![Ni l=1 log derivatives](paw2_assets/log1c.jpg)  
+![Ni l=1 log derivatives](paw2_assets/log1c.jpg) 
 
-Now, edit the `Ni.ghost.atompaw.input` file and replace `troulliermartins` by
-`ultrasoft`. Run `ATOMPAW` again... and look at `logderiv.1` file.  
+Now, edit the *Ni.ghost.atompaw.input* file and replace `troulliermartins` by
+`ultrasoft`. Run `ATOMPAW` again... and look at `logderiv.1` file.
 The ghost state has moved!
 
 Edit again the file and replace `ultrasoft` by `bessel`; then change the 17th
 line `2.0 2.0 2.0 2.0` by `2.0 2.0 1.8 2.0` (decreasing the $r_{Vloc}$ radius from $2.0$ to $1.8$).
 Run `ATOMPAW`: the ghost state disappears!
 
-Start from the original state of `Ni.ghost.atompaw.input` file and put `1.8` for
-the matching radius of $p$\- states (put `1.8` on lines 31 and 32).  
+Start from the original state of *Ni.ghost.atompaw.input* file and put `1.8` for
+the matching radius of $p$\- states (put `1.8` on lines 31 and 32).
 Run `ATOMPAW`: the ghost state disappears!
 
 ## 7. Testing the "efficiency" of a PAW dataset
 
-Let's use again our `Ni.atompaw.input1` file for Nickel (with all our modifications).
-You get a file `Ni.GGA-PBE-paw.abinit` containing the PAW dataset designated for ABINIT.
+Let's use again our *Ni.atompaw.input1* file for Nickel (with all our modifications).
+You get a file *Ni.GGA-PBE-paw.abinit* containing the PAW dataset designated for ABINIT.
 
-To test the efficiency of the generated PAW dataset, we finally will use ABINIT!  
+To test the efficiency of the generated PAW dataset, we finally will use ABINIT!
 You are about to run a DFT computation and determine the size of the _plane
 wave basis_ needed to reach a given accuracy. If the _cut-off energy_ defining the
 _plane waves basis_ is too high (higher than 20 Hartree),
 some changes have to be made in the input file.
  
-Copy `~abinit/tests/tutorial/Input/tpaw2_x.files` and
-`~abinit/tests/tutorial/Input/tpaw2_1.in` in your working directory.
-Edit `~abinit/tests/tutorial/Input/tpaw2_1.in`, and activate the 8 datasets.  
+Copy *\$ABI_TUTORIAL/Input/tpaw2_x.files* and
+*\$ABI_TUTORIAL/Input/tpaw2_1.in* in your working directory.
+Edit *tpaw2_1.in*, and activate the 8 datasets.
 Run ABINIT with them.
 
 {% dialog tests/tutorial/Input/tpaw2_x.files tests/tutorial/Input/tpaw2_1.in %}
@@ -556,15 +564,13 @@ This is not a good result for a PAW dataset; let's try to optimize it.
   Bloechl's ones .  
   Keyword `bloechl` has to be replaced by `vanderbilt` in the `ATOMPAW` input file
   and $r_c$ values have to be added at the end of the file (one for each PS partial-wave).
-  See this input file:
-  `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input.vanderbilt`.  
-
+  See this input file: *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input.vanderbilt*.
 
 * 2nd possibility: use `RRKJ` pseudization scheme for projectors.  
-  Use this input file for `ATOMPAW`: `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input2`.  
+  Use this input file for `ATOMPAW`: *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input2*.
   As you can see `bloechl` has been changed by `custom rrkj`
   and 6 $r_c$ values have been added at the end of the file, each one
-  corresponding to the matching radius of one PS partial-wave.  
+  corresponding to the matching radius of one PS partial-wave.
   Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and get a new ABINIT output file.  
   _Note: You have check again at log derivatives._
 
@@ -587,56 +593,59 @@ This is not a good result for a PAW dataset; let's try to optimize it.
     etotal7  -3.9629079826E+01  
     etotal8  -3.9629097793E+01
 
-`etotal` convergence (at 1 mHartree) is achieve for 12<=$e_{cut}$<=14 Hartree  
-`etotal` convergence (at 0,1 mHartree) is achieve for 16<=$e_{cut}$<=18 Hartree
+`etotal` convergence (at 1 mHartree) is achieve for 12 <= $e_{cut}$ <= 14 Hartree  
+`etotal` convergence (at 0,1 mHartree) is achieve for 16 <= $e_{cut}$ <= 18 Hartree
 
 This is a reasonable result for a PAW dataset!
 
 * 3rd possibility: use _enhanced polynomial_ pseudization scheme for projectors.  
-  Edit  `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input2` and replace `custom rrkj`
-  by `custom polynom2 7 10`.  
+  Edit *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input2* and replace `custom rrkj`
+  by `custom polynom2 7 10`.
   Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and look at the `ecut` convergence.  
 
-!!! Optional_exercise
-    Let's go back to Vanderbilt projectors.
+### Optional_exercise
 
-    Repeat the procedure (`ATOMPAW`\ + `ABINIT`) with
-    `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input.vanderbilt` file.
+Let's go back to Vanderbilt projectors.
+Repeat the procedure (`ATOMPAW`\ + `ABINIT`) with the
+*\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input.vanderbilt* file.
 
-    {% dialog tutorial/paw2_assets/Ni.atompaw.input.vanderbilt %}
+{% dialog tutorial/paw2_assets/Ni.atompaw.input.vanderbilt %}
 
-    As you can see ABINIT convergence cannot be achieved!  
-    You can try whatever you want with radii and/or references energies in the
-    `ATOMPAW` input file: ABINIT always diverges!  
-    The solution here is to change the pseudization scheme for the local pseudopotential.  
-    Try to replace the `troulliermartins` keyword by `ultrasoft`.
-    Repeat the procedure (`ATOMPAW` \+ `ABINIT`).  
-    ABINIT can now reach convergence!
+As you can see ABINIT convergence cannot be achieved!
+You can try whatever you want with radii and/or references energies in the
+`ATOMPAW` input file: ABINIT always diverges!
+The solution here is to change the pseudization scheme for the local pseudopotential.
+Try to replace the `troulliermartins` keyword by `ultrasoft`.
+Repeat the procedure (`ATOMPAW` \+ `ABINIT`).
+ABINIT can now reach convergence!
 
-    Results are below:
+Results are below:
 
-    ```
-      ecut1   8.00000000E+00 Hartree  
-      ecut2   1.00000000E+01 Hartree  
-      ecut3   1.20000000E+01 Hartree  
-      ecut4   1.40000000E+01 Hartree  
-      ecut5   1.60000000E+01 Hartree  
-      ecut6   1.80000000E+01 Hartree  
-      ecut7   2.00000000E+01 Hartree  
-      ecut8   2.20000000E+01 Hartree  
-    etotal1  -3.9609714395E+01  
-    etotal2  -3.9615187859E+01  
-    etotal3  -3.9618367959E+01  
-    etotal4  -3.9622476129E+01  
-    etotal5  -3.9624707476E+01  
-    etotal6  -3.9625234480E+01  
-    etotal7  -3.9625282524E+01  
-    etotal8  -3.9625330757E+01
-    ```
-    `etotal` convergence (at 1 mHartree) is achieve for 14<=$e_{cut}$<=16 Hartree
-    `etotal` convergence (at 0,1 mHartree) is achieve for 20<=$e_{cut}$<=22 Hartree
+```
+  ecut1   8.00000000E+00 Hartree  
+  ecut2   1.00000000E+01 Hartree  
+  ecut3   1.20000000E+01 Hartree  
+  ecut4   1.40000000E+01 Hartree  
+  ecut5   1.60000000E+01 Hartree  
+  ecut6   1.80000000E+01 Hartree  
+  ecut7   2.00000000E+01 Hartree  
+  ecut8   2.20000000E+01 Hartree  
+etotal1  -3.9609714395E+01  
+etotal2  -3.9615187859E+01  
+etotal3  -3.9618367959E+01  
+etotal4  -3.9622476129E+01  
+etotal5  -3.9624707476E+01  
+etotal6  -3.9625234480E+01  
+etotal7  -3.9625282524E+01  
+etotal8  -3.9625330757E+01
+```
 
-    _Note: You could have tried the `bessel` keyword instead of `ultrasoft` one.
+`etotal` convergence (at 1 mHartree) is achieved for 14 <= $e_{cut}$ <= 16 Hartree
+`etotal` convergence (at 0,1 mHartree) is achieved for 20 <= $e_{cut}$ <= 22 Hartree
+
+!!! note
+
+    You could have tried the `bessel` keyword instead of `ultrasoft` one.
 
 **Summary of convergence results**
 
@@ -663,15 +672,15 @@ This is a reasonable result for a PAW dataset!
 
 The last step is to examine carefully the physical quantities obtained with our PAW dataset.
 
-Copy `~abinit/tests/tutorial/Input/tpaw2_2.in` in your working directory.
+Copy *\$ABI_TUTORIAL/Input/tpaw2_2.in* in your working directory.
 Edit it, activate the 8 datasets,
-change `tpaw2_x.files` to use `~abinit/doc/tutorial/paw2_assets/Ni.GGA-PBE-paw.abinit.rrkj` psp file
-(obtained from `Ni.atompaw.input2 file`).  
+change *tpaw2_x.files* to use *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.GGA-PBE-paw.abinit.rrkj* psp file
+(obtained from *Ni.atompaw.input2 file*).
 Run ABINIT (this may take a while...).
 
 {% dialog tests/tutorial/Input/tpaw2_2.in %}
 
-ABINIT computes the converged ground state of ferromagnetic FCC Nickel for several volumes around equilibrium.  
+ABINIT computes the converged ground state of ferromagnetic FCC Nickel for several volumes around equilibrium.
 Plot the `etotal` vs `acell` curve:
 
 ![etotal vs acell](paw2_assets/acell-etotal.jpg)  
@@ -708,7 +717,7 @@ Compare these results with published results:
 ````
 
 You should always compare results with all-electron ones (or other PAW computations),
-not with experimental ones...
+not with experimental ones
 
 **Additional remark**:  
 It can be useful to test the sensitivity of results to some `ATOMPAW` input parameters 
@@ -726,14 +735,16 @@ All these parameters have to be meticulously checked, especially if the PAW
 dataset is used for non-standard solid structures or thermodynamical domains.
 
 !!! Optional_exercise
-    Let's add 3s and 3p semi-core states in PAW dataset!  
-    Repeat the procedure (`ATOMPAW` \+ `ABINIT`) with `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input.semicore`
-    file. The execution time is a bit longer as more electrons have to be treated by ABINIT.  
-    Look at $a_0$, $B$ or $\mu$ variation.  
-    _Note: this new PAW dataset has a smaller $r_{PAW}$ radius (because semi-core states are localized)._
+
+    Let's add 3s and 3p semi-core states in PAW dataset!
+    Repeat the procedure (`ATOMPAW` \+ `ABINIT`) with *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input.semicore*
+    file. The execution time is a bit longer as more electrons have to be treated by ABINIT.
+    Look at $a_0$, $B$ or $\mu$ variation.
+    Note: this new PAW dataset has a smaller $r_{PAW}$ radius (because semi-core states are localized).
+
     ````
         a0 = 3.519 angstrom
-         B = 194 GPa
+        B = 194 GPa
         mu = 0.60
     ````
 
@@ -746,17 +757,19 @@ We advise experienced users to try it.
 
 The idea is quite simple: when expressing the different atomic radial
 functions ($\phi_i, \tphi_i, \tprj_i$) on the plane wave basis, the number of plane waves
-depends on the "locality" of these radial functions in reciprocal space.  
+depends on the "locality" of these radial functions in reciprocal space.
+
 In [[cite:KingSmith1991|this paper]] a method to enforce the locality (in reciprocal space)
-of projectors $\tprj_i$ is presented; the projectors expressed in reciprocal space $\tprj_i(g)$ are modified according to the following scheme:  
+of projectors $\tprj_i$ is presented; the projectors expressed in reciprocal space $\tprj_i(g)$
+are modified according to the following scheme:
 The reciprocal space is divided in 3 regions:  
 
-* If $g < g_{max}$, $\tprj_i$(g) is unchanged  
+* If $g < g_{max}$, $\tprj_i$(g) is unchanged
 
-* If $g > \gamma$, $\tprj_i$(g) is set to zero  
+* If $g > \gamma$, $\tprj_i$(g) is set to zero
 
 * If $ g_{max} < g < \gamma$, $\tprj_i(g)$ is modified so that the contribution of $\tprj_i(r)$ is
-  conserved with an error $W$ (as small as possible).  
+  conserved with an error $W$ (as small as possible).
 
 ![RSO](paw2_assets/RSO.png)
 
@@ -770,9 +783,9 @@ In practice we have to:
 
 and let the `ATOMPAW` code apply the transformation to $\tprj_i$ and deduce $R_0$ radius.
 
-You can test it now.  
-In your working directory, re-use the dataset `~abinit/doc/tutorial/paw2_assets/Ni.atompaw.input3`
-(Bloechl's projectors).  
+You can test it now.
+In your working directory, re-use the dataset *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input3*
+(Bloechl's projectors).
 Replace the ABINIT options (penultimate line):
 ````
     2
@@ -784,9 +797,9 @@ with:
 ````
 8., 2 and 0.0001 are the values for $g_{max}$, $\frac{\gamma}{g_{max}}$ and $W$).
 
-Run ATOMPAW.  
-You get a new psp file for ABINIT.  
-Run ABINIT with it using the `~abinit/tests/tutorial/Input/tpaw2_1.in` file.  
+Run ATOMPAW.
+You get a new psp file for ABINIT.
+Run ABINIT with it using the *$ABI_TUTORIAL/Input/tpaw2_1.in* file.
 Compare the results with those obtained in section 7.
 
 You can try several values for $g_{max}$ (keeping $\frac{\gamma}{g_{max}}$ and $W$ constant) and

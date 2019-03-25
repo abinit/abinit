@@ -8,7 +8,7 @@
 !!  Genetic algorithm stochastic search implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (MT)
+!! Copyright (C) 2012-2019 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ MODULE m_ga
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  !use m_results_img, only : results_img_type, gather_array_img
 
@@ -94,13 +94,6 @@ CONTAINS !===========================================================
 
 subroutine ga_init(dtset,ga_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ga_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -149,13 +142,6 @@ end subroutine ga_init
 
 subroutine ga_destroy(ga_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ga_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -197,13 +183,6 @@ end subroutine ga_destroy
 !! SOURCE
 
 subroutine ga_nullify(ga_param)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ga_nullify'
-!End of the abilint section
 
  implicit none
 

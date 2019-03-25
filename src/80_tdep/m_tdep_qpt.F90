@@ -8,14 +8,14 @@ module m_tdep_qpt
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_tdep_readwrite,   only : Input_Variables_type
  use m_tdep_latt,        only : Lattice_Variables_type
 
  implicit none
 
   type QptBound_type
-  
+
     integer :: ihol,center
     character (len=5) :: letter
     double precision :: x,y,z
@@ -35,17 +35,10 @@ module m_tdep_qpt
   public :: tdep_make_qptpath
   public :: tdep_make_specialqpt
 
-contains 
+contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_specialqpt(InVar,Lattice,Qpt,QptBound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_make_specialqpt'
-!End of the abilint section
 
   implicit none
   integer :: qpt_tot,qptbound_tot
@@ -76,7 +69,7 @@ contains
 ! center=3        C-face centered
 
 ! Define the special Q points IN GENERAL
-! Here we use the definitions of special Q points in reduced coordinates 
+! Here we use the definitions of special Q points in reduced coordinates
 ! as defined in the article: Setyawan and Curtarolo CMS 49, 299 (2010)
   if ((InVar%bravais(1).eq.2).and.(InVar%bravais(2).eq.0)) then
 !FB    qptbound_tot=16
@@ -156,6 +149,21 @@ contains
 &                    QptBound_type (4,-1,'Y1   ', 0.500, 0.500,-zeta ),&
 &                    QptBound_type (4,-1,'Z    ', 0.500, 0.500,-0.500) /)
     end if
+  else if ((InVar%bravais(1).eq.5).and.(InVar%bravais(2).eq.0)) then
+    qptbound_tot=9
+    angle_alpha=Lattice%angle_alpha
+    eta=(1d0+4*dcos(angle_alpha*pi/180d0))/(2d0+4*dcos(angle_alpha*pi/180d0))
+    nu=3d0/4d0-eta/2d0
+    ABI_MALLOC(QptBound,(qptbound_tot))
+    QptBound(:)=(/ QptBound_type (5, 0,'G ', 0.000, 0.000, 0.000),&
+&                  QptBound_type (5, 0,'F ', 0.500, 0.500, 0.000),&
+&                  QptBound_type (5, 0,'F1 ', 0.500, 0.000, -0.500),&
+&                  QptBound_type (5, 0,'L ', 0.500, 0.000, 0.000),&
+&                  QptBound_type (5, 0,'Z ', 0.500, 0.500, 0.500),&
+&                  QptBound_type (5, 0,'Q ', 1-nu,nu,0),&
+&                  QptBound_type (5, 0,'X ', nu,0,-nu),&
+&                  QptBound_type (5, 0,'B1 ', 0.500,1-eta,eta-1),&
+&                  QptBound_type (5, 0,'B ', eta,0.500, 1-eta) /)
   else if ((InVar%bravais(1).eq.6).and.(InVar%bravais(2).eq.0)) then
     qptbound_tot=6
     ABI_MALLOC(QptBound,(qptbound_tot))
@@ -198,7 +206,7 @@ contains
   Qpt%qptbound_tot=qptbound_tot
 
 ! Define the special Q points USED IN THE CALCULATIONS
-! Two cases of generation: default (0) or by hand (>=1)   
+! Two cases of generation: default (0) or by hand (>=1)
   if (InVar%BZpath.eq.0) then
     write(InVar%stdout,*) 'Generate the BZ path using the Q points defined by default'
     write(40,*)           'Generate the BZ path using the Q points defined by default'
@@ -269,6 +277,19 @@ contains
         Qpt%special_qpt(10)="Y1   "
         Qpt%special_qpt(11)="Z    "
       end if
+    else if ((InVar%bravais(1).eq.5).and.(InVar%bravais(2).eq.0)) then
+!     RHOMBO:F1-Q-G-Z-B-B1-L-G-F
+      qpt_tot=9
+      ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
+      Qpt%special_qpt(1)="F1"
+      Qpt%special_qpt(2)="X"
+      Qpt%special_qpt(3)="G "
+      Qpt%special_qpt(4)="Z "
+      Qpt%special_qpt(5)="B "
+      Qpt%special_qpt(6)="B1 "
+      Qpt%special_qpt(7)="L "
+      Qpt%special_qpt(8)="G "
+      Qpt%special_qpt(9)="F "
     else if ((InVar%bravais(1).eq.6).and.(InVar%bravais(2).eq.0)) then
 !     HEX: G-M-K-G-A-L-H-A
       qpt_tot=8
@@ -282,7 +303,7 @@ contains
       Qpt%special_qpt(7)="H    "
       Qpt%special_qpt(8)="A    "
     else if ((InVar%bravais(1).eq.7).and.(InVar%bravais(2).eq.0)) then
-!     SC: G-X-M-G-R  
+!     SC: G-X-M-G-R
       qpt_tot=5
       ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
       Qpt%special_qpt(1)="Gamma"
@@ -320,16 +341,9 @@ contains
   end if
   Qpt%qpt_tot=qpt_tot
 
- end subroutine
+ end subroutine tdep_make_specialqpt
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_qptpath(InVar,Lattice,Qpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_make_qptpath'
-!End of the abilint section
 
   implicit none
   integer :: ii,jj,kk,nqpt,iqpt,qpt_tot,tmp_int
@@ -345,11 +359,11 @@ contains
   write(InVar%stdout,*) '#############################################################################'
   write(InVar%stdout,*) '########################## Q points generation  #############################'
   write(InVar%stdout,*) '#############################################################################'
-! Define the special Q points 
+! Define the special Q points
   call tdep_make_specialqpt(InVar,Lattice,Qpt,QptBound)
 
 ! Define the path in the BZ
-! Two cases of generation: default (0) or by hand (>=1)   
+! Two cases of generation: default (0) or by hand (>=1)
   qpt_tot     =Qpt%qpt_tot
   ABI_MALLOC(Qpt%special_red ,(qpt_tot,3)); Qpt%special_red (:,:)=zero
   ABI_MALLOC(Qpt%special_cart,(qpt_tot,3)); Qpt%special_cart(:,:)=zero
@@ -368,14 +382,14 @@ contains
             Qpt%special_red(jj,2)=QptBound(ii)%y
             Qpt%special_red(jj,3)=QptBound(ii)%z
             write(40,'(a,1x,3(f10.5,1x))') Qpt%special_qpt(jj),Qpt%special_red(jj,1),Qpt%special_red(jj,2),Qpt%special_red(jj,3)
-          end if  
+          end if
         end if
-      end do  
+      end do
       if (.not.IsThisAllowed) then
         MSG_ERROR('One of the Qpt bound (letter) is not allowed.')
       end if
-    end do  
-!   Compute the cartesian coordinates of the special Q points in the reciprocical lattice     
+    end do
+!   Compute the cartesian coordinates of the special Q points in the reciprocical lattice
     write(40,*) ' '
     write(40,*) '  In cartesian coordinates:'
     do ii=1,qpt_tot
@@ -386,10 +400,10 @@ contains
           else if (Lattice%line==0.or.Lattice%line==1) then
             Qpt%special_cart(ii,jj)=Qpt%special_cart(ii,jj)+Lattice%gprimt(kk,jj)*Qpt%special_red(ii,kk)/Lattice%acell_unitcell(kk)
           end if
-        end do 
+        end do
       end do
       write(40,'(a,1x,3(f10.5,1x))') Qpt%special_qpt(ii),Qpt%special_cart(ii,1),Qpt%special_cart(ii,2),Qpt%special_cart(ii,3)
-    end do  
+    end do
     write(40,*) ' '
     write(40,*) '  Using gprimt='
     write(40,'(3(f10.5,1x))') Lattice%gprimt(1,1),Lattice%gprimt(1,2),Lattice%gprimt(1,3)
@@ -405,16 +419,16 @@ contains
 &                                       (Qpt%special_cart(ii,2)-Qpt%special_cart(ii+1,2))**2+&
 &                                       (Qpt%special_cart(ii,3)-Qpt%special_cart(ii+1,3))**2)*100*2*pi)
       end do
-      
+
       tmp_int=Qpt%lgth_segments(1)
       do ii=1,qpt_tot-1
         if (InVar%firstqptseg.gt.0) then
           Qpt%lgth_segments(ii)=int(real(Qpt%lgth_segments(ii))/real(tmp_int)*InVar%firstqptseg)
-        else 
+        else
           Qpt%lgth_segments(ii)=100
         end if
         write(40,'(a2,a,a2,1x,i4)') Qpt%special_qpt(ii),'-',Qpt%special_qpt(ii+1),Qpt%lgth_segments(ii)
-      end do        
+      end do
 
 !     Allocate and define the qpt points along the segments
       do ii=1,qpt_tot-1
@@ -435,7 +449,7 @@ contains
       end do
       Qpt%qpt_red (:,nqpt)=Qpt%special_red (qpt_tot,:)
       Qpt%qpt_cart(:,nqpt)=Qpt%special_cart(qpt_tot,:)
-    else if (qpt_tot.eq.1) then  
+    else if (qpt_tot.eq.1) then
       nqpt=1
       ABI_MALLOC(Qpt%qpt_red ,(3,nqpt)); Qpt%qpt_red (:,:)=zero
       ABI_MALLOC(Qpt%qpt_cart,(3,nqpt)); Qpt%qpt_cart(:,:)=zero
@@ -458,9 +472,9 @@ contains
           else if (Lattice%line==0.or.Lattice%line==1) then
             Qpt%qpt_cart(ii,jj)=Qpt%qpt_cart(ii,jj)+Lattice%gprimt(kk,jj)*Qpt%qpt_red(ii,kk)/Lattice%acell_unitcell(kk)
           end if
-        end do 
+        end do
       end do
-    end do  
+    end do
   end if  !BZpath>=0
   write(InVar%stdout,*) 'See the qpt.dat file'
 
@@ -474,7 +488,7 @@ contains
   close(40)
 
   Qpt%nqpt=nqpt
- end subroutine
+ end subroutine tdep_make_qptpath
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module m_tdep_qpt

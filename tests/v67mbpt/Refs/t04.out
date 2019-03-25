@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -10,12 +10,12 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h01 )
+.Starting date : Mon 12 Nov 2018.
+- ( at 02h07 )
   
 - input  file    -> t04.in
 - output file    -> t04.out
@@ -95,7 +95,7 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -377,7 +377,7 @@ P           mkmem4          6
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -413,7 +413,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.4119E-08; max=  3.3638E-06
+ Mean square residual over all n,k,spin=   74.119E-09; max=  33.638E-07
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -528,7 +528,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.6059E-07; max=  3.4298E-05
+ Mean square residual over all n,k,spin=   66.059E-08; max=  34.298E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -582,7 +582,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -653,14 +653,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
   chi0(G,G') at the    2 th omega   0.0000  31.1373 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -3.225   0.000  -0.275  -0.001  -0.277  -0.003  -0.273   0.007
        -0.000   0.000  -0.545   0.002  -0.178   0.000  -0.178   0.003  -0.172
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  11.4131
-  dielectric constant without local fields =  11.8620
+  dielectric constant =  11.4129
+  dielectric constant without local fields =  11.8618
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     47.16  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -677,10 +677,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
    Upper and lower wings at the    2 th omega   0.0000  31.1373 [eV]
        1       2       3       4       5       6       7       8       9
       0.534   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-     -0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
+      0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.534   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-     -0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
+      0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
 
 
 
@@ -877,15 +877,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
   Number of electrons    =    7.9781
 
   QP Band energy    [Ha] =  1.34160597426197E+00
-  QP Hartree energy [Ha] =  8.13336906504031E-01
+  QP Hartree energy [Ha] =  8.13336905266484E-01
 
 --------------------------------------------------------------------------------
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -953,7 +953,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 
  k =    0.500   0.500   0.000
  Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -0.013   -15.456    -0.013    15.442   -22.190     6.480     1.000     0.000   -15.710    -0.254    -0.268    -0.290
+    1    -0.013   -15.456    -0.013    15.442   -22.190     6.480     1.000     0.000   -15.710    -0.255    -0.268    -0.290
     2    -0.013   -15.456    -0.013    15.442   -22.190     6.480     1.000     0.000   -15.710    -0.254    -0.268    -0.249
     3     7.315   -15.547     7.315    22.862   -18.921     4.125     1.000     0.000   -14.796     0.751     8.066     8.066
     4     7.315   -15.547     7.315    22.862   -18.915     4.122     1.000     0.000   -14.792     0.754     8.070     8.070
@@ -985,7 +985,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 
  k =    0.500   0.000   0.000
  Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -3.087   -15.573    -3.087    12.486   -23.738     7.657     1.000     0.000   -16.082    -0.508    -3.595    -3.597
+    1    -3.087   -15.573    -3.087    12.486   -23.738     7.657     1.000     0.000   -16.082    -0.508    -3.596    -3.597
     2    -0.289   -14.591    -0.289    14.302   -20.755     6.076     1.000     0.000   -14.679    -0.088    -0.377    -0.378
     3    12.053   -16.173    12.053    28.226   -18.303     3.267     1.000     0.000   -15.036     1.137    13.190    13.189
     4    12.053   -16.173    12.053    28.226   -18.288     3.269     1.000     0.000   -15.019     1.154    13.207    13.208
@@ -1008,7 +1008,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
     5    20.572   -15.038    20.572    35.611    -7.970    -4.217     1.000     0.000   -12.187     2.852    23.424    23.420
     6    20.572   -15.038    20.572    35.611    -7.956    -4.217     1.000     0.000   -12.173     2.865    23.438    23.421
     7    20.572   -15.038    20.572    35.611    -7.971    -4.216     1.000     0.000   -12.187     2.851    23.423    23.444
-    8    25.745   -15.802    25.745    41.547    -6.896    -6.140     1.000     0.000   -13.035     2.766    28.512    28.512
+    8    25.745   -15.802    25.745    41.547    -6.896    -6.139     1.000     0.000   -13.035     2.766    28.512    28.512
 
  E^0_gap          4.890
  E^GW_gap         6.239
@@ -1020,9 +1020,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   6.2235 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.1531 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   6.2236 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.1531 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t04o_DS4_QPS
 
@@ -1032,7 +1032,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 .  kptgw no:  2; Maximum DeltaE = (   3.377  -0.000) for band index:  6
 .  kptgw no:  3; Maximum DeltaE = (   4.381  -0.000) for band index:  7
 .  kptgw no:  4; Maximum DeltaE = (   3.334   0.000) for band index:  8
-.  kptgw no:  5; Maximum DeltaE = (   2.853  -0.000) for band index:  6
+.  kptgw no:  5; Maximum DeltaE = (   2.853   0.000) for band index:  6
 .  kptgw no:  6; Maximum DeltaE = (   2.865  -0.000) for band index:  6
 
 == END DATASET(S) ==============================================================
@@ -1303,52 +1303,70 @@ P           mkmem4          6
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Effect of self-consistency on quasiparticles in solids
 - F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).
 - Comment : in case gwcalctyp >= 10.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#bruneval2006
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.5
+- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.3  wall=          4.5
+.Delivered   5 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.6  wall=          4.8

@@ -7,7 +7,7 @@
 !!  Wrappers for various numeric operations (spline, sort, ...)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (MT,TR)
+!!  Copyright (C) 2012-2019 ABINIT group (MT,TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,6 +34,7 @@ module m_paw_numeric
  public:: paw_spline
  public:: paw_splint
  public:: paw_splint_der
+ public:: paw_uniform_splfit
  public:: paw_smooth
  public:: paw_sort_dp
  public:: paw_jbessel
@@ -133,13 +134,6 @@ subroutine paw_spline(t,y,n,ybcbeg,ybcend,ypp)
 !
 !  Author:
 !    John Burkardt, modified by Xavier Gonze
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_spline'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -256,13 +250,6 @@ end subroutine paw_spline
 
 subroutine paw_splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_splint'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -350,13 +337,6 @@ end subroutine paw_splint
 
 subroutine paw_splint_der(nspline,xspline,yspline,ysplin2,nfit,xfit,dydxfit,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_splint_der'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -413,6 +393,148 @@ end subroutine paw_splint_der
 
 !----------------------------------------------------------------------
 
+!!****f* m_paw_numeric/paw_uniform_splfit
+!! NAME
+!!  paw_uniform_splfit
+!!
+!! FUNCTION
+!!  Evaluate cubic spline fit to get function values on input set
+!!  of ORDERED, UNIFORMLY SPACED points.
+!!  Optionally gives derivatives (first and second) at those points too.
+!!  If point lies outside the range of arg, assign the extremal
+!!  point values to these points, and zero derivative.
+!!
+!! INPUTS
+!!  arg(numarg)=equally spaced arguments (spacing delarg) for data
+!!   to which spline was fit.
+!!  fun(numarg,2)=function values to which spline was fit and spline
+!!   fit to second derivatives (from Numerical Recipes spline).
+!!  ider=  see above
+!!  newarg(numnew)=new values of arguments at which function is desired.
+!!  numarg=number of arguments at which spline was fit.
+!!  numnew=number of arguments at which function values are desired.
+!!
+!! OUTPUT
+!!  derfun(numnew)=(optional) values of first or second derivative of function.
+!!   This is only computed for ider=1 or 2; otherwise derfun not used.
+!!  newfun(numnew)=values of function at newarg(numnew).
+!!   This is only computed for ider=0 or 1.
+!!
+!! NOTES
+!!  if ider=0, compute only the function (contained in fun)
+!!  if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
+!!  if ider=2, compute only the second derivative of the function (in derfun)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine paw_uniform_splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: ider,numarg,numnew
+!arrays
+ real(dp), intent(in) :: arg(numarg),fun(numarg,2),newarg(numnew)
+ real(dp), intent(out) :: derfun(numnew)
+ real(dp), intent(inout) :: newfun(numnew)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i,jspl
+ real(dp) :: argmin,delarg,d,aa,bb,cc,dd
+ character(len=500) :: msg
+!arrays
+
+! *************************************************************************
+
+!argmin is smallest x value in spline fit; delarg is uniform spacing of spline argument
+ argmin=arg(1)
+ delarg=(arg(numarg)-argmin)/dble(numarg-1)
+
+ if(delarg<tol12)then
+   write(msg,'(a,es16.8)') 'delarg should be strictly positive, while delarg= ',delarg
+   MSG_ERROR(msg)
+ endif
+
+ jspl=-1
+
+!Do one loop for no grads, other for grads:
+ if (ider==0) then
+
+! Spline index loop for no grads:
+  do i=1,numnew
+   if (newarg(i).ge.arg(numarg)) then
+    newfun(i)=fun(numarg,1)
+   else if (newarg(i).le.arg(1)) then
+    newfun(i)=fun(1,1)
+   else
+    jspl=1+int((newarg(i)-argmin)/delarg)
+    d=newarg(i)-arg(jspl)
+    bb = d/delarg
+    aa = 1.0d0-bb
+    cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
+    dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
+    newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
+   end if
+  end do
+
+ else if(ider==1)then
+
+! Spline index loop includes grads:
+  do i=1,numnew
+   if (newarg(i).ge.arg(numarg)) then
+    newfun(i)=fun(numarg,1)
+    derfun(i)=0.0d0
+   else if (newarg(i).le.arg(1)) then
+    newfun(i)=fun(1,1)
+    derfun(i)=0.0d0
+   else
+!   cubic spline interpolation:
+    jspl=1+int((newarg(i)-arg(1))/delarg)
+    d=newarg(i)-arg(jspl)
+    bb = d/delarg
+    aa = 1.0d0-bb
+    cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
+    dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
+    newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
+!   spline fit to first derivative:
+!   note correction of Numerical Recipes sign error
+    derfun(i) = (fun(jspl+1,1)-fun(jspl,1))/delarg +    &
+&      (-(3.d0*aa**2-1.d0)*fun(jspl,2)+                 &
+&        (3.d0*bb**2-1.d0)*fun(jspl+1,2)) * delarg/6.0d0
+    end if
+  end do
+
+ else if (ider==2) then
+
+  do i=1,numnew
+   if (newarg(i).ge.arg(numarg)) then
+    derfun(i)=0.0d0
+   else if (newarg(i).le.arg(1)) then
+    derfun(i)=0.0d0
+   else
+!   cubic spline interpolation:
+    jspl=1+int((newarg(i)-argmin)/delarg)
+    d=newarg(i)-arg(jspl)
+    bb = d/delarg
+    aa = 1.0d0-bb
+!   second derivative of spline (piecewise linear function)
+    derfun(i) = aa*fun(jspl,2)+bb*fun(jspl+1,2)
+   end if
+  end do
+
+ end if
+
+end subroutine paw_uniform_splfit
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_paw_numeric/paw_smooth
 !! NAME
 !! paw_smooth
@@ -440,13 +562,6 @@ end subroutine paw_splint_der
 !! SOURCE
 
 subroutine paw_smooth(a,mesh,it)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_smooth'
-!End of the abilint section
 
  implicit none
 
@@ -521,13 +636,6 @@ end subroutine paw_smooth
 !! SOURCE
 
 subroutine paw_sort_dp(n,list,iperm,tol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_sort_dp'
-!End of the abilint section
 
  implicit none
 
@@ -630,13 +738,6 @@ end subroutine paw_sort_dp
 !! SOURCE
 
 subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_jbessel'
-!End of the abilint section
 
  implicit none
 
@@ -769,13 +870,6 @@ end subroutine paw_jbessel
 
  subroutine paw_solvbes(root,alpha,beta,ll,nq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_solvbes'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -862,20 +956,7 @@ end subroutine paw_solvbes
 
 subroutine paw_jbessel_4spline(bes,besp,ll,order,xx,tol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_jbessel_4spline'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_jbessel_4spline'
-!End of the abilint section
 
 !Arguments ---------------------------------------------
 !scalars
@@ -991,13 +1072,6 @@ end subroutine paw_jbessel_4spline
 !! SOURCE
 
 elemental function paw_derfc(yy) result(derfc_yy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_derfc'
-!End of the abilint section
 
  implicit none
 

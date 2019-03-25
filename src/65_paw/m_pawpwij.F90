@@ -10,7 +10,7 @@
 !!    - pawpwij_t: Onsite matrix elements of a plane wave for a given atom type.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG,GKA)
+!! Copyright (C) 2008-2019 ABINIT group (MG,GKA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ MODULE m_pawpwij
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_fft
 
  use m_numeric_tools,  only : arth
@@ -139,8 +139,8 @@ MODULE m_pawpwij
 
 !----------------------------------------------------------------------
 
- integer,parameter :: PWIJ_ARNAUD   = 1   ! Arnaud-Alouani exact expression. PRB 62. 4464
- integer,parameter :: PWIJ_SHISHKIN = 2   ! Shishkin-Kresse approximated expression. PRB 74. 035101
+ integer,parameter :: PWIJ_ARNAUD   = 1   ! Arnaud-Alouani exact expression. PRB 62. 4464 [[cite:Arnaud2000]]
+ integer,parameter :: PWIJ_SHISHKIN = 2   ! Shishkin-Kresse approximated expression. PRB 74. 035101 [[cite:Shishkin2006]]
 
 CONTAINS  !========================================================================================
 !!***
@@ -178,13 +178,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine pawpwff_init(Paw_pwff,method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpwff_init'
-!End of the abilint section
 
  implicit none
 
@@ -271,13 +264,6 @@ end subroutine pawpwff_init
 
 subroutine pawpwff_free(Paw_pwff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpwff_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -342,13 +328,6 @@ end subroutine pawpwff_free
 
 subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpwij_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -396,7 +375,7 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
  ABI_MALLOC(my_qtmp,(3,my_nqpt))
  my_qtmp(:,1)=qpt_in(:)
  !
- ! * dummy_nband and dummy_nsppol are not used in sequential mode.
+ ! dummy_nband and dummy_nsppol are not used in sequential mode.
  dummy_nsppol=1
  ABI_MALLOC(dummy_nband,(my_nqpt*dummy_nsppol))
  dummy_nband=0
@@ -471,13 +450,6 @@ end subroutine pawpwij_init
 
 subroutine pawpwij_free_d1(Pwij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpwij_free_d1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -521,13 +493,6 @@ end subroutine pawpwij_free_d1
 
 subroutine pawpwij_free_d2(Pwij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpwij_free_d2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -568,8 +533,8 @@ end subroutine pawpwij_free_d2
 !!   = MAXVAL(Pawtab(:)%lmn2_size) if method=2
 !!  method=integer flag defining the approach used:
 !!   1 --> Expression based on the expansion on a plane wave in terms of Bessel functions
-!!        and spherical harmonics (Arnaud-Alouani's methos, see PRB 62, 4464
-!!   2 --> Approximate expression with correct description of the multipoles. Eq. 9 in PRB 74, 035101
+!!        and spherical harmonics (Arnaud-Alouani's methos, see PRB 62, 4464 [[cite:Arnaud2000]]
+!!   2 --> Approximate expression with correct description of the multipoles. Eq. 9 in PRB 74, 035101 [[cite:Shishkin2006]]
 !!  nq_spl=number of grid points in the q-mesh
 !!  qgrid_spl(nq_spl)=values where form factors are returned
 !!  ntypat=number of type of atoms
@@ -603,14 +568,6 @@ end subroutine pawpwij_free_d2
 
 subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad,Pawtab,pwff_spl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_mkrhox_spl'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -643,7 +600,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
  SELECT CASE (method)
 
  CASE (PWIJ_ARNAUD)
-   ! === Arnaud-Alouani exact expression PRB 62. 4464 ===
+   ! === Arnaud-Alouani exact expression PRB 62. 4464 [[cite:Arnaud2000]] ===
    ! * $ff_^{aL}_{ij}(q) =
    !    \int_0^{r_a} j_L(2\pi qr) [phi_{n_i,l_i}.phi_{n_j l_j}(r)-tphi_{n_i l_i}.tph_{n_j l_j}(r)]dr$
    ! * It does not descrive correctly the multipoles of the AE charge density if low cutoff on G
@@ -923,13 +880,6 @@ end subroutine paw_mkrhox_spl
 subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_spl,&
 &  gmet,qpt,npw,gvec,ylm_q,Psps,Pawtab,paw_rhox)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_mkrhox'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1173,13 +1123,6 @@ end subroutine paw_mkrhox
 
 pure subroutine paw_rho_tw_g(npw,dim_rtwg,nspinor,natom,ntypat,typat,xred,gvec,Cprj_kmqb1,Cprj_kb2,Pwij,rhotwg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_rho_tw_g'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1288,13 +1231,6 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
 & ur_ae1,ur_ae_onsite1,ur_ps_onsite1,i1,ktabr1,ktabp1,spinrot1,&
 & ur_ae2,ur_ae_onsite2,ur_ps_onsite2,i2,ktabr2,ktabp2,spinrot2,&
 & dim_rtwg,rhotwg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_cross_rho_tw_g'
-!End of the abilint section
 
  implicit none
 

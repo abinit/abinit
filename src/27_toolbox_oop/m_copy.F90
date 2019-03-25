@@ -10,7 +10,7 @@
 !!  addr_copy: used to copy the address contained in a pointer
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG,MT)
+!! Copyright (C) 2008-2019 ABINIT group (MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@
 MODULE m_copy
 
  use defs_basis,  only : dp, spc, dpc
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_FC_ISO_C_BINDING
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif
@@ -141,13 +141,6 @@ CONTAINS  !===========================================================
 subroutine deep_copy_int0d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_int0d'
-!End of the abilint section
-
  integer,intent(in) :: xval
  integer,intent(out) :: copy
 ! *********************************************************************
@@ -176,13 +169,6 @@ end subroutine deep_copy_int0d
 subroutine deep_copy_int1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_int1d'
-!End of the abilint section
-
  integer,pointer :: xval(:)
  integer,pointer :: copy(:)
 
@@ -220,13 +206,6 @@ end subroutine deep_copy_int1d
 subroutine deep_copy_int2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_int2d'
-!End of the abilint section
-
  integer,pointer :: xval(:,:)
  integer,pointer :: copy(:,:)
 
@@ -265,13 +244,6 @@ end subroutine deep_copy_int2d
 subroutine deep_copy_int3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_int3d'
-!End of the abilint section
-
  integer,pointer :: xval(:,:,:)
  integer,pointer :: copy(:,:,:)
 
@@ -311,13 +283,6 @@ end subroutine deep_copy_int3d
 subroutine deep_copy_int4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_int4d'
-!End of the abilint section
-
  integer,pointer :: xval(:,:,:,:)
  integer,pointer :: copy(:,:,:,:)
 
@@ -358,13 +323,6 @@ end subroutine deep_copy_int4d
 subroutine deep_copy_rdp0d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_rdp0d'
-!End of the abilint section
-
  real(dp),intent(in) :: xval
  real(dp),intent(out) :: copy
 ! *********************************************************************
@@ -392,13 +350,6 @@ end subroutine deep_copy_rdp0d
 subroutine deep_copy_rdp1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_rdp1d'
-!End of the abilint section
-
  real(dp),pointer :: xval(:)
  real(dp),pointer :: copy(:)
 
@@ -436,13 +387,6 @@ end subroutine deep_copy_rdp1d
 subroutine deep_copy_rdp2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_rdp2d'
-!End of the abilint section
-
  real(dp),pointer :: xval(:,:)
  real(dp),pointer :: copy(:,:)
 
@@ -481,13 +425,6 @@ end subroutine deep_copy_rdp2d
 subroutine deep_copy_rdp3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_rdp3d'
-!End of the abilint section
-
  real(dp),pointer :: xval(:,:,:)
  real(dp),pointer :: copy(:,:,:)
 
@@ -527,13 +464,6 @@ end subroutine deep_copy_rdp3d
 subroutine deep_copy_rdp4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_rdp4d'
-!End of the abilint section
-
  real(dp),pointer :: xval(:,:,:,:)
  real(dp),pointer :: copy(:,:,:,:)
 
@@ -574,13 +504,6 @@ end subroutine deep_copy_rdp4d
 subroutine deep_copy_csp0d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_csp0d'
-!End of the abilint section
-
  complex(spc),intent(in) :: xval
  complex(spc),intent(out) :: copy
 ! *********************************************************************
@@ -608,13 +531,6 @@ end subroutine deep_copy_csp0d
 subroutine deep_copy_csp1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_csp1d'
-!End of the abilint section
-
  complex(spc),pointer :: xval(:)
  complex(spc),pointer :: copy(:)
 
@@ -652,13 +568,6 @@ end subroutine deep_copy_csp1d
 subroutine deep_copy_csp2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_csp2d'
-!End of the abilint section
-
  complex(spc),pointer :: xval(:,:)
  complex(spc),pointer :: copy(:,:)
 
@@ -697,13 +606,6 @@ end subroutine deep_copy_csp2d
 subroutine deep_copy_csp3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_csp3d'
-!End of the abilint section
-
  complex(spc),pointer :: xval(:,:,:)
  complex(spc),pointer :: copy(:,:,:)
 
@@ -743,13 +645,6 @@ end subroutine deep_copy_csp3d
 subroutine deep_copy_csp4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_csp4d'
-!End of the abilint section
-
  complex(spc),pointer :: xval(:,:,:,:)
  complex(spc),pointer :: copy(:,:,:,:)
 
@@ -790,13 +685,6 @@ end subroutine deep_copy_csp4d
 subroutine deep_copy_cdp0d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_cdp0d'
-!End of the abilint section
-
  complex(dpc),intent(in) :: xval
  complex(dpc),intent(out) :: copy
 ! *********************************************************************
@@ -824,13 +712,6 @@ end subroutine deep_copy_cdp0d
 subroutine deep_copy_cdp1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_cdp1d'
-!End of the abilint section
-
  complex(dpc),pointer :: xval(:)
  complex(dpc),pointer :: copy(:)
 
@@ -868,13 +749,6 @@ end subroutine deep_copy_cdp1d
 subroutine deep_copy_cdp2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_cdp2d'
-!End of the abilint section
-
  complex(dpc),pointer :: xval(:,:)
  complex(dpc),pointer :: copy(:,:)
 
@@ -913,13 +787,6 @@ end subroutine deep_copy_cdp2d
 subroutine deep_copy_cdp3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_cdp3d'
-!End of the abilint section
-
  complex(dpc),pointer :: xval(:,:,:)
  complex(dpc),pointer :: copy(:,:,:)
 
@@ -959,13 +826,6 @@ end subroutine deep_copy_cdp3d
 subroutine deep_copy_cdp4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_cdp4d'
-!End of the abilint section
-
  complex(dpc),pointer :: xval(:,:,:,:)
  complex(dpc),pointer :: copy(:,:,:,:)
 
@@ -1010,13 +870,6 @@ end subroutine deep_copy_cdp4d
 subroutine deep_copy_ch1d(xval,copy,slen)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_ch1d'
-!End of the abilint section
-
  integer,intent(in) :: slen
  character(len=slen),pointer :: xval(:)
  character(len=slen),pointer :: copy(:)
@@ -1053,13 +906,6 @@ end subroutine deep_copy_ch1d
 subroutine deep_copy_log0d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_log0d'
-!End of the abilint section
-
  logical,intent(in) :: xval
  logical,intent(out) :: copy
 ! *********************************************************************
@@ -1088,13 +934,6 @@ end subroutine deep_copy_log0d
 subroutine deep_copy_log1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_log1d'
-!End of the abilint section
-
  logical,pointer :: xval(:)
  logical,pointer :: copy(:)
 
@@ -1132,13 +971,6 @@ end subroutine deep_copy_log1d
 subroutine deep_copy_log2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_log2d'
-!End of the abilint section
-
  logical,pointer :: xval(:,:)
  logical,pointer :: copy(:,:)
 
@@ -1177,13 +1009,6 @@ end subroutine deep_copy_log2d
 subroutine deep_copy_log3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_log3d'
-!End of the abilint section
-
  logical,pointer :: xval(:,:,:)
  logical,pointer :: copy(:,:,:)
 
@@ -1223,13 +1048,6 @@ end subroutine deep_copy_log3d
 subroutine deep_copy_log4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deep_copy_log4d'
-!End of the abilint section
-
  logical,pointer :: xval(:,:,:,:)
  logical,pointer :: copy(:,:,:,:)
 
@@ -1270,13 +1088,6 @@ end subroutine deep_copy_log4d
 subroutine alloc_copy_int1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_int1d'
-!End of the abilint section
-
  integer,intent(in) :: xval(:)
  integer,allocatable,intent(out) :: copy(:)
 
@@ -1310,13 +1121,6 @@ end subroutine alloc_copy_int1d
 subroutine alloc_copy_int2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_int2d'
-!End of the abilint section
-
  integer,intent(in) :: xval(:,:)
  integer,allocatable,intent(out) :: copy(:,:)
 
@@ -1351,13 +1155,6 @@ end subroutine alloc_copy_int2d
 subroutine alloc_copy_int3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_int3d'
-!End of the abilint section
-
  integer,intent(in) :: xval(:,:,:)
  integer,allocatable,intent(out) :: copy(:,:,:)
 
@@ -1393,13 +1190,6 @@ end subroutine alloc_copy_int3d
 subroutine alloc_copy_int4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_int4d'
-!End of the abilint section
-
  integer,intent(in) :: xval(:,:,:,:)
  integer,allocatable,intent(out) :: copy(:,:,:,:)
 
@@ -1436,13 +1226,6 @@ end subroutine alloc_copy_int4d
 subroutine alloc_copy_rdp1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_rdp1d'
-!End of the abilint section
-
  real(dp),intent(in) :: xval(:)
  real(dp),allocatable,intent(out) :: copy(:)
 
@@ -1476,13 +1259,6 @@ end subroutine alloc_copy_rdp1d
 subroutine alloc_copy_rdp2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_rdp2d'
-!End of the abilint section
-
  real(dp),intent(in) :: xval(:,:)
  real(dp),allocatable,intent(out) :: copy(:,:)
 
@@ -1517,13 +1293,6 @@ end subroutine alloc_copy_rdp2d
 subroutine alloc_copy_rdp3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_rdp3d'
-!End of the abilint section
-
  real(dp),intent(in) :: xval(:,:,:)
  real(dp),allocatable,intent(out) :: copy(:,:,:)
 
@@ -1559,13 +1328,6 @@ end subroutine alloc_copy_rdp3d
 subroutine alloc_copy_rdp4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_rdp4d'
-!End of the abilint section
-
  real(dp),intent(in) :: xval(:,:,:,:)
  real(dp),allocatable,intent(out) :: copy(:,:,:,:)
 
@@ -1602,13 +1364,6 @@ end subroutine alloc_copy_rdp4d
 subroutine alloc_copy_rdp5d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_rdp5d'
-!End of the abilint section
-
  real(dp),intent(in) :: xval(:,:,:,:,:)
  real(dp),allocatable,intent(out) :: copy(:,:,:,:,:)
 
@@ -1646,13 +1401,6 @@ end subroutine alloc_copy_rdp5d
 subroutine alloc_copy_rdp6d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_rdp6d'
-!End of the abilint section
-
  real(dp),intent(in) :: xval(:,:,:,:,:,:)
  real(dp),allocatable,intent(out) :: copy(:,:,:,:,:,:)
 
@@ -1691,13 +1439,6 @@ end subroutine alloc_copy_rdp6d
 subroutine alloc_copy_csp1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_csp1d'
-!End of the abilint section
-
  complex(spc),intent(in) :: xval(:)
  complex(spc),allocatable,intent(out) :: copy(:)
 
@@ -1731,13 +1472,6 @@ end subroutine alloc_copy_csp1d
 subroutine alloc_copy_csp2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_csp2d'
-!End of the abilint section
-
  complex(spc),intent(in) :: xval(:,:)
  complex(spc),allocatable,intent(out) :: copy(:,:)
 
@@ -1772,13 +1506,6 @@ end subroutine alloc_copy_csp2d
 subroutine alloc_copy_csp3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_csp3d'
-!End of the abilint section
-
  complex(spc),intent(in) :: xval(:,:,:)
  complex(spc),allocatable,intent(out) :: copy(:,:,:)
 
@@ -1814,13 +1541,6 @@ end subroutine alloc_copy_csp3d
 subroutine alloc_copy_csp4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_csp4d'
-!End of the abilint section
-
  complex(spc),intent(in) :: xval(:,:,:,:)
  complex(spc),allocatable,intent(out) :: copy(:,:,:,:)
 
@@ -1857,13 +1577,6 @@ end subroutine alloc_copy_csp4d
 subroutine alloc_copy_cdp1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_cdp1d'
-!End of the abilint section
-
  complex(dpc),intent(in) :: xval(:)
  complex(dpc),allocatable,intent(out) :: copy(:)
 
@@ -1897,13 +1610,6 @@ end subroutine alloc_copy_cdp1d
 subroutine alloc_copy_cdp2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_cdp2d'
-!End of the abilint section
-
  complex(dpc),intent(in) :: xval(:,:)
  complex(dpc),allocatable,intent(out) :: copy(:,:)
 
@@ -1938,13 +1644,6 @@ end subroutine alloc_copy_cdp2d
 subroutine alloc_copy_cdp3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_cdp3d'
-!End of the abilint section
-
  complex(dpc),intent(in) :: xval(:,:,:)
  complex(dpc),allocatable,intent(out) :: copy(:,:,:)
 
@@ -1980,13 +1679,6 @@ end subroutine alloc_copy_cdp3d
 subroutine alloc_copy_cdp4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_cdp4d'
-!End of the abilint section
-
  complex(dpc),intent(in) :: xval(:,:,:,:)
  complex(dpc),allocatable,intent(out) :: copy(:,:,:,:)
 
@@ -2027,13 +1719,6 @@ end subroutine alloc_copy_cdp4d
 subroutine alloc_copy_ch1d(xval,copy,slen)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_ch1d'
-!End of the abilint section
-
  integer,intent(in) :: slen
  character(len=slen),intent(in) :: xval(:)
  character(len=slen),allocatable,intent(out) :: copy(:)
@@ -2068,13 +1753,6 @@ end subroutine alloc_copy_ch1d
 subroutine alloc_copy_log1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_log1d'
-!End of the abilint section
-
  logical,intent(in) :: xval(:)
  logical,allocatable,intent(out) :: copy(:)
 
@@ -2108,13 +1786,6 @@ end subroutine alloc_copy_log1d
 subroutine alloc_copy_log2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_log2d'
-!End of the abilint section
-
  logical,intent(in) :: xval(:,:)
  logical,allocatable,intent(out) :: copy(:,:)
 
@@ -2149,13 +1820,6 @@ end subroutine alloc_copy_log2d
 subroutine alloc_copy_log3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_log3d'
-!End of the abilint section
-
  logical,intent(in) :: xval(:,:,:)
  logical,allocatable,intent(out) :: copy(:,:,:)
 
@@ -2191,13 +1855,6 @@ end subroutine alloc_copy_log3d
 subroutine alloc_copy_log4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_copy_log4d'
-!End of the abilint section
-
  logical,intent(in) :: xval(:,:,:,:)
  logical,allocatable,intent(out) :: copy(:,:,:,:)
 
@@ -2234,13 +1891,6 @@ end subroutine alloc_copy_log4d
 subroutine addr_copy_int1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addr_copy_int1d'
-!End of the abilint section
-
  integer,pointer :: xval(:)
  integer,pointer :: copy(:)
 
@@ -2290,13 +1940,6 @@ end subroutine addr_copy_int1d
 subroutine addr_copy_int2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addr_copy_int2d'
-!End of the abilint section
-
  integer,pointer :: xval(:,:)
  integer,pointer :: copy(:,:)
 
@@ -2346,13 +1989,6 @@ end subroutine addr_copy_int2d
 subroutine addr_copy_int3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addr_copy_int3d'
-!End of the abilint section
-
  integer,pointer :: xval(:,:,:)
  integer,pointer :: copy(:,:,:)
 
@@ -2402,13 +2038,6 @@ end subroutine addr_copy_int3d
 subroutine addr_copy_int4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addr_copy_int4d'
-!End of the abilint section
-
  integer,pointer :: xval(:,:,:,:)
  integer,pointer :: copy(:,:,:,:)
 
@@ -2458,13 +2087,6 @@ end subroutine addr_copy_int4d
 subroutine addr_copy_dp1d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addr_copy_dp1d'
-!End of the abilint section
-
  real(dp),pointer :: xval(:)
  real(dp),pointer :: copy(:)
 
@@ -2514,13 +2136,6 @@ end subroutine addr_copy_dp1d
 subroutine addr_copy_dp2d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addr_copy_dp2d'
-!End of the abilint section
-
  real(dp),pointer :: xval(:,:)
  real(dp),pointer :: copy(:,:)
 
@@ -2570,13 +2185,6 @@ end subroutine addr_copy_dp2d
 subroutine addr_copy_dp3d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addr_copy_dp3d'
-!End of the abilint section
-
  real(dp),pointer :: xval(:,:,:)
  real(dp),pointer :: copy(:,:,:)
 
@@ -2626,13 +2234,6 @@ end subroutine addr_copy_dp3d
 subroutine addr_copy_dp4d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addr_copy_dp4d'
-!End of the abilint section
-
  real(dp),pointer :: xval(:,:,:,:)
  real(dp),pointer :: copy(:,:,:,:)
 
@@ -2682,13 +2283,6 @@ end subroutine addr_copy_dp4d
 subroutine addr_copy_dp5d(xval,copy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addr_copy_dp5d'
-!End of the abilint section
-
  real(dp),pointer :: xval(:,:,:,:,:)
  real(dp),pointer :: copy(:,:,:,:,:)
 

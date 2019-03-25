@@ -14,16 +14,15 @@
 !! the specific spread of the components in G- or R- space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TD)
+!! Copyright (C) 1998-2019 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! dotprod_vn.F90
 !! interfaces_54_spacepar.F90
-!! meanvalue_g.F90
-!! multipoles_fftr.F90
+!! m_multipoles.F90
+!! m_spacepar.F90
 !!
 !!***

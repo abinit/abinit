@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2019 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 module m_getshell
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_linalg_interfaces
@@ -52,7 +52,7 @@ contains
 !! FUNCTION
 !! For each k-point, set up the shells of first neighbours and find
 !! the weigths required for the finite difference expression
-!! of Marzari and Vanderbilt (see PRB 56, 12847 (1997)).
+!! of Marzari and Vanderbilt (see PRB 56, 12847 (1997) [[cite:Marzari1997]]).
 !!
 !! INPUTS
 !! gmet(3,3) = metric tensor of reciprocal space
@@ -121,14 +121,6 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 & kpt3,mkmem,mkmem_max,mvwtk,&
 & nkpt2,nkpt3,nneigh,nshiftk,rmet,rprimd,shiftk,wtk2, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getshell'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -154,7 +146,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  integer :: neigh(0:6,nkpt2),symafm_dummy(1),vacuum(3)
  integer,allocatable :: symrel1(:,:,:)
  real(dp) :: dist(6),dk(3),dk_(3),mat(6,6),rvec(6),sgval(6)
- real(dp) :: shiftk_(3,210),work(30)
+ real(dp) :: shiftk_(3,MAX_NSHIFTK),work(30)
  real(dp),allocatable :: tnons1(:,:),wtk3(:)
 
 !************************************************************************
@@ -659,7 +651,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
    write(message,'(a,a,a,a,a,a,a,i3,a,a,f16.7)') ch10,&
 &   ' getshell : finite difference formula of Marzari and Vanderbilt',ch10,&
-&   '            (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)',&
+&   '            (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)',& ! [[cite:Marzari1997]]
 &   ch10,ch10,&
 &   '            number of first neighbours  : ', neigh(1,1),ch10,&
 &   '            weight : ',mvwtk(1,1)

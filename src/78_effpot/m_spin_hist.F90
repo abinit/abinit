@@ -7,6 +7,7 @@
 !! FUNCTION
 !! This module contains definition the type spin_hist_t
 !! and its related routines
+!! The observables are also calculated. 
 !!
 !! Datatypes:
 !!
@@ -24,7 +25,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! Copyright (C) 2001-2019 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +46,7 @@
 #include "abi_common.h"
 module m_spin_hist
   use defs_basis
-  use m_profiling_abi
+  use m_abicore
   use m_errors
   use m_xmpi
   implicit none
@@ -68,16 +69,16 @@ module m_spin_hist
   !! * mxhist                  : Maximum size of history
   !! * ihist                   : index of history
 
-  !! natom : number of atoms
-  !! nmatom: number of magnetic atoms
+  !! natoms : number of atoms
+  !! nspins: number of magnetic atoms
   !! * acell(3)         : Acell (acell , rprimd, xred: only initial value kept if there is!!  no lattice dynamics. Other wise for each step, the corresponding lattice step number is kept)
   !! * rprimd(3,3)      : Rprimd
-  !! * xred(3,natom)    : Xred
+  !! * xred(3,natoms)    : Xred
   !! * index_spin     : the index of atom in spin model, -1 if it is not in the spin model 
-  !! * heff(3,nmatom,mxhist)   : effective magnetic field (cartesian)
-  !! * snorm(nmatom, mxhist) : magnetitude of spin.
-  !! * S(3,nmatom,mxhist)   : spin orientation of atoms (cartesian)
-  !! * dSdt(3, nmatom, mxhist) : dS/dt (cartesian)
+  !! * heff(3,nspins,mxhist)   : effective magnetic field (cartesian)
+  !! * snorm(nspins, mxhist) : magnetitude of spin.
+  !! * S(3,nspins,mxhist)   : spin orientation of atoms (cartesian)
+  !! * dSdt(3, nspins, mxhist) : dS/dt (cartesian)
   !! * etot(mxhist)            : Electronic total Energy
   !! * entropy(mxhist)         : Entropy
   !! * itime(mxhist)           : index of spin dynamics step.
@@ -95,14 +96,14 @@ module m_spin_hist
      ! Maximun size of the historical records
      integer :: mxhist = 0
 
-     integer :: nmatom
+     integer :: nspins, nspins_prim
      ! whether lattice dynamics is also present
      integer, allocatable :: ihist_latt(:)
      logical :: has_latt
 
      ! arrays
      !  placeholders for structure-related parameters. They are not used currently. 
-     integer :: natom
+     integer :: natoms
      real(dp) :: acell(3)
      real(dp) :: rprimd(3,3)
      real(dp), allocatable :: xred(:, :)
@@ -112,40 +113,48 @@ module m_spin_hist
      integer, allocatable :: spin_index(:)
 
      ! spin
-     !heff(3, nmatom, mxhist)
+     !heff(3, nspins, mxhist)
      real(dp), allocatable :: heff(:, :, :)
-     !snorm(nmatom, mxhist)
+     !snorm(nspins, mxhist)
      real(dp), allocatable :: snorm(:, :)
 
-     !S(3, nmatom, mxhist)
+     !S(3, nspins, mxhist)
      real(dp), allocatable :: S(:, :, :)
-     !dSdt(3, nmatom, mxhist)
+     !dSdt(3, nspins, mxhist)
      ! TODO hexu: is it useful?
      real(dp), allocatable :: dSdt(:, :, :)
 
-     ! label of spins, sublattice
-     integer(dp), allocatable :: label(:)
-     ! sc_label(3, nmatom) label of cell. (R)
-     integer(dp), allocatable :: sc_label(:,:)
      ! etot(mxhist)
      real(dp), allocatable :: etot(:)
      real(dp), allocatable :: entropy(:)
      real(dp), allocatable :: time(:)
      integer, allocatable :: itime(:)
-     ! id of netcdf spin hist file
-     integer :: ncid
+
      ! spin_nctime: interval of step for writing to netcdf hist file.
      integer :: spin_nctime
      real(dp) :: spin_temperature
+
+     ! observables
+     integer:: calc_thermo_obs, calc_traj_obs, calc_correlation_obs
+
+     real(dp), allocatable :: ms_sub(:,:)   ! staggered M. 
+     real(dp), allocatable :: Cv(:) ! specfic heat
+     real(dp), allocatable :: binderU4_sub(:,:), binderU4(:)
+     real(dp), allocatable :: chi_sub(:, :), chi(:) ! magnetic susceptibility
+     real(dp), allocatable :: rcorr(:,:)
+     real(dp), allocatable :: sp_corr_func(:,:,:)
+
   end type spin_hist_t
   !!***
 
   public :: spin_hist_t_init
   public :: spin_hist_t_free
+  public :: spin_hist_t_reset
   public :: spin_hist_t_get_S
   public :: spin_hist_t_findIndex
   public :: spin_hist_t_set_vars
   public :: spin_hist_t_set_params
+  public :: spin_hist_t_inc
   !public :: spinhist2var
   !public :: var2spinhist
   !public :: write_sd_hist
@@ -164,7 +173,7 @@ contains
 !! initialize spin hist
 !!
 !! INPUTS
-!! nmatom = number of magnetic atoms 
+!! nspins = number of magnetic atoms
 !! mxhist = maximum number of hist steps
 !! has_latt = whether spin dynamics in with lattice dynamics
 !!
@@ -177,33 +186,27 @@ contains
 !!
 !! SOURCE
 
-  subroutine spin_hist_t_init(hist, nmatom, mxhist, has_latt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_init'
-!End of the abilint section
+  subroutine spin_hist_t_init(hist, nspins, mxhist, has_latt)
 
     implicit none
     class(spin_hist_t), intent(inout) :: hist
-    integer, intent(in) :: nmatom, mxhist
+    integer, intent(in) :: nspins, mxhist
     logical, intent(in) :: has_latt
-    hist%nmatom=nmatom
+    !integer, optional,  intent(in) :: calc_traj_obs, calc_thermo_obs, calc_correlation_obs
+
+    hist%nspins=nspins
     hist%ntypat=0
     hist%ihist=1
     hist%ihist_prev=0
     hist%mxhist=mxhist
-    hist%natom=0
+    hist%natoms=0
     hist%has_latt=has_latt
 
     !print *, "initialize HIST spin"
-    ABI_ALLOCATE(hist%heff, (3, nmatom, mxhist))
-    ABI_ALLOCATE(hist%snorm, (nmatom, mxhist))
-    ABI_ALLOCATE(hist%S, (3, nmatom, mxhist))
-    ABI_ALLOCATE(hist%dSdt, (3, nmatom, mxhist))
-    ABI_ALLOCATE(hist%label, (nmatom))
+    ABI_ALLOCATE(hist%heff, (3, nspins, mxhist))
+    ABI_ALLOCATE(hist%snorm, (nspins, mxhist))
+    ABI_ALLOCATE(hist%S, (3, nspins, mxhist))
+    ABI_ALLOCATE(hist%dSdt, (3, nspins, mxhist))
 
     ABI_ALLOCATE(hist%etot, (mxhist))
     ABI_ALLOCATE(hist%entropy, (mxhist))
@@ -211,6 +214,10 @@ contains
     ABI_ALLOCATE(hist%itime, (mxhist))
 
     ABI_ALLOCATE(hist%ihist_latt, (mxhist))
+
+
+
+    ! TODO: add observable allocation here.
 
     hist%etot(1) =zero
     hist%entropy(1) =zero
@@ -227,6 +234,32 @@ contains
   end subroutine spin_hist_t_init
 !!***
 
+  subroutine spin_hist_t_reset(hist, array_to_zero)
+
+    implicit none
+    class(spin_hist_t), intent(inout) :: hist
+    logical :: array_to_zero
+    hist%ntypat=0
+    hist%ihist=1
+    hist%ihist_prev=0
+    hist%natoms=0
+
+    hist%etot(1) =zero
+    hist%entropy(1) =zero
+    hist%time(1) =zero
+
+    if(array_to_zero) then
+       hist%heff(:,:,1)=zero
+       hist%S(:,:,1)=zero
+       hist%dSdt(:,:,1)=zero
+       hist%snorm(:,1)=zero
+       hist%Cv( 1)=zero
+       hist%sp_corr_func(:, :, 1)=zero
+    endif
+
+
+  end subroutine spin_hist_t_reset
+
   !!****f* m_spin_hist/spin_hist_t_set_atomic_structure
   !!
   !! NAME
@@ -239,8 +272,8 @@ contains
   !! INPUTS
   !! acell(3) = acell
   !! rprimd(3, 3) = 
-  !! xred(3, natom) = positions in reduced coordinates
-  !! spin_index(3, natom) = index of atom in spin hamiltonian
+  !! xred(3, natoms) = positions in reduced coordinates
+  !! spin_index(3, natoms) = index of atom in spin hamiltonian
   !! ntypat = number of types of atoms
   !! typat(ntypat)=types of atoms
   !! znucl=z of atoms
@@ -255,20 +288,13 @@ contains
   !! SOURCE
   subroutine spin_hist_t_set_atomic_structure(hist, acell, rprimd, xred, spin_index, ntypat,  typat, znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_set_atomic_structure'
-!End of the abilint section
-
     class(spin_hist_t), intent(inout) :: hist
     real(dp), intent(in) :: acell(3), rprimd(3,3), xred(:,:), znucl(:)
     integer, intent(in):: spin_index(:), ntypat, typat(:)
-    integer :: natom
-    natom=size(typat)
-    ABI_ALLOCATE(hist%xred, (3, natom))
-    ABI_ALLOCATE(hist%spin_index, (natom))
+    integer :: natoms
+    natoms=size(typat)
+    ABI_ALLOCATE(hist%xred, (3, natoms))
+    ABI_ALLOCATE(hist%spin_index, (natoms))
     ABI_ALLOCATE(hist%typat,(ntypat))
     ABI_ALLOCATE(hist%znucl, (ntypat))
 
@@ -283,7 +309,6 @@ contains
   !!***
 
 
-  
   !!****f* m_spin_hist/spin_hist_t_set_params
   !!
   !! NAME
@@ -307,13 +332,6 @@ contains
   !! SOURCE
   
   subroutine spin_hist_t_set_params(hist, spin_nctime, spin_temperature)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_set_params'
-!End of the abilint section
 
     class(spin_hist_t), intent(inout) :: hist
     integer, intent(in) :: spin_nctime
@@ -344,13 +362,6 @@ contains
   !! SOURCE
   subroutine spin_hist_t_free(hist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_free'
-!End of the abilint section
-
     class(spin_hist_t) , intent(inout) :: hist
 
     if (allocated(hist%xred)) then
@@ -361,9 +372,6 @@ contains
     end if
     if (allocated(hist%znucl)) then
        ABI_DEALLOCATE(hist%znucl)
-    end if
-    if (allocated(hist%label)) then
-       ABI_DEALLOCATE(hist%label)
     end if
     if (allocated(hist%spin_index)) then
        ABI_DEALLOCATE(hist%spin_index)
@@ -395,6 +403,7 @@ contains
     if (allocated(hist%ihist_latt)) then
        ABI_DEALLOCATE(hist%ihist_latt)
     end if
+
   end subroutine spin_hist_t_free
 !!***
 
@@ -413,7 +422,7 @@ contains
   !! hist <type(spin_hist_t)()> = spin hist type
   !! step = index of step. current step is 0. last step is -1. 
   !! OUTPUT
-  !! S(3, nmatom)=spin orientations at step
+  !! S(3, nspins)=spin orientations at step
   !! PARENTS
   !!      m_spin_hist
   !!
@@ -422,16 +431,9 @@ contains
   !! SOURCE
   function spin_hist_t_get_S(hist, step) result(S)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_get_S'
-!End of the abilint section
-
     class(spin_hist_t), intent(inout) :: hist
     integer, intent(in), optional:: step
-    real(dp) :: S(3, hist%nmatom)
+    real(dp) :: S(3, hist%nspins)
     integer :: i, j
     if (.not. present(step)) then
        j=0
@@ -464,13 +466,6 @@ contains
   !! SOURCE
   subroutine spin_hist_t_inc(hist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_inc'
-!End of the abilint section
-
     class(spin_hist_t), intent(inout) :: hist
     if(hist%ihist_prev ==0 ) then
         hist%itime(hist%ihist)=1
@@ -502,13 +497,6 @@ contains
   !! SOURCE
   function spin_hist_t_findIndex(hist, step) result(index)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_findIndex'
-!End of the abilint section
-
     type(spin_hist_t), intent(inout) :: hist
     integer , intent(in) :: step
     integer :: index
@@ -539,10 +527,10 @@ contains
   !! FUNCTION
   !! put the data into hist
   !! INPUTS
-  !! S(3, nmatoms)=spin orientation
-  !! Snorm(nmatoms)=spin amplitude
-  !! dSdt(3,nmatoms)= dS/dt
-  !! Heff(3, nmatoms) = effective magnetic field
+  !! S(3, nspins)=spin orientation
+  !! Snorm(nspins)=spin amplitude
+  !! dSdt(3,nspins)= dS/dt
+  !! Heff(3, nspins) = effective magnetic field
   !! etot = total energy
   !! entropy = entropy
   !! time = time (note: not index of time)
@@ -558,16 +546,9 @@ contains
   !! SOURCE
   subroutine spin_hist_t_set_vars(hist, S, Snorm, dSdt, Heff, etot, entropy, time, ihist_latt, inc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_set_vars'
-!End of the abilint section
-
     class(spin_hist_t), intent(inout) :: hist
-    real(dp), optional, intent(in) :: S(3, hist%nmatom), Snorm(hist%nmatom), dSdt(3, hist%nmatom), &
-        &  Heff(3, hist%nmatom), etot, entropy, time
+    real(dp), optional, intent(in) :: S(3, hist%nspins), Snorm(hist%nspins), dSdt(3, hist%nspins), &
+        &  Heff(3, hist%nspins), etot, entropy, time
     integer, optional :: ihist_latt
     logical, intent(in), optional :: inc
     integer :: ihist

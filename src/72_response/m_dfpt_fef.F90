@@ -7,7 +7,7 @@
 !!  Response calculations in finite electric field.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2004-2018 ABINIT group (XW).
+!!  Copyright (C) 2004-2019 ABINIT group (XW).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_dfpt_fef
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_efield
 
@@ -103,14 +103,6 @@ contains
 
 subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 &                mpw,mpw1,nkpt,npwarr,npwar1,nsppol,occ,pwindall,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptff_initberry'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -708,7 +700,7 @@ end subroutine dfptff_initberry
 !! Calculation of the gradient of Berry-phase term in finite electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (XW).
+!! Copyright (C) 2004-2019 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -755,13 +747,6 @@ end subroutine dfptff_initberry
 
 subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw1,mkmem,mk1mem,nkpt,&
 &                     npwarr,npwar1,nspinor,nsppol,qmat,pwindall)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptff_gradberry'
-!End of the abilint section
 
  implicit none
 
@@ -1163,7 +1148,7 @@ end subroutine dfptff_gradberry
 !!
 !! FUNCTION
 !! calculate the gradient of the second order \Omega E \cdot P
-!! term, Eq.(23) in PRB 75, 115116(2007).
+!! term, Eq.(23) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
 !! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
@@ -1206,13 +1191,6 @@ end subroutine dfptff_gradberry
 
 subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband,mpw,mpw1,mkmem,mk1mem,nkpt,&
 &                 npwarr,npwar1,nspinor,nsppol,qmat,pwindall,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptff_gbefd'
-!End of the abilint section
 
  implicit none
 
@@ -1615,7 +1593,7 @@ end subroutine dfptff_gbefd
 !!
 !! FUNCTION
 !! calculate the second order energy from the contribution of \Omega E \cdot P
-!! term, Eq.(6) in PRB 75, 115116(2007).
+!! term, Eq.(6) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
 !! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
@@ -1658,13 +1636,6 @@ end subroutine dfptff_gbefd
 
 subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
 &                mpw,mpw1,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptff_edie'
-!End of the abilint section
 
  implicit none
 
@@ -1995,13 +1966,6 @@ end subroutine dfptff_edie
 subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
 &               mpw,mpw1,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptff_ebp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ----------------------------------------
@@ -2244,7 +2208,7 @@ end subroutine dfptff_ebp
 !! dfptff_die
 !!
 !! FUNCTION
-!! calculate electric susceptibility tensor in Eq.(28) in PRB 75, 115116(2007).
+!! calculate electric susceptibility tensor in Eq.(28) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
 !! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
@@ -2287,13 +2251,6 @@ end subroutine dfptff_ebp
 
 subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
 &               mpw,mpw1,mpert,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptff_die'
-!End of the abilint section
 
  implicit none
 
@@ -2426,7 +2383,7 @@ end subroutine dfptff_die
 !! dfptff_bec
 !!
 !! FUNCTION
-!! calculate Born effective charge tensor in Eq.(33) in PRB 75, 115116(2007).
+!! calculate Born effective charge tensor in Eq.(33) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
 !! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
@@ -2469,13 +2426,6 @@ end subroutine dfptff_die
 
 subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
 &               mpw,mpw1,mpert,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptff_bec'
-!End of the abilint section
 
  implicit none
 
@@ -2640,13 +2590,6 @@ end subroutine dfptff_bec
 subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsppol,pwindall)
 
  use m_hide_lapack, only : dzgedi, dzgefa
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'qmatrix'
-!End of the abilint section
-
  implicit none
 
 !Arguments ----------------------------------------

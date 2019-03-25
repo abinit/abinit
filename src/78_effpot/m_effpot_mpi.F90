@@ -10,7 +10,7 @@
 !! This module is still experimental
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (AM)
+!! Copyright (C) 2010-2019 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_effpot_mpi
  use defs_basis
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_supercell,only: getPBCIndexes_supercell
  
  implicit none
@@ -115,13 +115,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effpot_mpi_init'
-!End of the abilint section
 
   implicit none
 
@@ -301,13 +294,6 @@ end subroutine effpot_mpi_init
 !! SOURCE
 
 subroutine effpot_mpi_free(effpot_mpi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effpot_mpi_free'
-!End of the abilint section
 
   implicit none
 

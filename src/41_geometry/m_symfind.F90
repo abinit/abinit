@@ -7,7 +7,7 @@
 !!  Symmetry finder high-level API.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2017 ABINIT group (XG, RC)
+!!  Copyright (C) 2000-2019 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,11 +28,11 @@ module m_symfind
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_symlist
 
  use m_symtk,     only : chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, smallprim
- use m_geometry,  only : xred2xcart
+ use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
 
  implicit none
@@ -59,7 +59,7 @@ contains
 !! From the symmetries of the Bravais lattice (ptsymrel),
 !! select those that leave invariant the system, and generate
 !! the corresponding tnons vectors.
-!! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972)
+!! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972) [[cite:Worton1972]]
 !!
 !! INPUTS
 !! berryopt    =  4/14, 6/16, 7/17: electric or displacement field
@@ -104,13 +104,6 @@ contains
 &  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
 &  nucdipmom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symfind'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -131,14 +124,16 @@ contains
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
- real(dp) :: spinatcl2,spinatcl20,det
+ real(dp) :: det,ndnorm,nucdipmomcl2,nucdipmomcl20,spinatcl2,spinatcl20
  logical,parameter :: afm_noncoll=.true.
- logical :: test_sameabscollin,test_sameabsnoncoll,test_samespin
+ logical :: test_sameabscollin,test_sameabsnoncoll,test_samenucdipmom,test_samespin
  character(len=500) :: message
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
- real(dp) :: diff(3),efieldrot(3),sxred0(3),symnucdipmom2(3)
- real(dp) :: symspinat2(3),symxred2(3),trialnons(3)
+ real(dp) :: diff(3),efieldrot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),sxred0(3)
+ real(dp) :: symnucdipmom2(3)
+ real(dp) :: symnucdipmom2cart(3,3),symnucdipmom2red(3,3),symspinat2(3),symxred2(3),trialnons(3)
+ real(dp),allocatable :: local_nucdipmom(:,:,:),nucdipmomcl(:,:),nucdipmomred(:,:,:)
  real(dp),allocatable :: spinatcl(:,:),spinatred(:,:)
 
 !**************************************************************************
@@ -163,7 +158,8 @@ contains
 !ENDDEBUG
 
 !Find the number of classes of atoms (type and spinat must be identical,
-!spinat might differ by a sign, if aligned with the z direction)
+!spinat might differ by a sign, if aligned with the z direction, or,
+! type and nucdipmom must be identical)
 !natomcl(iclass) will contain the number of atoms in the class
 !typecl(iclass) will contain the type of the atoms in the class
 !spinatcl(1:3,iclass) will contain the spinat of the atoms in the class
@@ -173,12 +169,44 @@ contains
  ABI_ALLOCATE(natomcl,(natom))
  ABI_ALLOCATE(typecl,(natom))
  ABI_ALLOCATE(spinatcl,(3,natom))
+ ABI_ALLOCATE(local_nucdipmom,(3,3,natom))
+ ABI_ALLOCATE(nucdipmomcl,(3,natom))
 
+ local_nucdipmom(:,:,:) = zero
+ if(present(nucdipmom)) then
+    local_nucdipmom(1:3,1,:) = nucdipmom(1:3,:)
+ end if
+ ! for each nuclear dipole we need a local right handed coord system, so we can
+ ! test later for whether a symmetry operation preserves the circulation induced
+ ! by the dipole
+ do iatom=1, natom
+    ndnorm=sqrt(DOT_PRODUCT(local_nucdipmom(1:3,1,iatom),local_nucdipmom(1:3,1,iatom)))
+
+    ! if nuclear dipole has effectively zero size, move on to the next atom
+    if (ndnorm < tol8) cycle
+
+    ! for testing purposes, we care only about direction so renormalize to unity
+    local_nucdipmom(1:3,1,iatom) = local_nucdipmom(1:3,1,iatom)/ndnorm
+
+    ! make a random vector, each component is (0,1]
+    call random_number(ndtest)
+
+    ! vector 2 is constructed to be orthogonal to original nuclear dipole moment vector
+    call acrossb(local_nucdipmom(1:3,1,iatom),ndtest(1:3),local_nucdipmom(1:3,2,iatom))
+
+    ! vector 3 is orthogonal to 1 and 2, and 1,2,3 form a right-handed set
+    call acrossb(local_nucdipmom(1:3,1,iatom),local_nucdipmom(1:3,2,iatom),local_nucdipmom(1:3,3,iatom))
+ end do
+
+ ! need rprimd later to transform back to cart coords
+ call matr3inv(gprimd,rprimd)
+ 
 !Initialise with the first atom
  nclass=1
  natomcl(1)=1
  typecl(1)=typat(1)
  spinatcl(:,1)=spinat(:,1)
+ nucdipmomcl(:,1)=local_nucdipmom(:,1,1)
  class(1,1)=1
  if(natom>1)then
    do iatom=2,natom
@@ -205,7 +233,14 @@ contains
 &         abs(spinat(1,iatom)+spinatcl(1,iclass))<tolsym .and. &
 &         abs(spinat(2,iatom)+spinatcl(2,iclass))<tolsym .and. &
 &         abs(spinat(3,iatom)+spinatcl(3,iclass))<tolsym
-         if( test_samespin .or. test_sameabscollin .or. test_sameabsnoncoll) then
+         test_samenucdipmom= &
+&             abs(local_nucdipmom(1,1,iatom)-nucdipmomcl(1,iclass))<tolsym .and. &
+&             abs(local_nucdipmom(2,1,iatom)-nucdipmomcl(2,iclass))<tolsym .and. &
+&             abs(local_nucdipmom(3,1,iatom)-nucdipmomcl(3,iclass))<tolsym
+         ! note in the following test, m_chkinp/chkinp has already prevented nucdipmom to be
+         ! nonzero when spinat is nonzero
+         if( (test_samespin .or. test_sameabscollin .or. test_sameabsnoncoll) .AND. &
+              & test_samenucdipmom ) then
 !          DEBUG
 !          write(std_out,*)' symfind : find it belongs to class iclass=',iclass
 !          write(std_out,*)' symfind : spinat(:,iatom)=',spinat(:,iatom)
@@ -226,6 +261,7 @@ contains
        natomcl(nclass)=1
        typecl(nclass)=typat(iatom)
        spinatcl(:,nclass)=spinat(:,iatom)
+       nucdipmomcl(:,nclass)=local_nucdipmom(:,1,iatom)
        class(1,nclass)=iatom
      end if
    end do
@@ -249,15 +285,23 @@ contains
  iclass0=1
  natom0=natomcl(1)
  spinatcl20=spinatcl(1,1)**2+spinatcl(2,1)**2+spinatcl(3,1)**2
+ nucdipmomcl20=nucdipmomcl(1,1)**2+nucdipmomcl(2,1)**2+nucdipmomcl(3,1)**2
  if(nclass>1)then
    do iclass=2,nclass
      spinatcl2=spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2
+     nucdipmomcl2=nucdipmomcl(1,iclass)**2+nucdipmomcl(2,iclass)**2+nucdipmomcl(3,iclass)**2
      if( (natomcl(iclass)<natom0 .and. (spinatcl20<tolsym .or. spinatcl2>tolsym))  &
 &     .or. (spinatcl20<tolsym .and. spinatcl2>tolsym)                         )then
        iclass0=iclass
        natom0=natomcl(iclass)
        spinatcl20=spinatcl2
      end if
+!      if( (natomcl(iclass)<natom0 .and. (nucdipmomcl20<tolsym .or. nucdipmomcl2>tolsym))  &
+! &     .or. (nucdipmomcl20<tolsym .and. nucdipmomcl2>tolsym)                         )then
+!        iclass0=iclass
+!        natom0=natomcl(iclass)
+!        nucdipmomcl20=nucdipmomcl2
+!      end if
    end do
  end if
 
@@ -283,6 +327,14 @@ contains
      end do
    end do
  end if
+
+ !represent nuclear dipole moments in reduced coords
+ ABI_ALLOCATE(nucdipmomred,(3,3,natom))
+ do iatom=1,natom
+    do ii=1,3
+       nucdipmomred(1:3,ii,iatom)=MATMUL(TRANSPOSE(gprimd),local_nucdipmom(1:3,ii,iatom))
+    end do
+ end do
 
 !Big loop over each symmetry operation of the Bravais lattice
  nsym=0
@@ -343,6 +395,12 @@ contains
 &       'isym,iatom0,iatom1=',isym,iatom0,iatom1
        MSG_ERROR_CLASS(message, "TolSymError")
      end if
+     if(sum(abs(local_nucdipmom(:,1,iatom1)-local_nucdipmom(:,1,iatom0)))>tolsym)then
+       write(message,'(3a,3i5)')&
+&       'Problem with matching the nuclear dipole moment within a class.',ch10,&
+&       'isym,iatom0,iatom1=',isym,iatom0,iatom1
+       MSG_ERROR_CLASS(message, "TolSymError")
+     end if
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
      if( jellslab/=0 .and. abs(trialnons(3)) > tolsym ) cycle
@@ -370,19 +428,21 @@ contains
 &           ptsymrel(:,2,isym)*spinatred(2,iatom2)+ &
 &           ptsymrel(:,3,isym)*spinatred(3,iatom2))
          end if
-         if(present(nucdipmom)) then
-!        Generate the tentative symmetric nuclear dipole moment of iatom2
-           symnucdipmom2(:)=(ptsymrel(:,1,isym)*nucdipmom(1,iatom2)+ &
-&           ptsymrel(:,2,isym)*nucdipmom(2,iatom2)+ &
-&           ptsymrel(:,3,isym)*nucdipmom(3,iatom2))
-         end if
+         !        Generate the tentative symmetric nucdipmom of iatom2
+         do kk = 1, 3
+            symnucdipmom2red(:,kk)=ptsymrel(:,1,isym)*nucdipmomred(1,kk,iatom2)+ &
+                 &           ptsymrel(:,2,isym)*nucdipmomred(2,kk,iatom2)+ &
+                 &           ptsymrel(:,3,isym)*nucdipmomred(3,kk,iatom2)
+            ! transform back to cart coords for final comparison to nucdipmom
+            symnucdipmom2cart(:,kk)=MATMUL(rprimd,symnucdipmom2red(:,kk))
+         end do
 
 !        DEBUG
 !        write(std_out,'(a,3f12.4,a,3f12.4)') ' Send atom at xred=',xred(:,iatom2),' to ',symxred2(:)
 !        ENDDEBUG
 
 !        Check whether there exists an atom of the same class at the
-!        same location, with the correct spinat and nuclear dipole moment
+!        same location, with the correct spinat and nuclear dipole moment circulation
          do kk=1,natomcl(iclass)
 
            found3=1
@@ -398,11 +458,15 @@ contains
              diff(:)=spinatred(:,iatom3)-symspinat2(:)
            end if
            if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )found3=0
-           if(present(nucdipmom)) then
-!            Check the nuclear dipole moment
-             diff(:) = nucdipmom(:,iatom3) - symnucdipmom2(:)
-             if(any(diff>tolsym))found3=0
-           end if
+           !          Check the nucdipmom
+           ! hand3 gives original circulation sense of nuclear dipole
+           call acrossb(local_nucdipmom(1:3,2,iatom3),local_nucdipmom(1:3,3,iatom3),hand3)
+
+           ! hand2 gives circulation sense of tentative, symmetry equivalent nuclear dipole
+           call acrossb(symnucdipmom2cart(1:3,2),symnucdipmom2cart(1:3,3),hand2)
+
+           diff(:)=hand3(:)-hand2(:)
+           if( any(abs(diff)>tolsym) )found3=0
 
            if(found3==1)exit
          end do ! End loop over iatom3
@@ -439,6 +503,9 @@ contains
  ABI_DEALLOCATE(natomcl)
  ABI_DEALLOCATE(spinatcl)
  ABI_DEALLOCATE(typecl)
+ ABI_DEALLOCATE(local_nucdipmom)
+ ABI_DEALLOCATE(nucdipmomcl)
+ ABI_DEALLOCATE(nucdipmomred)
  if (noncoll==1)   then
    ABI_DEALLOCATE(spinatred)
  end if
@@ -494,14 +561,6 @@ end subroutine symfind
 !! SOURCE
 
 subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symanal'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -668,13 +727,6 @@ end subroutine symanal
 !! SOURCE
 
 subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symbrav'
-!End of the abilint section
 
  implicit none
 
@@ -994,14 +1046,6 @@ end subroutine symbrav
 subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 
  use m_numeric_tools, only : OPERATOR(.x.)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symspgr'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1122,7 +1166,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
    symrelconv(:,:,isym), tnonsconv(:,isym), t_axes(isym))
    if (t_axes(isym) == -1) then
      write(message, '(a,a,i3,a,3(a,3i4,a),a,3es22.12,a,a,3es22.12)' )ch10,&
-&     ' symspgr : problem with isym=',isym,ch10,&
+&     ' symspgr: problem with isym=',isym,ch10,&
 &     '  symrelconv(:,1,isym)=',symrelconv(:,1,isym),ch10,&
 &     '  symrelconv(:,2,isym)=',symrelconv(:,2,isym),ch10,&
 &     '  symrelconv(:,3,isym)=',symrelconv(:,3,isym),ch10,&
@@ -1130,8 +1174,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 &     '  trialt(:)=',trialt(:)
      call wrtout(std_out,message,'COLL')
      write(message, '(a,i4,2a)' )&
-&     'The space symmetry operation number',isym,ch10,&
-&     'is not a (translated) root of unity'
+&     'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
      MSG_BUG(message)
    else if (t_axes(isym) == -2) then
      write(message, '(a,i0,a)' )'The symmetry operation number ',isym,' is not a root of unity'
@@ -1298,15 +1341,15 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
  if(spgroup/=0)then
-   write(message, '(a,i4,2x,a,a,a,a,a)' ) ' symspgr : spgroup=',spgroup,trim(brvsb),trim(intsb),'   (=',trim(schsb),')'
+   write(message, '(a,i4,2x,a,a,a,a,a)' ) ' symspgr: spgroup=',spgroup,trim(brvsb),trim(intsb),'   (=',trim(schsb),')'
    call wrtout(std_out,message,'COLL')
  end if
 
  if(bravais(1)==7)then
-   write(message, '(a)' ) ' symspgr : optical characteristics = isotropic '
+   write(message, '(a)' ) ' symspgr: optical characteristics = isotropic '
    call wrtout(std_out,message,'COLL')
  else if(bravais(1)==4 .or. bravais(1)==5 .or. bravais(1)==6)then
-   write(message, '(a)' ) ' symspgr : optical characteristics = uniaxial '
+   write(message, '(a)' ) ' symspgr: optical characteristics = uniaxial '
    call wrtout(std_out,message,'COLL')
 !  Identify the first symmetry operation that is order 3, 4 or 6
    found=0
@@ -1429,14 +1472,6 @@ end subroutine symspgr
 !! SOURCE
 
 subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlatt'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -2133,11 +2168,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      if(center==0 .or. center==-1 .or. center==-3)then
        iholohedry=7 ; found=1
        if(center==0)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is cP (primitive cubic)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cP (primitive cubic)'
        else if(center==-1)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is cI (body-centered cubic)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cI (body-centered cubic)'
        else if(center==-3)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is cF (face-centered cubic)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cF (face-centered cubic)'
        end if
      end if
    end if
@@ -2156,9 +2191,9 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          axes(:,:)=cell_base(:,:)
        end if
        if(center==0)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is tP (primitive tetragonal)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is tP (primitive tetragonal)'
        else if(center==-1)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is tI (body-centered tetragonal)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is tI (body-centered tetragonal)'
        end if
      end if
    end if
@@ -2168,13 +2203,13 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      iholohedry=3 ; found=1
      axes(:,:)=cell_base(:,:)
      if(center==0)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oP (primitive orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oP (primitive orthorhombic)'
      else if(center==-1)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oI (body-centered orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oI (body-centered orthorhombic)'
      else if(center==1 .or. center==2 .or. center==3)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oC (one-face-centered orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oC (one-face-centered orthorhombic)'
      else if(center==-3)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oF (face-centered orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oF (face-centered orthorhombic)'
      end if
    end if
 
@@ -2183,7 +2218,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !  Hexagonal system
    if(found==0 .and. ang90(1)==1 .and. ang90(2)==1 .and. equal(3)==1 .and. (2*metmin(2,1)+metmin(1,1))<tolsym*metmin(1,1))then
      iholohedry=6 ; found=1
-     write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is hP (primitive hexagonal)'
+     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is hP (primitive hexagonal)'
    end if
 
 !  Rhombohedral system
@@ -2191,23 +2226,23 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 &   abs(metmin(2,1)-metmin(3,2))<tolsym*metmin(2,2)             .and.       &
 &   abs(metmin(2,1)-metmin(3,1))<tolsym*metmin(1,1) )then
      iholohedry=5 ; found=1
-     write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is hR (rhombohedral)'
+     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is hR (rhombohedral)'
    end if
 
 !  Monoclinic system
    if(found==0 .and. ang90(1)+ang90(2)+ang90(3)==2 )then
      iholohedry=2 ; found=1
      if(center==0)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is mP (primitive monoclinic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is mP (primitive monoclinic)'
      else if(center==3)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is mC (one-face-centered monoclinic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is mC (one-face-centered monoclinic)'
      end if
    end if
 
 !  Triclinic system
    if(found==0)then
      iholohedry=1 ; found=1
-     write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is aP (primitive triclinic)'
+     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is aP (primitive triclinic)'
    end if
 
  end if

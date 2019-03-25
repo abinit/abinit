@@ -10,7 +10,7 @@
 !! dispersion coefficients C6, the supporting points of the interpolation
 !! and the cut-off radii (R0) for the dispersion correction
 !! COPYRIGHT
-!! Copyright (C) 2015-2018 ABINIT group (BVT)
+!! Copyright (C) 2015-2019 ABINIT group (BVT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,7 +21,7 @@
 !!                the divergence
 !!  vdw_dftd3_c6: C6ij tabulated dispersion coefficients used for the interpolation
 !!                of the coordination number ordered by reference number* (
-!!                Grimme, J. Chem. Phys. 132, 154104 (2010)) and then by
+!!                Grimme, J. Chem. Phys. 132, 154104 (2010) [[cite:Grimme2010]]) and then by
 !!                pair of chemical elements (H-H,He-H,He-He,etc.;
 !!                only i-j coefficient are given as j-i is identical by symmetry)
 !!  index_c6: table containing the index of non-zero values of C6 coefficients
@@ -61,13 +61,6 @@ subroutine vdw_dftd3_data(vdw_dftd3_r0,vdw_dftd3_c6,index_c6,vdw_dftd3_cni,index
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_dftd3_data'
-!End of the abilint section
-
  real(dp),intent(out) :: vdw_dftd3_r0(4465)
  real(dp),intent(out):: vdw_dftd3_c6(32385)
  integer,intent(out):: index_c6(254)

@@ -1,3 +1,45 @@
+!!****f* DUMMY_TESTS/m_dummy_tests
+!! NAME
+!! m_dummy_tests
+!!
+!! FUNCTION
+!!  Dummy module, to detect unused values
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2017-2019 ABINIT group (XG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  used_arg = used argument
+!!
+!! OUTPUT
+!!  dummy_out1 = first output value
+!!
+!! SIDE EFFECTS
+!!  used_arg = used argument
+!!
+!! PARENTS
+!!      dummy_tests
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ module m_dummy_tests
+
+ implicit none
+
+ !private
+ public
+
+ double precision, save :: dummy_value
+ public :: test_dummy
+
+ contains
+!!***
+
 !!****f* DUMMY_TESTS/test_unused_arg
 !! NAME
 !! test_unused_arg
@@ -6,7 +48,7 @@
 !!  Dummy subroutine, to test unused arguments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (XG)
+!!  Copyright (C) 2017-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,13 +76,6 @@
 
  subroutine test_unused_arg(used_arg,unused_arg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_unused_arg'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -63,7 +98,7 @@
 !!  Dummy subroutine, to detect when the calling subroutine attributes to one variable results from two different arguments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (XG)
+!!  Copyright (C) 2017-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,20 +120,7 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
  subroutine test_same_actual_arg(dummy_out1,dummy_out2,used_arg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_same_actual_arg'
-!End of the abilint section
 
  implicit none
 
@@ -115,53 +137,6 @@
  end subroutine test_same_actual_arg
 !!***
 
-!!****f* DUMMY_TESTS/m_dummy_tests
-!! NAME
-!! m_dummy_tests
-!!
-!! FUNCTION
-!!  Dummy module, to detect unused values
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (XG)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!  used_arg = used argument
-!!
-!! OUTPUT
-!!  dummy_out1 = first output value
-!!
-!! SIDE EFFECTS
-!!  used_arg = used argument
-!!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
- module m_dummy_tests
-
- implicit none
-
- private
-
- double precision, save :: dummy_value
- public :: test_dummy
-
- contains
-!!***
-
 !!****f* DUMMY_TESTS/test_dummy
 !! NAME
 !! test_dummy
@@ -170,7 +145,7 @@
 !!  Dummy subroutine
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (XG)
+!!  Copyright (C) 2017-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -189,13 +164,6 @@
 !! SOURCE
 
  subroutine test_dummy(dummy_out1,used_arg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_dummy'
-!End of the abilint section
 
  implicit none
 

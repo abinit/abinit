@@ -9,7 +9,7 @@
 !!  methods bound to the object.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2019 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ MODULE m_sigma
  use defs_datatypes
  use defs_abitypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use iso_c_binding
  use m_nctk
@@ -257,16 +257,6 @@ CONTAINS  !=====================================================================
 
 subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_sigma_header'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -455,16 +445,6 @@ end subroutine write_sigma_header
 
 subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_sigma_results'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikcalc,ikibz
@@ -623,15 +603,6 @@ end subroutine write_sigma_results
 
 function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gw_spectral_function'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: io,ib,ikibz,is
@@ -669,16 +640,6 @@ end function gw_spectral_function
 !! SOURCE
 
 subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_Sigma_perturbative'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -824,16 +785,6 @@ end subroutine print_Sigma_perturbative
 
 subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_Sigma_QPSC'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iband,ik_ibz,isp
@@ -963,15 +914,6 @@ end subroutine print_Sigma_QPSC
 
 subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nkibz,usepawu
 !scalars
@@ -1100,15 +1042,6 @@ end subroutine sigma_init
 
 subroutine sigma_free(Sr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(sigma_t),intent(inout) :: Sr
@@ -1117,100 +1050,40 @@ subroutine sigma_free(Sr)
 
  !@sigma_t
 !integer
- if (allocated(Sr%maxbnd)) then
-   ABI_FREE(Sr%maxbnd)
- end if
- if (allocated(Sr%minbnd)) then
-   ABI_FREE(Sr%minbnd)
- end if
+ ABI_SFREE(Sr%maxbnd)
+ ABI_SFREE(Sr%minbnd)
 
 !real
- if (allocated(Sr%degwgap)) then
-   ABI_FREE(Sr%degwgap)
- end if
- if (allocated(Sr%egwgap)) then
-   ABI_FREE(Sr%egwgap)
- end if
- if (allocated(Sr%en_qp_diago)) then
-   ABI_FREE(Sr%en_qp_diago)
- end if
- if (allocated(Sr%e0)) then
-   ABI_FREE(Sr%e0)
- end if
- if (allocated(Sr%e0gap)) then
-   ABI_FREE(Sr%e0gap)
- end if
- if (allocated(Sr%omega_r)) then
-   ABI_FREE(Sr%omega_r)
- end if
- if (allocated(Sr%kptgw)) then
-   ABI_FREE(Sr%kptgw)
- end if
- if (allocated(Sr%sigxme)) then
-   ABI_FREE(Sr%sigxme)
- end if
- if (allocated(Sr%x_mat)) then
-   ABI_FREE(Sr%x_mat)
- end if
- if (allocated(Sr%vxcme)) then
-   ABI_FREE(Sr%vxcme)
- end if
- if (allocated(Sr%vUme)) then
-   ABI_FREE(Sr%vUme)
- end if
+ ABI_SFREE(Sr%degwgap)
+ ABI_SFREE(Sr%egwgap)
+ ABI_SFREE(Sr%en_qp_diago)
+ ABI_SFREE(Sr%e0)
+ ABI_SFREE(Sr%e0gap)
+ ABI_SFREE(Sr%omega_r)
+ ABI_SFREE(Sr%kptgw)
+ ABI_SFREE(Sr%sigxme)
+ ABI_SFREE(Sr%x_mat)
+ ABI_SFREE(Sr%vxcme)
+ ABI_SFREE(Sr%vUme)
 
 !complex
- if (allocated(Sr%degw)) then
-   ABI_FREE(Sr%degw)
- end if
- if (allocated(Sr%dsigmee0)) then
-   ABI_FREE(Sr%dsigmee0)
- end if
- if (allocated(Sr%egw)) then
-   ABI_FREE(Sr%egw)
- end if
- if (allocated(Sr%eigvec_qp)) then
-   ABI_FREE(Sr%eigvec_qp)
- end if
- if (allocated(Sr%m_lda_to_qp)) then
-   ABI_FREE(Sr%m_lda_to_qp)
- end if
- if (allocated(Sr%hhartree)) then
-   ABI_FREE(Sr%hhartree)
- end if
- if (allocated(Sr%sigcme)) then
-   ABI_FREE(Sr%sigcme)
- end if
- if (allocated(Sr%sigmee)) then
-   ABI_FREE(Sr%sigmee)
- end if
- if (allocated(Sr%sigcmee0)) then
-   ABI_FREE(Sr%sigcmee0)
- end if
- if (allocated(Sr%sigcmesi)) then
-   ABI_FREE(Sr%sigcmesi)
- end if
- if (allocated(Sr%sigcme4sd)) then
-   ABI_FREE(Sr%sigcme4sd)
- end if
- if (allocated(Sr%sigxcme)) then
-   ABI_FREE(Sr%sigxcme)
- end if
- if (allocated(Sr%sigxcmesi)) then
-   ABI_FREE(Sr%sigxcmesi)
- end if
- if (allocated(Sr%sigxcme4sd)) then
-   ABI_FREE(Sr%sigxcme4sd)
- end if
- if (allocated(Sr%ze0)) then
-   ABI_FREE(Sr%ze0)
- end if
- if (allocated(Sr%omega_i)) then
-   ABI_FREE(Sr%omega_i)
- end if
- if (allocated(Sr%omega4sd)) then
-   ABI_FREE(Sr%omega4sd)
- end if
+ ABI_SFREE(Sr%degw)
+ ABI_SFREE(Sr%dsigmee0)
+ ABI_SFREE(Sr%egw)
+ ABI_SFREE(Sr%eigvec_qp)
+ ABI_SFREE(Sr%m_lda_to_qp)
+ ABI_SFREE(Sr%hhartree)
+ ABI_SFREE(Sr%sigcme)
+ ABI_SFREE(Sr%sigmee)
+ ABI_SFREE(Sr%sigcmee0)
+ ABI_SFREE(Sr%sigcmesi)
+ ABI_SFREE(Sr%sigcme4sd)
+ ABI_SFREE(Sr%sigxcme)
+ ABI_SFREE(Sr%sigxcmesi)
+ ABI_SFREE(Sr%sigxcme4sd)
+ ABI_SFREE(Sr%ze0)
+ ABI_SFREE(Sr%omega_i)
+ ABI_SFREE(Sr%omega4sd)
 
 end subroutine sigma_free
 !!***
@@ -1234,15 +1107,6 @@ end subroutine sigma_free
 !! SOURCE
 
 pure function sigma_get_exene(sigma,kmesh,bands) result(ex_energy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_get_exene'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1303,15 +1167,6 @@ end function sigma_get_exene
 !! SOURCE
 
 subroutine find_wpoles_for_cd(Sigp,Sr,Kmesh,BSt,omega_max)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_wpoles_for_cd'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1420,15 +1275,6 @@ end subroutine find_wpoles_for_cd
 !! SOURCE
 
 integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_ncwrite'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1669,14 +1515,6 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -1727,15 +1565,6 @@ end function sigma_ncwrite
 
 subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kptgw,mg0,my_nbks,proc_distrb,got,bks_mask,global)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_distribute_bks'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsppol
@@ -1765,7 +1594,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
 
 !************************************************************************
 
- call wfd_update_bkstab(Wfd)
+ call wfd%update_bkstab()
 
  get_more=0; if (PRESENT(got)) get_more=got
 
@@ -1782,7 +1611,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
        if (Ltg_kgw%ibzq(iq_bz)==1) then
          bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
          if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
-         call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
+         call wfd%distribute_bands(ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
          if (my_nband>0) proc_distrb(my_band_list(1:my_nband),ik_bz,spin)=Wfd%my_rank
        end if
      end do
@@ -1793,7 +1622,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
        ik_ibz = Kmesh%tab(ik_bz)
        bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
        if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
-       call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
+       call wfd%distribute_bands(ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
        if (my_nband>0) proc_distrb(my_band_list(1:my_nband),ik_bz,spin)=Wfd%my_rank
      end do
    end if

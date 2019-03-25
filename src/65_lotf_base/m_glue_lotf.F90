@@ -4,17 +4,18 @@
 !! glue_lotf
 !!
 !! FUNCTION
-!!  Contains the GLUE procedure and parameters for Lotf 
+!!  Contains the GLUE procedure and parameters for Lotf
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2019 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!  Parameters for the glue potential 
+!!  Parameters for the glue potential
 !!  ref: Ercolessi et al, Phil Mag A 58(1), 213 (1988)
+!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -45,23 +46,23 @@ module glue_lotf
  !--Function rho_r
  real(dp),public :: rmrho
  real(dp) :: rbrho
- real(dp) :: b0I,b1I,b2I,b3I 
+ real(dp) :: b0I,b1I,b2I,b3I
  real(dp) :: b0II,b1II,b2II,b3II,b0III,b1III,b2III,b3III
 
  !--Function U_n
  real(dp) :: n0U,nsU
- real(dp) :: c0I,c1I,c2I,c3I,c4I 
+ real(dp) :: c0I,c1I,c2I,c3I,c4I
  real(dp) :: c0II,c1II,c2II,c3II,c4II,c0III,c1III,c2III,c3III
 
  !--Auxiliary variables to change glue parameters
  real(dp),parameter :: ddphi = 0.028779246_dp
  real(dp),parameter :: scalefactor_phi = one
 
- 
+
  public ::             &
    glue_init,          &
    glue_pair_devs,     &
-   glue_pair,          & 
+   glue_pair,          &
    calc_coord,         &
    calc_rhop,          &
    calc_coord_new_d,   &
@@ -73,37 +74,31 @@ module glue_lotf
 contains !===========================================================
  !!***
 
- !!****f* glue_lotf/glue_init
- !! NAME
- !! glue_init
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* glue_lotf/glue_init
+!! NAME
+!! glue_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!
- !! SOURCE
- subroutine glue_init() 
+!! SOURCE
+
+ subroutine glue_init()
 
   !--Function phi_r
 ! *************************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'glue_init'
-!End of the abilint section
-
-  dphi =  (0.2878207442141723d+01 + ddphi) / 0.529177d0 
+  dphi =  (0.2878207442141723d+01 + ddphi) / 0.529177d0
   rcphi = (0.3700000000000000d+01 + ddphi) / 0.529177d0
 
   a0I = -0.8000000000000000d-01 / (13.6057d0 * 2.d0) *&
     scalefactor_phi
   a1I =  0.0000000000000000d+00 / (13.6057d0 * 2.d0) * (0.529177d0) *&
-    scalefactor_phi 
+    scalefactor_phi
   a2I =  0.7619231375231362d+00 / (13.6057d0 * 2.d0) * (0.529177d0)**2 *&
     scalefactor_phi
   a3I = -0.8333333333333333d+00 / (13.6057d0 * 2.d0) * (0.529177d0)**3 *&
@@ -176,27 +171,21 @@ contains !===========================================================
  !!***
 
 
- !!****f* glue_lotf/glue_pair_devs
- !! NAME
- !! glue_pair_devs
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* glue_lotf/glue_pair_devs
+!! NAME
+!! glue_pair_devs
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_eval_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine glue_pair_devs(alpha_dum,RD,r_au,epot_2,fdum,dfdum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'glue_pair_devs'
-!End of the abilint section
 
   implicit none
 
@@ -243,17 +232,17 @@ contains !===========================================================
      dfdum(:,:) = zero
 
      if (rst < dphi2) then
-       fdum(:) = scale_factor * (4.d0*a4I*r3 + 3.d0*a3I*r2 + 2.d0*a2I*r + a1I) * RD(:)/rst 
-       dfdum(:,1) = -scale_factor * (12.d0*a4I*r2 + 6.d0*a3I*r + 2.d0*a2I) * RD(:)/rst 
+       fdum(:) = scale_factor * (4.d0*a4I*r3 + 3.d0*a3I*r2 + 2.d0*a2I*r + a1I) * RD(:)/rst
+       dfdum(:,1) = -scale_factor * (12.d0*a4I*r2 + 6.d0*a3I*r + 2.d0*a2I) * RD(:)/rst
        dfdum(:,2) = fdum(:) / scale_factor
 
      elseif (rst < rcphi2) then
        fdum(:) = (scale_factor) * &
 &       (6.d0*a6II*r5 + 5.d0*a5II*r4 + 4.d0*a4II*r3 + 3.d0*a3II*r2 + 2.d0*a2II*r + a1II) * &
-&       RD(:)/rst         
+&       RD(:)/rst
 
        dfdum(:,1) = -scale_factor * &
-&       (30.d0*a6II*r4 + 20.d0*a5II*r3 + 12.d0*a4II*r2 + 6.d0*a3II*r + 2.d0*a2II) * RD(:)/rst 
+&       (30.d0*a6II*r4 + 20.d0*a5II*r3 + 12.d0*a4II*r2 + 6.d0*a3II*r + 2.d0*a2II) * RD(:)/rst
 
        dfdum(:,2) = fdum(:) / scale_factor
 
@@ -262,38 +251,32 @@ contains !===========================================================
 !!***
 
 
- !!****f* glue_lotf/glue_pair
- !! NAME
- !! glue_pair
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* glue_lotf/glue_pair
+!! NAME
+!! glue_pair
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_eval_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!
- !! SOURCE
- subroutine glue_pair(RD,r_au,epot_2,fdum) 
+!! SOURCE
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'glue_pair'
-!End of the abilint section
+ subroutine glue_pair(RD,r_au,epot_2,fdum)
 
   implicit none
 
   !Arguments ------------------------
   real(dp) ::  RD(3), fdum(3), r_au, epot_2
-  !Local --------------------------- 
+  !Local ---------------------------
   real(dp) ::  rst, r, r2, r3, r4, r5, r6
-  integer ::  k 
+  integer ::  k
   ! *********************************************************************
 !    --The calculation for a given pair
-     rst = sqrt(r_au) 
+     rst = sqrt(r_au)
      r = rst - dphi
      r2 = r*r
      r3 = r2*r
@@ -302,7 +285,7 @@ contains !===========================================================
 !    --Energy
      epot_2 = zero
      if (rst < dphi) then
-       epot_2 = a4I*r4 + a3I*r3 + a2I*r2 + a1I*r + a0I 
+       epot_2 = a4I*r4 + a3I*r3 + a2I*r2 + a1I*r + a0I
      elseif (rst < rcphi) then
        r5 = r4*r
        r6 = r5*r
@@ -327,38 +310,29 @@ contains !===========================================================
    end subroutine glue_pair
 !!***
 
- !!****f* glue_lotf/calc_coord
- !! NAME
- !! calc_coord
- !!
- !! FUNCTION
- !! 
- !!
- !! INPUTS
- !! 
- !!
- !! CHILDREN
- !!
+!!****f* glue_lotf/calc_coord
+!! NAME
+!! calc_coord
+!!
+!! FUNCTION
+!!
+!!
+!! INPUTS
+!!
 !! PARENTS
 !!      m_eval_lotf
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine calc_coord(r_au,coordatom_dum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_coord'
-!End of the abilint section
 
   implicit none
 
   !Arguments ------------------------
   real(dp) :: r_au,coordatom_dum
-  !Local --------------------------- 
+  !Local ---------------------------
   real(dp) :: rst,r,rho_neigh
   ! *********************************************************************
 !    --Adds the density of a single given neighbour
@@ -382,32 +356,24 @@ contains !===========================================================
    end subroutine calc_coord
 !!***
 
- !!****f* glue_lotf/calc_rhop
- !! NAME
- !! calc_rhop
- !!
- !! FUNCTION
- !! 
- !!
- !! INPUTS
- !! 
- !!
- !! CHILDREN
- !!
+!!****f* glue_lotf/calc_rhop
+!! NAME
+!! calc_rhop
+!!
+!! FUNCTION
+!!
+!!
+!! INPUTS
+!!
+!!
 !! PARENTS
 !!      m_eval_lotf
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
      subroutine calc_rhop(r_st,rhop_dum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_rhop'
-!End of the abilint section
 
      implicit none
 
@@ -431,37 +397,28 @@ contains !===========================================================
      elseif (r_st < rmrho) then
        r = r_st - rmrho
        r2 = r*r
-       rhop_dum = (3.d0*b3III*r2 + 2.d0*b2III*r + b1III) 
+       rhop_dum = (3.d0*b3III*r2 + 2.d0*b2III*r + b1III)
      end if
    end subroutine calc_rhop
 !!***
 
- !!****f* glue_lotf/calc_coord_new_d
- !! NAME
- !! calc_coord_new_d
- !!
- !! FUNCTION
- !! 
- !!
- !! INPUTS
- !! 
- !!
- !! CHILDREN
- !!
+!!****f* glue_lotf/calc_coord_new_d
+!! NAME
+!! calc_coord_new_d
+!!
+!! FUNCTION
+!!
+!!
+!! INPUTS
+!!
 !! PARENTS
 !!      m_eval_lotf
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine calc_coord_new_d(r_au,alpha_d,coordatom_dum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_coord_new_d'
-!End of the abilint section
 
   implicit none
 
@@ -485,7 +442,7 @@ contains !===========================================================
        rho_neigh = b3II*r*r*r + b2II*r*r + b1II*r + b0II
 
 !      --Restriction on rmrho to keep rho and rhop continuous
-     elseif (rst < (rmrho+alpha_d-dphi)) then   
+     elseif (rst < (rmrho+alpha_d-dphi)) then
        r = rst - (rmrho+alpha_d-dphi)
        rho_neigh = b3III*r*r*r + b2III*r*r + b1III*r + b0III
      end if
@@ -499,12 +456,8 @@ contains !===========================================================
 !! rho_devs
 !!
 !! FUNCTION
-!! 
 !!
 !! INPUTS
-!! 
-!!
-!! CHILDREN
 !!
 !! PARENTS
 !!      m_eval_lotf
@@ -512,14 +465,8 @@ contains !===========================================================
 !! CHILDREN
 !!
 !! SOURCE
+
      subroutine rho_devs(r_au,alpha_d,rho_neigh_d,rho_neigh_p,rho_neigh_pd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rho_devs'
-!End of the abilint section
 
      real(dp),intent(in) :: r_au,alpha_d
      real(dp),intent(out) :: rho_neigh_d,rho_neigh_p,rho_neigh_pd
@@ -537,7 +484,7 @@ contains !===========================================================
      if (rst < alpha_d) then
        r = rst - alpha_d
        rho_neigh_d = - ( 3.d0*b3I*r*r + 2.d0*b2I*r + b1I )
-       rho_neigh_p = - rho_neigh_d 
+       rho_neigh_p = - rho_neigh_d
        rho_neigh_pd = - ( 6.d0*b3I*r + 2.d0*b2I )
 
      elseif (rst < rbrho) then
@@ -547,42 +494,33 @@ contains !===========================================================
        rho_neigh_pd = - ( 6.d0*b3II*r + 2.d0*b2II )
 
 !      --Restriction on rmrho to keep rho and rhop continuous
-     elseif (rst < (rmrho+alpha_d-dphi)) then   
+     elseif (rst < (rmrho+alpha_d-dphi)) then
        r = rst - (rmrho+alpha_d-dphi)
        rho_neigh_d = zero
-       rho_neigh_p = 3.d0*b3III*r*r + 2.d0*b2III*r + b1III 
+       rho_neigh_p = 3.d0*b3III*r*r + 2.d0*b2III*r + b1III
        rho_neigh_pd = zero
 
      end if
    end subroutine rho_devs
 !!***
 
- !!****f* glue_lotf/rhop_value
- !! NAME
- !! rhop_value
- !!
- !! FUNCTION
- !! 
- !!
- !! INPUTS
- !! 
- !!
- !! CHILDREN
- !!
+!!****f* glue_lotf/rhop_value
+!! NAME
+!! rhop_value
+!!
+!! FUNCTION
+!!
+!!
+!! INPUTS
+!!
 !! PARENTS
 !!      m_eval_lotf
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine rhop_value(rst,alpha_d,rhop_dum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rhop_value'
-!End of the abilint section
 
   implicit none
 
@@ -601,37 +539,31 @@ contains !===========================================================
        rhop_dum = 3.d0*b3I*r*r + 2.d0*b2I*r + b1I
      elseif (rst < rbrho) then
        r = rst - alpha_d
-       rhop_dum = 3.d0*b3II*r*r + 2.d0*b2II*r + b1II 
+       rhop_dum = 3.d0*b3II*r*r + 2.d0*b2II*r + b1II
 !      --Restriction on rmrho to keep rho and rhop continuous
      elseif (rst < (rmrho+alpha_d-dphi)) then
        r = rst - (rmrho+alpha_d-dphi)
-       rhop_dum = 3.d0*b3III*r*r + 2.d0*b2III*r + b1III 
+       rhop_dum = 3.d0*b3III*r*r + 2.d0*b2III*r + b1III
      end if
    end subroutine rhop_value
 !!***
 
 
- !!****f* glue_lotf/eval_U_n
- !! NAME
- !! eval_U_n
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* glue_lotf/eval_U_n
+!! NAME
+!! eval_U_n
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine eval_U_n(coordatom_i,epot_dum2,up_dum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_U_n'
-!End of the abilint section
 
   implicit none
 
@@ -662,7 +594,7 @@ contains !===========================================================
     cns4 = cns3 * cns
 
     epot_dum2 = c4I*cns4 + c3I*cns3 + c2I*cns2 + c1I*cns + c0I
-    up_dum = 4.d0*c4I*cns3 + 3.d0*c3I*cns2 + 2.d0*c2I*cns + c1I 
+    up_dum = 4.d0*c4I*cns3 + 3.d0*c3I*cns2 + 2.d0*c2I*cns + c1I
 
   elseif (coordatom_i < n0U) then
 
@@ -688,27 +620,21 @@ contains !===========================================================
  !!***
 
 
- !!****f* eval_lotf/eval_Upp_n
- !! NAME
- !! eval_Upp_n
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* eval_lotf/eval_Upp_n
+!! NAME
+!! eval_Upp_n
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine eval_Upp_n(coordatom_i,up_dum,upp_dum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_Upp_n'
-!End of the abilint section
 
   implicit none
 
@@ -740,7 +666,7 @@ contains !===========================================================
     cns3 = cns2 * cns
 
     up_dum = 4.d0*c4I*cns3 + 3.d0*c3I*cns2 + 2.d0*c2I*cns + c1I
-    upp_dum = 12.d0*c4I*cns2 + 6.d0*c3I*cns + 2.d0*c2I 
+    upp_dum = 12.d0*c4I*cns2 + 6.d0*c3I*cns + 2.d0*c2I
 
   elseif (coordatom_i < n0U) then
 
@@ -749,7 +675,7 @@ contains !===========================================================
     cn03 = cn02 * cn0
 
     up_dum = 4.d0*c4II*cn03 + 3.d0*c3II*cn02 + 2.d0*c2II*cn0 + c1II
-    upp_dum = 12.d0*c4II*cn02 + 6.d0*c3II*cn0 + 2.d0*c2II 
+    upp_dum = 12.d0*c4II*cn02 + 6.d0*c3II*cn0 + 2.d0*c2II
 
   elseif (coordatom_i >= n0U) then
 
@@ -757,7 +683,7 @@ contains !===========================================================
     cn02 = cn0 * cn0
 
     up_dum = 3.d0*c3III*cn02 + 2.d0*c2III*cn0 + c1III
-    upp_dum = 6.d0*c3III*cn0 + 2.d0*c2III 
+    upp_dum = 6.d0*c3III*cn0 + 2.d0*c2III
 
   endif
  end subroutine eval_Upp_n

@@ -8,7 +8,7 @@
  */
 
 /*
- * Copyright (C) 2014-2018 ABINIT Group (MT)
+ * Copyright (C) 2014-2019 ABINIT Group (MT)
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
  * distribution.
@@ -35,7 +35,7 @@
 
 /* Messages, errors */
 /* Other macros already defined in abi_common.h */
-#  define USE_MSG_HANDLING use m_errors, only : msg_hndl, netcdf_check
+#  define USE_MSG_HANDLING use m_errors, only : msg_hndl, netcdf_check; use m_abicore
 #  undef  HAVE_YAML
 
 /* Allocation/deallocation with memory profiling */
@@ -78,7 +78,7 @@
 /* =============================
  * ========= BIGDFT ============
  * ============================= */
-#elif HAVE_LIBPAW_BIGDFT
+#elif defined HAVE_LIBPAW_BIGDFT
 
 /* Constants and defs */
 #  define USE_DEFS use m_libpaw_defs

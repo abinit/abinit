@@ -7,7 +7,7 @@
 !! Initialize pspcod=2, 3, 10 pseudopotentials (GTH)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, FD, PT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT, FD, PT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,13 +30,14 @@ module m_psp_hgh
  use defs_datatypes
  use defs_abitypes
  use m_splines
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_special_funcs,  only : abi_derfc
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: atomic_info
 #endif
+ use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
  implicit none
 
@@ -115,15 +116,6 @@ contains
 !! SOURCE
 
 subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlspl,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2in'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
-!End of the abilint section
 
  implicit none
 
@@ -308,13 +300,6 @@ end subroutine psp2in
 
 subroutine psp2nl(ekb,ffspl,h1p,h1s,h2s,lnmax,mqgrid,qgrid,rrp,rrs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2nl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -462,14 +447,6 @@ end subroutine psp2nl
 subroutine psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,mqgrid,qgrid,q2vq,&
 &  rloc,vlspl_recipSpace,yp1,ypn,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2lo'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -575,7 +552,7 @@ end subroutine psp2lo
 !! psp3in
 !!
 !! FUNCTION
-!! Initialize pspcod=3 pseudopotentials (HGH psps PRB58,3641(1998)):
+!! Initialize pspcod=3 pseudopotentials (HGH psps PRB58,3641(1998) [[cite:Hartwigsen1998]]):
 !! continue to read the file, then compute the corresponding
 !! local and non-local potentials.
 !!
@@ -631,15 +608,6 @@ end subroutine psp2lo
 !! SOURCE
 
 subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, pspso, vlspl, zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp3in'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
-!End of the abilint section
 
  implicit none
 
@@ -1080,13 +1048,6 @@ end subroutine psp3in
 subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 &                  h33d,h11f,mproj,mpsang,mqgrid,qgrid,rrd,rrf,rrp,rrs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp3nl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1397,8 +1358,8 @@ end subroutine psp3nl
 !!
 !! FUNCTION
 !! Initialize pspcod=10 pseudopotentials (formalism is the same as in HGH psps
-!! PRB58,3641(1998), but the full h and k matrices are read, allowing for using
-!! also subsequent developments such as Theor. Chem. Acc. 114, 145 (2005)):
+!! PRB58,3641(1998) [[cite:Hartwigsen1998]], but the full h and k matrices are read, allowing for using
+!! also subsequent developments such as Theor. Chem. Acc. 114, 145 (2005) [[cite:Dolg2005]]:
 !! continue to read the file, then compute the corresponding
 !! local and non-local potentials.
 !!
@@ -1454,15 +1415,6 @@ end subroutine psp3nl
 !! SOURCE
 
 subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, pspso, vlspl, zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp10in'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
-!End of the abilint section
 
  implicit none
 
@@ -1712,13 +1664,6 @@ end subroutine psp10in
 !! SOURCE
 
 subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp10nl'
-!End of the abilint section
 
  implicit none
 

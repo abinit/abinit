@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -10,12 +10,12 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h06 )
+.Starting date : Mon 12 Nov 2018.
+- ( at 02h08 )
   
 - input  file    -> t03.in
 - output file    -> t03.out
@@ -146,7 +146,7 @@ _ WF disk file :      1.955 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -588,7 +588,7 @@ P           mkmem7         64
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -626,7 +626,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.9928E-11; max=  2.9280E-09
+ Mean square residual over all n,k,spin=   79.928E-12; max=  29.280E-10
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -754,7 +754,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.8157E-07; max=  7.7377E-05
+ Mean square residual over all n,k,spin=   38.157E-08; max=  77.377E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -819,7 +819,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -894,14 +894,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
   chi0(G,G') at the    2 th omega   0.0000  16.4742 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000  -2.971   0.070   0.063   0.068   0.000  -0.000  -0.000  -0.000
        -0.000   0.000   0.000   0.000  -0.000  -1.077   0.004  -0.003   0.003
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  24.3839
-  dielectric constant without local fields =  26.2517
+  dielectric constant =  24.3840
+  dielectric constant without local fields =  26.2524
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     16.38  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -917,11 +917,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
    Upper and lower wings at the    2 th omega   0.0000  16.4742 [eV]
        1       2       3       4       5       6       7       8       9
-      0.483   0.008  -0.023   0.023  -0.008  -0.008   0.023  -0.023   0.008
-      0.000   0.008  -0.023   0.023  -0.008   0.008  -0.023   0.023  -0.008
+      0.482   0.008  -0.023   0.023  -0.008  -0.008   0.023  -0.023   0.008
+     -0.000   0.008  -0.023   0.023  -0.008   0.008  -0.023   0.023  -0.008
        1       2       3       4       5       6       7       8       9
-      0.483   0.008  -0.023   0.023  -0.008  -0.008   0.023  -0.023   0.008
-      0.000  -0.008   0.023  -0.023   0.008  -0.008   0.023  -0.023   0.008
+      0.482   0.008  -0.023   0.023  -0.008  -0.008   0.023  -0.023   0.008
+     -0.000  -0.008   0.023  -0.023   0.008  -0.008   0.023  -0.023   0.008
 
 
 
@@ -1166,15 +1166,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
   Number of electrons    =    7.8824
 
   QP Band energy    [Ha] =  2.24818896796077E-01
-  QP Hartree energy [Ha] =  4.15398173897317E-01
+  QP Hartree energy [Ha] =  4.15398174074010E-01
 
 --------------------------------------------------------------------------------
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5214 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   2.5214 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -1210,7 +1210,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  k =    0.000   0.000   0.000
  Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -6.162   -10.105    -6.162     3.943   -16.362     8.868     1.000     0.000    -7.494     2.612    -3.551    -3.551
+    1    -6.162   -10.105    -6.162     3.943   -16.362     8.869     1.000     0.000    -7.494     2.612    -3.551    -3.551
     2     5.850   -10.319     5.850    16.168   -10.930     2.176     1.000     0.000    -8.754     1.564     7.414     7.409
     3     5.850   -10.319     5.850    16.168   -10.933     2.177     1.000     0.000    -8.757     1.562     7.412     7.412
     4     5.850   -10.319     5.850    16.168   -10.934     2.177     1.000     0.000    -8.757     1.562     7.411     7.415
@@ -1290,7 +1290,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  k =   -0.250   0.250   0.000
  Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -4.104   -10.271    -4.104     6.167   -15.661     6.721     1.000     0.000    -8.940     1.332    -2.772    -2.773
+    1    -4.104   -10.271    -4.104     6.167   -15.661     6.721     1.000     0.000    -8.939     1.332    -2.772    -2.773
     2     0.328   -10.425     0.328    10.752   -13.544     4.004     1.000     0.000    -9.540     0.884     1.212     1.212
     3     2.018    -9.704     2.018    11.722   -11.664     2.913     1.000     0.000    -8.750     0.954     2.972     2.971
     4     4.488   -10.409     4.488    14.897   -11.502     2.462     1.000     0.000    -9.041     1.369     5.857     5.857
@@ -1341,9 +1341,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.0487 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.9396 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   3.0487 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.9396 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t03o_DS4_QPS
 
@@ -1444,10 +1444,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000 -10.064   0.133   0.087   0.126  -0.000   0.000   0.000   0.000
-       -0.000   0.000  -0.000   0.000   0.000  -4.247   0.181   0.135   0.174
+       -0.000  -0.000  -0.000   0.000   0.000  -4.247   0.181   0.135   0.174
 
   chi0(G,G') at the    2 th omega   0.0000  16.4743 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1458,8 +1458,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
        -0.000  -0.001   0.000   0.000  -0.000  -1.104  -0.003  -0.009  -0.003
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  12.5821
-  dielectric constant without local fields =  13.5313
+  dielectric constant =  12.5832
+  dielectric constant without local fields =  13.5332
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     17.29  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -1490,7 +1490,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.797  -1.129  -0.442  -0.447  -0.445   2.309  -1.261  -1.240  -1.257
-        0.000  -1.130  -0.442  -0.447  -0.445  -2.308   1.261   1.240   1.257
+       -0.000  -1.130  -0.442  -0.447  -0.445  -2.308   1.261   1.240   1.257
 
     2  -1.129  -8.033  -0.061  -0.067  -0.063  -0.001   0.000   0.000   0.000
         1.130   0.000   0.000  -0.000   0.000  -3.607   0.236   0.216   0.232
@@ -1512,7 +1512,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -10.904  -0.953  -1.231  -1.238  -1.232   2.840  -1.420  -1.392  -1.412
-       -0.000  -0.953  -1.231  -1.238  -1.232  -2.839   1.420   1.392   1.413
+        0.000  -0.953  -1.231  -1.238  -1.232  -2.839   1.420   1.392   1.413
 
     2  -0.953  -5.923   0.585   0.583   0.584  -0.000  -0.000  -0.000  -0.000
         0.953   0.000   0.000   0.000   0.000  -2.882   0.132   0.122   0.130
@@ -1537,7 +1537,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
        -0.000  -1.472   0.180   0.180  -1.473  -0.178   1.473   1.474  -0.179
 
     2  -1.472  -8.586  -0.027  -0.070   0.063  -0.001   0.000   0.000   0.000
-        1.472   0.000  -0.000  -0.000   0.000  -3.033   0.276   0.269   0.013
+        1.472  -0.000  -0.000  -0.000   0.000  -3.033   0.276   0.269   0.013
 
   chi0(G,G') at the    2 th omega   0.0000  16.4743 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1603,7 +1603,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
        -0.000  -1.409  -0.728  -0.727  -1.411   0.728   1.412   1.413   0.727
 
     2  -1.409  -6.735   0.389   0.351   0.542   0.000  -0.000  -0.000   0.000
-        1.409  -0.000  -0.000  -0.000   0.000  -1.845   0.133   0.131  -0.051
+        1.409   0.000  -0.000  -0.000   0.000  -1.845   0.133   0.131  -0.051
 
   chi0(G,G') at the    2 th omega   0.0000  16.4743 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1625,7 +1625,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
        -0.000  -0.900  -1.371  -1.256  -1.109   1.109   1.256   1.371   0.900
 
     2  -0.900 -13.103   0.212   1.705   0.128  -0.000   0.000   0.000   0.000
-        0.900  -0.000   0.000  -0.000   0.000  -1.970   0.005   0.216  -0.001
+        0.900   0.000   0.000  -0.000   0.000  -1.970   0.005   0.216  -0.001
 
   chi0(G,G') at the    2 th omega   0.0000  16.4743 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1725,16 +1725,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
   Number of electrons    =    7.8825
 
-  QP Band energy    [Ha] =  5.57249880119933E-01
-  QP Hartree energy [Ha] =  4.13120533194954E-01
+  QP Band energy    [Ha] =  5.57250152323801E-01
+  QP Hartree energy [Ha] =  4.13120533336425E-01
 
 --------------------------------------------------------------------------------
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5214 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   2.5214 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -1774,7 +1774,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
     2     5.850   -10.319     7.409    16.159   -10.904     2.058     1.000     0.000    -8.846    -0.095     7.314     7.314
     3     5.850   -10.319     7.412    16.159   -10.905     2.062     1.000     0.000    -8.844    -0.097     7.316     7.316
     4     5.850   -10.319     7.415    16.159   -10.903     2.061     1.000     0.000    -8.842    -0.097     7.317     7.317
-    5     8.371    -8.696    10.463    17.068    -4.450    -2.107     1.000     0.000    -6.557     0.047    10.511    10.510
+    5     8.371    -8.696    10.463    17.068    -4.450    -2.108     1.000     0.000    -6.557     0.047    10.511    10.510
     6     8.371    -8.696    10.464    17.068    -4.454    -2.104     1.000     0.000    -6.558     0.046    10.510    10.511
     7     8.371    -8.696    10.464    17.068    -4.449    -2.107     1.000     0.000    -6.556     0.047    10.511    10.511
     8     8.966   -10.231    11.605    19.183    -4.977    -2.599     1.000     0.000    -7.576     0.002    11.607    11.607
@@ -1809,7 +1809,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
     5     7.255    -9.647     9.441    16.901    -5.206    -2.222     1.000     0.000    -7.428     0.032     9.473     9.473
     6     9.185    -8.767    11.434    17.954    -4.145    -2.353     1.000     0.000    -6.498     0.022    11.455    11.455
     7     9.185    -8.767    11.440    17.953    -4.139    -2.355     1.000     0.000    -6.493     0.020    11.460    11.460
-    8    13.330    -7.611    15.838    20.962    -1.950    -3.084     1.000     0.000    -5.034     0.090    15.928    15.928
+    8    13.330    -7.611    15.838    20.962    -1.950    -3.084     1.000     0.000    -5.034     0.089    15.928    15.928
 
  E^0_gap          3.513
  E^GW_gap         3.629
@@ -1834,7 +1834,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  k =    0.500   0.250   0.000
  Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -3.421   -10.340    -2.286     6.905   -15.393     5.791     1.000     0.000    -9.602    -0.411    -2.697    -2.697
+    1    -3.421   -10.340    -2.286     6.905   -15.393     5.791     1.000     0.000    -9.602    -0.411    -2.696    -2.697
     2    -0.573   -10.328     0.220     9.738   -13.918     4.289     1.000     0.000    -9.630    -0.112     0.108     0.108
     3     2.242    -9.912     3.250    12.141   -11.759     2.789     1.000     0.000    -8.970    -0.078     3.171     3.171
     4     3.596   -10.157     4.736    13.742   -11.709     2.621     1.000     0.000    -9.088    -0.082     4.654     4.654
@@ -1857,7 +1857,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
     5     8.209    -9.157    10.517    17.340    -4.469    -2.337     1.000     0.000    -6.806     0.017    10.534    10.534
     6    10.603    -9.069    13.065    19.670    -3.910    -2.668     1.000     0.000    -6.578     0.027    13.092    13.092
     7    10.924    -9.438    13.597    20.377    -4.359    -2.425     1.000     0.000    -6.785    -0.005    13.592    13.592
-    8    11.813    -9.263    14.638    21.102    -3.587    -2.896     1.000     0.000    -6.483    -0.019    14.618    14.619
+    8    11.813    -9.263    14.638    21.102    -3.587    -2.896     1.000     0.000    -6.483    -0.019    14.618    14.618
 
  E^0_gap          4.660
  E^GW_gap         4.775
@@ -1866,12 +1866,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  k =    0.500   0.500   0.000
  Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -1.997   -10.367    -1.151     8.359   -14.725     5.055     1.000     0.000    -9.670    -0.159    -1.311    -1.311
+    1    -1.997   -10.367    -1.151     8.359   -14.725     5.055     1.000     0.000    -9.669    -0.159    -1.311    -1.311
     2    -1.997   -10.367    -1.139     8.359   -14.711     5.044     1.000     0.000    -9.668    -0.169    -1.308    -1.308
     3     2.939   -10.083     3.931    13.016   -12.017     2.860     1.000     0.000    -9.157    -0.072     3.859     3.859
-    4     2.939   -10.083     3.932    13.016   -12.017     2.860     1.000     0.000    -9.157    -0.073     3.859     3.859
+    4     2.939   -10.083     3.932    13.016   -12.017     2.861     1.000     0.000    -9.157    -0.073     3.859     3.859
     5     6.458    -8.757     8.354    15.219    -4.664    -2.156     1.000     0.000    -6.820     0.044     8.398     8.398
-    6     6.458    -8.757     8.355    15.218    -4.663    -2.156     1.000     0.000    -6.819     0.044     8.399     8.399
+    6     6.458    -8.757     8.355    15.218    -4.663    -2.156     1.000     0.000    -6.820     0.044     8.399     8.399
     7    15.778    -9.398    18.807    25.172    -2.659    -3.664     1.000     0.000    -6.322     0.043    18.850    18.849
     8    15.778    -9.398    18.807    25.172    -2.658    -3.664     1.000     0.000    -6.323     0.042    18.849    18.850
 
@@ -1896,14 +1896,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
  DeltaE^GW_gap    0.087
 
 
- New Fermi energy :        2.887683E-01 Ha ,    7.857784E+00 eV
+ New Fermi energy :        2.887683E-01 Ha ,    7.857785E+00 eV
  New Exchange energy :    -1.921194E+00 Ha ,   -5.227834E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.1925 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.0812 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   3.1925 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.0812 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t03o_DS6_QPS
 
@@ -1963,7 +1963,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -2007,30 +2007,30 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
    Writing top of the overlap matrix: M_mn(ikb,ik)
    m=n=1:3, ikb=1, ik=1
 
-;   (  -0.473798  -0.875005 ,   0.058147   0.048873 ,  -0.000109  -0.000917 ,    )
-;   (   0.013663   0.013492 ,   0.363677   0.150268 ,  -0.341686  -0.663937 ,    )
-;   (   0.017271   0.017251 ,   0.484269   0.200615 ,   0.192063   0.351923 ,    )
+;   (  -0.473740  -0.875036 ,   0.058141   0.048882 ,  -0.000109  -0.000917 ,    )
+;   (   0.013663   0.013493 ,   0.363665   0.150300 ,  -0.341610  -0.663975 ,    )
+;   (   0.017272   0.017249 ,   0.484255   0.200610 ,   0.192052   0.351925 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
-;   (   0.779891  -0.256407 ,   0.000834  -0.001983 ,  -0.000110  -0.000335 ,    )
-;   (  -0.000460   0.000801 ,  -0.392120  -0.819268 ,  -0.202463  -0.295719 ,    )
-;   (  -0.000053  -0.000117 ,   0.356163  -0.039009 ,  -0.876646   0.236013 ,    )
+;   (   0.779896  -0.256391 ,   0.000833  -0.001983 ,  -0.000110  -0.000335 ,    )
+;   (  -0.000460   0.000801 ,  -0.392239  -0.819205 ,  -0.202541  -0.295681 ,    )
+;   (  -0.000053  -0.000117 ,   0.356099  -0.039704 ,  -0.876158   0.237798 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
-;   (   0.306181  -0.913635 ,   0.306203  -0.913691 ,   0.306192  -0.913706 ,    )
-;   (   0.000708   0.493950 ,  -0.000473  -0.459757 ,  -0.000907  -0.536329 ,    )
-;   (  -0.001307   0.419517 ,  -0.000006  -0.607361 ,   0.000195   0.559134 ,    )
+;   (   0.306305  -0.913593 ,   0.306327  -0.913649 ,   0.306316  -0.913665 ,    )
+;   (   0.000669   0.493954 ,  -0.000433  -0.459759 ,  -0.000868  -0.536328 ,    )
+;   (  -0.001304   0.419536 ,  -0.000005  -0.607344 ,   0.000198   0.559122 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
-;   (  -0.282073   0.190148 ,  -0.282938   0.190725 ,  -0.284974   0.192045 ,    )
-;   (   0.089410  -0.366164 ,   0.127026  -0.394458 ,  -0.215994   0.758929 ,    )
-;   (   0.625002   0.306762 ,  -0.597230  -0.311290 ,  -0.026482   0.004845 ,    )
+;   (  -0.282073   0.190148 ,  -0.282938   0.190724 ,  -0.284973   0.192044 ,    )
+;   (   0.089395  -0.366164 ,   0.127013  -0.394467 ,  -0.215966   0.758936 ,    )
+;   (   0.625568   0.305612 ,  -0.597799  -0.310189 ,  -0.026476   0.004892 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t03o_DS7_w90.wout for details.
@@ -2044,7 +2044,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3651E-11; max=  9.8687E-11
+ Mean square residual over all n,k,spin=   13.651E-12; max=  98.687E-12
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -2498,52 +2498,70 @@ P           mkmem7         64
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Effect of self-consistency on quasiparticles in solids
 - F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).
 - Comment : in case gwcalctyp >= 10.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#bruneval2006
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         11.1  wall=         11.3
+- Proc.   0 individual time (sec): cpu=         11.6  wall=         11.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  48 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.1  wall=         11.3
+.Delivered  39 WARNINGs and  30 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.6  wall=         11.8

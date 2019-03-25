@@ -7,7 +7,7 @@
 !! Initialize geometry variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (XG, RC)
+!!  Copyright (C) 1998-2019 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +28,8 @@ module m_ingeo
 
  use defs_basis
  use defs_abitypes
- use m_ingeo_img
- use m_profiling_abi
+ use m_intagm_img
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_sort
@@ -135,7 +135,7 @@ contains
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,chkorthsy,fillcell,gensymshub,gensymshub4
-!!      gensymspgr,ingeo_img,ingeobld,intagm,mati3inv,metric,mkradim,mkrdim
+!!      gensymspgr,intagm_img,ingeobld,intagm,mati3inv,metric,mkradim,mkrdim
 !!      randomcellpos,symanal,symatm,symfind,symlatt,symmetrize_rprimd
 !!      symmetrize_xred,symrelrot,wrtout,xcart2xred,xred2xcart
 !!
@@ -147,14 +147,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 & nucdipmom,nzchempot,pawspnorb,&
 & ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
 & symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ingeo'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -214,12 +206,12 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  acell(1:3)=one
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tacell,'LEN')
  if(tacell==1) acell(1:3)=dprarr(1:3)
- call ingeo_img(acell,iimage,jdtset,lenstr,nimage,3,string,"acell",tacell,'LEN')
+ call intagm_img(acell,iimage,jdtset,lenstr,nimage,3,string,"acell",tacell,'LEN')
 
  scalecart(1:3)=one
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'scalecart',tscalecart,'LEN')
  if(tscalecart==1) scalecart(1:3)=dprarr(1:3)
- call ingeo_img(scalecart,iimage,jdtset,lenstr,nimage,3,string,"scalecart",tscalecart,'LEN')
+ call intagm_img(scalecart,iimage,jdtset,lenstr,nimage,3,string,"scalecart",tscalecart,'LEN')
 
 !Check that input length scales acell(3) are > 0
  do mu=1,3
@@ -236,13 +228,13 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  tread=0
  call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'rprim',trprim,'DPR')
  if(trprim==1)rprim(:,:)=reshape( dprarr(1:9) , (/3,3/) )
- call ingeo_img(rprim,iimage,jdtset,lenstr,nimage,3,3,string,"rprim",trprim,'DPR')
+ call intagm_img(rprim,iimage,jdtset,lenstr,nimage,3,3,string,"rprim",trprim,'DPR')
 
 !If none of the rprim were read ...
  if(trprim==0)then
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'angdeg',tangdeg,'DPR')
    angdeg(:)=dprarr(1:3)
-   call ingeo_img(angdeg,iimage,jdtset,lenstr,nimage,3,string,"angdeg",tangdeg,'DPR')
+   call intagm_img(angdeg,iimage,jdtset,lenstr,nimage,3,string,"angdeg",tangdeg,'DPR')
 
    if(tangdeg==1)then
      call wrtout(std_out,' ingeo: use angdeg to generate rprim.',"COLL")
@@ -279,8 +271,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
        rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
        rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
-!      write(std_out,*)' ingeo : angdeg=',angdeg(1:3)
-!      write(std_out,*)' ingeo : aa,cc=',aa,cc
+!      write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
      else
 !      Treat all the other cases
        rprim(:,:)=0.0_dp
@@ -429,15 +420,15 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
  call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xred',txred,'DPR')
  if(txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
- call ingeo_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
+ call intagm_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
 
  call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xangst',txangst,'DPR')
  if(txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
- call ingeo_img(xangst_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xangst",txangst,'DPR')
+ call intagm_img(xangst_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xangst",txangst,'DPR')
 
  call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xcart',txcart,'LEN')
  if(txcart==1 .and. txrandom==0)xcart_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
- call ingeo_img(xcart_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xcart",txcart,'LEN')
+ call intagm_img(xcart_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xcart",txcart,'LEN')
 
 !Might initialize xred from XYZ file
  if(txred+txcart+txangst+txrandom==0)then
@@ -1003,7 +994,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  angdeg(1)=180.0_dp/pi * acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))
  angdeg(2)=180.0_dp/pi * acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))
  angdeg(3)=180.0_dp/pi * acos(rmet(1,2)/sqrt(rmet(1,1)*rmet(2,2)))
- write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
+ !write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
 
 !--------------------------------------------------------------------------------------
 
@@ -1024,9 +1015,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    nsym=jsym
  end if
 
-!DEBUG
-!call symmultsg(nsym,symafm,symrel,tnons)
-!ENDDEBUG
+ !call symmultsg(nsym,symafm,symrel,tnons)
 
 !9) initialize the list of fixed atoms, and initial velocities -----------------
 !Note: these inputs do not influence the previous generation of
@@ -1116,7 +1105,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  vel(:,:)=zero
  call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'vel',tread,'DPR')
  if(tread==1)vel(:,:)=reshape( dprarr(1:3*natom) , (/3,natom/) )
- call ingeo_img(vel,iimage,jdtset,lenstr,nimage,3,natom,string,"vel",tread,'DPR')
+ call intagm_img(vel,iimage,jdtset,lenstr,nimage,3,natom,string,"vel",tread,'DPR')
 
  vel_cell(:,:)=zero
  call intagm(dprarr,intarr,jdtset,marr,3*3,string(1:lenstr),'vel_cell',tread,'DPR')
@@ -1138,7 +1127,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        MSG_ERROR(message)
      end if
    end do
-   call ingeo_img(mixalch,iimage,jdtset,lenstr,nimage,npspalch,ntypalch,string,"mixalch",tread,'DPR')
+   call intagm_img(mixalch,iimage,jdtset,lenstr,nimage,npspalch,ntypalch,string,"mixalch",tread,'DPR')
  end if
 
 !amu (needs mixalch to be initialized ...)
@@ -1167,7 +1156,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'amu',tread,'DPR')
  if(tread==1)amu(:)=dprarr(1:ntypat)
- call ingeo_img(amu,iimage,jdtset,lenstr,nimage,ntypat,string,"amu",tread,'DPR')
+ call intagm_img(amu,iimage,jdtset,lenstr,nimage,ntypat,string,"amu",tread,'DPR')
 
 
  ABI_DEALLOCATE(intarr)
@@ -1212,14 +1201,6 @@ end subroutine ingeo
 !! SOURCE
 
 subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ingeobld'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1287,8 +1268,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  call wrtout(std_out,message,'COLL')
  call wrtout(iout,message,'COLL')
 
- write(message, '(a,a)' )&
-& '--ingeobld: echo values of variables connected to objects --------',ch10
+ write(message, '(a,a)' )'--ingeobld: echo values of variables connected to objects --------',ch10
  call wrtout(std_out,message,'COLL')
  call wrtout(iout,message,'COLL')
 
@@ -1875,13 +1855,6 @@ end subroutine ingeobld
 
 subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fillcell'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2031,13 +2004,6 @@ end subroutine fillcell
 !! SOURCE
 
 subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invacuum'
-!End of the abilint section
 
  implicit none
 

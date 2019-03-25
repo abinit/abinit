@@ -4,11 +4,11 @@
 !!  test_radsintr
 !!
 !! FUNCTION
-!!  Tests the routine src/32_util/radsintr.F90 that performs 
+!!  Tests the routine src/32_util/radsintr.F90 that performs
 !!  radial Fourier transform.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (CE)
+!!  Copyright (C) 2011-2019 ABINIT group (CE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,8 +21,8 @@
 !!
 !! NOTES
 !!  All required data are generated internally. This program
-!!  performs radial FT of a gaussian function and then transforms  
-!!  it back to real space to check possible differences. 
+!!  performs radial FT of a gaussian function and then transforms
+!!  it back to real space to check possible differences.
 !!
 !! PARENTS
 !!
@@ -40,16 +40,10 @@
 program test_radsintr
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_radsintr'
- use interfaces_32_util
-!End of the abilint section
-
+ use m_integrals,     only : radsintr
  implicit none
 
 !Arguments ------------------------------------
@@ -70,7 +64,7 @@ program test_radsintr
  qmesh_size = 50
  qstep = 0.04
 
-!Initialization of meshes  
+!Initialization of meshes
  ABI_ALLOCATE(rmesh,(rmesh_size))
  ABI_ALLOCATE(qmesh,(qmesh_size))
  do ii=1,rmesh_size

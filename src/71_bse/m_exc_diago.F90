@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2019 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@ MODULE m_exc_diago
  use defs_datatypes
  use m_slk
  use m_bs_defs
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 #if defined HAVE_MPI2
@@ -46,7 +46,7 @@ MODULE m_exc_diago
  use m_ebands,          only : ebands_report_gap
  use m_eprenorms,       only : eprenorms_t
  use m_wfd,             only : wfd_t
- use m_pawhr,           only : pawhur_t
+ use m_paw_hr,          only : pawhur_t
  use m_pawtab,          only : pawtab_type
  use m_exc_itdiago,     only : exc_iterative_diago
  use m_hide_lapack,     only : xheev, xheevx, xgeev, xhegvx, xginv, xhdp_invert, xhegv
@@ -100,13 +100,6 @@ contains
 
 subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
 &  Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_driver'
-!End of the abilint section
 
  implicit none
 
@@ -237,14 +230,6 @@ end subroutine exc_diago_driver
 !! SOURCE
 
 subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst,elph_lifetime)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_resonant'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -410,14 +395,13 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    close(hreso_unt)
 
-
    if (do_ep_renorm) then
      write(std_out,'(a)') "Mapping kpts from bse to eph"
      sppoldbl = 1 !; if (any(Cryst%symafm == -1) .and. Epren%nsppol == 1) nsppoldbl=2
      ABI_MALLOC(bs2eph, (Kmesh%nbz*sppoldbl, 6))
      timrev = 1
      call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, Kmesh%bz, Epren%nkpt, Kmesh%nbz, Cryst%nsym, &
-&       sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
+        sppoldbl, Cryst%symafm, Cryst%symrel, timrev, xmpi_comm_self, use_symrec=.False.)
    end if
 
    do itemp = 1, ntemp
@@ -736,14 +720,6 @@ end subroutine exc_diago_resonant
 
 subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_print_eig'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -900,14 +876,6 @@ end subroutine exc_print_eig
 !! SOURCE
 
 subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_coupling'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1185,14 +1153,6 @@ end subroutine exc_diago_coupling
 !! SOURCE
 
 subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_coupling_hegv'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

@@ -9,7 +9,7 @@
 !!  of KS states.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (FB, MG)
+!! Copyright (C) 2008-2019 ABINIT group (FB, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@ MODULE m_qparticles
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_hdr
  use m_errors
  use m_nctk
@@ -41,12 +41,12 @@ MODULE m_qparticles
  use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d, rhophi
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : kmesh_t
  use m_ebands,         only : get_valence_idx
  use m_sigma,          only : sigma_t
  use m_pawtab,         only : pawtab_type
- use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io
+ use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io, pawrhoij_inquire_dim
+ use m_fourier_interpol,only : fourier_interpol
 
  implicit none
 
@@ -116,16 +116,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,ngfftf,Sr,Bst,m_lda_to_qp,rho_qp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrqps'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -282,17 +272,6 @@ end subroutine wrqps
 
 subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 & nfftot,ngfftf,ucvol,paral_kgb,Cryst,Pawtab,MPI_enreg,nbsc,m_lda_to_qp,rhor_out,Pawrhoij)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdqps'
- use interfaces_14_hidewrite
- use interfaces_65_paw
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -505,7 +484,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          MSG_WARNING(msg)
          call wrtout(ab_out,msg,"COLL")
          ! Init dummy rhoij just to avoid problems in sigma when rhoij is freed.
-         call pawrhoij_alloc(Pawrhoij,1,nspden,BSt%nspinor,BSt%nsppol,Cryst%typat,pawtab=Pawtab)
+         call pawrhoij_inquire_dim(nspden_rhoij=nspdenR, nspden=nspden)
+         call pawrhoij_alloc(Pawrhoij,1,nspdenR,BSt%nspinor,BSt%nsppol,Cryst%typat,pawtab=Pawtab)
          close(unqps)
          RETURN
        end if
@@ -588,15 +568,6 @@ end subroutine rdqps
 !! SOURCE
 
 subroutine show_QP(Bst,m_lda_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_QP'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -737,16 +708,6 @@ end subroutine show_QP
 !! SOURCE
 
 subroutine rdgw(Bst,fname,igwene,extrapolate)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdgw'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -956,15 +917,6 @@ end subroutine rdgw
 !! SOURCE
 
 subroutine updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,m_lda_to_qp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'updt_m_lda_to_qp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

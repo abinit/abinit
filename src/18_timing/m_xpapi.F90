@@ -7,7 +7,7 @@
 !!  Thin wrapper for the PAPI library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG,DC)
+!! Copyright (C) 2009-2019 ABINIT group (MG,DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,15 +62,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine xpapi_init()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_init'
-!End of the abilint section
-
- implicit none
 
 #ifdef HAVE_PAPI
 !Local variables-------------------------------
@@ -132,16 +123,6 @@ end subroutine xpapi_init
 !! SOURCE
 
 subroutine xpapi_show_info(unit,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_show_info'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments-------------------------
  integer,optional,intent(in) :: unit
@@ -229,15 +210,6 @@ end subroutine xpapi_show_info
 
 subroutine xpapi_flops(real_time,proc_time,flops,mflops,check)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_flops'
-!End of the abilint section
-
- implicit none
-
 !Arguments-------------------------
  integer(C_INT),intent(out) :: check
  integer(C_LONG_LONG),intent(out) :: flops
@@ -271,15 +243,6 @@ end subroutine xpapi_flops
 
 subroutine xpapi_shutdown()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_shutdown'
-!End of the abilint section
-
- implicit none
-
 ! *************************************************************************
 
 #ifdef HAVE_PAPI
@@ -305,15 +268,6 @@ end subroutine xpapi_shutdown
 !! SOURCE
 
 subroutine xpapi_handle_error(check,err_msg,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_handle_error'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

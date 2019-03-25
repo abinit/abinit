@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2018 ABINIT Group (MG)
+ * Copyright (C) 2008-2019 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -53,7 +53,7 @@
  */
 #ifdef HAVE_FC_LONG_LINES 
 #define _FILE_LINE_ARGS_    ,file=__FILE__, line=__LINE__
-#define _FILE_ABIFUNC_LINE_ARGS_    ,file=__FILE__, func=ABI_FUNC, line=__LINE__
+#define _FILE_ABIFUNC_LINE_ARGS_    ,file=__FILE__, line=__LINE__
 #else
 #define _FILE_LINE_ARGS_ 
 #define _FILE_ABIFUNC_LINE_ARGS_ 
@@ -109,11 +109,6 @@
  *   ABI_DT_ALLOCATE
  *   ABI_DT_DEALLOCATE
  *
- * Note for programmers using OpenMP:
- *   Do not use stat=ABI_ALLOC_STAT_ABI inside an OpenMP parallel region
- *   ABI_ALLOC_STAT_ABI is a global variable defined in m_profiling_abi.F90
- *   and this can have a detrimental effect if the allocation is done inside an OpenMP parallel region.
- *
  #define HAVE_MEM_PROFILING
 */
 
@@ -134,22 +129,22 @@
 /* and now the debugging macros */
 #  define ABI_ALLOCATE(ARR, SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, ABI_FUNC, __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__)
 
 #  define ABI_DEALLOCATE(ARR) \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, ABI_FUNC, __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, "", __LINE__) NEWLINE \
    deallocate(ARR) 
 
 #  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, ABI_FUNC, __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__)
 
 #  define ABI_DATATYPE_ALLOCATE(ARR,SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, ABI_FUNC, __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__)
 
 #  define ABI_DATATYPE_DEALLOCATE(ARR)  \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, ABI_FUNC, __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, "", __LINE__) NEWLINE \
    deallocate(ARR) 
 
 #else
@@ -161,8 +156,10 @@
 #  define ABI_DATATYPE_DEALLOCATE(ARR)   deallocate(ARR)
 #endif
 
-/* Macros defined in terms of previous macros */
-#define ABI_CALLOC(ARR,SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
+/* Macros to allocate zero-initializes arrays.
+ * defined in terms of previous macros */
+#define ABI_CALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
+#define ABI_ICALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = 0
 
 /* Shorthand versions */
 #define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
@@ -172,22 +169,19 @@
 #define ABI_DT_MALLOC(ARR,SIZE)  ABI_DATATYPE_ALLOCATE(ARR,SIZE)
 #define ABI_DT_FREE(ARR)         ABI_DATATYPE_DEALLOCATE(ARR)
 
-/* Macro for checking whether allocation was successful 
-#define ABI_CHECK_ALLOC(msg) if (ABI_ALLOC_STAT_ABI/=0) MSG_ERROR(msg)
-*/
-
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
    In this case, indeed, we should not count the deallocation */
 #define ABI_FREE_NOCOUNT(arr) deallocate(arr)
 
 /*
- * Macros to allocate/deallocate depending on the status of the entity
+ * Macros to allocate/deallocate depending on the allocation (association) status of the variable (pointer).
+ * SFREE stands for SAFE FREE
  * Caveat: pointers must use ABI_PTR_FREE_IF
  *
-#define ABI_MALLOC_IFNOT(ARR) if (.not.allocated(ARR)) ABI_MALLOC(ARR)
-#define ABI_SFREE(ARR) if (allocated(ARR)) ABI_FREE(ARR)
-#define ABI_SFREE_PTR(PTR) if (associated(PTR)) ABI_FREE(PTR)
 */
+#define ABI_MALLOC_IFNOT(ARR) if (.not. allocated(ARR)) then NEWLINE ABI_MALLOC(ARR) NEWLINE endif
+#define ABI_SFREE(ARR) if (allocated(ARR)) then NEWLINE ABI_FREE(ARR) NEWLINE endif
+#define ABI_SFREE_PTR(PTR) if (associated(PTR)) then NEWLINE ABI_FREE(PTR) NEWLINE endif
 
 /* Macros used in debug mode */
 #ifdef DEBUG_MODE
@@ -215,6 +209,8 @@
 /* Macro for basic messages */
 #define MSG_COMMENT(msg) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_)
 #define MSG_WARNING(msg) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_)
+#define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
 #define MSG_ERROR(msg)   call msg_hndl(msg,"ERROR", "PERS" _FILE_LINE_ARGS_)
 #define MSG_ERROR_CLASS(msg, cls)  call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
 #define MSG_BUG(msg)     call msg_hndl(msg,"BUG", "PERS" _FILE_LINE_ARGS_)
@@ -239,7 +235,7 @@
 
 /* Macro for clean exit */
 /*
-#define ABI_EXIT(exit_status) call leave_new("COLL",exit_status=exit_status,print_config=.False.)
+#define ABI_EXIT(exit_status) call abi_abort("COLL",exit_status=exit_status,print_config=.False.)
 */
 
 /* Macros used for stopping the code if external libraries have not been enabled */
@@ -344,17 +340,12 @@
 #ifdef FC_IBM
 #define HAVE_IBM6
 #endif
-#undef HAVE_IBM6
 
 #ifdef HAVE_IBM6
 #define _IBM6(message) call wrtout(std_out,message,"COLL",do_flush=.True.)
 #else
 #define _IBM6(message)
 #endif
-
-
-/*
-*/
 
 #endif
 /* _ABINIT_COMMON_H */

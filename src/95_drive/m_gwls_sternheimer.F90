@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!!  Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,18 +82,11 @@ use defs_wvltypes
 use m_pawang
 use m_pawrad
 use m_pawtab
-use m_profiling_abi
+use m_abicore
 use m_errors
 
 use m_time,      only : timab
 use m_gstateimg, only : gstateimg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gwls_sternheimer'
-!End of the abilint section
-
 implicit none
 !Arguments ------------------------------------
 !scalars

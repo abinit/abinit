@@ -9,7 +9,7 @@
 !! Main routine for conducting LDA calculations by self-consistent cycles.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TD)
+!! Copyright (C) 1998-2019 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@
 !! mrgscr.F90
 !! multibinit.F90
 !! optic.F90
+!! tdep.F90
 !! ujdet.F90
 !! vdw_kernelgen.F90
 !!

@@ -7,7 +7,7 @@
 !!  Raman susceptibilities of zone-center phonons and electroo tensor.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2019 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_raman
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_symtk,           only : matr3inv
 
@@ -79,15 +79,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
-& natom,phfrq,qphon,qphnrm,rsus,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ramansus'
-!End of the abilint section
+subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rsus,ucvol)
 
  implicit none
 
@@ -312,13 +304,6 @@ end subroutine ramansus
 !! SOURCE
 
 subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsus,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'electrooptic'
-!End of the abilint section
 
  implicit none
 

@@ -15,37 +15,24 @@
 !!  parameters (like PW sphere, spin or spinor characteristics
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TD)
+!! Copyright (C) 1998-2019 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! chebfi.F90
-!! fock_getghc.F90
-!! fxphas.F90
-!! getdc1.F90
-!! getgh1c.F90
-!! getgh2c.F90
-!! getghc.F90
-!! getghcnd.F90
-!! getgsc.F90
 !! interfaces_66_wfs.F90
 !! m_bandfft_kpt.F90
+!! m_cgcprj.F90
+!! m_chebfi.F90
 !! m_esymm.F90
+!! m_fock_getghc.F90
+!! m_getgh1c.F90
+!! m_getgh2c.F90
+!! m_getghc.F90
 !! m_invovl.F90
-!! prep_bandfft_tabs.F90
-!! prep_fourwf.F90
-!! prep_getghc.F90
-!! prep_index_wavef_bandpp.F90
-!! prep_nonlop.F90
-!! prep_sort_wavef_spin.F90
-!! prep_wavef_sym_do.F90
-!! prep_wavef_sym_undo.F90
-!! pw_orthon.F90
-!! rayleigh_ritz.F90
-!! subdiago.F90
-!! wfconv.F90
+!! m_prep_kgb.F90
+!! m_rayleigh_ritz.F90
 !!
 !!***

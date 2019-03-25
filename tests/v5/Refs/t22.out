@@ -2,7 +2,7 @@
 .Version 8.4.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -53,7 +53,7 @@
      ntemper        10
    temperinc         1.00000000E+02
    tempermin         1.00000000E+02
- Description of grid 2 :
+ Description of grid 2 (Fourier interp. or BZ sampling):
       ng2qpt        20        20        20
       ngrids         1
       q2shft         0.00000000E+00  0.00000000E+00  5.00000000E-01

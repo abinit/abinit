@@ -18,7 +18,7 @@
 !!  compile the module in reasonable time when -O2 is used.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MG)
+!! Copyright (C) 2010-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@
 module m_defs_ptgroups
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 

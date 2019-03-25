@@ -12,7 +12,7 @@
 !! Contact gmatteo
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (YG)
+!! Copyright (C) 2001-2019 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -129,13 +129,6 @@ CONTAINS  !=====================================================================
 
 subroutine eprenorms_init(Epren,nkpt,nsppol,mband,ntemp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_init'
-!End of the abilint section
-
  implicit none
 
 !Arugments -----------------------------------
@@ -191,13 +184,6 @@ end subroutine eprenorms_init
 
 subroutine eprenorms_free(Epren)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -252,13 +238,6 @@ end subroutine eprenorms_free
 !! SOURCE
 
 subroutine eprenorms_from_epnc(Epren,filename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_from_epnc'
-!End of the abilint section
 
  implicit none
 
@@ -324,13 +303,6 @@ end subroutine eprenorms_from_epnc
 
 subroutine eprenorms_bcast(Epren,master,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_bcast'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -393,13 +365,6 @@ end subroutine eprenorms_bcast
 
 subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'renorm_bst'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -413,7 +378,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 
 !Local variables------------------------------
 !scalars
- integer :: isppol,ikpt
+ integer :: isppol,ikpt,comm
  integer :: nband1, nband_tmp
  integer :: timrev, sppoldbl
  integer :: ik_eph
@@ -425,6 +390,8 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 ! ************************************************************************
 
  ABI_CHECK(Bst%nsppol == Epren%nsppol, "Nsppol should be the same")
+
+ comm = xmpi_comm_self
 
  if(do_lifetime) then
    ABI_MALLOC(Bst%lifetime,(Bst%mband,Bst%nkpt,Bst%nsppol))
@@ -439,7 +406,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
  ABI_MALLOC(bs2eph, (BSt%nkpt*sppoldbl, 6))
  timrev = 1
  call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, BSt%kptns, Epren%nkpt, Bst%nkpt, Cryst%nsym, &
-&   sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
+&   sppoldbl, Cryst%symafm, Cryst%symrel, timrev, comm, use_symrec=.False.)
 
  do isppol=1,Bst%nsppol
    do ikpt=1,Bst%nkpt

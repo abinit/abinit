@@ -4,11 +4,10 @@ t88o_SCR
 t87o_DS4_SCR
 1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgscr
-#%% exclude_builders = atlas_intel_18.0_openmpi
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t87.in, t88.in, t89.in, t90.in, t91.in
 #%% [files]
 #%% files_to_test = t89.stdout, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00

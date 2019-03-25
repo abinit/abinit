@@ -8,7 +8,7 @@
 !!  of dynamical matrices obtained with different unit cell volumes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (MG)
+!! Copyright (C) 2011-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,10 +29,9 @@ MODULE m_gruneisen
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_crystal
- use m_crystal_io
  use m_tetrahedron
  use m_ddb
  use m_ddb_hdr
@@ -99,8 +98,8 @@ MODULE m_gruneisen
  end type gruns_t
 
  public :: gruns_new        ! Constructor.
- public :: gruns_qpath      ! Compute Grunesein parameters on a q-path.
- public :: gruns_qmesh      ! Compute Grunesein parameters on a q-mesh.
+ public :: gruns_qpath      ! Compute Gruneisen parameters on a q-path.
+ public :: gruns_qmesh      ! Compute Gruneisen parameters on a q-mesh.
  public :: gruns_free       ! Release memory.
  public :: gruns_anaddb     ! Driver routine called in anaddb.
 !!***
@@ -129,16 +128,6 @@ contains  !===========================================================
 !! SOURCE
 
 type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_new'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -234,7 +223,7 @@ end function gruns_new
 !!  gruns_fourq
 !!
 !! FUNCTION
-!!  Compute grunesein parameters at an arbitrary q-point.
+!!  Compute gruneisen parameters at an arbitrary q-point.
 !!
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates.
@@ -247,7 +236,7 @@ end function gruns_new
 !!
 !! NOTES
 !!
-!!  The Grunesein parameter is given by:
+!!  The Gruneisen parameter is given by:
 !!
 !!     gamma(q,nu) = - (V / w(q,nu)) dw(q,nu)/dV
 !!
@@ -267,15 +256,6 @@ end function gruns_new
 !! SOURCE
 
 subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_fourq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -370,16 +350,6 @@ end subroutine gruns_fourq
 
 subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_qpath'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,comm
@@ -400,7 +370,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Grunesein parameters along q-path ',ch10
+ write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Gruneisen parameters along q-path ',ch10
  call wrtout(std_out, msg)
  !call wrtout(ab_out, msg)
 
@@ -421,16 +391,16 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
  call xmpi_sum(dwdq_qpath, comm, ierr)
  call xmpi_sum(phdispl_cart_qpath, comm, ierr)
 
- ! Write text files with phonon frequencies and grunesein on the path.
+ ! Write text files with phonon frequencies and gruneisen on the path.
  if (my_rank == master) then
    if (open_file(strcat(prefix, "_GRUNS_QPATH"), msg, newunit=unt, form="formatted", action="write") /= 0) then
      MSG_ERROR(msg)
    end if
-   write(unt,'(a)')'# Phonon band structure, Gruneseinen parameters and group velocity'
+   write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
    call kpath_print(qpath, unit=unt, pre="#")
    write(unt,'(5a)')&
-     "# phfreq(mode=1) grunesein(mode=1) velocity(mode=1) phfreq(mode=2) grunesein(mode=2) velocity(mode=2)"
+     "# phfreq(mode=1) gruneisen(mode=1) velocity(mode=1)    phfreq(mode=2) gruneisen(mode=2) velocity(mode=2)   ..."
    do iqpt=1,qpath%npts
      do nu=1,gruns%natom3
        write(unt, "(3es17.8)", advance="no") &
@@ -449,7 +419,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    ncerr = nctk_def_arrays(ncid, [ &
      ! q-points of the path
      nctkarr_t("gruns_qpath", "dp", "three, gruns_nqpath"), &
-     ! grunesein parameters on the path
+     ! gruneisen parameters on the path
      nctkarr_t("gruns_gvals_qpath", "dp", "number_of_phonon_modes, gruns_nqpath"), &
      ! phonon frequencies at the different volumes
      nctkarr_t("gruns_wvols_qpath", "dp", "number_of_phonon_modes, gruns_nvols, gruns_nqpath"), &
@@ -511,16 +481,6 @@ end subroutine gruns_qpath
 
 subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_qmesh'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nshiftq,ncid,comm
@@ -550,7 +510,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Grunesein DOSes ',ch10
+ write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Gruneisen DOSes ',ch10
  call wrtout(std_out, msg)
  !call wrtout(ab_out, msg)
 
@@ -631,7 +591,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  if (my_rank == master) then
    call wrtout(ab_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
 
-   ! Write text files with Grunesein and DOSes.
+   ! Write text files with Gruneisen and DOSes.
    if (open_file(strcat(prefix, "_GRUNS_DOS"), msg, newunit=unt, form="formatted", action="write") /= 0) then
      MSG_ERROR(msg)
    end if
@@ -642,7 +602,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    write(unt,'(5a)') &
      "# omega PH_DOS Gruns_DOS Gruns**2_DOS Vel_DOS  Vel**2_DOS  PH_IDOS Gruns_IDOS Gruns**2_IDOS Vel_IDOS Vel**2_IDOS"
    do io=1,nomega
-     write(unt, "(11es17.8)")omega_mesh, &
+     write(unt, "(11es17.8)")omega_mesh(io), &
        wdos(io,1), grdos(io,1), gr2dos(io,1), vdos(io,1), v2dos(io,1), &
        wdos(io,2), grdos(io,2), gr2dos(io,2), vdos(io,2), v2dos(io,2)
    end do
@@ -663,7 +623,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
     nctkarr_t("gruns_shiftq", "dp", "three, gruns_nshiftq"), &
     nctkarr_t("gruns_qibz", "dp", "three, gruns_nqibz"), &
     nctkarr_t("gruns_wtq", "dp", "gruns_nqibz"), &
-    ! grunesein parameters in IBZ
+    ! gruneisen parameters in IBZ
     ! phonon frequencies at the different volumes,
     ! group velocities at V0 in Cartesian coordinates.
     nctkarr_t("gruns_gvals_qibz", "dp", "number_of_phonon_modes, gruns_nqibz"), &
@@ -742,15 +702,6 @@ end subroutine gruns_qmesh
 
 subroutine gruns_free(gruns)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !array
  type(gruns_t),intent(inout) :: gruns
@@ -763,7 +714,7 @@ subroutine gruns_free(gruns)
 
  if (allocated(gruns%ifc_vol)) then
    do ii=1,size(gruns%cryst_vol)
-     call crystal_free(gruns%cryst_vol(ii))
+     call gruns%cryst_vol(ii)%free()
    end do
    ABI_FREE(gruns%cryst_vol)
  end if
@@ -813,16 +764,6 @@ end subroutine gruns_free
 
 subroutine gruns_anaddb(inp, prefix, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_anaddb'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  character(len=*),intent(in) :: prefix
@@ -858,7 +799,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
 
    ! Write structure corresponding to iv0
-   NCF_CHECK(crystal_ncwrite(gruns%cryst_vol(iv0), ncid))
+   NCF_CHECK(gruns%cryst_vol(iv0)%ncwrite(ncid))
 
    ! Add important dimensions and additional metadata.
    ncerr = nctk_def_dims(ncid, [ &
@@ -889,20 +830,20 @@ subroutine gruns_anaddb(inp, prefix, comm)
  end if
 #endif
 
- ! Compute grunesein parameters on the q-mesh.
+ ! Compute gruneisen parameters on the q-mesh.
  if (all(inp%ng2qpt /= 0)) then
    call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
-   MSG_WARNING("Cannot compute Grunesein parameters on q-mesh because ng2qpt == 0")
+   MSG_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
  end if
 
- ! Compute grunesein on the q-path.
+ ! Compute gruneisen on the q-path.
  if (inp%nqpath /= 0) then
    qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
    call gruns_qpath(gruns, prefix, qpath, ncid, comm)
    call kpath_free(qpath)
  else
-   MSG_WARNING("Cannot compute Grunesein parameters on q-path because nqpath == 0")
+   MSG_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
  end if
 
  ! Compute speed of sound for V0.

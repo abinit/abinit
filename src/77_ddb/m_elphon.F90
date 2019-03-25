@@ -8,7 +8,7 @@
 !! elements and calculates related properties - Tc, phonon linewidths...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer, BXu, MG, JPC)
+!! Copyright (C) 2004-2019 ABINIT group (MVer, BXu, MG, JPC)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ module m_elphon
  use defs_datatypes
  use defs_abitypes
  use defs_elphon
- use m_profiling_abi
+ use m_abicore
  use m_kptrank
  use m_errors
  use m_xmpi
@@ -57,6 +57,7 @@ module m_elphon
  use m_fstab,           only : mkqptequiv
  use m_epweights,       only : d2c_weights, ep_el_weights, ep_fs_weights
  use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova, get_tau_k
+ use m_symkpt,     only : symkpt
 
  implicit none
 
@@ -147,20 +148,9 @@ contains
 !!      printvtk,rchkgsheader,read_el_veloc,symkpt,timein,wrap2_pmhalf,wrtout
 !!      xmpi_bcast
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elphon'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
-!End of the abilint section
 
  implicit none
 
@@ -1428,14 +1418,6 @@ end subroutine elphon
 
 subroutine outelph(elph_ds,enunit,fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outelph'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1795,13 +1777,6 @@ end subroutine outelph
 
 subroutine rchkGSheader (hdr,natom,nband,unitgkk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rchkGSheader'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1881,14 +1856,6 @@ end subroutine rchkGSheader
 subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 
  use m_sort
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkFSkgrid'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2094,14 +2061,6 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 
  use m_special_funcs,  only : fermi_dirac, bose_einstein
  use m_epweights,      only : d2c_wtq, ep_ph_weights
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2f'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2475,9 +2434,9 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
        a2f3mom(iomega)  =     a2f2mom(iomega)*abs(omega)  ! third positive moment of alpha2F
        a2f4mom(iomega)  =     a2f3mom(iomega)*abs(omega)  ! fourth positive moment of alpha2F
 !
-!  electron lifetimes eq 4.48 in Grimvall electron phonon coupling in Metals (with T dependency). Also 5.69-5.72, 5.125, section 3.4
-!  phonon lifetimes eq 19 in Savrasov PhysRevB.54.16487 (T=0)
-!  a first T dependent expression in Allen PRB 6 2577 eq 10. Not sure about the units though
+!  electron lifetimes eq 4.48 in [[cite:Grimvall1981]] electron phonon coupling in Metals (with T dependency). Also 5.69-5.72, 5.125, section 3.4
+!  phonon lifetimes eq 19 in Savrasov PhysRevB.54.16487 [[cite:Savrasov1996]] (T=0)
+!  a first T dependent expression in Allen PRB 6 2577 [[cite:Allen1972]] eq 10. Not sure about the units though
 !
        do itemp = 1, ntemp
          temp = (itemp-1)*10._dp*kb_HaK
@@ -2487,7 +2446,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
      omega=omega + domega
    end do
 !
-!  From Allen PRL 59 1460
+!  From Allen PRL 59 1460 [[cite:Allen1987]]
 !  \lambda <\omega^n> = 2 \int_0^{\infty} d\omega [\alpha^2F / \omega] \omega^n
 !
    lambda_iso(isppol) = simpson(domega,a2f_1mom)
@@ -2647,14 +2606,6 @@ end subroutine mka2f
 !! SOURCE
 
 subroutine mka2fQgrid(elph_ds,fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2fQgrid'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -2850,13 +2801,6 @@ end subroutine mka2fQgrid
 
 subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'order_fs_kpts'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2953,15 +2897,6 @@ end subroutine order_fs_kpts
 
 subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ep_setupqpt'
- use interfaces_14_hidewrite
- use interfaces_29_kpoints
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3008,7 +2943,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
      mqpt = anaddb_dtset%ngqpt(1)*anaddb_dtset%ngqpt(2)*anaddb_dtset%ngqpt(3)*anaddb_dtset%nqshft
      ABI_ALLOCATE(qpt_full,(3,mqpt))
      ABI_ALLOCATE(wtq,(mqpt))
-     ABI_ALLOCATE(tmpshifts,(3,210))
+     ABI_ALLOCATE(tmpshifts,(3,MAX_NSHIFTK))
 
      wtq(:) = one
 
@@ -3158,14 +3093,6 @@ end subroutine ep_setupqpt
 !! SOURCE
 
 subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkph_linwid'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -3511,14 +3438,6 @@ end subroutine mkph_linwid
 
 subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband,nkptirr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_fs_bands'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3543,7 +3462,7 @@ subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband
  nband = hdr%nband(1)
 
 !gausstol = minimum weight value for integration weights on FS
-!should be set to reproduce DOS at Ef (Ref. PRB 34, 5065 p. 5067)
+!should be set to reproduce DOS at Ef (Ref. PRB 34, 5065 [[cite:Lam1986]] p. 5067)
  gausstol = 1.0d-10
 
 !use same band indices in both spin channels
@@ -3660,13 +3579,6 @@ end subroutine get_fs_bands
 
 subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_all_gkk2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3769,13 +3681,6 @@ end subroutine get_all_gkk2
 !! SOURCE
 
 subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'interpolate_gkk'
-!End of the abilint section
 
  implicit none
 
@@ -4027,14 +3932,6 @@ end subroutine interpolate_gkk
 subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksize,&
 &    qpttoqpt,ep_prt_yambo,unitgkk,ifltransport)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_all_gkq'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4198,13 +4095,6 @@ end subroutine get_all_gkq
 
 subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_all_gkr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4328,13 +4218,6 @@ end subroutine get_all_gkr
 !! SOURCE
 
 subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprimd,symrec,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'complete_gkk'
-!End of the abilint section
 
  implicit none
 
@@ -4673,14 +4556,6 @@ end subroutine complete_gkk
 !! SOURCE
 
 subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_nv_fs_en'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -5188,14 +5063,6 @@ end subroutine get_nv_fs_en
 
 subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_nv_fs_temp'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5312,6 +5179,7 @@ end subroutine get_nv_fs_temp
 !!  kphon_full2irr = mapping of full FS kpts to irreducible ones
 !!   FSfullpqtofull = mapping of k + q to k
 !!   FSirredtoGS = mapping of irreducible kpoints to GS set
+!!
 !! OUTPUT
 !! elph_tr_ds%FSelecveloc_sq = avergae FS electronic velocity
 !!
@@ -5323,13 +5191,6 @@ end subroutine get_nv_fs_temp
 !! SOURCE
 
 subroutine get_veloc_tr(elph_ds,elph_tr_ds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_veloc_tr'
-!End of the abilint section
 
   implicit none
 
@@ -5366,7 +5227,7 @@ subroutine get_veloc_tr(elph_ds,elph_tr_ds)
      end do
    end do
    elph_tr_ds%FSelecveloc_sq(:,isppol) = elph_tr_ds%FSelecveloc_sq(:,isppol)/elph_ds%k_fine%nkpt/elph_ds%n0(isppol)
-!  for factor 1/elph_ds%n0(isppol) see eq 12 of Allen prb 17 3725: sum of v**2 over all k gives n0 times FSelecveloc_sq
+!  for factor 1/elph_ds%n0(isppol) see eq 12 of Allen prb 17 3725 [[cite:Allen1978]] : sum of v**2 over all k gives n0 times FSelecveloc_sq
  end do ! end isppol
  write (std_out,*) '  get_veloc_tr: FSelecveloc_sq ', elph_tr_ds%FSelecveloc_sq
 
@@ -5404,14 +5265,6 @@ end subroutine get_veloc_tr
 !! SOURCE
 
 subroutine integrate_gamma(elph_ds,FSfullpqtofull)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integrate_gamma'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -5542,14 +5395,6 @@ end subroutine integrate_gamma
 
 subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integrate_gamma_tr'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5630,8 +5475,8 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
            vvelocwtkpq(:,:)=elph_tr_ds%tmp_vvelocwtk2(ib2,ikpt_phonq,:,:,isppol)
 
 !          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
-!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
-!          see also Allen PRB 17 3725
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987) [[cite:Al-Lehaibi1987]],
+!          see also Allen PRB 17 3725 [[cite:Allen1978]]
 !          generalization to tensorial quantities is simple, by keeping the directional
 !          references of velock and velockpq as indices.
            do icomp = 1, 3
@@ -5717,14 +5562,6 @@ end subroutine integrate_gamma_tr
 
 subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integrate_gamma_tr_lova'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5803,8 +5640,8 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
 
 
 !          MJV 31/03/2009: Note that the following is valid for any geometry, not just cubic!
-!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987)
-!          see also Allen PRB 17 3725
+!          see eq 5 and 6 of prb 36 4103 (Al-Lehaibi et al 1987) [[cite:Al-Lehaibi1987]]
+!          see also Allen PRB 17 3725 [[cite:Allen1978]]
 !          generalization to tensorial quantities is simple, by keeping the directional
 !          references of velock and velockpq as indices.
            do icomp = 1, 3
@@ -5949,13 +5786,6 @@ end subroutine integrate_gamma_tr_lova
 subroutine ftgkk (wghatm,gkk_qpt,gkk_rpt,gkqwrite,gkrwrite,gprim,ikpt_phon0,&
 &                  natom,nkpt_phon,ngkkband,nkpt_used,nqpt,nrpt,nsppol,&
 &                  qtor,rpt,qpt_full,unit_gkk_rpt,unitgkq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftgkk'
-!End of the abilint section
 
  implicit none
 
@@ -6188,13 +6018,6 @@ end subroutine ftgkk
 !! SOURCE
 
 subroutine test_ftgkk(elph_ds,gprim,natom,nrpt,rpt,qpt_full,wghatm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_ftgkk'
-!End of the abilint section
 
  implicit none
 

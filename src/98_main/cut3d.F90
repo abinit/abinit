@@ -8,7 +8,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2019 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,7 @@ program cut3d
  use m_build_info
  use m_xmpi
  use m_nctk
- use m_profiling_abi
+ use m_abicore
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -63,7 +63,6 @@ program cut3d
  use m_hdr
  use m_cut3d
  use m_crystal
- use m_crystal_io
 
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
@@ -74,14 +73,6 @@ program cut3d
  use m_distribfft,      only : init_distribfft_seq
  use m_ioarr,           only : fftdatar_write
  use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -767,7 +758,7 @@ program cut3d
          case (15)
            ! Write netcdf file.
            timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
-           call crystal_from_hdr(cryst, hdr, timrev)
+           cryst = hdr_get_crystal(hdr, timrev)
            call ngfft_seq(ngfft, [nr1, nr2, nr3])
            ngfft(4:6) = ngfft(1:3)
            nfft = product(ngfft(1:3))
@@ -776,7 +767,7 @@ program cut3d
            call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
 
            call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
-           call crystal_free(cryst)
+           call cryst%free()
 
          case(0)
            write(std_out,*)' Exit requested by user'

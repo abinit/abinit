@@ -6,7 +6,7 @@
 !!  FIXME: Description is missing
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group
+!! Copyright (C) 1998-2019 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,10 +14,7 @@
 !!
 !! CHILDREN
 !! interfaces_62_wvl_wfs.F90
-!! wvl_hpsitopsi.F90
-!! wvl_nl_gradient.F90
-!! wvl_psitohpsi.F90
-!! wvl_rwwf.F90
-!! wvl_tail_corrections.F90
+!! m_wvl_psi.F90
+!! m_wvl_rwwf.F90
 !!
 !!***

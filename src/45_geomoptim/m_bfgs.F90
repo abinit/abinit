@@ -8,7 +8,7 @@
 !!  Broyden-Fletcher-Goldfarb-Shanno (BFGS) minimization algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (XG,JCC)
+!! Copyright (C) 2012-2019 ABINIT group (XG,JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 MODULE m_bfgs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abimover
 
@@ -77,14 +77,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hessinit'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -219,13 +211,6 @@ end subroutine hessinit
 subroutine hessupdt(hessin,iatfix,natom,ndim,vin,vin_prev,vout,vout_prev, &
 &                   nimage) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hessupdt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -354,7 +339,7 @@ end subroutine hessupdt
 !! with a line minimisation that take into account the total energies.
 !! Also transfer vin to vin_prev, vout to vout_prev, and etotal to etotal_prev
 !! Could see Numerical Recipes (Fortran), 1986, page 307,
-!! as well as Schlegel, J. Comp. Chem. 3, 214 (1982).
+!! as well as Schlegel, J. Comp. Chem. 3, 214 (1982) [[cite:Schlegel1982]].
 !!
 !! INPUTS
 !!  etotal=new total energy (no meaning at output)
@@ -380,13 +365,6 @@ end subroutine hessupdt
 !! SOURCE
 
 subroutine brdene(etotal,etotal_prev,hessin,ndim,vin,vin_prev,vout,vout_prev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'brdene'
-!End of the abilint section
 
  implicit none
 

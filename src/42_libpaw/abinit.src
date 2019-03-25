@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2018 ABINIT Group (MT, TRangel)
+# Copyright (C) 2005-2019 ABINIT Group (MT, TRangel)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -33,6 +33,7 @@ sources = [
  "m_paw_ij.F90",
  "m_pawfgrtab.F90",
  "m_paw_finegrid.F90",
+ "m_paw_onsite.F90",
  "m_pawcprj.F90",
  "m_pawrhoij.F90",
  "m_pawdij.F90",

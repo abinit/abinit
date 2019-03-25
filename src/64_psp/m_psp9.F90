@@ -7,7 +7,7 @@
 !! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (JJ, MVer, YP)
+!!  Copyright (C) 1999-2019 ABINIT group (JJ, MVer, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_psp9
  use defs_basis
  use m_splines
  use m_errors
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_PSML
  use m_psml
 #endif
@@ -120,14 +120,6 @@ contains
 subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp9in'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -710,13 +702,6 @@ end subroutine psp9in
 #if defined HAVE_PSML
 
 subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp9cc'
-!End of the abilint section
 
  implicit none
 

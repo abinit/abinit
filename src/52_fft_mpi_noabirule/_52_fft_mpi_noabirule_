@@ -9,14 +9,13 @@
 !! coding rules (~abinit/doc/developers/rules_coding).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TD)
+!! Copyright (C) 1998-2019 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! bound.F90
 !! defs_fftdata.F90
 !! dfti_c2c_ip.finc
 !! dfti_c2c_op.finc
@@ -28,8 +27,6 @@
 !! fftw3_c2c_op.finc
 !! fftw3_fftpad.finc
 !! fftw3_fftrisc.finc
-!! getng.F90
-!! indirect_parallel_Fourier.F90
 !! interfaces_52_fft_mpi_noabirule.F90
 !! m_dfti.F90
 !! m_fft_mesh.F90
@@ -37,7 +34,6 @@
 !! m_fftw3.F90
 !! m_sg2002.F90
 !! m_sgfft.F90
-!! sphereboundary.F90
 !! utests_fftu.finc
 !!
 !!***

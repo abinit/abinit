@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2019 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,12 +26,12 @@
 module m_anaddb_dataset
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_fstrings,  only : next_token, rmquotes, sjoin, inupper
  use m_symtk,     only : mati3det
- use m_parser,    only : intagm
+ use m_parser,    only : intagm, chkvars_in_string
  use m_ddb,       only : DDB_QTOL
 
  implicit none
@@ -225,51 +225,22 @@ contains
 
 subroutine anaddb_dtset_free(anaddb_dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb_dtset_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(anaddb_dataset_type), intent(inout) :: anaddb_dtset
 
 ! *************************************************************************
 
- if (allocated(anaddb_dtset%atifc))  then
-   ABI_DEALLOCATE(anaddb_dtset%atifc)
- end if
- if (allocated(anaddb_dtset%iatfix))  then
-   ABI_DEALLOCATE(anaddb_dtset%iatfix)
- end if
- if (allocated(anaddb_dtset%iatprj_bs))  then
-   ABI_DEALLOCATE(anaddb_dtset%iatprj_bs)
- end if
- if (allocated(anaddb_dtset%qnrml1))  then
-   ABI_DEALLOCATE(anaddb_dtset%qnrml1)
- end if
- if (allocated(anaddb_dtset%qnrml2))  then
-   ABI_DEALLOCATE(anaddb_dtset%qnrml2)
- end if
- if (allocated(anaddb_dtset%qpath))  then
-   ABI_DEALLOCATE(anaddb_dtset%qpath)
- end if
- if (allocated(anaddb_dtset%qph1l))  then
-   ABI_DEALLOCATE(anaddb_dtset%qph1l)
- end if
- if (allocated(anaddb_dtset%qph2l))  then
-   ABI_DEALLOCATE(anaddb_dtset%qph2l)
- end if
- if (allocated(anaddb_dtset%ep_qptlist))  then
-   ABI_DEALLOCATE(anaddb_dtset%ep_qptlist)
- end if
- if (allocated(anaddb_dtset%gruns_ddbs))  then
-   ABI_DEALLOCATE(anaddb_dtset%gruns_ddbs)
- end if
+ ABI_SFREE(anaddb_dtset%atifc)
+ ABI_SFREE(anaddb_dtset%iatfix)
+ ABI_SFREE(anaddb_dtset%iatprj_bs)
+ ABI_SFREE(anaddb_dtset%qnrml1)
+ ABI_SFREE(anaddb_dtset%qnrml2)
+ ABI_SFREE(anaddb_dtset%qpath)
+ ABI_SFREE(anaddb_dtset%qph1l)
+ ABI_SFREE(anaddb_dtset%qph2l)
+ ABI_SFREE(anaddb_dtset%ep_qptlist)
+ ABI_SFREE(anaddb_dtset%gruns_ddbs)
 
 end subroutine anaddb_dtset_free
 !!***
@@ -310,16 +281,6 @@ end subroutine anaddb_dtset_free
 !! SOURCE
 
 subroutine invars9 (anaddb_dtset,lenstr,natom,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars9'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1774,15 +1735,6 @@ end subroutine invars9
 
 subroutine outvars_anaddb (anaddb_dtset,nunit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outvars_anaddb'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nunit
@@ -1881,10 +1833,6 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(a)')' Phonon DOS information :'
    write(nunit,'(3x,a9,es16.8)')'dosdeltae',anaddb_dtset%dosdeltae
    write(nunit,'(3x,a9,es16.8)')' dossmear',anaddb_dtset%dossmear
-   write(nunit,'(a)')' Description of grid 2 for Fourier interpolation :'
-   write(nunit,'(3x,a9,3i10)')'   ng2qpt',anaddb_dtset%ng2qpt(1:3)
-   write(nunit,'(3x,a9,3i10)')'   ngrids',anaddb_dtset%ngrids
-   write(nunit,'(3x,a9,7x,3es16.8)')'   q2shft',anaddb_dtset%q2shft(1:3)
  end if
 
 !Thermal information
@@ -1897,7 +1845,11 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(3x,a9,3i10)')'  ntemper',anaddb_dtset%ntemper
    write(nunit,'(3x,a9,7x,3es16.8)')'temperinc',anaddb_dtset%temperinc
    write(nunit,'(3x,a9,7x,3es16.8)')'tempermin',anaddb_dtset%tempermin
-   write(nunit,'(a)')' Description of grid 2 :'
+ endif
+
+!Grid 2 description
+ if(anaddb_dtset%thmflag/=0 .or. anaddb_dtset%prtdos/=0)then
+   write(nunit,'(a)')' Description of grid 2 (Fourier interp. or BZ sampling):'
    write(nunit,'(3x,a9,3i10)')'   ng2qpt',anaddb_dtset%ng2qpt(1:3)
    write(nunit,'(3x,a9,3i10)')'   ngrids',anaddb_dtset%ngrids
    write(nunit,'(3x,a9,7x,3es16.8)')'   q2shft',anaddb_dtset%q2shft(1:3)
@@ -2104,15 +2056,6 @@ end subroutine outvars_anaddb
 
 subroutine anaddb_init(filnam)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !arrays
  character(len=*),intent(out) :: filnam(7)
@@ -2167,16 +2110,6 @@ end subroutine anaddb_init
 !! SOURCE
 
 subroutine anaddb_chkvars(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb_chkvars'
- use interfaces_57_iovars
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -7,7 +7,7 @@
 !!  LDA or LDA-like XC functionals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LG, MF, JFD, LK)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LG, MF, JFD, LK)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_xclda
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_numeric_tools,      only : invcb
 
@@ -59,8 +59,8 @@ contains
 !!
 !! NOTE
 !! Perdew-Zunger parameterization of Ceperly-Alder electron gas energy data.
-!! J. Perdew and A. Zunger, Phys. Rev. B 23, 5048 (1981).
-!! D.M. Ceperly and B.J. Alder, Phys. Rev. Lett. 45, 566 (1980).
+!! J. Perdew and A. Zunger, Phys. Rev. B 23, 5048 (1981) [[cite:Perdew1981]]
+!! D.M. Ceperley and B.J. Alder, Phys. Rev. Lett. 45, 566 (1980) [[cite:Ceperley1980]]
 !!
 !! INPUTS
 !!  npt=number of real space points on which density is provided
@@ -82,13 +82,6 @@ contains
 
 subroutine xcpzca(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
 &                dvxc)                            !Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcpzca'
-!End of the abilint section
 
  implicit none
 
@@ -235,7 +228,7 @@ end subroutine xcpzca
 !! exc=-(a0+a1*rs+a2*rs**2+a3*rs**3)/(b1*rs+b2*rs**2+b3*rs**3+b4*rs**4)
 !! where the parameters are fit to reproduce
 !! (in this case) the Perdew-Wang parameterization of the correlation
-!! energy given in Phys. Rev. B 45, 13244-13249 (1992).
+!! energy given in Phys. Rev. B 45, 13244-13249 (1992) [[cite:Perdew1992]].
 !!
 !! Each parameter is interpolated between zeta=0 and 1 by
 !! a_i(zeta)=a_i(0)+(a_i(1)-a_i(0))*f_x(zeta) and
@@ -259,13 +252,6 @@ end subroutine xcpzca
 
 subroutine xcspol(exc,npts,nspden,order,rspts,vxc,zeta,ndvxc,& !Mandatory arguments
 &                 dvxc)                            !Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcspol'
-!End of the abilint section
 
  implicit none
 
@@ -730,7 +716,7 @@ end subroutine xcspol
 !! NOTES
 !! Teter exchange and correlation (xc)--Mike Teter s fit
 !! to Ceperly-Alder electron gas energy data.  Data from
-!! D.M. Ceperley and B.J. Alder, Phys. Rev. Lett. 45, 566 (1980)
+!! D.M. Ceperley and B.J. Alder, Phys. Rev. Lett. 45, 566 (1980) [[cite:Ceperley1980]]
 !! and private communication from authors.
 !! This form is based on Mike Teter s rational polynomial
 !! exc=-(a0+a1*rs+a2*rs**2+a3*rs**3)/(b1*rs+b2*rs**2+b3*rs**3+b4*rs**4)
@@ -763,13 +749,6 @@ end subroutine xcspol
 
 subroutine xctetr(exc,npt,order,rhor,rspts,vxc,& !Mandatory arguments
 &                 d2vxc,dvxc)                    !Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xctetr'
-!End of the abilint section
 
  implicit none
 
@@ -936,13 +915,6 @@ end subroutine xctetr
 subroutine xcwign(exc,npt,order,rspts,vxc,& !Mandatory arguments
 &                dvxc)                           !Optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcwign'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1032,7 +1004,7 @@ end subroutine xcwign
 !!
 !! NOTES
 !! Hedin-Lundqvist exchange and correlation (xc)--
-!! L. Hedin and B.I. Lundqvist, J. Phys. C. 4, 2064 (1971).
+!! L. Hedin and B.I. Lundqvist, J. Phys. C. 4, 2064 (1971) [[cite:Hedin1971]]
 !!
 !! INPUTS
 !!  npt=number of real space points on which density is provided
@@ -1052,13 +1024,6 @@ end subroutine xcwign
 !! SOURCE
 
 subroutine xchelu(exc,npt,order,rspts,vxc,dvxc)  ! dvxc is optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xchelu'
-!End of the abilint section
 
  implicit none
 
@@ -1157,13 +1122,6 @@ end subroutine xchelu
 
 subroutine xcxalp(exc,npt,order,rspts,vxc, dvxc)  ! dvxc is optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcxalp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1238,7 +1196,7 @@ end subroutine xcxalp
 !! must be provided as input,
 !!            vxci  <--  vxc_lb =: vxc_lda + vx_lb
 !!
-!! [R van Leeuwen and EJ Baerends, Phys Rev A 49, 2421 (1994)]
+!! R van Leeuwen and EJ Baerends, Phys Rev A 49, 2421 (1994) [[cite:VanLeeuwen1994]]
 !!
 !! With respect to spin, the van Leeuwen-Baerends
 !! potential is "exchange-like" : separate contributions from
@@ -1267,13 +1225,6 @@ end subroutine xcxalp
 !! SOURCE
 
 subroutine xclb(grho2_updn,npts,nspden,rho_updn,vxci)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xclb'
-!End of the abilint section
 
  implicit none
 
@@ -1330,7 +1281,7 @@ end subroutine xclb
 !!
 !! FUNCTION
 !! Add gradient part of the Thomas-Fermi-Weizsacker functional
-!! Perrot F.,Phys. Rev. A20,586-594 (1979)
+!! Perrot F., Phys. Rev. A20, 586-594 (1979) [[cite:Perrot1979]]
 !!
 !! INPUTS
 !!  ndvxcdgr= size of dvxcdgr(npts,ndvxcdgr)
@@ -1360,13 +1311,6 @@ end subroutine xclb
 !! SOURCE
 
 subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho2_updn,ngr2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xctfw'
-!End of the abilint section
 
  implicit none
 

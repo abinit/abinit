@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!   Copyright (C) 2004-2018 ABINIT group (JPC, MJV, BXU)
+!!   Copyright (C) 2004-2019 ABINIT group (JPC, MJV, BXU)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_a2ftr
  use defs_datatypes
  use defs_elphon
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_kptrank
  use m_splines
@@ -107,14 +107,6 @@ contains
 !! SOURCE
 
 subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elph_tr_ds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2f_tr'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -963,7 +955,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
    end do ! icomp
  end do ! isppol
 
-!Get thermal resistivity, based on eqn. (52) in Allen's PRB 17, 3725 (1978)
+!Get thermal resistivity, based on eqn. (52) in Allen's PRB 17, 3725 (1978) [[cite:Allen1978]]
 !WARNING: before 6.13.1 the thermal resistivity and Lorentz number were not in
 !atomic units, BUT the SI units are good.
  pref_w = 3.0_dp/(2.0_dp*pi**2.0d0)
@@ -1070,14 +1062,6 @@ end subroutine mka2f_tr
 !! SOURCE
 
 subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr_ds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2f_tr_lova'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1674,7 +1658,8 @@ end subroutine mka2f_tr_lova
 !!
 !! FUNCTION
 !!  Calculate the k-dependent relaxation time due to EPC. Impelementation based
-!!  on derivation from Grmvall's book or OD Restrepo's paper (PRB 94 212103 (2009))
+!!  on derivation from Grmvall's book or 
+!!  OD Restrepo's paper (PRB 94 212103 (2009) [[cite:Restrepo2009]])
 !!
 !! INPUTS
 !!  Cryst<crystal_t>=Info on the unit cell and on its symmetries.
@@ -1698,14 +1683,6 @@ end subroutine mka2f_tr_lova
 !! SOURCE
 
 subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_tau_k'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -2303,7 +2280,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  ABI_DEALLOCATE(tmp_tau_k)
 
 !Get the energy dependence of tau.
-!Eq. (6) in  Restrepo et al. Appl. Phys. Lett. 94, 212103 (2009)
+!Eq. (6) in  Restrepo et al. Appl. Phys. Lett. 94, 212103 (2009) [[cite:Restrepo2009]]
 
  fname = trim(elph_ds%elph_base_name) // '_TAUE'
  if (open_file(fname,message,newunit=unit_taue,status='unknown') /= 0) then

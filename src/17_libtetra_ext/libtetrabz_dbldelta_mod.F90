@@ -5,7 +5,7 @@
 
 #include "abi_common.h"
 !
-! Copyright (c) 2014 Mitsuaki Kawamura
+! Copyright (C) 2014 Mitsuaki Kawamura
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a
 ! copy of this software and associated documentation files (the
@@ -41,13 +41,6 @@ SUBROUTINE libtetrabz_dbldelta(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
   !
   USE ISO_C_BINDING
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_dbldelta'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3)
@@ -103,13 +96,6 @@ SUBROUTINE libtetrabz_dbldelta_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig
   USE libtetrabz_common, ONLY : libtetrabz_sort, &
   &                             libtetrabz_triangle_a1, libtetrabz_triangle_b1, &
   &                             libtetrabz_triangle_b2, libtetrabz_triangle_c1
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_dbldelta_main'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, &
@@ -212,13 +198,6 @@ END SUBROUTINE libtetrabz_dbldelta_main
 SUBROUTINE libtetrabz_dbldelta2(nb,ej,w)
   !
   USE libtetrabz_common, ONLY : libtetrabz_sort
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_dbldelta2'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nb

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MT)
+!!  Copyright (C) 2008-2019 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 module m_vdw_dftd2
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
 
@@ -82,7 +82,7 @@ contains
 !! NOTES
 !!  Ref.: S. Grimme, Semiempirical GGA-type density functional
 !!        constructed with a long-range dispersion correction,
-!!        J. Comp. Chem. 27, 1787 (2006)
+!!        J. Comp. Chem. 27, 1787 (2006) [[cite:Grimme2006]]
 !!
 !! PARENTS
 !!      respfn,setvtr,stress
@@ -93,14 +93,6 @@ contains
 
 subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xred,znucl,&
 &          dyn_vdw_dftd2,elt_vdw_dftd2,fred_vdw_dftd2,str_vdw_dftd2,qphon) ! Optionals
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_dftd2'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -515,13 +507,6 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !! SOURCE
 
 subroutine grad_cart2red(grad)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'grad_cart2red'
-!End of the abilint section
 
 implicit none
 

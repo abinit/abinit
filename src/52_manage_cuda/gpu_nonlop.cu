@@ -19,7 +19,7 @@
 //   - using Spherical Harmonics Ylm (N-conserving or PAW ; compulsory for PAW)
 //
 // COPYRIGHT
-// Copyright (C) 1998-2018 ABINIT group (MT,FDahm)
+// Copyright (C) 1998-2019 ABINIT group (MT,FDahm)
 // This file is distributed under the terms of the
 // GNU General Public License, see ~abinit/COPYING
 // or http://www.gnu.org/copyleft/gpl.txt .
@@ -314,36 +314,36 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
     printf("gpu_nonlop: Error:\n choice %d was used but only choice 0,1,2,3 and 23 are available on GPU\n",(*choice));
     printf(" Try to change your input files with correct optforces & optstress ...\n");
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   if((*nspinor)!=1){
     printf("gpu_nonlop: Error:\n Only nspinor = 1 is allowed at the moment but you used %d\n",(*nspinor));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   if(((*choice)==1)&&((*signs)!=2)){
     printf("gpu_nonlop: Error:\n when choice is 1 only signs=2 is implemented. ( %d was used) \n",(*signs));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
   if((((*choice)==2)||((*choice)==3)||((*choice)==23))&&((*signs)!=1)){
     printf("gpu_nonlop: Error:\n when choice is 2,3 or 23 only signs=1 is implemented. ( %d was used) \n",(*signs));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   if((*nloalg)<=0){
     printf("gpu_nonlop: Error:\n Only nloalg(1)>0 is allowed at the moment but you used %d\n",(*nloalg));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   if( ((*paw_opt)>0) && ((2*(*dimenl1)/((*lmnmax)*((*lmnmax)+1)))!=1) ){
     printf("gpu_nonlop: Error:\n only the real case for enl has been implemented on gpu and complex was used\n");
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   //GPU allocation
@@ -411,7 +411,7 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
   if(cuda_state!=cudaSuccess){
     printf("gpu_nonlop: Error while copying data to gpu : %s \n",cudaGetErrorString(cuda_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   //Compute Projection
@@ -454,7 +454,7 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
       if(cuda_state!=cudaSuccess){
 	printf("gpu_nonlop: Error while copying data 2 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
 	fflush(stdout);
-	leave_new_("COLL");
+	abi_cabort();
       }
     }
 
@@ -491,7 +491,7 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
     if(cuda_state!=cudaSuccess){
       printf("gpu_nonlop: Error while retrieving results from gpu :\n %s \n",cudaGetErrorString(cuda_state));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
   }
 
@@ -584,7 +584,7 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
   if(cuda_state!=cudaSuccess){
     printf("alloc_nonlop_gpu: Error during gpu memory allocation :\n %s \n",cudaGetErrorString(cuda_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   //Precompute couple (atom,lmn) for each projection
@@ -613,13 +613,13 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
   if(cuda_state!=cudaSuccess){
     printf("alloc_nonlop_gpu: Error while copying data to gpu :\n %s \n",cudaGetErrorString(cuda_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
   cuda_state=cudaMemset(rdlmn_gpu,0,3*(*natom)*(*lmnmax)*sizeof(double));
   if(cuda_state!=cudaSuccess){
     printf("alloc_nonlop_gpu: Error while set tabs to 0:\n %s \n",cudaGetErrorString(cuda_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 }
 
@@ -671,7 +671,7 @@ extern "C" void free_nonlop_gpu_(){
   if(cuda_state!=cudaSuccess){
     printf("free_nonlop_gpu: Error while freeing gpu data:\n %s \n",cudaGetErrorString(cuda_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 }
 
@@ -684,14 +684,14 @@ extern "C" void gpu_update_ham_data_(double *enl,int *size_enl, double *sij,int 
   if(cuda_state!=cudaSuccess){
     printf("gpu_update_ham_data: Error while copying data 1 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
   if((*size_sij)>0){
     cuda_state=cudaMemcpy(sij_gpu, sij, (*size_sij)*sizeof(double),cudaMemcpyHostToDevice);
     if(cuda_state!=cudaSuccess){
       printf("gpu_update_ham_data: Error while copying data 2 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
       fflush(stdout);
-      leave_new_("COLL");
+      abi_cabort();
     }
   }
 
@@ -699,7 +699,7 @@ extern "C" void gpu_update_ham_data_(double *enl,int *size_enl, double *sij,int 
   if(cuda_state!=cudaSuccess){
     printf("gpu_update_ham_data: Error while copying data 3 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
   m_ham_used = 1;
 }
@@ -712,13 +712,13 @@ extern "C" void gpu_update_ffnl_ph3d_(double *ph3din,int *dimph3din,double *ffnl
   if(cuda_state!=cudaSuccess){
     printf("gpu_update_ffnl_ph3d: Error while copying data 1 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
   cuda_state=cudaMemcpy(ph3din_gpu,ph3din,(*dimph3din)*sizeof(double),cudaMemcpyHostToDevice);
   if(cuda_state!=cudaSuccess){
     printf("gpu_update_ffnl_ph3d: Error while copying data 2 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 
   ffnl_ph3d_updated = 1;

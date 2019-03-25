@@ -7,14 +7,14 @@
 !!  Calculates van der Waals corrections to exchange-correlation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2019 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401
-!!  RS09 = doi:10.1103/PhysRevLett.103.096102
+!!  DRSLL04 = doi:10.1103/PhysRevLett.92.246401 [[cite:Dion2004]]
+!!  RS09 = doi:10.1103/PhysRevLett.103.096102 [[cite:Romanperez2009]]
 !!
 !! SOURCE
 
@@ -29,7 +29,7 @@ module m_xc_vdw
 
  use defs_basis
  use iso_c_binding
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use libxc_functionals
  use m_splines
@@ -37,8 +37,9 @@ module m_xc_vdw
  use netcdf
 #endif
 
- use m_io_tools, only : flush_unit, open_file
+ use m_io_tools,      only : flush_unit, open_file
  use m_numeric_tools, only : simpson_int, cspint
+ use m_integrals,     only : radsintr
 
  implicit none
 
@@ -279,14 +280,6 @@ contains
 subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 & rho_grho,deltae_vdw,exc_vdw,decdrho_vdw,decdgrho_vdw,stress_vdw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_aggregate'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
 #if defined HAVE_FFT_FFTW3
@@ -318,7 +311,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Init
   ngpts = my_vdw_params%ngpts
@@ -620,7 +613,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   ABI_DEALLOCATE(utmp)
   ABI_DEALLOCATE(wtmp)
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_aggregate
 !!***
@@ -662,13 +655,6 @@ end subroutine xc_vdw_aggregate
 
 subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
 & theta,eps,dexc,dexcg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_energy'
-!End of the abilint section
 
   implicit none
 
@@ -868,13 +854,6 @@ end subroutine xc_vdw_energy
 
 subroutine xc_vdw_done(vdw_params)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_done'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -886,7 +865,7 @@ subroutine xc_vdw_done(vdw_params)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   call libxc_functionals_end(xc_functionals=vdw_funcs)
 
@@ -902,7 +881,7 @@ subroutine xc_vdw_done(vdw_params)
   ABI_DEALLOCATE(phig)
   ABI_DEALLOCATE(d2phidg2)
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_done
 !!***
@@ -926,13 +905,6 @@ end subroutine xc_vdw_done
 !! SOURCE
 
 subroutine xc_vdw_get_params(vdw_params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_get_params'
-!End of the abilint section
 
   implicit none
 
@@ -990,14 +962,6 @@ end subroutine xc_vdw_get_params
 
 subroutine xc_vdw_init(vdw_params)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_init'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -1016,7 +980,7 @@ subroutine xc_vdw_init(vdw_params)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Global init
   call xc_vdw_set_params(vdw_params)
@@ -1353,7 +1317,7 @@ subroutine xc_vdw_init(vdw_params)
 
   vdw_switch = .true.
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_init
 !!***
@@ -1386,13 +1350,6 @@ end subroutine xc_vdw_init
 
 subroutine xc_vdw_libxc_init(ixc_vdw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_libxc_init'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -1408,7 +1365,7 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Select LibXC functionals
   select case (ixc_vdw)
@@ -1436,7 +1393,7 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
   ! XC functional init
   call libxc_functionals_init(ixc,1,xc_functionals=vdw_funcs)
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_libxc_init
 !!***
@@ -1461,14 +1418,6 @@ end subroutine xc_vdw_libxc_init
 !! SOURCE
 
 subroutine xc_vdw_memcheck(unt,vp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_memcheck'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
 
@@ -1580,14 +1529,6 @@ end subroutine xc_vdw_memcheck
 
 subroutine xc_vdw_read(filename)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_read'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -1602,7 +1543,7 @@ subroutine xc_vdw_read(filename)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
 #if defined HAVE_NETCDF
   write(msg,'("Reading vdW-DF data from",1x,a)') trim(filename)
@@ -1729,7 +1670,7 @@ subroutine xc_vdw_read(filename)
   MSG_ERROR('reading vdW-DF variables requires NetCDF')
 #endif
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_read
 !!***
@@ -1753,13 +1694,6 @@ end subroutine xc_vdw_read
 !! SOURCE
 
 subroutine xc_vdw_set_functional(vdw_func,vdw_zab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_set_functional'
-!End of the abilint section
 
   implicit none
 
@@ -1799,13 +1733,6 @@ end subroutine xc_vdw_set_functional
 !! SOURCE
 
 subroutine xc_vdw_set_params(vdw_params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_set_params'
-!End of the abilint section
 
   implicit none
 
@@ -1863,14 +1790,6 @@ end subroutine xc_vdw_set_params
 !! SOURCE
 
 subroutine xc_vdw_show(unt,vp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_show'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
 
@@ -1944,13 +1863,6 @@ end subroutine xc_vdw_show
 
 function xc_vdw_status()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_status'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -1984,14 +1896,6 @@ end function xc_vdw_status
 !! SOURCE
 
 subroutine xc_vdw_trigger(condition)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_trigger'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
 
@@ -2048,14 +1952,6 @@ end subroutine xc_vdw_trigger
 
 subroutine xc_vdw_write(filename)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_write'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2068,7 +1964,7 @@ subroutine xc_vdw_write(filename)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
 #if defined HAVE_NETCDF
   write(msg,'(a,1x,"Writing vdW-DF data to",1x,a)') ch10,trim(filename)
@@ -2202,7 +2098,7 @@ subroutine xc_vdw_write(filename)
   MSG_WARNING('writing vdW-DF variables requires NetCDF - skipping')
 #endif
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_write
 !!***
@@ -2243,14 +2139,6 @@ end subroutine xc_vdw_write
 
 subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_filter'
- use interfaces_32_util
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2265,7 +2153,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Init
 
@@ -2371,7 +2259,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
   ABI_DEALLOCATE(utmp)
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine vdw_df_filter
 !!***
@@ -2383,7 +2271,7 @@ end subroutine vdw_df_filter
 !! FUNCTION
 !!  Calculates the van der Waals kernel for specified d-coordinates.
 !!  Decides whether to use direct integration of Eq.(14) of
-!!  Dion et al., PRL 92, 246401 (2004), or to return a 4th-order
+!!  Dion et al., PRL 92, 246401 (2004) [[cite:Dion2004]], or to return a 4th-order
 !!  polynomial for small distances.
 !!
 !! INPUTS
@@ -2408,13 +2296,6 @@ end subroutine vdw_df_filter
 
 function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_kernel'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2429,7 +2310,7 @@ function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
 ! *************************************************************************
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 #endif
 
   ! Init
@@ -2477,7 +2358,7 @@ function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
   end if ! dtmp < dsoft
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 #endif
 
 end function vdw_df_kernel
@@ -2489,7 +2370,7 @@ end function vdw_df_kernel
 !!
 !! FUNCTION
 !!  Calculates the van der Waals kernel for specified d-coordinates. Uses
-!!  direct integration of Eq.(14) of Dion et al., PRL 92, 246401 (2004).
+!!  direct integration of Eq.(14) of Dion et al., PRL 92, 246401 (2004) [[cite:Dion2004]].
 !!
 !! INPUTS
 !!  d1= first coordinate
@@ -2508,14 +2389,6 @@ end function vdw_df_kernel
 
 function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_kernel_value'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2532,7 +2405,7 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
 ! *************************************************************************
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 #endif
 
   ! Create angular mesh
@@ -2670,7 +2543,7 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
   ABI_DEALLOCATE(eint)
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 #endif
 
 end function vdw_df_kernel_value
@@ -2707,13 +2580,6 @@ end function vdw_df_kernel_value
 subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 &                       exc_lda,vxc_lda,vxcg_lda)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_ldaxc'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2729,7 +2595,7 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   is_gga=libxc_functionals_isgga(vdw_funcs)
 
@@ -2790,7 +2656,7 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
     ABI_DEALLOCATE(grho2)
   end if
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine vdw_df_ldaxc
 !!***
@@ -2834,14 +2700,6 @@ end subroutine vdw_df_ldaxc
 subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
 & mesh_inc,mesh_ratio,mesh_tolerance,mesh_file,avoid_zero,exact_max)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_create_mesh'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2861,7 +2719,7 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
 ! *************************************************************************
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 #endif
 
   if ( present(avoid_zero) ) then
@@ -3021,7 +2879,7 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
   end select
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 #endif
 
 end subroutine vdw_df_create_mesh
@@ -3051,13 +2909,6 @@ end subroutine vdw_df_create_mesh
 !! SOURCE
 
 function vdw_df_indexof(list_1d,npts,value)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_indexof'
-!End of the abilint section
 
   implicit none
 
@@ -3112,13 +2963,6 @@ end function vdw_df_indexof
 function vdw_df_interpolate(d1,d2,sofswt)
 
   use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_interpolate'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -3199,14 +3043,6 @@ end function vdw_df_interpolate
 
 subroutine vdw_df_internal_checks(test_mode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_internal_checks'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -3222,7 +3058,7 @@ subroutine vdw_df_internal_checks(test_mode)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Here starts a test which will evaluate the integral over D for
   ! delta=0 (see Fig. 1 of DRSLL04).
@@ -3289,7 +3125,7 @@ subroutine vdw_df_internal_checks(test_mode)
 
   end if
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine vdw_df_internal_checks
 !!***
@@ -3321,13 +3157,6 @@ end subroutine vdw_df_internal_checks
 subroutine vdw_df_netcdf_ioerr(ncerr,file_name,file_line)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_netcdf_ioerr'
-!End of the abilint section
-
  integer,intent(in) :: ncerr
  character(len=*),optional,intent(in) :: file_name
  integer,optional,intent(in) :: file_line
@@ -3380,13 +3209,6 @@ end subroutine vdw_df_netcdf_ioerr
 
 subroutine vdw_df_set_tweaks(input_tweaks,output_tweaks)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_set_tweaks'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -3426,14 +3248,6 @@ end subroutine vdw_df_set_tweaks
 !! SOURCE
 
 subroutine vdw_df_write_func(func_name,mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_write_func'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
 

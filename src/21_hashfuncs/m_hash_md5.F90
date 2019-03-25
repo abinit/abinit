@@ -7,7 +7,7 @@
 !!  This module provides resources to calculate MD5 checksums.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2018 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2016-2019 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 module m_hash_md5
 
   use iso_c_binding
-  use m_profiling_abi
+  use m_abicore
 
   implicit none
 
@@ -107,13 +107,6 @@ contains  !===========================================================
 function md5_check(sum1,sum2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'md5_check'
-!End of the abilint section
-
   character(len=32),intent(in) :: sum1
   character(len=32),intent(in) :: sum2
 
@@ -149,13 +142,6 @@ end function md5_check
 !! SOURCE
 
 function md5_sum_from_file(fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'md5_sum_from_file'
-!End of the abilint section
 
   implicit none
 
@@ -208,13 +194,6 @@ end function md5_sum_from_file
 
 function md5_sum_from_string(text)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'md5_sum_from_string'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -257,22 +236,9 @@ end function md5_sum_from_string
 
 subroutine hash_final(retval, ctx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hash_final'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hash_final'
-!End of the abilint section
 
   character(len=32), intent(out) :: retval
   type(md5_context_t), intent(inout) :: ctx
@@ -317,13 +283,6 @@ end subroutine hash_final
 subroutine hash_init(ctx)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hash_init'
-!End of the abilint section
-
   type(md5_context_t), intent(inout) :: ctx
 
 ! *********************************************************************
@@ -360,20 +319,7 @@ end subroutine hash_init
 
 subroutine hash_update(ctx, buffer, bufsize)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hash_update'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hash_update'
-!End of the abilint section
 
 !Arguments ------------------------------------
   type(md5_context_t), intent(inout) :: ctx
@@ -409,13 +355,6 @@ end subroutine hash_update
 
   subroutine c_to_f_string(c_string, f_string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'c_to_f_string'
-!End of the abilint section
-
     character(kind=c_char,len=1), intent(in)  :: c_string(*)
     character(len=*), intent(out) :: f_string
 
@@ -431,13 +370,6 @@ end subroutine hash_update
   end subroutine c_to_f_string
 
   subroutine c_to_f_string_ptr(c_string, f_string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'c_to_f_string_ptr'
-!End of the abilint section
 
     type(c_ptr),      intent(in)  :: c_string
     character(len=*), intent(out) :: f_string
@@ -460,13 +392,6 @@ end subroutine hash_update
   end subroutine c_to_f_string_ptr
 
   subroutine f_to_c_string(f_string, c_string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'f_to_c_string'
-!End of the abilint section
 
     character(len=*), intent(in) :: f_string
     character(kind=c_char,len=1), intent(out) :: c_string(len_trim(f_string)+1)

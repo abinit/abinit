@@ -9,7 +9,7 @@
 !!  xmpi_sum is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2001-2019 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,14 +26,6 @@
 !! SOURCE
 
 subroutine xmpi_sum_int(xval,comm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_int'
-!End of the abilint section
 
  implicit none
 
@@ -96,12 +88,6 @@ end subroutine xmpi_sum_int
 
 subroutine xmpi_sum_intv(xval,comm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_intv'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------------
@@ -152,12 +138,6 @@ end subroutine xmpi_sum_intv
 
 subroutine xmpi_sum_intv2(xval,xsum,comm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_intv2'
-!End of the abilint section
-
  implicit none
 
 !Arguments---------------------
@@ -204,14 +184,6 @@ end subroutine xmpi_sum_intv2
 !! SOURCE
 
 subroutine xmpi_sum_intn(xval,n1,comm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_intn'
-!End of the abilint section
 
  implicit none
 
@@ -279,13 +251,6 @@ end subroutine xmpi_sum_intn
 subroutine xmpi_sum_int2t(xval,xsum,n1,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_int2t'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -334,13 +299,6 @@ end subroutine xmpi_sum_int2t
 !! SOURCE
 subroutine xmpi_sum_int2d(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_int2d'
-!End of the abilint section
 
  implicit none
 
@@ -406,14 +364,6 @@ end subroutine xmpi_sum_int2d
 !! SOURCE
 subroutine xmpi_sum_int3d(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_int3d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -478,14 +428,6 @@ end subroutine xmpi_sum_int3d
 !!
 !! SOURCE
 subroutine xmpi_sum_int4d(xval,comm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_int4d'
-!End of the abilint section
 
  implicit none
 
@@ -555,13 +497,6 @@ end subroutine xmpi_sum_int4d
 subroutine xmpi_sum_dp(xval,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp'
-!End of the abilint section
-
  implicit none
 
 
@@ -629,13 +564,6 @@ end subroutine xmpi_sum_dp
 subroutine xmpi_sum_dpvt(xval,xsum,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dpvt'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -694,13 +622,6 @@ end subroutine xmpi_sum_dpvt
 !! SOURCE
 subroutine xmpi_sum_dpv(xval,comm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dpv'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -755,13 +676,6 @@ end subroutine xmpi_sum_dpv
 !! SOURCE
 subroutine xmpi_sum_dpn(xval,n1,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dpn'
-!End of the abilint section
 
  implicit none
 
@@ -828,13 +742,6 @@ end subroutine xmpi_sum_dpn
 subroutine xmpi_sum_dp2d(xval,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp2d'
-!End of the abilint section
-
  implicit none
 
 
@@ -899,13 +806,6 @@ end subroutine xmpi_sum_dp2d
 !! SOURCE
 subroutine xmpi_sum_dp3d(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp3d'
-!End of the abilint section
 
  implicit none
 
@@ -973,13 +873,6 @@ end subroutine xmpi_sum_dp3d
 subroutine xmpi_sum_dp4d(xval,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp4d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1046,13 +939,6 @@ end subroutine xmpi_sum_dp4d
 !! SOURCE
 subroutine xmpi_sum_dp5d(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp5d'
-!End of the abilint section
 
  implicit none
 
@@ -1122,13 +1008,6 @@ end subroutine xmpi_sum_dp5d
 subroutine xmpi_sum_dp6d(xval,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp6d'
-!End of the abilint section
-
  implicit none
 
 
@@ -1197,13 +1076,6 @@ end subroutine xmpi_sum_dp6d
 !! SOURCE
 subroutine xmpi_sum_dp7d(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp7d'
-!End of the abilint section
 
  implicit none
 
@@ -1275,13 +1147,6 @@ end subroutine xmpi_sum_dp7d
 !! SOURCE
 subroutine xmpi_sum_dp2t(xval,xsum,n1,comm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp2t'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1329,13 +1194,6 @@ end subroutine xmpi_sum_dp2t
 !!
 !! SOURCE
 subroutine xmpi_sum_dp2d2t(xval,xsum,n,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp2d2t'
-!End of the abilint section
 
  implicit none
 
@@ -1391,13 +1249,6 @@ end subroutine xmpi_sum_dp2d2t
 
 subroutine xmpi_sum_dp3d2t(xval,xsum,n1,comm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp3d2t'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1447,13 +1298,6 @@ end subroutine xmpi_sum_dp3d2t
 !! SOURCE
 subroutine xmpi_sum_dp4d2t(xval,xsum,n1,comm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_dp4d2t'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1500,13 +1344,6 @@ end subroutine xmpi_sum_dp4d2t
 !!
 !! SOURCE
 subroutine xmpi_sum_c0dc(xval,comm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c0dc'
-!End of the abilint section
 
  implicit none
 
@@ -1561,13 +1398,6 @@ end subroutine xmpi_sum_c0dc
 !! SOURCE
 subroutine xmpi_sum_c1dc(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c1dc'
-!End of the abilint section
 
  implicit none
 
@@ -1633,13 +1463,6 @@ end subroutine xmpi_sum_c1dc
 subroutine xmpi_sum_c2dc(xval,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c2dc'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1704,13 +1527,6 @@ end subroutine xmpi_sum_c2dc
 !! SOURCE
 subroutine xmpi_sum_c3dc(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c3dc'
-!End of the abilint section
 
  implicit none
 
@@ -1778,13 +1594,6 @@ end subroutine xmpi_sum_c3dc
 subroutine xmpi_sum_c4dc(xval,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c4dc'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1851,13 +1660,6 @@ end subroutine xmpi_sum_c4dc
 subroutine xmpi_sum_c5dc(xval,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c5dc'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1921,13 +1723,6 @@ end subroutine xmpi_sum_c5dc
 !! SOURCE
 subroutine xmpi_sum_c6dc(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c6dc'
-!End of the abilint section
 
  implicit none
 
@@ -1995,13 +1790,6 @@ end subroutine xmpi_sum_c6dc
 !! SOURCE
 subroutine xmpi_sum_c7dc(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c7dc'
-!End of the abilint section
 
  implicit none
 
@@ -2074,13 +1862,6 @@ end subroutine xmpi_sum_c7dc
 subroutine xmpi_sum_c1cplx(xval,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c1cplx'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------
@@ -2144,13 +1925,6 @@ end subroutine xmpi_sum_c1cplx
 !! SOURCE
 subroutine xmpi_sum_c2cplx(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c2cplx'
-!End of the abilint section
 
  implicit none
 
@@ -2221,13 +1995,6 @@ end subroutine xmpi_sum_c2cplx
 !! SOURCE
 subroutine xmpi_sum_c3cplx(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c3cplx'
-!End of the abilint section
 
  implicit none
 
@@ -2300,13 +2067,6 @@ end subroutine xmpi_sum_c3cplx
 subroutine xmpi_sum_c4cplx(xval,comm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c4cplx'
-!End of the abilint section
-
  implicit none
 
 
@@ -2374,13 +2134,6 @@ end subroutine xmpi_sum_c4cplx
 !! SOURCE
 subroutine xmpi_sum_c5cplx(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c5cplx'
-!End of the abilint section
 
  implicit none
 
@@ -2450,13 +2203,6 @@ end subroutine xmpi_sum_c5cplx
 
 subroutine xmpi_sum_c6cplx(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_c6cplx'
-!End of the abilint section
 
  implicit none
 

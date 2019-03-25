@@ -8,7 +8,7 @@
 !!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,10 +22,10 @@
 !! CHILDREN
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-
 
 #include "abi_common.h"
 
@@ -34,7 +34,7 @@ MODULE m_read_plowannier
  use defs_basis
  implicit none
 
- private 
+ private
 
  public :: read_plowannier
 !!***
@@ -48,9 +48,9 @@ contains
 !! FUNCTION
 !!  Read Wannier coefficient in the file forlb.ovlp for ucrpa calculation
 !!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
-!! 
+!!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,33 +98,18 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,nspinor,nsppol,pawang,prtvol,ucrpa_bands)
 
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_io_tools,      only : open_file
  use m_crystal,       only : crystal_t
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
  use m_pawang,        only : pawang_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_plowannier'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !types and arrays
@@ -141,7 +126,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
 !Local variables-------------------------------
  character(len=500) :: message,msg
  integer :: at_indx,ik_ibz,band1,m1,m2,spin,ik_bz,dummy,isym,itim,iat,indx,ispinor,unt
- real(dp) :: xx,yy 
+ real(dp) :: xx,yy
  real(dp) :: kbz(3)
  complex(dpc), allocatable :: coeffW_IBZ(:,:,:,:,:,:)
 ! *********************************************************************

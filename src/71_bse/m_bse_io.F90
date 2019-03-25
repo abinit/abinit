@@ -7,7 +7,7 @@
 !!  This module provides routines to read the Bethe-Salpeter Hamiltonian from file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +28,8 @@ MODULE m_bse_io
 
  use defs_basis
  use m_xmpi
- use m_errors 
- use m_profiling_abi
+ use m_errors
+ use m_abicore
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -103,15 +103,6 @@ CONTAINS  !====================================================================
 
 subroutine exc_write_bshdr(funt,Bsp,Hdr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_bshdr'
-!End of the abilint section
-
- implicit none
-                                                                                                      
  !Arguments ------------------------------------
  integer,intent(in) :: funt
  type(excparam),intent(in) :: BSp
@@ -166,16 +157,6 @@ end subroutine exc_write_bshdr
 
 subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_bshdr'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-                                                                                                      
  !Arguments ------------------------------------
  integer,intent(in) :: funt
  integer,intent(out) :: fform,ierr
@@ -201,7 +182,7 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
 
  call hdr_free(Hdr)
 
- if (ANY(nreh_read/=BSp%nreh)) then 
+ if (ANY(nreh_read/=BSp%nreh)) then
    call wrtout(std_out,"Wrong number of e-h transitions","COLL")
    ierr = ierr + 1
  end if
@@ -242,15 +223,6 @@ end subroutine exc_read_bshdr
 
 subroutine exc_skip_bshdr(funt,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_skip_bshdr'
-!End of the abilint section
-
- implicit none
-                                                                                                      
 !Arguments ------------------------------------
  integer,intent(in) :: funt
  integer,intent(out) :: ierr
@@ -299,15 +271,6 @@ end subroutine exc_skip_bshdr
 
 subroutine exc_skip_bshdr_mpio(mpifh,at_option,ehdr_offset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_skip_bshdr_mpio'
-!End of the abilint section
-
- implicit none
-                                                                                                      
  !Arguments ------------------------------------
  integer,intent(in) :: mpifh,at_option
  integer(XMPI_OFFSET_KIND),intent(inout) :: ehdr_offset
@@ -315,13 +278,13 @@ subroutine exc_skip_bshdr_mpio(mpifh,at_option,ehdr_offset)
 !Local variables ------------------------------
 !scalars
  integer :: fform,ierr
-#ifdef HAVE_MPI_IO   
+#ifdef HAVE_MPI_IO
  integer(XMPI_OFFSET_KIND) :: fmarker
 #endif
 
  ! *************************************************************************
 
- call hdr_mpio_skip(mpifh,fform,ehdr_offset) 
+ call hdr_mpio_skip(mpifh,fform,ehdr_offset)
 
 #ifdef HAVE_MPI_IO
  call xmpio_read_frm(mpifh,ehdr_offset,at_option,fmarker,ierr)
@@ -347,8 +310,8 @@ end subroutine exc_skip_bshdr_mpio
 !!  hsize=Size of the Hamiltonian.
 !!  nvec=Number of excitonic states to analyze.
 !!  vec_idx(nvec)=List with the indeces of the excitonic states sorted in ascending order.
-!!  [Bsp]<excparam>=Structure storing the parameters of the run. If present the 
-!!    routine will perform additional consistency checks to make sure that 
+!!  [Bsp]<excparam>=Structure storing the parameters of the run. If present the
+!!    routine will perform additional consistency checks to make sure that
 !!    the content of the file is consistent with the present run.
 !!
 !! OUTPUT
@@ -365,15 +328,6 @@ end subroutine exc_skip_bshdr_mpio
 
 subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_eigen'
-!End of the abilint section
-
- implicit none
-                                                                                                      
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nvec,hsize
@@ -410,7 +364,7 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
 
  ! Read eigenvalues, ignore possibly small imaginary part.
  ABI_MALLOC(exc_ene_cplx,(neig_read))
- read(eig_unt, err=10, iomsg=errmsg) exc_ene_cplx 
+ read(eig_unt, err=10, iomsg=errmsg) exc_ene_cplx
 
  if (PRESENT(ene_list)) then
    do vec=1,nvec
@@ -426,7 +380,7 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
      read(eig_unt, err=10, iomsg=errmsg) vec_list(:,vec)
      if (vec==nvec) EXIT
      vec=vec+1
-   else 
+   else
      read(eig_unt, err=10, iomsg=errmsg)
    end if
  end do
@@ -454,16 +408,16 @@ end subroutine exc_read_eigen
 !! exc_read_rcblock
 !!
 !! FUNCTION
-!!  Reads the excitonic Hamiltonian from file 
+!!  Reads the excitonic Hamiltonian from file
 !!
 !! INPUTS
 !!  fname=File name.
 !!  diago_is_real=.TRUE. if diagonal elements are real (used only if is_resonant==.TRUE.)
 !!  nreh(nsppol)=Number of resonant transition for the two spins.
-!!  is_resonant=Set to .TRUE. if the block is resonant. 
+!!  is_resonant=Set to .TRUE. if the block is resonant.
 !!  hsize=Dimension of the block.
 !!  nsppol=2 for spin polarized systems. 1 otherwise.
-!!  my_t1,my_t2=The first and the last colums of the matrix treated by this node. 
+!!  my_t1,my_t2=The first and the last colums of the matrix treated by this node.
 !!  use_mpio=.TRUE. is MPI-IO routines are used.
 !!  comm=MPI communicator.
 !!
@@ -482,16 +436,6 @@ end subroutine exc_read_eigen
 !! SOURCE
 
 subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsize,my_t1,my_t2,hmat,use_mpio,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_rcblock'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -520,7 +464,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  integer :: irec,nrec !,ncount
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,my_offset,my_offpad,fsize
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
- integer :: glob_sizes(2),my_cols(2) 
+ integer :: glob_sizes(2),my_cols(2)
  integer :: block_sizes(2,3)
  integer :: status(MPI_STATUS_SIZE)
 #endif
@@ -550,9 +494,9 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  if (.not.use_mpio) then
 
    if (is_resonant) then
-     call wrtout(std_out,". Reading resonant block from file: "//TRIM(fname)//" using Fortran-IO","COLL") 
+     call wrtout(std_out,". Reading resonant block from file: "//TRIM(fname)//" using Fortran-IO","COLL")
    else
-     call wrtout(std_out,". Reading coupling block from file: "//TRIM(fname)//" using Fortran-IO","COLL") 
+     call wrtout(std_out,". Reading coupling block from file: "//TRIM(fname)//" using Fortran-IO","COLL")
    end if
 
    if (open_file(fname,msg,newunit=funit,form="unformatted",status="old",action="read") /= 0) then
@@ -566,7 +510,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    ! Construct full excitonic Hamiltonian using symmetries.
    if (nsppol==1) then
      call cwtime(cputime,walltime,gflops,"start")
-     ! 
+     !
      ABI_MALLOC(buffer_dpc,(neh1))
      do itp=1,hsize
        read(funit, err=10, iomsg=errmsg) buffer_dpc(1:itp)
@@ -582,11 +526,11 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
        !
        ! Reconstruct the rows below the diagonal (diagonal part is not touched here).
        if (is_resonant) then ! Use Hermiticity.
-         do it=1,itp-1 
+         do it=1,itp-1
            if (it>=my_t1 .and. it<=my_t2) hmat(itp,it) = CONJG(buffer_dpc(it))
          end do
        else  ! Coupling is symmetric.
-         do it=1,itp-1 
+         do it=1,itp-1
            if (it>=my_t1 .and. it<=my_t2) hmat(itp,it) = buffer_dpc(it)
          end do
        end if
@@ -597,11 +541,11 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      call cwtime(cputime,walltime,gflops,"stop")
      write(msg,'(2(a,f9.1),a)')" Fortran-IO completed. cpu_time ",cputime,"[s], walltime ",walltime," [s]"
      call wrtout(std_out,msg,"COLL", do_flush=.True.)
-   else 
+   else
      ! Spin polarized case.
      !
-     ! The file contains 
-     ! A) The up-up and the down-down block in packed form 
+     ! The file contains
+     ! A) The up-up and the down-down block in packed form
      ! (only the upper triangle is stored since the blocks are Hermitian)
      ! B) The entire up-down exchange block (no symmetry here)
      !
@@ -628,18 +572,18 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
              hmat(row,col) = buffer_dpc(it)
            end do
            ! Force the diagonal to be real.
-           if (is_resonant .and.diago_is_real) hmat(col,col) = DBLE(hmat(col,col)) 
+           if (is_resonant .and.diago_is_real) hmat(col,col) = DBLE(hmat(col,col))
          end if
          !
          ! Reconstruct the rows below the diagonal (diagonal part is not touched here).
          row = itp + spad
          if (is_resonant) then ! Hermitian
-           do it=1,itp-1 
+           do it=1,itp-1
              col = it + spad
              if (col>=my_t1 .and. col<=my_t2) hmat(row,col) = CONJG(buffer_dpc(it))
            end do
          else  ! Coupling is symmetric.
-           do it=1,itp-1 
+           do it=1,itp-1
              col = it + spad
              if (col>=my_t1 .and. col<=my_t2) hmat(row,col) = buffer_dpc(it)
            end do
@@ -658,7 +602,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
        read(funit, err=10, iomsg=errmsg) buffer_dpc(1:spin_dim)
        have_col = (spad+itp>=my_t1 .and. spad+itp<=my_t2)
        if (have_col) hmat(1:spin_dim,spad+itp) = buffer_dpc(1:spin_dim)
-       ! Construct and store the lower block 
+       ! Construct and store the lower block
        if (is_resonant) then ! Hermitian
          do it=1,spin_dim
            have_row = (it>=my_t1 .and. it<=my_t2)
@@ -676,12 +620,12 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 
    close(funit)
 
- else 
+ else
 #ifdef HAVE_MPI_IO
    if (is_resonant) then
-     call wrtout(std_out,". Reading resonant block from file "//TRIM(fname)//" using MPI-IO","COLL") 
+     call wrtout(std_out,". Reading resonant block from file "//TRIM(fname)//" using MPI-IO","COLL")
    else
-     call wrtout(std_out,". Reading coupling block from file "//TRIM(fname)//" using MPI-IO","COLL") 
+     call wrtout(std_out,". Reading coupling block from file "//TRIM(fname)//" using MPI-IO","COLL")
    end if
 
    amode=MPI_MODE_RDONLY
@@ -708,7 +652,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 #if 1
      nrec=neh1+2*neh2
      ABI_MALLOC(bsize_frecord,(nrec))
-     bsize_frecord(1:neh1)           = (/(irec*xmpi_bsize_dpc, irec=1,neh1)/) 
+     bsize_frecord(1:neh1)           = (/(irec*xmpi_bsize_dpc, irec=1,neh1)/)
      bsize_frecord(neh1+1:neh1+neh2) = (/(irec*xmpi_bsize_dpc, irec=1,neh2)/)
      bsize_frecord(neh1+neh2+1:)     = neh1*xmpi_bsize_dpc
      call xmpio_check_frmarkers(mpifh,ehdr_offset,xmpio_collective,nrec,bsize_frecord,ierr)
@@ -725,7 +669,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      call xmpio_create_coldistr_from_fp3blocks(glob_sizes,block_sizes,my_cols,old_type,ham_type,my_offpad,offset_err)
    end if
 
-   if (offset_err/=0) then 
+   if (offset_err/=0) then
      write(msg,"(3a)")&
 &      "Global position index cannot be stored in a standard Fortran integer ",ch10,&
 &      "Excitonic matrix cannot be read with a single MPI-IO call."
@@ -733,7 +677,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    end if
    !
    ! The offset used for reading.
-   my_offset = ehdr_offset + my_offpad 
+   my_offset = ehdr_offset + my_offpad
    write(std_out,*)"my_offset= ",my_offset
 
    etype=MPI_BYTE
@@ -753,7 +697,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    !ABI_CHECK_MPI(mpierr,"READ_ALL")
    !
    ! Close the file.
-   call MPI_FILE_CLOSE(mpifh, mpierr)               
+   call MPI_FILE_CLOSE(mpifh, mpierr)
    ABI_CHECK_MPI(mpierr,"FILE_CLOSE")
    !
    ! Use the symmetries of the block to reconstruct the local buffer.
@@ -766,7 +710,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    end if
 
    call xmpi_barrier(comm)
-#else 
+#else
    MSG_ERROR("MPI-IO support not enabled")
 #endif
  end if
@@ -793,7 +737,7 @@ end subroutine exc_read_rcblock
 
 !!****f* m_bse_io/exc_fullh_from_blocks
 !! NAME
-!!  exc_fullh_from_blocks 
+!!  exc_fullh_from_blocks
 !!
 !! FUNCTION
 !!   Construct the matrix F H
@@ -815,11 +759,11 @@ end subroutine exc_read_rcblock
 !!  nreh(nsppol)
 !!  exc_size=Size of the full excitonic Hamiltonian.
 !!
-!! SIDE EFFECTS 
+!! SIDE EFFECTS
 !!  exc_ham(exc_size,exc_size)
 !!
-!! NOTES  
-!! 
+!! NOTES
+!!
 !! PARENTS
 !!      m_exc_diago
 !!
@@ -829,15 +773,6 @@ end subroutine exc_read_rcblock
 !! SOURCE
 
 subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,nreh,exc_size,exc_ham)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_fullh_from_blocks'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -872,27 +807,27 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
  ABI_STAT_MALLOC(cbuff_dpc,(exc_size), ierr)
  ABI_CHECK(ierr==0, "out of memory in cbuff_dpc")
  !
- ! The two cases nsppol==1,2 can be merged but we keep them 
+ ! The two cases nsppol==1,2 can be merged but we keep them
  ! separated to keep to code readable.
 
  SELECT CASE (toupper(block_type))
  CASE ("RESONANT")
 
-   if (nsppol==1) then 
+   if (nsppol==1) then
      !
      ! Construct resonant block from the upper triangle stored on file.
      neh = nreh(1)
      do itp=1,neh
        read(funt, err=10, iomsg=errmsg) cbuff_dpc(1:itp)
        do it=1,itp-1 ! The diagonal is treated below.
-         cttp = cbuff_dpc(it) 
-         exc_ham(it     ,itp)     =                cttp   ! R             
+         cttp = cbuff_dpc(it)
+         exc_ham(it     ,itp)     =                cttp   ! R
          exc_ham(itp    ,it )     =          CONJG(cttp)  ! row_sign R*
          exc_ham(neh+it ,neh+itp) = row_sign*CONJG(cttp)
          exc_ham(neh+itp,neh+it ) = row_sign*cttp
        end do
        if (diago_is_real) then
-         exc_ham(itp    ,itp)     =          DBLE(cbuff_dpc(itp))  
+         exc_ham(itp    ,itp)     =          DBLE(cbuff_dpc(itp))
          exc_ham(neh+itp,neh+itp) = row_sign*DBLE(cbuff_dpc(itp))
        else
          exc_ham(itp,itp)         =           cbuff_dpc(itp)
@@ -901,32 +836,32 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
      end do
      !
      !
-   else 
+   else
      ! FIXME this part wont work if we have a different number of e-h pairs
      ABI_CHECK(ALL(nreh==nreh(1)),"Different number of transitions")
-     ! The file contains 
-     ! A) The up-up and the down-down block in packed form 
+     ! The file contains
+     ! A) The up-up and the down-down block in packed form
      ! (only the upper triangle is stored since these blocks are Hermitian)
      ! B) The entire up-down exchange block (no symmetry here)
      !
      ! The resonant block is given by:
-     !     |  (v'c' up)    | (v'c' dwn) | 
-     !     ------------------------------           where v_{-+} = v_{+-}^H when the momentum of the photon is neglected. 
+     !     |  (v'c' up)    | (v'c' dwn) |
+     !     ------------------------------           where v_{-+} = v_{+-}^H when the momentum of the photon is neglected.
      !     | [T-W+v]++     |      v+-   | (vc up)   Note that v_{+-} is not Hermitian due to the presence of different spins.
      ! R = ------------------------------           Actually it reduces to a Hermitian matrix when the system is not spin polarized.
      !     |     v-+       | [T-W+v]--  | (vc dwn)  [T-W+v] is Hermitian provided the the QP energies are purely real.
-     !     ------------------------------   
+     !     ------------------------------
      !
      ! *) Fill the diagonal blocks.
      !    only the upper triangle is stored on file.
      !    row1,col1 refer to the resonant block.
      !    row2,col2 refer to the anti-resonant block.
      do block=1,2
-       if (block==1) then 
+       if (block==1) then
          spad=0
          spin_stride=SUM(nreh)
        end if
-       if (block==2) then 
+       if (block==2) then
          spad=nreh(1)
          spin_stride=2*nreh(1) + nreh(2)
        end if
@@ -946,7 +881,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
          if (diago_is_real) then
            exc_ham(col1,col1) =          DBLE(cbuff_dpc(itp))
            exc_ham(col2,col2) = row_sign*DBLE(cbuff_dpc(itp))
-         else 
+         else
            exc_ham(col1,col1) = cbuff_dpc(itp)
            exc_ham(col2,col2) = row_sign*CONJG(cbuff_dpc(itp))
          end if
@@ -954,7 +889,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
      end do
      !
      ! Read v+- and reconstruct resonant and anti-resonat blocks.
-     ! TODO recheck this 
+     ! TODO recheck this
      pad_r1=SUM(nreh)
      pad_c1=2*nreh(1) + nreh(2)
 
@@ -966,7 +901,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
        col1 = itp+nreh(1)
        col2 = itp+(2*nreh(1) + nreh(2))
        do it=1,spin_dim
-         cttp = cbuff_dpc(it) 
+         cttp = cbuff_dpc(it)
          row1 = it
          exc_ham(col1,row1) =    CONJG(cttp)  ! lower reso.
          row2 = it + SUM(nreh)
@@ -992,22 +927,22 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
      !
    else
      !  The coupling block is given by:
-     !      |  (c'v' up)   |    (c'v dwn)     | 
-     !      -----------------------------------           where v_{-+} = v_{+-}^t when the momentum of the photon is neglected. 
+     !      |  (c'v' up)   |    (c'v dwn)     |
+     !      -----------------------------------           where v_{-+} = v_{+-}^t when the momentum of the photon is neglected.
      !      | [-W+v]++     |      v+-         | (vc up)   The entire matrix v_{+-} is stored on file.
-     !  C = -----------------------------------            
+     !  C = -----------------------------------
      !      |     v-+      |    [-W+v]--      | (vc dwn)
-     !      -----------------------------------   
+     !      -----------------------------------
      !
      ! *) Fill blocks that are diagonal in spin coordinates.
      !    row1,col1 refer to the resonat block.
      !    row2,col2 refer to the anti-resonant block.
      do block=1,2
-       if (block==1) then 
+       if (block==1) then
          spad_r=0
          spad_c=SUM(nreh)
        end if
-       if (block==2) then 
+       if (block==2) then
          spad_r=nreh(1)
          spad_c=2*nreh(1)+nreh(2)
        end if
@@ -1024,7 +959,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
            exc_ham(col1,row1) = row_sign*CONJG(cttp) ! lower anti-coupling
            exc_ham(col2,row2) = row_sign*CONJG(cttp) ! upper anti-couling
          end do
-         ! TODO recheck this 
+         ! TODO recheck this
          row1 = itp+spad_r
          exc_ham(row1,col1) = cbuff_dpc(itp)                  ! Diagonals of the block.
          col2 = itp+spad_c
@@ -1033,7 +968,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
      end do
      !
      ! Read Full v+- and reconstruct resonant and anti-resonat blocks.
-     ! TODO recheck this 
+     ! TODO recheck this
      spad=2*nreh(1) + nreh(2)
      pad_r1=SUM(nreh)
      pad_c1=2*nreh(1) + nreh(2)
@@ -1046,7 +981,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
        col1 = itp+spad
        row2 = itp+nreh(1)
        do it=1,spin_dim
-         cttp = cbuff_dpc(it) 
+         cttp = cbuff_dpc(it)
          row1 = it
          exc_ham(col1,row1) =  row_sign*CONJG(cttp)  ! lower anti-reso.
          col2 = it + SUM(nreh)
@@ -1090,15 +1025,6 @@ end subroutine exc_fullh_from_blocks
 
 pure function rrs_of_glob(row_glob,col_glob,size_glob)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rrs_of_glob'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer :: rrs_of_glob
  integer,intent(in) :: row_glob,col_glob
@@ -1117,7 +1043,7 @@ pure function rrs_of_glob(row_glob,col_glob,size_glob)
    rrs_of_glob=+1  ! Resonant.
  else if (row_glob >nreh1 .and. col_glob >nreh2) then
    rrs_of_glob=-1  ! anti-Resonant.
- else 
+ else
    rrs_of_glob=0
  end if
 
@@ -1143,15 +1069,6 @@ end function rrs_of_glob
 
 pure function ccs_of_glob(row_glob,col_glob,size_glob)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ccs_of_glob'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer :: ccs_of_glob
  integer,intent(in) :: row_glob,col_glob
@@ -1170,7 +1087,7 @@ pure function ccs_of_glob(row_glob,col_glob,size_glob)
    ccs_of_glob = +1
  else if (row_glob >nreh1 .and. col_glob<=nreh2) then ! anti-Coupling
    ccs_of_glob = -1
- else 
+ else
    ccs_of_glob = 0
  end if
 
@@ -1199,15 +1116,6 @@ end function ccs_of_glob
 
 function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm,bsize_frm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'offset_in_file'
-!End of the abilint section
-
- implicit none
-                                                                                                      
  !Arguments ------------------------------------
  integer(XMPI_OFFSET_KIND) :: offset_in_file
  integer,intent(in) :: row_glob,col_glob,nsblocks,bsize_elm,bsize_frm
@@ -1217,7 +1125,7 @@ function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm
 !scalars
  integer :: ii,jj,ijp_glob,swap
  integer(XMPI_OFFSET_KIND) :: my_offset
-                                                                                                      
+
  ! *************************************************************************
 
  if (nsblocks==1) then
@@ -1231,8 +1139,8 @@ function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm
      ii   = swap
    end if
    ijp_glob = ii + jj*(jj-1)/2  ! Index for packed storage mode.
-   my_offset = (ijp_glob-1)*bsize_elm + (jj-1)*2*bsize_frm 
- else 
+   my_offset = (ijp_glob-1)*bsize_elm + (jj-1)*2*bsize_frm
+ else
    ABI_UNUSED(sub_block(1,1,1))
    MSG_ERROR("nsppol==2 not coded")
  end if
@@ -1262,8 +1170,6 @@ end function offset_in_file
 !!  ierr=Status error
 !!  exc_mat(exc_size,exc_size)=The resonant block.
 !!
-!! OUTPUT
-!!
 !! PARENTS
 !!      m_exc_diago
 !!
@@ -1274,15 +1180,6 @@ end function offset_in_file
 
 subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_rblock_fio'
-!End of the abilint section
-
- implicit none
-                                                                                                      
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: funt,nsppol,exc_size
@@ -1306,7 +1203,7 @@ subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,i
 
  ! Construct full resonant block using Hermiticity. File is always in double precision.
  ABI_MALLOC(cbuff_dpc,(exc_size))
-                                                                                        
+
  if (nsppol==1) then ! Construct resonant block from the upper triangle stored on file.
    !
    do itp=1,nreh(1)
@@ -1317,22 +1214,22 @@ subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,i
        exc_mat(itp,it) = CONJG(ctemp)
      end do
      if (diago_is_real) then
-       exc_mat(itp,itp) = DBLE(cbuff_dpc(itp))  
+       exc_mat(itp,itp) = DBLE(cbuff_dpc(itp))
      else
        exc_mat(itp,itp) = cbuff_dpc(itp)
      end if
    end do
    !
  else
-   ! The file contains 
-   ! A) The up-up and the down-down block in packed form 
+   ! The file contains
+   ! A) The up-up and the down-down block in packed form
    ! (only the upper triangle is stored since these blocks are Hermitian)
    ! B) The entire up-down exchange block (no symmetry here)
    !
    ! A) Construct resonant blocks from the upper triangles stored on file.
    ! FIXME this part wont work if we have a different number of e-h pairs
    !ABI_CHECK(ALL(nreh==nreh(1)),"Different number of transitions")
-                                                                                        
+
    do block=1,2
      if (block==1) spad=0
      if (block==2) spad=nreh(1)
@@ -1347,7 +1244,7 @@ subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,i
        end do
        if (diago_is_real) then
          exc_mat(col,col) = DBLE(cbuff_dpc(itp))
-       else 
+       else
          exc_mat(col,col) = cbuff_dpc(itp)
        end if
      end do
@@ -1367,7 +1264,7 @@ subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,i
  return
 
  ! Raise the error.
-10 continue 
+10 continue
  ierr = 1
  MSG_WARNING(errmsg)
 
@@ -1381,8 +1278,8 @@ end subroutine exc_read_rblock_fio
 !!  exc_amplitude
 !!
 !! FUNCTION
-!!  Calculate the amplitude function of the excitonic eigenstate |exc_vec\> 
-!!    F(w) = \sum_t |<t|exc_vec>|^2 \delta(ww- ene_t) where the sum over t is done 
+!!  Calculate the amplitude function of the excitonic eigenstate |exc_vec\>
+!!    F(w) = \sum_t |<t|exc_vec>|^2 \delta(ww- ene_t) where the sum over t is done
 !!  of the full set of transitions used to construct the BS Hamiltoniam.
 !!
 !! INPUTS
@@ -1403,15 +1300,6 @@ end subroutine exc_read_rblock_fio
 !! SOURCE
 
 subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_amplitude'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1507,7 +1395,7 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
    !
    ! Write results
    write(out_unt,*)"# Amplitude function F(w) for exc_vector index ",vec_idx(vec)
-   do iw=1,nw 
+   do iw=1,nw
      write(out_unt,*)wmesh(iw)*Ha_eV,amplitude(iw)
    end do
    write(out_unt,*)"#"
@@ -1544,7 +1432,7 @@ end subroutine exc_amplitude
 !!  ierr=return status of the writing process.
 !!      => 0 if everything was ok
 !!      => -1 if NetCDF is not available
-!!      => 1 if NetCDF is available 
+!!      => 1 if NetCDF is available
 !!
 !! PARENTS
 !!
@@ -1555,15 +1443,6 @@ end subroutine exc_amplitude
 
 subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_optme'
-!End of the abilint section
-
- implicit none
-                                                                                                      
  !Arguments ------------------------------------
  integer,intent(in) :: minb,maxb,nkbz,nsppol,nq
  character(len=fnlen),intent(in) :: filname
@@ -1585,7 +1464,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  ncerr = nctk_open_create(ncid, filname, xmpi_comm_self)
  !MT aug 2013: keep the following on THREE lines in order to help abilint script
  NCF_CHECK_MSG(ncerr," create netcdf OME file")
- 
+
 !2. Define dimensions
  NCF_CHECK(nf90_def_dim(ncid,"xyz",3,xyz_id))
  NCF_CHECK(nf90_def_dim(ncid,"cmplx",2,cmplx_id))
@@ -1621,7 +1500,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  NCF_CHECK(nf90_put_var(ncid, maxb_id, maxb))
 
 !6 Write optical matrix elements
- 
+
  do iq=1,nq
    do is=1,nsppol
      do ik=1,nkbz
@@ -1657,14 +1536,14 @@ end subroutine exc_write_optme
 !! exc_ham_ncwrite
 !!
 !! FUNCTION
-!!  Writes the content of a hexc object to a NETCDF file 
+!!  Writes the content of a hexc object to a NETCDF file
 !!  according to the ETSF-IO specifications.
-!!    
+!!
 !! INPUTS
 !!  ncid =NC file handle
-!! 
+!!
 !! OUTPUT
-!!  
+!!
 !! PARENTS
 !!      m_hexc
 !!
@@ -1675,14 +1554,6 @@ end subroutine exc_write_optme
 
 subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_ham_ncwrite'
-!End of the abilint section
-
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1708,9 +1579,9 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  max_nreh = MAXVAL(nreh)
  sum_nreh = SUM(nreh)
 
- ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_reduced_dimensions", 3), nctkdim_t("number_of_spins", bsp%nsppol),& 
+ ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_reduced_dimensions", 3), nctkdim_t("number_of_spins", bsp%nsppol),&
     nctkdim_t("number_of_kpoints", kmesh%nbz), nctkdim_t("max_number_of_valence_bands", bsp%maxnbndv),&
-    nctkdim_t("max_number_of_conduction_bands", bsp%maxnbndc), nctkdim_t("max_number_of_transitions", max_nreh),& 
+    nctkdim_t("max_number_of_conduction_bands", bsp%maxnbndc), nctkdim_t("max_number_of_transitions", max_nreh),&
     nctkdim_t("total_number_of_transitions", sum_nreh), nctkdim_t("cplex", 2)], defmode=.True.)
  NCF_CHECK(ncerr)
 
@@ -1722,7 +1593,7 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
    nctkarr_t('homo', "dp", 'number_of_spins'), &
    nctkarr_t('lumo', "dp", 'number_of_spins'), &
    nctkarr_t('humo', "dp", 'number_of_spins'), &
-   nctkarr_t("reduced_coordinates_of_kpoints", "dp", "number_of_reduced_dimensions, number_of_kpoints"), & 
+   nctkarr_t("reduced_coordinates_of_kpoints", "dp", "number_of_reduced_dimensions, number_of_kpoints"), &
    nctkarr_t("kpoint_weights", "dp", "number_of_kpoints") &
    ])
  NCF_CHECK(ncerr)
@@ -1746,19 +1617,12 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  NCF_CHECK(nf90_put_var(ncid, vid("kpoint_weights"), kmesh%wt))
  NCF_CHECK(ncerr)
 
-#else 
+#else
  MSG_ERROR("netcdf support is not activated. ")
 #endif
 
 contains
- integer function vid(vname) 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
+ integer function vid(vname)
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid

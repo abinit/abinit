@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2019 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_pimd_nosehoover
 
  use defs_basis
  use m_pimd
- use m_profiling_abi
+ use m_abicore
 
  use m_geometry,  only : xcart2xred, xred2xcart
 
@@ -98,13 +98,6 @@ contains
 subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_cell,&
 &          volume,xred,xred_next,xred_prev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_nosehoover_npt'
-!End of the abilint section
 
  implicit none
 
@@ -277,8 +270,8 @@ end subroutine pimd_nosehoover_npt
 !!
 !! NOTES
 !!  Thermization by Nose-Hoover chains according to
-!!  Martyna, Klein, Tuckerman, J. Chem. Phys. 97, 2635 (1992)
-!!  Tuckerman, Marx, Klein, Parrinello, J. Chem. Phys. 104, 5579 (1996)
+!!  Martyna, Klein, Tuckerman, J. Chem. Phys. 97, 2635 (1992) [[cite:Martyna1992]]
+!!  Tuckerman, Marx, Klein, Parrinello, J. Chem. Phys. 104, 5579 (1996) [[cite:Tuckerman1996]]
 !!
 !! PARENTS
 !!      predict_pimd
@@ -294,14 +287,6 @@ end subroutine pimd_nosehoover_npt
 
 subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &                              rprimd,stressin,trotter,vel,volume,xred,xred_next,xred_prev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_nosehoover_nvt'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -391,7 +376,7 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !Recommended value of Nose mass
  write(msg,'(2a,f9.2,3a)') ch10,&
 & ' Recommended value of Nose mass is',one/(dble(trotter)*kt),' (atomic units)',ch10,&
-& '(see Tuckerman et al, J. Chem. Phys. 104, 5579 (1996))'
+& '(see Tuckerman et al, J. Chem. Phys. 104, 5579 (1996))' ! [[cite:Tuckerman1996]]
  call wrtout(std_out,msg,'COLL')
 
 !Compute cartesian coordinates

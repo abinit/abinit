@@ -8,7 +8,7 @@
 !! of the XC kernel (the third derivative of the XC energy)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (MT, MJV, CE, TD, XG)
+!!  Copyright (C) 2012-2019 ABINIT group (MT, MJV, CE, TD, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 module m_drivexc
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use libxc_functionals
 
@@ -176,13 +176,6 @@ contains
 subroutine drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel, &
 &                       dvxc,d2vxc,el_temp,exexch,fxcT,grho2,& ! Optional arguments
 &                       hyb_mixing,lrho,tau,vxcgrho,vxclrho,vxctau,xc_funcs,xc_tb09_c) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'drivexc_main'
-!End of the abilint section
 
  implicit none
 
@@ -432,14 +425,6 @@ end subroutine drivexc_main
 
 subroutine echo_xc_name (ixc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'echo_xc_name'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -464,68 +449,68 @@ subroutine echo_xc_name (ixc)
 !      LDA,LSD
    case (1)
      message = 'LDA: new Teter (4/93) with spin-polarized option - ixc=1'
-     citation = 'S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)'
+     citation = 'S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)' ! [[cite:Goedecker1996]]
    case (2)
      message = 'LDA: Perdew-Zunger-Ceperley-Alder - ixc=2'
-     citation = 'J.P.Perdew and A.Zunger, PRB 23, 5048 (1981) '
+     citation = 'J.P.Perdew and A.Zunger, PRB 23, 5048 (1981) ' ! [[cite:Perdew1981]]
    case (3)
      message = 'LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3'
      citation = ''
    case (4)
      message = 'LDA: Wigner - ixc=4'
-     citation = 'E.P.Wigner, Trans. Faraday Soc. 34, 67 (1938)'
+     citation = 'E.P.Wigner, Trans. Faraday Soc. 34, 67 (1938)' ! [[cite:Wigner1938]]
    case (5)
      message = 'LDA: Hedin-Lundqvist - ixc=5'
-     citation = 'L.Hedin and B.I.Lundqvist, J. Phys. C4, 2064 (1971)'
+     citation = 'L.Hedin and B.I.Lundqvist, J. Phys. C4, 2064 (1971)' ! [[cite:Hedin1971]]
    case (6)
      message = 'LDA: "X-alpha" xc - ixc=6'
-     citation = 'Slater J. C., Phys. Rev. 81, 385 (1951)'
+     citation = 'Slater J. C., Phys. Rev. 81, 385 (1951)' ! [[cite:Slater1951]]
    case (7)
      message = 'LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7'
-     citation = 'J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)'
+     citation = 'J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)' ! [[cite:Perdew1992a]]
    case (8)
      message = 'LDA: Perdew-Wang 92 LSD , exchange-only - ixc=8'
-     citation = 'J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)'
+     citation = 'J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)' ! [[cite:Perdew1992a]]
    case (9)
      message = 'LDA: Perdew-Wang 92 Ex+Ec_RPA  energy - ixc=9'
-     citation = 'J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)'
+     citation = 'J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)' ! [[cite:Perdew1992]]
    case (10)
      message = 'LDA: RPA LSD energy (only the energy !!) - ixc=10'
      citation = ''
 !      GGA
    case (11)
      message = 'GGA: Perdew-Burke-Ernzerhof functional - ixc=11'
-     citation = 'J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)'
+     citation = 'J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)' ! [[cite:Perdew1996]]
    case (12)
      message = 'GGA: x-only Perdew-Burke-Ernzerhof functional - ixc=12'
-     citation = 'J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)'
+     citation = 'J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)' ! [[cite:Perdew1996]]
    case (13)
      message = 'GGA: LDA (ixc==7) energy, and the xc _potential_ is given by van Leeuwen-Baerends GGA - ixc=13'
-     citation = 'R. van Leeuwen and E. J. Baerends PRA 49, 2421 (1994)'
+     citation = 'R. van Leeuwen and E. J. Baerends PRA 49, 2421 (1994)' ! [[cite:VanLeeuwen1994]]
    case (14)
      message = 'GGA: revPBE functional - ixc=14'
-     citation = 'Zhang and Yang, PRL 80, 890 (1998)'
+     citation = 'Zhang and Yang, PRL 80, 890 (1998)' ! [[cite:Zhang1998]]
    case (15)
      message = 'GGA: RPBE functional - ixc=15'
-     citation = 'Hammer, L. B. Hansen, and J. K. Norskov, PRB 59, 7413 (1999)'
+     citation = 'Hammer, L. B. Hansen, and J. K. Norskov, PRB 59, 7413 (1999)' ! [[cite:Hammer1999]]
    case (16)
      message = 'GGA: HCTH93 functional - ixc=16'
-     citation = 'F.A. Hamprecht, A.J. Cohen, D.J. Tozer, N.C. Handy, JCP 109, 6264 (1998)'
+     citation = 'F.A. Hamprecht, A.J. Cohen, D.J. Tozer, N.C. Handy, JCP 109, 6264 (1998)' ! [[cite:Hamprecht1998]]
    case (17)
      message = 'GGA: HCTH120 functional - ixc=17'
-     citation = 'A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, JCP 112, 1670 (1998)'
+     citation = 'A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, JCP 112, 1670 (2000)' ! [[cite:Boese2000]]
    case (23)
      message = 'GGA: Wu Cohen functional - ixc=23'
-     citation = 'Z. Wu and R. E. Cohen, PRB 73, 235116 (2006)'
+     citation = 'Z. Wu and R. E. Cohen, PRB 73, 235116 (2006)' ! [[cite:Wu2006]]
    case (24)
      message = 'GGA: C09x exchange functional - ixc=24'
-     citation = 'Valentino R. Cooper, PRB 81, 161104(R) (2010)'
+     citation = 'Valentino R. Cooper, PRB 81, 161104(R) (2010)' ! [[cite:Cooper2010]]
    case (26)
      message = 'GGA: HCTH147 functional - ixc=26'
-     citation = 'A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, JCP 112, 1670 (1998)'
+     citation = 'A.D. Boese, N.L. Doltsinis, N.C. Handy, and M. Sprik, JCP 112, 1670 (2000)' ! [[cite:Boese2000]]
    case (27)
      message = 'GGA: HCTH407 functional - ixc=27'
-     citation = 'A.D. Boese, and N.C. Handy, JCP 114, 5497 (2001)'
+     citation = 'A.D. Boese, and N.C. Handy, JCP 114, 5497 (2001)' ! [[cite:Boese2001]]
 !      Fermi-Amaldi
    case (20)
      message = 'Fermi-Amaldi correction - ixc=20'
@@ -559,7 +544,7 @@ subroutine echo_xc_name (ixc)
      citation = ''
    case (50)
      message = 'LDA at finite T Ichimaru-Iyetomy-Tanaka - ixc=50'
-     citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) '
+     citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) ' ! [[cite:Ichimaru1987]]
    case default
      write(message,'(a,i0)')" echo_xc_name does not know how to handle ixc = ",ixc
      MSG_WARNING(message)
@@ -609,13 +594,6 @@ end subroutine echo_xc_name
 !! SOURCE
 
 subroutine check_kxc(ixc,optdriver)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_kxc'
-!End of the abilint section
 
  implicit none
 
@@ -702,13 +680,6 @@ end subroutine check_kxc
 
 subroutine size_dvxc(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order,&
 & add_tfw,xc_funcs) ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'size_dvxc'
-!End of the abilint section
 
  implicit none
 
@@ -868,13 +839,6 @@ end subroutine size_dvxc
 
 subroutine xcmult (depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcmult'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -967,13 +931,6 @@ end subroutine xcmult
 !! SOURCE
 
 subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkdenpos'
-!End of the abilint section
 
  implicit none
 
@@ -1209,13 +1166,6 @@ end subroutine mkdenpos
 subroutine drivexc(exc,ixc,npts,nspden,order,rho_updn,vxcrho,ndvxc,ngr2,nd2vxc,nvxcgrho, &
 &   dvxc,d2vxc,grho2_updn,vxcgrho,el_temp,exexch,fxcT,& !Optional arguments
 &   hyb_mixing,lrho_updn,vxclrho,tau_updn,vxctau,xc_funcs,xc_tb09_c)  !Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'drivexc'
-!End of the abilint section
 
  implicit none
 

@@ -2,7 +2,7 @@
 .Version 8.0.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -10,12 +10,12 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 12 May 2016.
-- ( at 17h08 )
+.Starting date : Mon 12 Nov 2018.
+- ( at 02h08 )
   
 - input  file    -> t32.in
 - output file    -> t32.out
@@ -202,7 +202,7 @@ P           mkmem           8
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -359,10 +359,10 @@ P           mkmem           8
 
  Writing KS-RPA macroscopic dielectric function without local fields to file: t32o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t32o_DS1_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 170 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 178 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 172 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 172 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 178 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 174 iterations.
  Writing EXC Macroscopic dielectric function to file: t32o_DS1_EXC_MDF
@@ -373,12 +373,12 @@ P           mkmem           8
    0.1000  20.3545   0.0349  16.6902   0.0179  17.7768   0.0217
    0.2000  20.4068   0.0702  16.7170   0.0358  17.8093   0.0436
    0.3000  20.4946   0.1064  16.7618   0.0541  17.8638   0.0658
-   0.4000  20.6191   0.1439  16.8251   0.0728  17.9408   0.0887
+   0.4000  20.6191   0.1439  16.8250   0.0728  17.9408   0.0887
    0.5000  20.7818   0.1833  16.9072   0.0920  18.0409   0.1123
    0.6000  20.9849   0.2252  17.0088   0.1120  18.1650   0.1369
    0.7000  21.2311   0.2702  17.1308   0.1329  18.3143   0.1628
    0.8000  21.5240   0.3193  17.2742   0.1548  18.4900   0.1902
-   0.9000  21.8680   0.3733  17.4401   0.1781  18.6940   0.2194
+   0.9000  21.8680   0.3733  17.4400   0.1781  18.6940   0.2194
   
 
 == END DATASET(S) ==============================================================
@@ -520,14 +520,16 @@ P           mkmem           8
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Efficient on-the-fly interpolation technique for Bethe-Salpeter calculations of optical spectra
 - Y. Gillet, M. Giantomassi, and X. Gonze. Computer Physics Communications 203, 83 (2016)
 - Comment : in case an interpolation technique is combined with Haydock recursion.
 - Strong suggestion to cite this paper in your publications.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gillet2016
 -
-- [2] Recent developments in the ABINIT software package
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
 - D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
@@ -536,34 +538,39 @@ P           mkmem           8
 - A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
@@ -572,11 +579,12 @@ P           mkmem           8
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.4
+- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  12 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.3  wall=          5.4
+.Delivered  12 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.7  wall=          4.8

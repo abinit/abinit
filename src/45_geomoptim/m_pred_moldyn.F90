@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 module m_pred_moldyn
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
 
@@ -97,13 +97,6 @@ contains
 !! SOURCE
 
 subroutine pred_moldyn(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_moldyn'
-!End of the abilint section
 
 implicit none
 

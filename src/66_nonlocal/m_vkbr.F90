@@ -9,7 +9,7 @@
 !!  in the matrix elements <k-q,b1|e^{-iqr}|k,b2> when non-local pseudopotentials are used.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, FB)
+!! Copyright (C) 2008-2019 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ MODULE m_vkbr
  use defs_datatypes
  use m_hide_blas
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_gwdefs,        only : czero_gw
  use m_fstrings,      only : sjoin, itoa
@@ -74,6 +74,7 @@ MODULE m_vkbr
 
   integer :: inclvkb
   ! Option for calculating the matrix elements of [Vnl,r].
+  ! 0 to exclude commutator, 2 to include it
 
   real(dp) :: kpoint(3)
   ! The k-point in reduced coordinates.
@@ -89,6 +90,7 @@ MODULE m_vkbr
  public :: vkbr_init       ! vkbr_t Constructor
  public :: vkbr_free       ! Free memory
  public :: nc_ihr_comm     ! Compute matrix elements of the commutator i[H,r] for NC pseudos
+ public :: calc_vkb        ! Kleynman-Bylander form factors and derivatives.
 !!***
 
  interface vkbr_free
@@ -131,15 +133,6 @@ CONTAINS  !=====================================================================
 
 subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vkbr_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,inclvkb,istwfk
@@ -178,7 +171,7 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  ABI_MALLOC(vkbsign, (psps%lnmax, cryst%ntypat))
  ABI_MALLOC(vkb, (npw, psps%lnmax, cryst%ntypat))
  ABI_MALLOC(vkbd, (npw, psps%lnmax, cryst%ntypat))
- call calc_vkb(cryst,psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
+ call calc_vkb(cryst,psps,kpoint,npw,npw,gvec,vkbsign,vkb,vkbd)
 
  select case (inclvkb)
  case (2)
@@ -223,15 +216,6 @@ end subroutine vkbr_init
 
 subroutine vkbr_free_0D(vkbr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vkbr_free_0D'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(vkbr_t),intent(inout) :: vkbr
@@ -239,12 +223,8 @@ subroutine vkbr_free_0D(vkbr)
 !************************************************************************
 
 !complex
- if (allocated(vkbr%fnl)) then
-   ABI_FREE(vkbr%fnl)
- end if
- if (allocated(vkbr%fnld)) then
-   ABI_FREE(vkbr%fnld)
- end if
+ ABI_SFREE(vkbr%fnl)
+ ABI_SFREE(vkbr%fnld)
 
 end subroutine vkbr_free_0D
 !!***
@@ -266,15 +246,6 @@ end subroutine vkbr_free_0D
 !! SOURCE
 
 subroutine vkbr_free_1D(vkbr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vkbr_free_1D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -338,15 +309,6 @@ end subroutine vkbr_free_1D
 
 subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'add_vnlr_commutator'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,nspinor
@@ -389,7 +351,6 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
       do im=1,2*(il-1)+1
         ! Index of im and il
         ilm = im + (il-1)*(il-1)
-        !do ilm=1,vkbr%mpsang**2
         cta1 = czero_gw; cta2(:) = czero_gw
         cta4 = czero_gw; cta3(:) = czero_gw
         do ig=1,npw
@@ -452,27 +413,18 @@ end subroutine add_vnlr_commutator
 !!
 !! SOURCE
 
-subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_vkb'
-!End of the abilint section
-
- implicit none
+subroutine calc_vkb(cryst,psps,kpoint,npw_k,mpw,kg_k,vkbsign,vkb,vkbd)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npw_k
+ integer,intent(in) :: npw_k, mpw
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3)
- real(dp),intent(out) :: vkb (npw_k,psps%lnmax,psps%ntypat)
- real(dp),intent(out) :: vkbd(npw_k,psps%lnmax,psps%ntypat)
+ real(dp),intent(out) :: vkb (mpw,psps%lnmax,psps%ntypat)
+ real(dp),intent(out) :: vkbd(mpw,psps%lnmax,psps%ntypat)
  real(dp),intent(out) :: vkbsign(psps%lnmax,psps%ntypat)
 
 !Local variables ------------------------------
@@ -616,15 +568,6 @@ end subroutine calc_vkb
 
 function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gvec) result(ihr_comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nc_ihr_comm'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,nspinor,inclvkb,istwfk
@@ -654,6 +597,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)
  ! Note that here we assume c/=v, moreover the ug are supposed to be orthonormal and
  ! hence k+G can be replaced by G.
+ ! HM 03/08/2018: we need band velocities so we don't assume c/=v anymore and we use k+G.
 
  spinorwf_pad = RESHAPE([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
  ihr_comm = czero
@@ -664,15 +608,15 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
    do iab=1,nspinor
      spad1 = spinorwf_pad(1,iab); spad2 = spinorwf_pad(2,iab)
      do ig=1,npw
-       c_tmp = CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
-       ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp*gvec(:,ig)
+       c_tmp = GWPC_CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
+       ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp * (kpoint + gvec(:,ig))
      end do
    end do
  else
    ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0,G0) term is null.
    ABI_CHECK(nspinor == 1, "nspinor != 1")
    do ig=1,npw
-     c_tmp = CONJG(ug1(ig)) * ug2(ig)
+     c_tmp = GWPC_CONJG(ug1(ig)) * ug2(ig)
      ihr_comm(:,1) = ihr_comm(:,1) + two*j_dpc * AIMAG(c_tmp) * (kpoint + gvec(:,ig))
    end do
  end if
@@ -725,15 +669,6 @@ end function nc_ihr_comm
 !! SOURCE
 
 subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ccgradvnl_ylm'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -814,7 +749,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
      xdotg = gcart(1)*cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
      ! Remember that in the GW code the reciprocal vectors
      ! are defined such as a_i*b_j = 2pi delta_ij, no need to introduce 2pi
-     sfac=CMPLX(COS(xdotg), SIN(xdotg))
+     sfac=CMPLX(COS(xdotg), SIN(xdotg), kind=dpc)
 
      iln0 = 0
      nlmn = count(psps%indlmn(3,:,itypat) > 0)
@@ -822,14 +757,13 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
        il = 1 + psps%indlmn(1,ilmn,itypat)
        in = psps%indlmn(3,ilmn,itypat)
        iln = psps%indlmn(5,ilmn,itypat)
+       ! spin = 1 if scalar term (spin diagonal), 2 if SOC term.
+       !spin = psps%indlmn(6, ilmn, itypat)
        if (iln <= iln0) cycle
        iln0 = iln
        if (vkbsign(iln,itypat) == zero) cycle
-       !if (psps%indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
-       !end do
-       !do il=1,psps%mpsang
+       !if (spin /= 1 .or. vkbsign(iln,itypat) == zero) cycle
        factor = SQRT(four_pi/REAL(2*(il-1)+1))
-       !iln = il
        do im=1,2*(il-1)+1
          ! Index of im and il
          ilm = im + (il-1)*(il-1)

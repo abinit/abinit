@@ -4,23 +4,18 @@
 #include "abi_common.h"
 
 module m_mathfuncs
+
   use defs_basis, only: dp, PI
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   !use ziggurat
   use m_random_xoroshiro128plus
   implicit none
+
 contains
 
   ! vector cross production
   function cross(a, b) result(c)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross'
-!End of the abilint section
 
     real(dp), intent(in) :: a(3), b(3)
     real(dp)  :: c(3)
@@ -33,13 +28,6 @@ contains
 
   ! defines outer product of two vectors.
   function outer_product(a,b) ! result (c)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outer_product'
-!End of the abilint section
 
     real(dp), intent(in) :: a(:), b(:)
     real(dp)  :: outer_product(size(b, dim=1), size(a, dim=1))
@@ -54,13 +42,6 @@ contains
 
   subroutine set_random_seed(seed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_random_seed'
-!End of the abilint section
-
       integer , intent(in) :: seed(:)
       print*, "Warning! Currently I'm not sure about how this function  &
       &(set_random_seed,which calls RANDOM_SEED) works. Do test it!"
@@ -70,13 +51,6 @@ contains
   ! Random number generator; Normal (Gaussian) dist.
   ! a is a array.
   subroutine rand_normal_builtin(a)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_normal_builtin'
-!End of the abilint section
 
     real(dp), intent(out)::a(:,:)
     real(dp), allocatable :: b(:,:)
@@ -92,16 +66,10 @@ contains
 
   ! wrapper of  normal random number generator using ziggurat method.
   ! rnor implemented in ziggruat.F90
-  ! TODO hexu: implement a random number generator module which contains 
+  ! TODO hexu: implement a random number generator module which contains
   ! all the related subroutines. & Move this one there.
   !  subroutine rand_normal_ziggurat(a)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'rand_normal_ziggurat'
-!End of the abilint section
 
 !    real(dp), intent(out)::a(:,:)
 !    integer :: i, j
@@ -111,5 +79,5 @@ contains
 !      end do
 !    end do
 !    end subroutine rand_normal_ziggurat
-  
-end module
+
+end module m_mathfuncs

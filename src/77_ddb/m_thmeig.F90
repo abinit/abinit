@@ -7,7 +7,7 @@
 !! Calculate thermal corrections to the eigenvalues.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (PB, XG, GA)
+!!  Copyright (C) 2008-2019 ABINIT group (PB, XG, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 module m_thmeig
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_tetrahedron
  use m_errors
  use m_ddb
@@ -82,14 +82,6 @@ subroutine thmeig(inp, ddb, crystal, &
 &                 elph_base_name, eig2_filnam, ddbun, iout, &
 &                 natom, mpert, msize, d2asr, &
 &                 comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thmeig'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -150,7 +142,7 @@ subroutine thmeig(inp, ddb, crystal, &
  real(dp) :: diff_qpt(3)
  real(dp) :: gprimd(3,3),mesh(3,3)
  real(dp) :: qlatt(3,3),qphnrm(3),qpt_search(3,3)
- real(dp) :: rprimd(3,3),shiftq(3,210),tempqlatt(3)
+ real(dp) :: rprimd(3,3),shiftq(3,MAX_NSHIFTK),tempqlatt(3)
  real(dp) :: dummy(0),dummy2(0,0)
  real(dp),allocatable :: xcart(:,:),xred(:,:)
  real(dp),allocatable :: amu(:),zion(:)
@@ -819,7 +811,8 @@ subroutine thmeig(inp, ddb, crystal, &
    do iband=1,3*natom
      eigen_in(:) = phfreq(iband,:)
 
-!    calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
+!    calculate general integration weights at each irred kpoint 
+!    as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
      call get_tetra_weight(eigen_in,enemin,enemax,&
 &     one,nene,nqpt,tetrahedra,bcorr0,&
 &     tweight,dtweightde,xmpi_comm_self)
@@ -1050,14 +1043,6 @@ end subroutine thmeig
 
 subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,ntetra,telphint,unit_phdos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outphdos'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1151,13 +1136,6 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
 !! SOURCE
 
 subroutine outg2f(deltaene,enemin,enemax,filnam,g2f,g2fsmear,kpnt,mband,nene,nkpt,nqpt,ntetra,telphint,unit_g2f)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outg2f'
-!End of the abilint section
 
  implicit none
 

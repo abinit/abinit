@@ -7,7 +7,7 @@
 !!  XC+PAW related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (MT, FJ, TR, GJ, TD)
+!!  Copyright (C) 2013-2019 ABINIT group (MT, FJ, TR, GJ, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ module m_pawxc
 #ifdef HAVE_LIBPAW_ABINIT
  use m_xcpositron,  only : xcpositron
  use m_drivexc,     only : drivexc_main, size_dvxc, xcmult, mkdenpos
+ use m_xc_noncoll,  only : rotate_mag,rotate_back_mag,rotate_back_mag_dfpt
 #endif
 
  use m_libpaw_libxc
@@ -46,11 +47,13 @@ module m_pawxc
  public :: pawxc          ! Compute xc correlation potential and energies inside a paw sphere. USE (r,theta,phi)
  public :: pawxcpositron  ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (r,theta,phi)
  public :: pawxc_dfpt     ! Compute first-order change of XC potential and contribution to
-                          ! 2nd-order change of XC energy inside a PAW sphere. USE (r,theta,phi)
+                          !   2nd-order change of XC energy inside a PAW sphere. USE (r,theta,phi)
  public :: pawxcsum       ! Compute useful sums of moments of densities needed to compute on-site contributions to XC energy and potential
  public :: pawxcm         ! Compute xc correlation potential and energies inside a paw sphere. USE (L,M) MOMENTS
  public :: pawxcmpositron ! Compute electron-positron correlation potential and energies inside a PAW sphere. USE (L,M) MOMENTS
- public :: pawxcm_dfpt    ! Compute first-order change of XC potential and contribution to 2nd-order change of XC energy inside a PAW sphere. USE (L,M) MOMENTS
+ public :: pawxcm_dfpt    ! Compute 1st-order change of XC potential and contrib
+                          !   to 2nd-order change of XC ene inside a PAW sphere. USE (L,M) MOMENTS
+ public :: pawxc_get_nkxc ! Compute sze of XC kernel (Kxc) according to spin polarization and XC type
 
 !Private procedures
  private :: pawxcsph                   ! Compute XC energy and potential for a spherical density rho(r) given as (up,dn)
@@ -116,11 +119,11 @@ CONTAINS !===========================================================
 !!
 !! NOTES
 !!   References for electron-positron correlation functionals:
-!!         [1] J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979).
-!!         [2] Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986).
-!!         [3] P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991).
-!!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994).
-!!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1994)
+!!         [1] J. Arponen and E. Pajanne, Ann. Phys. (N.Y.) 121, 343 (1979) [[cite:Arponen1979a]].
+!!         [2] E. Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986) [[cite:Boronski1986]].
+!!         [3] P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991) [[cite:Sterne1991]].
+!!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994) [[cite:Puska1994]].
+!!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
 !!
 !! PARENTS
 !!      m_pawxc
@@ -133,13 +136,6 @@ CONTAINS !===========================================================
 subroutine pawxc_xcpositron_wrapper(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,&
 &                                   rhoer,rhopr,vxce,vxcegr,vxcp,&
 &                                   dvxce,dvxcp) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcpositron_wrapper'
-!End of the abilint section
 
  implicit none
 
@@ -184,13 +180,6 @@ contains
 
 subroutine pawxc_xcpositron_abinit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcpositron_abinit'
-!End of the abilint section
-
  implicit none
 
 ! *************************************************************************
@@ -229,13 +218,6 @@ end subroutine pawxc_xcpositron_abinit
 !! SOURCE
 
 subroutine pawxc_xcpositron_local()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcpositron_local'
-!End of the abilint section
 
  implicit none
 
@@ -286,13 +268,6 @@ end subroutine pawxc_xcpositron_wrapper
 
 subroutine pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_size_dvxc_wrapper'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------------
@@ -328,13 +303,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_size_dvxc_local()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_size_dvxc_local'
-!End of the abilint section
 
  implicit none
 
@@ -464,13 +432,6 @@ end subroutine pawxc_size_dvxc_wrapper
 
 subroutine pawxc_xcmult_wrapper(depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcmult_wrapper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -509,13 +470,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_xcmult_local()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcmult_local'
-!End of the abilint section
 
  implicit none
 
@@ -592,13 +546,6 @@ end subroutine pawxc_xcmult_wrapper
 
 subroutine pawxc_mkdenpos_wrapper(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_mkdenpos_wrapper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -638,13 +585,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_mkdenpos_local()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_mkdenpos_local'
-!End of the abilint section
 
  implicit none
 
@@ -859,13 +799,6 @@ end subroutine pawxc_mkdenpos_wrapper
 subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,nrad,nspden,option,&
 &                pawang,pawrad,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -908,11 +841,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !----- Check options
 !----------------------------------------------------------------------
 
- nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==19)
- if(nkxc_updn>3) then
-   msg='Kxc for GGA not implemented!'
-   MSG_ERROR(msg)
- end if
+ nkxc_updn=merge(nkxc-3,nkxc,nkxc==6.or.nkxc==22)
  if(nspden==4.and.nk3xc>0) then
    msg='K3xc for nspden=4 not implemented!'
    MSG_ERROR(msg)
@@ -998,7 +927,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      if (nspden/=4) then
        vxc_updn => vxc
      else
-       LIBPAW_ALLOCATE(vxc_updn,(nrad,npts,nspden_updn))
+       LIBPAW_POINTER_ALLOCATE(vxc_updn,(nrad,npts,nspden_updn))
        LIBPAW_ALLOCATE(mag,(nrad,npts,3))
      end if
    end if
@@ -1137,7 +1066,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !    ----- Accumulate and store XC kernel and its derivative
 !    ----------------------------------------------------------------------
      if (nkxc_updn>0.and.ndvxc>0) then
-       if (nkxc==1.and.ndvxc==15) then
+       if (nkxc_updn==1.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=half*(dvxci(1:nrad,1)+dvxci(1:nrad,9)+dvxci(1:nrad,10))
        else if (nkxc_updn==3.and.ndvxc==15) then
          kxc(1:nrad,ipts,1)=dvxci(1:nrad,1)+dvxci(1:nrad,9)
@@ -1348,7 +1277,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      LIBPAW_DEALLOCATE(mag_)
      LIBPAW_DEALLOCATE(vxc_nc)
 #endif
-     LIBPAW_DEALLOCATE(vxc_updn)
+     LIBPAW_POINTER_DEALLOCATE(vxc_updn)
      LIBPAW_DEALLOCATE(mag)
    end if
 
@@ -1481,13 +1410,6 @@ end subroutine pawxc
 subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselect,lmselect_ep,&
 &                        nhat,nhat_ep,nrad,nspden,option,pawang,pawrad,posdensity0_limit,&
 &                        rhor,rhor_ep,usecore,usexcnhat,vxc,xc_denpos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcpositron'
-!End of the abilint section
 
  implicit none
 
@@ -1800,13 +1722,6 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 &                 option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc,vxc1,xclevel,&
 &                 d2enxc_im) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_dfpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1828,7 +1743,7 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ilm,ipts,ir,ispden,jr,kr,lm_size_eff,npts,nspden_updn
+ integer :: ii,ilm,ipts,ir,ispden,jr,kr,lm_size_eff,nkxc_cur,npts,nspden_updn
  logical :: need_impart
  real(dp),parameter :: tol24=tol12*tol12
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
@@ -1866,12 +1781,9 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
    MSG_BUG(msg)
  end if
  if(option/=3) then
-   if (xclevel==1.and.nkxc/=2*min(nspden,2)-1+3*(nspden/4)) then
-     msg='nkxc must be 1 or 3 for LDA!'
-     MSG_BUG(msg)
-   end if
-   if(xclevel==2.and.nkxc/=12*min(nspden,2)-5+3*(nspden/4)) then
-     msg='nkxc should be 7 or 19 for GGA!'
+   call pawxc_get_nkxc(nkxc_cur,nspden,xclevel)
+   if (nkxc/=nkxc_cur) then
+     msg='Wrong dimension for array kxc!'
      MSG_BUG(msg)
    end if
    if(xclevel==2.and.nspden==4) then
@@ -1974,10 +1886,10 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
      rho1_updn => rho1arr
      vxc1_updn => vxc1_
    else
-     LIBPAW_ALLOCATE(rho1_updn,(cplex_den*nrad,nspden_updn))
-     LIBPAW_ALLOCATE(vxc1_updn,(cplex_vxc*nrad,npts,nspden_updn))
-     LIBPAW_ALLOCATE(rho1_nc,(cplex_den*nrad*npts,nspden))
-     LIBPAW_ALLOCATE(mag,(nrad,3))
+     LIBPAW_POINTER_ALLOCATE(rho1_updn,(cplex_den*nrad,nspden_updn))
+     LIBPAW_POINTER_ALLOCATE(vxc1_updn,(cplex_vxc*nrad,npts,nspden_updn))
+     LIBPAW_POINTER_ALLOCATE(rho1_nc,(cplex_den*nrad*npts,nspden))
+     LIBPAW_POINTER_ALLOCATE(mag,(nrad,3))
    end if
 
 !  Do loop on the angular part (theta,phi)
@@ -2321,8 +2233,8 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
      LIBPAW_DEALLOCATE(drho1core)
    end if
    if (nspden==4) then
-     LIBPAW_DEALLOCATE(rho1_updn)
-     LIBPAW_DEALLOCATE(mag)
+     LIBPAW_POINTER_DEALLOCATE(rho1_updn)
+     LIBPAW_POINTER_DEALLOCATE(mag)
    end if
 
  end if ! option/=3
@@ -2425,8 +2337,8 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
    LIBPAW_DEALLOCATE(kxc_)
    LIBPAW_DEALLOCATE(mag)
 #endif
-   LIBPAW_DEALLOCATE(rho1_nc)
-   LIBPAW_DEALLOCATE(vxc1_updn)
+   LIBPAW_POINTER_DEALLOCATE(rho1_nc)
+   LIBPAW_POINTER_DEALLOCATE(vxc1_updn)
  end if
 
 !----------------------------------------------------------------------
@@ -2647,13 +2559,6 @@ end subroutine pawxc_dfpt
 !! SOURCE
 
  subroutine pawxcsph(exc,exexch,ixc,kxc,nkxc,nrad,nspden,pawrad,rho_updn,vxc,xclevel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcsph'
-!End of the abilint section
 
  implicit none
 
@@ -2924,13 +2829,6 @@ end subroutine pawxcsph
 
 
 subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_updn,vxc1,xclevel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcsph_dfpt'
-!End of the abilint section
 
  implicit none
 
@@ -3245,13 +3143,6 @@ end subroutine pawxcsph_dfpt
 
  subroutine pawxcsphpositron(calctype,fxc,ixcpositron,nrad,pawrad,posdensity0_limit,rho,rho_ep,vxce,vxcp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcsphpositron'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3375,13 +3266,6 @@ end subroutine pawxcsphpositron
 
  subroutine pawxcsum(cplex1,cplex2,cplexsum,lmselect1,lmselect2,lm_size,nrad,nsums,&
 &                    option,pawang,rho1,rho2,sum1,sum2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcsum'
-!End of the abilint section
 
  implicit none
 
@@ -3766,13 +3650,6 @@ end subroutine pawxcsphpositron
  subroutine pawxcm(corexc,enxc,enxcdc,exexch,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magnetic_xc,nrad,nspden,option,&
 &                  pawang,pawrad,pawxcdev,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4103,7 +3980,7 @@ end subroutine pawxcsphpositron
 
 !  Non-collinear magnetism: replace rho_dn by (m_0.dot.m)/|m_0|
    if (nspden==4) then
-     LIBPAW_ALLOCATE(rho_dn,(nrad,lm_size))
+     LIBPAW_POINTER_ALLOCATE(rho_dn,(nrad,lm_size))
      rho_dn(:,1)=zero
      do ilm=2,lm_size
        rho_dn(1:nrad,ilm)=m_norm_inv(1:nrad) &
@@ -4445,7 +4322,7 @@ end subroutine pawxcsphpositron
  LIBPAW_DEALLOCATE(exci)
  LIBPAW_DEALLOCATE(vxci)
  if (nspden==4.and.option/=4.and.option/=5)  then
-   LIBPAW_DEALLOCATE(rho_dn)
+   LIBPAW_POINTER_DEALLOCATE(rho_dn)
  end if
  if (allocated(v1sum))  then
    LIBPAW_DEALLOCATE(v1sum)
@@ -4575,13 +4452,6 @@ end subroutine pawxcsphpositron
 &                   option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel,&
 &                   d2enxc_im) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcm_dfpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4602,7 +4472,7 @@ end subroutine pawxcsphpositron
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ilm,iplex,ir,ivxc,jr,kr
+ integer :: ii,ilm,iplex,ir,ivxc,jr,kr,nkxc_cur
  logical :: need_impart
  real(dp) :: invsqfpi,ro1i,ro1r,sqfpi,sqfpi2,v1i,v1r,vxcrho
  character(len=500) :: msg
@@ -4627,16 +4497,13 @@ end subroutine pawxcsphpositron
    msg='wrong option!'
    MSG_BUG(msg)
  end if
- if(option/=3.and.nkxc/=2*min(nspden,2)-1) then
-   msg='nkxc must be 1 or 3 (not OK for GGA)!'
-   MSG_BUG(msg)
+ if(option/=3) then
+   call pawxc_get_nkxc(nkxc_cur,nspden,xclevel)
+   if(nkxc/=nkxc_cur) then
+     msg='Wrong size for kxc array!'
+     MSG_BUG(msg)
+   end if
  end if
-!This is to avoid complain that xclevel is an unused argument.
- if(.false.)write(std_out,*)xclevel
-! if(xclevel==2) then
-!   msg='GGA is not implemented!'
-!   MSG_ERROR(msg)
-! end if
  if(nspden==4.and.option/=3) then
    msg='nspden=4 not implemented (for vxc)!'
    MSG_ERROR(msg)
@@ -4914,13 +4781,6 @@ end subroutine pawxcsphpositron
 subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselect,lmselect_ep,&
 &                         nhat,nhat_ep,nrad,nspden,option,pawang,pawrad,pawxcdev,posdensity0_limit,&
 &                         rhor,rhor_ep,usecore,usexcnhat,vxc,xc_denpos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcmpositron'
-!End of the abilint section
 
  implicit none
 
@@ -5357,6 +5217,109 @@ end subroutine pawxcmpositron
 
 !----------------------------------------------------------------------
 
+!!****f* m_pawxc/pawxc_get_nkxc
+!! NAME
+!! pawxc_get_nkxc
+!!
+!! FUNCTION
+!! Get size of XC kernel array (Kxc) according to spin polarization and XC type
+!!
+!! INPUTS
+!!  nspden= nmber of density spin components
+!!  xclevel= XC type
+!!
+!! OUTPUT
+!!  nkxc= size of XC kernel (kxc array)
+!!
+!! NOTES
+!!  Content of Kxc array:
+!!   ===== if LDA
+!!    if nspden==1: kxc(:,1)= d2Exc/drho2
+!!                 (kxc(:,2)= d2Exc/drho_up drho_dn)
+!!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
+!!                  kxc(:,2)= d2Exc/drho_up drho_dn
+!!                  kxc(:,3)= d2Exc/drho_dn drho_dn
+!!    if nspden==4: kxc(:,4:6)= (m_x, m_y, m_z) (magnetization)
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!    if nspden>=2:
+!!       kxc(:,1)= d2Exc/drho_up drho_up
+!!       kxc(:,2)= d2Exc/drho_up drho_dn
+!!       kxc(:,3)= d2Exc/drho_dn drho_dn
+!!       kxc(:,4)= 1/|grad(rho_up)| dEx/d|grad(rho_up)|
+!!       kxc(:,5)= 1/|grad(rho_dn)| dEx/d|grad(rho_dn)|
+!!       kxc(:,6)= 1/|grad(rho_up)| d2Ex/d|grad(rho_up)| drho_up
+!!       kxc(:,7)= 1/|grad(rho_dn)| d2Ex/d|grad(rho_dn)| drho_dn
+!!       kxc(:,8)= 1/|grad(rho_up)| * d/d|grad(rho_up)| ( 1/|grad(rho_up)| dEx/d|grad(rho_up)| )
+!!       kxc(:,9)= 1/|grad(rho_dn)| * d/d|grad(rho_dn)| ( 1/|grad(rho_dn)| dEx/d|grad(rho_dn)| )
+!!       kxc(:,10)=1/|grad(rho)| dEc/d|grad(rho)|
+!!       kxc(:,11)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_up
+!!       kxc(:,12)=1/|grad(rho)| d2Ec/d|grad(rho)| drho_dn
+!!       kxc(:,13)=1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dEc/d|grad(rho)| )
+!!       kxc(:,14)=gradx(rho_up)
+!!       kxc(:,15)=gradx(rho_dn)
+!!       kxc(:,16)=grady(rho_up)
+!!       kxc(:,17)=grady(rho_dn)
+!!       kxc(:,18)=gradz(rho_up)
+!!       kxc(:,19)=gradz(rho_dn)
+!!    if nspden==4:
+!!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
+!!
+!! PARENTS
+!!      m_pawxc,respfn,nonlinear
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine pawxc_get_nkxc(nkxc,nspden,xclevel)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nspden,xclevel
+ integer,intent(out) :: nkxc
+!arrays
+
+!Local variables-------------------------------
+!scalars
+!arrays
+
+!************************************************************************
+
+ nkxc=0
+
+ if (nspden==1) then ! Non polarized
+
+   if (xclevel==1) nkxc=1
+   if (xclevel==2) nkxc=7
+
+ else if (nspden==2) then ! Polarized
+
+   if (xclevel==1) nkxc=3
+   if (xclevel==2) nkxc=19
+
+ else if (nspden==4) then ! Non-collinear
+
+   ! Store magnetization in the 3 last terms of Kxc
+   if (xclevel==1) nkxc=6
+   if (xclevel==2) nkxc=22
+
+ end if
+
+ end subroutine pawxc_get_nkxc
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_pawxc/pawxc_drivexc_wrapper
 !! NAME
 !! pawxc_drivexc_wrapper
@@ -5382,13 +5345,6 @@ end subroutine pawxcmpositron
  subroutine pawxc_drivexc_wrapper(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,&
 &           order,rho,vxcrho,xclevel, &
 &           dvxc,d2vxc,el_temp,exexch,fxcT,grho2,lrho,tau,vxcgrho,vxclrho,vxctau,xc_tb09_c) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_drivexc_wrapper'
-!End of the abilint section
 
  implicit none
 
@@ -5444,13 +5400,6 @@ contains
 
 subroutine pawxc_drivexc_abinit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_drivexc_abinit'
-!End of the abilint section
-
  implicit none
 
 ! *************************************************************************
@@ -5498,13 +5447,6 @@ end subroutine pawxc_drivexc_abinit
 !! SOURCE
 
 subroutine pawxc_drivexc_libxc()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_drivexc_libxc'
-!End of the abilint section
 
  implicit none
 
@@ -5606,16 +5548,6 @@ end subroutine pawxc_drivexc_wrapper
 
  subroutine pawxc_rotate_mag(rho_in,rho_out,mag,vectsize,mag_norm_out,rho_out_format)
 
-#if defined HAVE_LIBPAW_ABINIT
- use m_xc_noncoll, only : rotate_mag
-#endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_rotate_mag'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5708,16 +5640,6 @@ end subroutine pawxc_rotate_mag
 
  subroutine pawxc_rotate_back_mag(vxc_in,vxc_out,mag,vectsize)
 
-#if defined HAVE_LIBPAW_ABINIT
- use m_xc_noncoll, only : rotate_back_mag
-#endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_rotate_back_mag'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5792,16 +5714,6 @@ end subroutine pawxc_rotate_back_mag
 !! SOURCE
 
  subroutine pawxc_rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize)
-
-#if defined HAVE_LIBPAW_ABINIT
- use m_xc_noncoll, only : rotate_back_mag_dfpt
-#endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_rotate_back_mag_dfpt'
-!End of the abilint section
 
  implicit none
 

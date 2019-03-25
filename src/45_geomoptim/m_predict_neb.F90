@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (MT)
+!!  Copyright (C) 2012-2019 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_predict_neb
  use defs_abitypes
  use m_splines
  use m_mep
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -102,13 +102,6 @@ contains
 
 subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &                      ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predict_neb'
-!End of the abilint section
 
  implicit none
 
@@ -202,7 +195,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
        tangent(:,:,iimage)=coordif(:,:,iimage  )/dimage(iimage) &
 &       +coordif(:,:,iimage+1)/dimage(iimage+1)
      end do
-!    === Improved tangent (J. Chem. Phys. 113, 9978 (2000))
+!    === Improved tangent (J. Chem. Phys. 113, 9978 (2000) [[cite:Henkelman2000]])
    else
      do iimage=2,nimage_tot-1
        test_minus_one=(etotal_all(iimage-1)<etotal_all(iimage))
@@ -279,7 +272,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
          vect(:,:)=spring(iimage+1)*coordif(:,:,iimage+1)-spring(iimage)*coordif(:,:,iimage)
          f_para2=mep_img_dotp(vect,tangent(:,:,iimage))
          ABI_DEALLOCATE(vect)
-       else                              ! Modification from (J. Chem. Phys. 113, 9978 (2000))
+       else       ! Modification from J. Chem. Phys. 113, 9978 (2000) [[cite:Henkelman2000]]
          f_para2=spring(iimage+1)*dimage(iimage+1)-spring(iimage)*dimage(iimage)
        end if
        neb_forces_all(:,:,iimage)=fcart_all(:,:,iimage) &       ! F_ortho

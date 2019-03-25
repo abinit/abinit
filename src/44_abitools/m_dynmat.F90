@@ -7,7 +7,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2019 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,9 +30,10 @@
 module m_dynmat
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_linalg_interfaces
+ use m_xmpi
 
  use m_fstrings,        only : itoa, sjoin
  use m_numeric_tools,   only : wrap2_pmhalf, mkherm
@@ -133,15 +134,6 @@ contains
 !! SOURCE
 
 subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asria_calc'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -309,15 +301,6 @@ end subroutine asria_calc
 
 subroutine asria_corr(asr,d2asr,d2cart,mpert,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asria_corr'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: asr,mpert,natom
@@ -388,16 +371,6 @@ end subroutine asria_corr
 !! SOURCE
 
 subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,natom,xcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrprs'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -753,15 +726,6 @@ end subroutine asrprs
 subroutine cart29(blkflg,blkval,carflg,d2cart,&
 & gprimd,iblok,mpert,natom,nblok,ntypat,rprimd,typat,ucvol,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cart29'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,natom,nblok,ntypat
@@ -908,15 +872,6 @@ end subroutine cart29
 
 subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cart39'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ipert,natom
@@ -1016,15 +971,6 @@ end subroutine cart39
 
 subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
 &                        ntypat,typat,ucvol,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2cart_to_red'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1172,16 +1118,6 @@ end subroutine d2cart_to_red
 
 subroutine chkph3(carflg,idir,mpert,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkph3'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: idir,mpert,natom
@@ -1275,16 +1211,6 @@ end subroutine chkph3
 !! SOURCE
 
 subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chneu9'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1518,6 +1444,9 @@ end subroutine chneu9
 !!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
 !!  timrev=1 if the time-reversal symmetry preserves the wavevector,
 !!     modulo a reciprocal lattice vector, timrev=0 otherwise
+!!  zero_by_symm= if 1, set blkflg to 1 for the elements that must be zero by symmetry, and zero them.
+!!    This has the indirect effect of being able to resymmetrize the whole matrix, thus
+!!    enforcing better the symmetry for the 2DTE.
 !!
 !! SIDE EFFECTS
 !!  Input/Output
@@ -1543,20 +1472,11 @@ end subroutine chneu9
 !!
 !! SOURCE
 
-subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2sym3'
-!End of the abilint section
-
- implicit none
+subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,nsym,timrev
+ integer,intent(in) :: mpert,natom,nsym,timrev,zero_by_symm
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symq(4,2,nsym)
  integer,intent(in),target :: symrec(3,3,nsym),symrel(3,3,nsym)
@@ -1569,7 +1489,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  logical, parameter :: do_final_sym=.true.
  logical :: qzero
  integer :: exch12,found,idir1,idir2,idisy1,idisy2,ipert1,ipert2
- integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,noccur,nsym_used,quit,quit1
+ integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,nblkflg_is_one,noccur,nsym_used,quit,quit1
  real(dp) :: arg1,arg2,im,norm,re,sumi,sumr,xi,xr
 !arrays
  integer,pointer :: sym1_(:,:,:),sym2_(:,:,:)
@@ -1753,11 +1673,13 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      sumr=zero
                      sumi=zero
                      noccur=0
+                     nblkflg_is_one=0
                      quit=0
                      do idisy1=1,3
                        do idisy2=1,3
                          if(sym1_(idir1,idisy1,isym)/=0 .and. sym2_(idir2,idisy2,isym)/=0 )then
                            if(blkflg(idisy1,ipesy1,idisy2,ipesy2)==1)then
+                             nblkflg_is_one=nblkflg_is_one+1
                              sumr=sumr+sym1_(idir1,idisy1,isym)*sym2_(idir2,idisy2,isym)*&
 &                             d2(1,idisy1,ipesy1,idisy2,ipesy2)
                              sumi=sumi+sym1_(idir1,idisy1,isym)*sym2_(idir2,idisy2,isym)*&
@@ -1808,7 +1730,12 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      end do
                    end if
 
-!                  Now, if still found, put the correct value into array d2
+!                  In case zero_by_symm==0, the computed materix element must be associated to at least one really computed matrix element
+                   if(zero_by_symm==0 .and. nblkflg_is_one==0)then
+                     found=0
+                   endif
+
+!                  Now, if still found and associated to at least one really computed matrix element, put the correct value into array d2
                    if(found==1)then
 
 !                    In case of phonons, need to take into account the
@@ -1883,7 +1810,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 
 !MT oct. 20, 2014:
 !Once the matrix has been built, it does not necessarily fulfill the correct symmetries.
-!It has just been filled up from rows or columns that only fulfill symmetries perserving
+!It has just been filled up from rows or columns that only fulfill symmetries preserving
 !one particular perturbation.
 !An additional symmetrization might solve this (do not consider TR-symmetry)
  if (do_final_sym) then
@@ -1912,6 +1839,11 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
          if (symq(4,1,isym)==1) then
            ipesy1=ipert1;if (ipert1<=natom) ipesy1=indsym(4,isym,ipert1)
            ipesy2=ipert2;if (ipert2<=natom) ipesy2=indsym(4,isym,ipert2)
+!          The condition on next line is too severe, since some elements of sym1_ or sym2_ might be zero,
+!          which means not all blkflg(:,ipesy1,:,ipesy2) would need to be 1 to symmetrize the matrix.
+!          However, coding something more refined is really more difficult.
+!          This condition then has the side effect that more symmetries can be applied when zero_by_symm==1,
+!          since blkflg can be set to 1 when the symmetries guarantee the matrix element to be zero.
            if (all(blkflg(:,ipesy1,:,ipesy2)==1)) then
              nsym_used=nsym_used+1
              re=one;im=zero
@@ -2004,15 +1936,6 @@ end subroutine d2sym3
 
 subroutine q0dy3_apply(natom,dyewq0,dyew)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'q0dy3_apply'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -2087,15 +2010,6 @@ end subroutine q0dy3_apply
 !! SOURCE
 
 subroutine q0dy3_calc(natom,dyewq0,dyew,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'q0dy3_calc'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2172,7 +2086,7 @@ end subroutine q0dy3_calc
 !!
 !! NOTES
 !! the procedure of the symmetrization of the dynamical matrix follows the
-!! equations in: Hendrikse et al., Computer Phys. Comm. 86, 297 (1995)
+!! equations in: Hendrikse et al., Computer Phys. Comm. 86, 297 (1995) [[cite:Hendrikse1995]]
 !!
 !! TODO
 !! A full description of the equations should be included
@@ -2185,15 +2099,6 @@ end subroutine q0dy3_calc
 !! SOURCE
 
 subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdyma'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2400,15 +2305,6 @@ end subroutine symdyma
 
 subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_sygra'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ipert,natom,nsym
@@ -2540,15 +2436,6 @@ end subroutine dfpt_sygra
 !! SOURCE
 
 subroutine dfpt_sydy(cplex,dyfrow,indsym,natom,nondiag,nsym,qphon,sdyfro,symq,symrec)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_sydy'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2702,15 +2589,6 @@ end subroutine dfpt_sydy
 
 subroutine wings3(carflg,d2cart,mpert)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wings3'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert
@@ -2780,15 +2658,6 @@ end subroutine wings3
 !! SOURCE
 
 subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrif9'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2898,15 +2767,6 @@ end subroutine asrif9
 
 subroutine make_bigbox(brav,cell,ngqpt,nqshft,rprim,nrpt,rpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_bigbox'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: brav,nqshft
@@ -2979,15 +2839,6 @@ end subroutine make_bigbox
 !! SOURCE
 
 subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bigbx9'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3167,16 +3018,6 @@ end subroutine bigbx9
 
 
 subroutine canat9(brav,natom,rcan,rprim,trans,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'canat9'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3406,15 +3247,6 @@ end subroutine canat9
 
 subroutine canct9(acell,gprim,ib,index,irpt,natom,nrpt,rcan,rcart,rprim,rpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'canct9'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: index,natom,nrpt
@@ -3479,15 +3311,6 @@ end subroutine canct9
 !! SOURCE
 
 subroutine chkrp9(brav,rprim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkrp9'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3606,15 +3429,6 @@ end subroutine chkrp9
 
 subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dist9'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,nrpt
@@ -3697,10 +3511,11 @@ end subroutine dist9
 !! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
 !!           These coordinates are normalized (=> * acell(3)!!)
 !! spqpt(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
+!! comm=MPI communicator.
 !!
 !! OUTPUT
-!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space !!
-!!  We used the imaginary part just for debugging !
+!! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space.
+!!  We used the imaginary part just for debugging!
 !!
 !! PARENTS
 !!      m_ifc
@@ -3709,20 +3524,11 @@ end subroutine dist9
 !!
 !! SOURCE
 
-subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftifc_q2r'
-!End of the abilint section
-
- implicit none
+subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: natom,nqpt,nrpt
+ integer,intent(in) :: natom,nqpt,nrpt,comm
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
  real(dp),intent(out) :: atmfrc(3,natom,3,natom,nrpt)
@@ -3730,7 +3536,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,iqpt,irpt,mu,nu
+ integer :: ia,ib,iqpt,irpt,mu,nu,nprocs,my_rank,ierr
  real(dp) :: im,kr,re
 !arrays
  real(dp) :: kk(3)
@@ -3739,9 +3545,12 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
 
  DBG_ENTER("COLL")
 
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
 !Interatomic Forces from Dynamical Matrices
  atmfrc = zero
  do irpt=1,nrpt
+   if (mod(irpt, nprocs) /= my_rank) cycle ! mpi-parallelism
    do iqpt=1,nqpt
 
 !    Calculation of the k coordinates in Normalized Reciprocal coordinates
@@ -3778,6 +3587,8 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
 
    end do
  end do
+
+ call xmpi_sum(atmfrc, comm, ierr)
 
 !The sumifc has to be weighted by a normalization factor of 1/nqpt
  atmfrc = atmfrc/nqpt
@@ -3821,15 +3632,6 @@ end subroutine ftifc_q2r
 !! SOURCE
 
 subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftifc_r2q'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3929,15 +3731,6 @@ end subroutine ftifc_r2q
 
 subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dynmat_dq'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,nrpt
@@ -4024,15 +3817,6 @@ end subroutine dynmat_dq
 
 subroutine ifclo9(ifccar,ifcloc,vect1,vect2,vect3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifclo9'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !arrays
  real(dp),intent(in) :: ifccar(3,3),vect1(3),vect2(3),vect3(3)
@@ -4112,24 +3896,16 @@ end subroutine ifclo9
 !!
 !! SOURCE
 
-subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r_inscribed_sphere,wghatm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wght9'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
+subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,tolsym,r_inscribed_sphere,wghatm,ierr)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt
+ integer,intent(out) :: ierr
  real(dp),intent(out) :: r_inscribed_sphere
 !arrays
  integer,intent(inout) :: ngqpt(9)
+ real(dp),intent(in) :: tolsym
  real(dp),intent(in) :: gprim(3,3),qshft(3,4),rcan(3,natom),rpt(3,nrpt),rprimd(3,3)
  real(dp),intent(out) :: wghatm(natom,natom,nrpt)
 
@@ -4137,7 +3913,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !scalars
  integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,new_wght,nptws,nreq
  integer :: idir
- real(dp), parameter :: tolsym=tol8
  real(dp) :: factor,sumwght,normsq,proj
  character(len=500) :: message
 !arrays
@@ -4146,6 +3921,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 
 ! *********************************************************************
 
+ ierr = 0
  DBG_ENTER("COLL")
 
 !First analyze the vectors qshft
@@ -4495,23 +4271,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r
 !      write(std_out,'(3es16.6,es18.6)' )&
 !      &    rpt(1,irpt),rpt(2,irpt),rpt(3,irpt),wghatm(ia,ib,irpt)
      end do
-     if (abs(sumwght-nqpt)>tol10) then
-       write(message, '(a,a,a,2i4,a,a,es14.4,a,a,i4)' )&
-&       'The sum of the weight is not equal to nqpt.',ch10,&
-&       'atoms :',ia,ib,ch10,&
-&       'The sum of the weights is : ',sumwght,ch10,&
-&       'The number of q points is : ',nqpt
-       call wrtout(std_out,message,'COLL')
-       write(message, '(13a)')&
-&       'This might have several sources.',ch10,&
-&       'If tolsym is larger than 1.0e-8, the atom positions might be loose',ch10,&
-&       'and the q point weights not computed properly.',ch10,&
-&       'Action: make input atomic positions more symmetric.',ch10,&
-&       'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine, and recompile.',ch10,&
-&       'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
-&       'if abs(brav)/=1, in which case you should change brav to 1.'
-       MSG_BUG(message)
-     end if
+     if (abs(sumwght-nqpt)>tol10) ierr = 1
    end do
  end do
 
@@ -4556,15 +4316,6 @@ end subroutine wght9
 !! SOURCE
 
 subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd3sym'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -4774,17 +4525,6 @@ end subroutine d3sym
 
 subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
- use defs_basis
- use m_profiling_abi
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sytens'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,natom,nsym
@@ -4992,7 +4732,6 @@ end subroutine sytens
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/symdm9
-!!
 !! NAME
 !! symdm9
 !!
@@ -5016,13 +4755,16 @@ end subroutine sytens
 !! nblok=number of blocks in the DDB
 !! nqpt=number of special q points
 !! nsym=number of space group symmetries
-!! rfmeth = 1 if non-stationary block
-!!  2 if stationary block
-!!  3 if third order derivatives
+!! rfmeth =
+!!   1 or -1 if non-stationary block
+!!   2 or -2 if stationary block
+!!   3 or -3 if third order derivatives
+!!   positive if symmetries are used to set elements to zero whenever possible, negative to prevent this to happen.
 !! rprim(3,3)=dimensionless primitive translations in real space
 !! spqpt(3,nqpt)=set of special q points generated by the Monkhorst & Pack Method
 !! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
 !! symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
+!! comm=MPI communicator.
 !!
 !! OUTPUT
 !! dynmat(2,3,natom,3,natom,nqpt)=dynamical matrices relative to the q points of the B.Z. sampling
@@ -5045,21 +4787,11 @@ end subroutine sytens
 
 subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 & dynmat,gprim,indsym,mpert,natom,nblok,nqpt,nsym,rfmeth,&
-& rprim,spqpt,symrec,symrel,qmissing)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdm9'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
+& rprim,spqpt,symrec,symrel,comm,qmissing)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,nblok,nqpt,nsym,rfmeth
+ integer,intent(in) :: mpert,natom,nblok,nqpt,nsym,rfmeth,comm
 !arrays
  integer,intent(in) :: blkflg(3,mpert,3,mpert,nblok),blktyp(nblok)
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
@@ -5070,12 +4802,12 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
  real(dp),intent(out) :: dynmat(2,3,natom,3,natom,nqpt)
 
 !Local variables -------------------------
-!tol sets tolerance for equality of q points between those of
-!the DDB and those of the sampling grid
+
 !scalars
  integer :: ia,ib,iblok,idir1,idir2,ii,ipert1,ipert2,iqpt,isym,jj,kk,ll
- integer :: mu,nu,q1,q2,nqmiss
+ integer :: mu,nu,q1,q2,nqmiss,nprocs,my_rank,ierr
  real(dp),parameter :: tol=2.d-8
+!tolerance for equality of q points between those of the DDB and those of the sampling grid
  real(dp) :: arg1,arg2,im,re,sumi,sumr
  logical :: allow_qmiss
  character(len=500) :: message
@@ -5086,8 +4818,11 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
  real(dp),allocatable :: ddd(:,:,:,:,:)
 
 ! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
  ! Initialize output (some q-points might not be reconstructed if qmissing is present)
- dynmat = huge(one)
+ dynmat = zero
  allow_qmiss = (present(qmissing))
 
  ABI_ALLOCATE(ddd,(2,3,natom,3,natom))
@@ -5105,10 +4840,12 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 
 !Q points coming from the DDB
 !write(std_out,*)' Nbr. of Blocks -> ',nblok
+! TODO: This part scales badly with nblock/nqpt
+! One could use listkk or rearrange the loop so that iqpt comes first and then MPI-parallelize.
 
  do iblok=1,nblok
 
-   if (blktyp(iblok)==rfmeth) then
+   if (abs(blktyp(iblok))==abs(rfmeth)) then
      qq(1)=blkqpt(1,iblok)/blknrm(1,iblok)
      qq(2)=blkqpt(2,iblok)/blknrm(1,iblok)
      qq(3)=blkqpt(3,iblok)/blknrm(1,iblok)
@@ -5164,11 +4901,11 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
            end if
          end if
 
-       end do ! End of the loop on the q points of the sampling
-     end do ! End of the loop on the symmetries
+       end do ! iqpt
+     end do ! isym
 
    end if
- end do !  End of the loop on the q points of the DDB
+ end do ! iblok
 
 ! Check if all the information relatives to the q points sampling are found in the DDB;
 ! if not => stop message
@@ -5177,13 +4914,12 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
    if (qtest(iqpt,1)==0) then
      nqmiss = nqmiss + 1
      qmiss_(nqmiss) = iqpt
-     write(message, '(a,a,a)' )&
-&     ' symdm9 : the bloks found in the DDB are characterized',ch10,&
+     write(message, '(3a)' )&
+&     ' symdm9: the bloks found in the DDB are characterized',ch10,&
 &     '  by the following wavevectors :'
      call wrtout(std_out,message,'COLL')
      do iblok=1,nblok
-       write(message, '(a,4d20.12)')&
-&       ' ',blkqpt(1,iblok),blkqpt(2,iblok),blkqpt(3,iblok),blknrm(1,iblok)
+       write(message, '(a,4d20.12)')' ',blkqpt(1,iblok),blkqpt(2,iblok),blkqpt(3,iblok),blknrm(1,iblok)
        call wrtout(std_out,message,'COLL')
      end do
      write(message, '(a,a,a,i0,a,a,a,3es16.6,a,a,a,a)' )&
@@ -5210,6 +4946,8 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 !Generation of the dynamical matrices relative to the q points
 !of the set which samples the entire Brillouin zone
  do iqpt=1,nqpt
+   if (mod(iqpt, nprocs) /= my_rank) cycle ! mpi-parallelism
+
    q1=qtest(iqpt,1)
    q2=qtest(iqpt,2)
    ! Skip this q-point if don't have enough info and allow_qmiss
@@ -5228,7 +4966,6 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
          end do
        end do
      end do
-!    write(std_out,*)"ss",ss
    else
      do ii=1,3
        qq(ii)=-blkqpt(ii,q1)/blknrm(1,q1)
@@ -5242,7 +4979,7 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
        end do
      end do
    end if
-!
+
 !  Check whether all the information is contained in the DDB
    do ipert2=1,natom
      do idir2=1,3
@@ -5276,16 +5013,13 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 !  Calculation of the dynamical matrix of a symmetrical q point
    do ia=1,natom
      do ib=1,natom
-!      write(std_out,*)'atom-> ',ia,indsym(4,q2,ia)
-!      write(std_out,*)'atom-> ',ib,indsym(4,q2,ib)
+!      write(std_out,*)'atom-> ',ia,indsym(4,q2,ia); write(std_out,*)'atom-> ',ib,indsym(4,q2,ib)
        arg1=two_pi*(qq(1)*indsym(1,q2,ia)+qq(2)*indsym(2,q2,ia)+qq(3)*indsym(3,q2,ia))
        arg2=two_pi*(qq(1)*indsym(1,q2,ib)+qq(2)*indsym(2,q2,ib)+qq(3)*indsym(3,q2,ib))
        re=cos(arg1)*cos(arg2)+sin(arg1)*sin(arg2)
        im=cos(arg2)*sin(arg1)-cos(arg1)*sin(arg2)
-!      write(std_out,*)'re : ',re, 'im : ',im
        do mu=1,3
          do nu=1,3
-!          write(std_out,*)' '
            sumr=zero
            sumi=zero
            do ii=1,3
@@ -5302,17 +5036,9 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
            end do
 
 !          Dynmat -> Dynamical Matrix for the q point of the sampling
-!          write(std_out,*)' Sumr -> ',mu,nu,sumr
-!          write(std_out,*)' Sumi -> ',mu,nu,sumi
+!          write(std_out,*)' Sumr -> ',mu,nu,sumr; write(std_out,*)' Sumi -> ',mu,nu,sumi
            dynmat(1,mu,ia,nu,ib,iqpt)=re*sumr-im*sumi
            dynmat(2,mu,ia,nu,ib,iqpt)=re*sumi+im*sumr
-
-!          DEBUG
-!          if((ia==2 .or. ia==3) .and. ib==1)then
-!          write(std_out,'(5i3,2es16.8)' )mu,ia,nu,ib,iqpt,dynmat(1:2,mu,ia,nu,ib,iqpt)
-!          end if
-!          ENDDEBUG
-
          end do ! End loop on the coordinates
        end do
 
@@ -5322,6 +5048,8 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 
  ABI_DEALLOCATE(ddd)
  ABI_DEALLOCATE(qtest)
+
+ call xmpi_sum(dynmat, comm, ierr)
 
 end subroutine symdm9
 !!***
@@ -5354,15 +5082,6 @@ end subroutine symdm9
 !! SOURCE
 
 subroutine axial9(ifccar,vect1,vect2,vect3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'axial9'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !arrays
@@ -5462,15 +5181,6 @@ end subroutine axial9
 
 subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dymfz9'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,nqpt,option
@@ -5555,15 +5265,6 @@ end subroutine dymfz9
 !! SOURCE
 
 subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nanal9'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -5663,19 +5364,8 @@ end subroutine nanal9
 !!
 !! SOURCE
 
-subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
-& dyewq0,d2cart,gmet,gprim,mpert,natom,&
-& nrpt,qphnrm,qpt,rmet,rprim,rpt,&
-& trans,ucvol,wghatm,xred,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gtdyn9'
-!End of the abilint section
-
- implicit none
+subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
+& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff)
 
 !Arguments -------------------------------
 !scalars
@@ -5821,15 +5511,6 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 & mpert,msym,natom,nsym,ntypat,phfrq,qphnrm,qphon,rprimd,&
 & symdynmat,symrel,symafm,typat,ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_phfrq'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,msym,natom,nsym,ntypat,symdynmat
@@ -5887,9 +5568,9 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
-!In the case the non-analyticity is required :
-! MG: the tensor is in cartesian coordinates and this means that qphon must be in
-!     given in Cartesian coordinates.
+!In the case the non-analyticity is required:
+! the tensor is in cartesian coordinates and this means that qphon must be in
+! given in Cartesian coordinates.
  if(analyt==0)then
 
 !  Normalize the limiting direction
@@ -5934,7 +5615,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
 
    ABI_DEALLOCATE(zeff)
- end if !  End of the non-analyticity treatment :
+ end if !  End of the non-analyticity treatment
 
  ! Multiply IFC(q) by masses
  call massmult_and_breaksym(natom, ntypat, typat, amu, displ)
@@ -6097,16 +5778,6 @@ end subroutine dfpt_phfrq
 !! SOURCE
 
 subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_prtph'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -6316,15 +5987,6 @@ end subroutine dfpt_prtph
 
 subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'massmult_and_breaksym'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -6430,15 +6092,6 @@ end subroutine massmult_and_breaksym
 !! SOURCE
 
 subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftgam'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -6554,15 +6207,6 @@ end subroutine ftgam
 !! SOURCE
 
 subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftgam_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

@@ -9,7 +9,7 @@ module m_lobpcg2
   use m_xg
   use m_xgScalapack
   use defs_basis, only : std_err, std_out
-  use m_profiling_abi
+  use m_abicore
   use m_errors
   use m_xomp
 #ifdef HAVE_OPENMP
@@ -133,13 +133,6 @@ module m_lobpcg2
 
   subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, space, spacecom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_init'
-!End of the abilint section
-
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: neigenpairs
     integer         , intent(in   ) :: spacedim
@@ -208,13 +201,6 @@ module m_lobpcg2
 
   subroutine lobpcg_allocateAll(lobpcg,space)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_allocateAll'
-!End of the abilint section
-
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: space
     integer :: spacedim
@@ -260,13 +246,6 @@ module m_lobpcg2
 
 
   function lobpcg_memInfo(neigenpairs, spacedim, blockdim, space) result(arraymem)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_memInfo'
-!End of the abilint section
 
     integer         , intent(in   ) :: neigenpairs
     integer         , intent(in   ) :: spacedim
@@ -325,13 +304,6 @@ module m_lobpcg2
 
 
   subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, residu, prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_run'
-!End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg
     type(xgBlock_t), intent(inout) :: X0   ! Full initial vectors
@@ -579,13 +551,6 @@ module m_lobpcg2
 
   subroutine lobpcg_getX0(lobpcg,iblock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_getX0'
-!End of the abilint section
-
     type(lobpcg_t), intent(inout) :: lobpcg
     integer       , intent(in   ) :: iblock
     integer :: blockdim
@@ -603,13 +568,6 @@ module m_lobpcg2
 
   subroutine lobpcg_setPreviousX0_BX0(lobpcg,iblock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_setPreviousX0_BX0'
-!End of the abilint section
-
     type(lobpcg_t) , intent(inout) :: lobpcg
     integer        , intent(in   ) :: iblock
     call xg_setBlock(lobpcg%AllBX0,lobpcg%BX0,1,lobpcg%spacedim,(iblock-1)*lobpcg%blockdim)
@@ -618,13 +576,6 @@ module m_lobpcg2
 
 
   subroutine lobpcg_orthoXwrtBlocks(lobpcg,var,iblock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_orthoXwrtBlocks'
-!End of the abilint section
 
     type(lobpcg_t) , intent(inout) :: lobpcg
     type(xgBlock_t), intent(inout) :: var
@@ -659,13 +610,6 @@ module m_lobpcg2
 
 
   subroutine lobpcg_Borthonormalize(lobpcg,var,BorthoA,info)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_Borthonormalize'
-!End of the abilint section
 
     type(lobpcg_t), intent(inout) :: lobpcg
     integer       , intent(in   ) :: var
@@ -753,13 +697,6 @@ module m_lobpcg2
   subroutine lobpcg_rayleighRitz(lobpcg,var,eigenvalues,info,tolerance)
 
     use m_time
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_rayleighRitz'
-!End of the abilint section
-
     type(lobpcg_t) , intent(inout) :: lobpcg
     integer        , intent(in   ) :: var
     type(xgBlock_t), intent(inout) :: eigenvalues
@@ -1055,32 +992,18 @@ module m_lobpcg2
 
   subroutine lobpcg_getResidu(lobpcg,eigenvalues)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_getResidu'
-!End of the abilint section
-
     type(lobpcg_t) , intent(inout) :: lobpcg
     type(xgBlock_t), intent(in   ) :: eigenvalues
     double precision :: tsec(2)
 
     call timab(tim_maxres,1,tsec)
       !lobpcg%XWP(1:spacedim,shiftW+iblock) = lobpcg%AXWP(:,shiftX+iblock) - lobpcg%BXWP(:,shiftX+iblock)*eigenvalues(iblock)
-    call xgBlock_colwiseCaxmy(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
+    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
     call timab(tim_maxres,2,tsec)
   end subroutine lobpcg_getResidu
 
 
   subroutine lobpcg_setX0(lobpcg,iblock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_setX0'
-!End of the abilint section
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: iblock
@@ -1098,13 +1021,6 @@ module m_lobpcg2
 
 
   subroutine lobpcg_transferAX_BX(lobpcg,jblock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_transferAX_BX'
-!End of the abilint section
 
     type(lobpcg_t), intent(inout) :: lobpcg
     integer       , intent(in   ) :: jblock
@@ -1125,13 +1041,6 @@ module m_lobpcg2
 
   subroutine lobpcg_getAX_BX(lobpcg,AX,BX)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_getAX_BX'
-!End of the abilint section
-
     type(lobpcg_t) , intent(in   ) :: lobpcg
     type(xgBlock_t), intent(  out) :: AX
     type(xgBlock_t), intent(  out) :: BX
@@ -1142,13 +1051,6 @@ module m_lobpcg2
 
 
   subroutine lobpcg_allowNested(lobpcg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_allowNested'
-!End of the abilint section
 
     type(lobpcg_t), intent(inout) :: lobpcg
 
@@ -1162,13 +1064,6 @@ module m_lobpcg2
 
   subroutine lobpcg_restoreNested(lobpcg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_restoreNested'
-!End of the abilint section
-
     type(lobpcg_t), intent(inout) :: lobpcg
 
 #ifdef HAVE_OPENMP
@@ -1180,13 +1075,6 @@ module m_lobpcg2
 
 
   subroutine lobpcg_free(lobpcg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcg_free'
-!End of the abilint section
 
     type(lobpcg_t), intent(inout) :: lobpcg
 

@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -10,12 +10,12 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h54 )
+.Starting date : Mon 12 Nov 2018.
+- ( at 02h07 )
   
 - input  file    -> tgw2_2.in
 - output file    -> tgw2_2.out
@@ -44,7 +44,7 @@ _ WF disk file :      0.159 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -195,7 +195,7 @@ P           mkmem           8
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm : epsatm=    1.36305739
+  pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -364,7 +364,7 @@ P           mkmem           8
   chi0(G,G') at the   12 th omega   0.0000  10.6848 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
-        0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+       -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
 
     2  -0.000  -4.637   0.117   0.231   0.176   0.231   0.176   0.231   0.176
        -0.000   0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
@@ -387,7 +387,7 @@ P           mkmem           8
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  69.0648
-  dielectric constant without local fields =  71.2326
+  dielectric constant without local fields =  71.2322
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.59  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -421,37 +421,37 @@ P           mkmem           8
 
    Upper and lower wings at the    4 th omega   9.0705   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-     -1.817   0.011  -0.011  -0.034   0.034   0.034  -0.034  -0.011   0.011
-     -0.981   0.010  -0.010  -0.031   0.031   0.031  -0.031  -0.010   0.010
+     -1.824   0.011  -0.011  -0.034   0.034   0.034  -0.034  -0.011   0.011
+     -0.986   0.010  -0.010  -0.030   0.030   0.030  -0.030  -0.010   0.010
        1       2       3       4       5       6       7       8       9
-     -1.817   0.011  -0.011  -0.034   0.034   0.034  -0.034  -0.011   0.011
-     -0.981   0.010  -0.010  -0.031   0.031   0.031  -0.031  -0.010   0.010
+     -1.824   0.011  -0.011  -0.034   0.034   0.034  -0.034  -0.011   0.011
+     -0.986   0.010  -0.010  -0.030   0.030   0.030  -0.030  -0.010   0.010
 
 
    Upper and lower wings at the    5 th omega  12.0939   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      4.016  -0.021   0.021   0.063  -0.063  -0.063   0.063   0.021  -0.021
-     -1.744  -0.097   0.097   0.293  -0.293  -0.294   0.294   0.098  -0.098
+      4.013  -0.021   0.021   0.062  -0.062  -0.062   0.062   0.021  -0.021
+     -1.743  -0.097   0.097   0.293  -0.293  -0.294   0.294   0.098  -0.098
        1       2       3       4       5       6       7       8       9
-      4.016  -0.021   0.021   0.063  -0.063  -0.063   0.063   0.021  -0.021
-     -1.744  -0.097   0.097   0.293  -0.293  -0.294   0.294   0.098  -0.098
+      4.013  -0.021   0.021   0.062  -0.062  -0.062   0.062   0.021  -0.021
+     -1.743  -0.097   0.097   0.293  -0.293  -0.294   0.294   0.098  -0.098
 
 
    Upper and lower wings at the    6 th omega  15.1174   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      1.871   0.001  -0.001  -0.002   0.002   0.002  -0.002  -0.001   0.001
-     -0.424  -0.018   0.018   0.055  -0.055  -0.055   0.055   0.018  -0.018
+      1.870   0.001  -0.001  -0.002   0.002   0.002  -0.002  -0.001   0.001
+     -0.423  -0.018   0.018   0.055  -0.055  -0.055   0.055   0.018  -0.018
        1       2       3       4       5       6       7       8       9
-      1.871   0.001  -0.001  -0.002   0.002   0.002  -0.002  -0.001   0.001
-     -0.424  -0.018   0.018   0.055  -0.055  -0.055   0.055   0.018  -0.018
+      1.870   0.001  -0.001  -0.002   0.002   0.002  -0.002  -0.001   0.001
+     -0.423  -0.018   0.018   0.055  -0.055  -0.055   0.055   0.018  -0.018
 
 
    Upper and lower wings at the    7 th omega  18.1409   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      1.569  -0.009   0.009   0.027  -0.027  -0.027   0.027   0.009  -0.009
+      1.568  -0.009   0.009   0.027  -0.027  -0.027   0.027   0.009  -0.009
      -0.195  -0.001   0.001   0.002  -0.002  -0.002   0.002   0.001  -0.001
        1       2       3       4       5       6       7       8       9
-      1.569  -0.009   0.009   0.027  -0.027  -0.027   0.027   0.009  -0.009
+      1.568  -0.009   0.009   0.027  -0.027  -0.027   0.027   0.009  -0.009
      -0.195  -0.001   0.001   0.002  -0.002  -0.002   0.002   0.001  -0.001
 
 
@@ -494,10 +494,10 @@ P           mkmem           8
    Upper and lower wings at the   12 th omega   0.0000  10.6848 [eV]
        1       2       3       4       5       6       7       8       9
       0.511  -0.002   0.002   0.007  -0.007  -0.007   0.007   0.002  -0.002
-      0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+     -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       0.511  -0.002   0.002   0.007  -0.007  -0.007   0.007   0.002  -0.002
-      0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+     -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
 
    Upper and lower wings at the   13 th omega   0.0000  22.5012 [eV]
@@ -1484,53 +1484,71 @@ P           mkmem           8
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment : Some pseudopotential generated using the FHI code were used.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.8
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          2.8
+.Delivered   3 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.8  wall=          2.8

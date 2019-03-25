@@ -29,7 +29,6 @@ bound_cell = 4 4 4
 bound_temp = 100
 bound_step = 100
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
@@ -48,5 +47,6 @@ bound_step = 100
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read ddb and HIST, fit and try to bound the anharmonic part
+#%%   read ddb and HIST, fit and enforce that the anharmonic part is bounded from below.
+#%% topics = FitProcess,BoundingProcess,LatticeModel
 #%%<END TEST_INFO>

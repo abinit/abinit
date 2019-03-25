@@ -94,8 +94,10 @@ class AbinitEnvironment(object):
 
         for root, dirs, files in os.walk(self.src_dir):
             for path in files:
+                if not path.lower().endswith(".f90"): continue
                 path = os.path.join(root, path)
                 with open(path, "rt") as fh:
+                    #print(path)
                     for line in fh:
                         if any(p in line for p in patterns):
                             print("Touching %s" % path)
@@ -153,6 +155,7 @@ _tsuite_dirs = [
     #"hpc",
     #"physics",
     "seq",
+    "tutomultibinit",
     "tutoparal",
     "tutoplugs",
     "tutorespfn",

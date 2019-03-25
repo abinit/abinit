@@ -9,7 +9,7 @@
 !!  xmpi_bcast is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (Rshaltaf,AR,XG)
+!!  Copyright (C) 2001-2019 ABINIT group (Rshaltaf,AR,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,11 +18,6 @@
 
 subroutine xmpi_bcast_intv(xval,master,spaceComm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_intv'
-!End of the abilint section
 
  implicit none
 
@@ -69,12 +64,6 @@ end subroutine xmpi_bcast_intv
 !! SOURCE
 subroutine xmpi_bcast_int1d(xval,master,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_int1d'
-!End of the abilint section
 
  implicit none
 
@@ -124,12 +113,6 @@ end subroutine xmpi_bcast_int1d
 !! SOURCE
 subroutine xmpi_bcast_int2d(xval,master,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_int2d'
-!End of the abilint section
 
  implicit none
 
@@ -183,13 +166,6 @@ end subroutine xmpi_bcast_int2d
 !! SOURCE
 subroutine xmpi_bcast_int3d(xval,master,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_int3d'
-!End of the abilint section
 
  implicit none
 
@@ -245,13 +221,6 @@ end subroutine xmpi_bcast_int3d
 subroutine xmpi_bcast_dpv(xval,master,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dpv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -299,13 +268,6 @@ end subroutine xmpi_bcast_dpv
 subroutine xmpi_bcast_dp1d(xval,master,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -352,12 +314,6 @@ end subroutine xmpi_bcast_dp1d
 !! SOURCE
 
 subroutine xmpi_bcast_dp2d(xval,master,spaceComm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -408,13 +364,6 @@ end subroutine xmpi_bcast_dp2d
 subroutine xmpi_bcast_dp3d(xval,master,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dp3d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -463,12 +412,6 @@ end subroutine xmpi_bcast_dp3d
 !! SOURCE
 
 subroutine xmpi_bcast_dp4d(xval,master,spaceComm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dp4d'
-!End of the abilint section
 
  implicit none
 
@@ -520,12 +463,6 @@ end subroutine xmpi_bcast_dp4d
 
 subroutine xmpi_bcast_dp5d(xval,master,spaceComm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dp5d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -576,12 +513,6 @@ end subroutine xmpi_bcast_dp5d
 !! SOURCE
 
 subroutine xmpi_bcast_dp6d(xval,master,spaceComm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dp6d'
-!End of the abilint section
 
  implicit none
 
@@ -635,13 +566,6 @@ end subroutine xmpi_bcast_dp6d
 
 subroutine xmpi_bcast_spv(xval,master,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_spv'
-!End of the abilint section
-
 implicit none
 
 
@@ -683,13 +607,6 @@ end subroutine xmpi_bcast_spv
 !! SOURCE
 
 subroutine xmpi_bcast_sp1d(xval,master,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_sp1d'
-!End of the abilint section
 
  implicit none
 
@@ -738,13 +655,6 @@ end subroutine xmpi_bcast_sp1d
 
 subroutine xmpi_bcast_sp2d(xval,master,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_sp2d'
-!End of the abilint section
 
  implicit none
 
@@ -795,13 +705,6 @@ end subroutine xmpi_bcast_sp2d
 subroutine xmpi_bcast_sp3d(xval,master,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_sp3d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -851,13 +754,6 @@ end subroutine xmpi_bcast_sp3d
 
 subroutine xmpi_bcast_sp4d(xval,master,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_sp4d'
-!End of the abilint section
 
  implicit none
 
@@ -914,13 +810,6 @@ end subroutine xmpi_bcast_sp4d
 subroutine xmpi_bcast_cplxv(xval,master,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_cplxv'
-!End of the abilint section
-
 implicit none
 
 !Arguments-------------------------
@@ -969,13 +858,6 @@ end subroutine xmpi_bcast_cplxv
 subroutine xmpi_bcast_cplx1d(xval,master,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_cplx1d'
-!End of the abilint section
-
 implicit none
 
 !Arguments-------------------------
@@ -1022,12 +904,6 @@ end subroutine xmpi_bcast_cplx1d
 !! SOURCE
 
 subroutine xmpi_bcast_cplx2d(xval,master,spaceComm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_cplx2d'
-!End of the abilint section
 
 implicit none
 
@@ -1078,13 +954,6 @@ end subroutine xmpi_bcast_cplx2d
 subroutine xmpi_bcast_cplx3d(xval,master,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_cplx3d'
-!End of the abilint section
-
 implicit none
 
 !Arguments-------------------------
@@ -1132,12 +1001,6 @@ end subroutine xmpi_bcast_cplx3d
 !!
 !! SOURCE
 subroutine xmpi_bcast_cplx4d(xval,master,spaceComm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_cplx4d'
-!End of the abilint section
 
  implicit none
 
@@ -1189,14 +1052,6 @@ end subroutine xmpi_bcast_cplx4d
 
 subroutine xmpi_bcast_dcv(xval,master,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dcv'
-!End of the abilint section
-
 implicit none
 
 !Arguments-------------------------
@@ -1237,13 +1092,6 @@ end subroutine xmpi_bcast_dcv
 !! SOURCE
 
 subroutine xmpi_bcast_dc1d(xval,master,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dc1d'
-!End of the abilint section
 
 implicit none
 
@@ -1293,12 +1141,6 @@ end subroutine xmpi_bcast_dc1d
 
 subroutine xmpi_bcast_dc2d(xval,master,spaceComm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dc2d'
-!End of the abilint section
-
 implicit none
 
 !Arguments-------------------------
@@ -1346,12 +1188,6 @@ end subroutine xmpi_bcast_dc2d
 !! SOURCE
 
 subroutine xmpi_bcast_dc3d(xval,master,spaceComm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dc3d'
-!End of the abilint section
 
 implicit none
 
@@ -1403,12 +1239,6 @@ end subroutine xmpi_bcast_dc3d
 
 subroutine xmpi_bcast_dc4d(xval,master,spaceComm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_dc4d'
-!End of the abilint section
-
 implicit none
 
 !Arguments-------------------------
@@ -1459,12 +1289,6 @@ end subroutine xmpi_bcast_dc4d
 
 subroutine xmpi_bcast_ch0d(xval,master,spaceComm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_ch0d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1514,12 +1338,6 @@ end subroutine xmpi_bcast_ch0d
 !! SOURCE
 subroutine xmpi_bcast_ch1d(xval,master,spaceComm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_ch1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1568,14 +1386,6 @@ end subroutine xmpi_bcast_ch1d
 
 subroutine xmpi_bcast_log0d(xval,master,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_log0d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1616,12 +1426,6 @@ end subroutine xmpi_bcast_log0d
 !! SOURCE
 
 subroutine xmpi_bcast_coeffi2_1d(xval,master,spaceComm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_coeffi2_1d'
-!End of the abilint section
 
  implicit none
 
@@ -1719,12 +1523,6 @@ end subroutine xmpi_bcast_coeffi2_1d
 !! SOURCE
 
 subroutine xmpi_bcast_coeff2_1d(xval,master,spaceComm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_bcast_coeff2_1d'
-!End of the abilint section
 
  implicit none
 

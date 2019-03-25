@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XW)
+!!  Copyright (C) 1999-2019 ABINIT group (XW, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,10 +27,14 @@
 module m_ddb_elast
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_crystal
  use m_ddb
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_fstrings,       only : itoa, sjoin
  use m_hide_lapack,    only : matrginv
@@ -60,7 +64,7 @@ contains
 !! considers the sress correction.
 !!
 !! INPUTS
-!! anaddb_dtset= (derived datatype) contains all the input variables
+!! inp= (derived datatype) contains all the input variables
 !! crystal<crystal_t>=Info on crystalline structure.
 !! blkval(2,3,mpert,3,mpert,nblok)=
 !!   second derivatives of total energy with respect to electric fields
@@ -73,6 +77,7 @@ contains
 !! mpert=maximum number of ipert
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
+!! ncid=NC file handle (open in the caller)
 !!
 !! OUTPUT
 !! elast=relaxed-ion elastic tensor(without stress correction) (6*6) in Voigt notation
@@ -92,28 +97,16 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
+subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &            elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&            instrain,iout,mpert,&
-! &msize,&
-&            natom,nblok)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_elast'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
+&            instrain,iout,mpert,natom,nblok,ncid)
 
 !Arguments -------------------------------------------
 !scalars
- integer,intent(in) :: iblok,iblok_stress,iout,mpert,natom,nblok
+ integer,intent(in) :: iblok,iblok_stress,iout,mpert,natom,nblok,ncid
 !integer,intent(in) :: msize
  type(crystal_t),intent(in) :: crystal
- type(anaddb_dataset_type),intent(in) :: anaddb_dtset
+ type(anaddb_dataset_type),intent(in) :: inp
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok),instrain(3*natom,6)
  real(dp),intent(in) :: d2asr(2,3,natom,3,natom)
@@ -122,7 +115,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
 !Local variables------------------------------------
 !scalars
- integer :: ier,ii1,ii2,ipert1,ipert2,ivarA,ivarB
+ integer :: ier,ii1,ii2,ipert1,ipert2,ivarA,ivarB,ncerr
  real(dp) :: ucvol
  logical :: iwrite
  character(len=500) :: message
@@ -140,6 +133,8 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  real(dp) :: d2cart(2,3*natom,3*natom)
 
 !***************************************************************************
+ compl = zero; compl_clamped = zero; compl_stress = zero
+ elast = zero; elast_clamped = zero; elast_stress = zero
 
  ucvol = crystal%ucvol
  iwrite = iout > 0
@@ -188,8 +183,8 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !then do the matrix mulplication of instrain*K*instrain to get the
 !correction of the relaxed ion quantities, in case natom/=1
 
- if( (anaddb_dtset%elaflag==2 .or. anaddb_dtset%elaflag==3&
-& .or. anaddb_dtset%elaflag==4 .or. anaddb_dtset%elaflag==5) .and. natom/=1 )then
+ if( (inp%elaflag==2 .or. inp%elaflag==3&
+& .or. inp%elaflag==4 .or. inp%elaflag==5) .and. natom/=1 )then
 !  extracting force matrix at gamma
    d2cart = zero
    do ipert1=1,natom
@@ -207,7 +202,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  Eventually impose the acoustic sum rule
 !  FIXME: this might depend on ifcflag: impose that it is 0 or generalize
    !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
-   call asria_corr(anaddb_dtset%asr,d2asr,d2cart,natom,natom)
+   call asria_corr(inp%asr,d2asr,d2cart,natom,natom)
    kmatrix = d2cart(1,:,:)
 
 !  DEBUG
@@ -474,7 +469,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  compl_relaxed(:,:)=elast_relaxed(:,:)
 
 !*******************************************************************
- if(anaddb_dtset%elaflag==1.or. anaddb_dtset%elaflag==3)then
+ if(inp%elaflag==1.or. inp%elaflag==3)then
 !  print out the clamped-ion elastic constants to output file
    write(message,'(3a)')ch10,' Elastic Tensor (clamped ion) (unit:10^2GP):',ch10
    call wrtout(std_out,message,'COLL')
@@ -494,9 +489,9 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
    end if
  end if
 
- if(anaddb_dtset%elaflag==2.or.anaddb_dtset%elaflag==3&
-& .or. anaddb_dtset%elaflag==4.or. anaddb_dtset%elaflag==5)then
-   if(anaddb_dtset%instrflag==0)then
+ if(inp%elaflag==2.or.inp%elaflag==3&
+& .or. inp%elaflag==4.or. inp%elaflag==5)then
+   if(inp%instrflag==0)then
      write(message,'(a,a,a,a,a,a,a,a)' )ch10,&
 &     'in order to get the elastic  tensor(relaxed ion), ',ch10,&
 &     'one needs information about internal strain ',ch10,&
@@ -530,7 +525,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
 !then print the corresponding compliances
 
- if(anaddb_dtset%elaflag==1.or.anaddb_dtset%elaflag==3)then
+ if(inp%elaflag==1.or.inp%elaflag==3)then
 !  compl(:,:)=elast_clamped(:,:) !convert the elastic tensor
    compl_clamped(:,:)=elast_clamped(:,:)
    call matrginv(compl_clamped,6,6)
@@ -558,11 +553,11 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
    end if
  end if
 
- if(anaddb_dtset%elaflag==2.or.anaddb_dtset%elaflag==3&
-& .or. anaddb_dtset%elaflag==4 .or. anaddb_dtset%elaflag==5)then
+ if(inp%elaflag==2.or.inp%elaflag==3&
+& .or. inp%elaflag==4 .or. inp%elaflag==5)then
 !  compl(:,:)=elast_relaxed(:,:)
    call matrginv(compl_relaxed,6,6)
-   if(anaddb_dtset%instrflag==0)then
+   if(inp%instrflag==0)then
      write(message,'(a,a,a,a,a,a,a,a)' )ch10,&
 &     'in order to get the compliance tensor(relaxed ion), ',ch10,&
 &     'one needs information about internal strain ',ch10,&
@@ -604,7 +599,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  compl(:,:)=compl_relaxed(:,:)
 
 !begin the part of computing stress corrected elastic tensors
- if(anaddb_dtset%elaflag==5)then
+ if(inp%elaflag==5)then
 
 !  DEBUG
 !  check the iblok number of first derivative of energy
@@ -639,7 +634,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
    compl_stress(:,:)=elast_stress(:,:)
    call matrginv(compl_stress,6,6)
 !  then print out the results of stress corrected elastic and compliance tensors
-   if(anaddb_dtset%instrflag==0)then
+   if(inp%instrflag==0)then
      write(message,'(a,a,a,a,a,a,a,a)' )ch10,&
 &     'In order to get the elastic tensor (relaxed ion with stress correction), ',ch10,&
 &     'one needs information about internal strain ',ch10,&
@@ -691,6 +686,62 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  end if
 !end the if 510th line
 !end the part of stress corrected elastic and compliance tensors
+
+
+ ! Writes the elastic constants tensors (clamped-ion, relaxed-ion with and
+ ! without stress corrections) to a netCDF file.
+ !
+ ! compl=relaxed-ion compliance tensor(without stress correction) (6*6) in Voigt notation
+ ! compl_clamped=clamped-ion compliance tensor(without stress correction) (6*6) in Voigt notation
+ ! compl_stress=relaxed-ion compliance tensor(with stress correction) (6*6) in Voigt notation
+ ! elast=relaxed-ion elastic tensor(without stress correction) (6*6) in Voigt notation
+ ! elast_clamped=clamped-ion elastic tensor(without stress correction) (6*6) in Voigt notation
+ ! elast_stress=relaxed-ion elastic tensor(with stress correction) (6*6) in Voigt notation
+ ! Units are GPa for elastic constants and GPa^-1 for compliance constants
+
+ if (ncid /= nctk_noid) then
+#ifdef HAVE_NETCDF
+   ! Define dimensions
+   NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "asr", "elaflag", "instrflag"])
+   NCF_CHECK(ncerr)
+
+   !arrays
+   ncerr = nctk_def_arrays(ncid, [&
+     nctkarr_t('internal_strain_tensor', "dp", 'natom3, six'), &
+     nctkarr_t('compliance_constants_relaxed_ion', "dp", 'six, six'), &
+     nctkarr_t('compliance_constants_clamped_ion', "dp", 'six, six'), &
+     nctkarr_t('compliance_constants_relaxed_ion_stress_corrected', "dp", "six, six"), &
+     nctkarr_t('elastic_constants_relaxed_ion', "dp", 'six, six'), &
+     nctkarr_t('elastic_constants_clamped_ion', "dp", 'six, six'), &
+     nctkarr_t('elastic_constants_relaxed_ion_stress_corrected', "dp", 'six, six')])
+   NCF_CHECK(ncerr)
+
+   ! Write variables.
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, vid('asr'), inp%asr))
+   NCF_CHECK(nf90_put_var(ncid, vid('elaflag'), inp%elaflag))
+   NCF_CHECK(nf90_put_var(ncid, vid('instrflag'), inp%instrflag))
+   NCF_CHECK(nf90_put_var(ncid, vid('internal_strain_tensor'), instrain))
+   NCF_CHECK(nf90_put_var(ncid, vid('compliance_constants_relaxed_ion'), compl))
+   NCF_CHECK(nf90_put_var(ncid, vid('compliance_constants_clamped_ion'), compl_clamped))
+   NCF_CHECK(nf90_put_var(ncid, vid('compliance_constants_relaxed_ion_stress_corrected'), compl_stress))
+   NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion'), elast))
+   NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_clamped_ion'), elast_clamped))
+   NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion_stress_corrected'), elast_stress))
+
+#else
+   MSG_ERROR("Netcdf support not enabled")
+#endif
+ end if
+
+contains
+
+ integer function vid(vname)
+   character(len=*),intent(in) :: vname
+   vid = nctk_idname(ncid, vname)
+ end function vid
 
 end subroutine ddb_elast
 !!***

@@ -15,7 +15,7 @@
 !! *  an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2019 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,13 +40,6 @@
 !! SOURCE
 
  subroutine abi_zgemm_2d(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zgemm_2d'
-
-!End of the abilint section
 
  implicit none
 
@@ -114,12 +107,6 @@ end subroutine abi_zgemm_2d
 !!
 subroutine abi_d2zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
 &       x_cplx)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_d2zgemm'
-!End of the abilint section
 
  implicit none
 

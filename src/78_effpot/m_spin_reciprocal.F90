@@ -15,7 +15,7 @@
 !! TODO hexu: not yet implemented.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! Copyright (C) 2001-2019 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@
 #include "abi_common.h"
         module m_spin_reciprocal
           use defs_basis
-    use m_profiling_abi
+    use m_abicore
     use m_errors
     use m_xmpi
     implicit none

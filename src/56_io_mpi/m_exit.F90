@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG, DCA, XG, GMR)
+!!  Copyright (C) 2008-2019 ABINIT group (MG, DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +25,7 @@ MODULE m_exit
 
  use defs_basis
  use m_xmpi
+ use m_abicore
  use m_errors
 
  use m_time,      only : abi_wtime, sec2str, timein
@@ -86,13 +87,6 @@ CONTAINS
 
 subroutine exit_init(time_limit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exit_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -127,20 +121,7 @@ end subroutine exit_init
 
 subroutine disable_timelimit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'disable_timelimit'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'disable_timelimit'
-!End of the abilint section
 
 !Local variables-------------------------------
 !scalars
@@ -174,23 +155,9 @@ end subroutine disable_timelimit
 
 logical pure function have_timelimit_in(abifunc) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'have_timelimit_in'
-!End of the abilint section
-
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'have_timelimit_in'
-!End of the abilint section
-
 !Arguments -----------------------------------
-
  character(len=*),intent(in) :: abifunc
 
 ! *************************************************************************
@@ -212,8 +179,8 @@ end function have_timelimit_in
 !!  Example:
 !!
 !!    ! enable time limit handler if not done in callers.
-!!    if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
-!!      write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+!!    if (enable_timelimit_in(FUNC_NAME) == FUNC_NAME) then
+!!      write(std_out,*)"Enabling timelimit check in function: ",trim(FUNC_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
 !!    end if
 !!
 !! PARENTS
@@ -222,20 +189,7 @@ end function have_timelimit_in
 
 function enable_timelimit_in(abifunc) result(prev_func)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'enable_timelimit_in'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'enable_timelimit_in'
-!End of the abilint section
 
 !Arguments -----------------------------------
  character(len=*),intent(in) :: abifunc
@@ -264,20 +218,7 @@ end function enable_timelimit_in
 
 real(dp) pure function get_timelimit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_timelimit'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_timelimit'
-!End of the abilint section
 
  get_timelimit = WTIME_LIMIT
 
@@ -299,20 +240,7 @@ end function get_timelimit
 
 pure function get_timelimit_string() result(string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_timelimit_string'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_timelimit'
-!End of the abilint section
 
 !Local variables-------------------------------
 !scalars
@@ -344,13 +272,6 @@ end function get_timelimit_string
 !! SOURCE
 
 real(dp) pure function get_start_time()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_start_time'
-!End of the abilint section
 
  get_start_time = WALL0
 
@@ -392,14 +313,6 @@ end function get_start_time
 !! SOURCE
 
 subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exit_check'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

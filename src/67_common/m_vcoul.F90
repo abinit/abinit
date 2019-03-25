@@ -10,7 +10,7 @@
 !!  Procedures to deal with the singularity for q-->0 are also provided.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2019 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@
 MODULE m_vcoul
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_splines
@@ -206,16 +206,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,nqlwl,qlwl,ngfft,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vcoul_init'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -546,7 +536,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 
  CASE ('SPHERE')
    ! TODO check that L-d > R_c > d
-   ! * A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008).
+   ! * A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
    if (Vcp%rcut<tol12) then
      Vcp%rcut = (ucvol*Kmesh%nbz*3.d0/four_pi)**third
      write(msg,'(2a,2x,f8.4,a)')ch10,&
@@ -759,7 +749,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
  CASE ('AUXILIARY_FUNCTION')
    !
    ! Numerical integration of the exact-exchange divergence through the
-   ! auxiliary function of Carrier et al. PRB 75, 205126 (2007).
+   ! auxiliary function of Carrier et al. PRB 75, 205126 (2007) [[cite:Carrier2007]].
    !
    do iq_ibz=1,Vcp%nqibz
      call cmod_qpg(Vcp%nqibz,iq_ibz,Vcp%qibz,ng,Gsph%gvec,gprimd,vcoul(:,iq_ibz))
@@ -779,7 +769,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    vcoul_lwl = four_pi/vcoul_lwl**2
    !
    ! === Integration of 1/q^2 singularity ===
-   ! * We use the auxiliary function from PRB 75, 205126 (2007)
+   ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
 
    ! It might be useful to perform the integration using the routine quadrature
@@ -819,7 +809,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    vcoul_lwl = four_pi/vcoul_lwl**2
    !
    ! === Integration of 1/q^2 singularity ===
-   ! * We use the auxiliary function of a Gygi-Baldereschi variant
+   ! * We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
    ! * the choice of alfa (the width of gaussian) is somehow empirical
    alfa = 150.0/ecut
@@ -870,7 +860,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
    vcoul_lwl = four_pi/vcoul_lwl**2
    !
    ! === Integration of 1/q^2 singularity ===
-   ! * We use the auxiliary function from PRB 75, 205126 (2007)
+   ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
 
    ! $$ MG: this is to restore the previous implementation, it will facilitate the merge
@@ -905,7 +895,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 
    !
    ! === Treat 1/q^2 singularity ===
-   ! * We use the auxiliary function from PRB 75, 205126 (2007)
+   ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
    do iq_bz=1,Qmesh%nbz
      qbz_cart(:)=Qmesh%bz(1,iq_bz)*b1(:)+Qmesh%bz(2,iq_bz)*b2(:)+Qmesh%bz(3,iq_bz)*b3(:)
@@ -974,19 +964,6 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 contains !===============================================================
 
  real(dp) function integratefaux()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integratefaux'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- !MG here there is a bug in abilint since integratefaux is chaged to integrate, dont know why!
- !real(dp) :: integrate
 
 !Local variables-------------------------------
   integer,parameter :: nref=3
@@ -1074,13 +1051,6 @@ contains !===============================================================
 
  function faux(qq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'faux'
-!End of the abilint section
-
   real(dp),intent(in) :: qq(3)
   real(dp) :: faux
   real(dp) :: bb4sinpiqq1_2,bb4sinpiqq2_2,bb4sinpiqq3_2,sin2piqq1,sin2piqq2,sin2piqq3
@@ -1097,13 +1067,6 @@ contains !===============================================================
  end function faux
 
  function faux_fast(qq,bb4sinpiqq1_2,bb4sinpiqq2_2,bb4sinpiqq3_2,sin2piqq1,sin2piqq2,sin2piqq3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'faux_fast'
-!End of the abilint section
 
   real(dp),intent(in) :: qq(3)
   real(dp) :: faux_fast
@@ -1124,13 +1087,6 @@ contains !===============================================================
 
 
  function adapt_nmc(nmc_max,qpg2) result(nmc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'adapt_nmc'
-!End of the abilint section
 
  real(dp),intent(in) :: qpg2
  integer,intent(in)  :: nmc_max
@@ -1170,15 +1126,6 @@ end subroutine vcoul_init
 !! SOURCE
 
 subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vcoul_plot'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1349,16 +1296,6 @@ end subroutine vcoul_plot
 
 subroutine vcoul_print(Vcp,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vcoul_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: prtvol,unit
@@ -1498,40 +1435,17 @@ end subroutine vcoul_print
 
 subroutine vcoul_free(Vcp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vcoul_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(vcoul_t),intent(inout) :: Vcp
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
- if (allocated(Vcp%qibz)) then
-   ABI_FREE(Vcp%qibz)
- end if
- if (allocated(Vcp%qlwl)) then
-   ABI_FREE(Vcp%qlwl)
- end if
- if (allocated(Vcp%vc_sqrt))   then
-   ABI_FREE(Vcp%vc_sqrt)
- end if
- if (allocated(Vcp%vc_sqrt_resid))   then
-   ABI_FREE(Vcp%vc_sqrt_resid)
- end if
- if (allocated(Vcp%vcqlwl_sqrt)) then
-   ABI_FREE(Vcp%vcqlwl_sqrt)
- end if
-
- DBG_EXIT("COLL")
+ ABI_SFREE(Vcp%qibz)
+ ABI_SFREE(Vcp%qlwl)
+ ABI_SFREE(Vcp%vc_sqrt)
+ ABI_SFREE(Vcp%vc_sqrt_resid)
+ ABI_SFREE(Vcp%vcqlwl_sqrt)
 
 end subroutine vcoul_free
 !!***
@@ -1569,15 +1483,6 @@ end subroutine vcoul_free
 !! SOURCE
 
 subroutine cutoff_sphere(nqpt,qpt,ngvec,gvec,gmet,rcut,vc_cut)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cutoff_sphere'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1672,16 +1577,6 @@ end subroutine cutoff_sphere
 !! SOURCE
 
 subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,method,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cutoff_cylinder'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1997,15 +1892,6 @@ end subroutine cutoff_cylinder
 
 subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut,method)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cutoff_surface'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: method,ng,nq
@@ -2135,15 +2021,6 @@ end subroutine cutoff_surface
 
 subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cmod_qpg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq,npwvec,nq
@@ -2187,13 +2064,6 @@ end subroutine cmod_qpg
 
 function F2(xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'F2'
-!End of the abilint section
-
  real(dp),intent(in) :: xx
  real(dp) :: F2
 
@@ -2217,13 +2087,6 @@ end function F2
 !----------------------------------------------------------------------
 
 function F1(rho)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'F1'
-!End of the abilint section
 
  real(dp),intent(in) :: rho
  real(dp) :: F1
@@ -2251,13 +2114,6 @@ end function F1
 
 pure function F3(xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'F3'
-!End of the abilint section
-
  real(dp),intent(in) :: xx
  real(dp) :: F3
 !************************************************************************
@@ -2271,13 +2127,6 @@ end function F3
 !----------------------------------------------------------------------
 
 function F4(rho)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'F4'
-!End of the abilint section
 
  real(dp),intent(in) :: rho
  real(dp) :: F4
@@ -2304,13 +2153,6 @@ end function F4
 
 function F5(rho)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'F5'
-!End of the abilint section
-
  real(dp),intent(in) :: rho
  real(dp) :: F5
 
@@ -2336,13 +2178,6 @@ end function F5
 
 function K0cos(yy)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'K0cos'
-!End of the abilint section
-
  real(dp),intent(in) :: yy
  real(dp) :: K0cos
 
@@ -2362,13 +2197,6 @@ end function K0cos
 !----------------------------------------------------------------------
 
 function K0cos_dy(xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'K0cos_dy'
-!End of the abilint section
 
  real(dp),intent(in) :: xx
  real(dp) :: K0cos_dy
@@ -2393,13 +2221,6 @@ end function K0cos_dy
 !----------------------------------------------------------------------
 
 function K0cos_dy_r0(xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'K0cos_dy_r0'
-!End of the abilint section
 
  real(dp),intent(in) :: xx
  real(dp) :: K0cos_dy_r0
@@ -2434,13 +2255,6 @@ end function K0cos_dy_r0
 !----------------------------------------------------------------------
 
 function K0cos_dth_r0(rho)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'K0cos_dth_r0'
-!End of the abilint section
 
  real(dp),intent(in) :: rho
  real(dp) :: K0cos_dth_r0
@@ -2477,13 +2291,6 @@ end function K0cos_dth_r0
 
 pure function Fcos_th(theta)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Fcos_th'
-!End of the abilint section
-
  real(dp),intent(in) :: theta
  real(dp) :: Fcos_th
 
@@ -2505,13 +2312,6 @@ end function Fcos_th
 !TODO Not yet used and indeed are still private
 
 function K0fit(mq,nn) result(vals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'K0fit'
-!End of the abilint section
 
  integer,intent(in) :: nn
  real(dp),intent(in) :: mq
@@ -2539,13 +2339,6 @@ function K0fit(mq,nn) result(vals)
 end function K0fit
 
 function K0fit_int(mq,par,nn) result(integ)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'K0fit_int'
-!End of the abilint section
 
  integer,intent(in) :: nn
  real(dp),intent(in) :: mq
@@ -2577,13 +2370,6 @@ end function K0fit_int
 
 function I0(xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'I0'
-!End of the abilint section
-
  real(dp),intent(in) :: xx
  real(dp) :: I0
 
@@ -2601,13 +2387,6 @@ end function I0
 
 ! Primitive of x^m Ln(x) for m/=-1
 function int_xmln(xx,mm)  result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_xmln'
-!End of the abilint section
 
  integer,intent(in) :: mm
  real(dp),intent(in) :: xx
@@ -2632,13 +2411,6 @@ end function int_xmln
 function int_I0ln(xx) result(res)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_I0ln'
-!End of the abilint section
-
  real(dp),intent(in) :: xx
  real(dp) :: res
 !Local variables-------------------------------

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2019 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 module m_relaxpol
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_fstrings,  only : sjoin, itoa
@@ -57,7 +57,7 @@ contains
 !! 1) Compute polarization in cartesian coordinates
 !! 2) Structural relaxation at fixed polarization: this routine
 !!    solves the linear system of equations Eq.(13)
-!!    of Na Sai et al., PRB 66, 104108 (2002).
+!!    of Na Sai et al., PRB 66, 104108 (2002) [[cite:Sai2002]].
 !!
 !! INPUTS
 !! blkflg(msize) = flag for every matrix element (0=> the element
@@ -109,13 +109,6 @@ contains
 subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 & mpert,msize,natfix,natom,nstrfix,pel,red_ptot,relaxat,relaxstr,&
 & strten,targetpol,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'relaxpol'
-!End of the abilint section
 
  implicit none
 

@@ -11,25 +11,31 @@ including excitonic effects within the Bethe-Salpeter (BS) approach.
 Crystalline silicon is used as test case. A brief description of the formalism
 can be found in the [[theory:bse|Bether-Salpeter notes]].
 
-The user should be familiarized with the four basic tutorials of ABINIT and the
-[first GW tutorial](gw1).
+The user should be familiarized with the four basic tutorials of ABINIT and the [first GW tutorial](gw1).
+
+[TUTORIAL_README]
 
 This tutorial should take about one hour to be completed.
+
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 ## Preparatory steps (WFK and the SCR file)
   
 *Before starting, you might consider to work in a different subdirectory as
-for the other tutorials. Why not "Work_bs"?*
+for the other tutorials. Why not Work_bs?*
 
-Copy the files file *~abinit/tests/tutorial/Input/tbs_1.files* 
-in the working directory *~abinit/tests/tutorial/Input/Work_bs*.
+Copy the files file *\$ABI_TUTORIAL/Input/tbs_1.files* 
+in the working directory *Work_bs*.
 Now run immediately the calculation with the command:
     
-    abinit < tbs_1.files >& tbs_1.log &
+    abinit < tbs_1.files > tbs_1.log 2> err &
 
 so that we can analyze the input file while the code is running.
 
-The input file is located in *~abinit/tests/tutorial/Input/tbs_1.in*. 
+The input file is located in *\$ABI_TUTORIAL/Input/tbs_1.in*. 
 The header reports a brief description of the calculation so read it carefully. 
 Don't worry if some parts are not clear to you as we are going to discuss the
 calculation in step by step fashion.
@@ -38,7 +44,7 @@ calculation in step by step fashion.
 
 This input file generates the two WFK files and the SCR file needed for
 the subsequent Bethe-Salpeter computations. The first dataset performs a
-rather standard ground-state calculation on an gamma-centered 4x4x4 grid (64 k
+rather standard ground-state calculation on an $\Gamma$-centered 4x4x4 grid (64 k
 points in the full Brillouin Zone, folding to 8 k points in the irreducible wedge). 
 Then the ground-state density is used in dataset 2 and 3 to generate
 two WFK files with a standard NSCF run and the conjugate-gradient method.
@@ -49,7 +55,7 @@ Note that the WFK file computed in dataset 2 contains **100 bands** on the 4x4x4
     
     shiftk3    0.11 0.21 0.31  # This shift breaks the symmetry of the k-mesh.
 
-The gamma-centered k-mesh contains 8 points in the IBZ while the
+The $\Gamma$-centered k-mesh contains 8 points in the IBZ while the
 shifted k-mesh breaks the symmetry of the crystal leading to 64 points in the
 IBZ (actually the IBZ now coincides with the full Brillouin zone). The second
 mesh is clearly inefficient, so you might wonder why we are using such a
@@ -123,7 +129,7 @@ rename these precious files using more meaningful names *e.g.*:
   
 This section is intended to show how to perform a standard excitonic
 calculation within the Tamm-Dancoff approximation (TDA) using the Haydock iterative technique. 
-The input file is *~abinit/tests/tutorial/Input/tbs_2.in*.
+The input file is *\$ABI_TUTORIAL/tutorial/Input/tbs_2.in*.
 
 Before running the job, we have to connect this calculation with the output
 results produced in *tbs_1.in*.
@@ -139,14 +145,14 @@ for doing so will be clear afterwards once we discuss the input file.
 This job lasts 1-2 minutes on a modern machine so it is worth running it
 before inspecting the input file.
 
-Copy the files file *~abinit/tests/tutorial/Input/tbs_2.files* in the working
+Copy the files file *\$ABI_TUTORIAL/Input/tbs_2.files* in the working
 directory and issue:
     
-    abinit < tbs_2.files >& tbs_2.log &
+    abinit < tbs_2.files > tbs_2.log 2> err &
 
 to put the job in background so that we can examine *tbs_2.in*.
 
-Now open *~abinit/tests/tutorial/Input/tbs_2.in* in your preferred editor and go
+Now open *\$ABI_TUTORIAL/Input/tbs_2.in* in your preferred editor and go
 to the next section where we discuss the most important variables governing a
 typical BS computation.
 
@@ -284,11 +290,11 @@ analyse the output data of the computation.
 
 The most important results are stored in five different files:
 
-  * tbs_2o_BSR 
-  * tbs_2o_HAYDR_SAVE 
-  * tbs_2o_RPA_NLF_MDF 
-  * tbs_2o_GW_NLF_MDF 
-  * tbs_2o_EXC_MDF 
+  * *tbs_2o_BSR*
+  * *tbs_2o_HAYDR_SAVE*
+  * *tbs_2o_RPA_NLF_MDF* 
+  * *tbs_2o_GW_NLF_MDF*
+  * *tbs_2o_EXC_MDF*
 
 In what follows, we provide a brief description of the format and of the
 content of each output file.
@@ -323,7 +329,7 @@ tbs_2o_EXC_MDF
 
 :   Formatted file reporting the macroscopic dielectric function with excitonic effects. 
     
-The `EXC_MDF` file contains the most important results of our
+The *EXC_MDF* file contains the most important results of our
 calculation so it is worth spending some time to discuss its format.
 
 First we have a header reporting the basic parameters of the calculation:
@@ -426,7 +432,7 @@ is already able to capture the most important physics.
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, you can use the |abiopen| script
+    If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `--expose` option to visualize the dielectric functions stored in the MDF.nc file:
 
         abiopen.py tbs_2o_MDF.nc --expose --seaborn
@@ -434,13 +440,13 @@ is already able to capture the most important physics.
     ![](bse_assets/abiopen_tbs_2o_MDF.png)
 
     For further information about the MDF file and the post-processing tools provided by AbiPy,
-    please consult the |MdfFileNb|
+    please consult the |MdfFileNb|.
 
 
 ### Optional Exercises
 
 * Change the value of the Lorentzian broadening [[zcut]] used to avoid divergences in the continued fraction. 
-  Then restart the Haydock algorithm from the `_BSR` and `_HAYDR_SAVE` files using the appropriate variables. 
+  Then restart the Haydock algorithm from the *_BSR* and *_HAYDR_SAVE* files using the appropriate variables. 
   What is the main effect of the broadening on the final spectrum. 
   Does the number of iterations needed to converge depend on the broadening? 
 
@@ -501,7 +507,7 @@ study should be done once converged values for the other parameters have been al
 In this section we take advantage of the multi-dataset capabilities of ABINIT
 to perform calculations with different values for [[bs_loband]] and [[nband]]
 
-Before running the test take some time to read the input file *~abinit/tests/tutorial/Input/tbs_3.in*.
+Before running the test take some time to read the input file *\$ABI_TUTORIAL/Input/tbs_3.in*.
 
 {% dialog tests/tutorial/Input/tbs_3.in %}
 
@@ -514,7 +520,7 @@ datasets with different values for [[nband]] and [[bs_loband]]
 
     
 The parameters defining how to build the excitonic Hamiltonian are similar to
-the ones used in tbs_2.in. The only difference is in the value used for [[bs_coulomb_term]], *i.e.*
+the ones used in *tbs_2.in*. The only difference is in the value used for [[bs_coulomb_term]], *i.e.*
     
     bs_coulomb_term  10  # Coulomb term evaluated within the diagonal approximation.
 
@@ -534,7 +540,7 @@ ln -s 444_shifted_WFK tbs_3i_DS2_WFK
     
 Now we can finally run the test with
     
-    abinit < tbs_3.files >& tbs3.log &
+    abinit < tbs_3.files > tbs3.log 2> err &
 
 This job should last 3-4 minutes so be patient!
 
@@ -577,7 +583,7 @@ convergence of the spectrum with respect to the number of planewaves in the scre
 
 !!! tip
 
-    If |AbiPy| in installed on your machine, you can use the |abicomp| script
+    If |AbiPy| is installed on your machine, you can use the |abicomp| script
     with the `mdf` command and the `--expose` option to compare 
     multiple dielectric functions:
 
@@ -607,7 +613,7 @@ provided that, in the input file, we replace [[irdwfk]] and [[irdscr]] with
 ## Convergence with respect to the number of planewaves in the screening
   
 First of all, before running the calculation, take some time to understand
-what is done in *~abinit/tests/tutorial/Input/tbs_4.in*.
+what is done in *\$ABI_TUTORIAL/Input/tbs_4.in*.
 
 The structure of the input file is very similar to the one of *tbs_3.in*, the
 main difference is in the first section:
@@ -631,7 +637,7 @@ block of the initial matrix. A WARNING message is issued if the value
 specified in the input file is larger than the one available in the SCR file.
 
 Now we can finally run the calculation. As usual, we have to copy
-*~abinit/tests/tutorial/Input/tbs_4.files* in the working directory *Work_bs*,
+*\$ABI_TUTORIAL/Input/tbs_4.files* in the working directory *Work_bs*,
 then we have to create a bunch of symbolic links for the input WFK and SCR files:
     
     ln -s 444_SCR tbs_4i_DS1_SCR
@@ -641,7 +647,7 @@ then we have to create a bunch of symbolic links for the input WFK and SCR files
     
 Now issue
     
-    abinit < tbs_4.files >& tbs4.log &
+    abinit < tbs_4.files > tbs4.log 2> err &
 
 to execute the test (it should take around 2 minutes).
 
@@ -683,7 +689,7 @@ part since it requires the generation of new WFK files and of the new SCR file
 for each k-mesh (the list of k-points for the wavefunctions and the set of
 q-points in the screening must be consistent with each other).
 
-The file *~abinit/tests/tutorial/Input/tbs_5.in* gathers the different steps of
+The file *\$ABI_TUTORIAL/Input/tbs_5.in* gathers the different steps of
 a standard BS calculation (generation of two WFK file, screening calculation,
 BS run) into a single input. The calculation is done with the converged
 parameters found in the previous studies, only [[ngkpt]] has been intentionally left undefined.

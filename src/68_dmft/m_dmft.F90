@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,6 +20,7 @@
 !! CHILDREN
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -32,7 +33,7 @@ MODULE m_dmft
  use defs_basis
  implicit none
 
- private 
+ private
 
  public :: dmft_solve
  public :: impurity_solve
@@ -50,7 +51,7 @@ contains
 !! Solve the DMFT loop from PAW data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,13 +85,6 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtvol)
 
 
@@ -98,7 +92,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_data4entropyDMFT
 
  use m_time,           only : timab
@@ -110,20 +104,12 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 &                    print_green,printocc_green,&
 &                    integrate_green,copy_green,compute_green,&
 &                    check_fourier_green,local_ks_green,fermi_green
- use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper
+ use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper!,upfold_oper,init_oper,destroy_oper,print_oper
  use m_self, only : self_type,initialize_self,destroy_self,print_self,dc_self,rw_self,new_self,make_qmcshift_self
  use m_hu, only : hu_type,init_hu,destroy_hu
  use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_ldau_energy
- use m_matlu, only : print_matlu,sym_matlu
+ use m_matlu, only : print_matlu,sym_matlu!,identity_matlu
  use m_datafordmft, only : psichi_renormalization
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dmft_solve'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -142,7 +128,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  real(dp) :: tsec(2)
 !scalars
  integer :: check,idmftloop,istep_iter,spaceComm,my_rank,opt_renorm
- integer :: itypat
+ integer :: itypat,natomcor,iatom
  logical :: etot_var
  character(len=200) :: char_enddmft
 ! type
@@ -152,6 +138,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  type(green_type) :: weiss
  type(self_type) :: self
  type(self_type) :: self_new
+ !type(oper_type) :: self_minus_hdc_oper
  type(energy_type) :: energies_dmft
  type(energy_type) :: energies_tmp
  character(len=500) :: message
@@ -163,9 +150,9 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  my_rank = xmpi_comm_rank(paw_dmft%spacecomm)
 
  check=paw_dmft%dmftcheck ! checks enabled
- paw_dmft%dmft_fepr=tol5
- paw_dmft%dmft_chpr=tol6
-!paw_dmft%dmft_chpr=20_dp ! total number of electron.
+ !paw_dmft%dmft_fermi_prec=tol5
+ paw_dmft%dmft_fermi_prec=paw_dmft%dmft_charge_prec*ten
+!paw_dmft%dmft_charge_prec=20_dp ! total number of electron.
  paw_dmft%dmft_prgn=1
  paw_dmft%dmft_prgn=0
  etot_var=.true.
@@ -222,15 +209,36 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 & '  ***** => Calculation of Green function is thus correct without self ****'
  call wrtout(std_out,message,'COLL')
  call destroy_green(greenlda)
- 
+
 !== Orthonormalize psichi
 !----------------------------------------------------------------------
  call timab(621,1,tsec)
+ natomcor=0
+ do iatom=1,paw_dmft%natom
+   if(paw_dmft%lpawu(iatom).ne.-1) then
+     natomcor=natomcor+1
+   end if
+ end do
  opt_renorm=3
- if(paw_dmft%nspinor==2.and.paw_dmft%dmft_solv==5) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
+! write(6,*) "natomcor",natomcor
+! if(natomcor>1) opt_renorm=2
+ if(paw_dmft%nspinor==2.and.paw_dmft%dmft_solv==8) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
                                                                 ! ought to be  generalized  in the  future
  if(paw_dmft%dmft_solv/=-1) then
    call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)
+
+
+   ! check that loc_oper(upfold_oper)=I
+   !  call init_oper(paw_dmft,self_minus_hdc_oper)
+   !  call identity_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom)
+   !  call print_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,1)
+   !  call upfold_oper(self_minus_hdc_oper,paw_dmft,1)
+   !  call print_oper(self_minus_hdc_oper,9,paw_dmft,3)
+   !  call loc_oper(self_minus_hdc_oper,paw_dmft,1)
+   !  call sym_matlu(cryst_struc,self_minus_hdc_oper%matlu,pawang)
+   !  call print_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,1)
+   !  call destroy_oper(self_minus_hdc_oper)
+
 
 !  ===========================================================================
 !  ==  re-construct LDA green function with new psichis
@@ -318,8 +326,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  call icip_green("Green_inputself",cryst_struc,green,&
 & paw_dmft,pawang,pawprtvol,self,opt_self=1)
    !call print_green('beforefermi_green',green,1,paw_dmft,pawprtvol=1,opt_wt=1)
-!   stop
-!   call leave_new('COLL')
+!   call abi_abort('COLL')
 
 !== Find fermi level
 !---------------------------------------------------------------------
@@ -355,7 +362,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 
 !=======================================================================
 !===  dmft loop  =======================================================
- do idmftloop=1, paw_dmft%dmft_iter 
+ do idmftloop=1, paw_dmft%dmft_iter
    !paw_dmft%idmftloop=idmftloop
    paw_dmft%idmftloop=paw_dmft%idmftloop+1
 !  =======================================================================
@@ -367,10 +374,9 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 
 !  == Dyson Equation G,self -> weiss(w)
 !  ---------------------------------------------------------------------
-   call dyson(green,paw_dmft,self,weiss,opt_weissself=1)  
+   call dyson(green,paw_dmft,self,weiss,opt_weissself=1)
 !   call print_green('afterDyson',green,1,paw_dmft,pawprtvol=1,opt_wt=1)
-!   stop
-!   call leave_new('COLL')
+!   call abi_abort('COLL')
 
 !  == Printout local "occupations" from weiss field  (useless)
    if(abs(pawprtvol)>3) then
@@ -378,7 +384,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 &     pawang,prtopt=2,opt_ksloc=2)
      call printocc_green(weiss,5,paw_dmft,3,opt_weissgreen=1)
    end if
-   
+
 !  ===  Prepare data, solve Impurity problem: weiss(w) -> G(w)
 !  ---------------------------------------------------------------------
    call initialize_self(self_new,paw_dmft)
@@ -396,7 +402,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !  ---------------------------------------------------------------------
 !  if dmft_solv==1, self is computed previously
    if(abs(paw_dmft%dmft_solv)/=1) then
-     call dyson(green,paw_dmft,self_new,weiss,opt_weissself=2) 
+     call dyson(green,paw_dmft,self_new,weiss,opt_weissself=2)
    end if
 !  do ifreq=1,green%nw
 !  call sym_matlu(cryst_struc,self%oper(ifreq)%matlu,pawang)
@@ -425,7 +431,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !  fermi level not optimized for this self_energy.
 !  ---------------------------------------------------------------------
 !  green= local green function and local charge comes directly from solver
-!  green= ks green function and occupations comes from old_self 
+!  green= ks green function and occupations comes from old_self
    call compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,&
 &   pawtab,self_new,occ_type="nlda",part=part2)
 
@@ -438,7 +444,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
    call print_self(self,"print_dc",paw_dmft,2) ! print self and DC
    call destroy_self(self_new)
 
-!  ==  Compute green function self -> G(k) 
+!  ==  Compute green function self -> G(k)
 !  ---------------------------------------------------------------------
    call compute_green(cryst_struc,green,paw_dmft,pawang,1,self,opt_self=1,opt_nonxsum=1)
 
@@ -453,7 +459,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !  ==  Find fermi level
 !  ---------------------------------------------------------------------
    call fermi_green(cryst_struc,green,paw_dmft,pawang,self)
-!  call leave_new('COLL')
+!  call abi_abort('COLL')
 
 !  ==  Compute Energy with Mixed self-energy and green function  recomputed with new self
 !  ---------------------------------------------------------------------
@@ -535,15 +541,14 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !write(std_out,*) "PRINTOCC AFTER LOC_OPER"
 !call printocc_green(green,9,paw_dmft,3,chtype="converged DMFT")
 !call flush_unit(std_out)
-!call leave_new('COLL')
+!call abi_abort('COLL')
  if(paw_dmft%dmft_solv<=2.and.paw_dmft%prtdos>=1) then
-   call spectral_function(cryst_struc,green,hu,&
-&   paw_dmft,pawang,pawtab,self,pawprtvol) 
+   call spectral_function(cryst_struc,green,hu,paw_dmft,pawang,pawtab,self,pawprtvol)
  end if
  call destroy_green(weiss)
  call destroy_green(green)
 !todo_ab rotate back density matrix into unnormalized basis just for
-!printout 
+!printout
  call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call destroy_self(self)
  call destroy_energy(energies_dmft,paw_dmft)
@@ -568,7 +573,7 @@ end subroutine dmft_solve
 !! Solve the Impurity problem
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -596,13 +601,6 @@ end subroutine dmft_solve
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,self_new,weiss,pawprtvol)
 
@@ -610,7 +608,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_time,    only : timab
  use m_crystal, only : crystal_t
@@ -628,14 +626,6 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
  use m_hubbard_one, only : hubbard_one
  use m_ldau_self, only : ldau_self
  use m_forctqmc, only : qmc_prep_ctqmc
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'impurity_solve'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -657,7 +647,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
  real(dp) :: tsec(2)
  character(len=500) :: message
  complex(dpc) :: xx
- integer :: ifreq   
+ integer :: ifreq
 ! integer iatom,il,i_nd,isppol,lpawu,im,Nd,nrat,nsweeptot
 ! real(dp) :: acc,kx
 ! real(dp), allocatable :: correl(:,:),g0(:,:),gtmp(:,:)
@@ -695,7 +685,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
    call wrtout(std_out,message,'COLL')
    call fourier_green(cryst_struc,weiss,paw_dmft,pawang,opt_ksloc=2,opt_tw=-1)
 
-!  == Print weiss function G2_0(tau=0-) 
+!  == Print weiss function G2_0(tau=0-)
 !  --------------------------------------
    call printocc_green(weiss,6,paw_dmft,3,opt_weissgreen=1)
 
@@ -713,7 +703,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
    write(message,'(2a,i3,13x,a)') ch10,'   ===  Initialize Green function G(tau)'
    call wrtout(std_out,message,'COLL')
    call init_green_tau(green,paw_dmft)
-   
+
  end if
 !=======================================================================
 !== End preparation of QMC
@@ -789,7 +779,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
      call fourier_green(cryst_struc,green,paw_dmft,&
 &     pawang,opt_ksloc=2,opt_tw=1)
      do ifreq=1,green%nw
-       xx= green%oper(ifreq)%matlu(1)%mat(1,1,1,1,1) 
+       xx= green%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
        write(112,*) paw_dmft%omega_lo(ifreq),real(one/xx),aimag(one/xx)
        write(113,*) paw_dmft%omega_lo(ifreq),real(xx),aimag(xx)
      end do
@@ -857,7 +847,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
      call print_green('DMFT_IMPURITY',green,1,paw_dmft,pawprtvol=1,opt_wt=1)
    end if
  end if
-!stop 
+!stop
 
  if(abs(pawprtvol)>0) then
  end if
@@ -872,10 +862,10 @@ end subroutine impurity_solve
 !! dyson
 !!
 !! FUNCTION
-!! Use the Dyson Equation to compute self-energy from green function 
+!! Use the Dyson Equation to compute self-energy from green function
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -906,17 +896,10 @@ end subroutine impurity_solve
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
-#include "abi_common.h"
-
 subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_time,         only : timab
@@ -926,14 +909,6 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  use m_oper, only : oper_type,inverse_oper
  use m_matlu, only : matlu_type,add_matlu,print_matlu
  use m_self, only : self_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dyson'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1032,7 +1007,7 @@ end subroutine dyson
 !! Print the spectral function computed from Green function in real frequency
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1040,12 +1015,12 @@ end subroutine dyson
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
-!!  green  <type(green_type)>= green function data 
+!!  green  <type(green_type)>= green function data
 !!  hu  <type(hu_type)>= datatype of type hu
 !!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  self <type(self_type)>= variables related to self-energy
-!!  prtopt= option for printing 
+!!  prtopt= option for printing
 !!
 !! OUTPUT
 !!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
@@ -1062,19 +1037,13 @@ end subroutine dyson
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,prtopt)
 
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_crystal, only : crystal_t
  use m_green, only : init_green,green_type,print_green,copy_green,compute_green,destroy_green
@@ -1087,14 +1056,6 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
  use m_pawtab, only : pawtab_type
  use m_hubbard_one, only : hubbard_one
  use m_ldau_self, only : ldau_self
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectral_function'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1125,7 +1086,7 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
  call copy_matlu(green%occup%matlu,greenr%occup%matlu,paw_dmft%natom)
  call initialize_self(selfr,paw_dmft,wtype="real")
 !=======================================================================
-!== Solve impurity model with green function for real frequency   
+!== Solve impurity model with green function for real frequency
 !=======================================================================
  write(message,'(2a,i3,13x,a)') ch10,'  ===  Write Spectral function'
  call wrtout(std_out,message,'COLL')
@@ -1172,7 +1133,7 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 !=======================================================================
  call dc_self(green%charge_matlu_solver,cryst_struc,hu,selfr,paw_dmft%dmft_dc,prtopt)
  if(abs(paw_dmft%dmft_solv)/=1.and.paw_dmft%dmft_solv/=0) then
-   call dyson(greenr,paw_dmft,selfr,weissr,opt_weissself=2) 
+   call dyson(greenr,paw_dmft,selfr,weissr,opt_weissself=2)
  end if
  call compute_green(cryst_struc,greenr,paw_dmft,pawang,1,selfr,opt_self=1)
  call print_green("realw",greenr,4,paw_dmft,pawprtvol=3)

@@ -8,7 +8,7 @@
 !!  spherical harmonics Ylm (resp. Slm) (and gradients).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT, FJ, TRangel)
+!! Copyright (C) 2013-2019 ABINIT group (MT, FJ, NH, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,21 +32,31 @@ MODULE m_paw_sphharm
  private
 
 !public procedures.
- public :: ylmc         ! Complex Spherical harmonics for l<=3.
- public :: ylmcd        ! First derivative of complex Ylm wrt theta and phi up to l<=3
- public :: ylm_cmplx    ! All (complex) spherical harmonics for lx<=4
- public :: initylmr     ! Real Spherical Harmonics on a set of vectors
- public :: ys           ! Matrix element <Yl'm'|Slm>
- public :: lxyz         ! Matrix element <Yl'm'|L_idir|Ylm>
- public :: slxyzs       ! Matrix element <Sl'm'|L_idir|Slm>
- public :: plm_coeff    ! Coefficients depending on Plm used to compute the 2nd der of Ylm
- public :: ass_leg_pol  ! Associated Legendre Polynomial Plm(x)
- public :: plm_d2theta  ! d2(Plm (cos(theta)))/d(theta)2 (P_lm= ass. legendre polynomial)
- public :: plm_dphi     ! m*P_lm(x)/sqrt((1-x^2)  (P_lm= ass. legendre polynomial)
- public :: plm_dtheta   ! -(1-x^2)^1/2*d/dx{P_lm(x)} (P_lm= ass. legendre polynomial)
- public :: pl_deriv     ! d2(Pl (x)))/d(x)2  where P_l is a legendre polynomial
- public :: mat_mlms2jmj ! Change a matrix from the Ylm basis to the J,M_J basis
- public :: mat_slm2ylm  ! Change a matrix from the Slm to the Ylm basis or from Ylm to Slm
+ public :: ylmc            ! Complex Spherical harmonics for l<=3.
+ public :: ylmcd           ! First derivative of complex Ylm wrt theta and phi up to l<=3
+ public :: ylm_cmplx       ! All (complex) spherical harmonics for lx<=4
+ public :: initylmr        ! Real Spherical Harmonics on a set of vectors
+ public :: ys              ! Matrix element <Yl'm'|Slm>
+ public :: lxyz            ! Matrix element <Yl'm'|L_idir|Ylm>
+ public :: slxyzs          ! Matrix element <Sl'm'|L_idir|Slm>
+ public :: plm_coeff       ! Coefficients depending on Plm used to compute the 2nd der of Ylm
+ public :: ass_leg_pol     ! Associated Legendre Polynomial Plm(x)
+ public :: plm_d2theta     ! d2(Plm (cos(theta)))/d(theta)2 (P_lm= ass. legendre polynomial)
+ public :: plm_dphi        ! m*P_lm(x)/sqrt((1-x^2)  (P_lm= ass. legendre polynomial)
+ public :: plm_dtheta      ! -(1-x^2)^1/2*d/dx{P_lm(x)} (P_lm= ass. legendre polynomial)
+ public :: pl_deriv        ! d2(Pl (x)))/d(x)2  where P_l is a legendre polynomial
+ public :: mkeuler         ! For a given symmetry operation, determines the corresponding Euler angles
+ public :: dble_factorial  ! Compute factorial of an integer; returns a double precision real
+ public :: dbeta           ! Calculate the rotation matrix d^l_{m{\prim}m}(beta)
+ public :: phim            ! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
+                           !                       Sqrt[2] sin[Abs(m) theta], if m<0
+                           !                       1                        , if m=0
+ public :: mat_mlms2jmj    ! Change a matrix from the Ylm basis to the J,M_J basis
+ public :: mat_slm2ylm     ! Change a matrix from the Slm to the Ylm basis or from Ylm to Slm
+ public :: create_slm2ylm  ! For a given angular momentum lcor, compute slm2ylm
+ public :: create_mlms2jmj ! For a given angular momentum lcor, give the rotation matrix msml2jmj
+ public :: setsym_ylm      ! Compute rotation matrices expressed in the basis of real spherical harmonics
+ public :: setnabla_ylm    ! Compute rotation matrices expressed in the basis of real spherical harmonics
 !!***
 
 CONTAINS
@@ -82,13 +92,6 @@ CONTAINS
 
 function ylmc(il,im,kcart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -122,7 +125,7 @@ function ylmc(il,im,kcart)
  rxy=SQRT(kcart(1)**2+kcart(2)**2)
  if (rxy<PPAD)rxy=r+PPAD
 !
-! Determine theta and phi 
+! Determine theta and phi
  costh= kcart(3)/r
 
 #if 1
@@ -167,7 +170,7 @@ function ylmc(il,im,kcart)
    ylmc = -SQRT(15.d0/(8.d0*pi))*sinth*costh*cmplx(cosphi,sinphi)
   else if (ABS(im)==2) then
    ylmc = SQRT(15.d0/(32.d0*pi))*(sinth)**2*CMPLX(costwophi,sintwophi)
-  else 
+  else
    msg='wrong im'
    MSG_ERROR(msg)
   end if
@@ -181,7 +184,7 @@ function ylmc(il,im,kcart)
    ylmc= SQRT(105.d0/(32.d0*pi))*sinth**2*costh*CMPLX(costwophi,sintwophi)
   else if (ABS(im)==3) then
    ylmc=-SQRT(35.d0/(64.d0*pi))*sinth**3*CMPLX(costhreephi,sinthreephi)
-  else 
+  else
    msg='wrong im'
    MSG_ERROR(msg)
   end if
@@ -195,20 +198,20 @@ function ylmc(il,im,kcart)
  if (im < 0) ylmc=(-one)**(im)*CONJG(ylmc)
 
  ! FIXME: Use the piece of code below as it works for arbitrary (l,m)
- ! the implementation above is buggy when the vector is along z! 
- ! 
+ ! the implementation above is buggy when the vector is along z!
+ !
 #if 0
 ! Remember the expression of complex spherical harmonics:
 ! $Y_{lm}(\theta,\phi)=sqrt{{(2l+1) over (4\pi)} {fact(l-m)/fact(l+m)} } P_l^m(cos(\theta)) e^{i m\phi}$
-  new_ylmc = SQRT((2*il+1)*factorial(il-ABS(im))/(factorial(il+ABS(im))*four_pi)) * &
+  new_ylmc = SQRT((2*il+1)*dble_factorial(il-ABS(im))/(dble_factorial(il+ABS(im))*four_pi)) * &
 &   ass_leg_pol(il,ABS(im),costh) * CMPLX(cosphi,sinphi)**ABS(im)
   if (im<0) new_ylmc=(-one)**(im)*CONJG(new_ylmc)
 
   if (ABS(new_ylmc-ylmc)>tol6) then
     !MSG_WARNING("Check new_ylmc")
     !write(std_out,*)"il,im,new_ylmc, ylmc",il,im,new_ylmc,ylmc
-    !write(std_out,*)"fact",SQRT((2*il+1)*factorial(il-ABS(im))/(factorial(il+ABS(im))*four_pi))
-    !write(std_out,*)"costh,sinth,ass_leg_pol",costh,sinth,ass_leg_pol(il,ABS(im),costh) 
+    !write(std_out,*)"fact",SQRT((2*il+1)*dble_factorial(il-ABS(im))/(dble_factorial(il+ABS(im))*four_pi))
+    !write(std_out,*)"costh,sinth,ass_leg_pol",costh,sinth,ass_leg_pol(il,ABS(im),costh)
     !write(std_out,*)"cosphi,sinphi,e^{imphi}",cosphi,sinphi,CMPLX(cosphi,sinphi)**ABS(im)
   end if
   ylmc = new_ylmc
@@ -224,7 +227,7 @@ end function ylmc
 !! ylmcd
 !!
 !! FUNCTION
-!!  Computes dth and dphi, the first derivatives of complex Ylm as a function of 
+!!  Computes dth and dphi, the first derivatives of complex Ylm as a function of
 !!  th and phi (the angles of the spherical coordinates)
 !!  It works for all spherical harmonics with l <= 3
 !!
@@ -245,18 +248,10 @@ end function ylmc
 !!      m_vkbr
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine ylmcd(il,im,kcart,dth,dphi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmcd'
-!End of the abilint section
 
  implicit none
 
@@ -271,7 +266,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
 !scalars
  integer,parameter :: LMAX=3
  real(dp),parameter :: PPAD=tol8
- real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi
+ real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi,c
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -290,7 +285,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
  rxy=SQRT(kcart(1)**2+kcart(2)**2)
  if (rxy<PPAD) rxy=r+PPAD
 
-! Determine theta and phi 
+! Determine theta and phi
  costh= kcart(3)/r
 #if 1
  ! old buggy coding
@@ -315,7 +310,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
  select case (il)
 
  case (0)
-   dth  = czero 
+   dth  = czero
    dphi = czero
 
  case (1)
@@ -344,11 +339,13 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
      dth = SQRT(7.d0/(16*pi))*(-15.d0*costh**2*sinth + 3.d0**sinth)
      dphi= czero
    else if (ABS(im)==1) then
-     dth= -SQRT(21.d0/(64.d0*pi))*CMPLX(cosphi,sinphi)*(5.d0*costh**3-costh-10.d0*sinth**2*costh)
-     dphi=-SQRT(21.d0/(64.d0*pi))*sinth*(5.d0*costh**2-1)*(0.d0,1.d0)*CMPLX(cosphi,sinphi)
+     c = SQRT(21.d0/(64.d0*pi))
+     dth= -c*      (15.d0*costh**3-11.d0*costh)*            CMPLX(cosphi,sinphi)
+     dphi=-c*sinth*( 5.d0*costh**2-1          )*(0.d0,1.d0)*CMPLX(cosphi,sinphi)
    else if (ABS(im)==2) then
-     dth =SQRT(105.d0/(32.d0*pi))*(2.d0*sinth*costh**2-sinth**3)*CMPLX(costwophi,sintwophi)
-     dphi=SQRT(105.d0/(32*pi))*sinth**2*costh*(0.d0,2.d0)*CMPLX(costwophi,sintwophi)
+     c = SQRT(105.d0/(32.d0*pi))
+     dth =c*(2.d0*sinth*costh**2-sinth**3)   *CMPLX(costwophi,sintwophi)
+     dphi=c*(2.d0*sinth**2*costh)*(0.d0,1.d0)*CMPLX(costwophi,sintwophi)
    else if (abs(im)==3) then
      dth =-SQRT(35.d0/(64.d0*pi))*3.d0*sinth**2*costh*CMPLX(costhreephi,sinthreephi)
      dphi=-SQRT(35.d0/(64.d0*pi))*sinth**3*(0.d0,3.d0)*CMPLX(costhreephi,sinthreephi)
@@ -392,21 +389,13 @@ end subroutine ylmcd
 !!  We are supressing the so-called Condon-Shortley phase
 !!
 !! PARENTS
-!!      mlwfovlp_proj,mlwfovlp_ylmfac
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine ylm_cmplx(lx,ylm,xx,yy,zz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylm_cmplx'
-!End of the abilint section
 
  implicit none
 
@@ -426,7 +415,7 @@ subroutine ylm_cmplx(lx,ylm,xx,yy,zz)
  real(dp) :: sina(lx+1)
 
 ! *************************************************************************
- 
+
 !normalization coefficients
  sq2=sqrt(2.0d0)
  fact(1)=1.0d0
@@ -550,22 +539,14 @@ end subroutine ylm_cmplx
 !! $Yr_{l-m}(%theta ,%phi)=(Im{Y_{l-m}}-(-1)^m Im{Y_{lm}})/sqrt{2}
 !!
 !! PARENTS
-!!      debug_tools,denfgr,m_paw_finegrid,m_paw_pwaves_lmn,m_pawang
-!!      mlwfovlp_ylmfar,posdoppler,pspnl_operat_rec,qijb_kk,smatrix_pawinit
+!!      m_mlwfovlp,m_paw_finegrid,m_paw_mkrho,m_paw_overlap,m_paw_pwaves_lmn
+!!      m_pawang,m_positron,m_rec
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initylmr'
-!End of the abilint section
 
  implicit none
 
@@ -760,8 +741,8 @@ end subroutine initylmr
 !!  integer :: l',m',l,m
 !!
 !! OUTPUT
-!!  complex(dpc) :: ys_val 
-!! 
+!!  complex(dpc) :: ys_val
+!!
 !! NOTES
 !! Ylm is the standard complex-valued spherical harmonic, Slm is the real spherical harmonic
 !! used througout abinit. <Yl'm'|Slm> is their overlap.
@@ -770,18 +751,10 @@ end subroutine initylmr
 !!      m_epjdos,m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine ys(lp,mp,ll,mm,ys_val)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ys'
-!End of the abilint section
 
  implicit none
 
@@ -791,35 +764,44 @@ subroutine ys(lp,mp,ll,mm,ys_val)
  complex(dpc),intent(out) :: ys_val
 
 !Local variables ---------------------------------------
-!scalars
- complex(dpc) :: dmpmm,dmpmmm,m1mm
+ !scalars
+ real(dp) :: d_lp_ll,d_mp_mm,d_mp_mbar,d_mp_am,d_mp_ambar,powm,powam
 
 ! *********************************************************************
 
- 
+
  ys_val = czero
 
- if(lp==ll .AND. (mp==mm .OR. mp==-mm) ) then
-  ! (-1)**mm
-   m1mm=cone; if(abs(mod(mm,2))==1) m1mm=-m1mm
-  
-  ! delta(mp,mm)
-   dmpmm=czero; if(mp==mm) dmpmm=cone
-  
-  ! delta(mp,-mm)
-   dmpmmm=czero; if(mp==-mm) dmpmmm=cone
+ d_lp_ll = zero
+ if (lp .EQ. ll) d_lp_ll = one
 
-   select case (mm)
-       case (0) ! case for S_l0
-         ys_val = dmpmm
-       case (:-1) ! case for S_lm with m < 0
-         ys_val = -(zero,one)*m1mm*sqrthalf*(dmpmmm-m1mm*dmpmm)
-       case (1:) ! case for S_lm with m > 0
-         ys_val = m1mm*sqrthalf*(dmpmm+m1mm*dmpmmm)
-   end select
+ d_mp_mm = zero
+ if (mp .EQ. mm) d_mp_mm = one
 
- end if
- 
+ d_mp_mbar = zero
+ if (mp .EQ. -mm) d_mp_mbar = one
+
+ d_mp_am = zero
+ if (mp .EQ. abs(mm)) d_mp_am = one
+
+ d_mp_ambar = zero
+ if (mp .EQ. -abs(mm)) d_mp_ambar = one
+
+ powm=-one
+ if (mod(mm,2) .EQ. 0) powm = one
+
+ powam=-one
+ if (mod(abs(mm),2) .EQ. 0) powam = one
+
+ select case (mm)
+ case (0) ! case for S_l0
+    ys_val = cone*d_lp_ll*d_mp_mm
+ case (:-1) ! case for S_lm with m < 0
+    ys_val = (zero,one)*sqrthalf*powm*d_lp_ll*(-d_mp_am+powam*d_mp_ambar)
+ case (1:) ! case for S_lm with m > 0
+    ys_val = cone*sqrthalf*d_lp_ll*(powm*d_mp_mm+d_mp_mbar)
+ end select
+
 end subroutine ys
 !!***
 
@@ -837,7 +819,7 @@ end subroutine ys
 !!
 !! OUTPUT
 !!   complex(dpc) :: lidir
-!! 
+!!
 !! NOTES
 !!  Ylm is the standard complex-valued spherical harmonic,
 !!  idir is the direction in space of L
@@ -846,18 +828,10 @@ end subroutine ys
 !!      m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine lxyz(lp,mp,idir,ll,mm,lidir)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lxyz'
-!End of the abilint section
 
  implicit none
 
@@ -877,9 +851,9 @@ subroutine lxyz(lp,mp,idir,ll,mm,lidir)
    if (mp==mm+1) jpme=cone*sqrt((ll-mm)*(ll+mm+one))
    if (mp==mm-1) jmme=cone*sqrt((ll-mm+one)*(ll+mm))
  end if
- 
+
  lidir = czero
- if (lp == ll) then 
+ if (lp == ll) then
    select case (idir)
      case (1) ! Lx
        lidir = cone*half*(jpme+jmme)
@@ -907,28 +881,20 @@ end subroutine lxyz
 !!
 !! OUTPUT
 !!   complex(dpc) :: sls_val
-!! 
+!!
 !! NOTES
 !! Slm is the real spherical harmonic used througout abinit,
 !! L_idir is a component of the angular momentum operator.
 !! The subroutine computes <S_l'm'|L_idir|S_lm>
 !!
 !! PARENTS
-!!      m_pawdij
+!!      m_orbmag,m_paw_nmr,m_pawdij
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slxyzs'
-!End of the abilint section
 
  implicit none
 
@@ -945,7 +911,7 @@ subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
 ! *********************************************************************
 
  sls_val = czero
- 
+
  if (lp == ll) then
    lpp  = ll
    lppp = ll
@@ -958,7 +924,7 @@ subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
      end do
    end do
  end if
- 
+
 end subroutine slxyzs
 !!***
 
@@ -980,21 +946,13 @@ end subroutine slxyzs
 !!  blm(5,mpsang*mpsang)=coefficients depending on Plm and its derivatives where P_lm is a legendre polynome
 !!
 !! PARENTS
-!!      initylmg,m_paw_sphharm
+!!      m_initylmg,m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine plm_coeff(blm,mpsang,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_coeff'
-!End of the abilint section
 
  implicit none
 
@@ -1103,13 +1061,6 @@ end subroutine plm_coeff
 
 function ass_leg_pol(l,m,xarg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ass_leg_pol'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1182,18 +1133,10 @@ end function ass_leg_pol
 !!      m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine plm_d2theta(mpsang,plm_d2t,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_d2theta'
-!End of the abilint section
 
  implicit none
 
@@ -1279,13 +1222,6 @@ end subroutine plm_d2theta
 !! SOURCE
 
 function plm_dphi(ll,mm,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_dphi'
-!End of the abilint section
 
  implicit none
 
@@ -1375,13 +1311,6 @@ end function plm_dphi
 
 function plm_dtheta(ll,mm,xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_dtheta'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1467,18 +1396,10 @@ end function plm_dtheta
 !!      m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine pl_deriv(mpsang,pl_d2,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pl_deriv'
-!End of the abilint section
 
  implicit none
 
@@ -1523,6 +1444,298 @@ end subroutine pl_deriv
 
 !----------------------------------------------------------------------
 
+!!****f* m_paw_sphharm/mkeuler
+!! NAME
+!! mkeuler
+!!
+!! FUNCTION
+!! For a given symmetry operation, determines the corresponding Euler angles
+!!
+!! INPUTS
+!!  rot(3,3)= symmetry matrix
+!!
+!! OUTPUT
+!!  cosalp=  cos(alpha) with alpha=Euler angle 1
+!!  cosbeta= cos(beta)  with beta =Euler angle 2
+!!  cosgam=  cos(gamma) with gamma=Euler angle 3
+!!  isn= error code (0 if the routine exit normally)
+!!  sinalp= sin(alpha) with alpha=Euler angle 1
+!!  singam= sin(gamma) with gamma=Euler angle 3
+!!
+!! NOTES
+!!  This file comes from the file crystal_symmetry.f
+!!  by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!
+!! PARENTS
+!!      m_paw_sphharm
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(out) :: isn
+ real(dp),intent(out) :: cosalp,cosbeta,cosgam,sinalp,singam
+!arrays
+ real(dp),intent(in) :: rot(3,3)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ier
+ real(dp) :: check,sinbeta
+ character(len=500) :: msg
+
+! *********************************************************************
+
+ do isn= -1,1,2
+   cosbeta=real(isn)*rot(3,3)
+   if(abs(1._dp-cosbeta*cosbeta)<tol10) then
+     sinbeta=zero
+   else
+     sinbeta=sqrt(1._dp-cosbeta*cosbeta)
+   end if
+   if (abs(sinbeta).gt.tol10)  then
+     cosalp=isn*rot(3,1)/sinbeta
+     sinalp=isn*rot(3,2)/sinbeta
+     cosgam=-isn*rot(1,3)/sinbeta
+     singam=isn*rot(2,3)/sinbeta
+   else
+     cosalp=isn*rot(1,1)/cosbeta
+     sinalp=isn*rot(1,2)/cosbeta
+     cosgam=one
+     singam=zero
+   end if
+
+!  Check matrix:
+   ier=0
+   check=cosalp*cosbeta*cosgam-sinalp*singam
+   if (abs(check-isn*rot(1,1))>tol8) ier=ier+1
+   check=sinalp*cosbeta*cosgam+cosalp*singam
+   if (abs(check-isn*rot(1,2))>tol8) ier=ier+1
+   check=-sinbeta*cosgam
+   if (abs(check-isn*rot(1,3))>tol8) ier=ier+1
+   check=-cosalp*cosbeta*singam-sinalp*cosgam
+   if (abs(check-isn*rot(2,1))>tol8) ier=ier+1
+   check=-sinalp*cosbeta*singam+cosalp*cosgam
+   if (abs(check-isn*rot(2,2))>tol8) ier=ier+1
+   check=sinbeta*singam
+   if (abs(check-isn*rot(2,3))>tol8) ier=ier+1
+   check=cosalp*sinbeta
+   if (abs(check-isn*rot(3,1))>tol8) ier=ier+1
+   check=sinalp*sinbeta
+   if (abs(check-isn*rot(3,2))>tol8) ier=ier+1
+   if (ier.eq.0) return
+ end do
+
+ isn=0
+ write(msg, '(7a)' )&
+& 'Error during determination of symetries!',ch10,&
+& 'Action: check your input file:',ch10,&
+& 'unit cell vectors and/or atoms positions',ch10,&
+& 'have to be given with a better precision.'
+ MSG_ERROR(msg)
+
+end subroutine mkeuler
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/dble_factorial
+!! NAME
+!! dble_factorial
+!!
+!! FUNCTION
+!! PRIVATE function
+!! Calculates N! as a double precision real.
+!!
+!! INPUTS
+!!   nn=input integer
+!!
+!! OUTPUT
+!!   factorial= N! (double precision)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental function dble_factorial(nn)
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ real(dp) :: dble_factorial
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ii
+
+! *********************************************************************
+
+ dble_factorial=one
+ do ii=2,nn
+   dble_factorial=dble_factorial*ii
+ end do
+
+end function dble_factorial
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/dbeta
+!! NAME
+!! dbeta
+!!
+!! FUNCTION
+!!  Calculate the rotation matrix d^l_{m{\prim}m}(beta) using Eq. 4.14 of
+!!  M.E. Rose, Elementary Theory of Angular Momentum,
+!!             John Wiley & Sons, New-York, 1957
+!!
+!! INPUTS
+!!  cosbeta= cosinus of beta (=Euler angle)
+!!  ll= index l
+!!  mm= index m
+!!  mp= index m_prime
+!!
+!! OUTPUT
+!!  dbeta= rotation matrix
+!!
+!! NOTES
+!!  - This file comes from the file crystal_symmetry.f
+!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!  - Assume l relatively small so that factorials do not cause
+!!    roundoff error
+!!
+!! PARENTS
+!!     m_paw_sphharm
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function dbeta(cosbeta,ll,mp,mm)
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: ll,mm,mp
+ real(dp) :: dbeta
+ real(dp),intent(in) :: cosbeta
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: mxterms=200
+ integer :: ii,ina,inb,inc,ml,ms
+ real(dp) :: arg,cosbetab2,pref,sinbetab2,sum,tt
+
+!************************************************************************
+ dbeta=zero
+
+!Special cases
+ if (abs(cosbeta-1._dp).lt.tol10) then
+   if (mp.eq.mm) dbeta=1
+ else if (abs(cosbeta+1._dp).lt.tol10) then
+   if (mp.eq.-mm) dbeta=(-1)**(ll+mm)
+ else
+
+!  General case
+   cosbetab2=sqrt((1+cosbeta)*0.5_dp)
+   sinbetab2=sqrt((1-cosbeta)*0.5_dp)
+   ml=max(mp,mm)
+   ms=min(mp,mm)
+   if (ml.ne.mp) sinbetab2=-sinbetab2
+   tt=-(sinbetab2/cosbetab2)**2
+   pref=sqrt((dble_factorial(ll-ms)*dble_factorial(ll+ml))&
+&   /(dble_factorial(ll+ms)*dble_factorial(ll-ml)))&
+&   /dble_factorial(ml-ms)*(cosbetab2**(2*ll+ms-ml))&
+&   *((-sinbetab2)**(ml-ms))
+   sum=1._dp
+   arg=1._dp
+   ina=ml-ll
+   inb=-ms-ll
+   inc=ml-ms+1
+   do ii=1,mxterms
+     if (ina.eq.0.or.inb.eq.0) exit
+     arg=(arg*ina*inb*tt)/(ii*inc)
+     sum=sum+arg
+     ina=ina+1
+     inb=inb+1
+     inc=inc+1
+   end do
+   dbeta=pref*sum
+ end if
+
+end function dbeta
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/phim
+!! NAME
+!! phim
+!!
+!! FUNCTION
+!! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
+!!                       Sqrt[2] sin[Abs(m) theta], if m<0
+!!                       1                        , if m=0
+!!
+!! INPUTS
+!!  costeta= cos(theta)  (theta= input angle)
+!!  mm = index m
+!!  sinteta= sin(theta)  (theta= input angle)
+!!
+!! OUTPUT
+!!  phim= Phi_m(theta) (see above)
+!!
+!! NOTES
+!!  - This file comes from the file crystal_symmetry.f
+!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!
+!! PARENTS
+!!     m_paw_sphharm
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function phim(costheta,sintheta,mm)
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: mm
+ real(dp) :: phim
+ real(dp),intent(in) :: costheta,sintheta
+
+! *********************************************************************
+
+ if (mm==0)  phim=one
+ if (mm==1)  phim=sqrt2*costheta
+ if (mm==-1) phim=sqrt2*sintheta
+ if (mm==2)  phim=sqrt2*(costheta*costheta-sintheta*sintheta)
+ if (mm==-2) phim=sqrt2*two*sintheta*costheta
+ if (mm==3)  phim=sqrt2*&
+& (costheta*(costheta*costheta-sintheta*sintheta)&
+& -sintheta*two*sintheta*costheta)
+ if (mm==-3) phim=sqrt2*&
+& (sintheta*(costheta*costheta-sintheta*sintheta)&
+& +costheta*two*sintheta*costheta)
+
+ end function phim
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_paw_sphharm/mat_mlms2jmj
 !! NAME
 !! mat_mlms2jmj
@@ -1543,29 +1756,20 @@ end subroutine pl_deriv
 !!  wrt_mode=printing mode in parallel ('COLL' or 'PERS')
 !!
 !! SIDE EFFECTS
-!!  mat_mlms= Input/Ouput matrix in the Ylm basis, size of the matrix is (2*lcor+1,2*lcor+1,ndij)
+!!  mat_mlms= Input/Output matrix in the Ylm basis, size of the matrix is (2*lcor+1,2*lcor+1,ndij)
 !!  mat_jmj= Input/Output matrix in the J,M_J basis, size is 2*(2*lcor+1),2*(2*lcor+1)
 !!
 !! NOTES
 !!  usefull only in ndij==4
 !!
 !! PARENTS
-!!      m_pawang,pawprt,setnoccmmp
+!!      m_paw_correlations,m_paw_tools,m_pawang
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,wrt_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mat_mlms2jmj'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1604,7 +1808,7 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
    msg=' optspin=/1 and =/2 !'
    MSG_BUG(msg)
  end if
- 
+
  if (unitfi/=-1) then
    if(option==1) then
      write(msg,'(3a)') ch10,&
@@ -1616,7 +1820,7 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
      call wrtout(unitfi,msg,wrt_mode)
    end if
  end if
- 
+
  if(option==1) then
    if(optspin==2) then
      if(abs(prtvol)>2.and.unitfi/=-1)&
@@ -1826,22 +2030,13 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
 !!  usefull only in ndij==4
 !!
 !! PARENTS
-!!      m_pawang,pawprt,setnoccmmp
+!!      m_paw_correlations,m_paw_tools,m_pawang
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitfi,wrt_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mat_slm2ylm'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1880,7 +2075,7 @@ subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitf
    write(msg,'(3a)') ch10, "   mat_slm2ylm"
    call wrtout(unitfi,msg,wrt_mode)
  end if
- 
+
  if(abs(prtvol)>2.and.unitfi/=-1) then
    if(option==1.or.option==3) then
      write(msg,'(3a)') ch10,"matrix in Slm basis is changed into Ylm basis"
@@ -1976,7 +2171,747 @@ end subroutine mat_slm2ylm
 
 !----------------------------------------------------------------------
 
-END MODULE m_paw_sphharm
+!!****f* m_paw_sphharm/create_slm2ylm
+!! NAME
+!! create_slm2ylm
+!!
+!! FUNCTION
+!! For a given angular momentum lcor, compute slm2ylm.
+!!
+!! INPUTS
+!!  lcor= angular momentum, size of the matrix is 2(2*lcor+1)
+!!
+!! OUTPUT
+!!  slm2ylm(2lcor+1,2lcor+1) = rotation matrix.
+!!
+!! NOTES
+!!  useful only in ndij==4
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine create_slm2ylm(lcor,slmtwoylm)
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lcor
+!arrays
+ complex(dpc),intent(out) :: slmtwoylm(2*lcor+1,2*lcor+1)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: jm,ll,mm,im
+ real(dp),parameter :: invsqrt2=one/sqrt2
+ real(dp) :: onem
+!arrays
+
+! *********************************************************************
+
+ ll=lcor
+ slmtwoylm=czero
+ do im=1,2*ll+1
+   mm=im-ll-1;jm=-mm+ll+1
+   onem=dble((-1)**mm)
+   if (mm> 0) then
+     slmtwoylm(im,im)= cmplx(onem*invsqrt2,zero,kind=dp)
+     slmtwoylm(jm,im)= cmplx(invsqrt2,     zero,kind=dp)
+   end if
+   if (mm==0) then
+     slmtwoylm(im,im)=cone
+   end if
+   if (mm< 0) then
+     slmtwoylm(im,im)= cmplx(zero,     invsqrt2,kind=dp)
+     slmtwoylm(jm,im)=-cmplx(zero,onem*invsqrt2,kind=dp)
+   end if
+ end do
+
+end subroutine create_slm2ylm
 !!***
 
+!----------------------------------------------------------------------
 
+!!****f* m_paw_sphharm/create_mlms2jmj
+!! NAME
+!! create_mlms2jmj
+!!
+!! FUNCTION
+!! For a given angular momentum lcor, give the rotation matrix msml2jmj
+!!
+!! INPUTS
+!!  lcor= angular momentum
+!!
+!! SIDE EFFECTS
+!!  mlms2jmj= rotation matrix
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine create_mlms2jmj(lcor,mlmstwojmj)
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lcor
+!arrays
+ complex(dpc),intent(out) :: mlmstwojmj(2*(2*lcor+1),2*(2*lcor+1))
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: jc1,jj,jm,ll,ml1,ms1
+ real(dp) :: invsqrt2lp1,xj,xmj
+ character(len=500) :: msg
+!arrays
+ integer, allocatable :: ind_msml(:,:)
+ complex(dpc),allocatable :: mat_mlms2(:,:)
+
+!*********************************************************************
+
+!--------------- Built indices + allocations
+ ll=lcor
+ mlmstwojmj=czero
+ LIBPAW_BOUND2_ALLOCATE(ind_msml,BOUNDS(1,2),BOUNDS(-ll,ll))
+ LIBPAW_ALLOCATE(mat_mlms2,(2*(2*lcor+1),2*(2*lcor+1)))
+ mlmstwojmj=czero
+ jc1=0
+ do ms1=1,2
+   do ml1=-ll,ll
+     jc1=jc1+1
+     ind_msml(ms1,ml1)=jc1
+   end do
+ end do
+
+!--------------- built mlmstwojmj
+!do jj=ll,ll+1    ! the physical value of j are ll-0.5,ll+0.5
+!xj(jj)=jj-0.5
+ if(ll==0)then
+   msg=' ll should not be equal to zero !'
+   MSG_BUG(msg)
+ end if
+ jc1=0
+ invsqrt2lp1=one/sqrt(float(2*lcor+1))
+ do jj=ll,ll+1
+   xj=float(jj)-half
+   do jm=-jj,jj-1
+     xmj=float(jm)+half
+     jc1=jc1+1
+     if(nint(xj+0.5)==ll+1) then
+       if(nint(xmj+0.5)==ll+1)  then
+         mlmstwojmj(ind_msml(2,ll),jc1)=1.0   !  J=L+0.5 and m_J=L+0.5
+       else if(nint(xmj-0.5)==-ll-1) then
+         mlmstwojmj(ind_msml(1,-ll),jc1)=1.0   !  J=L+0.5 and m_J=-L-0.5
+       else
+         mlmstwojmj(ind_msml(2,nint(xmj-0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
+         mlmstwojmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
+       end if
+     end if
+     if(nint(xj+0.5)==ll) then
+       mlmstwojmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
+       mlmstwojmj(ind_msml(2,nint(xmj-0.5)),jc1)=-invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
+     end if
+   end do
+ end do
+
+ LIBPAW_DEALLOCATE(ind_msml)
+ LIBPAW_DEALLOCATE(mat_mlms2)
+
+end subroutine create_mlms2jmj
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/setsym_ylm
+!! NAME
+!! setsym_ylm
+!!
+!! FUNCTION
+!! Compute rotation matrices expressed in the basis of real spherical harmonics
+!! This coefficients are used later to symmetrize PAW on-site quantities (rhoij, dij, ...).
+!!
+!! INPUTS
+!!  gprimd(3,3)==dimensional primitive translations for reciprocal space (bohr^-1)
+!!  lmax=value of lmax mentioned at the second line of the psp file
+!!  nsym=number of symmetry elements in space group
+!!  pawprtvol=control print volume and debugging output
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  sym(3,3,nsym)=symmetries of group in terms of operations on primitive translations
+!!
+!! OUTPUT
+!!  zarot(2*lmax+1,2*lmax+1,lmax+1,nsym)=coefficients of the
+!!      transformation of real spherical harmonics
+!!      under the symmetry operations
+!!
+!! NOTES
+!!  Typical use: sym(:,:,:) is symrec(:,:,:) (rotations in reciprocal space)
+!!               because we need symrel^-1 (=transpose[symrec])
+!!               to symmetrize quantities.
+!!
+!!  - This file comes from the file crystal_symmetry.f
+!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!  - Uses sign & phase convension of  M. E. Rose, Elementary Theory of Angular
+!!    Momentum, John Wiley & Sons,. inc. 1957)
+!!    zalpha = exp(-i*alpha)   zgamma = exp (-i*gamma)
+!!  - Assumes each transformation  can be expressed in terms of 3 Euler
+!!    angles with or without inversion
+!!
+!!  Reference for evaluation of rotation matrices in the basis of real SH:
+!!  Blanco M.A., Florez M. and Bermejo M.
+!!  Journal of Molecular Structure: THEOCHEM, Volume 419, Number 1, 8 December 1997 , pp. 19-27(9)
+!!  http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
+!!
+!! PARENTS
+!!      m_berryphase_new,m_bethe_salpeter,m_dfpt_looppert,m_gstate,m_nonlinear
+!!      m_orbmag,m_respfn_driver,m_screening_driver,m_sigma_driver
+!!      m_wfk_analyze
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lmax,nsym,pawprtvol
+!arrays
+ integer,intent(in) :: sym(3,3,nsym)
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
+ real(dp),intent(out) :: zarot(2*lmax+1,2*lmax+1,lmax+1,nsym)
+
+!Local variables ------------------------------
+!scalars
+ integer :: i1,ii,il,irot,isn,j1,jj,k1,ll,mm,mp
+ real(dp) :: cosalp,cosbeta,cosgam,sinalp,singam
+ character(len=1000) :: msg
+!arrays
+ real(dp) :: prod(3,3),rot(3,3)
+!************************************************************************
+
+ if (abs(pawprtvol)>=3) then
+   write(msg,'(8a,i4)') ch10,&
+&   ' PAW TEST:',ch10,&
+&   ' ==== setsym_ylm: rotation matrices in the basis ============',ch10,&
+&   ' ====              of real spherical harmonics    ============',ch10,&
+&   '  > Number of symmetries (nsym)=',nsym
+   call wrtout(std_out,msg,'COLL')
+ end if
+
+ zarot=zero
+
+ do irot=1,nsym
+
+   if (abs(pawprtvol)>=3) then
+     write(msg,'(a,i2,a,9i2,a)') '   >For symmetry ',irot,' (',sym(:,:,irot),')'
+     call wrtout(std_out,msg,'COLL')
+   end if
+
+!  === l=0 case ===
+   zarot(1,1,1,irot)=one
+
+!  === l>0 case ===
+   if (lmax>0) then
+!    Calculate the rotations in the cartesian basis
+     rot=zero;prod=zero
+     do k1=1,3
+       do j1=1,3
+         do i1=1,3
+           prod(i1,j1)=prod(i1,j1)+sym(i1,k1,irot)*rprimd(j1,k1)
+         end do
+       end do
+     end do
+     do j1=1,3
+       do i1=1,3
+         do k1=1,3
+           rot(i1,j1)=rot(i1,j1)+gprimd(i1,k1)*prod(k1,j1)
+         end do
+         if(abs(rot(i1,j1))<tol10) rot(i1,j1)=zero
+       end do
+     end do
+     call mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
+     do ll=1,lmax
+       il=(isn)**ll
+       do mp=-ll,ll
+         jj=mp+ll+1
+         do mm=-ll,ll
+           ii=mm+ll+1
+
+!          Formula (47) from the paper of Blanco et al
+           zarot(ii,jj,ll+1,irot)=il&
+&           *(phim(cosalp,sinalp,mm)*phim(cosgam,singam,mp)*sign(1,mp)&
+           *(dbeta(cosbeta,ll,abs(mp),abs(mm))&
+&           +(-1._dp)**mm*dbeta(cosbeta,ll,abs(mm),-abs(mp)))*half&
+&           -phim(cosalp,sinalp,-mm)*phim(cosgam,singam,-mp)*sign(1,mm)&
+           *(dbeta(cosbeta,ll,abs(mp),abs(mm))&
+&           -(-1._dp)**mm*dbeta(cosbeta,ll,abs(mm),-abs(mp)))*half)
+         end do
+       end do
+     end do
+   end if   ! lmax case
+
+   if (abs(pawprtvol)>=3) then
+     if(lmax>0) then
+       write(msg,'(2a,3(3(2x,f7.3),a))') &
+&       '    Rotation matrice for l=1:',ch10,&
+&       (zarot(1,jj,2,irot),jj=1,3),ch10,&
+&       (zarot(2,jj,2,irot),jj=1,3),ch10,&
+&       (zarot(3,jj,2,irot),jj=1,3)
+       call wrtout(std_out,msg,'COLL')
+     end if
+     if(lmax>1) then
+       write(msg,'(2a,5(5(2x,f7.3),a))') &
+&       '    Rotation matrice for l=2:',ch10,&
+&       (zarot(1,jj,3,irot),jj=1,5),ch10,&
+&       (zarot(2,jj,3,irot),jj=1,5),ch10,&
+&       (zarot(3,jj,3,irot),jj=1,5),ch10,&
+&       (zarot(4,jj,3,irot),jj=1,5),ch10,&
+&       (zarot(5,jj,3,irot),jj=1,5)
+       call wrtout(std_out,msg,'COLL')
+     end if
+     if(lmax>2) then
+       write(msg,'(2a,7(7(2x,f7.3),a))') &
+&       '    Rotation matrice for l=3:',ch10,&
+&       (zarot(1,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(2,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(3,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(4,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(5,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(6,jj,4,irot),jj=1,7),ch10,&
+&       (zarot(7,jj,4,irot),jj=1,7)
+       call wrtout(std_out,msg,'COLL')
+     end if
+   end if
+
+ end do  ! isym loop
+
+end subroutine setsym_ylm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/setnabla_ylm
+!! NAME
+!! setnabla_ylm
+!!
+!! FUNCTION
+!! Evaluate several inegrals involving spherical harmonics and their gradient.
+!! These integrals are angular part for <phi_i|nabla|phi_j> and <tphi_i|nabla|tphi_j>.
+!!
+!! INPUTS
+!!  mpsang=1+ max. angular momentum
+!!
+!! OUTPUT
+!!  ang_phipphj :: angular part for <phi_i|nabla|phi_j> and <tphi_i|nabla|tphi_j>
+!!  ang_phipphj(i,j,1)=\int sin\theta cos\phi Si Sj d\omega
+!!  ang_phipphj(i,j,2)=\int cos\theta cos\phi Si \frac{d}{d\theta}Sj d\Omega
+!!  ang_phipphj(i,j,3)=\int -sin\phi  Si \frac{d}{d\phi}Sj d\Omega
+!!  ang_phipphj(i,j,4)=\int sin\theta sin\phi Si Sj d\Omega
+!!  ang_phipphj(i,j,5)=\int cos\theta sin\phi Si \frac{d}{d\theta}Sj d\Omega
+!!  ang_phipphj(i,j,6)=\int cos\phi Si \frac{d}{d\phi}Sj d\Omega
+!!  ang_phipphj(i,j,7)=\int cos\theta  Si Sj d\Omega
+!!  ang_phipphj(i,j,8)=\int -sin\theta Si \frac{d}{d\theta}Sj d\Omega
+!!
+!!  NOTES
+!!   See : Mazevet, S., Torrent, M., Recoules, V. and Jollet, F., High Energy Density Physics, 6, 84-88 (2010)
+!!         Calculations of the Transport Properties within the PAW Formalism
+!! PARENTS
+!!      m_paw_onsite
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine setnabla_ylm(ang_phipphj,mpsang)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mpsang
+!arrays
+ real(dp),intent(out) :: ang_phipphj(mpsang**2,mpsang**2,8)
+
+!Local variables-------------------------------
+ character(len=500) :: msg
+ real(dp) :: ang_phipphj_tmp(16,16,8)
+
+! ************************************************************************
+
+ if (mpsang>4) then
+   msg='  Not designed for angular momentum greater than 3 !'
+   MSG_ERROR(msg)
+ end if
+
+!8 angular integrals for l=0..3, m=-l..+l
+!ang_phipphj(1,4,1)=\frac{1}{\sqrt{3}}
+!ang_phipphj(2,5,1)=\frac{1}{\sqrt{5}}
+!ang_phipphj(3,8,1)=\frac{1}{\sqrt{5}}
+!ang_phipphj(4,1,1)=\frac{1}{\sqrt{3}}
+!ang_phipphj(4,7,1)=-\frac{1}{\sqrt{15}}
+!ang_phipphj(4,9,1)=\frac{1}{\sqrt{5}}
+!ang_phipphj(5,2,1)=\frac{1}{\sqrt{5}}
+!ang_phipphj(5,10,1)=\sqrt{\frac{3}{14}}
+!ang_phipphj(5,12,1)=-\frac{1}{\sqrt{70}}
+!ang_phipphj(6,11,1)=\frac{1}{\sqrt{7}}
+!ang_phipphj(7,4,1)=-\frac{1}{\sqrt{15}}
+!ang_phipphj(7,14,1)=\sqrt{\frac{6}{35}}
+!ang_phipphj(8,3,1)=\frac{1}{\sqrt{5}}
+!ang_phipphj(8,13,1)=-\sqrt{\frac{3}{35}}
+!ang_phipphj(8,15,1)=\frac{1}{\sqrt{7}}
+!ang_phipphj(9,4,1)=\frac{1}{\sqrt{5}}
+!ang_phipphj(9,14,1)=-\frac{1}{\sqrt{70}}
+!ang_phipphj(9,16,1)=\sqrt{\frac{3}{14}}
+!ang_phipphj(10,5,1)=\sqrt{\frac{3}{14}}
+!ang_phipphj(11,6,1)=\frac{1}{\sqrt{7}}
+!ang_phipphj(12,5,1)=-\frac{1}{\sqrt{70}}
+!ang_phipphj(13,8,1)=-\sqrt{\frac{3}{35}}
+!ang_phipphj(14,7,1)=\sqrt{\frac{6}{35}}
+!ang_phipphj(14,9,1)=-\frac{1}{\sqrt{70}}
+!ang_phipphj(15,8,1)=\frac{1}{\sqrt{7}}
+!ang_phipphj(16,9,1)=\sqrt{\frac{3}{14}}
+!ang_phipphj(1,4,2)=\frac{1}{2 \sqrt{3}}
+!ang_phipphj(1,14,2)=-\frac{\sqrt{\frac{7}{6}}}{2}
+!ang_phipphj(2,5,2)=\frac{1}{2 \sqrt{5}}
+!ang_phipphj(3,8,2)=\frac{1}{2 \sqrt{5}}
+!ang_phipphj(4,7,2)=-\sqrt{\frac{3}{5}}
+!ang_phipphj(4,9,2)=\frac{1}{2 \sqrt{5}}
+!ang_phipphj(5,2,2)=\frac{1}{4 \sqrt{5}}
+!ang_phipphj(5,10,2)=\frac{\sqrt{\frac{3}{14}}}{2}
+!ang_phipphj(5,12,2)=-2 \sqrt{\frac{2}{35}}
+!ang_phipphj(6,11,2)=\frac{1}{2 \sqrt{7}}
+!ang_phipphj(7,4,2)=\frac{1}{\sqrt{15}}
+!ang_phipphj(7,14,2)=\frac{13}{2 \sqrt{210}}
+!ang_phipphj(8,3,2)=-\frac{1}{\sqrt{5}}
+!ang_phipphj(8,13,2)=-4 \sqrt{\frac{3}{35}}
+!ang_phipphj(8,15,2)=\frac{1}{2 \sqrt{7}}
+!ang_phipphj(9,4,2)=\frac{1}{4 \sqrt{5}}
+!ang_phipphj(9,14,2)=-2 \sqrt{\frac{2}{35}}
+!ang_phipphj(9,16,2)=\frac{\sqrt{\frac{3}{14}}}{2}
+!ang_phipphj(10,5,2)=\frac{1}{\sqrt{42}}
+!ang_phipphj(11,6,2)=-\frac{1}{4 \sqrt{7}}
+!ang_phipphj(12,5,2)=\sqrt{\frac{2}{35}}
+!ang_phipphj(13,8,2)=2 \sqrt{\frac{3}{35}}
+!ang_phipphj(14,7,2)=-2 \sqrt{\frac{6}{35}}
+!ang_phipphj(14,9,2)=\sqrt{\frac{2}{35}}
+!ang_phipphj(15,8,2)=-\frac{1}{4 \sqrt{7}}
+!ang_phipphj(16,9,2)=\frac{1}{\sqrt{42}}
+!ang_phipphj(1,4,3)=\frac{\sqrt{3}}{2}
+!ang_phipphj(1,14,3)=\frac{\sqrt{\frac{7}{6}}}{2}
+!ang_phipphj(2,5,3)=\frac{\sqrt{5}}{2}
+!ang_phipphj(3,8,3)=\frac{\sqrt{5}}{2}
+!ang_phipphj(4,9,3)=\frac{\sqrt{5}}{2}
+!ang_phipphj(5,2,3)=-\frac{\sqrt{5}}{4}
+!ang_phipphj(5,10,3)=\frac{\sqrt{\frac{21}{2}}}{2}
+!ang_phipphj(6,11,3)=\frac{\sqrt{7}}{2}
+!ang_phipphj(7,14,3)=\frac{\sqrt{\frac{35}{6}}}{2}
+!ang_phipphj(8,15,3)=\frac{\sqrt{7}}{2}
+!ang_phipphj(9,4,3)=-\frac{\sqrt{5}}{4}
+!ang_phipphj(9,16,3)=\frac{\sqrt{\frac{21}{2}}}{2}
+!ang_phipphj(10,5,3)=-\sqrt{\frac{7}{6}}
+!ang_phipphj(11,6,3)=-\frac{\sqrt{7}}{4}
+!ang_phipphj(15,8,3)=-\frac{\sqrt{7}}{4}
+!ang_phipphj(16,9,3)=-\sqrt{\frac{7}{6}}
+!ang_phipphj(1,2,4)=\frac{1}{\sqrt{3}}
+!ang_phipphj(2,1,4)=\frac{1}{\sqrt{3}}
+!ang_phipphj(2,7,4)=-\frac{1}{\sqrt{15}}
+!ang_phipphj(2,9,4)=-\frac{1}{\sqrt{5}}
+!ang_phipphj(3,6,4)=\frac{1}{\sqrt{5}}
+!ang_phipphj(4,5,4)=\frac{1}{\sqrt{5}}
+!ang_phipphj(5,4,4)=\frac{1}{\sqrt{5}}
+!ang_phipphj(5,14,4)=-\frac{1}{\sqrt{70}}
+!ang_phipphj(5,16,4)=-\sqrt{\frac{3}{14}}
+!ang_phipphj(6,3,4)=\frac{1}{\sqrt{5}}
+!ang_phipphj(6,13,4)=-\sqrt{\frac{3}{35}}
+!ang_phipphj(6,15,4)=-\frac{1}{\sqrt{7}}
+!ang_phipphj(7,2,4)=-\frac{1}{\sqrt{15}}
+!ang_phipphj(7,12,4)=\sqrt{\frac{6}{35}}
+!ang_phipphj(8,11,4)=\frac{1}{\sqrt{7}}
+!ang_phipphj(9,2,4)=-\frac{1}{\sqrt{5}}
+!ang_phipphj(9,10,4)=\sqrt{\frac{3}{14}}
+!ang_phipphj(9,12,4)=\frac{1}{\sqrt{70}}
+!ang_phipphj(10,9,4)=\sqrt{\frac{3}{14}}
+!ang_phipphj(11,8,4)=\frac{1}{\sqrt{7}}
+!ang_phipphj(12,7,4)=\sqrt{\frac{6}{35}}
+!ang_phipphj(12,9,4)=\frac{1}{\sqrt{70}}
+!ang_phipphj(13,6,4)=-\sqrt{\frac{3}{35}}
+!ang_phipphj(14,5,4)=-\frac{1}{\sqrt{70}}
+!ang_phipphj(15,6,4)=-\frac{1}{\sqrt{7}}
+!ang_phipphj(16,5,4)=-\sqrt{\frac{3}{14}}
+!ang_phipphj(1,2,5)=\frac{1}{2 \sqrt{3}}
+!ang_phipphj(1,12,5)=-\frac{\sqrt{\frac{7}{6}}}{2}
+!ang_phipphj(2,7,5)=-\sqrt{\frac{3}{5}}
+!ang_phipphj(2,9,5)=-\frac{1}{2 \sqrt{5}}
+!ang_phipphj(3,6,5)=\frac{1}{2 \sqrt{5}}
+!ang_phipphj(4,5,5)=\frac{1}{2 \sqrt{5}}
+!ang_phipphj(5,4,5)=\frac{1}{4 \sqrt{5}}
+!ang_phipphj(5,14,5)=-2 \sqrt{\frac{2}{35}}
+!ang_phipphj(5,16,5)=-\frac{\sqrt{\frac{3}{14}}}{2}
+!ang_phipphj(6,3,5)=-\frac{1}{\sqrt{5}}
+!ang_phipphj(6,13,5)=-4 \sqrt{\frac{3}{35}}
+!ang_phipphj(6,15,5)=-\frac{1}{2 \sqrt{7}}
+!ang_phipphj(7,2,5)=\frac{1}{\sqrt{15}}
+!ang_phipphj(7,12,5)=\frac{13}{2 \sqrt{210}}
+!ang_phipphj(8,11,5)=\frac{1}{2 \sqrt{7}}
+!ang_phipphj(9,2,5)=-\frac{1}{4 \sqrt{5}}
+!ang_phipphj(9,10,5)=\frac{\sqrt{\frac{3}{14}}}{2}
+!ang_phipphj(9,12,5)=2 \sqrt{\frac{2}{35}}
+!ang_phipphj(10,9,5)=\frac{1}{\sqrt{42}}
+!ang_phipphj(11,8,5)=-\frac{1}{4 \sqrt{7}}
+!ang_phipphj(12,7,5)=-2 \sqrt{\frac{6}{35}}
+!ang_phipphj(12,9,5)=-\sqrt{\frac{2}{35}}
+!ang_phipphj(13,6,5)=2 \sqrt{\frac{3}{35}}
+!ang_phipphj(14,5,5)=\sqrt{\frac{2}{35}}
+!ang_phipphj(15,6,5)=\frac{1}{4 \sqrt{7}}
+!ang_phipphj(16,5,5)=-\frac{1}{\sqrt{42}}
+!ang_phipphj(1,2,6)=\frac{\sqrt{3}}{2}
+!ang_phipphj(1,12,6)=\frac{\sqrt{\frac{7}{6}}}{2}
+!ang_phipphj(2,9,6)=-\frac{\sqrt{5}}{2}
+!ang_phipphj(3,6,6)=\frac{\sqrt{5}}{2}
+!ang_phipphj(4,5,6)=\frac{\sqrt{5}}{2}
+!ang_phipphj(5,4,6)=-\frac{\sqrt{5}}{4}
+!ang_phipphj(5,16,6)=-\frac{\sqrt{\frac{21}{2}}}{2}
+!ang_phipphj(6,15,6)=-\frac{\sqrt{7}}{2}
+!ang_phipphj(7,12,6)=\frac{\sqrt{\frac{35}{6}}}{2}
+!ang_phipphj(8,11,6)=\frac{\sqrt{7}}{2}
+!ang_phipphj(9,2,6)=\frac{\sqrt{5}}{4}
+!ang_phipphj(9,10,6)=\frac{\sqrt{\frac{21}{2}}}{2}
+!ang_phipphj(10,9,6)=-\sqrt{\frac{7}{6}}
+!ang_phipphj(11,8,6)=-\frac{\sqrt{7}}{4}
+!ang_phipphj(15,6,6)=\frac{\sqrt{7}}{4}
+!ang_phipphj(16,5,6)=\sqrt{\frac{7}{6}}
+!ang_phipphj(1,3,7)=\frac{1}{\sqrt{3}}
+!ang_phipphj(2,6,7)=\frac{1}{\sqrt{5}}
+!ang_phipphj(3,1,7)=\frac{1}{\sqrt{3}}
+!ang_phipphj(3,7,7)=\frac{2}{\sqrt{15}}
+!ang_phipphj(4,8,7)=\frac{1}{\sqrt{5}}
+!ang_phipphj(5,11,7)=\frac{1}{\sqrt{7}}
+!ang_phipphj(6,2,7)=\frac{1}{\sqrt{5}}
+!ang_phipphj(6,12,7)=2 \sqrt{\frac{2}{35}}
+!ang_phipphj(7,3,7)=\frac{2}{\sqrt{15}}
+!ang_phipphj(7,13,7)=\frac{3}{\sqrt{35}}
+!ang_phipphj(8,4,7)=\frac{1}{\sqrt{5}}
+!ang_phipphj(8,14,7)=2 \sqrt{\frac{2}{35}}
+!ang_phipphj(9,15,7)=\frac{1}{\sqrt{7}}
+!ang_phipphj(11,5,7)=\frac{1}{\sqrt{7}}
+!ang_phipphj(12,6,7)=2 \sqrt{\frac{2}{35}}
+!ang_phipphj(13,7,7)=\frac{3}{\sqrt{35}}
+!ang_phipphj(14,8,7)=2 \sqrt{\frac{2}{35}}
+!ang_phipphj(15,9,7)=\frac{1}{\sqrt{7}}
+!ang_phipphj(1,3,8)=\frac{2}{\sqrt{3}}
+!ang_phipphj(2,6,8)=\frac{3}{\sqrt{5}}
+!ang_phipphj(3,7,8)=2 \sqrt{\frac{3}{5}}
+!ang_phipphj(4,8,8)=\frac{3}{\sqrt{5}}
+!ang_phipphj(5,11,8)=\frac{4}{\sqrt{7}}
+!ang_phipphj(6,2,8)=-\frac{1}{\sqrt{5}}
+!ang_phipphj(6,12,8)=8 \sqrt{\frac{2}{35}}
+!ang_phipphj(7,3,8)=-\frac{2}{\sqrt{15}}
+!ang_phipphj(7,13,8)=\frac{12}{\sqrt{35}}
+!ang_phipphj(8,4,8)=-\frac{1}{\sqrt{5}}
+!ang_phipphj(8,14,8)=8 \sqrt{\frac{2}{35}}
+!ang_phipphj(9,15,8)=\frac{4}{\sqrt{7}}
+!ang_phipphj(11,5,8)=-\frac{2}{\sqrt{7}}
+!ang_phipphj(12,6,8)=-4 \sqrt{\frac{2}{35}}
+!ang_phipphj(13,7,8)=-\frac{6}{\sqrt{35}}
+!ang_phipphj(14,8,8)=-4 \sqrt{\frac{2}{35}}
+!ang_phipphj(15,9,8)=-\frac{2}{\sqrt{7}}
+
+
+ ang_phipphj_tmp=zero
+!
+ ang_phipphj_tmp(1,4,1)=0.57735026918962576451_dp
+ ang_phipphj_tmp(2,5,1)=0.44721359549995793928_dp
+ ang_phipphj_tmp(3,8,1)=0.44721359549995793928_dp
+ ang_phipphj_tmp(4,1,1)=0.57735026918962576451_dp
+ ang_phipphj_tmp(4,7,1)=-0.25819888974716112568_dp
+ ang_phipphj_tmp(4,9,1)=0.44721359549995793928_dp
+ ang_phipphj_tmp(5,2,1)=0.44721359549995793928_dp
+ ang_phipphj_tmp(5,10,1)=0.46291004988627573078_dp
+ ang_phipphj_tmp(5,12,1)=-0.11952286093343936400_dp
+ ang_phipphj_tmp(6,11,1)=0.37796447300922722721_dp
+ ang_phipphj_tmp(7,4,1)=-0.25819888974716112568_dp
+ ang_phipphj_tmp(7,14,1)=0.41403933560541253068_dp
+ ang_phipphj_tmp(8,3,1)=0.44721359549995793928_dp
+ ang_phipphj_tmp(8,13,1)=-0.29277002188455995381_dp
+ ang_phipphj_tmp(8,15,1)=0.37796447300922722721_dp
+ ang_phipphj_tmp(9,4,1)=0.44721359549995793928_dp
+ ang_phipphj_tmp(9,14,1)=-0.11952286093343936400_dp
+ ang_phipphj_tmp(9,16,1)=0.46291004988627573078_dp
+ ang_phipphj_tmp(10,5,1)=0.46291004988627573078_dp
+ ang_phipphj_tmp(11,6,1)=0.37796447300922722721_dp
+ ang_phipphj_tmp(12,5,1)=-0.11952286093343936400_dp
+ ang_phipphj_tmp(13,8,1)=-0.29277002188455995381_dp
+ ang_phipphj_tmp(14,7,1)=0.41403933560541253068_dp
+ ang_phipphj_tmp(14,9,1)=-0.11952286093343936400_dp
+ ang_phipphj_tmp(15,8,1)=0.37796447300922722721_dp
+ ang_phipphj_tmp(16,9,1)=0.46291004988627573078_dp
+!
+ ang_phipphj_tmp(1,4,2)=0.28867513459481288225_dp
+ ang_phipphj_tmp(1,14,2)=-0.54006172486732168591_dp
+ ang_phipphj_tmp(2,5,2)=0.22360679774997896964_dp
+ ang_phipphj_tmp(3,8,2)=0.22360679774997896964_dp
+ ang_phipphj_tmp(4,7,2)=-0.77459666924148337704_dp
+ ang_phipphj_tmp(4,9,2)=0.22360679774997896964_dp
+ ang_phipphj_tmp(5,2,2)=0.11180339887498948482_dp
+ ang_phipphj_tmp(5,10,2)=0.23145502494313786539_dp
+ ang_phipphj_tmp(5,12,2)=-0.47809144373375745599_dp
+ ang_phipphj_tmp(6,11,2)=0.18898223650461361361_dp
+ ang_phipphj_tmp(7,4,2)=0.25819888974716112568_dp
+ ang_phipphj_tmp(7,14,2)=0.44854261357253024157_dp
+ ang_phipphj_tmp(8,3,2)=-0.44721359549995793928_dp
+ ang_phipphj_tmp(8,13,2)=-1.1710800875382398152_dp
+ ang_phipphj_tmp(8,15,2)=0.18898223650461361361_dp
+ ang_phipphj_tmp(9,4,2)=0.11180339887498948482_dp
+ ang_phipphj_tmp(9,14,2)=-0.47809144373375745599_dp
+ ang_phipphj_tmp(9,16,2)=0.23145502494313786539_dp
+ ang_phipphj_tmp(10,5,2)=0.15430334996209191026_dp
+ ang_phipphj_tmp(11,6,2)=-0.094491118252306806804_dp
+ ang_phipphj_tmp(12,5,2)=0.23904572186687872799_dp
+ ang_phipphj_tmp(13,8,2)=0.58554004376911990761_dp
+ ang_phipphj_tmp(14,7,2)=-0.82807867121082506136_dp
+ ang_phipphj_tmp(14,9,2)=0.23904572186687872799_dp
+ ang_phipphj_tmp(15,8,2)=-0.094491118252306806804_dp
+ ang_phipphj_tmp(16,9,2)=0.15430334996209191026_dp
+!
+ ang_phipphj_tmp(1,4,3)=0.86602540378443864676_dp
+ ang_phipphj_tmp(1,14,3)=0.54006172486732168591_dp
+ ang_phipphj_tmp(2,5,3)=1.1180339887498948482_dp
+ ang_phipphj_tmp(3,8,3)=1.1180339887498948482_dp
+ ang_phipphj_tmp(4,9,3)=1.1180339887498948482_dp
+ ang_phipphj_tmp(5,2,3)=-0.55901699437494742410_dp
+ ang_phipphj_tmp(5,10,3)=1.6201851746019650577_dp
+ ang_phipphj_tmp(6,11,3)=1.3228756555322952953_dp
+ ang_phipphj_tmp(7,14,3)=1.2076147288491198811_dp
+ ang_phipphj_tmp(8,15,3)=1.3228756555322952953_dp
+ ang_phipphj_tmp(9,4,3)=-0.55901699437494742410_dp
+ ang_phipphj_tmp(9,16,3)=1.6201851746019650577_dp
+ ang_phipphj_tmp(10,5,3)=-1.0801234497346433718_dp
+ ang_phipphj_tmp(11,6,3)=-0.66143782776614764763_dp
+ ang_phipphj_tmp(15,8,3)=-0.66143782776614764763_dp
+ ang_phipphj_tmp(16,9,3)=-1.0801234497346433718_dp
+!
+ ang_phipphj_tmp(1,2,4)=0.57735026918962576451_dp
+ ang_phipphj_tmp(2,1,4)=0.57735026918962576451_dp
+ ang_phipphj_tmp(2,7,4)=-0.25819888974716112568_dp
+ ang_phipphj_tmp(2,9,4)=-0.44721359549995793928_dp
+ ang_phipphj_tmp(3,6,4)=0.44721359549995793928_dp
+ ang_phipphj_tmp(4,5,4)=0.44721359549995793928_dp
+ ang_phipphj_tmp(5,4,4)=0.44721359549995793928_dp
+ ang_phipphj_tmp(5,14,4)=-0.11952286093343936400_dp
+ ang_phipphj_tmp(5,16,4)=-0.46291004988627573078_dp
+ ang_phipphj_tmp(6,3,4)=0.44721359549995793928_dp
+ ang_phipphj_tmp(6,13,4)=-0.29277002188455995381_dp
+ ang_phipphj_tmp(6,15,4)=-0.37796447300922722721_dp
+ ang_phipphj_tmp(7,2,4)=-0.25819888974716112568_dp
+ ang_phipphj_tmp(7,12,4)=0.41403933560541253068_dp
+ ang_phipphj_tmp(8,11,4)=0.37796447300922722721_dp
+ ang_phipphj_tmp(9,2,4)=-0.44721359549995793928_dp
+ ang_phipphj_tmp(9,10,4)=0.46291004988627573078_dp
+ ang_phipphj_tmp(9,12,4)=0.11952286093343936400_dp
+ ang_phipphj_tmp(10,9,4)=0.46291004988627573078_dp
+ ang_phipphj_tmp(11,8,4)=0.37796447300922722721_dp
+ ang_phipphj_tmp(12,7,4)=0.41403933560541253068_dp
+ ang_phipphj_tmp(12,9,4)=0.11952286093343936400_dp
+ ang_phipphj_tmp(13,6,4)=-0.29277002188455995381_dp
+ ang_phipphj_tmp(14,5,4)=-0.11952286093343936400_dp
+ ang_phipphj_tmp(15,6,4)=-0.37796447300922722721_dp
+ ang_phipphj_tmp(16,5,4)=-0.46291004988627573078_dp
+!
+ ang_phipphj_tmp(1,2,5)=0.28867513459481288225_dp
+ ang_phipphj_tmp(1,12,5)=-0.54006172486732168591_dp
+ ang_phipphj_tmp(2,7,5)=-0.77459666924148337704_dp
+ ang_phipphj_tmp(2,9,5)=-0.22360679774997896964_dp
+ ang_phipphj_tmp(3,6,5)=0.22360679774997896964_dp
+ ang_phipphj_tmp(4,5,5)=0.22360679774997896964_dp
+ ang_phipphj_tmp(5,4,5)=0.11180339887498948482_dp
+ ang_phipphj_tmp(5,14,5)=-0.47809144373375745599_dp
+ ang_phipphj_tmp(5,16,5)=-0.23145502494313786539_dp
+ ang_phipphj_tmp(6,3,5)=-0.44721359549995793928_dp
+ ang_phipphj_tmp(6,13,5)=-1.1710800875382398152_dp
+ ang_phipphj_tmp(6,15,5)=-0.18898223650461361361_dp
+ ang_phipphj_tmp(7,2,5)=0.25819888974716112568_dp
+ ang_phipphj_tmp(7,12,5)=0.44854261357253024157_dp
+ ang_phipphj_tmp(8,11,5)=0.18898223650461361361_dp
+ ang_phipphj_tmp(9,2,5)=-0.11180339887498948482_dp
+ ang_phipphj_tmp(9,10,5)=0.23145502494313786539_dp
+ ang_phipphj_tmp(9,12,5)=0.47809144373375745599_dp
+ ang_phipphj_tmp(10,9,5)=0.15430334996209191026_dp
+ ang_phipphj_tmp(11,8,5)=-0.094491118252306806804_dp
+ ang_phipphj_tmp(12,7,5)=-0.82807867121082506136_dp
+ ang_phipphj_tmp(12,9,5)=-0.23904572186687872799_dp
+ ang_phipphj_tmp(13,6,5)=0.58554004376911990761_dp
+ ang_phipphj_tmp(14,5,5)=0.23904572186687872799_dp
+ ang_phipphj_tmp(15,6,5)=0.094491118252306806804_dp
+ ang_phipphj_tmp(16,5,5)=-0.15430334996209191026_dp
+!
+ ang_phipphj_tmp(1,2,6)=0.86602540378443864676_dp
+ ang_phipphj_tmp(1,12,6)=0.54006172486732168591_dp
+ ang_phipphj_tmp(2,9,6)=-1.1180339887498948482_dp
+ ang_phipphj_tmp(3,6,6)=1.1180339887498948482_dp
+ ang_phipphj_tmp(4,5,6)=1.1180339887498948482_dp
+ ang_phipphj_tmp(5,4,6)=-0.55901699437494742410_dp
+ ang_phipphj_tmp(5,16,6)=-1.6201851746019650577_dp
+ ang_phipphj_tmp(6,15,6)=-1.3228756555322952953_dp
+ ang_phipphj_tmp(7,12,6)=1.2076147288491198811_dp
+ ang_phipphj_tmp(8,11,6)=1.3228756555322952953_dp
+ ang_phipphj_tmp(9,2,6)=0.55901699437494742410_dp
+ ang_phipphj_tmp(9,10,6)=1.6201851746019650577_dp
+ ang_phipphj_tmp(10,9,6)=-1.0801234497346433718_dp
+ ang_phipphj_tmp(11,8,6)=-0.66143782776614764763_dp
+ ang_phipphj_tmp(15,6,6)=0.66143782776614764763_dp
+ ang_phipphj_tmp(16,5,6)=1.0801234497346433718_dp
+!
+ ang_phipphj_tmp(1,3,7)=0.57735026918962576451_dp
+ ang_phipphj_tmp(2,6,7)=0.44721359549995793928_dp
+ ang_phipphj_tmp(3,1,7)=0.57735026918962576451_dp
+ ang_phipphj_tmp(3,7,7)=0.51639777949432225136_dp
+ ang_phipphj_tmp(4,8,7)=0.44721359549995793928_dp
+ ang_phipphj_tmp(5,11,7)=0.37796447300922722721_dp
+ ang_phipphj_tmp(6,2,7)=0.44721359549995793928_dp
+ ang_phipphj_tmp(6,12,7)=0.47809144373375745599_dp
+ ang_phipphj_tmp(7,3,7)=0.51639777949432225136_dp
+ ang_phipphj_tmp(7,13,7)=0.50709255283710994651_dp
+ ang_phipphj_tmp(8,4,7)=0.44721359549995793928_dp
+ ang_phipphj_tmp(8,14,7)=0.47809144373375745599_dp
+ ang_phipphj_tmp(9,15,7)=0.37796447300922722721_dp
+ ang_phipphj_tmp(11,5,7)=0.37796447300922722721_dp
+ ang_phipphj_tmp(12,6,7)=0.47809144373375745599_dp
+ ang_phipphj_tmp(13,7,7)=0.50709255283710994651_dp
+ ang_phipphj_tmp(14,8,7)=0.47809144373375745599_dp
+ ang_phipphj_tmp(15,9,7)=0.37796447300922722721_dp
+!
+ ang_phipphj_tmp(1,3,8)=1.1547005383792515290_dp
+ ang_phipphj_tmp(2,6,8)=1.3416407864998738178_dp
+ ang_phipphj_tmp(3,7,8)=1.5491933384829667541_dp
+ ang_phipphj_tmp(4,8,8)=1.3416407864998738178_dp
+ ang_phipphj_tmp(5,11,8)=1.5118578920369089089_dp
+ ang_phipphj_tmp(6,2,8)=-0.44721359549995793928_dp
+ ang_phipphj_tmp(6,12,8)=1.9123657749350298240_dp
+ ang_phipphj_tmp(7,3,8)=-0.51639777949432225136_dp
+ ang_phipphj_tmp(7,13,8)=2.0283702113484397860_dp
+ ang_phipphj_tmp(8,4,8)=-0.44721359549995793928_dp
+ ang_phipphj_tmp(8,14,8)=1.9123657749350298240_dp
+ ang_phipphj_tmp(9,15,8)=1.5118578920369089089_dp
+ ang_phipphj_tmp(11,5,8)=-0.75592894601845445443_dp
+ ang_phipphj_tmp(12,6,8)=-0.95618288746751491198_dp
+ ang_phipphj_tmp(13,7,8)=-1.0141851056742198930_dp
+ ang_phipphj_tmp(14,8,8)=-0.95618288746751491198_dp
+ ang_phipphj_tmp(15,9,8)=-0.75592894601845445443_dp
+
+ ang_phipphj(:,:,:)=ang_phipphj_tmp(1:mpsang**2,1:mpsang**2,:)
+
+ end subroutine setnabla_ylm
+!!***
+
+!----------------------------------------------------------------------
+
+END MODULE m_paw_sphharm
+!!***

@@ -18,7 +18,6 @@ fit_ncoeff = 10
 fit_nfixcoeff  = 2
 fit_fixcoeff  = 48 50
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
@@ -37,5 +36,6 @@ fit_fixcoeff  = 48 50
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read ddb and HIST, fit the anharmonic part and generate effective potential 
+#%%   read ddb and HIST, fit the anharmonic part and generate effective potential
+#%% topics = FitProcess,LatticeModel
 #%%<END TEST_INFO>

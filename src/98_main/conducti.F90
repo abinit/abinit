@@ -9,7 +9,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (FJ,SMazevet)
+!! Copyright (C) 2006-2019 ABINIT group (FJ,SMazevet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,10 +20,6 @@
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!!
-!! CHILDREN
-!!      conducti_nc, conducti_paw
 !!
 !! PARENTS
 !!
@@ -46,7 +42,7 @@ program conducti
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -56,15 +52,7 @@ program conducti
  use m_time,      only : timein
  use m_fstrings,  only : sjoin, itoa
  use m_mpinfo,    only : destroy_mpi_enreg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'conducti'
- use interfaces_65_paw
- use interfaces_67_common
-!End of the abilint section
-
+ use m_paw_optics,only : linear_optics_paw
  implicit none
 
 !Arguments -----------------------------------

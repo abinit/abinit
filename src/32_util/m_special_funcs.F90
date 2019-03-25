@@ -8,7 +8,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
+!! Copyright (C) 2008-2019 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@
 module m_special_funcs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
 
@@ -49,9 +49,6 @@ module m_special_funcs
  public :: gamma_function    ! Computes the gamma function
  public :: besjm             ! Spherical bessel function of order nn. Handles nn=0,1,2,3,4, or 5 only.
  public :: sbf8              ! Computes set of spherical bessel functions using accurate algorithm
- public :: phim              ! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
-                             !                       Sqrt[2] sin[Abs(m) theta], if m<0
-                             !                       1                        , if m=0
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
 !!***
@@ -168,15 +165,6 @@ CONTAINS  !===========================================================
 
 pure function clp(x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp) :: clp
@@ -209,22 +197,12 @@ end function clp
 !!   factorial= n! (real)
 !!
 !! PARENTS
-!!      setsymrhoij
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 elemental function factorial(nn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'factorial'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -272,15 +250,6 @@ end function factorial
 !! SOURCE
 
 pure function permutations(nn,kk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'permutations'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -332,15 +301,6 @@ end function permutations
 
 elemental function binomcoeff(n,k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'binomcoeff'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: n,k
@@ -379,15 +339,6 @@ end function binomcoeff
 !! SOURCE
 
 function laguerre(x,n,a)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'laguerre'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -455,15 +406,6 @@ end function laguerre
 
 
 function RadFnH(r,n,l,Z)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'RadFnH'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -537,15 +479,6 @@ end function RadFnH
 !! SOURCE
 
 recursive function IRadFnH(a,b,n,l,Z,m) result(x)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'IRadFnH'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -624,15 +557,6 @@ end function IRadFnH
 
 elemental function dirac_delta(arg,sigma)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dirac_delta'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  real(dp),intent(in) :: arg,sigma
@@ -671,15 +595,6 @@ end function dirac_delta
 !! SOURCE
 
 elemental function gaussian(arg,sigma)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussian'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -723,15 +638,6 @@ end function gaussian
 !! SOURCE
 
 elemental function abi_derf(yy) result(derf_yy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_derf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -883,15 +789,6 @@ end function abi_derf
 
 elemental function abi_derfc(yy) result(derfc_yy)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_derfc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: yy
@@ -1033,13 +930,6 @@ end function abi_derfc
 !! SOURCE
 
 subroutine GAMMA_FUNCTION(X,GA)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GAMMA_FUNCTION'
-!End of the abilint section
 
   implicit none
 
@@ -1198,21 +1088,6 @@ end subroutine GAMMA_FUNCTION
 !! SOURCE
 
 subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'besjm'
-!End of the abilint section
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'besjm'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -1426,15 +1301,6 @@ end subroutine besjm
 
 subroutine sbf8(nm,xx,sb_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sbf8'
-!End of the abilint section
-
- implicit none
-
 !Arguments----------------------------------------------------------
 !scalars
  integer,intent(in) :: nm
@@ -1490,68 +1356,6 @@ subroutine sbf8(nm,xx,sb_out)
 end subroutine sbf8
 !!***
 
-!!****f* m_special_funcs/phim
-!! NAME
-!! phim
-!!
-!! FUNCTION
-!! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
-!!                       Sqrt[2] sin[Abs(m) theta], if m<0
-!!                       1                        , if m=0
-!!
-!! INPUTS
-!!  costeta= cos(theta)  (theta= input angle)
-!!  mm = index m
-!!  sinteta= sin(theta)  (theta= input angle)
-!!
-!! OUTPUT
-!!  phim= Phi_m(theta) (see above)
-!!
-!! NOTES
-!!  - This file comes from the file crystal_symmetry.f
-!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
-!!
-!! PARENTS
-!!     setsymrhoij
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-pure function phim(costheta,sintheta,mm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phim'
-!End of the abilint section
-
- implicit none
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: mm
- real(dp) :: phim
- real(dp),intent(in) :: costheta,sintheta
-
-! *********************************************************************
-
- if (mm==0)  phim=one
- if (mm==1)  phim=sqrt2*costheta
- if (mm==-1) phim=sqrt2*sintheta
- if (mm==2)  phim=sqrt2*(costheta*costheta-sintheta*sintheta)
- if (mm==-2) phim=sqrt2*two*sintheta*costheta
- if (mm==3)  phim=sqrt2*&
-& (costheta*(costheta*costheta-sintheta*sintheta)&
-& -sintheta*two*sintheta*costheta)
- if (mm==-3) phim=sqrt2*&
-& (sintheta*(costheta*costheta-sintheta*sintheta)&
-& +costheta*two*sintheta*costheta)
-
- end function phim
-!!***
-
 !----------------------------------------------------------------------
 
 !!****f* m_special_funcs/fermi_dirac
@@ -1572,15 +1376,6 @@ pure function phim(costheta,sintheta,mm)
 !! SOURCE
 
 function fermi_dirac(energy, mu, temperature)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fermi_dirac'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1627,15 +1422,6 @@ end function fermi_dirac
 !! SOURCE
 
 function bose_einstein(energy, temperature)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bose_einstein'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1685,15 +1471,6 @@ end function bose_einstein
 
 elemental function k_fermi(rhor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'k_fermi'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rhor
@@ -1727,15 +1504,6 @@ end function k_fermi
 !! SOURCE
 
 elemental function k_thfermi(rhor)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'k_thfermi'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1780,15 +1548,6 @@ end function k_thfermi
 !! SOURCE
 
 type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jlspline_new'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1867,15 +1626,6 @@ end function jlspline_new
 
 subroutine jlspline_free(jlspl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jlspline_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(jlspline_t),intent(inout) :: jlspl
 
@@ -1911,15 +1661,6 @@ end subroutine jlspline_free
 !! SOURCE
 
 real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jlspline_integral'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: il,nr,powr
@@ -1969,15 +1710,6 @@ end function jlspline_integral
 !! SOURCE
 
 type (gspline_t) function gspline_new(sigma) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gspline_new'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2041,15 +1773,6 @@ end function gspline_new
 !! SOURCE
 
 pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gspline_eval'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2119,15 +1842,6 @@ end subroutine gspline_eval
 !! SOURCE
 
 subroutine gspline_free(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gspline_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_forces
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_efield
  use m_errors
  use m_atomdata
@@ -42,13 +42,15 @@ module m_forces
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use libxc_functionals,  only : libxc_functionals_is_hybrid
- use m_fft,              only : zerosym
+ use m_fft,              only : zerosym, fourdp
  use m_cgtools,          only : mean_fftr
  use m_mpinfo,           only : pre_gather, pre_scatter
  use m_atm2fft,          only : atm2fft
  use m_mklocl,           only : mklocl
  use m_predtk,           only : prtxvf
  use m_xchybrid,         only : xchybrid_ncpp_cc
+ use m_mkcore,           only : mkcore, mkcore_alt
+ use m_mkcore_wvl,       only : mkcore_wvl
 
  implicit none
 
@@ -176,16 +178,6 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &                  vresid,vxc,wvl,wvl_den,xred,&
 &                  electronpositron) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'forces'
- use interfaces_53_ffts
- use interfaces_56_xc
- use interfaces_67_common
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -284,7 +276,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      ABI_ALLOCATE(v_dum,(nfft))
      ABI_ALLOCATE(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (dtset%nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
-     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_DEALLOCATE(v_dum)
@@ -638,13 +630,6 @@ end subroutine forces
 
 subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sygrad'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -740,15 +725,6 @@ end subroutine sygrad
 subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqgrid,nattyp,nfft,&
 &          ngfft,ntypat,psps,pawtab,ph1d,qgrid,ucvol,usepaw,vresid,zion,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fresidrsp'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -789,7 +765,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  ABI_ALLOCATE(work,(nfft))
  work(:)=vresid(:,1)
  if (dtset%nspden>=2) work(:)=work(:)+vresid(:,2)
- call fourdp(1,vresg,work,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+ call fourdp(1,vresg,work,-1,mpi_enreg,nfft,1,ngfft,0)
  ABI_DEALLOCATE(work)
 
 !Determine wether a gaussan atomic density has to be used or not
@@ -883,13 +859,6 @@ end subroutine fresidrsp
 
 subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 &                 pawtab,rhor,rprimd,ucvol,work,xred_new,xred_old,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fresid'
-!End of the abilint section
 
  implicit none
 
@@ -1463,13 +1432,6 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 
    function cross_fr(xx,yy,zz,aa,bb,cc)
 !Define magnitude of cross product of two vectors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross_fr'
-!End of the abilint section
-
    real(dp) :: cross_fr
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_fr=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
@@ -1522,14 +1484,6 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 & nconeq,prtvol,rprimd,wtatcon,xred)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'constrf'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

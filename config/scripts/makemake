@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2011-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2011-2019 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -183,9 +183,6 @@ parser.add_option("-c", "--clean", action="store_true",
 parser.add_option("-k", "--keep-source", action="store_false",
   dest="run_wipe", default=True,
   help="Keep script-generated files when cleaning source tree")
-parser.add_option("-l", "--without-abilint", action="store_false",
-  dest="run_abilint", default=True,
-  help="Skip abilint")
 parser.add_option("-m", "--without-makefiles", action="store_false",
   dest="run_makefiles", default=True,
   help="Skip makefile generation")
@@ -258,7 +255,7 @@ if ( opts.run_clean ):
   run_script(my_name, "Removing uncertified build examples",
     "rm -f doc/build/config-examples/uncertified/*.ac")
   run_script(my_name, "Removing RoboDOC tarball",
-    "rm -f infos_html*.tar.gz robodoc-html*.tar.gz")
+    "rm -f robodoc-html*.tar.gz")
 
   # Identify subdirs to clean, delegate the rest to the subsystems
   print_header(my_name, "Core-managed build files")
@@ -310,12 +307,6 @@ if ( opts.run_clean ):
       "rm -f src/10_dumpinfo/m_cppopts_dumper.F90")
     run_script(my_name, "Removing optimization flags dumper routine",
       "rm -f src/10_dumpinfo/m_optim_dumper.F90")
-    run_script(my_name, "Removing input variable checking routines",
-      "rm -f src/57_iovars/ab7_invars_f90.inc src/57_iovars/ab7_invars_f90_get.f90")
-    run_script(my_name, "Removing C headers for Python bindings",
-      "rm -f bindings/parser/ab7_invars.h bindings/parser/ab7_invars_c.h bindings/parser/ab7_invars_py.h")
-    run_script(my_name, "Removing Python pickle file for Abinit datasets",
-      "rm -f bindings/parser/dtset.pickle")
   else:
     print_message(my_name,
       "*** Skipping script-generated source file removal ***")
@@ -455,41 +446,31 @@ if ( opts.run_source ):
   run_script(my_name, "Generating CPP option dumper",
     "./config/scripts/make-cppopts-dumper")
 
-  if ( opts.run_abilint ):
-    abilint_cmdline = "./config/scripts/abilint %s" % \
-      (re.sub("\n", " ", mcnf.get("abilint", "arguments")))
-    print_message(my_name, "Updating Fortran interfaces")
-    print_message(my_name, "---> running %s" % (abilint_cmdline))
-    abilint_exitcode = os.system(abilint_cmdline)
+  # Call abisrc to build dependency graph and create files for buildsystem
+  #os.system("rm -rf ./src/*/interfaces_*.F90")
+  #abisrc_cmdline = "./src/abisrc.py validate" 
+  abisrc_cmdline = "./src/abisrc.py makemake" 
+  print_message(my_name, "---> running %s" % (abisrc_cmdline))
+  abisrc_exitcode = os.system(abisrc_cmdline)
 
-    if ( abilint_exitcode != 0 ):
-      sys.stderr.write("""
-     ****************************************************************
-     ***                     FATAL ERROR!                         ***
-     ****************************************************************
-     ***                                                          ***
-     *** The abilint script returned an non-zero exit code. As a  ***
-     *** consequence, the Fortran interfaces will likely produce  ***
-     *** build-time errors. The 'abilint.log' file has been left  ***
-     *** for your investigations. Its standard output has been    *** 
-     *** also redirected to 'abilint.out'.                        ***
-     *** It might be that the cache file (.abilint) has to be     ***
-     *** regenerated. Remove that file and issue abilint again.   ***
-     ***                                                          ***
-     *** Please have a careful look at abilint's outputs before   ***
-     *** sending a bug report.                                    ***
-     ***                                                          ***
-     ****************************************************************
+  if abisrc_exitcode != 0:
+    sys.stderr.write("""
+       ****************************************************************
+       ***                     FATAL ERROR!                         ***
+       ****************************************************************
+       ***                                                          ***
+       *** The abisrc.py script returned an non-zero exit status.   ***
+       *** This usually means that the script found subroutines or  ***
+       *** functions that are not declared inside modules or that   ***
+       *** there is a syntax error in the Fortran code.             ***
+       *** See above error message.                                 ***
+       *** Please note that procedures outside Fortran modules      ***
+       *** are not allowed any longer.                              ***
+       ****************************************************************\n""")
+    sys.stderr.write("[%s] Aborting now\n" % (my_name))
+    sys.exit(1)
 
-""")
-      sys.stderr.write("[%s] Aborting now\n" % (my_name))
-      sys.exit(1)
-  else:
-    print_message(my_name, "  *** Skipping update of Fortran interfaces ***")
 
-  if ( os.path.exists(os.path.join("bindings", "parser", "dtset.pickle")) ):
-    run_script(my_name, "Generating dtset source files",
-      "./config/scripts/make-sources-parser")
 else:
   print_message(my_name, "*** Skipping source tree update ***")
 

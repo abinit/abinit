@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (XG,ARom,MT)
+!!  Copyright (C) 2009-2019 ABINIT group (XG,ARom,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_predict_string
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_splines
  use m_mep
  use m_errors
@@ -103,13 +103,6 @@ contains
 
 subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &                         ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predict_string'
-!End of the abilint section
 
  implicit none
 

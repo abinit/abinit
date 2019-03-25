@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@ MODULE m_paw_dmft
  use defs_abitypes
  use m_CtqmcInterface
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_data4entropyDMFT
 
@@ -54,7 +54,11 @@ MODULE m_paw_dmft
  public :: print_sc_dmft
  public :: saveocc_dmft
  public :: readocc_dmft
+
+ private :: init_sc_dmft_paralkgb, destroy_sc_dmft_paralkgb
 !!***
+
+!----------------------------------------------------------------------
 
 !!****t* m_paw_dmft/paw_dmft_type
 !! NAME
@@ -112,6 +116,9 @@ MODULE m_paw_dmft
   ! CTQMC: Basis to perform the CTQMC calculation
   ! for historical reasons and tests
   ! 0 : Slm basis, 1 : diagonalise local Hamiltonian, 2: diago density matrix
+  !
+  integer :: dmft_blockdiag
+  !  Block diagonalize Hamiltonian in the local basis
 
   integer :: dmftctqmc_check
   ! CTQMC: perform a check on the impurity and/or bath operator
@@ -151,7 +158,7 @@ MODULE m_paw_dmft
 
   integer :: dmftctqmc_triqs_nleg
   ! CTQMC of TRIQS: Nb of Legendre polynomial used to compute the
-  ! Green's function (Phys. Rev. B 84, 075145). Default is 30.
+  ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]]. Default is 30.
   
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
 
@@ -217,12 +224,10 @@ MODULE m_paw_dmft
 
   real(dp) :: edmft
 
-  real(dp) :: dmft_chpr
+  real(dp) :: dmft_charge_prec
   ! Precision on charge required for determination of fermi level (fermi_green) with newton method
 
-
-
-  real(dp) :: dmft_fepr
+  real(dp) :: dmft_fermi_prec
   ! Required precision on Fermi level (fermi_green) during the DMFT SCF cycle, (=> ifermie_cv)
   ! used also for self (new_self)  (=> iself_cv).
 
@@ -268,6 +273,13 @@ MODULE m_paw_dmft
   logical, allocatable :: band_in(:)
   ! true for each band included in the calculation.
 
+  integer, allocatable :: bandc_proc(:)
+  ! proc index (on comm_band) for each correlated band in DMFT
+
+  logical, allocatable :: use_bandc(:)
+  ! true for each proc wich has at least one band involved in DMFT non diagonal
+  ! occupations on band parallelism
+
   integer :: use_dmft
   ! 1 if non diagonal occupations are used, else 0
 
@@ -276,7 +288,6 @@ MODULE m_paw_dmft
   ! electronic density.
 
   complex(dpc), allocatable :: psichi(:,:,:,:,:,:)
-
 
   real(dp), allocatable :: eigen_lda(:,:,:)
 
@@ -333,14 +344,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,nkpt,nspden,&
 &nspinor,nsppol,occ,usedmft,paw_dmft,use_sc_dmft,dmft_solv,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_sc_dmft'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -404,8 +407,6 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
 ! endif
 !#endif
 
-
-
  paw_dmft%mband       = mband
  paw_dmft%dmftbandf   = dmftbandf
  paw_dmft%dmftbandi   = dmftbandi
@@ -466,6 +467,11 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
  else
   paw_dmft%mbandc = 0
  endif
+  
+ if(paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb/=0) then
+   call init_sc_dmft_paralkgb(paw_dmft, mpi_enreg)
+ end if
+
  if(paw_dmft%use_dmft > 0 .and. paw_dmft%mbandc /= dmftbandf-dmftbandi+1) then
   write(message, '(3a)' )&
 &  ' WARNING init_sc_dmft',ch10,&
@@ -548,14 +554,6 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  use defs_abitypes
  use m_splines
  !use m_CtqmcInterface
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_dmft'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -638,6 +636,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  paw_dmft%prtdos = dtset%prtdos
  paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
  paw_dmft%dmft_lcpr = dtset%dmft_tollc
+ paw_dmft%dmft_charge_prec = dtset%dmft_charge_prec
 
 !=======================
 !==  Fixed self for input
@@ -648,7 +647,13 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
 !=======================
 !==  Choose solver
 !=======================
+
  paw_dmft%dmft_solv=dtset%dmft_solv
+ paw_dmft%dmft_blockdiag=0
+ if(paw_dmft%dmft_solv==-2) then
+   paw_dmft%dmft_solv=2
+   paw_dmft%dmft_blockdiag=1
+ endif
 !  0: LDA, no solver
 !  1: LDA+U
 ! -1: LDA+U but LDA values are not renormalized !
@@ -898,13 +903,6 @@ end subroutine init_dmft
 
 subroutine construct_nwli_dmft(paw_dmft,nwli,omega_li)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'construct_nwli_dmft'
-!End of the abilint section
-
  implicit none
 
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -973,14 +971,6 @@ end subroutine construct_nwli_dmft
 
 subroutine construct_nwlo_dmft(paw_dmft)
  use m_splines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'construct_nwlo_dmft'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
  type(paw_dmft_type), intent(inout) :: paw_dmft
@@ -1263,13 +1253,6 @@ end subroutine construct_nwlo_dmft
 
 subroutine destroy_dmft(paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_dmft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1337,13 +1320,6 @@ end subroutine destroy_dmft
 
 subroutine destroy_sc_dmft(paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_sc_dmft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1376,6 +1352,7 @@ subroutine destroy_sc_dmft(paw_dmft)
    ABI_DEALLOCATE(paw_dmft%exclude_bands)
  end if
 
+ call destroy_sc_dmft_paralkgb(paw_dmft)
 
 end subroutine destroy_sc_dmft
 !!***
@@ -1399,14 +1376,6 @@ end subroutine destroy_sc_dmft
 !! SOURCE
 
 subroutine print_dmft(paw_dmft,pawprtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_dmft'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1502,14 +1471,6 @@ end subroutine print_dmft
 
 subroutine print_sc_dmft(paw_dmft,pawprtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_sc_dmft'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1578,14 +1539,6 @@ end subroutine print_sc_dmft
 
 subroutine saveocc_dmft(paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'saveocc_dmft'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1612,13 +1565,8 @@ subroutine saveocc_dmft(paw_dmft)
    do ikpt = 1, paw_dmft%nkpt
      do ib = 1, paw_dmft%mbandc
        do ib1 = 1, paw_dmft%mbandc
-         if (paw_dmft%nspinor==1) then
-           write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-         endif
-         if (paw_dmft%nspinor==2) then
-           write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
-&           paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-         endif
+         write(unitsaveocc,*) is,ikpt,ib,ib1,paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
+&         paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
        enddo
      enddo
    enddo
@@ -1655,14 +1603,6 @@ end subroutine saveocc_dmft
 !! SOURCE
 
 subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'readocc_dmft'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1703,15 +1643,9 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
      do ikpt = 1, paw_dmft%nkpt
        do ib = 1, paw_dmft%mbandc
          do ib1 = 1, paw_dmft%mbandc
-           if (paw_dmft%nspinor==1) then
-             read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
-&             paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-           endif
-           if (paw_dmft%nspinor==2) then
-             read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
-&             paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
-&             paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
-           endif
+           read(unitsaveocc,*) dum1,dum2,dum3,dum4,&
+&           paw_dmft%occnd(1,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is),&
+&           paw_dmft%occnd(2,paw_dmft%include_bands(ib),paw_dmft%include_bands(ib1),ikpt,is)
          enddo
        enddo
      enddo
@@ -1728,6 +1662,97 @@ subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
  endif
 
 end subroutine readocc_dmft
+!!***
+
+!!****f* m_paw_dmft/init_sc_dmft_paralkgb
+!! NAME
+!! init_sc_dmft_paralkgb
+!!
+!! FUNCTION
+!!  Init some values used with KGB parallelism in self consistent DMFT
+!!  calculation.
+!!
+!! INPUTS
+!!  paw_dmft   = data structure
+!!  
+!! OUTPUT
+!!  paw_dmft: bandc_proc, use_bandc
+!!
+!! PARENTS
+!!      init_sc_dmft
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(paw_dmft_type),intent(inout) :: paw_dmft
+ type(MPI_type), intent(in) :: mpi_enreg
+
+!Local variables-------------------------------
+!scalars
+ integer :: nproc, ib, ibc, proc
+
+! *********************************************************************
+ nproc = mpi_enreg%nproc_band
+
+ ABI_ALLOCATE(paw_dmft%bandc_proc,(paw_dmft%mbandc))
+ ABI_ALLOCATE(paw_dmft%use_bandc,(nproc))
+ paw_dmft%bandc_proc = 0
+ paw_dmft%use_bandc = .false.
+ 
+ do ibc=1,paw_dmft%mbandc
+   ib = paw_dmft%include_bands(ibc)
+   proc = mod((ib-1)/mpi_enreg%bandpp,nproc)
+
+   paw_dmft%bandc_proc(ibc) = proc
+
+   paw_dmft%use_bandc(proc+1) = .true.
+ end do
+end subroutine init_sc_dmft_paralkgb
+
+!!***
+
+!!****f* m_paw_dmft/destroy_sc_dmft_paralkgb
+!! NAME
+!! destroy_sc_dmft_paralkgb
+!!
+!! FUNCTION
+!!   deallocate bandc_proc and use_bandc
+!!
+!! INPUTS
+!!  paw_dmft   = data structure
+!!  
+!! OUTPUT
+!!
+!! PARENTS
+!!      destroy_sc_dmft
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine destroy_sc_dmft_paralkgb(paw_dmft)
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(paw_dmft_type),intent(inout) :: paw_dmft
+! *********************************************************************
+
+ if ( allocated(paw_dmft%bandc_proc) )  then
+   ABI_DEALLOCATE(paw_dmft%bandc_proc)
+ end if
+
+ if ( allocated(paw_dmft%use_bandc) )  then
+   ABI_DEALLOCATE(paw_dmft%use_bandc)
+ end if
+
+end subroutine destroy_sc_dmft_paralkgb
 !!***
 
 END MODULE m_paw_dmft

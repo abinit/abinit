@@ -5,10 +5,10 @@
 !!
 !! FUNCTION
 !! Exchange-correlation at finite temperature of an electron gas
-!! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987)
+!! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) [[cite:Ichimaru1987]]
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2018 ABINIT group (JFD,LK)
+!!  Copyright (C) 2002-2019 ABINIT group (JFD,LK)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,7 @@ contains
 !!
 !! FUNCTION
 !! Exchange-correlation at finite temperature of an electron gas
-!! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987)
+!! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) [[cite:Ichimaru1987]]
 !!
 !! INPUTS
 !!  temp= (electronic) temperature
@@ -71,13 +71,6 @@ contains
 
 subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 &                dvxc)!Optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xciit'
-!End of the abilint section
 
  implicit none
 
@@ -120,7 +113,7 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 !  Compute Gamma
    Gamma=one/(tt*ef)/rs
 
-!  Exchange-correlation of Ichimaru functionnal
+!  Exchange-correlation of Ichimaru functional
    fxc(ipt)= fexsGamma(Gamma,tt)*rsm1
    exc(ipt)=fxc(ipt) - tdexcsdtiit(rs,tt);
    vxc(ipt)=(8.0_dp*(Fxc_iit(rs,tt,deltavxc)-Fxc_iit(rs,tt,-deltavxc)) &
@@ -154,13 +147,6 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 !! SOURCE
 
  function fexsGamma(Gamma,t)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fexsGamma'
-!End of the abilint section
 
  implicit none
 
@@ -215,13 +201,6 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 
  function Fxc_iit(rs,t,deltavxc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Fxc_iit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -258,13 +237,6 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
 !! SOURCE
 
  function tdexcsdtiit(rs,t)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdexcsdtiit'
-!End of the abilint section
 
  implicit none
 

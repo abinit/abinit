@@ -8,7 +8,7 @@
 !! and for each angular momentum.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, DRH)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 module m_mkffnl
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
 
@@ -159,7 +159,6 @@ contains
 !!        = Sum_(mu1,mu2,mu3,mu4) [ Gprim(mu1,mu) Gprim(mu2,nu) Gprim(mu1,mu3) Gprim(mu2,mu4) d2ffnl_mu3,mu4 ]
 !!   --------------------------
 !!
-!! NOTES
 !!  1) l may be 0, 1, 2, or 3 in this version.
 !!
 !!  2) Norm-conserving psps : only FFNL for which ekb is not zero are calculated.
@@ -187,13 +186,6 @@ contains
 subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 &                   kg,kpg,kpt,lmnmax,lnmax,mpsang,mqgrid,nkpg,npw,ntypat,pspso,&
 &                   qgrid,rmet,usepaw,useylm,ylm,ylm_gr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkffnl'
-!End of the abilint section
 
  implicit none
 

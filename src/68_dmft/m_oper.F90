@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@
 MODULE m_oper
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_matlu,    only : matlu_type
@@ -39,7 +39,7 @@ MODULE m_oper
 
  implicit none
 
- private 
+ private
 
  public :: init_oper
  public :: diff_oper
@@ -65,11 +65,11 @@ MODULE m_oper
 
  type, public :: oper_type ! for each atom
 
-!  integer :: maxlpawu         ! Number of correlated atoms 
+!  integer :: maxlpawu         ! Number of correlated atoms
 !
 !  integer :: mband
 !  ! Number of bands
-!      
+!
 !
   integer :: nkpt
   ! Number of k-point in the IBZ.
@@ -90,7 +90,7 @@ MODULE m_oper
   character(len=12) :: whichoper
   ! describe the type of operator computed (LDA, DMFT, KS..)
 
-!  ! Polarisation 
+!  ! Polarisation
   type(matlu_type), allocatable :: matlu(:)
 !   Local projection on correlated orbitals
 
@@ -98,7 +98,7 @@ MODULE m_oper
 !   In the KS basis  (nsppol,nkpt,nband,nband)
 
   real(dp), pointer :: wtk(:) => null()
-      
+
  end type oper_type
 !!***
 
@@ -135,13 +135,6 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
  use m_matlu, only : init_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -161,9 +154,9 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
  if(present(opt_ksloc)) then
    optksloc=opt_ksloc
  else
-   optksloc=3 
+   optksloc=3
  endif
- 
+
  if(optksloc/=3) then
     ! FIXME: empty line!
  endif
@@ -243,13 +236,6 @@ subroutine destroy_oper(oper)
  use m_crystal, only : crystal_t
  use m_matlu, only : destroy_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -304,13 +290,6 @@ subroutine copy_oper(oper1,oper2)
  use defs_basis
  use m_matlu, only : copy_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -376,14 +355,6 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  use m_matlu, only : print_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_oper'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -503,7 +474,7 @@ end subroutine print_oper
 !! inverse_oper
 !!
 !! FUNCTION
-!!  Compute the inverse of the operator either in the KS space or in the 
+!!  Compute the inverse of the operator either in the KS space or in the
 !!  correlated subspace.
 !!
 !! INPUTS
@@ -529,13 +500,6 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : inverse_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inverse_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -548,7 +512,7 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
 !oper variables-------------------------------
  integer :: ikpt,isppol
  complex(dpc), allocatable :: matrix(:,:)
- character(len=500) :: message 
+ character(len=500) :: message
  integer :: paral
  integer, allocatable :: procb2(:)
 !todo_ba: prb with gwpc here: necessary for matcginv but should be dpc
@@ -623,13 +587,6 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'loc_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -715,7 +672,7 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  ABI_DEALLOCATE(procb2)
 
 
- 
+
 
  DBG_EXIT("COLL")
 end subroutine loc_oper
@@ -745,13 +702,6 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upfold_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -780,7 +730,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
  else
    paral=0
  endif
- 
+
 
 
  DBG_ENTER("COLL")
@@ -867,13 +817,6 @@ subroutine identity_oper(oper,option)
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'identity_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -940,11 +883,11 @@ end subroutine identity_oper
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
-!!  occup1 <type(oper_type)>= occupations 
-!!  occup2 <type(oper_type)>= occupations 
+!!  occup1 <type(oper_type)>= occupations
+!!  occup2 <type(oper_type)>= occupations
 !!  option : option for printing (if 1 assume data are related to lda only)
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
-!! 
+!!
 !! OUTPUT
 !!
 !! PARENTS
@@ -962,13 +905,6 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
  use m_crystal, only : crystal_t
  use m_matlu, only : diff_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'diff_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1008,12 +944,11 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
 !&   '   Error: Differences between ',trim(char1),' and ',trim(char2),' is too large:',&
 !&   matludiff,'is large than',toldiff
 !   call wrtout(std_out,message,'COLL')
-!   call leave_new('COLL')
+!   call abi_abort('COLL')
 !  endif
 ! endif
-! call flush(std_out)
-! call leave_new('COLL')
- 
+! call abi_abort('COLL')
+
  DBG_EXIT("COLL")
 end subroutine diff_oper
 !!***
@@ -1041,13 +976,6 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc)
  use defs_basis
  use m_matlu, only : trace_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trace_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1116,13 +1044,6 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc)
  use defs_basis
  use m_errors
  use m_matlu, only : prod_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prod_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ use defs_basis
 use defs_datatypes
 use defs_abitypes
 use defs_wvltypes
-use m_profiling_abi
+use m_abicore
 use m_xmpi
 use m_pawang
 use m_errors
@@ -91,13 +91,6 @@ subroutine get_seeds(first_seed, nseeds, seeds)
 ! This subroutine compute the seeds using the eigenstates of the Hamiltonian
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_seeds'
-!End of the abilint section
-
 implicit none
 
 integer,      intent(in)  :: first_seed, nseeds
@@ -202,13 +195,6 @@ subroutine block_lanczos_algorithm(mpi_communicator,matrix_function,kmax,nseeds,
 !
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'block_lanczos_algorithm'
-!End of the abilint section
-
 implicit none
 
 !-----------------------------------------
@@ -509,13 +495,6 @@ subroutine diagonalize_lanczos_banded(kmax,nseeds,Hsize,alpha,beta,Lbasis,eigenv
 ! Given the result of the Lanczos algorithm, this subroutine diagonalize the banded
 ! matrix as well as updates the basis.
 !-----------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'diagonalize_lanczos_banded'
-!End of the abilint section
-
 implicit none
 
 integer, intent(in)  :: kmax        ! number of Lanczos blocks

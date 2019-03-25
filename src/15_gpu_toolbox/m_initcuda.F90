@@ -8,7 +8,7 @@
 !!  and the functions needed to extract them
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (MMancini, MT, FDahm)
+!!  Copyright (C) 2009-2019 ABINIT group (MMancini, MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@
 module m_initcuda
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi, only: xmpi_world,xmpi_comm_rank,xmpi_comm_size,xmpi_abort
 
  implicit none
@@ -96,14 +96,6 @@ CONTAINS !===========================================================
 !! SOURCE
 
  subroutine prt_device_info(device)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_device_info'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
 !Arguments ------------------------------------
@@ -176,13 +168,6 @@ CONTAINS !===========================================================
 
  subroutine InitGPU(gpuinfo,device)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'InitGPU'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -225,13 +210,6 @@ CONTAINS !===========================================================
 
  subroutine Get_ndevice(ndevice)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Get_ndevice'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -267,13 +245,6 @@ CONTAINS !===========================================================
 
 subroutine Get_Mem_Dev(device,max_mem_dev)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Get_Mem_Dev'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -304,13 +275,6 @@ end subroutine Get_Mem_Dev
 !! SOURCE
 
  subroutine CleanGPU(gpuinfo)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CleanGPU'
-!End of the abilint section
 
  implicit none
 
@@ -354,14 +318,6 @@ end subroutine Get_Mem_Dev
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setdevice_cuda'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -450,13 +406,6 @@ end subroutine Get_Mem_Dev
 
  subroutine unsetdevice_cuda(use_gpu_cuda)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unsetdevice_cuda'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -492,14 +441,6 @@ end subroutine Get_Mem_Dev
 !! SOURCE
 
  subroutine get_fastest_devices(devices,nb_devices)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_fastest_devices'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -588,13 +529,6 @@ contains
 !! SOURCE
 
  subroutine my_sort(list1,list2,iperm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'my_sort'
-!End of the abilint section
 
  implicit none
 

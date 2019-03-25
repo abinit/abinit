@@ -12,22 +12,17 @@
 !! file I/O is treated by ioarr.F90 .
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TD)
+!! Copyright (C) 1998-2019 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! WffReadEigK.F90
-!! WffReadSkipK.F90
-!! initwf.F90
 !! interfaces_62_iowfdenpot.F90
 !! m_io_screening.F90
+!! m_outqmc.F90
+!! m_outwant.F90
 !! m_wfk.F90
-!! out1dm.F90
-!! outwant.F90
-!! randac.F90
-!! rdnpw.F90
 !!
 !!***

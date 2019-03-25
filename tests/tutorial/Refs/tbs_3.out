@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -61,7 +61,7 @@ _ WF disk file :      1.902 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -269,7 +269,7 @@ P           mkmem          64
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -421,10 +421,10 @@ P           mkmem          64
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  15.8484  -0.0000  13.1060  -0.0000  14.5278   0.0000
+   0.0000  15.8484   0.0000  13.1060   0.0000  14.5278   0.0000
    0.0200  15.8489   0.0075  13.1062   0.0039  14.5281   0.0055
    0.0400  15.8504   0.0149  13.1070   0.0079  14.5292   0.0110
-   0.0600  15.8528   0.0224  13.1083   0.0118  14.5311   0.0166
+   0.0600  15.8529   0.0224  13.1083   0.0118  14.5311   0.0166
    0.0800  15.8563   0.0299  13.1101   0.0157  14.5336   0.0221
    0.1000  15.8608   0.0374  13.1125   0.0197  14.5369   0.0276
    0.1200  15.8662   0.0449  13.1154   0.0236  14.5409   0.0332
@@ -591,25 +591,25 @@ P           mkmem          64
  Writing KS-RPA macroscopic dielectric function without local fields to file: tbs_3o_DS2_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: tbs_3o_DS2_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 43 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 50 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 40 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 43 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 44 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 31 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 49 iterations.
  Writing EXC Macroscopic dielectric function to file: tbs_3o_DS2_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  17.2241   0.0000  14.2601   0.0000  15.9610   0.0000
+   0.0000  17.2242  -0.0000  14.2601  -0.0000  15.9610   0.0000
    0.0200  17.2247   0.0080  14.2604   0.0042  15.9614   0.0061
-   0.0400  17.2263   0.0160  14.2612   0.0085  15.9626   0.0122
+   0.0400  17.2263   0.0160  14.2612   0.0085  15.9627   0.0122
    0.0600  17.2289   0.0241  14.2626   0.0127  15.9647   0.0184
    0.0800  17.2326   0.0321  14.2646   0.0169  15.9675   0.0245
    0.1000  17.2374   0.0401  14.2671   0.0212  15.9712   0.0307
-   0.1200  17.2432   0.0482  14.2702   0.0254  15.9756   0.0368
-   0.1400  17.2501   0.0563  14.2738   0.0297  15.9809   0.0430
-   0.1600  17.2581   0.0644  14.2780   0.0339  15.9870   0.0492
-   0.1800  17.2672   0.0726  14.2828   0.0382  15.9939   0.0554
+   0.1200  17.2433   0.0482  14.2702   0.0254  15.9756   0.0368
+   0.1400  17.2502   0.0563  14.2738   0.0297  15.9809   0.0430
+   0.1600  17.2581   0.0644  14.2781   0.0339  15.9870   0.0492
+   0.1800  17.2672   0.0726  14.2828   0.0382  15.9940   0.0554
   
 
 == END DATASET(S) ==============================================================
@@ -806,48 +806,65 @@ P           mkmem          64
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         46.0  wall=         25.8
+- Proc.   0 individual time (sec): cpu=         25.0  wall=         25.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         46.0  wall=         25.8
+.Delivered  16 WARNINGs and  26 COMMENTs to log file.
++Overall time at end (sec) : cpu=         25.0  wall=         25.2

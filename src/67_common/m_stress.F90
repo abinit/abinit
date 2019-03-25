@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FJ, MT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_stress
  use defs_basis
  use defs_abitypes
  use m_efield
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -41,12 +41,13 @@ module m_stress
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_fft,              only : zerosym
+ use m_fft,              only : zerosym, fourdp
  use m_mpinfo,           only : ptabs_fourdp
  use m_vdw_dftd2,        only : vdw_dftd2
  use m_vdw_dftd3,        only : vdw_dftd3
  use m_atm2fft,          only : atm2fft
  use m_mklocl,           only : mklocl_recipspace
+ use m_mkcore,           only : mkcore, mkcore_alt
 
  implicit none
 
@@ -144,14 +145,14 @@ contains
 !!
 !! NOTES
 !! * Concerning the stress tensor:
-!!   See O. H. Nielsen and R. M. Martin, PRB 32, 3792 (1985).
+!!   See O. H. Nielsen and R. M. Martin, PRB 32, 3792 (1985) [[cite:Nielsen1985a]].
 !!   Note that first term in equation (2) should have minus sign
 !!   (for kinetic energy contribution to stress tensor).
 !!   Normalizations in this code differ somewhat from those employed
 !!   by Nielsen and Martin.
 !!   For the stress tensor contribution from the nonlocal Kleinman-Bylander
 !!   separable pseudopotential, see D. M. Bylander, L. Kleinman, and
-!!   S. Lee, PRB 42, 1394 (1990).
+!!   S. Lee, PRB 42, 1394 (1990) [[cite:Bylander1990]].
 !!   Again normalization conventions differ somewhat.
 !!   See Doug Allan s notes starting page 795 (13 Jan 1992).
 !! * This subroutine calls different subroutines to compute the stress
@@ -177,16 +178,6 @@ contains
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
 &                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'stress'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_56_xc
-!End of the abilint section
 
  implicit none
 
@@ -273,7 +264,7 @@ contains
      ABI_ALLOCATE(v_dum,(nfft))
      ABI_ALLOCATE(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
-     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_DEALLOCATE(v_dum)
@@ -366,7 +357,8 @@ contains
  call timab(38,2,tsec)
 
 !HONG  no Berry phase contribution if using reduced ebar or d according to
-!HONG  (PRL 89, 117602 (2002)   Nature Physics: M. Stengel et.al. (2009))
+!HONG  PRL 89, 117602 (2002) [[cite:Souza2002]]
+!HONG  Nature Physics: M. Stengel et.al. (2009)) [[cite:Stengel1999]]
 !=======================================================================
 !=================== Berry phase contribution ==========================
 !=======================================================================
@@ -534,7 +526,7 @@ contains
  if (abs(ipositron)==2) then
    ABI_ALLOCATE(rhog_ep,(2,nfft))
    ABI_ALLOCATE(dummy,(6))
-   call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    rhog_ep=-rhog_ep
    call strhar(electronpositron%e_hartree,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,rprimd)
    strten(:)=strten(:)+dummy(:);harstr(:)=harstr(:)+dummy(:)
@@ -713,13 +705,6 @@ end subroutine stress
 
 subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 &                 rhog2) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strhar'
-!End of the abilint section
 
  implicit none
 

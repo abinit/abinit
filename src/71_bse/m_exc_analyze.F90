@@ -8,7 +8,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!!  Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!!  Copyright (C) 2009-2019 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_exc_analyze
 
  use defs_basis
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_bs_defs
  use m_xmpi
  use m_errors
@@ -38,7 +38,7 @@ module m_exc_analyze
  use m_numeric_tools,     only : iseven, wrap2_zero_one
  use m_bz_mesh,           only : kmesh_t, get_BZ_item
  use m_crystal,           only : crystal_t
- use m_wfd,               only : wfd_t, wfd_change_ngfft, wfd_get_cprj, wfd_sym_ur, wfd_get_ur
+ use m_wfd,               only : wfd_t
  use m_bse_io,            only : exc_read_eigen
  use m_pptools,           only : printxsf
 
@@ -46,7 +46,8 @@ module m_exc_analyze
  use m_pawtab,            only : pawtab_type,pawtab_get_lsize
  use m_pawfgrtab,         only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
+ use m_paw_pwaves_lmn,    only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
+ use m_paw_nhat,          only : nhatgrid
 
  implicit none
 
@@ -97,17 +98,6 @@ contains
 !! SOURCE
 
 subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsite,spin_opt,which_fixed,eh_rcoord,nrcell,ngfftf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_plot'
- use interfaces_14_hidewrite
- use interfaces_65_paw
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -166,7 +156,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
 
  ! If needed, prepare FFT tables to have u(r) on the ngfftf mesh.
  if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
+   call wfd%change_ngfft(Cryst,Psps,ngfftf)
  end if
 
  comm    = Wfd%comm
@@ -331,8 +321,8 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
        antres_coeff = vec_list(art_idx,1)
      end if
 
-     call wfd_sym_ur(Wfd,Cryst,Kmesh,val ,ik_bz,spin,ur_v) ! TODO recheck this one.
-     call wfd_sym_ur(Wfd,Cryst,Kmesh,cond,ik_bz,spin,ur_c)
+     call wfd%sym_ur(Cryst,Kmesh,val ,ik_bz,spin,ur_v) ! TODO recheck this one.
+     call wfd%sym_ur(Cryst,Kmesh,cond,ik_bz,spin,ur_c)
 
      !call wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae,ur_ae_onsite,ur_ps_onsite)
 
@@ -453,16 +443,6 @@ end subroutine exc_plot
 
 subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_den'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftot
@@ -505,7 +485,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
 
  ! Prepare FFT tables to have u(r) on the ngfft_osc mesh.
  !if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) then
- !  call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
+ !  call wfd%change_ngfft(Cryst,Psps,ngfftf)
  !end if
 
  nfft1 = ngfft(1)
@@ -521,7 +501,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
 
  do ik_ibz=1,Wfd%nkibz
    do band=1,BSp%nbnds
-     call wfd_get_ur(Wfd,band,ik_ibz,spin,wfr(:,band,ik_ibz))
+     call wfd%get_ur(band,ik_ibz,spin,wfr(:,band,ik_ibz))
    end do
  end do
 

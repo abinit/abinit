@@ -7,7 +7,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2019 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,14 +23,14 @@
 module m_parser
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_xmpi
 
  use m_io_tools,  only : open_file
  use m_fstrings,  only : sjoin, itoa, inupper
- use m_nctk,   only : write_var_netcdf    ! FIXME Deprecated
+ use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
  implicit none
 
@@ -51,8 +51,9 @@ module m_parser
  public :: chkint_ne      ! Checks the value of an input integer variable against a list.
  !public :: chkint_prt
 
- public :: prttagm        ! Print the content of dprarr.
+ public :: prttagm        ! Print the content of intarr or dprarr.
  public :: prttagm_images ! Extension to prttagm to include the printing of images information.
+ public :: chkvars_in_string   !  Analyze variable names in string. Abort if name is not recognized.
 
 CONTAINS  !===========================================================
 !!***
@@ -85,15 +86,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'parsefile'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: filnamin
@@ -138,9 +130,9 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    if (tread==1) ndtset=intarr(1)
    ! Check that ndtset is not negative
    if (ndtset<0 .or. ndtset>9999) then
-     write(message, '(a,i0,a,a,a,a)' )&
+     write(message, '(a,i0,4a)' )&
 &     'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
-&     'This is not allowed.  ',ch10,&
+&     'This is not allowed.',ch10,&
 &     'Action: modify ndtset in the input file.'
      MSG_ERROR(message)
    end if
@@ -193,15 +185,6 @@ end subroutine parsefile
 
 subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inread'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndig
@@ -230,14 +213,15 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    if(errcod/=0)then
 !    integer reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
-&     ' inread : ERROR -',&
+&     ' inread: ERROR -',&
 &     '  Attempted to read ndig=',ndig,' integer digits,'
      write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),&
 &     ', to initialize an integer variable'
      errcod=1
    end if
 
- else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI') then
+ else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
 !  real(dp) input section
 
@@ -316,7 +300,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    if(errcod/=0)then
 !    integer reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
-&     'inread : ERROR -',&
+&     'inread: ERROR -',&
 &     'Attempted to read ndig=',ndig,' integer digits,'
      write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),', to initialize a logical variable.'
      errcod=3
@@ -326,7 +310,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
 
  else
    write(msg,'(4a)' ) &
-&   'Argument typevarphys must be INT,DPR,LEN,ENE,BFI or LOG ',ch10,&
+&   'Argument typevarphys must be INT,DPR,LEN,ENE,BFI,TIM or LOG ',ch10,&
 &   'but input value was: ',trim(typevarphys)
    MSG_ERROR(msg)
  end if
@@ -335,7 +319,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    do idig=1,ndig
      if( string(idig:idig) == 'O' )then
        write(std_out,'(/,a,/,a,a,a)' ) &
-&       'inread : WARNING -',&
+&       'inread: WARNING -',&
 &       'Note that this string contains the letter O. ',ch10,&
 &       'It is likely that this letter should be replaced by the number 0.'
        exit
@@ -379,16 +363,6 @@ end subroutine inread
 !! SOURCE
 
 recursive subroutine instrng(filnam,lenstr,option,strln,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'instrng'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -668,15 +642,6 @@ end subroutine instrng
 
 subroutine inreplsp(string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inreplsp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(inout) :: string
@@ -749,15 +714,6 @@ end subroutine inreplsp
 !! SOURCE
 
 subroutine incomprs(string,length)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'incomprs'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -946,7 +902,7 @@ end subroutine incomprs
 !!
 !! PARENTS
 !!      ingeo,ingeobld,inkpts,inqpt,invacuum,invars0,invars1,invars2
-!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_ingeo_img
+!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_intagm_img
 !!      m_multibinit_dataset,macroin,mpi_setup,parsefile,ujdet
 !!
 !! CHILDREN
@@ -955,17 +911,6 @@ end subroutine incomprs
 !! SOURCE
 
 subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,ds_input,key_value)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'intagm'
- use interfaces_14_hidewrite
- use interfaces_32_util
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1404,7 +1349,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  tread = 0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI')typevar='DPR'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  if(typevarphys=='KEY')then
    if(opttoken>=2)then
      write(message, '(9a)' )&
@@ -1542,6 +1488,7 @@ end subroutine intagm
 !!       and return in au -atomic units=bohr- )
 !!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
 !!   'BFI'=>real(dp) (expect a "magnetic field", identify T, Tesla)
+!!   'TIM'=>real(dp) (expect a "time", identify S, Second)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in token cs
 !!
@@ -1566,16 +1513,6 @@ end subroutine intagm
 !! SOURCE
 
 subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inarray'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1607,7 +1544,8 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  ii=0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI')typevar='DPR'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE'  &
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  strln=len_trim(string)
 
  do while (ii<narr)
@@ -1691,8 +1629,9 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    MSG_ERROR(message)
  end if
 
-!In case of 'LEN', 'ENE', or 'BFI', try to identify the unit
- if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI')then
+!In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
+if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' &
+&    .or. typevarphys=='TIM')then
    do
 
 !    Relative location of next blank after data
@@ -1702,8 +1641,10 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      if(b2==0) b2=strln-b1+1
 
 !    DEBUG
-!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+!    write(std_out,*)' inarray : strln=',strln
+!    write(std_out,*)' inarray : b1=',b1
 !    write(std_out,*)' inarray : b2=',b2
+!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
 !    write(std_out,*)' typevarphys==',typevarphys
 !    ENDDEBUG
 
@@ -1729,7 +1670,11 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
          if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE')then
            factor=BField_Tesla
          end if
-       end if
+       else if (typevarphys=='TIM' .and. b2>=2) then
+         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
+           factor=one/Time_Sec
+         end if
+       endif
        dprarr(1:narr)=dprarr(1:narr)*factor
        exit
      else
@@ -1781,16 +1726,6 @@ end subroutine inarray
 !! SOURCE
 
 subroutine importxyz(lenstr,string_raw,string_upper,strln)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'importxyz'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1914,16 +1849,6 @@ end subroutine importxyz
 !! SOURCE
 
 subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'append_xyz'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2104,16 +2029,6 @@ end subroutine append_xyz
 subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minimal_flag,reference_value,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkdpr'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: advice_change_cond,cond_number,minimal_flag,unit
@@ -2270,15 +2185,6 @@ subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: advice_change_cond,cond_number,input_value,list_number
@@ -2365,15 +2271,6 @@ end subroutine chkint
 subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,list_number,list_values,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_eq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: advice_change_cond,cond_number,input_value,list_number
@@ -2458,15 +2355,6 @@ end subroutine chkint_eq
 
 subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minmax_value,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_ge'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2554,15 +2442,6 @@ end subroutine chkint_ge
 subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  minmax_value,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_le'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2653,15 +2532,6 @@ end subroutine chkint_le
 subroutine chkint_ne(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_ne'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2775,16 +2645,6 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_prt'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: advice_change_cond,cond_number,input_value,list_number
@@ -2883,7 +2743,7 @@ end subroutine chkint_prt
 !! prttagm
 !!
 !! FUNCTION
-!! Eventually print the content of dprarr (if typevarphys='DPR','LEN', 'ENE' and 'BFI'),
+!! Eventually print the content of dprarr (if typevarphys='DPR','LEN', 'ENE', 'TIM' and 'BFI'),
 !! or intarr (if typevarphys='INT'), arrays of effective dimensions narr and 0:ndtset_alloc
 !! For the second dimension, the 0 index relates to a default.
 !! Print the array only if the content for at least one value of the second
@@ -2930,6 +2790,7 @@ end subroutine chkint_prt
 !!   'LEN'=>real(dp) (output in bohr and angstrom)
 !!   'ENE'=>real(dp) (output in hartree and eV)
 !!   'BFI'=>real(dp) (output in Tesla)
+!!   'TIM'=>real(dp) (output in second)
 !!  use_narrm= if 0, use of scalar 'narr' instead of array 'narrm'
 !!  [firstchar]= (optional) first character of the line (default=' ')
 !!  [forceprint]= (optional) control if output is forced even if a variable is equal to its default value:
@@ -2952,16 +2813,6 @@ end subroutine chkint_prt
 subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 & marr,narr,narrm,ncid,ndtset_alloc,token,typevarphys,use_narrm,&
   firstchar,forceprint)  ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prttagm'
- use interfaces_32_util
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3127,9 +2978,9 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
      end if !(print==1)
 
 !    ###########################################################
-!    ### 03. Treatment of real 'DPR', 'LEN', 'ENE', 'BFI'
+!    ### 03. Treatment of real 'DPR', 'LEN', 'ENE', 'BFI', 'TIM'
 
-   else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI') then
+   else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
      if((ndtset_alloc>1).and.(use_narrm==0))then
        do idtset=1,ndtset_alloc
@@ -3203,7 +3054,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(abs(length)==1)format_dp=digit//short_dpr
            if(abs(length)==2)format_dp=digit//long_dpr
            if(abs(length)==6)format_dp=digit//veryshort_dpr
-         else if(typevarphys=='ENE' .or. typevarphys=='LEN' .or. typevarphys=='BFI')then
+   else if(typevarphys=='ENE' .or. typevarphys=='LEN' .or. typevarphys=='BFI' .or. typevarphys=='TIM')then
            if (narr<10) write(digit,'(i1)')narr_eff
            if (narr> 9) write(digit,'(i2)')narr_eff
            if(abs(length)==1)format_dp=digit//short_dim
@@ -3236,6 +3087,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(typevarphys=='ENE')out_unit=' Hartree'
            if(typevarphys=='LEN')out_unit=' Bohr   '
            if(typevarphys=='BFI')out_unit='   ' !EB remove Tesla unit
+           if(typevarphys=='TIM')out_unit=' Second' !EB remove Tesla unit
 !          Format, according to the length of the dataset string
            if((multi==0).or.(ncid<0))then
              appen=' '
@@ -3268,7 +3120,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
      end if
 
 !    ###########################################################
-!    ### 04. The type is neither 'INT' nor 'DPR','ENE','LEN','BFI'
+!    ### 04. The type is neither 'INT' nor 'DPR','ENE','LEN','BFI','TIM'
    else
      MSG_BUG('Disallowed typevarphys = '//TRIM(typevarphys))
    end if
@@ -3307,17 +3159,7 @@ end subroutine prttagm
 
 subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 & marr,narrm,ncid,ndtset_alloc,token,typevarphys,&
-& mxnimage,nimage,ndtset,prtimg,strimg,firstchar,forceprint)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prttagm_images'
- use interfaces_32_util
-!End of the abilint section
-
- implicit none
+& mxnimage,nimagem,ndtset,prtimg,strimg,firstchar,forceprint)
 
 !Arguments ------------------------------------
 !scalars
@@ -3330,7 +3172,7 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 !arrays
  integer,intent(in) :: prtimg(mxnimage,0:ndtset_alloc)
  integer,intent(in) :: jdtset_(0:ndtset_alloc)
- integer,intent(in) :: nimage(0:ndtset_alloc)
+ integer,intent(in) :: nimagem(0:ndtset_alloc)
  character(len=8),intent(in) :: strimg(mxnimage)
  integer,intent(in) :: narrm(0:ndtset_alloc)
  real(dp),intent(in) :: dprarr_images(marr,mxnimage,0:ndtset_alloc)
@@ -3354,11 +3196,13 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 
 ! *************************************************************************
 
+!Test whether for this variable, the content of different images differ.
+!test_multiimages=.false. if, for all datasets, the content is identical.
  test_multiimages=.false.
  do idtset=1,ndtset_alloc
-   if(nimage(idtset)>1)then
+   if(nimagem(idtset)>1)then
      do iarr=1,narrm(idtset)
-       if(sum(abs( dprarr_images(iarr,2:nimage(idtset),idtset)- &
+       if(sum(abs( dprarr_images(iarr,2:nimagem(idtset),idtset)- &
 &       dprarr_images(iarr,1              ,idtset)))>tol12)then
          test_multiimages=.true.
        end if
@@ -3366,14 +3210,10 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
    end if
  end do
 
- if(nimage(0)==0)test_multiimages=.true.
+ if(nimagem(0)==0)test_multiimages=.true.
 
-!DEBUG
-!if(trim(token)=='vel')then
-!write(ab_out,*)' test_multiimages=',test_multiimages
-!endif
-!ENDDEBUG
-
+!If there is no differences between images, one is back to the usual prttagm routine.
+!Note the treatment of firstchar and forceprint has to be transmitted to prttagm.
  if(.not.test_multiimages)then
 
    narr=narrm(1)
@@ -3381,14 +3221,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
    ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
    do idtset=0,ndtset_alloc
      dprarr(1:narrm(idtset),idtset)=dprarr_images(1:narrm(idtset),1,idtset)
-
-!    DEBUG
-!    if(trim(token)=='vel')then
-!    write(ab_out,*)' idtset,narrm(idtset),dprarr(1:narrm(idtset),idtset)=',&
-!    &    idtset,narrm(idtset),dprarr(1:narrm(idtset),idtset)
-!    endif
-!    ENDDEBUG
-
    end do
    multi_narr=0
    if(ndtset_alloc>1)then
@@ -3396,17 +3228,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
        if(narrm(1)/=narrm(idtset))multi_narr=1
      end do
    end if
-!  if(narrm(0)==0)multi_narr=1
-!  DEBUG
-!  if(trim(token)=='fcart')then
-!  write(std_out,*)' will call prttagm with fcart '
-!  write(std_out,*)' narrm(0:ndtset_alloc)=',narrm(0:ndtset_alloc)
-!  write(std_out,*)' multi_narr=',multi_narr
-!  do idtset=0,ndtset_alloc
-!  write(std_out,*)' dprarr_images(1:narrm(idtset),1,idtset)=',dprarr_images(1:narrm(idtset),1,idtset)
-!  enddo
-!  endif
-!  ENDDEBUG
    if (present(firstchar).and.present(forceprint)) then
      call prttagm(dprarr,intarr,iout,jdtset_,length,marr,narr,&
 &     narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr,&
@@ -3433,11 +3254,11 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
    do idtset=1,ndtset_alloc
 
      if (narrm(idtset)>0)then
-       do iimage=1,nimage(idtset)
+       do iimage=1,nimagem(idtset)
 
          print_out=.true.
          if (prtimg(iimage,idtset)==0) print_out=.false.
-         if (nimage(0)>=nimage(idtset)) then
+         if (nimagem(0)>=nimagem(idtset)) then
            if (sum(abs(dprarr_images(1:narrm(idtset),iimage,idtset) &
 &           -dprarr_images(1:narrm(idtset),iimage,0)))<tol12) print_out=.false.
          end if
@@ -3492,6 +3313,137 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
  end if
 
 end subroutine prttagm_images
+!!***
+
+!!****f* m_parser/chkvars_in_string
+!! NAME
+!!  chkvars_in_string
+!!
+!! FUNCTION
+!!  Analyze variable names in string. Abort if name is not recognized.
+!!
+!! INPUTS
+!!  protocol=
+!!    0 if parser does not accept multiple datasets and +* syntax (e.g. anaddb)
+!!    1 if parser accepts multiple datasets and +* syntax (e.g. abinit)
+!!
+!!  list_vars(len=*)=string with the (upper case) names of the variables (excluding logicals and chars).
+!!  list_logicals(len=*)=string with the (upper case) names of the logical variables.
+!!  list_strings(len=*)=string with the (upper case) names of the character variables.
+!!  string(len=*)=string (with upper case) from the input file.
+!!
+!! OUTPUT
+!!  Abort if variable name is not recognized.
+!!
+!! PARENTS
+!!      chkvars,m_anaddb_dataset
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, string)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: protocol
+ character(len=*),intent(in) :: string
+ character(len=*),intent(in) :: list_logicals,list_strings,list_vars
+
+!Local variables-------------------------------
+ character,parameter :: blank=' '
+!scalars
+ integer :: index_blank,index_current,index_endword,index_endwordnow,index_list_vars
+ character(len=500) :: message
+
+!************************************************************************
+
+ index_current=1
+ do ! Infinite do-loop, to identify the presence of each potential variable names
+
+   if(len_trim(string)<=index_current)exit
+   index_blank=index(string(index_current:),blank)+index_current-1
+
+   if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_current:index_current))/=0)then
+
+     index_endword = index_blank -1
+     if (protocol == 1) then
+       ! Skip characters like : + or the digits at the end of the word
+       ! Start from the blank that follows the end of the word
+       do index_endword=index_blank-1,index_current,-1
+         if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
+       end do
+     end if
+     !write(std_out,*)"Will analyze:", string(index_current:index_endword)
+
+     ! Find the index of the potential variable name in the list of variables
+     index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
+
+     ! Treat the complications due to the possibility of images
+     if (index_list_vars==0 .and. protocol==1) then
+
+       ! Treat possible LASTIMG appendix
+       if(index_endword-6>=1)then
+         if(string(index_endword-6:index_endword)=='LASTIMG')index_endword=index_endword-7
+       end if
+
+       ! Treat possible IMG appendix
+       if(index_endword-2>=1)then
+         if(string(index_endword-2:index_endword)=='IMG')index_endword=index_endword-3
+       end if
+
+       index_endwordnow=index_endword
+
+       ! Again skip characters like : + or the digits before IMG
+       ! Start from the blank that follows the end of the word
+       do index_endword=index_endwordnow,index_current,-1
+         if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
+       end do
+
+       ! Find the index of the potential variable name in the list of variables
+       index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
+     end if
+
+     if(index_list_vars==0)then
+
+       ! Treat possible logical input variables
+       if(index(list_logicals,blank//string(index_current:index_endword)//blank)/=0)then
+         !write(std_out,*)"Found logical variable: ",string(index_current:index_endword)
+         index_blank=index(string(index_current:),blank)+index_current-1
+         if(index(' F T ',string(index_blank:index_blank+2))==0)then
+           write(message, '(8a)' )&
+&           'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
+&           'This variable should be given a logical value (T or F), but the following string was found :',&
+&           string(index_blank:index_blank+2),ch10,&
+&           'Action: check your input file. You likely misused the input variable.'
+           MSG_ERROR(message)
+         else
+           index_blank=index_blank+2
+         end if
+!        Treat possible string input variables
+       else if(index(list_strings,blank//string(index_current:index_endword)//blank)/=0)then
+!        Every following string is accepted
+         !write(std_out,*)"Found string variable: ",string(index_current:index_endword)
+         !write(std_out,*)"in string: ",trim(string(index_current:))
+         index_current=index(string(index_current:),blank)+index_current
+         index_blank=index(string(index_current:),blank)+index_current-1
+         !write(std_out,*)"next:: ",string(index_current:index_endword)
+
+!        If still not admitted, then there is a problem
+       else
+         write(message, '(7a)' )&
+&         'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
+&         'This name is not one of the registered input variable names (see https://www.abinit.org/doc).',ch10,&
+&         'Action: check your input file. You likely mistyped the input variable.'
+         MSG_ERROR(message)
+       end if
+     end if
+   end if
+
+   index_current=index_blank+1
+ end do
+
+end subroutine chkvars_in_string
 !!***
 
 end module m_parser

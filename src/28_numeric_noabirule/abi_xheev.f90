@@ -9,7 +9,7 @@
 !!  symmetric or hermitian matrix A.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2019 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,12 +32,6 @@
 !!
   subroutine abi_dheev(jobz,uplo,n,a,lda,w,work,lwork,rwork,info, &
 &       x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dheev'
-!End of the abilint section
 
  implicit none
 
@@ -200,13 +194,6 @@ end subroutine abi_dheev
   subroutine abi_dheev_alloc(jobz,uplo,n,a,w, &
 &       x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dheev_alloc'
-
-!End of the abilint section
-
  implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
@@ -241,12 +228,6 @@ end subroutine abi_dheev_alloc
 !! SOURCE
 
 subroutine abi_cheev(jobz,uplo,n,a,lda,w,work,lwork,rwork,info)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_cheev'
-!End of the abilint section
 
  implicit none
 
@@ -308,12 +289,6 @@ end subroutine abi_cheev
 !!
   subroutine abi_cheev_alloc(jobz,uplo,n,a,w)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_cheev_alloc'
-
-!End of the abilint section
 
  implicit none
  !Arguments ------------------------------------
@@ -347,12 +322,6 @@ end subroutine abi_cheev_alloc
 !! SOURCE
 
 subroutine abi_zheev(jobz,uplo,n,a,lda,w,work,lwork,rwork,info)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zheev'
-!End of the abilint section
 
  implicit none
 
@@ -415,13 +384,6 @@ end subroutine abi_zheev
 !! SOURCE
 
 subroutine abi_zheev_alloc(jobz,uplo,n,a,w)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zheev_alloc'
-
-!End of the abilint section
 
  implicit none
 

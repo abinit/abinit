@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (XG)
+!!  Copyright (C) 2008-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,9 +32,8 @@ module m_afterscfloop
  use defs_wvltypes
  use m_energies
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_efield
- use m_orbmag
  use m_ab7_mixing
  use m_hdr
 
@@ -55,6 +54,11 @@ module m_afterscfloop
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawcprj,          only : pawcprj_type,pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type
+ use m_paw_mkrho,        only : pawmkrho
+ use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
+ use m_paw_occupancies,  only : pawmkrhoij
+ use m_paw_correlations, only : setnoccmmp
+ use m_orbmag,           only : chern_number,mpi_chern_number,orbmag,orbmag_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -63,6 +67,9 @@ module m_afterscfloop
  use m_nonlop_test,      only : nonlop_test
  use m_common,           only : scprqt
  use m_xctk,             only : xcden
+ use m_forstr,           only : forstr
+ use m_wvl_rho,          only : wvl_mkrho
+ use m_wvl_psi,          only : wvl_psitohpsi, wvl_tail_corrections
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
@@ -123,6 +130,8 @@ contains
 !!                       under symmetry operations (computed in symatm)
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  istep=number of the SCF iteration
+!!  istep_fock_outer=number of outer SCF iteration in the double loop approach
+!!  istep_mix=number of inner SCF iteration in the double loop approach
 !!  kg(3,mpw*mkmem)=reduced (integer) coordinates of G vecs in basis sphere
 !!  kxc(nfftf,nkxc)=XC kernel
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
@@ -239,7 +248,7 @@ contains
 !!   | e_hybcomp_v0=potential compensation term for hybrid exchange-correlation energy (hartree) at fixed density
 !!   | e_hybcomp_v=potential compensation term for hybrid exchange-correlation energy (hartree) at self-consistent den
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
-!!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
+!!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
 !!   | e_paw(IN)=PAW spherical part energy
@@ -277,7 +286,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
 & gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& grxc,gsqcut,hdr,indsym,irrzon,istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
@@ -286,22 +295,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 & xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'afterscfloop'
- use interfaces_14_hidewrite
- use interfaces_62_wvl_wfs
- use interfaces_65_paw
- use interfaces_67_common
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istep,mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
+ integer,intent(in) :: istep,istep_fock_outer,istep_mix
+ integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
  integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
@@ -445,10 +444,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        if (dtset%iscf==0) then
          energies%e_kinetic=ekin    ; energies%e_hartree=eh
          energies%e_xc=exc          ; energies%e_localpsp=eloc
-         energies%e_nonlocalpsp=enl ; energies%e_exactX=eexctx
+         energies%e_nlpsp_vfock=enl ; energies%e_exactX=eexctx
          energies%e_sicdc=esicdc    ; energies%e_xcdc=evxc
          energies%e_eigenvalues = energies%e_kinetic + energies%e_localpsp &
-&         + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
+&         + energies%e_xcdc  + two*energies%e_hartree +energies%e_nlpsp_vfock
        end if
      end if
      call last_orthon(mpi_enreg%me_wvl,mpi_enreg%nproc_wvl,istep,wvl%wfs%ks,wvl%e%energs%evsum,.true.)
@@ -504,7 +503,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        paw_dmft%use_sc_dmft=0 ; paw_dmft%use_dmft=0 ! dmft not used here
        call pawmkrhoij(atindx,atindx1,cprj,dimcprj_srt,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
 &       mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&       occ,mpi_enreg%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
+&       occ,mpi_enreg%paral_kgb,paw_dmft,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
        ABI_DEALLOCATE(dimcprj_srt)
 !      3-Symetrize rhoij, compute nhat and add it to rhor
        call pawmkrho(1,dum,1,gprimd,0,indsym,0,mpi_enreg,my_natom,dtset%natom,dtset%nspden,dtset%nsym,&
@@ -540,13 +539,16 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
  if(dtset%orbmag==1 .OR. dtset%orbmag==3) then
-    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
-         &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
-         &            symrec,usecprj,psps%usepaw,xred)
+    ! call chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+    !      &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+    !      &            rprimd,symrec,usecprj,psps%usepaw,xred)
+    call mpi_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+         &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+         &            rprimd,symrec,usecprj,psps%usepaw,xred)
  end if
  if(dtset%orbmag==2 .OR. dtset%orbmag==3) then
     call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
-     &            mcg,mcprj,mpi_enreg,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
+     &            mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
  end if
 
@@ -944,7 +946,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  choice=3
  call scprqt(choice,cpus,deltae,diffor,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
-& 1,dtset%iscf,istep,dtset%kptns,maxfor,&
+& 1,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,maxfor,&
 & moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,&
 & dtset%nstep,occ,optres,prtfor,prtxml,quit,&
 & res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
@@ -1042,7 +1044,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%gresid(:,:)=gresid(:,:)
  results_gs%grewtn(:,:)=grewtn(:,:)
  results_gs%grxc(:,:)  =grxc(:,:)
+ results_gs%berryopt   =dtset%berryopt
  results_gs%pel(1:3)   =pel(1:3)
+ results_gs%pion(1:3)  =pion(1:3)
  results_gs%strten(1:6)=strten(1:6)
  results_gs%synlgr(:,:)=synlgr(:,:)
  results_gs%vxcavg     =vxcavg
@@ -1056,8 +1060,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (dtset%useria==112233) then
    call nonlop_test(cg,eigen,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,dtset%nkpt,&
-&   dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,pawtab,&
-&   ph1d,psps,rprimd,dtset%typat,xred)
+&   dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,&
+&   pawtab,ph1d,psps,rprimd,dtset%typat,xred)
  end if
 
  call timab(257,2,tsec)

@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 module m_pred_srkhna14
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
 
@@ -53,11 +53,11 @@ contains
 !!
 !! IONMOV 14:
 !! Simple molecular dynamics with a symplectic algorithm proposed
-!! by S.Blanes and P.C.Moans [called SRKNa14 in Practical symplectic partitioned
+!! by S.Blanes and P.C.Moans, called SRKNa14 in Practical symplectic partitioned
 !! Runge--Kutta and Runge--Kutta--Nystrom methods, Journal of Computational
-!! and Applied Mathematics archive, volume 142,  issue 2  (May 2002), pages 313 - 330]
-!! of the kind first published by H. Yoshida [Construction of higher order symplectic
-!! integrators, Physics Letters A, volume 150, number 5 to 7, pages 262 - 268].
+!! and Applied Mathematics archive, volume 142,  issue 2  (May 2002), pages 313 - 330 [[cite:Blanes2002]].
+!! of the kind first published by H. Yoshida, Construction of higher order symplectic
+!! integrators, Physics Letters A, volume 150, number 5 to 7, pages 262 - 268 [[cite:Yoshida1990]]
 !! This algorithm requires at least 14 evaluation of the forces (actually 15 are done
 !! within Abinit) per time step. At this cost it usually gives much better
 !! energy conservation than the verlet algorithm (ionmov 6) for a 30 times bigger
@@ -84,13 +84,6 @@ contains
 !! SOURCE
 
 subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_srkna14'
-!End of the abilint section
 
  implicit none
 

@@ -16,7 +16,7 @@
 !!  See notes below for more info.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
+!! Copyright (C) 2009-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,7 @@
 MODULE m_wfk
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_build_info
  use m_errors
 #ifdef HAVE_MPI2
@@ -64,7 +64,6 @@ MODULE m_wfk
  use m_hdr
  use m_sort
  use m_crystal
- use m_crystal_io
  use m_pawtab
  use m_ebands
  use m_pawrhoij
@@ -294,7 +293,7 @@ CONTAINS
 !!  comm = MPI communicator (used for collective parallel IO)
 !!
 !! OUTPUT
-!!  Wfk<type(wfk_t)> = WFK handler initialized and set in read mode
+!!  Wfk<class(wfk_t)> = WFK handler initialized and set in read mode
 !!  [Hdr_out]=Copy of the abinit header
 !!
 !! PARENTS
@@ -309,20 +308,11 @@ CONTAINS
 
 subroutine wfk_open_read(Wfk,fname,formeig,iomode,funt,comm,Hdr_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_open_read'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iomode,comm,formeig,funt
  character(len=*),intent(in) :: fname
- type(wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
  type(hdr_type),optional,intent(inout) :: Hdr_out  ! should be intent(out), but psc miscompiles the call!
 
 !Local variables-------------------------------
@@ -438,7 +428,7 @@ end subroutine wfk_open_read
 !!  [write_frm]=True if the fortran record markers should be written (default). Only if Fortran binary file.
 !!
 !! OUTPUT
-!!  Wfk<type(wfk_t)> = WFK handler initialized and set in read mode
+!!  Wfk<class(wfk_t)> = WFK handler initialized and set in read mode
 !!
 !! PARENTS
 !!      m_iowf,m_wfd,m_wfk
@@ -451,23 +441,13 @@ end subroutine wfk_open_read
 
 subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write_frm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_open_write'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iomode,comm,formeig,funt
  character(len=*),intent(in) :: fname
  logical,optional,intent(in) :: write_hdr,write_frm
  type(hdr_type),intent(in) :: Hdr
- type(wfk_t),intent(out) :: Wfk
+ class(wfk_t),intent(out) :: Wfk
 
 !Local variables-------------------------------
 !scalars
@@ -671,18 +651,9 @@ end subroutine wfk_open_write
 
 subroutine wfk_close(Wfk, delete)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_close'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- type(wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
  logical,optional,intent(in) :: delete
 
 !Local variables-------------------------------
@@ -739,15 +710,9 @@ subroutine wfk_close(Wfk, delete)
  ! Free memory.
  call hdr_free(Wfk%Hdr)
 
- if (allocated(Wfk%nband)) then
-   ABI_FREE(Wfk%nband)
- end if
- if (allocated(Wfk%recn_ks)) then
-   ABI_FREE(Wfk%recn_ks)
- end if
- if (allocated(Wfk%offset_ks)) then
-   ABI_FREE(Wfk%offset_ks)
- end if
+ ABI_SFREE(Wfk%nband)
+ ABI_SFREE(Wfk%recn_ks)
+ ABI_SFREE(Wfk%offset_ks)
 
  if (present(delete)) then
    if (delete) call delete_file(wfk%fname, ierr)
@@ -768,7 +733,7 @@ end subroutine wfk_close
 !!  Print information on the object.
 !!
 !! INPUTS
-!!  wfk<type(wfk_t)> = WFK handler
+!!  wfk<class(wfk_t)> = WFK handler
 !!  [header]=String to be printed as header for additional info.
 !!  [unit]=Unit number for output. Defaults to std_out
 !!  [prtvol]=Verbosity level
@@ -784,19 +749,9 @@ end subroutine wfk_close
 
 subroutine wfk_print(wfk,unit,header,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- type(wfk_t),intent(inout) :: wfk
+ class(wfk_t),intent(inout) :: wfk
  integer,optional,intent(in) :: unit,prtvol
  character(len=*),optional,intent(in) :: header
 
@@ -831,7 +786,7 @@ end subroutine wfk_print
 !!  Return non-zero value if error.
 !!
 !! INPUTS
-!!  wfk<type(wfk_t)> = WFK handler
+!!  wfk<class(wfk_t)> = WFK handler
 !!  ik_ibz=k-point index.
 !!  spin=Spin index.
 !!  [band]=Band index.
@@ -844,20 +799,11 @@ end subroutine wfk_print
 
 integer function wfk_validate_ks(wfk, ik_ibz, spin, band) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_validate_ks'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz, spin
  integer,optional,intent(in) :: band
- type(wfk_t),intent(in) :: wfk
+ class(wfk_t),intent(in) :: wfk
 
 !Local variables-------------------------------
 !scalars
@@ -912,7 +858,7 @@ end function wfk_validate_ks
 !!  Return -1 if not found.
 !!
 !! INPUTS
-!!  wfk<type(wfk_t)> = WFK handler initialized and set in read mode
+!!  wfk<class(wfk_t)> = WFK handler initialized and set in read mode
 !!  kpt(3)=k-point in reduced coordinates.
 !!  [ktol]=Optional tolerance for k-point comparison.
 !!         For each reduced direction the absolute difference between the coordinates must be less that ktol
@@ -925,19 +871,10 @@ end function wfk_validate_ks
 
 integer pure function wfk_findk(wfk, kpt, ktol) result(ikpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_findk'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),optional,intent(in) :: ktol
- type(wfk_t),intent(in) :: wfk
+ class(wfk_t),intent(in) :: wfk
 !arrays
  real(dp),intent(in) :: kpt(3)
 
@@ -986,15 +923,6 @@ end function wfk_findk
 !! SOURCE
 
 subroutine wfk_ncdef_dims_vars(ncid, hdr, fform, write_hdr, iskss)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_ncdef_dims_vars'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1073,7 +1001,7 @@ end subroutine wfk_ncdef_dims_vars
 !!  Test two wfk_t objects for consistency. Return non-zero value if test fails.
 !!
 !! INPUTS
-!!  wfk1, wfk1<type(wfk_t)> = WFK handlers to be compared
+!!  wfk1, wfk1<class(wfk_t)> = WFK handlers to be compared
 !!
 !! OUTPUT
 !!  ierr
@@ -1086,18 +1014,9 @@ end subroutine wfk_ncdef_dims_vars
 
 integer function wfk_compare(wfk1, wfk2) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_compare'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- type(wfk_t),intent(in) :: wfk1, wfk2
+ class(wfk_t),intent(in) :: wfk1, wfk2
 
 !Local variables-------------------------------
 !scalars
@@ -1169,7 +1088,7 @@ end function wfk_compare
 !!  Read a block of contiguous bands at a given (k-point, spin)
 !!
 !! INPUTS
-!!  Wfk<type(wfk_t)>= WFK file handler object.
+!!  Wfk<class(wfk_t)>= WFK file handler object.
 !!  band_block(2)=Initial and final band index.
 !!  ik_ibz=Index of the k-point in the IBZ.
 !!  spin=Spin index
@@ -1197,19 +1116,10 @@ end function wfk_compare
 
 subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_band_block'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin,sc_mode
- type(wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
 !arrays
  integer,intent(in) :: band_block(2)
  integer,intent(out), DEV_CONTARRD  optional :: kg_k(:,:) !(3,npw_k)
@@ -1578,7 +1488,7 @@ end subroutine wfk_read_band_block
 !!  for a given (band, k-point, spin).
 !!
 !! INPUTS
-!!  Wfk<type(wfk_t)>=WFK file handler.
+!!  Wfk<class(wfk_t)>=WFK file handler.
 !!  band=Band index
 !!  ik_ibz=Index of the k-point in the IBZ.
 !!  spin=Spin index
@@ -1601,19 +1511,10 @@ end subroutine wfk_read_band_block
 
 subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_bks'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin,sc_mode
- type(wfk_t),intent(inout) :: wfk
+ class(wfk_t),intent(inout) :: wfk
 !arrays
  real(dp),DEV_CONTARRD intent(out) :: cg_bks(:,:)
  real(dp),optional,intent(inout) :: eig1_bks(2*wfk%mband)
@@ -1836,7 +1737,7 @@ end subroutine wfk_read_bks
 !!  Write a block of contigous bands.
 !!
 !! INPUTS
-!!  Wfk<type(wfk_t)>=
+!!  Wfk<class(wfk_t)>=
 !!  band_block(2)=Initial and final band index.
 !!  ik_ibz=Index of the k-point in the IBZ.
 !!  spin=Spin index
@@ -1861,19 +1762,10 @@ end subroutine wfk_read_bks
 
 subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_write_band_block'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin,sc_mode !,mband,rdcg,rdeig,npw_k,nband_k
- type(wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
 !arrays
  integer,intent(in) :: band_block(2)
  integer,intent(in),optional :: kg_k(:,:)  !(3,npw_k)
@@ -2245,7 +2137,7 @@ end subroutine wfk_write_band_block
 !!  are specified by the logical mask `bmask`.
 !!
 !! INPUTS
-!!  Wfk<type(wfk_t)>=
+!!  Wfk<class(wfk_t)>=
 !!  ik_ibz=Index of the k-point in the IBZ.
 !!  spin=Spin index
 !!  sc_mode= MPI-IO option
@@ -2273,19 +2165,10 @@ end subroutine wfk_write_band_block
 
 subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_bmask'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin,sc_mode
- type(wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
 !arrays
  logical,intent(in) :: bmask(Wfk%mband)
  integer,intent(out), DEV_CONTARRD optional :: kg_k(:,:)  !(3,npw_k)
@@ -2797,6 +2680,7 @@ end subroutine wfk_read_bmask
 !!
 !! OUTPUTS
 !!  ebands<ebands_t>=GS band-structure.
+!!  [out_hdr]=Abinit header.
 !!
 !! PARENTS
 !!
@@ -2804,21 +2688,13 @@ end subroutine wfk_read_bmask
 !!
 !! SOURCE
 
-type(ebands_t) function wfk_read_ebands(path, comm) result(ebands)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_ebands'
-!End of the abilint section
-
- implicit none
+type(ebands_t) function wfk_read_ebands(path, comm, out_hdr) result(ebands)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
  integer,intent(in) :: comm
+ type(hdr_type),optional,intent(out) :: out_hdr
 
 !Local variables-------------------------------
 !scalars
@@ -2828,8 +2704,9 @@ type(ebands_t) function wfk_read_ebands(path, comm) result(ebands)
 
 !************************************************************************
 
- call wfk_read_eigenvalues(path,eigen,hdr,comm)
+ call wfk_read_eigenvalues(path, eigen, hdr, comm)
  ebands = ebands_from_hdr(hdr,maxval(hdr%nband),eigen)
+ if (present(out_hdr)) call hdr_copy(hdr, out_hdr)
 
  ABI_FREE(eigen)
  call hdr_free(hdr)
@@ -2847,7 +2724,7 @@ end function wfk_read_ebands
 !!  Helper function to read all the eigenvalues for a given (k-point,spin)
 !!
 !! INPUTS
-!!  Wfk<type(wfk_t)>= WFK file handler
+!!  Wfk<class(wfk_t)>= WFK file handler
 !!  ik_ibz=Index of the k-point in the IBZ.
 !!  spin=spin index
 !!  sc_mode= MPI-IO option
@@ -2874,19 +2751,10 @@ end function wfk_read_ebands
 
 subroutine wfk_read_eigk(Wfk,ik_ibz,spin,sc_mode,eig_k,occ_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_eigk'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin,sc_mode
- type(wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
 !arrays
  real(dp),intent(out) :: eig_k((2*Wfk%mband)**Wfk%formeig*Wfk%mband)
  real(dp),optional,intent(out) :: occ_k(Wfk%mband)
@@ -2936,15 +2804,6 @@ end subroutine wfk_read_eigk
 !! SOURCE
 
 subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_eigenvalues'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3006,9 +2865,7 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
      end if
    end if
    call xmpi_bcast(eigen,master,comm,ierr)
-   if (present(occ)) then
-     call xmpi_bcast(occ,master,comm,ierr)
-   end if
+   if (present(occ)) call xmpi_bcast(occ,master,comm,ierr)
  end if
 
 end subroutine wfk_read_eigenvalues
@@ -3037,19 +2894,10 @@ end subroutine wfk_read_eigenvalues
 
 subroutine wfk_write_h1mat(Wfk,sc_mode,eigen)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_write_h1mat'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sc_mode
- type(wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
 !arrays
  real(dp),intent(in) :: eigen(2*Wfk%mband**2*Wfk%nkpt*Wfk%nsppol)
 
@@ -3102,15 +2950,6 @@ end subroutine wfk_write_h1mat
 !! SOURCE
 
 subroutine wfk_read_h1mat(fname, eigen, hdr_out, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_h1mat'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3186,17 +3025,8 @@ end subroutine wfk_read_h1mat
 
 subroutine wfk_rewind(wfk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_rewind'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
- type(Wfk_t),intent(inout) :: wfk
+ class(wfk_t),intent(inout) :: wfk
 
 !Local variables-------------------------------
  integer :: ierr
@@ -3231,7 +3061,7 @@ end subroutine wfk_rewind
 !!   ik_ibz,spin = (k-point,spin) indices
 !!
 !! SIDE EFFECTS
-!!   Wfk<type(Wfk_t)> : modifies Wfk%f90_fptr and the internal F90 file pointer.
+!!   Wfk<class(wfk_t)> : modifies Wfk%f90_fptr and the internal F90 file pointer.
 !!
 !! PARENTS
 !!      m_wfk
@@ -3244,19 +3074,9 @@ end subroutine wfk_rewind
 
 subroutine wfk_seek(Wfk,ik_ibz,spin)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_seek'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)  :: ik_ibz,spin
- type(Wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
 
 !Local variables-------------------------------
  integer :: ierr,ik_fpt,spin_fpt,recn_wanted,recn_fpt,rec_type
@@ -3269,9 +3089,7 @@ subroutine wfk_seek(Wfk,ik_ibz,spin)
    !
    ! Find the position inside the file.
    if (ALL(Wfk%f90_fptr==FPTR_EOF)) then ! handle the EOF condition
-     if (Wfk%debug) then
-       call wrtout(std_out,"EOF condition","PERS")
-     end if
+     if (Wfk%debug) call wrtout(std_out,"EOF condition","PERS")
      recn_fpt = Wfk%recn_eof
    else
      ik_fpt   = Wfk%f90_fptr(1)
@@ -3323,17 +3141,8 @@ end subroutine wfk_seek
 
 subroutine wfk_update_f90ptr(wfk, ik_ibz, spin)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_update_f90ptr'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
- type(Wfk_t),intent(inout) :: wfk
+ class(wfk_t),intent(inout) :: wfk
  integer,intent(in) :: ik_ibz,spin
 
 ! *************************************************************************
@@ -3373,17 +3182,8 @@ end subroutine wfk_update_f90ptr
 
 subroutine wfk_compute_offsets(Wfk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_compute_offsets'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
- type(wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
 
 !Local variables-------------------------------
 !scalars
@@ -3520,17 +3320,8 @@ end subroutine wfk_compute_offsets
 
 subroutine wfk_show_offsets(Wfk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_show_offsets'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
- type(wfk_t),intent(inout) :: Wfk
+ class(wfk_t),intent(inout) :: Wfk
 
 !Local variables-------------------------------
 !scalars
@@ -3606,15 +3397,6 @@ end subroutine wfk_show_offsets
 #ifdef HAVE_MPI_IO
 
 subroutine mpio_read_kg_k(fh,offset,npw_disk,sc_mode,kg_k,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpio_read_kg_k'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3693,15 +3475,6 @@ end subroutine mpio_read_kg_k
 #ifdef HAVE_MPI_IO
 
 subroutine mpio_write_kg_k(fh,offset,npw_disk,sc_mode,kg_k,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpio_write_kg_k'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3787,15 +3560,6 @@ end subroutine mpio_write_kg_k
 #ifdef HAVE_MPI_IO
 
 subroutine mpio_read_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpio_read_eigocc_k'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3924,15 +3688,6 @@ end subroutine mpio_read_eigocc_k
 
 subroutine mpio_write_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpio_write_eigocc_k'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fh,nband_disk,formeig,sc_mode
@@ -4057,16 +3812,6 @@ end subroutine mpio_write_eigocc_k
 
 subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_tofullbz'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: in_path,out_path
@@ -4138,7 +3883,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  ABI_MALLOC(eig_ki, ((2*mband)**in_wfk%formeig*mband) )
  ABI_MALLOC(occ_ki, (mband))
 
- call crystal_from_hdr(cryst, in_wfk%hdr, 2)
+ cryst = hdr_get_crystal(in_wfk%hdr, 2)
 
  ! Build new header for out_wfk. This is the most delicate part since all the arrays in hdr_full
  ! that depend on k-points must be consistent with kfull and nkfull.
@@ -4336,7 +4081,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  ABI_FREE(bz2ibz)
  ABI_FREE(cg_kf)
 
- call crystal_free(cryst)
+ call cryst%free()
  call ebands_free(ebands_ibz)
  call ebands_free(ebands_full)
  call wfk_close(in_wfk)
@@ -4368,16 +4113,6 @@ end subroutine wfk_tofullbz
 !! SOURCE
 
 subroutine wfk_nc2fort(nc_path, fort_path)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_nc2fort'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4457,16 +4192,6 @@ end subroutine wfk_nc2fort
 
 subroutine wfk_prof(wfk_fname, formeig, nband, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_prof'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nband,formeig,comm
  character(len=*),intent(in) :: wfk_fname
@@ -4479,7 +4204,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
  type(hdr_type) :: Hdr
- type(Wfk_t) :: Wfk
+ type(wfk_t) :: Wfk
  type(wffile_type) :: wff
  type(MPI_type) :: MPI_enreg_seq
 !arrays
@@ -4662,15 +4387,6 @@ end subroutine wfk_prof
 
 subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_create_wfkfile'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iomode,formeig,comm
@@ -4777,15 +4493,6 @@ end subroutine wfk_create_wfkfile
 !! SOURCE
 
 subroutine wfk_check_wfkfile(wfk_fname,Hdr,iomode,method,formeig,Kvars,cwtimes,comm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_check_wfkfile'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4930,16 +4637,6 @@ end subroutine wfk_check_wfkfile
 
 subroutine fill_or_check(task,Hdr,Kvars,ik_ibz,spin,formeig,kg_k,cg_k,eig_k,occ_k,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fill_or_check'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin,formeig
@@ -5083,16 +4780,6 @@ end subroutine fill_or_check
 
 subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_diff'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,comm
  integer,intent(out) :: ierr
@@ -5105,7 +4792,7 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
  integer :: npw_k,mcg,fform1,fform2,sc_mode,my_rank,nproc
  character(len=500) :: msg
  type(hdr_type) :: Hdr1,Hdr2
- type(Wfk_t) :: Wfk1,Wfk2
+ type(wfk_t) :: Wfk1,Wfk2
 !arrays
  integer,allocatable :: kg1_k(:,:),kg2_k(:,:)
  real(dp),allocatable :: eig1_k(:),cg1_k(:,:),occ1_k(:)
@@ -5113,7 +4800,7 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
 
 ! *************************************************************************
 
- call wrtout(std_out,ABI_FUNC//": comparing "//TRIM(fname1)//" "//TRIM(fname2),"COLL")
+ call wrtout(std_out, "wfk_diff: comparing "//TRIM(fname1)//" "//TRIM(fname2))
 
  my_rank = xmpi_comm_rank(comm); nproc   = xmpi_comm_size(comm)
  sc_mode = xmpio_collective

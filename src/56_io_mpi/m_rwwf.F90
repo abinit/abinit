@@ -7,7 +7,7 @@
 !!   Read/Write wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_rwwf
  use defs_abitypes
  use m_errors
  use m_wffile
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 #if defined HAVE_MPI2
  use mpi
@@ -139,15 +139,6 @@ contains
 subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &               nband,nband_disk,npw,nspinor,occ,option,optkg,tim_rwwf,wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rwwf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,headform,icg,ikpt,isppol,mband,mcg,nband,npw
  integer,intent(inout) :: nband_disk
@@ -235,15 +226,6 @@ end subroutine rwwf
 !! SOURCE
 
 subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffReadSkipK'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -334,15 +316,6 @@ end subroutine WffReadSkipK
 
 subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                 nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'readwf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,headform,icg,ikpt,isppol,mband,mcg,nband,npw
@@ -826,15 +799,6 @@ end subroutine readwf
 
 subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                  nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'writewf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,icg,ikpt,isppol,mband,mcg,nband,nband_disk,npw,nspinor,option,optkg

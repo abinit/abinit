@@ -10,7 +10,7 @@
 !!  used, or be written to disk. All combinations should be feasible.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2019 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@
 module defs_elphon
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -322,13 +322,6 @@ CONTAINS  !=====================================================================
 
 subroutine elph_ds_clean(elph_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_ds_clean'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -409,13 +402,6 @@ end subroutine elph_ds_clean
 !! SOURCE
 
 subroutine elph_tr_ds_clean(elph_tr_ds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_tr_ds_clean'
-!End of the abilint section
 
  implicit none
 
@@ -531,13 +517,6 @@ end subroutine elph_tr_ds_clean
 
 subroutine elph_k_copy(elph_k_in, elph_k_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_k_copy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -612,13 +591,6 @@ end subroutine elph_k_copy
 !! SOURCE
 
 subroutine elph_k_destroy(elph_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_k_destroy'
-!End of the abilint section
 
  implicit none
 
@@ -708,13 +680,6 @@ end subroutine elph_k_destroy
 
 subroutine elph_k_procs(nproc, elph_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_k_procs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -791,13 +756,6 @@ end subroutine elph_k_procs
 
 subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gam_mult_displ'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -851,13 +809,6 @@ end subroutine gam_mult_displ
 !! SOURCE
 
 subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,qirredtofull,qpttoqpt,gamma_qpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'complete_gamma'
-!End of the abilint section
 
  implicit none
 
@@ -1109,13 +1060,6 @@ end subroutine complete_gamma
 subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsppol,gamma_qpt_tr,qirredtofull,qpttoqpt)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'complete_gamma_tr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

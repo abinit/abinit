@@ -12,7 +12,7 @@
 !!  stored in packed format  and B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2019 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,12 +30,6 @@
 !! SOURCE
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,info,rwork,istwf_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpgv'
-!End of the abilint section
 
  implicit none
 
@@ -88,13 +82,6 @@ end subroutine abi_dhpgv
 !! SOURCE
 !!
   subroutine abi_dhpgv_alloc_1d(itype,jobz,uplo,n,a,b,w,z,istwf_k,use_slk)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpgv_alloc_1d'
-
-!End of the abilint section
 
  implicit none
 
@@ -181,13 +168,6 @@ end subroutine abi_dhpgv_alloc_1d
 
   subroutine abi_dhpgv_alloc_2d(itype,jobz,uplo,n,a,b,w,z,istwf_k)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpgv_alloc_2d'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -229,12 +209,6 @@ end subroutine abi_dhpgv_alloc_2d
 !!
   subroutine abi_chpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpgv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -272,13 +246,6 @@ end subroutine abi_chpgv
 
   subroutine abi_chpgv_alloc(itype,jobz,uplo,n,a,b,w,z)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpgv_alloc'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -313,12 +280,6 @@ end subroutine abi_chpgv_alloc
 !! SOURCE
 
 subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpgv'
-!End of the abilint section
 
  implicit none
 
@@ -356,12 +317,6 @@ end subroutine abi_zhpgv
 !! SOURCE
 
 subroutine abi_zhpgv_alloc(itype,jobz,uplo,n,a,b,w,z)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpgv_alloc'
-!End of the abilint section
 
  implicit none
 

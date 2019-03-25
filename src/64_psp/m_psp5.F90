@@ -7,7 +7,7 @@
 !! Initialize pspcod=5 ("Phoney pseudopotentials" with Hamman grid):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FrD, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_psp5
  use defs_basis
  use m_splines
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_psptk,           only : psp1cc, psp5lo, psp5nl
 
@@ -110,14 +110,6 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &                  lloc,lmax,lmnmax,lnmax,mmax,mpsang,mpssoang,mqgrid,&
 &                  nproj,n1xccc,pspso,qchrg,qgrid,rcpsp,rms,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp5in'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

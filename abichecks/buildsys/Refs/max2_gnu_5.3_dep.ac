@@ -370,7 +370,7 @@ FCFLAGS="-O1 -g -ffree-line-length-none -ffree-form"
 # Forced Fortran linker libraries
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FC_LIBS="-lsvml"
+FC_LIBS="-L/home/buildbot/anaconda2/lib -lhdf5 -lhdf5_hl"
 
                        # ------------------------------ #
 
@@ -492,7 +492,7 @@ enable_mpi="yes"
 enable_mpi_io="yes"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
-# change the default values of accesswff)   
+# change the default values of iomode)   
 # Beware that not all the features of Abinit support MPI-IO,
 # This options is mainly used by developers for debugging purposes.
 #
@@ -705,31 +705,31 @@ with_mpi_prefix="${MPI_HOME}"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf"
+with_trio_flavor="netcdf+psml"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-#with_psml_incs="-I/usr/local/include/psml"
+with_psml_incs="-I${FALLBACKS_PATH}/xmlf90/1.5.3.1/include -I${FALLBACKS_PATH}/libpsml/1.1.7/include"
 
 # Link flags for the psml library (default is unset)
 #
-#with_psml_libs="-L/usr/local/lib/psml -lpsml"
+with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.7/lib -lpsml -L${FALLBACKS_PATH}/xmlf90/1.5.3.1/lib -lxmlf90"
 
                        # ------------------------------ #
 
 # Include flags for the NetCDF library (default is unset)
 #
-#with_netcdf_incs="-I/usr/local/include/netcdf"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
-# change the default values of accesswff)   
+# change the default values of iomode)   
 #
 #enable_netcdf_default="no"
 
@@ -929,15 +929,15 @@ with_dft_flavor="atompaw+libxc+wannier90"
 
 # Full path to the AtomPAW executables (default is unset)
 #
-#with_atompaw_bins="/usr/local/bin"
+with_atompaw_bins="${FALLBACKS_PATH}/atompaw/4.1.0.5/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_incs="-I/usr/local/include/atompaw"
+with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/4.1.0.5/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
+with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.1.0.5/lib -latompaw"
 
                        # ------------------------------ #
 
@@ -947,31 +947,31 @@ with_dft_flavor="atompaw+libxc+wannier90"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-#with_wannier90_bins="/usr/local/bin"
+with_wannier90_bins="${FALLBACKS_PATH}/wannier90/2.0.1.1/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_incs="-I/usr/local/include/wannier90"
+with_wannier90_incs="-I${FALLBACKS_PATH}/wannier90/2.0.1.1/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
+with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/2.0.1.1/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
@@ -991,8 +991,11 @@ with_dft_flavor="atompaw+libxc+wannier90"
 
 # Link with TRIQS library (for CTQMC and rotationally invariant interaction)
 #    (default is no)
+#    Different versions of TRIQS have differents API. Choose your installed 
+#    version.
 #
-#enable_triqs="no"
+#enable_triqs_v2_0="no"
+#enable_triqs_v1_4="no"
 #
 # Include flags for the TRIQS library (default is unset)
 #

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2018 ABINIT group (FA,MT,FJ)
+!!  Copyright (C) 2015-2019 ABINIT group (FA,MT,FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 module m_xchybrid
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xcdata
  use libxc_functionals
@@ -35,6 +35,7 @@ module m_xchybrid
  use defs_abitypes, only : MPI_type, dataset_type
  use m_dtset,       only : dtset_copy, dtset_free
  use m_rhotoxc,     only : rhotoxc
+ use m_mkcore,      only : mkcore
 
  implicit none
 
@@ -103,14 +104,6 @@ contains
 
 subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,strsxc,vxcavg,xccc3d,vxc,grxc,xcccrc,xccc1d,&
 &                           xred,n1xccc,optstr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xchybrid_ncpp_cc'
- use interfaces_56_xc
-!End of the abilint section
 
  implicit none
 
@@ -336,13 +329,6 @@ end subroutine xchybrid_ncpp_cc
 !! SOURCE
 
 subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hybrid_mixing,vxc,enxc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hybrid_corr'
-!End of the abilint section
 
  implicit none
 

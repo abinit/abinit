@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2019 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 module m_band2eps_dataset
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_parser,    only : intagm
@@ -115,13 +115,6 @@ contains
 
 subroutine band2eps_dtset_free(band2eps_dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'band2eps_dtset_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -182,13 +175,6 @@ end subroutine band2eps_dtset_free
 !! SOURCE
 
 subroutine invars11 (band2eps_dtset,lenstr,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars11'
-!End of the abilint section
 
  implicit none
 
@@ -367,13 +353,6 @@ end subroutine invars11
 !! SOURCE
 
 subroutine outvars_band2eps (band2eps_dtset,nunit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outvars_band2eps'
-!End of the abilint section
 
  implicit none
 

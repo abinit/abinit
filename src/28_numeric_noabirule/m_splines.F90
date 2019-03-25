@@ -7,7 +7,7 @@
 !!  This module contains routines for spline interpolation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (YP, BAmadon)
+!!  Copyright (C) 2010-2019 ABINIT group (YP, BAmadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 module m_splines
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  implicit none
@@ -91,19 +91,12 @@ contains
 
 subroutine splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'splfit'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: ider,numarg,numnew
  real(dp), intent(in) :: arg(numarg),fun(numarg,2),newarg(numnew)
  real(dp), intent(out) :: derfun(numnew)
- real(dp), intent(inout) :: newfun(numnew) !vz_i
+ real(dp), intent(inout) :: newfun(numnew)
 
  integer :: i,jspl
  real(dp) :: argmin,delarg,d,aa,bb,cc,dd
@@ -366,13 +359,6 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
 !      0: the spline should be a quadratic over the last interval;
 !      1: the first derivative at the right endpoint should be YBCEND;
 !      2: the second derivative at the right endpoint should be YBCEND.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spline'
-!End of the abilint section
-
   implicit none
 
   integer, intent(in) :: n
@@ -492,13 +478,6 @@ end subroutine spline
 
 subroutine spline_bicubic(n1,n2,x1,x2,y,der1_x1,der1_x2,der2_x1x2,spl_c)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spline_bicubic'
-!End of the abilint section
-
   implicit none
 
   integer,intent(in)  :: n1,n2
@@ -580,13 +559,6 @@ end subroutine spline_bicubic
 
 subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spline_c'
-!End of the abilint section
-
  implicit none
 
 !Arguments --------------------------------------------
@@ -647,13 +619,6 @@ end subroutine spline_c
 !! SOURCE
 
 subroutine spline_complex( t, y, n, ybcbeg, ybcend, ypp )
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spline_complex'
-!End of the abilint section
 
  implicit none
 
@@ -728,13 +693,6 @@ end subroutine spline_complex
 !! SOURCE
 
 subroutine splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'splint'
-!End of the abilint section
 
  implicit none
 
@@ -822,13 +780,6 @@ end subroutine splint
 
 subroutine splint_complex (nspline,xspline,yspline,ysplin2,nfit,xfit,yfit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'splint_complex'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: nfit, nspline
@@ -880,7 +831,7 @@ end subroutine splint_complex
 !!  Calculates an integral using cubic spline interpolation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT Group (Yann Pouillon)
+!!  Copyright (C) 2010-2019 ABINIT Group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -903,13 +854,6 @@ end subroutine splint_complex
 !! SOURCE
 
 subroutine spline_integrate(integral,npts,dx,integrand)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spline_integrate'
-!End of the abilint section
 
  implicit none
 
@@ -992,13 +936,6 @@ end subroutine spline_integrate
 !! SOURCE
 
 SUBROUTINE INTRPL(L,X,Y,N,U,V,dv,dv2,ideriv)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'INTRPL'
-!End of the abilint section
 
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       IMPLICIT INTEGER(I-N)

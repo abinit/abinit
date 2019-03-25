@@ -8,7 +8,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
+!! Copyright (C) 2011-2019 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ MODULE m_ddb_hdr
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_copy,      only : alloc_copy
@@ -178,13 +178,6 @@ CONTAINS  !===========================================================
 subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
                         nblok, xred, occ, ngfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_hdr_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -277,7 +270,7 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
  if (present(occ)) then
    ddb_hdr%occ(:) = occ(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol)
  else
-   ddb_hdr%occ(:) = dtset%occ_orig(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol)
+   ddb_hdr%occ(:) = dtset%occ_orig(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol,1)
  end if
 
 
@@ -324,13 +317,6 @@ end subroutine ddb_hdr_init
 !! SOURCE
 
 subroutine ddb_hdr_malloc(ddb_hdr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_hdr_malloc'
-!End of the abilint section
 
  implicit none
 
@@ -384,13 +370,6 @@ end subroutine ddb_hdr_malloc
 !! SOURCE
 
 subroutine ddb_hdr_free(ddb_hdr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_hdr_free'
-!End of the abilint section
 
  implicit none
 
@@ -476,13 +455,6 @@ end subroutine ddb_hdr_free
 
 subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb, fullinit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_hdr_open_write'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -543,13 +515,6 @@ end subroutine ddb_hdr_open_write
 
 subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
 &        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_hdr_open_read'
-!End of the abilint section
 
  implicit none
 
@@ -689,13 +654,6 @@ end subroutine ddb_hdr_open_read
 
 subroutine ddb_hdr_compare(ddb_hdr1, ddb_hdr2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_hdr_compare'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -802,13 +760,6 @@ end subroutine ddb_hdr_compare
 
 subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 &          nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psddb8'
-!End of the abilint section
 
  implicit none
 
@@ -1270,14 +1221,6 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 &  typat,usepaw,wtk,xred,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioddb8_in'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1867,13 +1810,6 @@ end subroutine ioddb8_in
 
 subroutine ddb_getdims(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,ntypat,unddb,usepaw,vrsddb,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_getdims'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1955,14 +1891,6 @@ end subroutine ddb_getdims
 
 subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 & ntypat,unddb,usepaw,vrsddb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inprep8'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -2458,13 +2386,6 @@ end subroutine inprep8
 
 subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_chkname'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2514,7 +2435,7 @@ end subroutine ddb_chkname
 !! as well as psp information.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,MT,GA)
+!! Copyright (C) 1999-2019 ABINIT group (XG,MT,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2585,13 +2506,6 @@ subroutine compare_ddb_variables(&
 & rprim,rprim8,dfpt_sciss,dfpt_sciss8,symrel,symrel8,&
 & tnons,tnons8,tolwfr,tolwfr8,typat,typat8,usepaw,wtk,wtk8,&
 & xred,xred8,zion,zion8)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compare_ddb_variables'
-!End of the abilint section
 
  implicit none
 
@@ -2923,13 +2837,6 @@ end subroutine compare_ddb_variables
 
 subroutine chkr8(reali,realt,name,tol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkr8'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2984,13 +2891,6 @@ subroutine chkr8(reali,realt,name,tol)
 !! SOURCE
 
 subroutine chki8(inti,intt,name)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chki8'
-!End of the abilint section
 
  implicit none
 
@@ -3097,14 +2997,6 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 &  typat,usepaw,wtk,xred,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_io_out'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

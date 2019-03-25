@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -10,12 +10,12 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h01 )
+.Starting date : Mon 12 Nov 2018.
+- ( at 02h07 )
   
 - input  file    -> t05.in
 - output file    -> t05.out
@@ -78,7 +78,7 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -250,7 +250,7 @@ P           mkmem           6
     1  15.431  21.987    0   1.4850707        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.83985002509544    0.99012430797080    0.51184907750884   rchrg,fchrg,qchrg
- pspatm : epsatm=    0.92590353
+  pspatm : epsatm=    0.92590353
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
@@ -299,9 +299,9 @@ P           mkmem           6
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -424,21 +424,21 @@ P           mkmem           6
     5  20.572 -15.038  -7.966  -4.216   0.846  -0.182 -12.622   2.417  22.989
     6  20.572 -15.038  -7.966  -4.216   0.846  -0.182 -12.622   2.417  22.989
     7  20.572 -15.038  -7.966  -4.216   0.846  -0.182 -12.622   2.417  22.989
-    8  25.745 -15.802  -6.896  -6.140   0.814  -0.228 -13.549   2.252  27.998
+    8  25.745 -15.802  -6.896  -6.140   0.814  -0.228 -13.549   2.252  27.997
 
  E^0_gap          4.890
  E^GW_gap         6.032
  DeltaE^GW_gap    1.142
 
 
- New Fermi energy :        6.620016E-01 Ha ,    1.801398E+01 eV
+ New Fermi energy :        6.620014E-01 Ha ,    1.801397E+01 eV
  New Exchange energy :    -2.972205E+00 Ha ,   -8.087781E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   6.0325 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.1153 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   6.0325 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.1154 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -502,15 +502,15 @@ P           mkmem           6
  omega_plasma =   31.1373 [eV]
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  11.8237
-  dielectric constant without local fields =  12.3975
+  dielectric constant =  11.8234
+  dielectric constant without local fields =  12.3973
 
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -640,14 +640,14 @@ P           mkmem           6
  DeltaE^GW_gap    1.132
 
 
- New Fermi energy :        6.672172E-01 Ha ,    1.815590E+01 eV
+ New Fermi energy :        6.672170E-01 Ha ,    1.815590E+01 eV
  New Exchange energy :    -2.972205E+00 Ha ,   -8.087781E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   6.0226 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.1650 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   6.0226 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.1650 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -727,16 +727,16 @@ P           mkmem           6
 
   Number of electrons    =    7.9783
 
-  QP Band energy    [Ha] =  1.44534236410950E+00
-  QP Hartree energy [Ha] =  8.09317576683040E-01
+  QP Band energy    [Ha] =  1.44534128644991E+00
+  QP Hartree energy [Ha] =  8.09317581399888E-01
 
 --------------------------------------------------------------------------------
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -776,7 +776,7 @@ P           mkmem           6
     2     9.059   -16.229     9.725    25.282   -19.517     3.984     1.000     0.000   -15.533     0.023     9.749     9.749
     3     9.731   -15.646    10.771    25.358   -18.037     3.444     1.000     0.000   -14.593    -0.007    10.765    10.765
     4     9.731   -15.646    10.774    25.357   -18.032     3.443     1.000     0.000   -14.590    -0.007    10.768    10.768
-    5    17.957   -14.218    20.169    32.155    -7.901    -4.160     1.000     0.000   -12.061    -0.076    20.093    20.096
+    5    17.957   -14.218    20.169    32.155    -7.901    -4.160     1.000     0.000   -12.061    -0.076    20.094    20.096
     6    22.962   -13.446    25.281    36.397    -6.051    -5.152     1.000     0.000   -11.203    -0.087    25.194    25.194
     7    27.315   -15.766    31.021    43.070    -6.817    -5.482     1.000     0.000   -12.299    -0.250    30.772    30.772
     8    27.315   -15.766    31.030    43.071    -6.818    -5.474     1.000     0.000   -12.292    -0.251    30.779    30.779
@@ -866,14 +866,14 @@ P           mkmem           6
  DeltaE^GW_gap   -0.082
 
 
- New Fermi energy :        6.697505E-01 Ha ,    1.822484E+01 eV
+ New Fermi energy :        6.697506E-01 Ha ,    1.822484E+01 eV
  New Exchange energy :    -2.969186E+00 Ha ,   -8.079566E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   6.1415 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.1432 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   6.1415 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.1432 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t05o_DS3_QPS
 
@@ -1050,52 +1050,70 @@ P           mkmem           6
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Effect of self-consistency on quasiparticles in solids
 - F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).
 - Comment : in case gwcalctyp >= 10.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#bruneval2006
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          5.5  wall=          5.6
+- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.5  wall=          5.6
+.Delivered  15 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.0  wall=          6.0

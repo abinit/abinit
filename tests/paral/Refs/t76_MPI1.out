@@ -2,7 +2,7 @@
 .Version 8.0.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -818,7 +818,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  15.8431  -0.0000  13.1097  -0.0000  14.4726   0.0000
+   0.0000  15.8431   0.0000  13.1097   0.0000  14.4726   0.0000
    0.0200  15.8436   0.0049  13.1100   0.0026  14.4729   0.0036
    0.0400  15.8450   0.0099  13.1108   0.0052  14.4740   0.0073
    0.0600  15.8475   0.0148  13.1121   0.0078  14.4758   0.0109
@@ -827,7 +827,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
    0.1200  15.8608   0.0297  13.1191   0.0156  14.4856   0.0218
    0.1400  15.8672   0.0347  13.1225   0.0183  14.4903   0.0255
    0.1600  15.8746   0.0396  13.1264   0.0209  14.4958   0.0291
-   0.1800  15.8830   0.0447  13.1308   0.0235  14.5019   0.0328
+   0.1800  15.8830   0.0447  13.1308   0.0235  14.5020   0.0328
   
 
 == END DATASET(S) ==============================================================
@@ -1266,7 +1266,7 @@ P           mkmem3         64
 
 - subtotal                      82.274  71.8      8.664  33.6
 
- Partitioning of scfcv
+ Partitioning of scfcv_core
 - scfcv                         81.046  70.8      7.630  29.6              2
  
 - scfcv(iniloop, setvtr  )       0.016   0.0      0.016   0.1              7
@@ -1455,7 +1455,7 @@ P           mkmem3         64
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] ABINIT : First-principles approach of materials and nanosystem properties.
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,

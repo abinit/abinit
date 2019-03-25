@@ -10,7 +10,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP)
+!! Copyright (C) 2011-2019 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ MODULE m_ddb
  use defs_basis
  use defs_abitypes
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_ddb_hdr
@@ -240,41 +240,20 @@ CONTAINS  !===========================================================
 
 subroutine ddb_free(ddb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(ddb_type),intent(inout) :: ddb
 
 ! ************************************************************************
 
  !integer
- if (allocated(ddb%flg))  then
-   ABI_FREE(ddb%flg)
- end if
- if (allocated(ddb%typ))  then
-   ABI_FREE(ddb%typ)
- end if
+ ABI_SFREE(ddb%flg)
+ ABI_SFREE(ddb%typ)
 
  ! real
- if (allocated(ddb%amu))  then
-   ABI_FREE(ddb%amu)
- end if
- if (allocated(ddb%nrm))  then
-   ABI_FREE(ddb%nrm)
- end if
- if (allocated(ddb%qpt))  then
-   ABI_FREE(ddb%qpt)
- end if
- if (allocated(ddb%val))  then
-   ABI_FREE(ddb%val)
- end if
+ ABI_SFREE(ddb%amu)
+ ABI_SFREE(ddb%nrm)
+ ABI_SFREE(ddb%qpt)
+ ABI_SFREE(ddb%val)
 
 end subroutine ddb_free
 !!***
@@ -296,15 +275,6 @@ end subroutine ddb_free
 !! SOURCE
 
 subroutine ddb_copy(iddb, oddb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_copy'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !array
@@ -358,15 +328,6 @@ end subroutine ddb_copy
 !! SOURCE
 
 subroutine ddb_malloc(ddb,msize,nblok,natom,ntypat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_malloc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !array
@@ -423,15 +384,6 @@ end subroutine ddb_malloc
 !! SOURCE
 
 subroutine ddb_bcast(Ddb, master, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_bcast'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !array
@@ -532,16 +484,6 @@ end subroutine ddb_bcast
 
 subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gtblk9'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: rftyp
@@ -602,7 +544,7 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
 !Check the validity of the requirement
  do ider=1,nder
-   !  Identifies if qphon is at gamma
+   ! Identifies if qphon is at gamma
    call gamma9(gamma(ider),qphon(1:3,ider),qphnrm(ider),DDB_QTOL)
 
    if(gamma(ider)==0)then
@@ -687,9 +629,9 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
        if (ddb%flg(1,iblok) /= 1) then
          ok = 0
          if (ddb%prtvol > 1) then
-           write(message,'(a,i0,a,a,a)' )&
-&           'The block ',iblok,' does not match the requirement',ch10,&
-&           'because it lacks the total energy'
+           write(message,'(a,i0,3a)' )&
+           'The block ',iblok,' does not match the requirement',ch10,&
+           'because it lacks the total energy'
            MSG_COMMENT(message)
          end if
        end if
@@ -743,7 +685,7 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    iblok=0
 
    if (ddb%prtvol > 1) then
-     write(message, '(a,a,a)' )&
+     write(message, '(3a)' )&
 &     ' gtblk9 : ',ch10,&
 &     '  Unable to find block corresponding to the following specifications :'
      call wrtout(std_out,message,'COLL')
@@ -751,17 +693,16 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
      call wrtout(std_out,message,'COLL')
      write(message, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs'
      call wrtout(std_out,message,'COLL')
-!    write(std_out,*)' nder=',nder
      do ider=1,nder
        write(message, '(i4,4f6.2,3i7)' )&
-&       ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider)
+       ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider)
        call wrtout(std_out,message,'COLL')
      end do
    end if
  end if
 
  if (ok==1 .and. ddb%prtvol > 1) then
-   write(message,'(a,i0,a,a)')' gtblk9: found block number ',iblok,' agree with',' specifications '
+   write(message,'(a,i0,2a)')' gtblk9: found block number ',iblok,' agree with',' specifications '
    call wrtout(std_out,message,'COLL')
  end if
 
@@ -800,15 +741,6 @@ end subroutine gtblk9
 
 subroutine gamma9(gamma,qphon,qphnrm,qtol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gamma9'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(out) :: gamma
@@ -818,10 +750,7 @@ subroutine gamma9(gamma,qphon,qphnrm,qtol)
 
 ! *********************************************************************
 
- if( (  abs(qphon(1))<qtol .and.  &
-& abs(qphon(2))<qtol .and.        &
-& abs(qphon(3))<qtol      ) .or.  &
-& abs(qphnrm)<qtol )then
+ if( (abs(qphon(1))<qtol .and. abs(qphon(2))<qtol .and. abs(qphon(3))<qtol) .or. abs(qphnrm)<qtol ) then
    gamma=1
  else
    gamma=0
@@ -882,15 +811,6 @@ end subroutine gamma9
 subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_blok8'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mband,mpert,msize,nkpt,nunit
@@ -902,8 +822,7 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
 !Local variables -------------------------
 !scalars
- integer :: band,iband,idir1,idir2,idir3,ii,ikpt,index,ipert1,ipert2,ipert3
- integer :: nelmts
+ integer :: band,iband,idir1,idir2,idir3,ii,ikpt,index,ipert1,ipert2,ipert3,nelmts
  real(dp) :: ai,ar
  character(len=32) :: name
  character(len=500) :: message
@@ -932,10 +851,10 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
  else if(name==' 2nd eigenvalue derivatives   - ' .or. name==' 2rd eigenvalue derivatives   - ')then
    ddb%typ(iblok)=5
  else
-   write(message, '(a,a,a,a,a,a)' )&
-&   'The following string appears in the DDB in place of',&
-&   ' the block type description :',ch10,trim(name),ch10,&
-&   'Action: check your DDB.'
+   write(message,'(6a)')&
+   'The following string appears in the DDB in place of',&
+   ' the block type description :',ch10,trim(name),ch10,&
+   'Action: check your DDB.'
    MSG_ERROR(message)
  end if
 
@@ -944,10 +863,9 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
 !  First check if there is enough space to read it
    if(msize<(3*mpert*3*mpert))then
-     write(message,'(a,a,a,i10,a,i10,a,a,a)')&
-&     'There is not enough space to read a second-derivative block.',ch10,&
-
-&     'Action: increase msize and recompile.'
+     write(message,'(3a)')&
+     'There is not enough space to read a second-derivative block.',ch10,&
+     'Action: increase msize and recompile.'
      MSG_ERROR(message)
    end if
 
@@ -969,9 +887,9 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 !  First check if there is enough space to read it
    if(msize<(3*mpert*3*mpert*3*mpert))then
      write(message, '(a,a,a,i10,a,i10,a,a,a)' )&
-&     'There is not enough space to read a third-derivative block.',ch10,&
-&     'The size provided is only ',msize,' although ',3*mpert*3*mpert*3*mpert,' is needed.',ch10,&
-&     'Action: increase msize and recompile.'
+     'There is not enough space to read a third-derivative block.',ch10,&
+     'The size provided is only ',msize,' although ',3*mpert*3*mpert*3*mpert,' is needed.',ch10,&
+     'Action: increase msize and recompile.'
      MSG_ERROR(message)
    end if
 
@@ -1014,10 +932,10 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
 !  First check if there is enough space to read it
    if (msize < (3*mpert)) then
-     write(message, '(a,a,a,i10,a,i10,a,a,a)' )&
-&     'There is not enough space to read a first-derivative block.',ch10,&
-&     'The size provided is only ',msize,' although ',3*mpert,' is needed.',ch10,&
-&     'Action: increase msize and recompile.'
+     write(message, '(3a,i0,a,i0,3a)' )&
+     'There is not enough space to read a first-derivative block.',ch10,&
+     'The size provided is only ',msize,' although ',3*mpert,' is needed.',ch10,&
+     'Action: increase msize and recompile.'
      MSG_ERROR(message)
    end if
 
@@ -1035,10 +953,10 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
 !  First check if there is enough space to read it
    if(msize<(3*mpert*3*mpert))then
-     write(message, '(a,a,a,i10,a,i10,a,a,a)' )&
-&     'There is not enough space to read a second-derivative block.',ch10,&
-&     'The size provided is only ',msize,' although ',3*mpert*3*mpert*mband*nkpt,' is needed.',ch10,&
-&     'Action: increase msize and recompile.'
+     write(message, '(3a,i0,a,i0,3a)' )&
+     'There is not enough space to read a second-derivative block.',ch10,&
+     'The size provided is only ',msize,' although ',3*mpert*3*mpert*mband*nkpt,' is needed.',ch10,&
+     'Action: increase msize and recompile.'
      MSG_ERROR(message)
    end if
 
@@ -1138,22 +1056,9 @@ end subroutine read_blok8
 !!
 !! SOURCE
 
-subroutine rdddb9(acell,atifc,amu,ddb,&
-& ddbun,filnam,gmet,gprim,indsym,iout,&
-& mband,mpert,msize,msym,&
-& natifc,natom,nkpt,nsym,ntypat,&
-& rmet,rprim,symrec,symrel,symafm,&
-& tnons,typat,ucvol,xcart,xred,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdddb9'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
+subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
+& mband,mpert,msize,msym,natifc,natom,nkpt,nsym,ntypat,&
+& rmet,rprim,symrec,symrel,symafm,tnons,typat,ucvol,xcart,xred,zion,znucl)
 
 !Arguments ------------------------------------
 ! NOTE: these are used for dimensioning and then re-assigned in ioddb8.
@@ -1200,8 +1105,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  DBG_ENTER("COLL")
 
 !Open the input derivative database file and read the header
- call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, DDB_VERSION, &
-&                       msym=msym, mband=mband)
+ call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, DDB_VERSION, msym=msym, mband=mband)
 
  !nkpt = ddb_hdr%nkpt
  !ntypat = ddb_hdr%ntypat
@@ -1273,7 +1177,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
      tmpval(2,:,:,:,:,1,1) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert/))
 
      ! Then apply symmetry operations
-     call d2sym3(tmpflg,tmpval,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev)
+     call d2sym3(tmpflg,tmpval,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,1)
 
      ! Transform the dynamical matrix in cartesian coordinates
      ABI_MALLOC(carflg,(3,mpert,3,mpert))
@@ -1391,15 +1295,6 @@ end subroutine rdddb9
 
 subroutine chkin9(atifc,natifc,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkin9'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natifc,natom
@@ -1416,7 +1311,7 @@ subroutine chkin9(atifc,natifc,natom)
 ! *********************************************************************
 
  if(natifc>natom)then
-   write(message, '(a,i0,a,a,a,i0,a,a,a)' )&
+   write(message, '(a,i0,3a,i0,3a)' )&
 &   'The number of atom ifc in the input files',natifc,',',ch10,&
 &   'is larger than the number of atoms',natom,'.',ch10,&
 &   'Action: change natifc in the input file.'
@@ -1429,7 +1324,7 @@ subroutine chkin9(atifc,natifc,natom)
 
    do iatifc=1,natifc
      if(atifc(iatifc)<=0.or.atifc(iatifc)>natom)then
-       write(message, '(a,i0,a,a,a,a,a,i0,a,a,a)' )&
+       write(message, '(a,i0,5a,i0,3a)' )&
 &       'For iatifc=',iatifc,', the number of the atom ifc to be ',ch10,&
 &       'analysed is not valid : either negative, ',ch10,&
 &       'zero, or larger than natom =',natom,'.',ch10,&
@@ -1464,18 +1359,15 @@ end subroutine chkin9
 !!  blkflg(3,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
 !!   has been calculated ; 0 otherwise )
 !!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
-!!  gprimd(3,3)=dimensional primitive translations for
-!!              reciprocal space(bohr^-1)
+!!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
 !!  mpert =maximum number of ipert
 !!  natom= number of atoms
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
 !!  ucvol=unit cell volume (bohr^3)
 !!
 !! OUTPUT
-!! carflg(3,mpert,3,mpert,3,mpert)=1 if the element of d3cart has been
-!!   calculated, 0 otherwise
-!! d3cart(2,3,mpert,3,mpert,3,mpert)=matrix of third-order energy
-!!   derivatives in cartesian coordinates
+!! carflg(3,mpert,3,mpert,3,mpert)=1 if the element of d3cart has been calculated, 0 otherwise
+!! d3cart(2,3,mpert,3,mpert,3,mpert)=matrix of third-order energy derivatives in cartesian coordinates
 !!
 !! PARENTS
 !!      m_ddb,nonlinear
@@ -1486,15 +1378,6 @@ end subroutine chkin9
 !! SOURCE
 
 subroutine nlopt(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nlopt'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1647,15 +1530,6 @@ end subroutine nlopt
 
 subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_from_file'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm,brav,natom,natifc
@@ -1687,8 +1561,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
  ddbun = get_unit()
- call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,comm=comm,&
-&                       dimonly=1)
+ call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION, comm=comm, dimonly=1)
 
  nblok = ddb_hdr%nblok
  mtyp = ddb_hdr%mblktyp
@@ -1701,11 +1574,8 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  dimekb = ddb_hdr%psps%dimekb
  lmnmax = ddb_hdr%psps%lmnmax
 
- ! JWZ occopt was used below before being initialized
- ! 13 April 2018
+ ! JWZ occopt was used below before being initialized 13 April 2018
  occopt = ddb_hdr%occopt
- !
-
  call ddb_hdr_free(ddb_hdr)
 
  if (ddb_natom /= natom) then
@@ -1715,8 +1585,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  mpert=natom+6
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
 
- ! Allocate arrays depending on msym
- ! (which is actually fixed to nsym inside inprep8)
+ ! Allocate arrays depending on msym (which is actually fixed to nsym inside inprep8)
  ABI_MALLOC(symrel,(3,3,msym))
  ABI_MALLOC(symafm,(msym))
  ABI_MALLOC(tnons,(3,msym))
@@ -1781,7 +1650,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    ABI_FREE(amu)
 
    ! Now the whole DDB is in central memory, contained in the array ddb%val(2,msize,nblok).
-   ! The information on it is contained in the four arrays
+   ! The data is contained in the four arrays
    !   ddb%flg(msize,nblok) : blok flag for each element
    !   ddb%qpt(9,nblok)     : blok wavevector (unnormalized)
    !   ddb%nrm(3,nblok)     : blok wavevector normalization
@@ -1878,15 +1747,6 @@ end subroutine ddb_from_file
 
 subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband,&
 & mpert,msize,natom,nblok,nkpt,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'carttransf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1999,15 +1859,6 @@ end subroutine carttransf
 subroutine carteig2d(blkflg,blkval,carflg,d2cart,&
 & gprimd,iblok,mpert,natom,nblok,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'carteig2d'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,natom,nblok
@@ -2110,16 +1961,6 @@ end subroutine carteig2d
 
 subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtech9'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,natom,nblok
@@ -2157,7 +1998,6 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 & dielt(1,1),dielt(1,2),dielt(1,3),&
 & dielt(2,1),dielt(2,2),dielt(2,3),&
 & dielt(3,1),dielt(3,2),dielt(3,3)
-
 
  call wrtout(std_out,message,'COLL')
 
@@ -2210,15 +2050,6 @@ end subroutine dtech9
 !! SOURCE
 
 subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtchi'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2395,15 +2226,6 @@ end subroutine dtchi
 
 integer function ddb_get_etotal(ddb,etotal) result(iblok)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_etotal'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  real(dp),intent(out) :: etotal
@@ -2476,16 +2298,6 @@ end function ddb_get_etotal
 !! SOURCE
 
 integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff) result(iblok)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_dielt_zeff'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2574,16 +2386,6 @@ end function ddb_get_dielt_zeff
 
 integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_dielt'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: rftyp
@@ -2670,15 +2472,6 @@ end function ddb_get_dielt
 
 integer function ddb_get_dchidet(ddb,ramansr,nlflag,dchide,dchidt) result(iblok)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_dchidet'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ramansr, nlflag
@@ -2754,15 +2547,6 @@ end function ddb_get_dchidet
 !! SOURCE
 
 type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_asrq0'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2880,15 +2664,6 @@ end function ddb_get_asrq0
 subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_cart, &
                       out_eigvec,out_displ_red)   ! Optional [out]
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_diagoq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: rftyp,symdynmat
@@ -2980,15 +2755,6 @@ end subroutine ddb_diagoq
 
 subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrq0_apply'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom, msize, mpert
@@ -3038,36 +2804,16 @@ end subroutine asrq0_apply
 
 subroutine asrq0_free(asrq0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrq0_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(asrq0_t),intent(inout) :: asrq0
 
 ! ************************************************************************
 
  ! real
- if (allocated(asrq0%d2asr)) then
-   ABI_FREE(asrq0%d2asr)
- end if
-
- if (allocated(asrq0%singular)) then
-   ABI_FREE(asrq0%singular)
- end if
-
- if (allocated(asrq0%uinvers)) then
-   ABI_FREE(asrq0%uinvers)
- end if
-
- if (allocated(asrq0%vtinvers)) then
-   ABI_FREE(asrq0%vtinvers)
- end if
+ ABI_SFREE(asrq0%d2asr)
+ ABI_SFREE(asrq0%singular)
+ ABI_SFREE(asrq0%uinvers)
+ ABI_SFREE(asrq0%vtinvers)
 
 end subroutine asrq0_free
 !!***
@@ -3128,15 +2874,6 @@ end subroutine asrq0_free
 subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_write_blok'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,mband,mpert,msize,nkpt,nunit
@@ -3163,23 +2900,17 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 !Write the block type and number of elements
  write(nunit,*)' '
  if (ddb%typ(iblok) == 0) then
-   write(nunit, '(a,i8)' )&
-&   ' Total energy                 - # elements :',nelmts
+   write(nunit, '(a,i8)' )' Total energy                 - # elements :',nelmts
  else if (ddb%typ(iblok)==1) then
-   write(nunit, '(a,i8)' )&
-&   ' 2nd derivatives (non-stat.)  - # elements :',nelmts
+   write(nunit, '(a,i8)' )' 2nd derivatives (non-stat.)  - # elements :',nelmts
  else if(ddb%typ(iblok)==2) then
-   write(nunit, '(a,i8)' )&
-&   ' 2nd derivatives (stationary) - # elements :',nelmts
+   write(nunit, '(a,i8)' )' 2nd derivatives (stationary) - # elements :',nelmts
  else if(ddb%typ(iblok)==3) then
-   write(nunit, '(a,i8)' )&
-&   ' 3rd derivatives              - # elements :',nelmts
+   write(nunit, '(a,i8)' )' 3rd derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == 4) then
-   write(nunit, '(a,i8)' )&
-&   ' 1st derivatives              - # elements :',nelmts
+   write(nunit, '(a,i8)' )' 1st derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == 5) then
-   write(nunit, '(a,i8)' )&
-&   ' 2nd eigenvalue derivatives   - # elements :',nelmts
+   write(nunit, '(a,i8)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
  end if
 
 !Write the 2nd derivative block
@@ -3197,8 +2928,7 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
            do idir1=1,3
              ii=ii+1
              if(ddb%flg(ii,iblok)==1)then
-               write(nunit,'(4i4,2d22.14)')idir1,ipert1,idir2,ipert2,&
-&               ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
+               write(nunit,'(4i4,2d22.14)')idir1,ipert1,idir2,ipert2,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
              end if
            end do
          end do
@@ -3210,12 +2940,9 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
  else if(ddb%typ(iblok)==3)then
 
 !  Write the phonon wavevectors
-   write(nunit, '(a,3es16.8,f6.1)' )&
-&   ' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
-   write(nunit, '(a,3es16.8,f6.1)' )&
-&   '    ',(ddb%qpt(ii,iblok),ii=4,6),ddb%nrm(2,iblok)
-   write(nunit, '(a,3es16.8,f6.1)' )&
-&   '    ',(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
+   write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
+   write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=4,6),ddb%nrm(2,iblok)
+   write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
 
 !  Write the matrix elements
    if(choice==2)then
@@ -3229,8 +2956,7 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
                  ii=ii+1
                  if(ddb%flg(ii,iblok)==1)then
                    write(nunit, '(6i4,2d22.14)' )&
-&                   idir1,ipert1,idir2,ipert2,idir3,ipert3,&
-&                   ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
+&                   idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
                  end if
                end do
              end do
@@ -3254,8 +2980,7 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
        do idir1 = 1, 3
          ii = ii + 1
          if (ddb%flg(ii,iblok) == 1) then
-           write(nunit,'(2i4,2d22.14)')idir1,ipert1,&
-&           ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
+           write(nunit,'(2i4,2d22.14)')idir1,ipert1,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
          end if
        end do
      end do
@@ -3324,16 +3049,6 @@ end subroutine ddb_write_blok
 
 subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptnl_doutput'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mband,mpert,nkpt,unddb,natom,ntypat
@@ -3372,10 +3087,8 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
 
  do i1pert=1,mpert
    do i1dir=1,3
-
      do i2pert=1,mpert
        do i2dir=1,3
-
          do i3pert=1,mpert
            do i3dir=1,3
 
@@ -3395,10 +3108,8 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
 
            end do
          end do
-
        end do
      end do
-
    end do
  end do
 
@@ -3411,7 +3122,6 @@ end subroutine dfptnl_doutput
 !!***
 
 !----------------------------------------------------------------------
-
 
 !!****f* m_ddb/ddb_to_dtset
 !! NAME
@@ -3433,15 +3143,6 @@ end subroutine dfptnl_doutput
 
 
 subroutine ddb_to_dtset(comm,dtset,filename,psps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_to_dtset'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -3654,16 +3355,6 @@ end subroutine ddb_to_dtset
 
 subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mblktyp1'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: chkopt,ddbun,mddb,nddb,vrsddb
@@ -3673,19 +3364,18 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
 !Local variables -------------------------
 !scalars
-!Define input and output unit numbers:
  integer :: choice,dimekb,iblok,iblok1,iblok2
  integer :: iddb,ii,lmnmax,matom
  integer :: mband,mblktyp,mblok,mkpt,mpert,msize,mtypat
  integer :: nblok,nblokt,nq
  integer :: tmerge,usepaw
- integer,allocatable :: mgblok(:)!,lloc(:)
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr8
-!arrays
  character(len=500) :: message
+!arrays
+ integer,allocatable :: mgblok(:)!,lloc(:)
 
 ! *********************************************************************
 
@@ -3706,9 +3396,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  msym=192
 
  do iddb=1,nddb
-
-   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb,&
-&   dimonly=1)
+   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb, dimonly=1)
 
    mblok=mblok+ddb_hdr%nblok
    mblktyp=max(mblktyp,ddb_hdr%mblktyp)
@@ -3722,7 +3410,6 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    usepaw=max(usepaw,ddb_hdr%usepaw)
 
    call ddb_hdr_free(ddb_hdr)
-
  end do
 
  mpert=matom+6
@@ -3745,8 +3432,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  if(ddb_hdr%nblok>=1)then
 !  Read the blocks from the input database.
-   write(message, '(a,i5,a)' ) ' read ',ddb_hdr%nblok, &
-&   ' blocks from the input DDB '
+   write(message, '(a,i5,a)' ) ' read ',ddb_hdr%nblok, ' blocks from the input DDB '
    call wrtout(std_out,message,'COLL')
    do iblok=1,ddb_hdr%nblok
      call read_blok8(ddb,iblok,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
@@ -3757,6 +3443,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    write(message, '(a)' )' No bloks in the first ddb '
    call wrtout(std_out,message,'COLL')
  end if
+
 !Close the first ddb
  close(ddbun)
 
@@ -3766,10 +3453,8 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !In case of merging of DDBs, iterate the reading
  do iddb=2,nddb
 
-!  Open the corresponding input DDB,
-!  and read the database file information
-   write(message, '(a,a,i6)' )ch10,&
-&   ' read the input derivative database number',iddb
+!  Open the corresponding input DDB, and read the database file information
+   write(message, '(a,a,i6)' )ch10,' read the input derivative database number',iddb
    call wrtout(std_out,message,'COLL')
 
    call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbun, vrsddb, &
@@ -3779,35 +3464,32 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    if (chkopt==1)then
 !    Compare the current DDB and input DDB information.
 !    In case of an inconsistency, halt the execution.
-     write(message, '(a)' )' compare the current and input DDB information'
-     call wrtout(std_out,message,'COLL')
-
+     call wrtout(std_out, ' compare the current and input DDB information', 'COLL')
      call ddb_hdr_compare(ddb_hdr, ddb_hdr8)
 
    else if(chkopt==0)then
 !    No comparison between the current DDB and input DDB information.
      write(message, '(a)' )' no comparison between the current and input DDB information'
      call wrtout(std_out,message,'COLL')
-     write(message, '(a,a,a)' )&
-&     'No comparison/check is performed for the current and input DDB information ',&
-&     'because argument --nostrict was passed to the command line. ',&
-&     'Use at your own risk !'
+     write(message, '(5a)' )&
+&     'No comparison/check is performed for the current and input DDB information ',ch10,&
+&     'because argument --nostrict was passed to the command line. ',ch10,&
+&     'Use at your own risk!'
      MSG_COMMENT(message)
    end if
 
    call wrtout(std_out,' Will try to merge this input DDB with the current one.','COLL')
 
-!  First estimate of the total number of bloks, and error
-!  message if too large
+!  First estimate of the total number of bloks, and sto with error message if too large.
    write(message, '(a,i5)' ) ' Current number of bloks =',nblok
    call wrtout(std_out,message,'COLL')
    write(message, '(a,i5,a)' )' Will read ',ddb_hdr8%nblok,' blocks from the input DDB '
    call wrtout(std_out,message,'COLL')
    nblokt=nblok+ddb_hdr8%nblok
    if(nblokt>mblok)then
-     write(message, '(a,i5,a,a,a,i5,a)' )&
-&     'The expected number of blocks',nblokt,' is larger than',ch10,&
-&     'the maximum number of blocks',mblok,'.'
+     write(message, '(a,i0,3a,i0,a)' )&
+     'The expected number of blocks',nblokt,' is larger than',ch10,&
+     'the maximum number of blocks',mblok,'.'
      MSG_ERROR(message)
    end if
 
@@ -3832,9 +3514,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    ddb_hdr%psps%ekb(:,:) = ddb_hdr8%psps%ekb(:,:)
 
    call ddb_hdr_free(ddb_hdr8)
-
  end do
-
 
  call wrtout(std_out,' All DDBs have been read ','COLL')
 
@@ -3842,7 +3522,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
 !Check the equality of blocks, and eventually merge them
 
- if(nblok>=1)then
+ if (nblok>=1) then
    call wrtout(std_out,' check the equality of blocks, and eventually merge ','COLL')
    do iblok2=2,nblok
      do iblok1=1,iblok2-1
@@ -3863,20 +3543,17 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
          end if
          if(nq/=0)then
            do ii=1,nq
-             diff=ddb%qpt(1+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1)&
-&             -ddb%qpt(1+3*(ii-1),iblok2)/ddb%nrm(ii,iblok2)
-             if(abs(diff)>qtol)tmerge=0
-             diff=ddb%qpt(2+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1)&
-&             -ddb%qpt(2+3*(ii-1),iblok2)/ddb%nrm(ii,iblok2)
-             if(abs(diff)>qtol)tmerge=0
-             diff=ddb%qpt(3+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1)&
-&             -ddb%qpt(3+3*(ii-1),iblok2)/ddb%nrm(ii,iblok2)
-             if(abs(diff)>qtol)tmerge=0
+             diff= ddb%qpt(1+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1) - ddb%qpt(1+3*(ii-1),iblok2)/ddb%nrm(ii,iblok2)
+             if (abs(diff) > qtol) tmerge=0
+             diff=ddb%qpt(2+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1) - ddb%qpt(2+3*(ii-1),iblok2)/ddb%nrm(ii,iblok2)
+             if (abs(diff) > qtol) tmerge=0
+             diff=ddb%qpt(3+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1) - ddb%qpt(3+3*(ii-1),iblok2)/ddb%nrm(ii,iblok2)
+             if (abs(diff) > qtol) tmerge=0
            end do ! ii
          end if
 
 !        Now merges,
-         if(tmerge==1)then
+         if (tmerge == 1) then
            write(message, '(a,i5,a,i5)' )' merge block #',iblok2,' to block #',iblok1
            call wrtout(std_out,message,'COLL')
            mgblok(iblok2)=1
@@ -3901,12 +3578,9 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    nblok=nblok-tmerge
 
 !  Summarize the merging phase
-   write(message, '(i6,a,i6,a)' )&
-&   tmerge,' blocks are merged; the new DDB will have ',nblok,' blocks.'
+   write(message, '(i6,a,i6,a)' )tmerge,' blocks are merged; the new DDB will have ',nblok,' blocks.'
    call wrtout(std_out,message,'COLL')
-
-!  End the condition on existence of more than one blok in current DDB
- end if
+ end if !  End the condition on existence of more than one blok in current DDB
 
 !**********************************************************************
 
@@ -4003,16 +3677,6 @@ end subroutine mblktyp1
 
 subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mblktyp5'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ddbun,mddb,nddb,vrsddb
@@ -4056,8 +3720,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  msym=192
 
  do iddb=1,nddb
-   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb,&
-&   dimonly=1)
+   call ddb_hdr_open_read(ddb_hdr, filnam(iddb+1), ddbun, vrsddb, dimonly=1)
 
    mblok=mblok+ddb_hdr%nblok
    mblktyp=max(mblktyp,ddb_hdr%mblktyp)

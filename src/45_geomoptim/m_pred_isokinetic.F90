@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@
 
 module m_pred_isokinetic
 
- use m_profiling_abi
+ use m_abicore
  use defs_basis
  use m_abimover
  use m_abihist
@@ -57,11 +57,10 @@ contains
 !! IONMOV 12:
 !! Isokinetic ensemble molecular dynamics.
 !! The equation of motion of the ions in contact with a thermostat
-!! are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)],
-!! as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)].
+!! are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)] [[cite:Zhang1997]],
+!! as worked out by Minary et al, J. Chem. Phys. 188, 2510 (2003) [[cite:Minary2003]].
 !! The conservation of the kinetic energy is obtained within machine precision, at each step.
-!! Related parameters : the time step (dtion), the initial temperature (mdtemp(1)),
-!! the final temperature (mdtemp(2)), and the friction coefficient (friction).
+!! Related parameters : the time step (dtion), the initial temperature (mdtemp(1)) if the velocities are not defined to start with.
 !!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
@@ -83,14 +82,6 @@ contains
 
 subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_isokinetic'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -104,7 +95,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
 !Local variables-------------------------------
 !scalars
- integer  :: kk,iatom,idim,idum=5,nfirst,ifirst
+ integer  :: kk,iatom,idim,idum=5,nxyzatfree,ndegfreedom,nfirst,ifirst
  real(dp) :: a,as,b,sqb,s,s1,s2,scdot,sigma2,vtest,v2gauss
  real(dp),parameter :: v2tol=tol8
  real(dp) :: etotal,rescale_vel
@@ -123,6 +114,11 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !***************************************************************************
 !Beginning of executable session
 !***************************************************************************
+
+!DEBUG
+!write(std_out,*)' pred_isokinetic : enter '
+!stop
+!ENDDEBUG
 
  if(iexit/=0)then
    if (allocated(fcart_m))       then
@@ -148,7 +144,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !write(std_out,*) 'isokinetic 02'
 !##########################################################
 !### 02. Allocate the vectors vin, vout and hessian matrix
-!###     These arrays could be allocated from a previus
+!###     These arrays could be allocated from a previous
 !###     dataset that exit before itime==ntime
 
  if(itime==1)then
@@ -208,6 +204,31 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !    end do
 !  end if
 
+!Count the number of degrees of freedom, taking into account iatfix.
+!Also fix the velocity to zero for the fixed atoms
+ nxyzatfree=0
+ do iatom=1,ab_mover%natom
+   do idim=1,3
+     if(ab_mover%iatfix(idim,iatom)==0)then
+       nxyzatfree=nxyzatfree+1
+     else
+       vel(idim,iatom)=zero
+     endif
+   enddo
+ enddo
+
+!Now, the number of degrees of freedom is reduced by four because of the kinetic energy conservation
+!and because of the conservation of the total momentum for each dimension, in case no atom position is fixed for that dimension 
+!(in the latter case, one degree of freedom has already been taken away)
+!This was not done until v8.9 of ABINIT ...
+ ndegfreedom=nxyzatfree
+ ndegfreedom=nxyzatfree-1 ! Kinetic energy conservation
+ do idim=1,3
+   if(sum(ab_mover%iatfix(idim,:))==0)then
+     ndegfreedom=ndegfreedom-1 ! Macroscopic momentum
+   endif
+ enddo
+
 !write(std_out,*) 'isokinetic 04'
 !##########################################################
 !### 04. Second half-velocity (Only after the first itime)
@@ -216,12 +237,17 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
    do iatom=1,ab_mover%natom
      do idim=1,3
-       fcart_m(idim,iatom)=fcart(idim,iatom)/ab_mover%amass(iatom)
+       if(ab_mover%iatfix(idim,iatom)==0)then
+         fcart_m(idim,iatom)=fcart(idim,iatom)/ab_mover%amass(iatom)
+       else
+         fcart_m(idim,iatom)=zero
+       endif
      end do
    end do
 
 !  Computation of vel(:,:) at the next positions
-!  Computation of v2gauss
+!  Computation of v2gauss, actually twice the kinetic energy. 
+!  Called 2K, cf Eq. (A13) of [[cite:Minary2003]].
    v2gauss=0.0_dp
    do iatom=1,ab_mover%natom
      do idim=1,3
@@ -231,7 +257,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
      end do
    end do
 
-!  Calcul de a et b (4.13 de Ref.1)
+!  Computation of a and b (4.13 of [[cite:Minary2003]])
    a=0.0_dp
    b=0.0_dp
    do iatom=1,ab_mover%natom
@@ -244,7 +270,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    b=b/v2gauss
 
 
-!  Calcul de s et scdot
+!  Computation of s and scdot
    sqb=sqrt(b)
    as=sqb*ab_mover%dtion/2.
 ! jmb
@@ -253,7 +279,16 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    s2=sinh(as)
    s=a*(s1-1.)/b+s2/sqb
    scdot=a*s2/sqb+s1
-   vel(:,:)=(vel_nexthalf(:,:)+fcart_m(:,:)*s)/scdot
+
+   do iatom=1,ab_mover%natom
+     do idim=1,3
+       if(ab_mover%iatfix(idim,iatom)==0)then
+         vel(idim,iatom)=(vel_nexthalf(idim,iatom)+fcart_m(idim,iatom)*s)/scdot
+       else
+         vel(idim,iatom)=zero
+       endif
+     enddo
+   enddo  
 
    if (zDEBUG)then
      write(std_out,*) 'Computation of the second half-velocity'
@@ -286,7 +321,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  do ifirst=1,nfirst
 
-!  Application of Gauss' principle of least constraint according to Fei Zhang's algorithm (J. Chem. Phys. 106, 1997, p.6102)
+!  Application of Gauss' principle of least constraint according to Fei Zhang's algorithm (J. Chem. Phys. 106, 1997, [[cite:Zhang1997]] p.6102)
 
 !  v2gauss is twice the kinetic energy
    v2gauss=0.0_dp
@@ -296,35 +331,41 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
      end do
    end do
 
-!  If there is no kinetic energy
+!  If there is no kinetic energy to start with ...
    if (v2gauss<=v2tol.and.itime==1) then
 !    Maxwell-Boltzman distribution
      v2gauss=zero
      vtest=zero
      do iatom=1,ab_mover%natom
        do idim=1,3
-         vel(idim,iatom)=sqrt(kb_HaK*ab_mover%mdtemp(1)/ab_mover%amass(iatom))*cos(two_pi*uniformrandom(idum))
-         vel(idim,iatom)=vel(idim,iatom)*sqrt(-2._dp*log(uniformrandom(idum)))
+         if(ab_mover%iatfix(idim,iatom)==0)then
+           vel(idim,iatom)=sqrt(kb_HaK*ab_mover%mdtemp(1)/ab_mover%amass(iatom))*cos(two_pi*uniformrandom(idum))
+           vel(idim,iatom)=vel(idim,iatom)*sqrt(-2._dp*log(uniformrandom(idum)))
+         else
+           vel(idim,iatom)=zero
+         endif
        end do
      end do
 
 !    Get rid of center-of-mass velocity
      s1=sum(ab_mover%amass(:))
      do idim=1,3
-       s2=sum(ab_mover%amass(:)*vel(idim,:))
-       vel(idim,:)=vel(idim,:)-s2/s1
+       if(sum(ab_mover%iatfix(idim,:))==0)then
+         s2=sum(ab_mover%amass(:)*vel(idim,:))
+         vel(idim,:)=vel(idim,:)-s2/s1
+       endif
      end do
 
 !    Recompute v2gauss
      do iatom=1,ab_mover%natom
        do idim=1,3
          v2gauss=v2gauss+vel(idim,iatom)*vel(idim,iatom)*ab_mover%amass(iatom)
-         vtest=vtest+vel(idim,iatom)/(3._dp*ab_mover%natom)
+         vtest=vtest+vel(idim,iatom)/ndegfreedom
        end do
      end do
 
 !    Now rescale the velocities to give the exact temperature
-     rescale_vel=sqrt(3._dp*ab_mover%natom*kb_HaK*ab_mover%mdtemp(1)/v2gauss)
+     rescale_vel=sqrt(ndegfreedom*kb_HaK*ab_mover%mdtemp(1)/v2gauss)
      vel(:,:)=vel(:,:)*rescale_vel
 
 !    Recompute v2gauss with the rescaled velocities
@@ -336,13 +377,17 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
      end do
 
 !    Compute the variance and print
-     sigma2=(v2gauss/(3._dp*ab_mover%natom)-ab_mover%amass(1)*vtest**2)/kb_HaK
+     sigma2=(v2gauss/ndegfreedom-ab_mover%amass(1)*vtest**2)/kb_HaK
 
    end if
 
    do iatom=1,ab_mover%natom
      do idim=1,3
-       fcart_m(idim,iatom)=fcart(idim,iatom)/ab_mover%amass(iatom)
+       if(ab_mover%iatfix(idim,iatom)==0)then
+         fcart_m(idim,iatom)=fcart(idim,iatom)/ab_mover%amass(iatom)
+       else
+         fcart_m(idim,iatom)=zero
+       endif
      end do
    end do
 
@@ -375,7 +420,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 &     ' --- Scaling factor :',rescale_vel,' Asked T (K) ',ab_mover%mdtemp(1)
      call wrtout(std_out,message,'COLL')
      write(message, '(a,d12.5,a,D12.5)' )&
-&     ' --- Effective temperature',v2gauss/(3*ab_mover%natom*kb_HaK),' From variance', sigma2
+&     ' --- Effective temperature',v2gauss/(ndegfreedom*kb_HaK),' From variance', sigma2
      call wrtout(std_out,message,'COLL')
    end if
 
@@ -393,8 +438,8 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  end do
 
-!Computation of vel_nexthalf (4.16 de Ref.1)
-!Computation of a and b (4.13 de Ref.1)
+!Computation of vel_nexthalf (4.16 of [[cite:Minary2003]])
+!Computation of a and b (4.13 of [[cite:Minary2003]])
  a=0.0_dp
  b=0.0_dp
  do iatom=1,ab_mover%natom
@@ -414,7 +459,15 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  s2=sinh(as)
  s=a*(s1-1.)/b+s2/sqb
  scdot=a*s2/sqb+s1
- vel_nexthalf(:,:)=(vel(:,:)+fcart_m(:,:)*s)/scdot
+ do iatom=1,ab_mover%natom
+   do idim=1,3
+     if(ab_mover%iatfix(idim,iatom)==0)then
+       vel_nexthalf(idim,iatom)=(vel(idim,iatom)+fcart_m(idim,iatom)*s)/scdot
+     else
+       vel_nexthalf(idim,iatom)=zero
+     endif
+   enddo
+ enddo
 
 !Computation of the next positions
  xcart_next(:,:)=xcart(:,:)+vel_nexthalf(:,:)*ab_mover%dtion

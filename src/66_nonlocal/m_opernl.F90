@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, DRH)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_opernl
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_mkffkg, only : mkffkg, dfpt_mkffkg
 
@@ -138,13 +138,6 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernl2'
-!End of the abilint section
 
  implicit none
 
@@ -525,7 +518,7 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !                Pay attention to the use of reals and imaginary parts here ...
 !                Also, the gxa and dgxdt arrays are switched, in order
 !                to give the correct combination when multiplying ffkg,
-!                see Eq.(53) of PRB55,10337(1997)
+!                see Eq.(53) of PRB55,10337(1997) [[cite:Gonze1997]]
                  scalars(1,jffkg)= two_pi*gxa(2,jj,ia,iproj)
                  scalars(2,jffkg)=-two_pi*gxa(1,jj,ia,iproj)
                  scalars(1,iffkg)= dgxdt(1,1,jj,ia,iproj)
@@ -759,13 +752,6 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernl3'
-!End of the abilint section
 
  implicit none
 
@@ -1149,7 +1135,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !                Pay attention to the use of reals and imaginary parts here ...
 !                Also, the gxa and dgxdt arrays are switched, in order
 !                to give the correct combination when multiplying ffkg,
-!                see Eq.(53) of PRB55,10337(1997)
+!                see Eq.(53) of PRB55,10337(1997) [[cite:Gonze1997]]
                  scalars(1,jffkg)= two_pi*gxa(2,jj,ia,iproj)
                  scalars(2,jffkg)=-two_pi*gxa(1,jj,ia,iproj)
                  scalars(1,iffkg)= dgxdt(1,1,jj,ia,iproj)
@@ -1365,13 +1351,6 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernl4a'
-!End of the abilint section
 
  implicit none
 
@@ -2382,13 +2361,6 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 &  lmnmax,matblk,mincat,mlang3,mlang4,mproj,ndgxdt,nffnl,nincat,&
 &  nkpg,nlang,nloalg,npw,ntypat,ph3d,vect)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernl4b'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2519,7 +2491,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 !                Pay attention to the use of reals and imaginary parts here ...
 !                Also, the gxa and dgxdt arrays are switched, in order
 !                to give the correct combination when multiplying ffkg,
-!                see Eq.(53) of PRB55,10337(1997)
+!                see Eq.(53) of PRB55,10337(1997) [[cite:Gonze1997]]
                  scalars(1,jffkg)= two_pi*gxa(2,jj,ia,iproj)
                  scalars(2,jffkg)=-two_pi*gxa(1,jj,ia,iproj)
                  scalars(1,iffkg)= dgxdt(1,1,jj,ia,iproj)

@@ -14,21 +14,21 @@
 !! can be found here.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TD)
+!! Copyright (C) 1998-2019 ABINIT group (TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! contistr01.F90
-!! contistr03.F90
-!! contistr12.F90
-!! contstr21.F90
-!! contstr23.F90
-!! contstr25.F90
-!! contstr25a.F90
-!! contstr26.F90
 !! interfaces_42_nlstrain.F90
+!! m_contistr01.F90
+!! m_contistr03.F90
+!! m_contistr12.F90
+!! m_contstr21.F90
+!! m_contstr23.F90
+!! m_contstr25.F90
+!! m_contstr25a.F90
+!! m_contstr26.F90
 !!
 !!***
