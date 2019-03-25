@@ -3437,7 +3437,7 @@ end subroutine dfpt_flexoout
            !Calculate and save the third order energy derivative
            tmpre=two*(ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad))+&
          & dyewdq(re,iatdir,iatom,jatdir,jatom,iq1dir)
-           tmpim=ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad)+&
+           tmpim=two*(ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad))+&
          & dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
            d3etot(re,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpre
            d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpim

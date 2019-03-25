@@ -2207,9 +2207,11 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
   &    dum_gs1,gs_hamkq,dum_gvnl1,idir,ipert,dum_lambda,mpi_enreg,optlocal,&
   &    optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
+       !tmp
+       call wfk_read_bks(wfk_t_atdis(jatpert), iband, indkpt1(ikpt), &
+     & isppol, xmpio_single, cg_bks=cg1_jatdis)
+
        !LOOP OVER BRA ATOMIC DISPLACEMENT PERTURBATION
-       !TODO: For Silicon it seems that this term is symmetric (cc) wrt exchange 
-       !of atomic displacement perturbations. Check whether this is a general rule. 
        do iatpert=1,natpert
 
          !Read atomic displacement wf1
@@ -2458,7 +2460,6 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
        &         (c1atdis_dQHatdis_c0_bks(2,iband,iatpert,jatpert,iq1grad) -               &
        &          c1atdis_dQHatdis_c0_bks(2,iband,jatpert,iatpert,iq1grad))
  
-
          !T3+T5
          ddmdqwf_t3_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_t3_k(1,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                                    &
@@ -2469,6 +2470,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
        &         wtk_k * occ_k(iband) *                                                    &
        &         (c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad) -               &
        &          c1atdis_Hatdisdq_c0_bks(2,iband,jatpert,iatpert,iq1grad)) 
+
        end do
      end do
    end do
