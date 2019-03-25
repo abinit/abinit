@@ -180,6 +180,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
    indkpt,bz2ibz_smap,fullbz=kbz)
 
  if (present(bz2ibz)) then
+   nkbz = size(kbz, dim=2)
    ABI_MALLOC(bz2ibz,(6,nkbz))
    bz2ibz = bz2ibz_smap
  endif
