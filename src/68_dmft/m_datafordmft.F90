@@ -362,7 +362,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
            lmn_size=pawtab(itypat)%lmn_size
 !          write(std_out,*) isppol,ikpt,iband,ispinor
            do iatom=icat,icat+cryst_struc%nattyp(itypat)-1
-             lpawu=pawtab(dtset%typat(iatom))%lpawu
+             lpawu=pawtab(itypat)%lpawu
 !            ----------   t2g case
              if(paw_dmft%dmftqmc_t2g==1.and.lpawu/=-1) then
                if(lpawu==2) then
@@ -422,7 +422,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
 !                    endif
 !                    write(std_out,*) "inside paw_dmft%band_in",iband
                      jj1=jj1+1
-                     if(jj1>pawtab(dtset%typat(iatom))%nproju*(2*lpawu+1)) then
+                     if(jj1>pawtab(itypat)%nproju*(2*lpawu+1)) then
                        write(message,'(a,a,a,a)')  ch10,&
 &                       ' jj1 is not correct in datafordmft',ch10,&
 &                       ' Action: CONTACT Abinit group'
@@ -734,7 +734,9 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
    if((me.eq.0.and.nbandkss/=0).or.(iscf<0)) then
 !     opt_renorm=1 ! if ucrpa==1, no need for individual orthonormalization
      opt_renorm=3
+     write(6,*) "opt_renorm",opt_renorm,dtset%ucrpa,iscf
      if(dtset%ucrpa>=1.or.iscf<0) opt_renorm=2
+     write(6,*) "opt_renorm",opt_renorm
      call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)
      call psichi_print(dtset,cryst_struc%nattyp,cryst_struc%ntypat,nkpt,my_nspinor,&
 &     nsppol,paw_dmft,pawtab,psps,t2g,x2my2d)
@@ -845,7 +847,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
              do iatom=icat,icat+nattyp(itypat)-1
                iat=iat+1
                jj1=0
-               if(pawtab(dtset%typat(iatom))%lpawu.ne.-1) then
+               if(pawtab(itypat)%lpawu.ne.-1) then
 !                chinorm=(pawtab(itypat)%phiphjint(1))
                  chinorm=1.d0
 !                write(std_out,*) isppol,ikpt,iband,ispinor,iat
@@ -854,12 +856,12 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
                  do ilmn=1,lmn_size
 !                  write(std_out,*) ilmn
 !                  ------------ Select l=lpawu.  ---------------------------------------
-                   if (psps%indlmn(1,ilmn,itypat)==pawtab(dtset%typat(iatom))%lpawu.and.psps%indlmn(3,ilmn,itypat)==1) then
+                   if (psps%indlmn(1,ilmn,itypat)==pawtab(itypat)%lpawu.and.psps%indlmn(3,ilmn,itypat)==1) then
 !                    ------------ Check that the band is choosen (within nbandi and nbandf)
                      if(paw_dmft%band_in(iband)) then
                        jj1=jj1+1
-                       if(jj1>(2*pawtab(dtset%typat(iatom))%lpawu+1)) then
-                         write(message,'(a,a,i4,i5,i4)') ch10," Error 2 in datafordmft",jj1,pawtab(dtset%typat(iatom))%lpawu
+                       if(jj1>(2*pawtab(itypat)%lpawu+1)) then
+                         write(message,'(a,a,i4,i5,i4)') ch10," Error 2 in datafordmft",jj1,pawtab(itypat)%lpawu
                          call wrtout(std_out,  message,'COLL')
                          MSG_ERROR("Aborting now")
                        end if ! jj1

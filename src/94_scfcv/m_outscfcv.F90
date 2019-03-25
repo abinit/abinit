@@ -1081,7 +1081,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !    ==  compute psichi
      call init_oper(paw_dmft,lda_occup)
 
-     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie,-1 &
+     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie,dtset%iscf &
 &     ,lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)

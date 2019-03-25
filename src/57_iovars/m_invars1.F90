@@ -1784,7 +1784,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%usepawu=intarr(1)
  if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
 
- if (dtset%usepawu > 0 ) then
+ if (dtset%usepawu > 0 .and. dtset%usedmft > 0) then
    write(message, '(7a)' )&
 &   'usedmft and usepawu are both activated ',ch10,&
 &   'This is not an usual calculation:',ch10,&
