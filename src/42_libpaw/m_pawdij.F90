@@ -9,7 +9,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2019 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2326,7 +2326,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,j0lmn,klmn,kln,mesh_size
+ integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,klmn,kln,mesh_size
  real(dp) :: intgr3,RecipAlpha2
  complex(dpc) :: lms
  logical :: ndmom
@@ -2367,13 +2367,12 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
      jm=indlmn(2,jlmn)
      jlm=indlmn(4,jlmn)
      jln=indlmn(5,jlmn)
-     j0lmn=jlmn*(jlmn-1)/2
-     do ilmn=1,jlmn
+     do ilmn=1,pawtab%lmn_size
        il=indlmn(1,ilmn)
        im=indlmn(2,ilmn)
        iln=indlmn(5,ilmn)
        ilm=indlmn(4,ilmn)
-       klmn=j0lmn+ilmn
+       klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
        kln = pawtab%indklmn(2,klmn)
 
   !    Computation of (<phi_i|phi_j>-<tphi_i|tphi_j>)/r^3 radial integral
@@ -2912,6 +2911,7 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 ! *************************************************************************
 
 !Check data consistency
+ lmn2_size=pawrhoij%lmn2_size
  if (size(diju,1)/=qphase*cplex_dij*lmn2_size.or.size(diju,2)/=ndij) then
    msg='invalid sizes for diju!'
    MSG_BUG(msg)
@@ -2927,7 +2927,6 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 
 !Initialization
  diju=zero
- lmn2_size=pawrhoij%lmn2_size
  cplex_rhoij=pawrhoij%cplex_rhoij
  compute_im=(cplex_dij==2.and.cplex_rhoij==2)
 
@@ -2968,9 +2967,10 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
              end if
 
            end do ! k,l
-         end do
+         end do ! i,j
 
-       end do ! i,j
+         jrhoij=jrhoij+cplex_rhoij
+       end do
 
      end do ! q phase
 

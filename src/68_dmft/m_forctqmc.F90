@@ -7,7 +7,7 @@
 !! Prepare CTQMC and call CTQMC
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@ contains
 !! Prepare and call the qmc subroutines
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon,VPlanes)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon,VPlanes)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2287,7 +2287,7 @@ end subroutine qmc_prep_ctqmc
 !! Setup ultra simple hybridization to test CTQMC in simple situations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

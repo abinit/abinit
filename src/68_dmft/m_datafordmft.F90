@@ -7,7 +7,7 @@
 !! This module produces inputs for the DMFT calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ contains
 !!  Compute psichi (and print some data for check)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1015,7 +1015,7 @@ end subroutine datafordmft
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1133,7 +1133,7 @@ end subroutine datafordmft
 !! Renormalize psichi.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1364,12 +1364,15 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 !scalars
  integer :: diag,iatom,ib,ikpt1,im,im1,ispinor,ispinor1,isppol,isppol1,jc,jc1
  integer :: tndim
- integer :: natom,mbandc,ndim,nspinor,nsppol
+ integer :: natom,mbandc,ndim,nspinor,nsppol,iortho,natomcor
+ integer :: itot,itot1,iatom1,ndim1,dimoverlap,iatomcor,iatomcor1
  real(dp) :: pawprtvol
  type(oper_type) :: norm1,norm2,norm3
  character(len=500) :: message
- complex(dpc),allocatable :: wan(:,:,:),sqrtmatinv(:,:)
+ complex(dpc),allocatable :: wan(:,:,:),sqrtmatinv(:,:),wanall(:)
  type(coeff2c_type), allocatable :: overlap(:)
+ complex(dpc), allocatable :: largeoverlap(:,:)
+ complex(dpc), allocatable :: psichivect(:,:)
 !arrays
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
 !************************************************************************
@@ -1379,174 +1382,319 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
    nspinor = paw_dmft%nspinor
    pawprtvol=3
    diag=0
+   natomcor=0
+   dimoverlap=0
+   do iatom=1,natom
+     if(paw_dmft%lpawu(iatom).ne.-1) then
+       natomcor=natomcor+1
+       ndim=2*paw_dmft%lpawu(iatom)+1
+       tndim=nspinor*ndim
+       dimoverlap=dimoverlap+tndim
+      ! write(6,*) "atom, dimoverlap",iatom,dimoverlap,natomcor
+     end if
+   end do
 
    if(nkpt/=1.and.present(jkpt)) then
      message = 'BUG in psichi_normalization'
      MSG_ERROR(message)
    end if
 
-!  *********************************************************************
-   call init_oper(paw_dmft,norm1,nkpt=nkpt,wtk=temp_wtk)
+   iortho=1
+  ! write(6,*) "nkpt, iortho",nkpt,iortho
+   !if (natomcor>1) iortho=2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  First case: usual case (should in fact be used only for one atom and nkpt=1)
+   if((.not.present(jkpt)).and.iortho==1) then
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!    *********************************************************************
+     call init_oper(paw_dmft,norm1,nkpt=nkpt,wtk=temp_wtk)
 
-!  == Build identity for norm1%ks (option=1)
-   call identity_oper(norm1,1)
+!    == Build identity for norm1%ks (option=1)
+     call identity_oper(norm1,1)
 
-   if(nkpt==1.and.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
-   end if
-   if(.not.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1)
-   end if
-   if(nkpt>1) then
-     call sym_matlu(cryst_struc,norm1%matlu,pawang)
-   end if
-
-   if(pawprtvol>2) then
-     write(message,'(2a)') ch10,'  - Print norm with current psichi '
-     call wrtout(std_out,message,'COLL')
-     call print_matlu(norm1%matlu,natom,prtopt=1,opt_exp=1)
-   end if
-!  ==-------------------------------------
-!  == Start loop on atoms
-   ABI_DATATYPE_ALLOCATE(overlap,(natom))
-   do iatom=1,natom
-     if(paw_dmft%lpawu(iatom).ne.-1) then
-       ndim=2*paw_dmft%lpawu(iatom)+1
-       tndim=nsppol*nspinor*ndim
-       ABI_ALLOCATE(overlap(iatom)%value,(tndim,tndim))
-       overlap(iatom)%value=czero
+     if(nkpt==1.and.present(jkpt)) then
+       call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
      end if
-   end do
-!  ==-------------------------------------
+     if(.not.present(jkpt)) then
+       call loc_oper(norm1,paw_dmft,1)
+     end if
+     if(nkpt>1) then
+       call sym_matlu(cryst_struc,norm1%matlu,pawang)
+     end if
 
-!  built large overlap matrix
-   write(message,'(2a)') ch10,'  - Overlap (before orthonormalization) -'
-   call wrtout(std_out,message,'COLL')
-   call gather_matlu(norm1%matlu,overlap,cryst_struc%natom,option=1,prtopt=1)
-   call destroy_oper(norm1)
-
-
-
-   do iatom=1,natom
-     if(paw_dmft%lpawu(iatom).ne.-1) then
-       ndim=2*paw_dmft%lpawu(iatom)+1
-       tndim=nsppol*nspinor*ndim
-       ABI_ALLOCATE(sqrtmatinv,(tndim,tndim))
-
-!      == Compute Inverse Square root of overlap : O^{-0.5}
-       !!write(message,'(a,1x,a,e21.14,a,e21.14,a)') "overlap", &
-       !!"(",real(overlap(1)%value),",",aimag(overlap(1)%value),")"
-       !!call wrtout(std_out,message,'COLL')
-       if(diag==0) then
-         call invsqrt_matrix(overlap(iatom)%value,tndim)
-         sqrtmatinv=overlap(iatom)%value
-       else
-         sqrtmatinv(:,:)=czero
-         do ib=1,tndim
-           sqrtmatinv(ib,ib)=cone/(sqrt(overlap(iatom)%value(ib,ib)))
-         end do
+     if(pawprtvol>2) then
+       write(message,'(2a)') ch10,'  - Print norm with current psichi '
+       call wrtout(std_out,message,'COLL')
+       call print_matlu(norm1%matlu,natom,prtopt=1,opt_exp=1)
+     end if
+!    ==-------------------------------------
+!    == Start loop on atoms
+     ABI_DATATYPE_ALLOCATE(overlap,(natom))
+     do iatom=1,natom
+       if(paw_dmft%lpawu(iatom).ne.-1) then
+         ndim=2*paw_dmft%lpawu(iatom)+1
+         tndim=nsppol*nspinor*ndim
+         ABI_ALLOCATE(overlap(iatom)%value,(tndim,tndim))
+         overlap(iatom)%value=czero
        end if
+     end do
+!    ==-------------------------------------
 
-!      == Apply O^{-0.5} on psichi
-       ABI_ALLOCATE(wan,(nsppol,nspinor,ndim))
-!      write(std_out,*) mbandc,nsppol,nspinor,ndim
-!      write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
-       do ikpt=1,nkpt
-         do ib=1,mbandc
-           if(present(jkpt)) then
-             ikpt1=jkpt
-           else
-             ikpt1=ikpt
-           end if
-           jc=0
-           wan=czero
-           do isppol=1,nsppol
-             do ispinor=1,nspinor
-               do im=1,ndim
-!                write(std_out,*) "psichi", paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)
-                 jc=jc+1
-                 jc1=0
-                 do isppol1=1,nsppol
-                   do ispinor1=1,nspinor
-                     do im1=1,ndim
-                       jc1=jc1+1
-                       wan(isppol,ispinor,im)= wan(isppol,ispinor,im) &
-&                       + paw_dmft%psichi(isppol1,ikpt1,ib,ispinor1,iatom,im1)*sqrtmatinv(jc,jc1)
-                     end do ! ispinor1
-                   end do ! isppol1
-                 end do ! im1
-               end do ! im
-             end do ! ispinor
-           end do !  isppol
-           do isppol=1,nsppol
-             do ispinor=1,nspinor
-               do im=1,ndim
-                 paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)=wan(isppol,ispinor,im)
-!                write(std_out,*) "psichi2", paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)
+!    built large overlap matrix
+     write(message,'(2a)') ch10,'  - Overlap (before orthonormalization) -'
+     call wrtout(std_out,message,'COLL')
+     call gather_matlu(norm1%matlu,overlap,cryst_struc%natom,option=1,prtopt=1)
+     call destroy_oper(norm1)
+
+
+
+     do iatom=1,natom
+       if(paw_dmft%lpawu(iatom).ne.-1) then
+         ndim=2*paw_dmft%lpawu(iatom)+1
+         tndim=nsppol*nspinor*ndim
+         ABI_ALLOCATE(sqrtmatinv,(tndim,tndim))
+
+!        == Compute Inverse Square root of overlap : O^{-0.5}
+         !!write(message,'(a,1x,a,e21.14,a,e21.14,a)') "overlap", &
+         !!"(",real(overlap(1)%value),",",aimag(overlap(1)%value),")"
+         !!call wrtout(std_out,message,'COLL')
+         if(diag==0) then
+           call invsqrt_matrix(overlap(iatom)%value,tndim)
+           sqrtmatinv=overlap(iatom)%value
+         else
+           sqrtmatinv(:,:)=czero
+           do ib=1,tndim
+             sqrtmatinv(ib,ib)=cone/(sqrt(overlap(iatom)%value(ib,ib)))
+           end do
+         end if
+
+!        == Apply O^{-0.5} on psichi
+         ABI_ALLOCATE(wan,(nsppol,nspinor,ndim))
+!        write(std_out,*) mbandc,nsppol,nspinor,ndim
+!        write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
+         do ikpt=1,nkpt
+           do ib=1,mbandc
+             if(present(jkpt)) then
+               ikpt1=jkpt
+             else
+               ikpt1=ikpt
+             end if
+             jc=0
+             wan=czero
+             do isppol=1,nsppol
+               do ispinor=1,nspinor
+                 do im=1,ndim
+!                  write(std_out,*) "psichi", paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)
+                   jc=jc+1
+                   jc1=0
+                   do isppol1=1,nsppol
+                     do ispinor1=1,nspinor
+                       do im1=1,ndim
+                         jc1=jc1+1
+                         wan(isppol,ispinor,im)= wan(isppol,ispinor,im) &
+&                         + paw_dmft%psichi(isppol1,ikpt1,ib,ispinor1,iatom,im1)*sqrtmatinv(jc,jc1)
+                       end do ! ispinor1
+                     end do ! isppol1
+                   end do ! im1
+                 end do ! im
                end do ! ispinor
-             end do ! isppol
-           end do ! im
-         end do ! ib
-       end do ! ikpt
-       ABI_DEALLOCATE(wan)
-       ABI_DEALLOCATE(sqrtmatinv)
-!      write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
+             end do !  isppol
+             do isppol=1,nsppol
+               do ispinor=1,nspinor
+                 do im=1,ndim
+                   paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)=wan(isppol,ispinor,im)
+!                  write(std_out,*) "psichi2", paw_dmft%psichi(isppol,ikpt1,ib,ispinor,iatom,im)
+                 end do ! ispinor
+               end do ! isppol
+             end do ! im
+           end do ! ib
+         end do ! ikpt
+         ABI_DEALLOCATE(wan)
+         ABI_DEALLOCATE(sqrtmatinv)
+!        write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
 
-!      ==-------------------------------------
-     end if ! lpawu.ne.-1
-   end do ! iatom
-!  == End loop on atoms
-!  ==-------------------------------------
-   do iatom=1,natom
-     if(paw_dmft%lpawu(iatom).ne.-1) then
-       ABI_DEALLOCATE(overlap(iatom)%value)
+!        ==-------------------------------------
+       end if ! lpawu.ne.-1
+     end do ! iatom
+!    == End loop on atoms
+!    ==-------------------------------------
+     do iatom=1,natom
+       if(paw_dmft%lpawu(iatom).ne.-1) then
+         ABI_DEALLOCATE(overlap(iatom)%value)
+       end if
+     end do
+     ABI_DATATYPE_DEALLOCATE(overlap)
+
+!    ======================================================================
+!    == Check norm with new psichi.
+!    ======================================================================
+
+     call init_oper(paw_dmft,norm1,nkpt=nkpt,wtk=temp_wtk)
+
+     call identity_oper(norm1,1)
+
+     if(nkpt==1.and.present(jkpt)) then
+       call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
      end if
-   end do
-   ABI_DATATYPE_DEALLOCATE(overlap)
+     if(.not.present(jkpt)) then
+       call loc_oper(norm1,paw_dmft,1)
+     end if
 
-!  ======================================================================
-!  == Check norm with new psichi.
-!  ======================================================================
+     if (nkpt>1) then
+       call sym_matlu(cryst_struc,norm1%matlu,pawang)
+     end if
 
-   call init_oper(paw_dmft,norm1,nkpt=nkpt,wtk=temp_wtk)
+     if(pawprtvol>2) then
+       write(message,'(2a)') ch10,'  - Print norm with new psichi '
+       call wrtout(std_out,message,'COLL')
+       call print_matlu(norm1%matlu,natom,prtopt=1)
+     end if
 
-   call identity_oper(norm1,1)
+!    ======================================================================
+!    == Check that norm-identity is zero
+!    ======================================================================
+     call init_oper(paw_dmft,norm2,nkpt=nkpt,wtk=temp_wtk)
+     call init_oper(paw_dmft,norm3,nkpt=nkpt,wtk=temp_wtk)
+     call identity_oper(norm2,2)
+     call add_matlu(norm1%matlu,norm2%matlu,norm3%matlu,natom,-1)
+     call destroy_oper(norm2)
+     if(pawprtvol>2) then
+       write(message,'(2a)') ch10,'  - Print norm with new psichi minus Identity '
+       call wrtout(std_out,message,'COLL')
+       call print_matlu(norm3%matlu,natom,prtopt=1,opt_exp=1)
+     end if
+     call destroy_oper(norm3)
 
-   if(nkpt==1.and.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
-   end if
-   if(.not.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1)
-   end if
+     call destroy_oper(norm1)
+!    call flush(std_out)           ! debug debug  debug   debug
+!    MSG_ERROR("Stop for debugging")
 
-   if (nkpt>1) then
-     call sym_matlu(cryst_struc,norm1%matlu,pawang)
-   end if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  New implementation, several atoms, general case.
+   else if(present(jkpt).or.iortho==2) then
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   if(pawprtvol>2) then
-     write(message,'(2a)') ch10,'  - Print norm with new psichi '
-     call wrtout(std_out,message,'COLL')
-     call print_matlu(norm1%matlu,natom,prtopt=1)
-   end if
+     ABI_ALLOCATE(largeoverlap,(dimoverlap,dimoverlap))
+     ABI_ALLOCATE(psichivect,(mbandc,dimoverlap))
+     ABI_ALLOCATE(sqrtmatinv,(dimoverlap,dimoverlap))
+     ABI_ALLOCATE(wanall,(dimoverlap))
 
-!  ======================================================================
-!  == Check that norm-identity is zero
-!  ======================================================================
-   call init_oper(paw_dmft,norm2,nkpt=nkpt,wtk=temp_wtk)
-   call init_oper(paw_dmft,norm3,nkpt=nkpt,wtk=temp_wtk)
-   call identity_oper(norm2,2)
-   call add_matlu(norm1%matlu,norm2%matlu,norm3%matlu,natom,-1)
-   call destroy_oper(norm2)
-   if(pawprtvol>2) then
-     write(message,'(2a)') ch10,'  - Print norm with new psichi minus Identity '
-     call wrtout(std_out,message,'COLL')
-     call print_matlu(norm3%matlu,natom,prtopt=1,opt_exp=1)
-   end if
-   call destroy_oper(norm3)
 
-   call destroy_oper(norm1)
-!  call flush(std_out)           ! debug debug  debug   debug
-!  MSG_ERROR("Stop for debugging")
+!    Big loop over isppol
+     do isppol=1,nsppol
+
+       do ib=1,mbandc
+         itot=0
+         do iatom=1,natom
+           if(paw_dmft%lpawu(iatom).ne.-1) then
+             ndim=2*paw_dmft%lpawu(iatom)+1
+             do im=1,ndim
+               do ispinor=1,nspinor
+                 itot=itot+1
+                 if(itot>dimoverlap) write(std_out,*) "itot>ndim",itot,ndim
+                ! write(6,*) "ib,iatom,im,ispinor",ib,iatom,im,ispinor,jkpt
+                 psichivect(ib,itot)= paw_dmft%psichi(isppol,jkpt,ib,ispinor,iatom,im)
+               enddo ! ispinor
+             enddo ! im
+           endif
+         enddo ! iatom
+       enddo ! ib
+
+
+!     calculation of overlap
+       largeoverlap=czero
+       do ib=1,mbandc
+         do itot=1,dimoverlap
+           do itot1=1,dimoverlap
+              largeoverlap(itot,itot1)=largeoverlap(itot,itot1)+ &
+&              psichivect(ib,itot)*conjg(psichivect(ib,itot1))
+           enddo ! itot1
+         enddo ! itot
+       enddo ! ib
+
+!     Math: orthogonalisation of overlap
+     !  write(std_out,*)"jkpt=",jkpt
+     !  do itot=1,dimoverlap
+     !    write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
+     !  enddo
+       call invsqrt_matrix(largeoverlap,dimoverlap)
+       sqrtmatinv=largeoverlap
+     !  write(std_out,*)"jkpt=",jkpt
+     !  do itot=1,dimoverlap
+     !    write(std_out,'(100f7.3)') (sqrtmatinv(itot,itot1),itot1=1,dimoverlap)
+     !  enddo
+
+
+       do ib=1,mbandc
+         wanall=czero
+         do itot=1,dimoverlap
+           do itot1=1,dimoverlap
+              wanall(itot)= wanall(itot)+psichivect(ib,itot1)*sqrtmatinv(itot,itot1)
+           enddo ! itot1
+     !      write(std_out,'(3i3,2x,i3,2x,2e15.5,2x,2e15.5)') jkpt,isppol,ib,itot,psichivect(ib,itot),wanall(itot)
+         enddo ! itot
+         iatomcor=0
+         do itot=1,dimoverlap
+           psichivect(ib,itot)=wanall(itot)   
+         enddo
+        ! do iatom=1,natom
+        !   if(paw_dmft%lpawu(iatom).ne.-1) then
+        !     ndim=2*paw_dmft%lpawu(iatom)+1
+        !     iatomcor=iatomcor+1
+        !     do im=1,ndim
+        !       do ispinor=1,nspinor
+        !         paw_dmft%psichi(isppol,jkpt,ib,ispinor,iatom,im)=wanall(iatomcor,isppol,ispinor,im)
+        !       end do ! ispinor
+        !     end do ! im
+        !   endif
+        ! enddo ! iatom
+       enddo ! ib
+
+
+!     calculation of overlap (check)
+       largeoverlap=czero
+       do ib=1,mbandc
+         do itot=1,dimoverlap
+           do itot1=1,dimoverlap
+              largeoverlap(itot,itot1)=largeoverlap(itot,itot1)+ &
+&              psichivect(ib,itot)*conjg(psichivect(ib,itot1))
+           enddo ! itot1
+         enddo ! itot
+       enddo ! ib
+
+!       write(std_out,*)"jkpt=",jkpt
+!       do itot=1,dimoverlap
+!         write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
+!       enddo
+
+
+!      psichivect -> psichi 
+       do ib=1,mbandc
+         itot=0
+         do iatom=1,natom
+           if(paw_dmft%lpawu(iatom).ne.-1) then
+             ndim=2*paw_dmft%lpawu(iatom)+1
+             iatomcor=iatomcor+1
+             do im=1,ndim
+               do ispinor=1,nspinor
+                 itot=itot+1
+                 paw_dmft%psichi(isppol,jkpt,ib,ispinor,iatom,im)=psichivect(ib,itot)
+               end do ! ispinor
+             end do ! im
+           endif
+         enddo ! iatom
+       enddo ! ib
+
+
+!   End big loop over isppol
+     enddo !ispppol
+
+     ABI_DEALLOCATE(psichivect)
+     ABI_DEALLOCATE(sqrtmatinv)
+     ABI_DEALLOCATE(wanall)
+     ABI_DEALLOCATE(largeoverlap)
+
+   endif
 
  end subroutine normalizepsichi
 
@@ -1562,7 +1710,7 @@ end subroutine psichi_renormalization
 !! Compute some components for the limit of hybridization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

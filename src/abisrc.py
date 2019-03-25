@@ -251,7 +251,7 @@ def main():
     # After this point I operate an AbinitProject instance.
     # Load the object from pickle first and then check if we need to parse the source files again.
     needs_reload = True
-    if not options.regenerate and os.path.exists(AbinitProject.DEFAULT_PICKLE_FILE):
+    if not options.regenerate and os.path.exists(AbinitProject.get_default_pickle_file()):
         proj = AbinitProject.pickle_load()
         needs_reload = proj.needs_reload()
         if needs_reload:
