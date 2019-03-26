@@ -1418,19 +1418,18 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
 !                 write(672,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
 !               enddo
 !                 TEST*************************
-              ! write(6,*) "TWO FACTOR IS PUT BECAUSE OF MAXENT CODE ??"
                do ifreq=1,self%nw
                  selftemp_re(ifreq)=selftemp_re(ifreq)+ &
  &                 real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1)- &
  &                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                  self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
   &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
-!    The factor two is here to compensate for the factor two in OmegaMaxent..
+!    The factor two is here to compensate for the factor two in OmegaMaxent, this has been checked and compared to another Maxent code.
 !  &                       =cmplx(selftemp_re(ifreq),0.0,kind=dp)
-                 write(67,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))&
+         !CHECK        write(67,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))&
                  ,aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                enddo
-               write(67,*) 
+         !CHECK      write(67,*) 
                !!!!!!!!!! Z renormalization
                slope=(selftemp_re((self%nw+1)/2+1)-selftemp_re((self%nw+1)/2))/&
                      (self%omega((self%nw+1)/2+1)-self%omega((self%nw+1)/2))

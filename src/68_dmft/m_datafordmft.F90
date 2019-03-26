@@ -373,7 +373,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
                else
                  write(message,'(a,a,i4,i4,2a)')  ch10,&
 &                 '  Wrong use of dmftqmc_t2g',paw_dmft%dmftqmc_t2g,lpawu,ch10,&
-&                 ' Action: desactivate qmftqmc_t2g or use lpawu=1'
+&                 ' Action: desactivate qmftqmc_t2g or use lpawu=2'
                  MSG_ERROR(message)
                end if
              end if
@@ -384,11 +384,11 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
 !                lpawu==2 must be chosen in input and thus in
 !                pawtab. On the contrary, paw_dmft now has
 !                lpawu=1
-                 m1_x2my2d=0 ! index for psichi which has a dimension 3
+                 m1_x2my2d=0 ! index for psichi which has a dimension 1
                else
                  write(message,'(a,a,i4,i4,2a)')  ch10,&
 &                 '  Wrong use of dmftqmc_x2my2d',paw_dmft%dmftqmc_x2my2d,lpawu,ch10,&
-&                 ' Action: desactivate dmftqmc_x2my2d or use lpawu=1'
+&                 ' Action: desactivate dmftqmc_x2my2d or use lpawu=2'
                  MSG_ERROR(message)
                end if
              end if
@@ -734,9 +734,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
    if((me.eq.0.and.nbandkss/=0).or.(iscf<0)) then
 !     opt_renorm=1 ! if ucrpa==1, no need for individual orthonormalization
      opt_renorm=3
-     write(6,*) "opt_renorm",opt_renorm,dtset%ucrpa,iscf
      if(dtset%ucrpa>=1.or.iscf<0) opt_renorm=2
-     write(6,*) "opt_renorm",opt_renorm
      call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)
      call psichi_print(dtset,cryst_struc%nattyp,cryst_struc%ntypat,nkpt,my_nspinor,&
 &     nsppol,paw_dmft,pawtab,psps,t2g,x2my2d)
