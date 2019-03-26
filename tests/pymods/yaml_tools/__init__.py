@@ -28,33 +28,11 @@ except ImportError:
 
 
 if is_available:
-    def yaml_parse(content, catch=True, *args, **kwargs):
+    def yaml_parse(content, *args, **kwargs):
         from . import structures
-        if catch:
-            try:
-                return yaml.load(content, *args, Loader=yaml.Loader, **kwargs)
-            except yaml.YAMLError as e:
-                return CorruptedDocument(e, context=content)
-        else:
-            return yaml.load(content, *args, Loader=yaml.Loader, **kwargs)
+        return yaml.load(content, *args, Loader=yaml.Loader, **kwargs)
 
     yaml_print = yaml.dump
-
-
-class CorruptedDocument(object):
-    '''
-        Replace the YAML parser output when it fail.
-    '''
-    # trick to workaround the custom sys.path
-    _is_corrupted_doc = True
-
-    def __init__(self, error, context=''):
-        self.error = error
-        self.context = context
-
-    def __repr__(self):
-        return "<Corrupted document {}: {}>".format(
-            self.error.__class__.__name__, str(self.error))
 
 
 class Document(object):
@@ -72,12 +50,15 @@ class Document(object):
 
     def _parse(self):
         if is_available:
-            self._obj = yaml_parse('\n'.join(self.lines))
+            content = '\n'.join(self.lines)
+            try:
+                self._obj = yaml_parse(content)
+            except yaml.YAMLError as e:
+                self._obj = e
+                self._corrupted = True
         else:
             raise NoYAMLSupportError('Try to access YAML document but YAML is'
                                      ' not available in this environment.')
-        if isinstance(self._obj, CorruptedDocument):
-            self._corrupted = True
 
     @property
     def obj(self):

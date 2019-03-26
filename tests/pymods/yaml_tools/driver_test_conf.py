@@ -18,7 +18,7 @@ def get_default_conf(filename):
     '''
     with open(filename) as f:
         try:
-            return yaml_parse(f.read(), catch=False) or {}
+            return yaml_parse(f.read()) or {}
         except YAMLError:
             return {}
 
@@ -49,7 +49,7 @@ class DriverTestConf:
         self.current_filter = None
         if src is not None:
             try:
-                conf = yaml_parse(src, catch=False)
+                conf = yaml_parse(src)
             except YAMLError as e:
                 conf = {}
                 self.warning('An error occured while parsing source:\n'
