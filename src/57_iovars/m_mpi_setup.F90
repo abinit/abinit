@@ -946,7 +946,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !This is not a very clean exit in case of paral_kgb<0
  if (iexit/=0)then
-   MSG_ERROR_NODUMP("aborting now")
+   message="Stopping now!"
+   MSG_STOP(message)
  end if
 
  DBG_EXIT("COLL")
@@ -1596,6 +1597,75 @@ end subroutine mpi_setup
    ABI_ALLOCATE(isort,(mcount))
    isort=(/(ii,ii=1,mcount)/)
    call sort_dp(mcount,weight,isort,tol6)
+   ncount=mcount;if (dtset%paral_kgb>=0) ncount=min(mcount,10)
+
+!Print output for abipy
+   if (iam_master.and.max_ncpus>0) then
+     write(ount,'(2a)')ch10,"--- !Autoparal"
+     if (optdriver==RUNL_GSTATE) then
+       write(ount,'(a)')'#Autoparal section for GS calculations with paral_kgb'
+     else if (optdriver==RUNL_RESPFN) then
+       write(ount,'(a)')'#Autoparal section for DFPT calculations'
+     else
+      msg='Unsupported optdriver'
+       MSG_ERROR(msg)
+     end if
+     write(ount,'(a)')   'info:'
+     write(ount,'(a,i0)')'    autoparal: ',autoparal
+     write(ount,'(a,i0)')'    paral_kgb: ',dtset%paral_kgb
+     write(ount,'(a,i0)')'    max_ncpus: ',max_ncpus
+     write(ount,'(a,i0)')'    nspinor: ',dtset%nspinor
+     write(ount,'(a,i0)')'    nsppol: ',dtset%nsppol
+     write(ount,'(a,i0)')'    nkpt: ',dtset%nkpt
+     write(ount,'(a,i0)')'    mband: ',mband
+     ! List of configurations.
+     if (mcount>0) then
+       write(ount,'(a)')'configurations:'
+       if (optdriver==RUNL_GSTATE) then
+         do jj=mcount,mcount-ncount+1,-1
+           ii=isort(jj)
+           tot_ncpus = my_distp(7,ii)
+           eff = weight(jj) / tot_ncpus
+           write(ount,'(a,i0)')'    - tot_ncpus: ',tot_ncpus
+           write(ount,'(a,i0)')'      mpi_ncpus: ',tot_ncpus
+           !write(ount,'(a,i0)')'      omp_ncpus: ',omp_ncpus !OMP not supported  (yet)
+           write(ount,'(a,f12.9)')'      efficiency: ',eff
+           !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
+
+           ! list of variables to use.
+           !'npimage','|','npkpt','|','npspinor','|','npfft','|','npband','|',' bandpp ' ,'|','nproc','|','weight','|'
+           write(ount,'(a)'   )'      vars: {'
+           write(ount,'(a,i0,a)')'            npimage: ',my_distp(1,ii),','
+           write(ount,'(a,i0,a)')'            npkpt: ', my_distp(2,ii),','
+           write(ount,'(a,i0,a)')'            npspinor: ',my_distp(3,ii),','
+           write(ount,'(a,i0,a)')'            npfft: ', my_distp(4,ii),','
+           write(ount,'(a,i0,a)')'            npband: ',my_distp(5,ii),','
+           write(ount,'(a,i0,a)')'            bandpp: ',my_distp(6,ii),','
+           write(ount,'(a)')   '            }'
+         end do
+       else if (optdriver==RUNL_RESPFN) then
+         do jj=mcount,mcount-ncount+1,-1
+           ii=isort(jj)
+           tot_ncpus = my_distp(7,ii)
+           eff = weight(jj) / tot_ncpus
+
+           write(ount,'(a,i0)')'    - tot_ncpus: ',tot_ncpus
+           write(ount,'(a,i0)')'      mpi_ncpus: ',tot_ncpus
+           !write(ount,'(a,i0)')'      omp_ncpus: ',omp_ncpus !OMP not supported  (yet)
+           write(ount,'(a,f12.9)')'      efficiency: ',eff
+           !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
+           ! list of variables to use.
+           !'nppert','|','npkpt','|','nproc','|','weight','|',
+           write(ount,'(a)'   )'      vars: {'
+           write(ount,'(a,i0,a)')'             nppert: ', my_distp(1,ii),','
+           write(ount,'(a,i0,a)')'             npkpt: ', my_distp(2,ii),','
+           write(ount,'(a)')   '            }'
+         end do
+       end if
+       write(ount,'(a)')'...'
+       iexit = iexit + 1
+     end if
+   end if
 
 !Print title
    if (iam_master) then
@@ -1645,7 +1715,6 @@ end subroutine mpi_setup
    end if
 
 !Print selected choices
-   ncount=mcount;if (dtset%paral_kgb>=0) ncount=min(mcount,10)
    if (iam_master) then
      do jj=mcount,mcount-ncount+1,-1
        ii=isort(jj)
@@ -1684,7 +1753,7 @@ end subroutine mpi_setup
      npf=1;if (with_fft   ) npf=npf_min
    end if
    nproc1=npc*npk*nps*npf
-   msg=ch10//' >>> Possible (best) choices for then number of bands (nband) are:'
+   msg=ch10//' >>> Possible (best) choices for the number of bands (nband) are:'
    if (with_image.or.with_kpt.or.with_spinor.or.with_fft) msg=trim(msg)//ch10//'     with:'
    write(strg,'(a,i0)') ' npimage=' ,npc;if (with_image)  msg=trim(msg)//trim(strg)
    write(strg,'(a,i0)') ' npkpt='   ,npk;if (with_kpt)    msg=trim(msg)//trim(strg)
@@ -1783,79 +1852,6 @@ end subroutine mpi_setup
        end if
      end if
    end do
- end if
-
-!if (iam_master .and. dtset%paral_kgb<0) then
- if (iam_master.and.max_ncpus>0) then
-   write(ount,'(2a)')ch10,"--- !Autoparal"
-   if (optdriver==RUNL_GSTATE) then
-     write(ount,'(a)')'#Autoparal section for GS calculations with paral_kgb'
-   else if (optdriver==RUNL_RESPFN) then
-     write(ount,'(a)')'#Autoparal section for DFPT calculations'
-   else
-    msg='Unsupported optdriver'
-     MSG_ERROR(msg)
-   end if
-   write(ount,'(a)')   'info:'
-   write(ount,'(a,i0)')'    autoparal: ',autoparal
-   write(ount,'(a,i0)')'    paral_kgb: ',dtset%paral_kgb
-   write(ount,'(a,i0)')'    max_ncpus: ',max_ncpus
-   write(ount,'(a,i0)')'    nspinor: ',dtset%nspinor
-   write(ount,'(a,i0)')'    nsppol: ',dtset%nsppol
-   write(ount,'(a,i0)')'    nkpt: ',dtset%nkpt
-   write(ount,'(a,i0)')'    mband: ',mband
-
-   ! List of configurations.
-   if (mcount>0) then
-     write(ount,'(a)')'configurations:'
-
-     if (optdriver==RUNL_GSTATE) then
-       do jj=mcount,mcount-ncount+1,-1
-         ii=isort(jj)
-         tot_ncpus = my_distp(7,ii)
-         eff = weight(jj) / tot_ncpus
-
-         write(ount,'(a,i0)')'    - tot_ncpus: ',tot_ncpus
-         write(ount,'(a,i0)')'      mpi_ncpus: ',tot_ncpus
-         !write(ount,'(a,i0)')'      omp_ncpus: ',omp_ncpus !OMP not supported  (yet)
-         write(ount,'(a,f12.9)')'      efficiency: ',eff
-         !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
-
-         ! list of variables to use.
-         !'npimage','|','npkpt','|','npspinor','|','npfft','|','npband','|',' bandpp ' ,'|','nproc','|','weight','|'
-         write(ount,'(a)'   )'      vars: {'
-         write(ount,'(a,i0,a)')'            npimage: ',my_distp(1,ii),','
-         write(ount,'(a,i0,a)')'            npkpt: ', my_distp(2,ii),','
-         write(ount,'(a,i0,a)')'            npspinor: ',my_distp(3,ii),','
-         write(ount,'(a,i0,a)')'            npfft: ', my_distp(4,ii),','
-         write(ount,'(a,i0,a)')'            npband: ',my_distp(5,ii),','
-         write(ount,'(a,i0,a)')'            bandpp: ',my_distp(6,ii),','
-         write(ount,'(a)')   '            }'
-       end do
-
-     else if (optdriver==RUNL_RESPFN) then
-       do jj=mcount,mcount-ncount+1,-1
-         ii=isort(jj)
-         tot_ncpus = my_distp(7,ii)
-         eff = weight(jj) / tot_ncpus
-
-         write(ount,'(a,i0)')'    - tot_ncpus: ',tot_ncpus
-         write(ount,'(a,i0)')'      mpi_ncpus: ',tot_ncpus
-         !write(ount,'(a,i0)')'      omp_ncpus: ',omp_ncpus !OMP not supported  (yet)
-         write(ount,'(a,f12.9)')'      efficiency: ',eff
-         !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
-         ! list of variables to use.
-         !'nppert','|','npkpt','|','nproc','|','weight','|',
-         write(ount,'(a)'   )'      vars: {'
-         write(ount,'(a,i0,a)')'             nppert: ', my_distp(1,ii),','
-         write(ount,'(a,i0,a)')'             npkpt: ', my_distp(2,ii),','
-         write(ount,'(a)')   '            }'
-       end do
-
-     end if
-     write(ount,'(a)')'...'
-     iexit = iexit + 1
-   end if
  end if
 
 !Store new process distribution
