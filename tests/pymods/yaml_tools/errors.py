@@ -10,7 +10,7 @@ class ConfigContextError(YAMLTestError):
         spath = '.'.join(path)
         msg = ('Tried to enter a None context in the config tree at {}'
                .format(spath))
-        super(ConfigContextError, self).__init__(self, msg)
+        super(ConfigContextError, self).__init__(msg)
 
 
 class NoYAMLSupportError(YAMLTestError):
@@ -26,7 +26,7 @@ class UnknownParamError(ConfigParserError):
     def __init__(self, cons, param):
         msg = ('Encounterd an unknown parameter name "{}"'
                ' when registering constraint "{}".')
-        super(UnknownParamError, self).__init__(self, msg.format(param, cons))
+        super(UnknownParamError, self).__init__(msg.format(param, cons))
 
 
 ###############################################################################
@@ -45,25 +45,26 @@ class InvalidNodeError(ConfigError):
     def __init__(self, name, value):
         msg = ('The node labeled {} is not a known parameter or constraint and'
                ' have not the form of a specialisation. Value: {}')
-        ConfigError.__init__(self, msg.format(name, value))
+        super(InputFileError, self).__init__(msg.format(name, value))
 
 
 class EmptySetError(ConfigError):
     def __init__(self, obj):
         msg = 'User tried to create an empty set with {}.'
-        ConfigError.__init__(self, msg.format(obj))
+        super(EmptySetError, self).__init__(msg.format(obj))
 
 
 class NotOrderedOverlappingSetError(ConfigError):
     def __init__(self, set1, set2):
         msg = '{} and {} are overlapping but cannot be ordered.'
-        ConfigError.__init__(self, msg.format(set1, set2))
+        super(NotOrderedOverlappingSetError, self).__init__(msg.format(set1,
+                                                                       set2))
 
 
 class IllegalFilterNameError(ConfigError):
     def __init__(self, name):
         msg = '{} is a reserved name, you cannot use it as a filter name.'
-        ConfigError.__init__(self, msg.format(name))
+        super(IllegalFilterNameError, self).__init__(msg.format(name))
 
 
 ###############################################################################
@@ -77,7 +78,7 @@ class NoIteratorDefinedError(InputFileError):
     def __init__(self, doc):
         msg = ('No iterator have been found before the first document {}.'
                .format(doc.obj))
-        super(NoIteratorDefinedError, self).__init__(self, doc.start+1, msg)
+        super(NoIteratorDefinedError, self).__init__(doc.start+1, msg)
 
 
 class NotAvailableTagError(InputFileError):

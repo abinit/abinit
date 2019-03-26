@@ -166,13 +166,13 @@ class TestResult:
 
 class TestDataExtractor:
     def test_default(self):
-        dext = DataExtractor()
+        dext = DataExtractor(True)
         assert dext.ignore
         assert dext.ignoreP
         assert not dext.xml_mode
 
     def test_get_metachar(self):
-        dext = DataExtractor()
+        dext = DataExtractor(True)
         assert dext._get_metachar('-truc') == '-'
         assert dext._get_metachar('+truc') == '+'
         assert dext._get_metachar(' truc') == ' '
@@ -185,14 +185,14 @@ class TestDataExtractor:
         assert dext._get_metachar('Ptruc') == '-'
         assert dext._get_metachar(',truc') == '-'
 
-        dext = DataExtractor(ignore=False)
+        dext = DataExtractor(True, ignore=False)
         assert dext._get_metachar(',truc') == '+'
 
-        dext = DataExtractor(ignoreP=False)
+        dext = DataExtractor(True, ignoreP=False)
         assert dext._get_metachar('Ptruc') == '+'
 
     def test_extract_ignore_minus_meta(self):
-        dext = DataExtractor()
+        dext = DataExtractor(True)
         lines = [
             '- first',
             'P second',
@@ -205,7 +205,7 @@ class TestDataExtractor:
         assert ignored == [(i, line) for i, line in enumerate(lines)]
 
     def test_extract_keep_all_non_minus(self):
-        dext = DataExtractor(ignore=False, ignoreP=False)
+        dext = DataExtractor(True, ignore=False, ignoreP=False)
         lines = [
             '+ first',
             'P second',
@@ -226,7 +226,7 @@ class TestDataExtractor:
 
     def test_extract_require_iterstart(self):
 
-        dext = DataExtractor()
+        dext = DataExtractor(True)
         dext.iterators_state = {'dtset': 1}
         lines = '''\
 ---
@@ -242,7 +242,7 @@ a list of strings:
             _, documents, _ = dext.extract(lines)
 
     def test_extract_find_yaml_doc(self):
-        dext = DataExtractor()
+        dext = DataExtractor(True)
         dext.iterators_state = {'dtset': 1}
         lines = '''\
 --- !IterStart
@@ -266,12 +266,11 @@ a list of strings:
 
         # IterStart documents should not be in the document list
         assert len(documents) == 1
-        assert documents[0]['type'] == 'yaml'
-        assert documents[0]['iterators'] == {'dtset': 1}
-        assert documents[0]['start'] == 6
-        assert documents[0]['end'] == 13
-        assert documents[0]['lines'] == lines[6:]
-        assert documents[0]['obj'] == {
+        assert documents[0].iterators == {'dtset': 1}
+        assert documents[0].start == 6
+        assert documents[0].end == 13
+        assert documents[0].lines == lines[6:]
+        assert documents[0].obj == {
             'a field': 58,
             'another': 78,
             'a list of strings': ['a string', 'two strings', '...']
