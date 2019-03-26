@@ -4,6 +4,8 @@
 '''
 from __future__ import print_function, division, unicode_literals
 
+import warnings
+
 try:
     import yaml
     import numpy  # numpy is also required
@@ -11,6 +13,7 @@ try:
     is_available = True
 
 except ImportError:
+    warnings.warn("Cannot import numpy or yaml package. Use `pip install numpy pyyaml --user` to install the packages in user mode.")
     is_available = False
 
 try:
@@ -18,6 +21,7 @@ try:
     has_pandas = True
 except ImportError:
     has_pandas = False
+    warnings.warn("Cannot import pandas package. Use `pip install pandas --user` to install the package in user mode.")
 
 
 

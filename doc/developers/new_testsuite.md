@@ -1,4 +1,14 @@
-# WIP The new testsuite
+---
+description: Design of the new Yaml-based test suite.
+authors: TC, MG
+---
+
+# Yaml-based test suite: design principles and implementation details
+
+This document discusses the new Yaml-based format used to represent physical results
+in the main output file.
+The connection with the ABINIT test suite and the syntax used to define tolerances, parameters and constraints in Yaml syntax
+is also discussed.
 
 ## Presentation
 
@@ -10,147 +20,317 @@
 
 ### Principle
 
-The goal of this project is to give to ABINIT developers tools to create
-physics aware tests.  The mean to achieve this is a set of Fortran and Python
-tools to output structured data and process it easily.
+The goal of this project is to provide ABINIT developers with reusable tools to implement physics-aware tests. 
+With "physics-aware" we mean tests in which the developer can customize the tolerances and the logic used to 
+compare numerical results thanks to the fact that the new parser
+is aware of the context and of the meaning of the numerical values extracted from the output file.
+The new infrastructure consists of a set of Fortran modules to output 
+structured data in YAML format and Python code to parse the output files and analyze data.
 
 ### Motivations
 
 __Current situation__
 
-In its current state the ABINIT testing system is based on inputs files and
-associated reference output files.  A test consist in comparing the reference
-file with the output file of a fresh run in a pretty linear way, only making
-difference between floating-point numbers and other strings.
+In its current state, the ABINIT test suite is based on input files with the
+corresponding reference output files. 
+Roughly speaking, an automatic test consists in comparing the reference file with the output file 
+in a line-oriented fashion by computing differences between floating-point numbers without any knowledge
+about the meaning and the importance of the numerical values.
+This approach is very rigid and rather limited because it obliges developers
+to use a single (usually large) tolerance to account for possibly large fluctuations 
+in the intermediate results whereas the tolerance criteria should be ideally applied only
+to the final results that are (hopefully) independent of details such as 
+hardware, optimization level and parallelism.
 
-This approach is very strict because it compares every single quantity in the
-main output file and report each time a difference exceed a given tolerance.
-Moreover, the line number (and therefor the number of iterations in every loops
-printing in the output file) have to be exactly the same to allow the
-comparison to end properly and mark the test as succeeded.
+This limitation is clearly seen when comparing the results of iterative algorithms.
+The number of iterations required to converge, indeed, may depend on several factors especially
+when the input parameters are far from convergence or when different parallelization schemes
+or stochastic methods are used. 
+From the point of view of code validation, what really matters is the final converged value 
+plus the time to solution if performance ends up being of concern.
+Unfortunately, any line-by-line comparison algorithm will miserably fail in such conditions
+because it will continue to insist on having the same number of iterations (lines) in the two calculations
+to mark the test as succeeded.
 
-Given the variety of configurations of the test farm and the use of different
-parallelism configurations it may be hard to create a stable test with decent
-tolerances and a lot of current test are really weak because of this
-limitation.
+It is evident that the approach used so far to validate new developments in Abinit is not able 
+to cope with the challenges posed by high-performance computing and that smarter and more 
+flexible approaches are needed to address these limitations.
 
-__Solution concepts__
+__Solution__
 
-The proposal of this project is to allow stricter tests on pertinent
-quantities, ignoring the rest. This can be achieved by creating tests
-specialized for given physical quantities, taking in account there properties
-(Newton's Law, energy conservation, well-known equations...).
+One of the goals of this project is to implement a python-based infrastructure that allows 
+developers to implement more rigorous tests on the portability of important physical quantities 
+while ignoring intermediate results. 
+This goal is achieved by providing a *declarative* interface that allows developers to define
+the logic to be used to compare selected physical quantities.
+We also provide a declarative API to check that the results computed by the ab-initio code 
+satisfies fundamental physical and mathematical rules such as energy conservation, Newton's third law, 
+symmetry properties, etc.
 
+That's not quite as simple as it sounds, especially because one of our goals is to minimize the
+amount of (coding) work required to express such logic.
+There are therefore basic rules and design principles Abinit developers should be aware of 
+in order to take fully advantage of the new infrastructure.
+In what follows, we briefly describe the philosophy employed to implement the YAML-based test suite,
+the syntax used to define tests and the modifications required to extend the framework.
+
+<!--
 Of course all these tests would have to be designed nearly independently for
 every interesting quantities and that is why this project should focus on
 producing reusable tools to create these tests.
-
 These tools would be used to create the tests associated with the more common
 quantities of ground state calculations (components of total energy, stress
 tensor and atomic forces). The test suite would be enriched later with the
 participation of the ABINIT community.
+-->
+
+!!! important
+
+    The new Yaml-based testsuite relies on libraries that are not provided 
+    by the python standard library. 
+    To install these dependencies in *user* mode, use:
 
 
-## Proof of concept implementation
+        pip install numpy pyyaml pandas --user
 
-The output of data should use a machine-readable format, preferably human
-readable but not necessarily.  This format could be YAML which is already used
-in a few situations in ABINIT, JSON (for its great support) or NetCDF (already
-used in Abipy).  Post processing tools may be available like plotting and
-computing facilities based on standard python technologies like NumPy, SciPy,
-Matplotlib and Pandas. Currently the prototype integrate YAML syntax and NumPy
-arrays.
 
-For the Fortran side routines may be available to output given structures of
-data (matrices, scalars, arrays...) along with meaningful metadata helping post
-processing and analysis.
+## Implementation details
 
-A few basic tools have already been implemented to check feasibility.
+The most important physical results are written in the main output file (aka *ab_out*) inside machine-readable 
+[YAML](https://en.wikipedia.org/wiki/YAML) documents. 
+A YAML document starts with three hyphens (---) followed by an (optional) tag beginning with an exclamation mark (e.g. `!ETOT`).
+Three periods (...) signals the end of the document.
+According to this syntax, one can easily write a dictionary storing the different contributions to the total free energy with:
 
-On the Fortran side:
 
-- a module based on C and Fortran code have been written for managing a
-  map-like key-value pair list. Pair list have been chosen over hash table
-  because in the practical case the O(n) cost of finding a key is less
-  problematic than the overhead in memory usage of hash tables because their
-  will never be a lot of elements in the table.  The pair list can dynamically
-  hold either real of integer values. It implements the basic getters and
-  setters and an iterator system to allow looping over the key-value pairs
-  easily in Fortran.
-- a module written in Fortran provides tools to manipulate variable length
-  strings with a file like interface.
-- a module written in Fortran and using the two previous module have been
-  written to easily output YAML into an arbitrary file from Fortran code. This
-  module is supposed to be the lowest level layer of the output system and
-  may be abstracted by higher layers. It provides basic routines for output
-  YAML documents based on a mapping at the root and containing well formated
+```yaml
+--- !ETOT
+label               : Etot
+comment             : Components of total free energy (in Hartree)
+Kinetic energy      :  5.279019930263079807E+00
+Hartree energy      :  8.846303409910728499E-01
+XC energy           : -4.035286123400158687E+00
+Ewald energy        : -1.095155892074578219E+01
+PsPCore             :  1.549159282251551528E-01
+Loc. psp. energy    : -3.356800625695788298E+00
+NL psp energy       :  1.895544586353373973E+00
+Etotal              : -1.012953488400904689E+01
+Band energy         :  1.406569063148472631E+00
+Total energy(eV)    : -2.756386620520307815E+02
+...
+```
+
+Further details about the meaning of tags, labels and their connection with the testing infrastructure
+will be given in the sections below.
+For the time being, it is sufficient to say that we opted for YAML because it is a *human-readable* data serialization language
+already used in the log file to record important events such as WARNINGs, ERRORs and COMMENTs
+(this is indeed the *protocol* employed by AbiPy to monitor the status of Abinit calculations). 
+
+Many programming languages, including python, provide support for reading and writing YAML
+hence it is relatively easy to implement post processing tools based on well-established python libraries 
+for scientific computing such as NumPy, SciPy, Matplotlib and Pandas. 
+Last but not least, writing YAML in Fortran does not represent an insurmountable problem provided
+one keeps the level of complexity of the YAML document at a *reasonable level*.
+Our Fortran implementation, indeed, supports only a subset of the YAML specifications:
+
+* scalars
+* arrays (@Theo: max shape?)
+* tables in CSV format
+
+A more detailed discussion about the Fortran API is given in the XXX section.
+
+!!! important
+
+    YAML is not designed to handle large amount of data therefore it should
+    not be used to represent large arrays for which performance is critical and human-readability 
+    is lost by definition (do you really consider a YAML list with one thousand numbers human-readable?).
+    Following this philosophy, YAML is supposed to be used to print the most important results 
+    in the main output file and should not be considered as a replacement for binary netcdf files 
+    when it comes to storing large data structures with lots of metadata.
+
+    Note also that we do not plan to rewrite entirely the main output file in YAML syntax
+    but we prefer to focus on those physical properties that will be used by the new test suite 
+    to validate new developments.
+    This approach, indeed, will facilitate the migration to the new YAML-based approach as only selected portions
+    of the output file will be ported to the new format thus maintaining the look and the feel relatively 
+    close to the previous *unstructured* format.
+
+Several low-level tools have already been implemented during the prototyping process:
+
+On the Fortran side, we provide:
+
+- a Fortran module for managing dictionaries mapping strings to values. 
+  Internally, the dictionary is implemented in C in terms of a list of key-value pairs.
+  Lists have been chosen over hash tables because, in this particular context, 
+  performance is not critical and the O(n) cost required to locate a key is negligible 
+  given that there will never be a lot of elements in the table. 
+  The pair list can dynamically hold either real or integer values. 
+  It implements the basic getters and setters and an iterator system to allow looping 
+  over the key-value pairs easily in Fortran.
+
+- a Fortran module providing tools to manipulate variable length
+  strings with a file like interface (stream object)
+
+- a Fortran module based on the two previous modules providing the API
+  to easily output YAML documents from Fortran. 
+  This module is supposed to be the lowest level layer of the output system and
+  may be abstracted by higher layers. It provides basic routines to produce
+  YAML documents based on a mapping at the root and containing well formatted
   (as human readable as possible and valid YAML) 1D and 2D arrays of numbers
   (integer or real), key-value mapping (using pair lists), list of key-value
   mapping and scalar fields.  Routines support tags for specifying special data
   structures.
-- a higher level module called m\_neat provide routines for creating specific
-  documents associated with interesting physical properties. Currently routines
+
+- a higher level module called *m_neat* provides Fortran procedures to creat specific
+  documents associated to important physical properties. Currently routines
   for total energy components and ground state general results are implemented.
 
-On the python side:
+<!--
+For the Fortran side routines may be available to output given structures of
+data (matrices, scalars, arrays...) along with meaningful metadata helping post
+processing and analysis.
+-->
 
-- fldiff algorithm have been slightly modified to extract encountered YAML
-  documents from the source and reserve them for later treatment.
-- Tools have been written to make easier the creation of new classes
+As concerns the python implementation:
+
+- The fldiff algorithm has been slightly modified to extract YAML
+  documents from the output file and reserve them for later treatment.
+
+- Tools have been written to facilitate the creation of new python classes
   corresponding to YAML tags for adding new features to the extracted data.
   These tools are very easy to use class decorators.
+
 - These tools have been used to create basic classes for futures tags, among
   other classes that directly convert YAML list of numbers into NumPy arrays.
   These classes may be used as examples for the creation of further tags.
+
 - A parser for test configuration have been added and all facilities to do
   tests are in place.
-- A command line tool testtools.py to allow doing different manual actions (see
-  Test CLI)
 
+- A command line tool `testtools.py` to allow doing different manual actions (see Test CLI)
+
+==TODO==
+Add Pseudo code with examples showing how to write ETOT in Fortran, how to define and register 
+a python YAML object associated to the ETOT tag.
+==END TODO==
+
+The new infrastructure has been designed with extensibility and ease-of-use in mind.
+From the perspective of an Abinit developer, adding support for the Yaml-based approach requires two steps (??):
+
+1. Implement the output of the YAML document in Fortran using the pre-existent API. 
+   Associate a tag and possibly a label to the new document.
+2. Modify the python code in pymods to associate a python object to the Yaml document
+
+An example will help clarify.
+Let's assume we want to implement the output of the `!ETOT` dictionary with the different components 
+of the total free energy.
+In Fortran, we will have to write something like:
+
+```fortran
+use m_neat
+
+call foo()
+call bar()
+```
+
+To connect the new YAML document to the python infrastructure, we have 
+to modify `~pymods/yaml_tools/structures.py` by adding the following lines:
+
+```python
+@yaml_auto_map
+class Etot(object):
+    __yaml_tag = 'ETOT'
+
+    def __init__(self, label='nothing', comment='no comment'):
+        self.label = label
+        self.comment = comment
+
+    @classmethod
+    def from_map(cls, map):
+        new = super(Etot, cls).from_map(map)
+        new.components = {
+            name: value for name, value in new.__dict__.items()
+            if name not in [
+                'Etotal',
+                'label',
+                'comment',
+                'Band energy',
+                'Total energy(eV)'
+            ]
+        }
+        return new
+```
+
+This code registers the object *Etot* in the Pyyaml library and instructs the Yaml parser to instantiate
+this class when a document with the *!ETOT* tag is encountered.
+For further details about the PyYaml API please consult the [official documentation](https://pyyaml.org/wiki/PyYAMLDocumentation).
+      
 
 ## Test specification draft
 
 ### Declaration from ABINIT input file
 
-ABINIT input files for tests already embed information for the test suite in a
-specific TEST\_INFO section at the end of the file. This section is structured
-with a INI like syntax (the syntax define by the config parser module of
-Python). The introduction of YAML based test will be done with two modifications
-to the current test specification:
+In the standard approach, the parameters governing the execution of the test
+are specified in the `TEST_INFO` section located at the end of the file.
+The options are given in the [INI file format](https://en.wikipedia.org/wiki/INI_file).
+The integration of the new YAML-based tests with the pre-existent infrastructure 
+is obtained via two modifications of the current specifications.
+More specifically:
 
-- the *files\_to\_test* option will hold a new optional argument *use_yaml*
-  that will hold one of "yes" (default, use YAML based test), "no" (do not use
-  YAML test) or "only" (use YAML based test but not legacy fldiff algorithm)
-- a new section *[yaml_test]* will optionally be added with two options: *test*
-  whom value is an embedded test specification and *file* which would be a path to
-  the file containing the test specification
+- the *files_to_test* section now accepts the optional argument *use_yaml*. 
+  Possible values are:
+  
+    * "yes" --> activate YAML based test (default)
+    * "no" -->  do not use YAML test
+    * "only" --> use YAML based test but not legacy fldiff algorithm
+
+- a new (optional) section `[yaml_test]` is added with two possible options: 
+
+    * *test* --> whom value is an embedded test specification  (MG this part is not clear)
+    * *file* --> path to the file containing the test specification
 
 ### Test specification syntax
 
-The test specification will also use YAML syntax. It uses three basic concepts:
+==TODO==
+Refactor this part, try to have a smooth introduction to the different concepts 
+in the form of a HOWTO manual. Start with the simplest use case scenario (e.g. how to
+specify tolerances for the ETOT document), present a simple example of yaml file, explain
+the basic concepts then move to more complicated examples e.g. *results_gs*.
+The success of the new approach strongly depends on the easiness of use and this comes from the documentation
+and the explanation provided here.
+==END TODO==
+
+This section explains the syntax used to define the tolerances, the constraints and the parameters
+used by the python code to compare results.
+The configuration file consists of a *single* YAML document organized as a dictionary. 
+Each element of the mapping represents a *constraint* or a *parameter* or a *specialization* where:
 
 - _constraint_ is an actual check of the data
-- _parameter_ is an arbitrary value passed to some constraint and that can
-  modify there behavior
+- _parameter_ is an arbitrary value passed to some constraint and that can modify the behavior
 - _specialization_ is a way to override already defines _constraints_ and
   _parameters_ for a specific node of the data tree (and its children)
 
-The test configuration file consists of a single YAML document structured as a
-mapping. Each element of the mapping can be a constraint, a parameter of a
-specialization. The distinction is made by looking at the list of known
-parameters and constraints. The value of a parameter or a constraint depend on
+
+The distinction is made by looking at the list of known
+parameters and constraints. The value of a parameter or a constraint depends on
 its definition. The value of a specialization is itself a mapping filled with
 parameters, constraints and specialization.
-
 The first level of specialization match the documents label value from tested
 files. The next levels match the different attributes of the document.
+==MG I find this part difficult to understand==
 
-To get the list of constraints and parameters run the program
-`~abinit/tests/testtools.py explore` and type `show *`. You can then type for
-example `show tol_eq` to learn more about a specific constraint or parameter.
 
-Constraints and parameters have several properties that define their behavior.
-Most of the time constraints and parameters and apply to all children level,
+!!! tip
+
+    To get the list of constraints and parameters, run:
+    
+        ~abinit/tests/testtools.py explore
+    
+    and type `show *`. You can then type for
+    example `show tol_eq` to learn more about a specific constraint or parameter.
+
+Constraints and parameters have several properties defining their behavior.
+Most of the time constraints and parameters apply to all children level,
 they are inherited, though some of them apply only at the level where they are
 defined. Constraints can have a list of parameters they use. If these parameters
 are not available at the current level (they are not defined in any higher
@@ -160,6 +340,12 @@ defined, all constraints define in higher level this one excludes are hidden to
 the current level and its children.
 
 Here is an example of a possible file:
+
+<!--
+Let's start with a minimalistic example in which we compare the components of the total free energy
+then we move to more complicated examples that will allows to introduce more advanced features.
+-->
+
 ```yaml
 Etot:  # this defines rules for the document Etot
     tol: 1.0e-3  # this say that for all numerical values encountered in
@@ -195,12 +381,11 @@ results_gs:
 ```
 
 In some cases it is important to define different behavior depending on the
-state of iterations (dtset, image...).  This is possible thanks to a tool
-called __filters__. Filters allow user to add special constraints and
-parameters when treating documents matching a given set of dtset, image etc. To
-define a filter user use the special node _filters_, each child of this node
-is a filter.  The label of the child define the name of the filter and its
-children define the set it matches. See the example below use two filters that
+state of iterations (dtset, image...).  This is possible thanks to the so-called __filters__. 
+Filters allow users to add special constraints and parameters when treating documents matching a given set of dtset, image etc. 
+To define a filter, the developer uses the special node _filters_, each child of this node
+is a filter.  The label of the child defines the name of the filter and its
+children defines the set it matches. The below example uses two filters that
 simply match one specific dataset.
 
 ```yaml
@@ -220,13 +405,13 @@ filters:
         dtset: 2
 ```
 
-A filter can specify all currently known iterators: dtset, timimage, image, and
-time. For each iterator a set of integers can be defined with three methods:
+A filter can specify all currently known iterators: dtset, timimage, image, and time. 
+For each iterator a set of integers can be defined with three methods:
 
 - a single integer value
-- a YAML list of value
-- a mapping with optional members "from" and "to" giving the boundaries (both
-  included) of the integer interval If "from" is omitted the default is 1. If
+- a YAML list of values
+- a mapping with the optional members "from" and "to" specifying the boundaries (both
+  included) of the integer interval. If "from" is omitted, the default is 1. If
   "to" is omitted the default is no upper boundary.
 
 Several filters can be used for the same document if they overlap. However, it
@@ -277,6 +462,7 @@ know how it works. By default, only what is explicitly specified is overridden
 which means that if a constraint is defined at a deeper level on the default
 tree than what is done on the new tree, the original constraints will be kept.
 For example let `f1`  and `f2` two filters such that `f2` is included in `f1`.
+
 ```yaml
 f1:
     results_gs:
@@ -299,8 +485,10 @@ filters:
         dtset: 1
         image: 5
 ```
-When the tester will reach the fifth image of the first dataset the config tree
+
+When the tester will reach the fifth image of the first dataset, the config tree
 used will be the following:
+
 ```yaml
 results_gs:
     tol_abs: 1.0e-6
@@ -311,9 +499,10 @@ results_gs:
             1.0e-4  # this one have been kept
 ```
 
-If this is not the behavior you need, you can you the "hard reset marker".
+If this is not the behavior you need, you can use the "hard reset marker".
 Append `!` to the name of the specialization you want to override to completely
-replace it. Let the `f2` tree be :
+replace it. Let the `f2` tree be:
+
 ```yaml
 f2:
     results_gs:
@@ -321,7 +510,8 @@ f2:
             ceil: 1.0e-7
 ```
 
-and now the resulting tree for fifth image of the first dataset is
+and now the resulting tree for the fifth image of the first dataset is:
+
 ```yaml
 results_gs:
     tol_abs: 1.0e-6
@@ -329,78 +519,96 @@ results_gs:
         ceil: 1.0e-7
 ```
 
-Here again the `explore` shell could be of great help to know what is inherited
-from other trees and what is overridden.
+!!! tip
+
+    Here again the `explore` shell could be of great help to know what is inherited
+    from the other trees and what is overridden.
 
 
-## Test tools
+## Command line interface
 
-A command line tool `~abinit/tests/testtools.py` provide tools to work on
-writing tests.  It provides help if run without argument.  The available sub
-commands are described here.
+The `~abinit/tests/testtools.py` script provides a command line interface to facilitate the creation of new tests. 
+The script uses the syntax:
 
-### Diff
+    ./testtools.py COMMAND [options]
 
-The __diff__ sub-command provide a command line interface to the fldiff.py
-module. It may be useful to compare output and reference file without running
-ABINIT each time like `runtest.py` would do.
+Run the script without arguments to get the list of possible commands and use
 
-It allows the user to provide the same parameters that are passed by the
-testsuite.py when runtest.py is used.
+    ./testtools.py COMMAND --help
 
-Use `~abinit/tests/testtools.py diff --help` for more informations.
+to display the options supported by `COMMAND`.
 
-### Explore
+The available commands are:
 
-This tool provides is helpful to explore a test configuration file. It provides a
-shell like interface where the user can move around the tree of the
-configuration file, seeing what constraints define the test. It also provides
-documentation about constraints and parameters using the show command. Run
-`~abinit/tests/testtools.py explore` to use it.
+Diff
+
+:   Command line interface to the *fldiff.py* module. 
+    It may be useful to compare output and reference files without running ABINIT each time 
+    like *runtests.py* would do.
+    It allows the user to provide the same parameters that are passed by the
+    *testsuite.py* when *runtests.py* is used.
+
+
+Explore
+
+:   This tool allows the user to *explore* a test configuration file. It provides a
+    shell like interface in which the user can move around the tree of the
+    configuration file and print the constraints defined by the test. It also provides
+    documentation about constraints and parameters via the *show* command. 
 
 ## Extending the test suite
 
 ### Entry points
+
 There are three main entry points of growing complexity in this system.
 
-The first is the yaml file configuration intended to all Abinit developers. It
-does not expect any Python knowledges, but only comprehension of the conventions
-for writing a test. Being fully declarative (no logic) it should be quite easy
-to learn from existing examples.
+The first one is the yaml configuration file intended to all Abinit developers. It
+does not require any Python knowledge, only a basic comprehension of the conventions
+used for writing tests. Being fully *declarative* (no logic) it should be quite easy
+to learn its usage from the available examples.
 
-The second is the file *~abinit/tests/pymods/yaml_tests/conf_parser.py*. It
+The second one is the *~abinit/tests/pymods/yaml_tests/conf_parser.py* file. It
 contains declarations of the available constraints and parameters. A basic
-python understanding is required to modify that file. Comments en docstring
-should help to grasp this file.
+python understanding is required in order to modify this file. Comments and doc strings
+should help users to grasp the meaning of this file.
 
 The third is the file *~abinit/tests/pymods/yaml_tests/structures.py*. It
-defines the structures used by YAML parser when reaching a tag (starting with
-!), or in some cases when reaching a given pattern (__undef__ for example). Even
-if the abstraction layer on top of _yaml_ module should help, it is better to
-have a good understanding of more "advanced" python concept like _inheritance_
-_decorators_, _classmethod_...
+defines the structures used by the YAML parser when encountering a tag (starting with !), 
+or in some cases when reaching a given pattern (__undef__ for example). Even
+if the abstraction layer on top of the _yaml_ module should help, it is better to
+have a good understanding of more "advanced" python concepts like _inheritance_, _decorators_, _classmethod_ etc.
 
 ### Code structure
 
 As long as possible, it is better to include any extensions to the existing code
 in these three entry points to keep the system consistent. However, this system
 will eventually prove to be limited in some way. Hence, here is the general
-structure of the system.
+structure of the system. (MG: Please clarify this point)
 
-The whole system consists in three main parts:
-- *~abinit/tests/pymods/fldiff.py* is the interface between the yaml specific
-  tools and the legacy test suite tools. It implements the legacy algorithm and
-  the creation of the final report.
-- *~abinit/tests/pymods/data_extractor.py*,
-  *~abinit/tests/pymods/yaml_tools/__init__.py* and
-  *~abinit/tests/pymods/yaml_tools/structures.py* constitute the Abinit output
-  parser. *data_extractor.py* identify and extract the YAML documents from the
-  source, *__init__.py* provide generic tools base on pyyaml to parse the
-  documents and *structures.py* provide the classes that are used by YAML to
-  handle tags. *~abinit/tests/pymods/yaml_tools/register_tag.py* define the
-  abstraction layer used to simplify the code in *structures.py*. It directly
-  deals with PyYaml black magic.
-- the other files in *~abinit/tests/pymods/yaml_tools* are dedicated to the
+The whole system consists of three main parts:
+
+Fldiff algorithm
+
+:   *~abinit/tests/pymods/fldiff.py* implements the legacy algorithm and the creation of the final report.
+    This module represents the interface between the yaml specific tools and the legacy test suite tools. 
+
+
+Interface with Pyyaml library
+
+:  *~abinit/tests/pymods/data_extractor.py*,
+   *~abinit/tests/pymods/yaml_tools/\_\_init\_\_.py* and
+   *~abinit/tests/pymods/yaml_tools/structures.py* constitute the Abinit output
+   parser. *data_extractor.py* identify and extract the YAML documents from the
+   source, *__init__.py* provide generic tools base on pyyaml to parse the
+   documents and *structures.py* provide the classes that are used by YAML to
+   handle tags. *~abinit/tests/pymods/yaml_tools/register_tag.py* define the
+   abstraction layer used to simplify the code in *structures.py*. It directly
+   deals with PyYaml black magic.
+
+
+Yaml parsers and tools
+
+: the other files in *~abinit/tests/pymods/yaml_tools* are dedicated to the
   testing procedure. *meta_conf_parser.py* provide the tools to read and
   interpret the YAML configuration file, namely __ConfParser__ the main parsing
   class, __ConfTree__ the tree configuration "low-level" interface (only handle
@@ -412,5 +620,42 @@ The whole system consists in three main parts:
   *tester.py* is the main test driver. It browses the data tree and use the
   configuration to run tests on Abinit output. It produces an __Issue__ list that
   will be used by *fldiff.py* to produce the report.
- 
 
+
+## Coding rules
+
+This section discusses the basic rules that should be followed when writing Yaml documents in Fortran.
+In a nutshell:
+
+* no savage usage of write statements!
+* In the majority of the cases, Yaml documents should be opened and closed in the same routine!
+* A document with a tag is considered a standardized document i.e. a document for which there's 
+  an official commitment from the ABINIT community to maintain backward compatibility.
+  Official Yaml documents may be used by third-party software to implement post-processing tools.
+* To be discussed: `crystal%yaml_write(stream, indent=4)`
+
+
+## Further developments
+
+This new Yaml-based infrastructure can be used as building block to implement the 
+high-level logic required by more advanced integration tests such as:
+
+Parametrized tests
+
+: Tests in which multiple parameters are changed either at the level of the input variables 
+  or at the MPI/OpenMP level.
+  Typical example: running calculations with [[useylm]] in [0, 1] or [[paral_kgb]] = 1 runs 
+  with multiple configurations of [[npfft]], [[npband]], [[npkpt]].
+
+Benchmarks
+
+: Tests to monitor the scalability of the code and make sure that serious bottlenecks are not 
+  introduced in trunk/develop when important dimension are increased (e.g. [[chksymbreak]]  > 0 with [[ngkpt]] > 30 **3).
+  Other possible applications: monitor the memory allocated to detect possible regressions.
+
+Interface with AbiPy and Abiflows
+
+: AbiPy has its own set of integration tests but here we mainly focus on the python layer
+  without testing for numerical values. 
+  Still it would be nice to check for numerical reproducibility, especially when it comes to 
+  workflows that are already used in production for high-throughput applications (e.g. DFPT). 

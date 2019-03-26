@@ -25,6 +25,7 @@ from tests.pymods.termcolor import cprint
 ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
 
+
 @contextmanager
 def cd(path):
     """
@@ -106,11 +107,13 @@ def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=Non
             cprint("Executing: %s" % cmd, "yellow")
             ctx.run(cmd, pty=True)
 
+
 @task
 def makemake(ctx):
     """Invoke makemake"""
     with cd(ABINIT_ROOTDIR):
         ctx.run("./config/scripts/makemake", pty=true)
+
 
 
 @task
@@ -120,11 +123,6 @@ def makedeep(ctx, jobs="auto"):
     make(ctk, jobs=jobs, clean=True)
 
 
-@task
-def abilint(ctx):
-    """Invoke abilint"""
-    with cd(ABINIT_ROOTDIR):
-        ctx.run("./config/scripts/abilint . .", pty=True)
 
 @task
 def abichecks(ctx):
@@ -151,26 +149,32 @@ def abichecks(ctx):
 
     return retcode
 
-#@task
-#def robodoc(ctx):
-#    with cd(ABINIT_ROOTDIR):
-#        cmd = "./abisrc.py robodoc"
-#        result = ctx.run(cmd, pty=True)
-#
-#    if result.ok
-#        return 0
-#        return webbrowser.open_new_tab("http://127.0.0.1:8000")
-#    else:
-#        print("robodoc build FAILED")
 
-#@task
-#def mksite(ctx):
-#    """
-#    Build the Abinit documentation by invoking mksite and open the main page in the browser.
-#    """
-#    with cd(ABINIT_ROOTDIR):
-#        ctx.run("./mksite.py serve --dirtyreload", pty=True)
-#        return webbrowser.open_new_tab("http://127.0.0.1:8000")
+@task
+def robodoc(ctx):
+    with cd(ABINIT_ROOTDIR):
+        result = ctx.run("./mkrobodoc.sh", pty=True)
+
+        if result.ok:
+            cprint("ROBODOC BUILD OK", "green")
+            # https://stackoverflow.com/questions/44447469/cannot-open-an-html-file-from-python-in-a-web-browser-notepad-opens-instead
+            html_path = os.path.join(ABINIT_ROOTDIR, "./tmp-robodoc/www/robodoc/masterindex.html")
+            print("Trying to open %s in browser ..." % html_path)
+            return webbrowser.open_new_tab(html_path)
+        else:
+            cprint("ROBODOC BUILD FAILED", "red")
+
+        return result.ok
+
+
+@task
+def mksite(ctx):
+    """
+    Build the Abinit documentation by running the mksite.py script and open the main page in the browser.
+    """
+    with cd(ABINIT_ROOTDIR):
+        ctx.run("./mksite.py serve --dirtyreload", pty=True)
+        return webbrowser.open_new_tab("http://127.0.0.1:8000")
 
 
 #def pulltrunk(ctx):
