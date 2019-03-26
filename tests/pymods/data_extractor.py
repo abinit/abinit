@@ -5,15 +5,9 @@
 '''
 from __future__ import print_function, division, unicode_literals
 import re
-from .yaml_tools import is_available as has_yaml
+from .yaml_tools import Document
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
 from .yaml_tools.errors import NoIteratorDefinedError
-
-if has_yaml:
-    from .yaml_tools import yaml_parse
-else:
-    def yaml_parse(x):
-        pass
 
 doc_start_re = re.compile(r'---( !.*)?\n?$')
 doc_end_re = re.compile(r'\.\.\.')
@@ -24,7 +18,8 @@ class DataExtractor:
         Setup extraction of formated documents and significant lines.
     '''
 
-    def __init__(self, ignore=True, ignoreP=True, xml_mode=False):
+    def __init__(self, use_yaml, ignore=True, ignoreP=True, xml_mode=False):
+        self.use_yaml = use_yaml
         self.ignore = ignore
         self.ignoreP = ignoreP
         self.iterators_state = {}
@@ -64,12 +59,6 @@ class DataExtractor:
             Extract formated documents and significant lines for the source.
         '''
 
-        def parse_doc(doc):
-            if doc['type'] == 'yaml':
-                obj = yaml_parse(''.join(doc['lines']))
-                doc['obj'] = obj
-            return doc
-
         # Reset those states to allow several extract with the same instance
         self.iterators_state = {}
         self.corrupted_docs = []
@@ -79,20 +68,15 @@ class DataExtractor:
         for i, line in enumerate(src_lines):
             if current_doc is not None:
                 # accumulate source lines
-                current_doc['lines'].append(line)
+                current_doc.lines.append(line)
                 if doc_end_re.match(line):  # reached the end of the doc
-                    if not has_yaml:
-                        # ignore the document
-                        pass
-                    else:
-                        current_doc['end'] = i
-                        # parse source
-                        parse_doc(current_doc)
+                    if self.use_yaml:
+                        current_doc.end = i
 
-                        if getattr(current_doc['obj'], '_is_iter_start',
+                        if getattr(current_doc.obj, '_is_iter_start',
                                    False):
                             # special case of IterStart
-                            curr_it = current_doc['obj'].iterator
+                            curr_it = current_doc.obj.iterator
 
                             # Update current iterators state
                             for iterator in self.iterators_state:
@@ -100,21 +84,20 @@ class DataExtractor:
                                    < ITERATOR_RANKS[iterator]:
                                     del self.iterators_state[iterator]
                             self.iterators_state[curr_it] = \
-                                current_doc['obj'].iteration
+                                current_doc.obj.iteration
 
-                        elif getattr(current_doc['obj'], '_is_corrupted_doc',
-                                     False):
+                        elif current_doc.corrupted:
                             # Signal corruption but ignore the document
-                            self.corrupted_docs.append(current_doc['start']+1)
+                            self.corrupted_docs.append(current_doc.start+1)
 
-                        elif getattr(current_doc['obj'], '_is_abinit_message',
+                        elif getattr(current_doc.obj, '_is_abinit_message',
                                      False):
                             # Special case of Warning, Error etc..
                             # store it for later use
                             self.abinit_messages.append(current_doc)
 
-                        elif current_doc['obj'] is not None:
-                            if not current_doc['iterators']:
+                        elif current_doc.obj is not None:
+                            if not current_doc.iterators:
                                 # This is not normal !
                                 raise NoIteratorDefinedError(current_doc)
                             docs.append(current_doc)
@@ -122,15 +105,8 @@ class DataExtractor:
 
             elif self._get_metachar(line) == '-':
                 if doc_start_re.match(line):  # starting a yaml doc
-                    current_doc = {
-                        'type': 'yaml',
-                        # save iterations states
-                        'iterators': self.iterators_state.copy(),
-                        'start': i,
-                        'end': -1,
-                        'lines': [line],
-                        'obj': None
-                    }
+                    current_doc = Document(self.iterators_state.copy(),
+                                           i, [line])
                 else:
                     ignored.append((i, line))
             else:  # significant line not in a doc

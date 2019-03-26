@@ -77,8 +77,7 @@ class Tester(object):
                 except Exception as e:
                     msg = ('Exception while checking {} ({}/{}):\n'
                            '{}: {}').format(cons.name, ref, tested,
-                                            e.__class__.__name__,
-                                            str(e))
+                                            e.__class__.__name__, str(e))
                     self.issues.append(Failure(self.conf, msg))
                 else:
                     if success:
@@ -110,8 +109,8 @@ class Tester(object):
         top_cons = self.conf.get_top_level_constraints()
         for cons in top_cons:
             if top_cons[cons].apply_to('this'):
-                # ref = [doc['obj'] for doc in self.ref]
-                # tested = [doc['obj'] for doc in self.tested]
+                # ref = [doc.obj for doc in self.ref]
+                # tested = [doc.obj for doc in self.tested]
                 # success = top_cons[cons].check(ref, tested, self.conf)
                 # if success:
                 #     msg = '{} ok'.format(cons.name)
@@ -131,8 +130,8 @@ class Tester(object):
             # FIXME Use a non linear matching of documents ?
             # ref_doc['iterators'] could be of some use here
             for ref_doc, tested_doc in zip(self.ref, self.tested):
-                with self.conf.use_filter(ref_doc['iterators']):
-                    self.check_this(ref_doc['obj']['label'], ref_doc['obj'],
-                                    tested_doc['obj'])
+                with self.conf.use_filter(ref_doc.iterators):
+                    self.check_this(ref_doc.obj['label'], ref_doc.obj,
+                                    tested_doc.obj)
 
         return self.issues

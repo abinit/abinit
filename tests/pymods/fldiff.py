@@ -444,7 +444,7 @@ class Differ(object):
                       verbose=self.options['verbose'])
 
     def _diff_lines(self, lines1, lines2):
-        dext = DataExtractor(xml_mode=self.xml_mode,
+        dext = DataExtractor(self.use_yaml, xml_mode=self.xml_mode,
                              ignore=self.options['ignore'],
                              ignoreP=self.options['ignoreP'])
 
@@ -459,25 +459,25 @@ class Differ(object):
         else:
             lines_differences = []
 
-        if self.use_yaml:
-            if doc1_corrupted_documents:
-                doc_differences = [YFailure(
-                    self.yaml_conf,
-                    'Reference has corrupted YAML documents at lines {}.'
-                    .format(doc1_corrupted_documents)
-                )]
-
-            elif doc2_corrupted_documents:
-                doc_differences = [YFailure(
-                    self.yaml_conf,
-                    'Tested file has corrupted YAML documents at lines {}'
-                    .format(doc1_corrupted_documents)
-                )]
-
-            else:
-                doc_differences = self._test_doc(documents1, documents2)
-        else:
+        if not self.use_yaml:
             doc_differences = []
+
+        elif doc1_corrupted_documents:
+            doc_differences = [YFailure(
+                self.yaml_conf,
+                'Reference has corrupted YAML documents at lines ({}).'
+                .format(', '.join(doc1_corrupted_documents))
+            )]
+
+        elif doc2_corrupted_documents:
+            doc_differences = [YFailure(
+                self.yaml_conf,
+                'Tested file has corrupted YAML documents at lines ({})'
+                .format(', '.join(doc2_corrupted_documents))
+            )]
+
+        else:
+            doc_differences = self._test_doc(documents1, documents2)
 
         return lines_differences, doc_differences
 

@@ -13,6 +13,10 @@ class ConfigContextError(YAMLTestError):
         super(ConfigContextError, self).__init__(self, msg)
 
 
+class NoYAMLSupportError(YAMLTestError):
+    pass
+
+
 ###############################################################################
 class ConfigParserError(YAMLTestError):
     pass
@@ -72,8 +76,8 @@ class InputFileError(YAMLTestError):
 class NoIteratorDefinedError(InputFileError):
     def __init__(self, doc):
         msg = ('No iterator have been found before the first document {}.'
-               .format(doc['obj']))
-        super(NoIteratorDefinedError, self).__init__(self, doc['start']+1, msg)
+               .format(doc.obj))
+        super(NoIteratorDefinedError, self).__init__(self, doc.start+1, msg)
 
 
 class NotAvailableTagError(InputFileError):
