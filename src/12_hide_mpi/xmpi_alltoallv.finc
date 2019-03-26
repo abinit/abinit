@@ -36,8 +36,6 @@
 
 subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:)
@@ -87,9 +85,6 @@ end subroutine xmpi_alltoallv_dp2d
 
 subroutine xmpi_alltoallv_int2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
 
-
- implicit none
-
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:,:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:,:)
@@ -132,8 +127,6 @@ end subroutine xmpi_alltoallv_int2d
 !! SOURCE
 
 subroutine xmpi_alltoallv_dp1d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
@@ -186,8 +179,6 @@ end subroutine xmpi_alltoallv_dp1d
 !! SOURCE
 
 subroutine xmpi_alltoallv_dp1d2(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)

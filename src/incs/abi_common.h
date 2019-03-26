@@ -179,9 +179,11 @@
  * Caveat: pointers must use ABI_PTR_FREE_IF
  *
 */
-#define ABI_MALLOC_IFNOT(ARR) if (.not. allocated(ARR)) then NEWLINE ABI_MALLOC(ARR) NEWLINE endif
+#define ABI_MALLOC_IFNOT(ARR, SIZE) if (.not. allocated(ARR)) then NEWLINE ABI_MALLOC(ARR, SIZE) NEWLINE endif
 #define ABI_SFREE(ARR) if (allocated(ARR)) then NEWLINE ABI_FREE(ARR) NEWLINE endif
 #define ABI_SFREE_PTR(PTR) if (associated(PTR)) then NEWLINE ABI_FREE(PTR) NEWLINE endif
+#define ABI_REMALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_MALLOC(ARR, SIZE)
+#define ABI_RECALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_CALLOC(ARR, SIZE)
 
 /* Macros used in debug mode */
 #ifdef DEBUG_MODE
@@ -216,8 +218,10 @@
 #define MSG_BUG(msg)     call msg_hndl(msg,"BUG", "PERS" _FILE_LINE_ARGS_)
 
 #define MSG_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
-#define MSG_ERROR_NOSTOP(msg,ierr) \
+#define MSG_ERROR_NOSTOP(msg, ierr) \
    ierr=ierr+1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_)
+#define MSG_ERROR_NOSTOP_IF(condition, msg, ierr) \
+   if (condition)  then NEWLINE MSG_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
 #define ETSF_CHECK_ERROR(lstat,Error_data)   if (.not. lstat) call abietsf_msg_hndl(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
 #define ETSF_WARN(lstat,Error_data) call abietsf_warn(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)

@@ -36,8 +36,6 @@
 
 subroutine xmpi_ialltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
 
- implicit none
-
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(in) :: xval(:,:)
  real(dp) ABI_ASYNC, intent(inout) :: recvbuf(:,:)
@@ -82,8 +80,6 @@ end subroutine xmpi_ialltoallv_dp2d
 
 subroutine xmpi_ialltoallv_int2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
 
- implicit none
-
 !Arguments-------------------------
  integer ABI_ASYNC, intent(in) :: xval(:,:)
  integer ABI_ASYNC, intent(inout) :: recvbuf(:,:)
@@ -127,8 +123,6 @@ end subroutine xmpi_ialltoallv_int2d
 !! SOURCE
 
 subroutine xmpi_ialltoallv_dp1d2(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(in) :: xval(:)

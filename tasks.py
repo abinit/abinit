@@ -110,7 +110,7 @@ def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=Non
 def makemake(ctx):
     """Invoke makemake"""
     with cd(ABINIT_ROOTDIR):
-        ctx.run("./config/scripts/makemake", pty=true)
+        ctx.run("./config/scripts/makemake", pty=True)
 
 
 @task
