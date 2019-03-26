@@ -412,9 +412,11 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 end subroutine symkpt
 !!***
 
+!----------------------------------------------------------------------
+
 !!****f* ABINIT/symkpt_new
 !! NAME
-!! symkpt
+!! symkpt_new
 !!
 !! FUNCTION
 !! Same routine as above but with an algorithm with better scalling than before

@@ -942,9 +942,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    call xmpi_sum(full_phfrq, comm, ierr)
    call xmpi_sum(full_eigvec, comm, ierr)
 
-#if 1
-   ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
    ABI_MALLOC(wdt, (nomega, 2))
+   ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
+#if 1
    ABI_MALLOC(tweight, (nomega, phdos%nqibz))
    ABI_MALLOC(dtweightde, (nomega, phdos%nqibz))
 
@@ -1022,10 +1022,10 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
      end do ! iq_ibz
    end do ! imode
    call cwtime_report(" accumulate", cpu, wall, gflops)
+   ABI_FREE(tweight)
+   ABI_FREE(dtweightde)
 #else
 
-   ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
-   ABI_MALLOC(wdt, (nomega, 2))
    ABI_MALLOC(energies, (phdos%nomega))
    energies = arth(phdos%omega_min,phdos%omega_step,phdos%nomega)
 
@@ -1092,7 +1092,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    end do ! iq_ibz
    call cwtime_report(" accumulate", cpu, wall, gflops)
    ABI_FREE(energies)
-
 #endif
    ABI_FREE(wdt)
 
@@ -1115,9 +1114,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    ABI_FREE(full_eigvec)
    ABI_FREE(full_phfrq)
    ABI_FREE(tmp_phfrq)
-   ABI_SFREE(tweight)
-   ABI_SFREE(dtweightde)
    call destroy_tetra(tetraq)
+   call htetra_free(htetraq)
  else
 #ifdef HAVE_NETCDF
    MSG_WARNING('The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations')
@@ -1256,7 +1254,7 @@ subroutine phdos_unittests(comm)
  in_qptrlatt(:,1)=[50, 0, 0]
  in_qptrlatt(:,2)=[ 0,50, 0]
  in_qptrlatt(:,3)=[ 0, 0,50]
- dos_qshift(:,1) = [0.5,0.5,0.5]
+ dos_qshift(:,1) =[0.0,0.0,0.5]
 
  amu = 1
  natom = 1
@@ -1336,18 +1334,18 @@ subroutine phdos_unittests(comm)
  dos(:)  = sum(dtweightde,2)
  idos(:) = sum(tweight,2)
  call cwtime_report(" tetra_blochl", cpu, wall, gflops)
- call write_file('parabola_tetra.dat', nw, energies(iw), idos(iw), dos(iw))
+ call write_file('parabola_tetra.dat', nw, energies, idos, dos)
 
  ! Compute DOS using new tetrahedron implementation
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
-   !call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
+   !call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
  call cwtime_report(" htetra_get_onwk", cpu, wall, gflops)
- call write_file('parabola_htetra.dat', nw, energies(iw), idos(iw), dos(iw))
+ call write_file('parabola_htetra.dat', nw, energies, idos, dos)
 
  !
  ! 2. Compute energies for a flat band
@@ -1360,20 +1358,21 @@ subroutine phdos_unittests(comm)
  dos(:)  = sum(dtweightde,2)
  idos(:) = sum(tweight,2)
  call cwtime_report(" tetra_blochl", cpu, wall, gflops)
- call write_file('flat_tetra.dat', nw, energies(iw), idos(iw), dos(iw))
+ call write_file('flat_tetra.dat', nw, energies, idos, dos)
 
  ! Compute DOS using new tetrahedron implementation
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
-   !call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
-   dos(:)  = dos(:)  + wdt(:,1)/nqibz!*wtq_ibz(iqibz)
-   idos(:) = idos(:) + wdt(:,2)/nqibz!*wtq_ibz(iqibz)
+   !call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
+   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
+   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
  call cwtime_report(" htetra_get_onwk", cpu, wall, gflops)
- call write_file('flat_htetra.dat', nw, energies(iw), idos(iw), dos(iw))
+ call write_file('flat_htetra.dat', nw, energies, idos, dos)
 
  ! Free memory
+ ABI_SFREE(energies)
  ABI_SFREE(eigen)
  ABI_SFREE(wdt)
  ABI_SFREE(tweight)
@@ -1381,6 +1380,12 @@ subroutine phdos_unittests(comm)
  ABI_SFREE(wtq_ibz)
  ABI_SFREE(dos)
  ABI_SFREE(idos)
+ ABI_SFREE(qbz)
+ ABI_SFREE(qibz)
+ ABI_SFREE(bz2ibz)
+ call crystal%free()
+ call htetra_free(htetraq)
+ call destroy_tetra(tetraq)
 
  contains
  subroutine write_file(fname,nw,energies,dos,idos)

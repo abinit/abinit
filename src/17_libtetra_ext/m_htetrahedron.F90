@@ -656,9 +656,9 @@ end subroutine htetra_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/get_onetetra_
+!!****f* m_htetrahedron/get_onetetra_new_
 !! NAME
-!! get_onetetra_
+!! get_onetetra_new_
 !!
 !! FUNCTION
 !! Private function to calculate the contributions to the weights due to a single tetrahedron.
