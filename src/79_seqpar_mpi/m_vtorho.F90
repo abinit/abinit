@@ -1263,7 +1263,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
 
 !        ==  allocate paw_dmft%psichi and paw_dmft%eigen_lda
-         call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+         call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,&
+&         dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !        ==  gather crystal structure date into data "cryst_struc"

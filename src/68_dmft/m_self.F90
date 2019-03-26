@@ -1427,7 +1427,8 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
   &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
 !    The factor two is here to compensate for the factor two in OmegaMaxent..
 !  &                       =cmplx(selftemp_re(ifreq),0.0,kind=dp)
-                 write(67,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)),aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+                 write(67,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))&
+                 ,aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                enddo
                write(67,*) 
                !!!!!!!!!! Z renormalization
