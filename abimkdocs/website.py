@@ -253,7 +253,10 @@ class Website(object):
         # Read mkdocs configuration file.
         # TODO: Should read Abinit version from a centralized file.
         with io.open(os.path.join(self.root, "..", "mkdocs.yml"), "rt", encoding="utf-8") as fh:
-            self.mkdocs_config = yaml.load(fh, Loader=yaml.FullLoader)
+            if hasattr(yaml, "FullLoader"):
+                self.mkdocs_config = yaml.load(fh, Loader=yaml.FullLoader)
+            else:
+                self.mkdocs_config = yaml.load(fh)
 
         # Build parser to convert Markdown to HTML.
         # The parser must support the same extensions as those used by mkdocs
