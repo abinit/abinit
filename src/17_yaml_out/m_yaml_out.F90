@@ -388,7 +388,6 @@ module m_yaml_out
     real(kind=dp) :: val
     character(len=*),intent(in) :: label
     character(len=*),intent(in),optional :: tag, real_fmt
-    character(len=30) :: rfmt
     integer,intent(in), optional :: file_d
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
@@ -398,6 +397,7 @@ module m_yaml_out
     integer :: w
     character(len=50) :: tmp_r
     type(stream_string) :: interm
+    character(len=30) :: rfmt
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
@@ -833,19 +833,21 @@ module m_yaml_out
     end if
   end subroutine yaml_add_dictlist
 
-  subroutine yaml_open_tabular(label, tag, file_d, string, stream, newline)
+  subroutine yaml_open_tabular(label, tag, file_d, string, stream, indent, newline)
     character(len=*),intent(in) :: label
     character(len=*),intent(in),optional :: tag
     integer,intent(in),optional :: file_d
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: indent
 
     integer :: n
     type(stream_string) :: interm
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(n, indent, 4)
   
     ASSERT(doclock == 1, "No document is opened yet.")
     
@@ -927,7 +929,7 @@ module m_yaml_out
     call yaml_open_tabular(label, tag=t, stream=interm, newline=nl)
     
     if(n > 4) then
-      call interm%write(repeat(' ', n-4))
+      call interm%write(repeat(' ', n - 4))
     end if
 
     call write_indent(input, interm, n)
