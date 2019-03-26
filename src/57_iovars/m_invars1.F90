@@ -2426,17 +2426,18 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
+   !dtsets(idtset)%plowan_compute=0
    dtsets(idtset)%plowan_bandi=0
    dtsets(idtset)%plowan_bandf=0
-   if(dtsets(idtset)%plowan_compute>0) then
-     dtsets(idtset)%plowan_it(:)=0
-     dtsets(idtset)%plowan_iatom(:)=0
-     dtsets(idtset)%plowan_lcalc(:)=-1
-     dtsets(idtset)%plowan_projcalc(:)=0
-     dtsets(idtset)%plowan_nbl(:)=0
-   end if
+   !if(dtsets(idtset)%plowan_compute>0) then
+   dtsets(idtset)%plowan_it(:)=0
+   dtsets(idtset)%plowan_iatom(:)=0
+   dtsets(idtset)%plowan_lcalc(:)=-1
+   dtsets(idtset)%plowan_projcalc(:)=0
+   dtsets(idtset)%plowan_nbl(:)=0
+   !end if
    dtsets(idtset)%plowan_natom=0
-   dtsets(idtset)%plowan_nt=0
+   dtsets(idtset)%plowan_nt=1
    dtsets(idtset)%plowan_realspace=0
    dtsets(idtset)%pol(:)=zero
    dtsets(idtset)%polcen(:)=zero

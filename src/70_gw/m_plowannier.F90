@@ -49,6 +49,10 @@ MODULE m_plowannier
  public :: compute_oper_ks2wan
  public :: normalization_plowannier
  public :: print_operwan
+ public :: init_operwan_realspace
+ public :: destroy_operwan_realspace
+ public :: zero_operwan_realspace
+ public :: compute_oper_wan2realspace
 !!***
 
 
@@ -773,6 +777,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  type(operwan_type), allocatable :: operwan(:,:,:)
  type(operwan_realspace_type), allocatable :: operwan_realspace(:,:)
+ type(operwan_realspace_type), allocatable :: operocc(:,:)
  complex(dpc), allocatable :: eigenks(:,:,:,:)
  complex(dpc), allocatable :: operks(:,:,:,:)
  complex(dpc), allocatable :: identityks(:,:,:,:)
@@ -1145,80 +1150,74 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
    !compute the occupation in wannier basis and print it
   write(message,*)char(10),&
-&"Print the occupation levels (not normalized) for 1 atom, 1 orbital and for 5 k-points"
+&"Print the occupation levels (not normalized) for 1 atom, 1 orbital"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   ABI_ALLOCATE(densmat,(5,5))
-   densmat=czero
    do ikpt = 1,wan%nkpt
      call compute_oper_ks2wan(wan,eigenks,operwan,ikpt)
-     do im1=1,5
-       do im2=1,5
-         densmat(im1,im2)=densmat(im1,im2)+operwan(ikpt,1,1)%atom(1,1)%matl(im1,im2,1,1,1)*wan%wtk(ikpt)
-       enddo
-     enddo
-!     if (ikpt<=5)then write(message,*)char(10),"For ikpt=",ikpt,"the occupation matrix is :"
-!       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-!       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
-!         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
-!         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
-!       enddo
-!     endif
-   end do
-         write(6,*) "DENSITY MATRIX"
-     do im1=1,5
-         write(6,*) (densmat(im1,im2),im2=1,5)
-     enddo
-!     if (ikpt<=5)then write(message,*)char(10),"For ikpt=",ikpt,"the occupation matrix is :"
-   ABI_DEALLOCATE(densmat)
+   enddo
+   ABI_DATATYPE_ALLOCATE(operocc,(wan%natom_wan,wan%natom_wan))
+   call init_operwan_realspace(wan,operocc)
+   write(message,*)char(10),"The occupation matrix before normalization is :"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   call compute_oper_wan2realspace(wan,operwan,operocc)
+   do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+     write(mat_writing,'(7f20.10)')real(operocc(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+     call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+   enddo
+ 
  endif
 
  !!-------------------------------------------------------------
  !!NORMALIZATION
  !!--------------------------------------------------------------
 
- do isppol = 1,wan%nsppol
-   do iband1 = 1,wan%bandf_wan-wan%bandi_wan+1
-     ibandc = iband1 + wan%bandi_wan - 1
-     do ikpt = 1,wan%nkpt
-       identityks(ikpt,iband1,iband1,isppol) = one
-       write(6,*) "idks", identityks(ikpt,iband1,iband1,isppol) 
+ if(dtset%prtvol>=5) then 
+   do isppol = 1,wan%nsppol
+     do iband1 = 1,wan%bandf_wan-wan%bandi_wan+1
+       ibandc = iband1 + wan%bandi_wan - 1
+       do ikpt = 1,wan%nkpt
+         identityks(ikpt,iband1,iband1,isppol) = one
+!write(6,*) "idks", identityks(ikpt,iband1,iband1,isppol) 
+       end do
      end do
    end do
- end do
- call zero_operwan(wan,operwan)
- do ikpt = 1,wan%nkpt
-   call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
- enddo
- do ikpt = 1,wan%nkpt
-   if (ikpt<=5)then
-     write(message,*)char(10),"For ikpt=",ikpt,"the normalization matrix is before normalization :"
-     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
-       write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
-       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
-     enddo
-   endif
- end do
+   call zero_operwan(wan,operwan)
+   do ikpt = 1,wan%nkpt
+     call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
+   enddo
+   do ikpt = 1,wan%nkpt
+     if (ikpt<=5)then
+       write(message,*)char(10),"For ikpt=",ikpt,"the normalization matrix is before normalization :"
+       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
+         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+       enddo
+     endif
+   end do
+ endif
 
  call normalization_plowannier(wan)
 
- call zero_operwan(wan,operwan)
- do ikpt = 1,wan%nkpt
-   call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
- enddo
- do ikpt = 1,wan%nkpt
-   if (ikpt<=5)then
-     write(message,*)char(10),"For ikpt=",ikpt,"the normalization matrix is after normalization :"
-     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
-       write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
-       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
-     enddo
-   endif
- end do
 
+ if (dtset%prtvol>=5) then
+   call zero_operwan(wan,operwan)
+   do ikpt = 1,wan%nkpt
+     call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
+   enddo
+   do ikpt = 1,wan%nkpt
+     if (ikpt<=5)then
+       write(message,*)char(10),"For ikpt=",ikpt,"the normalization matrix is after normalization :"
+       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
+         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+       enddo
+     endif
+   end do
+ endif
  !! -------------------------------------------------------------
  !! COMPUTATION OF THE OCCUPATION MATRIX AFTER NORMALIZATION
  !! -------------------------------------------------------------
@@ -1227,28 +1226,33 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
  if (dtset%prtvol >= 5) then  
    write(message,*)char(10),&
-     &"Print the occupation levels (normalized) for 1 atom, 1 orbital and for 5 k-points"
+     &"Print the occupation levels (normalized) for 1 atom, 1 orbital"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    call zero_operwan(wan,operwan)
    do ikpt = 1,wan%nkpt
      call compute_oper_ks2wan(wan,eigenks,operwan,ikpt)
-     if (ikpt<=5)then
-       write(message,*)char(10),"For ikpt=",ikpt,"the occupation matrix is :"
-       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
-         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
-         call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
-       enddo
-     endif
-   end do
- ! destroy the operator and the occupation matrix
+   enddo
+   call zero_operwan_realspace(wan,operocc)
+   write(message,*)char(10),"The occupation matrix after normalization is :"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   call compute_oper_wan2realspace(wan,operwan,operocc)
+   do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+     write(mat_writing,'(7f20.10)')real(operocc(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+     call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+   enddo
+
+ ! destroy operators and the occupation matrix
    ABI_DEALLOCATE(eigenks)
    ABI_DEALLOCATE(identityks)
-   call destroy_operwan(wan,operwan) !!Destroy the occupation matrix
+   call destroy_operwan(wan,operwan)
    ABI_DATATYPE_DEALLOCATE(operwan)
+   call destroy_operwan_realspace(wan,operocc)!!Destroy the occupation matrix 
+   ABI_DATATYPE_DEALLOCATE(operocc)
  endif
+
+
 !! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
@@ -1297,7 +1301,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
              write(mat_writing,'(a)') "An eigenvalue has an imaginary part: ikpt, atom, l, m, isppol, value"
              write(mat_writing2,'(i0,i0,i0,i0,i0,E15.6)') ikpt, iatom1, il1, im1, isppol, &
   &                   operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(m1,m1,isppol,1,1)
-             MSG_ERROR(message)
+             
            end if
          end do
        end do
@@ -1313,29 +1317,34 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  !! Transform the Wannier operator in real space (in eV)
  !! 1) allocate operwan_realspace
  !! -------------------------------------------------------------
- ABI_DATATYPE_ALLOCATE(operwan_realspace,(wan%natom_wan,wan%natom_wan))
- do iatom1 = 1,wan%natom_wan
-   do iatom2 = 1,wan%natom_wan
-     n1=size(wan%nposition(iatom1)%pos,1)
-     n2=size(wan%nposition(iatom2)%pos,1)
-     ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position,(n1,n2))
-     do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-       do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-         n1=wan%nbl_atom_wan(iatom1)
-         n2=wan%nbl_atom_wan(iatom2)
-         ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom,(n1,n2))
-         do il1 = 1,wan%nbl_atom_wan(iatom1)
-           do il2 = 1,wan%nbl_atom_wan(iatom2)
-             n1=2*wan%latom_wan(iatom1)%lcalc(il1)+1
-             n2=2*wan%latom_wan(iatom2)%lcalc(il2)+1
- ABI_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl,(n1,n2,wan%nsppol,1,1))
-             operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl = zero
-           end do
-         end do
-       end do
-     end do
-   end do
- end do
+if (dtset%plowan_realspace == 1) then
+  ABI_DATATYPE_ALLOCATE(operwan_realspace,(wan%natom_wan,wan%natom_wan))
+  call init_operwan_realspace(wan,operwan_realspace)
+endif
+
+! ABI_DATATYPE_ALLOCATE(operwan_realspace,(wan%natom_wan,wan%natom_wan))
+! do iatom1 = 1,wan%natom_wan
+!   do iatom2 = 1,wan%natom_wan
+!     n1=size(wan%nposition(iatom1)%pos,1)
+!     n2=size(wan%nposition(iatom2)%pos,1)
+!     ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position,(n1,n2))
+!     do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+!       do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+!         n1=wan%nbl_atom_wan(iatom1)
+!         n2=wan%nbl_atom_wan(iatom2)
+!         ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom,(n1,n2))
+!         do il1 = 1,wan%nbl_atom_wan(iatom1)
+!           do il2 = 1,wan%nbl_atom_wan(iatom2)
+!             n1=2*wan%latom_wan(iatom1)%lcalc(il1)+1
+!             n2=2*wan%latom_wan(iatom2)%lcalc(il2)+1
+! ABI_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl,(n1,n2,wan%nsppol,1,1))
+!             operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl = zero
+!           end do
+!         end do
+!       end do
+!     end do
+!   end do
+! end do
 
  !! -------------------------------------------------------------
  !! Transform the Wannier operator in real space (in eV)
@@ -1591,30 +1600,30 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      end do
    end do
 
- end if ! plowan_realspace==2 (Wannier interpolation)
+ ! plowan_realspace==2 (Wannier interpolation)
 
  !! -------------------------------------------------------------
  !! End Transform the Wannier operator in real space (in eV)
  !! n) deallocate operwan_realspace
  !! -------------------------------------------------------------
- do iatom1 = 1,wan%natom_wan
-   do iatom2 = 1,wan%natom_wan
-     do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-       do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-         do il1 = 1,wan%nbl_atom_wan(iatom1)
-           do il2 = 1,wan%nbl_atom_wan(iatom2)
-             ABI_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl)
+   do iatom1 = 1,wan%natom_wan
+     do iatom2 = 1,wan%natom_wan
+       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+         do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+           do il1 = 1,wan%nbl_atom_wan(iatom1)
+             do il2 = 1,wan%nbl_atom_wan(iatom2)
+               ABI_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl)
+             end do
            end do
+           ABI_DATATYPE_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom)
          end do
-         ABI_DATATYPE_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom)
        end do
+       ABI_DATATYPE_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position)
      end do
-     ABI_DATATYPE_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position)
    end do
- end do
- ABI_DATATYPE_DEALLOCATE(operwan_realspace)
-
-
+   ABI_DATATYPE_DEALLOCATE(operwan_realspace)
+ end if
+ 
  ! ----------------------------------------------------------------------------------------
  ! Here each block of the hamiltonian matrix in Wannier basis is diagonalized separately
  ! ----------------------------------------------------------------------------------------
@@ -3260,6 +3269,230 @@ end do
   close(unt)
 
 end subroutine print_operwan
+
+
+
+!!****f* m_plowannier/init_operwan_realspace
+!! NAME
+!!  init_operwan_realspace
+!!
+!! FUNCTION
+!!  Initialize an operwan_realspace type variable
+!!
+!! INPUTS
+!!  wan, operwan_realspace
+!!
+!! OUTPUT
+!! operwan_realspace
+!!
+!! PARENTS
+!! m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine init_operwan_realspace(wan,operwan_realspace)
+
+!Arguments----------------------------------
+  type(operwan_realspace_type),intent(inout) :: operwan_realspace(:,:)
+  type(plowannier_type), intent(in) :: wan
+
+!Local variables----------------------------
+  integer :: iatom1,iatom2,n1,n2,pos1,pos2,il1,il2
+ 
+
+  
+  do iatom1 = 1,wan%natom_wan
+    do iatom2 = 1,wan%natom_wan
+      n1=size(wan%nposition(iatom1)%pos,1)
+      n2=size(wan%nposition(iatom2)%pos,1)
+      ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position,(n1,n2))
+      do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+        do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+          n1=wan%nbl_atom_wan(iatom1)
+          n2=wan%nbl_atom_wan(iatom2)
+          ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom,(n1,n2))
+          do il1 = 1,wan%nbl_atom_wan(iatom1)
+            do il2 = 1,wan%nbl_atom_wan(iatom2)
+              n1=2*wan%latom_wan(iatom1)%lcalc(il1)+1
+              n2=2*wan%latom_wan(iatom2)%lcalc(il2)+1
+              ABI_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl,(n1,n2,wan%nsppol,1,1))
+              operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl = czero
+            end do
+         end do
+       end do
+     end do
+    ! write(6,*)"taille", iatom1,iatom2,size(operwan_realspace(iatom1,iatom2)%position,1),size(operwan_realspace(iatom1,iatom2)%position,2)
+   end do
+ end do
+
+end subroutine init_operwan_realspace
+
+!!****f* m_plowannier/destroy_operwan_realspace
+!! NAME
+!!  destroy_operwan_realspace
+!!
+!! FUNCTION
+!!  Destroy an operwan_realspace type variable
+!!
+!! INPUTS
+!!  wan, operwan_realspace
+!!
+!! OUTPUT
+!! operwan_realspace
+!!
+!! PARENTS
+!! m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine destroy_operwan_realspace(wan,operwan_realspace)
+
+!Arguments----------------------------------
+  type(operwan_realspace_type),allocatable,intent(inout) :: operwan_realspace(:,:)
+  type(plowannier_type), intent(in) :: wan
+
+!Local variables----------------------------
+  integer :: iatom1,iatom2,pos1,pos2,il1,il2
+
+
+ do iatom1 = 1,wan%natom_wan
+   do iatom2 = 1,wan%natom_wan
+     do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+       do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+         do il1 = 1,wan%nbl_atom_wan(iatom1)
+           do il2 = 1,wan%nbl_atom_wan(iatom2)
+            ABI_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl)
+           end do
+         end do
+         ABI_DATATYPE_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom)
+       end do
+     end do
+     ABI_DATATYPE_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position)
+   end do
+ end do
+ 
+
+end subroutine destroy_operwan_realspace
+
+
+
+!!****f* m_plowannier/zero_operwan_realspace
+!! NAME
+!!  zero_operwan_realspace
+!!
+!! FUNCTION
+!!  Set an operwan_realspace to zero
+!!
+!! INPUTS
+!!  wan, operwan_realspace
+!!
+!! OUTPUT
+!! operwan_realspace
+!!
+!! PARENTS
+!! m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine zero_operwan_realspace(wan,operwan_realspace)
+
+!Arguments----------------------------------
+  type(operwan_realspace_type),allocatable,intent(inout) :: operwan_realspace(:,:)
+  type(plowannier_type), intent(in) :: wan
+
+!Local variables----------------------------
+  integer :: isppol,iatom1,iatom2,pos1,pos2,il1,il2,im1,im2
+
+
+  do isppol = 1,wan%nsppol
+    do iatom1 = 1,wan%natom_wan
+      do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+        do il1 = 1,wan%nbl_atom_wan(iatom1)
+           do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+             do iatom2 = 1,wan%natom_wan
+               do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+                 do il2 = 1,wan%nbl_atom_wan(iatom2)
+                   do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+                     operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)=czero
+                   enddo
+                 enddo
+               enddo
+             enddo
+           enddo
+         enddo
+       enddo
+     enddo
+   enddo
+end subroutine zero_operwan_realspace
+
+
+
+
+
+!!****f* m_plowannier/compute_oper_wan2realspace
+!! NAME
+!!  compute_operwan_wan2realspace
+!!
+!! FUNCTION
+!! Compute an operator from WannierK space to real space
+!!
+!! INPUTS
+!!  wan,operwan, operwan_realspace
+!!
+!! OUTPUT
+!! operwan_realspace
+!!
+!! PARENTS
+!! m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine compute_oper_wan2realspace(wan,operwan,operwan_realspace)
+
+!Arguments----------------------------------
+  type(operwan_realspace_type),intent(inout) :: operwan_realspace(:,:)
+  type(operwan_type),intent(in) :: operwan(:,:,:) 
+  type(plowannier_type), intent(in) :: wan
+  
+
+!Local variables----------------------------
+  integer :: isppol,iatom1,pos1,il1,im1,iatom2,pos2,il2,im2,ikpt
+  character(len=500) :: mat_writing
+
+  do isppol = 1,wan%nsppol
+     do iatom1 = 1,wan%natom_wan
+       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+         do il1 = 1,wan%nbl_atom_wan(iatom1)
+           do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+             do iatom2 = 1,wan%natom_wan
+               do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+                 do il2 = 1,wan%nbl_atom_wan(iatom2)
+                   do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+                     !sum over ikpt
+                     do ikpt = 1,wan%nkpt
+                       operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1) =&
+                         operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
+                         + real(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
+                         * wan%wtk(ikpt) * exp( cmplx(0.0,1.0) * two_pi * ( &
+                         wan%kpt(1,ikpt) * ( wan%nposition(iatom1)%pos(pos1,1) - wan%nposition(iatom2)%pos(pos2,1) )+&
+                         wan%kpt(2,ikpt) * ( wan%nposition(iatom1)%pos(pos1,2) - wan%nposition(iatom2)%pos(pos2,2) )+&
+                         wan%kpt(3,ikpt) * ( wan%nposition(iatom1)%pos(pos1,3) - wan%nposition(iatom2)%pos(pos2,3)))))
+                     end do
+                     !end of the sum
+                   end do
+                 end do
+               end do
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+ end subroutine compute_oper_wan2realspace
 
 END MODULE m_plowannier
 !!***

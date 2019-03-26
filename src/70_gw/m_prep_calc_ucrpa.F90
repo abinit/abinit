@@ -59,7 +59,7 @@ MODULE m_prep_calc_ucrpa
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_failed
  use m_read_plowannier, only : read_plowannier
- use m_plowannier, only : plowannier_type,get_plowannier
+ use m_plowannier, only : plowannier_type
 
  implicit none
 
@@ -272,16 +272,13 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  dumint=0
  luwindow=.true.
 ! write(6,*) "cc",allocated(coeffW_BZ)
- if (plowan_compute>=10) then
-   call get_plowannier(wan)
- else
-   call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
-     & nspinor,nsppol,pawang,prtvol,dumint)
-   if(lcor/=lpawu) then
-     msg = "lcor and lpawu differ in prep_calc_ucrpa"
-     MSG_ERROR(msg)
-   endif
+ call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
+   & nspinor,nsppol,pawang,prtvol,dumint)
+ if(lcor/=lpawu) then
+   msg = "lcor and lpawu differ in prep_calc_ucrpa"
+   MSG_ERROR(msg)
  endif
+
 
  ! === End of read Wannier function coefficients for Ucrpa
 
