@@ -233,7 +233,7 @@ definitively offers more guarantees concerning the convergence and the timing.
 > You could check that the convergence is not changed when the [[npfft]]
 value is modified.  
 
-## 4 Even more sophisticated: *BAND*s *P*er *P*rocess (bandpp)
+## 4 Even more sophisticated: BANDs Per Process (bandpp)
   
 We have seen in the previous section that the best convergence is obtained
 when the size of the block is the largest. This size was exactly equal to the
@@ -241,7 +241,7 @@ when the size of the block is the largest. This size was exactly equal to the
 the number of MPI processes.  
 
 *Is it possible to do better?*  
-The answer is *yes*! The input variable named [[bandpp]] (*BAND*s *P*er *P*rocess)
+The answer is *yes*! The input variable named [[bandpp]] (BANDs Per Process)
 enables an increasing of the block size without changing the number of processes
 dedicated to bands.  
 
@@ -331,13 +331,14 @@ In so-called *many-core* architecture CPU cores can be numerous on the same node
 You could continue to use them as if they were not sharing the memory (using MPI only)
 but this is not the most efficient way to take benefit from the computer.  
 The best practice is to used *hybrid* parallelism, mixing distributed memory parallelism
-(MPI, between nodes) and shared memory parallelism (*openMP*, inside a node). As you will
+(MPI, between nodes) and shared memory parallelism ( *openMP*, inside a node). As you will
 see, this will also have consequences on the performance of the iterative diagonalization
 algorithm (LOBPCG).  
 Let's try!  
 
 We are going to run ABINIT using 2 threads. Copy the `tgspw_04.files` and `tgspw_04.in`
-files run ABINIT using 54 MPI processes (note: `54MPI x 2threads = 108 CPU cores`).  
+files and run ABINIT using 54 MPI processes and 2 *openMP* threads (by setting `OMP_NUM_THREADS=2` in your environment).  
+Note: `54MPI x 2threads = 108 CPU cores`.  
 <!--- ADDON3 --->
 
 > **Important note**:  
