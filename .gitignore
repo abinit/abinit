@@ -298,7 +298,7 @@ scripts/*/*/dist
 src/tags
 build2-debug-s
 .prev_run.pickle
-_project.pickle
+_project*.pickle
 buildbot.ac
 tests/Analysis*
 tests/report.log
