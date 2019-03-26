@@ -780,7 +780,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,useylmgr1,kg_k, &
    & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
 
@@ -1115,7 +1115,7 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
  real(dp),allocatable :: vhart1dqdq(:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),vlocal1dqdq(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vpsp1(:),vpsp1dqdq(:)
- real(dp),allocatable :: dum_ylmgr1_k(:,:,:),part_ylmgr1_k(:,:,:)
+ real(dp),allocatable :: dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
  
 ! *************************************************************************
@@ -1242,8 +1242,8 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
 
 !Specific allocations
  ABI_ALLOCATE(cj_h1vstrain_ci,(2,nstrpert,nband_k,nband_k))
- ABI_ALLOCATE(part_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
- part_ylmgr1_k(:,:,:)=ylmgr_k(:,1:3+6*((ipert-dtset%natom)/10),:)
+ ABI_ALLOCATE(part_ylmgr_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3+6*((ipert-dtset%natom)/10),:)
 
 !LOOP OVER STRAIN PERTURBATIONS
  do istrpert=1,nstrpert
@@ -1270,7 +1270,7 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
    kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
-   npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr1_k,&                    ! In
+   npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&                    ! In
    dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
 
    !LOOP OVER KET BANDS
@@ -1438,7 +1438,7 @@ c0_VefielddQ_c1strain_bks=zero
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
    kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
-   npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr1_k,&                    ! In
+   npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&                    ! In
    dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
 
    !LOOP OVER BANDS
@@ -1504,7 +1504,7 @@ c0_VefielddQ_c1strain_bks=zero
  ABI_DEALLOCATE(gv1c)
  ABI_DEALLOCATE(vlocal1)
  !ABI_DEALLOCATE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
- ABI_DEALLOCATE(part_ylmgr1_k)
+ ABI_DEALLOCATE(part_ylmgr_k)
 
 !--------------------------------------------------------------------------------------
 !Other three therms
@@ -1691,7 +1691,7 @@ c0_VefielddQ_c1strain_bks=zero
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k,    &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,useylmgr1,kg_k, &
    & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS
@@ -1999,7 +1999,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  real(dp),allocatable :: gh1dqc(:,:),gvloc1dqc(:,:),gvnl1dqc(:,:),gv1c(:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),vlocal1dq(:,:,:,:), dum_vpsp(:)
- real(dp),allocatable :: vpsp1(:),vpsp1dq(:), dum_ylmgr1_k(:,:,:)
+ real(dp),allocatable :: vpsp1(:),vpsp1dq(:), dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
 
@@ -2166,7 +2166,10 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !--------------------------------------------------------------------------------------
 
 !Specific allocations
+ ipert=dtset%natom+1
  ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_ALLOCATE(part_ylmgr_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+ part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3+6*((ipert-dtset%natom)/10),:)
 
 !Specific definitions
  vlocal1=zero
@@ -2187,7 +2190,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
    kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
-   npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,ylmgr_k,&                          ! In
+   npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&                    ! In
    dkinpw,nkpg,nkpg,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
 
    !LOOP OVER BANDS
@@ -2206,10 +2209,6 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
        call getgh1c(berryopt,cg1_jatdis,dum_cwaveprj,gv1c,dum_grad_berry,&
   &    dum_gs1,gs_hamkq,dum_gvnl1,idir,ipert,dum_lambda,mpi_enreg,optlocal,&
   &    optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
-
-       !tmp
-       call wfk_read_bks(wfk_t_atdis(jatpert), iband, indkpt1(ikpt), &
-     & isppol, xmpio_single, cg_bks=cg1_jatdis)
 
        !LOOP OVER BRA ATOMIC DISPLACEMENT PERTURBATION
        do iatpert=1,natpert
@@ -2347,8 +2346,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,jdir,jpert,q1grad(2,iq1grad), &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
-   & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,useylmgr1,kg_k, &
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS
      do iband=1,nband_k
@@ -2406,6 +2405,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  ABI_DEALLOCATE(vlocal1dq)
  ABI_DEALLOCATE(dum_vpsp)
  ABI_DEALLOCATE(dum_vlocal)
+ ABI_DEALLOCATE(part_ylmgr_k)
 
 !--------------------------------------------------------------------------------------
 ! Acumulates all the wf dependent terms of the quadrupole tensor
