@@ -227,7 +227,7 @@ type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
 integer :: irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: nloop,nshell,ntime,option,comm, mxhist 
+integer :: nloop,nshell,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request,unit_out
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
@@ -319,7 +319,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  comm=scfcv_args%mpi_enreg%comm_cell
  me=xmpi_comm_rank(comm)
 
- mxhist=zero 
 
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
@@ -331,7 +330,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    end if
    call abihist_bcast(hist_prev,master,comm)
 
-   mxhist = hist_prev%mxhist ! Wirte number of MD-steps into mxhist  
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
@@ -384,12 +382,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  if(specs%nhist/=-1)then   
   nhisttot = specs%nhist! We don't need to store all the history
  endif 
- !MS if for less than three MD steps to restart from single snapshot .nc file
- if(mxhist > 0 .and. mxhist  < 3)then
-  nhisttot = mxhist ! Less than three MD-Steps
- elseif( mxhist == 0)then  
-  nhisttot = 1 
- end if
 
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
@@ -617,11 +609,11 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
            INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
              if(file_opened .eqv. .TRUE.)then
-               write(unit_out,'(I7)',advance='no') itime !If wanted Write cycle to anharmonic_energy_contribution file
+               write(unit_out,'(I7)',advance='no') itime  !Write cycle to anharmonic_energy_contribution file
              endif
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
-               xred(:,:) = hist%xred(:,:,hist%mxhist) ! Fill xred with new ordering
+               xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
              end if 
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
