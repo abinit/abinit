@@ -68,8 +68,6 @@ contains  !=====================================================
 
 subroutine appdig(integ,string,strinn)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: integ
@@ -81,18 +79,18 @@ subroutine appdig(integ,string,strinn)
  integer :: i,length,ndig
  character(len=2) :: ncha
  character(len=8) :: form
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
-!
-!Check that integer is nonnegative
+
+ ! Check that integer is nonnegative
  !if (integ<0) then
  !  write(msg,'(a,i0,a)') &
  !  'Input integer =',integ,' must not be <0. Argument integ was input as negative.'
  !  MSG_BUG(msg)
  !end if
 
-!Fill output string initially with blanks to end of dimensioned length
+ ! Fill output string initially with blanks to end of dimensioned length
  length=len(strinn)
  do i=1,length
    strinn(i:i)=' '

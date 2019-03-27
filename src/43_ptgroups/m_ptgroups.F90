@@ -538,7 +538,7 @@ subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol)
    do icls=1,Ptg%nclass
      sidx = Ptg%class_ids(1,icls)
      trace = Row%trace(sidx)
-     if (ABS(AIMAG(trace)) > 10**(-6)) then
+     if (ABS(AIMAG(trace)) > tol6) then
         write(std_out,"('|',(2f5.2))",advance="no")trace
       else
         write(std_out,"('|',(f10.2))",advance="no")REAL(trace)

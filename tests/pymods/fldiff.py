@@ -159,8 +159,8 @@ class MetaCharDifference(LineDifference):
         self.metas = (m1, m2)
 
     def __repr__(self):
-        return ('At line {} (in file 1), line {} (in file 2), the leading'
-                ' characters where differents: {} and {}.\n').format(
+        return ('At line {} (in file 1), line {} (in file 2), different'
+                ' leading characters: {} and {}.\n').format(
                     *(self.lines + self.metas))
 
 

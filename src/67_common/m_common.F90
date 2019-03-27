@@ -163,8 +163,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  vxcavg,wtk,xred,conv_retcode,&
 &  electronpositron, fock) ! optional arguments)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,initGS,iscf,istep,istep_fock_outer,istep_mix
@@ -190,7 +188,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !scalars
  integer,parameter :: master=0
  integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank 
+ integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank
  integer :: nband_index,nband_k,nnsclohf
  integer :: openexit,option,tmagnet,usefock
 #if defined DEV_YP_VDWXC
@@ -993,7 +991,6 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
  use m_geometry,   only : mkrdim, metric
  use m_kg,         only : getcut
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1011,7 +1008,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,ikpt,isppol
+ integer :: ikpt,isppol
  real(dp) :: boxcut,boxcutc
  character(len=500) :: message
 !arrays
@@ -1029,9 +1026,9 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
  if(dtset%nqpt>1.or.dtset%nqpt<0) then
    write(message,'(a,i0,5a)')&
-&   'nqpt =',dtset%nqpt,' is not allowed',ch10,&
-&   '(only 0 or 1 are allowed).',ch10,&
-&   'Action: correct your input file.'
+   'nqpt =',dtset%nqpt,' is not allowed',ch10,&
+   '(only 0 or 1 are allowed).',ch10,&
+   'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1142,7 +1139,6 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 &  nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
 
  use m_io_tools,  only : open_file
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1438,8 +1434,6 @@ end subroutine prteigrs
 
 subroutine prtene(dtset,energies,iout,usepaw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,usepaw
@@ -1513,7 +1507,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
 !XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
-!      At present, there is still a problem with the variational formulation for the Fock term with PAW. 
+!      At present, there is still a problem with the variational formulation for the Fock term with PAW.
 !      So, for the time being, keep it inside.
        if(usepaw==1)exc_semilocal=exc_semilocal+energies%e_fock
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
@@ -1818,8 +1812,6 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  use defs_datatypes, only : pspheader_type
  use m_pspheads,     only : inpspheads, pspheads_comm
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(out) :: lenstr, ndtset
@@ -1834,7 +1826,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
 !Local variables-------------------------------
 !scalars
- integer :: jdtset,ipsp,ios, me, ndtset_alloc, nprocs
+ integer :: ipsp,ios, me, ndtset_alloc, nprocs
  integer :: istatr,istatshft, papiopt, npsp, ii, idtset, msym, usepaw
  character(len=fnlen) :: filpsp
  character(len=500) :: msg
@@ -1852,7 +1844,6 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  ! Read the file, stringify it and return the number of datasets.
  call parsefile(path, lenstr, ndtset, string, comm)
 
- !subroutine ab7_invars_load(dtsetsId, string, lenstr, ndtset, with_psp, with_mem, pspfilnam)
  ndtset_alloc = ndtset; if (ndtset == 0) ndtset_alloc=1
  ABI_DATATYPE_ALLOCATE(dtsets, (0:ndtset_alloc))
 
@@ -1860,7 +1851,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
  ! Continue to analyze the input string, get upper dimensions, and allocate the remaining arrays.
  call invars0(dtsets, istatr, istatshft, lenstr, msym, mx%natom, mx%nimage, mx%ntypat, &
-              ndtset, ndtset_alloc, npsp, papiopt, timopt, string)
+              ndtset, ndtset_alloc, npsp, papiopt, timopt, string, comm)
 
  ! Enable PAPI timers
  call time_set_papiopt(papiopt)
@@ -1888,26 +1879,26 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  pspheads(:)%usewvl = dtsets(1)%usewvl
  if (me == 0) then
     !if (.not. present(pspfilnam)) then
-       ! Read the name of the psp file
-       ABI_MALLOC(pspfilnam_,(npsp))
-       do ipsp=1,npsp
-         write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
-         read (std_in, '(a)' , iostat=ios ) filpsp
-         ! It might be that a file name is missing
-         if (ios/=0) then
-           write(msg, '(7a)' )&
-           'There are not enough names of pseudopotentials',ch10,&
-           'provided in the files file.',ch10,&
-           'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
-           'if they are correct, complete your files file.'
-           MSG_ERROR(msg)
-         end if
-         pspfilnam_(ipsp) = trim(filpsp)
-         write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
-       end do ! ipsp=1,npsp
+    ! Read the name of the psp file
+    ABI_MALLOC(pspfilnam_,(npsp))
+    do ipsp=1,npsp
+      write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
+      read (std_in, '(a)' , iostat=ios ) filpsp
+      ! It might be that a file name is missing
+      if (ios/=0) then
+        write(msg, '(7a)' )&
+        'There are not enough names of pseudopotentials',ch10,&
+        'provided in the files file.',ch10,&
+        'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
+        'if they are correct, complete your files file.'
+        MSG_ERROR(msg)
+      end if
+      pspfilnam_(ipsp) = trim(filpsp)
+      write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
+    end do ! ipsp=1,npsp
 
-       call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
-       ABI_FREE(pspfilnam_)
+    call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
+    ABI_FREE(pspfilnam_)
     !else
     !   call inpspheads(pspfilnam, npsp, pspheads, ecut_tmp)
     !end if
@@ -1948,7 +1939,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
  ! Get MAX dimension over datasets
  call invars1m(dmatpuflag, dtsets, ab_out, lenstr, mband_upper_, mx,&
-               msym, ndtset, ndtset_alloc, string, npsp, zionpsp)
+               msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
  ABI_FREE(zionpsp)
  call timab(42,2,tsec)
@@ -1967,7 +1958,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  end if
 
  ! Call the main input routine.
- call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
+ call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string, comm)
 
  call macroin2(dtsets, ndtset_alloc)
 

@@ -188,6 +188,9 @@ contains
    write(logunt,'(a,t60,a,t90,4(1x,a12))')&
       '(Data in KB) Routine','Array name    ','Array size','Total Memory'
 
+ case(3)
+   write(std_out,'(a20,a10,a10,a20,a)') 'memorytracer:', 'total [Mb]', 'now [Mb]', 'file',':line'
+
  case default
    _ABORT("invalid abimem_level")
  end select
@@ -396,6 +399,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, func, line)
  real(dp) :: now
  logical :: do_log
  character(len=500) :: msg
+ character(len=10)  :: i_char
 ! *************************************************************************
 
  ! Handle allocate/deallocate failures
@@ -501,6 +505,13 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, func, line)
      !to be used for inspecting a variable which is not deallocated
      write(logunt,'(a,t60,a,1x,2(i0,1x),2(a,1x),2(i0,1x))')&
        trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), trim(func), line, memtot_abi%memory
+
+   case (3)
+     ! Write memory allocations larger than 1 MB
+     if (isize>1024**2) then
+       write(i_char,'(i8)') line
+       write(std_out,'(a20,i10,i10,a20,a,a)') 'memorytracer:', memtot_abi%memory/1024**2, isize/1024**2, file, ':',adjustl(i_char)
+     end if
 
    case default
      _ABORT("invalid abimem_level")

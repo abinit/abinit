@@ -5,7 +5,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
 !!  This file is distributed under the terms of the
@@ -34,6 +33,7 @@ module m_dfpt_scfcv
  use m_errors
  use m_abicore
  use m_wfk
+ use m_wffile
  use m_xmpi
  use m_nctk
  use m_hdr
@@ -76,6 +76,8 @@ module m_dfpt_scfcv
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_dfpt_nstwf,   only : dfpt_nstpaw, dfpt_nstwf
+ use m_mkcore,         only : dfpt_mkcore
+ use m_spacepar,   only : hartrestr, symrhg
 
  implicit none
 
@@ -286,8 +288,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  kramers_deg,&
 &  cg_mq,cg1_mq,cg1_active_mq,docckde_mq,eigen_mq,eigen1_mq,gh0c1_set_mq,gh1c_set_mq,&
 &  kg1_mq,npwar1_mq,occk_mq,resid_mq,residm_mq,rhog1_pq,rhog1_mq,rhor1_pq,rhor1_mq)
-
- implicit none
 
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
@@ -1579,8 +1579,6 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 &                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 &                enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,ipert,natom,optene
@@ -1724,8 +1722,6 @@ subroutine newfermie1(cplex,fermie1,fe1fixed,ipert,istep,ixc,my_natom,natom,nfft
 &                     pawrhoij1,pawrhoijfermi,pawtab,pawxcdev,prtvol,rhorfermi,&
 &                     ucvol,usepaw,usexcnhat,vtrial1,vxc1,xclevel,&
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1922,8 +1918,6 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 &          initialized,iscf,ispmix,istep,mix,mixtofft,&
 &          mpi_enreg,my_natom,nfft,nfftmix,ngfft,ngfftmix,npawmix,pawrhoij,&
 &          qphon,rhor,rprimd,usepaw,vresid,vtrial)
-
- implicit none
 
 !Arguments-------------------------------
 !scalars
@@ -2342,9 +2336,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 & xred,ylm,ylm1,ylmgr,ylmgr1)
 
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
- use m_spacepar,   only : hartrestr
- use m_mkcore,      only : dfpt_mkcore
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2739,12 +2730,9 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 &  istwf_k,kg_k,kg1_k,kpoint,mband,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
 &  npw_k,npw1_k,nspinor,nsppol,ntypat,occ_k,psps,rmet,wtk_k,ylm,ylmgr)
 
- use m_wffile
-
- use m_hamiltonian, only : gs_hamiltonian_type,load_k_hamiltonian
+ use m_hamiltonian, only : gs_hamiltonian_type, load_k_hamiltonian
  use m_mkffnl,      only : mkffnl
  use m_nonlop,      only : nonlop
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3009,8 +2997,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  use m_symtk,     only : mati3inv
  use m_dynmat,    only : dfpt_sygra
  use m_dfpt_mkvxc,     only : dfpt_mkvxc
- use m_mkcore,         only : dfpt_mkcore
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3590,7 +3576,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,&
 & ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
 
-
  use m_hamiltonian
 
  use m_occ,         only : occeig
@@ -3599,9 +3584,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &                          pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_paw_mkrho,   only : pawmkrho
 
- use m_spacepar,    only : symrhg
  use m_mkffnl,      only : mkffnl
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -4288,7 +4271,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type
  use m_getgh1c,     only : getgh1c
  use m_dfpt_mkrho,  only : dfpt_accrho
- implicit none
 
 !Arguments ------------------------------------
 !scalars
