@@ -14,6 +14,7 @@ module m_yaml_out
 
   use ieee_arithmetic
 
+  use m_errors
   use m_pair_list
   use m_stream_string
 
