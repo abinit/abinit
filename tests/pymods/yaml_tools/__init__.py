@@ -28,9 +28,11 @@ except ImportError:
 
 
 if is_available:
+    Loader = yaml.SafeLoader
+
     def yaml_parse(content, *args, **kwargs):
         from . import structures
-        return yaml.load(content, *args, Loader=yaml.Loader, **kwargs)
+        return yaml.load(content, *args, Loader=Loader, **kwargs)
 
     yaml_print = yaml.dump
 

@@ -9,6 +9,7 @@ import re
 from inspect import ismethod
 import yaml
 
+from . import Loader
 from .errors import NotAvailableTagError
 
 re_word = re.compile(r'[a-zA-Z0-9_]+')
@@ -45,7 +46,7 @@ def yaml_map(Cls):
     def representer(dumper, data):
         return dumper.represent_mapping(tag, data.to_map())
 
-    yaml.add_constructor(tag, constructor)
+    yaml.add_constructor(tag, constructor, Loader=Loader)
     yaml.add_representer(Cls, representer)
 
     return Cls
@@ -71,7 +72,7 @@ def yaml_seq(Cls):
     def representer(dumper, data):
         return dumper.represent_sequence(tag, data.to_seq())
 
-    yaml.add_constructor(tag, constructor)
+    yaml.add_constructor(tag, constructor, Loader=Loader)
     yaml.add_representer(Cls, representer)
 
     return Cls
@@ -97,7 +98,7 @@ def yaml_scalar(Cls):
     def representer(dumper, data):
         return dumper.represent_scalar(tag, data.to_scalar())
 
-    yaml.add_constructor(tag, constructor)
+    yaml.add_constructor(tag, constructor, Loader=Loader)
     yaml.add_representer(Cls, representer)
 
     return Cls
@@ -229,4 +230,4 @@ def yaml_implicit_scalar(Cls):
 def yaml_not_available_tag(tag, reason):
     def constructor(loader, node):
         raise NotAvailableTagError(tag, reason)
-    yaml.add_constructor('!' + tag, constructor)
+    yaml.add_constructor('!' + tag, constructor, Loader=Loader)
