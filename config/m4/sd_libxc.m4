@@ -278,6 +278,22 @@ AC_DEFUN([_SD_LIBXC_CHECK_USE], [
   AC_LANG_POP([C])
   AC_MSG_RESULT([${sd_libxc_ok}])
 
+  # Check old LibXC C API
+  if test "${sd_libxc_ok}" != "yes"; then
+    AC_MSG_CHECKING([whether the LibXC library has an old API])
+    AC_LANG_PUSH([C])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[
+#include <xc.h>
+      ]],
+      [[
+        int ma, mi;
+        xc_version(&ma, &mi);
+      ]])], [sd_libxc_ok="yes"], [sd_libxc_ok="no"])
+    AC_LANG_POP([C])
+    AC_MSG_RESULT([${sd_libxc_ok}])
+  fi
+
   # Check LibXC Fortran API
   if test "${sd_libxc_ok}" = "yes" -a "${sd_libxc_fc_enable}" = "yes"; then
     AC_MSG_CHECKING([whether the LibXC Fortran interface works])
