@@ -1036,10 +1036,11 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
        tmp_phfrq(:) = full_phfrq(imode,:)
        !call htetra_get_onewk(htetraq,iq_ibz,bcorr0,phdos%nomega,phdos%nqibz,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,wdt)
        call htetra_get_onewk_wvals(htetraq,iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
+       wdt = wdt * wtq_ibz(iq_ibz)
 
        ! Accumulate DOS/IDOS
-       phdos%phdos(:)     = phdos%phdos(:)     + wdt(:, 1)*wtq_ibz(iq_ibz)
-       phdos%phdos_int(:) = phdos%phdos_int(:) + wdt(:, 2)*wtq_ibz(iq_ibz)
+       phdos%phdos(:)     = phdos%phdos(:)     + wdt(:, 1)
+       phdos%phdos_int(:) = phdos%phdos_int(:) + wdt(:, 2)
 
        ! Rotate e(q) to get e(Sq) to account for other q-points in BZ. See notes in gaussian branch
        syme2_xyza = zero
@@ -1337,15 +1338,30 @@ subroutine phdos_unittests(comm)
  call write_file('parabola_tetra.dat', nw, energies, idos, dos)
 
  ! Compute DOS using new tetrahedron implementation
+ call htetra_blochl_weights(htetraq,eigen,emin,emax,max_occ1,nw,&
+                           nqibz,bcorr0,tweight,dtweightde,comm)
+ dos(:)  = sum(dtweightde,2)
+ idos(:) = sum(tweight,2)
+ call cwtime_report(" htetra_blochl", cpu, wall, gflops)
+ call write_file('parabola_htetra.dat', nw, energies, idos, dos)
+
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   !call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
    call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
- call cwtime_report(" htetra_get_onwk", cpu, wall, gflops)
- call write_file('parabola_htetra.dat', nw, energies, idos, dos)
+ call cwtime_report(" htetra_get_onewk_wvals", cpu, wall, gflops)
+ call write_file('parabola_htetra_onewk_wvals.dat', nw, energies, idos, dos)
+
+ dos = zero; idos = zero
+ do iqibz=1,nqibz
+   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
+   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
+ end do
+ call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
+ call write_file('parabola_htetra_onewk.dat', nw, energies, idos, dos)
 
  !
  ! 2. Compute energies for a flat band
@@ -1361,15 +1377,31 @@ subroutine phdos_unittests(comm)
  call write_file('flat_tetra.dat', nw, energies, idos, dos)
 
  ! Compute DOS using new tetrahedron implementation
+ call htetra_blochl_weights(htetraq,eigen,emin,emax,max_occ1,nw,&
+                           nqibz,bcorr0,tweight,dtweightde,comm)
+ dos(:)  = sum(dtweightde,2)
+ idos(:) = sum(tweight,2)
+ call cwtime_report(" htetra_blochl", cpu, wall, gflops)
+ call write_file('flat_htetra.dat', nw, energies, idos, dos)
+
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   !call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
    call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
- call cwtime_report(" htetra_get_onwk", cpu, wall, gflops)
- call write_file('flat_htetra.dat', nw, energies, idos, dos)
+ call cwtime_report(" htetra_get_onewk_wvals", cpu, wall, gflops)
+ call write_file('flat_htetra_onewk_wvals.dat', nw, energies, idos, dos)
+
+ dos = zero; idos = zero
+ do iqibz=1,nqibz
+   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
+   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
+ end do
+ call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
+ call write_file('flat_htetra_onewk.dat', nw, energies, idos, dos)
+
 
  ! Free memory
  ABI_SFREE(energies)

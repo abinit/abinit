@@ -103,36 +103,10 @@ public :: htetra_init            ! Initialize the object
 public :: htetra_free            ! Free memory.
 public :: htetra_get_onewk       ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
 public :: htetra_get_onewk_wvals ! Similar to tetra_get_onewk_wvalsa but receives arbitrary list of frequency points.
+public :: htetra_blochl_weights  ! And interface to help to facilitate the transition to the new tetrahedron implementation
 !!***
 
 contains
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_htetrahedron/htetra_free
-!! NAME
-!! htetra_free
-!!
-!! FUNCTION
-!! deallocate tetrahedra pointers if needed
-!!
-!! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_epjdos
-!!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine htetra_free(tetra)
-
- type(t_htetrahedron), intent(inout) :: tetra
- ABI_SFREE(tetra%mapping_ibz)
- ABI_SFREE(tetra%mapping_bz)
- ABI_SFREE(tetra%ibz_weights)
-
-end subroutine htetra_free
 !!***
 
 !----------------------------------------------------------------------
@@ -586,8 +560,8 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  main_diagonals(:,4) = [ 1, 1,-1] ! 3-4
 
  ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
- TETRA_ALLOCATE(tetra%mapping_bz,(4,24,nkpt_ibz))
- TETRA_ALLOCATE(tetra%mapping_ibz,(4,24,nkpt_ibz))
+ ABI_MALLOC(tetra%mapping_bz,(4,24,nkpt_ibz))
+ ABI_MALLOC(tetra%mapping_ibz,(4,24,nkpt_ibz))
 
  ! Determine the smallest diagonal in k-space
  min_length = huge(min_length)
@@ -635,6 +609,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    tetra%ibz_weights(ikibz) = tetra%ibz_weights(ikibz) + 1
  end do
  tetra%ibz_weights = tetra%ibz_weights / nkpt_fullbz
+ tetra%nkibz = nkpt_ibz
 
  ! HM TODO: Need to check where this will be used!
  ! Calculate the volume of the tetrahedra
@@ -652,6 +627,33 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
                 k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
 
 end subroutine htetra_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_htetrahedron/htetra_free
+!! NAME
+!! htetra_free
+!!
+!! FUNCTION
+!! deallocate tetrahedra pointers if needed
+!!
+!! PARENTS
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_epjdos
+!!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine htetra_free(tetra)
+
+ type(t_htetrahedron), intent(inout) :: tetra
+ ABI_SFREE(tetra%mapping_ibz)
+ ABI_SFREE(tetra%mapping_bz)
+ ABI_SFREE(tetra%ibz_weights)
+
+end subroutine htetra_free
 !!***
 
 !----------------------------------------------------------------------
@@ -1389,6 +1391,72 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
 
 end subroutine htetra_get_onewk_wvals
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_htetrahedron/htetra_blochl_weights
+!! NAME
+!!  htetra_blochl_weights
+!!
+!! FUNCTION
+!!   Emulates the behaviour of the previous tetrahedron implementation.
+!!   HM: I find that in many routines its better to change the implementation
+!!   and accumulate the tetrahedron weights in the same way as the
+!!   gaussian smearing weights using htetra_get_onewk_wvals. However this requires
+!!   some refactoring of the code. I provide this routine to make it easier
+!!   to transition to the new tetrahedron implementation without refactoring.
+!!   New implementations should try to use htetra_get_onewk_wvals.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+!!***
+
+!----------------------------------------------------------------------
+
+subroutine htetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
+  bcorr,tweight_t,dtweightde_t,comm)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nene,nkpt,bcorr,comm
+ type(t_htetrahedron), intent(in) :: tetra
+ real(dp) ,intent(in) :: enemax,enemin,max_occ
+!arrays
+ real(dp) ,intent(in) :: eigen_in(nkpt)
+ real(dp) ,intent(out) :: dtweightde_t(nene,nkpt),tweight_t(nene,nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ik_ibz,nprocs,my_start,my_stop,ierr,ii
+!arrays
+ integer :: ind_ibz(4)
+ real(dp) :: eigen_1tetra(4)
+ real(dp), allocatable :: weights(:,:)
+
+! *********************************************************************
+
+ ABI_MALLOC(weights,(nene,2))
+ tweight_t = zero; dtweightde_t = zero
+
+ ! For each irreducible Brillouin zone point
+ do ik_ibz=1,tetra%nkibz
+   call htetra_get_onewk(tetra, ik_ibz, bcorr, nene, tetra%nkibz, eigen_in, enemin, enemax, max_occ, weights)
+
+   tweight_t(:,ik_ibz)    = tweight_t(:,ik_ibz)    + weights(:,2)*tetra%ibz_weights(ik_ibz)
+   dtweightde_t(:,ik_ibz) = dtweightde_t(:,ik_ibz) + weights(:,1)*tetra%ibz_weights(ik_ibz)
+ end do
+ ABI_FREE(weights)
+
+end subroutine htetra_blochl_weights
+
 
 !----------------------------------------------------------------------
 
