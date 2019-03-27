@@ -1,3 +1,9 @@
+'''
+    This file solve problems that can only be solved either by a trick or by
+    a global refactoring such as python 2 compatibility (should be dropped
+    soon) or problems related to the modified sys.path.
+'''
+
 from __future__ import print_function, division, unicode_literals
 import sys
 
