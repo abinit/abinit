@@ -24,13 +24,13 @@ typedef union {
   int* iarr;
   double* rarr;
 */
-} number;
+} value;
 
 typedef struct Pair {
-  unsigned char type_code;
+  int8_t type_code;
   char* key;
   struct Pair* next;
-  number val;
+  value val;
 } pair_t;
 
 typedef struct {
@@ -39,7 +39,9 @@ typedef struct {
   int length;
 } pair_list;
 
-bool str_eq(char* s1, char* s2){
+/* Lazy string comparision
+ */
+static bool str_eq(char* s1, char* s2){
   while(*s1 && *s2){
     if(*s1 != *s2){
       return FALSE;
@@ -49,7 +51,10 @@ bool str_eq(char* s1, char* s2){
   return (*s1 | *s2) == 0;
 }
 
-char* ftoc_str(char* fstr, int length){
+/* Fortran style to C style string
+ * return a new allocated pointer to the C string
+ */
+static char* ftoc_str(char* fstr, int length){
   int i;
   char* cstr;
   cstr = malloc((length+1)*sizeof(char));
@@ -60,7 +65,10 @@ char* ftoc_str(char* fstr, int length){
   return cstr;
 }
 
-void ctof_str(char* fstr, char* cstr, int length){
+/* C style to Fortran style string
+ * fstr must be allocated and of size length
+ */
+static void ctof_str(char* fstr, char* cstr, int length){
   int c = 0;
   while(cstr[c] != '\x00' && c < length){
     fstr[c] = cstr[c];
@@ -71,7 +79,11 @@ void ctof_str(char* fstr, char* cstr, int length){
   }
 }
 
-bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
+/* Look for a given key, if found return FALSE and have
+ * selected point to the pair, else return TRUE, allocate a new pair
+ * and have selected point to it
+ */
+static bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
   if(pl->first){
     pair_t* prev = NULL;
     pair_t* pair = pl->first;
@@ -79,7 +91,7 @@ bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
     while(pair){
       if(str_eq(ckey, pair->key)){
         *selected = pair;
-        return 0;
+        return FALSE;
       } else {
         prev = pair;
         pair = pair->next;
@@ -89,7 +101,7 @@ bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
     new_pair->next = NULL;
     prev->next = new_pair;
     *selected = new_pair;
-    return 1;
+    return TRUE;
   } else {  /* first element of the list */
     pair_t* new_pair = malloc(sizeof(pair_t));
     new_pair->key = ckey;
@@ -97,11 +109,13 @@ bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
     pl->first = new_pair;
     pl->cursor = new_pair;
     *selected = new_pair;
-    return 1;
+    return TRUE;
   }
 }
 
-void pair_free(pair_t* p){
+/* free a pair after freeing the next one
+ */
+static void pair_free(pair_t* p){
   if(p){
     pair_free(p->next);
     free(p->key);
@@ -115,6 +129,8 @@ void pair_free(pair_t* p){
 
 /* Visible from fortran */
 
+/* set an integer value
+ */
 void pair_list_seti(pair_list* l, char* fkey, int* i, int* len){
   pair_t* pair = NULL;
   char* ckey = ftoc_str(fkey, *len);
@@ -131,6 +147,8 @@ void pair_list_seti(pair_list* l, char* fkey, int* i, int* len){
   pair->val.i = *i;
 }
 
+/* set a real (double) value
+ */
 void pair_list_setr(pair_list* l, char* fkey, double* r, int* len){
   pair_t* pair = NULL;
   char* ckey = ftoc_str(fkey, *len);
@@ -147,6 +165,8 @@ void pair_list_setr(pair_list* l, char* fkey, double* r, int* len){
   pair->val.r = *r;
 }
 
+/* set a string value
+ */
 void pair_list_sets(pair_list* l, char* fkey, char* s, int* len, int* len_s){
   pair_t* pair = NULL;
   char* ckey = ftoc_str(fkey, *len);
@@ -163,6 +183,8 @@ void pair_list_sets(pair_list* l, char* fkey, char* s, int* len, int* len_s){
   pair->val.s = ftoc_str(s, *len_s);
 }
 
+/* get a value from a key
+ */
 void pair_list_get_(pair_list* l, char* fkey, int* type_code, int*i, double* r, char* s, int* len, int* len_s){
   if(!l->first){
     /* list is empty */
@@ -198,10 +220,14 @@ void pair_list_get_(pair_list* l, char* fkey, int* type_code, int*i, double* r, 
   }
 }
 
+/* move the cursor forward in the chain
+ */
 void pair_list_next(pair_list* pl){
   pl->cursor = pl->cursor->next;
 }
 
+/* free the whole chained list
+ */
 void pair_list_free(pair_list* pl){
   pair_free(pl->first);
   pl->first = NULL;
@@ -209,6 +235,8 @@ void pair_list_free(pair_list* pl){
   pl->length = 0;
 }
 
+/* Return the pair pointed by the cursor
+ */
 void pair_list_look_(pair_list* pl, char* fkey, int* type_code, int* i, double* r, char* s, int* len, int* len_s){
   pair_t* p = pl->cursor;
   if(p){
