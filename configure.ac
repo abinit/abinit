@@ -729,13 +729,6 @@ if test "${abi_psml_enable}" = "yes"; then
   ABI_TRIGGER_PSML
 fi
 
-# YAML library support
-AC_MSG_CHECKING([whether to enable YAML support])
-AC_MSG_RESULT([${abi_yaml_enable}])
-if test "${abi_yaml_enable}" = "yes"; then
-  ABI_TRIGGER_YAML
-fi
-
 # NetCDF library support
 AC_MSG_CHECKING([whether to enable NetCDF support])
 AC_MSG_RESULT([${abi_netcdf_enable}])

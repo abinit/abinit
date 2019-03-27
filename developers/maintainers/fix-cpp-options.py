@@ -16,8 +16,7 @@ renamed_cppopts = {
   "HAVE_TRIO_ETSF_IO":"HAVE_ETSF_IO",
   "HAVE_TRIO_NETCDF":"HAVE_NETCDF",
   "HAVE_TRIO_NETCDF_MPI":"HAVE_NETCDF_MPI",
-  "HAVE_TRIO_PSML":"HAVE_PSML",
-  "HAVE_TRIO_YAML":"HAVE_YAML"}
+  "HAVE_TRIO_PSML":"HAVE_PSML"}
 renamed_keys = renamed_cppopts.keys()
 renamed_keys.sort()
 
