@@ -323,6 +323,8 @@ if ( opts.run_clean ):
   for block in sorted(abinit_blocks.keys()):
     run_script(my_name, "Removing binary Fortran modules in %s" % block,
       "find %s -name '*.mod' -exec rm {} \;" % abinit_blocks[block])
+  run_script(my_name, "Removing Python-generated files in src/",
+    "find src -name '*.pickle' -exec rm {} \;")
   abinit_bins = xcnf.sections()
   abinit_bins.sort()
   abinit_bins = "src/98_main/" + " src/98_main/".join(abinit_bins)
