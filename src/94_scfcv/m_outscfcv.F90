@@ -583,7 +583,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Output of the GSR file (except when we are inside mover)
 #ifdef HAVE_NETCDF
- if (me == master .and. dtset%prtgsr==1 .and. dtset%usewvl == 0) then
+ if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
 
@@ -774,12 +774,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    if (dtset%prtgeo>0) then
      coordn=dtset%prtgeo
      call bonds_lgth_angles(coordn,dtfil%fnameabo_app_geo,natom,psps%ntypat,&
-&     rprimd,dtset%typat,xred,dtset%znucl)
+      rprimd,dtset%typat,xred,dtset%znucl)
    end if
 
    if (dtset%prtcif > 0) then
      call prt_cif(dtset%brvltt, dtfil%fnameabo_app_cif, natom, dtset%nsym, dtset%ntypat, rprimd, &
-&     dtset%spgaxor, dtset%spgroup, dtset%spgorig, dtset%symrel, dtset%tnons, dtset%typat, xred, dtset%znucl)
+      dtset%spgaxor, dtset%spgroup, dtset%spgorig, dtset%symrel, dtset%tnons, dtset%typat, xred, dtset%znucl)
    end if
 
    call timab(957,2,tsec)
