@@ -54,6 +54,7 @@ module m_outscfcv
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
  use m_nucprop,          only : calc_efg,calc_fc
+ use m_neat,             only : neat_crystal, neat_results_gs
  use m_outwant,          only : outwant
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type, simp_gen, bound_deriv
@@ -1185,6 +1186,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (nint(dtset%einterp(1)) /= 0) then
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
  end if
+
+ ! YAML output
+ call neat_crystal(crystal, ab_out, comment="Summary crystal properties.")
+ call neat_results_gs(results_gs, ab_out, ecut, dtset%pawecutdg, comment="Summary of ground states results.")
 
  call crystal%free()
  call ebands_free(ebands)
