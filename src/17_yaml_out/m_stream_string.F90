@@ -41,6 +41,8 @@ module m_stream_string
 
   contains
 
+! free stream. Most of the time this is not needed since
+! routines to access the content free the stream
   subroutine stream_free(stream)
     class(stream_string),intent(inout) :: stream
     type(stream_chunk), pointer :: cursor, prev
@@ -52,6 +54,7 @@ module m_stream_string
     end do
   end subroutine stream_free
 
+! copy src content to dest without altering src
   subroutine stream_copy(src, dest)
     class(stream_string),intent(inout) :: src, dest
     type(stream_chunk), pointer :: cursor
@@ -62,6 +65,7 @@ module m_stream_string
     end do
   end subroutine stream_copy
 
+! Write string to stream, allocating memory if needed
   subroutine stream_write(stream, string)
     class(stream_string),intent(inout) :: stream
     character(len=*),intent(in) :: string
@@ -97,6 +101,7 @@ module m_stream_string
     stream%length = stream%length + len(string)
   end subroutine stream_write
 
+! Remove the last chunk of stream an put its content in string
   subroutine stream_get_chunk(stream, string)
     class(stream_string),intent(inout) :: stream
     character(len=chunk_size),intent(out) :: string
@@ -118,6 +123,8 @@ module m_stream_string
     end if
   end subroutine stream_get_chunk
 
+! Copy the content of stream to string, freeing stream
+! string HAVE to be large enough
   subroutine stream_to_string(stream, string)
     class(stream_string),intent(inout) :: stream
     character(len=*),intent(out) :: string
@@ -134,6 +141,7 @@ module m_stream_string
     end do
   end subroutine stream_to_string
 
+! Write the content of stream to the file, freeing stream
   subroutine stream_to_file(stream, file_d)
     class(stream_string),intent(inout) :: stream
     integer,intent(in) :: file_d
@@ -149,6 +157,9 @@ module m_stream_string
     end do
   end subroutine stream_to_file
 
+! Copy the content of src to dest, freeing src
+! If possible does not reallocate memory and just have
+! dest point to src content
   subroutine stream_transfer(src, dest)
     class(stream_string),intent(inout) :: src, dest
     character(len=chunk_size) :: chunk
@@ -171,6 +182,7 @@ module m_stream_string
     end if
   end subroutine stream_transfer
 
+! Show the content of the chunks on stdout
   subroutine stream_debug(src)
     class(stream_string),intent(inout) :: src
     type(stream_chunk), pointer :: cursor
