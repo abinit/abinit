@@ -4472,28 +4472,6 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    ! Temporary weights (on the fine IBZ_k mesh if double grid is used)
    ABI_MALLOC(tmp_deltaw_pm, (3, sigma%ephwg%nq_k, 2))
 
-#if 0
-   ! OLD VERSION
-   ! loop over all bands to sum
-   this_calc = 0
-   do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
-    ! loop over my phonon modes
-    do imyp=1,sigma%my_npert
-      nu = sigma%my_pinfo(3, imyp)
-      ! loop over bands in the self-energy
-      do ib_k=1,nbcalc_ks
-        this_calc = this_calc + 1; if (mod(this_calc,nprocs) /= my_rank) cycle ! MPI parallelism.
-        band_ks = ib_k + bstart_ks - 1
-        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-        eminmax = [eig0nk - tol2, eig0nk + tol2]
-        call sigma%ephwg%get_deltas(ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, xmpi_comm_self)
-        ! we pay the efficiency here
-        sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 1) / ( sigma%ephwg%lgk%weights(:) )
-        sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 2) / ( sigma%ephwg%lgk%weights(:) )
-      enddo
-    enddo
-   enddo
-#else
    ! loop over bands to sum
    do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
     ! loop over my phonon modes
@@ -4533,7 +4511,6 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
       end do
     end do
    end do
-#endif
 
    ABI_FREE(tmp_deltaw_pm)
 

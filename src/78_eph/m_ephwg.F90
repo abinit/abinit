@@ -154,9 +154,6 @@ type, public :: ephwg_t
      procedure :: get_deltas => ephwg_get_deltas
      ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
 
-     procedure :: get_dweights => ephwg_get_dweights
-     ! Compute weights for a set of frequencies.
-
      procedure :: get_deltas_qibzk => ephwg_get_deltas_qibzk
      ! Compute weights for $ \delta(\omega - \omega_{q\nu}} $ using IBZ(k) ordering
 
@@ -507,48 +504,6 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
                             self%lgk%symrec_lg, self%lgk%nsym_lg, &
                             eph_doublegrid%bz2lgkibz, timrev0, use_symrec=.true.)
 
-#if 0
-   ABI_MALLOC(indkk, (eph_doublegrid%dense_nbz * sppoldbl1, 6))
-   call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, eph_doublegrid%kpts_dense,&
-               self%lgk%nibz, eph_doublegrid%dense_nbz, cryst%nsym,&
-               sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
-
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6)' ) &
-      "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     MSG_ERROR(msg)
-   end if
-
-   !check if same results as listkk
-   !eph_doublegrid%bz2lgkibz(:)=indkk(:,1)
-   do ii=1,self%nbz
-      if (indkk(ii,1).ne.eph_doublegrid%bz2lgkibz(ii)) then
-        write(*,*) ii
-        write(*,*) eph_doublegrid%kpts_dense(:,ii)
-        write(*,*) ii, '-->', indkk(ii,1)
-        write(*,*) self%lgk%ibz(:,indkk(ii,1)), indkk(ii,2), indkk(ii,6)
-        !check listkk stuff
-        kpt = (1-2*indkk(ii,6))*matmul(transpose(cryst%symrel(:,:,indkk(ii,2))),self%lgk%ibz(:,indkk(ii,1)))
-        call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
-        call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
-        call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
-        write(*,*) wrap_kpt
-
-        write(*,*) ii, '-->', eph_doublegrid%bz2lgkibz(ii)
-        write(*,*) self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)), mapping(ii,1), mapping(ii,2)
-        !check double grid stuff
-        kpt = (1-2*mapping(ii,2))*matmul(transpose(cryst%symrel(:,:,mapping(ii,1))),self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)))
-        call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
-        call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
-        call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
-        write(*,*) wrap_kpt
-        write(*,*)
-      end if
-      ABI_CHECK(indkk(ii,1)==eph_doublegrid%bz2lgkibz(ii),'Unmatching indexes')
-   enddo
-   ABI_FREE(indkk)
-#endif
-
  ! self%lgrp%ibz --> dg%bz
  ABI_CALLOC(lgkibz2bz,(self%lgk%nibz))
  do ii=1,self%nbz
@@ -787,129 +742,6 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
  end if
 
 end subroutine ephwg_get_deltas
-!!***
-
-!!****f* m_ephwg/ephwg_get_dweights
-!! NAME
-!! ephwg_get_dweights
-!!
-!! FUNCTION
-!! Compute weights for $ \delta(ww - \ee_{k+q, b} \pm \omega_{q\nu} $
-!! for a given (qpoint, band, spin) and all phonon modes.
-!!
-!! INPUTS
-!! band=band index (global index i.e. unshifted)
-!! spin=Spin index
-!! nw=number of energies for DOS
-!! bcorr=1 to include Blochl correction else 0.
-!! comm=MPI communicator
-!!
-!! OUTPUT
-!!  deltaw_pm(nw, nq_k, 2)  (plus, minus) including the weights for BZ integration.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine ephwg_get_dweights(self, qlklist, nqlk, nw, wvals, spin, bcorr, nbsum, deltaw_pm, comm)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nqlk, spin, nw, bcorr, nbsum, comm
- class(ephwg_t),intent(in) :: self
-!arrays
- integer,intent(in) :: qlklist(nqlk)
- real(dp),intent(in) :: wvals(nw)
- real(dp),intent(inout) :: deltaw_pm(2, nw, self%natom3, nbsum, nqlk)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: nene3=3
- real(dp),parameter :: max_occ1 = one
- integer :: iq, iq_ibz, ikpq_ibz, ib, ib_k, ie, iw, nu, ii, jj, kk
- integer :: ntetra, itetra, iqlk, iqlk_microzone
-!arrays
- integer :: ind_ibz(4), counter, mappingsize
- integer,allocatable :: tetra_mask(:), mapping(:)
- real(dp) :: tmp_deltaw_pm(nw,2,4)
- real(dp) :: pme_k(4, 2), weights(nw, 2)
- real(dp) :: enemin, enemax
- real(dp) :: theta_tmp(nene3,4), delta_tmp(nene3,4), eigen_1tetra(4)
-
-!----------------------------------------------------------------------
-
- !
- ! This routine still has some bug
- ! The results are not consistent with the calculation where all the weights are precomputed.
- !
-
- ntetra = self%tetra_k%ntetra
- deltaw_pm = 0
- mappingsize = maxval(qlklist)
- ABI_CALLOC(tetra_mask,(ntetra))
- ABI_CALLOC(mapping,(mappingsize))
- !first loop to identify the tetrahedron contribution to the qpoints in the microzone
- do jj=1,nqlk
-   !get index of this q in the little group of k
-   iqlk = qlklist(jj)
-   !map iqlk to microzone
-   mapping(iqlk) = jj
-
-   ! Get all the tetrahedron corresponding to this q
-   do ii=1,self%tetra_k%ibz_tetra_count(iqlk)
-     itetra = self%tetra_k%ibz_tetra_mapping(iqlk,ii)
-     !this tetrahedra is contributing to the microzone so we will calculate it
-     tetra_mask(itetra) = 1
-   end do
- end do
-
- !second loop to accumulate the contributions of the different tetrahedra
- do itetra=1,ntetra
-   !this tetrahedra does not contribute to the microzone
-   if (tetra_mask(itetra) == 0) cycle
-
-   ! Here we need the original ordering to reference the correct irred kpoints
-   ! map from tetra to ibz
-   ind_ibz(:) = self%tetra_k%tetra_full(:,1,itetra)
-
-   !loop over nbsum bands
-   ! TODO this has to be consistent with nbsum in sigma
-   do ib=self%bstart,self%nbcount
-     !loop over phonon freqs
-     do nu = 1, self%natom3
-       ! Fill array for e_{k+q, b} +- w_{q,nu)
-       do ii=1,4
-         iq = ind_ibz(ii)
-         iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
-         ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
-         pme_k(ii, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
-         pme_k(ii, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
-       end do
-
-       do ii = 1,2
-         !calculate weights of one tetrahedron
-         call tetra_get_onetetra_wvals(self%tetra_k, itetra, pme_k(:,ii), bcorr, &
-                                       nw, wvals, tmp_deltaw_pm)
-         !this tetrahedron give 4 contributions we map these weights to the array
-         do jj = 1,4
-           !get index of this q
-           iqlk = ind_ibz(jj)
-           if (iqlk > mappingsize) cycle !this q-point is not in the microzone
-           kk = mapping(iqlk)
-           if (kk == 0) cycle !this q-point is not in the microzone
-           deltaw_pm(ii,:,nu,ib,kk) = deltaw_pm(ii,:,nu,ib,kk) + tmp_deltaw_pm(:,1,jj) / ( self%lgk%weights(iqlk) )
-         end do
-       end do !pm
-     end do !nu
-   end do !ib
- end do !itetra
-
- ABI_FREE(tetra_mask)
- ABI_FREE(mapping)
-
-end subroutine ephwg_get_dweights
 !!***
 
 !----------------------------------------------------------------------
