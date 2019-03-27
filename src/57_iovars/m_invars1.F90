@@ -1798,7 +1798,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &   'This is not an usual calculation:',ch10,&
 &   'usepawu will be put to a value >= 10:',ch10,&
 &   'LDA+U potential and energy will be put to zero'
-   MSG_WARNING(message)
+   MSG_WARNING(msg)
  end if
 
  dtset%usedmatpu=0
