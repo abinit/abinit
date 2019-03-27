@@ -60,7 +60,6 @@ Other external packages
 Abinit may use the following other packages:
 
   * FFTW3;
-  * GSL;
   * ScaLAPACK.
 
 

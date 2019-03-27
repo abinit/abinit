@@ -745,15 +745,6 @@ if test "${abi_etsf_io_enable}" = "yes"; then
 
                        # ------------------------------ #
 
-# GSL library support
-AC_MSG_CHECKING([whether to enable GSL support])
-AC_MSG_RESULT([${abi_gsl_enable}])
-if test "${abi_gsl_enable}" = "yes"; then
-  ABI_TRIGGER_GSL
-fi
-AM_CONDITIONAL([DO_BUILD_01_GSL_EXT],
-  [test "${abi_gsl_enable}" = "yes"])
-
 # Levmar library support
 AC_MSG_CHECKING([whether to enable Levmar support])
 AC_MSG_RESULT([${abi_levmar_enable}])
