@@ -283,8 +283,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,wffnew,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
 
- implicit none
-
 !Arguments -------------------------------
  integer, intent(in) :: afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
  integer, intent(in) :: my_natom,natom,nfftf,nfftdiel,nkxc,npwdiel
@@ -1857,8 +1855,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 subroutine wvl_nscf_loop()
 
- implicit none
-
 !Arguments ------------------------------------
 ! integer, intent(in)                    :: istep,mcprj,nfft,nnsclo
 ! real(dp), intent(inout)                :: residm
@@ -1961,8 +1957,6 @@ subroutine wvl_nscf_loop()
 
 subroutine wvl_nscf_loop_bigdft()
 
- implicit none
-
 !Arguments ------------------------------------
 ! integer, intent(in)                    :: istep,mcprj,nfft,nnsclo
 ! real(dp), intent(inout)                :: residm
@@ -2054,8 +2048,6 @@ subroutine wvl_nscf_loop_bigdft()
 
 subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
- implicit none
-
 !Arguments ------------------------------------
  integer , intent(in)  :: mband,nkpt,nsppol
  integer , intent(in)  :: nband(nkpt*nsppol)
@@ -2114,8 +2106,6 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
 subroutine wvl_occ()
 
- implicit none
-
 !Local variables-------------------------------
  real(dp):: doccde_(dtset%mband*dtset%nkpt*dtset%nsppol)
 ! *************************************************************************
@@ -2168,8 +2158,6 @@ subroutine wvl_occ()
 
 subroutine wvl_occ_bigdft()
 
- implicit none
-
 ! *************************************************************************
 
    DBG_ENTER("COLL")
@@ -2221,8 +2209,6 @@ subroutine wvl_occ_bigdft()
 !! SOURCE
 
 subroutine wvl_comm_eigen()
-
- implicit none
 
 !Arguments ------------------------------------
 
@@ -2320,8 +2306,6 @@ end subroutine vtorho
 subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,mcgq,&
 &                      me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
 &                      npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: ikpt,ikpt_loc,isppol,me_distrb,mcg,mcgq,mkgq,my_nspinor,nband_k

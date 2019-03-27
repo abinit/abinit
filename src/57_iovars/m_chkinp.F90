@@ -89,8 +89,6 @@ contains
 
 subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,ndtset,ndtset_alloc,npsp
@@ -724,7 +722,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      ! Avoid wasting CPUs if nsppol==2.
      if (dt%nsppol==2 .and. .not. iseven(nproc) .and. nproc > 1) then
        write(msg,'(3a)') "Spin-polarized GW calculations should be run with an even number of processors ",ch10,&
-&       " for achieving an optimal distribution of memory and CPU load. Change the number of processors."
+        " for achieving an optimal distribution of memory and CPU load. Change the number of processors."
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
    end if
@@ -750,6 +748,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       'Action: adjust ecutwfn with ecut.'
        MSG_ERROR_NOSTOP(message,ierr)
      end if
+   end if
+
+   ! Check variables used to specify k-points in self-energy.
+   if (dt%nkptgw /= 0 .and. (any(dt%sigma_erange > zero .or. dt%gw_qprange /= 0))) then
+     MSG_ERROR_NOSTOP("nkptw cannot be used with sigma_erange or gw_qprange", ierr)
+   end if
+   if (any(dt%sigma_erange > zero) .and. dt%gw_qprange /= 0) then
+     MSG_ERROR_NOSTOP("sigma_erange and gw_qprange are mutually exclusive", ierr)
    end if
 
 !  efmas
@@ -806,24 +812,25 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-         10, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6], iout)
+         11, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
-     if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
+     if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
-     if (dt%eph_task==-5) then
+     if (dt%eph_task == -5) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
      end if
 
-     !if (all(dt%eph_task /= [5, 6]) .and. any(dt%istwfk(1:nkpt) /= 1)) then
-     !  MSG_ERROR_NOSTOP('EPH code does not yet support istwfk != 1. Regenerate WFK with istwfk = *1', ierr)
-     !end if
-
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
+
+     if (dt%eph_stern /= 0) then
+       MSG_ERROR_NOSTOP_IF(dt%tolwfr == zero, "tolwfr must be specified when eph_stern /= 0", ierr)
+       !if (dt%getpot_path == ABI_NOFILE)
+     end if
    end if
 
 !  exchmix
@@ -928,10 +935,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
    end if
 
-!  gwmem
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwmem',dt%gwmem,4,[0,1,10,11],iout)
 
-!  gwpara
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwpara',dt%gwpara,3,[0,1,2],iout)
 
 !  gwrpacorr
