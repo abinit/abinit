@@ -4,9 +4,8 @@
 
 #include "abi_common.h"
 #define SET_DEFAULT(v, optv, defv) v = defv; if(present(optv)) v = optv
-#define ERROR(msg) write(0,*) msg; stop
-#define ERROR_NO_OUT ERROR("No output medium have been provided.")
-#define ASSERT(cond, msg) if(.not. cond) then; ERROR(msg); end if
+#define ERROR_NO_OUT MSG_ERROR("No output medium have been provided.")
+#define YASSERT(cond, msg) if(.not. cond) then; MSG_ERROR(msg); end if
 
 #define MAGIC_NAN 9.9999999999D+99
 
@@ -403,7 +402,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
 
     rfmt = '                              '
     SET_DEFAULT(rfmt, real_fmt, default_rfmt)
@@ -449,7 +448,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
 
     ifmt = '                              '
     SET_DEFAULT(ifmt, int_fmt, default_ifmt)
@@ -492,7 +491,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
 
     if(present(tag)) then
       call yaml_start_field(interm, label, width=w, tag=tag)
@@ -536,7 +535,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
 
     rfmt = '                              '
     SET_DEFAULT(rfmt, real_fmt, default_rfmt)
@@ -583,7 +582,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
 
     ifmt = '                              '
     SET_DEFAULT(ifmt, int_fmt, default_ifmt)
@@ -632,7 +631,7 @@ module m_yaml_out
     SET_DEFAULT(ks, key_size, default_keysize)
     SET_DEFAULT(ss, string_size, default_stringsize)
 
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
 
     kfmt = '                              '
     rfmt = '                              '
@@ -686,7 +685,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
     
     rfmt = '                              '
     SET_DEFAULT(rfmt, real_fmt, default_rfmt)
@@ -739,7 +738,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
     
     ifmt = '                              '
     SET_DEFAULT(ifmt, int_fmt, default_ifmt)
@@ -790,7 +789,7 @@ module m_yaml_out
     integer :: vmax, ks, i, ss
     logical :: nl
 
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
     
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
@@ -849,7 +848,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(n, indent, 4)
   
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
     
     if(n > 4) then
       call interm%write(repeat(' ', n-4))
@@ -888,7 +887,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(n, indent, 4)
   
-    ASSERT(doclock == 1, "No document is opened yet.")
+    YASSERT(doclock == 1, "No document is opened yet.")
 
     call interm%write(repeat(' ', n)//trim(line))
 
