@@ -40,13 +40,27 @@ module m_argparse
  use m_io_tools,        only : open_file
  use m_cppopts_dumper,  only : dump_cpp_options
  use m_optim_dumper,    only : dump_optim
- use m_fstrings,        only : atoi, itoa, firstchar, sjoin
+ use m_fstrings,        only : atoi, itoa, firstchar, startswith, sjoin
  use m_time,            only : str2sec
  use m_libpaw_tools,    only : libpaw_log_flag_set
 
  implicit none
 
  private
+
+ public :: get_arg         !  Parse scalar argument from command line. Return exit code.
+
+ interface get_arg
+   module procedure get_arg_int
+   module procedure get_arg_dp
+ end interface get_arg
+
+ public :: get_arg_list    ! Parse array argument from command line. Return exit code.
+
+ interface get_arg_list
+   module procedure get_arg_list_int
+   module procedure get_arg_list_dp
+ end interface get_arg_list
 !!***
 
 !!****t* m_argparse/args_t
@@ -93,8 +107,6 @@ contains
 !! SOURCE
 
 type(args_t) function args_parser() result(args)
-
- implicit none
 
 !Local variables-------------------------------
  integer :: ii,ierr
@@ -179,7 +191,7 @@ type(args_t) function args_parser() result(args)
       if (iam_master) then
         call clib_mtrace(ierr)
         if (ierr/=0 .and. iam_master) write(std_out,"(a,i0)")"clib_mtrace returned ierr: ",ierr
-    end if
+      end if
 
     else if (arg == "--log") then
        ! Enable logging
@@ -272,8 +284,6 @@ end function args_parser
 
 subroutine args_print(args)
 
- implicit none
-
 !Arguments ------------------------------------
  type(args_t),intent(in) :: args
 
@@ -298,8 +308,6 @@ end subroutine args_print
 
 pure logical function begins_with(arg, string) result(bool)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: arg,string
@@ -311,7 +319,7 @@ end function begins_with
 
 !----------------------------------------------------------------------
 
-!!****f* m_abi_linalg/parse_yesno
+!!****f* m_argparse/parse_yesno
 !! NAME
 !!  parse_yesno
 !!
@@ -323,8 +331,6 @@ end function begins_with
 !! SOURCE
 
 logical function parse_yesno(arg, optname, default) result(bool)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -347,6 +353,329 @@ logical function parse_yesno(arg, optname, default) result(bool)
  end select
 
 end function parse_yesno
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_argparse/get_arg_int
+!! NAME
+!!  get_arg_int
+
+!! FUNCTION
+!!  Parse scalar argument from command line. Return exit code.
+!!
+!! INPUT
+!!  argname= Argument name
+!!  [default]= Default value.
+!!  [exclude]= argname and exclude are mutually exclusive.
+!!  
+!! OUTPUT
+!!  argval= Value of argname
+!!  msg= Error message
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+integer function get_arg_int(argname, argval, msg, default, exclude) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: argname
+ integer,intent(out) :: argval
+ character(len=*),intent(out) :: msg
+ integer,optional,intent(in) :: default
+ character(len=*),optional,intent(in) :: exclude
+
+!Local variables-------------------------------
+ integer :: ii, istat
+ logical :: found_argname, found_excl
+ character(len=500) :: arg, iomsg
+
+! *************************************************************************
+
+ ierr = 0; msg = ""; if (present(default)) argval = default
+ found_argname = .False.; found_excl = .False.
+
+ do ii=1,command_argument_count()
+   call get_command_argument(ii, arg)
+   if (present(exclude)) then
+     if (arg == "--" // trim(exclude)) found_excl = .True.
+   end if
+   if (arg == "--" // trim(argname)) then
+     found_argname = .True.
+     call get_command_argument(ii + 1, arg, status=istat)
+     if (istat == 0) then
+       read(arg, *, iostat=istat, iomsg=iomsg) argval
+       if (istat /= 0) then
+         ierr = ierr + 1; msg = sjoin(msg, ch10, iomsg)
+       end if
+     else
+       ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument") 
+     end if
+   end if
+ end do
+
+ if (ierr /= 0) msg = sjoin("Error while reading argument: ", argname, ch10, msg)
+ if (found_argname .and. found_excl) then
+   ierr = ierr + 1; msg = sjoin("Variables", argname, "and", exclude, "are mutually exclusive", ch10, msg)
+ end if
+
+end function get_arg_int
+!!***
+
+!!****f* m_argparse/get_arg_dp
+!! NAME
+!!  get_arg_dp
+!!
+!! FUNCTION
+!!  Parse scalar argument from command line. Return exit code.
+!!
+!! INPUTS
+!!  argname= Argument name
+!!  [default]= Default value
+!!  [exclude]= argname and exclude are mutually exclusive.
+!! 
+!! OUTPUT
+!!   argval= Value of argname
+!!   msg= Error message
+!!
+!! SOURCE
+
+integer function get_arg_dp(argname, argval, msg, default, exclude) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: argname
+ real(dp),intent(out) :: argval
+ character(len=*),intent(out) :: msg
+ real(dp),optional,intent(in) :: default
+ character(len=*),optional,intent(in) :: exclude
+
+!Local variables-------------------------------
+ integer :: ii, istat
+ logical :: found_argname, found_excl
+ character(len=500) :: arg, iomsg
+
+! *************************************************************************
+
+ ierr = 0; msg = ""; if (present(default)) argval = default
+ found_argname = .False.; found_excl = .False.
+
+ do ii=1,command_argument_count()
+   call get_command_argument(ii, arg)
+   if (present(exclude)) then
+     if (arg == "--" // trim(exclude)) found_excl = .True.
+   end if
+   if (arg == "--" // trim(argname)) then
+     found_argname = .True.
+     call get_command_argument(ii + 1, arg, status=istat)
+     if (istat == 0) then
+       read(arg, *, iostat=istat, iomsg=iomsg) argval
+       if (istat /= 0) then
+         ierr = ierr + 1; msg = sjoin(msg, ch10, iomsg)
+       end if
+     else 
+       ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument") 
+     end if
+   end if
+ end do
+
+ if (ierr /= 0) msg = sjoin("Error while reading argument: ", argname, ch10, msg)
+ if (found_argname .and. found_excl) then
+   ierr = ierr + 1; msg = sjoin("Variables", argname, "and", exclude, "are mutually exclusive", ch10, msg)
+ end if
+
+end function get_arg_dp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_argparse/get_arg_list_int
+!! NAME
+!!  get_arg_list_int
+!!
+!! FUNCTION
+!!  Parse array argument from command line. Return exit code.
+!!
+!! INPUT
+!!  argname= Argument name
+!!  [default]= Default value (scalar)
+!!  [default_list]= Default value (vector)
+!!  [exclude]= argname and exclude are mutually exclusive.
+!!  [want_len]= Require want_len items in CLI.
+!!  
+!! OUTPUT
+!!  argval= Value of argname
+!!  msg= Error message
+!!
+!! SOURCE
+
+integer function get_arg_list_int(argname, argval, lenr, msg, default, default_list, exclude, want_len) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: argname
+ integer,intent(out) :: argval(:)
+ integer,intent(out) :: lenr
+ character(len=*),intent(out) :: msg
+ character(len=*),optional,intent(in) :: exclude
+ integer,optional,intent(in) :: default
+ integer,optional,intent(in) :: default_list(:)
+ integer,optional,intent(in) :: want_len
+
+!Local variables-------------------------------
+ integer :: ii, istat, iarg, maxlen
+ logical :: found_argname, found_excl
+ character(len=500) :: arg, iomsg
+
+! *************************************************************************
+
+ ierr = 0; msg = ""; lenr = 0
+ found_argname = .False.; found_excl = .False.
+
+ maxlen = size(argval); 
+ if (maxlen == 0) then
+   ierr = ierr + 1; msg = "zero-sized argval!"; return
+ end if
+
+ if (present(default)) argval = default
+ if (present(default_list)) argval = default_list
+
+ do ii=1,command_argument_count()
+   call get_command_argument(ii, arg)
+   if (present(exclude)) then
+     if (arg == "--" // trim(exclude)) found_excl = .True.
+   end if
+   if (arg == "--" // trim(argname)) then
+     ! Read list of values
+     found_argname = .True.
+     do iarg=1,maxlen
+       call get_command_argument(ii + iarg, arg, status=istat)
+       if (istat == 0) then
+         !write(std_out, *)"arg:", trim(arg)
+         if (startswith(arg, "--")) exit
+         read(arg,*, iostat=istat, iomsg=iomsg) argval(iarg)
+         if (istat == 0) then
+           lenr = lenr + 1
+         else
+           ierr = ierr + 1; msg = sjoin(msg, ch10, iomsg)
+         end if
+       else
+         ! If there are less than NUMBER arguments specified at the command line, VALUE will be filled with blanks.
+         if (arg == "") exit
+         ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument") 
+       end if
+     end do
+   end if
+ end do
+
+ if (ierr /= 0) msg = sjoin("Error while reading argument: ", argname, ch10, msg)
+ if (found_argname .and. found_excl) then
+   ierr = ierr + 1; msg = sjoin("Variables", argname, "and", exclude, "are mutually exclusive", ch10, msg)
+ end if
+ if (found_argname .and. present(want_len)) then
+   if (want_len /= lenr) then
+     ierr = ierr + 1
+     msg = sjoin(argname, "requires", itoa(want_len), " tokens while found ", itoa(lenr), ch10, msg)
+   end if
+ end if
+
+end function get_arg_list_int
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_argparse/get_arg_list_dp
+!! NAME
+!!  get_arg_list_dp
+!!
+!! FUNCTION
+
+!! INPUT
+!!  argname
+!!  [default]
+!!  [default_list]
+!!  [exclude]
+!!  [want_len]
+!!  
+!! OUTPUT
+!!  argval
+!!  msg
+!!
+!! SOURCE
+
+integer function get_arg_list_dp(argname, argval, lenr, msg, default, default_list, exclude, want_len) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: argname
+ real(dp),intent(out) :: argval(:)
+ integer,intent(out) :: lenr
+ character(len=*),intent(out) :: msg
+ character(len=*),optional,intent(in) :: exclude
+ real(dp),optional,intent(in) :: default
+ real(dp),optional,intent(in) :: default_list(:)
+ integer,optional,intent(in) :: want_len
+
+!Local variables-------------------------------
+ integer :: ii, istat, iarg, maxlen
+ logical :: found_argname, found_excl
+ character(len=500) :: arg, iomsg
+
+! *************************************************************************
+
+ ierr = 0; msg = ""; lenr = 0
+ found_argname = .False.; found_excl = .False.
+
+ maxlen = size(argval); 
+ if (maxlen == 0) then
+   ierr = ierr + 1; msg = "zero-sized argval!"; return
+ end if
+
+ if (present(default)) argval = default
+ if (present(default_list)) argval = default_list
+
+ do ii=1,command_argument_count()
+   call get_command_argument(ii, arg)
+   if (present(exclude)) then
+     if (arg == "--" // trim(exclude)) found_excl = .True.
+   end if
+   if (arg == "--" // trim(argname)) then
+     ! Read list of values
+     found_argname = .True.
+     do iarg=1,maxlen
+       call get_command_argument(ii + iarg, arg, status=istat)
+       if (istat == 0) then
+         !write(std_out, *)"arg:", trim(arg)
+         if (startswith(arg, "--")) exit
+         read(arg,*, iostat=istat, iomsg=iomsg) argval(iarg)
+         if (istat == 0) then
+           lenr = lenr + 1
+         else
+           ierr = ierr + 1; msg = sjoin(msg, ch10, iomsg)
+         end if
+       else
+         ! If there are less than NUMBER arguments specified at the command line, VALUE will be filled with blanks.
+         if (arg == "") exit
+         ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument") 
+       end if
+     end do
+   end if
+ end do
+
+ if (ierr /= 0) msg = sjoin("Error while reading argument: ", argname, ch10, msg)
+ if (found_argname .and. found_excl) then
+   ierr = ierr + 1; msg = sjoin("Variables", argname, "and", exclude, "are mutually exclusive", ch10, msg)
+ end if
+ if (found_argname .and. present(want_len)) then
+   if (want_len /= lenr) then
+     ierr = ierr + 1
+     msg = sjoin(argname, "requires", itoa(want_len), " tokens while found ", itoa(lenr), ch10, msg)
+   end if
+ end if
+
+end function get_arg_list_dp
 !!***
 
 !----------------------------------------------------------------------

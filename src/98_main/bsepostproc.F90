@@ -4,10 +4,9 @@
 !! bsepostproc
 !!
 !! FUNCTION
-!!  Utility for post-processing Bethe-Salpeter results
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (YG)
+!! Copyright (C) 2013-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,9 +19,6 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,close_haydock,continued_fract,destroy_mpi_enreg
-!!      flush_unit,herald,initmpi_seq,open_haydock,read_dim_haydock
-!!      read_haydock,timein,wrtout,xmpi_end,xmpi_init
 !!
 !! SOURCE
 
@@ -32,159 +28,436 @@
 
 #include "abi_common.h"
 
- program bsepostproc
+program bsepostproc
 
  use defs_basis
  use defs_abitypes
  use m_build_info
  use m_xmpi
- use m_haydock_io
- use m_numeric_tools
+ use m_errors
+ use m_hdr
+ use m_ebands
+ use m_crystal
+ use m_kpts
+ use m_tetrahedron
 
- use m_time,      only : timein
- use m_specialmsg,only : specialmsg_getcount, herald
- use m_io_tools,  only : get_unit, flush_unit
- use m_mpinfo,    only : destroy_mpi_enreg, nullify_mpi_enreg, initmpi_seq
+
+ use defs_datatypes,   only : ebands_t
+ use m_fstrings,       only : sjoin, strcat, basename
+ use m_specialmsg,     only : herald
+ use m_argparse,       only : get_arg, get_arg_list
 
  implicit none
 
 !Arguments ----------------------------
 !Local variables-----------------------
 !scalars
- integer :: funt
- integer :: ios
- integer :: niter_file, io, iq
- integer :: n_all_omegas, nomega
- integer :: term
- real(dp) :: broad_in
- real(dp) :: omega_min,omega_max,delta_omega
- real(dp) :: omegaev
- real(dp) :: tcpui,twalli
- complex(dpc) :: factor
- character(len=50) :: restart_file
- character(len=500) :: frm
- character(len=24) :: codename
- character(len=50) :: output_file
- type(haydock_type) :: haydock_file
- type(MPI_type) :: mpi_enreg
+ integer,parameter :: master = 0
+ integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
+ integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, ierr, occopt, intmeth
+ real(dp) :: spinmagntarget, tsmear, extrael, step, broad
+ character(len=500) :: command, arg, msg
+ character(len=fnlen) :: path !, prefix
+ type(hdr_type) :: hdr
+ type(ebands_t) :: ebands !, ebands_kpath
+ type(edos_t) :: edos
+ type(crystal_t) :: cryst
+ type(t_tetrahedron) :: tetra
 !arrays
- real(dp),allocatable :: tmp_eps(:,:)
- real(dp),allocatable :: bb_file(:)
- complex(dpc),allocatable :: omega(:),green_temp(:),green(:,:)
- complex(dpc),allocatable :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
- complex(dpc),allocatable :: all_omegas(:)
+ integer :: kptrlatt(3,3), new_kptrlatt(3,3)
+ !real(dp):: params(4)
+ real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
 
 !*******************************************************
 
-!Change communicator for I/O (mandatory!)
+ ! Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
 
-!Initialize MPI
+ ! Initialize MPI
  call xmpi_init()
+ comm = xmpi_world; my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
- call timein(tcpui,twalli)
+ ! Initialize memory profiling if it is activated
+ ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
+ ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+#ifdef HAVE_MEM_PROFILING
+ call abimem_init(0)
+#endif
 
-!Default for sequential use
- call initmpi_seq(mpi_enreg)
+ nargs = command_argument_count()
+ ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
 
- codename='BSEPOSTPROC'//REPEAT(' ',13)
- call herald(codename,abinit_version,std_out)
+ !if (nargs == 0) then
+ !else
+ ! Command line options.
+ do ii=1,command_argument_count()
+   call get_command_argument(ii, arg)
+   if (arg == "--version") then
+     write(std_out,"(a)") trim(abinit_version); goto 100
 
- write(std_out,'(a)') "Broad_in (eV) ?"
- read(std_in,*) broad_in
-
- write(std_out,'(a)') "Range of frequencies (eV)"
- read(std_in,*) omega_min, omega_max, delta_omega
-
- write(std_out,'(a)') "Terminator ?"
- read(std_in,*) term
-
- write(std_out,'(a)') "Input file ?"
- read(std_in,*) restart_file
-
- write(std_out,'(a)') "Output file ?"
- read(std_in,*) output_file
-
- omega_min = omega_min/Ha_eV
- omega_max = omega_max/Ha_eV
- delta_omega = delta_omega/Ha_eV
-
- broad_in = broad_in/Ha_eV
-
- nomega = (omega_max - omega_min)/delta_omega + 1
- ABI_MALLOC(omega,(nomega))
- do io=1,nomega
-   omega(io) = (omega_min + (io-1)*delta_omega)  + j_dpc*broad_in
+   else if (arg == "-h" .or. arg == "--help") then
+     ! Document the options.
+     write(std_out,"(a)")" --version              Show version number and exit."
+     write(std_out,"(a)")" -h, --help                 Show this help and exit."
+     write(std_out,"(a)")" -v                         Increase verbosity level"
+     write(std_out,"(2a)")ch10,"=== HEADER ==="
+     write(std_out,"(a)")"hdr FILE                   Print ABINIT header."
+     write(std_out,"(2a)")ch10,"=== KPOINTS ==="
+     write(std_out,"(a)")"ibz FILE --kptopt 1 --kptrlatt or --ngkpt --shiftk 0.5 0.5, 0.5 --chksymbreak 1"
+     write(std_out,"(2a)")ch10,"=== CRYSTAL ==="
+     write(std_out,"(a)")"crystal_print FILE                   Print info on crystalline structure."
+     write(std_out,"(2a)")ch10,"=== ELECTRONS ==="
+     write(std_out,"(a)")"ebands_print FILE                    Print info on electron band structure."
+     write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with bands."
+     write(std_out,"(a)")"ebands_gnuplot FILE                  Produce GNUPLOT file with bands."
+     write(std_out,"(a)")"ebands_dos FILE --intmeth, --step, --broad  Compute electron DOS."
+     !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
+     write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
+     !write(std_out,"(a)")"ebands_skw_path FILE                     Produce BXSF file for Xcrysden."
+     write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
+     write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
+     write(std_out,"(a)")"test_mjv                             Old tetrahedron routine"
+     write(std_out,"(a)")"test_unit_tests                      Run unit tests for tetrahedron routines."
+     goto 100
+   end if
  end do
 
-!Create new frequencies "mirror" in negative range to add
-!their contributions. Can be improved by computing only once
-!zero frequency, but loosing clearness
- n_all_omegas = 2*nomega
+ call get_command_argument(1, command)
 
- ABI_MALLOC(all_omegas,(n_all_omegas))
-!Put all omegas with frequency > 0 in table
- all_omegas(nomega+1:n_all_omegas) = omega
-!Put all omegas with frequency < 0
-!Warning, the broadening must be kept positive
- all_omegas(1:nomega) = -DBLE(omega(nomega:1:-1)) &
-& + j_dpc*AIMAG(omega(nomega:1:-1))
+ select case (command)
+ case ("hdr_print")
+   ABI_CHECK(nargs > 1, "FILE argument is required.")
+   call get_command_argument(2, path)
+   call hdr_read_from_fname(hdr, path, fform, comm)
+   ABI_CHECK(fform /= 0, "fform == 0")
+   !rdwr = 3; if (prtvol > 0) rdwr = 4
+   rdwr = 4
+   call hdr_echo(hdr, fform, rdwr, unit=std_out)
+   
+ case ("ibz")
+   ! Print list of kpoints in the IBZ with the corresponding weights
+   call get_path_cryst(path, cryst, comm)
+   call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
+   ABI_CHECK(any(kptrlatt /= 0), "kptrlatt or ngkpt must be specified")
 
- ABI_MALLOC(green_temp,(n_all_omegas))
+   call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
+      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk) !, bz2ibz)  ! Optional
+   new_nshiftk = size(new_shiftk, dim=2)
 
- call open_haydock(restart_file,haydock_file)
+   write(std_out, "(/, a)")" Input_kptrlatt | New_kptrlatt"
+   do ii=1,3
+     write(std_out, "(2(a, 3(i0,1x)), a)")" [", kptrlatt(ii, :), "],       [ ", new_kptrlatt(ii, :), "]"
+   end do
+   write(std_out, "(/, a)")" Input_shiftk   |   New_shiftk"
+   do ii=1,max(nshiftk, new_nshiftk)
+     if (ii <= nshiftk .and. ii <= new_nshiftk) then
+       write(std_out, "(2(a, 3(f3.1, 1x)), a)")" [", shiftk(:, ii), "],   [", new_shiftk(:, ii), "]"
+     else if (ii <= nshiftk .and. ii > new_nshiftk) then
+       write(std_out, "((a, 3(f3.1, 1x)), a)")" [", shiftk(:, ii), "]      ......"
+     end if
+   end do
+   write(std_out, "(/, a, i0)")" nkibz: ", nkibz
 
- call read_dim_haydock(haydock_file)
+ !case ("testkgrid")
+   !call get_path_cryst(path, cryst, comm)
+   !call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
+   !call testkgrid(bravais, iout, kptrlatt, kptrlen, msym, nshiftk, nsym, prtkpt, rprimd, shiftk, symafm, symrel, vacuum)
 
- ABI_MALLOC(green,(nomega,haydock_file%nq))
+ case ("crystal_print")
+    call get_path_cryst(path, cryst, comm)
+    call crystal_print(cryst, unit=std_out, prtvol=prtvol)
+ 
+ case ("ebands_print", "ebands_xmgrace", "ebands_gnuplot")
+   call get_path_ebands(path, ebands, comm)
+   if (command == "ebands_print") then
+     call ebands_print(ebands, unit=std_out, prtvol=prtvol)
+   else
+     prtebands = 1; if (command == "ebands_gnuplot") prtebands = 2
+     call ebands_write(ebands, prtebands, basename(path))
+   end if
 
- do iq = 1, haydock_file%nq
-   call read_haydock(haydock_file,haydock_file%qpoints(:,iq),aa_file,bb_file,phi_nm1_file,phi_n_file, niter_file,factor)
+ case ("ebands_dos", "ebands_jdos")
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
+   ABI_CHECK(get_arg("intmeth", intmeth, msg, default=1) == 0, msg)
+   ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
+   ABI_CHECK(get_arg("broad", broad, msg, default=0.04 * ev_Ha) == 0, msg)
 
-   call continued_fract(niter_file,term,aa_file,bb_file,n_all_omegas,all_omegas,green_temp)
+   if (command == "ebands_dos") then
+     edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
+     call edos%write(strcat(basename(path), "_EDOS"))
+     call edos%free()
+   else if (command == "ebands_jdos") then
+     !jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+     !call jdos%write(strcat(basename(path), "_EJDOS"))
+     !call jdos%free()
+   end if
 
-!  Computing result from two ranges of frequencies
-!  The real part is added, the imaginary part is substracted
-   green(:,iq) = green_temp(nomega+1:n_all_omegas)+CONJG(green_temp(nomega:1:-1))
+ case ("ebands_bxsf")
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
+   if (ebands_write_bxsf(ebands, cryst, strcat(basename(path), "_BXSF")) /= 0)  then
+     MSG_ERROR("Cannot produce file for Fermi surface, check log file for more info")
+   end if
 
-   green(:,iq) = cone+factor*green(:,iq)
+ !case ("nesting")
+   !call get_path_ebands_cryst(path, ebands, cryst, comm)
+   !ierr = ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermie_nest, qpath_vertices,errmsg)
 
- end do
+ case ("ebands_skw_kpath")
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
+   ! Generate k-path
+   !ABI_CHECK(get_arg("ndivsm", ndivsm, msg, default=20) == 0, msg)
+   !nbounds = dtset%nkpath
+   !if (nbounds <= 0) then
+   !  MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
+   !  nbounds = 5
+   !  ABI_MALLOC(bounds, (3, 5))
+   !  bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
+   !else
+   !  call alloc_copy(dtset%kptbounds, bounds)
+   !end if
+   !kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
+   !call kpath_print(kpath, header="Interpolating energies on k-path", unit=std_out)
+   ! Interpolate band energies with star-functions
+   !params = 0; params(1) = 1; params(2) = 5
+   !if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
+   !ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, params, [1, ebands%mband], comm)
+   !call kpath%free()
+   !call ebands_free(ebands_kpath)
+   !ABI_CHECK(get_arg("prtebands", prtebands, msg, default=1) == 0, msg)
+   !call ebands_write(ebands_kpath, prtebands, basename(path))
+   !call ebands_kpath(ebands_kpath)
 
- call close_haydock(haydock_file)
+   !ebands_kmesh = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
+   !     band_block, comm, out_prefix)
+   !call ebands_free(ebands_kmesh)
 
- ABI_MALLOC(tmp_eps,(2,haydock_file%nq))
+ case ("ebands_extrael")
+   call get_path_ebands(path, ebands, comm)
+   ABI_CHECK(get_arg("occopt", occopt, msg, default=3) == 0, msg)
+   ABI_CHECK(get_arg("tsmear", tsmear, msg, default=tol2) == 0, msg)
+   ABI_CHECK(get_arg("extrael", extrael, msg) == 0, msg)
+   ABI_CHECK(get_arg("spinmagntarget", spinmagntarget, msg, default=-99.99_dp) == 0, msg)
 
- funt = get_unit()
- open(unit=funt,file=output_file,form="formatted",iostat=ios)
+   call ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol)
+   call ebands_set_nelect(ebands, ebands%nelect + extrael, spinmagntarget, msg)
+   write(std_out, "(a)") msg
+   call ebands_update_occ(ebands, spinmagntarget, prtvol=prtvol)
+   call ebands_print(ebands, prtvol=prtvol)
 
- write(funt,'(a)')"# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ... "
-!write(frm,*)'(f7.3,',2*BSp%nq,'es12.4)'
- write(frm,*)'(f7.3,',2*haydock_file%nq,'(1x,f9.4))'
- do io=1,nomega
-   omegaev = DBLE(omega(io))*Ha_eV
-   tmp_eps(1,:) = REAL (green(io,:))
-   tmp_eps(2,:) = AIMAG(green(io,:))
-!  where (ABS(tmp_eps) < SMALL) ! this to improve the portability of the automatic tests.
-!  tmp_eps = zero
-!  end where
-   write(funt,frm) omegaev,(tmp_eps(:,iq), iq=1,haydock_file%nq)
- end do
+ case ("tetra_mjv")
+   call get_path_cryst(path, cryst, comm)
+   call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
+   ABI_CHECK(any(kptrlatt /= 0), "ngkpt or kptrlatt must be specified")
 
- ABI_FREE(tmp_eps)
+   call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
+      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk) !, bz2ibz)  ! Optional
 
- close(funt)
+   new_nshiftk = size(new_shiftk, dim=2)
+   tetra = tetra_from_kptrlatt(cryst, kptopt, new_kptrlatt, new_nshiftk, new_shiftk, nkibz, kibz, comm, msg, ierr)
+   ABI_CHECK(ierr == 0, msg)
+   call tetra_write(tetra, nkibz, kibz, strcat(basename(path), "_TETRA"))
+   call destroy_tetra(tetra)
 
- ABI_FREE(omega)
- ABI_FREE(all_omegas)
- ABI_FREE(green_temp)
+ case ("tetra_unit_tests")
+   !call phdos_unittests(comm)
 
- call wrtout(std_out,ch10//" Analysis completed.","COLL")
+ case default
+   MSG_ERROR(sjoin("Unknown command:", command))
+ end select
 
- call flush_unit(std_out)
+ ! Deallocate memory to make memcheck happy.
+ call hdr_free(hdr)
+ call cryst%free()
+ call ebands_free(ebands)
 
- call destroy_mpi_enreg(mpi_enreg)
- call xmpi_end()
+ ABI_SFREE(kibz)
+ ABI_SFREE(wtk)
+ ABI_SFREE(kbz)
+ ABI_SFREE(new_shiftk)
 
- end program bsepostproc
+ call abinit_doctor("__bsepostproc")
+
+ 100 call xmpi_end()
+
+contains 
+
+
+subroutine get_path_ebands_cryst(path, ebands, cryst, comm)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(out) :: path
+ type(ebands_t),intent(out) :: ebands
+ type(crystal_t),intent(out) :: cryst
+ integer,intent(in) :: comm
+
+!Arguments ----------------------------
+!Local variables-----------------------
+ integer :: nargs
+
+ nargs = command_argument_count()
+ ABI_CHECK(nargs > 1, "FILE argument is required.")
+ call get_command_argument(2, path)
+ cryst = crystal_from_file(path, comm)
+ ebands = ebands_from_file(path, comm)
+
+end subroutine get_path_ebands_cryst
+
+subroutine get_path_ebands(path, ebands, comm)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(out) :: path
+ type(ebands_t),intent(out) :: ebands
+ integer,intent(in) :: comm
+
+!Arguments ----------------------------
+!Local variables-----------------------
+ integer :: nargs
+
+ nargs = command_argument_count()
+ ABI_CHECK(nargs > 1, "FILE argument is required.")
+ call get_command_argument(2, path)
+ ebands = ebands_from_file(path, comm)
+
+end subroutine get_path_ebands
+
+subroutine get_path_cryst(path, cryst, comm)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(out) :: path
+ type(crystal_t),intent(out) :: cryst
+ integer,intent(in) :: comm
+
+!Arguments ----------------------------
+!Local variables-----------------------
+ integer :: nargs
+
+ nargs = command_argument_count()
+ ABI_CHECK(nargs > 1, "FILE argument is required.")
+ call get_command_argument(2, path)
+ cryst = crystal_from_file(path, comm)
+
+end subroutine get_path_cryst
+
+subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
+
+ use m_fstrings,       only : atoi
+
+!Arguments ------------------------------------
+ integer,intent(out) :: kptopt, nshiftk, chksymbreak
+ integer,intent(out) :: kptrlatt(3,3)
+ real(dp),allocatable,intent(out) :: shiftk(:,:)
+
+!Local variables-------------------------------
+ integer :: ii, lenr
+ character(len=500) :: arg, msg
+ integer :: ivec9(9), ngkpt(3)
+ real(dp) :: my_shiftk(3 * MAX_NSHIFTK)
+
+! *************************************************************************
+ 
+ ABI_CHECK(get_arg("kptopt", kptopt, msg, default=1) == 0, msg)
+ ABI_CHECK(get_arg("chksymbreak", chksymbreak, msg, default=1) == 0, msg)
+ ABI_CHECK(get_arg_list("ngkpt", ngkpt, lenr, msg, exclude="kptrlatt", want_len=3) == 0, msg)
+ if (lenr == 3) then
+   kptrlatt = 0
+   do ii=1,3
+     kptrlatt(ii, ii) = ngkpt(ii)
+   end do
+ end if
+ ABI_CHECK(get_arg_list("kptrlatt", ivec9, lenr, msg, exclude="ngkpt", want_len=9) == 0, msg)
+ if (lenr == 9) kptrlatt = transpose(reshape(ivec9, [3, 3]))
+
+ ! Init default
+ ABI_CHECK(get_arg_list("shiftk", my_shiftk, lenr, msg) == 0, msg)
+ if (lenr /= 0) then
+   ABI_CHECK(mod(lenr, 3) == 0, "Expecting 3 * nshift array")
+   nshiftk = lenr / 3
+   ABI_MALLOC(shiftk, (3, nshiftk))
+   shiftk = reshape(my_shiftk(1:lenr), [3, nshiftk])
+ else
+   nshiftk = 1
+   ABI_MALLOC(shiftk, (3, nshiftk))
+   shiftk(:, 1) = [half, half, half]
+ end if
+
+ write(std_out, *)"kptopt = ", kptopt, ", chksymbreak = ", chksymbreak, ", nshiftk = ", nshiftk, ", kptrlatt = ", kptrlatt
+
+end subroutine parse_kargs
+
+
+type(crystal_t) function crystal_from_file(path, comm) result(new)
+
+ use m_fstrings,       only : endswith
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: fform, timrev
+ type(hdr_type) :: hdr
+
+! *************************************************************************
+
+ if (endswith(path, ".abi") .or. endswith(path, ".in")) then
+   NOT_IMPLEMENTED_ERROR()
+   !new = crystal_from_abinit_input(path, comm)
+   !call iofn1(filnam, filstat, comm)
+   !call get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
+ else
+ !if (endswith(path, ".nc")) then
+    !new = crystal_from_ncfile(path, comm)
+    call hdr_read_from_fname(hdr, path, fform, comm)
+    ABI_CHECK(fform /= 0, "fform == 0")
+    timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
+    new = hdr_get_crystal(hdr, timrev)
+    call hdr_free(hdr)
+ !else
+ !  MSG_ERROR(sjoin("Don't know how to construct crystal structure from:", path, ch10, "Supported extensions: .nc, .abi., .in"))
+ end if
+
+end function crystal_from_file
+
+type(ebands_t) function ebands_from_file(path, comm) result(new)
+
+ use m_fstrings,       only : endswith
+
+ use m_wfk
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: fform
+ type(hdr_type) :: hdr
+!arrays
+ real(dp),pointer :: gs_eigen(:,:,:)
+
+! *************************************************************************
+
+ if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
+   call hdr_read_from_fname(hdr, path, fform, comm)
+   ABI_CHECK(fform /= 0, "fform == 0")
+   call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
+   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   call hdr_free(hdr)
+   ABI_FREE(gs_eigen)
+ else if (endswith(path, ".nc")) then
+   NOT_IMPLEMENTED_ERROR()
+   !new = ebands_ncread(path, comm)
+ else
+   MSG_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
+ end if
+
+end function ebands_from_file
+
+end program bsepostproc
 !!***
