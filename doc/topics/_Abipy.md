@@ -11,7 +11,7 @@ This page gives hints on how to use the Abipy python package with the ABINIT pac
 [AbiPy](https://github.com/abinit/abipy) is a Python library to analyze the
 results produced by Abinit, It also provides tools to generate input files and
 workflows to automate ab-initio calculations and typical convergence studies.
-AbiPy is interfaced with [pymatgen](http://www.pymatgen.org) and this allows
+AbiPy is interfaced with [pymatgen](http://pymatgen.org) and this allows
 users to benefit from the different tools and python objects available in the
 pymatgen ecosystem. AbiPy can be used in conjunction with matplotlib, pandas,
 ipython and jupyter thus providing a powerful and user-friendly environment
