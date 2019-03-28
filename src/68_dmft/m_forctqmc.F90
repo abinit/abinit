@@ -41,6 +41,7 @@ MODULE m_forctqmc
  public :: testcode_ctqmc_b
  public :: ctqmcoutput_to_green
  public :: ctqmcoutput_printgreen
+ public :: ctqmc_calltriqs
 !!***
 
 contains
@@ -96,7 +97,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use m_errors
  use m_xmpi
 
- use m_special_funcs, only : sbf8
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
  use m_green, only : green_type,occup_green_tau,print_green,printocc_green,spline_fct,copy_green,init_green,destroy_green,&
@@ -118,13 +118,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use m_data4entropyDMFT
  !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
  use m_io_tools, only : flush_unit, open_file
- use m_paw_numeric, only : jbessel=>paw_jbessel
  use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
 
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
- use TRIQS_CTQMC !Triqs module
-#endif
- use ISO_C_BINDING
  implicit none
 
 !Arguments ------------------------------------
@@ -182,33 +177,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(CtqmcoffdiagInterface) :: hybridoffdiag   !!! WARNING THIS IS A BACKUP PLAN
  type(green_type) :: greenlda
  type(matlu_type), allocatable  :: hybri_coeff(:)
+ integer :: unt,unt2
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
- logical(kind=1) :: rot_inv = .false.
  logical(kind=1) :: leg_measure = .true.
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
- logical(kind=1) :: hist = .false.
- logical(kind=1) :: wrt_files = .true.
- logical(kind=1) :: tot_not = .true.
-#endif
-
- integer :: nfreq,unt,unt2
- integer :: ntau ! >= 2*nfreq + 1
- integer :: nleg
- integer :: ileg
- integer :: verbosity_solver ! min 0 -> max 3
-
- real(dp) :: beta,besp,bespp,xx
- complex(dpc) :: u_nl
-
- complex(dpc), allocatable, target ::fw1_nd_tmp(:,:,:)
- complex(dpc), allocatable, target :: g_iw(:,:,:)
- real(dp), allocatable, target :: u_mat_ij(:,:)
- real(dp), allocatable, target :: u_mat_ijkl(:,:,:,:)
- real(dp), allocatable, target :: u_mat_ijkl_tmp(:,:,:,:)
- real(dp), allocatable, target :: gl_nd(:,:,:)
- real(dp), allocatable :: jbes(:)
-
- type(c_ptr) :: levels_ptr, fw1_nd_ptr, u_mat_ij_ptr, u_mat_ijkl_ptr, g_iw_ptr, gtau_ptr, gl_ptr
 
 ! ************************************************************************
  mbandc=paw_dmft%mbandc
@@ -1310,20 +1281,20 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &       opt_gmove   =paw_dmft%dmftctqmc_gmove )
      endif
 
-       write(message,'(a,2x,2a)') ch10,&
-&       " == Initialization CTQMC done", ch10
+       write(message,'(a,2x,2a)') ch10, " == Initialization CTQMC done", ch10
        call wrtout(std_out,message,'COLL')
      end if
 
      if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
-       ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
-         open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
+       !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
+       ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) 
+       open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
        if(paw_dmft%dmft_solv==5) ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
-!     use  gw_tmp to put freq
+       !use  gw_tmp to put freq
        do ifreq=1,paw_dmft%dmft_nwlo
-          if(paw_dmft%dmft_solv==5) gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
+         if(paw_dmft%dmft_solv==5) gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
          gw_tmp_nd(ifreq,nflavor,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
        end do
      end if
@@ -1379,299 +1350,16 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        else if (paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
        ! =================================================================
 
-       ! fw1_nd: Hybridation
-       ! levels_ctqmc: niveaux
-       ! hu(itypat)%udens(:,:) : U_ij
-       ! hu(itypat)%u(:,:,:,:) : uijkl
-       ! temperature : paw_dmft%temp
-       ! paw_dmft%dmftqmc_l: nombre de points en temps -1
-       ! paw_dmft%dmftqmc_n: nombre de cycles
-       ! ?? Quelles sorties: Les fonctions de Green
-       ! frequence/temps/Legendre.
-       ! Double occupations ?? <n_i n_j>
-       ! test n_tau > 2*nfreq => ntau = 2*nfreq + 1
-!        for non diagonal code:
-!        call CtqmcInterface_run(hybrid,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
-!&       Gw=gw_tmp_nd,D=Doccsum,E=green%ecorr_qmc(iatom),&
-!&       Noise=Noise,matU=hu(itypat)%udens,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
-       !Check choice of user to fix model bool var for the solver
-         if (paw_dmft%dmft_solv==6) then
-           rot_inv = .false.
-         else !obviously paw_dmft%dmft_solv==7 with rot invariant terms
-           rot_inv = .true.
-         end if
+         if ( paw_dmft%dmftqmc_l >= (2*paw_dmft%dmft_nwli)+1 ) then
 
-         nfreq = paw_dmft%dmft_nwli
-       !paw_dmft%dmft_nwlo = paw_dmft%dmft_nwli !transparent for user
-         ntau  = paw_dmft%dmftqmc_l !(2*paw_dmft%dmftqmc_l)+1 !nfreq=paw_dmft%dmft_nwli
-         nleg  = paw_dmft%dmftctqmc_triqs_nleg
-
-         if ( ntau >= (2*nfreq)+1 ) then
-
-           verbosity_solver = paw_dmft%prtvol
-           beta = 1.0/(paw_dmft%temp*Ha_eV)
-
-           !Allocation in/output array phase:
-           ABI_ALLOCATE(fw1_nd_tmp,(1:nflavor,1:nflavor,1:nfreq)) !column major
-           ABI_ALLOCATE(g_iw,(1:nflavor,1:nflavor,1:nfreq)) !column major
-           ABI_ALLOCATE(u_mat_ij,(1:nflavor,1:nflavor)) !column major
-           ABI_ALLOCATE(u_mat_ijkl,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
-           ABI_ALLOCATE(u_mat_ijkl_tmp,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
-
-           if ( leg_measure ) then !only if functionality is enabled
-             ABI_ALLOCATE(gl_nd,(1:nleg,1:nflavor,1:nflavor)) !column major !nl = 30 by default
-           end if
-
-           !Conversion datas Ha -> eV (some duplications for test...)
-           !fw1_nd_tmp = fw1_nd(1:paw_dmft%dmftqmc_l,:,:) * Ha_eV !fw1_nd = fw1_nd * Ha_eV !Ok?
-
-           do iflavor=1,nflavor
-             do iflavor1=1,nflavor
-               do ifreq=1,nfreq
-                 fw1_nd_tmp(iflavor,iflavor1,ifreq) = fw1_nd(ifreq,iflavor,iflavor1) * Ha_eV
-!              WRITE(500,*) "[IN Fortran] F[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",fw1_nd(ifreq,iflavor,iflavor1)
-               end do
-             end do
-           end do
-
-         !Report test
-!         WRITE(502,*) hu(itypat)%udens
-!         do ifreq=1,paw_dmft%dmftqmc_l
-!           write(501,*) ((fw1_nd(ifreq,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
-!         enddo
-         !write(866,*)paw_dmft%dmft_nwlo,paw_dmft%dmftqmc_l
-         !write(866,*) u_mat_ij
-!        do iflavor=1,nflavor+1
-!          do iflavor1=1,nflavor+1
-!            WRITE(502,*) "[OUT Fortran] U(i,j)[ l= ",iflavor," l_= ",iflavor1,"] = ",hu(itypat)%udens(iflavor,iflavor1)
-!          enddo
-!        enddo
-
-!          if(paw_dmft%myproc==0) then
-!          do iflavor=1,nflavor
-!            do iflavor1=1,nflavor
-!               do iflavor2=1,nflavor
-!                  do iflavor3=1,nflavor
-!                    write(490,*), hu(itypat)%vee(iflavor,iflavor1,iflavor2,iflavor3)
-!                  enddo
-!                 enddo
-!                enddo
-!              enddo
-!          endif
-
-!          if(paw_dmft%myproc==0) then
-!          do iflavor=1,nflavor
-!            do iflavor1=1,nflavor
-!            write(491,*), hu(itypat)%udens(iflavor,iflavor1) !(1,1,1,1)
-!            enddo
-!          enddo
-!          endif
-
-!          do iflavor=1,nflavor
-!            do iflavor1=1,nflavor
-!          do iflavor2=1,nflavor
-!            do iflavor3=1,nflavor
-                 ! WRITE(552,*), hu(itypat)%vee!(iflavor,iflavor1,iflavor2,iflavor3)
-!            enddo
-!          enddo
-!            enddo
-!          enddo
-
-           call vee_ndim2tndim_hu_r(lpawu,hu(itypat)%vee,u_mat_ijkl_tmp,1)
-           do iflavor=1,nflavor
-             do iflavor1=1,nflavor
-               do iflavor2=1,nflavor
-                 do iflavor3=1,nflavor
-                   u_mat_ijkl(iflavor,iflavor1,iflavor2,iflavor3)   =  Ha_eV * u_mat_ijkl_tmp(iflavor,iflavor1,iflavor2,iflavor3)
-                 end do
-               end do
-             end do
-           end do
-
-         !u_mat_ijkl   =  Ha_eV * reshape( u_mat_ijkl , [nflavor,nflavor,nflavor,nflavor] )  !column -> row major + conversion
-           u_mat_ij     = transpose( hu(itypat)%udens ) * Ha_eV !column -> row major + conversion
-           levels_ctqmc = levels_ctqmc * Ha_eV
-
-         !Location array in memory for C++ pointer args to pass
-         !----------------------------------------------------
-           g_iw_ptr       = C_LOC( gw_tmp_nd ) !C_LOC( g_iw )
-           gtau_ptr       = C_LOC( gtmp_nd ) !C_LOC( gtau )
-           gl_ptr         = C_LOC( gl_nd )
-           fw1_nd_ptr     = C_LOC( fw1_nd_tmp )
-           u_mat_ij_ptr   = C_LOC( u_mat_ij )
-           u_mat_ijkl_ptr = C_LOC( u_mat_ijkl )
-           levels_ptr     = C_LOC( levels_ctqmc )
-
-         !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
-         !----------------------------------------------------
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
-           call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,                            &
-&           nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
-&           paw_dmft%dmftctqmc_meas*2*2*nflavor, paw_dmft%dmftqmc_therm,               &
-&           verbosity_solver, paw_dmft%dmftqmc_seed,beta,                              &
-&           levels_ptr,  u_mat_ij_ptr, u_mat_ijkl_ptr, fw1_nd_ptr,                     &
-&           g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
-#endif
-
-         !WRITE(*,*) "Hello Debug"
-         !call xmpi_barrier(paw_dmft%spacecomm) !Resynch all processus after calling Impurity solver from TRIQS
-
-         !Report output datas from TRIQS to Abinit
-         !Interacting G(iw)
-           do ifreq=1,nfreq
-             do iflavor1=1,nflavor
-               do iflavor=1,nflavor
-            !   gw_tmp_nd(ifreq,iflavor,iflavor1) = g_iw(iflavor,iflavor1,ifreq) !* Ha_eV !because 1/ G0(eV)
-            !  WRITE(503,*) "[OUT Fortran] G(iw)[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",gw_tmp_nd(ifreq,iflavor,iflavor1)!g_iw(iflavor,iflavor1,ifreq)
-               end do
-             end do
-           end do
-
-!        Convert in Ha
-           gw_tmp_nd = gw_tmp_nd*Ha_eV
-
-!            do iflavor1=1,nflavor
-!              do iflavor=1,nflavor
-!
-!               WRITE(510,*) "[OUT Fortran] U[ l= ",iflavor," l_= ",iflavor1,"] = ",u_mat_ij(iflavor,iflavor1)
-!              enddo
-!            enddo
-
-!        if(paw_dmft%myproc==0) write(6,*) "essai",paw_dmft%myproc, gw_tmp_nd(2,1,1)
-!        if(paw_dmft%myproc==1) write(6,*) "essai",paw_dmft%myproc,gw_tmp_nd(2,1,1)
-!        if(paw_dmft%myproc==0) write(621,*) "essai",paw_dmft%myproc, gw_tmp_nd(2,1,1)
-!        if(paw_dmft%myproc==1) write(622,*) "essai",paw_dmft%myproc,gw_tmp_nd(2,1,1)
-!        call flush_unit(621)
-!        call flush_unit(622)
-!        write(message,*) ch10, "essai",paw_dmft%myproc, paw_dmft%myproc,paw_dmft%dmftqmc_seed!gw_tmp_nd(2,1,1)
-!        call wrtout(555,message,'PERS',.true.)
-!        if(paw_dmft%myproc==0) write(499,*) "essai",paw_dmft%myproc, paw_dmft%dmftqmc_seed
-!        if(paw_dmft%myproc==1) write(498,*) "essai",paw_dmft%myproc,paw_dmft%dmftqmc_seed
-
-         !Its associated G(tau): Problem of compatibility => paw_dmft%dmftqmc_l < (2*paw_dmft%dmftqmc_l)+1 => We report only  paw_dmft%dmftqmc_l =  first values of G(tau)...
-!          do iflavor=1,nflavor
-!            do iflavor1=1,nflavor
-!              do itau=1,ntau
-!                if ( modulo(itau,2) == 1 ) then !Problem of binding: paw_dmft%dmftqmc_l =! ntau => We take one value by 2 and Write in file all the G(tau) out function from TRIQS
-                 !gtmp_nd(itau,iflavor,iflavor1) = gtau(iflavor,iflavor1,itau)
-!                endif
-!                if(paw_dmft%myproc==0) then
-!                  WRITE(504,*) "[OUT Fortran] G[ tau= ",itau," l= ",iflavor," l_= ",iflavor1,"] = ",gtmp_nd(itau,iflavor,iflavor1) !gtmp_nd(itau,iflavor,iflavor1) !passage ok avec ntau/iflavor1/iflavor (iflavor,iflavor1,ntau)
-!                endif
-!              enddo
-!            enddo
-!          enddo
-
-         ! Write Legendre Polynoms G(L) for extrapolation of Interacting G(iw) by FT, only if leg_measure == TRUE
-         ! -------------------------------------------------------------------------------------------
-           if (leg_measure) then
-             do ileg=1,nleg
-               WRITE(505,*) ileg,((gl_nd(ileg,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
-             end do
-             close(505)
-           end if
-!        if(paw_dmft%myproc==0) then
-!          do itau=1,paw_dmft%dmftqmc_l
-!            write(490,*) ((gtmp_nd(itau,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
-!          enddo
-!        endif
-           ABI_DEALLOCATE( fw1_nd_tmp )
-           ABI_DEALLOCATE( g_iw )
-           ABI_DEALLOCATE( u_mat_ijkl )
-           ABI_DEALLOCATE( u_mat_ijkl_tmp )
-           ABI_DEALLOCATE( u_mat_ij )
-
-           
-           !  Compute Green's function in imaginary freq using Legendre coefficients
-           ! -----------------------------------------------------------------------
-           if (leg_measure) then
-             call xmpi_barrier(paw_dmft%spacecomm)
-             call flush_unit(std_out)
-             write(message,'(2a)') ch10,"    ==  Compute G(iw_n) from Legendre coefficients"
-             call wrtout(std_out,message,'COLL')
-             ABI_ALLOCATE( jbes, (nleg))
-             gw_tmp_nd=czero
-
-            !   write(77,*) " TEST OF BESSEL S ROUTINES 0 0"
-
-            !   xx=0_dp
-            !   ileg=0
-            !   call sbf8(ileg+1,xx,jbes)
-            !   write(77,*) "T0 A",jbes(ileg+1)
-            !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
-            !   write(77,*) "T0 B",jbes(ileg+1)
-            !   write(77,*) "T0 C",bessel_jn(ileg,xx)
-
-            !   write(77,*) " TEST OF BESSEL S ROUTINES 1.5 0"
-
-            !   xx=1.5_dp
-            !   ileg=0
-            !   call sbf8(ileg+1,xx,jbes)
-            !   write(77,*) "T1 A",jbes(ileg+1)
-            !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
-            !   write(77,*) "T1 B",jbes(ileg+1)
-            !   write(77,*) "T1 C",bessel_jn(ileg,xx)
-
-            !   write(77,*) " TEST OF BESSEL S ROUTINES 1.5 1"
-
-            !   xx=1.5_dp
-            !   ileg=1
-            !   call sbf8(ileg+1,xx,jbes)
-            !   write(77,*) "T2 A",jbes(ileg+1)
-            !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
-            !   write(77,*) "T2 B",jbes(ileg+1)
-            !   write(77,*) "T2 C",bessel_jn(ileg,xx)
-
-
-             do ifreq=1,paw_dmft%dmft_nwli
-               xx=real(2*ifreq-1,kind=dp)*pi/two
-               if(xx<=100_dp) call sbf8(nleg,xx,jbes)
-               do ileg=1,nleg
-              ! write(77,*) "A",ifreq,jbes(ileg),xx
-
-                 if(xx>=99) call jbessel(jbes(ileg),besp,bespp,ileg-1,1,xx)
-              ! write(77,*) "B",ifreq,jbes(ileg),xx
-
-               !write(77,*) "C",ifreq,jbes(ileg),xx
-
-                 u_nl=sqrt(float(2*ileg-1))*(-1)**(ifreq-1)*cmplx(0_dp,one)**(ileg)*jbes(ileg)
-           !    write(77,*) "----------",ileg,jbes(ileg), u_nl,gl_nd(ileg,1,1)
-
-                 do iflavor=1,nflavor
-                   do iflavor1=1,nflavor
-                     gw_tmp_nd(ifreq,iflavor,iflavor1)= gw_tmp_nd(ifreq,iflavor,iflavor1) + &
-&                     u_nl*gl_nd(ileg,iflavor,iflavor1)
-                   end do
-                 end do
-
-           !    write(77,*) "------------------", gw_tmp_nd(ifreq,1,1)
-
-               end do
-           !  write(77,*) "------------------ sum ", gw_tmp_nd(ifreq,1,1)
-             end do
-             ABI_DEALLOCATE( jbes )
-             call xmpi_barrier(paw_dmft%spacecomm)
-             call flush_unit(std_out)
-           end if
-           gw_tmp_nd = gw_tmp_nd*Ha_eV
-
-
-           if ( leg_measure ) then !only if functionality is enabled
-             ABI_DEALLOCATE(gl_nd)
-           end if
+           call ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
 
          else
            write(message,'(2a)') ch10," Can't launch TRIQS CTHYB solver because dmftqmc_l must be >= 2*dmft_nwli + 1"
            MSG_ERROR(message)
          end if
 
-
-       ! =================================================================
-       !    END CTQMC run TRIQS
-       ! =================================================================
        end if
-
-
 
      ! =================================================================
      !    CTQMC run for tests
@@ -1706,8 +1394,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      !    END CALL TO CTQMC SOLVERS
      ! =================================================================
 
-
-! =================================================================
 
      ! Print green function is files directly from CTQMC
      ! --------------------------------------------------
@@ -2494,7 +2180,7 @@ subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iat
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type), intent(in)  :: paw_dmft
- type(green_type), intent(out) :: green
+ type(green_type), intent(inout) :: green
  real(dp), allocatable, intent(in) :: gtmp_nd(:,:,:)
  complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
  complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:) 
@@ -2791,6 +2477,392 @@ subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_
 
 
 end subroutine ctqmcoutput_printgreen
+!!***
+
+!!****f* m_forctqmc/ctqmc_calltriqs
+!! NAME
+!! ctqmc_calltriqs
+!!
+!! FUNCTION
+!!  Call TRIQS solver and perform calculation of Green's function using
+!!  Legendre coefficients.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
+!!  cryst_struc <type(crystal_t)>=crystal structure data
+!!  hu <type(hu_type)>= U interaction
+!!  levels_ctqmc(nflavor) = atomic levels
+!!  gw_tmp_nd(nb_of_frequency,nflavor,nflavor) = Green's fct in imag freq (with off diag terms)
+!!  gtmp_nd(dmftqmc_l,nflavor,nflavor) = Green's fct in imag time (with off diag terms)
+!!  fw1_nd(dmft_nwlo,nflavor,nflavor) = Hybridization fct in imag time (with off diag terms)
+!!  leg_measure = logical, true is legendre measurement is activated
+!!  iatom= index of atom
+!!  
+!! OUTPUT
+!!
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      qmc_prep_ctqmc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_errors
+ use m_xmpi
+ use m_special_funcs, only : sbf8
+ use m_crystal, only : crystal_t
+ !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
+ use m_io_tools, only : flush_unit, open_file
+ use m_paw_numeric, only : jbessel=>paw_jbessel
+ use m_pawang, only : pawang_type
+ use m_paw_dmft, only : paw_dmft_type
+ use m_matlu, only : init_matlu, rotate_matlu,slm2ylm_matlu,sym_matlu,destroy_matlu,matlu_type
+ use m_hu, only : hu_type,vee_ndim2tndim_hu_r
+
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+ use TRIQS_CTQMC !Triqs module
+#endif
+ use ISO_C_BINDING
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(paw_dmft_type), intent(in)  :: paw_dmft
+ type(crystal_t),intent(in) :: cryst_struc
+ type(hu_type), intent(in) :: hu(cryst_struc%ntypat)
+ real(dp), allocatable, target, intent(inout) :: gtmp_nd(:,:,:)
+ complex(dpc), allocatable, target, intent(inout) :: gw_tmp_nd(:,:,:) 
+ complex(dpc), allocatable, target, intent(in) :: fw1_nd(:,:,:) 
+ real(dp), allocatable, target, intent(inout) ::  levels_ctqmc(:) 
+ logical(kind=1), intent(in) :: leg_measure 
+ integer, intent(in) :: iatom
+
+!Local variables ------------------------------
+ complex(dpc), allocatable, target ::fw1_nd_tmp(:,:,:)
+ complex(dpc), allocatable, target :: g_iw(:,:,:)
+ real(dp), allocatable, target :: u_mat_ij(:,:)
+ real(dp), allocatable, target :: u_mat_ijkl(:,:,:,:)
+ real(dp), allocatable, target :: u_mat_ijkl_tmp(:,:,:,:)
+ real(dp), allocatable, target :: gl_nd(:,:,:)
+ type(c_ptr) :: levels_ptr, fw1_nd_ptr, u_mat_ij_ptr, u_mat_ijkl_ptr, g_iw_ptr, gtau_ptr, gl_ptr
+ real(dp), allocatable :: jbes(:)
+ character(len=500) :: message
+ integer :: ifreq, itau,iflavor1
+ integer :: iflavor2,iflavor,nflavor,iflavor3,itypat
+ integer :: nfreq,ntau,nleg,ileg
+ integer :: verbosity_solver ! min 0 -> max 3
+ logical(kind=1) :: rot_inv = .false.
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+ logical(kind=1) :: hist = .false.
+ logical(kind=1) :: wrt_files = .true.
+ logical(kind=1) :: tot_not = .true.
+#endif
+ real(dp) :: beta,besp,bespp,xx
+ complex(dpc) :: u_nl
+! ************************************************************************
+
+ ! fw1_nd: Hybridation
+ ! levels_ctqmc: niveaux
+ ! hu(itypat)%udens(:,:) : U_ij
+ ! hu(itypat)%u(:,:,:,:) : uijkl
+ ! temperature : paw_dmft%temp
+ ! paw_dmft%dmftqmc_l: nombre de points en temps -1
+ ! paw_dmft%dmftqmc_n: nombre de cycles
+ ! ?? Quelles sorties: Les fonctions de Green
+ ! frequence/temps/Legendre.
+ ! Double occupations ?? <n_i n_j>
+ ! test n_tau > 2*nfreq => ntau = 2*nfreq + 1
+ !   for non diagonal code:
+ !   call CtqmcInterface_run(hybrid,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
+ !&  Gw=gw_tmp_nd,D=Doccsum,E=green%ecorr_qmc(iatom),&
+ !&  Noise=Noise,matU=hu(itypat)%udens,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
+ !Check choice of user to fix model bool var for the solver
+ if (paw_dmft%dmft_solv==6) then
+   rot_inv = .false.
+ else !obviously paw_dmft%dmft_solv==7 with rot invariant terms
+   rot_inv = .true.
+ end if
+ 
+ nfreq = paw_dmft%dmft_nwli
+ !paw_dmft%dmft_nwlo = paw_dmft%dmft_nwli !transparent for user
+ ntau  = paw_dmft%dmftqmc_l !(2*paw_dmft%dmftqmc_l)+1 !nfreq=paw_dmft%dmft_nwli
+ nleg  = paw_dmft%dmftctqmc_triqs_nleg
+ nflavor=2*(2*paw_dmft%lpawu(iatom)+1)
+ itypat=cryst_struc%typat(iatom)
+
+
+ verbosity_solver = paw_dmft%prtvol
+ beta = 1.0/(paw_dmft%temp*Ha_eV)
+
+ !Allocation in/output array phase:
+ ABI_ALLOCATE(fw1_nd_tmp,(1:nflavor,1:nflavor,1:nfreq)) !column major
+ ABI_ALLOCATE(g_iw,(1:nflavor,1:nflavor,1:nfreq)) !column major
+ ABI_ALLOCATE(u_mat_ij,(1:nflavor,1:nflavor)) !column major
+ ABI_ALLOCATE(u_mat_ijkl,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
+ ABI_ALLOCATE(u_mat_ijkl_tmp,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
+
+ if ( leg_measure ) then !only if functionality is enabled
+   ABI_ALLOCATE(gl_nd,(1:nleg,1:nflavor,1:nflavor)) !column major !nl = 30 by default
+ end if
+
+ !Conversion datas Ha -> eV (some duplications for test...)
+ !fw1_nd_tmp = fw1_nd(1:paw_dmft%dmftqmc_l,:,:) * Ha_eV !fw1_nd = fw1_nd * Ha_eV !Ok?
+
+ do iflavor=1,nflavor
+   do iflavor1=1,nflavor
+     do ifreq=1,nfreq
+       fw1_nd_tmp(iflavor,iflavor1,ifreq) = fw1_nd(ifreq,iflavor,iflavor1) * Ha_eV
+!        WRITE(500,*) "[IN Fortran] F[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",fw1_nd(ifreq,iflavor,iflavor1)
+     end do
+   end do
+ end do
+
+    !Report test
+!    WRITE(502,*) hu(itypat)%udens
+!    do ifreq=1,paw_dmft%dmftqmc_l
+!      write(501,*) ((fw1_nd(ifreq,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
+!    enddo
+    !write(866,*)paw_dmft%dmft_nwlo,paw_dmft%dmftqmc_l
+    !write(866,*) u_mat_ij
+!   do iflavor=1,nflavor+1
+!     do iflavor1=1,nflavor+1
+!       WRITE(502,*) "[OUT Fortran] U(i,j)[ l= ",iflavor," l_= ",iflavor1,"] = ",hu(itypat)%udens(iflavor,iflavor1)
+!     enddo
+!   enddo
+
+!          if(paw_dmft%myproc==0) then
+!          do iflavor=1,nflavor
+!            do iflavor1=1,nflavor
+!               do iflavor2=1,nflavor
+!                  do iflavor3=1,nflavor
+!                    write(490,*), hu(itypat)%vee(iflavor,iflavor1,iflavor2,iflavor3)
+!                  enddo
+!                 enddo
+!                enddo
+!              enddo
+!          endif
+
+!          if(paw_dmft%myproc==0) then
+!          do iflavor=1,nflavor
+!            do iflavor1=1,nflavor
+!            write(491,*), hu(itypat)%udens(iflavor,iflavor1) !(1,1,1,1)
+!            enddo
+!          enddo
+!          endif
+
+!          do iflavor=1,nflavor
+!            do iflavor1=1,nflavor
+!          do iflavor2=1,nflavor
+!            do iflavor3=1,nflavor
+                 ! WRITE(552,*), hu(itypat)%vee!(iflavor,iflavor1,iflavor2,iflavor3)
+!            enddo
+!          enddo
+!            enddo
+!          enddo
+
+ call vee_ndim2tndim_hu_r(paw_dmft%lpawu(iatom),hu(itypat)%vee,u_mat_ijkl_tmp,1)
+ do iflavor=1,nflavor
+   do iflavor1=1,nflavor
+     do iflavor2=1,nflavor
+       do iflavor3=1,nflavor
+         u_mat_ijkl(iflavor,iflavor1,iflavor2,iflavor3)   =  Ha_eV * u_mat_ijkl_tmp(iflavor,iflavor1,iflavor2,iflavor3)
+       end do
+     end do
+   end do
+ end do
+
+ !u_mat_ijkl   =  Ha_eV * reshape( u_mat_ijkl , [nflavor,nflavor,nflavor,nflavor] )  !column -> row major + conversion
+ u_mat_ij     = transpose( hu(itypat)%udens ) * Ha_eV !column -> row major + conversion
+ levels_ctqmc = levels_ctqmc * Ha_eV
+
+ !Location array in memory for C++ pointer args to pass
+ !----------------------------------------------------
+ g_iw_ptr       = C_LOC( gw_tmp_nd ) !C_LOC( g_iw )
+ gtau_ptr       = C_LOC( gtmp_nd ) !C_LOC( gtau )
+ gl_ptr         = C_LOC( gl_nd )
+ fw1_nd_ptr     = C_LOC( fw1_nd_tmp )
+ u_mat_ij_ptr   = C_LOC( u_mat_ij )
+ u_mat_ijkl_ptr = C_LOC( u_mat_ijkl )
+ levels_ptr     = C_LOC( levels_ctqmc )
+
+  !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
+  !----------------------------------------------------
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+ call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,                            &
+&   nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
+&   paw_dmft%dmftctqmc_meas*2*2*nflavor, paw_dmft%dmftqmc_therm,               &
+&   verbosity_solver, paw_dmft%dmftqmc_seed,beta,                              &
+&   levels_ptr,  u_mat_ij_ptr, u_mat_ijkl_ptr, fw1_nd_ptr,                     &
+&   g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
+#endif
+
+  !WRITE(*,*) "Hello Debug"
+  !call xmpi_barrier(paw_dmft%spacecomm) !Resynch all processus after calling Impurity solver from TRIQS
+
+  !Report output datas from TRIQS to Abinit
+  !Interacting G(iw)
+ do ifreq=1,nfreq
+   do iflavor1=1,nflavor
+     do iflavor=1,nflavor
+    !   gw_tmp_nd(ifreq,iflavor,iflavor1) = g_iw(iflavor,iflavor1,ifreq) !* Ha_eV !because 1/ G0(eV)
+    !  WRITE(503,*) "[OUT Fortran] G(iw)[ w= ",ifreq," l= ",iflavor," l_= ",iflavor1,"] = ",gw_tmp_nd(ifreq,iflavor,iflavor1)!g_iw(iflavor,iflavor1,ifreq)
+     end do
+   end do
+ end do
+
+! Convert in Ha
+ gw_tmp_nd = gw_tmp_nd*Ha_eV
+
+!     do iflavor1=1,nflavor
+!       do iflavor=1,nflavor
+!
+!        WRITE(510,*) "[OUT Fortran] U[ l= ",iflavor," l_= ",iflavor1,"] = ",u_mat_ij(iflavor,iflavor1)
+!       enddo
+!     enddo
+
+! if(paw_dmft%myproc==0) write(6,*) "essai",paw_dmft%myproc, gw_tmp_nd(2,1,1)
+! if(paw_dmft%myproc==1) write(6,*) "essai",paw_dmft%myproc,gw_tmp_nd(2,1,1)
+! if(paw_dmft%myproc==0) write(621,*) "essai",paw_dmft%myproc, gw_tmp_nd(2,1,1)
+! if(paw_dmft%myproc==1) write(622,*) "essai",paw_dmft%myproc,gw_tmp_nd(2,1,1)
+! call flush_unit(621)
+! call flush_unit(622)
+! write(message,*) ch10, "essai",paw_dmft%myproc, paw_dmft%myproc,paw_dmft%dmftqmc_seed!gw_tmp_nd(2,1,1)
+! call wrtout(555,message,'PERS',.true.)
+! if(paw_dmft%myproc==0) write(499,*) "essai",paw_dmft%myproc, paw_dmft%dmftqmc_seed
+! if(paw_dmft%myproc==1) write(498,*) "essai",paw_dmft%myproc,paw_dmft%dmftqmc_seed
+
+  !Its associated G(tau): Problem of compatibility => paw_dmft%dmftqmc_l < (2*paw_dmft%dmftqmc_l)+1 => We report only  paw_dmft%dmftqmc_l =  first values of G(tau)...
+!   do iflavor=1,nflavor
+!     do iflavor1=1,nflavor
+!       do itau=1,ntau
+!         if ( modulo(itau,2) == 1 ) then !Problem of binding: paw_dmft%dmftqmc_l =! ntau => We take one value by 2 and Write in file all the G(tau) out function from TRIQS
+          !gtmp_nd(itau,iflavor,iflavor1) = gtau(iflavor,iflavor1,itau)
+!         endif
+!         if(paw_dmft%myproc==0) then
+!           WRITE(504,*) "[OUT Fortran] G[ tau= ",itau," l= ",iflavor," l_= ",iflavor1,"] = ",gtmp_nd(itau,iflavor,iflavor1) !gtmp_nd(itau,iflavor,iflavor1) !passage ok avec ntau/iflavor1/iflavor (iflavor,iflavor1,ntau)
+!         endif
+!       enddo
+!     enddo
+!   enddo
+
+  ! Write Legendre Polynoms G(L) for extrapolation of Interacting G(iw) by FT, only if leg_measure == TRUE
+  ! -------------------------------------------------------------------------------------------
+ if (leg_measure) then
+   do ileg=1,nleg
+     WRITE(505,*) ileg,((gl_nd(ileg,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
+   end do
+   close(505)
+ end if
+! f(paw_dmft%myproc==0) then
+!  do itau=1,paw_dmft%dmftqmc_l
+!    write(490,*) ((gtmp_nd(itau,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
+!  enddo
+! ndif
+ ABI_DEALLOCATE( fw1_nd_tmp )
+ ABI_DEALLOCATE( g_iw )
+ ABI_DEALLOCATE( u_mat_ijkl )
+ ABI_DEALLOCATE( u_mat_ijkl_tmp )
+ ABI_DEALLOCATE( u_mat_ij )
+
+   
+  !  Compute Green's function in imaginary freq using Legendre coefficients
+  ! -----------------------------------------------------------------------
+ if (leg_measure) then
+   call xmpi_barrier(paw_dmft%spacecomm)
+   call flush_unit(std_out)
+   write(message,'(2a)') ch10,"    ==  Compute G(iw_n) from Legendre coefficients"
+   call wrtout(std_out,message,'COLL')
+   ABI_ALLOCATE( jbes, (nleg))
+   gw_tmp_nd=czero
+
+  !   write(77,*) " TEST OF BESSEL S ROUTINES 0 0"
+
+  !   xx=0_dp
+  !   ileg=0
+  !   call sbf8(ileg+1,xx,jbes)
+  !   write(77,*) "T0 A",jbes(ileg+1)
+  !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
+  !   write(77,*) "T0 B",jbes(ileg+1)
+  !   write(77,*) "T0 C",bessel_jn(ileg,xx)
+
+  !   write(77,*) " TEST OF BESSEL S ROUTINES 1.5 0"
+
+  !   xx=1.5_dp
+  !   ileg=0
+  !   call sbf8(ileg+1,xx,jbes)
+  !   write(77,*) "T1 A",jbes(ileg+1)
+  !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
+  !   write(77,*) "T1 B",jbes(ileg+1)
+  !   write(77,*) "T1 C",bessel_jn(ileg,xx)
+
+  !   write(77,*) " TEST OF BESSEL S ROUTINES 1.5 1"
+
+  !   xx=1.5_dp
+  !   ileg=1
+  !   call sbf8(ileg+1,xx,jbes)
+  !   write(77,*) "T2 A",jbes(ileg+1)
+  !   call jbessel(jbes(ileg+1),besp,bespp,ileg,1,xx)
+  !   write(77,*) "T2 B",jbes(ileg+1)
+  !   write(77,*) "T2 C",bessel_jn(ileg,xx)
+
+
+   do ifreq=1,paw_dmft%dmft_nwli
+     xx=real(2*ifreq-1,kind=dp)*pi/two
+     if(xx<=100_dp) call sbf8(nleg,xx,jbes)
+     do ileg=1,nleg
+    ! write(77,*) "A",ifreq,jbes(ileg),xx
+
+       if(xx>=99) call jbessel(jbes(ileg),besp,bespp,ileg-1,1,xx)
+    ! write(77,*) "B",ifreq,jbes(ileg),xx
+
+     !write(77,*) "C",ifreq,jbes(ileg),xx
+
+       u_nl=sqrt(float(2*ileg-1))*(-1)**(ifreq-1)*cmplx(0_dp,one)**(ileg)*jbes(ileg)
+      write(77,*) "----------",ileg,jbes(ileg), u_nl,gl_nd(ileg,1,1)
+
+       do iflavor=1,nflavor
+         do iflavor1=1,nflavor
+           gw_tmp_nd(ifreq,iflavor,iflavor1)= gw_tmp_nd(ifreq,iflavor,iflavor1) + &
+&           u_nl*gl_nd(ileg,iflavor,iflavor1)
+         end do
+       end do
+
+  !    write(77,*) "------------------", gw_tmp_nd(ifreq,1,1)
+
+     end do
+  !  write(77,*) "------------------ sum ", gw_tmp_nd(ifreq,1,1)
+   end do
+   ABI_DEALLOCATE( jbes )
+   call xmpi_barrier(paw_dmft%spacecomm)
+   call flush_unit(std_out)
+ end if
+ gw_tmp_nd = gw_tmp_nd*Ha_eV
+
+
+ if ( leg_measure ) then !only if functionality is enabled
+   ABI_DEALLOCATE(gl_nd)
+ end if
+
+
+end subroutine ctqmc_calltriqs
 !!***
 
 END MODULE m_forctqmc

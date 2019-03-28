@@ -213,29 +213,33 @@ subroutine zero_matlu(matlu,natom,onlynondiag)
  type(matlu_type),intent(inout) :: matlu(natom)
  integer, optional, intent(in) :: onlynondiag
 !Local variables-------------------------------
- integer :: iatom,im,im1,ispinor,ispinor1,isppol,tndim
+ integer :: iatom,im,im1,ispinor,ispinor1,isppol,ndim
 
 !*********************************************************************
 
- if(.not.present(onlynondiag)) then
+ if(present(onlynondiag)) then
+   do iatom=1,natom
+     if(matlu(iatom)%lpawu.ne.-1) then
+       do ispinor=1,matlu(iatom)%nspinor
+         ndim=(2*matlu(iatom)%lpawu+1)
+         do im=1,ndim
+           do im1=1,ndim
+             do ispinor1=1,matlu(iatom)%nspinor
+               if(im/=im1.or.ispinor/=ispinor1) then
+                 do isppol=1,matlu(iatom)%nsppol
+                   matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=czero
+                 enddo
+               end if
+             end do
+           end do
+         end do
+       end do
+     endif
+   enddo
+ else
    do iatom=1,natom
     matlu(iatom)%mat=czero
    enddo
- else
-   do ispinor=1,matlu(iatom)%nspinor
-     tndim=(2*matlu(iatom)%lpawu+1)
-     do im=1,tndim
-       do im1=1,tndim
-         do ispinor1=1,matlu(iatom)%nspinor
-           if(im/=im1.or.ispinor/=ispinor1) then
-             do isppol=1,matlu(iatom)%nsppol
-               matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=czero
-             enddo
-           end if
-         end do
-       end do
-     end do
-   end do
  endif
 
 
