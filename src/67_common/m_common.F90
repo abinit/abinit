@@ -44,7 +44,7 @@ module m_common
  use m_energies,          only : energies_type, energies_eval_eint
 
  use m_pair_list,         only : pair_list
- use m_neat,              only : neat_energies
+ use m_neat,              only : neat_energies, neat_open_etot, neat_finish_etot, neat_etot_add_line, stream_string
 
 
  implicit none
@@ -57,6 +57,8 @@ module m_common
  public :: prteigrs
  public :: prtene
  public :: get_dtsets_pspheads
+
+ type(stream_string) :: etot_yaml_doc
 !!***
 
 contains
@@ -326,6 +328,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          end if
        end if
      end if
+     call neat_open_etot(etot_yaml_doc, '', message)
      call wrtout(ab_out,message,'COLL')
    end if
 
@@ -432,6 +435,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &         firstchar,'ETOT',istep,etotal,deltae,residm,res2
        end if
      end if
+     call neat_etot_add_line(etot_yaml_doc, message)
      call wrtout(ab_out,message,'COLL')
 
      if(mpi_enreg%paral_pert==1) then
@@ -1758,13 +1762,19 @@ subroutine prtene(dtset,energies,iout,usepaw)
  write(msg,'(a,80a)')('-',mu=1,80)
  call wrtout(iout,msg,'COLL')
 
+ call neat_finish_etot(etot_yaml_doc, iout)
+
+ call wrtout(iout, ch10, 'COLL')
+
  call neat_energies(e_components, iout)
  call e_components%free()
 
  if(e_components_dc%length() > 1) then
+   call wrtout(iout, ch10, 'COLL')
    call neat_energies(e_components_dc, iout, label='Etot DC')
    call e_components_dc%free()
  end if
+
 
 end subroutine prtene
 !!***

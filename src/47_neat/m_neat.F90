@@ -16,8 +16,10 @@ module m_neat
   implicit none
 
   private
-  public :: neat_energies, neat_results_gs, neat_crystal, neat_start_dataset
+  public :: neat_energies, neat_results_gs, neat_crystal, neat_start_iter
   public :: neat_open_gw_sigma_pert, neat_gw_sigma_pert_add_line, neat_finish_gw_sigma_pert
+  public :: neat_etot_add_line, neat_open_etot, neat_finish_etot
+  public :: stream_string
   contains
 
   subroutine wrtout_stream(stream, iout)
@@ -54,7 +56,7 @@ module m_neat
 !!     yaml_iterstart, wrtout_stream
 !!
 !! SOURCE
-  subroutine neat_start_iter()
+  subroutine neat_start_iter(n, name, iout)
     integer,intent(in) :: n, iout
     character(len=*),intent(in) :: name
     type(stream_string) :: stream
@@ -296,7 +298,7 @@ module m_neat
 !! neat_finish_gw_sigma_pert
 !!
 !! FUNCTION
-!! Add a line to GW Sigma_perturbative document
+!! Close the document and write it to iout
 !!
 !! INPUTS
 !!
@@ -320,4 +322,100 @@ module m_neat
   end subroutine neat_finish_gw_sigma_pert
 !!*** m_neat/neat_finish_gw_sigma_pert
 
+!!****f* m_neat/neat_open_etot
+!!
+!! NAME
+!! neat_open_etot
+!!
+!! FUNCTION
+!! Open a document for ETOT
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!    Write the beginning of the document to stream
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+  subroutine neat_open_etot(stream, comment, header, tag)
+    type(stream_string),intent(inout) :: stream
+    character(len=*),intent(in) :: header, comment
+    character(len=*),intent(in),optional :: tag
+
+    if(present(tag)) then
+      call yaml_open_doc('Etot steps', comment, tag=tag, stream=stream)
+    else
+      call yaml_open_doc('Etot steps', comment, stream=stream)
+    end if
+
+    call yaml_open_tabular('data', stream=stream, tag='EtotIters')
+    call yaml_add_tabular_line(header, stream=stream)
+    
+  end subroutine neat_open_etot
+!!*** m_neat/neat_open_etot
+
+!!***f* m_neat/neat_etot_add_line
+!!
+!! NAME
+!! neat_etot_add_line
+!!
+!! FUNCTION
+!! Add a line to the ETOT table
+!!
+!! INPUTS
+!!     stream <type(stream_string)>= stream to accumulate the document
+!!     line <character(len=*)>= line to add
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!     
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+  subroutine neat_etot_add_line(stream, line)
+    type(stream_string),intent(inout) :: stream
+    character(len=*),intent(in) :: line
+
+    call yaml_add_tabular_line(line(5:), stream=stream)
+  end subroutine neat_etot_add_line
+!!*** m_neat/neat_etot_add_line
+
+!!****f* m_neat/neat_finish_etot
+!!
+!! NAME
+!! neat_finish_etot
+!!
+!! FUNCTION
+!! Close the document and write the document to iout
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!    Print a YAML document to output file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+  subroutine neat_finish_etot(stream, iout)
+    type(stream_string),intent(inout) :: stream
+    integer,intent(in) :: iout
+
+    call yaml_close_doc(stream=stream)
+
+    call wrtout_stream(stream, iout)
+  end subroutine neat_finish_etot
+!!*** m_neat/neat_finish_etot
 end module m_neat
