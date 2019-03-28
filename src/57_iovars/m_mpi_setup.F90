@@ -37,6 +37,7 @@ module m_mpi_setup
  use m_abicore
 
  use m_time,         only : abi_wtime
+ use m_io_tools,     only : flush_unit
  use m_parser,       only : intagm
  use m_geometry,     only : mkrdim, metric
  use m_fftcore,      only : fftalg_for_npfft, getng,  kpgcount
@@ -339,7 +340,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    nproc=mpi_enregs(idtset)%nproc_cell
 
 !  Cycle if the processor is not used
-   if (mpi_enregs(idtset)%me<0) then
+   if (mpi_enregs(idtset)%me<0.or.iexit>0) then
      ABI_DEALLOCATE(intarr)
      ABI_DEALLOCATE(dprarr)
      cycle
@@ -1204,17 +1205,6 @@ end subroutine mpi_setup
    call wrtout(std_out,msg,'COLL')
  end if
 
-!Initial comment
- if (nthreads==1) then
-   write(msg,'(a,1x,100("="),2a,i0,2a)') ch10,ch10,&
-&   ' Computing all possible proc distributions for this input with #CPUs<=',nthreads*nproc,':',ch10
- else
-   write(msg,'(a,1x,100("="),2a,i0,a,i0,2a)')  ch10,ch10,&
-&   ' Computing all possible proc distributions for this input with #CPUs<=',nthreads*nproc,&
-&   ' and ',nthreads,' openMP threads:',ch10
- end if
- call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
-
 !Parallelization over images
  npi_min=1;npi_max=1;nimage_eff=1
  if (optdriver==RUNL_GSTATE) then
@@ -1592,6 +1582,27 @@ end subroutine mpi_setup
  mcount_eff=icount
  mcount=min(mcount_eff,MAXCOUNT)
 
+!Stop if no solution found
+ if (mcount==0) then
+!  Override here the 0 default value changed in indefo1
+   dtset%npimage  = max(1,dtset%npimage)
+   dtset%nppert   = max(1,dtset%nppert)
+   dtset%npkpt    = max(1,dtset%npkpt)
+   dtset%npspinor = max(1,dtset%npspinor)
+   dtset%npfft    = max(1,dtset%npfft)
+   dtset%npband   = max(1,dtset%npband)
+   dtset%bandpp   = max(1,dtset%bandpp)
+   write(msg,'(a,i0,2a,i0,a)')  &
+&  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
+&  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
+   MSG_WARNING(msg)
+   if (max_ncpus>0) then
+     call wrtout(ab_out,msg,'COLL')
+     call flush_unit(ab_out)
+   end if
+   iexit=iexit+1
+ end if
+
 !Sort data by increasing weight
  if (mcount>0) then
    ABI_ALLOCATE(isort,(mcount))
@@ -1669,6 +1680,15 @@ end subroutine mpi_setup
 
 !Print title
    if (iam_master) then
+     if (nthreads==1) then
+       write(msg,'(a,1x,100("="),2a,i0,2a)') ch10,ch10,&
+&       ' Searching for all possible proc distributions for this input with #CPUs<=',nthreads*nproc,':',ch10
+     else
+       write(msg,'(a,1x,100("="),2a,i0,a,i0,2a)')  ch10,ch10,&
+&       ' Searching for all possible proc distributions for this input with #CPUs<=',nthreads*nproc,&
+&       ' and ',nthreads,' openMP threads:',ch10
+     end if
+     call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
      msgttl='~'
      if (with_image)  msgttl=trim(msgttl)//'~~~~~~~~~~~'
      if (with_pert)   msgttl=trim(msgttl)//'~~~~~~~~~~~'
@@ -1907,23 +1927,6 @@ end subroutine mpi_setup
 &   ' and the associated input variables (npkpt, npband, npfft, bandpp, etc.).',ch10,&
 &   ' The higher weight should be better.'
    call wrtout(std_out,msg,'COLL');if (max_ncpus>0) call wrtout(ab_out,msg,'COLL')
-   iexit=iexit+1
- end if
-
-!Stop if no solution found
- if (mcount==0) then
-   write(msg,'(a,i0,2a,i0,a)')  &
-&  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
-&  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
-   MSG_WARNING(msg)
-!  Override here the 0 default value changed in indefo1
-   dtset%npimage  = max(1,dtset%npimage)
-   dtset%nppert   = max(1,dtset%nppert)
-   dtset%npkpt    = max(1,dtset%npkpt)
-   dtset%npspinor = max(1,dtset%npspinor)
-   dtset%npfft    = max(1,dtset%npfft)
-   dtset%npband   = max(1,dtset%npband)
-   dtset%bandpp   = max(1,dtset%bandpp)
    iexit=iexit+1
  end if
 
