@@ -31,6 +31,7 @@ pages:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
+    - Tdep: guide/tdep.md
     - Installation:
         - HowTo: installation.md
         - MacOSX: README_MacOSX.md
@@ -117,6 +118,7 @@ pages:
     - topics/STM.md
     - topics/Susceptibility.md
     - topics/TDDFT.md
+    - topics/Tdep.md
     - topics/TDepES.md
     - topics/Temperature.md
     - topics/TransPath.md
@@ -154,6 +156,7 @@ pages:
     - Optic: variables/optic.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
+    - Tdep: variables/tdep.md
     - Statistics: variables/varset_stats.md
 - Tutorial:
     - Overview: tutorial/index.md
