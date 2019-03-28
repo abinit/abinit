@@ -1,6 +1,6 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
-README_gpu.md
 README_MacOSX.md
+README_gpu.md
 README_xlf.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
@@ -27,6 +27,7 @@ variables/aim.md
 variables/anaddb.md
 variables/multibinit.md
 variables/optic.md
+variables/tdep.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
@@ -105,6 +106,7 @@ topics/spinpolarisation.md
 topics/STM.md
 topics/Susceptibility.md
 topics/TDDFT.md
+topics/Tdep.md
 topics/TDepES.md
 topics/Temperature.md
 topics/TransPath.md
