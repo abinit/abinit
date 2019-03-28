@@ -471,7 +471,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !  == Save self on disk
 !  ---------------------------------------------------------------------
    call timab(627,1,tsec)
-   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2)
+   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2,pawang=pawang,cryst_struc=cryst_struc)
    call timab(627,2,tsec)
 
 !  == Test convergency

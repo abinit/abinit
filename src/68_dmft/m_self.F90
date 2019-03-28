@@ -522,15 +522,18 @@ end subroutine dc_self
 !!
 !! SOURCE
 
-subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,opt_selflimit,opt_hdc,opt_stop)
+subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,opt_selflimit,opt_hdc,opt_stop,pawang,cryst_struc)
 
  use defs_basis
  use defs_abitypes
 
  use m_io_tools, only : get_unit
  use m_crystal, only : crystal_t
+ use m_pawang, only : pawang_type
  use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : copy_matlu,shift_matlu
+ use m_matlu, only : copy_matlu,shift_matlu,diag_matlu,rotate_matlu,init_matlu,destroy_matlu,print_matlu
+ use m_oper, only : oper_type,init_oper,destroy_oper
+ use m_datafordmft, only : compute_levels
  implicit none
 
 !Arguments ------------------------------------
@@ -544,13 +547,20 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  integer, intent(in), optional :: opt_stop
  type(matlu_type), optional, intent(in) :: opt_selflimit(paw_dmft%natom)
  type(matlu_type), optional, intent(in) :: opt_hdc(paw_dmft%natom)
+ type(pawang_type), optional, intent(in) :: pawang
+ type(crystal_t), optional, intent(in) :: cryst_struc
 
 !local variables-------------------------------
+ type(coeff2c_type), allocatable :: eigvectmatlu(:,:)
+ type(matlu_type), allocatable :: level_diag(:)
+ type(matlu_type), allocatable :: selfrotmatlu(:)
+ type(oper_type)  :: energy_level
  logical :: lexist
  complex(dpc), allocatable :: buffer(:)
  integer :: iall,iatom,iatu,ier,iexist2,ifreq,im,im1,ioerr,ispinor,ispinor1,isppol,istepiter,istep,istep_imp
  integer :: icount,iexit,iter,iter_imp,master,mbandc,myproc,natom,ncount,ndim,nkpt,nproc,nrecl,nspinor,nsppol,spacecomm
- integer :: natom_read,nsppol_read,nspinor_read,ndim_read,nw_read,optrw,readimagonly
+ integer :: natom_read,nsppol_read,nspinor_read,ndim_read,nw_read,optrw,readimagonly,tndim
+ logical :: nondiaglevels
  character(len=30000) :: message ! Big buffer to avoid buffer overflow.
  integer,allocatable :: unitselffunc_arr(:)
  character(len=fnlen) :: tmpfil
@@ -612,6 +622,43 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  nspinor=paw_dmft%nspinor
  mbandc=paw_dmft%mbandc
  nkpt=paw_dmft%nkpt
+
+!   - For the Tentative diagonalisation of the self-energy file (begin init)
+ if(optrw==2.and.present(pawang)) then
+   ABI_DATATYPE_ALLOCATE(eigvectmatlu,(natom,nsppol))
+   do iatom=1,natom
+     if(paw_dmft%lpawu(iatom)/=-1) then
+       tndim=nspinor*(2*paw_dmft%lpawu(iatom)+1)
+       do isppol=1,nsppol
+         ABI_ALLOCATE(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
+       end do
+     end if
+   end do
+   ABI_DATATYPE_ALLOCATE(level_diag,(natom))
+   ABI_DATATYPE_ALLOCATE(selfrotmatlu,(natom))
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,selfrotmatlu)
+   call init_oper(paw_dmft,energy_level,opt_ksloc=3)
+   call compute_levels(cryst_struc,energy_level,self%hdc,pawang,paw_dmft,nondiag=nondiaglevels)
+ endif
+!   - For the Tentative diagonalisation of the self-energy file (end init)
+
+!   - For the Tentative diagonalisation of the self-energy file (begin diag)
+ if(optrw==2.and.present(pawang)) then
+   write(message,'(a,2x,a,f13.5)') ch10,&
+&   " == Print not Diagonalized Self Energy for Fermi Level=",paw_dmft%fermie
+   call wrtout(std_out,message,'COLL')
+   call print_matlu(self%oper(2)%matlu,natom,1,compl=1,opt_exp=1)
+   call diag_matlu(energy_level%matlu,level_diag,natom,&
+&   prtopt=prtopt,eigvectmatlu=eigvectmatlu,&
+&   test=paw_dmft%dmft_solv)  
+   write(message,'(a,2x,a,f13.5)') ch10,&
+&   " == Print Diagonalized levels for Fermi Level=",paw_dmft%fermie
+   call wrtout(std_out,message,'COLL')
+   call print_matlu(level_diag,natom,1,compl=1,opt_exp=1)
+ endif
+!   - For the Tentative diagonalisation of the self-energy file (end diag)
+
  if((optrw==2.or.optrw==1).and.myproc==master)then
    ABI_ALLOCATE(unitselffunc_arr,(natom*nsppol*nspinor))
    iall=0
@@ -736,6 +783,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !          ===========================
 !           == Write/Read self in the file
 !          ===========================
+
+           rewind(111)
            do ifreq=1,self%nw
              if(optrw==2) then
 !               write(std_out,'(a,2x,31(e15.8,2x))') &
@@ -763,7 +812,28 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 &                aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)),&
 &                im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
                endif
+
+!             - For the Tentative diagonalisation of the self-energy file (begin rot)
+               if(present(pawang)) then
+                 call copy_matlu(self%oper(ifreq)%matlu,selfrotmatlu,natom)
+                 write(message,'(a,2x,a,i4)') ch10,&
+&                  " == Print non Rotated Self Energy for freq=",ifreq
+                 call wrtout(std_out,message,'COLL')
+                 call print_matlu(selfrotmatlu,natom,1,compl=1,opt_exp=1)
+                 call rotate_matlu(selfrotmatlu,eigvectmatlu,natom,3,1)
+                 write(message,'(a,2x,a,i4)') ch10,&
+&                  " == Print Rotated Self Energy for freq=",ifreq
+                 call wrtout(std_out,message,'COLL')
+                 call print_matlu(selfrotmatlu,natom,1,compl=1,opt_exp=1)
+                 write(message,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
+&                  ((real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
+&                  aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
+&                  im=1,ndim),ispinor=1,nspinor)
+               endif
+!             - For the Tentative diagonalisation of the self-energy file (end rot)
+
                call wrtout(unitselffunc_arr(iall),message,'COLL')
+               call wrtout(111,message,'COLL')
 !               write(std_out,*) unitselffunc_arr(iall)
              else if(optrw==1.and.iexist2==1.and.ioerr==0) then
            !write(std_out,*) "8"
@@ -794,6 +864,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                endif
              endif
            enddo ! ifreq
+
+
            if(optrw==1.and.iexist2==1.and.ioerr==0) then
              if(readimagonly==1) then ! read from OmegaMaxent
                s_r=zero
@@ -870,6 +942,23 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  endif ! optrw==2.or.myproc==master
 ! call xmpi_barrier(spacecomm)
            !write(std_out,*) "9"
+!   - For the Tentative diagonalisation of the self-energy file (begin destroy)
+ if(optrw==2.and.present(pawang)) then
+   call destroy_oper(energy_level)
+   call destroy_matlu(level_diag,natom)
+   call destroy_matlu(selfrotmatlu,natom)
+   ABI_DATATYPE_DEALLOCATE(level_diag)
+   ABI_DATATYPE_DEALLOCATE(selfrotmatlu)
+   do iatom=1,natom
+     if(paw_dmft%lpawu(iatom)/=-1) then
+       do isppol=1,nsppol
+         ABI_DEALLOCATE(eigvectmatlu(iatom,isppol)%value)
+       end do
+     end if
+   end do
+   ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
+ endif 
+!   - For the Tentative diagonalisation of the self-energy file (end destroy)
 
 !  ===========================
 !  == Error messages 

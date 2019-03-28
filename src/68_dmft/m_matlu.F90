@@ -202,7 +202,7 @@ end subroutine init_matlu
 !!
 !! SOURCE
 
-subroutine zero_matlu(matlu,natom)
+subroutine zero_matlu(matlu,natom,onlynondiag)
 
  use defs_basis
  implicit none
@@ -211,14 +211,32 @@ subroutine zero_matlu(matlu,natom)
 !scalars
  integer, intent(in) :: natom
  type(matlu_type),intent(inout) :: matlu(natom)
+ integer, optional, intent(in) :: onlynondiag
 !Local variables-------------------------------
- integer :: iatom
+ integer :: iatom,im,im1,ispinor,ispinor1,isppol,tndim
 
 !*********************************************************************
 
- do iatom=1,natom
-  matlu(iatom)%mat=czero
- enddo
+ if(.not.present(onlynondiag)) then
+   do iatom=1,natom
+    matlu(iatom)%mat=czero
+   enddo
+ else
+   do ispinor=1,matlu(iatom)%nspinor
+     tndim=(2*matlu(iatom)%lpawu+1)
+     do im=1,tndim
+       do im1=1,tndim
+         do ispinor1=1,matlu(iatom)%nspinor
+           if(im/=im1.or.ispinor/=ispinor1) then
+             do isppol=1,matlu(iatom)%nsppol
+               matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=czero
+             enddo
+           end if
+         end do
+       end do
+     end do
+   end do
+ endif
 
 
 end subroutine zero_matlu
