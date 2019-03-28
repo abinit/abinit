@@ -274,7 +274,12 @@ if has_pandas:
     @yaml_auto_map
     class GwSigma(object):
         pass
+
+    @yaml_auto_map
+    class EtotIters(Table):
+        pass
 else:
     yaml_not_available_tag('Table', 'Pandas module is not available')
     yaml_not_available_tag('GwSigma', 'Pandas module is not available')
     yaml_not_available_tag('GwSigmaData', 'Pandas module is not available')
+    yaml_not_available_tag('EtotIters', 'Pandas module is not available')
