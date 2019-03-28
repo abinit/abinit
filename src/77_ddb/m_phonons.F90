@@ -782,8 +782,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    call htetra_init(htetraq, bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
    call cwtime_report(" init_tetra", cpu, wall, gflops)
 #endif
-   ABI_SFREE(bz2ibz)
-   ABI_SFREE(bz2ibz_smap)
    ABI_CHECK(ierr == 0, errstr)
 
    !ABI_FREE(kpt_fullbz)
@@ -795,6 +793,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    ABI_CHECK(ierr == 0, 'out-of-memory in full_eigvec')
    full_eigvec = zero
  end if ! tetra
+ ABI_SFREE(bz2ibz)
+ ABI_SFREE(bz2ibz_smap)
  ABI_FREE(new_shiftq)
 
  ! MPI Sum over irreducible q-points then sync the following integrals:
