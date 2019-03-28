@@ -30,14 +30,40 @@ module m_neat
     call wrtout(iout, s, 'COLL')
   end subroutine wrtout_stream
 
-  subroutine neat_start_dataset(n, iout)
+!!***f* m_neat/neat_start_iter
+!!
+!! NAME
+!! neat_start_iter
+!!
+!! FUNCTION
+!! Mark the beginning of an iteration
+!!
+!! INPUTS
+!!     n integer= index of the iteration
+!!     iout integer= file descriptor to write in
+!!     name character(len=*)= name of the iteration (without i or n prefix)
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!     Output a YAML document to start the iteration
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!     yaml_iterstart, wrtout_stream
+!!
+!! SOURCE
+  subroutine neat_start_iter()
     integer,intent(in) :: n, iout
+    character(len=*),intent(in) :: name
     type(stream_string) :: stream
+    
+    call yaml_iterstart(trim(name), n, stream=stream)
+    call wrtout_stream(stream, iout)
+  end subroutine neat_start_iter
+!!*** m_neat/neat_start_iter
 
-    call yaml_iterstart('dtset', n, stream=stream);
-    call wrtout_stream(stream, iout);
-  end subroutine neat_start_dataset
-  
 !!****f* m_neat/neat_energies
 !!
 !! NAME
