@@ -385,7 +385,7 @@ module m_neat
     type(stream_string),intent(inout) :: stream
     character(len=*),intent(in) :: line
 
-    call yaml_add_tabular_line(line(5:), stream=stream)
+    call yaml_add_tabular_line('  '//line(6:), stream=stream)
   end subroutine neat_etot_add_line
 !!*** m_neat/neat_etot_add_line
 
