@@ -142,7 +142,7 @@ implementation, indeed, supports only a subset of the YAML specifications:
 * scalars
 * arrays of one or two dimensions
 * mapping containing scalars
-* tables in CSV format
+* tables in CSV format (which is more like an extension of the standard)
 
 A more detailed discussion about the Fortran API is given in the XXX section.
 
@@ -188,7 +188,7 @@ On the Fortran side, we provide:
   mapping and scalar fields.  Routines support tags for specifying special data
   structures.
 
-- a higher level module called *m_neat* provides Fortran procedures to creat specific
+- a higher level module called *m_neat* provides Fortran procedures to create specific
   documents associated to important physical properties. Currently routines
   for total energy components and ground state general results are implemented.
 
@@ -218,17 +218,21 @@ As concerns the python implementation:
   (see Test CLI)
 
 ==TODO== Add Pseudo code with examples showing how to write ETOT in Fortran, how
-to define and register a python YAML object associated to the ETOT tag.  ==END
-TODO==
+to define and register a python YAML object associated to the ETOT tag.
+==END TODO==
 
 The new infrastructure has been designed with extensibility and ease-of-use in
-mind.  From the perspective of an Abinit developer, adding support for the
-Yaml-based approach requires two steps (??):
+mind. From the perspective of an Abinit developer, adding support for the
+YAML-based approach requires two steps (??):
 
 1. Implement the output of the YAML document in Fortran using the pre-existent
    API.  Associate a tag and possibly a label to the new document.
-2. Modify the python code in pymods to associate a python object to the Yaml
-   document
+2. Create a YAML configuration for the new document in tests that will produce
+   it
+
+If new tags are used (to handle new advanced structures) a third step is
+required consisting in registering the tag and the associated class in the
+python side. More about that can be found below.
 
 An example will help clarify.  Let's assume we want to implement the output of
 the `!ETOT` dictionary with the different components of the total free energy.
@@ -240,42 +244,6 @@ use m_neat
 call foo()
 call bar()
 ```
-
-To connect the new YAML document to the python infrastructure, we have 
-to modify `~pymods/yaml_tools/structures.py` by adding the following lines:
-
-```python
-@yaml_auto_map  # register the following class as a known tag
-                # and give it a basic set of methods so it will save
-                # all fields from the YAML data as attributes
-class Etot(object):
-    __yaml_tag = 'ETOT'
-
-    def __init__(self, label='nothing', comment='no comment'):
-        self.label = label
-        self.comment = comment
-
-    @classmethod
-    def from_map(cls, map):
-        new = super(Etot, cls).from_map(map)
-        new.components = {  # we want to have access to components as a coherent
-                            # list
-            name: value for name, value in new.__dict__.items()
-            if name not in [
-                'Etotal',
-                'label',
-                'comment',
-                'Band energy',
-                'Total energy(eV)'
-            ]
-        }
-        return new
-```
-
-This code registers the object *Etot* in the Pyyaml library and instructs the Yaml parser to instantiate
-this class when a document with the *!ETOT* tag is encountered.
-For further details about the PyYaml API please consult the [official documentation](https://pyyaml.org/wiki/PyYAMLDocumentation).
-      
 
 ## Test specification draft
 
@@ -770,6 +738,20 @@ test is compound of several non-trivial checks `FailDetail` come in handy to
 tell the user which part failed. Use `FailDetail('some explanations')` to
 provide details about the failure.
 
+### Add a new tag
+
+Pyyaml offer the possibility to directly convert some YAML structures to a
+Python class using a tag. To register a new tag one should edit the file
+`~abinit/tests/pymods/yaml_tools/structures.py`. In this file are defined several
+classes that are decorated with one of `@yaml_map`, `@yaml_scalar`, `@yaml_seq`
+or `@yaml_auto_map`. Those decorator are the functions that actually register
+the class as a known tag. Whether you should use one or another depend on the
+structure of the data in YAML. Is it a mapping/dictionary, a scalar or a
+list/sequence ?
+
+==TODO==
+Explain step by step how to add tags
+==END TODO==
 
 ## Coding rules
 
@@ -799,7 +781,8 @@ Parametrized tests
 Benchmarks
 
 : Tests to monitor the scalability of the code and make sure that serious bottlenecks are not 
-  introduced in trunk/develop when important dimension are increased (e.g. [[chksymbreak]]  > 0 with [[ngkpt]] > 30 **3).
+  introduced in trunk/develop when important dimension are increased (e.g.
+  [[chksymbreak]]  > 0 with [[ngkpt]] > 30\*\*3).
   Other possible applications: monitor the memory allocated to detect possible regressions.
 
 Interface with AbiPy and Abiflows
