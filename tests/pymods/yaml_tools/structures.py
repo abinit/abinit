@@ -254,8 +254,8 @@ if has_pandas:
         _is_dict_like = False  # preventy tester from going inside by itself
 
         def last_iter(self, other, **opts):
-            tol = opts.get('tol', 1.0e-7)
-            ceil = opts.get('ceil', 1.0e-7)
+            tol = opts.get('tol', 1.0e-10)
+            ceil = opts.get('ceil', 1.0e-10)
             tol_iter = opts.get('tol_iter', 5)
 
             def chk_tol(a, b):
