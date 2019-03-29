@@ -725,7 +725,7 @@ module m_yaml_out
     integer,intent(in),optional :: multiline_trig
     integer,intent(in), optional :: file_d
     type(stream_string),intent(inout),optional :: stream
-    character(len=*).,intent(out),optional :: string
+    character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
     integer,intent(in),optional :: width
 
