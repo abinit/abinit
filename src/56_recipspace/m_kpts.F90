@@ -41,6 +41,7 @@ module m_kpts
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
+ use m_htetrahedron,   only : t_htetrahedron, htetra_init
  use m_symkpt,         only : symkpt
 
  implicit none
@@ -263,8 +264,8 @@ end subroutine kpts_ibz_from_kptrlatt
 !!
 !! SOURCE
 
-type(t_tetrahedron) function tetra_from_kptrlatt( &
-&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, comm, msg, ierr) result (tetra)
+type(t_htetrahedron) function tetra_from_kptrlatt( &
+&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, comm, msg, ierr) result (htetra)
 
 !Arguments ------------------------------------
 !scalars
@@ -308,7 +309,6 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
  call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, &
    my_nkibz, my_kibz, my_wtk, nkfull, kfull, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
 
- ABI_FREE(my_kibz)
  ABI_FREE(my_wtk)
  new_nshiftk = size(new_shiftk, dim=2)
 
@@ -353,10 +353,12 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
 
  rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
 
- call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring, comm)
+ !call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring, comm)
+ call htetra_init(htetra, indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, my_kibz, my_nkibz, ierr, errorstring, comm)
  if (ierr /= 0) msg = errorstring
 
  10 continue
+ ABI_SFREE(my_kibz)
  ABI_SFREE(indkk)
  ABI_SFREE(kfull)
  ABI_SFREE(new_shiftk)

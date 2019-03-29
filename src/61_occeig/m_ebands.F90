@@ -35,7 +35,7 @@ MODULE m_ebands
  use m_errors
  use m_abicore
  use m_xmpi
- use m_tetrahedron
+ use m_htetrahedron
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -2947,7 +2947,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
  type(stats_t) :: ediffs
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  real(dp) :: eminmax_spin(2,ebands%nsppol)
  real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
@@ -3028,7 +3028,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
 
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
-         call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
+         call htetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
 
          edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)
          ! IDOS is computed afterwards with simpson
@@ -3042,7 +3042,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
    ! Free memory
    ABI_FREE(tmp_eigen)
    ABI_FREE(wdt)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
 
    ! Filter so that dos[i] is always >= 0 and idos is monotonic
    ! IDOS is computed afterwards with simpson
@@ -4162,7 +4162,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  !real(dp) :: dksqmax
  character(len=500) :: msg
  type(stats_t) :: ediffs
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  !integer,allocatable :: bz2ibz(:,:)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
@@ -4305,7 +4305,7 @@ select case (intmeth)
        if (present(emin) .and. all(tmp_eigen<emin)) cycle
        if (present(emax) .and. all(tmp_eigen>emax)) cycle
 
-       call tetra_blochl_weights(tetra, tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
+       call htetra_blochl_weights(tetra, tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
          bcorr, wdt(:,:,2), wdt(:,:,1), comm)
 
        do ikpt=1,ebands%nkpt
@@ -4359,7 +4359,7 @@ select case (intmeth)
    ! Free memory
    ABI_FREE(tmp_eigen)
    ABI_FREE(wdt)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
 
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
@@ -4475,7 +4475,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  integer :: ik_ibz,ibc,ibv,spin,iw,nw,nband_k,nbv,nproc,my_rank,cnt,mpierr,unt,bcorr
  real(dp) :: wtk,wmax,wstep,wbroad
  type(stats_t) :: ediffs
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
  character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
@@ -4568,7 +4568,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
      ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, comm, msg, ierr)
    if (ierr/=0) then
-     call destroy_tetra(tetra); return
+     call htetra_free(tetra); return
    end if
 
    ! For each spin and band, interpolate over kpoints,
@@ -4588,7 +4588,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
            cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism
 
            ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
-           call tetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, jdos%mesh(0), jdos%mesh(nw), one, wdt)
+           call htetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, jdos%mesh(0), jdos%mesh(nw), one, wdt)
            jdos%values(:,spin) = jdos%values(:,spin) + wdt(:, 1)
          end do
        end do ! ibc
@@ -4600,7 +4600,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    ! Free memory
    ABI_FREE(wdt)
    ABI_FREE(cvmw)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
 
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))

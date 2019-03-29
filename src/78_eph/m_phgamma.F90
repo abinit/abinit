@@ -29,7 +29,7 @@ module m_phgamma
  use m_xmpi
  use m_errors
  use m_kptrank
- use m_tetrahedron
+ use m_htetrahedron
  use m_ifc
  use m_ebands
  use m_fstab
@@ -1938,7 +1938,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  real(dp) :: temp_el, min_temp, delta_temp, chempot, ene1, ene2, G0
  logical :: do_qintp
  character(len=500) :: msg
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  integer :: qptrlatt(3,3),new_qptrlatt(3,3)
  real(dp),allocatable :: my_qshift(:,:)
@@ -2163,7 +2163,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
        do iq_ibz=1,nqibz
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi-parallelism
 
-         call tetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu), &
+         call htetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu), &
            omega_min, omega_max, one, wdt)
 
          ! Accumulate (Integral of a2F is computed afterwards)
@@ -2177,7 +2177,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    ABI_FREE(wdt)
    ABI_FREE(lambda_tetra)
    ABI_FREE(phfreq_tetra)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
  end if
 
  ! Collect final results on each node
@@ -3174,7 +3174,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
  real(dp) :: omega,xx,omega_min,omega_max,ww
  logical :: do_qintp
  character(len=500) :: msg
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  integer :: qptrlatt(3,3),new_qptrlatt(3,3)
  real(dp),allocatable :: my_qshift(:,:)
@@ -3344,7 +3344,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
        do iq_ibz=1,nqibz
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi-parallelism
 
-         call tetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu,spin), &
+         call htetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu,spin), &
            omega_min, omega_max, one, wdt)
 
          ! Accumulate (Integral of a2F_tr is computed afterwards)
@@ -3366,7 +3366,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
    ABI_FREE(lambda_in_tetra)
    ABI_FREE(lambda_out_tetra)
    ABI_FREE(phfreq_tetra)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
  end if
 
  ! Collect final results on each node and divide by g(eF, spin)
