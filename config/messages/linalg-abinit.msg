@@ -30,7 +30,7 @@ For production-grade calculations, you will find detailed
 documentation on how to configure Abinit for optimized
 linear algebra libraries in the \\"Linear algebra
 connector\\" section of Abinit\\'s config file template:
-'~abinit/doc/build/config-template.ac'.
+'~abinit/doc/build/config-template.ac8'.
 
 Do not hesitate to contact your system administrator in
 case of doubt or if you need linear algebra libraries

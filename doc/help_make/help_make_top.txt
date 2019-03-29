@@ -2,7 +2,7 @@
 
 Typing `make` in the top directory (~abinit) leads to the compilation of all
 abinit sources, either standard, or following specific indications
-of a config file, see ~abinit/doc/build/config-template.ac for details.
+of a config file, see ~abinit/doc/build/config-template.ac8 for details.
 `make` should be prepared with configure or `./config/scripts/makemake`
 for developers using the git repository.
 

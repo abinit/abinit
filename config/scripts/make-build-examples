@@ -46,7 +46,7 @@ def key_is_ok(key):
 # Initial setup
 my_name     = "make-build-examples"
 my_configs  = ["config/specs/testfarm.conf"]
-my_template = "doc/build/config-template.ac"
+my_template = "doc/build/config-template.ac8"
 my_outdir   = "doc/build/config-examples"
 my_fbck     = "config/specs/fbversion.conf"
 

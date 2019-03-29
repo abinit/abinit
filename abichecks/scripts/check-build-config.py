@@ -160,18 +160,18 @@ def main():
     sys.stderr.write("%s  %s  %s\n" % ("-","-" * 48,"-" * 24))
 
     for env in denv_config:
-      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",env,"config-template.ac"))
+      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",env,"config-template.ac8"))
     for env in denv_template:
       sys.stderr.write("%s  %-48s  %-24s\n" % ("U",env,"environment.conf"))
     for opt in dopt_config:
-      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",opt,"config-template.ac"))
+      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",opt,"config-template.ac8"))
     for opt in dopt_values:
       for val in opt_values[opt]:
-        sys.stderr.write("%s  %-48s  %-24s\n" % ("D","%s='%s'" % (opt,val),"config-template.ac"))
+        sys.stderr.write("%s  %-48s  %-24s\n" % ("D","%s='%s'" % (opt,val),"config-template.ac8"))
     for opt in dopt_template:
       sys.stderr.write("%s  %-48s  %-24s\n" % ("U",opt,"options.conf"))
     for opt in dopt_removed:
-      sys.stderr.write("%s  %-48s  %-24s\n" % ("R",opt,"config-template.ac"))
+      sys.stderr.write("%s  %-48s  %-24s\n" % ("R",opt,"config-template.ac8"))
 
     sys.stderr.write("\n")
 

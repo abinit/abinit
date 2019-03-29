@@ -86,7 +86,7 @@ my_output  = "config/m4/auto-output.m4"
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
-     not os.path.exists("build/config-template.ac") ):
+     not os.path.exists("build/config-template.ac8") ):
   print("%s: You must be in the top of an ABINIT documentation source tree." % my_name)
   print("%s: Aborting now." % my_name)
   sys.exit(1)

@@ -208,7 +208,7 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
   AC_ARG_WITH([@package@-flavor],
     AC_HELP_STRING([--with-@package@-flavor],
       [Flavor of @name@ to use (default: @default_flavor@),
-       see ~abinit/doc/build/config-template.ac for details]),
+       see ~abinit/doc/build/config-template.ac8 for details]),
     [abi_@package@_flavor="${withval}"],
     [abi_@package@_flavor="@default_flavor@"])"""
             trig_substs["subst_flavor"] = "\n  AC_SUBST(abi_@package@_flavor)"

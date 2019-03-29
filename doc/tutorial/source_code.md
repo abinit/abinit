@@ -113,7 +113,7 @@ Before actually starting the compilation, type:
     ./configure --help
 
 and read carefully the output. You might then find useful to have a look at
-the template for config files stored in _~abinit/doc/build/config-template.ac_
+the template for config files stored in _~abinit/doc/build/config-template.ac8_
 which will provide you with more details on the configuration. Other example
 config files in that subdirectory can be used to set up your build more
 quickly.  If you have a configuration file called _~/.abinit/build/hostname.ac_
