@@ -376,18 +376,19 @@ contains
 
  intarr(1,:)=dtsets(:)%plowan_bandf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_bandf','INT',0)
- 
+
  intarr(1,:)=dtsets(:)%plowan_compute
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_compute','INT',0)
- 
+
  intarr(1,:)=dtsets(:)%plowan_natom
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_natom','INT',0) 
- 
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_natom','INT',0)
+
  intarr(1,:)=dtsets(:)%plowan_nt
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_nt','INT',0)
- 
+
  intarr(1,:)=dtsets(:)%plowan_realspace
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_realspace','INT',0)
+
 
 !plowan_it
  narr=100
@@ -398,7 +399,8 @@ contains
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_it(1:narrm(idtset))
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1) 
+
 
 !plowan_iatom
  narr=mxvals%natom
@@ -443,6 +445,7 @@ contains
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_projcalc','INT',1)
+
 
  intarr(1,:)=dtsets(:)%posdoppler
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'posdoppler','INT',0)

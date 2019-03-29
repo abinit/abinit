@@ -59,7 +59,7 @@ MODULE m_prep_calc_ucrpa
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_failed
  use m_read_plowannier, only : read_plowannier
- use m_plowannier, only : plowannier_type
+ use m_plowannier, only : plowannier_type,operwan_realspace_type
 
  implicit none
 
@@ -165,7 +165,7 @@ contains
 subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Gsph_x,Vcp,Kmesh,Qmesh,lpawu,&
 & M1_q_m,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,&
 & Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
-& prtvol,pawcross,plowan_compute,rhot1_q_m)
+& prtvol,pawcross,plowan_compute,rhot1_q_m,wanbz,rhot1)
 
 !Arguments ------------------------------------
 !scalars
@@ -189,6 +189,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  type(esymm_t),target,intent(in) :: allQP_sym(Wfd%nkibz,Wfd%nsppol)
  type(pawfgrtab_type),intent(inout) :: Pawfgrtab(Cryst%natom*Psps%usepaw)
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
+ type(plowannier_type),intent(in) :: wanbz
+ type(operwan_realspace_type),intent(inout) :: rhot1(Sigp%npwx,Qmesh%nibz)
 
 !Local variables ------------------------------
 !scalars
@@ -203,6 +205,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  integer :: ispinor1,ispinor3,isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
  integer :: gwx_nfftot,nfftf,mgfftf,ierr
  integer :: nhat12_grdim
+ integer :: iatom1,iatom2,il1,il2,im1,im2,ispinor2,pos1,pos2,wan_jb,wan_ib_sum,pwx
  real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty,norm,weight
  complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma
@@ -233,7 +236,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  logical     :: ecriture=.FALSE.
  logical     :: l_ucrpa,luwindow
  integer     :: g0_dump(3),iq_ibz_dump,dumint(2)
-
+ 
 !************************************************************************
 
  l_ucrpa=.true.
@@ -272,11 +275,13 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  dumint=0
  luwindow=.true.
 ! write(6,*) "cc",allocated(coeffW_BZ)
- call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
-   & nspinor,nsppol,pawang,prtvol,dumint)
- if(lcor/=lpawu) then
-   msg = "lcor and lpawu differ in prep_calc_ucrpa"
-   MSG_ERROR(msg)
+ if (plowan_compute <10)then 
+   call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
+     & nspinor,nsppol,pawang,prtvol,dumint)
+   if(lcor/=lpawu) then
+     msg = "lcor and lpawu differ in prep_calc_ucrpa"
+     MSG_ERROR(msg)
+   endif
  endif
 
 
@@ -764,19 +769,21 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
          if (ib_sum.GE.ib1.AND.ib_sum.LE.ib2) then
            call flush_unit(std_out)
            call flush_unit(ab_out)
-           do iat=1, cryst%nattyp(itypatcor)
-             do ispinor1=1,nspinor
-               do ispinor3=1,nspinor
-                 do m1=1,2*lcor+1
-                   do m3=1,2*lcor+1
-                      M1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)=M1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)+&
+           if (plowan_compute <10)then
+             do iat=1, cryst%nattyp(itypatcor)
+               do ispinor1=1,nspinor
+                 do ispinor3=1,nspinor
+                   do m1=1,2*lcor+1
+                     do m3=1,2*lcor+1
+                       M1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)=M1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)+&
 &                      rhotwg_ki(:,jb)*coeffW_BZ(iat,spin,jb,jk_bz,ispinor3,m3)*conjg(coeffW_BZ(iat,spin,ib_sum,ik_bz,ispinor1,m1))
+                     enddo
                    enddo
                  enddo
                enddo
              enddo
-           enddo
-         end if
+           end if
+         endif
 !  ************************************8
 !  ************************************8
          !
@@ -839,22 +846,53 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
          if (ib_sum.GE.ib1.AND.ib_sum.LE.ib2) then
            call flush_unit(std_out)
            call flush_unit(ab_out)
-           do iat=1, cryst%nattyp(itypatcor)
-             do ispinor1=1,nspinor
-               do ispinor3=1,nspinor
-                 do m1=1,2*lcor+1
-                   do m3=1,2*lcor+1
-                     if(m1==2.and.m3==2) then
-                     endif
-                      rhot1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)=&
-&                       rhot1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)+&
-&                       rhotwg_ki(:,jb)*coeffW_BZ(iat,spin,jb,jk_bz,ispinor3,m3)&
-&                       *conjg(coeffW_BZ(iat,spin,ib_sum,ik_bz,ispinor1,m1))*weight
+           if (plowan_compute<10)then
+             do iat=1, cryst%nattyp(itypatcor)
+               do ispinor1=1,nspinor
+                 do ispinor3=1,nspinor
+                   do m1=1,2*lcor+1
+                     do m3=1,2*lcor+1
+                       if(m1==2.and.m3==2) then
+                       endif
+                       rhot1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)=&
+                         &rhot1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)+&
+                         &rhotwg_ki(:,jb)*coeffW_BZ(iat,spin,jb,jk_bz,ispinor3,m3)&
+                         &*conjg(coeffW_BZ(iat,spin,ib_sum,ik_bz,ispinor1,m1))*weight
+                     enddo
                    enddo
                  enddo
                enddo
              enddo
-           enddo
+           else
+             wan_jb=jb-wanbz%bandi_wan+1
+             wan_ib_sum=ib_sum-wanbz%bandi_wan+1
+             do pwx=1,sigp%npwx
+               do ispinor1=1,wanbz%nspinor
+                 do ispinor2=1,wanbz%nspinor
+                   do iatom1=1,wanbz%natom_wan
+                     do iatom2=1,wanbz%natom_wan
+                       do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+                         do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+                           do il1=1,wanbz%nbl_atom_wan(iatom1)
+                             do il2=1,wanbz%nbl_atom_wan(iatom2)
+                               do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+                                 do im2=1,2*wanbz%latom_wan(iatom1)%lcalc(il2)+1
+      rhot1(pwx,iq_ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=&
+      &rhot1(pwx,iq_ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)+&
+      &rhotwg_ki(pwx,jb)*wanbz%psichi(jk_bz,wan_jb,iatom1)%atom(il1)%matl(im1,spin,ispinor1)*&
+      &conjg(wanbz%psichi(ik_bz,wan_ib_sum,iatom2)%atom(il2)%matl(im2,spin,ispinor2))*weight
+                                 enddo!im2
+                               enddo!im1
+                             enddo!il2
+                           enddo!il1
+                         enddo!pos2
+                       enddo!pos1
+                     enddo!iatom2
+                   enddo!iatom1
+                 enddo!ispinor2
+               enddo!ispinor1
+             enddo!pwx
+           endif!plowan_compute<10
          end if
 !  ************************************8
 !  ************************************8
@@ -927,7 +965,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  ABI_DEALLOCATE(vc_sqrt_qbz)
  ABI_DEALLOCATE(ktabr)
 ! ABI_DEALLOCATE(proc_distrb)
- ABI_DEALLOCATE(coeffW_BZ)
+ if (plowan_compute<10) ABI_DEALLOCATE(coeffW_BZ)
 
 
  call timab(430,2,tsec) ! csigme (SigX)

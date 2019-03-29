@@ -86,7 +86,7 @@ contains
 !! SOURCE
 
  subroutine calc_ucrpa(itypatcor,cryst,Kmesh,lpawu,M1_q_m,Qmesh,npwe,&
-& npw,nsym,rhot1_q_m,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname)
+& npw,nsym,rhot1_q_m,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname,plowan_compute,rhot1)
 
  use defs_basis
  use m_abicore
@@ -98,6 +98,7 @@ contains
  use m_io_screening,  only : read_screening, em1_ncname
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
  use m_crystal,       only : crystal_t
+ use m_plowannier,    only : operwan_realspace_type
  implicit none
 !   _____            _
 !  |_   _|          | |
@@ -113,6 +114,7 @@ contains
  integer, intent(in)   :: nomega
  integer, intent(in)   :: bandinf
  integer, intent(in)   :: bandsup
+ integer, intent(in)   :: plowan_compute 
  character(len=fnlen), intent(in) :: fname
  character(len=*), intent(in) :: optimisation
  real(dp), intent(in) :: ucvol,omegamin,omegamax
@@ -120,6 +122,7 @@ contains
  type(wfd_t),intent(inout) :: Wfd
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(crystal_t),intent(in) :: Cryst
+ type(operwan_realspace_type),intent(in) :: rhot1(npw,Qmesh%nibz)
  complex(dpc), intent(in) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
  complex(dpc), intent(in) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
 
