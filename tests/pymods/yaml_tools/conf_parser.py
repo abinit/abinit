@@ -127,7 +127,7 @@ def tensor_is_symetric(sym, ref, tested):
         return tested.is_anti_symetric()
 
 
-@conf_parser.constraint(value_type=BaseDictWrapper, apply_to='this')
+@conf_parser.constraint(value_type=dict, apply_to='this')
 def callback(locs, ref, tested):
     method = locs.method
     del locs['method']
