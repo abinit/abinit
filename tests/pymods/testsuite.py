@@ -288,13 +288,15 @@ class FileToTest(object):
     #  atr_name,   default, conversion function. None designes mandatory attributes.
     _attrbs = [
         ("name",     None, str),
-        ("tolnlines",None, int),    # fldiff tolerances
-        ("tolabs",   None, float),
-        ("tolrel",   None, float),
+        ("tolnlines", 0, int),    # fldiff tolerances
+        ("tolabs",   0, float),
+        ("tolrel",   0, float),
         ("fld_options","",str) ,     # options passed to fldiff.
         ("fldiff_fname","",str),
         ("hdiff_fname","",str),
         ("diff_fname","",str),
+        ("use_yaml","no",str),
+        ("verbose_report","no",str),
         #("pydiff_fname","",str),
     ]
 
@@ -321,7 +323,8 @@ class FileToTest(object):
     @lazy__str__
     def __str__(self): pass
 
-    def compare(self, fldiff_path, ref_dir, workdir, timebomb=None, outf=sys.stdout):
+    def compare(self, fldiff_path, ref_dir, workdir, yaml_test, timebomb=None,
+                outf=sys.stdout):
         """
         Use fldiff_path to compare the reference file located in ref_dir with
         the output file located in workdir. Results are written to stream outf.
@@ -351,17 +354,40 @@ class FileToTest(object):
         if '-includeP' in self.fld_options:
             opts['ignoreP'] = False
 
-        differ = FlDiffer(**opts)
+        if self.verbose_report == 'yes':
+            opts['verbose'] = True
+
+        if self.use_yaml not in ('yes', 'no', 'only'):
+            # raise ParameterError
+            pass
+        if self.use_yaml == 'yes':
+            opts['use_yaml'] = True
+            opts['use_fl'] = True
+        elif self.use_yaml == 'only':
+            opts['use_yaml'] = True
+            opts['use_fl'] = False
+        else:  # self.use_yaml == 'no':
+            opts['use_yaml'] = False
+            opts['use_fl'] = True
+
+        differ = FlDiffer(yaml_test=yaml_test, **opts)
 
         try:
             fld_result = differ.diff(ref_fname, out_fname)
             fld_result.dump_details(outf)
-            isok, status, msg = fld_result.passed_within_tols(self.tolnlines, self.tolabs, self.tolrel)
+
+            isok, status, msg = fld_result.passed_within_tols(
+                self.tolnlines, self.tolabs, self.tolrel
+            )
+
             msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
         except Exception as e:
-            warnings.warn('[{}] Something went wrong with this test:\n{}\n'.format(self.name, str(e)))
-            isok, status, msg = False, 'failed', 'internal error:\n' + str(e)
+            warnings.warn('[{}] Something went wrong with this test:\n{}: {}\n'
+                          .format(self.name, e.__class__.__name__, str(e)))
+            isok, status = False, 'failed'
+            msg = 'internal error:\n{}: {}'.format(e.__class__.__name__,
+                                                   str(e))
 
         # Save comparison results.
         self.fld_isok = isok
@@ -411,6 +437,7 @@ def _str2bool(string):
     if string == "yes": return True
     return False
 
+
 # TEST_INFO specifications
 TESTCNF_KEYWORDS = {
 # keyword        : (parser, default, section, description)
@@ -454,6 +481,8 @@ TESTCNF_KEYWORDS = {
 "description"    : (str      , "No description available",  "extra_info", "String containing extra information on the test"),
 "topics"         : (_str2list, "",  "extra_info", "Topics associated to the test"),
 "references"     : (_str2list, "",  "extra_info", "List of references to papers or other articles"),
+"file"           : (str, "", "yaml_test", "File path to the YAML config file relative to the input file."),
+"yaml"           : (str, "", "yaml_test", "Raw YAML config for quick config."),
 }
 
 #TESTCNF_SECTIONS = set( [ TESTCNF_KEYWORDS[k][2] for k in TESTCNF_KEYWORDS ] )
@@ -466,6 +495,7 @@ TESTCNF_SECTIONS = [
   "shell",
   "paral_info",
   "extra_info",
+  "yaml_test",
 ]
 
 # consistency check.
@@ -501,7 +531,7 @@ def doc_testcnf_format(fh=sys.stdout):
         for key in TESTCNF_KEYWORDS:
             tup = TESTCNF_KEYWORDS[key]
             if section == tup[2]:
-                line_parser = tup[0]
+                # line_parser = tup[0]
                 default = tup[1]
                 if default is None:
                     default = "Mandatory"
@@ -679,30 +709,31 @@ class AbinitTestInfoParser(object):
         info = Record()
         d = info.__dict__
 
+        d['yaml_test'] = self.yaml_test()
+
         # First read and parse the global options.
         for key in TESTCNF_KEYWORDS:
             tup = TESTCNF_KEYWORDS[key]
             line_parser = tup[0]
             section = tup[2]
 
-            if section in self.parser.sections():
-                try:
-                    d[key] = self.parser.get(section, key)
-                except NoOptionError:
-                    d[key] = tup[1] # Section exists but option is not specified. Use default value.
+            if section == 'yaml_test':
+                # special case: handle this separatly
+                continue
+            elif (section in self.parser.sections()
+                  and self.parser.has_option(section, key)):
+                d[key] = self.parser.get(section, key)
             else:
-                d[key] = tup[1] # Section does not exist. Use default value.
+                d[key] = tup[1]  # Section does not exist. Use default value.
 
             # Process the line
             #if key == "files_to_test": print("hello files", d[key], "bye files")
             try:
                 d[key] = line_parser(d[key])
             except Exception as exc:
-                try:
-                    err_msg = "Wrong line:\n key = %s, d[key] = %s\n in file: %s" % (key, d[key], self.inp_fname)
-                except:
-                    err_msg = "In file %s:\n%s" % (self.inp_fname, str(exc))
-
+                err_msg = ("In file: %s\nWrong line:\n key = %s, d[key] = %s\n"
+                           "%s: %s") % (self.inp_fname, key, d[key],
+                                        exc.__class__.__name__, str(exc))
                 raise self.Error(err_msg)
 
         # At this point info contains the parsed global values.
@@ -719,10 +750,10 @@ class AbinitTestInfoParser(object):
                 raise self.Error(err_msg)
 
             if nprocs > info.max_nprocs:
-                try:
+                if hasattr(self, 'max_nprocs'):
                     err_msg = "in file: %s. nprocs = %s > max_nprocs = %s" % (self.inp_fname, nprocs, self.max_nprocs)
-                except Exception as exc:
-                    err_msg = "in file: %s\n%s" % (self.inp_fname, str(exc))
+                else:
+                    err_msg = "in file: %s\nmax_nprocs is not defined" % self.inp_fname
 
                 raise self.Error(err_msg)
 
@@ -744,12 +775,16 @@ class AbinitTestInfoParser(object):
                 opt = self.parser.get(ncpu_section, key)
                 tup = TESTCNF_KEYWORDS[key]
                 line_parser = tup[0]
-                #
+
                 # Process the line and replace the global value.
                 try:
                     d[key] = line_parser(opt)
-                except:
-                    err_msg = "In file: %s. Wrong line: key: %s, value: %s" % (self.inp_fname, key, d[key])
+                except Exception as exc:
+                    err_msg = ("In file: %s\nWrong line:\n"
+                               " key = %s, d[key] = %s\n %s: %s") % (
+                                   self.inp_fname, key, d[key],
+                                   exc.__class__.__name__, str(exc)
+                               )
                     raise self.Error(err_msg)
 
                 #print(self.inp_fname, d["max_nprocs"])
@@ -790,6 +825,23 @@ class AbinitTestInfoParser(object):
 
         fnames = parse(self.parser.get(section, opt))
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
+
+    def yaml_test(self):
+        sec_name = 'yaml_test'
+        ytest = {}
+
+        if self.parser.has_section(sec_name):
+            scalar_key = ['file', 'yaml']
+            for key in scalar_key:
+                if self.parser.has_option(sec_name, key):
+                    ytest[key] = self.parser.get(sec_name, key)
+
+            if 'file' in ytest:
+                val = ytest['file']
+                base = os.path.realpath(os.path.dirname(self.inp_fname))
+                ytest['file'] = os.path.join(base, val)
+
+        return ytest
 
     #@property
     #def is_parametrized_test(self):
@@ -914,7 +966,6 @@ class CPreProcessor(object):
         cmd = " ".join(cmd)
         if self.verbose: print(cmd)
 
-        from subprocess import Popen, PIPE
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
 
@@ -1077,9 +1128,9 @@ class BuildEnvironment(object):
                 bin_path = os.path.join(p, bin_name)
                 if os.path.isfile(bin_path): break
             else:
-                err_msg = ("Cannot find path of bin_name %s, neither in the build directory nor in PATH %s" %
-                           (bin_name, paths))
-                #warnings.warn(err_msg)
+                # err_msg = ("Cannot find path of bin_name %s, neither in the build directory nor in PATH %s" %
+                #           (bin_name, paths))
+                # warnings.warn(err_msg)
                 bin_path = ""
 
         return bin_path
@@ -1594,16 +1645,16 @@ class BaseTest(object):
                 # Have new variable
                 if tok[-1].isdigit(): # and "?" not in tok:
                     # Handle dataset index.
-                    l = []
+                    # l = []
                     for i, c in enumerate(tok[::-1]):
                         if c.isalpha(): break
-                        #l.append(c)
+                        # l.append(c)
                     else:
                         raise ValueError("Cannot find dataset index in token: %s" % tok)
                     tok = tok[:len(tok) - i]
-                    #l.reverse()
-                    #print("tok", tok, l)
-                    #tok = l
+                    # l.reverse()
+                    # print("tok", tok, l)
+                    # tok = l
                 vnames.append(tok)
 
         #print(vnames)
@@ -1868,7 +1919,7 @@ class BaseTest(object):
         else:
             self.timebomb = TimeBomb(timeout, delay=0.05)
 
-        str_colorizer = StringColorizer(sys.stdout)
+        # str_colorizer = StringColorizer(sys.stdout)
 
         #status2txtcolor = {
         #    "succeeded": lambda string: str_colorizer(string, "green"),
@@ -1981,7 +2032,7 @@ class BaseTest(object):
                     f.fldiff_fname = fldiff_fname
 
                     isok, status, msg = f.compare(self.abenv.fldiff_path, self.ref_dir, self.workdir,
-                                                  timebomb=self.timebomb, outf=fh)
+                                                  yaml_test=self.yaml_test, timebomb=self.timebomb, outf=fh)
 
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
@@ -2150,11 +2201,11 @@ class BaseTest(object):
         A default patcher is provided if patcher is None (use $PATCHER shell variable)
         """
         assert self._executed
+        from tests.pymods import Patcher
         for f in self.files_to_test:
             ref_fname = os.path.abspath(os.path.join(self.ref_dir, f.name))
             out_fname = os.path.abspath(os.path.join(self.workdir,f.name) )
             raise NotImplementedError("patcher should be tested")
-            from tests.pymods import Patcher
             Patcher(patcher).patch(out_fname, ref_fname)
 
     def make_html_diff_files(self):
