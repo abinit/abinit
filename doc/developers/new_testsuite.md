@@ -32,47 +32,49 @@ structured data in YAML format and Python code to parse the output files and ana
 __Current situation__
 
 In its current state, the ABINIT test suite is based on input files with the
-corresponding reference output files. 
-Roughly speaking, an automatic test consists in comparing the reference file with the output file 
-in a line-oriented fashion by computing differences between floating-point numbers without any knowledge
-about the meaning and the importance of the numerical values.
-This approach is very rigid and rather limited because it obliges developers
-to use a single (usually large) tolerance to account for possibly large fluctuations 
-in the intermediate results whereas the tolerance criteria should be ideally applied only
-to the final results that are (hopefully) independent of details such as 
-hardware, optimization level and parallelism.
+corresponding reference output files.  Roughly speaking, an automatic test
+consists in comparing the reference file with the output file in a line-oriented
+fashion by computing differences between floating-point numbers without any
+knowledge about the meaning and the importance of the numerical values.  This
+approach is very rigid and rather limited because it obliges developers to use a
+single (usually large) tolerance to account for possibly large fluctuations in
+the intermediate results whereas the tolerance criteria should be ideally
+applied only to the final results that are (hopefully) independent of details
+such as hardware, optimization level and parallelism.
 
-This limitation is clearly seen when comparing the results of iterative algorithms.
-The number of iterations required to converge, indeed, may depend on several factors especially
-when the input parameters are far from convergence or when different parallelization schemes
-or stochastic methods are used. 
-From the point of view of code validation, what really matters is the final converged value 
-plus the time to solution if performance ends up being of concern.
-Unfortunately, any line-by-line comparison algorithm will miserably fail in such conditions
-because it will continue to insist on having the same number of iterations (lines) in the two calculations
-to mark the test as succeeded.
+This limitation is clearly seen when comparing the results of iterative
+algorithms.  The number of iterations required to converge, indeed, may depend
+on several factors especially when the input parameters are far from convergence
+or when different parallelization schemes or stochastic methods are used.  From
+the point of view of code validation, what really matters is the final converged
+value plus the time to solution if performance ends up being of concern.
+Unfortunately, any line-by-line comparison algorithm will miserably fail in such
+conditions because it will continue to insist on having the same number of
+iterations (lines) in the two calculations to mark the test as succeeded.
 
-It is evident that the approach used so far to validate new developments in Abinit is not able 
-to cope with the challenges posed by high-performance computing and that smarter and more 
-flexible approaches are needed to address these limitations.
+It is evident that the approach used so far to validate new developments in
+Abinit is not able to cope with the challenges posed by high-performance
+computing and that smarter and more flexible approaches are needed to address
+these limitations.
 
 __Solution__
 
-One of the goals of this project is to implement a python-based infrastructure that allows 
-developers to implement more rigorous tests on the portability of important physical quantities 
-while ignoring intermediate results. 
-This goal is achieved by providing a *declarative* interface that allows developers to define
-the logic to be used to compare selected physical quantities.
-We also provide a declarative API to check that the results computed by the ab-initio code 
-satisfies fundamental physical and mathematical rules such as energy conservation, Newton's third law, 
-symmetry properties, etc.
+One of the goals of this project is to implement a python-based infrastructure
+that allows developers to implement more rigorous tests on the portability of
+important physical quantities while ignoring intermediate results.  This goal is
+achieved by providing a *declarative* interface that allows developers to define
+the logic to be used to compare selected physical quantities.  We also provide a
+declarative API to check that the results computed by the ab-initio code
+satisfies fundamental physical and mathematical rules such as energy
+conservation, Newton's third law, symmetry properties, etc.
 
-That's not quite as simple as it sounds, especially because one of our goals is to minimize the
-amount of (coding) work required to express such logic.
-There are therefore basic rules and design principles Abinit developers should be aware of 
-in order to take fully advantage of the new infrastructure.
-In what follows, we briefly describe the philosophy employed to implement the YAML-based test suite,
-the syntax used to define tests and the modifications required to extend the framework.
+That's not quite as simple as it sounds, especially because one of our goals is
+to minimize the amount of (coding) work required to express such logic.  There
+are therefore basic rules and design principles Abinit developers should be
+aware of in order to take fully advantage of the new infrastructure.  In what
+follows, we briefly describe the philosophy employed to implement the YAML-based
+test suite, the syntax used to define tests and the modifications required to
+extend the framework.
 
 <!--
 Of course all these tests would have to be designed nearly independently for
@@ -96,11 +98,13 @@ participation of the ABINIT community.
 
 ## Implementation details
 
-The most important physical results are written in the main output file (aka *ab_out*) inside machine-readable 
-[YAML](https://en.wikipedia.org/wiki/YAML) documents. 
-A YAML document starts with three hyphens (---) followed by an (optional) tag beginning with an exclamation mark (e.g. `!ETOT`).
-Three periods (...) signals the end of the document.
-According to this syntax, one can easily write a dictionary storing the different contributions to the total free energy with:
+The most important physical results are written in the main output file (aka
+*ab_out*) inside machine-readable [YAML](https://en.wikipedia.org/wiki/YAML)
+documents.  A YAML document starts with three hyphens (---) followed by an
+(optional) tag beginning with an exclamation mark (e.g. `!ETOT`).  Three periods
+(...) signals the end of the document.  According to this syntax, one can easily
+write a dictionary storing the different contributions to the total free energy
+with:
 
 
 ```yaml
@@ -120,21 +124,24 @@ Total energy(eV)    : -2.756386620520307815E+02
 ...
 ```
 
-Further details about the meaning of tags, labels and their connection with the testing infrastructure
-will be given in the sections below.
-For the time being, it is sufficient to say that we opted for YAML because it is a *human-readable* data serialization language
-already used in the log file to record important events such as WARNINGs, ERRORs and COMMENTs
-(this is indeed the *protocol* employed by AbiPy to monitor the status of Abinit calculations). 
+Further details about the meaning of tags, labels and their connection with the
+testing infrastructure will be given in the sections below.  For the time being,
+it is sufficient to say that we opted for YAML because it is a *human-readable*
+data serialization language already used in the log file to record important
+events such as WARNINGs, ERRORs and COMMENTs (this is indeed the *protocol*
+employed by AbiPy to monitor the status of Abinit calculations). 
 
-Many programming languages, including python, provide support for reading and writing YAML
-hence it is relatively easy to implement post processing tools based on well-established python libraries 
-for scientific computing such as NumPy, SciPy, Matplotlib and Pandas. 
-Last but not least, writing YAML in Fortran does not represent an insurmountable problem provided
-one keeps the level of complexity of the YAML document at a *reasonable level*.
-Our Fortran implementation, indeed, supports only a subset of the YAML specifications:
+Many programming languages, including python, provide support for reading and
+writing YAML hence it is relatively easy to implement post processing tools
+based on well-established python libraries for scientific computing such as
+NumPy, SciPy, Matplotlib and Pandas.  Last but not least, writing YAML in
+Fortran does not represent an insurmountable problem provided one keeps the
+level of complexity of the YAML document at a *reasonable level*.  Our Fortran
+implementation, indeed, supports only a subset of the YAML specifications:
 
 * scalars
-* arrays (@Theo: max shape?)
+* arrays of one or two dimensions
+* mapping containing scalars
 * tables in CSV format
 
 A more detailed discussion about the Fortran API is given in the XXX section.
@@ -164,7 +171,7 @@ On the Fortran side, we provide:
   Lists have been chosen over hash tables because, in this particular context, 
   performance is not critical and the O(n) cost required to locate a key is negligible 
   given that there will never be a lot of elements in the table. 
-  The pair list can dynamically hold either real or integer values. 
+  The pair list can dynamically hold either real, integer or string values. 
   It implements the basic getters and setters and an iterator system to allow looping 
   over the key-value pairs easily in Fortran.
 
@@ -207,23 +214,24 @@ As concerns the python implementation:
 - A parser for test configuration have been added and all facilities to do
   tests are in place.
 
-- A command line tool `testtools.py` to allow doing different manual actions (see Test CLI)
+- A command line tool `testtools.py` to allow doing different manual actions
+  (see Test CLI)
 
-==TODO==
-Add Pseudo code with examples showing how to write ETOT in Fortran, how to define and register 
-a python YAML object associated to the ETOT tag.
-==END TODO==
+==TODO== Add Pseudo code with examples showing how to write ETOT in Fortran, how
+to define and register a python YAML object associated to the ETOT tag.  ==END
+TODO==
 
-The new infrastructure has been designed with extensibility and ease-of-use in mind.
-From the perspective of an Abinit developer, adding support for the Yaml-based approach requires two steps (??):
+The new infrastructure has been designed with extensibility and ease-of-use in
+mind.  From the perspective of an Abinit developer, adding support for the
+Yaml-based approach requires two steps (??):
 
-1. Implement the output of the YAML document in Fortran using the pre-existent API. 
-   Associate a tag and possibly a label to the new document.
-2. Modify the python code in pymods to associate a python object to the Yaml document
+1. Implement the output of the YAML document in Fortran using the pre-existent
+   API.  Associate a tag and possibly a label to the new document.
+2. Modify the python code in pymods to associate a python object to the Yaml
+   document
 
-An example will help clarify.
-Let's assume we want to implement the output of the `!ETOT` dictionary with the different components 
-of the total free energy.
+An example will help clarify.  Let's assume we want to implement the output of
+the `!ETOT` dictionary with the different components of the total free energy.
 In Fortran, we will have to write something like:
 
 ```fortran
@@ -237,7 +245,9 @@ To connect the new YAML document to the python infrastructure, we have
 to modify `~pymods/yaml_tools/structures.py` by adding the following lines:
 
 ```python
-@yaml_auto_map
+@yaml_auto_map  # register the following class as a known tag
+                # and give it a basic set of methods so it will save
+                # all fields from the YAML data as attributes
 class Etot(object):
     __yaml_tag = 'ETOT'
 
@@ -248,7 +258,8 @@ class Etot(object):
     @classmethod
     def from_map(cls, map):
         new = super(Etot, cls).from_map(map)
-        new.components = {
+        new.components = {  # we want to have access to components as a coherent
+                            # list
             name: value for name, value in new.__dict__.items()
             if name not in [
                 'Etotal',
@@ -286,39 +297,37 @@ More specifically:
 
 - a new (optional) section `[yaml_test]` is added with two possible options: 
 
-    * *test* --> whom value is an embedded test specification  (MG this part is not clear)
+    * *test* --> the value is used as the YAM test specification YAML
     * *file* --> path to the file containing the test specification
 
 ### Test specification syntax
 
-==TODO==
-Refactor this part, try to have a smooth introduction to the different concepts 
-in the form of a HOWTO manual. Start with the simplest use case scenario (e.g. how to
-specify tolerances for the ETOT document), present a simple example of yaml file, explain
-the basic concepts then move to more complicated examples e.g. *results_gs*.
-The success of the new approach strongly depends on the easiness of use and this comes from the documentation
-and the explanation provided here.
-==END TODO==
+To explain how to build a test specification I will go step-by-step through
+the definition of the _paral[86]_ test.
 
-This section explains the syntax used to define the tolerances, the constraints and the parameters
-used by the python code to compare results.
-The configuration file consists of a *single* YAML document organized as a dictionary. 
-Each element of the mapping represents a *constraint* or a *parameter* or a *specialization* where:
+First we have to introduce the main concepts.
 
-- _constraint_ is an actual check of the data
-- _parameter_ is an arbitrary value passed to some constraint and that can modify the behavior
-- _specialization_ is a way to override already defines _constraints_ and
-  _parameters_ for a specific node of the data tree (and its children)
+Data tree
+: The processed data is a YAML document. Therefore it can be seen as a tree
+  whose nodes have a label and leaf are scalars or special data structures
+  identified by a tag (not all tags mark a leaf)
 
+Config tree
+: The configuration also take the form of a tree. Its nodes are
+  _specializations_ and its leaf are _parameters_ or _constraints_.
+  Its structure match the structure of the _data tree_ so one can define rules
+  (constraint and parameters) that apply to a specific place of the _data tree_.
 
-The distinction is made by looking at the list of known
-parameters and constraints. The value of a parameter or a constraint depends on
-its definition. The value of a specialization is itself a mapping filled with
-parameters, constraints and specialization.
-The first level of specialization match the documents label value from tested
-files. The next levels match the different attributes of the document.
-==MG I find this part difficult to understand==
+Specialization
+: The rules defined under a specialization will apply only on the matching node
+  of the _data tree_ and its children.
 
+Constraint
+: A constraint is a condition one impose for the test to succeed.
+
+Parameter
+: A parameter is a value that can be used by constraints to modify their
+  behavior.
 
 !!! tip
 
@@ -326,59 +335,154 @@ files. The next levels match the different attributes of the document.
     
         ~abinit/tests/testtools.py explore
     
-    and type `show *`. You can then type for
-    example `show tol_eq` to learn more about a specific constraint or parameter.
+    and type `show *`. You can then type for example `show tol_eq` to learn more
+    about a specific constraint or parameter.
 
-Constraints and parameters have several properties defining their behavior.
-Most of the time constraints and parameters apply to all children level,
-they are inherited, though some of them apply only at the level where they are
-defined. Constraints can have a list of parameters they use. If these parameters
-are not available at the current level (they are not defined in any higher
-level, or they cannot be inherited) the default value of the parameter is used.
-Constraints can be mutually exclusive which mean that when a constraint is
-defined, all constraints define in higher level this one excludes are hidden to
-the current level and its children.
+Let's start with a minimalistic example in which we compare the components of
+the total free energy.
 
-Here is an example of a possible file:
+We will start by comparing the values of each components with both absolute
+tolerance of 1.0e-7 Ha.
 
-<!--
-Let's start with a minimalistic example in which we compare the components of the total free energy
-then we move to more complicated examples that will allows to introduce more advanced features.
--->
+The document holding this piece of data have the _label_ `Etot` so the YAML file
+will look like this:
 
 ```yaml
-Etot:  # this defines rules for the document Etot
-    tol: 1.0e-3  # this say that for all numerical values encountered in
-                 # the document Etot we will check a tolerance of 1.0e-3
-                 # both on absolute a relative differences
-    Kinetic energy:  # this override the tol constraints for the Kinetic energy
-                     # attribute
-        tol: 1.0e-10
-
-results_gs:
-    tol: 1.0e-5
-    convergence:
-        ceil: 5.0e-8  # here we define a ceil which exclude tol
-                      # instead of a test between ref and tested file
-                      # we will just check that values in convergence
-                      # are below 5.0e-8
-        residm:
-            ceil: 5.0e-6
-
-    entropy:
-        ceil: 1.0e-10
-
-    stress tensor:
-        tol: 1.0e-5
-        tensor_is_symetric: True  # check that tensor is symetric
-
-    cartesian_force:
-        tol_eq: 1.0e-8  # tol_eq is a parameter used by equation
-        equation: "this.sum(axis=0)"  # 2-norm of sum of forces is under 1e-8
-
-    etotal:
-        tol: 1.0e-8
+Etot:
+    tol_abs: 1.0e-7
 ```
+
+The `tol_abs` keyword is a _constraint_. It will check for each children of
+`Etot` that the value doesn't differ of more than 1.0e-7 Ha. If one does, the
+test will fail and the report will tell you what component is wrong.
+
+In the `Etot` document one can find the total energy in eV. Since the unit is
+different the absolute tolerance have not the same impact on the precision.
+We want to achieve the same relative precision on this term but we cannot
+achieve the same absolute precision. Though we will __specialize__ the rules
+and use the `tol_rel`. The name of the field holding the total energy in eV in 
+the `Etot` document is `Total energy (eV)`. We could do something like this:
+
+```yaml
+Etot:
+    tol_abs: 1.0e-7
+    Total energy (eV):
+        tol_rel: 1.0e-10
+```
+
+However the `tol_abs` constraint defined in `Etot` is _inherited_ by `Total
+energy (eV)` which mean we will not only apply `tol_rel` with a tolerance of
+1.0e-10 but also `tol_abs` with a tolerance of 1.0e-7. Most of the time it is
+what we need even though here it's not. So we will just use a different
+tolerance for `tol_abs` in `Total energy (eV)`.
+
+```yaml
+Etot:
+    tol_abs: 1.0e-7
+    Total energy (eV):
+        tol_abs: 1.0e-5
+        tol_rel: 1.0e-10
+```
+
+Now we achieve the same relative precision and the test does not fail because
+of the looser absolute precision of the total energy in eV.
+
+The `Etot` document is the simplest possible document. It only contains fields
+with real values. We now will have a look at the `results_gs` document. It come
+from the structure of the same name in ABINIT code. In the ABINIT output file it
+look like this:
+
+```yaml
+---
+label     : results_gs
+comment   : Summary of ground states results.
+natom     :        5
+nsppol    :        1
+cut       : {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
+convergence: {
+    "deltae":   2.37409381043107715E-09, "res2":   1.41518780109792898E-08, 
+    "residm":   2.60254842131463755E-07, "diffor": 0.00000000000000000E+00, 
+}
+etotal    :  -1.51507711707660150E+02
+entropy   :   0.00000000000000000E+00
+fermie    :   3.09658145725792422E-01
+stress tensor: !Tensor
+- [  3.56483996349480498E-03,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
+- [  0.00000000000000000E+00,   3.56483996349480151E-03,   0.00000000000000000E+00, ]
+- [  0.00000000000000000E+00,   0.00000000000000000E+00,   3.56483996349478416E-03, ]
+
+cartesian forces: !CartForces
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+- [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
+...
+```
+
+Here we have a more examples of what can be found in a document. We have real
+and integer fields, mappings/dictionaries and 2D arrays.
+
+To check this document in our test we have to add a specialization for it along
+side the `Etot` one. It will look like this:
+
+```yaml
+Etot:
+    tol_abs: 1.0e-7
+    Total energy (eV):
+        tol_abs: 1.0e-5
+        tol_rel: 1.0e-10
+results_gs:
+    tol_rel: 1.0e-8
+```
+
+For simplicities sake I will only write the `results_gs` part in next examples.
+First we want to check the integers and real values. This is what the `tol_rel`
+is for.
+However the content of the `convergence` field represent residues. It does not
+make sense to check those against the reference. What we really want is make
+sure that they are below a given ceil. This is what the `ceil` constraint is
+for:
+
+```yaml
+results_gs:
+    tol_rel: 1.0e-8
+    convergence:
+        ceil: 3.0e-7
+```
+
+Now the test will fail if one of the components of the `convergence` mapping is
+above 3.0e-7. The `ceil` constraint have the particularity to disable `tol_rel`
+and `tol_abs` defined before because they are mutually exclusive.
+
+!!! tip
+
+    Within the explore shell `show ceil` will tell you among other informations
+    what are the constraints disabled by the use of `ceil`.
+
+Fields with the `!Tensor` tags are leaf of the tree. Then the tester routine
+won't try to compare each individual coefficient with `tol_rel`. However we
+still want to check that it does not change too much. For that we use the
+`tol_vec` constraint which apply to all arrays derived from Numpy arrays (most
+arrays with a tag). `tol_vec` check the euclidian norm of the differences
+between reference and tested array. Since we also want to apply this constraint
+to `cartesian_force` we will define the constraint a the top level of
+`results_gs`.
+
+```yaml
+results_gs:
+    tol_rel: 1.0e-8
+    convergence:
+        ceil: 3.0e-7
+    tol_vec: 1.0e-5
+```
+
+
+
+==TODO==
+Continue the How To with the explanations of the filters
+==END TODO==
+
 
 In some cases it is important to define different behavior depending on the
 state of iterations (dtset, image...).  This is possible thanks to the so-called __filters__. 
@@ -540,7 +644,7 @@ to display the options supported by `COMMAND`.
 
 The available commands are:
 
-Diff
+fldiff
 
 :   Command line interface to the *fldiff.py* module. 
     It may be useful to compare output and reference files without running ABINIT each time 
@@ -549,7 +653,7 @@ Diff
     *testsuite.py* when *runtests.py* is used.
 
 
-Explore
+explore
 
 :   This tool allows the user to *explore* a test configuration file. It provides a
     shell like interface in which the user can move around the tree of the
@@ -576,7 +680,8 @@ The third is the file *~abinit/tests/pymods/yaml_tests/structures.py*. It
 defines the structures used by the YAML parser when encountering a tag (starting with !), 
 or in some cases when reaching a given pattern (__undef__ for example). Even
 if the abstraction layer on top of the _yaml_ module should help, it is better to
-have a good understanding of more "advanced" python concepts like _inheritance_, _decorators_, _classmethod_ etc.
+have a good understanding of more "advanced" python concepts like _inheritance_,
+_decorators_, _classmethod_ etc.
 
 ### Code structure
 
@@ -620,6 +725,50 @@ Yaml parsers and tools
   *tester.py* is the main test driver. It browses the data tree and use the
   configuration to run tests on Abinit output. It produces an __Issue__ list that
   will be used by *fldiff.py* to produce the report.
+
+### Add a new parameter
+To have the parser recognise a new token as a parameter one should edit the
+*~abinit/tests/pymods/conf_parser.py*.
+
+The `conf_parser` variable in this file have a method `parameter` to register a
+new parameter. Arguments are the following:
+
+- `token`: mandatory, the name used in configuration for this parameter
+- `default`: optional (`None`), the default value used when the parameter is
+  not available in the configuration.
+- `value_type`: optional (`float`), the expected type of the value found in
+  the configuration.
+- `inherited`: optional (`True`), whether or not an explicit value in the
+  configuration should be propagated to deeper levels.
+
+### Adding a constraint
+To have the parser recognise a new token as a constraint one should also edit the
+*~abinit/tests/pymods/conf_parser.py*.
+
+`conf_parser` have a method `constraint` to register a new constraint It is
+supposed to be used as a decorator that takes arguments. The arguments are all
+optional and are the following:
+
+- `value_type`: (`float`) the expected type of the value found in the
+  configuration.
+- `inherited`: (`True`), whether or not the constraint should be propagated to
+  deeper levels.
+- `apply_to`: (`'number'`), the type of data this constraint can be applied to.
+  This can be a type or one of the special strings (`'number'`, `'real'`,
+  `'integer'`, `'complex'`, `'Array'` (refer to numpy arrays), `'this'`) `'this'`
+  is used when the constraint should be applied to the structure where it is
+  defined and not be inherited.
+- `use_params`: (`[]`) a list of names of parameters to be passed as argument to
+  the test function.
+- `exclude`: (`set()`) a set of names of constraints that should not be applied
+  when this one is.
+
+The decorated function contains the actual test code. It should return `True` if
+the test succeed and either `False` or an instance of `FailDetail` if the test
+failed. If the test is simple enougth one should use `False`.  However if the
+test is compound of several non-trivial checks `FailDetail` come in handy to
+tell the user which part failed. Use `FailDetail('some explanations')` to
+provide details about the failure.
 
 
 ## Coding rules
