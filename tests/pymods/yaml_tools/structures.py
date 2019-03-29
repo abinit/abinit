@@ -251,7 +251,7 @@ if has_pandas:
 
     @yaml_auto_map
     class EtotIters(Table):
-        _is_dict_like = False  # preventy tester from going inside by itself
+        _is_dict_like = False  # prevent tester from going inside by itself
 
         def last_iter(self, other, **opts):
             tol = opts.get('tol', 1.0e-10)

@@ -20,16 +20,12 @@ from .errors import MissingCallbackError
 conf_parser = ConfParser()
 
 # Parameters
+# arguments are token, default=None, value_type=float, inherited=True
 conf_parser.parameter('tol_eq', default=1e-8, inherited=True)
 
 
-tol_group = {
-    'tol_rel', 'tol_abs', 'tol'
-}
-
-
 # Constraints
-# default parameters for constraints are:
+# default arguments for constraints are:
 # value_type=float, inherited=True, apply_to='number' use_params=[], exclude={}
 # handle_undef = True
 @conf_parser.constraint(exclude={'tol', 'ceil', 'ignore'})
