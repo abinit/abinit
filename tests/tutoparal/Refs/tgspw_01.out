@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 28 Mar 2019.
-- ( at 14h05 )
+.Starting date : Fri 29 Mar 2019.
+- ( at 19h15 )
   
 - input  file    -> tgspw_01.in
 - output file    -> tgspw_01.out
@@ -36,51 +36,8 @@ info:
 configurations:
     - tot_ncpus: 108
       mpi_ncpus: 108
-      efficiency:  0.699630778
-      vars: {
-            npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
-            npfft: 9,
-            npband: 12,
-            bandpp: 54,
-            }
-    - tot_ncpus: 108
-      mpi_ncpus: 108
-      efficiency:  0.699630778
-      vars: {
-            npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
-            npfft: 12,
-            npband: 9,
-            bandpp: 72,
-            }
-    - tot_ncpus: 108
-      mpi_ncpus: 108
-      efficiency:  0.699630778
-      vars: {
-            npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
-            npfft: 2,
-            npband: 54,
-            bandpp: 12,
-            }
-    - tot_ncpus: 108
-      mpi_ncpus: 108
-      efficiency:  0.699630778
-      vars: {
-            npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
-            npfft: 18,
-            npband: 6,
-            bandpp: 108,
-            }
-    - tot_ncpus: 108
-      mpi_ncpus: 108
-      efficiency:  0.699630778
+      omp_ncpus: 0
+      efficiency:  0.693901756
       vars: {
             npimage: 1,
             npkpt: 1,
@@ -91,29 +48,32 @@ configurations:
             }
     - tot_ncpus: 108
       mpi_ncpus: 108
-      efficiency:  0.699630778
+      omp_ncpus: 0
+      efficiency:  0.692242577
       vars: {
             npimage: 1,
             npkpt: 1,
             npspinor: 1,
-            npfft: 3,
-            npband: 36,
-            bandpp: 18,
+            npfft: 6,
+            npband: 18,
+            bandpp: 12,
             }
     - tot_ncpus: 108
       mpi_ncpus: 108
-      efficiency:  0.699630778
+      omp_ncpus: 0
+      efficiency:  0.691749151
       vars: {
             npimage: 1,
             npkpt: 1,
             npspinor: 1,
-            npfft: 1,
-            npband: 108,
-            bandpp: 6,
+            npfft: 9,
+            npband: 12,
+            bandpp: 54,
             }
     - tot_ncpus: 108
       mpi_ncpus: 108
-      efficiency:  0.699630778
+      omp_ncpus: 0
+      efficiency:  0.677884017
       vars: {
             npimage: 1,
             npkpt: 1,
@@ -124,25 +84,15 @@ configurations:
             }
     - tot_ncpus: 108
       mpi_ncpus: 108
-      efficiency:  0.698695163
+      omp_ncpus: 0
+      efficiency:  0.677076033
       vars: {
             npimage: 1,
             npkpt: 1,
             npspinor: 1,
-            npfft: 18,
-            npband: 6,
-            bandpp: 54,
-            }
-    - tot_ncpus: 108
-      mpi_ncpus: 108
-      efficiency:  0.698695163
-      vars: {
-            npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
-            npfft: 2,
-            npband: 54,
-            bandpp: 6,
+            npfft: 4,
+            npband: 27,
+            bandpp: 12,
             }
 ...
 
@@ -153,33 +103,33 @@ configurations:
  |       npkpt|       npfft|      npband|      bandpp|  #MPI(proc)|    WEIGHT|
  |    1<<    1|    1<<   22|    1<<  108|    1<<  648|    1<<  108|  <=   108|
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- |           1|           9|          12|          54|         108|    75.560|
- |           1|          12|           9|          72|         108|    75.560|
- |           1|           2|          54|          12|         108|    75.560|
- |           1|          18|           6|         108|         108|    75.560|
- |           1|           6|          18|          36|         108|    75.560|
- |           1|           3|          36|          18|         108|    75.560|
- |           1|           1|         108|           6|         108|    75.560|
- |           1|           4|          27|          24|         108|    75.560|
- |           1|          18|           6|          54|         108|    75.459|
- |           1|           2|          54|           6|         108|    75.459|
+ |           1|           6|          18|          36|         108|    74.941|
+ |           1|           6|          18|          12|         108|    74.762|
+ |           1|           9|          12|          54|         108|    74.709|
+ |           1|           4|          27|          24|         108|    73.211|
+ |           1|           4|          27|          12|         108|    73.124|
+ |           1|           4|          27|           8|         108|    73.037|
+ |           1|          18|           6|          12|         108|    73.025|
+ |           1|           4|          27|           6|         108|    72.950|
+ |           1|           4|          27|           4|         108|    72.775|
+ |           1|           4|          27|           2|         108|    72.252|
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  Only the best possible choices for nproc are printed...
 
  >>> Possible (best) choices for the number of bands (nband) are:
-     with: npfft=9
-     nband=   648 using    108 CPUs =   108 MPI x  1 threads (npband=   12)
-     nband=   636 using    108 CPUs =   108 MPI x  1 threads (npband=   12)
-     nband=   660 using    108 CPUs =   108 MPI x  1 threads (npband=   12)
-     nband=   649 using     99 CPUs =    99 MPI x  1 threads (npband=   11)
-     nband=   638 using     99 CPUs =    99 MPI x  1 threads (npband=   11)
-     nband=   640 using     90 CPUs =    90 MPI x  1 threads (npband=   10)
-     nband=   650 using     90 CPUs =    90 MPI x  1 threads (npband=   10)
-     nband=   639 using     81 CPUs =    81 MPI x  1 threads (npband=    9)
-     nband=   657 using     81 CPUs =    81 MPI x  1 threads (npband=    9)
-     nband=   664 using     72 CPUs =    72 MPI x  1 threads (npband=    8)
-     nband=   632 using     72 CPUs =    72 MPI x  1 threads (npband=    8)
-     nband=   656 using     72 CPUs =    72 MPI x  1 threads (npband=    8)
+     with: npfft=6
+     nband=   648 using    108 CPUs =   108 MPI x  1 threads (npband=   18)
+     nband=   663 using    102 CPUs =   102 MPI x  1 threads (npband=   17)
+     nband=   646 using    102 CPUs =   102 MPI x  1 threads (npband=   17)
+     nband=   640 using     96 CPUs =    96 MPI x  1 threads (npband=   16)
+     nband=   656 using     96 CPUs =    96 MPI x  1 threads (npband=   16)
+     nband=   645 using     90 CPUs =    90 MPI x  1 threads (npband=   15)
+     nband=   660 using     90 CPUs =    90 MPI x  1 threads (npband=   15)
+     nband=   644 using     84 CPUs =    84 MPI x  1 threads (npband=   14)
+     nband=   658 using     84 CPUs =    84 MPI x  1 threads (npband=   14)
+     nband=   650 using     78 CPUs =    78 MPI x  1 threads (npband=   13)
+     nband=   637 using     78 CPUs =    78 MPI x  1 threads (npband=   13)
+     nband=   636 using     72 CPUs =    72 MPI x  1 threads (npband=   12)
  >>> The present nband value (   648) seems to be the best choice!
 
  Launch a parallel version of ABINIT with a distribution of processors among the above list,

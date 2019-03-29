@@ -101,18 +101,18 @@ At the end of the log file `*log`, you will see:
  
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  |       npkpt|       npfft|      npband|      bandpp|  #MPI(proc)|    WEIGHT|
- |    1<<    1|    1<<   22|    1<<  108|    1<<   65|    1<<  108|  <=   108|
+ |    1<<    1|    1<<   22|    1<<  108|    1<<  648|    1<<  108|  <=   108|
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- |           1|          12|           9|           1|         108|    55.130|
- |           1|          10|           9|           1|          90|    54.976|
- |           1|           9|           9|           1|          81|    54.850|
- |           1|           9|          12|           1|         108|    54.373|
- |           1|          12|           9|           2|         108|    52.860|
- |           1|          10|           9|           2|          90|    52.712|
- |           1|           9|           9|           2|          81|    52.591|
- |           1|           9|          12|           2|         108|    51.346|
- |           1|          12|           9|           4|         108|    48.320|
- |           1|          10|           9|           4|          90|    48.184|
+ |           1|           6|          18|          36|         108|    74.941|
+ |           1|           6|          18|          12|         108|    74.762|
+ |           1|           9|          12|          54|         108|    74.709|
+ |           1|           4|          27|          24|         108|    73.211|
+ |           1|           4|          27|          12|         108|    73.124|
+ |           1|           4|          27|           8|         108|    73.037|
+ |           1|          18|           6|          12|         108|    73.025|
+ |           1|           4|          27|           6|         108|    72.950|
+ |           1|           4|          27|           4|         108|    72.775|
+ |           1|           4|          27|           2|         108|    72.252|
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  Only the best possible choices for nproc are printed...
 ......................  
@@ -120,14 +120,14 @@ At the end of the log file `*log`, you will see:
 
 A weight is assigned to each distribution of processors. As indicated, you are advised
 to select a processor distribution with a high "weight"". If we just focus on [[npband]]
-and [[npfft]], we see that, for 108 processes, the recommended distribution is (12x9).  
+and [[npfft]], we see that, for 108 processes, the recommended distribution is (18x6).  
   
 In a second step you can launch ABINIT in parallel on 108 processors by
 changing your input file as follows:  
   
 ```diff
 - paral_kgb 1 autoparal 1 max_ncpus 108  
-+ paral_kgb 1 npband 9 npfft 12  
++ paral_kgb 1 npband 18 npfft 6  
 ```
  
 <!--- ADDON2 --->
