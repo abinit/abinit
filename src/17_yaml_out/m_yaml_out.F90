@@ -983,6 +983,7 @@ module m_yaml_out
     if (doclock) then
      call interm%write('...'//eol)
     end if
+    doclock = .true.
     
     call interm%write('---')
     if(present(tag)) then
