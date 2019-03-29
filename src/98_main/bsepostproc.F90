@@ -280,6 +280,23 @@ program bsepostproc
  100 call xmpi_end()
 
 contains 
+!!***
+
+!!****p* ABINIT/get_ebands_path_cryst
+!! NAME
+!! get_ebands_path_cryst
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 
 subroutine get_path_ebands_cryst(path, ebands, cryst, comm)
@@ -302,6 +319,24 @@ subroutine get_path_ebands_cryst(path, ebands, cryst, comm)
  ebands = ebands_from_file(path, comm)
 
 end subroutine get_path_ebands_cryst
+!!***
+
+
+!!****p* ABINIT/get_path_ebands
+!! NAME
+!! get_path_ebands
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine get_path_ebands(path, ebands, comm)
 
@@ -321,6 +356,24 @@ subroutine get_path_ebands(path, ebands, comm)
  ebands = ebands_from_file(path, comm)
 
 end subroutine get_path_ebands
+!!***
+
+
+!!****p* ABINIT/get_path_cryst
+!! NAME
+!! get_path_cryst
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine get_path_cryst(path, cryst, comm)
 
@@ -340,6 +393,24 @@ subroutine get_path_cryst(path, cryst, comm)
  cryst = crystal_from_file(path, comm)
 
 end subroutine get_path_cryst
+!!***
+
+
+!!****p* ABINIT/parse_kargs
+!! NAME
+!! parse_kargs
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
 
@@ -386,6 +457,23 @@ subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
  write(std_out, *)"kptopt = ", kptopt, ", chksymbreak = ", chksymbreak, ", nshiftk = ", nshiftk, ", kptrlatt = ", kptrlatt
 
 end subroutine parse_kargs
+!!***
+
+!!****p* ABINIT/crystal_from_file
+!! NAME
+!! crystal_from_file
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 
 type(crystal_t) function crystal_from_file(path, comm) result(new)
@@ -422,6 +510,25 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
  end if
 
 end function crystal_from_file
+!!***
+
+
+!!****p* ABINIT/ebands_from_file
+!! NAME
+!! ebands_from_file
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 
 type(ebands_t) function ebands_from_file(path, comm) result(new)
 
@@ -458,6 +565,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
  end if
 
 end function ebands_from_file
+!!***
 
 end program bsepostproc
 !!***
