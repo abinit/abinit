@@ -541,6 +541,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
         ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
         tmp_eigen(:) = ebands%eig(iband, :, isppol)
         call htetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        wdt = wdt*ebands%wtk(ikpt)
         eig_dos = eig_dos + wdt
 
         ! Accumulate L-DOS.
