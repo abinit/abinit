@@ -968,6 +968,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    end if
  end if
 
+ !call dvdb%ftinterp_setup(ngqpt, nqshift, qshift, nfft, ngfft, comm, cryst_op)
+ !call dvdb%ftinterp_qpt(qpt, nfft, ngfft, ov1r, comm)
+
  ! Set cache in Mb for q-points.
  ! When we ask for a qpt in the BZ the code checks whether the IBZ image is in the cache.
  ! and if we have a cache hit we "rotate" the qibz in the cache to return V(qbz) else the code reads qibz and rotates.
