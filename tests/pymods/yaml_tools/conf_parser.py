@@ -12,7 +12,6 @@
 from __future__ import print_function, division, unicode_literals
 from numpy import ndarray
 from numpy.linalg import norm
-from .common import BaseDictWrapper
 from .meta_conf_parser import ConfParser
 from .structures import Tensor
 from .errors import MissingCallbackError
@@ -46,6 +45,15 @@ def tol_abs(tol, ref, tested):
         given tolerance.
     '''
     return abs(ref - tested) < tol
+
+
+@conf_parser.constraint(apply_to='Array', inherited=True)
+def tol_vec(tol, ref, tested):
+    '''
+        Valid if the cartesian norm of the vector (ref - tested) is below
+        the given tolerance.
+    '''
+    return (ref - tested).norm() < tol
 
 
 @conf_parser.constraint(exclude={'ceil', 'tol_abs', 'tol_rel', 'ignore'})
