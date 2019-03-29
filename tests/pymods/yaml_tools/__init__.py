@@ -29,9 +29,12 @@ except ImportError:
 
 if is_available:
     Loader = yaml.SafeLoader
+    from .common import Undef
 
     def yaml_parse(content, *args, **kwargs):
         from . import structures
+        from .register_tag import yaml_implicit_scalar
+        yaml_implicit_scalar(Undef)
         return yaml.load(content, *args, Loader=Loader, **kwargs)
 
     yaml_print = yaml.dump

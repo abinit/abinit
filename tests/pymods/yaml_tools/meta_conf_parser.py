@@ -5,9 +5,8 @@ from numpy import ndarray
 from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
                      IllegalFilterNameError)
 from .abinit_iterators import IterStateFilter
-from .register_tag import normalize_attr
 from .tricks import cstm_isinstance
-from .structures import Undef
+from .common import Undef, normalize_attr
 
 
 def make_apply_to(type_):

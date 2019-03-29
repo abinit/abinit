@@ -1,6 +1,5 @@
 from __future__ import print_function, division, unicode_literals
-from .tricks import string
-from .register_tag import BaseDictWrapper
+from .common import BaseDictWrapper, string
 
 
 class Issue(object):
@@ -42,6 +41,18 @@ class Failure(Issue):
         return True
 
 
+class DetailedFailure(Failure):
+    def __init__(self, conf, msg, details):
+        self.detail = details
+        Issue.__init__(self, conf, msg)
+
+    def __repr__(self):
+        if self.details:
+            return Issue.__repr__(self) + '\n{}'.format(self.details)
+        else:
+            return Issue.__repr__(self)
+
+
 class Success(Issue):
     pass
 
@@ -79,10 +90,14 @@ class Tester(object):
                            '{}: {}').format(cons.name, ref, tested,
                                             e.__class__.__name__, str(e))
                     self.issues.append(Failure(self.conf, msg))
-                else:
+                else:  # no exceptions
                     if success:
                         msg = '{} ok'.format(cons.name)
                         self.issues.append(Success(self.conf, msg))
+                    elif hasattr(success, 'details'):
+                        msg = '{} ({}) failed'.format(cons.name, cons.value)
+                        self.issues.append(DetailedFailure(self.conf, msg,
+                                                           success.details))
                     else:
                         msg = '{} ({}) failed'.format(cons.name, cons.value)
                         self.issues.append(Failure(self.conf, msg,

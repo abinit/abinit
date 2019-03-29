@@ -4,40 +4,14 @@
     children have to hinerit from BaseDataStructure
 '''
 from __future__ import print_function, division, unicode_literals
+import numpy as np
 from . import has_pandas
+from .common import FailDetail
 from .abinit_iterators import ITERATOR_RANKS
 from .register_tag import (
     yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar,
     yaml_not_available_tag
 )
-import re
-import numpy as np
-
-
-@yaml_implicit_scalar
-class Undef(float):
-    '''
-        Represent the magic number undef.
-    '''
-    _is_undef = True
-    yaml_pattern = re.compile('undef')
-
-    @staticmethod
-    def __new__(cls):
-        return super(Undef, cls).__new__(cls, 'nan')
-
-    def __eq__(self, other):
-        return getattr(other, '_is_undef', False)
-
-    def __repr__(self):
-        return 'undef'
-
-    @classmethod
-    def from_scalar(cls, scal):
-        return cls()
-
-    def to_scalar(self):
-        return 'undef'
 
 
 @yaml_map
@@ -277,7 +251,35 @@ if has_pandas:
 
     @yaml_auto_map
     class EtotIters(Table):
-        pass
+        _is_dict_like = False  # preventy tester from going inside by itself
+
+        def last_iter(self, other, **opts):
+            tol = opts.get('tol', 1.0e-7)
+            ceil = opts.get('ceil', 1.0e-7)
+            tol_iter = opts.get('tol_iter', 5)
+
+            def chk_tol(a, b):
+                return abs(a - b) / (abs(a) + abs(b)) < tol
+
+            def chk_ceil(b):
+                return abs(b) < ceil
+
+            for key in self:
+                if key in ('residm', 'vres2'):
+                    if not chk_ceil(other[key][-1]):
+                        msg = ('Last item of {} column does not match the'
+                               ' ceil {}.')
+                        return FailDetail(msg.format(key, ceil))
+                else:
+                    if not chk_tol(self[key][-1], other[key][-1]):
+                        msg = ('Last item of {} column does not match the'
+                               ' tolerance {}.')
+                        return FailDetail(msg.format(key, tol))
+            if abs(self.shape[1] - other.shape[1]) > tol_iter:
+                return FailDetail('Difference between number of iteration'
+                                  ' is above tol_iter')
+            return True
+
 else:
     yaml_not_available_tag('Table', 'Pandas module is not available')
     yaml_not_available_tag('GwSigma', 'Pandas module is not available')

@@ -67,6 +67,12 @@ class IllegalFilterNameError(ConfigError):
         super(IllegalFilterNameError, self).__init__(msg.format(name))
 
 
+class MissingCallbackError(ConfigError):
+    def __init__(self, obj, method):
+        msg = '{} does not expose a {} method.'.format(obj, method)
+        super(MissingCallbackError, self).__init__(msg)
+
+
 ###############################################################################
 class InputFileError(YAMLTestError):
     def __init__(self, line, msg):

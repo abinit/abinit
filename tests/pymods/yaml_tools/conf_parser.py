@@ -10,10 +10,12 @@
     should explain when the test fail and when it succeed.
 '''
 from __future__ import print_function, division, unicode_literals
-from numpy import ndarray, isnan
+from numpy import ndarray
 from numpy.linalg import norm
+from .common import BaseDictWrapper
 from .meta_conf_parser import ConfParser
-from .structures import Tensor, Undef
+from .structures import Tensor
+from .errors import MissingCallbackError
 
 conf_parser = ConfParser()
 
@@ -123,3 +125,13 @@ def tensor_is_symetric(sym, ref, tested):
         return tested.is_symetric()
     else:
         return tested.is_anti_symetric()
+
+
+@conf_parser.constraint(value_type=BaseDictWrapper, apply_to='this')
+def callback(locs, ref, tested):
+    method = locs.method
+    del locs['method']
+    if hasattr(ref, method):
+        return getattr(ref, method)(tested, **locs)
+    else:
+        raise MissingCallbackError(ref, method)
