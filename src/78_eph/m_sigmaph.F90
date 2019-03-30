@@ -4469,6 +4469,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    ABI_REMALLOC(sigma%deltaw_pm, (2, nbcalc_ks, sigma%my_npert, bsum_start:bsum_stop, sigma%my_nqibz_k, ndiv))
    sigma%deltaw_pm = zero
 
+#if 1
    ! Temporary weights (on the fine IBZ_k mesh if double grid is used)
    ABI_MALLOC(tmp_deltaw_pm, (3, sigma%ephwg%nq_k, 2))
 
@@ -4511,6 +4512,50 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
       end do
     end do
    end do
+#else
+   ! Temporary weights (on the fine IBZ_k mesh if double grid is used)
+   ABI_MALLOC(tmp_deltaw_pm, (nbcalc_ks, sigma%ephwg%nq_k, 2))
+
+   ! loop over bands to sum
+   do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
+    ! loop over my phonon modes
+    do imyp=1,sigma%my_npert
+      nu = sigma%my_pinfo(3, imyp)
+
+      ! Compute weights inside comm_bq
+      call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, nbcalc_ks, ebands%eig(bstart_ks:bstart_ks+nbcalc_ks, ik_ibz, spin), &
+                                        sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
+
+      ! loop over bands in self-energy matrix elements.
+      do ib_k=1,nbcalc_ks
+
+        ! For all the q-points that I am going to calculate
+        do imyq=1,sigma%my_nqibz_k
+          iq_ibz = sigma%myq2ibz_k(imyq)
+
+          if (sigma%use_doublegrid) then
+            ! For all the q-points in the microzone
+            ! This is done again in the main sigmaph routine
+            qpt = sigma%qibz_k(:,iq_ibz)
+            call sigma%eph_doublegrid%get_mapping(kk, kq, qpt)
+            do jj=1,sigma%eph_doublegrid%ndiv
+              iq_bz_fine = sigma%eph_doublegrid%mapping(3,jj)
+              iq_ibz_fine = sigma%eph_doublegrid%bz2lgkibz(iq_bz_fine)
+              weight = sigma%ephwg%lgk%weights(iq_ibz_fine)
+              dpm = tmp_deltaw_pm(ib_k, iq_ibz_fine, :)
+              sigma%deltaw_pm(:, ib_k, imyp, ibsum_kq, imyq, jj) = dpm / weight
+            end do
+          else
+            weight = sigma%ephwg%lgk%weights(iq_ibz)
+            dpm = tmp_deltaw_pm(ib_k, iq_ibz, :)
+            sigma%deltaw_pm(:, ib_k, imyp, ibsum_kq, imyq, 1) = dpm / weight
+          end if
+
+        end do
+      end do
+    end do
+   end do
+#endif
 
    ABI_FREE(tmp_deltaw_pm)
 

@@ -40,6 +40,7 @@ module m_htetrahedron
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
  use m_kptrank
+ use m_simtet,          only : sim0onei, SIM0TWOI
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -102,7 +103,8 @@ end type t_htetrahedron
 public :: htetra_init            ! Initialize the object
 public :: htetra_free            ! Free memory.
 public :: htetra_get_onewk       ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
-public :: htetra_get_onewk_wvals ! Similar to tetra_get_onewk_wvalsa but receives arbitrary list of frequency points.
+public :: htetra_get_onewk_wvals ! Similar to tetra_get_onewk_wvals but receives arbitrary list of frequency points.
+public :: htetra_get_onewk_wvals_zinv ! Calculate integration weights for 1/(z-E(k)) for a single k-point in the IBZ.
 public :: htetra_blochl_weights  ! And interface to help to facilitate the transition to the new tetrahedron implementation
 !!***
 
@@ -1390,6 +1392,84 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
  end do ! itetra
 
 end subroutine htetra_get_onewk_wvals
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_htetrahedron/htetra_get_onewk_wvals_zinv
+!! NAME
+!! htetra_get_onewk_wvals_zinv
+!!
+!! FUNCTION
+!! Calculate integration weights for 1/(z-E(k)) for a single k-point in the IBZ.
+!! Using either the implementation from:
+!! S. Kaprzyk, Computer Physics Communications 183, 347 (2012).
+!! or (TODO)
+!! P. Lambin and J.P. Vigneron, Phys. Rev. B 29, 3430 (1984).
+!!
+!! INPUTS
+!! tetra<t_htetrahedron>=Object with tables for tetrahedron method.
+!! ik_ibz=Index of the k-point in the IBZ array
+!! bcorr=1 to include Blochl correction else 0.
+!! nw=number of energies in wvals
+!! nibz=number of irreducible kpoints
+!! wvals(nw)=Frequency points.
+!! eigen_ibz(nkibz)=eigenenergies for each k point
+!!
+!! OUTPUT
+!!  weights(nw,2) = integration weights for
+!!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
+!!    for a given (band, k-point, spin).
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz, eig_ibz, cweights)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ik_ibz,nz,nkibz
+ real(dp) ,intent(in) :: max_occ
+ type(t_htetrahedron), intent(in) :: tetra
+!arrays
+ complex(dp),intent(in) :: zvals(nz)
+ real(dp),intent(in) :: eig_ibz(nkibz)
+ complex(dp),intent(out) :: cweights(nz, 2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: itetra,isummit,iz
+!arrays
+ integer  :: ind_ibz(4)
+ real(dp) :: eigen_1tetra(4)
+ real(dp) :: tweight_tmp(4,nz),dtweightde_tmp(4,nz)
+ complex(dp) :: verm(4), verl(4), verli(4)
+! *********************************************************************
+
+ cweights = zero
+
+ ! For each tetrahedron that belongs to this k-point
+ do itetra=1,24
+
+   do isummit=1,4
+     ! Get mapping of each summit to eig_ibz
+     ind_ibz(isummit) = tetra%mapping_ibz(isummit,itetra,ik_ibz)
+     eigen_1tetra(isummit) = eig_ibz(ind_ibz(isummit))
+   end do
+
+   ! Loop over frequencies
+   do iz=1,nz
+     verm = zvals(iz) - eigen_1tetra
+     call SIM0TWOI(VERL, VERLI, VERM)
+     cweights(iz,1) = cweights(iz,1) + verl(isummit)
+     cweights(iz,2) = cweights(iz,2) + verli(isummit)
+   end do
+ end do ! itetra
+
+end subroutine htetra_get_onewk_wvals_zinv
 !!***
 
 !----------------------------------------------------------------------
