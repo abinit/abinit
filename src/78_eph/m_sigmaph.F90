@@ -970,7 +970,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
  !if (all(dtset%eph_ngqpt_fine /= 0)) then
- !  call dvdb%ftinterp_setup(ngqpt, nqshift, qshift, nfft, ngfft, comm)
+ !  call dvdb%ftinterp_setup(ngqpt, nqshift, qshift, nfft, ngfft, sigma%comm_bq)
  !  call dvdb%ftinterp_qpt(qpt, nfft, ngfft, ov1r, comm)
  !end if
 
