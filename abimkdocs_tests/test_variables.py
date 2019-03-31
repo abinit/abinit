@@ -189,7 +189,7 @@ class VariablesTest(AbimkdocsTest):
 
         # TODO: should parse chkvars and
         black_list = set([
-            "atompaw", "cut3d", "multibinit", "fftprof", "conducti", "mrgscr",
+            "atompaw", "cut3d", "multibinit", "fftprof", "conducti", "mrgscr", "tdep",
             "mrgddb", "mrggkk", "mrgdv", "band2eps", "ujdet", "fold2Bloch", "macroave",
         ])
         for test in tests:
