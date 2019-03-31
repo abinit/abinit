@@ -2165,6 +2165,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 
          call htetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu), &
            omega_min, omega_max, one, wdt)
+         wdt = wdt*tetra%ibz_weights(iq_ibz)
 
          ! Accumulate (Integral of a2F is computed afterwards)
          a2f%vals(:,mu,spin) = a2f%vals(:,mu,spin) + wdt(:,1) * lambda_tetra(iq_ibz,mu,spin)
@@ -3346,6 +3347,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
 
          call htetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu,spin), &
            omega_min, omega_max, one, wdt)
+         wdt = wdt*tetra%ibz_weights(iq_ibz)
 
          ! Accumulate (Integral of a2F_tr is computed afterwards)
          do idir=1,3

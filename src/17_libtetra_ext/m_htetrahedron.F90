@@ -93,11 +93,6 @@ type, public :: t_htetrahedron
   ! For each kpoint in the IBZ store the indexes of the kpoints in the IBZ
   ! for the 4 summits of the 24 adjacent tetrhedra
 
-  integer,allocatable :: mapping_bz(:,:,:)
-  ! (nkibz,4,24)
-  ! For each kpoint in the IBZ store the indexes of the kpoints in the BZ
-  ! for the 4 summits of the 24 adjacent tetrhedra
-
 end type t_htetrahedron
 
 public :: htetra_init            ! Initialize the object
@@ -130,7 +125,6 @@ contains
 !!
 !! OUTPUT
 !!  tetra%mapping_ibz(4,24,nkibz)=for each k-point, the indexes in the IBZ
-!!  tetra%mapping_bz(4,24,nkibz)= for each k-point, the indexes in the BZ
 !!  tetra%vv = tetrahedron volume divided by full BZ volume
 !!
 !! PARENTS
@@ -160,14 +154,13 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  integer :: ikibz,ikbz,idiag,min_idiag,my_rank,nprocs
  integer :: symrankkpt
  real(dp) :: rcvol,length,min_length
+ character(len=500) :: msg
 !arrays
  integer :: tetra_shifts(3,4,24,4)  ! 3 dimensions, 4 summits, 24 tetrahedra, 4 main diagonals
  integer :: main_diagonals(3,4)
  real(dp)  :: k1(3),k2(3),k3(3),diag(3)
 
 ! *********************************************************************
-
- ierr = 0
 
  ! Use the shifts from kpclib developed by Atsushi Togo
  ! This part is produced by a python script
@@ -561,9 +554,12 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  main_diagonals(:,3) = [ 1,-1, 1] ! 2-5
  main_diagonals(:,4) = [ 1, 1,-1] ! 3-4
 
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ tetra%nkibz = nkpt_ibz
+ ierr = 0
+
  ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
- ABI_MALLOC(tetra%mapping_bz,(4,24,nkpt_ibz))
- ABI_MALLOC(tetra%mapping_ibz,(4,24,nkpt_ibz))
+ ABI_CALLOC(tetra%mapping_ibz,(4,24,nkpt_ibz))
 
  ! Determine the smallest diagonal in k-space
  min_length = huge(min_length)
@@ -583,7 +579,8 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  call mkkptrank(kpt_fullbz,nkpt_fullbz,kptrank_t)
 
  ! For each k-point in the IBZ
- do ikibz=1,nkpt_ibz
+ do ikibz=1,tetra%nkibz
+   !if (mod(ikibz,nprocs) /= my_rank) cycle
    do itetra=1,24
      do isummit=1,4
        ! Find the index of the neighbouring k-points in the BZ
@@ -596,13 +593,13 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
        ! Check if the index is correct
        !write(*,*) sum((kpt_fullbz(:,ikpt2)-k1)**2)
        ! Find the index of those points in the BZ and IBZ
-       tetra%mapping_bz(isummit,itetra,ikibz)  = ikpt2
        tetra%mapping_ibz(isummit,itetra,ikibz) = bz2ibz(ikpt2)
      end do
    end do
  end do
 
  call destroy_kptrank(kptrank_t)
+ !call xmpi_sum(tetra%mapping_ibz, comm, ierr)
 
  ! Compute the weights
  ABI_CALLOC(tetra%ibz_weights,(nkpt_ibz))
@@ -611,7 +608,6 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    tetra%ibz_weights(ikibz) = tetra%ibz_weights(ikibz) + 1
  end do
  tetra%ibz_weights = tetra%ibz_weights / nkpt_fullbz
- tetra%nkibz = nkpt_ibz
 
  ! HM TODO: Need to check where this will be used!
  ! Calculate the volume of the tetrahedra
@@ -652,7 +648,6 @@ subroutine htetra_free(tetra)
 
  type(t_htetrahedron), intent(inout) :: tetra
  ABI_SFREE(tetra%mapping_ibz)
- ABI_SFREE(tetra%mapping_bz)
  ABI_SFREE(tetra%ibz_weights)
 
 end subroutine htetra_free
@@ -1515,7 +1510,7 @@ subroutine htetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,nprocs,my_start,my_stop,ierr,ii
+ integer :: ik_ibz,nprocs,my_rank,ierr,ii
 !arrays
  integer :: ind_ibz(4)
  real(dp) :: eigen_1tetra(4)
@@ -1528,12 +1523,16 @@ subroutine htetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,
 
  ! For each irreducible Brillouin zone point
  do ik_ibz=1,tetra%nkibz
+   !if (mod(ik_ibz,nprocs) /= my_rank) cycle
    call htetra_get_onewk(tetra, ik_ibz, bcorr, nene, tetra%nkibz, eigen_in, enemin, enemax, max_occ, weights)
 
    tweight_t(:,ik_ibz)    = tweight_t(:,ik_ibz)    + weights(:,2)*tetra%ibz_weights(ik_ibz)
    dtweightde_t(:,ik_ibz) = dtweightde_t(:,ik_ibz) + weights(:,1)*tetra%ibz_weights(ik_ibz)
  end do
  ABI_FREE(weights)
+
+ !call xmpi_sum(tweight_t,    comm, ierr)
+ !call xmpi_sum(dtweightde_t, comm, ierr)
 
 end subroutine htetra_blochl_weights
 
