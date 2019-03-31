@@ -664,7 +664,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call xmpi_bcast(restart, master, comm, ierr)
  call xmpi_bcast(sigma%qp_done, master, comm, ierr)
- call sigmaph_write(sigma, dtset, ecut, cryst, ebands, ifc, dtfil, restart, comm)
+ call sigmaph_write(sigma, dtset, cryst, ebands, dtfil, restart, comm)
  if (my_rank == master) then
    call sigmaph_print(sigma, dtset, ab_out)
    call sigmaph_print(sigma, dtset, std_out)
@@ -968,10 +968,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    end if
  end if
 
- ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
- !if (all(dtset%eph_ngqpt_fine /= 0)) then
- !  call dvdb%ftinterp_setup(ngqpt, nqshift, qshift, nfft, ngfft, sigma%comm_bq)
- !  call dvdb%ftinterp_qpt(qpt, nfft, ngfft, ov1r, comm)
+ !if (dtset%useria == 2000) then
+   ! Prepare Fourier interpolation of DFPT potentials. For the time being we use ddb_ngqpt
+   !v1R = dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, sigma%comm_bq)
+   !call v1R%set_qcache_mb(ngfftf, dtset%dvdb_qcache_mb)
+   !call v1R%print(prtvol=dtset%prtvol)
+   !call v1R%qcache_build(nfftf, ngfftf, qselect, comm)
+   !acll v1R%free()
+ !else
  !end if
 
  ! Set cache in Mb for q-points.
@@ -1092,7 +1096,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end do
 
      ! Distribute q-points, compute tetra weigths.
-     call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, dtset%prtvol, comm)
+     call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, comm)
 
      ! Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamkq, spin, vlocal=vlocal, with_nonlocal=.true.)
@@ -1123,6 +1127,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (.not. ihave_ikibz_spin(ikq_ibz, spin)) then
          ignore_kq = ignore_kq + 1; cycle
        end if
+
+       !if (dtset%useria == 2000) then
+       !  call v1R%get_qbz(cryst, qpt, sigma%indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, sigma%comm_pert)
+       !else
 
        ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
        ! This call allocates v1scf(cplex, nfftf, nspden, my_npert))
@@ -2822,7 +2830,6 @@ end function sigmaph_new
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
-!!  ecut=Cutoff energy for wavefunctions.
 !!  cryst<crystal_t>=Crystalline structure
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
@@ -2836,16 +2843,14 @@ end function sigmaph_new
 !!
 !! SOURCE
 
-subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, comm)
+subroutine sigmaph_write(self, dtset, cryst, ebands, dtfil, restart, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm, restart
- real(dp),intent(in) :: ecut
  type(sigmaph_t),intent(inout) :: self
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands
- type(ifc_type),intent(in) :: ifc
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables ------------------------------
@@ -2853,7 +2858,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
  integer,parameter :: master=0
  integer :: my_rank, ii, edos_intmeth
 #ifdef HAVE_NETCDF
- integer :: ncid,ncerr !,varid
+ integer :: ncid, ncerr
 #endif
  !character(len=500) :: msg
  real(dp) :: edos_broad, edos_step,  cpu_all, wall_all, gflops_all, cpu, wall, gflops
@@ -3109,7 +3114,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, 
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  character(len=500),intent(out) :: msg
- real(dp), optional :: extrael_fermie(2)
+ real(dp), optional, intent(inout) :: extrael_fermie(2)
  logical,optional,intent(in) :: keep_open
 
 !Local variables ------------------------------
@@ -3136,7 +3141,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, 
  if (.not. file_exists(path)) then
    ierr = 1; return
  end if
- NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
+ NCF_CHECK(nctk_open_read(ncid, path, comm))
 
  !TODO?
  !NCF_CHECK(cryst%ncread(ncid))
@@ -3208,7 +3213,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, 
  ABI_CHECK(ph_wstep    == dtset%ph_wstep,    "netcdf ph_wstep != input file")
  ABI_CHECK(ph_smear    == dtset%ph_smear,    "netcdf ph_smear != input file")
  if (present(extrael_fermie)) then
-   extrael_fermie = [eph_extrael,eph_fermie]
+   extrael_fermie = [eph_extrael, eph_fermie]
  else
    ABI_CHECK(eph_extrael == dtset%eph_extrael, "netcdf eph_extrael != input file")
    ABI_CHECK(eph_fermie  == dtset%eph_fermie,  "netcdf eph_feremie != input file")
@@ -3748,7 +3753,6 @@ end subroutine sigmaph_setup_kcalc
 !!  ikcalc=Index of the k-point to compute.
 !!  nfftf=Number of fft-points on the fine grid for interpolated potential
 !!  ngfftf(18)=information on 3D FFT for interpolated potential
-!!  prtvol= Verbosity level
 !!  comm= MPI communicator
 !!
 !! PARENTS
@@ -3758,10 +3762,10 @@ end subroutine sigmaph_setup_kcalc
 !!
 !! SOURCE
 
-subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, prtvol, comm)
+subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, comm)
 
 !Arguments ------------------------------------
- integer,intent(in) :: spin, ikcalc, nfftf, prtvol, comm
+ integer,intent(in) :: spin, ikcalc, nfftf, comm
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(sigmaph_t),intent(inout) :: self
@@ -3864,6 +3868,9 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ! Make sure each node has the q-points we need. Perform collective IO inside comm if needed.
        ! TODO: Should not break qcache_size_mb contract!
        if (self%imag_only .and. self%qint_method == 1) then
+         !if (dtset%useria == 2000) then
+         !else
+         !end if
          ! Find q-points needed by this MPI rank.
          ABI_ICALLOC(ineed_qpt, (dvdb%nqpt))
          do imyq=1,self%my_nqibz_k

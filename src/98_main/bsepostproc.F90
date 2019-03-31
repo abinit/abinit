@@ -454,7 +454,7 @@ subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
    shiftk(:, 1) = [half, half, half]
  end if
 
- write(std_out, *)"kptopt = ", kptopt, ", chksymbreak = ", chksymbreak, ", nshiftk = ", nshiftk, ", kptrlatt = ", kptrlatt
+ !write(std_out, *)"kptopt = ", kptopt, ", chksymbreak = ", chksymbreak, ", nshiftk = ", nshiftk, ", kptrlatt = ", kptrlatt
 
 end subroutine parse_kargs
 !!***

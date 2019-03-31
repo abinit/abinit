@@ -47,16 +47,18 @@ program mrgdv
  use m_abicore
  use m_dvdb
 
+
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print
  use m_io_tools,        only : file_exists, prompt
+ use m_argparse,        only : get_arg, get_arg_list
 
  implicit none
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,nargs,nfiles,comm,prtvol,my_rank,ierr
+ integer :: ii,nargs,nfiles,comm,prtvol,my_rank,ierr, lenr
  character(len=24) :: codename
  character(len=500) :: command,arg, msg
  character(len=fnlen) :: db_path,dump_file
@@ -87,8 +89,7 @@ program mrgdv
  call herald(codename,abinit_version,std_out)
 
  ABI_CHECK(xmpi_comm_size(comm) == 1, "Not programmed for parallel execution")
- prtvol = 0
- !prtvol = 10
+ ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
 
  nargs = command_argument_count()
 
@@ -98,7 +99,7 @@ program mrgdv
    call prompt("Enter total number of DFPT POT files:", nfiles)
    ABI_MALLOC(v1files, (nfiles))
    do ii=1,nfiles
-     call prompt(sjoin("Enter name of POT file",itoa(ii),":"), v1files(ii))
+     call prompt(sjoin("Enter name of POT file", itoa(ii), ":"), v1files(ii))
    end do
    call dvdb_merge_files(nfiles, v1files, db_path, prtvol)
    ABI_FREE(v1files)
@@ -174,20 +175,15 @@ program mrgdv
    case ("test_ftinterp")
      call get_command_argument(2, db_path)
      ngqpt = [2, 2, 2]
-     if (nargs > 2) then
-       call get_command_argument(3, arg)
-       read(arg, *, iostat=ierr, iomsg=msg)ngqpt
-       ABI_CHECK(ierr == 0, msg)
-     end if
-
+     ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default=2, want_len=3) == 0, msg)
      write(std_out,"(a)")sjoin("Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(ngqpt))
      call dvdb_test_ftinterp(db_path, ngqpt, comm)
 
    case ("downsample")
      call get_command_argument(2, db_path)
      call get_command_argument(3, dump_file)
-     read(arg, *, iostat=ierr, iomsg=msg)ngqpt
-     ABI_CHECK(ierr == 0, msg)
+     ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default=2, want_len=3) == 0, msg)
+     write(std_out,"(a)")sjoin("Downsampling DVDB using ngqpt:", ltoa(ngqpt))
      call dvdb_qdownsample(db_path, dump_file, ngqpt, comm)
 
    !case ("convert")

@@ -142,13 +142,16 @@ module m_dvdb
   integer :: my_npert = -1
    ! Number of atomic perturbations or phonon modes treated by this MPI rank
 
-  integer,pointer :: my_pinfo(:,:) => null()
+  integer,allocatable :: my_pinfo(:,:)
     ! my_pinfo(3, my_npert)
     ! my_pinfo(1, ip) gives the `idir` index of the ip-th perturbation.
     ! my_pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
     ! my_pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
 
-  integer,pointer :: pert_table(:,:) => null()
+  integer,allocatable :: pert_table(:,:)
+    ! pert_table(2, natom3)
+    !     pert_table(1, npert): rank of the processor treating this atomic perturbation.
+    !     pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
 
   integer :: version
   ! File format version read from file.
@@ -345,10 +348,10 @@ module m_dvdb
    procedure :: list_perts => dvdb_list_perts
    ! Check if all the (phonon) perts are available taking into account symmetries.
 
-   ! TODO Deprecated
-   !procedure :: dvdb_ftinterp_setup
+   procedure :: ftinterp_setup => dvdb_ftinterp_setup
    ! Prepare the internal tables for Fourier interpolation.
-   !procedure :: dvdb_ftinterp_qpt
+
+   procedure :: ftinterp_qpt => dvdb_ftinterp_qpt
    ! Fourier interpolation of potentials for given q-point
 
    procedure :: v1r_long_range => dvdb_v1r_long_range
@@ -415,7 +418,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 !scalars
  integer,parameter :: master=0,timrev2=2
  integer :: iv1,ii,ierr,unt,fform,nqpt,iq,iq_found,cplex,trev_q
- integer :: idir,ipert,my_rank, nprocs
+ integer :: idir,ipert,my_rank, nprocs, iatom, pertcase
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  type(hdr_type) :: hdr1 !,hdr_ref
@@ -574,15 +577,15 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  new%my_npert = new%natom3
 
  ! Init tables assuming no MPI distribution of perturbations. 
- !ABI_MALLOC(new%my_pinfo, (3, new%natom3))
- !ABI_MALLOC(new%pert_table, (2, new%natom3))
- !do iatom=1,cryst%natom
- !  do idir=1,3
- !    pertcase = idir + (iatom-1) * 3
- !    new%my_pinfo(:, pertcase) = [idir, iatom, pertcase]
- !    new%pert_table(1, pertcase) = (pertcase - 1) / (new%natom3 / new%nprocs_pert)
- !  end do
- !end do
+ ABI_MALLOC(new%my_pinfo, (3, new%natom3))
+ ABI_MALLOC(new%pert_table, (2, new%natom3))
+ do iatom=1,new%natom
+   do idir=1,3
+     pertcase = idir + (iatom-1) * 3
+     new%my_pinfo(:, pertcase) = [idir, iatom, pertcase]
+     new%pert_table(1, pertcase) = 0 !(pertcase - 1) / (new%natom3 / new%nprocs_pert)
+   end do
+ end do
 
  ! Init Born effective charges
  ABI_CALLOC(new%zeff, (3, 3, new%natom))
@@ -780,10 +783,8 @@ subroutine dvdb_free(db)
    ABI_FREE(db%qcache)
  end if
 
- db%my_pinfo => null()
- db%pert_table => null()
- !ABI_SFREE(db%my_pinfo)
- !ABI_SFREE(db%pert_table)
+ ABI_SFREE(db%my_pinfo)
+ ABI_SFREE(db%pert_table)
 
  ! Close the file but only if we have performed IO.
  if (db%rw_mode == DVDB_NOMODE) return
@@ -1224,10 +1225,6 @@ end subroutine dvdb_readsym_allv1
 !! This is the MAIN ENTRY POINT for client code.
 !! Reconstruct the DFPT potential for a q-point in the BZ starting
 !! from its symmetrical image in the IBZ. Implements caching mechanism to reduce IO.
-!! Two options are implemented:
-!!
-!!   1) Q-points in the IBZ associated to the DVDB file are read from file and stored in the cache.
-!!   2) Q-points are Fourier-interpolated using the real-space representation of the DFPT potentials. 
 !!
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
@@ -1284,7 +1281,11 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
 
  !if (db%use_ftinterp) then
- !  call dvdb_ftinterp_qpt(db, qbz, nfft, ngfft, ov1r)
+ !  ! TODO Check cplex
+ !  cplex = 2
+ !  ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+ !  call dvdb_ftinterp_qpt(db, qbz, nfft, ngfft, v1scf)
+ !  call timab(1802, 2, tsec)
  !  return 
  !end if
 
@@ -1296,7 +1297,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    ABI_CHECK(npc /= 0, "npc == 0!")
    db%qcache_stats(1) = db%qcache_stats(1) + 1
 
-   ! Remember that that size of v1scf in qcache depends on db%my_npert
+   ! Remember that the size of v1scf in qcache depends on db%my_npert
    if (allocated(db%qcache(db_iqpt)%v1scf)) then
       if (size(db%qcache(db_iqpt)%v1scf, dim=1) == cplex .and. &
           size(db%qcache(db_iqpt)%v1scf, dim=2) == nfft) then
@@ -1322,7 +1323,6 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  if (.not. incache) then
    ! Read the dvscf potentials in the IBZ for all 3*natom perturbations.
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-   ! TODO: This is a big allocation. Should implement something with MPI_WIN (Henrique is gonna love it!)
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
  end if
 
@@ -2458,7 +2458,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqshift,nfft,comm_rpt
- type(dvdb_t),target,intent(inout) :: db
+ class(dvdb_t),target,intent(inout) :: db
 !arrays
  integer,intent(in) :: ngqpt(3),ngfft(18)
  real(dp),intent(in) :: qshift(3,nqshift)
@@ -2470,8 +2470,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert, ipc
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
- integer :: ifft,ierr 
+ integer :: ifft, ierr, nrtot, my_start, my_stop
  real(dp) :: dksqmax,phre,phim
+ real(dp) :: cpu_all,wall_all,gflops_all !cpu,wall,gflops,
  logical :: isirr_q, found
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
@@ -2480,12 +2481,14 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  integer :: qptrlatt(3,3),g0q(3) !,ngfft_qspace(18)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3),shift(3) !,qpt_ibz(3)
- real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
+ real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:), all_rpt(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:,:) !,all_v1qr(:,:,:,:)
 
 ! *************************************************************************
 
  ABI_CHECK(.not. allocated(db%v1scf_rpt), " v1scf_rpt is already allocated!")
+
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Set communicator for R-point parallelism.
  ! TODO: Setup q-cache at this level
@@ -2532,8 +2535,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ! Use the following indexing (N means ngfft of the adequate direction)
  ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gc
  ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
- db%nrpt = nqbz
- ABI_MALLOC(db%rpt, (3, db%nrpt))
+ nrtot = nqbz 
+ ABI_CALLOC(all_rpt, (3, nrtot))
  ii = 0
  do iz=1,nq3
    r3 = ig2gfft(iz, nq3)
@@ -2542,16 +2545,20 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
      do ix=1,nq1
        r1 = ig2gfft(ix, nq1)
        ii = ii + 1
-       db%rpt(:, ii) = [r1, r2, r3]
+       all_rpt(:, ii) = [r1, r2, r3]
      end do
    end do
  end do
 
- ! MAke sure that number of R-points is divisible inside comm_rpt so that memory is equally distributed.
- !db%nrpt = nqbz + mod(db%nproc_rpt / nqbz)
- !ABI_MALLOC(db%rpt, (3, db%nrpt))
- !ii = db%nrpt / db%nproc_rpt
- !db%rpt = db%rpt(db%me_rpt * ii + 1: (db%me_rpt + 1) * ii)
+ ! Distribute R-points. In the unlikely case that nqbz > nprocs, nrpt is set to zero 
+ call xmpi_split_work(nrtot, db%comm_rpt, my_start, my_stop, msg, ierr)
+ db%nrpt = 0
+ if (my_stop >= my_start) then
+   db%nrpt = my_stop - my_start + 1
+   ABI_MALLOC(db%rpt, (3, db%nrpt))
+   db%rpt = all_rpt(:, my_start:my_stop)
+ end if
+ ABI_FREE(all_rpt)
 
  ! Find correspondence BZ --> IBZ. Note:
  ! q --> -q symmetry is always used for phonons.
@@ -2737,7 +2744,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ABI_CHECK(iqst == nqbz, "iqst /= nqbz")
 
  db%v1scf_rpt = db%v1scf_rpt / nqbz
- !call xmpi_sum(db%v1scf_rpt, comm, ierr)
 
  ! Build mpi_type for executing fourdp in sequential.
  !call ngfft_seq(ngfft_qspace, [nq1, nq2, nq3])
@@ -2773,6 +2779,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ABI_FREE(v1r_qbz)
  ABI_FREE(v1r_lr)
 
+ call cwtime_report(" Construction of V(r, R)", cpu_all, wall_all, gflops_all)
+
 end subroutine dvdb_ftinterp_setup
 !!***
 
@@ -2806,7 +2814,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft
- type(dvdb_t),intent(in) :: db
+ class(dvdb_t),intent(in) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
@@ -2817,7 +2825,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r)
 !scalars
  integer,parameter :: cplex2 = 2
  integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q !, ierr
- real(dp) :: wr, wi
+ real(dp) :: wr, wi ! cpu, wall, gflops
 !arrays
  integer :: symq(4,2,db%cryst%nsym)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
@@ -2825,6 +2833,8 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r)
 ! *************************************************************************
 
  ABI_CHECK(allocated(db%v1scf_rpt), "v1scf_rpt is not allocated (call dvdb_ftinterp_setup)")
+
+ !call cwtime(cpu, wall, gflops, "start")
 
  ! Examine the symmetries of the q-wavevector
  call littlegroup_q(db%cryst%nsym, qpt, symq, db%cryst%symrec, db%cryst%symafm, timerev_q, prtvol=db%prtvol)
@@ -2881,6 +2891,8 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r)
 
  ABI_FREE(eiqr)
  ABI_SFREE(v1r_lr)
+
+ !call cwtime_report("dvdb_ftinterp_qpt", cpu, wall, gflops)
 
 end subroutine dvdb_ftinterp_qpt
 !!***
@@ -3517,19 +3529,19 @@ subroutine dvdb_set_pert_distrib(self, comm_pert, my_pinfo, pert_table)
  class(dvdb_t),intent(inout) :: self
  integer,intent(in) :: comm_pert
 !arrays
- integer,target,intent(in) :: my_pinfo(:,:), pert_table(:,:)
+ integer,intent(in) :: my_pinfo(:,:), pert_table(:,:)
 
 ! *************************************************************************
 
  self%comm_pert = comm_pert
  self%nprocs_pert = xmpi_comm_size(comm_pert)
  self%me_pert = xmpi_comm_rank(comm_pert)
- self%my_pinfo => my_pinfo
  self%my_npert = size(my_pinfo, dim=2)
- self%pert_table => pert_table
 
- !call alloc_copy(my_pinfo, self%my_pinfo)
- !call alloc_copy(pert_table, self%pert_table)
+ ABI_SFREE(self%my_pinfo)
+ ABI_SFREE(self%pert_table)
+ call alloc_copy(my_pinfo, self%my_pinfo)
+ call alloc_copy(pert_table, self%pert_table)
 
 end subroutine dvdb_set_pert_distrib
 !!***
