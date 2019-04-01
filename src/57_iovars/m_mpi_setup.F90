@@ -1074,10 +1074,6 @@ end subroutine mpi_setup
    msg="autoparal>0 not available for Hartree-Fock or hybrid XC calculations!"
    MSG_ERROR(msg)
  end if
- if (dtset%wfoptalg==1) then
-   msg="autoparal not yet available for Chebyshev filtering algorithm (wfoptalg=1)!"
-   MSG_ERROR(msg)
- end if
  if ((autoparal>1).and.dtset%wfoptalg/=4.and.dtset%wfoptalg/=14) then
    msg="autoparal>1 only available for the old LOBPCG algorithm (wfoptalg=4/14)!"
    MSG_ERROR(msg)
@@ -1238,8 +1234,8 @@ end subroutine mpi_setup
    if (tread(1)==1.and.dtset%paral_kgb==0) then
      npf_min=1;npf_max=1
    end if
-   !Deactivate MPI FFT parallelism for multi-threaded LOBPCG
-   if (wf_algo_global==ALGO_LOBPCG_NEW.and.nthreads>1) then
+   !Deactivate MPI FFT parallelism for multi-threaded LOBPCG / CHEBFI
+   if ((wf_algo_global==ALGO_LOBPCG_NEW.or.wf_algo_global==ALGO_CHEBFI).and.nthreads>1) then
      npf_min=1;npf_max=1
    end if
 
@@ -1296,6 +1292,8 @@ end subroutine mpi_setup
    bpp_max=mband
    if (wf_algo_global==ALGO_LOBPCG_OLD) bpp_max=max(4,nint(mband/10.)) ! reasonnable bandpp max
    if (tread(8)==1) bpp_max=dtset%bandpp
+   if (wf_algo_global==ALGO_CHEBFI) bpp_min=1 ! bandpp not used with ChebFi
+   if (wf_algo_global==ALGO_CHEBFI) bpp_max=1
 
  end if ! RUNL_GSTATE
 
@@ -1304,8 +1302,8 @@ end subroutine mpi_setup
 !  - paral_kgb=0 present in input file
 !  - nstep=0
 !  - Hartree-Fock or hybrid calculation (for now on)
- if ( (optdriver/=RUNL_GSTATE) .or. (dtset%paral_kgb==0.and.tread(1)==1) .or. &
-&     (dtset%nstep==0) .or. (dtset%usefock==1) ) then
+ if ( (optdriver/=RUNL_GSTATE).or.(dtset%paral_kgb==0.and.tread(1)==1).or. &
+&     (dtset%nstep==0).or.(dtset%usefock==1)) then
    nps_min=1; nps_max=1
    npf_min=1; npf_max=1
    npb_min=1; npb_max=1
@@ -1391,7 +1389,7 @@ end subroutine mpi_setup
          if (optdriver==RUNL_GSTATE.and.npf>1.and. &
 &            wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
 
-!        FFT parallelism not compatible with mutlithreading
+!        FFT parallelism not compatible with multithreading
          if (wf_algo==ALGO_LOBPCG_NEW.or.wf_algo==ALGO_CHEBFI) then
            if (nthreads>1.and.npf>1) cycle
          end if
@@ -1436,7 +1434,7 @@ end subroutine mpi_setup
                if (one*npb*bpp >max(1.,mband/3.).and.(mband>30)) cycle
                if (npb*npf<=4.and.(.not.first_bpp)) cycle
              else if (wf_algo==ALGO_CHEBFI) then
-               !TO BE COMPLETED
+               if (modulo(npb,nthreads)>0) cycle
              else
                if (bpp/=1.or.npb/=1) cycle
              end if
@@ -1460,6 +1458,17 @@ end subroutine mpi_setup
                  tot_ncpus=max(npb,npf);if (tot_ncpus==2) tot_ncpus=0
                  acc_kgb=acc_kgb*(one-0.8_dp*((dble(npb)/dble(npf))-2_dp)**2/(tot_ncpus-2_dp)**2)
                  eff=max(npf,20);acc_kgb=acc_kgb*(one-0.8_dp*min(one,(eff-20)**2))
+               end if
+             end if
+
+!            CHEBFI: promote npfft=npband and nband>=npfft
+             if (wf_algo==ALGO_CHEBFI) then
+               if (nproc1>1) then
+                 if (npb>npf) then
+                   acc_kgb=acc_kgb*(one-0.8_dp*0.25_dp*((dble(npb)/dble(npf))-one)**2/(nproc1-one)**2)
+                 else
+                   acc_kgb=acc_kgb*(one-0.8_dp*nproc1**2*((dble(npb)/dble(npf))-one)**2/(nproc1-one)**2)
+                 end if
                end if
              end if
 
@@ -1687,7 +1696,8 @@ end subroutine mpi_setup
 !Determine an optimal number of bands
  if (optdriver==RUNL_GSTATE.and. &
 &    (any(my_algo(1:mcount)==ALGO_LOBPCG_OLD.or. &
-&         my_algo(1:mcount)==ALGO_LOBPCG_NEW))) then
+&         my_algo(1:mcount)==ALGO_LOBPCG_NEW.or. &
+&         my_algo(1:mcount)==ALGO_CHEBFI))) then
    if (mcount>0) then
      icount=isort(mcount)
      npc=my_distp(1,icount);npk=my_distp(2,icount)
@@ -1706,7 +1716,7 @@ end subroutine mpi_setup
    write(strg,'(a,i0)') ' npspinor=',nps;if (with_spinor) msg=trim(msg)//trim(strg)
    write(strg,'(a,i0)') ' npfft='   ,npf;if (with_fft)    msg=trim(msg)//trim(strg)
    call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
-   ib1=mband-int(mband*relative_nband_range)
+   ib1=mband-int(mband*relative_nband_range);if (my_algo(icount)==ALGO_CHEBFI) ib1=mband
    ib2=mband+int(mband*relative_nband_range)
    ABI_ALLOCATE(nproc_best,(1+ib2-ib1))
    ABI_ALLOCATE(nband_best,(1+ib2-ib1))
@@ -1731,11 +1741,24 @@ end subroutine mpi_setup
      if (nband_best(ii)==mband) kk=nproc_best(ii)
    end do
    if (kk==maxval(nproc_best(:))) then
-     write(msg,'(a,i6,a)') ' >>> The present nband value (',mband,') seems to be the best choice!'
+     if (my_algo(icount)/=ALGO_CHEBFI) then
+       write(msg,'(a,i6,a)') ' >>> The present nband value (',mband,') seems to be the best choice!'
+     end if
+     if (my_algo(icount)==ALGO_CHEBFI) then
+       write(msg,'(a,i6,a)') ' >>> The present nband value (',mband,') seems to be a good choice!'
+     end if
      call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
    end if
    ABI_DEALLOCATE(nproc_best)
    ABI_DEALLOCATE(nband_best)
+ end if
+
+ if (optdriver==RUNL_GSTATE.and.(any(my_algo(1:mcount)==ALGO_CHEBFI))) then
+   write(msg,'(5a)') &
+&   ' >>> Note that with the "Chebyshev Filtering" algorithm, it is often',ch10,&
+&   '     better to increase the number of bands (10% more or a few tens more).',ch10,&
+&   '     Advice: increase nband and put nbdbuf input variable to (nband_new-nband_old).'
+   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
  end if
 
 !Refinement of the process distribution by mean of a LinAlg routines benchmarking
