@@ -1216,12 +1216,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
        ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
-       ABI_STAT_MALLOC(h1kets_kq, (2, npw_kq*nspinor, my_npert, nbcalc_ks), ierr)
-       ABI_CHECK(ierr==0, "out of memory in h1kets_kq")
+       ABI_MALLOC_OR_DIE(h1kets_kq, (2, npw_kq*nspinor, my_npert, nbcalc_ks), ierr)
 
        ! Allocate vlocal1 with correct cplex. Note nvloc
-       ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6, gs_hamkq%nvloc, my_npert), ierr)
-       ABI_CHECK(ierr==0, "out of memory in vlocal1")
+       ABI_MALLOC_OR_DIE(vlocal1,(cplex*n4,n5,n6, gs_hamkq%nvloc, my_npert), ierr)
 
        ABI_MALLOC(gs1c, (2,npw_kq*nspinor*((sij_opt+1)/2)))
        ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor))

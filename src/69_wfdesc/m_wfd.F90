@@ -3995,10 +3995,8 @@ subroutine wfd_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_dist
 
 !************************************************************************
 
- ABI_STAT_MALLOC(whocan_k ,(Wfd%mband,Wfd%nproc), ierr)
- ABI_CHECK(ierr==0, "out of memory in whocan_k")
- ABI_STAT_MALLOC(whocan_kp,(Wfd%mband,Wfd%nproc), ierr)
- ABI_CHECK(ierr==0, "out of memory in whocan_kp")
+ ABI_MALLOC_OR_DIE(whocan_k ,(Wfd%mband,Wfd%nproc), ierr)
+ ABI_MALLOC_OR_DIE(whocan_kp,(Wfd%mband,Wfd%nproc), ierr)
  whocan_k =0 !  Will be set to 1 if this node can calculate something containing (k,b)
  whocan_kp=0 !  Will be set to 1 if this node can calculate something containing (kp,bp)
 
@@ -4812,8 +4810,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
      ! Try to allocate all u(g) first,
      ! TODO If not enough memory fallback to a blocked algorithm.
      cgsize = Wfd%nspinor * npw_k * how_manyb
-     ABI_STAT_MALLOC(cg_k, (2,cgsize), ierr)
-     ABI_CHECK(ierr==0, "out of memory in cg_k")
+     ABI_MALLOC_OR_DIE(cg_k, (2,cgsize), ierr)
 
      ! Extract the set of u(g) for this (kpoint,spin)
      ! This works only if all the bands are on the same node.
@@ -4981,8 +4978,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_MALLOC(eig_k,((2*Wfk%mband)**formeig0*Wfk%mband))
 
       ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
-      ABI_STAT_MALLOC(cg_k,(2,mcg), ierr)
-      ABI_CHECK(ierr==0, "out of memory in cg_k")
+      ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
       call wfk_read_band_block(Wfk, [1,nband_wfd] , ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
 
@@ -5057,8 +5053,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
 
       mcg = npw_disk*Wfd%nspinor*COUNT(my_readmask(:,ik_ibz,spin))
-      ABI_STAT_MALLOC(cg_k,(2,mcg), ierr)
-      ABI_CHECK(ierr==0, "out of memory in cg_k")
+      ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
       call wfk_read_bmask(Wfk,my_readmask(:,ik_ibz,spin),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k)
 

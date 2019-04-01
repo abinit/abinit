@@ -804,8 +804,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
    MSG_ERROR(" different nreh are not supported")
  end if
 
- ABI_STAT_MALLOC(cbuff_dpc,(exc_size), ierr)
- ABI_CHECK(ierr==0, "out of memory in cbuff_dpc")
+ ABI_MALLOC_OR_DIE(cbuff_dpc,(exc_size), ierr)
  !
  ! The two cases nsppol==1,2 can be merged but we keep them
  ! separated to keep to code readable.
@@ -1350,8 +1349,7 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
  hsize = SUM(Bsp%nreh); if (Bsp%use_coupling>0) hsize=2*hsize
 
  ABI_MALLOC(ene_list,(nvec))
- ABI_STAT_MALLOC(vec_list,(hsize,nvec), ierr)
- ABI_CHECK(ierr==0, "out of memory in vec_list")
+ ABI_MALLOC_OR_DIE(vec_list,(hsize,nvec), ierr)
 
  call exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp=Bsp)
 

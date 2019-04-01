@@ -575,19 +575,15 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    call wrtout(std_out,msg,"COLL")
 
    ! Allocate big (scalable) buffer to store the BS matrix on this node.
-   ABI_STAT_MALLOC(my_bsham,(t_start(my_rank):t_stop(my_rank)), ierr)
-   ABI_CHECK(ierr==0, 'Not enough memory for exc Hamiltonian')
+   ABI_MALLOC_OR_DIE(my_bsham,(t_start(my_rank):t_stop(my_rank)), ierr)
 
    if (BSp%prep_interp) then
      ! Allocate big (scalable) buffers to store a,b,c coeffients
-     ABI_STAT_MALLOC(acoeffs,(t_start (my_rank):t_stop(my_rank)), ierr)
-     ABI_CHECK(ierr==0, 'Not enough memory for acoeffs')
+     ABI_MALLOC_OR_DIE(acoeffs,(t_start (my_rank):t_stop(my_rank)), ierr)
 
-     ABI_STAT_MALLOC(bcoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
-     ABI_CHECK(ierr==0, 'Not enough memory for bcoeffs')
+     ABI_MALLOC_OR_DIE(bcoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
 
-     ABI_STAT_MALLOC(ccoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
-     ABI_CHECK(ierr==0, 'Not enough memory for ccoeffs')
+     ABI_MALLOC_OR_DIE(ccoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
    end if
 
    if (do_coulomb_term) then ! Construct Coulomb term.
@@ -2363,8 +2359,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 
  ABI_MALLOC(rhotwg1,(npweps))
 
- ABI_STAT_MALLOC(mgq0, (npweps,lomo_min:humo_max,lomo_min:humo_max,Wfd%nkibz,Wfd%nsppol), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in mgq0")
+ ABI_MALLOC_OR_DIE(mgq0, (npweps,lomo_min:humo_max,lomo_min:humo_max,Wfd%nkibz,Wfd%nsppol), ierr)
  mgq0 = czero
 
  call cwtime(cpu,wall,gflops,"start")

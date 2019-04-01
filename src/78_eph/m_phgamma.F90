@@ -514,25 +514,21 @@ subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transpor
    gams%nqibz, gams%qibz, gams%wtq, gams%nqbz, gams%qbz)
 
  ! Allocate matrices in the IBZ.
- ABI_STAT_MALLOC(gams%vals_qibz, (2, gams%natom3, gams%natom3, gams%nqibz, nsppol), ierr)
- ABI_CHECK(ierr==0, "out of memory in %vals_qibz")
+ ABI_MALLOC_OR_DIE(gams%vals_qibz, (2, gams%natom3, gams%natom3, gams%nqibz, nsppol), ierr)
  gams%vals_qibz = zero
 
  ! TODO: if we remove the nsig dependency in the gvvvals_*_qibz we can remove
  ! the intermediate array and save a lot of memory
- ABI_STAT_MALLOC(gams%vals_in_qibz, (2,gams%ndir_transp**2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
- ABI_CHECK(ierr==0, "out of memory in %vals_in_qibz")
+ ABI_MALLOC_OR_DIE(gams%vals_in_qibz, (2,gams%ndir_transp**2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
  gams%vals_in_qibz = zero
 
  if (eph_transport > 0) then
-   ABI_STAT_MALLOC(gams%vals_out_qibz, (2,gams%ndir_transp**2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
-   ABI_CHECK(ierr==0, "out of memory in %vals_out_qibz")
+   ABI_MALLOC_OR_DIE(gams%vals_out_qibz, (2,gams%ndir_transp**2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
    gams%vals_out_qibz = zero
  end if
 
 #ifdef DEV_MJV
- ABI_STAT_MALLOC(gams%vals_ee,(2,gams%nene,gams%nene,gams%natom3,gams%natom3,gams%nqibz,gams%nsppol), ierr)
- ABI_CHECK(ierr==0, 'out of memory in gams%vals_ee')
+ ABI_MALLOC_OR_DIE(gams%vals_ee,(2,gams%nene,gams%nene,gams%natom3,gams%natom3,gams%nqibz,gams%nsppol), ierr)
 #endif
 
  ! Prepare Fourier interpolation.
@@ -1044,8 +1040,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
 
  case ("INIT")
    if (.not.allocated(gams%vals_bz)) then
-     ABI_STAT_MALLOC(gams%vals_bz,(2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in gams%vals_bz')
+     ABI_MALLOC_OR_DIE(gams%vals_bz,(2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
      gams%vals_bz = zero
 
      ! Build tables needed by complete_gamma.
@@ -1133,8 +1128,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
    ! to be consistent with the dimensions of the rpt, which come from anaddb.
    ! TODO: this is needed only if FT is used, no when the linear interpolation is employed.
    if (.not.allocated(gams%vals_rpt)) then
-     ABI_STAT_MALLOC(gams%vals_rpt,(2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in gams%vals_rpt')
+     ABI_MALLOC_OR_DIE(gams%vals_rpt,(2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
      gams%vals_rpt = zero
 
      ! q --> r
@@ -1499,11 +1493,9 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
 
  case ("INIT")
    if (.not.allocated(gams%vals_in_bz)) then
-     ABI_STAT_MALLOC(gams%vals_in_bz,(2,gams%ndir_transp**2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in gams%vals_in_bz')
+     ABI_MALLOC_OR_DIE(gams%vals_in_bz,(2,gams%ndir_transp**2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
      gams%vals_in_bz = zero
-     ABI_STAT_MALLOC(gams%vals_out_bz,(2,gams%ndir_transp**2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in gams%vals_out_bz')
+     ABI_MALLOC_OR_DIE(gams%vals_out_bz,(2,gams%ndir_transp**2,gams%natom3**2,gams%nqbz,gams%nsppol), ierr)
      gams%vals_out_bz = zero
 
      ! Build tables needed by complete_gamma.
@@ -1591,11 +1583,9 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
    ! to be consistent with the dimensions of the rpt, which come from anaddb.
    ! TODO: this is needed only if FT is used, not when the linear interpolation is employed.
    if (.not.allocated(gams%vals_in_rpt)) then
-     ABI_STAT_MALLOC(gams%vals_in_rpt,(2,gams%ndir_transp**2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in gams%vals_in_rpt')
+     ABI_MALLOC_OR_DIE(gams%vals_in_rpt,(2,gams%ndir_transp**2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
      gams%vals_in_rpt = zero
-     ABI_STAT_MALLOC(gams%vals_out_rpt,(2,gams%ndir_transp**2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in gams%vals_out_rpt')
+     ABI_MALLOC_OR_DIE(gams%vals_out_rpt,(2,gams%ndir_transp**2,gams%natom3**2,gams%nrpt,gams%nsppol), ierr)
      gams%vals_out_rpt = zero
 
      ! q --> r
@@ -2038,12 +2028,10 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    tetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f%nqshift, a2f%qshift, nqibz, qibz, comm, msg, ierr)
    if (ierr/=0) MSG_ERROR(msg)
 
-   ABI_STAT_MALLOC(lambda_tetra, (nqibz,natom3,nsppol), ierr)
-   ABI_CHECK(ierr==0, "oom in lambda_tetra, use gaussians for A2F")
+   ABI_MALLOC_OR_DIE(lambda_tetra, (nqibz,natom3,nsppol), ierr)
    lambda_tetra = zero
 
-   ABI_STAT_MALLOC(phfreq_tetra, (nqibz,natom3), ierr)
-   ABI_CHECK(ierr==0, "oom in phfreq_tetra, use gaussians for A2F")
+   ABI_MALLOC_OR_DIE(phfreq_tetra, (nqibz,natom3), ierr)
    phfreq_tetra = zero
    cnt = 0
    do iq_ibz = 1, nqibz
@@ -3267,15 +3255,12 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
    tetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f_tr%nqshift, a2f_tr%qshift, nqibz, qibz, comm, msg, ierr)
    if (ierr/=0) MSG_ERROR(msg)
 
-   ABI_STAT_MALLOC(lambda_in_tetra, (nqibz,3,3,natom3,nsppol), ierr)
-   ABI_CHECK(ierr==0, "oom in lambda_in_tetra, use gaussians for A2F_tr")
-   ABI_STAT_MALLOC(lambda_out_tetra, (nqibz,3,3,natom3,nsppol), ierr)
-   ABI_CHECK(ierr==0, "oom in lambda_out_tetra, use gaussians for A2F_tr")
+   ABI_MALLOC_OR_DIE(lambda_in_tetra, (nqibz,3,3,natom3,nsppol), ierr)
+   ABI_MALLOC_OR_DIE(lambda_out_tetra, (nqibz,3,3,natom3,nsppol), ierr)
    lambda_in_tetra = zero
    lambda_out_tetra = zero
 
-   ABI_STAT_MALLOC(phfreq_tetra, (nqibz,natom3,nsppol), ierr)
-   ABI_CHECK(ierr==0, "oom in phfreq_tetra, use gaussians for A2F_tr")
+   ABI_MALLOC_OR_DIE(phfreq_tetra, (nqibz,natom3,nsppol), ierr)
    phfreq_tetra = zero
 
    call cwtime(cpu,wall,gflops,"stop")
@@ -4030,14 +4015,11 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  gmax = 2*gmax + 1
  call ngfft_seq(work_ngfft, gmax)
  write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
- ABI_STAT_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)), ierr)
- ABI_CHECK(ierr==0, 'out of memory in work')
+ ABI_MALLOC_OR_DIE(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)), ierr)
 
  ! Allow PW-arrays dimensioned with mpw
- ABI_STAT_MALLOC(kg_k, (3, mpw), ierr)
- ABI_CHECK(ierr==0, 'out of memory in kg_k')
- ABI_STAT_MALLOC(kg_kq, (3, mpw), ierr)
- ABI_CHECK(ierr==0, 'out of memory in kg_kq')
+ ABI_MALLOC_OR_DIE(kg_k, (3, mpw), ierr)
+ ABI_MALLOC_OR_DIE(kg_kq, (3, mpw), ierr)
 
  ! Spherical Harmonics for useylm==1.
  ABI_MALLOC(ylm_k,(mpw, psps%mpsang*psps%mpsang*psps%useylm))
@@ -4093,8 +4075,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
  ! TODO: if we remove the nsig dependency we can remove this intermediate array
  ! and save a lot of memory
- ABI_STAT_MALLOC(gvals_qibz, (2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
- ABI_CHECK(ierr==0, 'out of memory in gvals_qibz')
+ ABI_MALLOC_OR_DIE(gvals_qibz, (2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
 
  if (dtset%eph_transport > 0) then
    ABI_MALLOC(tgamvv_in, (2,gams%ndir_transp**2,natom3,natom3,nsig))
@@ -4103,10 +4084,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_MALLOC(resvv_out, (2,gams%ndir_transp**2))
    ! TODO: if we remove the nsig dependency we can remove this intermediate array
    ! and save a lot of memory
-   ABI_STAT_MALLOC(gvvvals_in_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
-   ABI_CHECK(ierr==0, 'out of memory in gvvvals_in_qibz')
-   ABI_STAT_MALLOC(gvvvals_out_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
-   ABI_CHECK(ierr==0, 'out of memory in gvvvals_out_qibz')
+   ABI_MALLOC_OR_DIE(gvvvals_in_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
+   ABI_MALLOC_OR_DIE(gvvvals_out_qibz, (2,gams%ndir_transp**2,natom3,natom3,nsig,gams%nqibz,nsppol), ierr)
  end if
 
 #ifdef DEV_MJV
@@ -4140,8 +4119,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dtset%prtvol)
 
    ! Allocate vlocal1 with correct cplex. Note nvloc
-   ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
-   ABI_CHECK(ierr==0, "oom vlocal1")
+   ABI_MALLOC_OR_DIE(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
 
 #ifdef DEV_MJV
    gams%vals_ee = zero
