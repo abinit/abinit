@@ -1,5 +1,5 @@
 from __future__ import print_function, division, unicode_literals
-from .common import BaseDictWrapper, string
+from .common import BaseDictWrapper, string, basestring
 
 
 class Issue(object):
@@ -122,7 +122,7 @@ class Tester(object):
 
             elif (hasattr(ref, '__iter__')
                   and not getattr(ref, '_has_no_child', False)
-                  and not isinstance(ref, string)):
+                  and not isinstance(ref, basestring)):
                 for index, (vref, vtest) in enumerate(zip(ref, tested)):
                     self.check_this(string(index), vref, vtest)
 
