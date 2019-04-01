@@ -130,10 +130,13 @@ module m_lgroup
 
    procedure :: findq_ibzk => lgroup_findq_ibzk
    ! Find the index of the point in the IBZ(k).
+
    procedure :: find_ibzimage => lgroup_find_ibzimage
    ! Find the symmetrical image in the IBZ(k) of a qpoint in the BZ.
+
    procedure :: print => lgroup_print
    ! Print the object
+
    procedure :: free => lgroup_free
    ! Free memory.
 

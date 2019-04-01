@@ -147,6 +147,11 @@
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, "", __LINE__) NEWLINE \
    deallocate(ARR) 
 
+#  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
+   allocate(ARR SIZE, stat=ierr) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__) \
+   ABI_CHECK(ierr == 0, "out-of-memory")
+
 #else
 /* macros used in production */
 #  define ABI_ALLOCATE(ARR,SIZE) allocate(ARR SIZE)
@@ -154,6 +159,9 @@
 #  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) allocate(ARR SIZE, stat=ierr)
 #  define ABI_DATATYPE_ALLOCATE(ARR,SIZE)  allocate(ARR SIZE)
 #  define ABI_DATATYPE_DEALLOCATE(ARR)   deallocate(ARR)
+#  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
+        allocate(ARR SIZE, stat=ierr) NEWLINE \
+        ABI_CHECK(ierr == 0, "out-of-memory")
 #endif
 
 /* Macros to allocate zero-initializes arrays.
