@@ -127,12 +127,12 @@ module m_multibinit_dataset
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
   !MS Variables for SCALE-UP 
-  #if defined DEV_MS_SCALEUP 
-  integer :: scup_elec_model
-  integer :: scup_ksamp(3)
-  integer :: scup_ismagnetic 
-  integer :: scup_istddft  
-  #endif 
+#if defined DEV_MS_SCALEUP 
+   integer :: scup_elec_model
+   integer :: scup_ksamp(3)
+   integer :: scup_ismagnetic 
+   integer :: scup_istddft    
+#endif 
   ! TODO hexu: add parameters for spin.
   integer :: spin_calc_traj_obs
   integer :: spin_calc_thermo_obs
@@ -188,9 +188,9 @@ module m_multibinit_dataset
   real(dp) :: spin_qpoint(3)
   real(dp) :: spin_sia_k1dir(3)
   !MS Variables for SCALE-UP 
-  #if defined DEV_MS_SCALEUP 
+#if defined DEV_MS_SCALEUP 
   real*8   :: scup_tcharge 
-  #endif 
+#endif 
 ! Integer arrays
   integer, allocatable :: atifc(:)
   ! atifc(natom)
@@ -386,10 +386,11 @@ multibinit_dtset%spin_write_traj=1
 
 !MS Variables for SCALE-UP 
 #if defined DEV_MS_SCALEUP
-ksamp = 0 
-tcharge = 0 
-ismagnetic = 0 
-istddft = 0
+multibinit_dtset%scup_elec_model = 0
+multibinit_dtset%scup_ksamp = 0 
+multibinit_dtset%scup_tcharge = 0 
+multibinit_dtset%scup_ismagnetic = 0 
+multibinit_dtset%scup_istddft = 0
 #endif 
 
 !=======================================================================
@@ -1166,35 +1167,36 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 !MS Variables for SCALE-UP 
 #if defined DEV_MS_SCALEUP 
- multibinit_dtset%scup_elec_model=zero
+
+multibinit_dtset%scup_elec_model=zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_elec_model',tread,'INT')
- if(tread==1) multibinit_dtset%scup_elec_model=dprarr(1)
+ if(tread==1) multibinit_dtset%scup_elec_model=intarr(1)
  if(multibinit_dtset%scup_elec_model<0 .or. multibinit_dtset%scup_elec_model>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
 &   'scup_elec_model is',multibinit_dtset%scup_elec_model,', but the only allowed values',ch10,&
-&   'are 0 and 1.'ch10,&
+&   'are 0 and 1.',ch10,&
 &   'Action: correct scup_elec_model in your input file.'
    MSG_ERROR(message)
  end if
 
  multibinit_dtset%scup_ismagnetic=zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_ismagnetic',tread,'INT')
- if(tread==1) multibinit_dtset%scup_ismagnetic=dprarr(1)
+ if(tread==1) multibinit_dtset%scup_ismagnetic=intarr(1)
  if(multibinit_dtset%scup_ismagnetic<0 .or. multibinit_dtset%scup_ismagnetic>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
 &   'scup_ismagnetic is',multibinit_dtset%scup_ismagnetic,', but the only allowed values',ch10,&
-&   'are 0 and 1.'ch10,&
+&   'are 0 and 1.',ch10,&
 &   'Action: correct scup_ismagnetic in your input file.'
    MSG_ERROR(message)
  end if
 
  multibinit_dtset%scup_istddft=zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_istddft',tread,'INT')
- if(tread==1) multibinit_dtset%scup_istddft=dprarr(1)
+ if(tread==1) multibinit_dtset%scup_istddft=intarr(1)
  if(multibinit_dtset%scup_istddft<0 .or. multibinit_dtset%scup_istddft>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
 &   'scup_istddft is',multibinit_dtset%scup_istddft,', but the only allowed values',ch10,&
-&   'are 0 and 1.'ch10,&
+&   'are 0 and 1.',ch10,&
 &   'Action: correct scup_istddft in your input file.'
    MSG_ERROR(message)
  end if
@@ -1220,7 +1222,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct scup_tcharge in your input file.'
    MSG_ERROR(message)
  end if
- #endif 
+ 
+#endif 
 
  multibinit_dtset%spin_damping=-1.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_damping',tread,'DPR')
@@ -2492,10 +2495,10 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 #if defined DEV_MS_SCALEUP 
  if(multibinit_dtset%scup_elec_model/=0)then  
    write(nunit,'(a)')'Variables for SCALE-UP electronic model :'
-   write(nunit,'(1x,a17,I3)')  '   scup_ksamp',multibinit_dtset%scup_ksamp
-   write(nunit,'(1x,a17,I3)')  '   scup_tcharge',multibinit_dtset%scup_tcharge
-   write(nunit,'(1x,a17,I3)')  '   scup_ismagnetic',multibinit_dtset%scup_ismagnetic
-   write(nunit,'(1x,a17,I3)')  '   scup_istddft',multibinit_dtset%scup_isdtdft
+   write(nunit,'(1x,a16,3I3)')    '      scup_ksamp',multibinit_dtset%scup_ksamp
+   write(nunit,'(1x,a16,F7.3)')   '    scup_tcharge',multibinit_dtset%scup_tcharge
+   write(nunit,'(1x,a16,I3)')     ' scup_ismagnetic',multibinit_dtset%scup_ismagnetic
+   write(nunit,'(1x,a16,I3)')     '    scup_istddft',multibinit_dtset%scup_istddft
  end if
 #endif
 

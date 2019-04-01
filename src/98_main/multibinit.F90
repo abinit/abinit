@@ -277,6 +277,7 @@ program multibinit
 !****************************************************************************************
 
 #if defined DEV_MS_SCALEUP
+ write(*,*) 'scup_elec_model' ,inp%scup_elec_model
  if(inp%scup_elec_model == 1)then 
    write(message,'(a,(80a),4a)') ch10,('=',ii=1,80),ch10,ch10,&
         ' Initializing Electronic Model with SCALE-UP',ch10
