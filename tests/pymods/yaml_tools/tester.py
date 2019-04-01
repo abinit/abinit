@@ -73,6 +73,20 @@ class Tester(object):
             Check constraints applying to the 'tested' node (of name 'name')
             against 'ref'
         '''
+
+        def analyze(success, cons):
+            if success:
+                msg = '{} ok'.format(cons.name)
+                self.issues.append(Success(self.conf, msg))
+            elif hasattr(success, 'details'):
+                msg = '{} ({}) failed'.format(cons.name, cons.value)
+                self.issues.append(DetailedFailure(self.conf, msg,
+                                                   success.details))
+            else:
+                msg = '{} ({}) failed'.format(cons.name, cons.value)
+                self.issues.append(Failure(self.conf, msg,
+                                           ref, tested))
+
         # we want to detect only dictionaries, not classes that inherit from it
         if type(ref) is dict:
             ref = BaseDictWrapper(ref)
@@ -82,26 +96,22 @@ class Tester(object):
         with self.conf.go_down(name):
             constraints = self.conf.get_constraints_for(ref)
 
-            for cons in constraints:
-                try:
+            print(self.conf.debug)
+            if self.conf.debug:
+                for cons in constraints:
                     success = cons.check(ref, tested, self.conf)
-                except Exception as e:
-                    msg = ('Exception while checking {} ({}/{}):\n'
-                           '{}: {}').format(cons.name, ref, tested,
-                                            e.__class__.__name__, str(e))
-                    self.issues.append(Failure(self.conf, msg))
-                else:  # no exceptions
-                    if success:
-                        msg = '{} ok'.format(cons.name)
-                        self.issues.append(Success(self.conf, msg))
-                    elif hasattr(success, 'details'):
-                        msg = '{} ({}) failed'.format(cons.name, cons.value)
-                        self.issues.append(DetailedFailure(self.conf, msg,
-                                                           success.details))
-                    else:
-                        msg = '{} ({}) failed'.format(cons.name, cons.value)
-                        self.issues.append(Failure(self.conf, msg,
-                                                   ref, tested))
+                    analyze(success, cons)
+            else:
+                for cons in constraints:
+                    try:
+                        success = cons.check(ref, tested, self.conf)
+                    except Exception as e:
+                        msg = ('Exception while checking {} ({}/{}):\n'
+                               '{}: {}').format(cons.name, ref, tested,
+                                                e.__class__.__name__, str(e))
+                        self.issues.append(Failure(self.conf, msg))
+                    else:  # no exceptions
+                        analyze(success, cons)
 
             if getattr(ref, '_is_dict_like', False):  # have children
                 for child in ref:

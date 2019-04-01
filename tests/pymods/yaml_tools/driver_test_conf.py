@@ -62,6 +62,8 @@ class DriverTestConf:
             self.trees = {}
             self.filters = {}
 
+        self.debug = False
+
         self.trees['__default'] = self.tree.copy()
         self._tree_cache = {}
 

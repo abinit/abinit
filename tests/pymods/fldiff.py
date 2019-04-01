@@ -402,7 +402,8 @@ class Differ(object):
             'label': None,
             'use_fl': True,
             'use_yaml': True,
-            'verbose': False
+            'verbose': False,
+            'debug': False
         }
 
         self.options.update(options)
@@ -423,6 +424,7 @@ class Differ(object):
                     self.yaml_conf = YDriverConf(yaml_test['yaml'])
                 else:
                     self.yaml_conf = YDriverConf()
+                self.yaml_conf.debug = self.options['debug']
 
     def diff(self, file1, file2):
         '''

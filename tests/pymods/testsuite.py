@@ -341,6 +341,7 @@ class FileToTest(object):
             'label': self.name,
             'ignore': True,
             'ignoreP': True,
+            'debug': fldebug,
         }
 
         if '-medium' in self.fld_options:
@@ -374,22 +375,19 @@ class FileToTest(object):
 
         differ = FlDiffer(yaml_test=yaml_test, **opts)
 
-        def do_it():
-            fld_result = differ.diff(ref_fname, out_fname)
-            fld_result.dump_details(outf)
+        def make_diff():
+            result = differ.diff(ref_fname, out_fname)
+            result.dump_details(outf)
 
-            isok, status, msg = fld_result.passed_within_tols(
+            return result.passed_within_tols(
                 self.tolnlines, self.tolabs, self.tolrel
             )
 
-            msg += ' [file={}]'.format(os.path.basename(ref_fname))
-            return isok, status, msg
-
         if fldebug:
-            isok, status, msg = do_it()
+            isok, status, msg = make_diff()
         else:
             try:
-                isok, status, msg = do_it()
+                isok, status, msg = make_diff()
             except Exception as e:
                 warnings.warn(('[{}] Something went wrong with this test:\n'
                                '{}: {}\n').format(self.name,
@@ -402,7 +400,7 @@ class FileToTest(object):
         # Save comparison results.
         self.fld_isok = isok
         self.fld_status = status
-        self.fld_msg = msg
+        self.fld_msg = msg + ' [file={}]'.format(os.path.basename(ref_fname))
 
         return isok, status, msg
 
