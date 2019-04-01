@@ -79,7 +79,9 @@ class DataExtractor:
                             curr_it = current_doc.obj.iterator
 
                             # Update current iterators state
-                            for iterator in self.iterators_state:
+                            # list freeze the key list to allow deleting in the
+                            # loop
+                            for iterator in list(self.iterators_state):
                                 if ITERATOR_RANKS[curr_it] \
                                    < ITERATOR_RANKS[iterator]:
                                     del self.iterators_state[iterator]
@@ -88,7 +90,7 @@ class DataExtractor:
 
                         elif current_doc.corrupted:
                             # Signal corruption but ignore the document
-                            self.corrupted_docs.append(current_doc.start+1)
+                            self.corrupted_docs.append(current_doc)
 
                         elif getattr(current_doc.obj, '_is_abinit_message',
                                      False):
