@@ -96,7 +96,6 @@ class Tester(object):
         with self.conf.go_down(name):
             constraints = self.conf.get_constraints_for(ref)
 
-            print(self.conf.debug)
             if self.conf.debug:
                 for cons in constraints:
                     success = cons.check(ref, tested, self.conf)
