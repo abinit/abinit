@@ -413,9 +413,11 @@ module m_neat
     type(stream_string),intent(inout) :: stream
     integer,intent(in) :: iout
 
-    call yaml_close_doc(stream=stream)
+    if(stream%length() > 0) then
+      call yaml_close_doc(stream=stream)
 
-    call wrtout_stream(stream, iout)
+      call wrtout_stream(stream, iout)
+    end if
   end subroutine neat_finish_etot
 !!*** m_neat/neat_finish_etot
 end module m_neat
