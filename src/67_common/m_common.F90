@@ -1520,7 +1520,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
 &       '    Hartree energy  = ',energies%e_hartree,ch10,&
 &       '    XC energy       = ',exc_semilocal,ch10,&
-&       '    '//eneName//'  =',enevalue,ch10,&
+&       '    '//eneName//'  = ',enevalue,ch10,&
 &       '    PspCore energy  = ',energies%e_corepsp
        call wrtout(iout,msg,'COLL')
        call e_components%set('Hartree energy', r=energies%e_hartree)
