@@ -53,7 +53,7 @@ def tol_vec(tol, ref, tested):
         Valid if the cartesian norm of the vector (ref - tested) is below
         the given tolerance.
     '''
-    return (ref - tested).norm() < tol
+    return norm(ref - tested) < tol
 
 
 @conf_parser.constraint(exclude={'ceil', 'tol_abs', 'tol_rel', 'ignore'})
