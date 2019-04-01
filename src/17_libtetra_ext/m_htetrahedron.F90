@@ -1520,10 +1520,11 @@ subroutine htetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,
 
  ABI_MALLOC(weights,(nene,2))
  tweight_t = zero; dtweightde_t = zero
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! For each irreducible Brillouin zone point
  do ik_ibz=1,tetra%nkibz
-   !if (mod(ik_ibz,nprocs) /= my_rank) cycle
+   if (mod(ik_ibz,nprocs) /= my_rank) cycle
    call htetra_get_onewk(tetra, ik_ibz, bcorr, nene, tetra%nkibz, eigen_in, enemin, enemax, max_occ, weights)
 
    tweight_t(:,ik_ibz)    = tweight_t(:,ik_ibz)    + weights(:,2)*tetra%ibz_weights(ik_ibz)
@@ -1531,8 +1532,8 @@ subroutine htetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,
  end do
  ABI_FREE(weights)
 
- !call xmpi_sum(tweight_t,    comm, ierr)
- !call xmpi_sum(dtweightde_t, comm, ierr)
+ call xmpi_sum(tweight_t,    comm, ierr)
+ call xmpi_sum(dtweightde_t, comm, ierr)
 
 end subroutine htetra_blochl_weights
 

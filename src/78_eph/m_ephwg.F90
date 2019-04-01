@@ -820,6 +820,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
 !Local variables-------------------------------
 !scalars
  integer :: iq,iq_ibz,ikpq_ibz,ib,ie
+ integer :: nprocs, my_rank, ierr
  real(dp),parameter :: max_occ1 = one
  real(dp) :: wme0(neig)
 !arrays
@@ -828,6 +829,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
 !----------------------------------------------------------------------
 
  ib = band - self%bstart + 1
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! Fill array for e_{k+q, b} +- w_{q,nu)
  do iq=1,self%nq_k
@@ -839,6 +841,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
 
  ! Compute the tetrahedron or gaussian weights
  do iq_ibz=1,self%nq_k
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
    if (present(broad)) then
      wme0 = eig - pme_k(iq_ibz, 1)
      deltaw_pm(:,iq_ibz,1) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
@@ -858,6 +861,8 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
 #endif
    end if
  end do
+
+ call xmpi_sum(deltaw_pm, comm, ierr)
 
 end subroutine ephwg_get_deltas_wvals
 !!***
