@@ -225,6 +225,11 @@ class AbinitComment(AbinitMessage):
     __yaml_tag = 'COMMENT'
 
 
+@yaml_auto_map
+class GwSigma(object):
+    pass
+
+
 if has_pandas:
     from pandas import read_csv, DataFrame
     from pandas.compat import StringIO
@@ -245,11 +250,7 @@ if has_pandas:
     class GwSigmaData(Table):
         pass
 
-    @yaml_auto_map
-    class GwSigma(object):
-        pass
-
-    @yaml_auto_map
+    @yaml_scalar
     class EtotIters(Table):
         _is_dict_like = False  # prevent tester from going inside by itself
 
@@ -282,6 +283,5 @@ if has_pandas:
 
 else:
     yaml_not_available_tag('Table', 'Pandas module is not available')
-    yaml_not_available_tag('GwSigma', 'Pandas module is not available')
     yaml_not_available_tag('GwSigmaData', 'Pandas module is not available')
     yaml_not_available_tag('EtotIters', 'Pandas module is not available')
