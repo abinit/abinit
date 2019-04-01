@@ -1577,6 +1577,7 @@ end subroutine mpi_setup
        end do
      end do
    else if (optdriver==RUNL_GSTATE) then
+     omp_ncpus=nthreads
      do jj=mcount,mcount-min(ncount,MAXABIPY)+1,-1
        ii=isort(jj)
        tot_ncpus = my_distp(7,ii)
