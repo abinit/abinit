@@ -1434,7 +1434,7 @@ end subroutine mpi_setup
                if (one*npb*bpp >max(1.,mband/3.).and.(mband>30)) cycle
                if (npb*npf<=4.and.(.not.first_bpp)) cycle
              else if (wf_algo==ALGO_CHEBFI) then
-               if (modulo(npb,nthreads)>0) cycle
+               !Nothing
              else
                if (bpp/=1.or.npb/=1) cycle
              end if
@@ -1463,7 +1463,7 @@ end subroutine mpi_setup
 
 !            CHEBFI: promote npfft=npband and nband>=npfft
              if (wf_algo==ALGO_CHEBFI) then
-               if (nproc1>1) then
+               if (npf>1) then
                  if (npb>npf) then
                    acc_kgb=acc_kgb*(one-0.8_dp*0.25_dp*((dble(npb)/dble(npf))-one)**2/(nproc1-one)**2)
                  else
@@ -1722,12 +1722,13 @@ end subroutine mpi_setup
    ABI_ALLOCATE(nband_best,(1+ib2-ib1))
    nproc_best(:)=1
    nband_best=(/(ii,ii=ib1,ib2)/)
+   bpp=merge(1,nthreads,my_algo(icount)==ALGO_CHEBFI)
    do ii=ib1,ib2
      do jj=1,nproc/nproc1
        ibest=1
        do kk=1,jj
          if (mod(jj,kk)/=0) cycle
-         if (mod(ii,kk*nthreads)==0) ibest=max(ibest,kk)
+         if (mod(ii,kk*bpp)==0) ibest=max(ibest,kk)
        end do
        nproc_best(1+ii-ib1)=max(nproc_best(1+ii-ib1),ibest)
      end do
