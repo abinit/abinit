@@ -52,6 +52,8 @@ __all__ = [
     "AbinitTestSuite",
 ]
 
+fldebug = ('FLDIFF_DEBUG' in os.environ and os.environ['FLDIFF_DEBUG'])
+
 _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 
 
@@ -372,7 +374,7 @@ class FileToTest(object):
 
         differ = FlDiffer(yaml_test=yaml_test, **opts)
 
-        try:
+        def do_it():
             fld_result = differ.diff(ref_fname, out_fname)
             fld_result.dump_details(outf)
 
@@ -381,13 +383,21 @@ class FileToTest(object):
             )
 
             msg += ' [file={}]'.format(os.path.basename(ref_fname))
+            return isok, status, msg
 
-        except Exception as e:
-            warnings.warn('[{}] Something went wrong with this test:\n{}: {}\n'
-                          .format(self.name, e.__class__.__name__, str(e)))
-            isok, status = False, 'failed'
-            msg = 'internal error:\n{}: {}'.format(e.__class__.__name__,
-                                                   str(e))
+        if fldebug:
+            isok, status, msg = do_it()
+        else:
+            try:
+                isok, status, msg = do_it()
+            except Exception as e:
+                warnings.warn(('[{}] Something went wrong with this test:\n'
+                               '{}: {}\n').format(self.name,
+                                                  e.__class__.__name__,
+                                                  str(e)))
+                isok, status = False, 'failed'
+                msg = 'internal error:\n{}: {}'.format(e.__class__.__name__,
+                                                       str(e))
 
         # Save comparison results.
         self.fld_isok = isok
