@@ -282,7 +282,7 @@ program bsepostproc
 contains 
 !!***
 
-!!****p* ABINIT/get_ebands_path_cryst
+!!****f* ABINIT/get_ebands_path_cryst
 !! NAME
 !! get_ebands_path_cryst
 !!
@@ -321,8 +321,7 @@ subroutine get_path_ebands_cryst(path, ebands, cryst, comm)
 end subroutine get_path_ebands_cryst
 !!***
 
-
-!!****p* ABINIT/get_path_ebands
+!!****f* ABINIT/get_path_ebands
 !! NAME
 !! get_path_ebands
 !!
@@ -359,7 +358,7 @@ end subroutine get_path_ebands
 !!***
 
 
-!!****p* ABINIT/get_path_cryst
+!!****f* ABINIT/get_path_cryst
 !! NAME
 !! get_path_cryst
 !!
@@ -395,8 +394,7 @@ subroutine get_path_cryst(path, cryst, comm)
 end subroutine get_path_cryst
 !!***
 
-
-!!****p* ABINIT/parse_kargs
+!!****f* ABINIT/parse_kargs
 !! NAME
 !! parse_kargs
 !!
@@ -459,7 +457,7 @@ subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
 end subroutine parse_kargs
 !!***
 
-!!****p* ABINIT/crystal_from_file
+!!****f* ABINIT/crystal_from_file
 !! NAME
 !! crystal_from_file
 !!
@@ -512,8 +510,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
 end function crystal_from_file
 !!***
 
-
-!!****p* ABINIT/ebands_from_file
+!!****f* ABINIT/ebands_from_file
 !! NAME
 !! ebands_from_file
 !!
