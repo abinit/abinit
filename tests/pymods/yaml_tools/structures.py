@@ -254,6 +254,12 @@ if has_pandas:
     class EtotIters(Table):
         _is_dict_like = False  # prevent tester from going inside by itself
 
+        residues = {
+            'deltaE(h)',
+            'residm',
+            'vres2'
+        }
+
         def last_iter(self, other, **opts):
             tol = opts.get('tol', 1.0e-10)
             ceil = opts.get('ceil', 1.0e-10)
@@ -270,7 +276,7 @@ if has_pandas:
                 # index -1 does not work on series
                 o_n, s_n = other.shape[1], self.shape[1]
 
-                if key in ('residm', 'vres2'):
+                if key in self.residues:
                     if not chk_ceil(oserie[o_n]):
                         msg = ('Last item of {} column does not match the'
                                ' ceil {}.')
