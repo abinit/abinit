@@ -533,6 +533,7 @@ end subroutine print_matlu
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  gloc(natom) <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!  pawang <type(pawang)>=paw angular mesh and related data
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!
 !! OUTPUT
 !!  gloc(natom) <type(matlu_type)>= density matrix symetrized in the local orbital basis and related variables
@@ -548,24 +549,28 @@ end subroutine print_matlu
 !! CHILDREN
 !!
 !! SOURCE
- subroutine sym_matlu(cryst_struc,gloc,pawang)
+ subroutine sym_matlu(cryst_struc,gloc,pawang,paw_dmft)
 
  use defs_basis
 ! use defs_wvltypes
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
+ use m_paw_dmft, only: paw_dmft_type
+
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
  type(pawang_type),intent(in) :: pawang
+ type(paw_dmft_type), intent(in) :: paw_dmft
 !arrays
  type(matlu_type),intent(inout) :: gloc(cryst_struc%natom)
+!scalars
 !Local variables-------------------------------
 !scalars
  integer :: at_indx,iatom,irot,ispinor,ispinor1,isppol,lpawu,m1,m2,m3,m4,mu
- integer :: natom,ndim,nsppol,nspinor,nu
+ integer :: natom,ndim,nsppol,nspinor,nu,t2g,m1s,m2s,m3s,m4s,lpawu_zarot,x2my2d
  complex(dpc) :: sumrho,summag(3),rotmag(3),ci
  real(dp) :: zarot2
 !arrays
@@ -575,6 +580,13 @@ end subroutine print_matlu
  type(matlu_type),allocatable :: glocnms(:)
  type(matlu_type),allocatable :: glocsym(:)
  real(dp),allocatable :: symrec_cart(:,:,:)
+ integer :: mt2g(3),mx2my2d
+ mt2g(1)=1
+ mt2g(2)=2
+ mt2g(3)=4
+ mx2my2d=5
+ t2g=paw_dmft%dmftqmc_t2g
+ x2my2d=paw_dmft%dmftqmc_x2my2d
 
 ! DBG_ENTER("COLL")
 
@@ -606,7 +618,26 @@ end subroutine print_matlu
         at_indx=cryst_struc%indsym(4,irot,iatom)
         do m3=1, 2*lpawu+1
          do m4=1, 2*lpawu+1
-          zarot2=pawang%zarot(m3,m1,lpawu+1,irot)*pawang%zarot(m4,m2,lpawu+1,irot)
+          if(t2g==1) then
+           m1s=mt2g(m1)
+           m2s=mt2g(m2)
+           m3s=mt2g(m3)
+           m4s=mt2g(m4)
+           lpawu_zarot=2
+          else if (x2my2d==1) then
+           m1s=mx2my2d
+           m2s=mx2my2d
+           m3s=mx2my2d
+           m4s=mx2my2d
+           lpawu_zarot=2
+          else
+           m1s=m1
+           m2s=m2
+           m3s=m3
+           m4s=m4
+           lpawu_zarot=lpawu
+          endif
+          zarot2=pawang%zarot(m3s,m1s,lpawu_zarot+1,irot)*pawang%zarot(m4s,m2s,lpawu_zarot+1,irot)
           glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)=&
 &          glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)&
 &          +gloc(at_indx)%mat(m3,m4,isppol,ispinor,ispinor1)*zarot2
@@ -673,7 +704,26 @@ end subroutine print_matlu
        at_indx=cryst_struc%indsym(4,irot,iatom)
        do m3=1, 2*lpawu+1
         do m4=1, 2*lpawu+1
-         zarot2=pawang%zarot(m3,m2,lpawu+1,irot)*pawang%zarot(m4,m1,lpawu+1,irot)
+          if(t2g==1) then
+           m1s=mt2g(m1)
+           m2s=mt2g(m2)
+           m3s=mt2g(m3)
+           m4s=mt2g(m4)
+           lpawu_zarot=2
+          else if (x2my2d==1) then
+           m1s=mx2my2d
+           m2s=mx2my2d
+           m3s=mx2my2d
+           m4s=mx2my2d
+           lpawu_zarot=2
+          else
+           m1s=m1
+           m2s=m2
+           m3s=m3
+           m4s=m4
+           lpawu_zarot=lpawu
+          endif
+         zarot2=pawang%zarot(m3s,m2s,lpawu_zarot+1,irot)*pawang%zarot(m4s,m1s,lpawu_zarot+1,irot)
          sumrho=sumrho +  glocnm(at_indx)%mat(m4,m3,isppol,1,1)  * zarot2
          do mu=1,3
           summag(mu)=summag(mu) + glocnm(at_indx)%mat(m4,m3,isppol,mu+1,1) * zarot2
@@ -1609,7 +1659,7 @@ end subroutine add_matlu
 !           end do
 !           call dgemm('n','n',tndim,tndim,tndim,cone,valuer2,tndim,&
 !&            valuer4,tndim,czero,valuer                ,tndim)
-           write(6,*) "INFO",info
+           !write(6,*) "INFO",info
            gathermatlu(iatom)%value=cmplx(valuer,0.d0,kind=dp)
 !           write(message,'(a,i4,a,i4)')  "AFTER valuer for atom",iatom,"  and isppol",isppol
 !           call wrtout(std_out,message,'COLL')
