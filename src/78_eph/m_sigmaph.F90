@@ -1775,7 +1775,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end do ! iq_ibz (sum over q-points in IBZ_k)
 
      ! Print cache stats.
-     call dvdb%qcache_report()
+     call dvdb%qcache%report()
 
      ABI_FREE(sigma%e0vals)
      ABI_FREE(kets_k)
@@ -3883,7 +3883,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
          !    iq_ibz_k = self%myq2ibz_k(imyq)
          !    TODO
          !    iq_ibz = self%ibzk2ibz(iq_ibz_k)
-         !    if (.not. allocated(dvdb%qcacheft_ibz(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
+         !    if (.not. allocated(dvdb%qcache_ftibz(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
          !  end do
          !  Update cache.
          !  call dvdb_ftinterp_qcache_update(dvdb, nfftf, ngfftf, ineed_qpt, comm)
@@ -3895,7 +3895,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
          do imyq=1,self%my_nqibz_k
            iq_ibz_k = self%myq2ibz_k(imyq)
            iq_dvdb = self%indq2dvdb_k(1, iq_ibz_k)
-           if (.not. allocated(dvdb%qcache(iq_dvdb)%v1scf)) ineed_qpt(iq_dvdb) = 1
+           if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qpt(iq_dvdb) = 1
          end do
          ! Update cache.
          call dvdb%qcache_update(nfftf, ngfftf, ineed_qpt, comm)
