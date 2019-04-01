@@ -14,7 +14,8 @@ if PY3:
     string = str
     basestring = str
 else:
-    string = basestring
+    string = unicode
+    basestring = basestring
 
 
 def normalize_attr(string):
