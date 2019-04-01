@@ -2129,7 +2129,7 @@ endif
 !Allocation of rhot1
 !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    if (dtset%plowan_compute>=10)then
-     write(msg,'(a)')"cRPA calculations using wannier weights from data.plowann"
+     write(msg,'(a)')" cRPA calculations using wannier weights from data.plowann"
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,dtset%plowan_iatom,&
@@ -2161,7 +2161,7 @@ endif
 !&      ' nkptgw and nbz differs: this is not allowed to compute U in cRPA '
 !      MSG_ERROR(msg)
 !    endif
-     write(std_out,*) "ikcalc",ikcalc,size(Sigp%kptgw2bz),nkcalc
+     write(std_out,*) " ikcalc",ikcalc,size(Sigp%kptgw2bz),nkcalc
 
      if(mod(ikcalc-1,nprocs)==Wfd%my_rank) then
        if(cryst%nsym==1) ik_ibz=Kmesh%tab(ikcalc) ! Index of the irred k-point for GW

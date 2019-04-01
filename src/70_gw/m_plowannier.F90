@@ -958,7 +958,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      MSG_ERROR(message)
    end if
    rewind(unt)
-   write(unt,*) "Number of bands,   spins, and  k-point; and spin-orbit flag"
+   write(unt,*) " Number of bands,   spins, and  k-point; and spin-orbit flag"
    write(unt,*) dtset%mband,wan%nsppol,wan%nkpt,wan%nspinor,wan%bandi_wan,wan%bandf_wan
    write(unt,*) " For each k-point, eigenvalues for each band"
    write(unt,*) (dtset%wtk(ikpt)*facpara,ikpt=1,wan%nkpt)
@@ -1003,7 +1003,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        end if
      end do
      if (count .eq. 0) then
-       write(message,'(a)') "The projector choice is not consistent with the orbital l"
+       write(message,'(a)') " The projector choice is not consistent with the orbital l"
        MSG_ERROR(message)
      else !good choice of projector
        wan%psichi(1,1,iatom)%atom(il)%ph0phiint = zero
@@ -1166,15 +1166,15 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
    !compute the occupation in wannier basis and print it
   write(message,*)char(10),&
-&"Print the occupation levels (not normalized) for 1 atom, 1 orbital"
+&" Print the occupation levels (not normalized) for 1 atom, 1 orbital"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
+   write(message,*)" Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    do ikpt = 1,wan%nkpt
      call compute_oper_ks2wan(wan,eigenks,operwan,ikpt)
    enddo
    call init_operwan_realspace(wan,operocc)
-   write(message,*)char(10),"The occupation matrix before normalization is :"
+   write(message,*)char(10)," The occupation matrix before normalization is :"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    call compute_oper_wanK2realspace(wan,operwan,operocc)
    do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
@@ -1204,7 +1204,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    enddo
    do ikpt = 1,wan%nkpt
      if (ikpt<=5)then
-       write(message,*)char(10),"For ikpt=",ikpt,"the normalization matrix is before normalization :"
+       write(message,*)char(10)," For ikpt=",ikpt,"the normalization matrix is before normalization :"
        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
        do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
          write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
@@ -1224,7 +1224,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    enddo
    do ikpt = 1,wan%nkpt
      if (ikpt<=5)then
-       write(message,*)char(10),"For ikpt=",ikpt,"the normalization matrix is after normalization :"
+       write(message,*)char(10)," For ikpt=",ikpt,"the normalization matrix is after normalization :"
        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
        do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
          write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
@@ -1241,7 +1241,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
  if (dtset%prtvol >= 5) then  
    write(message,*)char(10),&
-     &"Print the occupation levels (normalized) for 1 atom, 1 orbital"
+     &" Print the occupation levels (normalized) for 1 atom, 1 orbital"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
@@ -1250,7 +1250,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      call compute_oper_ks2wan(wan,eigenks,operwan,ikpt)
    enddo
    call zero_operwan_realspace(wan,operocc)
-   write(message,*)char(10),"The occupation matrix after normalization is :"
+   write(message,*)char(10)," The occupation matrix after normalization is :"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    call compute_oper_wanK2realspace(wan,operwan,operocc)
    do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
@@ -1312,7 +1312,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        do m1= 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
          do isppol = 1,wan%nsppol
            if (aimag(operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(m1,m1,isppol,1,1)) > 1d-8) then
-             write(mat_writing,'(a)') "An eigenvalue has an imaginary part: ikpt, atom, l, m, isppol, value"
+             write(mat_writing,'(a)') " An eigenvalue has an imaginary part: ikpt, atom, l, m, isppol, value"
              write(mat_writing2,'(i0,i0,i0,i0,i0,E15.6)') ikpt, iatom1, il1, im1, isppol, &
   &                   operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(m1,m1,isppol,1,1)
              MSG_ERROR(message)
@@ -2465,7 +2465,7 @@ end subroutine get_plowannier
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
      &dtset%kpt,dtset%nimage,dtset%nkpt*sym,dtset%nspinor,dtset%nsppol,dtset%wtk,wanbz)
   
-   write(msg,'(a)')"Reconstruction of the full Brillouin Zone using data.plowann in the IBZ"
+   write(msg,'(a)')" Reconstruction of the full Brillouin Zone using data.plowann in the IBZ"
    call wrtout(std_out,msg,'COLL');call wrtout(ab_out,msg,'COLL')
    if (sym==1) then 
      wanbz=wanibz
@@ -3338,7 +3338,7 @@ subroutine init_operwan_realspace(wan,operwan_realspace)
          end do
        end do
      end do
-    ! write(6,*)"taille", iatom1,iatom2,size(operwan_realspace(iatom1,iatom2)%position,1),size(operwan_realspace(iatom1,iatom2)%position,2)
+    ! .write(6,*)"taille", iatom1,iatom2,size(operwan_realspace(iatom1,iatom2)%position,1),size(operwan_realspace(iatom1,iatom2)%position,2)
    end do
  end do
 
