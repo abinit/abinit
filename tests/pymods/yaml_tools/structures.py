@@ -266,17 +266,21 @@ if has_pandas:
                 return abs(b) < ceil
 
             for key in self:
+                oserie, sserie = other[key], self[key]
+                # index -1 does not work on series
+                o_n, s_n = other.shape[1], self.shape[1]
+
                 if key in ('residm', 'vres2'):
-                    if not chk_ceil(other[key][-1]):
+                    if not chk_ceil(oserie[o_n]):
                         msg = ('Last item of {} column does not match the'
                                ' ceil {}.')
                         return FailDetail(msg.format(key, ceil))
                 else:
-                    if not chk_tol(self[key][-1], other[key][-1]):
+                    if not chk_tol(sserie[s_n], oserie[o_n]):
                         msg = ('Last item of {} column does not match the'
                                ' tolerance {}.')
                         return FailDetail(msg.format(key, tol))
-            if abs(self.shape[1] - other.shape[1]) > tol_iter:
+            if abs(s_n - o_n) > tol_iter:
                 return FailDetail('Difference between number of iteration'
                                   ' is above tol_iter')
             return True
