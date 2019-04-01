@@ -142,7 +142,7 @@ program multibinit
 !set the argument of abimem_init to "2" instead of "0"
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(2)
+ call abimem_init(0)
 #endif
 
 !Initialisation of the timing
@@ -277,12 +277,22 @@ program multibinit
 !****************************************************************************************
 
 #if defined DEV_MS_SCALEUP
-  write(message,'(a,(80a),4a)') ch10,('=',ii=1,80),ch10,ch10,&
-       ' Initializing Electronic Model with SCALE-UP',ch10
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+ if(inp%scup_elec_model == 1)then 
+   write(message,'(a,(80a),4a)') ch10,('=',ii=1,80),ch10,ch10,&
+        ' Initializing Electronic Model with SCALE-UP',ch10
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+   
+   !Set Variables
+   ksamp = inp%scup_ksamp 
+   tcharge = inp%scup_tcharge 
+   if(inp%scup_ismagnetic == 1)ismagnetic=.TRUE. 
+   if(inp%scup_istddft == 1)istddft=.TRUE. 
 
-  err_init_elec = global_init_model(filnam(3),inp%ncell,needlattice,needelectrons,didi,harm_der,tcharge,ksamp,ismagnetic,istddft) 
+   ! Call to Scale-Up
+   err_init_elec = global_init_model(filnam(3),inp%ncell,needlattice,needelectrons,didi,harm_der,tcharge,ksamp,ismagnetic,istddft) 
+ 
+ endif
 #endif 
 
 !****************************************************************************************

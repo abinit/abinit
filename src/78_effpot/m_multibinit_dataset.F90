@@ -126,8 +126,13 @@ module m_multibinit_dataset
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
-
-
+  !MS Variables for SCALE-UP 
+  #if defined DEV_MS_SCALEUP 
+  integer :: scup_elec_model
+  integer :: scup_ksamp(3)
+  integer :: scup_ismagnetic 
+  integer :: scup_istddft  
+  #endif 
   ! TODO hexu: add parameters for spin.
   integer :: spin_calc_traj_obs
   integer :: spin_calc_thermo_obs
@@ -182,6 +187,10 @@ module m_multibinit_dataset
   real(dp) :: spin_mag_field(3)  ! external magnetic field
   real(dp) :: spin_qpoint(3)
   real(dp) :: spin_sia_k1dir(3)
+  !MS Variables for SCALE-UP 
+  #if defined DEV_MS_SCALEUP 
+  real*8   :: scup_tcharge 
+  #endif 
 ! Integer arrays
   integer, allocatable :: atifc(:)
   ! atifc(natom)
@@ -374,6 +383,14 @@ multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above.
 
 multibinit_dtset%spin_var_temperature=0 
 multibinit_dtset%spin_write_traj=1 
+
+!MS Variables for SCALE-UP 
+#if defined DEV_MS_SCALEUP
+ksamp = 0 
+tcharge = 0 
+ismagnetic = 0 
+istddft = 0
+#endif 
 
 !=======================================================================
 !Arrays
@@ -1146,6 +1163,65 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !S
+
+!MS Variables for SCALE-UP 
+#if defined DEV_MS_SCALEUP 
+ multibinit_dtset%scup_elec_model=zero
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_elec_model',tread,'INT')
+ if(tread==1) multibinit_dtset%scup_elec_model=dprarr(1)
+ if(multibinit_dtset%scup_elec_model<0 .or. multibinit_dtset%scup_elec_model>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_elec_model is',multibinit_dtset%scup_elec_model,', but the only allowed values',ch10,&
+&   'are 0 and 1.'ch10,&
+&   'Action: correct scup_elec_model in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%scup_ismagnetic=zero
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_ismagnetic',tread,'INT')
+ if(tread==1) multibinit_dtset%scup_ismagnetic=dprarr(1)
+ if(multibinit_dtset%scup_ismagnetic<0 .or. multibinit_dtset%scup_ismagnetic>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_ismagnetic is',multibinit_dtset%scup_ismagnetic,', but the only allowed values',ch10,&
+&   'are 0 and 1.'ch10,&
+&   'Action: correct scup_ismagnetic in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%scup_istddft=zero
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_istddft',tread,'INT')
+ if(tread==1) multibinit_dtset%scup_istddft=dprarr(1)
+ if(multibinit_dtset%scup_istddft<0 .or. multibinit_dtset%scup_istddft>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_istddft is',multibinit_dtset%scup_istddft,', but the only allowed values',ch10,&
+&   'are 0 and 1.'ch10,&
+&   'Action: correct scup_istddft in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%scup_ksamp(:) = 0
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'scup_ksamp',tread,'INT')
+ if(tread==1) multibinit_dtset%scup_ksamp(1:3)=intarr(1:3)
+ do ii=1,3
+   if(multibinit_dtset%scup_ksamp(ii)<1)then
+     write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
+&     'scup_ksamp(',ii,') is',multibinit_dtset%scup_ksamp(ii),', which is lower than 1 .',ch10,&
+&     'Action: correct scup_ksamp(',ii,') in your input file.'
+     MSG_ERROR(message)
+   end if
+ end do
+
+ multibinit_dtset%scup_tcharge = zero
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_tcharge',tread,'DPR')
+ if(tread==1) multibinit_dtset%scup_tcharge=dprarr(1)
+ if(multibinit_dtset%scup_tcharge<0 )then
+   write(message, '(a,I3,a,a,a)' )&
+&   'scup_tcharge is',multibinit_dtset%scup_tcharge,', which is lower than zero ',ch10,&
+&   'Action: correct scup_tcharge in your input file.'
+   MSG_ERROR(message)
+ end if
+ #endif 
+
  multibinit_dtset%spin_damping=-1.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_damping',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_damping=dprarr(1)
@@ -1928,12 +2004,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      ABI_ALLOCATE(intarr,(marr))
    end if
    multibinit_dtset%opt_coeff(:)=0
-   write(*,*) "marr ", marr
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%opt_ncoeff,&
 &              string(1:lenstr),'opt_coeff',tread,'INT')
    if(tread==1)then
      do ii=1,multibinit_dtset%opt_ncoeff
-       write(*,*) "intarr(ii)", intarr(ii)
        multibinit_dtset%opt_coeff(ii)=intarr(ii)
      end do
    end if
@@ -2170,7 +2244,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &                       multibinit_dtset%ncell(:),')',ch10,&
 &                 '     dipdip_range is set to ncell.',ch10,&
 &                 ' ---',ch10
-     multibinit_dtset%dipdip_range(:) =  multibinit_dtset%ncell(:)
+    multibinit_dtset%dipdip_range(:) =  multibinit_dtset%ncell(:)
      call wrtout(std_out,message,'COLL')
      exit
    end if
@@ -2402,7 +2476,6 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    end if
  end if 
 
-
  if(multibinit_dtset%bound_model /=0)then
    write(nunit,'(a)')' Bound the coefficients :'
    write(nunit,'(1x,a16,I3)')    'bound_anhaStrain',multibinit_dtset%bound_anhaStrain   
@@ -2414,6 +2487,17 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a16,I7)')   '      bound_step',multibinit_dtset%bound_step
    write(nunit,'(1x,a16,2I3.1)')'bound_rangePower',multibinit_dtset%bound_rangePower
  end if
+
+!MS Variables for SCALE-UP 
+#if defined DEV_MS_SCALEUP 
+ if(multibinit_dtset%scup_elec_model/=0)then  
+   write(nunit,'(a)')'Variables for SCALE-UP electronic model :'
+   write(nunit,'(1x,a17,I3)')  '   scup_ksamp',multibinit_dtset%scup_ksamp
+   write(nunit,'(1x,a17,I3)')  '   scup_tcharge',multibinit_dtset%scup_tcharge
+   write(nunit,'(1x,a17,I3)')  '   scup_ismagnetic',multibinit_dtset%scup_ismagnetic
+   write(nunit,'(1x,a17,I3)')  '   scup_istddft',multibinit_dtset%scup_isdtdft
+ end if
+#endif
 
 !Write the general information
  if( multibinit_dtset%rfmeth/=1 .or. &

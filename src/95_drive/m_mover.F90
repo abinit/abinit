@@ -874,7 +874,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if (skipcycle) exit
 
 !DEBUG
-     write(std_out,*)' m_mover : will call precpred_1geo'
+!     write(std_out,*)' m_mover : will call precpred_1geo'
 !    call flush(std_out)
 !ENDDEBUG
 
