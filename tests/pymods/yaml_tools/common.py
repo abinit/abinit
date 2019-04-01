@@ -94,6 +94,10 @@ class Undef(float):
     yaml_pattern = re.compile('undef')
 
     @staticmethod
+    def is_undef(obj):
+        return getattr(obj, '_is_undef', False)
+
+    @staticmethod
     def __new__(cls):
         return super(Undef, cls).__new__(cls, 'nan')
 

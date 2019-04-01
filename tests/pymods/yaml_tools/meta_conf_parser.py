@@ -67,6 +67,7 @@ class Constraint(object):
         self.metadata = metadata
         self.handle_undef = handle_undef
 
+        self._apply_to_type = apply_to
         self._apply_to = make_apply_to(apply_to)
 
     def __repr__(self):
@@ -86,13 +87,12 @@ class Constraint(object):
             Return True if the constraint is verified.
         '''
         # apply to floats at least
-        if self._apply_to(self, 1.0) and self.handle_undef:
+        if isinstance(ref, (float, complex)) and self._apply_to(self, 1.0) \
+           and self.handle_undef:
             if conf.get_param('allow_undef'):
-                if ref == Undef():
-                    print('left undef')
+                if Undef.is_undef(ref):
                     return True
-            elif ref == Undef() or tested == Undef():
-                print('left or right undef')
+            elif Undef.is_undef(ref) or Undef.is_undef(tested):
                 return False
 
         params = [conf.get_param(p) for p in self.use_params]
