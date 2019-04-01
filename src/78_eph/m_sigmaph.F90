@@ -2865,7 +2865,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, restart, co
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0, fform_sigeph = 52
+ integer,parameter :: master=0
  integer :: my_rank, ii, edos_intmeth
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
@@ -2916,7 +2916,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, restart, co
 
    ncid = self%ncid
 
-   NCF_CHECK(hdr_ncwrite(wfk_hdr, ncid, fform_sigeph, nc_define=.True.))
+   NCF_CHECK(hdr_ncwrite(wfk_hdr, ncid, fform_from_ext("SIGPEH.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    if (dtset%prtdos /= 0) then

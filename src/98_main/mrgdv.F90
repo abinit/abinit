@@ -58,7 +58,7 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,nargs,nfiles,comm,prtvol,my_rank,ierr, lenr
+ integer :: ii,nargs,nfiles,comm,prtvol,my_rank,lenr
  character(len=24) :: codename
  character(len=500) :: command,arg, msg
  character(len=fnlen) :: db_path,dump_file

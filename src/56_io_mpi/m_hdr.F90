@@ -35,7 +35,7 @@
 ! Reference files should be updated
 !#define DEV_NEW_HDR
 
-MODULE m_hdr
+module m_hdr
 
  use defs_basis
  use m_build_info
@@ -177,7 +177,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(49) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(50) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -257,7 +257,8 @@ MODULE m_hdr
    abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
    abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data"), &
    abifile_t(varname="no_fftdatar_write", fform=6000, ext="ABIWAN", class="data"), &
-   abifile_t(varname="None", fform=6001, ext="KERANGE", class="data") &
+   abifile_t(varname="None", fform=6001, ext="KERANGE", class="data"), &
+   abifile_t(varname="None", fform=6002, ext="SIGEPH", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")

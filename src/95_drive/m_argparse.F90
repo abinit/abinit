@@ -61,6 +61,8 @@ module m_argparse
    module procedure get_arg_list_int
    module procedure get_arg_list_dp
  end interface get_arg_list
+
+ public :: parse_kargs    !  Parse command line arguments, return options related to k-point sampling
 !!***
 
 !!****t* m_argparse/args_t
@@ -679,6 +681,67 @@ end function get_arg_list_dp
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* ABINIT/parse_kargs
+!! NAME
+!! parse_kargs
+!!
+!! FUNCTION
+!!  Parse command line arguments, return options related to k-point sampling
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
+
+!Arguments ------------------------------------
+ integer,intent(out) :: kptopt, nshiftk, chksymbreak
+ integer,intent(out) :: kptrlatt(3,3)
+ real(dp),allocatable,intent(out) :: shiftk(:,:)
+
+!Local variables-------------------------------
+ integer :: ii, lenr
+ character(len=500) :: msg
+ integer :: ivec9(9), ngkpt(3)
+ real(dp) :: my_shiftk(3 * MAX_NSHIFTK)
+
+! *************************************************************************
+ 
+ ABI_CHECK(get_arg("kptopt", kptopt, msg, default=1) == 0, msg)
+ ABI_CHECK(get_arg("chksymbreak", chksymbreak, msg, default=1) == 0, msg)
+ ABI_CHECK(get_arg_list("ngkpt", ngkpt, lenr, msg, exclude="kptrlatt", want_len=3) == 0, msg)
+ if (lenr == 3) then
+   kptrlatt = 0
+   do ii=1,3
+     kptrlatt(ii, ii) = ngkpt(ii)
+   end do
+ end if
+ ABI_CHECK(get_arg_list("kptrlatt", ivec9, lenr, msg, exclude="ngkpt", want_len=9) == 0, msg)
+ if (lenr == 9) kptrlatt = transpose(reshape(ivec9, [3, 3]))
+
+ ! Init default
+ ABI_CHECK(get_arg_list("shiftk", my_shiftk, lenr, msg) == 0, msg)
+ if (lenr /= 0) then
+   ABI_CHECK(mod(lenr, 3) == 0, "Expecting 3 * nshift array")
+   nshiftk = lenr / 3
+   ABI_MALLOC(shiftk, (3, nshiftk))
+   shiftk = reshape(my_shiftk(1:lenr), [3, nshiftk])
+ else
+   nshiftk = 1
+   ABI_MALLOC(shiftk, (3, nshiftk))
+   shiftk(:, 1) = [half, half, half]
+ end if
+ !write(std_out, *)"kptopt = ", kptopt, ", chksymbreak = ", chksymbreak, ", nshiftk = ", nshiftk, ", kptrlatt = ", kptrlatt
+
+end subroutine parse_kargs
+!!***
 
 end module m_argparse
 !!***
