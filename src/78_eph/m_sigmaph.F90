@@ -503,12 +503,13 @@ contains  !=====================================================
 !!  Compute phonon-contribution to the electron self-energy.
 !!
 !! INPUTS
-!! wk0_path=String with the path to the GS unperturbed WFK file.
+!! wfk0_path=String with the path to the GS unperturbed WFK file.
 !! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
 !! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
+!! wfk_hdr=Header of the WFK file.
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !! pawang<pawang_type)>=PAW angular mesh and related data.
 !! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
@@ -525,7 +526,7 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk_hdr, &
                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -541,6 +542,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
+ type(hdr_type),intent(in) :: wfk_hdr
  type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
@@ -664,7 +666,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call xmpi_bcast(restart, master, comm, ierr)
  call xmpi_bcast(sigma%qp_done, master, comm, ierr)
- call sigmaph_write(sigma, dtset, cryst, ebands, dtfil, restart, comm)
+ call sigmaph_write(sigma, dtset, cryst, ebands, wfk_hdr, dtfil, restart, comm)
  if (my_rank == master) then
    call sigmaph_print(sigma, dtset, ab_out)
    call sigmaph_print(sigma, dtset, std_out)
@@ -2838,6 +2840,7 @@ end function sigmaph_new
 !!  dtset<dataset_type>=All input variables for this dataset.
 !!  cryst<crystal_t>=Crystalline structure
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!!  wfk_hdr=Header of the WFK file.
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !!  dtfil<datafiles_type>=variables related to files.
 !!  restart=1 if we are in restart mode, 0 if new SIGEPH.nc file should be created.
@@ -2849,7 +2852,7 @@ end function sigmaph_new
 !!
 !! SOURCE
 
-subroutine sigmaph_write(self, dtset, cryst, ebands, dtfil, restart, comm)
+subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, restart, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm, restart
@@ -2857,11 +2860,12 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, dtfil, restart, comm)
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands
+ type(hdr_type),intent(in) :: wfk_hdr
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0
+ integer,parameter :: master=0, fform_sigeph = 52
  integer :: my_rank, ii, edos_intmeth
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
@@ -2912,6 +2916,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, dtfil, restart, comm)
 
    ncid = self%ncid
 
+   NCF_CHECK(hdr_ncwrite(wfk_hdr, ncid, fform_sigeph, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    if (dtset%prtdos /= 0) then

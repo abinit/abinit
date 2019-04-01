@@ -353,7 +353,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call crystal_print(cryst,header="crystal structure from WFK file")
 
    ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
-   call hdr_free(wfk0_hdr)
    ABI_FREE(gs_eigen)
  end if
 
@@ -627,8 +626,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (4, -4)
    ! Compute electron self-energy (phonon contribution)
-   call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
+     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
    if (dtset%eph_task == -4) then
      call wrtout(std_out, "Calling transport routine after sigmaph run...", do_flush=.True.)
@@ -660,6 +659,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call ddb_free(ddb)
  call ddk_free(ddk)
  call ifc_free(ifc)
+ call hdr_free(wfk0_hdr)
  if (use_wfk) call ebands_free(ebands)
  if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)

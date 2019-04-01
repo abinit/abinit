@@ -357,7 +357,6 @@ subroutine get_path_ebands(path, ebands, comm)
 end subroutine get_path_ebands
 !!***
 
-
 !!****f* ABINIT/get_path_cryst
 !! NAME
 !! get_path_cryst
@@ -421,7 +420,7 @@ subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
 
 !Local variables-------------------------------
  integer :: ii, lenr
- character(len=500) :: arg, msg
+ character(len=500) :: msg
  integer :: ivec9(9), ngkpt(3)
  real(dp) :: my_shiftk(3 * MAX_NSHIFTK)
 
