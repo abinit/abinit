@@ -830,6 +830,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
 
  ib = band - self%bstart + 1
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ deltaw_pm = zero
 
  ! Fill array for e_{k+q, b} +- w_{q,nu)
  do iq=1,self%nq_k
