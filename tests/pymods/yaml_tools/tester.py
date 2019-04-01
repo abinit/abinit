@@ -43,7 +43,7 @@ class Failure(Issue):
 
 class DetailedFailure(Failure):
     def __init__(self, conf, msg, details):
-        self.detail = details
+        self.details = details
         Issue.__init__(self, conf, msg)
 
     def __repr__(self):
