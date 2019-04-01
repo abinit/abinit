@@ -1042,8 +1042,7 @@ end subroutine mpi_setup
  integer :: nproc,nproc1,nprocmin,np_slk,nthreads,use_linalg_gpu,omp_ncpus
  logical :: dtset_found,file_found,first_bpp,iam_master
  logical :: with_image,with_pert,with_kpt,with_spinor,with_fft,with_band,with_bandpp,with_thread
- real(dp):: acc_c,acc_k,acc_kgb,acc_kgb_0,acc_s,ecut_eff,ucvol,weight0
- real(dp):: eff
+ real(dp):: acc_c,acc_k,acc_kgb,acc_kgb_0,acc_s,ecut_eff,eff,ucvol,weight0
  character(len=9) :: suffix
  character(len=20) :: strg
  character(len=500) :: msg,msgttl
@@ -1451,19 +1450,20 @@ end subroutine mpi_setup
              end if
 !            NEW LOBPCG: promote minimal number of blocks
 !                        promote block size <= BLOCKSIZE_MAX
-!                        promote npband vs bandpp ; promote npb/npf=1
              if (wf_algo==ALGO_LOBPCG_NEW) then
                acc_kgb=acc_kgb*(one-0.9_dp*dble(nblocks-1)/dble(mband-1))
                if (blocksize>BLOCKSIZE_MAX) acc_kgb=acc_kgb*max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX))
                if (nthreads==1) then
-!                Promote npband vs bandpp ; promote npb/npf=1.5
+!                Promote npband vs bandpp & npfft
                  if (blocksize>1) acc_kgb=acc_kgb*(0.1_dp*bpp+0.9_dp-blocksize)/(one-blocksize)
-                 !acc_kgb=acc_kgb*1.0_dp*min(dble(npf)/dble(npb),dble(npb)/dble(npf))+0.25_dp
-                 acc_kgb=acc_kgb*(one-0.8_dp*((dble(npb)/dble(npf))-2_dp)**2/(max(npb,npf)-2_dp)**2)
+                 if (npb*npf>4.and.mband>100) acc_kgb=acc_kgb*(one-0.8_dp*((three*bpp*npb)/(one*mband)-one)**2)
+                 tot_ncpus=max(npb,npf);if (tot_ncpus==2) tot_ncpus=0
+                 acc_kgb=acc_kgb*(one-0.8_dp*((dble(npb)/dble(npf))-2_dp)**2/(tot_ncpus-2_dp)**2)
+                 eff=max(npf,20);acc_kgb=acc_kgb*(one-0.8_dp*min(one,(eff-20)**2))
                end if
              end if
 
-!            Resulting "speedup"
+!            Resulting "weight"
 !            weight0=acc_c*acc_k*acc_s*acc_kgb
              weight0=nproc1*(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
 
