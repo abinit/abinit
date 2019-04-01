@@ -6,7 +6,8 @@ from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
                      IllegalFilterNameError)
 from .abinit_iterators import IterStateFilter
 from .tricks import cstm_isinstance
-from .common import Undef, normalize_attr
+from .common import Undef, normalize_attr, string
+from warnings import warn
 
 
 def make_apply_to(type_):
@@ -148,7 +149,9 @@ class SpecKey(object):
     @classmethod
     def parse(cls, name):
         hardr = False
-        if name.endswith('!'):
+        if isinstance(name, int):
+            name = string(name)
+        elif name.endswith('!'):
             hardr = True
             name = name[:-1]
 
@@ -379,13 +382,15 @@ class ConfParser(object):
                     raise IllegalFilterNameError(name)
                 filters[name] = IterStateFilter(filt)
 
-                # Parse each filtered tree then remove it from the source tree
+                # Parse each filtered tree and remove it from the source tree
                 if name in parsed_src:
                     self.metadata['tree'] = name
-                    trees[name] = ConfTree.make_tree(parsed_src[name], self)
-                    del parsed_src[name]
+                    trees[name] = ConfTree.make_tree(parsed_src.pop(name),
+                                                     self)
                 else:
-                    pass  # Should we raise an error ?
+                    # Should we raise an error ?
+                    warn('In YAML config {} filter is defined but not used.'
+                         .format(name))
 
             # Remove the filters field from the dict
             del parsed_src['filters']

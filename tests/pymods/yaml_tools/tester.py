@@ -111,11 +111,11 @@ class Tester(object):
                     else:
                         self.check_this(child, ref[child], tested[child])
 
-            elif hasattr(ref, '__iter__') \
-                    and not getattr(ref, '_has_no_child', False) \
-                    and not isinstance(ref, string):
+            elif (hasattr(ref, '__iter__')
+                  and not getattr(ref, '_has_no_child', False)
+                  and not isinstance(ref, string)):
                 for index, (vref, vtest) in enumerate(zip(ref, tested)):
-                    self.check_this(index, vref, vtest)
+                    self.check_this(string(index), vref, vtest)
 
     def run(self):
         '''
