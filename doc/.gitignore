@@ -26,6 +26,7 @@ variables/rlx.md
 variables/vdw.md
 variables/w90.md
 variables/optic.md
+variables/tdep.md
 variables/anaddb.md
 variables/varset_stats.md
 topics/Abipy.md
@@ -106,6 +107,7 @@ topics/SpinDynamicsMultibinit.md
 topics/STM.md
 topics/Susceptibility.md
 topics/TDDFT.md
+topics/Tdep.md
 topics/TDepES.md
 topics/Temperature.md
 topics/TransPath.md
