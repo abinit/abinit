@@ -133,8 +133,7 @@ def tensor_is_symetric(sym, ref, tested):
 
 @conf_parser.constraint(value_type=dict, apply_to='this')
 def callback(locs, ref, tested):
-    method = locs.method
-    del locs['method']
+    method = locs.pop('method')
     if hasattr(ref, method):
         return getattr(ref, method)(tested, **locs)
     else:
