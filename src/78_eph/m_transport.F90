@@ -517,8 +517,8 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 #define second  (Time_Sec)
 #define volt    (Ha_J/e_Cb)
 #define siemens (e_Cb**2 / Ha_J / second**2)
-#define fact0   (siemens / meter / cryst%ucvol)
-#define fact1   (meter**2 / second**2 * Ha_J)
+#define fact0   (second * siemens / meter / cryst%ucvol)
+#define fact1   (meter**2 / second * Ha_J)
 
  self%sigma = fact0 * self%l0
  self%pi(:,:,:,:,itemp) = volt * self%l1(:,:,:,:,itemp) /  max(self%l0(:,:,:,:,itemp),tol12)
@@ -617,7 +617,8 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 
  ! Get spin degeneracy
  max_occ = two/(self%nspinor*self%nsppol)
- fact = max_occ / ( 2*Ha_s )
+ ! 2 comes from linewidth-lifetime relation
+ fact = max_occ /  2
 
  do itemp=1,self%ntemp
    kT = self%kTmesh(itemp)
@@ -715,7 +716,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  end do
 
  ! Get spin degeneracy
- fact = max_occ * fact0 / e_Cb / ( 2*Ha_s ) * 100**2
+ fact = max_occ * fact0 / e_Cb / 2 * 100**2
 
  ! Compute mobility
  self%mobility_mu = 0
