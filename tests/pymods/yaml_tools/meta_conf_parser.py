@@ -6,7 +6,7 @@ from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
                      IllegalFilterNameError)
 from .abinit_iterators import IterStateFilter
 from .tricks import cstm_isinstance
-from .common import Undef, normalize_attr, string
+from .common import Undef, normalize_attr, string, BaseArray
 from warnings import warn
 
 
@@ -87,13 +87,19 @@ class Constraint(object):
             Return True if the constraint is verified.
         '''
         # apply to floats at least
-        if isinstance(ref, (float, complex)) and self._apply_to(self, 1.0) \
-           and self.handle_undef:
-            if conf.get_param('allow_undef'):
-                if Undef.is_undef(ref):
-                    return True
-            elif Undef.is_undef(ref) or Undef.is_undef(tested):
-                return False
+        if self.handle_undef:
+            if isinstance(ref, (float, complex)) and self._apply_to(self, 1.0):
+                if conf.get_param('allow_undef'):
+                    if Undef.is_undef(ref):
+                        return True
+                elif Undef.is_undef(ref) or Undef.is_undef(tested):
+                    return False
+            elif isinstance(ref, BaseArray) and self._apply_to(self, ndarray):
+                if conf.get_param('allow_undef'):
+                    if ref._has_undef:
+                        return True
+                elif ref._has_undef or tested._has_undef:
+                    return False
 
         params = [conf.get_param(p) for p in self.use_params]
         return self.test(self.value, ref, tested, *params)

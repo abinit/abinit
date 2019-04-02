@@ -6,7 +6,7 @@
 from __future__ import print_function, division, unicode_literals
 import numpy as np
 from . import has_pandas
-from .common import FailDetail
+from .common import FailDetail, Undef, BaseArray
 from .abinit_iterators import ITERATOR_RANKS
 from .register_tag import (
     yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar,
@@ -63,36 +63,11 @@ class Etot(object):
         return new
 
 
-@yaml_seq
-class AutoNumpy(np.ndarray):
-    '''
-        Define a base class for YAML tags converted to numpy compatible
-        objects.  Can be used for converting any YAML array of number of any
-        dimension into a numpy compatible array.
-    '''
-    __yaml_tag = 'Array'
-
-    # by default we want to treat this as a coherent object and do not check
-    # values individualy
-    _has_no_child = True
-
-    @classmethod
-    def from_seq(cls, s):
-        return np.array(s).view(cls)
-
-    def to_seq(self):
-        # conversion have to be explicit because numpy float are not
-        # recognised as float by yaml
-        def to_list(arr):
-            if len(arr.shape) > 1:
-                return [to_list(line) for line in arr]
-            else:
-                return [float(f) for f in arr]
-        return to_list(self)
+yaml_seq(BaseArray)
 
 
 @yaml_seq
-class Atoms3D(AutoNumpy):
+class Atoms3D(BaseArray):
     pass
 
 
@@ -102,15 +77,14 @@ class CartForces(Atoms3D):
 
 
 @yaml_seq
-class Matrix33(AutoNumpy):
+class Matrix33(BaseArray):
     '''
         Define a matrix of shape (3, 3) compatible with numpy arrays and
         with YAML tags.
     '''
     def __init__(self, shape=(3, 3), *args, **kwargs):
-        # numpy ndarray does not have __init__
-        # everything is done in __new__
         assert shape == (3, 3)
+        super(Matrix33, self).__init__(shape, *args, **kwargs)
 
     @classmethod
     def from_seq(cls, s):

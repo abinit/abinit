@@ -4,6 +4,7 @@
 from __future__ import print_function, division, unicode_literals
 import re
 import sys
+import numpy as np
 
 re_word = re.compile(r'[a-zA-Z0-9_]+')
 
@@ -125,3 +126,50 @@ class FailDetail(object):
             As a fail it is always Falsy
         '''
         return False
+
+
+class BaseArray(np.ndarray):
+    '''
+        Define a base class for YAML tags converted to numpy compatible
+        objects.  Can be used for converting any YAML array of number of any
+        dimension into a numpy compatible array.
+    '''
+    __yaml_tag = 'Array'
+
+    # by default we want to treat this as a coherent object and do not check
+    # values individualy
+    _has_no_child = True
+
+    def __init__(self, *args, **kwargs):
+        # numpy ndarray does not have __init__
+        # everything is done in __new__
+        self._has_undef = False
+
+    @classmethod
+    def from_seq(cls, s):
+        def check_undef(s):
+            '''
+                Look for Undef in the original list because numpy convert it to
+                nan
+            '''
+            if hasattr(s, '__iter__'):
+                for el in s:
+                    if check_undef(el):
+                        return True
+                return False
+            else:
+                return Undef.is_undef(s)
+
+        new = np.array(s).view(cls)
+        new._has_undef = check_undef(s)
+        return new
+
+    def to_seq(self):
+        # conversion have to be explicit because numpy float are not
+        # recognised as float by yaml
+        def to_list(arr):
+            if len(arr.shape) > 1:
+                return [to_list(line) for line in arr]
+            else:
+                return [float(f) for f in arr]
+        return to_list(self)
