@@ -165,11 +165,18 @@ def yaml_implicit_scalar(Cls):
     re_pattern = Cls.yaml_pattern
     if not hasattr(re_pattern, 'match'):
         re_pattern = re.compile(re_pattern)
-    yaml.add_implicit_resolver(tag, re_pattern)  # register the mplicit pattern
+    # register the implicit pattern
+    yaml.add_implicit_resolver(tag, re_pattern, Loader=Loader)
     return Cls
 
 
 def yaml_not_available_tag(tag, reason, fatal=False):
+    '''
+        Register tag as a known tag but trigger a warning (if fatal == false)
+        of an error (if fatal == True) if it is used. Use reason as the message
+        to give more details to the user. If fatal is False the return object
+        is an empty dictionary.
+    '''
     msg = 'The tag !{} is used but is not available:\n{}'.format(tag, reason)
 
     def constructor(loader, node):
