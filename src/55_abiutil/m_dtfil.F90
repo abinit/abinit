@@ -703,8 +703,8 @@ end subroutine dtfil_init_time
 !!        if -1 : append "_SUF0" (called from brdmin)
 !!        if -2, -3, -4, -5: append "_SUFA", ... ,"_SUFD", (called from move)
 !!      SUF can be TIM (default) or IMG
-!! suff= --optional argument--indicates the suffixe to be appended:
-!!       SUF=TIM (default) or SUF=IMG or ...
+!! [suff]= --optional argument--indicates the suffixe to be appended:
+!!         SUF=TIM (default) or SUF=IMG or ...
 !!
 !! OUTPUT
 !! filapp= filename with appended string
@@ -810,7 +810,7 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
  type(datafiles_type),intent(out) :: dtfil
  type(dataset_type),intent(in) :: dtset
 !arrays
- integer :: jdtset(0:ndtset)
+ integer,intent(in) :: jdtset(0:ndtset)
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------
@@ -888,15 +888,14 @@ end subroutine dtfil_init_img
 !! From the root (input or output) file names, produce a real file name.
 !!
 !! INPUTS
-!! character(len=fnlen):: filnam(5)=the root file names
-!!  (only filnam(3) and filnam(4) are really needed)
+!! filnam(5)=the root file names (only filnam(3) and filnam(4) are really needed)
 !! get=input 'get variable', if 1, must get the file from another dataset
 !! idtset=number of the dataset
 !! ird=input 'iread variable', if 1, must get the file from the input root
 !! jdtset_(0:ndtset)=actual index of the dataset
 !! ndtset=number of datasets
-!! stringfil character(len=*)=the string of characters to be appended e.g. '_WFK' or '_DEN'
-!! stringvar tcharacter(len=*)=the string of characters to be appended
+!! stringfil=the string of characters to be appended e.g. '_WFK' or '_DEN'
+!! stringvar=the string of characters to be appended
 !!   that defines the 'get' or 'ird' variables, e.g. 'wfk' or 'ddk'
 !!
 !! OUTPUT
@@ -986,11 +985,11 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      filnam_out=trim(filnam(4))//'_DS'//trim(appen)//trim(stringfil)
 
      if(jdtset>=100)then
-       write(msg, '(a,a,a,a,a,i5,a,a)' )&
+       write(msg, '(5a,i5,2a)' )&
        ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
        ' from output of DATASET ',jget,'.',ch10
      else
-       write(msg, '(a,a,a,a,a,i3,a,a)' )&
+       write(msg, '(5a,i3,2a)' )&
        ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
        ' from output of DATASET ',jget,'.',ch10
      end if
@@ -1011,8 +1010,8 @@ end subroutine mkfilename
 !! FUNCTION
 !! Inquire Status of FILE
 !! Checks that for status =
-!! 'old': file already exists
-!! 'new': file does not exist; if file exists,
+!!      'old': file already exists
+!!      'new': file does not exist; if file exists,
 !! filnam is modified to filnam.A or filnam.B,....
 !!
 !! INPUTS
@@ -1044,8 +1043,7 @@ subroutine isfile(filnam, status)
  logical :: ex,found
  integer :: ii,ios, ioserr
  character(len=500) :: msg
- character(len=fnlen) :: filnam_tmp
- character(len=fnlen) :: trialnam
+ character(len=fnlen) :: filnam_tmp, trialnam
 
 ! *************************************************************************
 

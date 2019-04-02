@@ -305,7 +305,15 @@ module m_sigmaph
 
   integer,allocatable :: indq2dvdb_k(:,:)
    ! (6, sigma%nqibz_k))
-   ! Mapping qibz_k --> IBZ found in DVDB file. Depends on ikcalc.
+   ! Mapping qibz_k --> IBZ found in DVDB file. Used when DFPT potentials are read from DVDB file
+   ! so that we know how to access/symmetrize v1scf
+   ! Depends on ikcalc.
+
+  !integer,allocatable :: indq2ibz_k(:,:)
+   ! (6, sigma%nqibz_k))
+   ! Mapping qibz_k --> IBZ defined by eph_ngqpt_fine. Used when DFPT potentials are FT interpolated.
+   ! so that we know how to access/symmetrize v1scf
+   ! Depends on ikcalc.
 
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
@@ -970,12 +978,35 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
 
  !if (dtset%useria == 2000) then
+ !if (all(dtset%eph_ngqpt_fine /= 0)) then
    ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation. 
+   ! R-points are distributed inside comm_rpt
    ! Note that when R-points are distributed inside comm_bq we cannot interpolate potentials on-the-fly 
    ! inside the loop over q-points. 
    ! In this case, indeed, the interpolation must be done in sigma_setup_qloop once we know the q-points contributing 
    ! to the integral and the potentials must be cached.
-   !call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, sigma%comm_bq)
+   !comm_rpt = sigma%comm_bq
+   !call dvdb%ftinterp_setup(dtset%eph_ngqpt_fine, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+
+   !ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
+   !iqk2dvdb = -1
+   !call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, self%qibz_k, dvdb%nqpt, self%nqibz_k, cryst%nsym, &
+   !     1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+   !if (dtset%useria /= 1999) then
+   !  if (dksqmax > tol12) then
+   !    write(msg, '(a,es16.6,2a)' )&
+   !      "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
+   !      'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
+   !    MSG_ERROR(msg)
+   !  end if
+   !end if
+
+   !call cwtime_report(" IBZ_k --> DVDB", cpu, wall, gflops)
+
+   !ABI_REMALLOC(self%indq2dvdb_k, (6, self%nqibz_k))
+   !do iq_ibz=1,self%nqibz_k
+   !  self%indq2dvdb_k(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
+   !end do
 
    ! Now build q-cache in the IBZ using qselect mask.
    !ABI_CALLOC(qselect, (sigma%nqibz))
@@ -1118,6 +1149,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      do imyq=1,sigma%my_nqibz_k
        iq_ibz = sigma%myq2ibz_k(imyq)
        qpt = sigma%qibz_k(:,iq_ibz)
+       !qibz_ = ...
        isqzero = sum(qpt**2) < tol14 !; if (isqzero) cycle
 
        call cwtime(cpu, wall, gflops, "start")
@@ -1137,7 +1169,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
        !if (dvdb%use_ftinterp) then
-       !  call dvdb%get_ftinterp_qbz(qpt, sigma%indqk2ibz(:, iq_ibz), cplex, nfftf, ngfft, v1scf, sigma%comm_pert)
+       !  call dvdb%get_ftinterp_qbz(qpt, qibz, sigma%indq2ibz_k(:, iq_ibz), cplex, nfftf, ngfft, v1scf, sigma%comm_pert)
        !else
 
        ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
@@ -1981,13 +2013,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
 
- nqeff = count(dvdb%count_qused /= 0)
- call wrtout(std_out, sjoin(" Number of qpts in IBZ used by this rank:", itoa(nqeff), &
-    " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
- call xmpi_sum(dvdb%count_qused, comm, ierr)
- nqeff = count(dvdb%count_qused /= 0)
- call wrtout(std_out, sjoin(" Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
-    " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
+ if (allocated(dvdb%qcache%count_qused)) then
+   nqeff = count(dvdb%qcache%count_qused /= 0)
+   call wrtout(std_out, sjoin(" Number of qpts in IBZ used by this rank:", itoa(nqeff), &
+      " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
+   call xmpi_sum(dvdb%qcache%count_qused, comm, ierr)
+   nqeff = count(dvdb%qcache%count_qused /= 0)
+   call wrtout(std_out, sjoin(" Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
+      " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
+ end if
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
@@ -3660,7 +3694,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    call wrtout(std_out, sjoin(" symsigma = 0 --> Integration done over full BZ with nqbz:", itoa(self%nqibz_k)))
 
  else if (abs(self%symsigma) == 1) then
-   ! Use the symmetries of the little group
+   ! Use the symmetries of the little group of the k-point
    compute_lgk = .not. (self%qint_method > 0 .and. .not. self%use_doublegrid)
    if (compute_lgk) then
      lgk = lgroup_new(cryst, kk, self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz, comm)
@@ -3971,13 +4005,13 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
  ! Could use non-blocking communications and double buffer technique to reduce synchronisation cost...
  call cwtime(cpu, wall, gflops, "start", msg=" Gathering results. Waiting for other processes...")
+
  call xmpi_sum_master(self%vals_e0ks, master, comm, ierr)
  call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
- if (self%calc_mrta) then
-   call xmpi_sum_master(self%linewidth_mrta, master, comm, ierr)
- end if
+ if (self%calc_mrta) call xmpi_sum_master(self%linewidth_mrta, master, comm, ierr)
+
  call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
  ! Only master writes
  if (my_rank /= master) return
