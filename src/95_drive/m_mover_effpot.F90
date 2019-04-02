@@ -150,6 +150,7 @@ implicit none
  logical :: iam_master
  integer, parameter:: master=0
  logical :: verbose,writeHIST,file_opened
+ logical :: need_elec_eval 
 !real(dp) :: cpui
 !character(len=6) :: codvsn
 
@@ -560,14 +561,18 @@ implicit none
      if(inp%analyze_anh_pot == 1)then
        call effective_potential_writeAnhHead(ncoeff,name_file,&
 &                        effective_potential%anharmonics_terms)      
-     end if 
+     end if
+
+     !Check if we want to use an effective electronic Model of SCALE UP  
+     need_elec_eval = .FALSE. 
+     if(inp%scup_elec_model == 1) need_elec_eval = .TRUE.
 
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST)     
+&     verbose=verbose,writeHIST=writeHIST,scup_elec_eval=need_elec_eval)     
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then

@@ -2264,7 +2264,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! SOURCE
 
 subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
-&                                          compute_anharmonic,print_file,filename)
+&                                          compute_anharmonic,print_file,filename,elec_eval)
 
  implicit none
 
@@ -2272,7 +2272,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 !scalars
  integer, intent(in) :: natom,ntime
  real(dp),intent(out):: mse,msef,mses
- logical,optional,intent(in) :: compute_anharmonic,print_file
+ logical,optional,intent(in) :: compute_anharmonic,print_file,elec_eval
 !arrays
  real(dp) :: sqomega(ntime)
  type(effective_potential_type),intent(in) :: eff_pot
@@ -2292,6 +2292,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
  character(len=500) :: msg
  type(abihist) :: hist_out
  character(len=200) :: filename_hist
+ logical :: need_elec_eval
 
 ! *************************************************************************
 
@@ -2309,6 +2310,9 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
  if(present(compute_anharmonic))then
    need_anharmonic = compute_anharmonic
  end if
+
+ need_elec_eval = .FALSE. 
+ if(present(elec_eval)) need_elec_eval = elec_eval
 
  name_file=''
  if(present(filename))name_file = filename
@@ -2353,12 +2357,13 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
    end if 
    call effective_potential_evaluate(eff_pot,energy_harm_tot,energy_ph_htot,energy_harm_short,energy_harm_ewald,&
 &                                    fcart,fred,strten,natom,rprimd,&
-&                                    xred=xred,compute_anharmonic=.False.,verbose=.false.)
+&                                    xred=xred,compute_anharmonic=.False.,verbose=.false.,&
+&                                    elec_eval=need_elec_eval)
 
    call effective_potential_evaluate(eff_pot,energy,energy_ph_htot,energy_harm_short,energy_harm_ewald,& 
 &                                    fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.,&
-&                                    filename=file_anh)
+&                                    filename=file_anh,elec_eval=need_elec_eval)
 
    if(need_print)then
      WRITE(unit_energy ,'(I10,7(F23.14))') ii,hist%etot(ii),energy_ph_htot,energy_harm_short,&
@@ -2428,7 +2433,7 @@ end subroutine fit_polynomial_coeff_computeMSD
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharmonic)
+subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharmonic,elec_eval)
 
        
   implicit none
@@ -2438,6 +2443,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   integer,intent(in) :: master,comm
 !logicals
   logical,optional,intent(in) :: print_anharmonic
+  logical,optional,intent(in) :: elec_eval
 !array
   type(effective_potential_type),intent(inout) :: eff_pot
   type(abihist),intent(in) :: hist
@@ -2452,6 +2458,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   integer :: natom,ntime,ncoeff,my_rank
 !logicals 
   logical :: iam_master, need_print_anharmonic,file_opened
+  logical :: need_elec_eval
 !strings/characters
  character(len=fnlen) :: filename 
  character(len=1000) :: message
@@ -2466,6 +2473,9 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   !Initialisation of optional arguments
   need_print_anharmonic = .FALSE. 
   if(present(print_anharmonic)) need_print_anharmonic = print_anharmonic
+
+  need_elec_eval = .FALSE. 
+  if(present(elec_eval)) need_elec_eval = elec_eval
 
   !Setting/Allocating other Variables 
   natom = size(hist%xred,2)   

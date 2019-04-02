@@ -118,6 +118,8 @@ contains
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!   | mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
+!!  scup_elec_eval = logical, if true evaluate effective electron model as 
+!!                   provided by SCALE-UP
 !!
 !! OUTPUT
 !!  results_gs <type(results_gs_type)>=results (energy and its components,
@@ -196,7 +198,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,verbose,writeHIST)
+& effective_potential,filename_ddb,verbose,writeHIST,scup_elec_eval)
 
 implicit none
 
@@ -209,6 +211,7 @@ type(ab_xfh_type),intent(inout) :: ab_xfh
 type(effective_potential_type),optional,intent(inout) :: effective_potential
 logical,optional,intent(in) :: verbose
 logical,optional,intent(in) :: writeHIST
+logical,optional,intent(in) :: scup_elec_eval
 character(len=fnlen),optional,intent(in) :: filename_ddb
 !arrays
 real(dp),intent(inout) :: acell(3)
@@ -241,6 +244,7 @@ logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
 logical :: skipcycle, file_opened
+logical :: need_scup_elec_eval
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
@@ -255,6 +259,9 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  need_writeHIST=.TRUE.
  if(present(writeHIST)) need_writeHIST = writeHIST
+
+ need_scup_elec_eval = .FALSE. 
+ if(present(scup_elec_eval)) need_scup_elec_eval = scup_elec_eval
 
  ! enable time limit handler if not done in callers.
  if (enable_timelimit_in(MY_NAME) == MY_NAME) then
@@ -624,7 +631,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 &           effective_potential,scfcv_args%results_gs%etotal,e_d_ht,e_d_sr,e_d_lr,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,& 
-&           filename=name_file)
+&           filename=name_file,elec_eval=need_scup_elec_eval)
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E2)then

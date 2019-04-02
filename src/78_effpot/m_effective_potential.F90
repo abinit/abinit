@@ -2277,7 +2277,7 @@ end subroutine effective_potential_writeAbiInput
 subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_harm_short,energy_harm_ewald,& 
 &                                       fcart,fred,strten,natom,rprimd,&
 &                                       displacement,du_delta,strain,xred,&
-&                                       compute_anharmonic,verbose,filename)
+&                                       compute_anharmonic,verbose,filename,elec_eval)
 
   implicit none
 
@@ -2296,7 +2296,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   real(dp),intent(in),optional :: strain(6)
   real(dp),intent(in),optional :: displacement(3,natom)
   real(dp),intent(in),optional :: du_delta(6,3,natom)
-  logical,intent(in),optional :: verbose,compute_anharmonic
+  logical,intent(in),optional :: verbose,compute_anharmonic,elec_eval
 !Local variables-------------------------------
 !scalar
   integer :: alpha,ii,ia,mu,ncell,comm,natom_for_scup
@@ -2305,6 +2305,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   logical :: iam_master,need_anharmonic
   logical :: err_eng, err_for
   logical*1 :: update_dens=.TRUE.
+  logical :: need_elec_eval
   integer, parameter:: master = 0
 !array
   type(strain_type) :: strain_t
@@ -2332,7 +2333,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
 
   natom_for_scup = natom
 
-
   need_verbose = .TRUE.
   if(present(verbose)) then
     need_verbose = verbose
@@ -2342,6 +2342,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   if(present(compute_anharmonic))then
     need_anharmonic = compute_anharmonic
   end if
+
+  need_elec_eval = .FALSE. 
+  if(present(elec_eval)) need_elec_eval = elec_eval
 
 ! Check some variables
   if (natom /= eff_pot%supercell%natom) then
@@ -2661,6 +2664,7 @@ err_for = .FALSE.
 energy_part = 0 
 fcart_part = 0 
 
+if(need_elec_eval)then 
 #if defined DEV_MS_SCALEUP
    write(msg,'(a)') ' wohoo i was here and call scale-up now!---STILL WOHOOO!---'
    call wrtout(ab_out,msg,'COLL')
@@ -2674,6 +2678,7 @@ fcart_part = 0
 
 energy = energy + energy_part 
 fcart = fcart + fcart_part 
+endif 
 
 !-----------------------------------
 ! 9 - Add variation of the atomic

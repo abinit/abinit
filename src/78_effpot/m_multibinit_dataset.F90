@@ -387,7 +387,7 @@ multibinit_dtset%spin_write_traj=1
 !MS Variables for SCALE-UP 
 #if defined DEV_MS_SCALEUP
 multibinit_dtset%scup_elec_model = 0
-multibinit_dtset%scup_ksamp = 0 
+multibinit_dtset%scup_ksamp = (/ 1, 1, 1 /)
 multibinit_dtset%scup_tcharge = 0 
 multibinit_dtset%scup_ismagnetic = 0 
 multibinit_dtset%scup_istddft = 0
@@ -1201,7 +1201,7 @@ multibinit_dtset%scup_elec_model=zero
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%scup_ksamp(:) = 0
+ multibinit_dtset%scup_ksamp(:) = (/ 1, 1, 1 /)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'scup_ksamp',tread,'INT')
  if(tread==1) multibinit_dtset%scup_ksamp(1:3)=intarr(1:3)
  do ii=1,3

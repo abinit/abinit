@@ -99,7 +99,11 @@ program multibinit
 
 ! MS
 ! temporary variables for testing SCALE-UP with Multibinit
+  !Variable to pass tu effpot_evaluate routine of multibinit
+  !To declare evaluation of electronice model 
+  logical  :: elec_eval
 #if defined DEV_MS_SCALEUP 
+  !Variables needed to call SCALE-UP
   logical*1 :: needlattice = .FALSE.
   logical*1 :: needelectrons = .TRUE. 
   logical*1 :: didi = .FALSE. 
@@ -116,12 +120,6 @@ program multibinit
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)
 !TEST_AM
 !******************************************************************
-
-!TEST MS SCALE-up with Multibinit 
-#if defined DEV_MS_SCALEUP 
- ksamp = (/2,2,2/)
- tcharge = 0 
-#endif 
 
 !Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
@@ -273,18 +271,19 @@ program multibinit
  end if
 
 !****************************************************************************************
-!Initialized the electronic model (If scale-up is available)
+!Initialize the electronic model (If scale-up is available)
 !****************************************************************************************
+elec_eval = .FALSE.
 
 #if defined DEV_MS_SCALEUP
- write(*,*) 'scup_elec_model' ,inp%scup_elec_model
  if(inp%scup_elec_model == 1)then 
    write(message,'(a,(80a),4a)') ch10,('=',ii=1,80),ch10,ch10,&
         ' Initializing Electronic Model with SCALE-UP',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
-   
+  
    !Set Variables
+   elec_eval = .TRUE.
    ksamp = inp%scup_ksamp 
    tcharge = inp%scup_tcharge 
    if(inp%scup_ismagnetic == 1)ismagnetic=.TRUE. 
@@ -297,14 +296,13 @@ program multibinit
 #endif 
 
 !****************************************************************************************
-
 ! Compute the third order derivative with finite differences
 !****************************************************************************************
    if (inp%strcpling > 0) then
      call compute_anharmonics(reference_effective_potential,filnam,inp,comm)
    end if
-!****************************************************************************************
 
+!****************************************************************************************
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
    if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0 .or. inp%opt_effpot/=0) then
@@ -437,8 +435,6 @@ program multibinit
 
 
 
-
-
 !****************************************************************************************
 ! OPTIMIZE SECTION, Optimize selected coefficients of effective potential while
 ! keeping the others constant
@@ -496,7 +492,8 @@ program multibinit
      need_analyze_anh_pot = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.  
 !  Call to test routine 
-     call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm,print_anharmonic=need_analyze_anh_pot)
+     call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm,&
+&                                   print_anharmonic=need_analyze_anh_pot,elec_eval=elec_eval)
 
    end if ! End if(inp%test_effpot == 1)then 
 
