@@ -265,8 +265,9 @@ More specifically:
 
 - a new (optional) section `[yaml_test]` is added with two possible options: 
 
-    * *test* --> the value is used as the YAM test specification YAML
-    * *file* --> path to the file containing the test specification
+    * *test* --> the value is used as the YAML test specification source
+    * *file* --> the value is the path to the file containing the YAML test
+specification. The path is relative to the Abinit input file.
 
 ### Test specification syntax
 
@@ -291,7 +292,9 @@ Specialization
   of the _data tree_ and its children.
 
 Constraint
-: A constraint is a condition one impose for the test to succeed.
+: A constraint is a condition one impose for the test to succeed. Constraints
+  can apply to leafs of the data tree or to nodes depending of the nature of the
+  constraint.
 
 Parameter
 : A parameter is a value that can be used by constraints to modify their
@@ -328,8 +331,9 @@ In the `Etot` document one can find the total energy in eV. Since the unit is
 different the absolute tolerance have not the same impact on the precision.
 We want to achieve the same relative precision on this term but we cannot
 achieve the same absolute precision. Though we will __specialize__ the rules
-and use the `tol_rel`. The name of the field holding the total energy in eV in 
-the `Etot` document is `Total energy (eV)`. We could do something like this:
+and use the `tol_rel` constraint. The name of the field holding the total energy
+in eV in the `Etot` document is `Total energy (eV)`. We could do something like
+this:
 
 ```yaml
 Etot:
@@ -339,7 +343,7 @@ Etot:
 ```
 
 However the `tol_abs` constraint defined in `Etot` is _inherited_ by `Total
-energy (eV)` which mean we will not only apply `tol_rel` with a tolerance of
+energy (eV)` which mean we will not only check `tol_rel` with a tolerance of
 1.0e-10 but also `tol_abs` with a tolerance of 1.0e-7. Most of the time it is
 what we need even though here it's not. So we will just use a different
 tolerance for `tol_abs` in `Total energy (eV)`.
@@ -388,7 +392,7 @@ cartesian forces: !CartForces
 ...
 ```
 
-Here we have a more examples of what can be found in a document. We have real
+Here we have a various examples of what can be found in a document. We have real
 and integer fields, mappings/dictionaries and 2D arrays.
 
 To check this document in our test we have to add a specialization for it along
@@ -404,9 +408,8 @@ results_gs:
     tol_rel: 1.0e-8
 ```
 
-For simplicities sake I will only write the `results_gs` part in next examples.
-First we want to check the integers and real values. This is what the `tol_rel`
-is for.
+For simplicity sake I will only write the `results_gs` part in next examples.
+First we want to check the integers and real values and so we use `tol_rel`.
 However the content of the `convergence` field represent residues. It does not
 make sense to check those against the reference. What we really want is make
 sure that they are below a given ceil. This is what the `ceil` constraint is
@@ -426,16 +429,17 @@ and `tol_abs` defined before because they are mutually exclusive.
 !!! tip
 
     Within the explore shell `show ceil` will tell you among other informations
-    what are the constraints disabled by the use of `ceil`.
+    what are the constraints disabled by the use of `ceil` in the _exclude_
+    field.
 
-Fields with the `!Tensor` tags are leaf of the tree. Then the tester routine
+Fields with the `!Tensor` tags are leafs of the tree. Then the tester routine
 won't try to compare each individual coefficient with `tol_rel`. However we
-still want to check that it does not change too much. For that we use the
-`tol_vec` constraint which apply to all arrays derived from Numpy arrays (most
-arrays with a tag). `tol_vec` check the euclidian norm of the differences
-between reference and tested array. Since we also want to apply this constraint
-to `cartesian_force` we will define the constraint a the top level of
-`results_gs`.
+still want to check that it does not change too much. For that purpose we use the
+`tol_vec` constraint which apply to all arrays derived from `BaseArray` (most
+arrays with a tag). `BaseArray` let us use the capabilities of Numpy arrays with
+YAML defined arrays. `tol_vec` check the euclidian distance between reference
+and tested array. Since we also want to apply this constraint to
+`cartesian_force` we will define the constraint at the top level of `results_gs`.
 
 ```yaml
 results_gs:
@@ -453,9 +457,10 @@ Continue the How To with the explanations of the filters
 
 
 In some cases it is important to define different behavior depending on the
-state of iterations (dtset, image...).  This is possible thanks to the so-called __filters__. 
-Filters allow users to add special constraints and parameters when treating documents matching a given set of dtset, image etc. 
-To define a filter, the developer uses the special node _filters_, each child of this node
+state of iterations (dtset, image...). This is possible thanks to the so-called
+__filters__.  Filters allow users to add special constraints and parameters when
+treating documents matching a given set of dtset, image etc.  To define a
+filter, the developer uses the special node _filters_, each child of this node
 is a filter.  The label of the child defines the name of the filter and its
 children defines the set it matches. The below example uses two filters that
 simply match one specific dataset.
@@ -480,11 +485,11 @@ filters:
 A filter can specify all currently known iterators: dtset, timimage, image, and time. 
 For each iterator a set of integers can be defined with three methods:
 
-- a single integer value
-- a YAML list of values
+- a single integer value (`dtset: 1`)
+- a YAML list of values (`dtset: [1, 2, 5]`)
 - a mapping with the optional members "from" and "to" specifying the boundaries (both
-  included) of the integer interval. If "from" is omitted, the default is 1. If
-  "to" is omitted the default is no upper boundary.
+  included) of the integer interval (`dtset: {from: 1, to: 5}`). If "from" is omitted, the default is 1. If
+  "to" is omitted the default is no upper boundary. 
 
 Several filters can be used for the same document if they overlap. However, it
 is fundamental that an order of specificity can be determined which means that
@@ -645,11 +650,57 @@ python understanding is required in order to modify this file. Comments and doc 
 should help users to grasp the meaning of this file.
 
 The third is the file *~abinit/tests/pymods/yaml_tests/structures.py*. It
-defines the structures used by the YAML parser when encountering a tag (starting with !), 
-or in some cases when reaching a given pattern (__undef__ for example). Even
-if the abstraction layer on top of the _yaml_ module should help, it is better to
-have a good understanding of more "advanced" python concepts like _inheritance_,
-_decorators_, _classmethod_ etc.
+defines the structures used by the YAML parser when encountering a tag (starting
+with !), or in some cases when reaching a given pattern (__undef__ for example).
+Even if the abstraction layer on top of the _yaml_ module should help, it is
+better to have a good understanding of more "advanced" python concepts like
+_inheritance_, _decorators_, _classmethod_ etc.
+
+### The special constraints equation, equations and callback
+
+`equation`, `equations` and `callback` are special constraints because their
+actual effects are defined directly in the configuration file. They are made to
+provide a bit more flexibility to the configuration file without diving into
+python code.
+
+equation and equations
+: These two are sisters. `equation` take a string as a value. This string will
+  be interpreted as a python expression that must result in a number. The
+  absolute value of this number will be compared to the value of the `tol_eq`
+  parameter and if `tol_eq` is greater the test will succeed. The expression can
+  also result in a Numpy array. In this case it is the euclidean norm of the
+  array that will be compared to `tol_eq` value. `equations` works exactly the
+  same but has a list of string as value. Each string is a different expression
+  that will be tested independently from the others. In both case the tested
+  object can be referred as `this` and the reference object can be referred as
+  `ref`.
+
+Dumb example:
+```yaml
+Etot:
+    tol_eq: 1.0e-6
+    equation: 'this["Etotal"] - this["Total energy(eV)"]/27.2114'
+```
+
+callback
+: This one require a bit of python coding since it will use a method of the
+  structure it is defined in. Suppose with have a tag `!AtomSpeeds` associated
+  to a class `AtomSpeeds` and to a document labeled `Atomic speeds` in the data
+  tree. The `AtomSpeeds` class have a method `not_going_anywhere` that checks
+  that the atoms are not going to try to leave the box. We would like to
+  pass some kind of tolerance `d_min` the minimal distance atoms can approach
+  the border of the box. The signature of the method have to be
+  `not_going_anywhere(self, tested, d_min=DEFAULT_VALUE)` and should return
+  `True`, `False` or an instance of `FailDetail` (see __Add a new constraint__
+  for explanations about those). We can then use it by with the following
+  configuration:
+
+```yaml
+Atomic speeds:
+    callback:
+        method: not_going_anywhere
+        d_min: 1.0e-2
+```
 
 ### Code structure
 
@@ -662,8 +713,9 @@ The whole system consists of three main parts:
 
 Fldiff algorithm
 
-:   *~abinit/tests/pymods/fldiff.py* implements the legacy algorithm and the creation of the final report.
-    This module represents the interface between the yaml specific tools and the legacy test suite tools. 
+: *~abinit/tests/pymods/fldiff.py* implements the legacy algorithm and the
+  creation of the final report. This module represents the interface between the
+  yaml specific tools and the legacy test suite tools. 
 
 
 Interface with Pyyaml library
@@ -735,8 +787,9 @@ The decorated function contains the actual test code. It should return `True` if
 the test succeed and either `False` or an instance of `FailDetail` if the test
 failed. If the test is simple enougth one should use `False`.  However if the
 test is compound of several non-trivial checks `FailDetail` come in handy to
-tell the user which part failed. Use `FailDetail('some explanations')` to
-provide details about the failure.
+tell the user which part failed. When you want to signal a failed test and
+explaining what happened return `FailDetail('some explanations')`. The message
+passed to `FailDetail` will be transmitted to the final report for the user.
 
 ### Add a new tag
 
@@ -749,9 +802,197 @@ the class as a known tag. Whether you should use one or another depend on the
 structure of the data in YAML. Is it a mapping/dictionary, a scalar or a
 list/sequence ?
 
-==TODO==
-Explain step by step how to add tags
-==END TODO==
+In most cases one wants `tester` to browse the children of the strucure and apply
+relevant constraints on it and to access attributes through their original name
+from the data. In this case the simpler way to register a new tag is to use
+`yaml_auto_map`. For example to register a tag ETOT that simply register all
+fields from the data tree and let the tester check them with `tol_abs` or
+`tol_rel` we would put the following in
+*~abinit/tests/pymods/yaml_tools/structures.py*:
+
+```python
+@yaml_auto_map
+class Etot(object):
+    __yaml_tag = 'ETOT'
+```
+
+ETOT does not match the python naming conventions so we use `Etot` as a class
+name, however since we want to use the tag `!ETOT` we use the special attribute
+`__yaml_tag` to declare our custom tag. If this attribute is not used the name
+of the class is the default tag.
+
+`yaml_auto_map` does several things for us:
+- it gives the class a `dict` like interface by defining relevant methods, which
+  allows tester to browse children
+- it registers the tag in YAML parser
+- it automatically register all attributes found in the data tree as attributes
+  of the class instance. These attributes are accessible through the attribute
+  syntax (`my_object.my_attribute`) with a normalized name (basically remove
+  characters that cannot be in a python identifier like spaces and ponctuation)
+  or through the dictionary syntax with their original name (`my_object['my
+attribute']`)
+
+Sometimes one wants more control over the building of the class instance. This
+is what `yaml_map` is for.
+Let suppose we still want to register tag but we want to select only a subset of
+the components for example. We will use `yaml_map` to gives us control over the
+building of the instance. This is done by implementing the `from_map` class
+method (a class method is a method that is called from the class instead of
+being called from an instance). This method take in argument a dictionary built
+from the data tree by the YAML parser and should return an instance of our
+class.
+
+```python
+@yaml_map
+class Etot(object):
+    __yaml_tag = 'ETOT'
+    def __init__(self, kin, hart, xc, ew):
+        self.kinetic = kin
+        self.hartree = hart
+        self.xc = xc
+        self.ewald = ew
+
+    @classmethod
+    def from_map(cls, d):
+        # cls is the class (Etot here but it can be
+        # something else if we subclass Etot)
+        # d is a dictionary built from the data tree
+        kin = d['Kinetic energy']
+        hart = d['Hartree energy']
+        xc = d['XC energy']
+        ew = d['Ewald energy']
+        return cls(kin, hart, xc, ew)
+```
+
+Now we fully control the building of the structure, however we lost the ability
+for the tester to browse the components to check them. If we want to only make
+our custom check it is fine. For example we can define a method
+`check_components` and use the `callback` constraint like this:
+
+In `~abinit/tests/pymods/yaml_tools/structure.py`
+```python
+@yaml_map
+class Etot(object):
+    __yaml_tag = 'ETOT'
+
+    ...  # same code as the previous example
+
+    def check_components(self, tested):
+        # self will always be the reference object
+        return (
+            abs(self.kinetic - other.kinetic) < 1.0e-10
+            and abs(self.hartree - other.hartree) < 1.0e-10
+            and abs(self.xc - other.xc) < 1.0e-10
+            and abs(self.ewald - other.ewald) < 1.0e-10
+        )
+```
+
+In the configuration file
+```
+Etotal:
+    callback:
+        method: check_components
+```
+
+However it can be better to give back the control to `tester`. For that purpose
+we can implement the method `to_dict` that should return a dictionary of the
+data to be checked automatically. `tester` will detect it and use it to check
+what you gave him.
+
+```python
+@yaml_map
+class Etot(object):
+    __yaml_tag = 'ETOT'
+
+    ...  # same code as the previous example
+
+    def to_dict(self):
+        return {
+            'kin': self.kinetic,
+            'hart': self.hartree,
+            'xc': self.xc,
+            'ew': self.ewald
+        }
+```
+
+Now `tester` will be able to apply `tol_abs` and friends to the components we
+game him.
+
+If the class has a __complete__ dict-like read interface (`__iter__` yielding
+keys, `__contains__`, `__getitem__`, `keys` and `items`) then it can have a
+class attribute `is_dict_like` set to `True` and it will be treated as any other
+node (it not longer need `to_dict`). `yaml_auto_map` registered classes automatically
+address these requirements.
+
+`yaml_seq` is analogous to `yaml_map` however `to_map` became `to_seq` and the
+YAML source data have to match the YAML sequence structure (either `[a, b, c]`
+or
+```yaml
+- a
+- b
+- c
+```
+)
+
+The argument passed to `to_seq` is a list. If one wants `tester` to browse the
+elements of the resulting object one can either inherit implement a `to_list`
+method or implement the `__iter__` python special method.
+
+If for some reason a class have the `__iter__` method implemented but one does
+__not__ want tester to browse its children (`BaseArray` and its subclasses are
+such a case) one can defined the `has_no_child` attribute and set it to `True`.
+Then tester won't try to browse it. Strings are a particular case. They have the
+`__iter__` method but will never been browsed.
+
+To associate a tag to anything else than a YAML mapping or sequence one can use
+`yaml_scalar`. This decorator expect the class to have a method `from_scalar`
+that takes the raw source as a string in argument and return an instance of the
+class. It can be used to create custom parsers of new number representation.
+For example to create a 3D vector with unit tag:
+```
+@yaml_scalar
+class Vec3Unit(object):
+    def __init__(self, x, y, z, unit):
+        self.x, self.y, self.z = x, y, z
+        self.unit = unit
+    
+    @classmethod
+    def from_scalar(cls, raw):
+        sx, sy, sz, unit, *_ = raw.split()  # split on blanks
+        return cls(float(sx), float(sy), float(sz), unit)
+```
+
+With that new tag registered the YAML parser will happily parse something like
+```yaml
+kpt: !Vec3Unit 0.5 0.5 0.5 Bohr^-1
+```
+
+Finally when the scalar have a easily detectable form one can create an implicit
+scalar. For example to parse directly complex numbers we could (naively) do the
+following:
+
+```yaml
+@yaml_implicit_scalar
+class YAMLComplex(complex):
+    # regular expression matching a (quite rigid) writing of complex number
+    yaml_pattern = r'[+-]?\d+\.\d+) [+-] (\d+\.\d+)i'
+
+    # this have nothing to do with yam_implicit_scalar, it is just the way to
+    # create a subclass of a python *native* object
+    @staticmethod
+    def __new__(*args, **kwargs):
+        return complex.__new__(*args, **kwargs)
+
+    @classmethod
+    def from_scalar(cls, scal):
+        # few adjustment to match the python restrictions on complex number
+        # writing
+        return cls(scal.replace('i', 'j').replace(' ', ''))
+```
+
+Such a class is used by the YAML parser as soon as it match the `yaml_pattern`
+regex, without the need of writing the tag before.
+
 
 ## Coding rules
 
