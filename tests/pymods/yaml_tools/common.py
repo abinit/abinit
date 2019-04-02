@@ -134,6 +134,12 @@ class BaseArray(np.ndarray):
         objects.  Can be used for converting any YAML array of number of any
         dimension into a numpy compatible array.
     '''
+
+    # attribute to identify the class without relying on isinstance (unreliable
+    # because of sys.path manipulation)
+    _is_base_array = True
+
+    # Short tag name
     __yaml_tag = 'Array'
 
     # by default we want to treat this as a coherent object and do not check

@@ -1,12 +1,11 @@
 from __future__ import print_function, division, unicode_literals
 from inspect import isclass
 from copy import deepcopy
-from numpy import ndarray
 from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
                      IllegalFilterNameError)
 from .abinit_iterators import IterStateFilter
 from .tricks import cstm_isinstance
-from .common import Undef, normalize_attr, string, BaseArray
+from .common import Undef, normalize_attr, string, BaseArray, FailDetail
 from warnings import warn
 
 
@@ -32,9 +31,10 @@ def make_apply_to(type_):
         def apply_to(self, obj):
             return isinstance(obj, complex)
 
-    elif type_ == 'Array' or (isclass(type_) and issubclass(type_, ndarray)):
+    elif type_ == 'Array' or (isclass(type_)
+                              and getattr(type_, '_is_base_array', False)):
         def apply_to(self, obj):
-            return isinstance(obj, ndarray)
+            return getattr(type_, '_is_base_array', False)
 
     elif type_ == 'this':
         def apply_to(self, obj):
@@ -93,13 +93,14 @@ class Constraint(object):
                     if Undef.is_undef(ref):
                         return True
                 elif Undef.is_undef(ref) or Undef.is_undef(tested):
-                    return False
-            elif isinstance(ref, BaseArray) and self._apply_to(self, ndarray):
+                    return FailDetail('undef value have been found.')
+            elif (getattr(ref, '_is_base_array', False)
+                  and self._apply_to(self, BaseArray())):
                 if conf.get_param('allow_undef'):
                     if ref._has_undef:
                         return True
                 elif ref._has_undef or tested._has_undef:
-                    return False
+                    return FailDetail('undef value have been found.')
 
         params = [conf.get_param(p) for p in self.use_params]
         return self.test(self.value, ref, tested, *params)

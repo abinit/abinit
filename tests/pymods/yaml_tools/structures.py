@@ -6,7 +6,7 @@
 from __future__ import print_function, division, unicode_literals
 import numpy as np
 from . import has_pandas
-from .common import FailDetail, Undef, BaseArray
+from .common import FailDetail, BaseArray
 from .abinit_iterators import ITERATOR_RANKS
 from .register_tag import (
     yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar,
