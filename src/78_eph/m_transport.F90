@@ -513,23 +513,23 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  call onsager(2,self%l2)
 
  ! Compute transport quantities
-#define siemens (e_Cb**2/Ha_J/Time_Sec)
-#define meter   (Bohr_Ang * 1d-10)
+#define meter   (Bohr_meter)
 #define second  (Time_Sec)
 #define volt    (Ha_J/e_Cb)
-#define fact0   (siemens / (meter*second) / cryst%ucvol)
-#define fact1   (volt * fact0)
-#define fact2   (volt**2 * fact0)
+#define siemens (e_Cb**2 / Ha_J / second**2)
+#define fact0   (second * siemens / meter / cryst%ucvol)
+#define fact1   (meter**2 / second * Ha_J)
+
  self%sigma = fact0 * self%l0
- self%pi(:,:,:,:,itemp) = (fact1 * self%l1(:,:,:,:,itemp)) / (fact0 * max(self%l0(:,:,:,:,itemp),tol12))
+ self%pi(:,:,:,:,itemp) = volt * self%l1(:,:,:,:,itemp) /  max(self%l0(:,:,:,:,itemp),tol12)
  do itemp=1,self%ntemp
    if (kT < tol8) cycle
    kT = self%kTmesh(itemp) / kb_HaK
-   self%seebeck(:,:,:,:,itemp) = 1/kT * (fact1 * self%l1(:,:,:,:,itemp))/ &
-                                        (fact0 * max(self%l0(:,:,:,:,itemp),tol12))
-   self%kappa(:,:,:,:,itemp) = 1/kT * (-(fact1 * self%l1(:,:,:,:,itemp))**2 / &
-                                        (fact0 * max(self%l0(:,:,:,:,itemp),tol12)) + &
-                                        (fact2 * self%l2(:,:,:,:,itemp)))
+   self%seebeck(:,:,:,:,itemp) = 1/kT * volt * self%l1(:,:,:,:,itemp)/ &
+                                        max(self%l0(:,:,:,:,itemp),tol12)
+   self%kappa(:,:,:,:,itemp) = 1/kT * fact1 * (-self%l1(:,:,:,:,itemp)**2 / &
+                                        max(self%l0(:,:,:,:,itemp),tol12) + &
+                                        self%l2(:,:,:,:,itemp))
  end do
 
  ! Compute the index of the fermi level
@@ -554,14 +554,14 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
      do iw=1,self%nw !doping
        self%n(iw,itemp,1) = carriers(self%vvdos_mesh,self%edos%dos(:,ispin)*max_occ,ifermi,self%nw, &
                                      kT,self%vvdos_mesh(iw)) / &
-                                     cryst%ucvol / (Bohr_Ang * 1.0d-10)**3
+                                     cryst%ucvol / Bohr_meter**3
      end do
 
      ! Compute carrier density of holes
      do iw=1,self%nw !doping
        self%n(iw,itemp,2) = carriers(self%vvdos_mesh,self%edos%dos(:,ispin)*max_occ,1,ifermi, &
                                      kT,self%vvdos_mesh(iw)) / &
-                                     cryst%ucvol / (Bohr_Ang * 1.0d-10)**3
+                                     cryst%ucvol / Bohr_meter**3
      end do
 
      self%n(:,itemp,2) = self%n(self%nw,itemp,2) - self%n(:,itemp,2)
@@ -617,7 +617,8 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 
  ! Get spin degeneracy
  max_occ = two/(self%nspinor*self%nsppol)
- fact = max_occ / ( 2*Ha_s )
+ ! 2 comes from linewidth-lifetime relation
+ fact = max_occ /  2
 
  do itemp=1,self%ntemp
    kT = self%kTmesh(itemp)
@@ -716,7 +717,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  end do
 
  ! Get spin degeneracy
- fact = max_occ * fact0 / e_Cb / ( 2*Ha_s ) * 100**2
+ fact = max_occ * fact0 / e_Cb / 2 * 100**2
 
  ! Compute mobility
  self%mobility_mu = 0
@@ -757,14 +758,14 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
    ! Electron mobility
    if (self%ne(itemp)>tol12) then
      self%mobility_mu(1,:,:,:,itemp) = fact * self%mobility_mu(1,:,:,:,itemp) / &
-                                       ( self%ne(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-10)**3 )
+                                       ( self%ne(itemp) / cryst%ucvol / Bohr_meter**3 )
    else
      self%mobility_mu(1,:,:,:,itemp) = 0
    end if
    ! Hole mobility
    if (self%nh(itemp)>tol12) then
      self%mobility_mu(2,:,:,:,itemp) = fact * self%mobility_mu(2,:,:,:,itemp) / &
-                                       ( self%nh(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-10)**3 )
+                                       ( self%nh(itemp) / cryst%ucvol / Bohr_meter**3 )
    else
      self%mobility_mu(2,:,:,:,itemp) = 0
    end if
@@ -901,8 +902,8 @@ subroutine transport_rta_write(self,cryst)
  do ispin=1,self%nsppol
    do itemp=1,self%ntemp
      write(msg,"(f16.2,2e16.2,2f16.2)") self%kTmesh(itemp) / kb_HaK, &
-                            self%ne(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-8)**3, &
-                            self%nh(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-8)**3, &
+                            self%ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
+                            self%nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
                             self%mobility_mu(1,ispin,1,1,itemp), self%mobility_mu(2,ispin,1,1,itemp)
      call wrtout(std_out,msg)
      call wrtout(ab_out,msg)
