@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  1 Apr 2019.
-- ( at 16h12 )
+.Starting date : Tue  2 Apr 2019.
+- ( at 15h05 )
   
 - input  file    -> t62.in
 - output file    -> t62_MPI4.out
@@ -594,12 +594,18 @@ P          mk1mem6         64
                        0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
                        0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
                        0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
-           tolvrs1     1.00000000E-15
+           tolvrs1     0.00000000E+00
            tolvrs2     1.00000000E-08
            tolvrs3     1.00000000E-08
            tolvrs4     1.00000000E-08
            tolvrs5     1.00000000E-08
            tolvrs6     1.00000000E-08
+           tolwfr1     1.00000000E-20
+           tolwfr2     0.00000000E+00
+           tolwfr3     0.00000000E+00
+           tolwfr4     0.00000000E+00
+           tolwfr5     0.00000000E+00
+           tolwfr6     0.00000000E+00
             typat      1  2
            useylm           1
          wfoptalg1        114
@@ -779,7 +785,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      37.438      37.415
  ETOT 11  -8.5615692600533    -5.862E-14 1.472E-20 1.180E-15
  ETOT 12  -8.5615692600533     2.665E-14 1.165E-22 1.165E-16
 
- At SCF step   12       nres2   =  1.17E-16 < tolvrs=  1.00E-15 =>converged.
+ At SCF step   12   max residual=  1.17E-22 < tolwfr=  1.00E-20 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.59935832E-04  sigma(3 2)=  0.00000000E+00
@@ -3007,12 +3013,18 @@ P          mk1mem6         64
                        0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
                        0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
                        0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
-           tolvrs1     1.00000000E-15
+           tolvrs1     0.00000000E+00
            tolvrs2     1.00000000E-08
            tolvrs3     1.00000000E-08
            tolvrs4     1.00000000E-08
            tolvrs5     1.00000000E-08
            tolvrs6     1.00000000E-08
+           tolwfr1     1.00000000E-20
+           tolwfr2     0.00000000E+00
+           tolwfr3     0.00000000E+00
+           tolwfr4     0.00000000E+00
+           tolwfr5     0.00000000E+00
+           tolwfr6     0.00000000E+00
             typat      1  2
            useylm           1
          wfoptalg1        114
@@ -3169,10 +3181,10 @@ P          mk1mem6         64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         21.3  wall=         23.0
+- Proc.   0 individual time (sec): cpu=         21.9  wall=         23.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         87.9  wall=         90.6
++Overall time at end (sec) : cpu=         90.1  wall=         92.8
