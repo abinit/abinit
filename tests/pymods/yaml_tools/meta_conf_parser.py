@@ -19,22 +19,21 @@ def make_apply_to(type_):
         def apply_to(self, obj):
             return isinstance(obj, (int, float, complex))
 
-    elif type_ == 'real' or (isclass(type_) and issubclass(type_, float)):
+    elif type_ == 'real':
         def apply_to(self, obj):
             return isinstance(obj, float)
 
-    elif type_ == 'integer' or (isclass(type_) and issubclass(type_, int)):
+    elif type_ == 'integer':
         def apply_to(self, obj):
             return isinstance(obj, int)
 
-    elif type_ == 'complex' or (isclass(type_) and issubclass(type_, complex)):
+    elif type_ == 'complex':
         def apply_to(self, obj):
-            return isinstance(obj, complex)
+            return isinstance(obj, complex) or isinstance(obj, float)
 
-    elif type_ == 'Array' or (isclass(type_)
-                              and getattr(type_, '_is_base_array', False)):
+    elif type_ == 'Array':
         def apply_to(self, obj):
-            return getattr(type_, '_is_base_array', False)
+            return getattr(obj, '_is_base_array', False)
 
     elif type_ == 'this':
         def apply_to(self, obj):
