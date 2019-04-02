@@ -968,8 +968,10 @@ kpt: !Vec3Unit 0.5 0.5 0.5 Bohr^-1
 ```
 
 Finally when the scalar have a easily detectable form one can create an implicit
-scalar. For example to parse directly complex numbers we could (naively) do the
-following:
+scalar. An implicit scalar have the advantage to be detected by the YAML parser
+without the need of writing the tag before as soon as it match a given regular
+expression. For example to parse directly complex numbers we could (naively) do
+the following:
 
 ```yaml
 @yaml_implicit_scalar
@@ -989,9 +991,6 @@ class YAMLComplex(complex):
         # writing
         return cls(scal.replace('i', 'j').replace(' ', ''))
 ```
-
-Such a class is used by the YAML parser as soon as it match the `yaml_pattern`
-regex, without the need of writing the tag before.
 
 
 ## Coding rules
