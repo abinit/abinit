@@ -127,12 +127,10 @@ module m_multibinit_dataset
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
   !MS Variables for SCALE-UP 
-#if defined DEV_MS_SCALEUP 
    integer :: scup_elec_model
    integer :: scup_ksamp(3)
    integer :: scup_ismagnetic 
    integer :: scup_istddft    
-#endif 
   ! TODO hexu: add parameters for spin.
   integer :: spin_calc_traj_obs
   integer :: spin_calc_thermo_obs
@@ -188,9 +186,7 @@ module m_multibinit_dataset
   real(dp) :: spin_qpoint(3)
   real(dp) :: spin_sia_k1dir(3)
   !MS Variables for SCALE-UP 
-#if defined DEV_MS_SCALEUP 
   real*8   :: scup_tcharge 
-#endif 
 ! Integer arrays
   integer, allocatable :: atifc(:)
   ! atifc(natom)
@@ -385,13 +381,11 @@ multibinit_dtset%spin_var_temperature=0
 multibinit_dtset%spin_write_traj=1 
 
 !MS Variables for SCALE-UP 
-#if defined DEV_MS_SCALEUP
 multibinit_dtset%scup_elec_model = 0
 multibinit_dtset%scup_ksamp = (/ 1, 1, 1 /)
 multibinit_dtset%scup_tcharge = 0 
 multibinit_dtset%scup_ismagnetic = 0 
 multibinit_dtset%scup_istddft = 0
-#endif 
 
 !=======================================================================
 !Arrays
