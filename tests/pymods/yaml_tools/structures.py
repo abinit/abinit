@@ -7,36 +7,10 @@ from __future__ import print_function, division, unicode_literals
 import numpy as np
 from . import has_pandas
 from .common import FailDetail, BaseArray
-from .abinit_iterators import ITERATOR_RANKS
 from .register_tag import (
     yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar,
     yaml_not_available_tag
 )
-
-
-@yaml_map
-class IterStart(object):
-    '''
-        Mark the begining of a iteration of a given iterator.
-    '''
-    # Don't do this at home, trick to workaround the custom sys.path
-    _is_iter_start = True
-
-    def __init__(self, iterator, iteration):
-        self.iterator = iterator
-        self.iteration = iteration
-
-    @classmethod
-    def from_map(cls, d):
-        iterator = max(d.keys(), key=lambda x: ITERATOR_RANKS[x])
-        iteration = d[iterator]
-        return cls(iterator, iteration)
-
-    def to_map(self):
-        return {self.iterator: self.iteration}
-
-    def __repr__(self):
-        return 'IterStart({}={})'.format(self.iterator, self.iteration)
 
 
 @yaml_auto_map
@@ -210,7 +184,8 @@ if has_pandas:
 
     @yaml_scalar
     class Table(DataFrame):
-        _is_dict_like = True
+        # imply that the class implement a complete dict-like interface
+        is_dict_like = True
         table_sep = r'\s+'
 
         @classmethod
@@ -226,7 +201,7 @@ if has_pandas:
 
     @yaml_scalar
     class EtotIters(Table):
-        _is_dict_like = False  # prevent tester from going inside by itself
+        is_dict_like = False  # prevent tester from browsing columns
 
         residues = {
             'deltaE(h)',

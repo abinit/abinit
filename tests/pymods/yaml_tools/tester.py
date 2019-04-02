@@ -109,13 +109,29 @@ class Tester(object):
                     else:  # no exceptions
                         analyze(success, cons)
 
-            if getattr(ref, '_is_dict_like', False):  # have children
+            if getattr(ref, 'is_dict_like', False):  # have children
                 for child in ref:
                     if child not in tested:
                         msg = '{} was not present'.format(child)
                         self.issues.append(Failure(self.conf, msg))
                     else:
                         self.check_this(child, ref[child], tested[child])
+
+            elif getattr(ref, 'to_dict', None):  # user made browsable
+                dref = ref.to_dict()
+                dtest = tested.to_dict()
+                for child in dref:
+                    if child not in tested:
+                        msg = '{} was not present'.format(child)
+                        self.issues.append(Failure(self.conf, msg))
+                    else:
+                        self.check_this(child, dref[child], dtest[child])
+
+            elif hasattr(ref, 'to_list'):
+                lref = ref.to_list()
+                ltest = tested.to_list()
+                for index, (vref, vtest) in enumerate(zip(lref, ltest)):
+                    self.check_this(string(index), vref, vtest)
 
             elif (hasattr(ref, '__iter__')
                   and not getattr(ref, '_has_no_child', False)

@@ -1,10 +1,13 @@
 '''
-    Define classes usefull in several places.
+    Define classes usefull in several places and structures required by other
+    modules.
 '''
 from __future__ import print_function, division, unicode_literals
 import re
 import sys
 import numpy as np
+
+from .abinit_iterators import ITERATOR_RANKS
 
 re_word = re.compile(r'[a-zA-Z0-9_]+')
 
@@ -29,7 +32,7 @@ class BaseDictWrapper(object):
         keep a consistent behaviour with AutoMap structures. It does not
         inherit from dict but it implement the complete interface.
     '''
-    _is_dict_like = True
+    is_dict_like = True
 
     def __init__(self, d={}):
         for attr in d:
@@ -179,3 +182,27 @@ class BaseArray(np.ndarray):
             else:
                 return [float(f) for f in arr]
         return to_list(self)
+
+
+class IterStart(object):
+    '''
+        Mark the begining of a iteration of a given iterator.
+    '''
+    # Don't do this at home, trick to workaround the custom sys.path
+    _is_iter_start = True
+
+    def __init__(self, iterator, iteration):
+        self.iterator = iterator
+        self.iteration = iteration
+
+    @classmethod
+    def from_map(cls, d):
+        iterator = max(d.keys(), key=lambda x: ITERATOR_RANKS[x])
+        iteration = d[iterator]
+        return cls(iterator, iteration)
+
+    def to_map(self):
+        return {self.iterator: self.iteration}
+
+    def __repr__(self):
+        return 'IterStart({}={})'.format(self.iterator, self.iteration)

@@ -29,7 +29,7 @@ def make_apply_to(type_):
 
     elif type_ == 'complex':
         def apply_to(self, obj):
-            return isinstance(obj, complex) or isinstance(obj, float)
+            return isinstance(obj, (float, complex))
 
     elif type_ == 'Array':
         def apply_to(self, obj):
