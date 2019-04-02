@@ -95,7 +95,7 @@ class Constraint(object):
                 elif Undef.is_undef(ref) or Undef.is_undef(tested):
                     return FailDetail('undef value have been found.')
             elif (getattr(ref, '_is_base_array', False)
-                  and self._apply_to(self, BaseArray())):
+                  and self._apply_to(self, BaseArray((0,)))):
                 if conf.get_param('allow_undef'):
                     if ref._has_undef:
                         return True
