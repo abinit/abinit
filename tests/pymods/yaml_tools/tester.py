@@ -30,7 +30,7 @@ class Failure(Issue):
         Issue.__init__(self, conf, msg)
 
     def __repr__(self):
-        if self.ref:
+        if self.ref is not None:
             return Issue.__repr__(self) + '\nref: {}\ntested: {}'.format(
                 self.ref, self.tested
             )
@@ -47,10 +47,7 @@ class DetailedFailure(Failure):
         Issue.__init__(self, conf, msg)
 
     def __repr__(self):
-        if self.details:
-            return Issue.__repr__(self) + '\n{}'.format(self.details)
-        else:
-            return Issue.__repr__(self)
+        return Issue.__repr__(self) + '\n{}'.format(self.details)
 
 
 class Success(Issue):
