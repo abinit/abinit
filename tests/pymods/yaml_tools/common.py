@@ -147,7 +147,7 @@ class BaseArray(np.ndarray):
 
     # by default we want to treat this as a coherent object and do not check
     # values individualy
-    _has_no_child = True
+    has_no_child = True
 
     def __init__(self, *args, **kwargs):
         # numpy ndarray does not have __init__

@@ -134,7 +134,7 @@ class Tester(object):
                     self.check_this(string(index), vref, vtest)
 
             elif (hasattr(ref, '__iter__')
-                  and not getattr(ref, '_has_no_child', False)
+                  and not getattr(ref, 'has_no_child', False)
                   and not isinstance(ref, basestring)):
                 for index, (vref, vtest) in enumerate(zip(ref, tested)):
                     self.check_this(string(index), vref, vtest)
