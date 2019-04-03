@@ -559,12 +559,14 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  complex(dpc), allocatable :: buffer(:)
  integer :: iall,iatom,iatu,ier,iexist2,ifreq,im,im1,ioerr,ispinor,ispinor1,isppol,istepiter,istep,istep_imp
  integer :: icount,iexit,iter,iter_imp,master,mbandc,myproc,natom,ncount,ndim,nkpt,nproc,nrecl,nspinor,nsppol,spacecomm
- integer :: natom_read,nsppol_read,nspinor_read,ndim_read,nw_read,optrw,readimagonly,tndim
+ integer :: natom_read,nsppol_read,nspinor_read,ndim_read,nw_read,optrw,readimagonly,tndim,iflavor
  logical :: nondiaglevels
  character(len=30000) :: message ! Big buffer to avoid buffer overflow.
  integer,allocatable :: unitselffunc_arr(:)
- character(len=fnlen) :: tmpfil
+ integer,allocatable :: unitselfrot(:,:,:,:)
+ character(len=fnlen) :: tmpfil,tmpfilrot,tmpmatrot
  character(len=1) :: tag_is
+ character(len=10) :: tag_iflavor
  character(len=10) :: tag_at
  character(len=4) :: chtemp
  real(dp):: xtemp,fermie_read
@@ -582,6 +584,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  if(present(opt_imagonly)) then
    if(opt_imagonly==1.and.paw_dmft%dmft_solv>=5) then
      readimagonly=opt_imagonly
+     write(message,*)
      write(message,'(4x,2a)') "About to read imaginary part of Self energy"
      call wrtout(std_out,message,'COLL')
    else
@@ -623,8 +626,18 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  mbandc=paw_dmft%mbandc
  nkpt=paw_dmft%nkpt
 
-!   - For the Tentative diagonalisation of the self-energy file (begin init)
- if(optrw==2.and.present(pawang)) then
+!   - For the Tentative rotation of the self-energy file (begin init)
+ if(present(pawang)) then
+   ABI_ALLOCATE(unitselfrot,(natom,nsppol,nspinor,7)) ! 7 is the max ndim possible
+   if(optrw==2) then
+     write(message,'(a,2x,a,f13.5)') ch10,&
+&     " == About to print self-energy for MAXENT code "
+   else if (optrw==1)  then
+     write(message,'(a,2x,a,f13.5)') ch10,&
+&     " == About to read self-energy from MAXENT code "
+   endif
+   call wrtout(std_out,message,'COLL')
+
    ABI_DATATYPE_ALLOCATE(eigvectmatlu,(natom,nsppol))
    do iatom=1,natom
      if(paw_dmft%lpawu(iatom)/=-1) then
@@ -639,12 +652,12 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,selfrotmatlu)
    call init_oper(paw_dmft,energy_level,opt_ksloc=3)
-   call compute_levels(cryst_struc,energy_level,self%hdc,pawang,paw_dmft,nondiag=nondiaglevels)
  endif
-!   - For the Tentative diagonalisation of the self-energy file (end init)
+!   - For the Tentative rotation of the self-energy file (end init)
 
-!   - For the Tentative diagonalisation of the self-energy file (begin diag)
+!   - For the Tentative rotation of the self-energy file (begin diag)
  if(optrw==2.and.present(pawang)) then
+   call compute_levels(cryst_struc,energy_level,self%hdc,pawang,paw_dmft,nondiag=nondiaglevels)
    write(message,'(a,2x,a,f13.5)') ch10,&
 &   " == Print not Diagonalized Self Energy for Fermi Level=",paw_dmft%fermie
    call wrtout(std_out,message,'COLL')
@@ -656,8 +669,37 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 &   " == Print Diagonalized levels for Fermi Level=",paw_dmft%fermie
    call wrtout(std_out,message,'COLL')
    call print_matlu(level_diag,natom,1,compl=1,opt_exp=1)
+   !  Create file for rotation
  endif
-!   - For the Tentative diagonalisation of the self-energy file (end diag)
+ if(present(pawang)) then
+   if(optrw==2) then
+     tmpmatrot = trim(paw_dmft%filapp)//'.UnitaryMatrix_for_DiagLevel'
+   else if (optrw==1) then
+     tmpmatrot = trim(paw_dmft%filnamei)//'.UnitaryMatrix_for_DiagLevel'
+   endif
+#ifdef FC_NAG
+   open (unit=3000,file=trim(tmpmatrot),status='unknown',form='formatted',recl=ABI_RECL)
+#else
+   open (unit=3000,file=trim(tmpmatrot),status='unknown',form='formatted')
+#endif
+   write(std_out,*) "Open file  ",trim(tmpmatrot)
+   rewind(3000)
+   do iatom=1,natom
+     if(self%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+       ndim=2*self%oper(1)%matlu(iatom)%lpawu+1
+       do isppol=1,nsppol
+         if(optrw==2) then
+           write(message,*) ((eigvectmatlu(iatom,isppol)%value(im,im1),im1=1,ndim),im=1,ndim)
+         else if (optrw==1) then
+           read(message,*) ((eigvectmatlu(iatom,isppol)%value(im,im1),im1=1,ndim),im=1,ndim)
+         endif
+         call wrtout(3000,message,'COLL')
+       enddo
+     endif
+   enddo
+   close(3000)
+ endif
+!   - For the Tentative rotation of the self-energy file (end diag)
 
  if((optrw==2.or.optrw==1).and.myproc==master)then
    ABI_ALLOCATE(unitselffunc_arr,(natom*nsppol*nspinor))
@@ -694,6 +736,28 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            unitselffunc_arr(iall) = get_unit()
            ABI_CHECK(unitselffunc_arr(iall) > 0, "Cannot find free IO unit!")
 
+           !- For the Tentative rotation of the self-energy file (create file)
+           if(optrw==2.and.present(pawang)) then
+             iflavor=0
+             do ispinor=1,nspinor
+              do im=1,ndim
+                iflavor=iflavor+1
+                call int2char4(iflavor,tag_iflavor)
+                unitselfrot(iatom,isppol,ispinor,im)=3000+iflavor
+                ABI_CHECK(unitselfrot(iatom,isppol,ispinor,im) > 0, "Cannot find free IO unit for unitselfrot!")
+                tmpfilrot = trim(paw_dmft%filapp)//'Selfrotformaxent'//trim(tag_at)//'_isppol'//tag_is//'_iflavor'//trim(tag_iflavor)
+                write(std_out,*) "Create file  ",trim(tmpfilrot)," unit ",unitselfrot(iatom,isppol,ispinor,im)," for flavor",iflavor
+#ifdef FC_NAG
+                open (unit=unitselfrot(iatom,isppol,ispinor,im),file=trim(tmpfilrot),status='unknown',form='formatted',recl=ABI_RECL)
+#else
+                open (unit=unitselfrot(iatom,isppol,ispinor,im),file=trim(tmpfilrot),status='unknown',form='formatted')
+#endif
+                rewind(unitselfrot(iatom,isppol,ispinor,im))
+              enddo
+             enddo
+           endif
+           !- For the Tentative rotation of the self-energy file (create file)
+
 !           write(std_out,*) "1"
 
 !          ===========================
@@ -726,7 +790,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              rewind(unitselffunc_arr(iall))
              !write(std_out,*) "61",nrecl
              if(prtopt>=3) then
-               write(message,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', unitselffunc_arr(iall)
+               write(message,'(a,a,a,i4)') '    opened file : ', trim(tmpfil), ' unit', unitselffunc_arr(iall)
                call wrtout(std_out,message,'COLL')
              endif
            endif
@@ -739,7 +803,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              write(message,'(3a,5i5,2x,e25.17)') "# natom,nsppol,nspinor,ndim,nw,fermilevel",ch10&
 &             ,"####",natom,nsppol,nspinor,ndim,self%nw,paw_dmft%fermie
              call wrtout(unitselffunc_arr(iall),message,'COLL')
-           else if(optrw==1.and.iexist2==1) then
+           else if(optrw==1.and.iexist2==1.and.readimagonly==0) then
              read(unitselffunc_arr(iall),*) 
              read(unitselffunc_arr(iall),*,iostat=ioerr)&
 &              chtemp,natom_read,nsppol_read,nspinor_read,ndim_read,nw_read,fermie_read
@@ -812,28 +876,48 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 &                aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)),&
 &                im=1,ndim),im1=1,ndim),ispinor=1,nspinor),ispinor1=1,nspinor)
                endif
+               call wrtout(unitselffunc_arr(iall),message,'COLL')
 
-!             - For the Tentative diagonalisation of the self-energy file (begin rot)
-               if(present(pawang)) then
+               !- For the Tentative rotation of the self-energy file (begin rot)
+               !----------------------------------------------------------------
+               if(optrw==2.and.present(pawang)) then
                  call copy_matlu(self%oper(ifreq)%matlu,selfrotmatlu,natom)
                  write(message,'(a,2x,a,i4)') ch10,&
 &                  " == Print non Rotated Self Energy for freq=",ifreq
                  call wrtout(std_out,message,'COLL')
-                 call print_matlu(selfrotmatlu,natom,1,compl=1,opt_exp=1)
+                 call print_matlu(selfrotmatlu,natom,1,compl=1)
                  call rotate_matlu(selfrotmatlu,eigvectmatlu,natom,3,1)
                  write(message,'(a,2x,a,i4)') ch10,&
 &                  " == Print Rotated Self Energy for freq=",ifreq
                  call wrtout(std_out,message,'COLL')
-                 call print_matlu(selfrotmatlu,natom,1,compl=1,opt_exp=1)
+                 call print_matlu(selfrotmatlu,natom,1,compl=1)
                  write(message,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
 &                  ((real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
 &                  aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
 &                  im=1,ndim),ispinor=1,nspinor)
+                 iflavor=0
+                 do ispinor=1,nspinor
+                   do im=1,ndim
+                     iflavor=iflavor+1
+                     write(std_out,*) "Write in file unit",unitselfrot(iatom,isppol,ispinor,im),"for flavor",iflavor
+                     write(message,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
+&                      real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
+&                      aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
+                     write(6,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
+&                      real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
+&                      aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
+                    ! if(iflavor==1) then
+                    ! write(1024,*) iatom,isppol,ispinor,im,unitselfrot(iatom,isppol,ispinor,im)
+                    ! write(1024,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
+&                   !   real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
+&                   !   aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
+                    ! endif
+                     call wrtout(unitselfrot(iatom,isppol,ispinor,im),message,'COLL')
+                   enddo
+                 enddo
                endif
-!             - For the Tentative diagonalisation of the self-energy file (end rot)
+               !- For the Tentative rotation of the self-energy file (end rot)
 
-               call wrtout(unitselffunc_arr(iall),message,'COLL')
-               call wrtout(111,message,'COLL')
 !               write(std_out,*) unitselffunc_arr(iall)
              else if(optrw==1.and.iexist2==1.and.ioerr==0) then
            !write(std_out,*) "8"
@@ -865,38 +949,53 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              endif
            enddo ! ifreq
 
+           !- For the Tentative rotation of the self-energy file (begin close file)
+           if(optrw==2.and.present(pawang)) then
+             do ispinor=1,nspinor
+               do im=1,ndim
+                 close(unitselfrot(iatom,isppol,ispinor,im))
+                 write(std_out,*) "Close file unit",unitselfrot(iatom,isppol,ispinor,im)
+               enddo
+             enddo
+           endif
+           !- For the Tentative rotation of the self-energy file (end close file)
+
 
            if(optrw==1.and.iexist2==1.and.ioerr==0) then
              if(readimagonly==1) then ! read from OmegaMaxent
                s_r=zero
-               do im=1,ndim
-                 do ispinor=1,nspinor
+
+               ! Read self energy from Maxent (imag part) on the real axis
+               !----------------------------------------------------------
+               do ispinor=1,nspinor
+                 do im=1,ndim
                    do ifreq=1,self%nw
                      read(unitselffunc_arr(iall),*,iostat=ioerr) xtemp,s_i(im,im,ispinor,ispinor)
-!*************************************************************************************
-                     !s_i(im,im,ispinor,ispinor)=zero
-!*************************************************************************************
                       ! minus sign because - Im Sigma is the output of OmegaMaxent
                      self%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)&
 &                       =cmplx(s_r(im,im,ispinor,ispinor),-s_i(im,im,ispinor,ispinor),kind=dp)
-                         
-                       !  write(6,*)'read self', s_r(im,im,ispinor,ispinor),s_i(im,im,ispinor,ispinor)
-                         !write(68,*)self%omega(ifreq), s_r(im,im,ispinor,ispinor),s_i(im,im,ispinor,ispinor)
                    enddo ! ifreq
-                         !write(68,*)
                  enddo
                enddo
-             endif
-           endif
 
-           if(optrw==1.and.iexist2==1.and.ioerr==0) then
-             if(readimagonly==1) then
-               write(message,'(4x,2a)') "Read only diagonal self energy from Maxent"
+               ! Kramers Kronig
+               !-------------------
+               write(message,'(4x,2a)') " Read only diagonal self energy from Maxent"
                call wrtout(std_out,message,'COLL')
                !write(6,*) "opt_hdc",opt_hdc(1)%mat(1,1,1,1,1)
                call kramerskronig_self(self,opt_selflimit,opt_hdc)
+
+               ! Rotate back rotate_matlu
+               !-----------------------------
+               if(present(pawang)) then
+                 do ifreq=1,self%nw
+                   call rotate_matlu(self%oper(ifreq)%matlu,eigvectmatlu,natom,3,-1)
+                 enddo
+               endif
+
              endif
            endif
+
 !          ===========================
 !           == Write/Read hdc in the file
 !          ===========================
@@ -929,7 +1028,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                enddo
              enddo
            else 
-            write(std_out,*) "self%hdc fixed in kramerskronig_self"
+            write(std_out,*) "     self%hdc fixed in kramerskronig_self"
            endif
            close(unitselffunc_arr(iall))
 !         enddo ! ispinor
@@ -942,8 +1041,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  endif ! optrw==2.or.myproc==master
 ! call xmpi_barrier(spacecomm)
            !write(std_out,*) "9"
-!   - For the Tentative diagonalisation of the self-energy file (begin destroy)
- if(optrw==2.and.present(pawang)) then
+!   - For the Tentative rotation of the self-energy file (begin destroy)
+ if(present(pawang)) then
    call destroy_oper(energy_level)
    call destroy_matlu(level_diag,natom)
    call destroy_matlu(selfrotmatlu,natom)
@@ -958,7 +1057,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end do
    ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
  endif 
-!   - For the Tentative diagonalisation of the self-energy file (end destroy)
+!   - For the Tentative rotation of the self-energy file (end destroy)
 
 !  ===========================
 !  == Error messages 
