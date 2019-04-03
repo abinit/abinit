@@ -415,8 +415,6 @@ class AbinitProject(object):
     and generate the configuration files required by the build system.
     """
 
-    DEFAULT_PICKLE_FILE = "_project.pickle"
-
     IGNORED_FILES = {"m_build_info.F90", "m_optim_dumper.F90"}
 
     # Marcos used to import modules in abinit libraries.
@@ -436,11 +434,21 @@ class AbinitProject(object):
     }
 
     @classmethod
+    def get_default_pickle_file(cls):
+        """
+        Return string with the default name of the pickle file used to save the object to disk.
+        The string contains the python major version to avoid possible incompatibilites
+        in the pickle protocol that may occur when reading a pickle file produced by another python interpreter.
+        """
+        import sys
+        return "_project_py%s.pickle" % sys.version_info[0]
+
+    @classmethod
     def pickle_load(cls, filepath=None):
         """
         Reconstruct object from pickle file. Default is used if filepath is None.
         """
-        if filepath is None: filepath = cls.DEFAULT_PICKLE_FILE
+        if filepath is None: filepath = cls.get_default_pickle_file()
         with open(filepath, "rb") as fh:
             return pickle.load(fh)
 
@@ -594,7 +602,7 @@ class AbinitProject(object):
         """
         Save the object in pickle format. Default name is used if filepath is None.
         """
-        if filepath is None: filepath = self.DEFAULT_PICKLE_FILE
+        if filepath is None: filepath = self.get_default_pickle_file()
         with open(filepath, "wb") as fh:
             return pickle.dump(self, fh)
 

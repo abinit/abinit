@@ -127,9 +127,6 @@ D.4 New input variables [[prtefmas]], [[irdefmas]] and [[getefmas]], to deal wit
 D.5 The spin dynamics has been implemented in multibinit.   
     By He Xu.
 
-D.5 Automatic test [[test:v8_37]] for TDep application.   
-    By J. Bieder.
-
 D.6 New value for input variable [[usepawu]]=4.
     The FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without polarization in the exchange correlation functional.  
 By B. Amadon.

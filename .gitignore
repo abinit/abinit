@@ -64,6 +64,7 @@ tests/TestBot_MPI*/*
 /aclocal.m4
 /autom4te.cache
 /build
+/_build*
 /configure
 /config.dump
 /config.dump.in
@@ -298,7 +299,7 @@ scripts/*/*/dist
 src/tags
 build2-debug-s
 .prev_run.pickle
-_project.pickle
+_project*.pickle
 buildbot.ac
 tests/Analysis*
 tests/report.log

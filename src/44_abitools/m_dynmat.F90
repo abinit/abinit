@@ -1916,8 +1916,7 @@ end subroutine d2sym3
 !! Should be used just after each call to dfpt_ewald, for both
 !! q==0 and the real wavelength.
 !!
-!! The q0dy3_apply should be used in conjunction with the subroutine
-!! dfpt_ewald (or ewald9):
+!! The q0dy3_apply should be used in conjunction with the subroutine dfpt_ewald (or ewald9):
 !! First, the call of dfpt_ewald with q==0 should be done,
 !!   then the call to q0dy3_calc will produce
 !!   the dyewq0 matrix from the (q=0) dyew matrix
@@ -1991,8 +1990,7 @@ end subroutine q0dy3_apply
 !!   in an unsymmetrical form (if option=1), or
 !!   in a symmetrical form (if option=2).
 !!
-!! The q0dy3_calc should be used in conjunction with the subroutine
-!! dfpt_ewald (or ewald9).
+!! The q0dy3_calc should be used in conjunction with the subroutine dfpt_ewald (or ewald9).
 !! First, the call of dfpt_ewald with q==0 should be done ,
 !!   then the call to q0dy3_calc will produce
 !!   the dyewq0 matrix from the (q=0) dyew matrix
@@ -3620,6 +3618,7 @@ end subroutine ftifc_q2r
 !!   These coordinates are normalized (=> * acell(3)!!)
 !! spqpt(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
+!! comm: MPI communicator
 !!
 !! OUTPUT
 !! dynmat(2,3,natom,3,natom,nqpt)= Dynamical matrices coming from the Derivative Data Base
@@ -3631,11 +3630,11 @@ end subroutine ftifc_q2r
 !!
 !! SOURCE
 
-subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
+subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm,comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: natom,nqpt,nrpt
+ integer,intent(in) :: natom,nqpt,nrpt,comm
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
  real(dp),intent(in) :: wghatm(natom,natom,nrpt)
@@ -3644,31 +3643,34 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,iqpt,irpt,mu,nu
+ integer :: ia,ib,iqpt,irpt,mu,nu,cnt,my_rank,nprocs, ierr
  real(dp) :: facti,factr,im,kr,re
 !arrays
  real(dp) :: kk(3)
 
 ! *********************************************************************
 
- dynmat = zero
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ dynmat = zero
+ cnt = 0
  do iqpt=1,nqpt
    do irpt=1,nrpt
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
 
-!    Calculation of the k coordinates in Normalized Reciprocal coordinates
+     ! Calculation of the k coordinates in Normalized Reciprocal coordinates
      kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)* gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
      kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)* gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
      kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)* gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
 
-!    Product of k and r
+     ! Product of k and r
      kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
 
-!    Get phase factor
+     ! Get phase factor
      re=cos(two_pi*kr)
      im=sin(two_pi*kr)
 
-!    Inner loop on atoms and directions
+     ! Inner loop on atoms and directions
      do ib=1,natom
        do ia=1,natom
          if(abs(wghatm(ia,ib,irpt))>1.0d-10)then
@@ -3676,7 +3678,7 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
            facti=im*wghatm(ia,ib,irpt)
            do nu=1,3
              do mu=1,3
-!              Real and imaginary part of the dynamical matrices
+               !  Real and imaginary part of the dynamical matrices
                dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
 &               +factr*atmfrc(mu,ia,nu,ib,irpt)
 !              Atmfrc should be real
@@ -3693,6 +3695,8 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
    end do
  end do
 
+ if (nprocs > 1) call xmpi_sum(dynmat, comm, ierr)
+
 end subroutine ftifc_r2q
 !!***
 
@@ -3704,8 +3708,8 @@ end subroutine ftifc_r2q
 !! dynmat_dq
 !!
 !! FUNCTION
-!!   Compute the derivative D(q)/dq of the dynamical matrix via Fourier transform
-!!   of the interatomic forces
+!!  Compute the derivative D(q)/dq of the dynamical matrix via Fourier transform
+!!  of the interatomic forces
 !!
 !! INPUTS
 !! qpt(3)= Reduced coordinates of the q vector in reciprocal space
@@ -3989,8 +3993,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
 
    ! Does not support multiple shifts
    if (nqshft/=1) then
-     write(message, '(a)' ) 'This version of the weights does not support nqshft/=1.'
-     MSG_ERROR(message)
+     MSG_ERROR('This version of the weights does not support nqshft/=1.')
    end if
 
    ! Find the points of the lattice given by ngqpt*acell. These are used to define
@@ -4014,9 +4017,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
    end do
  end if ! end new_wght
 
-!DEBUG
 !write(std_out,*)'factor,ngqpt',factor,ngqpt(1:3)
-!ENDDEBUG
 
  r_inscribed_sphere = sum((matmul(rprimd(:,:),ngqpt(1:3)))**2)
  do ii=-1,1
@@ -4148,8 +4149,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          else if (nbordh==2) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/3
          else if (nbordh/=0) then
-           message = 'There is a problem of borders and weights (hex).'
-           MSG_BUG(message)
+           MSG_BUG('There is a problem of borders and weights (hex).')
          end if
          if (nbord(3)==1)then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
@@ -4199,8 +4199,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          else if (nbord(1)==4) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/6
          else if (nbord(1)/=0) then
-           message = ' There is a problem of borders and weights (BCC).'
-           MSG_ERROR(message)
+           MSG_ERROR(' There is a problem of borders and weights (BCC).')
          end if
 
 !        FCC packing of k-points
@@ -4245,8 +4244,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/4
          else if (nbord(1)/=0 .and. wghatm(ia,ib,irpt)>1.d-10) then
 !          Interestingly nbord(1)==4 happens for some points outside of the volume
-           message = ' There is a problem of borders and weights (FCC).'
-           MSG_BUG(message)
+           MSG_BUG(' There is a problem of borders and weights (FCC).')
          end if
 
        else
@@ -4543,13 +4541,6 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
 !***********************************************************************
 
-!DEBUG
-!write(std_out,*)'sytens : enter'
-!write(std_out,*)'indsym = '
-!write(std_out,*)indsym
-!stop
-!ENDDEBUG
-
  ABI_ALLOCATE(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
 
@@ -4653,17 +4644,13 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                          end if
                        end if
 
-
-
                      end do
                    end do
                  end do
 
-
                  if (found == 1) then
                    pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -1
                  end if
-
 
 !                In case a symmetry operation only changes the sign of an
 !                element, this element has to be equal to zero
@@ -4674,8 +4661,6 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  end if
 
                end do    ! close loop on symmetries
-
-
 
 !              If the elemetn i1pert,i2pert,i3pert is not symmetric
 !              to a basis element, it is a basis element
@@ -4802,7 +4787,6 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
  real(dp),intent(out) :: dynmat(2,3,natom,3,natom,nqpt)
 
 !Local variables -------------------------
-
 !scalars
  integer :: ia,ib,iblok,idir1,idir2,ii,ipert1,ipert2,iqpt,isym,jj,kk,ll
  integer :: mu,nu,q1,q2,nqmiss,nprocs,my_rank,ierr
@@ -5197,8 +5181,6 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 
 ! *********************************************************************
 
- DBG_ENTER("COLL")
-
  do iqpt=1,nqpt
    !  Definition of q in normalized reciprocal space
    kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)*gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
@@ -5228,8 +5210,6 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
      end do
    end do
  end do
-
- DBG_EXIT("COLL")
 
 end subroutine dymfz9
 !!***
@@ -5309,7 +5289,7 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
    end do
 
  else
-   write(message,'(a,a,a,i0,a)' )&
+   write(message,'(3a,i0,a)' )&
 &   'The argument "plus" must be equal to 0 or 1.',ch10,&
 &   'The value ',plus,' is not available.'
    MSG_BUG(message)
@@ -5353,6 +5333,7 @@ end subroutine nanal9
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
 !! xred(3,natom)= relative coords of atoms in unit cell (dimensionless)
 !! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
+!! comm=MPI communicator.
 !!
 !! OUTPUT
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
@@ -5365,11 +5346,11 @@ end subroutine nanal9
 !! SOURCE
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
-& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff)
+& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dipdip,mpert,natom,nrpt
+ integer,intent(in) :: dipdip,mpert,natom,nrpt,comm
  real(dp),intent(in) :: qphnrm,ucvol
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qpt(3)
@@ -5400,7 +5381,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  end if
 
 !Generate the analytical part from the interatomic forces
- call ftifc_r2q (atmfrc,dq,gprim,natom,nqpt1,nrpt,rpt,qphon,wghatm)
+ call ftifc_r2q (atmfrc,dq,gprim,natom,nqpt1,nrpt,rpt,qphon,wghatm, comm)
 
 !The analytical dynamical matrix dq has been generated
 !in the normalized canonical coordinate system. Now, the
@@ -5536,8 +5517,8 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
 ! *********************************************************************
 
-!Prepare the diagonalisation: analytical part.
-!Note: displ is used as work space here
+ ! Prepare the diagonalisation: analytical part.
+ ! Note: displ is used as work space here
  i1=0
  do ipert1=1,natom
    do idir1=1,3
@@ -5554,11 +5535,11 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end do
 
-!Determine the analyticity of the matrix.
+ ! Determine the analyticity of the matrix.
  analyt=1; if(abs(qphnrm)<tol8) analyt=0
  if(abs(qphon(1))<tol8.and.abs(qphon(2))<tol8.and.abs(qphon(3))<tol8) analyt=2
 
-!In case of q=Gamma, only the real part is used
+ ! In case of q=Gamma, only the real part is used
  if(analyt==0 .or. analyt==2)then
    do i1=1,3*natom
      do i2=1,3*natom
@@ -5568,16 +5549,15 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
-!In the case the non-analyticity is required:
-! the tensor is in cartesian coordinates and this means that qphon must be in
-! given in Cartesian coordinates.
+ !In the case the non-analyticity is required:
+ ! the tensor is in cartesian coordinates and this means that qphon must be in given in Cartesian coordinates.
  if(analyt==0)then
 
-!  Normalize the limiting direction
+   ! Normalize the limiting direction
    qphon2=qphon(1)**2+qphon(2)**2+qphon(3)**2
    qphon(:)=qphon(:)/sqrt(qphon2)
 
-!  Get the dielectric constant for the limiting direction
+   ! Get the dielectric constant for the limiting direction
    epsq=zero
    do idir1=1,3
      do idir2=1,3
@@ -5587,7 +5567,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
    ABI_ALLOCATE(zeff,(3,natom))
 
-!  Get the effective charges for the limiting direction
+   ! Get the effective charges for the limiting direction
    do idir1=1,3
      do ipert1=1,natom
        zeff(idir1,ipert1)=zero
@@ -5597,7 +5577,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
      end do
    end do
 
-!  Get the non-analytical part of the dynamical matrix, and suppress its imaginary part.
+   ! Get the non-analytical part of the dynamical matrix, and suppress its imaginary part.
    i1=0
    do ipert1=1,natom
      do idir1=1,3
@@ -5666,8 +5646,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
 !***********************************************************************
 
-!Get the phonon frequencies (negative by convention, if
-!the eigenvalue of the dynamical matrix is negative)
+!Get the phonon frequencies (negative by convention, if the eigenvalue of the dynamical matrix is negative)
  do imode=1,3*natom
    if(eigval(imode)>=1.0d-16)then
      phfrq(imode)=sqrt(eigval(imode))
@@ -5678,10 +5657,10 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end if
  end do
 
-!Fix the phase of the eigenvectors
+ ! Fix the phase of the eigenvectors
  call fxphas_seq(eigvec,dum,0,0,1,3*natom*3*natom,0,3*natom,3*natom,0)
 
-!Normalise the eigenvectors
+ ! Normalise the eigenvectors
  do imode=1,3*natom
    norm=zero
    do idir1=1,3
@@ -5702,7 +5681,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end do
 
-!Get the phonon displacements
+ ! Get the phonon displacements
  do imode=1,3*natom
    do idir1=1,3
      do ipert1=1,natom
@@ -6006,13 +5985,12 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
 
 ! *********************************************************************
 
-!This slight breaking of the symmetry allows the
-!results to be more portable between machines
+ ! This slight breaking of the symmetry allows the results to be more portable between machines
  nearidentity(:,:)=one
  nearidentity(1,1)=one+break_symm
  nearidentity(3,3)=one-break_symm
 
-!Include the masses in the dynamical matrix
+ ! Include the masses in the dynamical matrix
  do ipert1=1,natom
    do ipert2=1,natom
      fac=1.0_dp/sqrt(amu(typat(ipert1))*amu(typat(ipert2)))/amu_emass
@@ -6023,8 +6001,7 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
          index=i1+3*natom*(i2-1)
          mat(2*index-1)=mat(2*index-1)*fac*nearidentity(idir1,idir2)
          mat(2*index  )=mat(2*index  )*fac*nearidentity(idir1,idir2)
-!        This is to break slightly the translation invariance, and make
-!        the automatic tests more portable
+         ! This is to break slightly the translation invariance, and make the automatic tests more portable
          if(ipert1==ipert2 .and. idir1==idir2)then
            mat(2*index-1)=mat(2*index-1)+break_symm*natom/amu_emass/idir1*0.01_dp
          end if
@@ -6112,67 +6089,56 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
 ! *********************************************************************
 
  select case (qtor)
-!
-   case (1)  !Recip to real space
-     gam_rpt(:,:,:) = zero
-     do irpt=1,nrpt
-       do iqpt=1,nqpt
-!        Get the phase factor with normalization!
-         re=coskr(iqpt,irpt)
-         im=sinkr(iqpt,irpt)
-         do ip=1,3*natom*3*natom
-!          Real and imaginary part of the real-space gam matrices
-           gam_rpt(1,ip,irpt) = gam_rpt(1,ip,irpt)&
-&           +re*gam_qpt(1,ip,iqpt) &
-&           +im*gam_qpt(2,ip,iqpt)
-           gam_rpt(2,ip,irpt) = gam_rpt(2,ip,irpt)&
-&           +re*gam_qpt(2,ip,iqpt) &
-&           -im*gam_qpt(1,ip,iqpt)
-         end do
+ case (1)
+   ! Recip to real space
+   gam_rpt(:,:,:) = zero
+   do irpt=1,nrpt
+     do iqpt=1,nqpt
+       ! Get the phase factor with normalization!
+       re=coskr(iqpt,irpt)
+       im=sinkr(iqpt,irpt)
+       do ip=1,3*natom*3*natom
+         ! Real and imaginary part of the real-space gam matrices
+         gam_rpt(1,ip,irpt) = gam_rpt(1,ip,irpt) + re*gam_qpt(1,ip,iqpt) + im*gam_qpt(2,ip,iqpt)
+         gam_rpt(2,ip,irpt) = gam_rpt(2,ip,irpt) + re*gam_qpt(2,ip,iqpt) - im*gam_qpt(1,ip,iqpt)
        end do
      end do
-     gam_rpt = gam_rpt/nqpt
-!
-   case (0) ! Recip space from real space
+   end do
+   gam_rpt = gam_rpt/nqpt
 
-     gam_qpt(:,:,:)=zero
+ case (0)
+   ! Recip space from real space
+   gam_qpt(:,:,:)=zero
 
-     do irpt=1,nrpt
-       do iqpt=1,nqpt
+   do irpt=1,nrpt
+     do iqpt=1,nqpt
 
-         do iatom=1,natom
-           do jatom=1,natom
-             re = coskr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
-             im = sinkr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
+       do iatom=1,natom
+         do jatom=1,natom
+           re = coskr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
+           im = sinkr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
 
-             do idir=1,3
-               do jdir=1,3
-!                Get phase factor
+           do idir=1,3
+             do jdir=1,3
+               ! Get phase factor
 
-                 ip= jdir + (jatom-1)*3 + (idir-1)*3*natom + (iatom-1)*9*natom
-!                Real and imaginary part of the interatomic forces
-                 gam_qpt(1,ip,iqpt)=&
-&                 gam_qpt(1,ip,iqpt)&
-&                 +re*gam_rpt(1,ip,irpt)&
-&                 -im*gam_rpt(2,ip,irpt)
-!                !DEBUG
-                 gam_qpt(2,ip,iqpt)=&
-&                 gam_qpt(2,ip,iqpt)&
-&                 +im*gam_rpt(1,ip,irpt)&
-&                 +re*gam_rpt(2,ip,irpt)
-!                !ENDDEBUG
+               ip= jdir + (jatom-1)*3 + (idir-1)*3*natom + (iatom-1)*9*natom
+               ! Real and imaginary part of the interatomic forces
+               gam_qpt(1,ip,iqpt) = gam_qpt(1,ip,iqpt) + re*gam_rpt(1,ip,irpt) - im*gam_rpt(2,ip,irpt)
+               !DEBUG
+               gam_qpt(2,ip,iqpt) = gam_qpt(2,ip,iqpt) + im*gam_rpt(1,ip,irpt) + re*gam_rpt(2,ip,irpt)
+               !ENDDEBUG
+             end do ! end jdir
+           end do ! end idir
+         end do
+       end do ! end iatom
 
-               end do ! end jdir
-             end do ! end idir
-           end do
-         end do ! end iatom
+     end do ! end iqpt
+   end do ! end irpt
 
-       end do ! end iqpt
-     end do ! end irpt
-
-   case default ! There is no other space to Fourier transform from
-     write(message,'(a,i0,a)' )'  The only allowed values for qtor are 0 or 1, while  qtor=',qtor,' has been required.'
-     MSG_BUG(message)
+ case default
+   write(message,'(a,i0,a)' )'The only allowed values for qtor are 0 or 1, while qtor= ',qtor,' has been required.'
+   MSG_BUG(message)
  end select
 
 end subroutine ftgam
@@ -6228,17 +6194,9 @@ subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
 ! Prepare the phase factors
  do iqpt=1,nqpt
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-   kk(1)=   qpt_full(1,iqpt)*gprim(1,1)+&
-&   qpt_full(2,iqpt)*gprim(1,2)+&
-&   qpt_full(3,iqpt)*gprim(1,3)
-
-   kk(2)=   qpt_full(1,iqpt)*gprim(2,1)+&
-&   qpt_full(2,iqpt)*gprim(2,2)+&
-&   qpt_full(3,iqpt)*gprim(2,3)
-
-   kk(3)=   qpt_full(1,iqpt)*gprim(3,1)+&
-&   qpt_full(2,iqpt)*gprim(3,2)+&
-&   qpt_full(3,iqpt)*gprim(3,3)
+   kk(1) = qpt_full(1,iqpt)*gprim(1,1) + qpt_full(2,iqpt)*gprim(1,2) + qpt_full(3,iqpt)*gprim(1,3)
+   kk(2) = qpt_full(1,iqpt)*gprim(2,1) + qpt_full(2,iqpt)*gprim(2,2) + qpt_full(3,iqpt)*gprim(2,3)
+   kk(3) = qpt_full(1,iqpt)*gprim(3,1) + qpt_full(2,iqpt)*gprim(3,2) + qpt_full(3,iqpt)*gprim(3,3)
    do irpt=1,nrpt
      ! Product of k and r
      kr = kk(1)*rpt(1,irpt)+ kk(2)*rpt(2,irpt)+ kk(3)*rpt(3,irpt)

@@ -43,8 +43,6 @@
 
 subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 
- implicit none
-
 !Arguments-------------------------
  integer ABI_ASYNC, intent(inout) :: xval(:)
  integer, intent(in) :: dest,tag,spaceComm
@@ -91,10 +89,8 @@ subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(inout) :: xval(:)
@@ -142,10 +138,8 @@ end subroutine xmpi_isend_dp1d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(inout) :: xval(:,:)

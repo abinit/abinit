@@ -123,6 +123,8 @@ program mrgdv
        write(std_out,*)"test_v1rsym                Test symmetries of DFPT potentials in real space."
        write(std_out,*)"test_ftinterp [n1,n2,n3]   Test Fourier interpolation of DFPT potentials."
        write(std_out,*)"downsample in_DVDB out_DVDB [n1,n2,n3] Produce new DVDB with q-subsmesh"
+       !write(std_out,*)"convert in_old_DVDB out_DVDB.nc  Convert old DVDB format to new DVDB in netcdf format"
+       !write(std_out,*)"add_gspot in_POT in_DVDB.nc  Add GS potential to DVDB file (required for Sternheimer."
        goto 100
      end if
    end do
@@ -155,7 +157,7 @@ program mrgdv
 
      db = dvdb_new(db_path, comm)
      call db%print(prtvol=prtvol)
-     call db%list_perts([-1,-1,-1])
+     call db%list_perts([-1, -1, -1])
      call db%free()
 
    case ("test_v1comp", "test_v1complete")
@@ -171,7 +173,7 @@ program mrgdv
 
    case ("test_ftinterp")
      call get_command_argument(2, db_path)
-     ngqpt = [2,2,2]
+     ngqpt = [2, 2, 2]
      if (nargs > 2) then
        call get_command_argument(3, arg)
        read(arg, *, iostat=ierr, iomsg=msg)ngqpt
@@ -184,10 +186,19 @@ program mrgdv
    case ("downsample")
      call get_command_argument(2, db_path)
      call get_command_argument(3, dump_file)
-     !ngqpt = [2,2,2]
      read(arg, *, iostat=ierr, iomsg=msg)ngqpt
      ABI_CHECK(ierr == 0, msg)
      call dvdb_qdownsample(db_path, dump_file, ngqpt, comm)
+
+   !case ("convert")
+   !  call get_command_argument(2, db_path)
+   !  call get_command_argument(3, dump_file)
+   !  call dvdb_convert_fort2nc(db_path, dump_file, comm)
+
+   !case ("add_gspot")
+   !  call get_command_argument(2, gspot_path)
+   !  call get_command_argument(3, db_path)
+   !  call dvdb_add_gspot(db_path, gspot_path, comm)
 
    case default
      MSG_ERROR(sjoin("Unknown command:", command))

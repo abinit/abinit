@@ -411,7 +411,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  call cwtime(cpu, wall, gflops, "start")
 
  tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-   dtset%shiftk, dtset%nkpt, dtset%kpt, msg, ierr)
+   dtset%shiftk, dtset%nkpt, dtset%kpt, comm, msg, ierr)
  if (ierr /= 0) then
    call destroy_tetra(tetra)
    MSG_WARNING(msg)

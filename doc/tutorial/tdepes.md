@@ -215,7 +215,7 @@ Alternatively, copy this example file in the Work directory if not yet done, and
 
         conda install netcdf4
 
-    if you are using [conda](https://conda.io/miniconda.html)
+    if you are using [conda](https://docs.conda.io/en/latest/miniconda.html)
 
 
 You should see on the screen an output similar to:

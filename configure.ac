@@ -23,8 +23,17 @@
 # Autoconf & Automake startup
 #
 
+# Enhance help message
+m4_divert_text([HELP_END], [
+In order to facilitate the configuration of Abinit, you can save the options
+you regularly use into a file. For full instructions, please consult the
+doc/build/config-template.ac file in this directory tree.
+
+A lot more documentation on how to build and run Abinit is available on the
+Abinit Wiki. Please consult it at https://wiki.abinit.org/ whenever needed.])
+
 # Initialize Autoconf
-AC_INIT([ABINIT],[8.11.5],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[8.11.6],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
