@@ -2501,7 +2501,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,&
 &                                      sqomega,&
-&                 compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename)
+&                 compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename,elec_eval=need_elec_eval)
 
 
 !  Print the standard deviation after the fit
