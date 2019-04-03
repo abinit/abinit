@@ -131,6 +131,10 @@ module m_multibinit_dataset
    integer :: scup_ksamp(3)
    integer :: scup_ismagnetic 
    integer :: scup_istddft    
+   integer :: scup_printgeom 
+   integer :: scup_printeigv
+   integer :: scup_printeltic 
+   integer :: scup_printorbocc
   ! TODO hexu: add parameters for spin.
   integer :: spin_calc_traj_obs
   integer :: spin_calc_thermo_obs
@@ -386,6 +390,12 @@ multibinit_dtset%scup_ksamp = (/ 1, 1, 1 /)
 multibinit_dtset%scup_tcharge = 0 
 multibinit_dtset%scup_ismagnetic = 0 
 multibinit_dtset%scup_istddft = 0
+multibinit_dtset%scup_printgeom   = 0  
+multibinit_dtset%scup_printeigv   = 0 
+multibinit_dtset%scup_printeltic  = 0  
+multibinit_dtset%scup_printorbocc = 0 
+
+
 
 !=======================================================================
 !Arrays
@@ -1206,6 +1216,51 @@ multibinit_dtset%scup_elec_model=zero
      MSG_ERROR(message)
    end if
  end do
+
+ multibinit_dtset%scup_printgeom=zero
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printgeom',tread,'INT')
+ if(tread==1) multibinit_dtset%scup_printgeom=intarr(1)
+ if(multibinit_dtset%scup_printgeom<0 .or. multibinit_dtset%scup_printgeom>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_printgeom is',multibinit_dtset%scup_printgeom,', but the only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct scup_printgeom in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%scup_printeigv=zero
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeigv',tread,'INT')
+ if(tread==1) multibinit_dtset%scup_printeigv=intarr(1)
+ if(multibinit_dtset%scup_printeigv<0 .or. multibinit_dtset%scup_printeigv>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_printeigv is',multibinit_dtset%scup_printeigv,', but the only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct scup_printeigv in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%scup_printeltic=zero
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeltic',tread,'INT')
+ if(tread==1) multibinit_dtset%scup_printeltic=intarr(1)
+ if(multibinit_dtset%scup_printeltic<0 .or. multibinit_dtset%scup_printeltic>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_printeltic is',multibinit_dtset%scup_printeltic,', but the only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct scup_printeltic in your input file.'
+   MSG_ERROR(message)
+ end if
+
+
+ multibinit_dtset%scup_printorbocc=zero
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printorbocc',tread,'INT')
+ if(tread==1) multibinit_dtset%scup_printorbocc=intarr(1)
+ if(multibinit_dtset%scup_printorbocc<0 .or. multibinit_dtset%scup_printorbocc>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_printorbocc is',multibinit_dtset%scup_printorbocc,', but the only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct scup_printorbocc in your input file.'
+   MSG_ERROR(message)
+ end if
 
  multibinit_dtset%scup_tcharge = zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_tcharge',tread,'DPR')
@@ -2493,6 +2548,10 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a16,F7.3)')   '    scup_tcharge',multibinit_dtset%scup_tcharge
    write(nunit,'(1x,a16,I3)')     ' scup_ismagnetic',multibinit_dtset%scup_ismagnetic
    write(nunit,'(1x,a16,I3)')     '    scup_istddft',multibinit_dtset%scup_istddft
+   write(nunit,'(1x,a16,I3)')     ' scup_printgeom',multibinit_dtset%scup_printgeom    
+   write(nunit,'(1x,a16,I3)')     '    scup_printeigv',multibinit_dtset%scup_printeigv   
+   write(nunit,'(1x,a16,I3)')     ' scup_printeltic',multibinit_dtset%scup_printeltic   
+   write(nunit,'(1x,a16,I3)')     '    scup_printorbocc',multibinit_dtset%scup_printorbocc 
  end if
 #endif
 
