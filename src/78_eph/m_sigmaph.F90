@@ -249,8 +249,11 @@ module m_sigmaph
    !   1: Use spherical integration inside the micro zone around the Gamma point
    !   2: More advanced (and expensive) treatmentent inside the BZ (NOT IMPLEMENTED YET)
 
-  logical :: use_doublegrid
+  logical :: use_doublegrid = .False.
    ! whether to use double grid or not
+
+  logical :: use_ftinterp = .False.
+   ! whether DFPT potentials should be read from the DVDB or interpolated on the fly.
 
   type(eph_double_grid_t) :: eph_doublegrid
    ! store the double grid related object
@@ -968,35 +971,35 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (dtset%symdynmat == 1) dvdb%symv1 = .True.
    !dvdb%symv1 = .False.
    if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
+
+ else if (dtset%useria == 2000) then
+     sigma%use_ftinterp = .True.
+     !if (all(dtset%eph_ngqpt_fine /= 0)) then
+     !if (dtset%useria == 2000 .and. all(dtset%eph_ngqpt_fine /= 0)) then
+     ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation. 
+     ! R-points are distributed inside comm_rpt
+     ! Note that when R-points are distributed inside comm_bq we cannot interpolate potentials on-the-fly 
+     ! inside the loop over q-points. 
+     ! In this case, indeed, the interpolation must be done in sigma_setup_qloop once we know the q-points contributing 
+     ! to the integral and the potentials must be cached.
+     comm_rpt = sigma%comm_bq
+     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+
+     ! Now build q-cache in the IBZ using qselect mask.
+     ABI_CALLOC(qselect, (sigma%nqibz))
+     qselect = 1
+     if (sigma%imag_only .and. sigma%qint_method == 1) then
+       call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
+     end if
+     call dvdb%qcacheft_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, qselect, comm)
+
  else
    ABI_CALLOC(qselect, (dvdb%nqpt))
    qselect = 1
    ! Try to predict the q-points required to compute tau.
-   !if (sigma%imag_only .and. sigma%qint_method == 1 .and. dtset%userie == 123) then
    if (sigma%imag_only .and. sigma%qint_method == 1) then
      call qpoints_oracle(sigma, cryst, ebands, dvdb%qpts, dvdb%nqpt, sigma%nqbz, sigma%qbz, qselect, comm)
    end if
- end if
-
- !if (all(dtset%eph_ngqpt_fine /= 0)) then
- if (dtset%useria == 2000 .and. all(dtset%eph_ngqpt_fine /= 0)) then
-   ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation. 
-   ! R-points are distributed inside comm_rpt
-   ! Note that when R-points are distributed inside comm_bq we cannot interpolate potentials on-the-fly 
-   ! inside the loop over q-points. 
-   ! In this case, indeed, the interpolation must be done in sigma_setup_qloop once we know the q-points contributing 
-   ! to the integral and the potentials must be cached.
-   comm_rpt = sigma%comm_bq
-   call dvdb%ftinterp_setup(dtset%eph_ngqpt_fine, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
-
-   ! Now build q-cache in the IBZ using qselect mask.
-   !ABI_CALLOC(qselect, (sigma%nqibz))
-   !qselect = 1
-   !if (sigma%imag_only .and. sigma%qint_method == 1) then
-   !  call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
-   !end if
-   !call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, qselect, comm)
- !else
  end if
 
  ! Set cache in Mb for q-points.
@@ -1008,7 +1011,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! This is also the reason why we reorder the q-points in ibz_k to pack the points in *shells* to minimise cache misses.
  call dvdb%set_qcache_mb(ngfftf, dtset%dvdb_qcache_mb)
  call dvdb%print(prtvol=dtset%prtvol)
- call dvdb%qcache_read(nfftf, ngfftf, qselect, comm)
+
+ if (dtset%useria /= 2000) then
+   call dvdb%qcache_read(nfftf, ngfftf, qselect, comm)
+ end if
 
  ABI_FREE(qselect)
 
@@ -1147,10 +1153,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ignore_kq = ignore_kq + 1; cycle
        end if
 
-       !if (dvdb%use_ftinterp) then
-       !  qq_ibz = sigma%qibz(:, sigma%ind_ibzk2ibz(1, iq_ibz))
-       !  call dvdb%get_ftinterp_qbz(qpt, qq_ibz, sigma%ind_ibzk2ibz(:, iq_ibz), cplex, nfftf, ngfft, v1scf, sigma%comm_pert)
-       !else
+if (sigma%use_ftinterp) then
+         db_iqpt = sigma%ind_ibzk2ibz(1, iq_ibz)
+         qq_ibz = sigma%qibz(:, db_iqpt)
+         call dvdb%get_ftinterp_qbz(cryst, qpt, qq_ibz, sigma%ind_ibzk2ibz(:, iq_ibz), &
+             cplex, nfftf, ngfft, v1scf, sigma%comm_pert)
+else
 
        ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
        ! This call allocates v1scf(cplex, nfftf, nspden, my_npert))
@@ -1160,6 +1168,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        else
          MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB file."))
        end if
+
+end if
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
        call timab(1901, 1, tsec)
@@ -3667,6 +3677,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  endif
 
  call cwtime(cpu, wall, gflops, "start")
+
  if (self%symsigma == 0) then
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
    self%nqibz_k = self%nqbz
@@ -3702,9 +3713,9 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  call cwtime_report(" lgroup_symsigma", cpu, wall, gflops)
 
  ! Find correspondence IBZ_k --> IBZ needed for Fourier interpolation.
- ABI_SFREE(self%ind_ibzk2ibz)
- ABI_MALLOC(self%ind_ibzk2ibz, (6, self%nqibz_k))
- call listkk(dksqmax, cryst%gmet, self%ind_ibzk2ibz, self%qibz, self%qibz_k, self%nqibz, self%nqibz_k, cryst%nsym, &
+if (self%use_ftinterp) then
+ ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
+ call listkk(dksqmax, cryst%gmet, iqk2dvdb, self%qibz, self%qibz_k, self%nqibz, self%nqibz_k, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
 
  if (dksqmax > tol12) then
@@ -3713,9 +3724,15 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
      'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
    MSG_ERROR(msg)
  end if
+ ABI_REMALLOC(self%ind_ibzk2ibz, (6, self%nqibz_k))
+ do iq_ibz=1,self%nqibz_k
+   self%ind_ibzk2ibz(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
+ end do
+ ABI_FREE(iqk2dvdb)
 
  call cwtime_report(" IBZ_k --> IBZ", cpu, wall, gflops)
 
+else
  ! Find correspondence IBZ_k --> set of q-points in DVDB.
  ! Need to handle q_bz = S q_ibz by symmetrizing the potentials already available in the DVDB.
  !
@@ -3726,7 +3743,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  iqk2dvdb = -1
  call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, self%qibz_k, dvdb%nqpt, self%nqibz_k, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
- if (dtset%useria /= 1999) then
+ if (all(dtset%useria /= [1999, 2000])) then
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6,2a)' )&
        "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
@@ -3741,6 +3758,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  do iq_ibz=1,self%nqibz_k
    self%indq2dvdb_k(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
  end do
+ ABI_FREE(iqk2dvdb)
+endif
 
  ! Find k+q in the extended zone and extract symmetry info.
  ! Be careful here because there are two umklapp vectors to be considered:
@@ -3753,6 +3772,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  end do
 
  ! Use iqk2dvdb as workspace array.
+ ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
  call listkk(dksqmax, cryst%gmet, iqk2dvdb, ebands%kptns, kq_list, ebands%nkpt, self%nqibz_k, cryst%nsym, &
    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
  if (dksqmax > tol12) then
@@ -3908,8 +3928,8 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ! Make sure each node has the q-points we need. Perform collective IO inside comm if needed.
        ! TODO: Should not break qcache_size_mb contract!
        if (self%imag_only .and. self%qint_method == 1) then
-         !if (dvdb%use_ftinterp) then
-         !  ABI_ICALLOC(ineed_qpt, (sigma%nqibz))
+if (self%use_ftinterp) then
+         ABI_ICALLOC(ineed_qpt, (self%nqibz))
          !  do imyq=1,self%my_nqibz_k
          !    iq_ibz_k = self%myq2ibz_k(imyq)
          !    TODO
@@ -3918,9 +3938,8 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
          !  end do
          !  Update cache.
          !  call dvdb_ftinterp_qcache_update(dvdb, nfftf, ngfftf, ineed_qpt, comm)
-         !  ABI_FREE(ineed_qpt)
-         !else
-         !end if
+         ABI_FREE(ineed_qpt)
+else
          ! Find q-points needed by this MPI rank.
          ABI_ICALLOC(ineed_qpt, (dvdb%nqpt))
          do imyq=1,self%my_nqibz_k
@@ -3931,6 +3950,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
          ! Update cache.
          call dvdb%qcache_update(nfftf, ngfftf, ineed_qpt, comm)
          ABI_FREE(ineed_qpt)
+end if
        end if
 
      end if ! qfilter

@@ -174,7 +174,7 @@ program mrgdv
 
    case ("test_ftinterp")
      call get_command_argument(2, db_path)
-     ngqpt = [2, 2, 2]
+     !ngqpt = [2, 2, 2]
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default=2, want_len=3) == 0, msg)
      write(std_out,"(a)")sjoin("Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(ngqpt))
      call dvdb_test_ftinterp(db_path, ngqpt, comm)
