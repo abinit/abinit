@@ -2512,6 +2512,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
 
 ! *************************************************************************
 
+ call wrtout(std_out, " Building V(r, R) ...", do_flush=.True.)
+
  ABI_CHECK(.not. allocated(db%v1scf_rpt), " v1scf_rpt is already allocated!")
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -2985,11 +2987,13 @@ subroutine dvdb_get_ftinterp_qbz(db, cryst, qbz, indq2ibz, cplex, nfft, ngfft, v
  isym = indq2ibz(2); itimrev = indq2ibz(6) + 1; g0q = indq2ibz(3:5)
  isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
 
+ ! Note that cplex is always set to 2 here
+ cplex = 2
+
  ! Check whether iq_ibz is in cache.
  incache = .False.
  if (db%qcache_ftqibz%size > 0) then
    ! Get number of perturbations computed for this iqpt as well as cplex.
-   !cplex = ?
    !npc = dvdb_get_pinfo(db, db_iqpt, cplex, pinfo)
    !ABI_CHECK(npc /= 0, "npc == 0!")
    db%qcache_ftqibz%stats(1) = db%qcache_ftqibz%stats(1) + 1
@@ -3018,7 +3022,8 @@ subroutine dvdb_get_ftinterp_qbz(db, cryst, qbz, indq2ibz, cplex, nfft, ngfft, v
    ! Read the dvscf potentials in the IBZ for all 3*natom perturbations.
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
    !call dvdb_readsym_allv1(db, iq_ibz, cplex, nfft, ngfft, v1scf, comm)
-   !call dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r)
+   ABI_MALLOC_OR_DIE(v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
+   call dvdb_ftinterp_qpt(db, qbz, nfft, ngfft, v1scf)
  end if
 
  if (db%qcache_ftqibz%size > 0 .and. .not. incache) then
