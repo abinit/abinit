@@ -69,12 +69,12 @@ contains
 !! filnam(5)=character strings giving file names
 !! filstat=character strings giving name of status file
 !! idtset=number of the dataset
-!! image_index= -optional argument- index of image to be used when appending
-!!             "_IMGxxx" string to file names. To be used only when an algorithm
-!!             using images of the cell is activated
 !! jdtset_(0:ndtset)=actual index of the datasets
 !! mpi_enreg=information about MPI parallelization
 !! ndtset=number of datasets
+!! [image_index]= index of image to be used when appending
+!!             "_IMGxxx" string to file names. To be used only when an algorithm
+!!             using images of the cell is activated
 !!
 !! OUTPUT
 !! dtfil=<type datafiles_type>infos about file names, file unit numbers
@@ -935,30 +935,30 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  ! Here, defaults if no get variable
  will_read=ird
 
- filnam_appen=trim(filnam(3))
- if(ndtset>0)then
-   jdtset=jdtset_(idtset)
-   call appdig(jdtset,'',appen)
-   filnam_appen=trim(filnam_appen)//'_DS'//appen
+ filnam_appen = trim(filnam(3))
+ if (ndtset > 0) then
+   jdtset = jdtset_(idtset)
+   call appdig(jdtset, '', appen)
+   filnam_appen = trim(filnam_appen)//'_DS'//appen
  end if
- filnam_out=trim(filnam_appen)//trim(stringfil)
+ filnam_out = trim(filnam_appen)//trim(stringfil)
 
- ! Treatment of the multi-dataset case  (get is not relevant otherwise)
- if(ndtset/=0)then
+ ! Treatment of the multi-dataset case (get is not relevant otherwise)
+ if (ndtset /= 0) then
 
-   if(ndtset==1.and.get<0.and.(jdtset_(1)+get>0))then
+   if(ndtset==1 .and. get<0 .and. (jdtset_(1)+get>0)) then
      write(msg, '(7a,i0,a,i0,5a)' )&
      'You cannot use a negative value of get',trim(stringvar),' with only 1 dataset!',ch10, &
-     ' If you want to refer to a previously computed dataset,',ch10, &
-     ' you should give the absolute index of it (i.e. ', jdtset_(idtset)+get,' instead of ',get,').',ch10, &
+     'If you want to refer to a previously computed dataset,',ch10, &
+     'you should give the absolute index of it (i.e. ', jdtset_(idtset)+get,' instead of ',get,').',ch10, &
      'Action: correct get',trim(stringvar),' in your input file.'
      MSG_ERROR(msg)
    end if
 
-   if(idtset+get<0)then
+   if (idtset + get < 0) then
      write(msg, '(5a,i0,3a,i0,4a)' )&
      'The sum of idtset and get',trim(stringvar),' cannot be negative,',ch10,&
-     'while they are idtset=',idtset,', and get',trim(stringvar),'=',get,ch10,&
+     'while they are idtset = ',idtset,', and get',trim(stringvar),' = ',get,ch10,&
      'Action: correct get',trim(stringvar),' in your input file.'
      MSG_ERROR(msg)
    end if
@@ -968,7 +968,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      if(ird/=0 .and. get/=0)then
        write(msg, '(7a,i0,3a,i0,a,i0,7a)' )&
        'The input variables ird',trim(stringvar),' and get',trim(stringvar),' cannot be',ch10,&
-       'simultaneously non-zero, while for idtset=',idtset,',',ch10,&
+       'simultaneously non-zero, while for idtset = ',idtset,',',ch10,&
        'they are ',ird,', and ',get,'.',ch10,&
        'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
        MSG_ERROR(msg)
@@ -986,12 +986,10 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
 
      if(jdtset>=100)then
        write(msg, '(5a,i5,2a)' )&
-       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
-       ' from output of DATASET ',jget,'.',ch10
+       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),' from output of DATASET ',jget,'.',ch10
      else
        write(msg, '(5a,i3,2a)' )&
-       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
-       ' from output of DATASET ',jget,'.',ch10
+       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),' from output of DATASET ',jget,'.',ch10
      end if
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,msg,'COLL')

@@ -287,8 +287,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !  1-Compute all <g|S|Cnk+q>
    igscq=0
    mgscq=mpw1*nspinor*mband
-   ABI_STAT_ALLOCATE(gscq,(2,mgscq), ierr)
-   ABI_CHECK(ierr==0, "out of memory in gscq")
+   ABI_MALLOC_OR_DIE(gscq,(2,mgscq), ierr)
 
    call getgsc(cgq,cprjq,gs_hamkq,gscq,ibgq,icgq,igscq,ikpt,isppol,mcgq,mcprjq,&
 &   mgscq,mpi_enreg,natom,nband_k,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
@@ -682,10 +681,9 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 !Local variables-------------------------------
 !scalars
  integer :: ibandkq,index_cgq,index_cprjq,index_eig1,ii
- real(dp) :: facti,factr,invocc,eta,delta_E,inv_delta_E,gkkr
+ real(dp) :: facti,factr,eta,delta_E,inv_delta_E,gkkr
 !arrays
  real(dp) :: tsec(2)
- real(dp),allocatable :: cwcorr(:,:)
 
 ! *********************************************************************
 

@@ -433,8 +433,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 #ifdef HAVE_MPI
    call xmpi_barrier(spaceComm)
 !  Compute mband and mpw
-   ABI_STAT_ALLOCATE(cg_disk,(2,mcg_disk), ierr)
-   ABI_CHECK(ierr==0, "out of memory in cg_disk")
+   ABI_MALLOC_OR_DIE(cg_disk,(2,mcg_disk), ierr)
 #endif
 
    band_index=0

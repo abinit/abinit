@@ -734,6 +734,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! This table is needed when computing tau:
  ! k+q states outside energy window are not read hence their contribution won't be included.
  ! Error is small provided calculation is close to convergence.
+ ! TODO: Store min/max energy difference ...
  ABI_MALLOC(ihave_ikibz_spin, (nkpt, nsppol))
  ihave_ikibz_spin = .False.
  do spin=1,sigma%nsppol
@@ -1107,9 +1108,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Arrays for Debye-Waller
      if (.not. sigma%imag_only) then
-       ABI_STAT_ALLOCATE(gkq0_atm, (2, nbcalc_ks, bsum_start:bsum_stop, natom3), ierr)
-       ABI_CHECK(ierr == 0, "out of memory in gkq0_atm")
-       gkq0_atm = zero
+       ABI_CALLOC_OR_DIE(gkq0_atm, (2, nbcalc_ks, bsum_start:bsum_stop, natom3), ierr)
      end if
 
      ! Integrate delta functions inside miniBZ around Gamma.

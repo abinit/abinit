@@ -2623,8 +2623,7 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 
 
  ABI_ALLOCATE(chi0_diag,(Ep%npwe))
- ABI_STAT_ALLOCATE(chitmp,(Ep%npwe,Ep%npwe), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in chitmp")
+ ABI_MALLOC_OR_DIE(chitmp,(Ep%npwe,Ep%npwe), ierr)
 
  do io=2,Ep%nomega
 

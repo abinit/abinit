@@ -268,8 +268,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    igsc=0
    mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
 
-   ABI_STAT_ALLOCATE(gsc,(2,mgsc), ierr)
-   ABI_CHECK(ierr==0, "out of memory in gsc")
+   ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
    gsc=zero
  end if
 

@@ -31,20 +31,11 @@
 # endif
 #endif
 
-/** #define DEBUG_MODE   **/
-
 #if defined(HAVE_FC_LONG_LINES) || defined(__INTEL_COMPILER) || defined(FC_NAG) || !defined(HAVE_FC_MACRO_NEWLINE)
 # define NEWLINE ;
 #else
 # define NEWLINE \newline
 #endif
-
-/**
-#ifdef FC_NAG
-#  undef HAVE_FC_LONG_LINES
-#  define HAVE_FC_LONG_LINES
-#endif
-**/
 
 /*
  * These macros are used to pass information on the file and the line to the children if the compiler supports long lines.
@@ -164,10 +155,11 @@
         ABI_CHECK(ierr == 0, "out-of-memory")
 #endif
 
-/* Macros to allocate zero-initializes arrays.
+/* Macros to allocate zero-initialized arrays.
  * defined in terms of previous macros */
 #define ABI_CALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
 #define ABI_ICALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = 0
+#define ABI_CALLOC_OR_DIE(ARR,SIZE,ierr) ABI_MALLOC_OR_DIE(ARR, SIZE, ierr) NEWLINE ARR = zero
 
 /* Shorthand versions */
 #define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)

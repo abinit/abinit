@@ -80,7 +80,7 @@ module m_wfk
  use m_geometry,     only : metric
  use m_time,         only : cwtime, cwtime_report, asctime
  use m_fstrings,     only : sjoin, strcat, endswith, itoa, ktoa
- use m_io_tools,     only : get_unit, mvrecord, iomode_from_fname, open_file, close_unit, delete_file, file_exists
+ use m_io_tools,     only : get_unit, mvrecord, iomode_from_fname, iomode2str, open_file, close_unit, delete_file, file_exists
  use m_numeric_tools,only : mask2blocks
  use m_cgtk,         only : cgtk_rotate
  use m_fftcore,      only : get_kg, ngfft_seq
@@ -2814,9 +2814,13 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
 !scalars
  integer,parameter :: master=0,formeig0=0
  integer :: ik_ibz,spin,my_rank,ierr,iomode,funt,sc_mode,mband
+ real(dp) :: cpu, wall, gflops
  type(wfk_t) :: Wfk
 
 !************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
+ call wrtout(std_out, sjoin(" Reading eigenvalues from: ", fname,", with iomode = ",iomode2str(iomode)))
 
  iomode = iomode_from_fname(fname)
  my_rank = xmpi_comm_rank(comm)
@@ -2862,6 +2866,8 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
    call xmpi_bcast(eigen,master,comm,ierr)
    if (present(occ)) call xmpi_bcast(occ,master,comm,ierr)
  end if
+
+ call cwtime_report(" wfk_read_eigenvalues", cpu, wall, gflops)
 
 end subroutine wfk_read_eigenvalues
 !!***

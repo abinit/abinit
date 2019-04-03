@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****p* ABINIT/bsepostproc
+!!****p* ABINIT/abitk
 !! NAME
-!! bsepostproc
+!! abitk
 !!
 !! FUNCTION
 !!
@@ -28,7 +28,7 @@
 
 #include "abi_common.h"
 
-program bsepostproc
+program abitk
 
  use defs_basis
  use defs_abitypes
@@ -276,7 +276,7 @@ program bsepostproc
  ABI_SFREE(kbz)
  ABI_SFREE(new_shiftk)
 
- call abinit_doctor("__bsepostproc")
+ call abinit_doctor("__abitk")
 
  100 call xmpi_end()
 
@@ -394,5 +394,5 @@ subroutine get_path_cryst(path, cryst, comm)
 end subroutine get_path_cryst
 !!***
 
-end program bsepostproc
+end program abitk
 !!***
