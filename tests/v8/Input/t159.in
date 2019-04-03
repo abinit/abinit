@@ -13,14 +13,16 @@ t157o_DS6_POT4
 #%% [setup]
 #%% executable = mrgdv
 #%% exclude_builders = .*_intel_1[89].0_.*
-#%% test_chain = t157.in, t158.in, t159.in, t160.in
+#%% test_chain = t157.in, t158.in, t159.in, t160.in, t161.in
 #%% [files]
 #%% files_to_test =
 #%%   t159.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]
-#%% post_commands = ww_cp t159o_DVDB t160o_DS20_DVDB
+#%% post_commands = 
+#%%  ww_cp t159o_DVDB t160o_DS20_DVDB;
+#%%  ww_cp t159o_DVDB t161o_DS20_DVDB
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

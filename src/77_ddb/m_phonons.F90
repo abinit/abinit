@@ -729,7 +729,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 
  ! Parameters defining the gaussian approximant.
  if (prtdos == 1) then
-   ! TODO: use dirac_delta and update reference files.
+   ! TODO: use gaussian and update reference files.
    gaussprefactor = one / (dossmear * sqrt(two_pi))
    gaussfactor = one / (sqrt2 * dossmear)
    write(msg, '(4a,f8.5,2a,f8.5)') ch10, &
@@ -765,7 +765,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
        nkpt_fullbz, size(new_shiftq, dim=2), crystal%nsym, new_shiftq, crystal%symrel)
 
    ! Init tetrahedra, i.e. indexes of the full q-points at their summits
-   call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr)
+   call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr, comm)
    ABI_CHECK(ierr == 0, errstr)
 
    ABI_FREE(bz2ibz)
@@ -1841,8 +1841,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
-     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom,&
-&     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff)
+     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
+      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff, &
+      xmpi_comm_self)
 
    else if (ifcflag == 0) then
 

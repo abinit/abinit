@@ -10,6 +10,7 @@ EXTRA_DIST += \
         xmpi_recv.finc \
         xmpi_irecv.finc \
         xmpi_sum.finc \
+        xmpi_ibcast.finc \
         xmpi_isum.finc \
         xmpi_alltoall.finc \
         xmpi_ialltoall.finc \
