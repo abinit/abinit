@@ -117,21 +117,21 @@ class Tester(object):
                     else:
                         self.check_this(child, ref[child], tested[child])
 
-            elif getattr(ref, 'to_dict', None):  # user made browsable
-                dref = ref.to_dict()
-                dtest = tested.to_dict()
-                for child in dref:
-                    if child not in tested:
-                        msg = '{} was not present'.format(child)
-                        self.issues.append(Failure(self.conf, msg))
-                    else:
-                        self.check_this(child, dref[child], dtest[child])
-
-            elif hasattr(ref, 'to_list'):
-                lref = ref.to_list()
-                ltest = tested.to_list()
-                for index, (vref, vtest) in enumerate(zip(lref, ltest)):
-                    self.check_this(string(index), vref, vtest)
+            elif hasattr(ref, 'get_children'):  # user made browsable
+                try:
+                    dref = ref.get_children()
+                    dtest = tested.get_children()
+                except Exception as e:
+                    msg = ('Tried to get a dict of item from {} but failed:\n'
+                           '{}: {}').format(name, e.__class__.__name__, str(e))
+                    self.issues.append(Failure(self.conf, msg))
+                else:
+                    for child in dref:
+                        if child not in dtest:
+                            msg = '{} was not present'.format(child)
+                            self.issues.append(Failure(self.conf, msg))
+                        else:
+                            self.check_this(child, dref[child], dtest[child])
 
             elif (hasattr(ref, '__iter__')
                   and not getattr(ref, 'has_no_child', False)

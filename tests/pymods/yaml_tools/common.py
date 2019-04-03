@@ -39,9 +39,10 @@ class BaseDictWrapper(object):
             self[attr] = d[attr]
 
     def get(self, key, default=None):
-        nkey = normalize_attr(key)
-        if nkey in self.__dict__:
-            elem = self.__dict__[nkey]
+        if isinstance(key, basestring):
+            key = normalize_attr(key)
+        if key in self.__dict__:
+            elem = self.__dict__[key]
         else:
             elem = default
         if type(elem) is dict:
@@ -50,11 +51,15 @@ class BaseDictWrapper(object):
             return elem
 
     def __contains__(self, key):
-        nkey = normalize_attr(key)
-        return nkey in self.__dict__
+        if isinstance(key, basestring):
+            key = normalize_attr(key)
+        return key in self.__dict__
 
     def __getitem__(self, key):
-        nkey = normalize_attr(key)
+        if isinstance(key, basestring):
+            nkey = normalize_attr(key)
+        else:
+            nkey = key
         if nkey not in self.__dict__:
             raise KeyError(key)
         elem = self.__dict__[nkey]
@@ -64,9 +69,11 @@ class BaseDictWrapper(object):
             return elem
 
     def __setitem__(self, key, val):
+        if isinstance(key, basestring):
+            key = normalize_attr(key)
         if type(val) is dict:
             val = BaseDictWrapper(val)
-        self.__dict__[normalize_attr(key)] = val
+        self.__dict__[key] = val
 
     def __delitem__(self, key):
         nkey = normalize_attr(key)

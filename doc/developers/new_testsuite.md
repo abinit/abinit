@@ -895,7 +895,7 @@ Etotal:
 ```
 
 However it can be better to give back the control to `tester`. For that purpose
-we can implement the method `to_dict` that should return a dictionary of the
+we can implement the method `get_children` that should return a dictionary of the
 data to be checked automatically. `tester` will detect it and use it to check
 what you gave him.
 
@@ -906,7 +906,7 @@ class Etot(object):
 
     ...  # same code as the previous example
 
-    def to_dict(self):
+    def get_children(self):
         return {
             'kin': self.kinetic,
             'hart': self.hartree,
@@ -921,8 +921,8 @@ game him.
 If the class has a __complete__ dict-like read interface (`__iter__` yielding
 keys, `__contains__`, `__getitem__`, `keys` and `items`) then it can have a
 class attribute `is_dict_like` set to `True` and it will be treated as any other
-node (it not longer need `to_dict`). `yaml_auto_map` registered classes automatically
-address these requirements.
+node (it not longer need `get_children`). `yaml_auto_map` registered classes
+automatically address these requirements.
 
 `yaml_seq` is analogous to `yaml_map` however `to_map` became `to_seq` and the
 YAML source data have to match the YAML sequence structure (either `[a, b, c]`
@@ -935,7 +935,7 @@ or
 )
 
 The argument passed to `to_seq` is a list. If one wants `tester` to browse the
-elements of the resulting object one can either inherit implement a `to_list`
+elements of the resulting object one can either implement a `get_children`
 method or implement the `__iter__` python special method.
 
 If for some reason a class have the `__iter__` method implemented but one does
