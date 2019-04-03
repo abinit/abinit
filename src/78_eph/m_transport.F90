@@ -42,7 +42,7 @@ module m_transport
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
- use m_numeric_tools,  only : bisect, arth, simpson_int, polyn_interp
+ use m_numeric_tools,  only : bisect, arth, simpson_int, polyn_interp, safe_div
  use m_fstrings,       only : strcat
  use m_occ,            only : occ_fd, occ_dfd
  use m_pawang,         only : pawang_type
@@ -455,9 +455,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
        ! Multiply by the lifetime
        do itemp=1,self%ntemp
          linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
-         vv_tens(:, :, 1+itemp, ib, ik, ispin) = 0
-         if (linewidth < tol12) cycle
-         vv_tens(:, :, 1+itemp, ib, ik, ispin) = vv_tens(:, :, 1, ib, ik, ispin) / linewidth
+         call safe_div( vv_tens(:, :, 1, ib, ik, ispin), linewidth, zero, vv_tens(:, :, 1+itemp, ib, ik, ispin))
        end do
      end do
    end do
@@ -521,15 +519,17 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 #define fact1   (meter**2 / second * Ha_J)
 
  self%sigma = fact0 * self%l0
- self%pi(:,:,:,:,itemp) = volt * self%l1(:,:,:,:,itemp) /  max(self%l0(:,:,:,:,itemp),tol12)
+ call safe_div(volt * self%l1(:,:,:,:,itemp), self%l0(:,:,:,:,itemp), zero, self%pi(:,:,:,:,itemp))
  do itemp=1,self%ntemp
-   if (kT < tol8) cycle
    kT = self%kTmesh(itemp) / kb_HaK
-   self%seebeck(:,:,:,:,itemp) = 1/kT * volt * self%l1(:,:,:,:,itemp)/ &
-                                        max(self%l0(:,:,:,:,itemp),tol12)
-   self%kappa(:,:,:,:,itemp) = 1/kT * fact1 * (-self%l1(:,:,:,:,itemp)**2 / &
-                                        max(self%l0(:,:,:,:,itemp),tol12) + &
-                                        self%l2(:,:,:,:,itemp))
+   call safe_div(volt * self%l1(:,:,:,:,itemp), &
+                 kT * self%l0(:,:,:,:,itemp), zero, self%seebeck(:,:,:,:,itemp))
+
+   ! HM: to write it as a single division I do:
+   ! kappa = L1^2/L0 + L2 = (L1^2 + L2*L0)/L0
+   ! Check why do we need minus sign here to get consistent results with Boltztrap!
+   call safe_div( - volt**2 * fact0 * (self%l1(:,:,:,:,itemp)**2 - self%l2(:,:,:,:,itemp)*self%l0(:,:,:,:,itemp)), &
+                 kT * self%l0(:,:,:,:,itemp), zero, self%kappa(:,:,:,:,itemp))
  end do
 
  ! Compute the index of the fermi level
@@ -571,9 +571,9 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
      do ii=1,3
        do jj=1,3
          do iw=1,self%nw
-           if (abs(self%n(iw,itemp,iel)) < tol12) cycle
-           self%mobility(iw,ispin,ii,jj,itemp,iel) = self%sigma(iw,ispin,ii,jj,itemp) / &
-                                                 ( e_Cb * self%n(iw,itemp,iel) ) * 100**2
+           call safe_div( self%sigma(iw,ispin,ii,jj,itemp) * 100**2, &
+                          e_Cb * self%n(iw,itemp,iel), &
+                          zero, self%mobility(iw,ispin,ii,jj,itemp,iel) )
          end do
        end do
      end do
@@ -618,7 +618,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  ! Get spin degeneracy
  max_occ = two/(self%nspinor*self%nsppol)
  ! 2 comes from linewidth-lifetime relation
- fact = max_occ /  2
+ fact = max_occ / two
 
  do itemp=1,self%ntemp
    kT = self%kTmesh(itemp)
@@ -674,7 +674,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  integer :: nsppol, nkpt, mband, ib, ik, ispin, ii, jj, itemp
  integer :: ielhol, nvalence
  integer :: bmin(2), bmax(2)
- real(dp) :: vr(3), vv_tens(3,3)
+ real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
  real(dp) :: eig_nk, mu_e, linewidth, fact
  real(dp) :: max_occ, kT, wtk
 
@@ -744,10 +744,8 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
          mu_e = self%transport_mu_e(itemp)
          kT = self%kTmesh(itemp)
          linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
-         if (linewidth < tol12) cycle
-         self%mobility_mu(ielhol, ispin, :, :, itemp) = &
-                                      self%mobility_mu(ielhol, ispin, :, :, itemp) + &
-                                      wtk * vv_tens(:, :) * occ_dfd(eig_nk,kT,mu_e) / linewidth
+         call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk,kT,mu_e), linewidth, zero, vv_tenslw(:, :))
+         self%mobility_mu(ielhol, ispin, :, :, itemp) = self%mobility_mu(ielhol, ispin, :, :, itemp) + vv_tenslw(:, :)
        end do
      end do
    end do !kpt
@@ -755,20 +753,14 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
 
  ! Scale by the carrier concentration
  do itemp=1,self%ntemp
-   ! Electron mobility
-   if (self%ne(itemp)>tol12) then
-     self%mobility_mu(1,:,:,:,itemp) = fact * self%mobility_mu(1,:,:,:,itemp) / &
-                                       ( self%ne(itemp) / cryst%ucvol / Bohr_meter**3 )
-   else
-     self%mobility_mu(1,:,:,:,itemp) = 0
-   end if
-   ! Hole mobility
-   if (self%nh(itemp)>tol12) then
-     self%mobility_mu(2,:,:,:,itemp) = fact * self%mobility_mu(2,:,:,:,itemp) / &
-                                       ( self%nh(itemp) / cryst%ucvol / Bohr_meter**3 )
-   else
-     self%mobility_mu(2,:,:,:,itemp) = 0
-   end if
+   ! for electrons
+   call safe_div( fact * self%mobility_mu(1,:,:,:,itemp), &
+                  self%ne(itemp) / cryst%ucvol / Bohr_meter**3, &
+                  zero, self%mobility_mu(1,:,:,:,itemp) )
+   ! for holes
+   call safe_div( fact * self%mobility_mu(2,:,:,:,itemp), &
+                  self%nh(itemp) / cryst%ucvol / Bohr_meter**3, &
+                  zero, self%mobility_mu(2,:,:,:,itemp) )
  end do
 
  contains
