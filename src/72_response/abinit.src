@@ -35,6 +35,7 @@ sources = [
  "m_dvdb.F90",
  "m_efmas.F90",
  "m_eig2d.F90",
+ "m_hightemp.F90",
  "m_rf2.F90",
  "m_paral_pert.F90",
  "m_strain.F90",
