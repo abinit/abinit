@@ -8,12 +8,32 @@
 ../configure FC=ifort FCFLAGS="-qopenmp -heap-arrays 1000000" FCFLAGS_OPENMP="-qopenmp" FCFLAGS_OPTIM="-xCORE-AVX512" --enable-openmp="yes" --with-linalg-flavor="mkl" --with-linalg-incs="-I${MKLROOT}/include/" --with-linalg-libs="-L${MKLROOT}/lib/intel64/ -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm" --with-fft-flavor="fftw3" --with-fft-libs="-L${MKLROOT}/lib/intel64/ -Wl,--start-group -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -Wl,--end-group"
 
 #CSL MAQAO
-../configure FC=ifort FCFLAGS="-qopenmp -heap-arrays 1000000 -g -Ofast" FCFLAGS_OPENMP="-qopenmp" FCFLAGS_OPTIM="-xCORE-AVX512" --enable-openmp="yes" --with-linalg-flavor="mkl" --with-linalg-incs="-I${MKLROOT}/include/" --with-linalg-libs="-L${MKLROOT}/lib/intel64/ -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm" --with-fft-flavor="fftw3" --with-fft-libs="-L${MKLROOT}/lib/intel64/ -Wl,--start-group -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -Wl,--end-group"
+../configure FC=ifort FCFLAGS="-qopenmp -heap-arrays 1000000 -g -Ofast -funroll-loops -xCORE-AVX512" FCFLAGS_OPENMP="-qopenmp" FCFLAGS_OPTIM="-xCORE-AVX512" --enable-openmp="yes" --with-linalg-flavor="mkl" --with-linalg-incs="-I${MKLROOT}/include/" --with-linalg-libs="-L${MKLROOT}/lib/intel64/ -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm" --with-fft-flavor="fftw3" --with-fft-libs="-L${MKLROOT}/lib/intel64/ -Wl,--start-group -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -Wl,--end-group"
 
 #KNL
 ../configure FC=ifort FCFLAGS="-qopenmp -heap-arrays 1000000" FCFLAGS_OPENMP="-qopenmp" FCFLAGS_OPTIM="-xMIC-AVX512" --enable-openmp="yes" --with-linalg-flavor="mkl" --with-linalg-incs="-I${MKLROOT}/include/" --with-linalg-libs="-L${MKLROOT}/lib/intel64/ -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm" --with-fft-flavor="fftw3" --with-fft-libs="-L${MKLROOT}/lib/intel64/ -Wl,--start-group -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -Wl,--end-group"
 
 #KNL MAQAO
-../configure FC=ifort FCFLAGS="-qopenmp -heap-arrays 1000000 -g -ofast" FCFLAGS_OPENMP="-qopenmp" FCFLAGS_OPTIM="-xMIC-AVX512" --enable-openmp="yes" --with-linalg-flavor="mkl" --with-linalg-incs="-I${MKLROOT}/include/" --with-linalg-libs="-L${MKLROOT}/lib/intel64/ -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm" --with-fft-flavor="fftw3" --with-fft-libs="-L${MKLROOT}/lib/intel64/ -Wl,--start-group -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -Wl,--end-group"
+../configure FC=ifort FCFLAGS="-qopenmp -heap-arrays 1000000 -g -ofast -funroll-loops" FCFLAGS_OPENMP="-qopenmp" FCFLAGS_OPTIM="-xMIC-AVX512" --enable-openmp="yes" --with-linalg-flavor="mkl" --with-linalg-incs="-I${MKLROOT}/include/" --with-linalg-libs="-L${MKLROOT}/lib/intel64/ -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm" --with-fft-flavor="fftw3" --with-fft-libs="-L${MKLROOT}/lib/intel64/ -Wl,--start-group -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -Wl,--end-group"
 
+#MPI + OPENMP (configuration file)
+FC="/home/bogdan/intel/compilers_and_libraries_2019.1.144/linux/mpi/intel64/bin/mpif90 -fc=ifort"
+CC="/home/bogdan/intel/compilers_and_libraries_2019.1.144/linux/mpi/intel64/bin/mpicc"
+FCFLAGS="-O2 -heap-arrays 1000000"
+
+enable_mpi="yes"
+enable_openmp="yes"
+
+with_linalg_flavor="mkl"
+with_linalg_incs="-I${MKLROOT}/include/"
+with_linalg_libs="-L${MKLROOT}/lib/intel64 -lmkl_scalapack_lp64 \
+                  -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core \
+                  -lmkl_blacs_intelmpi_lp64 -liomp5 -lpthread \
+                  -lm -ldl"
+                  
+with_fft_flavor="fftw3"
+with_fft_libs="-L${MKLROOT}/lib/intel64 \
+               -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core \
+               -lmkl_blacs_intelmpi_lp64 -liomp5 -lpthread \
+               -lm -ldl"
 

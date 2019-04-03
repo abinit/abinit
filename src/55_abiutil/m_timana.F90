@@ -1619,6 +1619,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(78)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
          message='low-level xgTransposer type '
+       !case(79)
+        ! list(:12)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/)
+        ! message='chebfiwf2 core engine '
        case default
          cycle ! This allows to disable temporarily some partitionings
 

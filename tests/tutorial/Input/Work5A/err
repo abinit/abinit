@@ -1,24 +1,6 @@
-forrtl: error (69): process interrupted (SIGINT)
-Image              PC                Routine            Line        Source             
-libifcoremt.so.5   00007FD944BAB555  for__signal_handl     Unknown  Unknown
-libpthread-2.27.s  00007FD9454C5890  Unknown               Unknown  Unknown
-libiomp5.so        00007FD94288B910  Unknown               Unknown  Unknown
-libiomp5.so        00007FD942893818  Unknown               Unknown  Unknown
-libiomp5.so        00007FD9428DC2D9  Unknown               Unknown  Unknown
-libiomp5.so        00007FD9428DB8B0  Unknown               Unknown  Unknown
-libiomp5.so        00007FD942896E9E  __kmpc_fork_call      Unknown  Unknown
-abinit             00000000027CD542  Unknown               Unknown  Unknown
-abinit             0000000001CA5277  Unknown               Unknown  Unknown
-abinit             0000000001CA4286  Unknown               Unknown  Unknown
-abinit             0000000001C8A933  Unknown               Unknown  Unknown
-abinit             00000000010DB45F  Unknown               Unknown  Unknown
-abinit             0000000000670BDA  Unknown               Unknown  Unknown
-abinit             00000000005FBC51  Unknown               Unknown  Unknown
-abinit             00000000005F1063  Unknown               Unknown  Unknown
-abinit             00000000005C5999  Unknown               Unknown  Unknown
-abinit             00000000004279F4  Unknown               Unknown  Unknown
-abinit             0000000000415460  Unknown               Unknown  Unknown
-abinit             00000000004089A9  Unknown               Unknown  Unknown
-abinit             00000000004072F2  Unknown               Unknown  Unknown
-libc-2.27.so       00007FD941FE2B97  __libc_start_main     Unknown  Unknown
-abinit             00000000004071DA  Unknown               Unknown  Unknown
+Abort(873028357) on node 0 (rank 0 in comm 0): Fatal error in PMPI_Comm_size: Invalid communicator, error stack:
+PMPI_Comm_size(114): MPI_Comm_size(comm=0xffffffff, size=0x7ffedf588b3c) failed
+PMPI_Comm_size(71).: Invalid communicator
+Command exited with non-zero status 5
+10.35user 0.13system 0:10.51elapsed 99%CPU (0avgtext+0avgdata 166112maxresident)k
+0inputs+40outputs (0major+83403minor)pagefaults 0swaps
