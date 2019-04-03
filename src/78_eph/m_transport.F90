@@ -427,7 +427,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  integer :: ntens, nvecs, nvals, edos_intmeth, ifermi, iel
  real(dp) :: vr(3)
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT
- real(dp) :: linewidth, diff, min_diff, n0, n0_dy
+ real(dp) :: linewidth, diff, min_diff, n0, n0_dy, fact0
  real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
@@ -511,24 +511,18 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  call onsager(2,self%l2)
 
  ! Compute transport quantities
-#define meter   (Bohr_meter)
-#define second  (Time_Sec)
-#define volt    (Ha_J/e_Cb)
-#define siemens (e_Cb**2 / Ha_J / second**2)
-#define fact0   (second * siemens / meter / cryst%ucvol)
-#define fact1   (meter**2 / second * Ha_J)
-
+ fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
  self%sigma = fact0 * self%l0
- call safe_div(volt * self%l1(:,:,:,:,itemp), self%l0(:,:,:,:,itemp), zero, self%pi(:,:,:,:,itemp))
+ call safe_div(volt_SI * self%l1(:,:,:,:,itemp), self%l0(:,:,:,:,itemp), zero, self%pi(:,:,:,:,itemp))
  do itemp=1,self%ntemp
    kT = self%kTmesh(itemp) / kb_HaK
-   call safe_div(volt * self%l1(:,:,:,:,itemp), &
+   call safe_div(volt_SI * self%l1(:,:,:,:,itemp), &
                  kT * self%l0(:,:,:,:,itemp), zero, self%seebeck(:,:,:,:,itemp))
 
    ! HM: to write it as a single division I do:
    ! kappa = L1^2/L0 + L2 = (L1^2 + L2*L0)/L0
    ! Check why do we need minus sign here to get consistent results with Boltztrap!
-   call safe_div( - volt**2 * fact0 * (self%l1(:,:,:,:,itemp)**2 - self%l2(:,:,:,:,itemp)*self%l0(:,:,:,:,itemp)), &
+   call safe_div( - volt_SI**2 * fact0 * (self%l1(:,:,:,:,itemp)**2 - self%l2(:,:,:,:,itemp)*self%l0(:,:,:,:,itemp)), &
                  kT * self%l0(:,:,:,:,itemp), zero, self%kappa(:,:,:,:,itemp))
  end do
 
@@ -675,7 +669,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  integer :: ielhol, nvalence
  integer :: bmin(2), bmax(2)
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
- real(dp) :: eig_nk, mu_e, linewidth, fact
+ real(dp) :: eig_nk, mu_e, linewidth, fact, fact0
  real(dp) :: max_occ, kT, wtk
 
  ABI_MALLOC(self%mobility_mu,(2,self%nsppol,3,3,self%ntemp+1))
@@ -716,8 +710,9 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
    end do
  end do
 
- ! Get spin degeneracy
- fact = max_occ * fact0 / e_Cb / 2 * 100**2
+ ! Get units conversion factor and spin degeneracy
+ fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
+ fact = max_occ * fact0 / e_Cb / two * 100**2
 
  ! Compute mobility
  self%mobility_mu = 0
