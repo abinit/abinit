@@ -4118,30 +4118,47 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  VVIII(1,1:3) = ucvol*MATMUL(gprimd,VVIII(1,1:3))
  VVIII(2,1:3) = ucvol*MATMUL(gprimd,VVIII(2,1:3))
 
- ! accumulate in orbmagvec
-
- orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
-                  & - s1trace(1:2,1:3) &
-                  & + CCI(1:2,1:3) &
-                  & + VVII(1:2,1:3) &
-                  & + VVI(1:2,1:3) &
-                  & + VVIII(1:2,1:3) &
-                  & - CCIV(1:2,1:3)
-
- ! orbmagvec(1:2,1:3) = VVI(1:2,1:3)
- ! orbmagvec(1:2,1:3) = VVI(1:2,1:3) + VVIII(1:2,1:3)
- ! orbmagvec(1:2,1:3) = CCVV(1:2,1:3)
- ! orbmagvec(1:2,1:3) = VVII(1:2,1:3)
- ! orbmagvec(1:2,1:3) = VVIII(1:2,1:3)
- ! orbmagvec(1:2,1:3) = VVI(1:2,1:3)
- ! orbmagvec(1:2,1:3) = VVI(1:2,1:3) + VVIII(1:2,1:3)
- ! orbmagvec(1:2,1:3) = CCI(1:2,1:3)
- ! orbmagvec(1:2,1:3) = CCIV(1:2,1:3)
-
+ ! scale for integration over Brillouin zone
  ! pre factor is occ/ucvol*N_k
  ! factor of 2 in numerator is the band occupation (two electrons in normal insulator)
  ! converting integral over k space to a sum gives a factor of Omega_BZ/N_k or 1/ucvol*N_k
- dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/(ucvol*dtorbmag%fnkpt)
+ onsite_l(1:2,1:3) = onsite_l(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+ s1trace(1:2,1:3) = s1trace(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+ CCI(1:2,1:3) = CCI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+ VVII(1:2,1:3) = VVII(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+ VVI(1:2,1:3) = VVI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+ VVIII(1:2,1:3) = VVIII(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+ CCIV(1:2,1:3) = CCIV(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+
+ write(std_out,'(a,3es16.8)')' JWZ debug onsite_l ',onsite_l(1,1),onsite_l(1,2),onsite_l(1,3)
+ write(std_out,'(a,3es16.8)')' JWZ debug s1trace ',s1trace(1,1),s1trace(1,2),s1trace(1,3)
+ write(std_out,'(a,3es16.8)')' JWZ debug CCI ',CCI(1,1),CCI(1,2),CCI(1,3)
+ write(std_out,'(a,3es16.8)')' JWZ debug CCIV ',CCIV(1,1),CCIV(1,2),CCIV(1,3)
+ write(std_out,'(a,3es16.8)')' JWZ debug VVII ',VVII(1,1),VVII(1,2),VVII(1,3)
+ write(std_out,'(a,3es16.8)')' JWZ debug VVI ',VVI(1,1),VVI(1,2),VVI(1,3)
+ write(std_out,'(a,3es16.8)')' JWZ debug VVIII ',VVIII(1,1),VVIII(1,2),VVIII(1,3)
+
+ ! accumulate in orbmagvec
+
+ ! orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
+ !                  & - s1trace(1:2,1:3) &
+ !                  & + CCI(1:2,1:3) &
+ !                  & + VVII(1:2,1:3) &
+ !                  & + VVI(1:2,1:3) &
+ !                  & + VVIII(1:2,1:3) &
+ !                  & - CCIV(1:2,1:3)
+
+ orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
+                  & - s1trace(1:2,1:3) &
+                  & + VVII(1:2,1:3) &
+                  & + VVI(1:2,1:3) &
+                  & + VVIII(1:2,1:3) &
+                  & + CCI(1:2,1:3) &
+                  & - CCIV(1:2,1:3)
+
+
+ ! dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/(ucvol*dtorbmag%fnkpt)
+ dtorbmag%orbmagvec(1:2,1:3) = orbmagvec(1:2,1:3)
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
