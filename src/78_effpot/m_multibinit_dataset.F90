@@ -129,6 +129,7 @@ module m_multibinit_dataset
   !MS Variables for SCALE-UP 
    integer :: scup_elec_model
    integer :: scup_ksamp(3)
+   integer :: scup_initorbocc
    integer :: scup_ismagnetic 
    integer :: scup_istddft    
    integer :: scup_printgeom 
@@ -388,6 +389,7 @@ multibinit_dtset%spin_write_traj=1
 multibinit_dtset%scup_elec_model = 0
 multibinit_dtset%scup_ksamp = (/ 1, 1, 1 /)
 multibinit_dtset%scup_tcharge = 0 
+multibinit_dtset%scup_initorbocc = 0 
 multibinit_dtset%scup_ismagnetic = 0 
 multibinit_dtset%scup_istddft = 0
 multibinit_dtset%scup_printgeom   = 0  
@@ -1180,6 +1182,17 @@ multibinit_dtset%scup_elec_model=zero
 &   'scup_elec_model is',multibinit_dtset%scup_elec_model,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_elec_model in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%scup_initorbocc=zero
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_initorbocc',tread,'INT')
+ if(tread==1) multibinit_dtset%scup_initorbocc=intarr(1)
+ if(multibinit_dtset%scup_initorbocc<0 .or. multibinit_dtset%scup_initorbocc>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_initorbocc is',multibinit_dtset%scup_initorbocc,', but the only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct scup_initorbocc in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -2546,6 +2559,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(a)')'Variables for SCALE-UP electronic model :'
    write(nunit,'(1x,a16,3I3)')    '      scup_ksamp',multibinit_dtset%scup_ksamp
    write(nunit,'(1x,a16,F7.3)')   '    scup_tcharge',multibinit_dtset%scup_tcharge
+   write(nunit,'(1x,a16,I3)')     ' scup_initorbocc',multibinit_dtset%scup_initorbocc
    write(nunit,'(1x,a16,I3)')     ' scup_ismagnetic',multibinit_dtset%scup_ismagnetic
    write(nunit,'(1x,a16,I3)')     '    scup_istddft',multibinit_dtset%scup_istddft
    write(nunit,'(1x,a16,I3)')     '  scup_printgeom',multibinit_dtset%scup_printgeom    
