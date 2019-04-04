@@ -552,7 +552,7 @@ subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transpor
  end do
  gams%my_nqibz = ind
 
- ABI_STAT_MALLOC(gams%my_iqbz, (gams%nqibz), ierr)
+ ABI_STAT_MALLOC(gams%my_iqbz, (gams%nqbz), ierr)
  ABI_CHECK(ierr==0, "out of memory in %my_iqbz")
  gams%my_iqbz = -1
 
