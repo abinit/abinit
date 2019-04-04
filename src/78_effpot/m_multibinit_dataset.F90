@@ -32,6 +32,7 @@ module m_multibinit_dataset
 
  use m_parser, only : intagm
  use m_ddb,    only : DDB_QTOL
+ use m_scup_dataset
 
  implicit none
 
@@ -126,16 +127,6 @@ module m_multibinit_dataset
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
-  !MS Variables for SCALE-UP 
-   integer :: scup_elec_model
-   integer :: scup_ksamp(3)
-   integer :: scup_initorbocc
-   integer :: scup_ismagnetic 
-   integer :: scup_istddft    
-   integer :: scup_printgeom 
-   integer :: scup_printeigv
-   integer :: scup_printeltic 
-   integer :: scup_printorbocc
   ! TODO hexu: add parameters for spin.
   integer :: spin_calc_traj_obs
   integer :: spin_calc_thermo_obs
@@ -190,8 +181,6 @@ module m_multibinit_dataset
   real(dp) :: spin_mag_field(3)  ! external magnetic field
   real(dp) :: spin_qpoint(3)
   real(dp) :: spin_sia_k1dir(3)
-  !MS Variables for SCALE-UP 
-  real*8   :: scup_tcharge 
 ! Integer arrays
   integer, allocatable :: atifc(:)
   ! atifc(natom)
@@ -231,6 +220,9 @@ module m_multibinit_dataset
 
   real(dp), allocatable :: qph2l(:,:)
   ! qph2l(3,nph2l)
+ 
+  !MS all variables for scale-up are put into their one type 
+  type(scup_dtset_type) :: scup_dtset
 
   ! spin part
   !real(dp), allocatable :: gilbert_damping ! if not provided in xml or override is needed. 
@@ -384,20 +376,6 @@ multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above.
 
 multibinit_dtset%spin_var_temperature=0 
 multibinit_dtset%spin_write_traj=1 
-
-!MS Variables for SCALE-UP 
-multibinit_dtset%scup_elec_model = 0
-multibinit_dtset%scup_ksamp = (/ 1, 1, 1 /)
-multibinit_dtset%scup_tcharge = 0 
-multibinit_dtset%scup_initorbocc = 0 
-multibinit_dtset%scup_ismagnetic = 0 
-multibinit_dtset%scup_istddft = 0
-multibinit_dtset%scup_printgeom   = 0  
-multibinit_dtset%scup_printeigv   = 0 
-multibinit_dtset%scup_printeltic  = 0  
-multibinit_dtset%scup_printorbocc = 0 
-
-
 
 !=======================================================================
 !Arrays
@@ -1170,122 +1148,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !S
-
-!MS Variables for SCALE-UP 
-#if defined DEV_MS_SCALEUP 
-
-multibinit_dtset%scup_elec_model=zero
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_elec_model',tread,'INT')
- if(tread==1) multibinit_dtset%scup_elec_model=intarr(1)
- if(multibinit_dtset%scup_elec_model<0 .or. multibinit_dtset%scup_elec_model>1 )then
-   write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_elec_model is',multibinit_dtset%scup_elec_model,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_elec_model in your input file.'
-   MSG_ERROR(message)
- end if
-
- multibinit_dtset%scup_initorbocc=zero
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_initorbocc',tread,'INT')
- if(tread==1) multibinit_dtset%scup_initorbocc=intarr(1)
- if(multibinit_dtset%scup_initorbocc<0 .or. multibinit_dtset%scup_initorbocc>1 )then
-   write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_initorbocc is',multibinit_dtset%scup_initorbocc,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_initorbocc in your input file.'
-   MSG_ERROR(message)
- end if
-
- multibinit_dtset%scup_ismagnetic=zero
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_ismagnetic',tread,'INT')
- if(tread==1) multibinit_dtset%scup_ismagnetic=intarr(1)
- if(multibinit_dtset%scup_ismagnetic<0 .or. multibinit_dtset%scup_ismagnetic>1 )then
-   write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_ismagnetic is',multibinit_dtset%scup_ismagnetic,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_ismagnetic in your input file.'
-   MSG_ERROR(message)
- end if
-
- multibinit_dtset%scup_istddft=zero
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_istddft',tread,'INT')
- if(tread==1) multibinit_dtset%scup_istddft=intarr(1)
- if(multibinit_dtset%scup_istddft<0 .or. multibinit_dtset%scup_istddft>1 )then
-   write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_istddft is',multibinit_dtset%scup_istddft,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_istddft in your input file.'
-   MSG_ERROR(message)
- end if
-
- multibinit_dtset%scup_ksamp(:) = (/ 1, 1, 1 /)
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'scup_ksamp',tread,'INT')
- if(tread==1) multibinit_dtset%scup_ksamp(1:3)=intarr(1:3)
- do ii=1,3
-   if(multibinit_dtset%scup_ksamp(ii)<1)then
-     write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'scup_ksamp(',ii,') is',multibinit_dtset%scup_ksamp(ii),', which is lower than 1 .',ch10,&
-&     'Action: correct scup_ksamp(',ii,') in your input file.'
-     MSG_ERROR(message)
-   end if
- end do
-
- multibinit_dtset%scup_printgeom=zero
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printgeom',tread,'INT')
- if(tread==1) multibinit_dtset%scup_printgeom=intarr(1)
- if(multibinit_dtset%scup_printgeom<0 .or. multibinit_dtset%scup_printgeom>1 )then
-   write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printgeom is',multibinit_dtset%scup_printgeom,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_printgeom in your input file.'
-   MSG_ERROR(message)
- end if
-
- multibinit_dtset%scup_printeigv=zero
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeigv',tread,'INT')
- if(tread==1) multibinit_dtset%scup_printeigv=intarr(1)
- if(multibinit_dtset%scup_printeigv<0 .or. multibinit_dtset%scup_printeigv>1 )then
-   write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printeigv is',multibinit_dtset%scup_printeigv,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_printeigv in your input file.'
-   MSG_ERROR(message)
- end if
-
- multibinit_dtset%scup_printeltic=zero
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeltic',tread,'INT')
- if(tread==1) multibinit_dtset%scup_printeltic=intarr(1)
- if(multibinit_dtset%scup_printeltic<0 .or. multibinit_dtset%scup_printeltic>1 )then
-   write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printeltic is',multibinit_dtset%scup_printeltic,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_printeltic in your input file.'
-   MSG_ERROR(message)
- end if
-
-
- multibinit_dtset%scup_printorbocc=zero
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printorbocc',tread,'INT')
- if(tread==1) multibinit_dtset%scup_printorbocc=intarr(1)
- if(multibinit_dtset%scup_printorbocc<0 .or. multibinit_dtset%scup_printorbocc>1 )then
-   write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printorbocc is',multibinit_dtset%scup_printorbocc,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_printorbocc in your input file.'
-   MSG_ERROR(message)
- end if
-
- multibinit_dtset%scup_tcharge = zero
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_tcharge',tread,'DPR')
- if(tread==1) multibinit_dtset%scup_tcharge=dprarr(1)
- if(multibinit_dtset%scup_tcharge<0 )then
-   write(message, '(a,I3,a,a,a)' )&
-&   'scup_tcharge is',multibinit_dtset%scup_tcharge,', which is lower than zero ',ch10,&
-&   'Action: correct scup_tcharge in your input file.'
-   MSG_ERROR(message)
- end if
- 
-#endif 
 
  multibinit_dtset%spin_damping=-1.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_damping',tread,'DPR')
@@ -2217,6 +2079,12 @@ multibinit_dtset%scup_elec_model=zero
 !Z
 
 !=======================================================================
+! Read SCALE UP variables 
+!=======================================================================
+
+call invars10scup(multibinit_dtset%scup_dtset,lenstr,string)
+
+!=======================================================================
 !Finished reading in variables - deallocate
 !=======================================================================
 
@@ -2378,8 +2246,8 @@ end subroutine invars10
 !! outvars_multibinit
 !!
 !! FUNCTION
-!! Open input file for the multibinit code, then
-!! echoes the input information.
+!! Takes as an input the input dtset for multibinit and echoes it to 
+!! the output
 !!
 !! INPUTS
 !! multibinit_dtset <type(multibinit_dtset_type)> datatype with all the input variables
@@ -2554,20 +2422,10 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
  end if
 
 !MS Variables for SCALE-UP 
-#if defined DEV_MS_SCALEUP 
- if(multibinit_dtset%scup_elec_model/=0)then  
-   write(nunit,'(a)')'Variables for SCALE-UP electronic model :'
-   write(nunit,'(1x,a16,3I3)')    '      scup_ksamp',multibinit_dtset%scup_ksamp
-   write(nunit,'(1x,a16,F7.3)')   '    scup_tcharge',multibinit_dtset%scup_tcharge
-   write(nunit,'(1x,a16,I3)')     ' scup_initorbocc',multibinit_dtset%scup_initorbocc
-   write(nunit,'(1x,a16,I3)')     ' scup_ismagnetic',multibinit_dtset%scup_ismagnetic
-   write(nunit,'(1x,a16,I3)')     '    scup_istddft',multibinit_dtset%scup_istddft
-   write(nunit,'(1x,a16,I3)')     '  scup_printgeom',multibinit_dtset%scup_printgeom    
-   write(nunit,'(1x,a16,I3)')     '  scup_printeigv',multibinit_dtset%scup_printeigv   
-   write(nunit,'(1x,a16,I3)')     ' scup_printeltic',multibinit_dtset%scup_printeltic   
-   write(nunit,'(1x,a16,I3)')     'scup_printorbocc',multibinit_dtset%scup_printorbocc 
+!Replace by function from m_scup_dataset.F90
+ if(multibinit_dtset%scup_dtset%scup_elec_model/=0)then  
+   call outvars_scup(multibinit_dtset%scup_dtset,nunit)  
  end if
-#endif
 
 !Write the general information
  if( multibinit_dtset%rfmeth/=1 .or. &
