@@ -1923,6 +1923,8 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
   & mpi_enreg,nfft,ngfft,occ,prtfor,&
   & resid,rhor,rprimd,vxcavg,xred)
 
+ use m_hightemp,         only : prt_eigocc
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -2032,6 +2034,10 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 &     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
+
+!    Print in a file eigenvalues and occupations (m_hightemp)
+     call prt_eigocc(eigen,fermie,fnameabo_eig,std_out,dtset%kptns,&
+&     dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,occ,rprimd,dtset%tsmear,vxcavg,dtset%wtk)
    end if
 
 #if defined HAVE_NETCDF
