@@ -111,6 +111,9 @@ module m_phgamma
   integer :: my_nqibz
   ! Number of q-points from the IBZ for current processor
 
+  integer :: my_nqbz
+  ! Number of q-points from the IBZ for current processor
+
   integer :: nqbz
   ! Number of q-points in the BZ.
 
@@ -135,8 +138,11 @@ module m_phgamma
   integer :: nene
   ! Number of chemical potential values used for inelastic integration
 
-  integer, allocatable :: my_iq(:)
-  ! indices of full iq in local array for vals_ee. -1 if iq does not belong to current proc
+  integer, allocatable :: my_iqibz(:)
+  ! indices of ibz iq in local array. -1 if iq does not belong to current proc
+
+  integer, allocatable :: my_iqbz(:)
+  ! indices of full iq in local array. -1 if iq does not belong to current proc
 
   real(dp) :: enemin
   ! Minimal chemical potential value used for inelastic integration Copied from fstab
@@ -442,6 +448,8 @@ subroutine phgamma_free(gams)
  ABI_SFREE(gams%vals_out_bz)
  ABI_SFREE(gams%vals_out_rpt)
  ABI_SFREE(gams%vals_ee)
+ ABI_SFREE(gams%my_iqibz)
+ ABI_SFREE(gams%my_iqbz)
 
 end subroutine phgamma_free
 !!***
@@ -529,9 +537,9 @@ subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transpor
  ABI_CHECK(ierr==0, "out of memory in %vals_qibz")
  gams%vals_qibz = zero
 
- ABI_STAT_MALLOC(gams%my_iq, (gams%nqibz), ierr)
- ABI_CHECK(ierr==0, "out of memory in %my_iq")
- gams%my_iq = -1
+ ABI_STAT_MALLOC(gams%my_iqibz, (gams%nqibz), ierr)
+ ABI_CHECK(ierr==0, "out of memory in %my_iqibz")
+ gams%my_iqibz = -1
 
  ! distribution of q across processors for memory issues with vals_ee. Could be used for other arrays too.
  ! in particular the vals_in_qibz, vals_out_qibz and others depending on full nbz
@@ -539,10 +547,25 @@ subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transpor
  do iq = 1, gams%nqibz
     if (mod(iq, nproc) == my_rank) then
       ind = ind + 1
-      gams%my_iq(iq) = ind
+      gams%my_iqibz(iq) = ind
     end if
  end do
  gams%my_nqibz = ind
+
+ ABI_STAT_MALLOC(gams%my_iqbz, (gams%nqibz), ierr)
+ ABI_CHECK(ierr==0, "out of memory in %my_iqbz")
+ gams%my_iqbz = -1
+
+ ! distribution of q across processors. Could be used for other arrays too,
+ ! in particular those depending on full nbz
+ ind = 0
+ do iq = 1, gams%nqbz
+    if (mod(iq, nproc) == my_rank) then
+      ind = ind + 1
+      gams%my_iqbz(iq) = ind
+    end if
+ end do
+ gams%my_nqbz = ind
 
  ! TODO: if we remove the nsig dependency in the gvvvals_*_qibz we can remove
  ! the intermediate array and save a lot of memory
@@ -803,10 +826,6 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
  !@phgamma_t
  natom3 = gams%natom3
 
- if (gams%my_iq(iq_ibz) == -1) then
-   MSG_BUG("phgamma_eval_qibz called for iq this proc does not have:")
- end if
-
  ! Get phonon frequencies and eigenvectors.
  call ifc_fourq(ifc,cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
@@ -824,7 +843,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
  end do
 
 #ifdef DEV_MJV
- if (present (gamma_ph_ee)) then
+ if (present (gamma_ph_ee) .and. gams%my_iq(iq_ibz) /= -1) then
    do iene = 1, gams%nene
      do jene = 1, gams%nene
        tmp_gam2 = reshape(gams%vals_ee(:,jene,iene,:,:,iq_ibz,spin), [2,natom3,natom3])
@@ -4527,8 +4546,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
 #ifdef DEV_MJV
      call xmpi_sum(tmp_vals_ee, comm, ierr) ! this sums over kfs
-     if (gams%my_iq(iq_ibz) /= -1) then ! this saves the right matrices locally
-       gams%vals_ee(:,:,:,:,:,gams%my_iq(iq_ibz),spin) = tmp_vals_ee
+     if (gams%my_iqibz(iq_ibz) /= -1) then ! this saves the right matrices locally
+!TODO: apply same distributed mem scheme for other vals_XX arrays
+       gams%vals_ee(:,:,:,:,:,gams%my_iqibz(iq_ibz),spin) = tmp_vals_ee
      end if
 #endif
 
