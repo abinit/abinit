@@ -68,7 +68,7 @@ program multibinit
  use m_dtfil,      only : isfile
  use m_mover_effpot, only : mover_effpot
 #if defined DEV_MS_SCALEUP 
- use scup_global,  only : global_init_model
+ use scup_global,  only : global_init_model,global_set_print_parameters
 #endif 
  !use m_generate_training_set, only : generate_training_set
  use m_compute_anharmonics, only : compute_anharmonics
@@ -107,9 +107,14 @@ program multibinit
   logical*1 :: needlattice = .FALSE.
   logical*1 :: needelectrons = .TRUE. 
   logical*1 :: didi = .FALSE. 
-  logical*1 :: harm_der = .FALSE.  
+  logical*1 :: harm_der = .FALSE. 
+  logical*1 :: initorbocc = .FALSE. 
   logical*1 :: ismagnetic = .FALSE. 
   logical*1 :: istddft = .FALSE.  
+  logical*4 :: printgeom = .FALSE. 
+  logical*4 :: printeigv = .FALSE. 
+  logical*4 :: printeltic = .FALSE. 
+  logical*4 :: printorbocc = .FALSE.
   integer :: ksamp(3) 
   real*8 :: tcharge
 #endif 
@@ -288,10 +293,21 @@ elec_eval = .FALSE.
    tcharge = inp%scup_tcharge 
    if(inp%scup_ismagnetic == 1)ismagnetic=.TRUE. 
    if(inp%scup_istddft == 1)istddft=.TRUE. 
+   if(inp%scup_initorbocc == 1)initorbocc=.TRUE.
 
    ! Call to Scale-Up
-   err_init_elec = global_init_model(filnam(3),inp%ncell,needlattice,needelectrons,didi,harm_der,tcharge,ksamp,ismagnetic,istddft) 
- 
+   err_init_elec = global_init_model(filnam(3),inp%ncell,needlattice,needelectrons,didi,&
+&                               harm_der,tcharge,ksamp,ismagnetic,istddft,initorbocc)
+
+   !Set Print variables 
+   if(inp%scup_printgeom == 1)printgeom=.TRUE. 
+   if(inp%scup_printeigv == 1)printeigv=.TRUE. 
+   if(inp%scup_printeltic == 1)printeltic=.TRUE. 
+   if(inp%scup_printorbocc == 1)printorbocc=.TRUE.
+
+   !Set Print Parameters within scaleup
+   call global_set_print_parameters(printgeom,printeigv,printeltic, printorbocc) 
+
  endif
 #endif 
 
