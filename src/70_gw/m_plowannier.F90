@@ -1167,7 +1167,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    
    !compute the occupation in wannier basis and print it
   write(message,*)char(10),&
-&" Print the occupation levels (not normalized) for 1 atom, 1 orbital, and 2 spins"
+&" Print the occupation levels (not normalized) for 1 atom, 1 orbitals"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)" Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
@@ -1178,15 +1178,27 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    write(message,*)char(10)," The occupation matrix before normalization is :"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    call compute_oper_wank2realspace(wan,operwan,operocc)
-   do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
-     if (wan%nsppol ==1)then
+    if (wan%nsppol ==1)then
+     write(message,*)char(10)," For one spin :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')     
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
        write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
-     else 
-        write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))+&
-          &real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,2,1,1))
-      endif
-     call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
-   enddo
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   else 
+     write(message,*)char(10)," For spin up :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+     write(message,*)char(10)," For spin down : "
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1       
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,2,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   endif
  
  endif
 
@@ -1247,7 +1259,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
  if (dtset%prtvol >= 5) then  
    write(message,*)char(10),&
-     &" Print the occupation levels (normalized) for 1 atom, 1 orbital, and 2 spin"
+     &" Print the occupation levels (normalized) for 1 atom, 1 orbital"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
@@ -1259,15 +1271,27 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    write(message,*)char(10)," The occupation matrix after normalization is :"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    call compute_oper_wank2realspace(wan,operwan,operocc)
-   do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
-     if (wan%nsppol==1) then
+   if (wan%nsppol ==1)then
+     write(message,*)char(10)," For one spin :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')     
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
        write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
-     else
-       write(mat_writing,'(10f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))+&
-         &real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,2,1,1))
-     endif
-     call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
-   enddo
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   else 
+     write(message,*)char(10)," For spin up :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+     write(message,*)char(10)," For spin down : "
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1       
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,2,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   endif
 
 
    mat_writing = ""
