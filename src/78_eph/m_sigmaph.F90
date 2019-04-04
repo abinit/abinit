@@ -253,7 +253,7 @@ module m_sigmaph
    ! whether to use double grid or not
 
   logical :: use_ftinterp = .False.
-   ! whether DFPT potentials should be read from the DVDB or interpolated on the fly.
+   ! whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
 
   type(eph_double_grid_t) :: eph_doublegrid
    ! store the double grid related object
@@ -1012,10 +1012,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call dvdb%set_qcache_mb(ngfftf, dtset%dvdb_qcache_mb)
  call dvdb%print(prtvol=dtset%prtvol)
 
- if (dtset%useria /= 2000) then
-   call dvdb%qcache_read(nfftf, ngfftf, qselect, comm)
- end if
-
+ if (.not. sigma%use_ftinterp) call dvdb%qcache_read(nfftf, ngfftf, qselect, comm)
  ABI_FREE(qselect)
 
  ! Loop over k-points in Sigma_nk.
@@ -1365,7 +1362,7 @@ end if
                !opt_gvnlx1, -15, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, dtset%tolrde, dtset%tolwfr, &
                usedcwavef0, dtset%wfoptalg, nlines_done)
 
-             ! Handle possible convergence issue.
+             ! Handle possible convergence issues.
              if (out_resid > dtset%tolwfr) then
                write(msg, "(2(a, es13.5), a, i0, a)") &
                  "Sternheimer solver didn't convergence: out_resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
@@ -1375,7 +1372,7 @@ end if
                MSG_ERROR(sjoin(" out_resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
              else
                if (my_rank == master .and. dtset%prtvol > 10) then
-                 write(std_out, *)" Converged with out_resid: ", out_resid, " after ", nlines_done, " iterations."
+                 write(std_out,*)" Converged with out_resid: ", out_resid, " after ", nlines_done, " iterations."
                  write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
                end if
              end if
@@ -1797,7 +1794,11 @@ end if
      end do ! iq_ibz (sum over q-points in IBZ_k)
 
      ! Print cache stats.
-     call dvdb%qcache%report()
+     if (sigma%use_ftinterp) then
+       call dvdb%qcache_ftqibz%report_stats()
+     else
+       call dvdb%qcache%report_stats()
+     end if
 
      ABI_FREE(sigma%e0vals)
      ABI_FREE(kets_k)
@@ -3836,7 +3837,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: my_rank, iq_ibz_k, ierr, q_start, q_stop, nprocs, imyq, iq_dvdb
+ integer :: my_rank, iq_ibz_k, iq_ibz, ierr, q_start, q_stop, nprocs, imyq, iq_dvdb
  integer :: nqeff, ndiv !nbcalc_ks, 
  real(dp) :: cpu, wall, gflops !weight_q,
  logical :: qfilter
@@ -3887,6 +3888,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ABI_ICALLOC(mask_qibz_k, (self%nqibz_k))
        do imyq=1,self%my_nqibz_k
          iq_ibz_k = self%myq2ibz_k(imyq)
+         ! TODO: Weight should be reintroduced when Henrique's htetra is merged....
          !weight_q = self%wtq_k(iq_ibz_k)
          if (any(abs(self%deltaw_pm(1, :, :, :, imyq, :)) >= dtset%eph_tols_idelta(1) / ndiv)) mask_qibz_k(iq_ibz_k) = 1
          if (any(abs(self%deltaw_pm(2, :, :, :, imyq, :)) >= dtset%eph_tols_idelta(2) / ndiv)) mask_qibz_k(iq_ibz_k) = 1
@@ -3897,7 +3899,9 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        call xmpi_max(imask, mask_qibz_k, comm, ierr)
        ABI_FREE(imask)
 
-       ! Redistribute q-points inside comm_bq to reduce load imbalance.
+       ! Now we know the q-pts in IBZ_k contributing to Im(sigma)
+       ! Redistribute q-points inside comm_bq: take into account cache status, cache policy and 
+       ! try to reduce load imbalance as much as possible.
        ABI_MALLOC(qtab, (self%nqibz_k))
        nqeff = 0
        do iq_ibz_k=1,self%nqibz_k
@@ -3925,19 +3929,18 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ! Recompute weights with new q-point distribution.
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
-       ! Make sure each node has the q-points we need. Perform collective IO inside comm if needed.
+       ! Make sure each node has the q-points we need. 
        ! TODO: Should not break qcache_size_mb contract!
        if (self%imag_only .and. self%qint_method == 1) then
 if (self%use_ftinterp) then
          ABI_ICALLOC(ineed_qpt, (self%nqibz))
-         !  do imyq=1,self%my_nqibz_k
-         !    iq_ibz_k = self%myq2ibz_k(imyq)
-         !    TODO
-         !    iq_ibz = self%ibzk2ibz(iq_ibz_k)
-         !    if (.not. allocated(dvdb%qcache_ftibz(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
-         !  end do
-         !  Update cache.
-         !  call dvdb_ftinterp_qcache_update(dvdb, nfftf, ngfftf, ineed_qpt, comm)
+         do imyq=1,self%my_nqibz_k
+           iq_ibz_k = self%myq2ibz_k(imyq)
+           iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
+           if (.not. allocated(dvdb%qcache_ftqibz%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
+         end do
+         ! Update cache by interpolating W(r, R)
+         ! call dvdb_qcache_ftqibz_update(dvdb, nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
          ABI_FREE(ineed_qpt)
 else
          ! Find q-points needed by this MPI rank.
@@ -3947,7 +3950,7 @@ else
            iq_dvdb = self%indq2dvdb_k(1, iq_ibz_k)
            if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qpt(iq_dvdb) = 1
          end do
-         ! Update cache.
+         ! Update cache. Perform collective IO inside comm if needed.
          call dvdb%qcache_update(nfftf, ngfftf, ineed_qpt, comm)
          ABI_FREE(ineed_qpt)
 end if
@@ -5100,6 +5103,20 @@ end subroutine eval_sigfrohl2
 !!  qpoints_oracle
 !!
 !! FUNCTION
+!!  This function tries to predict the **full** list of q-points needed to compute the lifetimes
+!!  once we know sigma%nkcalc. It uses a energy window computed from the max phonon frequency times sigma%winfact
+!!
+!! INPUT
+!! cryst=Crystalline structure read from the the DVDB file.
+!! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!! qpts(3, nqpt)=
+!! nqpt= Number of points in qpts
+!! nqbz=Number of q-points in BZ.
+!! qbz(3, nbz) = full BZ
+!! comm=MPI communicator.
+!!
+!! OUTPUT
+!!  qselect(nqpt) 
 !!
 !! PARENTS
 !!
@@ -5116,7 +5133,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
 !arrays
- real(dp), intent(in) :: qpts(3,nqpt), qbz(3,nqbz)
+ real(dp),intent(in) :: qpts(3,nqpt), qbz(3,nqbz)
  integer,intent(out) :: qselect(nqpt)
 
 !Local variables ------------------------------
@@ -5154,10 +5171,10 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
       1, cryst%symafm, cryst%symrec, sigma%timrev, comm, exit_loop=.True., use_symrec=.True.)
  if (dksqmax > tol12) then
    write(msg, '(a, es16.6)' ) &
-    "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
+    "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ", dksqmax
    MSG_ERROR(msg)
  end if
- call cwtime_report(" listkk1", cpu, wall, gflops)
+ call cwtime_report(" qpoints_oracle_listkk1", cpu, wall, gflops)
 
  ! Make full k-point rank arrays
  call mkkptrank(kbz, nkbz, kptrank)
@@ -5202,7 +5219,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  call xmpi_sum(qbz_count, comm, ierr)
  call cwtime_report(" qbz_count", cpu, wall, gflops)
 
- ! Get mapping QBZ --> DVDB q-points.
+ ! Get mapping QBZ --> QPTS q-points.
  ABI_MALLOC(qbz2dvdb, (nqbz, 6))
  call listkk(dksqmax, cryst%gmet, qbz2dvdb, qpts, qbz, nqpt, nqbz, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
@@ -5212,7 +5229,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
      'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
    MSG_ERROR(msg)
  end if
- call cwtime_report(" listkk2", cpu, wall, gflops)
+ call cwtime_report(" oracle_listkk_qbz_qpts", cpu, wall, gflops)
 
  ! Compute qselect using qbz2dvdb.
  qselect = 0
