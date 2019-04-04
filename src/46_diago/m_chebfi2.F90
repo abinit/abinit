@@ -459,7 +459,7 @@ module m_chebfi2
       call timab(tim_invovl, 1, tsec)
       call getBm1X(chebfi%AX%self, chebfi%X_next) 
       !call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !AX_swap = X_next;
-      call timab(tim_invovl, 1, tsec)
+      call timab(tim_invovl, 2, tsec)
     else
       call xgBlock_copy(chebfi%AX%self,chebfi%X_next, 1, 1)
       !!TODO try to swap buffers in a way that last copy is avoided
