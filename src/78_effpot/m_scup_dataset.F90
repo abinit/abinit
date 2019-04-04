@@ -76,7 +76,7 @@ module m_scup_dataset
 
  end type scup_dtset_type
 !!***
-
+contains
 
 !!****f* m_scup_dataset/scup_dtset_init
 !!

@@ -281,7 +281,7 @@ program multibinit
 elec_eval = .FALSE.
 
 #if defined DEV_MS_SCALEUP
- if(inp%scup_elec_model == 1)then 
+ if(inp%scup_dtset%scup_elec_model == 1)then 
    write(message,'(a,(80a),4a)') ch10,('=',ii=1,80),ch10,ch10,&
         ' Initializing Electronic Model with SCALE-UP',ch10
    call wrtout(ab_out,message,'COLL')
@@ -289,21 +289,21 @@ elec_eval = .FALSE.
   
    !Set Variables
    elec_eval = .TRUE.
-   ksamp = inp%scup_ksamp 
-   tcharge = inp%scup_tcharge 
-   if(inp%scup_ismagnetic == 1)ismagnetic=.TRUE. 
-   if(inp%scup_istddft == 1)istddft=.TRUE. 
-   if(inp%scup_initorbocc == 1)initorbocc=.TRUE.
+   ksamp = inp%scup_dtset%scup_ksamp 
+   tcharge = inp%scup_dtset%scup_tcharge 
+   if(inp%scup_dtset%scup_ismagnetic == 1)ismagnetic=.TRUE. 
+   if(inp%scup_dtset%scup_istddft == 1)istddft=.TRUE. 
+   if(inp%scup_dtset%scup_initorbocc == 1)initorbocc=.TRUE.
 
    ! Call to Scale-Up
    err_init_elec = global_init_model(filnam(3),inp%ncell,needlattice,needelectrons,didi,&
 &                               harm_der,tcharge,ksamp,ismagnetic,istddft,initorbocc)
 
    !Set Print variables 
-   if(inp%scup_printgeom == 1)printgeom=.TRUE. 
-   if(inp%scup_printeigv == 1)printeigv=.TRUE. 
-   if(inp%scup_printeltic == 1)printeltic=.TRUE. 
-   if(inp%scup_printorbocc == 1)printorbocc=.TRUE.
+   if(inp%scup_dtset%scup_printgeom == 1)printgeom=.TRUE. 
+   if(inp%scup_dtset%scup_printeigv == 1)printeigv=.TRUE. 
+   if(inp%scup_dtset%scup_printeltic == 1)printeltic=.TRUE. 
+   if(inp%scup_dtset%scup_printorbocc == 1)printorbocc=.TRUE.
 
    !Set Print Parameters within scaleup
    call global_set_print_parameters(printgeom,printeigv,printeltic, printorbocc) 
