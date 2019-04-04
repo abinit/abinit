@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  2 Apr 2019.
-- ( at 17h25 )
+.Starting date : Thu  4 Apr 2019.
+- ( at 11h45 )
   
 - input  file    -> t26.in
 - output file    -> t26_MPI4.out
@@ -530,8 +530,8 @@ P           mkmem9          1
            toldff4     0.00000000E+00
            toldff5     1.00000000E-06
            toldff6     1.00000000E-06
-           toldff7     1.00000000E-07
-           toldff8     1.00000000E-07
+           toldff7     1.00000000E-08
+           toldff8     1.00000000E-08
            toldff9     0.00000000E+00
            tolmxf1     5.00000000E-05
            tolmxf2     5.00000000E-05
@@ -3946,7 +3946,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     174.250     174.249
 
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
-  maximum force difference=  1.989E-06 exceeds toldff=  1.000E-07
+  maximum force difference=  1.989E-06 exceeds toldff=  1.000E-08
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4075,7 +4075,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     174.250     174.249
 
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
-  maximum force difference=  4.352E-06 exceeds toldff=  1.000E-07
+  maximum force difference=  4.352E-06 exceeds toldff=  1.000E-08
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4208,7 +4208,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     174.250     174.249
 
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
-  maximum force difference=  1.378E-07 exceeds toldff=  1.000E-07
+  maximum force difference=  1.378E-07 exceeds toldff=  1.000E-08
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4459,7 +4459,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     174.250     174.249
 
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
-  maximum force difference=  1.989E-06 exceeds toldff=  1.000E-07
+  maximum force difference=  1.989E-06 exceeds toldff=  1.000E-08
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4588,7 +4588,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     174.250     174.249
 
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
-  maximum force difference=  4.352E-06 exceeds toldff=  1.000E-07
+  maximum force difference=  4.352E-06 exceeds toldff=  1.000E-08
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4721,7 +4721,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     174.250     174.249
 
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
-  maximum force difference=  1.378E-07 exceeds toldff=  1.000E-07
+  maximum force difference=  1.378E-07 exceeds toldff=  1.000E-08
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -5595,8 +5595,8 @@ P           mkmem9          1
            toldff4     0.00000000E+00
            toldff5     1.00000000E-06
            toldff6     1.00000000E-06
-           toldff7     1.00000000E-07
-           toldff8     1.00000000E-07
+           toldff7     1.00000000E-08
+           toldff8     1.00000000E-08
            toldff9     0.00000000E+00
            tolmxf1     5.00000000E-05
            tolmxf2     5.00000000E-05
@@ -5764,10 +5764,10 @@ P           mkmem9          1
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          9.4  wall=         22.5
+- Proc.   0 individual time (sec): cpu=          9.3  wall=         10.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered 183 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         76.2  wall=         89.2
++Overall time at end (sec) : cpu=         38.9  wall=         39.7
