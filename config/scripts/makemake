@@ -459,7 +459,7 @@ if ( opts.run_source ):
        ***                     FATAL ERROR!                         ***
        ****************************************************************
        ***                                                          ***
-       *** The abisrc.py script returned an non-zero exit status.   ***
+       *** The abisrc.py script returned a non-zero exit status.    ***
        *** This usually means that the script found subroutines or  ***
        *** functions that are not declared inside modules or that   ***
        *** there is a syntax error in the Fortran code.             ***

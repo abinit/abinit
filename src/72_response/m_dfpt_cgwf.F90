@@ -154,8 +154,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 & opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,berryopt
