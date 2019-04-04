@@ -1542,7 +1542,8 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 !BEGIN EXECUTABLE SECTION
 
  if (npti > 12000) then
-   msg = "Sorry - the interpolator INTRPL is hard coded for maximum 12000 points. Reduce the conducti input npti, or implement a better interpolator!"
+   msg = "Sorry - the interpolator INTRPL is hard coded for maximum 12000 points." // &
+&        ch10 // " Reduce the conducti input npti, or implement a better interpolator!"
    MSG_ERROR(msg)
  end if
 
