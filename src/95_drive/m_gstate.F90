@@ -234,8 +234,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &                 mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
 &                 psps,results_gs,rprim,scf_history,vel,vel_cell,wvl,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(inout) :: iexit,initialized
@@ -473,8 +471,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Open and read pseudopotential files
  comm_psp=mpi_enreg%comm_cell;if (dtset%usewvl==1) comm_psp=mpi_enreg%comm_wvl
  if (dtset%nimage>1) psps%mixalch(:,:)=args_gs%mixalch(:,:) ! mixalch can evolve for some image algos
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,&
-& pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
 
  call timab(701,2,tsec)
  call timab(33,3,tsec)
@@ -1422,16 +1419,20 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if (write_wfk) then
    call outwf(cg,dtset,psps,eigen,filnam,hdr,kg,dtset%kptns,&
-&   dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
-&   dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
-&   occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
+    dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
+    dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
+    occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
+
+   ! Generate WFK with k-mesh from WFK containing list of k-points inside pockets.
+   if (dtset%getkerange_path /= ABI_NOFILE) then
+     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_path, dtset, psps, pawtab, comm)
+   end if
+
    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
    !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN')
  end if
 
- if (dtset%prtwf==2) then
-   call outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
- end if
+ if (dtset%prtwf==2) call outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
 
 !Restore the original rprimd in hdr
  hdr%rprimd=rprimd
@@ -1445,7 +1446,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ! Write tetrahedron tables.
    cryst = hdr_get_crystal(hdr, 2)
    tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-   dtset%shiftk, dtset%nkpt, dtset%kptns, message, ierr)
+   dtset%shiftk, dtset%nkpt, dtset%kptns, xmpi_comm_self, message, ierr)
    if (ierr == 0) then
      call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
    else
@@ -1786,8 +1787,6 @@ end subroutine gstate
 
 subroutine setup2(dtset,npwtot,start,wfs,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
@@ -1924,8 +1923,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
   & fnameabo_dos,fnameabo_eig,fred,&
   & mpi_enreg,nfft,ngfft,occ,prtfor,&
   & resid,rhor,rprimd,vxcavg,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2116,8 +2113,6 @@ end subroutine clnup1
 
 subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,iwfrc,natom
@@ -2284,8 +2279,6 @@ end subroutine prtxf
 
 subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
 &                 prtfor,prtstr,prtvol,start,strten,synlgr,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2545,8 +2538,6 @@ end subroutine clnup2
 
 subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(scfcv_t), intent(inout) :: scfcv_args
@@ -2686,7 +2677,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 #if defined HAVE_NETCDF
  use netcdf
 #endif
- implicit none
 
 !Arguments ------------------------------------
  integer          ,intent(in)    :: natom,option

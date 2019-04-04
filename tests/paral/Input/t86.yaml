@@ -1,0 +1,43 @@
+tol_eq: 1.0e-6
+
+lda:
+    # tolvrs 1.0e-7
+    tol_abs: 5.0e-7
+    tol_rel: 5.0e-7
+    results_gs!:
+        convergence:
+            ceil: 1.0e-6
+        stress tensor:
+            tensor_is_symetric: true
+
+dmft:
+    tol_abs: 2.0e-8
+    tol_rel: 5.0e-9
+    results_gs!:  # hard reset result_gs
+        convergence:
+            ceil: 1.0e-6
+            deltae:
+                ceil: 2.0e-3
+            res2:
+                ignore: true
+        fermie:
+            tol_abs: 1.0e-7
+            tol_rel: 1.0e-8
+        stress tensor:
+            ignore: true
+    Etot:
+        Total energy eV:
+            tol_abs: 1.0e-5
+            tol_rel: 1.0e-8
+    Etot DC:
+        tol_abs: 1.0e-7
+        Total DC energy eV:
+            tol_abs: 1.0e-5
+            tol_rel: 1.0e-8
+
+
+filters:
+    lda:
+        dtset: 1
+    dmft:
+        dtset: 2

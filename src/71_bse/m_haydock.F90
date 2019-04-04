@@ -300,7 +300,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      do_ep_lifetime = .TRUE.
    end if
 
-   ! Force elphon lifetime
+   ! Force elphon linewidth
    do_ep_lifetime = .TRUE.
 
    ! Map points from BSE to elphon kpoints
@@ -351,10 +351,10 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
          end if
          ep_renorms(ireh) = (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
 
-         ! Add lifetime
+         ! Add linewith
          if(do_ep_lifetime) then
-           ep_renorms(ireh) = ep_renorms(ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) +&
-&                                                       Epren%lifetimes(1,iv,ik,isppol,itemp))
+           ep_renorms(ireh) = ep_renorms(ireh) - j_dpc*(Epren%linewidth(1,ic,ik,isppol,itemp) +&
+&                                                       Epren%linewidth(1,iv,ik,isppol,itemp))
          end if
 
        end do
