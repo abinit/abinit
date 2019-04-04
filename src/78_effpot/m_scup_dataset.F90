@@ -321,6 +321,7 @@ call scup_dtset_init(scup_dtset)
    MSG_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_elec_model = .TRUE.
+ tmp_int = 0 
 
 !F 
 !G 
@@ -336,6 +337,7 @@ call scup_dtset_init(scup_dtset)
    MSG_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_initorbocc = .TRUE.
+ tmp_int = 0 
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_ismagnetic',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -347,6 +349,7 @@ call scup_dtset_init(scup_dtset)
    MSG_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_ismagnetic = .TRUE.
+ tmp_int = 0 
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_istddft',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -358,6 +361,7 @@ call scup_dtset_init(scup_dtset)
    MSG_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_istddft = .TRUE.
+ tmp_int = 0 
 
 
 !J
@@ -388,6 +392,7 @@ call scup_dtset_init(scup_dtset)
    MSG_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printbands = .TRUE.
+ tmp_int = 0 
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeigv',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -399,6 +404,7 @@ call scup_dtset_init(scup_dtset)
    MSG_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printeigv = .TRUE.
+ tmp_int = 0 
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeltic',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -410,6 +416,7 @@ call scup_dtset_init(scup_dtset)
    MSG_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printeltic = .TRUE.
+ tmp_int = 0 
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printgeom',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -421,6 +428,7 @@ call scup_dtset_init(scup_dtset)
    MSG_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printgeom = .TRUE.
+ tmp_int = 0 
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printorbocc',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -432,6 +440,7 @@ call scup_dtset_init(scup_dtset)
    MSG_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printorbocc = .TRUE.
+ tmp_int = 0 
 
 !Q
 !R

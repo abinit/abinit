@@ -586,7 +586,9 @@ elec_eval = .FALSE.
    call multibinit_dtset_free(inp)
    call abihist_free(hist)
    call abihist_free(hist_tes)
-   call spin_model_t_finalize(spin_model)
+   if(inp%spin_dynamics>0) then
+      call spin_model_t_finalize(spin_model)
+   endif
 !****************************************************************************************
 
    write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
