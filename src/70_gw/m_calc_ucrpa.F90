@@ -86,7 +86,7 @@ contains
 !! SOURCE
 
  subroutine calc_ucrpa(itypatcor,cryst,Kmesh,lpawu,M1_q_m,Qmesh,npwe,&
-& npw,nsym,rhot1_q_m,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname,plowan_compute,rhot1)
+& npw,nsym,rhot1_q_m,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname,plowan_compute,rhot1,wanbz)
 
  use defs_basis
  use m_abicore
@@ -98,7 +98,7 @@ contains
  use m_io_screening,  only : read_screening, em1_ncname
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
  use m_crystal,       only : crystal_t
- use m_plowannier,    only : operwan_realspace_type
+ use m_plowannier,    only : operwan_realspace_type,plowannier_type
  implicit none
 !   _____            _
 !  |_   _|          | |
@@ -123,6 +123,7 @@ contains
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(crystal_t),intent(in) :: Cryst
  type(operwan_realspace_type),intent(in) :: rhot1(npw,Qmesh%nibz)
+ type(plowannier_type),intent(in) :: wanbz
  complex(dpc), intent(in) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
  complex(dpc), intent(in) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
 
@@ -135,7 +136,7 @@ contains
 
  complex :: nC,ualter
 
- integer :: iat,im_paral,iqalloc,ib1,ib2,m1,m2,m3,m4
+ integer :: iat,im_paral,iqalloc,ib1,ib2,m1,m2,m3,m4,iqbz
  integer :: ierr,ik_bz,ik_ibz,iq_ibz,i,iG1,iG2,iG,iiG,iomega,iomega1,ispinor1,ispinor2,ispinor3,ispinor4
  integer :: lpawu_read,nkibz,nbband,nkbz,nprocs,nqalloc,nqibz,ms1,ms2,ms3,ms4,mbband,nspinor
  integer :: isym_kgw,iik,unt
@@ -332,29 +333,39 @@ contains
 !==========================================================
 !== Read Wannier coefficient in forlb.ovlp
 !==========================================================
- write(message,*) ""
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
- write(message,*) "Read wannier in iBZ"
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
  nkibz=Kmesh%nibz
 
 !Read "l"
- if (open_file('forlb.ovlp',message,newunit=unt,form='formatted',status='unknown') /= 0) then
-   MSG_ERROR(message)
- end if
- rewind(unt)
- read(unt,*) message, lpawu_read
- read(unt,*) message, ib1, ib2
- close(unt)
+ if (plowan_compute<10) then
+   write(message,*) ""
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+   write(message,*) "Read wannier in iBZ"
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+   if (open_file('forlb.ovlp',message,newunit=unt,form='formatted',status='unknown') /= 0) then
+     MSG_ERROR(message)
+   end if
+   rewind(unt)
+   read(unt,*) message, lpawu_read
+   read(unt,*) message, ib1, ib2
+   close(unt)
+   mbband=2*lpawu_read+1
+ else 
+   ib1=wanbz%bandi_wan
+   ib2=wanbz%bandf_wan
+   mbband=2*wanbz%latom_wan(1)%lcalc(1)+1
+   write(message,*)"Read l and bands from wanbz",ib1,ib2,mbband
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ endif
  if(ib1/=bandinf.and.ib2/=bandsup) then
    write(message,*) "Error with bands",ib1,bandinf,ib2,bandsup
    MSG_ERROR(message)
  endif
 !!Read the bandinf, bandinf redondance information
- mbband=2*lpawu_read+1
-
+  
+  
 !*******************************************************
 !if (3==4) then
 !!  USELESS START
@@ -542,13 +553,32 @@ contains
  ABI_DEALLOCATE(ikmq_bz_t)
 
  ABI_ALLOCATE(rhot_q_m,(nspinor,nspinor,mbband,mbband,npw,nqibz))
-
+ 
+ if (plowan_compute>=10)then
+   write(message,*)" cRPA calculation using plowan module"
+   call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+   do iG=1,npw
+     do iqbz=1,nqibz
+       do ispinor1=1,nspinor
+         do ispinor2=1,nspinor
+           do m1=1,2*wanbz%latom_wan(1)%lcalc(1)+1
+             do m2=1,2*wanbz%latom_wan(1)%lcalc(1)+1
+               rhot_q_m(ispinor1,ispinor2,m1,m2,iG,iqbz)=&
+                 &rhot1(iG,iqbz)%atom_index(1,1)%position(1,1)%atom(1,1)%matl(m1,m2,1,ispinor1,ispinor2)
+               !write(6,*) rhot_q_m(ispinor1,ispinor2,m1,m2,iG,iqbz)
+             enddo
+           enddo
+         enddo
+       enddo
+     enddo
+   enddo
+ endif
  do iat=1,Cryst%nattyp(itypatcor)
    write(message,*)  "== cRPA Calculation of Interaction for atom  ", iat
    call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-
-   rhot_q_m(:,:,:,:,:,:)=rhot1_q_m(iat,:,:,:,:,:,:)
-
+   if (plowan_compute <10) then
+     rhot_q_m(:,:,:,:,:,:)=rhot1_q_m(iat,:,:,:,:,:,:)
+   endif
    if (verbose) then
      !==Ecriture de Ro_G^(mm')(q)==!:
      eVnorme=sqrt(Ha_eV/ucvol)

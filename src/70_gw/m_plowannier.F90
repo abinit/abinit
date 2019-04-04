@@ -52,7 +52,7 @@ MODULE m_plowannier
  public :: init_operwan_realspace
  public :: destroy_operwan_realspace
  public :: zero_operwan_realspace
- public :: compute_oper_wanK2realspace
+ public :: compute_oper_wank2realspace
 !!***
 
 
@@ -718,7 +718,7 @@ end subroutine destroy_orbital
 !! SOURCE
 
 
-subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
+subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,& 
 & mpi_enreg,occ,wan,pawtab,psps,usecprj,unpaw,pawrad,dtfil)
 
 #ifdef FC_INTEL
@@ -1156,17 +1156,18 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    identityks=czero
    do isppol = 1,wan%nsppol
      do iband1 = 1,wan%bandf_wan-wan%bandi_wan+1
-       ibandc = iband1 + wan%bandi_wan - 1
+      ibandc = iband1 + wan%bandi_wan - 1
        do ikpt = 1,wan%nkpt
-         eigenks(ikpt,iband1,iband1,isppol) = occ(((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband))
-         ! write(6,*) 'eigenks', ikpt,iband1,isppol, eigenks(ikpt,iband1,iband1,isppol)
+        eigenks(ikpt,iband1,iband1,isppol) = occ(((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband))
+         !write(6,*) 'eigenks', ikpt,iband1,isppol,((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband),occ(((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband))
        end do
      end do
    end do
-
+   
+   
    !compute the occupation in wannier basis and print it
   write(message,*)char(10),&
-&" Print the occupation levels (not normalized) for 1 atom, 1 orbital"
+&" Print the occupation levels (not normalized) for 1 atom, 1 orbital, and 2 spins"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)" Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
@@ -1176,9 +1177,14 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    call init_operwan_realspace(wan,operocc)
    write(message,*)char(10)," The occupation matrix before normalization is :"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   call compute_oper_wanK2realspace(wan,operwan,operocc)
+   call compute_oper_wank2realspace(wan,operwan,operocc)
    do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
-     write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+     if (wan%nsppol ==1)then
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+     else 
+        write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))+&
+          &real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,2,1,1))
+      endif
      call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
    enddo
  
@@ -1241,7 +1247,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
  if (dtset%prtvol >= 5) then  
    write(message,*)char(10),&
-     &" Print the occupation levels (normalized) for 1 atom, 1 orbital"
+     &" Print the occupation levels (normalized) for 1 atom, 1 orbital, and 2 spin"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
@@ -1252,13 +1258,27 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    call zero_operwan_realspace(wan,operocc)
    write(message,*)char(10)," The occupation matrix after normalization is :"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   call compute_oper_wanK2realspace(wan,operwan,operocc)
+   call compute_oper_wank2realspace(wan,operwan,operocc)
    do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
-     write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+     if (wan%nsppol==1) then
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+     else
+       write(mat_writing,'(10f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))+&
+         &real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,2,1,1))
+     endif
      call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
    enddo
 
- ! destroy operators and the occupation matrix
+
+   mat_writing = ""
+   
+   if (me.eq.0) then
+!print operwan in the real space, in a file
+     mat_writing = trim(dtfil%filnam_ds(4))//"_wannierocc"
+     convert = 1
+     call print_operwan(wan,operwan,trim(mat_writing),convert)
+   end if
+! destroy operators and the occupation matrix
    ABI_DEALLOCATE(eigenks)
    ABI_DEALLOCATE(identityks)
    call destroy_operwan(wan,operwan)
@@ -1365,7 +1385,7 @@ endif
  !! 2) compute the value in real space (only if kptopt>0 ie BZ correctly sampled)
  !! -------------------------------------------------------------
  if (dtset%plowan_realspace >= 1 .and. dtset%kptopt > 0 ) then ! interpolation and kptopt >0 : compute Wannier functions in real space.
-   call compute_oper_wanK2realspace(wan,operwan,operwan_realspace)
+   call compute_oper_wank2realspace(wan,operwan,operwan_realspace)
 !   do isppol = 1,wan%nsppol
 !     do iatom1 = 1,wan%natom_wan
 !       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
@@ -3448,7 +3468,7 @@ end subroutine zero_operwan_realspace
 
 
 
-!!****f* m_plowannier/compute_oper_wanK2realspace
+!!****f* m_plowannier/compute_oper_wank2realspace
 !! NAME
 !!  compute_operwan_wanK2realspace
 !!
@@ -3467,7 +3487,7 @@ end subroutine zero_operwan_realspace
 !! CHILDREN
 !!
 !! SOURCE
-subroutine compute_oper_wanK2realspace(wan,operwan,operwan_realspace)
+subroutine compute_oper_wank2realspace(wan,operwan,operwan_realspace)
 
 !Arguments----------------------------------
   type(operwan_realspace_type),intent(inout) :: operwan_realspace
@@ -3508,7 +3528,7 @@ subroutine compute_oper_wanK2realspace(wan,operwan,operwan_realspace)
        end do
      end do
    end do
- end subroutine compute_oper_wanK2realspace
+ end subroutine compute_oper_wank2realspace
 
 END MODULE m_plowannier
 !!***

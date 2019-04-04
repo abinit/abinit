@@ -45,7 +45,7 @@ module m_sigma_driver
  use libxc_functionals
  use m_wfd
 
- use m_time,          only : timab
+ use m_time,          only : timab,cwtime
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa, basename, ktoa, ltoa
  use m_hide_blas,     only : xdotc
@@ -229,7 +229,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,optrhoij,psp_gencond
  integer :: my_rank,rhoxsp_method,comm,use_aerhor,use_umklp,usexcnhat
  integer :: ioe0j,spin,io,jb,nomega_sigc
- integer :: temp_unt,ncid
+ integer :: temp_unt,ncid,dim,nnn,dummy
  integer :: work_size,nstates_per_proc,my_nbks
  integer :: iatom1,iatom2,il1,il2,pos1,pos2,im1,im2,ispinor1,ispinor2
  !integer :: jb_qp,ib_ks,ks_irr
@@ -237,9 +237,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
  real(dp) :: ucvol,vxcavg,vxcavg_qp
- real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
+ real(dp) :: gwc_gsq,gwx_gsq,gw_gsq,cpu,wall,gflops
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- complex(dpc) :: max_degw,cdummy
+ complex(dpc) :: max_degw,cdummy,xx
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname
@@ -291,6 +291,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: sigcme_k(:,:,:,:)
  complex(dpc), allocatable :: rhot1_q_m(:,:,:,:,:,:,:)
  complex(dpc), allocatable :: M1_q_m(:,:,:,:,:,:,:)
+ complex(dpc),allocatable :: buffer(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:)
  type(esymm_t),target,allocatable :: KS_sym(:,:)
  type(esymm_t),pointer :: QP_sym(:,:)
@@ -2154,6 +2155,7 @@ endif
 !   if(cryst%nsym==1) nkcalc=Kmesh%nbz
 !   if(cryst%nsym>1)  nkcalc=Kmesh%nibz
    nkcalc=Kmesh%nbz
+   if(1==1)then!DEBUG
    open(67,file="test.rhot1",status="REPLACE")
    do ikcalc=1,nkcalc ! for the oscillator strengh, spins are identical without SOC
 !    if(Sigp%nkptgw/=Kmesh%nbz) then
@@ -2186,7 +2188,6 @@ endif
                do im1=1,2*lcor+1
                  do im2=1,2*lcor+1
                    write(67,*)ibz,im1,im2,rhot1_q_m(iatom1,ispinor1,ispinor2,im1,im2,pwx,ibz)
-                   !write(67,*)iatom1,ispinor1,ispinor2,im1,im2,pwx,ibz
                  enddo
                enddo
              enddo
@@ -2195,6 +2196,17 @@ endif
        enddo
      enddo
    else
+     !call cwtime(cpu,wall,gflops,"start") !reduction of rhot1
+     dim=0
+     do iatom1=1,wanbz%natom_wan
+       do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+         do il1=1,wanbz%nbl_atom_wan(iatom1)
+           dim=dim+(2*wanbz%latom_wan(iatom1)%lcalc(il1)+1)**2*wanbz%nspinor**2*wanbz%nsppol*sigp%npwx*Qmesh%nibz
+         enddo
+       enddo
+     enddo
+     ABI_ALLOCATE(buffer,(dim))
+     nnn=0
      do pwx=1,sigp%npwx
        do ibz=1,Qmesh%nibz
          do ispinor1=1,wanbz%nspinor
@@ -2207,11 +2219,40 @@ endif
                        do il2=1,wanbz%nbl_atom_wan(iatom2)
                          do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
                            do im2=1,2*wanbz%latom_wan(iatom1)%lcalc(il2)+1
-      call xmpi_sum(rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,1,ispinor1,ispinor2),Wfd%comm,ierr)
-      rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,1,ispinor1,ispinor2)=&
-      &rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,1,ispinor1,ispinor2)/Kmesh%nbz/Wfd%nsppol
-      write(67,*)ibz,im1,im2,rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,1,ispinor1,ispinor2)
-      !write(67,*)iatom1,ispinor2,ispinor2,im1,im2,pwx,ibz
+      nnn=nnn+1
+      buffer(nnn)=rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,1,ispinor1,ispinor2)
+                          enddo!im2
+                         enddo!im1
+                       enddo!il2
+                     enddo!il1
+                   enddo!pos2
+                 enddo!pos1
+               enddo!iatom2
+             enddo!iatom1
+           enddo!ispinor2
+         enddo!ispinor1
+       enddo!ibz
+     enddo!pwx
+     call xmpi_barrier(Wfd%comm)
+     call xmpi_sum(buffer,Wfd%comm,ierr)
+     call xmpi_barrier(Wfd%comm)
+     buffer=buffer/Kmesh%nbz/Wfd%nsppol
+     nnn=0
+     do pwx=1,sigp%npwx
+       do ibz=1,Qmesh%nibz
+         do ispinor1=1,wanbz%nspinor
+           do ispinor2=1,wanbz%nspinor
+             do iatom1=1,wanbz%natom_wan
+               do iatom2=1,wanbz%natom_wan
+                 do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+                   do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+                     do il1=1,wanbz%nbl_atom_wan(iatom1)
+                       do il2=1,wanbz%nbl_atom_wan(iatom2)
+                         do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+                           do im2=1,2*wanbz%latom_wan(iatom1)%lcalc(il2)+1
+      nnn=nnn+1
+      rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,1,ispinor1,ispinor2)=buffer(nnn)
+      write(67,*)ibz,im1,im2,rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,1,ispinor1 ,ispinor2)
                            enddo!im2
                          enddo!im1
                        enddo!il2
@@ -2224,16 +2265,53 @@ endif
          enddo!ispinor1
        enddo!ibz
      enddo!pwx
+     ABI_DEALLOCATE(buffer)
    endif
+   
    close(67)
+   ! call xmpi_barrier(Wfd%comm)
+   ! call cwtime(cpu,wall,gflops,"stop")!reduction of rhot1
+   ! write(6,*)cpu,wall,gflops
 !   if(Cryst%nsym==1) then
 !   M1_q_m=M1_q_m/Kmesh%nbz/Wfd%nsppol
 !   rhot1_q_m=rhot1_q_m/Kmesh%nbz/Wfd%nsppol
 !   endif
 !  Calculation of U in cRPA: need to treat with a different cutoff the
 !  bare coulomb and the screened coulomb interaction.
+   else !DEBUG
+     write(6,*)"DEBUGGING calc_ucrpa"
+     open(67,file="test.rhot1",status="OLD")
+     rewind(67)
+      do pwx=1,sigp%npwx
+       do ibz=1,Qmesh%nibz
+         do ispinor1=1,wanbz%nspinor
+           do ispinor2=1,wanbz%nspinor
+             do iatom1=1,wanbz%natom_wan
+               do iatom2=1,wanbz%natom_wan
+                 do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+                   do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+                     do il1=1,wanbz%nbl_atom_wan(iatom1)
+                       do il2=1,wanbz%nbl_atom_wan(iatom2)
+                         do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+                           do im2=1,2*wanbz%latom_wan(iatom1)%lcalc(il2)+1
+      read(67,*)dummy,dummy,dummy,xx
+      rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,1,ispinor1,ispinor2)=xx
+                           enddo!im2
+                         enddo!im1
+                       enddo!il2
+                     enddo!il1
+                   enddo!pos2
+                 enddo!pos1
+               enddo!iatom2
+             enddo!iatom1
+           enddo!ispinor2
+         enddo!ispinor1
+       enddo!ibz
+     enddo!pwx
+     close(67)
+   endif!DEBUG
    call calc_ucrpa(itypatcor,cryst,Kmesh,lcor,M1_q_m,Qmesh,Er%npwe,sigp%npwx,&
-&   Cryst%nsym,rhot1_q_m,Sigp%nomegasr,Sigp%minomega_r,Sigp%maxomega_r,ib1,ib2,'Gsum',Cryst%ucvol,Wfd,Er%fname,dtset%plowan_compute,rhot1)
+&   Cryst%nsym,rhot1_q_m,Sigp%nomegasr,Sigp%minomega_r,Sigp%maxomega_r,ib1,ib2,'Gsum',Cryst%ucvol,Wfd,Er%fname,dtset%plowan_compute,rhot1,wanbz)
 
 !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 !Deallocation of wan and rhot1
