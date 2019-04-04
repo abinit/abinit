@@ -2548,10 +2548,10 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a16,F7.3)')   '    scup_tcharge',multibinit_dtset%scup_tcharge
    write(nunit,'(1x,a16,I3)')     ' scup_ismagnetic',multibinit_dtset%scup_ismagnetic
    write(nunit,'(1x,a16,I3)')     '    scup_istddft',multibinit_dtset%scup_istddft
-   write(nunit,'(1x,a16,I3)')     ' scup_printgeom',multibinit_dtset%scup_printgeom    
-   write(nunit,'(1x,a16,I3)')     '    scup_printeigv',multibinit_dtset%scup_printeigv   
+   write(nunit,'(1x,a16,I3)')     '  scup_printgeom',multibinit_dtset%scup_printgeom    
+   write(nunit,'(1x,a16,I3)')     '  scup_printeigv',multibinit_dtset%scup_printeigv   
    write(nunit,'(1x,a16,I3)')     ' scup_printeltic',multibinit_dtset%scup_printeltic   
-   write(nunit,'(1x,a16,I3)')     '    scup_printorbocc',multibinit_dtset%scup_printorbocc 
+   write(nunit,'(1x,a16,I3)')     'scup_printorbocc',multibinit_dtset%scup_printorbocc 
  end if
 #endif
 
