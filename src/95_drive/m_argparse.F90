@@ -576,10 +576,16 @@ integer function get_arg_list_int(argname, argval, lenr, msg, default, default_l
  if (found_argname .and. found_excl) then
    ierr = ierr + 1; msg = sjoin("Variables", argname, "and", exclude, "are mutually exclusive", ch10, msg)
  end if
- if (found_argname .and. present(want_len)) then
-   if (want_len /= lenr) then
+
+ if (present(want_len)) then
+   if (found_argname) then
+     if (want_len /= lenr) then
+       ierr = ierr + 1
+       msg = sjoin(argname, "requires", itoa(want_len), " tokens while found ", itoa(lenr), ch10, msg)
+     end if
+   else
      ierr = ierr + 1
-     msg = sjoin(argname, "requires", itoa(want_len), " tokens while found ", itoa(lenr), ch10, msg)
+     msg = sjoin("Cannot find", argname, "in cli and want_len:", itoa(want_len), ch10, msg)
    end if
  end if
 
@@ -670,10 +676,16 @@ integer function get_arg_list_dp(argname, argval, lenr, msg, default, default_li
  if (found_argname .and. found_excl) then
    ierr = ierr + 1; msg = sjoin("Variables", argname, "and", exclude, "are mutually exclusive", ch10, msg)
  end if
- if (found_argname .and. present(want_len)) then
-   if (want_len /= lenr) then
+
+ if (present(want_len)) then
+   if (found_argname) then
+     if (want_len /= lenr) then
+       ierr = ierr + 1
+       msg = sjoin(argname, "requires", itoa(want_len), " tokens while found ", itoa(lenr), ch10, msg)
+     end if
+   else
      ierr = ierr + 1
-     msg = sjoin(argname, "requires", itoa(want_len), " tokens while found ", itoa(lenr), ch10, msg)
+     msg = sjoin("Cannot find ", argname, "in cli and want_len:", itoa(want_len), ch10, msg)
    end if
  end if
 

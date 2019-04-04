@@ -4000,6 +4000,7 @@ end function dvdb_findq
 !!  dvdb_set_pert_distrib
 !!
 !! FUNCTION
+!!  Activate MPI distribution of the 3*natom perturbations.
 !!
 !! INPUTS
 !!  comm_pert=MPI communicator used to distribute the 3*natom perturbations
@@ -5732,12 +5733,11 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
  integer :: ierr,my_rank,nproc,idir,ipert,iat,ipc,ispden
  integer :: cplex, db_iqpt, npc
  integer :: nqbz, nqibz, iq, ifft, nperts_read, nfftf
- integer :: ount, unt, fform
+ integer :: ount !, fform
  !real(dp) :: dksqmax
  character(len=500) :: msg
  type(dvdb_t), target :: dvdb
  type(crystal_t),pointer :: cryst
- type(hdr_type) :: hdr_ref
 !arrays
  integer :: ngfftf(18), qptrlatt(3,3)
  integer,allocatable :: iq_read(:), pinfo(:,:) !indkk(:,:),
@@ -5758,6 +5758,7 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
  call dvdb%list_perts([-1,-1,-1], unit=std_out)
  call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:, 1))
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+
  nfftf = product(ngfftf(1:3))
  cryst => dvdb%cryst
 
@@ -5778,29 +5779,12 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
  !  MSG_ERROR("Coarse q-mesh is not a submesh of the DVDB file.")
  !end if
 
- ! ==========================================
- ! Prepare the header to write the potentials
- ! ==========================================
-
- ! Read the first header
- if (open_file(dvdb%path, msg, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
-   MSG_ERROR(msg)
- end if
- read(unt, err=10, iomsg=msg) dvdb%version
- read(unt, err=10, iomsg=msg) dvdb%numv1
-
- call hdr_fort_read(hdr_ref, unt, fform)
- if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
-   MSG_ERROR(sjoin("While reading:", dvdb%path, ch10, msg))
- end if
- close(unt)
-
  ! =======================================
  ! Open DVDB and copy important dimensions
  ! =======================================
 
  ABI_MALLOC(iq_read, (nqibz))
- ABI_MALLOC(pinfo, (3,3*dvdb%mpert))
+ ABI_MALLOC(pinfo, (3, 3*dvdb%mpert))
  nperts_read = 0
 
  do iq=1,nqibz
@@ -5848,11 +5832,12 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
        MSG_ERROR(msg)
      end if
 
-     hdr_ref%qptn = qibz(:, iq)
-     hdr_ref%pertcase = ipert
+     ! Change the header.
+     dvdb%hdr_ref%qptn = qibz(:, iq)
+     dvdb%hdr_ref%pertcase = ipert
 
      ! Write header
-     call hdr_fort_write(hdr_ref, ount, fform_pot, ierr)
+     call hdr_fort_write(dvdb%hdr_ref, ount, fform_pot, ierr)
      ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr = 0")
 
      do ispden=1,dvdb%nspden
@@ -5876,7 +5861,6 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
  ABI_FREE(iq_read)
  ABI_FREE(pinfo)
 
- call hdr_free(hdr_ref)
  call dvdb_free(dvdb)
 
  write(msg, '(2a)') " Downsampling of the electron-phonon coupling potential completed", ch10

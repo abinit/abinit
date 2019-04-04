@@ -182,8 +182,7 @@ program mrgdv
    case ("downsample")
      call get_command_argument(2, db_path)
      call get_command_argument(3, dump_file)
-     ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default=2, want_len=3) == 0, msg)
-     write(std_out,"(a)")sjoin("Downsampling DVDB using ngqpt:", ltoa(ngqpt))
+     ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, want_len=3) == 0, msg)
      call dvdb_qdownsample(db_path, dump_file, ngqpt, comm)
 
    !case ("convert")
