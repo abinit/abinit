@@ -2019,7 +2019,6 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  nsppol = gams%nsppol; natom3 = gams%natom3
 
  call cwtime(cpu,wall,gflops,"start")
-print *, "do_qintp ", do_qintp
  if (do_qintp) then
    ! Generate the q-mesh by finding the IBZ and the corresponding weights.
    qptrlatt = 0
@@ -2120,7 +2119,6 @@ print *, "do_qintp ", do_qintp
  write (900,*) '# do_qintp ', do_qintp
 #endif
  ! Loop over spins and qpoints in the IBZ. For the moment parallelize over iq_ibz
-print *, "nqi nqi ", nqibz, gams%nqibz
  do spin=1,nsppol
    do iq_ibz=1,nqibz
 
@@ -2331,7 +2329,9 @@ print *, "nqi nqi ", nqibz, gams%nqibz
    ABI_ALLOCATE (a2feew_partial_int, (a2f%nene))
    ABI_ALLOCATE (a2feew_w, (nomega))
    ABI_ALLOCATE (a2feew_w_int, (nomega))
-   print *, "temp_el, G_0(T_e) in W/m^3/K, spin"
+   ount = get_unit()
+   open (unit=ount, name="EPC_strength_aafo_T.dat")
+   write (ount, "# temp_el, G_0(T_e) in W/m^3/K, spin")
    do spin=1,nsppol
      do itemp = 1, ntemp
        temp_el = min_temp + (itemp-1)*delta_temp
@@ -2356,9 +2356,10 @@ print *, "nqi nqi ", nqibz, gams%nqibz
        call simpson_int(nomega,wstep,a2feew_w,a2feew_w_int)
        G0 = a2feew_w_int(nomega) * two_pi * a2f%n0(spin) / cryst%ucvol
        ! conversion factor for G0 to SI units =  Ha_J / Time_Sec / (Bohr_meter)**3 ~ 1.2163049915755545e+30
-       print *, temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
+       write (ount, "2(e20.10,2x)") temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
      end do
    end do
+   close (ount)
    ABI_DEALLOCATE (a2feew_partial)
    ABI_DEALLOCATE (a2feew_partial_int)
    ABI_DEALLOCATE (a2feew_w)
