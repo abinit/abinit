@@ -264,9 +264,15 @@ MODULE m_pawtab
    ! useexexch=1 ; use local exact-exchange
 
   integer :: usepawu
-   ! usepawu=0 ; do not use PAW+U formalism
-   ! usepawu=1 ; use PAW+U formalism (Full localized limit)
-   ! usepawu=2 ; use PAW+U formalism (Around Mean Field)
+   ! usepawu= 0 ; do not use PAW+U formalism
+   ! usepawu= 1 ; use PAW+U formalism (Full localized limit)
+   ! usepawu= 2 ; use PAW+U formalism (Around Mean Field)
+   ! usepawu= 3 ; use PAW+U formalism (Around Mean Field) - Alternative
+   ! usepawu= 4 ; use PAW+U formalism (FLL) without polarization in the XC 
+   ! usepawu=-1 ; use PAW+U formalism (FLL) - No use of the occupation matrix - Experimental
+   ! usepawu=-2 ; use PAW+U formalism (AMF) - No use of the occupation matrix - Experimental
+   ! usepawu=10 ; use PAW+U within DMFT
+   ! usepawu=14 ; use PAW+U within DMFT without polarization in the XC
 
   integer :: usepotzero
    ! usepotzero=0 if it is the Kresse-Joubert convention

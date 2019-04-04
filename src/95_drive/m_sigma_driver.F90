@@ -236,7 +236,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  complex(dpc) :: max_degw,cdummy
- logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit
+ logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname
  type(kmesh_t) :: Kmesh,Qmesh
@@ -489,19 +489,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Initialize optional flags in Pawtab to zero
    ! (Cannot be done in Pawinit since the routine is called only if some pars. are changed)
    Pawtab(:)%has_nabla = 0
-   Pawtab(:)%usepawu   = 0
-   Pawtab(:)%useexexch = 0
-   Pawtab(:)%exchmix   =zero
 
    call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
    ! Initialize and compute data for LDA+U
    Paw_dmft%use_dmft=Dtset%usedmft
-   if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
-     call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-&     Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+   call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
+&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
-   end if
 
    if (my_rank == master) call pawtab_print(Pawtab)
 
@@ -852,7 +847,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  * Initialize also lmselect (index of non-zero LM-moments of densities).
    ABI_DT_MALLOC(KS_paw_ij,(Cryst%natom))
 !  cplex=1;cplex_dij=Dtset%nspinor
-   has_dijso=Dtset%pawspnorb; has_dijU=Dtset%usepawu
+   has_dijso=Dtset%pawspnorb; has_dijU=merge(0,1,Dtset%usepawu==0)
    call paw_ij_nullify(KS_paw_ij)
    call paw_ij_init(KS_paw_ij,cplex,Dtset%nspinor,Dtset%nsppol,&
 &   Dtset%nspden,Dtset%pawspnorb,Cryst%natom,Cryst%ntypat,Cryst%typat,Pawtab,&
@@ -989,8 +984,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  KS_mflags%has_vhartree=1
  KS_mflags%has_vxc     =1
  KS_mflags%has_vxcval  =1
- if (Dtset%usepawu>0     )  KS_mflags%has_vu     =1
- if (Dtset%useexexch>0   )  KS_mflags%has_lexexch=1
+ if (Dtset%usepawu/=0    )  KS_mflags%has_vu     =1
+ if (Dtset%useexexch/=0  )  KS_mflags%has_lexexch=1
  if (Sigp%use_sigxcore==1)  KS_mflags%has_sxcore =1
  if (gwcalctyp<10           )  KS_mflags%only_diago =1 ! off-diagonal elements only for SC on wavefunctions.
 
@@ -1453,8 +1448,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  * Core contribution estimated using Fock exchange.
    if (Dtset%usepaw==1) then
      if (Sigp%use_sigxcore==1) Sr%hhartree=hlda - (KS_me%vxc - KS_me%sxcore)
-     if (Dtset%usepawu>0) Sr%hhartree=Sr%hhartree-KS_me%vu
-     if (Dtset%useexexch>0) then
+     if (Dtset%usepawu/=0) Sr%hhartree=Sr%hhartree-KS_me%vu
+     if (Dtset%useexexch/=0) then
        MSG_ERROR("useexexch > 0 not implemented")
        Sr%hhartree = Sr%hhartree - KS_me%vlexx
      end if
@@ -1510,8 +1505,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      QP_mflags%has_vxcval_hybrid=1
    end if
 !  if (Sigp%use_sigxcore==1) QP_mflags%has_sxcore =1
-!  if (Dtset%usepawu>0)    QP_mflags%has_vu     =1
-!  if (Dtset%useexexch>0)  QP_mflags%has_lexexch=1
+!  if (Dtset%usepawu/=0)    QP_mflags%has_vu     =1
+!  if (Dtset%useexexch/=0)  QP_mflags%has_lexexch=1
 
    ABI_MALLOC(tmp_kstab,(2,Wfd%nkibz,Wfd%nsppol))
    tmp_kstab=0
@@ -1641,7 +1636,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! Matrix elements of V_U are zero unless we are using LDA+U as starting point
  do ib=b1gw,b2gw
    Sr%vxcme(ib,:,:)=KS_me%vxcval(ib,ib,:,:)
-   if (Dtset%usepawu>0) Sr%vUme (ib,:,:)=KS_me%vu(ib,ib,:,:)
+   if (Dtset%usepawu/=0) Sr%vUme (ib,:,:)=KS_me%vu(ib,ib,:,:)
  end do
 
  ! Initial guess for the GW energies
@@ -3870,7 +3865,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 
  ! Allocate quantities related to the PAW spheres for the QP Hamiltonian.
  ! TODO call paw_ij_init in scfcv and respfn, fix small issues
- has_dijso=Dtset%pawspnorb; has_dijU=Dtset%usepawu
+ has_dijso=Dtset%pawspnorb; has_dijU=merge(0,1,Dtset%usepawu==0)
 
  call paw_ij_nullify(QP_paw_ij)
  call paw_ij_init(QP_paw_ij,cplex,Dtset%nspinor,Dtset%nsppol,&

@@ -703,8 +703,8 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
    mx%nsppol = max(dtsets(ii)%nsppol, mx%nsppol)
    mx%ntypat = max(dtsets(ii)%ntypat, mx%ntypat)
    mx%nzchempot = max(dtsets(ii)%nzchempot, mx%nzchempot)
-   if (dtsets(ii)%usepawu>0) then
-     if (dtsets(ii)%usedmatpu/=0) dmatpuflag=1
+   if (dtsets(ii)%usepawu/=0) then
+     if (dtsets(ii)%usepawu>0.and.dtsets(ii)%usedmatpu/=0) dmatpuflag=1
      lpawu=maxval(dtsets(ii)%lpawu(:))
      mx%lpawu=max(lpawu,mx%lpawu)
      !dtsets(ii)%natpawu=count(dtsets(ii)%lpawu(dtsets(ii)%typat((/(i1,i1=1,dtsets(ii)%natom)/)))/=-1)
@@ -1790,9 +1790,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
+ if ( dtset%usedmft > 0 ) dtset%usepawu = 1
 
- if (dtset%usepawu > 0 ) then
+ if (dtset%usepawu /= 0 ) then
    write(msg, '(7a)' )&
    'usedmft and usepawu are both activated ',ch10,&
    'This is not an usual calculation:',ch10,&
@@ -1803,7 +1803,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
- if (dtset%usepawu>0.or.dtset%usedmft>0) then
+ if (dtset%usepawu/=0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
@@ -1818,7 +1818,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  dtset%lexexch(1:dtset%ntypat)=-1
 
- if (dtset%useexexch>0) then
+ if (dtset%useexexch/=0) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lexexch',tread,'INT')
    if(tread==1) dtset%lexexch(1:dtset%ntypat)=intarr(1:dtset%ntypat)
  end if

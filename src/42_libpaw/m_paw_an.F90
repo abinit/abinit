@@ -349,7 +349,7 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nk3xc1,nspden,cplex,pawxcdev,ty
   ! local exact-exchange potential inside the sphere
   Paw_an(iat)%has_vxc_ex=0
   if (PRESENT(has_vxc_ex)) then
-   if (has_vxc_ex>0.and.Pawtab(itypat)%useexexch>0) then
+   if (has_vxc_ex>0.and.Pawtab(itypat)%useexexch/=0) then
     Paw_an(iat)%has_vxc_ex=1
     LIBPAW_ALLOCATE(Paw_an(iat)%vxc_ex,(cplex*Paw_an(iat)%mesh_size,v_size,nspden))
     Paw_an(iat)%vxc_ex=zero
