@@ -72,7 +72,6 @@ Merged successfully 14 files
 -P Number of CPUs for parallelism over perturbations: 1
 -P Number of perturbations treated by this CPU: 3
  Activate symmetrization of v1scf(r): no
- Use internal cache for Vscf(q): no
  List of q-points: min(10, nqpt)
 [ 1 ] [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 [ 2 ] [ 2.5000E-01,  0.0000E+00,  0.0000E+00]

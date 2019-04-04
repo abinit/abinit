@@ -129,9 +129,6 @@ module m_dvdb
    procedure :: get_mbsize => qcache_get_mbsize
    ! Return the (allocated) size of the cache in Mb.
 
-   !procedure :: set_qcache_mb => dvdb_set_qcache_mb
-   ! Allocate internal cache for potentials.
-
    !procedure :: qcache_update => dvdb_qcache_update
    ! Read selected potentials and update cache (collective routine)
 
@@ -365,10 +362,8 @@ module m_dvdb
    ! Reconstruct the DFPT potential for a q-point in the BZ starting
    ! from its symmetrical image in the IBZ.
 
-   procedure :: set_qcache_mb => dvdb_set_qcache_mb
-   ! Allocate internal cache for potentials.
-
    procedure :: qcache_read => dvdb_qcache_read
+   ! Allocate internal cache for potentials.
    ! Read potentials from DVDB file and store them in cache (COLLECTIVE routine)
 
    procedure :: qcache_update => dvdb_qcache_update
@@ -877,11 +872,11 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("-P Number of CPUs for parallelism over perturbations:", itoa(db%nprocs_pert))
  write(std_out,"(a)")sjoin("-P Number of perturbations treated by this CPU:", itoa(db%my_npert))
  write(std_out,"(a)")sjoin(" Activate symmetrization of v1scf(r):", yesno(db%symv1))
- write(std_out,"(a)")sjoin(" Use internal cache for Vscf(q):", yesno(db%qcache%maxsize > 0))
- if (db%qcache%maxsize > 0) then
-   cache_size = db%qcache%maxsize * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%my_npert * QCACHE_KIND)
-   write(std_out,'(a,f12.1,a)')' Max memory needed for cache: ', cache_size * b2Mb,' [Mb]'
- end if
+ !write(std_out,"(a)")sjoin(" Use internal cache for Vscf(q):", yesno(db%qcache%maxsize > 0))
+ !if (db%qcache%maxsize > 0) then
+ !  cache_size = db%qcache%maxsize * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%my_npert * QCACHE_KIND)
+ !  write(std_out,'(a,f12.1,a)')' Max memory needed for cache: ', cache_size * b2Mb,' [Mb]'
+ !end if
  write(std_out,"(a)")" List of q-points: min(10, nqpt)"
  do iq=1,min(db%nqpt, 10)
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
@@ -1452,19 +1447,23 @@ end subroutine dvdb_readsym_qbz
 
 !----------------------------------------------------------------------
 
-!!****f* m_dvdb/dvdb_set_qcache_mb
+!!****f* m_dvdb/dvdb_qcache_read
 !! NAME
-!!  dvdb_set_qcache_mb
+!!  dvdb_qcache_read
 !!
 !! FUNCTION
-!! Allocate internal cache storing v1scf potentials.
+!!  This function initializes the internal q-cache from file.
+!!  This is a collective routine that must be called by all procs in comm.
 !!
 !! INPUTS
-!!  ngfftf(18)=information on 3D FFT for interpolated potential
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  mbsize: Cache size in megabytes.
 !!    < 0 to allocate all q-points.
 !!    0 has not effect.
 !!    > 0 for cache with automatically computed nqpt points.
+!!  qselect_dvdb(%nqpt)=0 to ignore this q-point when reading (global array)
+!!  comm=MPI communicator
 !!
 !! OUTPUT
 !!
@@ -1474,21 +1473,25 @@ end subroutine dvdb_readsym_qbz
 !!
 !! SOURCE
 
-subroutine dvdb_set_qcache_mb(db, ngfftf, mbsize)
+subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, comm)
 
 !Arguments ------------------------------------
 !scalars
- !integer,intent(in) :: nfftf
- real(dp),intent(in) :: mbsize
+ integer,intent(in) :: nfft,comm
  class(dvdb_t),target,intent(inout) :: db
+ real(dp),intent(in) :: mbsize
 !arrays
- integer,intent(in) :: ngfftf(18)
+ integer,intent(in) :: ngfft(18), qselect_dvdb(db%nqpt)
 
 !Local variables-------------------------------
 !scalars
- integer :: nq
- real(dp) :: onepot_mb
+ integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii, nq
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all, onepot_mb
+ character(len=500) :: msg
  type(qcache_t),pointer :: qcache
+!arrays
+ real(dp),allocatable :: v1scf(:,:,:,:)
+ real(dp) :: tsec(2)
 
 ! *************************************************************************
 
@@ -1502,7 +1505,7 @@ subroutine dvdb_set_qcache_mb(db, ngfftf, mbsize)
    qcache%maxsize = 0; return
  end if
 
- onepot_mb = two * product(ngfftf(1:3)) * db%nspden * QCACHE_KIND * b2Mb
+ onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
  if (mbsize < zero) then
    qcache%maxsize = nq
  else
@@ -1511,61 +1514,12 @@ subroutine dvdb_set_qcache_mb(db, ngfftf, mbsize)
  qcache%maxsize = min(qcache%maxsize, nq)
  if (qcache%maxsize == 0) qcache%maxsize = 1
 
- call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Using cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" Max Number of q-points stored in memory: ", itoa(qcache%maxsize)))
  call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
  call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.2"), " [Mb]"))
 
  ABI_MALLOC(qcache%key, (nq))
-
-end subroutine dvdb_set_qcache_mb
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_dvdb/dvdb_qcache_read
-!! NAME
-!!  dvdb_qcache_read
-!!
-!! FUNCTION
-!!  This function initializes the internal q-cache from file.
-!!  This is a collective routine that must be called by all procs in comm.
-!!
-!! INPUTS
-!!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  qselect_dvdb(%nqpt)=0 to ignore this q-point when reading (global array)
-!!  comm=MPI communicator
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine dvdb_qcache_read(db, nfft, ngfft, qselect_dvdb, comm)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nfft,comm
- class(dvdb_t),intent(inout) :: db
-!arrays
- integer,intent(in) :: ngfft(18), qselect_dvdb(db%nqpt)
-
-!Local variables-------------------------------
-!scalars
- integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii
- real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
- character(len=500) :: msg
-!arrays
- real(dp),allocatable :: v1scf(:,:,:,:)
- real(dp) :: tsec(2)
-
-! *************************************************************************
-
- if (db%qcache%maxsize == 0) return
 
  call timab(1801, 1, tsec)
 
@@ -1609,7 +1563,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect_dvdb, comm)
 
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(db%qcache%get_mbsize(), fmt="f12.1"), " [Mb]"))
 
- call cwtime_report(" Qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" DVDB Qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
  call timab(1801, 2, tsec)
 
 end subroutine dvdb_qcache_read
@@ -5410,12 +5364,8 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  ! This to symmetrize the DFPT potentials.
  !if (dtset%symdynmat == 1) dvdb%symv1 = .True.
 
- ! TODO: Activate this part.
  ! Besides perturbations with same q-points won't be contiguous on file --> IO is gonna be inefficient.
- ! Set cache in Mb for q-points.
- !call dvdb_set_qcache_mb(dvdb, dtset%dvdb_qcache_mb)
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
- !call dvdb_qcache_read(dvdb, nfftf, ngfftf, comm)
 
  natom = cryst%natom
  natom3 = 3 * natom
