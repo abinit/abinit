@@ -33,6 +33,7 @@ module m_scup_dataset
 
  use m_parser, only : intagm
  use m_ddb,    only : DDB_QTOL
+ use m_bz_mesh
 
  implicit none
 
@@ -59,20 +60,25 @@ module m_scup_dataset
  type scup_dtset_type 
 
 !Integer 
- integer :: scup_elec_model
- integer :: scup_initorbocc
- integer :: scup_ismagnetic 
- integer :: scup_istddft    
- integer :: scup_printbands
- integer :: scup_printeigv
- integer :: scup_printeltic 
- integer :: scup_printgeom 
- integer :: scup_printorbocc
+ integer :: scup_nspeck
+!Logicals 
+ logical*1 :: scup_elec_model
+ logical*1 :: scup_initorbocc
+ logical*1 :: scup_ismagnetic 
+ logical*1 :: scup_istddft    
+ logical*1 :: scup_printbands
+ logical*1 :: scup_printeigv
+ logical*1 :: scup_printeltic 
+ logical*1 :: scup_printgeom 
+ logical*1 :: scup_printorbocc
 !Real 
  real*8   :: scup_tcharge 
 
 !Integer Array
  integer :: scup_ksamp(3)
+
+!Real Array 
+ real,allocatable :: scup_speck(:,:)
 
  end type scup_dtset_type
 !!***
@@ -109,18 +115,20 @@ subroutine scup_dtset_init(scup_dtset)
 !Local variables -------------------------
 !scalars
 !arrays
+!-----------------------------------------
 
-scup_dtset%scup_elec_model  = 0
+scup_dtset%scup_nspeck       = 0 
+scup_dtset%scup_elec_model  = .FALSE.
 scup_dtset%scup_ksamp       = (/ 1, 1, 1 /)
-scup_dtset%scup_tcharge     = 0 
-scup_dtset%scup_initorbocc  = 0 
-scup_dtset%scup_ismagnetic  = 0 
-scup_dtset%scup_istddft     = 0
-scup_dtset%scup_printbands  = 0  
-scup_dtset%scup_printeigv   = 0 
-scup_dtset%scup_printeltic  = 0  
-scup_dtset%scup_printgeom   = 0  
-scup_dtset%scup_printorbocc = 0 
+scup_dtset%scup_tcharge     = 0
+scup_dtset%scup_initorbocc  = .FALSE. 
+scup_dtset%scup_ismagnetic  = .FALSE. 
+scup_dtset%scup_istddft     = .FALSE.
+scup_dtset%scup_printbands  = .FALSE.  
+scup_dtset%scup_printeigv   = .FALSE. 
+scup_dtset%scup_printeltic  = .FALSE.  
+scup_dtset%scup_printgeom   = .FALSE.  
+scup_dtset%scup_printorbocc = .FALSE. 
 
 
 
@@ -201,21 +209,34 @@ subroutine outvars_scup(scup_dtset,nunit)
 !Local variables -------------------------
 !Set routine version number here:
 !scalars
- integer :: ii,iph1,iph2,iqshft
+!integers for printing
+ integer :: int_inorb=0,int_mgn=0,int_tddft=0,int_pband=0
+ integer :: int_peigv=0,int_peltic=0,int_pgeom=0,int_porbocc=0
 
 !*********************************************************************
-
+   
+   !Check if logicals are true, if yes set integers to one for printing
+   if(scup_dtset%scup_initorbocc)   int_inorb   =1
+   if(scup_dtset%scup_ismagnetic)   int_mgn     =1
+   if(scup_dtset%scup_istddft)      int_tddft   =1
+   if(scup_dtset%scup_printbands)   int_pband   =1
+   if(scup_dtset%scup_printeigv)    int_peigv   =1
+   if(scup_dtset%scup_printeltic)   int_peltic  =1
+   if(scup_dtset%scup_printgeom)    int_pgeom   =1
+   if(scup_dtset%scup_printorbocc)  int_porbocc =1
+   
+   !Print  
    write(nunit,'(a)')'Variables for SCALE-UP electronic model :'
    write(nunit,'(1x,a16,3I3)')    '      scup_ksamp',scup_dtset%scup_ksamp
    write(nunit,'(1x,a16,F7.3)')   '    scup_tcharge',scup_dtset%scup_tcharge
-   write(nunit,'(1x,a16,I3)')     ' scup_initorbocc',scup_dtset%scup_initorbocc
-   write(nunit,'(1x,a16,I3)')     ' scup_ismagnetic',scup_dtset%scup_ismagnetic
-   write(nunit,'(1x,a16,I3)')     '    scup_istddft',scup_dtset%scup_istddft
-   write(nunit,'(1x,a16,I3)')     ' scup_printbands',scup_dtset%scup_printbands    
-   write(nunit,'(1x,a16,I3)')     '  scup_printeigv',scup_dtset%scup_printeigv   
-   write(nunit,'(1x,a16,I3)')     ' scup_printeltic',scup_dtset%scup_printeltic   
-   write(nunit,'(1x,a16,I3)')     '  scup_printgeom',scup_dtset%scup_printgeom    
-   write(nunit,'(1x,a16,I3)')     'scup_printorbocc',scup_dtset%scup_printorbocc 
+   write(nunit,'(1x,a16,I3)')     ' scup_initorbocc',int_inorb  
+   write(nunit,'(1x,a16,I3)')     ' scup_ismagnetic',int_mgn    
+   write(nunit,'(1x,a16,I3)')     '    scup_istddft',int_tddft  
+   write(nunit,'(1x,a16,I3)')     ' scup_printbands',int_pband     
+   write(nunit,'(1x,a16,I3)')     '  scup_printeigv',int_peigv   
+   write(nunit,'(1x,a16,I3)')     ' scup_printeltic',int_peltic   
+   write(nunit,'(1x,a16,I3)')     '  scup_printgeom',int_pgeom    
+   write(nunit,'(1x,a16,I3)')     'scup_printorbocc',int_porbocc 
 
 end subroutine outvars_scup
 
@@ -264,6 +285,8 @@ subroutine invars10scup(scup_dtset,lenstr,string)
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:),work(:)
+ !tmp integer to transfer to logicals 
+ integer :: tmp_int
 
 !*********************************************************************
 
@@ -289,49 +312,52 @@ call scup_dtset_init(scup_dtset)
 !D 
 !E 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_elec_model',tread,'INT')
- if(tread==1) scup_dtset%scup_elec_model=intarr(1)
- if(scup_dtset%scup_elec_model<0 .or. scup_dtset%scup_elec_model>1 )then
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_elec_model is',scup_dtset%scup_elec_model,', but the only allowed values',ch10,&
+&   'scup_elec_model is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_elec_model in your input file.'
    MSG_ERROR(message)
  end if
+ if(tmp_int == 1) scup_dtset%scup_elec_model = .TRUE.
 
 !F 
 !G 
 !H 
 !I 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_initorbocc',tread,'INT')
- if(tread==1) scup_dtset%scup_initorbocc=intarr(1)
- if(scup_dtset%scup_initorbocc<0 .or. scup_dtset%scup_initorbocc>1 )then
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_initorbocc is',scup_dtset%scup_initorbocc,', but the only allowed values',ch10,&
+&   'scup_initorbocc is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_initorbocc in your input file.'
    MSG_ERROR(message)
  end if
+ if(tmp_int == 1) scup_dtset%scup_initorbocc = .TRUE.
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_ismagnetic',tread,'INT')
- if(tread==1) scup_dtset%scup_ismagnetic=intarr(1)
- if(scup_dtset%scup_ismagnetic<0 .or. scup_dtset%scup_ismagnetic>1 )then
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_ismagnetic is',scup_dtset%scup_ismagnetic,', but the only allowed values',ch10,&
+&   'scup_ismagnetic is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_ismagnetic in your input file.'
    MSG_ERROR(message)
  end if
+ if(tmp_int == 1) scup_dtset%scup_ismagnetic = .TRUE.
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_istddft',tread,'INT')
- if(tread==1) scup_dtset%scup_istddft=intarr(1)
- if(scup_dtset%scup_istddft<0 .or. scup_dtset%scup_istddft>1 )then
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_istddft is',scup_dtset%scup_istddft,', but the only allowed values',ch10,&
+&   'scup_istddft is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_istddft in your input file.'
    MSG_ERROR(message)
  end if
-
+ if(tmp_int == 1) scup_dtset%scup_istddft = .TRUE.
 
 
 !J
@@ -353,60 +379,75 @@ call scup_dtset_init(scup_dtset)
 !O
 !P 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printbands',tread,'INT')
- if(tread==1) scup_dtset%scup_printbands=intarr(1)
- if(scup_dtset%scup_printbands<0 .or. scup_dtset%scup_printbands>1 )then
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printbands is',scup_dtset%scup_printbands,', but the only allowed values',ch10,&
+&   'scup_printbands is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printbands in your input file.'
    MSG_ERROR(message)
  end if
+ if(tmp_int == 1) scup_dtset%scup_printbands = .TRUE.
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeigv',tread,'INT')
- if(tread==1) scup_dtset%scup_printeigv=intarr(1)
- if(scup_dtset%scup_printeigv<0 .or. scup_dtset%scup_printeigv>1 )then
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printeigv is',scup_dtset%scup_printeigv,', but the only allowed values',ch10,&
+&   'scup_printeigv is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printeigv in your input file.'
    MSG_ERROR(message)
  end if
+ if(tmp_int == 1) scup_dtset%scup_printeigv = .TRUE.
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeltic',tread,'INT')
- if(tread==1) scup_dtset%scup_printeltic=intarr(1)
- if(scup_dtset%scup_printeltic<0 .or. scup_dtset%scup_printeltic>1 )then
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printeltic is',scup_dtset%scup_printeltic,', but the only allowed values',ch10,&
+&   'scup_printeltic is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printeltic in your input file.'
    MSG_ERROR(message)
  end if
+ if(tmp_int == 1) scup_dtset%scup_printeltic = .TRUE.
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printgeom',tread,'INT')
- if(tread==1) scup_dtset%scup_printgeom=intarr(1)
- if(scup_dtset%scup_printgeom<0 .or. scup_dtset%scup_printgeom>1 )then
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printgeom is',scup_dtset%scup_printgeom,', but the only allowed values',ch10,&
+&   'scup_printgeom is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printgeom in your input file.'
    MSG_ERROR(message)
  end if
+ if(tmp_int == 1) scup_dtset%scup_printgeom = .TRUE.
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printorbocc',tread,'INT')
- if(tread==1) scup_dtset%scup_printorbocc=intarr(1)
- if(scup_dtset%scup_printorbocc<0 .or. scup_dtset%scup_printorbocc>1 )then
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printorbocc is',scup_dtset%scup_printorbocc,', but the only allowed values',ch10,&
+&   'scup_printorbocc is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printorbocc in your input file.'
    MSG_ERROR(message)
  end if
-
+ if(tmp_int == 1) scup_dtset%scup_printorbocc = .TRUE.
 
 !Q
 !R
 !S 
-!T 
+!T
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_tcharge',tread,'DPR')
+ if(tread==1) scup_dtset%scup_tcharge=dprarr(1)
+ if(scup_dtset%scup_tcharge<0)then
+   write(message, '(a,f10.2,a,a,a,a,a)' )&
+&   'scup_tcharge is',scup_dtset%scup_tcharge,', but the only allowed value',ch10,&
+&   'is superior to 0.',ch10,&
+&   'Action: correct scup_tcharge in your input file.'
+   MSG_ERROR(message)
+ end if
+
+
 !U 
 !V 
 !W
@@ -416,3 +457,4 @@ call scup_dtset_init(scup_dtset)
 
 end subroutine invars10scup
 
+end module m_scup_dataset

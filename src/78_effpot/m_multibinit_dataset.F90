@@ -2423,7 +2423,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
 !MS Variables for SCALE-UP 
 !Replace by function from m_scup_dataset.F90
- if(multibinit_dtset%scup_dtset%scup_elec_model/=0)then  
+ if(multibinit_dtset%scup_dtset%scup_elec_model)then  
    call outvars_scup(multibinit_dtset%scup_dtset,nunit)  
  end if
 

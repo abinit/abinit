@@ -565,7 +565,7 @@ implicit none
 
      !Check if we want to use an effective electronic Model of SCALE UP  
      need_elec_eval = .FALSE. 
-     if(inp%scup_elec_model == 1) need_elec_eval = .TRUE.
+     if(inp%scup_dtset%scup_elec_model) need_elec_eval = .TRUE.
 
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
