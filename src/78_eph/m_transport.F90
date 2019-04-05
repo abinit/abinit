@@ -513,7 +513,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  ! Compute transport quantities
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
  self%sigma = fact0 * self%l0
- call safe_div(volt_SI * self%l1(:,:,:,:,itemp), self%l0(:,:,:,:,itemp), zero, self%pi(:,:,:,:,itemp))
+ call safe_div(volt_SI * self%l1, self%l0, zero, self%pi)
  do itemp=1,self%ntemp
    kT = self%kTmesh(itemp) / kb_HaK
    call safe_div(volt_SI * self%l1(:,:,:,:,itemp), &
