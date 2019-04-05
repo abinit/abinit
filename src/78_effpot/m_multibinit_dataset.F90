@@ -494,6 +494,11 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  !  ABI_DEALLOCATE(multibinit_dtset%qph2l_spin)
  !end if
 
+!=====================================================================
+!Free Scale-up dataset
+!=====================================================================
+
+ call scup_dtset_free(multibinit_dtset%scup_dtset)
 
 end subroutine multibinit_dtset_free
 !!***

@@ -61,6 +61,7 @@ module m_scup_dataset
 
 !Integer 
  integer :: scup_nspeck
+ integer :: scup_ndivsm
 !Logicals 
  logical*1 :: scup_elec_model
  logical*1 :: scup_initorbocc
@@ -117,10 +118,11 @@ subroutine scup_dtset_init(scup_dtset)
 !arrays
 !-----------------------------------------
 
-scup_dtset%scup_nspeck       = 0 
+scup_dtset%scup_ndivsm      =  0
+scup_dtset%scup_nspeck      =  0 
 scup_dtset%scup_elec_model  = .FALSE.
-scup_dtset%scup_ksamp       = (/ 1, 1, 1 /)
-scup_dtset%scup_tcharge     = 0
+scup_dtset%scup_ksamp       =  (/ 1, 1, 1 /)
+scup_dtset%scup_tcharge     =  0
 scup_dtset%scup_initorbocc  = .FALSE. 
 scup_dtset%scup_ismagnetic  = .FALSE. 
 scup_dtset%scup_istddft     = .FALSE.
@@ -142,7 +144,6 @@ end subroutine  scup_dtset_init
 !!
 !! FUNCTION
 !!  deallocate remaining arrays in the scup_dtset datastructure
-!!  At the moment no allocations in scup_dtset so it's empty
 !!
 !! INPUTS
 !!  scup_dtset <type(scup_dtset_type)> = scup_dataset structure
@@ -166,6 +167,11 @@ subroutine scup_dtset_free(scup_dtset)
  type(scup_dtset_type), intent(inout) :: scup_dtset
 
 ! *************************************************************************
+
+
+if(allocated(scup_dtset%scup_speck))then 
+        ABI_DEALLOCATE(scup_dtset%scup_speck)
+endif
 
 
 end subroutine scup_dtset_free
@@ -212,7 +218,8 @@ subroutine outvars_scup(scup_dtset,nunit)
 !integers for printing
  integer :: int_inorb=0,int_mgn=0,int_tddft=0,int_pband=0
  integer :: int_peigv=0,int_peltic=0,int_pgeom=0,int_porbocc=0
-
+!Character for defining fromat string 
+ character(len=32) :: string
 !*********************************************************************
    
    !Check if logicals are true, if yes set integers to one for printing
@@ -224,6 +231,12 @@ subroutine outvars_scup(scup_dtset,nunit)
    if(scup_dtset%scup_printeltic)   int_peltic  =1
    if(scup_dtset%scup_printgeom)    int_pgeom   =1
    if(scup_dtset%scup_printorbocc)  int_porbocc =1
+   
+   !Debug format string for writing kpoints to output
+   !Write format string for special kpoints 
+   !if(allocated(scup_dtset%scup_speck))then 
+   !   write (string, '( "(1x,a16 ", I4, "(F6.2))" )' )  scup_dtset%scup_nspeck
+   !endif
    
    !Print  
    write(nunit,'(a)')'Variables for SCALE-UP electronic model :'
@@ -237,6 +250,13 @@ subroutine outvars_scup(scup_dtset,nunit)
    write(nunit,'(1x,a16,I3)')     ' scup_printeltic',int_peltic   
    write(nunit,'(1x,a16,I3)')     '  scup_printgeom',int_pgeom    
    write(nunit,'(1x,a16,I3)')     'scup_printorbocc',int_porbocc 
+   write(nunit,'(1x,a16,I3)')     '     scup_nspeck',scup_dtset%scup_nspeck
+   write(nunit,'(1x,a16,I3)')     '     scup_ndivsm',scup_dtset%scup_ndivsm
+   !Debug write kpoints to output 
+   !if(allocated(scup_dtset%scup_speck))then 
+   !   write(nunit,string)     '      scup_speck',scup_dtset%scup_speck
+   !endif
+
 
 end subroutine outvars_scup
 
@@ -379,7 +399,29 @@ call scup_dtset_init(scup_dtset)
 
 !L 
 !M 
-!N 
+!N
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_ndivsm',tread,'INT')
+ if(tread==1) scup_dtset%scup_ndivsm=intarr(1)
+ if(scup_dtset%scup_ndivsm<0 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_ndivsm is',scup_dtset%scup_ndivsm,', but the only allowed values',ch10,&
+&   'are positiv.',ch10,&
+&   'Action: correct scup_ndivsm in your input file.'
+   MSG_ERROR(message)
+ end if
+
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_nspeck',tread,'INT')
+ if(tread==1) scup_dtset%scup_nspeck=intarr(1)
+ if(scup_dtset%scup_nspeck<0 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_nspeck is',scup_dtset%scup_nspeck,', but the only allowed values',ch10,&
+&   'are positiv.',ch10,&
+&   'Action: correct scup_nspeck in your input file.'
+   MSG_ERROR(message)
+ end if
+
 !O
 !P 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printbands',tread,'INT')
@@ -463,6 +505,56 @@ call scup_dtset_init(scup_dtset)
 !X
 !Y
 !Z 
+
+!=====================================================================
+!start reading dimension dependent variables
+!=====================================================================
+
+
+!A
+!B
+!C
+!D
+!E
+!F
+!G
+!H
+!I
+!J
+!K
+!L
+!M
+!N
+!O
+!P
+!Q
+!R
+!S
+   !Allocate
+   if(scup_dtset%scup_printbands)then 
+     ABI_ALLOCATE(scup_dtset%scup_speck,(3,scup_dtset%scup_nspeck))
+    
+   call intagm(dprarr,intarr,jdtset,marr,3*scup_dtset%scup_nspeck,string(1:lenstr),'scup_speck',tread,'DPR')
+     if(tread==1)then
+       scup_dtset%scup_speck(:,:)=reshape( dprarr(1:3*scup_dtset%scup_nspeck), [3,scup_dtset%scup_nspeck])
+     else
+       write(message,'(5a)') &
+&       'When scup_printbands is asked, scup_speck must be initialized ',ch10,&
+&       'in the input file, which is not the case.',ch10,&
+&       'Action: initialize scup_speck in your input file, or change printbands.'
+       MSG_ERROR(message)
+     end if
+   end if
+
+
+!T
+!U 
+!V 
+!W
+!X
+!Y
+!Z 
+
 
 end subroutine invars10scup
 

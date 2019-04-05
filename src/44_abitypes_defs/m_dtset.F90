@@ -2467,7 +2467,8 @@ subroutine chkvars (string)
 !MS Variables for SCALE-UP 
 #if defined DEV_MS_SCALEUP 
  list_vars=trim(list_vars)//' scup_elec_model scup_ksamp scup_tcharge scup_initorbocc scup_ismagnetic'
- list_vars=trim(list_vars)//' scup_istddft scup_printgeom scup_printeigv scup_printeltic scup_printorbocc'
+ list_vars=trim(list_vars)//' scup_istddft scup_printbands scup_printgeom scup_printeigv scup_printeltic ' 
+ list_vars=trim(list_vars)//' scup_printorbocc  scup_nspeck scup_speck scup_ndivsm'
 #endif 
  list_vars=trim(list_vars)//' sigma_bsum_range sigma_ngkpt sigma_nshiftk sigma_shiftk'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
