@@ -2121,6 +2121,9 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  ! Loop over spins and qpoints in the IBZ. For the moment parallelize over iq_ibz
  do spin=1,nsppol
    do iq_ibz=1,nqibz
+! TODO: for the moment the memory is not distributed, only the calculation
+!   exception is vals_ee
+     if (gams%my_iqibz(iq_ibz) == -1) cycle
 
      ! Interpolate or evaluate gamma directly.
 #ifdef DEV_MJV
