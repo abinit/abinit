@@ -19,7 +19,6 @@
 !! CHILDREN
 !!
 !! SOURCE
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -27,19 +26,19 @@
 #include "abi_common.h"
 
 module m_hightemp
-
   use defs_basis
+  use defs_abitypes
   use m_io_tools
   use m_errors
   use m_geometry
   use m_specialmsg
+  use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle
 
   implicit none
 
-  private
-
+  public :: mkrho_hightemp
   public :: prt_eigocc
-
+  private :: free_transfactor
 contains
 
 !!****f* ABINIT/prt_eigocc
@@ -51,15 +50,6 @@ contains
 !! electronic temperature (tsmear when occopt=3), eigenvalues and occupation for each k-point,
 !! wheight of the k-point, number of bands, number of k-points...
 !! This file is intended to be used for custom DOS computation with external tools for example.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (??)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! TODO
 !!
 !! INPUTS
 !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
@@ -99,7 +89,6 @@ subroutine prt_eigocc(eigen,fermie,fnameabo_eig,iout,kptns,&
   real(dp),intent(in) :: occ(mband*nkpt*nsppol)
   real(dp),intent(in) :: wtk(nkpt)
 
-
   ! Local variables -------------------------
   ! Scalars
   integer :: band_index,iband,ii,ikpt,isppol,nband_k,temp_unit
@@ -111,6 +100,7 @@ subroutine prt_eigocc(eigen,fermie,fnameabo_eig,iout,kptns,&
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
 
   ! *********************************************************************
+
   band_index=0
   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -155,5 +145,106 @@ subroutine prt_eigocc(eigen,fermie,fnameabo_eig,iout,kptns,&
 
   close(temp_unit)
 end subroutine prt_eigocc
+
+!!****f* ABINIT/free_transfactor
+!! NAME
+!! free_transfactor
+!!
+!! FUNCTION
+!! Compute the translation factor $U_0$ that appears in the density of states of free electrons.
+!!
+!! TODO
+!! INPUTS
+!!
+!! TODO
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine free_transfactor()
+end subroutine free_transfactor
+
+!!****f* ABINIT/mkrho_hightemp
+!! NAME
+!! mkrho_hightemp
+!!
+!! FUNCTION
+!! Make the electronic density replacing high energy bands by free electron states.
+!!
+!! TODO
+!! INPUTS
+!!
+!! TODO
+!! OUTPUT
+!!
+!! NOTES
+!! TODO Parallelization is still to be done.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine mkrho_hightemp(dtset,mpi_enreg,npwarr,occ,rhor)
+
+  ! Arguments -------------------------------
+  ! Scalars
+  type(MPI_type),intent(in) :: mpi_enreg
+  type(dataset_type),intent(in) :: dtset
+  ! Arrays
+  integer,intent(in) :: npwarr(dtset%nkpt)
+  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+  real(dp),intent(out) :: rhor(dtset%nfft,dtset%nspden)
+
+  ! Local variables -------------------------
+  ! Scalars
+  integer :: band_cut,bdtot_index,iband,ikpt,isppol,me,n1,n2,n3,n4,n5,n6,nband_k,npw_k
+  ! Arrays
+  real(dp),allocatable :: rhoaug(:,:,:)
+
+  ! *********************************************************************
+
+  band_cut = 100
+  me=mpi_enreg%me_kpt
+  bdtot_index=0
+  ! n4,n5,n6 are FFT dimensions, modified to avoid cache trashing
+  n1=dtset%ngfft(1);n2=dtset%ngfft(2);n3=dtset%ngfft(3)
+  n4=dtset%ngfft(4);n5=dtset%ngfft(5);n6=dtset%ngfft(6)
+  ABI_ALLOCATE(rhoaug,(n4,n5,n6))
+
+  ! Loop over spins
+  do isppol=1,dtset%nsppol
+    rhoaug(:,:,:)=zero
+
+    ! Loop over k-points
+    do ikpt=1,dtset%nkpt
+      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+      npw_k=npwarr(ikpt)
+
+      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
+        bdtot_index=bdtot_index+nband_k
+        cycle
+      end if
+      ! Loop over bands
+      do iband=1,nband_k
+
+        ! Treating only occupied bands
+        if(abs(occ(iband+bdtot_index))>tol8) then
+
+          if(iband<=band_cut) then
+            ! call fourwf(1,rhoaug(:,:,:),cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
+            !   & istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+            !   & npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+            !   & use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
+            !   & use_gpu_cuda=dtset%use_gpu_cuda)
+          end if
+        end if
+      end do ! End loop over bands
+    end do ! End loop over k-points
+  end do ! End loop over spins
+end subroutine mkrho_hightemp
 
 end module m_hightemp
