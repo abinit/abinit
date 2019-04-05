@@ -852,9 +852,13 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !  PAW: possibly substract compensation density
    if ((usexcnhat==0.and.nhatdim==1).or.(non_magnetic_xc)) then
      ABI_ALLOCATE(rhor_,(nfft,nspden))
-     rhor_(:,:) =rhor(:,:)-nhat(:,:)
+     if (usexcnhat==0.and.nhatdim==1) then
+       rhor_(:,:) =rhor(:,:)-nhat(:,:)
+     else
+       rhor_(:,:) =rhor(:,:)
+     end if
      if (non_magnetic_xc) then
-       if(nspden==2) rhor_(:,2)=rhor_(:,1)/two
+       if(nspden==2) rhor_(:,2)=rhor_(:,1)*half
        if(nspden==4) rhor_(:,2:4)=zero
      end if
    else

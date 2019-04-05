@@ -409,7 +409,10 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
 &     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu)
-     MSG_ERROR("BS equation with LDA+U not completely coded")
+   if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
+     msg='BS equation with LDA+U not completely coded!'
+     MSG_ERROR(msg)
+   end if
    if (my_rank == master) call pawtab_print(Pawtab)
 
    ! Get Pawrhoij from the header of the WFK file.
