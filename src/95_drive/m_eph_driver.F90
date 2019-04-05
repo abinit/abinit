@@ -550,6 +550,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dipdip == 0
    ! TODO: Change name: has_dielt_zeff --> lr_treatment = 0, 1
+   !dvdb%add_lr_part = .False.
    if (iblock /= 0) then
      dvdb%dielt = dielt
      dvdb%zeff = zeff
@@ -631,7 +632,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    if (dtset%eph_task == -4) then
      call wrtout(std_out, "Calling transport routine after sigmaph run...", do_flush=.True.)
-     call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
+     !call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
    end if
 
  case (5, -5)

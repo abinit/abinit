@@ -983,15 +983,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! inside the loop over q-points. 
      ! In this case, indeed, the interpolation must be done in sigma_setup_qloop once we know the q-points contributing 
      ! to the integral and the potentials must be cached.
-     comm_rpt = sigma%comm_bq
-     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+     comm_rpt = xmpi_comm_self
+     !comm_rpt = sigma%comm_bq
+     !if (.not. sigma%imag_only) comm_rpt = comm_band
+     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
-     ! Now build q-cache in the IBZ using qselect mask.
+     ! Now build q-cache in the *dense* IBZ using qselect mask.
      ABI_CALLOC(qselect, (sigma%nqibz))
      qselect = 1
-     if (sigma%imag_only .and. sigma%qint_method == 1) then
-       call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
-     end if
+     !if (sigma%imag_only .and. sigma%qint_method == 1) then
+     !  call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
+     !end if
      call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, comm)
 
  else
@@ -1153,8 +1155,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 if (sigma%use_ftinterp) then
          db_iqpt = sigma%ind_ibzk2ibz(1, iq_ibz)
          qq_ibz = sigma%qibz(:, db_iqpt)
-         call dvdb%get_ftinterp_qbz(cryst, qpt, qq_ibz, sigma%ind_ibzk2ibz(:, iq_ibz), &
-             cplex, nfftf, ngfft, v1scf, sigma%comm_pert)
+         call dvdb%get_ftqbz(cryst, qpt, qq_ibz, sigma%ind_ibzk2ibz(:, iq_ibz), cplex, nfftf, ngfftf, v1scf, sigma%comm_pert)
 else
 
        ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
@@ -3939,7 +3940,7 @@ if (self%use_ftinterp) then
            if (.not. allocated(dvdb%ftqcache%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
          end do
          ! Update cache by interpolating W(r, R)
-         ! call dvdb%ftqcache_update(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
+         !call dvdb%ftqcache_update(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
          ABI_FREE(ineed_qpt)
 else
          ! Find q-points needed by this MPI rank.
@@ -5106,7 +5107,7 @@ end subroutine eval_sigfrohl2
 !!  once we know sigma%nkcalc. It uses a energy window computed from the max phonon frequency times sigma%winfact
 !!
 !! INPUT
-!! cryst=Crystalline structure read from the the DVDB file.
+!! cryst=Crystalline structure
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !! qpts(3, nqpt)=
 !! nqpt= Number of points in qpts

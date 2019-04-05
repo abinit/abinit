@@ -2682,7 +2682,7 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 & '  The value of the input variable ',trim(input_name),' is ',input_value,', while it must be'
  if(minmax_flag==2)then
    write(message, '(3a,20(i0,1x))' ) trim(message),ch10,&
-   '  different from one of the following:',list_values(1:list_number)
+   '  different from one of the following: ',list_values(1:list_number)
  else if(list_number>1 .or. &
 &   minmax_flag==0 .or. list_values(1)/=minmax_value )then
 !  The following format restricts list_values to be between -99 and 999
@@ -2690,8 +2690,7 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
      write(message, '(3a,40(i0,1x))' ) trim(message),ch10,&
      '  equal to one of the following: ',list_values(1:list_number)
    else
-     write(message, '(3a,40(i0,1x))' ) trim(message),ch10,&
-     '  equal to ',list_values(1)
+     write(message, '(3a,40(i0,1x))' ) trim(message),ch10,'  equal to ',list_values(1)
    end if
    if(minmax_flag==1)then
 !    The following format restricts minmax_value to be between -99 and 999

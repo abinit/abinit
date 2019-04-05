@@ -502,7 +502,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call cwtime(cpu, wall, gflops, "stop")
        if (inonsc == 1) call wrtout(std_out, sjoin(" k-point: [", itoa(ikpt), "/", itoa(nkpt), "], spin:", itoa(isppol)))
        call wrtout(std_out, sjoin("   Max resid =", ftoa(residk, fmt="es13.5"), &
-         " (without nbdbuf buffer). One NSCF iteration required cpu-time:", &
+         " (exclude nbdbuf bands). One NSCF iteration cpu-time:", &
          sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
        if (inonsc == enough) call wrtout(std_out, "   Printing residuals every mod(10) iteration ...")
      end if
