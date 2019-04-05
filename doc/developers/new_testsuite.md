@@ -628,10 +628,11 @@ fldiff
 
 explore
 
-:   This tool allows the user to *explore* a test configuration file. It provides a
-    shell like interface in which the user can move around the tree of the
-    configuration file and print the constraints defined by the test. It also provides
-    documentation about constraints and parameters via the *show* command. 
+:   This tool allows the user to *explore* and validate a test configuration
+    file. It provides a shell like interface in which the user can move around the
+    tree of the configuration file and print the constraints defined by the test. It
+    also provides documentation about constraints and parameters via the *show*
+    command. 
 
 ## Extending the test suite
 
@@ -664,6 +665,7 @@ provide a bit more flexibility to the configuration file without diving into
 python code.
 
 equation and equations
+
 : These two are sisters. `equation` take a string as a value. This string will
   be interpreted as a python expression that must result in a number. The
   absolute value of this number will be compared to the value of the `tol_eq`
@@ -683,6 +685,7 @@ Etot:
 ```
 
 callback
+
 : This one require a bit of python coding since it will use a method of the
   structure it is defined in. Suppose with have a tag `!AtomSpeeds` associated
   to a class `AtomSpeeds` and to a document labeled `Atomic speeds` in the data
@@ -785,7 +788,7 @@ optional and are the following:
 
 The decorated function contains the actual test code. It should return `True` if
 the test succeed and either `False` or an instance of `FailDetail` if the test
-failed. If the test is simple enougth one should use `False`.  However if the
+failed. If the test is simple enough one should use `False`.  However if the
 test is compound of several non-trivial checks `FailDetail` come in handy to
 tell the user which part failed. When you want to signal a failed test and
 explaining what happened return `FailDetail('some explanations')`. The message
@@ -827,10 +830,10 @@ of the class is the default tag.
 - it registers the tag in YAML parser
 - it automatically register all attributes found in the data tree as attributes
   of the class instance. These attributes are accessible through the attribute
-  syntax (`my_object.my_attribute`) with a normalized name (basically remove
+  syntax (ex: `my_object.my_attribute_unit`) with a normalized name (basically remove
   characters that cannot be in a python identifier like spaces and ponctuation)
-  or through the dictionary syntax with their original name (`my_object['my
-attribute']`)
+  or through the dictionary syntax with their original name (ex: `my_object['my
+attribute (unit)']`)
 
 Sometimes one wants more control over the building of the class instance. This
 is what `yaml_map` is for.
