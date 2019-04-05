@@ -766,22 +766,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    nkpt_fullbz = nqbz
    ABI_MALLOC(bz2ibz, (nkpt_fullbz))
    bz2ibz = bz2ibz_smap(1,:)
-   !ABI_MALLOC(kpt_fullbz, (3, nkpt_fullbz))
 
-   ! Make full kpoint grid and get equivalence to irred kpoints.
-   !call get_full_kgrid(bz2ibz, qibz, kpt_fullbz, new_qptrlatt, phdos%nqibz, &
-   !    nkpt_fullbz, size(new_shiftq, dim=2), crystal%nsym, new_shiftq, crystal%symrel)
-   !call cwtime_report(" get_full_kgrid", cpu, wall, gflops)
-
-   ! Init tetrahedra, i.e. indexes of the full q-points at their summits
-   !call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr, comm)
-#if 1
-   call init_tetra(bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
-   call cwtime_report(" init_tetra", cpu, wall, gflops)
-#else
    call htetra_init(htetraq, bz2ibz, crystal%gprimd, qlatt, qbz, nqbz, qibz, phdos%nqibz, ierr, errstr, comm)
    call cwtime_report(" init_tetra", cpu, wall, gflops)
-#endif
    ABI_CHECK(ierr == 0, errstr)
 
    !ABI_FREE(kpt_fullbz)
@@ -944,97 +931,14 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 
    ABI_MALLOC(wdt, (nomega, 2))
    ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
-#if 1
-   ABI_MALLOC(tweight, (nomega, phdos%nqibz))
-   ABI_MALLOC(dtweightde, (nomega, phdos%nqibz))
-
-   do imode=1,3*natom
-     tmp_phfrq(:) = full_phfrq(imode,:)
-
-     ! Parallelize weights computation inside comm, then distribute nqibz
-     call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,phdos%nomega,&
-        phdos%nqibz,bcorr0,tweight,dtweightde,comm)
-     !call cwtime_report(" tetra_blochl_weights", cpu, wall, gflops)
-
-     !if (mod(imode, nprocs) /= my_rank) cycle ! mpi-parallelism
-     !call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,phdos%nomega,&
-     !   phdos%nqibz,bcorr0,tweight,dtweightde,xmpi_comm_self)
-
-     do iq_ibz=1,phdos%nqibz
-       if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-       wdt(:, 1) = dtweightde(:, iq_ibz)
-       wdt(:, 2) = tweight(:, iq_ibz)
-
-       !call tetra_get_onewk(tetraq, iq_ibz, bcorr0, phdos%nomega, phdos%nqibz, &
-       !  tmp_phfrq, phdos%omega_min, phdos%omega_max, max_occ, wdt)
-
-       ! Accumulate DOS/IDOS
-       phdos%phdos(:) = phdos%phdos(:) + wdt(:, 1)
-       phdos%phdos_int(:) = phdos%phdos_int(:) + wdt(:, 2)
-
-       ! Rotate e(q) to get e(Sq) to account for other q-points in BZ. See notes in gaussian branch
-       syme2_xyza = zero
-       do iat=1,natom
-         do isym=1, crystal%nsym
-           jat = crystal%indsym(4,isym,iat)
-           syme2_xyza(:,jat) = syme2_xyza(:,jat) + &
-             matmul(symcart(:,:,isym), full_eigvec(1,:,iat,imode,iq_ibz)) ** 2 + &
-             matmul(symcart(:,:,isym), full_eigvec(2,:,iat,imode,iq_ibz)) ** 2
-         end do
-       end do
-       !syme2_xyza = syme2_xyza / crystal%nsym
-
-       do iat=1,natom
-         do idir=1,3
-           phdos%pjdos(:,idir,iat) = phdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,1)
-           phdos%pjdos_int(:,idir,iat) = phdos%pjdos_int(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,2)
-         end do
-       end do
-
-       do iat=1,natom
-         ! Accumulate outer product of displacement vectors
-         msqd_atom_tmp = zero
-         do idir=1,3
-           do jdir=1,3
-             msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
-                   full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
-                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) ) !* gvals_wtq
-           end do ! jdie
-         end do
-
-         ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
-         ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
-         ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
-         ! from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
-         ! TODO: need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
-         do isym=1, crystal%nsym
-           temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
-           jat = crystal%indsym(4,isym,iat)
-           do idir=1,3
-             do jdir=1,3
-               phdos%msqd_dos_atom(:,idir,jdir,jat) = phdos%msqd_dos_atom(:,idir,jdir,jat) + &
-                 temp_33(idir, jdir) * wdt(:,1)
-             end do
-           end do
-         end do
-       end do ! iat
-
-     end do ! iq_ibz
-   end do ! imode
-   call cwtime_report(" accumulate", cpu, wall, gflops)
-   ABI_FREE(tweight)
-   ABI_FREE(dtweightde)
-#else
-
    ABI_MALLOC(energies, (phdos%nomega))
-   energies = arth(phdos%omega_min,phdos%omega_step,phdos%nomega)
+   energies = linspace(phdos%omega_min,phdos%omega_max,phdos%nomega)
 
    do iq_ibz=1,phdos%nqibz
 
      ! Compute the weights for this q-point using tetrahedron
      do imode=1,3*natom
        tmp_phfrq(:) = full_phfrq(imode,:)
-       !call htetra_get_onewk(htetraq,iq_ibz,bcorr0,phdos%nomega,phdos%nqibz,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,wdt)
        call htetra_get_onewk_wvals(htetraq,iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
        wdt = wdt * wtq_ibz(iq_ibz)
 
@@ -1093,7 +997,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    end do ! iq_ibz
    call cwtime_report(" accumulate", cpu, wall, gflops)
    ABI_FREE(energies)
-#endif
    ABI_FREE(wdt)
 
    ! Make eigvec into phonon displacements.

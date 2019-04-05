@@ -38,6 +38,7 @@ MODULE m_numeric_tools
  private
 
  public :: arth                  ! Return an arithmetic progression
+ public :: linspace              ! Similar to the above but with start, stop and num of division
  public :: geop                  ! Return a geometric progression
  public :: reverse               ! Reverse a 1D array *IN PLACE*
  public :: set2unit              ! Set the matrix to be a unit matrix (if it is square)
@@ -365,6 +366,51 @@ pure function arth_rdp(start,step,nn)
 
 end function arth_rdp
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/linspace
+!! NAME
+!!  linspace
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+pure function linspace(start,stop,nn)
+
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ real(dp),intent(in) :: start,stop
+ real(dp) :: length
+ real(dp) :: linspace(nn)
+
+!Local variables-------------------------------
+ integer :: ii
+! *********************************************************************
+
+ select case (nn)
+
+ case (1:)
+  length = stop-start
+  do ii=1,nn
+   linspace(ii)=start+length*(ii-1)/(nn-1)
+  end do
+
+ case (0)
+  RETURN
+
+ end select
+
+end function linspace
+!!***
+
 
 !----------------------------------------------------------------------
 
