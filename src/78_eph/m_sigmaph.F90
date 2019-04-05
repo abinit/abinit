@@ -992,7 +992,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (sigma%imag_only .and. sigma%qint_method == 1) then
        call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
      end if
-     !call dvdb%qcacheft_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, comm)
+     call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, comm)
 
  else
    ABI_CALLOC(qselect, (dvdb%nqpt))
@@ -1795,7 +1795,7 @@ end if
 
      ! Print cache stats.
      if (sigma%use_ftinterp) then
-       call dvdb%qcache_ftqibz%report_stats()
+       call dvdb%ftqcache%report_stats()
      else
        call dvdb%qcache%report_stats()
      end if
@@ -3936,10 +3936,10 @@ if (self%use_ftinterp) then
          do imyq=1,self%my_nqibz_k
            iq_ibz_k = self%myq2ibz_k(imyq)
            iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
-           if (.not. allocated(dvdb%qcache_ftqibz%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
+           if (.not. allocated(dvdb%ftqcache%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
          end do
          ! Update cache by interpolating W(r, R)
-         ! call dvdb_qcache_ftqibz_update(dvdb, nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
+         ! call dvdb%ftqcache_update(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
          ABI_FREE(ineed_qpt)
 else
          ! Find q-points needed by this MPI rank.
