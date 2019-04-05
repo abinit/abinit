@@ -45,6 +45,8 @@ module m_scup_dataset
  public :: outvars_scup
  public :: invars10scup
  public :: scup_kpath_new 
+ public :: scup_kpath_print
+
 
 !!****t* m_scup_dataset/scup_dtset_type
 !! NAME
@@ -175,6 +177,8 @@ subroutine scup_dtset_free(scup_dtset)
 if(allocated(scup_dtset%scup_speck))then 
         ABI_DEALLOCATE(scup_dtset%scup_speck)
 endif
+
+call kpath_free(scup_dtset%scup_kpath)
 
 
 end subroutine scup_dtset_free
@@ -639,5 +643,54 @@ scup_kpath%ndivs = ndivs_tmp
 ABI_DEALLOCATE(ndivs_tmp)
 
 end subroutine scup_kpath_new
+
+!!****f* m_scup_dataset/scup_kpath_print
+!!
+!! NAME
+!! scup_kpath_print
+!!
+!! FUNCTION
+!! Print info of kpath provide to SCALE UP 
+!!
+!! INPUTS
+!!
+!! scup_kpath<tpye(kpath_t) = kpath_t with all informations about kpath  
+!!
+!! OUTPUT
+!! Only Printing
+!!
+!! NOTES
+!! Should be executed by one processor only.
+!!
+!! PARENTS
+!!      multibinit
+!!
+!! CHILDREN
+!!  
+!!  m_bz_mesh/kpath_printing 
+!!
+!! SOURCE
+
+subroutine scup_kpath_print(scup_kpath)
+
+!Arguments ------------------------------------
+!scalars
+!arrays 
+ type(kpath_t), intent(in) :: scup_kpath 
+!Local variables-------------------------------
+ integer :: unt
+
+! *************************************************************************
+
+ unt = std_out 
+ 
+ write(unt,'(a)') ch10
+ write(unt,'(4a)') ' scup_printbands = 1. Printing of electronic bands active',ch10,&
+&                  ' Kpath information below:',ch10
+
+ call kpath_print(scup_kpath)
+
+end subroutine scup_kpath_print
+
 
 end module m_scup_dataset

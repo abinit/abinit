@@ -315,6 +315,7 @@ elec_eval = .FALSE.
            call scup_kpath_new(inp%scup_dtset%scup_speck,&
 &                                      reference_effective_potential%supercell%rprimd,& 
 &                                inp%scup_dtset%scup_ndivsm,inp%scup_dtset%scup_kpath)
+           call scup_kpath_print(inp%scup_dtset%scup_kpath)
 
    endif 
  endif
