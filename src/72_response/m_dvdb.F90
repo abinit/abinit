@@ -2529,14 +2529,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
 ! *************************************************************************
 
  call wrtout(std_out, sjoin(" Building V(r, R) using ngqpt: ", ltoa(ngqpt)), do_flush=.True.)
-
  ABI_CHECK(.not. allocated(db%v1scf_rpt), " v1scf_rpt is already allocated!")
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Set communicator for R-point parallelism.
  ! Note that client code is responsible for calling the interpolation routine R -> q 
- ! with all procs inside comm_rpt to avoid deadlock.
+ ! with all procs inside comm_rpt to avoid deadlocks.
  db%comm_rpt = comm_rpt
  db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
@@ -2911,6 +2910,9 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r)
        end if
      end do ! ifft
 
+     ! Remove the phase.
+     call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
+
      ! Need to collect results if R-points are distributed.
      ! Collective or single depending on receiver.
      if (db%nprocs_rpt > 1) then
@@ -2920,9 +2922,6 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r)
        !  call xmpi_sum_master(ov1r(:,:, ispden,imyp) receiver, db%comm_rpt, ierr)
        !end if
      end if
-
-     ! Remove the phase.
-     call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
    end do ! ispden
 
    ! Be careful with gamma and cplex!
@@ -3171,6 +3170,10 @@ end subroutine dvdb_get_ftinterp_qbz
 !!  ngfft(18)=contain all needed information about 3D FFT.
 !!  nqibz=Number of points in the IBZ.
 !!  qibz(3, nqibz)=q-points in the IBZ.
+!!  mbsize: Cache size in megabytes.
+!!    < 0 to allocate all q-points.
+!!    0 has not effect.
+!!    > 0 for cache with automatically computed nqpt points.
 !!  qselect_ibz(nqibz)=0 to ignore this q-point (global array)
 !!  comm=MPI communicator
 !!
@@ -3182,12 +3185,13 @@ end subroutine dvdb_get_ftinterp_qbz
 !!
 !! SOURCE
 
-subroutine dvdb_qcacheft_build(db, nfft, ngfft, nqibz, qibz, qselect_ibz, comm)
+subroutine dvdb_qcacheft_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft, nqibz, comm
- class(dvdb_t),intent(inout) :: db
+ real(dp),intent(in) :: mbsize
+ class(dvdb_t),target,intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18), qselect_ibz(nqibz)
  real(dp),intent(in) :: qibz(3, nqibz)
@@ -3195,8 +3199,9 @@ subroutine dvdb_qcacheft_build(db, nfft, ngfft, nqibz, qibz, qselect_ibz, comm)
 !Local variables-------------------------------
 !scalars
  integer :: iq_ibz, cplex, ii , ierr !, imyp, ipc, , qcnt, 
- real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all, onepot_mb
  character(len=500) :: msg
+ type(qcache_t),pointer :: qcache
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: v1scf(:,:,:,:)
@@ -3205,21 +3210,33 @@ subroutine dvdb_qcacheft_build(db, nfft, ngfft, nqibz, qibz, qselect_ibz, comm)
 
  !call timab(1801, 1, tsec)
 
+ qcache => db%qcache_ftqibz
+
  ABI_ICALLOC(db%qcache_ftqibz%count_qused, (nqibz))
+ !qcache%policy = policy
 
- !if (abs(mbsize) < tol3) then
- !  qcache%maxsize = 0; return
+ if (abs(mbsize) < tol3) then
+   qcache%maxsize = 0; return
+ end if
+
+ onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
+ !if (mbsize < zero) then
+ !  qcache%maxsize = nqibz
+ !else
+ !  qcache%maxsize = int(mbsize / (onepot_mb * db%my_npert))
  !end if
+ !qcache%maxsize = min(qcache%maxsize, nqibz)
+ !if (qcache%maxsize == 0) qcache%maxsize = 1
 
- call wrtout(std_out, " Precomputing Vscf(q) from W(r, R) and building  qcache...", do_flush=.True.)
+ call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Number of q-points stored in memory: ", itoa(qcache%maxsize)))
+ call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
+ call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.2"), " [Mb]"))
+
+ call wrtout(std_out, " Precomputing Vscf(q) from W(r, R) and building qcache...", do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
- !call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
- !call wrtout(std_out, sjoin(" Number of q-points stored in memory: ", itoa(qcache%maxsize)))
- !call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
- !call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.2"), " [Mb]"))
-
- ABI_MALLOC(db%qcache_ftqibz%key, (nqibz))
+ ABI_MALLOC(qcache%key, (nqibz))
 
  ! TODO: Note that cplex is always set to 2 here
  cplex = 2
@@ -3232,9 +3249,9 @@ subroutine dvdb_qcacheft_build(db, nfft, ngfft, nqibz, qibz, qselect_ibz, comm)
    ! Exit when we reach qcache_size
    !qcnt = 0
    !do ii=1,nqibz
-   !  if (allocated(db%qcache_ftqibz%key(ii)%v1scf)) qcnt = qcnt + 1
+   !  if (allocated(qcache%key(ii)%v1scf)) qcnt = qcnt + 1
    !end do
-   !if (qcnt >= db%qcache_ftqibz%maxsize) exit
+   !if (qcnt >= qcache%maxsize) exit
 
    call cwtime(cpu, wall, gflops, "start")
 
@@ -3242,12 +3259,12 @@ subroutine dvdb_qcacheft_build(db, nfft, ngfft, nqibz, qibz, qselect_ibz, comm)
    call dvdb_ftinterp_qpt(db, qibz(:, iq_ibz), nfft, ngfft, v1scf)
 
    ! Allocate cache entry taking into account my_npert
-   ABI_MALLOC_OR_DIE(db%qcache_ftqibz%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
-   db%qcache_ftqibz%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
+   ABI_MALLOC_OR_DIE(qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
+   qcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
 
    ! Print progress.
    if (iq_ibz <= 50 .or. mod(iq_ibz, 50) == 0) then
-     write(msg,'(2(a,i0),a)') " Interpolating q-point [",iq_ibz,"/",nqibz, "]"
+     write(msg,'(2(a,i0),a)') " Interpolating q-point [", iq_ibz, "/", nqibz, "]"
      call cwtime_report(msg, cpu, wall, gflops)
    end if
  end do
@@ -3255,7 +3272,7 @@ subroutine dvdb_qcacheft_build(db, nfft, ngfft, nqibz, qibz, qselect_ibz, comm)
  ABI_FREE(v1scf)
 
  ! Compute final cache size.
- call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(db%qcache_ftqibz%get_mbsize(), fmt="f12.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(qcache%get_mbsize(), fmt="f12.1"), " [Mb]"))
 
  call cwtime_report(" Qcache from W(r, R) + symmetrization", cpu_all, wall_all, gflops_all)
  !call timab(1801, 2, tsec)

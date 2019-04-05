@@ -992,7 +992,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (sigma%imag_only .and. sigma%qint_method == 1) then
        call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
      end if
-     call dvdb%qcacheft_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, qselect, comm)
+     !call dvdb%qcacheft_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, comm)
 
  else
    ABI_CALLOC(qselect, (dvdb%nqpt))
@@ -3867,8 +3867,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
    if (self%qint_method == 1) call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
  case (-4)
-   ! Computation of imaginary part.
-   ! Distribute ALL nqibz_k q-points inside comm_bq
+   ! Computation of imaginary part: distribute ALL nqibz_k q-points inside comm_bq
    call xmpi_split_work(self%nqibz_k, self%comm_bq, q_start, q_stop, msg, ierr)
    self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
    ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
@@ -3899,7 +3898,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        call xmpi_max(imask, mask_qibz_k, comm, ierr)
        ABI_FREE(imask)
 
-       ! Now we know the q-pts in IBZ_k contributing to Im(sigma)
+       ! Now we know the q-pts in the IBZ_k contributing to Im(Sigma).
        ! Redistribute q-points inside comm_bq: take into account cache status, cache policy and 
        ! try to reduce load imbalance as much as possible.
        ABI_MALLOC(qtab, (self%nqibz_k))
@@ -3914,7 +3913,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        call xmpi_split_work(nqeff, self%comm_bq, q_start, q_stop, msg, ierr)
        if (my_rank == master) then
          write(std_out, "(a, 2(es16.6,1x))")" Removing q-points with integration weights < ", dtset%eph_tols_idelta / ndiv
-         write(std_out, "(a,i0,a,f5.1,a)")" Total number of q-points contributing to integral: ", nqeff, &
+         write(std_out, "(a,i0,a,f5.1,a)")" Total number of q-points contributing to Im(Sigma): ", nqeff, &
            " (nq_eff / nqibz_k): ", (100.0_dp * nqeff) / self%nqibz_k, " [%]"
        end if
 
