@@ -2120,10 +2120,11 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 #endif
  ! Loop over spins and qpoints in the IBZ. For the moment parallelize over iq_ibz
  do spin=1,nsppol
+   cnt = 0
    do iq_ibz=1,nqibz
 ! TODO: for the moment the memory is not distributed, only the calculation
 !   exception is vals_ee
-     if (gams%my_iqibz(iq_ibz) == -1) cycle
+     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
 
      ! Interpolate or evaluate gamma directly.
 #ifdef DEV_MJV
@@ -2203,18 +2204,16 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 #endif
 
  if (intmeth == 2) then
-   ! Collect results on each node.
-   call xmpi_sum(lambda_tetra, comm, ierr)
-
    ! workspace for tetra.
    ABI_MALLOC(wdt, (nomega, 2))
 
    ! For each mode get its contribution
-   cnt = 0
    do spin=1,nsppol
      do mu=1,natom3
+       cnt = 0
        do iq_ibz=1,nqibz
-         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi-parallelism: NB this no longer depends on the distribution of vals_ee and other arrays inside gams
+! NB: if we are interpolating the gamma, nqibz > gams%nqibz
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
 
          call tetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu), &
            omega_min, omega_max, one, wdt)
@@ -2237,13 +2236,17 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  call xmpi_sum(a2f%vals, comm, ierr)
  do spin=1,nsppol
    a2f%vals(:,0,spin) = sum(a2f%vals(:,1:natom3,spin), dim=2)
-#ifdef DEV_MJV
-   a2f%vals_ee(:,:,:,spin) = a2f%vals_ee(:,:,:,spin) / (two * pi * gams%n0(spin))
-#endif
-
    ! previously would divide by g(eF, spin)
    !a2f%vals(:,:,spin) = a2f%vals(:,:,spin) / (two_pi*a2f%n0(spin))
  end do
+
+#ifdef DEV_MJV
+ call xmpi_sum(a2f%vals_ee, comm, ierr) ! For the moment vals_ee only works with gaussians
+ do spin=1,nsppol
+   a2f%vals_ee(:,:,:,spin) = a2f%vals_ee(:,:,:,spin) / (two * pi * gams%n0(spin))
+ end do
+#endif
+
 
  !to avoid numerical noise uses a smoothing function
  ! TODO: Move smooth to m_numeric_tools and add ndat dimension.
