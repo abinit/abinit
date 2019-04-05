@@ -579,7 +579,79 @@ subroutine phdos_free(PHdos)
 end subroutine phdos_free
 !!***
 
-!----------------------------------------------------------------------
+!--------------------------------------------------------------------------
+
+!!****f* m_phonons/phdos_init
+!!
+!! NAME
+!! phdos_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
+
+ ! Arguments ------------------------------------------------------
+ type(crystal_t),intent(in) :: crystal
+ type(phonon_dos_type),intent(out) :: phdos
+ type(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: prtdos
+ real(dp),intent(in) :: dosdeltae,dossmear
+ real(dp),intent(in) :: wminmax(2)
+
+ !Local variables -------------------------------------------------
+ integer :: io
+
+ phdos%ntypat     = crystal%ntypat
+ phdos%natom      = crystal%natom
+ phdos%prtdos     = prtdos
+ phdos%dossmear   = dossmear
+ phdos%omega_step = dosdeltae
+ ! Use values stored in ifc (obtained with ab-initio q-mesh + pad)
+ if (wminmax(2) > wminmax(1)) then
+   phdos%omega_min = wminmax(1)
+   phdos%omega_max = wminmax(2)
+ else
+   phdos%omega_min = ifc%omega_minmax(1)
+   phdos%omega_max = ifc%omega_minmax(2)
+ end if
+ ! Must be consistent with mesh computed in tetra routines!
+ phdos%nomega = nint((phdos%omega_max - phdos%omega_min) / phdos%omega_step) + 1
+ ! Ensure Simpson integration will be ok
+ phdos%nomega = max(6, phdos%nomega)
+
+ ! Build frequency mesh.
+ ABI_MALLOC(phdos%omega, (phdos%nomega))
+ do io=1,phdos%nomega
+   phdos%omega(io) = phdos%omega_min + phdos%omega_step * (io - 1)
+ end do
+ phdos%omega_min = phdos%omega(1)
+ phdos%omega_max = phdos%omega(phdos%nomega)
+
+ ! Allocate arrays that depend on nomega and set them to zero.
+ ABI_CALLOC(phdos%phdos, (phdos%nomega))
+ ABI_CALLOC(phdos%phdos_int, (phdos%nomega))
+ ABI_CALLOC(phdos%pjdos, (phdos%nomega, 3, crystal%natom))
+ ABI_CALLOC(phdos%pjdos_int, (phdos%nomega, 3, crystal%natom))
+ ABI_CALLOC(phdos%msqd_dos_atom, (phdos%nomega, 3, 3, crystal%natom))
+ ABI_MALLOC(phdos%atom_mass, (crystal%natom))
+ phdos%atom_mass = crystal%amu(crystal%typat(:)) * amu_emass
+
+end subroutine phdos_init
+!!***
+
+!---------------------------------------------------------------
 
 !!****f* m_phonons/mkphdos
 !!
@@ -625,13 +697,13 @@ end subroutine phdos_free
 !!
 !! SOURCE
 
-subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
+subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
                    wminmax, count_wminmax, comm)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: prtdos,nqshft,comm
- real(dp),intent(in) :: dosdeltae,dossmear
+ real(dp),intent(in) :: dosdeltae_in,dossmear
  character(len=*),intent(in) ::  prefix
  type(crystal_t),intent(in) :: crystal
  type(ifc_type),intent(in) :: ifc
@@ -647,12 +719,13 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0,qptopt1=1,master=0
  integer :: iat,jat,idir,imode,io,iq_ibz,itype,nkpt_fullbz
  integer :: nqbz,ierr,natom,nomega,jdir, isym, nprocs, my_rank, ncid
+ logical :: refine_dosdeltae
  real(dp),parameter :: max_occ1=one, gaussmaxarg = sqrt(-log(1.d-90)), max_smallq = 0.0625_dp
  real(dp) :: nsmallq,gaussfactor,gaussprefactor,normq,debyefreq,rtmp
  real(dp) :: cpu, wall, gflops
+ real(dp) :: dosdeltae, phdos_int
  character(len=500) :: msg
  character(len=80) :: errstr
- type(t_tetrahedron) :: tetraq
  type(t_htetrahedron) :: htetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
@@ -679,8 +752,11 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  if (all(prtdos /= [1, 2])) then
    MSG_BUG(sjoin('prtdos should be 1 or 2, but received', itoa(prtdos)))
  end if
+ dosdeltae = dosdeltae_in
+ refine_dosdeltae = .false.
  if (dosdeltae <= zero) then
-   MSG_BUG(sjoin('dosdeltae should be positive, but received', ftoa(dosdeltae)))
+   dosdeltae = -dosdeltae
+   refine_dosdeltae = .true.
  end if
  if (prtdos == 1 .and. dossmear <= zero) then
    MSG_BUG(sjoin('dossmear should be positive but received', ftoa(dossmear)))
@@ -694,41 +770,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  end do
 
  natom = crystal%natom
- phdos%ntypat     = crystal%ntypat
- phdos%natom      = crystal%natom
- phdos%prtdos     = prtdos
- phdos%dossmear   = dossmear
- phdos%omega_step = dosdeltae
- ! Use values stored in ifc (obtained with ab-initio q-mesh + pad)
- if (wminmax(2) > wminmax(1)) then
-   phdos%omega_min = wminmax(1)
-   phdos%omega_max = wminmax(2)
- else
-   phdos%omega_min = ifc%omega_minmax(1)
-   phdos%omega_max = ifc%omega_minmax(2)
- end if
- ! Must be consistent with mesh computed in tetra routines!
- phdos%nomega = nint((phdos%omega_max - phdos%omega_min) / phdos%omega_step) + 1
- ! Ensure Simpson integration will be ok
- phdos%nomega = max(6, phdos%nomega)
+ call phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
  nomega = phdos%nomega
-
- ! Build frequency mesh.
- ABI_MALLOC(phdos%omega, (phdos%nomega))
- do io=1,phdos%nomega
-   phdos%omega(io) = phdos%omega_min + phdos%omega_step * (io - 1)
- end do
- phdos%omega_min = phdos%omega(1)
- phdos%omega_max = phdos%omega(phdos%nomega)
-
- ! Allocate arrays that depend on nomega and set them to zero.
- ABI_CALLOC(phdos%phdos, (nomega))
- ABI_CALLOC(phdos%phdos_int, (nomega))
- ABI_CALLOC(phdos%pjdos, (nomega, 3, natom))
- ABI_CALLOC(phdos%pjdos_int, (nomega, 3, natom))
- ABI_CALLOC(phdos%msqd_dos_atom, (nomega, 3, 3, natom))
- ABI_MALLOC(phdos%atom_mass, (natom))
- phdos%atom_mass = crystal%amu(crystal%typat(:)) * amu_emass
 
  ABI_MALLOC(gvals_wtq, (nomega))
  ABI_MALLOC(xvals, (nomega))
@@ -929,72 +972,94 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    call xmpi_sum(full_phfrq, comm, ierr)
    call xmpi_sum(full_eigvec, comm, ierr)
 
-   ABI_MALLOC(wdt, (nomega, 2))
    ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
-   ABI_MALLOC(energies, (phdos%nomega))
-   energies = linspace(phdos%omega_min,phdos%omega_max,phdos%nomega)
 
-   do iq_ibz=1,phdos%nqibz
+   do
+     ABI_MALLOC(wdt, (phdos%nomega, 2))
+     ABI_MALLOC(energies, (phdos%nomega))
+     energies = linspace(phdos%omega_min,phdos%omega_max,phdos%nomega)
 
-     ! Compute the weights for this q-point using tetrahedron
-     do imode=1,3*natom
-       tmp_phfrq(:) = full_phfrq(imode,:)
-       call htetra_get_onewk_wvals(htetraq,iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
-       wdt = wdt * wtq_ibz(iq_ibz)
+     do iq_ibz=1,phdos%nqibz
 
-       ! Accumulate DOS/IDOS
-       phdos%phdos(:)     = phdos%phdos(:)     + wdt(:, 1)
-       phdos%phdos_int(:) = phdos%phdos_int(:) + wdt(:, 2)
+       ! Compute the weights for this q-point using tetrahedron
+       do imode=1,3*natom
+         tmp_phfrq(:) = full_phfrq(imode,:)
+         call htetra_get_onewk_wvals(htetraq,iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
+         wdt = wdt * wtq_ibz(iq_ibz)
 
-       ! Rotate e(q) to get e(Sq) to account for other q-points in BZ. See notes in gaussian branch
-       syme2_xyza = zero
-       do iat=1,natom
-         do isym=1, crystal%nsym
-           jat = crystal%indsym(4,isym,iat)
-           syme2_xyza(:,jat) = syme2_xyza(:,jat) + &
-             matmul(symcart(:,:,isym), full_eigvec(1,:,iat,imode,iq_ibz)) ** 2 + &
-             matmul(symcart(:,:,isym), full_eigvec(2,:,iat,imode,iq_ibz)) ** 2
-         end do
-       end do
-       !syme2_xyza = syme2_xyza / crystal%nsym
+         ! Accumulate DOS/IDOS
+         phdos%phdos(:)     = phdos%phdos(:)     + wdt(:, 1)
+         phdos%phdos_int(:) = phdos%phdos_int(:) + wdt(:, 2)
 
-       do iat=1,natom
-         do idir=1,3
-           phdos%pjdos(:,idir,iat) = phdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,1)
-           phdos%pjdos_int(:,idir,iat) = phdos%pjdos_int(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,2)
-         end do
-       end do
-
-       do iat=1,natom
-         ! Accumulate outer product of displacement vectors
-         msqd_atom_tmp = zero
-         do idir=1,3
-           do jdir=1,3
-             msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
-                   full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
-                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) ) !* gvals_wtq
-           end do ! jdie
-         end do
-
-         ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
-         ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
-         ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
-         ! from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
-         ! TODO: need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
-         do isym=1, crystal%nsym
-           temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
-           jat = crystal%indsym(4,isym,iat)
-           do idir=1,3
-             do jdir=1,3
-               phdos%msqd_dos_atom(:,idir,jdir,jat) = phdos%msqd_dos_atom(:,idir,jdir,jat) + &
-                 temp_33(idir, jdir) * wdt(:,1)
-             end do
+         ! Rotate e(q) to get e(Sq) to account for other q-points in BZ. See notes in gaussian branch
+         syme2_xyza = zero
+         do iat=1,natom
+           do isym=1, crystal%nsym
+             jat = crystal%indsym(4,isym,iat)
+             syme2_xyza(:,jat) = syme2_xyza(:,jat) + &
+               matmul(symcart(:,:,isym), full_eigvec(1,:,iat,imode,iq_ibz)) ** 2 + &
+               matmul(symcart(:,:,isym), full_eigvec(2,:,iat,imode,iq_ibz)) ** 2
            end do
          end do
-       end do ! iat
+         !syme2_xyza = syme2_xyza / crystal%nsym
 
-     end do ! imode
-   end do ! iq_ibz
+         do iat=1,natom
+           do idir=1,3
+             phdos%pjdos(:,idir,iat) = phdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,1)
+             phdos%pjdos_int(:,idir,iat) = phdos%pjdos_int(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,2)
+           end do
+         end do
+
+         do iat=1,natom
+           ! Accumulate outer product of displacement vectors
+           msqd_atom_tmp = zero
+           do idir=1,3
+             do jdir=1,3
+               msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
+                     full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
+                  +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) ) !* gvals_wtq
+             end do ! jdie
+           end do
+
+           ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
+           ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
+           ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
+           ! from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
+           ! TODO: need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
+           do isym=1, crystal%nsym
+             temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
+             jat = crystal%indsym(4,isym,iat)
+             do idir=1,3
+               do jdir=1,3
+                 phdos%msqd_dos_atom(:,idir,jdir,jat) = phdos%msqd_dos_atom(:,idir,jdir,jat) + &
+                   temp_33(idir, jdir) * wdt(:,1)
+               end do
+             end do
+           end do
+         end do ! iat
+
+       end do ! imode
+     end do ! iq_ibz
+
+     if (refine_dosdeltae) then
+       ! HM: Check if the integration of the DOS is correct, otherwise half dos%deltae and re-run
+       call ctrap(phdos%nomega, phdos%phdos, phdos%omega_step, phdos_int)
+       if (abs(phdos_int-crystal%natom*3)>tol2) then
+         write(msg,'(a,f6.2,a,i4,2a,e10.3,a,e10.3)') "The value of the integral is", phdos_int, &
+                      " but it should be", crystal%natom*3, ch10,&
+                      "I will decrease dosdeltae from", dosdeltae, " to", dosdeltae/two
+         MSG_WARNING(msg)
+         dosdeltae = dosdeltae / two
+         call phdos_free(phdos)
+         call phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
+         nomega = phdos%nomega
+         ABI_FREE(wdt)
+         ABI_FREE(energies)
+         cycle
+       endif
+     endif
+     exit
+   end do
    call cwtime_report(" accumulate", cpu, wall, gflops)
    ABI_FREE(energies)
    ABI_FREE(wdt)
@@ -1018,7 +1083,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    ABI_FREE(full_eigvec)
    ABI_FREE(full_phfrq)
    ABI_FREE(tmp_phfrq)
-   call destroy_tetra(tetraq)
    call htetra_free(htetraq)
  else
 #ifdef HAVE_NETCDF

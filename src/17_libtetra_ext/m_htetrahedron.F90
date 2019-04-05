@@ -33,28 +33,16 @@
 #include "config.h"
 #endif
 
-#include "libtetra.h"
+#include "abi_common.h"
 
 module m_htetrahedron
 
- USE_MEMORY_PROFILING
- USE_MSG_HANDLING
+ use m_abicore
  use m_kptrank
- use m_numeric_tools
  use m_simtet,          only : sim0onei, SIM0TWOI
-#ifdef HAVE_MPI2
- use mpi
-#endif
-#ifdef HAVE_LIBTETRA_ABINIT
- use m_io_tools, only : open_file
  use m_xmpi
-#endif
 
 implicit none
-
-#if defined HAVE_MPI1
- include 'mpif.h'
-#endif
 
 private
 !!***
@@ -1137,10 +1125,6 @@ end subroutine htetra_get_onewk_wvals_zinv
 !!
 !! SOURCE
 
-!!***
-
-!----------------------------------------------------------------------
-
 subroutine htetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nw,nkpt,&
   bcorr,tweight_t,dtweightde_t,comm)
 
@@ -1183,96 +1167,6 @@ subroutine htetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nw,nkpt,&
  call xmpi_sum(dtweightde_t, comm, ierr)
 
 end subroutine htetra_blochl_weights
-
-
-!----------------------------------------------------------------------
-
-!!****f* m_htetrahedron/sort_tetra
-!! NAME
-!!  sort_tetra
-!!
-!! FUNCTION
-!!  Sort double precision array list(n) into ascending numerical order using Heapsort
-!!  algorithm, while making corresponding rearrangement of the integer
-!!  array iperm. Consider that two double precision numbers
-!!  within tolerance tol are equal.
-!!
-!! INPUTS
-!!  n        intent(in)    dimension of the list
-!!  tol      intent(in)    numbers within tolerance are equal
-!!  list(n)  intent(inout) list of double precision numbers to be sorted
-!!  iperm(n) intent(inout) iperm(i)=i (very important)
-!!
-!! OUTPUT
-!!  list(n)  sorted list
-!!  iperm(n) index of permutation given the right ascending order
-!!
-!! PARENTS
-!!      m_htetrahedron
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-
-subroutine sort_tetra(n,list,iperm,tol)
-
- integer, intent(in) :: n
- integer, intent(inout) :: iperm(n)
- real(dp), intent(inout) :: list(n)
- real(dp), intent(in) :: tol
-
- integer :: l,ir,iap,i,j
- real(dp) :: ap
-
- ! Conduct the usual sort
- l=n/2+1
- ir=n
-
- do   ! Infinite do-loop
-  if (l>1) then
-   l=l-1
-   ap=list(l)
-   iap=iperm(l)
-
-  else ! l<=1
-   ap=list(ir)
-   iap=iperm(ir)
-   list(ir)=list(1)
-   iperm(ir)=iperm(1)
-   ir=ir-1
-
-   if (ir==1) then
-    list(1)=ap
-    iperm(1)=iap
-    exit   ! This is the end of this algorithm
-   end if
-  end if ! l>1
-
-  i=l
-  j=l+l
-
-  do while (j<=ir)
-   if (j<ir) then
-    if ( list(j)<list(j+1)-tol .or.  &
-&       (list(j)<list(j+1)+tol.and.iperm(j)<iperm(j+1))) j=j+1
-   endif
-   if (ap<list(j)-tol .or. (ap<list(j)+tol.and.iap<iperm(j))) then
-    list(i)=list(j)
-    iperm(i)=iperm(j)
-    i=j
-    j=j+j
-   else
-    j=ir+1
-   end if
-  enddo
-
-  list(i)=ap
-  iperm(i)=iap
-
- enddo ! End infinite do-loop
-
-end subroutine sort_tetra
 !!***
 
 !----------------------------------------------------------------------
@@ -1366,6 +1260,49 @@ pure subroutine sort_4tetra(list,perm)
  endif
 
 end subroutine sort_4tetra
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/linspace
+!! NAME
+!!  linspace
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+pure function linspace(start,stop,nn)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ real(dp),intent(in) :: start,stop
+ real(dp) :: length
+ real(dp) :: linspace(nn)
+
+!Local variables-------------------------------
+ integer :: ii
+! *********************************************************************
+
+ select case (nn)
+
+ case (1:)
+  length = stop-start
+  do ii=1,nn
+   linspace(ii)=start+length*(ii-1)/(nn-1)
+  end do
+
+ case (0)
+  RETURN
+
+ end select
+
+end function linspace
 !!***
 
 !----------------------------------------------------------------------
