@@ -435,10 +435,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &         firstchar,'ETOT',istep,etotal,deltae,residm,res2
        end if
      end if
-     if (etot_yaml_doc%length == 0) then
-       call neat_open_etot(etot_yaml_doc, '', '')
+     if (etot_yaml_doc%length /= 0) then
+       call neat_etot_add_line(etot_yaml_doc, message)
      end if
-     call neat_etot_add_line(etot_yaml_doc, message)
      call wrtout(ab_out,message,'COLL')
 
      if(mpi_enreg%paral_pert==1) then
