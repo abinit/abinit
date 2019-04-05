@@ -188,8 +188,11 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    if (option/=0) then
      if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
        ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-       rhor1_(:,:)=rhor1(:,:)
-       if (usexcnhat==0.and.nhat1dim==1) rhor1_(:,:)=rhor1_(:,:)-nhat1(:,:)
+       if (usexcnhat==0.and.nhat1dim==1) then
+         rhor1_(:,:)=rhor1_(:,:)-nhat1(:,:)
+       else
+         rhor1_(:,:)=rhor1(:,:)
+       end if
        if (non_magnetic_xc) then
          if(nspden==2) rhor1_(:,2)=rhor1_(:,1)*half
          if(nspden==4) rhor1_(:,2:4)=zero
@@ -866,9 +869,13 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    end if
    if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
      ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-     rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+     if (usexcnhat==0.and.nhatdim==1) then
+       rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+     else
+       rhor1_(:,:)=rhor1(:,:)
+     end if
      if (non_magnetic_xc) then
-       if(nspden==2) rhor1_(:,2)=rhor1_(:,1)/two
+       if(nspden==2) rhor1_(:,2)=rhor1_(:,1)*half
        if(nspden==4) rhor1_(:,2:4)=zero
      end if
    else
