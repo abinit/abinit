@@ -1529,7 +1529,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : matlu_type,copy_matlu
+ use m_matlu, only : matlu_type,copy_matlu,print_matlu
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1551,6 +1551,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  real(dp), allocatable :: selftemp_imag(:)
  integer :: natom,ndim,nsppol,nspinor
  real(dp) :: delta,real_part,imag_part,slope,y0
+ character(len=500) :: message
 ! *********************************************************************
  delta=0.0000000
  ABI_ALLOCATE(selftemp_re,(self%nw))
@@ -1558,6 +1559,16 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  natom=self%hdc%natom
  nsppol  = self%hdc%nsppol
  nspinor=self%hdc%nspinor
+ write(message,'(2a,i4)')  ch10,'  ------ Limit of real part of Self'
+ call wrtout(std_out,  message,'COLL')
+
+ call print_matlu(selflimit,natom,3)
+
+!print norms
+ write(message,'(2a,i4)')  ch10,'  ------ Double counting'
+ call wrtout(std_out,  message,'COLL')
+
+ call print_matlu(selfhdc,natom,3)
 !  Compute limit of Real Part and put in double counting energy.
 ! call copy_matlu(selfhdc,self%hdc%matlu,natom)
      !!write(6,*) "selfhdc   kramerskronig",selfhdc(1)%mat(1,1,1,1,1)
@@ -1608,17 +1619,22 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
 !                 TEST*************************
               ! write(6,*) "TWO FACTOR IS PUT BECAUSE OF MAXENT CODE ??"
                do ifreq=1,self%nw
+                 write(68,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
                  selftemp_re(ifreq)=selftemp_re(ifreq)+ &
  &                 real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1)- &
  &                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                  self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
   &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
+  !               self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
+  !&                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two
+  !&                       =cmplx(0.d0,0.d0,kind=dp)/two
 !    The factor two is here to compensate for the factor two in OmegaMaxent..
 !  &                       =cmplx(selftemp_re(ifreq),0.0,kind=dp)
-         !CHECK        write(67,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))&
-         !CHECK        ,aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+                 write(67,*)  self%omega(ifreq),real(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))&
+                 ,aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                enddo
                write(67,*) 
+               write(68,*) 
                !!!!!!!!!! Z renormalization
                slope=(selftemp_re((self%nw+1)/2+1)-selftemp_re((self%nw+1)/2))/&
                      (self%omega((self%nw+1)/2+1)-self%omega((self%nw+1)/2))
@@ -1721,9 +1737,9 @@ subroutine selfreal2imag_self(selfr,self)
  &                 * (selfr%omega(jfreq+1)-selfr%omega(jfreq))
                  enddo 
                  selftempmatsub(ifreq)=selftempmatsub(ifreq)/pi
-               !  write(672,*)  self%omega(ifreq),real(selftempmatsub(ifreq)),imag(selftempmatsub(ifreq))
+                 write(672,*)  self%omega(ifreq),real(selftempmatsub(ifreq)),imag(selftempmatsub(ifreq))
                enddo
-               !  write(672,*)  
+                 write(672,*)  
              enddo
            enddo
          enddo

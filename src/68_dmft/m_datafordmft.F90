@@ -1329,7 +1329,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
  call identity_oper(norm,1)
 
 !== Deduce norm%matlu from norm%ks with new psichi
- if (iscf<0) then
+ if (iscfloc<0) then
    do jkpt=1,nkpt  ! jkpt
      call loc_oper(norm,paw_dmft,1,jkpt=jkpt)
      write(message,'(2a,i3)') &
@@ -1341,7 +1341,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
      call diff_matlu('Overlap after renormalization','Identity',&
 &     norm%matlu,oper_temp%matlu,norm%natom,1,tol6,zero_or_one=1)
    enddo
- else
+ else ! iscfloc
    call loc_oper(norm,paw_dmft,1)
 
 
@@ -1372,7 +1372,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
    call destroy_oper(oper_temp)
 
    call destroy_oper(norm)
- endif
+ endif ! iscfloc
 
  paw_dmft%lpsichiortho=1
 
