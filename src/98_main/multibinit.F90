@@ -56,6 +56,7 @@ program multibinit
  use m_opt_effpot
  use m_multibinit_dataset
  use m_effective_potential_file
+ use m_scup_dataset
  use m_spin_model
  use m_abihist
 
@@ -276,7 +277,7 @@ program multibinit
  end if
 
 !****************************************************************************************
-!Initialize the electronic model (If scale-up is available)
+!SCALE UP Initialize the electronic model (If scale-up is available)
 !****************************************************************************************
 elec_eval = .FALSE.
 
@@ -304,10 +305,18 @@ elec_eval = .FALSE.
    if(inp%scup_dtset%scup_printeigv)printeigv=.TRUE. 
    if(inp%scup_dtset%scup_printeltic)printeltic=.TRUE. 
    if(inp%scup_dtset%scup_printorbocc)printorbocc=.TRUE.
-
+   
    !Set Print Parameters within scaleup
    call global_set_print_parameters(printgeom,printeigv,printeltic, printorbocc) 
 
+   !Create kpath if printbands=true and pass it to SCALE UP 
+   if(inp%scup_dtset%scup_printbands)then 
+
+           call scup_kpath_new(inp%scup_dtset%scup_speck,&
+&                                      reference_effective_potential%supercell%rprimd,& 
+&                                inp%scup_dtset%scup_ndivsm,inp%scup_dtset%scup_kpath)
+
+   endif 
  endif
 #endif 
 

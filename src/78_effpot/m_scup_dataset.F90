@@ -32,7 +32,7 @@ module m_scup_dataset
  use m_errors
 
  use m_parser, only : intagm
- use m_ddb,    only : DDB_QTOL
+ use m_symtk,  only : matr3inv
  use m_bz_mesh
 
  implicit none
@@ -44,7 +44,7 @@ module m_scup_dataset
  public :: scup_dtset_free
  public :: outvars_scup
  public :: invars10scup
-
+ public :: scup_kpath_new 
 
 !!****t* m_scup_dataset/scup_dtset_type
 !! NAME
@@ -79,11 +79,14 @@ module m_scup_dataset
  integer :: scup_ksamp(3)
 
 !Real Array 
- real,allocatable :: scup_speck(:,:)
+ real(dp),allocatable :: scup_speck(:,:)
+
+!Kpath Type 
+ type(kpath_t) :: scup_kpath
 
  end type scup_dtset_type
 !!***
-contains
+CONTAINS
 
 !!****f* m_scup_dataset/scup_dtset_init
 !!
@@ -557,5 +560,84 @@ call scup_dtset_init(scup_dtset)
 
 
 end subroutine invars10scup
+
+
+!!****f* m_scup_dataset/scup_kpath_init
+!!
+!! NAME
+!! scup_kpath_init
+!!
+!! FUNCTION
+!! Initialize the kpath and all other variables SCALE UP needs to plot electronic bands 
+!! along kpath
+!!
+!! INPUTS
+!!
+!! speck = array with special k-points along the path 
+!! gprimd = reciprocal latice vectors of cell 
+!! ndivsm = number of divisions for smallest segment 
+!!
+!!
+!! OUTPUT
+!! scup_kpath <type(kpath_t)> = kpath_t with all informations about kpath
+!!
+!! NOTES
+!! Should be executed by one processor only.
+!!
+!! PARENTS
+!!      multibinit
+!!
+!! CHILDREN
+!!  
+!!  m_bz_mesh/kpath_new
+!!
+!! SOURCE
+
+subroutine scup_kpath_new(speck,rprimd,ndivsm,scup_kpath)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: ndivsm
+
+!arrays 
+ real(dp),intent(in) :: speck(:,:),rprimd(3,3)
+ type(kpath_t), intent(out) :: scup_kpath
+
+!Local variables -------------------------
+!Dummy arguments for subroutine 'intagm' to parse input file
+!Set routine version number here:
+!scalars
+ integer :: nspeck 
+!arrays
+ integer,allocatable :: ndivs_tmp(:)
+ real(dp) :: gprimd(3,3)
+
+!*********************************************************************
+
+!Get gprimd 
+call matr3inv(rprimd,gprimd)
+
+!Create Kpath 
+scup_kpath = kpath_new(speck,gprimd,ndivsm)
+
+!Change size of scup_kpath%ndivs(:) variable 
+!from nspeck-1 to nspeck and put 1 to first entry
+nspeck = size(speck,2)
+ABI_ALLOCATE(ndivs_tmp,(nspeck))
+
+!First entry is always 1
+ ndivs_tmp(1) = 1 
+!Copy point/per segments
+ ndivs_tmp(2:) = scup_kpath%ndivs(:) 
+
+!Delete original segments 
+ABI_DEALLOCATE(scup_kpath%ndivs)
+!Put new path 
+ABI_ALLOCATE(scup_kpath%ndivs,(nspeck))
+scup_kpath%ndivs = ndivs_tmp
+!Free temporary array
+ABI_DEALLOCATE(ndivs_tmp)
+
+end subroutine scup_kpath_new
 
 end module m_scup_dataset
