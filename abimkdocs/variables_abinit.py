@@ -19654,7 +19654,7 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval=1,
+    defaultval=0,
     mnemonics="SYMmetrize V1 DFPT SCF potentials",
     text=r"""
 If symv1scf is equal to 1, the spatial-symmetry on the first-order DFPT potentials 

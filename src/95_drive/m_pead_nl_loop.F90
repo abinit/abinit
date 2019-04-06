@@ -157,8 +157,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 & npwarr,occ,psps,pwind,&
 & rfpert,rprimd,ucvol,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mgfft,mk1mem,mkmem,mkmem_max,mpert,mpw,natom,nfft
@@ -186,7 +184,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !scalars
  integer,parameter :: level=51
  integer :: ask_accurate,counter,cplex,formeig,i1dir
- integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,iexit,ifft,index,ir
+ integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,ifft,index,ir
  integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftot,nspden,option,optorth
  integer :: pert1case,pert2case,pert3case,rdwrpaw,timrev,comm_cell
  real(dp) :: ecut_eff,exc3,valuei
@@ -747,8 +745,6 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 & mpert,mpi_enreg,mpsang,mpw,natom,nfft,nkpt,nspden,nspinor,nsppol,&
 & npwarr,occ,ph1d,psps,rprimd,vtrial1,xred,ylm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
@@ -771,7 +767,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=52
- integer :: bantot,choice,counter,cpopt,dimffnl,iband,icg0,ider,ierr,iexit
+ integer :: bantot,choice,counter,cpopt,dimffnl,iband,icg0,ider,ierr
  integer :: ii,ikg,ikpt,ilm,ipw,isppol,istwf_k,jband,jj
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nnlout,npw_k
  integer :: option,paw_opt,signs,spaceComm,tim_fourwf,tim_nonlop
@@ -1065,7 +1061,6 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 &                   nsppol,pwind)
 
  use m_hide_lapack, only : dzgedi, dzgefa
- implicit none
 
 !Arguments ------------------------------------
 !
@@ -1098,7 +1093,7 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !
 !---- Local variables : integer scalars
  integer :: count,counter,count1,iband,icg
- integer :: ierr,iexit,ii,ikpt,ikpt_loc,ikpt2
+ integer :: ierr,ii,ikpt,ikpt_loc,ikpt2
  integer :: ikpt_rbz,ineigh,info,ipw,isppol,jband,jcg,jj,jkpt,job,jpw, jkpt2, jkpt_rbz
  integer :: lband,lpband,nband_occ,npw_k,npw_k1,my_source,his_source,dest,tag
  integer :: spaceComm

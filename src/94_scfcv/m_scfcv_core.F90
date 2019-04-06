@@ -282,8 +282,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &  pwind_alloc,pwnsfac,rec_set,resid,results_gs,rhog,rhor,rprimd,&
 &  scf_history,symrec,taug,taur,wffnew,wvl,xred,xred_old,ylm,ylmgr,conv_retcode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,my_natom,ndtpawuj,pwind_alloc
@@ -341,7 +339,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  integer :: computed_forces,cplex,cplex_hf,ctocprj_choice,dbl_nnsclo,dielop,dielstrt,dimdmat
  integer :: forces_needed,errid,has_dijhat,has_dijnd,has_dijU,has_vhartree,has_dijfock,history_size,usefock
 !integer :: dtset_iprcel
- integer :: iatom,ider,idir,ierr,iexit,ii,ikpt,impose_dmat,denpot
+ integer :: iatom,ider,idir,ierr,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
  integer :: ispmix,istep,istep_fock_outer,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mcprj_wvl,mband_cprj
  integer :: me,me_wvl,mgfftdiel,mgfftf,moved_atm_inside,moved_rhor,my_nspinor,n1xccc
@@ -2425,8 +2423,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
 &  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_natom,mgfft,n1xccc,n3xccc,nfft,ngrvdw,nkxc,ntypat,optene,optforces
@@ -2745,7 +2741,6 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
  !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj, dotprodm_sumdiag_cgcprj, lincom_cgcprj, cgcprj_cholesky
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -991,9 +991,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Now build q-cache in the *dense* IBZ using qselect mask.
      ABI_CALLOC(qselect, (sigma%nqibz))
      qselect = 1
-     !if (sigma%imag_only .and. sigma%qint_method == 1) then
-     !  call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
-     !end if
+     if (sigma%imag_only .and. sigma%qint_method == 1) then
+       call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
+     end if
      call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, comm)
 
  else

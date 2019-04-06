@@ -48,7 +48,7 @@ module m_dvdb
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : open_file, file_exists, delete_file
- use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
+ use m_numeric_tools, only : wrap2_pmhalf, vdiff_t, vdiff_eval, vdiff_print
  use m_symtk,         only : mati3inv, littlegroup_q
  use m_geometry,      only : littlegroup_pert, irreducible_set_pert
  use m_copy,          only : alloc_copy
@@ -998,7 +998,7 @@ end function dvdb_get_pinfo
 !!  iqpt=Index of the q-point in dvdb%qpts
 !!  cplex=1 if real, 2 if complex potentials.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT.
 !!
 !! OUTPUT
 !!  ierr=Non-zero if error.
@@ -1139,7 +1139,7 @@ end function dvdb_read_onev1
 !! INPUTS
 !!  iqpt=Index of the q-point in dvdb%qpts
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -1255,7 +1255,7 @@ end subroutine dvdb_readsym_allv1
 !!  qbz(3)=Q-point in BZ.
 !!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoint produced by listkk.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT
 !!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations.
 !!
 !! OUTPUT
@@ -1460,7 +1460,7 @@ end subroutine dvdb_readsym_qbz
 !!
 !! INPUTS
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT
 !!  mbsize: Cache size in megabytes.
 !!    < 0 to allocate all q-points.
 !!    0 has not effect.
@@ -1780,10 +1780,7 @@ pure real(dp) function qcache_get_mbsize(qcache) result(mbsize)
  ! Compute cache size.
  qcnt = 0
  do iq=1,size(qcache%key)
-   if (allocated(qcache%key(iq)%v1scf)) then
-     qcnt = qcnt + 1
-     !if (qcnt == 1) onepot_mb = product(shape(qcache%key(iq)%v1scf)) * (QCACHE_KIND * b2Mb)
-   end if
+   if (allocated(qcache%key(iq)%v1scf)) qcnt = qcnt + 1
  end do
 
  mbsize = qcache%onepot_mb * qcnt
@@ -2486,7 +2483,7 @@ end subroutine rotate_fqg
 !!  dvdb_ftinterp_setup
 !!
 !! FUNCTION
-!!  Prepare the internal tables used for the Fourier interpolation of the DFPT potentials.
+!!  Precompute the v1scf_rpt array with with the DFPT potential in the supercell required for the Fourier interpolation 
 !!  This is a collective routine that should be called by all procs inside db%comm.
 !!
 !! INPUTS
@@ -2540,7 +2537,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Set communicator for R-point parallelism.
- ! Note that client code is responsible for calling the interpolation routine R -> q 
+ ! Note that client code is responsible for calling the interpolation routine dvdb_get_ftqbz (R -> q )
  ! with all procs inside comm_rpt to avoid deadlocks.
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
@@ -2669,6 +2666,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  end if
 
  ! Allocate potential in the supercell (memory is distributed over nrpt and npert)
+ call wrtout(std_out, sjoin(" Memory required for W(r,R): ", &
+    ftoa(two * db%nrpt * nfft * db%nspden * db%my_npert*dp * b2Mb, fmt="f6.1"), "[Mb]"))
  ABI_MALLOC(emiqr, (2, db%nrpt))
  ABI_MALLOC_OR_DIE(db%v1scf_rpt,(2, db%nrpt, nfft, db%nspden, db%my_npert), ierr)
  db%v1scf_rpt = zero
@@ -3392,7 +3391,7 @@ end subroutine dvdb_ftqcache_update
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT
 !!  nrpt=Number of R-points = number of q-points in the full BZ
 !!  nspden=Number of spin densities.
 !!  ipert=index of the perturbation to be treated [1,natom3]
@@ -3736,7 +3735,7 @@ end subroutine dvdb_get_v1scf_rpt
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT
 !!  nrpt=Number of R-points = number of q-points in the full BZ
 !!  nspden=Number of spin densities.
 !!  ipert=index of the perturbation to be treated [1,natom3]
@@ -3855,7 +3854,7 @@ end subroutine dvdb_get_v1scf_qpt
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngfft(18)=contain all needed information about 3D FFT
 !!  nfftf=Number of fft-points on the fine grid for interpolated potential
 !!  ngfftf(18)=information on 3D FFT for interpolated potential
 !!  comm=MPI communicator
@@ -4018,6 +4017,11 @@ subroutine dvdb_set_pert_distrib(self, comm_pert, my_pinfo, pert_table)
  ABI_SFREE(self%pert_table)
  call alloc_copy(my_pinfo, self%my_pinfo)
  call alloc_copy(pert_table, self%pert_table)
+
+ write(std_out, *)"Activating perturbation over perturbations:"
+ write(std_out, *)"nprocs_pert: ", self%nprocs_pert
+ write(std_out, *)"my_pinfo: ",self%my_pinfo
+ write(std_out, *)"pert_table: ",self%pert_table
 
 end subroutine dvdb_set_pert_distrib
 !!***
@@ -5015,6 +5019,7 @@ subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
 !scalars
  integer :: nfft, iq, cplex, mu, ispden, comm_rpt
  type(dvdb_t) :: db
+ type(vdiff_t) :: vd_max
 !arrays
  integer :: ngfft(18)
  real(dp),allocatable :: file_v1r(:,:,:,:),intp_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
@@ -5026,6 +5031,7 @@ subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
  db%debug = .True.
  db%symv1 = .True.
  db%symv1 = .False.
+ !db%add_lr_part = .False.
  !call db%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
  call db%print()
 
@@ -5058,7 +5064,7 @@ subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
    do mu=1,db%natom3
      do ispden=1,db%nspden
        write(std_out,"(2(a,i0))")"  iatom3: ", mu, ", ispden: ", ispden
-       call vdiff_print(vdiff_eval(2,nfft,file_v1r(:,:,ispden,mu),intp_v1r(:,:,ispden,mu),db%cryst%ucvol))
+       call vdiff_print(vdiff_eval(2, nfft, file_v1r(:,:,ispden,mu), intp_v1r(:,:,ispden,mu), db%cryst%ucvol, vd_max=vd_max))
        !do ifft=1,nfft
        !  write(std_out,*)file_v1r(1,ifft,ispden,mu),intp_v1r(1,ifft,ispden,mu),&
        !  file_v1r(2,ifft,ispden,mu),intp_v1r(2,ifft,ispden,mu)
@@ -5068,6 +5074,9 @@ subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
    end do
    write(std_out,*)" "
  end do ! iq
+
+ write(std_out, "(/, a)")" Max values over q-points and perturbations" 
+ call vdiff_print(vd_max)
 
  ABI_FREE(intp_v1r)
  ABI_FREE(file_v1r)

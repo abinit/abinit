@@ -122,7 +122,7 @@ program mrgdv
        write(std_out,*)"test_v1complete [file]     Test symmetrization of DFPT potentials."
        write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (prep_gkk)."
        write(std_out,*)"test_v1rsym                Test symmetries of DFPT potentials in real space."
-       write(std_out,*)"test_ftinterp [n1,n2,n3]   Test Fourier interpolation of DFPT potentials."
+       write(std_out,*)"test_ftinterp inDVDB --ngqpt 4 4 4  Test Fourier interpolation of DFPT potentials."
        write(std_out,*)"downsample in_DVDB out_DVDB [n1,n2,n3] Produce new DVDB with q-subsmesh"
        !write(std_out,*)"convert in_old_DVDB out_DVDB.nc  Convert old DVDB format to new DVDB in netcdf format"
        !write(std_out,*)"add_gspot in_POT in_DVDB.nc  Add GS potential to DVDB file (required for Sternheimer."
@@ -174,7 +174,6 @@ program mrgdv
 
    case ("test_ftinterp")
      call get_command_argument(2, db_path)
-     !ngqpt = [2, 2, 2]
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default=2, want_len=3) == 0, msg)
      write(std_out,"(a)")sjoin("Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(ngqpt))
      call dvdb_test_ftinterp(db_path, ngqpt, comm)
