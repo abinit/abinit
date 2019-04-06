@@ -216,6 +216,9 @@ MODULE m_crystal
    procedure :: adata_type
    ! Return atomic data from the itypat index.
 
+   !procedure :: compare => crystal_compare
+   ! Compare two structures, write warning messages if they differ
+
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.

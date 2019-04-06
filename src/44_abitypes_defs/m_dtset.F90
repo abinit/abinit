@@ -494,12 +494,14 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ph_wstep          = dtin%ph_wstep
  dtout%ph_intmeth        = dtin%ph_intmeth
  dtout%symdynmat         = dtin%symdynmat
+ dtout%symv1scf          = dtin%symv1scf
  dtout%ph_nqshift        = dtin%ph_nqshift
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
+ dtout%dvdb_add_lr       = dtin%dvdb_add_lr
 
  dtout%sigma_bsum_range = dtin%sigma_bsum_range
  dtout%sigma_erange = dtin%sigma_erange
@@ -2332,7 +2334,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
 !D
- list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_qcache_mb delayperm densfor_pred densty dfield'
+ list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_add_lr dvdb_qcache_mb delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
@@ -2483,7 +2485,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' spin_temperature_nstep spin_tolavg spin_tolvar spin_var_temperature spin_write_traj'
  list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
- list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma'
+ list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
 !T
  list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'

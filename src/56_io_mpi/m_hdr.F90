@@ -4577,7 +4577,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!  Compare two int value and may raise an exception on error.
 !!
 !! INPUTS
-!!  name=Name of the variable
+!!  vname=Name of the variable
 !!  iexp= expected value.
 !!  ifound=the actuval value
 !!
@@ -4592,27 +4592,23 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!
 !! SOURCE
 
- subroutine compare_int(name,iexp,ifound,ierr)
+ subroutine compare_int(vname, iexp, ifound, ierr)
 
 !Arguments ------------------------------------
  integer,intent(in) :: iexp,ifound
  integer,intent(inout) :: ierr
- character(len=*),intent(in) :: name
+ character(len=*),intent(in) :: vname
 
 !Local variables-------------------------------
- logical :: leq
  character(len=500) :: msg
 
 ! *************************************************************************
 
- leq = (iexp == ifound)
- if (.not.leq) then
-   write(msg,'(4a,i6,a,i6)')ch10,&
-   ' hdr_vs_dtset: WARNING - Mismatch in '//TRIM(name),ch10,&
-   '  Expected = ',iexp,' Found = ',ifound
-   call wrtout(std_out,msg,'COLL')
+ if (.not. iexp == ifound) then
+   write(msg,'(3a,i0,a,i0)')' Mismatch in '//trim(vname),' Expected = ', iexp, ' Found = ', ifound
+   call wrtout(std_out, msg)
    ! Increase ierr to signal we should stop in the caller.
-   ierr=ierr + 1
+   ierr = ierr + 1
  end if
 
  end subroutine compare_int

@@ -473,7 +473,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
- iblock = ddb_get_dielt_zeff(ddb,cryst,dtset%rfmeth,dtset%chneut,selectz0,dielt,zeff)
+ iblock = ddb_get_dielt_zeff(ddb, cryst, dtset%rfmeth, dtset%chneut, selectz0, dielt, zeff)
  if (my_rank == master) then
    if (iblock == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
@@ -484,8 +484,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  call ifc_init(ifc,cryst,ddb,&
- brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
- nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
+   brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
+   nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
  ABI_FREE(ddb_qshifts)
  call ifc_print(ifc, unit=std_out)
 
@@ -549,21 +549,20 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! Set dielectric tensor, BECS and has_dielt_zeff flag that
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dipdip == 0
-   ! TODO: Change name: has_dielt_zeff --> lr_treatment = 0, 1
-   !dvdb%add_lr_part = .False.
+   dvdb%add_lr_part = .False.
    if (iblock /= 0) then
      dvdb%dielt = dielt
      dvdb%zeff = zeff
-     if (dtset%useria==9) dvdb%add_lr_part = .False.
-     if (dtset%dipdip /= 0) then
-       dvdb%has_dielt_zeff = .True.
-       call wrtout(std_out, " Setting has_dielt_zeff to True. Long-range term will be substracted in Fourier interpolation.")
-     end if
+     dvdb%has_dielt_zeff = .True.
+     dvdb%add_lr_part = .True.; if (dtset%dvdb_add_lr == 0)  dvdb%add_lr_part = .False.
+     !if (dtset%dipdip /= 0) then
+     !  call wrtout(std_out, " Setting has_dielt_zeff to True. Long-range term will be substracted in Fourier interpolation.")
+     !end if
    end if
 
    if (my_rank == master) then
      call dvdb%print()
-     call dvdb%list_perts([-1,-1,-1], unit=ab_out)
+     call dvdb%list_perts([-1, -1, -1], unit=ab_out)
    end if
 
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
@@ -665,12 +664,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
- if (allocated(efmasdeg)) then
-   call efmasdeg_free_array(efmasdeg)
- endif
- if (allocated(efmasval)) then
-   call efmasval_free_array(efmasval)
- endif
+ if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)
+ if (allocated(efmasval)) call efmasval_free_array(efmasval)
  ABI_SFREE(kpt_efmas)
 
 !XG20180810: please do not remove. Otherwise, I get an error on my Mac.

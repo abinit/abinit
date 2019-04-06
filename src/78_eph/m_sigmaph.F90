@@ -922,8 +922,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call dvdb%open_read(ngfftf, xmpi_comm_self)
  if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
- if (dtset%symdynmat == 1) dvdb%symv1 = .True.
- !dvdb%symv1 = .False.
+ dvdb%symv1 = dtset%symv1scf > 0
  if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
  ! FIXME: Temporary Hack to interpolate dvdb only in qpoints that will be used
@@ -954,6 +953,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                                      ifc%ngqpt, ifc%nqshft, ifc%qshft, comm, custom_qpt)
    end if
    call dvdb%free()
+   ! MG: WARNING: zeff, dielt, has_dielt_zeff and add_lr_part might be lost here
+   ! One should get them from DDB!
    dvdb = dvdb_new(dtfil%fnameabo_dvdb, comm)
    ! Naive q-point check
    do iq_ibz=1,cnt-1
@@ -969,8 +970,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call dvdb%open_read(ngfftf, xmpi_comm_self)
    if (dtset%prtvol > 10) dvdb%debug = .True.
    ! This to symmetrize the DFPT potentials.
-   if (dtset%symdynmat == 1) dvdb%symv1 = .True.
-   !dvdb%symv1 = .False.
+   dvdb%symv1 = dtset%symv1scf > 0
    if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
  else if (dtset%useria == 2000) then
@@ -1158,7 +1158,7 @@ if (sigma%use_ftinterp) then
          call dvdb%get_ftqbz(cryst, qpt, qq_ibz, sigma%ind_ibzk2ibz(:, iq_ibz), cplex, nfftf, ngfftf, v1scf, sigma%comm_pert)
 else
 
-       ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
+       ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
        ! This call allocates v1scf(cplex, nfftf, nspden, my_npert))
        db_iqpt = sigma%indq2dvdb_k(1, iq_ibz)
        if (db_iqpt /= -1) then

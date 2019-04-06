@@ -950,6 +950,8 @@ type dataset_type
  real(dp) :: ddb_shiftq(3)
 
  integer :: mixprec = 0
+ integer :: symv1scf = 0
+ integer :: dvdb_add_lr = 1
 
  integer :: sigma_bsum_range(2) = 0
 

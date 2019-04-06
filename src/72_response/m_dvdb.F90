@@ -134,7 +134,7 @@ module m_dvdb
   contains
 
    procedure :: free => qcache_free
-   ! Release the memory allocated and close the file.
+   ! Release dynamic memory.
 
    procedure :: report_stats => qcache_report_stats
    ! Print info on q-cache stats and reset counters.
@@ -208,7 +208,7 @@ module m_dvdb
   integer :: version
   ! File format version read from file.
 
-  integer :: iomode=IO_MODE_FORTRAN
+  integer :: iomode = IO_MODE_FORTRAN
   ! Method used to access the DVDB file:
   !   IO_MODE_FORTRAN for usual Fortran IO routines
   !   IO_MODE_MPI if MPI/IO routines.
@@ -329,7 +329,7 @@ module m_dvdb
 
   real(dp),allocatable :: zeff(:,:,:)
   ! zeff(3,3,natom)
-  ! Effective charge on each atom, versus electric field and atomic displacement.
+  ! Effective charges on each atom, versus electric field and atomic displacement.
 
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDB file.
@@ -887,7 +887,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  if (db%nqpt > 10) write(std_out,"(a)")"..."
 
  write(std_out,"(a)")sjoin(" Have dielectric tensor and Born effective charges:", yesno(db%has_dielt_zeff))
- !write(std_out,"(a)")sjoin(" Add LR contribution:", yesno(db%add_lr_part))
+ write(std_out,"(a)")sjoin(" Add LR term in polar materials:", yesno(db%add_lr_part))
  if (db%has_dielt_zeff) then
    write(std_out, '(a,3(/,3es16.6))') ' Dielectric Tensor:', &
      db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
@@ -2994,7 +2994,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  integer :: iq_ibz,itimrev,isym,nqcache,iq,ierr, imyp, ipc, mu, root
  logical :: isirr_q, incache
 !!arrays
- integer :: g0q(3),lgsize(db%nqpt), iqmax(1), requests(db%natom3)
+ integer :: g0q(3), requests(db%natom3) !,lgsize(db%nqpt), iqmax(1), 
  real(dp) :: tsec(2)
  real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
@@ -3048,6 +3048,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
    ! Interpolate the dvscf potentials in the IBZ for my_npert perturbations.
    ABI_MALLOC_OR_DIE(v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
    !call dvdb_ftinterp_qpt(db, qibz, nfft, ngfft, v1scf)
+   MSG_ERROR("For the time being incache should always be true!")
 
    ! This is possible only if all procs inside comm_rpt call this routine.
    call dvdb_ftinterp_qpt(db, qbz, nfft, ngfft, v1scf)
@@ -3057,7 +3058,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  if (db%ftqcache%maxnq > 0 .and. .not. incache) then
    ! Entry not in cache. --> Count number of entries in qcache first.
    NOT_IMPLEMENTED_ERROR()
-   nqcache = 0; lgsize = -1
+   !nqcache = 0; lgsize = -1
    !do iq=1,db%nqpt
    !  if (allocated(db%ftqcache%key(iq)%v1scf)) then
    !     nqcache = nqcache + 1
@@ -3067,28 +3068,28 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
    ! Deallocate one item if needed. Prefer q-points with
    ! largest number of symmetries in the litte-group e.g. Gamma.
-   if (nqcache >= db%ftqcache%maxnq) then
-     iqmax = maxloc(lgsize); iq = iqmax(1)
-     ! Try to avoid removing the last qpt added to cache.
-     if (iq == db%ftqcache%prev_iqpt .and. nqcache > 1) then
-        lgsize(iq) = -1
-        iqmax = maxloc(lgsize); iq = iqmax(1)
-     end if
-     ABI_CHECK(allocated(db%ftqcache%key(iq)%v1scf), "free error")
-     ABI_FREE(db%ftqcache%key(iq)%v1scf)
-   end if
+   !if (nqcache >= db%ftqcache%maxnq) then
+   !  iqmax = maxloc(lgsize); iq = iqmax(1)
+   !  ! Try to avoid removing the last qpt added to cache.
+   !  if (iq == db%ftqcache%prev_iqpt .and. nqcache > 1) then
+   !     lgsize(iq) = -1
+   !     iqmax = maxloc(lgsize); iq = iqmax(1)
+   !  end if
+   !  ABI_CHECK(allocated(db%ftqcache%key(iq)%v1scf), "free error")
+   !  ABI_FREE(db%ftqcache%key(iq)%v1scf)
+   !end if
 
    ! Allocate new entry and store v1scf
-   ABI_CHECK(.not. allocated(db%ftqcache%key(iq_ibz)%v1scf), "free error")
-   ABI_MALLOC(db%ftqcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
-   db%ftqcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
+   !ABI_CHECK(.not. allocated(db%ftqcache%key(iq_ibz)%v1scf), "free error")
+   !ABI_MALLOC(db%ftqcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
+   !db%ftqcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
    !else
    !  do imyp=1,db%my_npert
    !    ipc = db%my_pinfo(3, imyp)
    !    db%ftqcache%key(iq_ibz)%v1scf(:,:,:,imyp) = real(v1scf(:,:,:,ipc), kind=QCACHE_KIND)
    !  end do
    !end if
-   db%ftqcache%prev_iqpt = iq_ibz
+   !db%ftqcache%prev_iqpt = iq_ibz
  end if
 
  if (.not. isirr_q) then
@@ -3325,7 +3326,6 @@ subroutine dvdb_ftqcache_update(db, nfft, ngfft, nqibz, qibz, ineed_qpt, comm)
 
 !Local variables-------------------------------
 !scalars
- !integer,parameter :: master = 0
  integer :: iq_ibz, cplex, ierr, qcnt
  real(dp) :: cpu_all, wall_all, gflops_all
 !arrays
