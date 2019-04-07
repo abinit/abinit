@@ -282,10 +282,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    end if
    write(message,'(3a,i5)') trim(message),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
 
-
-   if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
-     write(message,'(2a)') trim(message),'   -> not optimal: autoparal keyword recommended in input file'
+   if (dtset%optdriver == RUNL_GSTATE) then
+     if (.not. mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
+       write(message,'(2a)') trim(message),'   -> not optimal: autoparal keyword recommended in input file'
+     end if
    end if
+
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier

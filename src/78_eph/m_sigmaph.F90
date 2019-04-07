@@ -177,9 +177,13 @@ module m_sigmaph
   integer :: nprocs_bq
 
   ! TODO: Add communicators for band/qpts
-  !integer :: comm_bqfft = xmpi_comm_null
-  !integer :: me_bqfft
-  !integer :: nprocs_bqfft
+  !integer :: comm_qpt = xmpi_comm_null
+  !integer :: me_qpt = 0
+  !integer :: nprocs_qpt = 1
+
+  !integer :: comm_bsum = xmpi_comm_null
+  !integer :: me_bsum = 0
+  !integer :: nprocs_bsum = 1
 
   integer :: coords(3)
 
@@ -923,7 +927,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
  dvdb%symv1 = dtset%symv1scf > 0
- if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
+ if (sigma%nprocs_pert > 1) then
+   call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%comm_pert)
+ end if
 
  ! FIXME: Temporary Hack to interpolate dvdb only in qpoints that will be used
  if (dtset%useria == 1999) then
@@ -971,7 +977,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (dtset%prtvol > 10) dvdb%debug = .True.
    ! This to symmetrize the DFPT potentials.
    dvdb%symv1 = dtset%symv1scf > 0
-   if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
+   if (sigma%nprocs_pert > 1) then 
+     call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%comm_pert)
+   end if
 
  else if (dtset%useria == 2000) then
      sigma%use_ftinterp = .True.
@@ -994,14 +1002,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (sigma%imag_only .and. sigma%qint_method == 1) then
        call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
      end if
-     call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, comm)
+     call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, comm) ! # comm_qpt
 
  else
    ABI_CALLOC(qselect, (dvdb%nqpt))
    qselect = 1
    ! Try to predict the q-points required to compute tau.
    if (sigma%imag_only .and. sigma%qint_method == 1) then
-     call qpoints_oracle(sigma, cryst, ebands, dvdb%qpts, dvdb%nqpt, sigma%nqbz, sigma%qbz, qselect, comm)
+     call qpoints_oracle(sigma, cryst, ebands, dvdb%qpts, dvdb%nqpt, sigma%nqbz, sigma%qbz, qselect, comm) 
    end if
  end if
 
@@ -1014,7 +1022,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! This is also the reason why we reorder the q-points in ibz_k to pack the points in *shells* to minimise cache misses.
  call dvdb%print(prtvol=dtset%prtvol)
 
- if (.not. sigma%use_ftinterp) call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, comm)
+ if (.not. sigma%use_ftinterp) call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, comm) ! comm_qpt
  ABI_FREE(qselect)
 
  ! Loop over k-points in Sigma_nk.
@@ -2174,7 +2182,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart
  logical :: reorder
- integer,allocatable :: dims(:) !coords(:), 
+ integer,allocatable :: dims(:)
  logical,allocatable :: periods(:), keepdim(:)
 #endif
 
@@ -3899,7 +3907,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        call xmpi_max(imask, mask_qibz_k, comm, ierr)
        ABI_FREE(imask)
 
-       ! Now we know the q-pts in the IBZ_k contributing to Im(Sigma).
+       ! Now we know the qpts in the IBZ_k contributing to Im(Sigma).
        ! Redistribute q-points inside comm_bq: take into account cache status, cache policy and 
        ! try to reduce load imbalance as much as possible.
        ABI_MALLOC(qtab, (self%nqibz_k))
@@ -3911,13 +3919,31 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        end do
        ABI_FREE(mask_qibz_k)
 
-       call xmpi_split_work(nqeff, self%comm_bq, q_start, q_stop, msg, ierr)
        if (my_rank == master) then
          write(std_out, "(a, 2(es16.6,1x))")" Removing q-points with integration weights < ", dtset%eph_tols_idelta / ndiv
          write(std_out, "(a,i0,a,f5.1,a)")" Total number of q-points contributing to Im(Sigma): ", nqeff, &
-           " (nq_eff / nqibz_k): ", (100.0_dp * nqeff) / self%nqibz_k, " [%]"
+           " (nqeff / nqibz_k): ", (100.0_dp * nqeff) / self%nqibz_k, " [%]"
        end if
 
+       !if (self%me_pert == 0) then
+       !  ABI_ICALLOC(we_need_qpt, (self%nqibz))
+       !  do iq=1,nqeff
+       !    iq_ibz_k = qtab(iq)
+       !    iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
+       !    if (.not. allocated(dvdb%ftqcache%key(iq_ibz)%v1scf)) we_need_qpt(iq_ibz) = 1
+       !  end do
+       !  call xmpi_sum(we_need_qpt, self%comm_pert, ierr)
+       !  qcnt = count(we_need_qpt > 0)
+       !  if (qcnt > 0) then
+       !    mbsizes()
+       !    qcache_get_mbsize()
+       !    getmin
+       !    ABI_FREE(mbsizes)
+       !  end if
+       !  ABI_FREE(we_need_qpt)
+       !end if
+
+       call xmpi_split_work(nqeff, self%comm_bq, q_start, q_stop, msg, ierr)
        self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
        ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
        if (self%my_nqibz_k /= 0) self%myq2ibz_k = qtab(q_start:q_stop)
@@ -3939,8 +3965,8 @@ if (self%use_ftinterp) then
            iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
            if (.not. allocated(dvdb%ftqcache%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
          end do
-         ! Update cache by interpolating W(r, R)
-         !call dvdb%ftqcache_update(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
+         ! Update cache by Fourier transforming W(r,R)
+         !call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
          ABI_FREE(ineed_qpt)
 else
          ! Find q-points needed by this MPI rank.
@@ -3951,7 +3977,7 @@ else
            if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qpt(iq_dvdb) = 1
          end do
          ! Update cache. Perform collective IO inside comm if needed.
-         call dvdb%qcache_update(nfftf, ngfftf, ineed_qpt, comm)
+         call dvdb%qcache_update_from_file(nfftf, ngfftf, ineed_qpt, comm)
          ABI_FREE(ineed_qpt)
 end if
        end if
