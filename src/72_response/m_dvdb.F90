@@ -102,12 +102,9 @@ module m_dvdb
 
   !integer :: nspden, my_npert, nfft
 
-  !character(len=500) :: policy = "greedy"
-  ! TODO: Add extra item with 3natom potentials in the IBZ to avoid symmetrizzation
-  ! Should be faster if we start to loop over q-stars
-
   integer :: prev_iqpt = 0
    ! Index of the last point added to the cache.
+   ! TODO: Remove
 
   real(dp) :: max_mbsize = zero
    ! Max cache size in megabytes.
@@ -118,6 +115,9 @@ module m_dvdb
   real(dp) :: onepot_mb = zero
    ! Size of 1 DFPT potential in megabytes
 
+  logical :: use_3natom_cache
+   ! True if v1scf_3natom_qibz cache is used.
+
   integer :: stats(3) = 0
    ! Total Number of calls, no cache hit, no cache misses.
 
@@ -125,9 +125,21 @@ module m_dvdb
    ! count_qused(nq)
    ! Number of times this q-point has been used in dvdb_readsym_qbz
 
-  logical,allocatable :: i_can_treat(:)
-   ! i_can_treat(nq)
-   ! Set to True if this MPI rank is allowed to consider this q-point and store it if needed.
+  integer(i1b),allocatable :: itreatq(:)
+   ! itreatq(nq)
+   ! Table used to distribute q-points in the IBZ among procs.
+   ! 0 if this MPI rank should not store and treat this q-point.
+   ! 1 or 2-9 
+
+  real(QCACHE_KIND), allocatable :: v1scf_3natom_qibz(:,:,:,:)
+   ! v1scf_3natom(2, nfftf, nspden, 3*natom))
+   ! Store all the 3*natom perturbations associated to index `stored_iqibz`
+   ! Used to reduce the number of MPI communications required to collect all the potentials
+   ! on the MPI rank before computing V(Sq) from V(q).
+   ! I assume client code is looping over stars/shells
+
+  integer :: stored_iqibz = huge(1)
+   ! The index of the qpoint in the IBZ/DVDB file associated to v1scf_3natom_qibz.
 
   type(qcache_entry_t), allocatable :: key(:)
    ! key(nq)
@@ -267,11 +279,11 @@ module m_dvdb
   logical :: symv1 = .False.
    ! Activate symmetrization of v1 potentials.
 
-  type(qcache_t) :: qcache    !! private
+  type(qcache_t) :: qcache
     ! Cache used to store potentials if Fourier interpolation is not used 
     ! (see dvdb_readsym_qbz for the implementation)
 
-  type(qcache_t) :: ftqcache  !! private
+  type(qcache_t) :: ftqcache
     ! Cache used to store potentials if Fourier interpolation is used 
     ! (see dvdb_get_ftqbz for the implementation)
 
@@ -321,8 +333,8 @@ module m_dvdb
   ! Real space points for Fourier interpolation (MPI distributed if nprocs_rpt > 1)
 
   real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
-  ! DFPT potential in the real space supercell representation (real-valued)
-  ! v1scf_rpt(2, nrpt, nfft , nspden, my_npert)
+  ! DFPT potential in the real space supercell representation.
+  ! v1scf_rpt(2, nrpt, nfft, nspden, my_npert)
 
   real(dp),allocatable :: rhog1_g0(:,:)
   ! rhog1_g0(2, numv1)
@@ -423,7 +435,7 @@ module m_dvdb
  public :: dvdb_test_v1rsym        ! Check symmetries of the DFPT potentials.
  public :: dvdb_test_v1complete    ! Debugging tool used to test the symmetrization of the DFPT potentials.
  public :: dvdb_test_ftinterp      ! Test Fourier interpolation of DFPT potentials.
- public :: dvdb_qdownsample        ! Downsample q-mesh, produce new DVDB file
+ public :: dvdb_qdownsample        ! Downsample q-mesh, produce new DVDB file.
 
 
 !----------------------------------------------------------------------
@@ -1301,13 +1313,18 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  call timab(1802, 1, tsec)
 
  db_iqpt = indq2db(1)
- if (allocated(db%qcache%count_qused)) then
-   db%qcache%count_qused(db_iqpt) = db%qcache%count_qused(db_iqpt) + 1
- end if
+ db%qcache%count_qused(db_iqpt) = db%qcache%count_qused(db_iqpt) + 1
 
  ! IS(q_dvdb) + g0q = q_bz
  isym = indq2db(2); itimrev = indq2db(6) + 1; g0q = indq2db(3:5)
  isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
+
+ !if (db%qcache%use_3natom_cache .and. db%qcache%stored_iqibz == iq_ibz .and. .not. isirr_q) then
+ !  db%qcache%v1scf_3natom_qibz(2, nfft, db%nspden, db%natom3)
+ !  call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
+ !    db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2, db%comm_pert)
+ !  call timab(1802, 2, tsec); return
+ !end if
 
  ! Check whether db_iqpt is in cache.
  incache = .False.
@@ -1340,8 +1357,18 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    ! Read the dvscf potentials in the IBZ for all 3*natom perturbations.
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
+
+   !if (db%ftqcache%use_3natom_cache .and. db%ftqcache%stored_iqibz /= iq_ibz) then
+   !  db%ftqcache%stored_iqibz = iq_ibz
+   !  if (cplex == 1) then
+   !    db%ftqcache%v1scf_3natom_qibz(1,:,:,:) = v1scf
+   !    db%ftqcache%v1scf_3natom_qibz(2,:,:,:) = zero
+   !  end if
+   !  if (cplex == 2) db%ftqcache%v1scf_3natom_qibz = v1scf
+   !end if
  end if
 
+ ! TODO: Remove
  if (db%qcache%maxnq > 0 .and. .not. incache) then
    ! Entry not in cache. --> Count number of entries in qcache first.
    nqcache = 0; lgsize = -1
@@ -1422,8 +1449,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
      end if
 
      ! Reallocate v1scf with my_npert and extract data from work2.
-     ABI_FREE(v1scf)
-     ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+     ABI_REMALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
      do imyp=1,db%my_npert
        ipc = db%my_pinfo(3, imyp)
        v1scf(:,:,:,imyp) = work2(:,:,:,ipc)
@@ -1439,8 +1465,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        ipc = db%my_pinfo(3, imyp)
        work(:,:,:,imyp) = v1scf(:,:,:,ipc)
      end do
-     ABI_FREE(v1scf)
-     ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+     ABI_REMALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
      v1scf = work
      ABI_FREE(work)
    end if
@@ -1449,6 +1474,75 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  call timab(1802, 2, tsec)
 
 end subroutine dvdb_readsym_qbz
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/qcache_new
+!! NAME
+!!  qcache_new
+!!
+!! FUNCTION
+!!  Initialize qcache_t object from dimensions.
+!!
+!! INPUTS
+!!  nqpt
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  mbsize: Cache size in megabytes.
+!!    < 0 to allocate all q-points.
+!!    0 has not effect.
+!!    > 0 for cache with automatically computed nqpt points.
+!!  natom3, my_npert=Total number of perturbations and number of perturbations treated by this CPU.
+!!  nspden=Number of spin density components.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, nspden) result(qcache)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nqpt, nfft, natom3, nspden, my_npert
+ real(dp),intent(in) :: mbsize
+!arrays
+ integer,intent(in) :: ngfft(18)
+
+! *************************************************************************
+
+ ABI_ICALLOC(qcache%count_qused, (nqpt))
+ ABI_MALLOC(qcache%key, (nqpt))
+ ABI_MALLOC(qcache%itreatq, (nqpt)) 
+ qcache%itreatq = 1
+ qcache%use_3natom_cache = .False.
+
+ qcache%max_mbsize = mbsize
+ qcache%onepot_mb = two * product(ngfft(1:3)) * nspden * QCACHE_KIND * b2Mb
+ if (abs(mbsize) < tol3) then
+   qcache%maxnq = 0
+ else if (mbsize < zero) then
+   qcache%maxnq = nqpt
+ else
+   qcache%maxnq = nint(mbsize / (qcache%onepot_mb * my_npert))
+   qcache%maxnq = max(min(qcache%maxnq, nqpt), 1)
+ end if
+
+ ! Allocate cache with all the 3*natom perturbations.
+ qcache%use_3natom_cache = .True.
+ ABI_MALLOC(qcache%v1scf_3natom_qibz, (2, nfft, nspden, natom3))
+ qcache%stored_iqibz = huge(1)
+
+ call wrtout(std_out, sjoin(" Using cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Max number of q-points stored in memory: ", itoa(qcache%maxnq)))
+ call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(qcache%onepot_mb, fmt="f9.2"), " [Mb]"))
+ call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
+
+end function qcache_new
 !!***
 
 !----------------------------------------------------------------------
@@ -1469,6 +1563,8 @@ end subroutine dvdb_readsym_qbz
 !!    0 has not effect.
 !!    > 0 for cache with automatically computed nqpt points.
 !!  qselect_dvdb(%nqpt)=0 to ignore this q-point when reading (global array)
+!!  itreatq(%nqpt) = 0 if this q-point won't be treated by this CPU else > 0. 
+!!    Each CPU calls this routine with its own array.
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -1479,59 +1575,34 @@ end subroutine dvdb_readsym_qbz
 !!
 !! SOURCE
 
-subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, comm)
+subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,comm
- class(dvdb_t),target,intent(inout) :: db
+ class(dvdb_t),intent(inout) :: db
  real(dp),intent(in) :: mbsize
 !arrays
  integer,intent(in) :: ngfft(18), qselect_dvdb(db%nqpt)
+ integer(i1b),intent(in) :: itreatq(nqibz)
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii, nq
+ integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
- type(qcache_t),pointer :: qcache
 !arrays
  real(dp),allocatable :: v1scf(:,:,:,:)
  real(dp) :: tsec(2)
 
 ! *************************************************************************
 
- nq = db%nqpt
- qcache => db%qcache
-
- ABI_ICALLOC(db%qcache%count_qused, (nq))
- ABI_MALLOC(qcache%key, (nq))
- !qcache%policy = policy
- ABI_MALLOC(qcache%i_can_treat, (nq)) 
- qcache%i_can_treat = .True.
-
- qcache%max_mbsize = mbsize
- qcache%onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
- if (abs(mbsize) < tol3) then
-   qcache%maxnq = 0; call wrtout(std_out, " DVDB Qcache has been disabled!"); return
- end if
-
- if (mbsize < zero) then
-   qcache%maxnq = nq
- else
-   qcache%maxnq = nint(mbsize / (qcache%onepot_mb * db%my_npert))
- end if
- qcache%maxnq = max(min(qcache%maxnq, nq), 1)
-
- call wrtout(std_out, sjoin(" Using cache for DVDB Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
- call wrtout(std_out, sjoin(" Max number of q-points stored in memory: ", itoa(qcache%maxnq)))
- call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(qcache%onepot_mb, fmt="f9.2"), " [Mb]"))
- call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
-
  call timab(1801, 1, tsec)
-
  call wrtout(std_out, " Loading Vscf(q) from DVDB into qcache...", do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+
+ db%qcache = qcache_new(db%nqpt, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
+ db%qcache%itreatq = itreatq
 
  do db_iqpt=1,db%nqpt
    ! Ignore points reported by the oracle 
@@ -1556,7 +1627,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, comm)
    end if
 
    ! Transfer to cache taking into account my_npert. Note that IBZ may be distributed.
-   if (qcache%i_can_treat(db_iqpt)) then
+   if (db%qcache%itreatq(db_iqpt) /= 0) then
      ABI_MALLOC_OR_DIE(db%qcache%key(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
      if (db%my_npert == db%natom3) then
        db%qcache%key(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
@@ -1571,7 +1642,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, comm)
    ABI_FREE(v1scf)
  end do
 
- call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(db%qcache%get_mbsize(), fmt="f12.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Memory allocated for cache:", ftoa(db%qcache%get_mbsize(), fmt="f12.1"), " [Mb]"))
 
  call cwtime_report(" DVDB Qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
  call timab(1801, 2, tsec)
@@ -1665,7 +1736,7 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
 
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(db%qcache%get_mbsize(), fmt="f12.1"), " [Mb]"))
 
- call cwtime_report(" dvdb_qcache update", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" dvdb_qcache_update_from_file", cpu_all, wall_all, gflops_all)
  call timab(1807, 2, tsec)
 
 end subroutine dvdb_qcache_update_from_file
@@ -1705,7 +1776,8 @@ subroutine qcache_free(qcache)
    ABI_SFREE(qcache%key)
  end if
  ABI_SFREE(qcache%count_qused)
- ABI_SFREE(qcache%i_can_treat)
+ ABI_SFREE(qcache%itreatq)
+ ABI_SFREE(qcache%v1scf_3natom_qibz)
 
 end subroutine qcache_free
 !!***
@@ -2822,7 +2894,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ABI_FREE(v1r_qbz)
  ABI_FREE(v1r_lr)
 
- call cwtime_report(" Construction of V(r, R)", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" Construction of V(r,R)", cpu_all, wall_all, gflops_all)
 
 end subroutine dvdb_ftinterp_setup
 !!***
@@ -2954,13 +3026,14 @@ end subroutine dvdb_ftinterp_qpt
 !!  dvdb_get_ftqbz
 !!
 !! FUNCTION
-!!  Fourier interpolation of potentials for a given q-point in the BZ.
+!!  Fourier interpolation of potentials for a given q-point in the BZ (qbz).
 !!  Internal tables must be prepared in advance by calling `dvdb_ftinterp_setup`.
 !!  Interpolation is avoided if potential is in ftqcache
 !!
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
-!!  qbz(3)=q-point in reduced coordinates.
+!!  qbz(3)= q-point in the BZ in reduced coordinates.
+!!  qibz(3) = Image of qbz in the IBZ. Needed to apply symmetries IBZ --> qbz
 !!  indq2ibz(6)=Symmetry mapping qbz --> IBZ qpoint produced by listkk.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
@@ -2990,10 +3063,10 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz,itimrev,isym,nqcache,iq,ierr, imyp, ipc, mu, root
+ integer :: iq_ibz,itimrev,isym,iq,ierr, imyp, ipc, mu, root
  logical :: isirr_q, incache
 !!arrays
- integer :: g0q(3), requests(db%natom3) !,lgsize(db%nqpt), iqmax(1), 
+ integer :: g0q(3), requests(db%natom3)
  real(dp) :: tsec(2)
  real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
@@ -3004,11 +3077,17 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
  iq_ibz = indq2ibz(1)
  db%ftqcache%count_qused(iq_ibz) = db%ftqcache%count_qused(iq_ibz) + 1
- !qibz = ! Need qpoint in the IBZ to apply symmetries. 
 
- ! IS(q_qibz) + g0q = q_bz
+ ! IS(q_ibz) + g0q = q_bz
  isym = indq2ibz(2); itimrev = indq2ibz(6) + 1; g0q = indq2ibz(3:5)
  isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
+
+ !if (db%ftqcache%use_3natom_cache .and. db%ftqcache%stored_iqibz == iq_ibz .and. .not. isirr_q) then
+ !  db%ftqcache%v1scf_3natom_qibz(2, nfft, db%nspden, db%natom3)
+ !  call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
+ !    db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
+ !  call timab(1809, 2, tsec); return
+ !end if
 
  ! TODO: Note that cplex is always set to 2 here
  cplex = 2
@@ -3052,27 +3131,6 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  if (db%ftqcache%maxnq > 0 .and. .not. incache) then
    ! Entry not in cache. --> Count number of entries in qcache first.
    NOT_IMPLEMENTED_ERROR()
-   !nqcache = 0; lgsize = -1
-   !do iq=1,db%nqpt
-   !  if (allocated(db%ftqcache%key(iq)%v1scf)) then
-   !     nqcache = nqcache + 1
-   !     lgsize(iq) = count(db%symq_table(4,:,:,iq) == 1)
-   !  end if
-   !end do
-
-   ! Deallocate one item if needed. Prefer q-points with
-   ! largest number of symmetries in the litte-group e.g. Gamma.
-   !if (nqcache >= db%ftqcache%maxnq) then
-   !  iqmax = maxloc(lgsize); iq = iqmax(1)
-   !  ! Try to avoid removing the last qpt added to cache.
-   !  if (iq == db%ftqcache%prev_iqpt .and. nqcache > 1) then
-   !     lgsize(iq) = -1
-   !     iqmax = maxloc(lgsize); iq = iqmax(1)
-   !  end if
-   !  ABI_CHECK(allocated(db%ftqcache%key(iq)%v1scf), "free error")
-   !  ABI_FREE(db%ftqcache%key(iq)%v1scf)
-   !end if
-
    ! Allocate new entry and store v1scf
    !ABI_CHECK(.not. allocated(db%ftqcache%key(iq_ibz)%v1scf), "free error")
    !ABI_MALLOC(db%ftqcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
@@ -3129,6 +3187,15 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
        !  db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2, db%comm_pert)
      end if
 
+     !if (db%ftqcache%use_3natom_cache .and. db%ftqcache%stored_iqibz /= iq_ibz) then
+     !  db%ftqcache%stored_iqibz = iq_ibz
+     !  if (cplex == 1) then
+     !    db%ftqcache%v1scf_3natom_qibz(1,:,:,:) = work2
+     !    db%ftqcache%v1scf_3natom_qibz(2,:,:,:) = zero
+     !  end if
+     !  if (cplex == 2) db%ftqcache%v1scf_3natom_qibz = work2
+     !end if
+
      ! Reallocate v1scf with my_npert and extract data from work2.
      ABI_FREE(v1scf)
      ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
@@ -3138,22 +3205,6 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
      end do
      ABI_FREE(work2)
    end if
-
- else
-   ! potential is already available in v1scf
-   ! Handle potentials read from file in case of parallelism over perturbations.
-   !NOT_IMPLEMENTED_ERROR()
-   !if (.not. incache .and. db%my_npert /= db%natom3) then
-   !  ABI_MALLOC(work, (cplex, nfft, db%nspden, db%my_npert))
-   !  do imyp=1,db%my_npert
-   !    ipc = db%my_pinfo(3, imyp)
-   !    work(:,:,:,imyp) = v1scf(:,:,:,ipc)
-   !  end do
-   !  ABI_FREE(v1scf)
-   !  ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
-   !  v1scf = work
-   !  ABI_FREE(work)
-   !end if
  end if ! not is_irred
 
  call timab(1809, 2, tsec)
@@ -3181,6 +3232,8 @@ end subroutine dvdb_get_ftqbz
 !!    0 has not effect.
 !!    > 0 for cache with automatically computed nqpt points.
 !!  qselect_ibz(nqibz)=0 to ignore this q-point (global array)
+!!  itreatq(nqibz) = 0 if this q-point won't be treated by this CPU else > 0. 
+!!    Each CPU calls this routine with its own array.
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -3191,7 +3244,7 @@ end subroutine dvdb_get_ftqbz
 !!
 !! SOURCE
 
-subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz, comm)
+subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz, itreatq, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3200,6 +3253,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  class(dvdb_t),intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18), qselect_ibz(nqibz)
+ integer(i1b),intent(in) :: itreatq(nqibz)
  real(dp),intent(in) :: qibz(3, nqibz)
 
 !Local variables-------------------------------
@@ -3214,34 +3268,11 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 ! *************************************************************************
 
  call timab(1808, 1, tsec)
-
- ABI_ICALLOC(db%ftqcache%count_qused, (nqibz))
- ABI_MALLOC(db%ftqcache%key, (nqibz))
- ABI_MALLOC(db%ftqcache%i_can_treat, (nqibz)) 
- db%ftqcache%i_can_treat = .True.
- !db%ftqcache%policy = policy
-
- db%ftqcache%max_mbsize = mbsize
- db%ftqcache%onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
- if (abs(mbsize) < tol3) then
-   db%ftqcache%maxnq = 0; call wrtout(std_out, " FT Qcache has been disabled!"); return
- end if
-
- if (mbsize < zero) then
-   db%ftqcache%maxnq = nqibz
- else
-   db%ftqcache%maxnq = nint(mbsize / (db%ftqcache%onepot_mb * db%my_npert))
- end if
- db%ftqcache%maxnq = max(min(db%ftqcache%maxnq, nqibz), 1)
-
- call wrtout(std_out, sjoin(" Activating cache for Fourier-interpolated Vscf(q) with MAX input size: ", &
-     ftoa(mbsize, fmt="f9.2"), " [Mb]"))
- call wrtout(std_out, sjoin(" Max number of q-points stored in memory: ", itoa(db%ftqcache%maxnq)))
- call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(db%ftqcache%onepot_mb, fmt="f9.2"), " [Mb]"))
- call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
-
- call wrtout(std_out, " Precomputing Vscf(q) from W(r, R) and building qcache...", do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call wrtout(std_out, " Precomputing Vscf(q) from W(r, R) and building qcache...", do_flush=.True.)
+
+ db%ftqcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
+ db%qcache%itreatq = itreatq
 
  ! TODO: Note that cplex is always set to 2 here
  cplex = 2
@@ -3251,7 +3282,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
    ! Ignore points reported by the oracle 
    if (qselect_ibz(iq_ibz) == 0) cycle
    ! IBZ may be distributed.
-   if (.not. db%ftqcache%i_can_treat(iq_ibz)) cycle
+   if (db%ftqcache%itreatq(iq_ibz) == 0) cycle
 
    call cwtime(cpu, wall, gflops, "start")
 
@@ -3360,7 +3391,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  ABI_FREE(v1scf)
 
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(db%ftqcache%get_mbsize(), fmt="f12.1"), " [Mb]"))
- call cwtime_report(" dvdb_qcache update", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" dvdb_ftqcache_update_from_ft", cpu_all, wall_all, gflops_all)
  call timab(1807, 2, tsec)
 
 end subroutine dvdb_ftqcache_update_from_ft

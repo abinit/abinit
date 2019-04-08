@@ -4,6 +4,8 @@
 !! abitk
 !!
 !! FUNCTION
+!!  Command line interface to perform very basic post-processing of output files (mainly netcdf files).
+!!  Use `abitk --help` to get list of possible commands.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2013-2019 ABINIT group (MG)
@@ -15,6 +17,7 @@
 !!  (main program)
 !!
 !! OUTPUT
+!!  (main routine)
 !!
 !! PARENTS
 !!
@@ -283,7 +286,7 @@ program abitk
 contains 
 !!***
 
-!!****f* ABINIT/get_ebands_path_cryst
+!!****f* abitk/get_ebands_path_cryst
 !! NAME
 !! get_ebands_path_cryst
 !!
@@ -298,7 +301,6 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
-
 
 subroutine get_path_ebands_cryst(path, ebands, cryst, comm)
 
@@ -322,7 +324,7 @@ subroutine get_path_ebands_cryst(path, ebands, cryst, comm)
 end subroutine get_path_ebands_cryst
 !!***
 
-!!****f* ABINIT/get_path_ebands
+!!****f* abitk/get_path_ebands
 !! NAME
 !! get_path_ebands
 !!
@@ -358,7 +360,7 @@ subroutine get_path_ebands(path, ebands, comm)
 end subroutine get_path_ebands
 !!***
 
-!!****f* ABINIT/get_path_cryst
+!!****f* abitk/get_path_cryst
 !! NAME
 !! get_path_cryst
 !!

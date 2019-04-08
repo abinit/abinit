@@ -804,10 +804,10 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor0=0
- integer :: natom3,nu1,nu2
+ integer :: natom3,nu1
  integer :: iene, jene
  integer :: ierr
- real(dp) :: diagerr,spinfact
+ real(dp) :: spinfact
  character(len=500) :: msg
  !arrays
  real(dp) :: displ_red(2,gams%natom3,gams%natom3)
@@ -937,9 +937,11 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor0=0
+#ifdef DEV_MJV
  integer, save :: icall=0
- integer :: natom3,nu1,nu2
- real(dp) :: diagerr,spinfact
+#endif
+ integer :: natom3,nu1
+ real(dp) :: spinfact
  character(len=500) :: msg
  !arrays
  real(dp) :: displ_red(2,gams%natom3,gams%natom3)
@@ -1267,9 +1269,9 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor0=0
- integer :: natom3,nu1,nu2
+ integer :: natom3,nu1
  integer :: idir, jdir, ii
- real(dp) :: diagerr,spinfact
+ real(dp) :: spinfact
  character(len=500) :: msg
  !arrays
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
@@ -1390,9 +1392,9 @@ subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor0=0
- integer :: natom3,nu1,nu2
+ integer :: natom3,nu1
  integer :: idir,jdir,ii
- real(dp) :: diagerr,spinfact
+ real(dp) :: spinfact
  character(len=500) :: msg
  !arrays
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)

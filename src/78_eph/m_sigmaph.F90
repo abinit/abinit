@@ -603,6 +603,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: g0_k(3),g0_kq(3)
  integer :: qptrlatt(3,3)
  integer :: work_ngfft(18),gmax(3) !g0ibz_kq(3),
+ integer(i1b),allocatable :: itreatq(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
  integer,allocatable :: wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
@@ -1002,7 +1003,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (sigma%imag_only .and. sigma%qint_method == 1) then
        call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
      end if
-     call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, comm) ! # comm_qpt
+     ABI_ICALLOC(itreatq, (sigma%nqibz))
+     itreatq = 1
+     !do iq_ibz=1, sigma%nqibz
+     !  if (mod(iq_ibz, sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_ibz) = 1
+     !end do
+     call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, itreatq, comm)
+     ABI_FREE(itreatq)
 
  else
    ABI_CALLOC(qselect, (dvdb%nqpt))
@@ -1022,7 +1029,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! This is also the reason why we reorder the q-points in ibz_k to pack the points in *shells* to minimise cache misses.
  call dvdb%print(prtvol=dtset%prtvol)
 
- if (.not. sigma%use_ftinterp) call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, comm) ! comm_qpt
+ if (.not. sigma%use_ftinterp) then
+   ABI_ICALLOC(itreatq, (sigma%nqibz))
+   itreatq = 1
+   !do iq_dvdb=1, dvdb%nqpt
+   !  if (mod(iq_dvdb, sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_dvdb) = 1
+   !end do
+   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq, comm) ! comm_qpt
+   ABI_FREE(itreatq)
+ end if
  ABI_FREE(qselect)
 
  ! Loop over k-points in Sigma_nk.
@@ -2013,15 +2028,15 @@ end if
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
 
- if (allocated(dvdb%qcache%count_qused)) then
-   nqeff = count(dvdb%qcache%count_qused /= 0)
-   call wrtout(std_out, sjoin(" Number of qpts in IBZ used by this rank:", itoa(nqeff), &
-      " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
-   call xmpi_sum(dvdb%qcache%count_qused, comm, ierr)
-   nqeff = count(dvdb%qcache%count_qused /= 0)
-   call wrtout(std_out, sjoin(" Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
-      " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
- end if
+ !if (allocated(dvdb%qcache%count_qused)) then
+ !  nqeff = count(dvdb%qcache%count_qused /= 0)
+ !  call wrtout(std_out, sjoin(" Number of qpts in IBZ used by this rank:", itoa(nqeff), &
+ !     " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
+ !  call xmpi_sum(dvdb%qcache%count_qused, comm, ierr)
+ !  nqeff = count(dvdb%qcache%count_qused /= 0)
+ !  call wrtout(std_out, sjoin(" Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
+ !     " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
+ !end if
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
@@ -2194,8 +2209,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call cwtime(cpu, wall, gflops, "start")
 
  ! Copy important dimensions.
- new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
- mband = dtset%mband; natom3 = cryst%natom * 3
+ new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor; mband = dtset%mband; natom3 = cryst%natom * 3
 
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
@@ -2212,14 +2226,25 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! Broadening parameter from zcut
  new%ieta = + j_dpc * dtset%zcut
 
+ ! Define q-mesh for integration of the self-energy.
+ ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
+ new%ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
+ if (all(dtset%eph_ngqpt_fine /= 0)) then
+   new%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
+ end if
+
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems without inversion
+ qptrlatt = 0; qptrlatt(1,1) = new%ngqpt(1); qptrlatt(2,2) = new%ngqpt(2); qptrlatt(3,3) = new%ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
+   new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz)
+
  ! Parallelism over perturbations.
  ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements.
  ! Perturbations are equally distributed --> Total number of CPUs should be divisible by 3 * natom
  new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
  do cnt=natom3,2,-1
    if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-     new%nprocs_pert = cnt
-     new%my_npert = natom3 / cnt
+     new%nprocs_pert = cnt; new%my_npert = natom3 / cnt
      exit
    end if
  end do
@@ -2292,8 +2317,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ip = new%my_pinfo(3, ii)
    new%pert_table(2, ip) = ii
  end do
- !write(std_out,*)"my_npert", new%my_npert, "nprocs_pert", new%nprocs_pert
- !write(std_out,*)"my_pinfo", new%my_pinfo
+ !write(std_out,*)"my_npert", new%my_npert, "nprocs_pert", new%nprocs_pert; write(std_out,*)"my_pinfo", new%my_pinfo
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  new%ntemp = nint(dtset%tmesh(3))
@@ -2317,18 +2341,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    new%wr_step = two * eV_Ha / (new%nwr - 1)
    if (dtset%freqspmax /= zero) new%wr_step = dtset%freqspmax / (new%nwr - 1)
  end if
-
- ! Define q-mesh for integration of the self-energy.
- ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
- new%ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
- if (all(dtset%eph_ngqpt_fine /= 0)) then
-   new%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
- end if
-
- ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems without inversion
- qptrlatt = 0; qptrlatt(1,1) = new%ngqpt(1); qptrlatt(2,2) = new%ngqpt(2); qptrlatt(3,3) = new%ngqpt(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
-   new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz)
 
  ! Select k-point and bands where corrections are wanted
  ! if symsigma == +1, we have to include all degenerate states in the set
@@ -2804,7 +2816,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    call gauleg(-one, one, th, wth, new%ntheta)
 
    ! Initialize qvers_cart and angular weights angwgth
-   ! NB: summing overt f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
+   ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
    new%angl_size = new%ntheta * new%nphi
    ABI_MALLOC(new%qvers_cart, (3, new%angl_size))
    ABI_MALLOC(new%angwgth, (new%angl_size))
