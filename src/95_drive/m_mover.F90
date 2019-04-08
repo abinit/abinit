@@ -73,6 +73,10 @@ module m_mover
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef 
+#if defined DEV_MS_SCALEUP 
+ use scup_global, only : global_set_parent_iter,global_set_print_parameters 
+#endif 
+ use m_scup_dataset
  implicit none
 
  private
@@ -118,8 +122,8 @@ contains
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!   | mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
-!!  scup_elec_eval = logical, if true evaluate effective electron model as 
-!!                   provided by SCALE-UP
+!!  scup_dtset <type(scup_dtset_type) = derived datatype holding all options 
+ !!            for the evaluation of an effective electronic model using SCALE UP
 !!
 !! OUTPUT
 !!  results_gs <type(results_gs_type)>=results (energy and its components,
@@ -198,7 +202,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,verbose,writeHIST,scup_elec_eval)
+& effective_potential,filename_ddb,verbose,writeHIST,scup_dtset)
 
 implicit none
 
@@ -211,7 +215,6 @@ type(ab_xfh_type),intent(inout) :: ab_xfh
 type(effective_potential_type),optional,intent(inout) :: effective_potential
 logical,optional,intent(in) :: verbose
 logical,optional,intent(in) :: writeHIST
-logical,optional,intent(in) :: scup_elec_eval
 character(len=fnlen),optional,intent(in) :: filename_ddb
 !arrays
 real(dp),intent(inout) :: acell(3)
@@ -219,6 +222,7 @@ real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
+type(scup_dtset_type),optional, intent(in) :: scup_dtset  
 
 !Local variables-------------------------------
 !scalars
@@ -244,7 +248,6 @@ logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
 logical :: skipcycle, file_opened
-logical :: need_scup_elec_eval
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
@@ -259,9 +262,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  need_writeHIST=.TRUE.
  if(present(writeHIST)) need_writeHIST = writeHIST
-
- need_scup_elec_eval = .FALSE. 
- if(present(scup_elec_eval)) need_scup_elec_eval = scup_elec_eval
 
  ! enable time limit handler if not done in callers.
  if (enable_timelimit_in(MY_NAME) == MY_NAME) then
@@ -627,11 +627,16 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,hist%mxhist) ! Fill xred with new ordering
              end if
+
+           !If we a SCALE UP effective electron model give the iteration and set print-options
+           if(scup_dtset%scup_elec_model)then 
+              call global_set_parent_iter(itime)
+           end if 
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,e_d_ht,e_d_sr,e_d_lr,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,& 
-&           filename=name_file,elec_eval=need_scup_elec_eval)
+&           filename=name_file,elec_eval=scup_dtset%scup_elec_model)
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E2)then

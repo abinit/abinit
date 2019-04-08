@@ -563,16 +563,12 @@ implicit none
 &                        effective_potential%anharmonics_terms)      
      end if
 
-     !Check if we want to use an effective electronic Model of SCALE UP  
-     need_elec_eval = .FALSE. 
-     if(inp%scup_dtset%scup_elec_model) need_elec_eval = .TRUE.
-
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_elec_eval=need_elec_eval)     
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=inp%scup_dtset)     
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
