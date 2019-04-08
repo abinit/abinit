@@ -175,12 +175,6 @@ def lazy_writelines(fname, lines):
         fh.writelines(lines)
 
 
-class Record(object):
-    @lazy__str__
-    def __str__(self):
-        pass
-
-
 def rmrf(top, exclude_paths=None):
     """
     Recursively remove all files and directories contained in directory top.
@@ -719,8 +713,7 @@ class AbinitTestInfoParser(object):
 
     def generate_testinfo_nprocs(self, nprocs):
         """Returns a record with the variables needed to handle the job with nprocs."""
-        info = Record()
-        d = info.__dict__
+        d = {}
 
         d['yaml_test'] = self.yaml_test()
 
@@ -754,16 +747,16 @@ class AbinitTestInfoParser(object):
         # Now check if this is a parallel test and, in case, overwrite the values
         # using those reported in the [CPU_nprocs] sections.
         # Set also the value of info._ismulti_paral so that we know how to create the test id
-        if not info.nprocs_to_test:
+        if not d['nprocs_to_test']:
             assert nprocs == 1
-            info._ismulti_paral = False
+            d['_ismulti_paral'] = False
         else:
             logger.debug("multi parallel case")
-            if nprocs not in info.nprocs_to_test:
-                err_msg = "in file: %s. nprocs = %s > not in nprocs_to_test = %s" % (self.inp_fname, nprocs, info.nprocs_to_test)
+            if nprocs not in d['nprocs_to_test']:
+                err_msg = "in file: %s. nprocs = %s > not in nprocs_to_test = %s" % (self.inp_fname, nprocs, d['nprocs_to_test'])
                 raise self.Error(err_msg)
 
-            if nprocs > info.max_nprocs:
+            if nprocs > d['max_nprocs']:
                 if hasattr(self, 'max_nprocs'):
                     err_msg = "in file: %s. nprocs = %s > max_nprocs = %s" % (self.inp_fname, nprocs, self.max_nprocs)
                 else:
@@ -772,12 +765,12 @@ class AbinitTestInfoParser(object):
                 raise self.Error(err_msg)
 
             # Redefine variables related to the number of CPUs.
-            info._ismulti_paral = True
-            info.nprocs_to_test = [nprocs]
-            info.max_nprocs = nprocs
+            d['_ismulti_paral'] = True
+            d['nprocs_to_test'] = [nprocs]
+            d['max_nprocs'] = nprocs
 
-            info.exclude_nprocs = list(range(1, nprocs))
-            # print(self.inp_fname, nprocs, info.exclude_nprocs)
+            d['exclude_nprocs'] = list(range(1, nprocs))
+            # print(self.inp_fname, nprocs, d['exclude_nprocs'])
 
             ncpu_section = "NCPU_" + str(nprocs)
             if not self.parser.has_section(ncpu_section):
@@ -805,7 +798,7 @@ class AbinitTestInfoParser(object):
                 # print(self.inp_fname, d["max_nprocs"])
 
         # Add the name of the input file.
-        info.inp_fname = self.inp_fname
+        d['inp_fname'] = self.inp_fname
 
         return AbinitTestInfo(d)
 
