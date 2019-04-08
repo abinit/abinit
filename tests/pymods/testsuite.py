@@ -618,45 +618,24 @@ class AbinitTestInfoParser(object):
         HEADER = "<BEGIN TEST_INFO>\n"
         FOOTER = "<END TEST_INFO>\n"
 
-        # Extract the lines that start with SENTINEL and parse the file.
         lines = lazy_readlines(inp_fname)
-        # for l in lines:
-        #     print(l)
-        # print(inp_fname)
-        lines = [l.replace(SENTINEL, "", 1) for l in lines if l.startswith(SENTINEL)]
+        lines = [l.replace(SENTINEL, "", 1)
+                 for l in lines if l.startswith(SENTINEL)]
 
         try:
             start, stop = lines.index(HEADER), lines.index(FOOTER)
         except ValueError:
-            raise self.Error("%s does not contain any valid testcnf section!" % inp_fname)
+            raise self.Error("{} does not contain any valid testcnf section!"
+                             .format(inp_fname))
 
-        lines = [line[1:] if line.startswith(' ') else line for i, line in enumerate(lines) if start < i < stop]
+        # Keep only test section lines and remove one space at the begining
+        lines = [line[1:] if line.startswith(' ') else line
+                 for i, line in enumerate(lines) if start < i < stop]
+
         if not lines:
             raise self.Error("%s does not contain any valid testcnf section!" % inp_fname)
 
-        # Not needed in python 2.7 or 3.x
-        # Hack to allow options occupying more than one line.
-        # string = ""
-        # for l in lines:
-        #     # MGDEBUG
-        #     # This is needed to avoid problems with multiple lines, see docstring.
-        #     l = fix_punctuation_marks(l)
-        #     if line_starts_with_section_or_option(l):
-        #         string += l
-        #     else:
-        #         if l.startswith("#"):
-        #             continue
-        #         string = string.rstrip() + " " + l
-        # lines = [l + "\n" for l in string.split("\n")]
-        # MGDEBUG
-        # print("in gmatteo's parser ")
-        # for l in lines: print(l, end="")
-
-        # s = StringIO()
-        # s.writelines(lines)
-        # s.seek(0)
-
-        # Old version. ok with py2 but not with py3k
+        # Interface in python 3 is richer so we rebuilt part of it
         if py2:
             class MySafeConfigParser(SafeConfigParser):
                 """Wrap the get method of SafeConfigParser to disable the interpolation of raw_options."""
@@ -665,7 +644,6 @@ class AbinitTestInfoParser(object):
                 def get(self, section, option, raw=False, vars=None):
                     if option in self.raw_options and section == TESTCNF_KEYWORDS[option][2]:
                         logger.debug("Disabling interpolation for section = %s, option = %s" % (section, option))
-                        # print("Disabling interpolation for section = %s, option = %s" % (section, option))
                         return SafeConfigParser.get(self, section, option, raw=True, vars=vars)
                     else:
                         return SafeConfigParser.get(self, section, option, raw, vars)
@@ -674,8 +652,7 @@ class AbinitTestInfoParser(object):
                     s = StringIO(string)
                     SafeConfigParser.readfp(self, s, filename=source)
 
-            self.parser = MySafeConfigParser(defaults)  # Wrap the parser.
-            # self.parser = RawConfigParser(defaults)
+            self.parser = MySafeConfigParser(defaults)
         else:
             self.parser = ConfigParser(defaults, interpolation=None)
 
@@ -700,18 +677,6 @@ class AbinitTestInfoParser(object):
                 err_msg = "%s : test_chain contains repeated tests %s" % (inp_fname, string)
                 raise self.Error(err_msg)
 
-            # Check whether (section, option) is correct.
-            # _defs = [s.upper() for s in defaults] if defaults else []
-            # err_msg = ""
-            # for section in parser.sections():
-            #   for opt in parser.options(section):
-            #     if opt.upper() in _defs: continue
-            #     if opt not in TESTCNF_KEYWORDS:
-            #       err_msg += "Unknown (section, option) = %s, %s\n" % (section, opt)
-            #     elif section != TESTCNF_KEYWORDS[opt][2]:
-            #       err_msg += "Wrong (section, option) = %s, %s\n" % (section, opt)
-            # if err_msg: raise ValueError(err_msg)
-
     def generate_testinfo_nprocs(self, nprocs):
         """Returns a record with the variables needed to handle the job with nprocs."""
         d = {}
@@ -735,7 +700,6 @@ class AbinitTestInfoParser(object):
                 d[key] = tup[1]  # Section does not exist. Use default value.
 
             # Process the line
-            # if key == "files_to_test": print("hello files", d[key], "bye files")
             try:
                 d[key] = line_parser(d[key])
             except Exception as exc:
@@ -811,9 +775,9 @@ class AbinitTestInfoParser(object):
         default = TESTCNF_KEYWORDS[key][1]
         section = TESTCNF_KEYWORDS[key][2]
 
-        try:
+        if self.parser.has_option(section, key):
             opt = self.parser.get(section, key)
-        except NoOptionError:
+        else:
             opt = default
 
         return opt_parser(opt)
@@ -852,14 +816,6 @@ class AbinitTestInfoParser(object):
 
         return ytest
 
-    # @property
-    # def is_parametrized_test(self):
-    #     """True if this is a parametrized test."""
-    #     raise NotImplemented()
-
-    # def get_parametrized_tests(self):
-    #     """Return the list of parametrized tests."""
-
 
 def find_top_build_tree(start_path, with_abinit=True, ntrials=10):
     """
@@ -871,8 +827,7 @@ def find_top_build_tree(start_path, with_abinit=True, ntrials=10):
     """
     abs_path = os.path.abspath(start_path)
 
-    trial = 0
-    while trial <= ntrials:
+    for _ in range(ntrials):
         config_h = os.path.join(abs_path, "config.h")
         abinit_bin = os.path.join(abs_path, "src", "98_main", "abinit")
         # Check if we are in the top of the ABINIT source tree
@@ -884,8 +839,7 @@ def find_top_build_tree(start_path, with_abinit=True, ntrials=10):
         if found:
             return abs_path
         else:
-            abs_path, tail = os.path.split(abs_path)
-            trial += 1
+            abs_path, _ = os.path.split(abs_path)
 
     raise RuntimeError("Cannot find the ABINIT build tree after %s trials" % ntrials)
 
