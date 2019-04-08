@@ -377,7 +377,7 @@ class FileToTest(object):
                 self.tolnlines, self.tolabs, self.tolrel
             )
 
-        if fldebug:
+        if fldebug:  # fail on first error and output the traceback
             isok, status, msg = make_diff()
         else:
             try:
@@ -390,11 +390,12 @@ class FileToTest(object):
                 isok, status = False, 'failed'
                 msg = 'internal error:\n{}: {}'.format(e.__class__.__name__,
                                                        str(e))
+        msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
         # Save comparison results.
         self.fld_isok = isok
         self.fld_status = status
-        self.fld_msg = msg + ' [file={}]'.format(os.path.basename(ref_fname))
+        self.fld_msg = msg
 
         return isok, status, msg
 
