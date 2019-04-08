@@ -82,11 +82,11 @@ def html_colorize_text(string, code):
     return "<FONT COLOR='%s'>%s</FONT>" % (code, string)
 
 _status2htmlcolor = {
-    "succeeded": lambda string : html_colorize_text(string, 'Green'),
-    "passed": lambda string : html_colorize_text(string, 'DeepSkyBlue'),
-    "failed": lambda string : html_colorize_text(string, 'Red'),
-    "disabled": lambda string : html_colorize_text(string, 'Cyan'),
-    "skipped": lambda string : html_colorize_text(string, 'Cyan'),
+    "succeeded": lambda string: html_colorize_text(string, 'Green'),
+    "passed": lambda string: html_colorize_text(string, 'DeepSkyBlue'),
+    "failed": lambda string: html_colorize_text(string, 'Red'),
+    "disabled": lambda string: html_colorize_text(string, 'Cyan'),
+    "skipped": lambda string: html_colorize_text(string, 'Cyan'),
 }
 
 
@@ -2298,14 +2298,16 @@ class BaseTest(object):
 
             if ref_exists and out_exists:
                 # n is for ndiff format, c for context, u for unified
-                #for out_opt in ["-n", "-c"]:
-                #out_opt = "-n"
-                #out_opt = "-c"
+                # for out_opt in ["-n", "-c"]:
+                # out_opt = "-n"
+                # out_opt = "-c"
                 out_opt = "-u"
-                args = [diffpy, out_opt, "-f " + diff_fname, out_fname, ref_fname]
+                args = [diffpy, out_opt, "-f " + diff_fname, out_fname,
+                        ref_fname]
                 cmd = " ".join(args)
 
-                (p, ret_code) = self.timebomb.run(cmd, shell=True, cwd=self.workdir)
+                (p, ret_code) = self.timebomb.run(cmd, shell=True,
+                                                  cwd=self.workdir)
 
                 if ret_code != 0:
                     err_msg = "Timeout error (%s s) while executing %s, retcode = %s" % (
@@ -2331,13 +2333,13 @@ class BaseTest(object):
 
         # Try to read stdout, stderr and the abort_file produced by Abinit in parallel
         # Ignore errors (fock takes years to flush the stdout)
-        #stdout_text, stderr_text = 2*("",)
+        # stdout_text, stderr_text = 2*("",)
         nlast = 120
         stderr_text, stdout_text, abiabort_text = 3 * (" ",)
         abort_file = find_abortfile(self.workdir)
-        #self.fld_isok = False
+        # self.fld_isok = False
         errinfo_text = " "
-        #print("fld_isok:", self.fld_isok)
+        # print("fld_isok:", self.fld_isok)
         if not self.fld_isok or self.status == "failed":
             try:
                 stderr_text = str2html(self.stderr_read())
@@ -2346,7 +2348,9 @@ class BaseTest(object):
 
                 if abort_file:
                     with open(abort_file, "rt") as f:
-                        abiabort_text = 12*"=" + os.path.basename(abort_file) + 12*"=" + 2*"\n" + str(f.read())
+                        abiabort_text = (12 * "="
+                                         + os.path.basename(abort_file)
+                                         + 12 * "=" + 2 * "\n" + str(f.read()))
 
             except Exception as exc:
                 s = "Exception while trying to get info from stderr, stdout and __ABI_MPIABORTFILE\n" + str(exc)
@@ -2371,7 +2375,7 @@ class BaseTest(object):
             "page_title": "page_title",
             "user_name": username,
             "hostname": gethostname(),
-            "Headings": ['File_to_test', 'Status', 'fld_output', 'fld_options', 'txt_diff', 'html_diff',] ,
+            "Headings": ['File_to_test', 'Status', 'fld_output', 'fld_options', 'txt_diff', 'html_diff',],
             "nlast": nlast,
             "stderr_text": stderr_text,
             "stdout_text": stdout_text,
@@ -2384,7 +2388,7 @@ class BaseTest(object):
             "str2html": str2html,
             "sec2str": sec2str,
             "args2htmltr": args2htmltr,
-            "html_link"  : html_link,
+            "html_link": html_link,
             "status2html": status2html
             }
 
@@ -2524,7 +2528,7 @@ class AbinitTest(BaseTest):
         else:
             o_prefix = self.id + "o"
 
-        t_prefix = self.id #+ "t"
+        t_prefix = self.id  # + "t"
 
         t_stdin.writelines(l + "\n" for l in [i_prefix, o_prefix, t_prefix])
 
@@ -2542,7 +2546,7 @@ class AbinitTest(BaseTest):
                     err_msg = "Cannot find pp file %s, neither in Psps_for_tests nor in self.workdir" % pname
                     self.exceptions.append(self.Error(err_msg))
 
-        psp_paths = [self.cygwin_path(p) for p in psp_paths] # Cygwin
+        psp_paths = [self.cygwin_path(p) for p in psp_paths]  # Cygwin
 
         t_stdin.writelines[p + "\n" for p in psp_paths)
 
@@ -2557,8 +2561,8 @@ class AnaddbTest(BaseTest):
         t_stdin = StringIO()
 
         inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
-        t_stdin.write( inp_fname + "\n")              # 1) formatted input file
-        t_stdin.write( self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(inp_fname + "\n")              # 1) formatted input file
+        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
 
         iddb_fname = self.id + ".ddb.in"
         if self.input_ddb:
@@ -2569,14 +2573,14 @@ class AnaddbTest(BaseTest):
 
             iddb_fname = self.cygwin_path(iddb_fname)   # cygwin
 
-        t_stdin.write( iddb_fname + "\n")         # 3) input derivative database e.g. t13.ddb.in
-        t_stdin.write( self.id + ".md" + "\n")    # 4) output molecular dynamics e.g. t13.md
+        t_stdin.write(iddb_fname + "\n")         # 3) input derivative database e.g. t13.ddb.in
+        t_stdin.write(self.id + ".md" + "\n")    # 4) output molecular dynamics e.g. t13.md
 
         input_gkk = self.id + ".gkk"
         if self.input_gkk:
-            input_gkk = os.path.join(self.workdir, self.input_gkk) # Use output GKK of a previous run.
+            input_gkk = os.path.join(self.workdir, self.input_gkk)  # Use output GKK of a previous run.
             if not os.path.isfile(input_gkk):
-                self.exceptions.append(self.Error("%s no such GKK file: " % input_gkk) )
+                self.exceptions.append(self.Error("%s no such GKK file: " % input_gkk))
 
             input_gkk = self.cygwin_path(input_gkk)    # cygwin
 
@@ -2584,7 +2588,7 @@ class AnaddbTest(BaseTest):
         t_stdin.write(self.id + "\n")           # 6) base name for elphon output files e.g. t13
 
         input_ddk = self.id + ".ddk"
-        if not os.path.isfile(input_ddk): # Try in input directory:
+        if not os.path.isfile(input_ddk):  # Try in input directory:
             input_ddk = os.path.join(self.inp_dir, input_ddk)
             # FIXME: Someone has to rewrite the treatment of the anaddb files file
             input_ddk = self.cygwin_path(input_ddk)
@@ -2601,48 +2605,49 @@ class MultibinitTest(BaseTest):
         t_stdin = StringIO()
 
         inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
-        t_stdin.write( inp_fname + "\n")              # 1) formatted input file
-        t_stdin.write( self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(inp_fname + "\n")              # 1) formatted input file
+        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
 
         if self.input_ddb:
-            iddb_fname = os.path.join(self.inp_dir,self.input_ddb)
+            iddb_fname = os.path.join(self.inp_dir, self.input_ddb)
             if not os.path.isfile(iddb_fname):
                 self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
             iddb_fname = self.cygwin_path(iddb_fname)   # cygwin
             t_stdin.write(iddb_fname + "\n")         # 3) input derivative database e.g. ddb.in
         else:
             if self.system_xml:
-                sys_xml_fname =  os.path.join(self.inp_dir,self.system_xml)
+                sys_xml_fname = os.path.join(self.inp_dir, self.system_xml)
                 if not os.path.isfile(sys_xml_fname):
                     self.exceptions.append(self.Error("%s no such xml file: " % sys_xml_fname))
                 sys_xml_fname = self.cygwin_path(sys_xml_fname)
-                t_stdin.write(sys_xml_fname + "\n") # 3) input for system.xml XML
+                t_stdin.write(sys_xml_fname + "\n")  # 3) input for system.xml XML
             else:
                 self.exceptions.append(self.Error("%s no file avail for the system"))
 
         if self.coeff_xml:
-            coeffxml_fname =  os.path.join(self.inp_dir,self.coeff_xml)
+            coeffxml_fname = os.path.join(self.inp_dir, self.coeff_xml)
             if not os.path.isfile(coeffxml_fname):
                 self.exceptions.append(self.Error("%s no such xml file for coeffs: " % coeffxml_fname))
 
             coeffxml_fname = self.cygwin_path(coeffxml_fname)
-            t_stdin.write(coeffxml_fname + "\n") # 4) input for coefficients
+            t_stdin.write(coeffxml_fname + "\n")  # 4) input for coefficients
         else:
             coeffxml_fname = "no"
             t_stdin.write(coeffxml_fname + "\n")
 
         if self.md_hist:
-            md_hist_fname =  os.path.join(self.inp_dir,self.md_hist)
+            md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
             if not os.path.isfile(md_hist_fname):
                 self.exceptions.append(self.Error("%s no such xml file for coeffs: " % md_hist_fname))
 
             md_hist_fname = self.cygwin_path(md_hist_fname)
-            t_stdin.write(md_hist_fname + "\n") # 5) input for coefficients
+            t_stdin.write(md_hist_fname + "\n")  # 5) input for coefficients
         else:
             md_hist_fname = "no"
             t_stdin.write(md_hist_fname + "\n")
 
         return t_stdin.getvalue()
+
 
 class TdepTest(BaseTest):
     """
@@ -2653,15 +2658,15 @@ class TdepTest(BaseTest):
 
         inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
         inp_fname = os.path.basename(inp_fname)
-        t_stdin.write( inp_fname + "\n")              # 1) formatted input file
+        t_stdin.write(inp_fname + "\n")              # 1) formatted input file
 
-        md_hist_fname =  os.path.join(self.inp_dir,self.md_hist)
+        md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
         if not os.path.isfile(md_hist_fname):
             self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
 
         md_hist_fname = self.cygwin_path(md_hist_fname)
         t_stdin.write(md_hist_fname + "\n")
-        t_stdin.write( self.id + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.out
 
         return t_stdin.getvalue()
 
@@ -2682,7 +2687,7 @@ class AimTest(BaseTest):
 
         # Path to the pseudopotential files.
         psp_paths = [os.path.join(self.abenv.psps_dir, pname) for pname in self.psp_files]
-        psp_paths = [self.cygwin_path(p) for p in psp_paths] # Cygwin
+        psp_paths = [self.cygwin_path(p) for p in psp_paths]  # Cygwin
 
         t_stdin.writelines(p + "\n" for p in psp_paths)
 
@@ -2711,7 +2716,7 @@ class OpticTest(BaseTest):
         t_stdin = StringIO()
 
         inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write( inp_fname + "\n")   # optic input file e.g. .../Input/t57.in
+        t_stdin.write(inp_fname + "\n")   # optic input file e.g. .../Input/t57.in
         t_stdin.write(self.id + ".out\n")  # Output. e.g t57.out
         t_stdin.write(self.id + "\n")      # Used as suffix to diff and prefix to log file names,
                                            # and also for roots for temporaries
@@ -2725,8 +2730,8 @@ class Band2epsTest(BaseTest):
         t_stdin = StringIO()
 
         inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write( inp_fname + "\n")        # input file e.g. .../Input/t51.in
-        t_stdin.write( self.id + ".out.eps\n")  # output file e.g. t51.out.eps
+        t_stdin.write(inp_fname + "\n")        # input file e.g. .../Input/t51.in
+        t_stdin.write(self.id + ".out.eps\n")  # output file e.g. t51.out.eps
 
         inp_freq = os.path.join(self.inp_dir, self.id + ".in_freq")
         inp_freq = self.cygwin_path(inp_freq)
@@ -2795,7 +2800,7 @@ class ChainOfTests(object):
         for ks in all_keys:
             self.keywords = self.keywords.union(ks)
 
-        all_cpp_vars = [t.need_cpp_vars  for t in self.tests]
+        all_cpp_vars = [t.need_cpp_vars for t in self.tests]
         self.need_cpp_vars = set()
         for vs in all_cpp_vars:
             self.need_cpp_vars = self.need_cpp_vars.union(vs)
@@ -2853,10 +2858,10 @@ class ChainOfTests(object):
     def listoftests(self, width=100, html=True, abslink=True):
         string = ""
         if not html:
-            string += "\n".join( [test.listoftests(width, html, abslink) for test in self] )
+            string += "\n".join(test.listoftests(width, html, abslink) for test in self)
             string = self.full_id + ":\n" + string
         else:
-            string += "<br>".join( [test.listoftests(width, html, abslink) for test in self] )
+            string += "<br>".join(test.listoftests(width, html, abslink) for test in self)
             string = "Test Chain " + self.full_id + ":<br>" + string
         return string
 
@@ -2903,8 +2908,8 @@ class ChainOfTests(object):
         _stats = [test._status for test in self]
         if "disabled" in _stats or "skipped" in _stats:
             if any(s != _stats[0] for s in _stats):
-                #print(self)
-                #print("WARNING, expecting all(s == _stats[0] but got\n %s" % str(_stats))
+                # print(self)
+                # print("WARNING, expecting all(s == _stats[0] but got\n %s" % str(_stats))
                 return "failed"
             return _stats[0]
 
@@ -2976,7 +2981,7 @@ class ChainOfTests(object):
         return snames
 
     def has_authors(self, authors, mode="any"):
-        #return set(authors).issubset(self._authors_snames)
+        # return set(authors).issubset(self._authors_snames)
         if mode == "all":
             return set(authors).issubset(self._authors_snames)
         elif mode == "any":
@@ -3072,7 +3077,7 @@ class AbinitTestSuite(object):
         start = slice.start
         if start is None: start = 0
         stop = slice.stop
-        if stop is None: stop = 10000 # Not very elegant, but cannot use len(self) since indices are not contiguous
+        if stop is None: stop = 10000  # Not very elegant, but cannot use len(self) since indices are not contiguous
         assert slice.step is None     # Slices with steps (e.g. [1:4:2]) are not supported.
 
         # Rules for the test id:
@@ -3082,7 +3087,7 @@ class AbinitTestSuite(object):
 
         test_list = []
         for test in self:
-            #print("ID",test.id)
+            # print("ID",test.id)
             # extract the ID of the first test (if test_chain)
             tokens = test.id.split("-")
             assert tokens[0][0] == "t"  # Assume first character is "t"
@@ -3090,10 +3095,10 @@ class AbinitTestSuite(object):
 
             if "_MPI" in test.id:
                 # Handle multi-parallel tests.
-                #print(test.id)
+                # print(test.id)
                 idx = test.id.find("_MPI")
                 tok = test.id[1:idx]
-                #print(tok)
+                # print(tok)
                 idx = tok.rfind("_")
                 if idx != -1:
                     # Handle tdfpt_01_MPI2 ...
@@ -3112,14 +3117,14 @@ class AbinitTestSuite(object):
 
             num = int(num)
             if num in range(start, stop):
-                #print "got", test.id
+                # print "got", test.id
                 test_list.append(test)
 
         return self.__class__(self.abenv, test_list=test_list)
 
     @property
     def full_length(self):
-        one = lambda : 1
+        one = lambda: 1
         return sum(getattr(test, "__len__", one)() for test in self)
 
     @property
@@ -3168,7 +3173,7 @@ class AbinitTestSuite(object):
 
     def _tests_with_status(self, status):
         assert status in BaseTest._possible_status
-        #assert self._executed
+        # assert self._executed
         return [test for test in self if test.status == status]
 
     def succeeded_tests(self): return self._tests_with_status("succeeded")
@@ -3194,7 +3199,7 @@ class AbinitTestSuite(object):
         exclude_exts = [".cpkl", ".py", "pyc", ]
 
         self._targz_fname = None
-        ofname = os.path.join(self.workdir,"results.tar.gz")
+        ofname = os.path.join(self.workdir, "results.tar.gz")
 
         # The most delicate part here is the treatment of the exceptions
         # since the test might not have produced the reference files
@@ -3211,33 +3216,33 @@ class AbinitTestSuite(object):
 
                 files = set(test.files_to_keep)
                 save_files = [f for f in files if not has_exts(f, exclude_exts)]
-                #print(save_files)
+                # print(save_files)
 
                 # Store stdout files only if the test failed.
-                important_status = ["failed",]
+                important_status = {"failed", }
 
                 # Special treatment for reference machines
                 if self.on_refslave:
-                    important_status = ["passed", "failed",]
+                    important_status = {"passed", "failed", }
 
                 if test.status not in important_status:
                     if isinstance(test, ChainOfTests):
                         for t in test:
-                            #print "Removing Test Chain", t.stdout_fname
+                            # print "Removing Test Chain", t.stdout_fname
                             save_files.remove(t.stdout_fname)
                     else:
-                        #print "Removing", test.stdout_fname
+                        # print "Removing", test.stdout_fname
                         save_files.remove(test.stdout_fname)
 
                 for p in save_files:
-                    #if not os.path.exists(os.path.join(self.workdir, p)): continue
+                    # if not os.path.exists(os.path.join(self.workdir, p)): continue
                     # /foo/bar/suite_workdir/test_workdir/file --> test_workdir/t01/file
                     rpath = os.path.relpath(p, start=self.workdir)
-                    #arcname = str(rpath.encode("ascii", "ignore"))
+                    # arcname = str(rpath.encode("ascii", "ignore"))
                     arcname = str(rpath)
                     try:
-                        #print("targz.add: adding:", p," with arcname ", arcname)
-                        #print(type(p), type(arcname))
+                        # print("targz.add: adding:", p," with arcname ", arcname)
+                        # print(type(p), type(arcname))
                         targz.add(p, arcname=arcname)
                     except:
                         # Handle the case in which the output file has not been produced.
@@ -3288,7 +3293,7 @@ class AbinitTestSuite(object):
         self.workdir = workdir
 
         # Acquire the lock file.
-        self.lock = FileLock(os.path.join(self.workdir,"__run_tests_lock__"), timeout=3)
+        self.lock = FileLock(os.path.join(self.workdir, "__run_tests_lock__"), timeout=3)
 
         try:
             self.lock.acquire()
@@ -3317,7 +3322,7 @@ class AbinitTestSuite(object):
             test.write_html_report()
 
             # Dump the object with pickle.
-            #test.cpkl_dump()
+            # test.cpkl_dump()
 
             # Remove useless files in workdir.
             test.clean_workdir()
@@ -3413,9 +3418,9 @@ class AbinitTestSuite(object):
                   nfail, nsucc, npass, nskip, ndisa)
 
             if nfail:
-              cprint(msg, "red", attrs=['underline'])
+                cprint(msg, "red", attrs=['underline'])
             else:
-              cprint(msg, "green")
+                cprint(msg, "green")
 
             # Print outliers
             if False and dev_etime > 0.0:
@@ -3507,7 +3512,7 @@ class AbinitTestSuite(object):
             Automatically generated by %s on %s. Logged on as %s@%s
           <hr>
           </body>
-          </html> """ % (_MY_NAME, time.asctime(), username, gethostname() )
+          </html> """ % (_MY_NAME, time.asctime(), username, gethostname())
 
         template = header + table + footer
 
@@ -3600,7 +3605,7 @@ class AbinitTestSuite(object):
 class Results(object):
     """Stores the final results."""
     def __init__(self, test_suite):
-        #assert test_suite._executed
+        # assert test_suite._executed
         self.test_suite = test_suite
         self.failed_tests = test_suite.failed_tests()
         self.passed_tests = test_suite.passed_tests()
@@ -3653,7 +3658,7 @@ class Results(object):
         out_files, ref_files = [], []
         for test in (self.tests_with_status(status)):
             for f in test.files_to_test:
-                #if status != "all" and f.status != status: continue
+                # if status != "all" and f.status != status: continue
 
                 out_files.append(os.path.join(test.workdir, f.name))
                 ref_fname = os.path.join(test.ref_dir, f.name)
@@ -3685,15 +3690,15 @@ class Results(object):
     def edit_inputs(self, status="failed"):
         """Edit the input files of the tests with the specified status."""
         in_files = self.in_files(status=status)
-        #for r, o in zip(out_files, ref_files):
-        #    print("reference: %s, output %s" % (r, o))
+        # for r, o in zip(out_files, ref_files):
+        #     print("reference: %s, output %s" % (r, o))
 
         return Editor().edit_files(in_files)
 
-    #def inspect_stdouts(self):
-    #  out_files, ref_files = self.outref_files()
-    #  return Editor().edit_files(in_files)
-    #def inspect_diffs(self):
+    # def inspect_stdouts(self):
+    #     out_files, ref_files = self.outref_files()
+    #     return Editor().edit_files(in_files)
+    # def inspect_diffs(self):
 
     def inspect_stderrs(self, status="failed"):
         """Open the stderr of the tests with the give status in `Editor`."""
