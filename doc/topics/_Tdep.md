@@ -1,6 +1,6 @@
 ---
-description: How to perform a PIMD calculation
-authors: GG
+description: How to perform a Tdep calculation
+authors: YB, FBottin
 ---
 <!--- This is the source file for this topics. Can be edited. -->
 

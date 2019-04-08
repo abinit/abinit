@@ -2594,7 +2594,7 @@ discussion of density-density approximation with respect with the
 rotationnally invariant formulation, see e.g. [[cite:Antipov2012]].
 The ABINIT/CT Hyb implementation is discussed in [[cite:Gonze2016]].
 The TRIQS/CT Hyb implementation is described in [[cite:Seth2016]].
-Before using it, it has to be installed following instructions available [here](https://triqs.ipht.cnrs.fr/1.x/install.html).
+Before using it, it has to be installed following instructions available [here](https://triqs.github.io/triqs/2.1.x).
 Starting from release 8.6.0, the
 interface is valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. An example of a
 config.ac file to compile ABINIT with TRIQS can be found in
