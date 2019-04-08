@@ -1,4 +1,4 @@
-from __future__ import print_function, division, absolute_import #, unicode_literals
+from __future__ import print_function, division, absolute_import  # , unicode_literals
 
 import sys
 import os
@@ -1997,7 +1997,7 @@ class BaseTest(object):
             self.stdout_fname = os.path.join(workdir, self.id + ".stdout")
             self.stderr_fname = os.path.join(workdir, self.id + ".stderr")
 
-            self.keep_files(self.stdin_fname, self.stdout_fname, self.stderr_fname)
+            self.keep_files([self.stdin_fname, self.stdout_fname, self.stderr_fname])
 
             # Create input file.
             t_stdin = self.make_stdin()
@@ -2548,7 +2548,7 @@ class AbinitTest(BaseTest):
 
         psp_paths = [self.cygwin_path(p) for p in psp_paths]  # Cygwin
 
-        t_stdin.writelines[p + "\n" for p in psp_paths)
+        t_stdin.writelines(p + "\n" for p in psp_paths)
 
         return t_stdin.getvalue()
 
