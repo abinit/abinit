@@ -17,7 +17,7 @@ This tutorial aims at showing how to get the following physical properties, for 
 It should take about 1 hour.
 
 For the theory related to the temperature-dependent calculations, please read
-the following papers: [[cite:Ponce2015]], [[cite:Ponce2014]] and [[cite:Ponce2014a]].
+the following papers: [[cite:Ponce2015c]], [[cite:Ponce2014]] and [[cite:Ponce2014a]].
 
 There are two ways to compute the temperature dependence with Abinit:
 
@@ -70,7 +70,7 @@ There are two ways to compute the temperature dependence with Abinit:
         prefix='/home/XXXX/abinit/build/'
 
     A list of configuration files for clusters is available in the 
-    [abiconfig repository](https://github.com/abinit/abiconfig)
+    [abiconfig repository](https://github.com/abinit/abiconfigg)
 
     If you have a prebuilt abinit executable, use:
         
@@ -116,7 +116,7 @@ with respect to the dataset 1, it only extract a subset of the eight k-point gri
 This second dataset produces the wavefunction file tdepes_1o_DS2_WFQ, that is read by the third dataset ([[getwfq]]3=2),
 as well as the tdepes_1o_DS1_WFK file from the first dataset ([[getwfk]]3=1).
 
-The third dataset corresponds to a DFPT phonon calculation ([[rfphon]]3=1) 
+The third dataset corresponds to a DFPT phonon calculation ([[rfphongg]]3=1) 
 with displacement of all atoms ([[rfatpol]]3= 1 2) in all directions ([[rfdir]]3= 1 1 1).
 This induces the creation of the Derivative DataBase file tdepes_1o_DS3_DDB.
 The electron-phonon matrix elements are produced because of [[ieig2rf]]3=5 ,
