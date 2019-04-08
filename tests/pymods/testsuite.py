@@ -18,11 +18,11 @@ py2 = sys.version_info[0] <= 2
 if py2:
     import cPickle as pickle
     from StringIO import StringIO
-    from ConfigParser import SafeConfigParser, ConfigParser, NoOptionError
+    from ConfigParser import SafeConfigParser, NoOptionError
 else:
     import pickle
     from io import StringIO
-    from configparser import SafeConfigParser, ConfigParser, NoOptionError
+    from configparser import ConfigParser
 
 from .jobrunner import TimeBomb
 from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher,
@@ -3279,9 +3279,7 @@ class AbinitTestSuite(object):
 
         elif nthreads > 1:
             logger.info("Threaded version with nthreads = %s" % nthreads)
-            from threading import Thread
-            # Internal replacement that provides task_done, join_with_timeout (py2.4 compliant)
-            from pymods.myqueue import QueueWithTimeout
+            from threading import Thread, Queue
 
             def worker():
                 while True:
@@ -3289,7 +3287,7 @@ class AbinitTestSuite(object):
                     run_and_check_test(test)
                     q.task_done()
 
-            q = QueueWithTimeout()
+            q = Queue()
             for i in range(nthreads):
                 t = Thread(target=worker)
                 t.setDaemon(True)
