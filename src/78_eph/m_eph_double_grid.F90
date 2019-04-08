@@ -125,6 +125,7 @@ module m_eph_double_grid
 !!***
 
  public :: eph_double_grid_new
+ public :: eph_double_grid_get_index
  ! Initialize the double grid structure
 
 contains  !=====================================================

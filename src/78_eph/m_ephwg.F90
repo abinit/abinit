@@ -135,6 +135,10 @@ type, public :: ephwg_t
   ! (nibz, natom3)
   ! Phonon frequencies in the IBZ
 
+  complex(dp),allocatable :: frohl_ibz(:,:)
+  ! (nibz, natom3)
+  ! Frohlich matrix elements in the IBZ
+
   real(dp),allocatable :: eigkbs_ibz(:, :, :)
   ! (nibz, nbcount, nsppol)
   ! Electron eigenvalues in the IBZ for nbcount states
@@ -231,10 +235,14 @@ type(ephwg_t) function ephwg_new( &
 !Local variables-------------------------------
 !scalars
  integer :: nprocs, my_rank, ik, ierr, out_nkibz
+ integer :: nu, iatom
+ real(dp) :: fqdamp, wqnu, inv_qepsq
+ complex(dp) :: cnum, cdd(3)
 !arrays
  real(dp) :: rlatt(3,3)
  integer :: out_kptrlatt(3,3)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), phfrq(3*cryst%natom)
+ real(dp) :: gkq2_lr(3*cryst%natom), qpt(3), qpt_cart(3)
  real(dp),allocatable :: out_kibz(:,:), out_wtk(:)
 
 !----------------------------------------------------------------------
@@ -268,12 +276,37 @@ type(ephwg_t) function ephwg_new( &
  end do
 
  ! Fourier interpolate phonon frequencies on the same mesh.
+ open(unit=20,file='frohl.dat')
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
+ ABI_CALLOC(new%frohl_ibz, (new%nibz, new%natom3))
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
    call ifc_fourq(ifc, cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
+
+   ! Compute Frohlich matrix elements
+   qpt = new%ibz(:,ik)
+   qpt_cart = two_pi*matmul(cryst%gprimd, qpt)
+   inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
+   fqdamp = (two / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
+
+   ! Compute gkq_{LR}. Note that in our approx it does not dependend on ib_k.
+   gkq2_lr(:) = zero
+   do nu=1,new%natom3
+     wqnu = phfrq(nu); if (wqnu < tol8) cycle
+     cnum = zero
+     do iatom=1,cryst%natom
+       ! This is complex
+       cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
+             exp(-j_dpc * two_pi * dot_product(qpt, cryst%xred(:, iatom)))
+       cnum = cnum + dot_product(qpt_cart, matmul(ifc%zeff(:, :, iatom), cdd))
+     end do
+     gkq2_lr(nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu)
+   end do
+   new%frohl_ibz(ik,:) = gkq2_lr !* fqdamp
+   write(20,*) qpt, gkq2_lr
  end do
+ close(unit=20)
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
 
@@ -1116,6 +1149,7 @@ subroutine ephwg_free(self)
  ABI_SFREE(self%bz)
  ABI_SFREE(self%lgk2ibz)
  ABI_SFREE(self%phfrq_ibz)
+ ABI_SFREE(self%frohl_ibz)
  ABI_SFREE(self%eigkbs_ibz)
 
  ! types
