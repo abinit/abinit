@@ -69,7 +69,7 @@ program multibinit
  use m_dtfil,      only : isfile
  use m_mover_effpot, only : mover_effpot
 #if defined DEV_MS_SCALEUP 
- use scup_global,  only : global_init_model,global_set_print_parameters
+ use scup_global
 #endif 
  !use m_generate_training_set, only : generate_training_set
  use m_compute_anharmonics, only : compute_anharmonics
@@ -307,7 +307,8 @@ elec_eval = .FALSE.
    if(inp%scup_dtset%scup_printorbocc)printorbocc=.TRUE.
    
    !Set Print Parameters within scaleup
-   call global_set_print_parameters(printgeom,printeigv,printeltic, printorbocc) 
+   call global_set_print_parameters(printgeom,printeigv,printeltic,printorbocc,&
+&                                  inp%scup_dtset%scup_printbands) 
 
    !Create kpath if printbands=true and pass it to SCALE UP 
    if(inp%scup_dtset%scup_printbands)then 
@@ -317,6 +318,9 @@ elec_eval = .FALSE.
 &                                inp%scup_dtset%scup_ndivsm,inp%scup_dtset%scup_kpath)
            call scup_kpath_print(inp%scup_dtset%scup_kpath)
 
+           call global_set_print_bands(inp%scup_dtset%scup_printbands,&
+&               inp%scup_dtset%scup_nspeck,inp%scup_dtset%scup_kpath%ndivs,& 
+&               inp%scup_dtset%scup_speck)
    endif 
  endif
 #endif 

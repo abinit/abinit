@@ -65,15 +65,15 @@ module m_scup_dataset
  integer :: scup_nspeck
  integer :: scup_ndivsm
 !Logicals 
- logical*1 :: scup_elec_model
- logical*1 :: scup_initorbocc
- logical*1 :: scup_ismagnetic 
- logical*1 :: scup_istddft    
- logical*1 :: scup_printbands
- logical*1 :: scup_printeigv
- logical*1 :: scup_printeltic 
- logical*1 :: scup_printgeom 
- logical*1 :: scup_printorbocc
+ logical :: scup_elec_model
+ logical :: scup_initorbocc
+ logical :: scup_ismagnetic 
+ logical :: scup_istddft    
+ logical :: scup_printbands
+ logical :: scup_printeigv
+ logical :: scup_printeltic 
+ logical :: scup_printgeom 
+ logical :: scup_printorbocc
 !Real 
  real*8   :: scup_tcharge 
 
