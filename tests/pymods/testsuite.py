@@ -1026,15 +1026,15 @@ class BuildEnvironment(object):
         # Try to figure out the top level directory of the build tree.
         try:
             build_dir = find_top_build_tree(build_dir)
-        except:
-            raise
+        except Exception as e:
+            raise e
 
         self.uname = platform.uname()
         self.hostname = gethostname().split(".")[0]
 
-        try:
+        if hasattr(os, 'getlogin'):
             self.username = os.getlogin()
-        except:
+        else:
             self.username = "No_username"
 
         self.build_dir = os.path.abspath(build_dir)
@@ -1219,7 +1219,7 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
 
     re_ivars = {}
     for varname in ivars:
-        re_ivars[varname] = re.compile(varname + "\d*\s*(\d+)\s*")
+        re_ivars[varname] = re.compile(varname + r"\d*\s*(\d+)\s*")
 
     nfound = 0
     for line in lines:
@@ -1252,11 +1252,6 @@ def make_abitest_from_input(inp_fname, abenv, keywords=None, need_cpp_vars=None,
     Factory function to generate a Test object from the input file inp_fname
     """
     inp_fname = os.path.abspath(inp_fname)
-
-    try:  # Assumes some_path/Input/t30.in
-        inpdir_path, x = os.path.split(inp_fname)
-    except:
-        raise ValueError("%s is not a valid path" % inp_fname)
 
     parser = AbinitTestInfoParser(inp_fname)
 
@@ -1294,17 +1289,8 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
 
     out_tests = []
 
-    while True:
-        try:
-            inp_fname = inp_fnames.pop(0)
-        except IndexError:
-            break
-
-        try:
-            # Assumes some_path/Input/t30.in
-            inpdir_path, x = os.path.split(inp_fname)
-        except:
-            raise ValueError("%s is not a valid path" % inp_fname)
+    while inp_fnames:
+        inp_fname = inp_fnames.pop(0)
 
         # print("inp_fname", inp_fname)
         parser = AbinitTestInfoParser(inp_fname)
@@ -1586,8 +1572,8 @@ class BaseTest(object):
             editor = Editor()
         try:
             editor.edit_file(self.inp_fname)
-        except:
-            raise
+        except Exception as e:
+            raise e
 
     def listoftests(self, width=100, html=True, abslink=True):
         string = self.description.lstrip()
@@ -1628,7 +1614,7 @@ class BaseTest(object):
             dest = os.path.join(self.workdir, os.path.basename(self.inp_fname))
             shutil.copy(src, dest)
             self.keep_files(dest)  # Do not remove it after the test.
-        except:
+        except Exception:
             self.exceptions.append(self.Error("copying %s => %s" % (src, dest)))
 
         for extra in self.extra_inputs:
@@ -2284,9 +2270,9 @@ class BaseTest(object):
         ##################################################
         # Document Name Space that serves as the substitution
         # namespace for instantiating a doc template.
-        try:
+        if hasattr(os, 'getlogin'):
             username = os.getlogin()
-        except:
+        else:
             username = "No_username"
 
         DNS = {
@@ -2903,8 +2889,8 @@ class ChainOfTests(object):
         for test in self:
             try:
                 test.edit_input(editor=editor)
-            except:
-                raise
+            except Exception as e:
+                raise e
 
     @property
     def _authors_snames(self):
@@ -3127,10 +3113,7 @@ class AbinitTestSuite(object):
         Location of the tarball file with the results in HTML format
         Returns None if the tarball has not been created.
         """
-        try:
-            return self._targz_fname
-        except:
-            return None
+        return egtattr(self, '_targz_fname', None)
 
     def create_targz_results(self):
         """Create the tarball file results.tar.gz in the working directory."""
@@ -3183,9 +3166,8 @@ class AbinitTestSuite(object):
                         # print("targz.add: adding:", p," with arcname ", arcname)
                         # print(type(p), type(arcname))
                         targz.add(p, arcname=arcname)
-                    except:
+                    except Exception as exc:
                         # Handle the case in which the output file has not been produced.
-                        exc = sys.exc_info()[1]
                         warnings.warn("exception while adding %s to tarball:\n%s" % (p, exc))
                         self.exceptions.append(exc)
 
@@ -3194,8 +3176,7 @@ class AbinitTestSuite(object):
             # Save the name of the tarball file.
             self._targz_fname = ofname
 
-        except:
-            exc = sys.exc_info()[1]
+        except Exception as exc:
             warnings.warn("exception while creating tarball file: %s" % str(exc))
             self.exceptions.append(exc)
 
@@ -3372,9 +3353,9 @@ class AbinitTestSuite(object):
         with open(os.path.join(self.workdir, "results.txt"), "w") as fh:
             pprint_table(table, out=fh)
 
-        try:
+        if hasattr(os, 'getlogin'):
             username = os.getlogin()
-        except:
+        else:
             username = "No_username"
 
         # Create the HTML index.
