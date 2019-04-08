@@ -18,15 +18,15 @@ py2 = sys.version_info[0] <= 2
 if py2:
     import cPickle as pickle
     from StringIO import StringIO
-    from ConfigParser import SafeConfigParser, RawConfigParser, ConfigParser, NoOptionError
+    from ConfigParser import SafeConfigParser, ConfigParser, NoOptionError
 else:
     import pickle
     from io import StringIO
-    from configparser import SafeConfigParser, RawConfigParser, ConfigParser, NoOptionError
+    from configparser import SafeConfigParser, ConfigParser, NoOptionError
 
 from .jobrunner import TimeBomb
-from .tools import (RestrictedShell,  StringColorizer, unzip, tail_file,
-                    pprint_table, Patcher, Editor)
+from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher,
+                    Editor)
 from .xyaptu import xcopier
 from .devtools import FileLock
 from .memprof import AbimemParser
@@ -34,12 +34,7 @@ from .termcolor import cprint
 
 from .fldiff import Differ as FlDiffer
 
-from collections import namedtuple
-# OrderedDict was added in 2.7. ibm6 still uses python6
-try:
-    from collections import OrderedDict
-except ImportError:
-    from .ordereddict import OrderedDict
+from collections import OrderedDict
 
 import logging
 logger = logging.getLogger(__name__)
