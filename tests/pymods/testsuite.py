@@ -74,7 +74,7 @@ def fix_punctuation_marks(s):
     only t93.out is stored in dictionary and tested by fldiff.
     """
     for mark in (",", ";"):
-        s = (mark + " ").join([tok.rstrip() for tok in s.split(mark)])
+        s = (mark + " ").join(tok.rstrip() for tok in s.split(mark))
     return s + "\n"
 
 
@@ -142,7 +142,7 @@ def lazy__str__(func):
     """Lazy decorator for __str__ methods"""
     def oncall(*args, **kwargs):
         self = args[0]
-        return "\n".join([str(k) + " : " + str(v) for (k, v) in self.__dict__.items()])
+        return "\n".join(str(k) + " : " + str(v) for (k, v) in self.__dict__.items())
     return oncall
 
 # Helper functions for performing IO
@@ -271,7 +271,7 @@ def extract_errinfo_from_files(workdir):
     Return:
         String with the content of the files. Empty string if no debug file is found.
     """
-    registered_exts = set([".flun", ".mocc"])
+    registered_exts = {".flun", ".mocc"}
     errinfo = []
 
     for path in os.listdir(workdir):
@@ -437,7 +437,7 @@ def _str2filestotest(string):
 
 def _str2list(string):    return [s.strip() for s in string.split(",") if s]
 def _str2intlist(string): return [int(item) for item in _str2list(string) ]
-def _str2set(string):     return set([s.strip() for s in string.split(",") if s])
+def _str2set(string):     return {s.strip() for s in string.split(",") if s}
 def _str2cmds(string):    return [s.strip() for s in string.split(";") if s]
 
 def _str2bool(string):
@@ -562,7 +562,7 @@ class AbinitTestInfo(object):
         #  raise TestInfoParserError(err_msg)
 
         # Add the executable name to the list of keywords.
-        self.add_keywords([self.executable])
+        self.add_keywords(self.executable)
 
     @lazy__str__
     def __str__(self): pass
@@ -984,7 +984,7 @@ class CPreProcessor(object):
         if not remove_lhash:
             return stdout
         else:
-            return "\n".join([str(l) for l in stdout.splitlines() if not l.startswith("#")])
+            return "\n".join(str(l) for l in stdout.splitlines() if not l.startswith("#"))
 
 
 class FortranBacktrace(object):
@@ -1761,7 +1761,7 @@ class BaseTest(object):
         all_fldstats = [f.fld_status for f in self.files_to_test]
         if "failed" in all_fldstats: return "failed"
         if "passed" in all_fldstats: return "passed"
-        assert all([s == "succeeded" for s in all_fldstats])
+        assert all(s == "succeeded" for s in all_fldstats)
 
         return "succeeded"
 
@@ -1997,7 +1997,7 @@ class BaseTest(object):
             self.stdout_fname = os.path.join(workdir, self.id + ".stdout")
             self.stderr_fname = os.path.join(workdir, self.id + ".stderr")
 
-            self.keep_files([self.stdin_fname, self.stdout_fname, self.stderr_fname])
+            self.keep_files(self.stdin_fname, self.stdout_fname, self.stderr_fname)
 
             # Create input file.
             t_stdin = self.make_stdin()
@@ -2458,9 +2458,9 @@ class BaseTest(object):
               <py-close/>
               <p>
               <h3>Extra Information</h3>
-              <py-line code = "authors = ', '.join([a for a in self.authors])" />
+              <py-line code = "authors = ', '.join(a for a in self.authors)" />
               <p>Authors = ${authors}</p>
-              <py-line code = "keys = ', '.join([k for k in self.keywords])" />
+              <py-line code = "keys = ', '.join(k for k in self.keywords)" />
               <p>Keywords = ${keys}</p>
               <p>${self.listoftests(abslink=False)}</p>
             """
@@ -2526,7 +2526,7 @@ class AbinitTest(BaseTest):
 
         t_prefix = self.id #+ "t"
 
-        t_stdin.writelines([l + "\n" for l in [i_prefix, o_prefix, t_prefix]])
+        t_stdin.writelines(l + "\n" for l in [i_prefix, o_prefix, t_prefix])
 
         # Path to the pseudopotential files.
         # 1) pp files are searched in pspd_dir first then in workdir.
@@ -2544,7 +2544,7 @@ class AbinitTest(BaseTest):
 
         psp_paths = [self.cygwin_path(p) for p in psp_paths] # Cygwin
 
-        t_stdin.writelines([p + "\n" for p in psp_paths])
+        t_stdin.writelines[p + "\n" for p in psp_paths)
 
         return t_stdin.getvalue()
 
@@ -2684,7 +2684,7 @@ class AimTest(BaseTest):
         psp_paths = [os.path.join(self.abenv.psps_dir, pname) for pname in self.psp_files]
         psp_paths = [self.cygwin_path(p) for p in psp_paths] # Cygwin
 
-        t_stdin.writelines([p + "\n" for p in psp_paths])
+        t_stdin.writelines(p + "\n" for p in psp_paths)
 
         return t_stdin.getvalue()
 
@@ -2780,7 +2780,7 @@ class ChainOfTests(object):
     Error = BaseTestError
 
     def __init__(self, tests):
-        self.tests = tuple([t for t in tests])
+        self.tests = tuple(t for t in tests)
 
         self.inp_dir = tests[0].inp_dir
         self.suite_name = tests[0].suite_name
@@ -2806,7 +2806,7 @@ class ChainOfTests(object):
         return len(self.tests)
 
     def __str__(self):
-        return "\n".join([ str(t) for t in self ])
+        return "\n".join(str(t) for t in self)
 
     def __iter__(self):
         for t in self.tests: yield t
@@ -2830,7 +2830,7 @@ class ChainOfTests(object):
     # See the doc strings of BaseTest
     @property
     def id(self):
-        return "-".join([test.id for test in self])
+        return "-".join(test.id for test in self)
 
     @property
     def full_id(self):
@@ -2838,16 +2838,16 @@ class ChainOfTests(object):
 
     @property
     def max_nprocs(self):
-        return max([test.max_nprocs for test in self])
+        return max(test.max_nprocs for test in self)
 
     @property
     def _executed(self):
-        return all([test._executed for test in self])
+        return all(test._executed for test in self)
 
     @property
     def ref_dir(self):
         ref_dirs = [test.ref_dir for test in self]
-        assert all([dir == ref_dirs[0] for dir in ref_dirs])
+        assert all(dir == ref_dirs[0] for dir in ref_dirs)
         return ref_dirs[0]
 
     def listoftests(self, width=100, html=True, abslink=True):
@@ -2880,15 +2880,15 @@ class ChainOfTests(object):
 
     @property
     def run_etime(self):
-        return sum([test.run_etime for test in self])
+        return sum(test.run_etime for test in self)
 
     @property
     def tot_etime(self):
-        return sum([test.tot_etime for test in self])
+        return sum(test.tot_etime for test in self)
 
     @property
     def isok(self):
-        return all([test.isok for test in self])
+        return all(test.isok for test in self)
 
     @property
     def exceptions(self):
@@ -2902,7 +2902,7 @@ class ChainOfTests(object):
     def status(self):
         _stats = [test._status for test in self]
         if "disabled" in _stats or "skipped" in _stats:
-            if any([s != _stats[0] for s in _stats]):
+            if any(s != _stats[0] for s in _stats):
                 #print(self)
                 #print("WARNING, expecting all(s == _stats[0] but got\n %s" % str(_stats))
                 return "failed"
@@ -2912,7 +2912,7 @@ class ChainOfTests(object):
         if "failed" in all_fldstats: return "failed"
         if "passed" in all_fldstats: return "passed"
 
-        if any([s != "succeeded" for s in all_fldstats]):
+        if any(s != "succeeded" for s in all_fldstats):
             print(self)
             print("WARNING, expecting all(s == 'succeeded' but got\n %s" % str(all_fldstats))
 
@@ -3048,7 +3048,7 @@ class AbinitTestSuite(object):
             raise ValueError("Either inp_files or test_list must be specified!")
 
     def __str__(self):
-        return "\n".join([str(t) for t in self.tests])
+        return "\n".join(str(t) for t in self.tests)
 
     def __add__(self, other):
         test_list = [t for t in self] + [t for t in other]
@@ -3120,13 +3120,13 @@ class AbinitTestSuite(object):
     @property
     def full_length(self):
         one = lambda : 1
-        return sum([getattr(test, "__len__", one)() for test in self])
+        return sum(getattr(test, "__len__", one)() for test in self)
 
     @property
     def run_etime(self):
         """Total elapsed time i.e. the wall-time spent in the sub-processes e.g. abinit)"""
         assert self._executed
-        return sum([test.run_etime for test in self])
+        return sum(test.run_etime for test in self)
 
     @property
     def keywords(self):
@@ -3403,8 +3403,8 @@ class AbinitTestSuite(object):
 
         executed = [t for t in self if t.status != "skipped"]
         if executed:
-            mean_etime = sum([test.run_etime for test in executed]) / len(executed)
-            dev_etime = (sum([(test.run_etime - mean_etime)**2 for test in executed]) / len(executed))**0.5
+            mean_etime = sum(test.run_etime for test in executed) / len(executed)
+            dev_etime = (sum((test.run_etime - mean_etime)**2 for test in executed) / len(executed))**0.5
 
             cprint("Completed in %.2f [s]. Average time for test=%.2f [s], stdev=%.2f [s]" % (
                   self.tot_etime, mean_etime, dev_etime), "yellow")
@@ -3577,7 +3577,7 @@ class AbinitTestSuite(object):
     def make_listoftests(self, width=100, html=True):
         """Create the ListOfTests files."""
         if not html:
-            return "\n\n".join([test.listoftests(width, html) for test in self])
+            return "\n\n".join(test.listoftests(width, html) for test in self)
         else:
             header = """
              <html>
@@ -3585,7 +3585,7 @@ class AbinitTestSuite(object):
              <body bgcolor="#FFFFFF" text="#000000">
              <!-- Automatically generated by %s on %s. ****DO NOT EDIT**** -->""" % (_MY_NAME, time.asctime())
 
-            body = "<hr>".join([test.listoftests(width, html) for test in self])
+            body = "<hr>".join(test.listoftests(width, html) for test in self)
 
             footer = """
               <hr>
@@ -3669,7 +3669,7 @@ class Results(object):
         in_files = []
         for test in (self.tests_with_status(status)):
             if isinstance(test, ChainOfTests):
-                in_files.extend([t.inp_fname for t in test])
+                in_files.extend(t.inp_fname for t in test)
             else:
                 in_files.append(test.inp_fname)
 
