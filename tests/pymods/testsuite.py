@@ -1757,7 +1757,7 @@ class BaseTest(object):
     @property
     def status(self):
         """The status of the test"""
-        if self._status in ["disabled", "skipped", "failed"]: return self._status
+        if self._status in {"disabled", "skipped", "failed"}: return self._status
         all_fldstats = [f.fld_status for f in self.files_to_test]
         if "failed" in all_fldstats: return "failed"
         if "passed" in all_fldstats: return "passed"
@@ -2220,7 +2220,7 @@ class BaseTest(object):
         """Generate and write diff files in HTML format."""
         assert self._executed
         if (self.make_html_diff == 0 or
-            self._status in ["disabled", "skipped"]): return
+            self._status in {"disabled", "skipped"}): return
 
         diffpy = self.abenv.apath_of("tests", "pymods", "diff.py")
 
@@ -2244,7 +2244,7 @@ class BaseTest(object):
             f.hdiff_fname = hdiff_fname
 
             x, ext = os.path.splitext(f.name)
-            safe_hdiff = ext in [".out", ".stdout"] # Create HTML diff file only for these files
+            safe_hdiff = ext in {".out", ".stdout"} # Create HTML diff file only for these files
 
             if ref_exists and out_exists and safe_hdiff:
                 out_opt = "-u"
@@ -2266,11 +2266,11 @@ class BaseTest(object):
     def make_txt_diff_files(self):
         """Generate and write diff files in txt format."""
         assert self._executed
-        if self._status in ["disabled", "skipped"]:
+        if self._status in {"disabled", "skipped"}:
             return
 
         #print(self._status)
-        #if self._status not in ["failed", "passed"]:
+        #if self._status not in {"failed", "passed"}:
         #  return
         diffpy = self.abenv.apath_of("tests", "pymods", "diff.py")
 
@@ -2394,7 +2394,7 @@ class BaseTest(object):
          <body bgcolor="#FFFFFF" text="#000000">
         """
 
-        if self.status in ["skipped", "disabled"]:
+        if self.status in {"skipped", "disabled"}:
             if self.status == "skipped":
                 template = str2html(self.skip_msg)
             else:
@@ -3206,7 +3206,7 @@ class AbinitTestSuite(object):
             for test in self:
 
                 # Don't try to collect files for tests that are disabled or skipped.
-                if test.status in ["disabled", "skipped"]:
+                if test.status in {"disabled", "skipped"}:
                     continue
 
                 files = set(test.files_to_keep)
