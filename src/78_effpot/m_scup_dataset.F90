@@ -64,6 +64,7 @@ module m_scup_dataset
 !Integer 
  integer :: scup_nspeck
  integer :: scup_ndivsm
+ integer :: scup_printniter
 !Logicals 
  logical :: scup_elec_model
  logical :: scup_initorbocc
@@ -135,6 +136,7 @@ scup_dtset%scup_printbands  = .FALSE.
 scup_dtset%scup_printeigv   = .FALSE. 
 scup_dtset%scup_printeltic  = .FALSE.  
 scup_dtset%scup_printgeom   = .FALSE.  
+scup_dtset%scup_printniter  =  0  
 scup_dtset%scup_printorbocc = .FALSE. 
 
 
@@ -256,6 +258,7 @@ subroutine outvars_scup(scup_dtset,nunit)
    write(nunit,'(1x,a16,I3)')     '  scup_printeigv',int_peigv   
    write(nunit,'(1x,a16,I3)')     ' scup_printeltic',int_peltic   
    write(nunit,'(1x,a16,I3)')     '  scup_printgeom',int_pgeom    
+   write(nunit,'(1x,a16,I3)')     ' scup_printniter',scup_dtset%scup_printniter
    write(nunit,'(1x,a16,I3)')     'scup_printorbocc',int_porbocc 
    write(nunit,'(1x,a16,I3)')     '     scup_nspeck',scup_dtset%scup_nspeck
    write(nunit,'(1x,a16,I3)')     '     scup_ndivsm',scup_dtset%scup_ndivsm
@@ -478,6 +481,16 @@ call scup_dtset_init(scup_dtset)
  end if
  if(tmp_int == 1) scup_dtset%scup_printgeom = .TRUE.
  tmp_int = 0 
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printniter',tread,'INT')
+ if(tread==1) scup_dtset%scup_printniter=intarr(1)
+ if(scup_dtset%scup_printniter<0 .or. scup_dtset%scup_printniter>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_printniter is',scup_dtset%scup_printniter,', but the only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct scup_printniter in your input file.'
+   MSG_ERROR(message)
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printorbocc',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
