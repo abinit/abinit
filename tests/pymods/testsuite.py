@@ -54,23 +54,23 @@ _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 
 # Helper functions and tools
 
-def fix_punctuation_marks(s):
-    """
-    Remove whitespaces before `,` and `;` that trigger a bug in ConfigParser
-    when the option spans multiple lines separated by `;`
-
-    For instance:
-
-        #%% files_to_test =
-        #%%   t93.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00 ;
-        #%%   t93.out_ep_SBK, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-
-    is not treated properly by ConfigParser due to ` ;` at the end of the line and
-    only t93.out is stored in dictionary and tested by fldiff.
-    """
-    for mark in (",", ";"):
-        s = (mark + " ").join(tok.rstrip() for tok in s.split(mark))
-    return s + "\n"
+# def fix_punctuation_marks(s):
+#     """
+#     Remove whitespaces before `,` and `;` that trigger a bug in ConfigParser
+#     when the option spans multiple lines separated by `;`
+#
+#     For instance:
+#
+#         #%% files_to_test =
+#         #%%   t93.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00 ;
+#         #%%   t93.out_ep_SBK, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#
+#     is not treated properly by ConfigParser due to ` ;` at the end of the line and
+#     only t93.out is stored in dictionary and tested by fldiff.
+#     """
+#     for mark in (",", ";"):
+#         s = (mark + " ").join(tok.rstrip() for tok in s.split(mark))
+#     return s + "\n"
 
 
 def html_colorize_text(string, code):
@@ -628,66 +628,64 @@ class AbinitTestInfoParser(object):
         # for l in lines:
         #     print(l)
         # print(inp_fname)
-        lines = [l.replace(SENTINEL, "", 1).lstrip() for l in lines if l.startswith(SENTINEL)]
+        lines = [l.replace(SENTINEL, "", 1) for l in lines if l.startswith(SENTINEL)]
 
         try:
             start, stop = lines.index(HEADER), lines.index(FOOTER)
         except ValueError:
             raise self.Error("%s does not contain any valid testcnf section!" % inp_fname)
 
-        lines = lines[start + 1:stop]
+        lines = [line[1:] if line.startswith(' ') else line for i, line in enumerate(lines) if start < i < stop]
         if not lines:
             raise self.Error("%s does not contain any valid testcnf section!" % inp_fname)
 
+        # Not needed in python 2.7 or 3.x
         # Hack to allow options occupying more than one line.
-        string = ""
-        for l in lines:
-            # MGDEBUG
-            # This is needed to avoid problems with multiple lines, see docstring.
-            l = fix_punctuation_marks(l)
-            if line_starts_with_section_or_option(l):
-                string += l
-            else:
-                if l.startswith("#"):
-                    continue
-                string = string.rstrip() + " " + l
-        lines = [l + "\n" for l in string.split("\n")]
+        # string = ""
+        # for l in lines:
+        #     # MGDEBUG
+        #     # This is needed to avoid problems with multiple lines, see docstring.
+        #     l = fix_punctuation_marks(l)
+        #     if line_starts_with_section_or_option(l):
+        #         string += l
+        #     else:
+        #         if l.startswith("#"):
+        #             continue
+        #         string = string.rstrip() + " " + l
+        # lines = [l + "\n" for l in string.split("\n")]
         # MGDEBUG
         # print("in gmatteo's parser ")
         # for l in lines: print(l, end="")
 
-        s = StringIO()
-        s.writelines(lines)
-        s.seek(0)
-
-        class MySafeConfigParser(SafeConfigParser):
-            """Wrap the get method of SafeConfigParser to disable the interpolation of raw_options."""
-            raw_options = {"description"}
-
-            def get(self, section, option, raw=False, vars=None):
-                if option in self.raw_options and section == TESTCNF_KEYWORDS[option][2]:
-                    logger.debug("Disabling interpolation for section = %s, option = %s" % (section, option))
-                    # print("Disabling interpolation for section = %s, option = %s" % (section, option))
-                    if py2:
-                        return SafeConfigParser.get(self, section, option, raw=True, vars=vars)
-                    else:
-                        return SafeConfigParser.get(self, section, option, raw=True, vars=vars, fallback=None)
-                else:
-                    # print("Calling SafeConfigParser for section = %s, option = %s" % (section, option))
-                    if py2:
-                        return SafeConfigParser.get(self, section, option, raw, vars)
-                    else:
-                        return SafeConfigParser.get(self, section, option, raw=raw, vars=vars, fallback=None)
+        # s = StringIO()
+        # s.writelines(lines)
+        # s.seek(0)
 
         # Old version. ok with py2 but not with py3k
         if py2:
+            class MySafeConfigParser(SafeConfigParser):
+                """Wrap the get method of SafeConfigParser to disable the interpolation of raw_options."""
+                raw_options = {"description"}
+
+                def get(self, section, option, raw=False, vars=None):
+                    if option in self.raw_options and section == TESTCNF_KEYWORDS[option][2]:
+                        logger.debug("Disabling interpolation for section = %s, option = %s" % (section, option))
+                        # print("Disabling interpolation for section = %s, option = %s" % (section, option))
+                        return SafeConfigParser.get(self, section, option, raw=True, vars=vars)
+                    else:
+                        return SafeConfigParser.get(self, section, option, raw, vars)
+
+                def read_string(self, string, source='<string>'):
+                    s = StringIO(string)
+                    SafeConfigParser.readfp(self, s, filename=source)
+
             self.parser = MySafeConfigParser(defaults)  # Wrap the parser.
             # self.parser = RawConfigParser(defaults)
         else:
             self.parser = ConfigParser(defaults, interpolation=None)
 
         try:
-            self.parser.readfp(s)
+            self.parser.read_string("".join(lines), source=inp_fname)
         except Exception as exc:
             cprint("Exception while parsing: %s\n%s" % (inp_fname, exc), "red")
             for l in lines:

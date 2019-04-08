@@ -25,7 +25,7 @@ t09o
 #%% authors = S. Mazevet, M. Torrent
 #%% keywords = 
 #%% description = 
-#%% Tests a PAW conductivity calculation.
-#%% It tests the following parts of the code:
-#%%   conducti, conducti_paw, conducti_paw_core, emispec_paw
+#%%   Tests a PAW conductivity calculation.
+#%%   It tests the following parts of the code:
+#%%     conducti, conducti_paw, conducti_paw_core, emispec_paw
 #%%<END TEST_INFO>
