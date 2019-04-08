@@ -222,7 +222,7 @@ real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
-type(scup_dtset_type),optional, intent(in) :: scup_dtset  
+type(scup_dtset_type),optional, intent(inout) :: scup_dtset  
 
 !Local variables-------------------------------
 !scalars
@@ -629,8 +629,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
              end if
 
            !If we a SCALE UP effective electron model give the iteration and set print-options
-           if(scup_dtset%scup_elec_model)then 
+           if(scup_dtset%scup_elec_model)then
               call global_set_parent_iter(itime)
+              ! Set all print options to false. 
+              call global_set_print_parameters(geom=.FALSE.,eigvals=.FALSE.,eltic=.FALSE.,&
+&                      orbocc=.FALSE.,bands=.FALSE.)
+              if(modulo(itime,scup_dtset%scup_printniter) == 0)then 
+                 call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,& 
+&                         scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
+              end if 
            end if 
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,e_d_ht,e_d_sr,e_d_lr,&

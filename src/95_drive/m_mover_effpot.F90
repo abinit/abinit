@@ -105,6 +105,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
  use m_geometry, only : xcart2xred, xred2xcart
  use m_multibinit_dataset, only : multibinit_dtset_type
+ use m_scup_dataset,       only : scup_dtset_type 
  use m_effective_potential,only : effective_potential_type
  use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML
  use m_fit_polynomial_coeff, only : fit_polynomial_coeff_fit,genereList
@@ -150,8 +151,9 @@ implicit none
  logical :: iam_master
  integer, parameter:: master=0
  logical :: verbose,writeHIST,file_opened
- logical :: need_elec_eval 
-!real(dp) :: cpui
+ !type 
+ type(scup_dtset_type) :: scup_inp
+ !real(dp) :: cpui
 !character(len=6) :: codvsn
 
 !TEST_AM
@@ -518,6 +520,11 @@ implicit none
      MSG_BUG(message)
    end if
 
+  !Get SCALE-UP INPUT
+
+  scup_inp = inp%scup_dtset
+
+
 !***************************************************************
 !2  initialization of the structure for the dynamics
 !***************************************************************
@@ -568,7 +575,7 @@ implicit none
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_dtset=inp%scup_dtset)     
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp)     
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then

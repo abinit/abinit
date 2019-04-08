@@ -484,10 +484,10 @@ call scup_dtset_init(scup_dtset)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printniter',tread,'INT')
  if(tread==1) scup_dtset%scup_printniter=intarr(1)
- if(scup_dtset%scup_printniter<0 .or. scup_dtset%scup_printniter>1 )then
+ if(scup_dtset%scup_printniter<0 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
 &   'scup_printniter is',scup_dtset%scup_printniter,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
+&   'are positiv',ch10,&
 &   'Action: correct scup_printniter in your input file.'
    MSG_ERROR(message)
  end if
