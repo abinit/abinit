@@ -1353,60 +1353,6 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
     return out_tests
 
 
-class Status(int):
-    """
-    This object is an integer representing the status of the `Test`.
-
-    Statuses are ordered, negative values are used for positive outcomes,
-    positive values for failures.
-    """
-    # Possible status of the node.
-    _STATUS2STR = OrderedDict([
-        (-3, "Skipped"),         # Test has been skipped because test requirements are not fulfilled
-        (-2, "Succeeded"),       # fldiff returned succeeded
-        (-1, "Passed"),          # fldiff returned passed
-        (0, "None"),             # Initial status of the test.
-        (1, "FileDifferError"),  # File comparison could not be performed but the calculation terminated
-                                 # (e.g. different number of lines in ref and out files)
-        (2, "NumericalError"),   # File comparison detected too large numerical errors.
-        (3, "ExecutionError"),   # Run didn't complete due to some error in the code e.g. segmentation fault
-        (4, "PythonError"),      # A python exception was raised in the driver code.
-    ])
-
-    def __repr__(self):
-        return "<%s: %s, at %s>" % (self.__class__.__name__, str(self), id(self))
-
-    def __str__(self):
-        """String representation."""
-        return self._STATUS2STR[self]
-
-    @classmethod
-    def from_string(cls, s):
-        """Return a `Status` instance from its string representation."""
-        for num, text in cls._STATUS2STR.items():
-            if text == s:
-                return cls(num)
-        else:
-            raise ValueError("Wrong string %s" % s)
-
-    @property
-    def is_problematic(self):
-        """True if test was not successful."""
-        return self > 0
-
-    @property
-    def info(self):
-        """Human-readable string with info on the outcome of the test."""
-        try:
-            return self._info
-        except AttributeError:
-            return "None"
-
-    def set_info(self, info):
-        """info setter."""
-        self._info = info
-
-
 class BaseTestError(Exception):
     """Base Error class raised by Test objects"""
 
@@ -1421,25 +1367,6 @@ class BaseTest(object):
 
     # Possible status of the test.
     _possible_status = ["failed", "passed", "succeeded", "skipped", "disabled"]
-
-    # S_SKIPPED = Status(-3)
-    # S_SUCCEDED = Status(-2)
-    # S_PASSED = Status(-1)
-    # S_NODE = Status(0)
-    # S_DIFF_ERROR = Status(2)
-    # S_NUM_ERROR = Status(2)
-    # S_EXEC_ERROR = Status(3)
-    # S_PY_ERROR = Status(4)
-
-    # ALL_STATUS = [
-    #     S_SKIPPED,
-    #     S_SUCCEDED,
-    #     S_PASSED,
-    #     S_NODE,
-    #     S_NUM_ERROR,
-    #     S_EXEC_ERROR,
-    #     S_PY_ERROR,
-    # ]
 
     def __init__(self, test_info, abenv):
         logger.info("Initializing BaseTest from inp_fname: ", test_info.inp_fname)
