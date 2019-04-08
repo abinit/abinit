@@ -189,7 +189,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
      if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
        ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
        if (usexcnhat==0.and.nhat1dim==1) then
-         rhor1_(:,:)=rhor1_(:,:)-nhat1(:,:)
+         rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
        else
          rhor1_(:,:)=rhor1(:,:)
        end if
