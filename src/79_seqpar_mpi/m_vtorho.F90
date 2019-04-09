@@ -1261,7 +1261,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
 
 !        ==  allocate paw_dmft%psichi and paw_dmft%eigen_lda
-         call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+         call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,&
+&         dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !        ==  gather crystal structure date into data "cryst_struc"
@@ -1277,7 +1278,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call init_oper(paw_dmft,lda_occup)
          call flush_unit(std_out)
          call timab(620,1,tsec)
-         call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,&
+         call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,iscf,&
 &         lda_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
 &         dtset%nkpt,my_nspinor,dtset%nsppol,occ,&
 &         paw_dmft,paw_ij,pawang,pawtab,psps,usecprj_local,dtfil%unpaw)
