@@ -43,7 +43,11 @@ module m_fit_polynomial_coeff
  use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy,write_md_hist,var2hist
  use m_random_zbq
  use m_fit_data
- use m_geometry, only: metric 
+ use m_geometry, only: metric
+ use m_scup_dataset 
+#if defined DEV_MS_SCALEUP 
+ use scup_global, only : global_set_parent_iter,global_set_print_parameters 
+#endif 
 
  implicit none
 
@@ -2264,7 +2268,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! SOURCE
 
 subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
-&                                          compute_anharmonic,print_file,filename,elec_eval)
+&                                          compute_anharmonic,print_file,filename,scup_dtset)
 
  implicit none
 
@@ -2272,16 +2276,17 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 !scalars
  integer, intent(in) :: natom,ntime
  real(dp),intent(out):: mse,msef,mses
- logical,optional,intent(in) :: compute_anharmonic,print_file,elec_eval
+ logical,optional,intent(in) :: compute_anharmonic,print_file
 !arrays
  real(dp) :: sqomega(ntime)
  type(effective_potential_type),intent(in) :: eff_pot
  type(abihist),intent(in) :: hist
 !Strings/Characters
- character(len=fnlen),optional :: filename
+ character(len=fnlen),optional,intent(in) :: filename
+ type(scup_dtset_type),optional,intent(inout) :: scup_dtset
 !Local variables-------------------------------
 !scalar
-integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
+integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst,itime
 ! integer :: ifirst
  real(dp):: energy,energy_harm_tot,energy_ph_htot,energy_harm_short,energy_harm_ewald
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE., anh_opened
@@ -2292,7 +2297,6 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
  character(len=500) :: msg
  type(abihist) :: hist_out
  character(len=200) :: filename_hist
- logical :: need_elec_eval
 
 ! *************************************************************************
 
@@ -2310,9 +2314,6 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
  if(present(compute_anharmonic))then
    need_anharmonic = compute_anharmonic
  end if
-
- need_elec_eval = .FALSE. 
- if(present(elec_eval)) need_elec_eval = elec_eval
 
  name_file=''
  if(present(filename))name_file = filename
@@ -2354,16 +2355,30 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
    rprimd(:,:) = hist%rprimd(:,:,ii)
    if(anh_opened .eqv. .TRUE.)then
      write(unit_anh,'(I7)',advance='no') ii !If wanted Write cycle to anharmonic_energy_contribution file
+   end if
+#if defined DEV_MS_SCALEUP 
+   !Pass print options to scale-up
+   itime = ii
+   if(scup_dtset%scup_elec_model)then
+      call global_set_parent_iter(itime)
+      ! Set all print options to false. 
+      call global_set_print_parameters(geom=.FALSE.,eigvals=.FALSE.,eltic=.FALSE.,&
+&              orbocc=.FALSE.,bands=.FALSE.)
+      if(modulo(ii,scup_dtset%scup_printniter) == 0)then 
+         call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,& 
+&                 scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
+      end if 
    end if 
+#endif
    call effective_potential_evaluate(eff_pot,energy_harm_tot,energy_ph_htot,energy_harm_short,energy_harm_ewald,&
 &                                    fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.False.,verbose=.false.,&
-&                                    elec_eval=need_elec_eval)
+&                                    elec_eval=scup_dtset%scup_elec_model)
 
    call effective_potential_evaluate(eff_pot,energy,energy_ph_htot,energy_harm_short,energy_harm_ewald,& 
 &                                    fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.,&
-&                                    filename=file_anh,elec_eval=need_elec_eval)
+&                                    filename=file_anh,elec_eval=scup_dtset%scup_elec_model)
 
    if(need_print)then
      WRITE(unit_energy ,'(I10,7(F23.14))') ii,hist%etot(ii),energy_ph_htot,energy_harm_short,&
@@ -2433,7 +2448,7 @@ end subroutine fit_polynomial_coeff_computeMSD
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharmonic,elec_eval)
+subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharmonic,scup_dtset)
 
        
   implicit none
@@ -2443,10 +2458,10 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   integer,intent(in) :: master,comm
 !logicals
   logical,optional,intent(in) :: print_anharmonic
-  logical,optional,intent(in) :: elec_eval
 !array
   type(effective_potential_type),intent(inout) :: eff_pot
   type(abihist),intent(in) :: hist
+  type(scup_dtset_type),optional,intent(inout) :: scup_dtset
 !Local variables-------------------------------
 !reals 
   real(dp) :: factor,mse,msef,mses
@@ -2458,7 +2473,6 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   integer :: natom,ntime,ncoeff,my_rank
 !logicals 
   logical :: iam_master, need_print_anharmonic,file_opened
-  logical :: need_elec_eval
 !strings/characters
  character(len=fnlen) :: filename 
  character(len=1000) :: message
@@ -2474,8 +2488,6 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   need_print_anharmonic = .FALSE. 
   if(present(print_anharmonic)) need_print_anharmonic = print_anharmonic
 
-  need_elec_eval = .FALSE. 
-  if(present(elec_eval)) need_elec_eval = elec_eval
 
   !Setting/Allocating other Variables 
   natom = size(hist%xred,2)   
@@ -2501,7 +2513,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,&
 &                                      sqomega,&
-&                 compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename,elec_eval=need_elec_eval)
+&                 compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename,scup_dtset=scup_dtset)
 
 
 !  Print the standard deviation after the fit
