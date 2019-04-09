@@ -868,15 +868,15 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
              wan_ib_sum=ib_sum-wanbz%bandi_wan+1
              do pwx=1,sigp%npwx
                do ispinor1=1,wanbz%nspinor
-                 do ispinor2=1,wanbz%nspinor
-                   do iatom1=1,wanbz%natom_wan
-                     do iatom2=1,wanbz%natom_wan
-                       do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
-                         do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
-                           do il1=1,wanbz%nbl_atom_wan(iatom1)
-                             do il2=1,wanbz%nbl_atom_wan(iatom2)
-                               do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
-                                 do im2=1,2*wanbz%latom_wan(iatom1)%lcalc(il2)+1
+               do ispinor2=1,wanbz%nspinor
+                 do iatom1=1,wanbz%natom_wan
+                 do iatom2=1,wanbz%natom_wan
+                   do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+                   do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+                     do il1=1,wanbz%nbl_atom_wan(iatom1)
+                     do il2=1,wanbz%nbl_atom_wan(iatom2)
+                       do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+                         do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
       rhot1(pwx,iq_ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=&
       &rhot1(pwx,iq_ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)+&
       &rhotwg_ki(pwx,jb)*wanbz%psichi(jk_bz,wan_jb,iatom1)%atom(il1)%matl(im1,spin,ispinor1)*&
