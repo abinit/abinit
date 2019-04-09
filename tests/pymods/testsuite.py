@@ -1351,6 +1351,8 @@ class BaseTest(object):
 
         self._executed = False
         self._status = None
+        self._isok = None
+        self.stdout_fname = None
         if os.path.basename(self.inp_fname).startswith("-"):
             self._status = "disabled"
 
@@ -1433,7 +1435,8 @@ class BaseTest(object):
     @property
     def full_id(self):
         """Full identifier of the test."""
-        return "[%s][%s][np=%s]" % (self.suite_name, self.id, self.nprocs)
+        return "[%s][%s][np=%s]" % (self.suite_name, self.id,
+                                    self.nprocs if self.nprocs != 0 else 1)
 
     @property
     def bin_path(self):
@@ -1587,7 +1590,7 @@ class BaseTest(object):
     def get_extra_inputs(self):
         """Copy extra inputs from inp_dir to workdir."""
         # First copy the main input file (useful for debugging the test)
-        # Avoid raising exceptions as python threads do not handle them correctly.
+        # Avoid raising exceptions as python processes do not handle them correctly.
         try:
             src = self.inp_fname
             dest = os.path.join(self.workdir, os.path.basename(self.inp_fname))
@@ -1627,21 +1630,27 @@ class BaseTest(object):
     @property
     def status(self):
         """The status of the test"""
-        if self._status in {"disabled", "skipped", "failed"}:
-            return self._status
-        all_fldstats = {f.fld_status for f in self.files_to_test}
-        if "failed" in all_fldstats:
-            return "failed"
-        if "passed" in all_fldstats:
-            return "passed"
-        assert len(all_fldstats) == 1 and "succeeded" in all_fldstats
+        if self._status is None:
+            all_fldstats = {f.fld_status for f in self.files_to_test}
 
-        return "succeeded"
+            if "failed" in all_fldstats:
+                self._status = "failed"
+            elif "passed" in all_fldstats:
+                self._status = "passed"
+            else:
+                assert all_fldstats == {"succeeded"}, (
+                    "Unexpected test status: {}".format(all_fldstats)
+                )
+                self._status = "succeeded"
+
+        return self._status
 
     @property
     def isok(self):
         """Return true if test is OK (test passed and not python exceptions."""
-        return self.fld_isok and not self.exceptions
+        if self._isok is None:
+            self._isok = self.fld_isok and not self.exceptions
+        return self._isok
 
     @property
     def files_to_keep(self):
@@ -1751,7 +1760,8 @@ class BaseTest(object):
                     return True
         return False
 
-    def run(self, build_env, runner, workdir, nprocs=1, runmode="static", **kwargs):
+    def run(self, build_env, runner, workdir, print_lock, nprocs=1,
+            runmode="static", **kwargs):
         """
         Run the test with nprocs MPI nodes in the build environment build_env using the `JobRunner` runner.
         Results are produced in directory workdir. kwargs is used to pass additional options
@@ -1826,7 +1836,8 @@ class BaseTest(object):
         if self._status == "disabled":
             msg = self.full_id + ": Disabled"
             can_run = False
-            cprint(msg, status2txtcolor[self._status])
+            with print_lock:
+                cprint(msg, status2txtcolor[self._status])
 
         # Here we get the number of MPI nodes for test.
         self.nprocs, self.skip_msg = self.compute_nprocs(self.build_env, nprocs, runmode=runmode)
@@ -1834,22 +1845,25 @@ class BaseTest(object):
         if self.skip_msg:
             self._status = "skipped"
             msg = self.full_id + ": Skipped."
-            cprint(msg, status2txtcolor[self._status])
-            for l in self.skip_msg.splitlines():
-                cprint("\t" + l, status2txtcolor[self._status])
-            print()
+            with print_lock:
+                cprint(msg, status2txtcolor[self._status])
+                for l in self.skip_msg.splitlines():
+                    cprint("\t" + l, status2txtcolor[self._status])
+                print()
             can_run = False
 
         if self.skip_host():
             self._status = "skipped"
             msg = self.full_id + ": Skipped: this hostname has been excluded."
-            cprint(msg, status2txtcolor[self._status])
+            with print_lock:
+                cprint(msg, status2txtcolor[self._status])
             can_run = False
 
         if self.skip_buildbot_builder():
             self._status = "skipped"
             msg = self.full_id + ": Skipped: this buildbot builder has been excluded."
-            cprint(msg, status2txtcolor[self._status])
+            with print_lock:
+                cprint(msg, status2txtcolor[self._status])
             can_run = False
 
         self.run_etime = 0.0
@@ -1895,7 +1909,8 @@ class BaseTest(object):
                 self.exceptions.extend(runner.exceptions)
                 if not self.expected_failure:
                     for exc in runner.exceptions:
-                        print(exc)
+                        with print_lock:
+                            print(exc)
 
             # Execute post_commands in workdir.
             for cmd_str in self.post_commands:
@@ -1923,13 +1938,15 @@ class BaseTest(object):
                 self.fld_isok = self.fld_isok and isok
 
                 msg = ": ".join([self.full_id, msg])
-                cprint(msg, status2txtcolor[status])
+                with print_lock:
+                    cprint(msg, status2txtcolor[status])
 
             # Check if the test is expected to fail.
             if runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
                 msg = (self.full_id + "Test was not expected to fail but subprocesses returned %s" % runner.retcode)
-                cprint(msg, status2txtcolor["failed"])
+                with print_lock:
+                    cprint(msg, status2txtcolor["failed"])
 
             # If pedantic, stderr must be empty unless the test is expected to fail!
             if self.pedantic and not self.expected_failure:
@@ -1952,11 +1969,10 @@ class BaseTest(object):
                         # TODO: Not very clean, I should introduce a new status and a setter method.
                         self._status = "failed"
                         msg = " ".join([self.full_id, "VALGRIND ERROR:", parser.error_report])
-                        cprint(msg, status2txtcolor["failed"])
+                        with print_lock:
+                            cprint(msg, status2txtcolor["failed"])
 
                 except Exception as exc:
-                    # Py threads do not like exceptions.
-                    # Store the exception and continue.
                     self.exceptions.append(exc)
 
             if self.status == "failed":
@@ -1965,22 +1981,26 @@ class BaseTest(object):
                 try:
                     errout = self.stderr_read()
                     if errout:
-                        cprint(errout, status2txtcolor["failed"])
+                        with print_lock:
+                            cprint(errout, status2txtcolor["failed"])
 
                     # Extract YAML error message from ABORTFILE or stdout.
                     abort_file = os.path.join(self.workdir, "__ABI_MPIABORTFILE__")
                     if os.path.exists(abort_file):
                         f = open(abort_file, "r")
-                        print(12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
-                        cprint(f.read(), status2txtcolor["failed"])
-                        f.close()
+                        with print_lock:
+                            print(12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
+                            cprint(f.read(), status2txtcolor["failed"])
+                            f.close()
                     else:
                         yamlerr = read_yaml_errmsg(self.stdout_fname)
                         if yamlerr:
-                            print("YAML Error found in the stdout of", self)
-                            cprint(yamlerr, status2txtcolor["failed"])
+                            with print_lock:
+                                print("YAML Error found in the stdout of", self)
+                                cprint(yamlerr, status2txtcolor["failed"])
                         else:
-                            print("No YAML Error found in", self)
+                            with print_lock:
+                                print("No YAML Error found in", self)
 
                 except Exception as exc:
                     self.exceptions.append(exc)
@@ -1988,7 +2008,8 @@ class BaseTest(object):
             if kwargs.get("abimem_check", False):
                 paths = [os.path.join(self.workdir, f) for f in os.listdir(self.workdir)
                          if f.startswith("abimem") and f.endswith(".mocc")]
-                print("Found %s abimem files" % len(paths))
+                with print_lock:
+                    print("Found %s abimem files" % len(paths))
                 # abimem_retcode = 0
                 for path in paths:
                     parser = AbimemParser(path)
@@ -2022,9 +2043,11 @@ class BaseTest(object):
 
                             if elist:
                                 all_errors.append(elist)
-                                cprint("%s [FAILED]" % p, "red")
+                                with print_lock:
+                                    cprint("%s [FAILED]" % p, "red")
                             else:
-                                cprint("%s [OK]" % p, "green")
+                                with print_lock:
+                                    cprint("%s [OK]" % p, "green")
 
                     nc_retcode = len(all_errors)
 
@@ -2040,12 +2063,43 @@ class BaseTest(object):
                     self._status = "failed"
                     # Store the exception and continue.
                     self.exceptions.append(Exception(errmsg))
-                    print(errmsg)
+                    with print_lock:
+                        print(errmsg)
                 else:
-                    cprint("netcdf validation [OK]", "green")
+                    with print_lock:
+                        cprint("netcdf validation [OK]", "green")
 
         self._executed = True
         self.tot_etime = time.time() - start_time
+
+    def results_load(self, d):
+        """
+        Load the run results from a run in a different process.
+        """
+        self._status = d['status']
+        self.stdout_fname = d['stdout']
+        self._files_to_keep = d['files_to_keep']
+        self.tot_etime = d['tot_etime']
+        self.run_etime = d['run_etime']
+        self._executed = d['executed']
+        self._isok = d['isok']
+        self.workdir = d['workdir']
+
+    def results_dump(self, skipped_info=False):
+        """
+        Dump the run results to pass it to a different process
+        """
+        return {
+            'full_id': self.full_id,
+            'status': self.status,
+            'stdout': self.stdout_fname,
+            'files_to_keep': self.files_to_keep,
+            'tot_etime': self.tot_etime,
+            'run_etime': self.run_etime,
+            'executed': self._executed,
+            'isok': self.isok,
+            'workdir': self.workdir,
+        }
 
     @property
     def executed(self):
@@ -2694,6 +2748,11 @@ class ChainOfTests(object):
         for vs in all_cpp_vars:
             self.need_cpp_vars = self.need_cpp_vars.union(vs)
 
+        self._priv_executed = None
+        self._status = None
+        self._tot_etime = None
+        self._run_etime = None
+        self._isok = None
         self._files_to_keep = []
 
     def __len__(self):
@@ -2737,7 +2796,9 @@ class ChainOfTests(object):
 
     @property
     def _executed(self):
-        return all(test._executed for test in self)
+        if self._priv_executed is None:
+            self._priv_executed = all(test._executed for test in self)
+        return self._priv_executed
 
     @property
     def ref_dir(self):
@@ -2778,15 +2839,21 @@ class ChainOfTests(object):
 
     @property
     def run_etime(self):
-        return sum(test.run_etime for test in self)
+        if self._run_etime is None:
+            self._run_etime = sum(test.run_etime for test in self)
+        return self._run_etime
 
     @property
     def tot_etime(self):
-        return sum(test.tot_etime for test in self)
+        if self._tot_etime is None:
+            self._tot_etime = sum(test.tot_etime for test in self)
+        return self._tot_etime
 
     @property
     def isok(self):
-        return all(test.isok for test in self)
+        if self._isok is None:
+            self._isok = all(test.isok for test in self)
+        return self._isok
 
     @property
     def exceptions(self):
@@ -2798,29 +2865,30 @@ class ChainOfTests(object):
 
     @property
     def status(self):
-        _stats = [test._status for test in self]
-        if "disabled" in _stats or "skipped" in _stats:
-            if any(s != _stats[0] for s in _stats):
-                # print(self)
-                # print("WARNING, expecting all(s == _stats[0] but got\n %s" % str(_stats))
-                return "failed"
-            return _stats[0]
+        if self._status is None:
+            _stats = [test._status for test in self]
+            if "disabled" in _stats or "skipped" in _stats:
+                if any(s != _stats[0] for s in _stats):
+                    # print(self)
+                    # print("WARNING, expecting all(s == _stats[0] but got\n %s" % str(_stats))
+                    return "failed"
+                return _stats[0]
 
-        all_fldstats = {f.fld_status for f in self.files_to_test}
+            all_fldstats = {f.fld_status for f in self.files_to_test}
 
-        if "failed" in all_fldstats:
-            return "failed"
+            if "failed" in all_fldstats:
+                self._status = "failed"
+            elif "passed" in all_fldstats:
+                self._status = "passed"
+            elif all_fldstats != {"succeeded"}:
+                print(self)
+                print("WARNING, expecting {'succeeded'} but got\n%s"
+                      % str(all_fldstats))
+                self._status = "failed"
+            else:
+                self._status = "succeeded"
 
-        if "passed" in all_fldstats:
-            return "passed"
-
-        if all_fldstats != {"succeeded"}:
-            print(self)
-            print("WARNING, expecting all(s == 'succeeded' but got\n %s" % str(all_fldstats))
-
-            return "failed"
-
-        return "succeeded"
+        return self._status
 
     def keep_files(self, files):
         if is_string(files):
@@ -2908,6 +2976,33 @@ class ChainOfTests(object):
         for test in self:
             test.run(build_env, runner, workdir=self.workdir, nprocs=nprocs, **kwargs)
 
+    def results_load(self, d):
+        """
+        Load the run results from a run in a different process.
+        """
+        self._status = d['status']
+        self._files_to_keep = d['files_to_keep']
+        self._tot_etime = d['tot_etime']
+        self._run_etime = d['run_etime']
+        self._priv_executed = d['executed']
+        self._isok = d['isok']
+        self.workdir = d['workdir']
+
+    def results_dump(self):
+        """
+        Dump the run results to pass it to a different process
+        """
+        return {
+            'full_id': self.full_id,
+            'status': self.status,
+            'files_to_keep': self.files_to_keep,
+            'tot_etime': self.tot_etime,
+            'run_etime': self.run_etime,
+            'executed': self._executed,
+            'isok': self.isok,
+            'workdir': self.workdir
+        }
+
     def clean_workdir(self, other_test_files=None):
         for test in self:
             test.clean_workdir(other_test_files=self.files_to_keep)
@@ -2920,38 +3015,48 @@ class ChainOfTests(object):
         return [test._get_one_backtrace() for test in self]
 
 
+class NotALock(object):
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *args):
+        pass
+
+
 class AbinitTestSuite(object):
     """
     List of BaseTest instances. Provide methods to:
 
     1) select subset of tests according to keywords, authors, numbers
-    2) run tests in parallel with python threads
+    2) run tests in parallel with python processes
     3) analyze the final results
     """
     def __init__(self, abenv, inp_files=None, test_list=None, keywords=None, need_cpp_vars=None):
 
-        # Check arguments.
-        args = [inp_files, test_list]
-        no_of_notnone = [arg is not None for arg in args].count(True)
-        if no_of_notnone != 1:
-            raise ValueError("Wrong args: " + str(args))
+        # One and only one should be provided
+        if (inp_files is None) == (test_list is None):
+            raise ValueError(
+                "One and only one of inp_file and test_list is expected but"
+                " found: {} and {}".format(inp_files, test_list)
+            )
 
         self._executed = False
         self.abenv = abenv
         self.exceptions = []
+        self._processes = []
 
         if inp_files is not None:
             self.tests = make_abitests_from_inputs(
                 inp_files, abenv,
-                keywords=keywords, need_cpp_vars=need_cpp_vars)
+                keywords=keywords, need_cpp_vars=need_cpp_vars
+            )
 
         elif test_list is not None:
-            assert keywords is None
-            assert need_cpp_vars is None
+            assert keywords is None, ("keywords argument is not expected with"
+                                      " test_list")
+            assert need_cpp_vars is None, ("need_cpp_vars argument is not"
+                                           " expected with test_list.")
             self.tests = tuple(test_list)
-
-        else:
-            raise ValueError("Either inp_files or test_list must be specified!")
 
     def __str__(self):
         return "\n".join(str(t) for t in self.tests)
@@ -2981,7 +3086,8 @@ class AbinitTestSuite(object):
         stop = slice.stop
         if stop is None:
             stop = 10000  # Not very elegant, but cannot use len(self) since indices are not contiguous
-        assert slice.step is None     # Slices with steps (e.g. [1:4:2]) are not supported.
+        assert slice.step is None, ("Slices with steps (e.g. [1:4:2]) are not"
+                                    " supported.")
 
         # Rules for the test id:
         # Simple case: t01, tgw1_1
@@ -3164,7 +3270,7 @@ class AbinitTestSuite(object):
         if len(all_full_ids) != len(set(all_full_ids)):
             raise ValueError("Cannot have more than two tests with the same full_id")
 
-    def run_tests(self, build_env, workdir, runner, nprocs=1, nthreads=1, runmode="static", **kwargs):
+    def run_tests(self, build_env, workdir, runner, nprocs=1, py_nprocs=1, runmode="static", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
@@ -3177,8 +3283,8 @@ class AbinitTestSuite(object):
                 `JobRunner` instance
             nprocs:
                 number of MPI processes to use for a single test.
-            nthreads:
-                number of OpenMP threads for tests
+            py_nprocs:
+                number of py_nprocs for tests
         """
         self.sanity_check()
 
@@ -3208,62 +3314,113 @@ class AbinitTestSuite(object):
         rmrf(self.workdir, exclude_paths=self.lock.lockfile)
 
         self.nprocs = nprocs
-        self.nthreads = nthreads
+        self.py_nprocs = py_nprocs
 
-        def run_and_check_test(test):
+        def run_and_check_test(test, print_lock=NotALock()):
             """Helper function to execute the test. Must be thread-safe."""
 
             testdir = os.path.abspath(os.path.join(self.workdir, test.suite_name + "_" + test.id))
 
             # Run the test
-            test.run(build_env, runner, testdir, nprocs=nprocs, runmode=runmode, **kwargs)
+            test.run(build_env, runner, testdir, print_lock=print_lock, nprocs=nprocs, runmode=runmode, **kwargs)
 
             # Write HTML summary
-            test.write_html_report()
-
-            # Dump the object with pickle.
-            # test.cpkl_dump()
+            with print_lock:
+                test.write_html_report()
 
             # Remove useless files in workdir.
             test.clean_workdir()
+
+            d = test.results_dump()
+            d['type'] = 'result'
+            return d
 
         ##############################
         # And now let's run the tests
         ##############################
         start_time = time.time()
 
-        if nthreads == 1:
+        if py_nprocs == 1:
             logger.info("Sequential version")
             for test in self:
+                # discard the return value because tests are directly modified
                 run_and_check_test(test)
 
-        elif nthreads > 1:
-            logger.info("Threaded version with nthreads = %s" % nthreads)
-            from threading import Thread, Queue
+        elif py_nprocs > 1:
+            logger.info("Threaded version with py_nprocs = %s" % py_nprocs)
+            from multiprocessing import Process, Queue, Lock
 
-            def worker(q):
-                while not q.empty():
-                    test = q.get()
-                    run_and_check_test(test)
-                    q.task_done()
+            def proc_done(error=None):
+                return {
+                    'type': 'proc_done',
+                    'error': error
+                }
 
-            q = Queue()
+            def worker(qin, qout, print_lock):
+                try:
+                    while not qin.empty():
+                        test = qin.get()
+                        qout.put(run_and_check_test(test,
+                                                    print_lock=print_lock))
+                    qout.put(proc_done())
+                except Exception as e:
+                    qout.put(proc_done(error=e))
+
+            qin = Queue()
+            qout = Queue()
+            print_lock = Lock()
 
             for test in self:
-                q.put(test)
+                qin.put(test)
 
-            for i in range(nthreads):
-                t = Thread(target=worker, args=(q,))
-                t.setDaemon(True)
-                t.start()
+            for i in range(py_nprocs):
+                p = Process(target=worker, args=(qin, qout, print_lock))
+                self._processes.append(p)
+                p.start()
 
             # Block until all tasks are done. Raise QueueTimeoutError after timeout seconds.
             timeout_1test = float(runner.timebomb.timeout)
             if timeout_1test <= 0.1:
                 timeout_1test = 240.
 
-            queue_timeout = 1.3 * timeout_1test * self.full_length / float(nthreads)
-            q.join_with_timeout(queue_timeout)
+            results = {}
+
+            proc_running = py_nprocs
+            while proc_running > 0:
+                msg = qout.get()
+                if msg['type'] == 'proc_done':
+                    proc_running -= 1
+                    if msg['error'] is not None:
+                        e = msg['error']
+                        print('Error append in a worker:\n',
+                              e.__class__.__name__, str(e))
+                    print(proc_running, "worker(s) remaining.")
+                elif msg['type'] == 'result':
+                    results[msg['full_id']] = msg
+
+            qin.close()
+            # remove this to let python carbage collect processes and avoid
+            # Pickle to complain (it does not accept processes for security
+            # reasons)
+            del self._processes
+
+            # update local tests instances wit the results of their running in
+            # a remote process
+            for test in self.tests:
+                if test.full_id in results:
+                    # test.status = d['status']
+                    # test.stdout_fname = d['stdout']
+                    # test.files_to_keep = d['files_to_keep']
+
+                    test.results_load(results[test.full_id])
+                else:
+                    print(set(results.keys()))
+                    raise RuntimeError((
+                        "I did not get the results of the test {}. It means"
+                        " that something fishy happen in the worker."
+                    ).format(test.full_id))
+
+            qout.close()
 
         # Run completed.
         self._executed = True
@@ -3288,7 +3445,6 @@ class AbinitTestSuite(object):
                 d["tot_etime"] = 0.0
                 stats_suite[test.suite_name] = d
 
-        for test in self:
             stats_suite[test.suite_name][test.status] += 1
             stats_suite[test.suite_name]["run_etime"] += test.run_etime
             stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
@@ -3381,7 +3537,7 @@ class AbinitTestSuite(object):
             <p>
             tot_etime = ${sec2str(self.tot_etime)} <br>
             run_etime = ${sec2str(self.run_etime)} <br>
-            no_pythreads = ${self.nthreads} <br>
+            no_pyprocs = ${self.py_nprocs} <br>
             no_MPI = ${self.nprocs} <br>
             ${str2html(str(runner))}
            <hr>
@@ -3429,6 +3585,14 @@ class AbinitTestSuite(object):
         self.lock.release()
 
         return Results(self)
+
+    def terminate(self):
+        '''
+        Kill all workers
+        '''
+        for p in self._processes:
+            p.terminate()
+        del self._processes
 
     @staticmethod
     def _pyhtml_table_section(status):
