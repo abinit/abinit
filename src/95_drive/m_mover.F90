@@ -628,6 +628,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
                xred(:,:) = hist%xred(:,:,hist%mxhist) ! Fill xred with new ordering
              end if
 
+#if defined DEV_MS_SCALEUP 
            !If we a SCALE UP effective electron model give the iteration and set print-options
            if(scup_dtset%scup_elec_model)then
               call global_set_parent_iter(itime)
@@ -638,7 +639,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
                  call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,& 
 &                         scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
               end if 
-           end if 
+           end if
+#endif  
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,e_d_ht,e_d_sr,e_d_lr,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
