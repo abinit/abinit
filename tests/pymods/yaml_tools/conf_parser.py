@@ -64,8 +64,8 @@ def tol(tolv, ref, tested):
     '''
     if abs(ref) + abs(tested) == 0.0:
         return True
-    return (abs(ref - tested) / (abs(ref) + abs(tested)) < tolv and
-            abs(ref - tested) < tolv)
+    return (abs(ref - tested) / (abs(ref) + abs(tested)) < tolv
+            and abs(ref - tested) < tolv)
 
 
 @conf_parser.constraint(exclude={'tol', 'tol_abs', 'tol_rel', 'ignore'})

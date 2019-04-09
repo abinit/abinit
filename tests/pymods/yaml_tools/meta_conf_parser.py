@@ -311,9 +311,9 @@ class ConfParser(object):
     def __init__(self):
         self.parameters = {
             'allow_undef': {
-                 'type': bool,
-                 'inherited': True,
-                 'default': True
+                'type': bool,
+                'inherited': True,
+                'default': True
             }
         }
         self.constraints = {}

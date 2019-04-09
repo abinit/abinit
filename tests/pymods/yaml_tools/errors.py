@@ -84,7 +84,7 @@ class NoIteratorDefinedError(InputFileError):
     def __init__(self, doc):
         msg = ('No iterator have been found before the first document {}.'
                .format(doc.obj))
-        super(NoIteratorDefinedError, self).__init__(doc.start+1, msg)
+        super(NoIteratorDefinedError, self).__init__(doc.start + 1, msg)
 
 
 class NotAvailableTagError(InputFileError):

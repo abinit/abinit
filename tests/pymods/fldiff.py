@@ -468,7 +468,7 @@ class Differ(object):
             doc_differences = [YFailure(
                 self.yaml_conf,
                 'Reference has corrupted YAML documents at line(s) {}.'
-                .format(', '.join(str(d.start+1)
+                .format(', '.join(str(d.start + 1)
                                   for d in doc1_corrupted_documents))
             )]
 
@@ -476,7 +476,7 @@ class Differ(object):
             doc_differences = [YFailure(
                 self.yaml_conf,
                 'Tested file has corrupted YAML documents at line(s) {}.'
-                .format(', '.join(str(d.start+1)
+                .format(', '.join(str(d.start + 1)
                                   for d in doc2_corrupted_documents))
             )]
 
@@ -548,8 +548,8 @@ class Differ(object):
                                 i = 0
                                 n = len(seq1)
                                 while i + 1 < n:
-                                    yield (seq1[i], seq1[i+1],
-                                           seq2[i], seq2[i+1])
+                                    yield (seq1[i], seq1[i + 1],
+                                           seq2[i], seq2[i + 1])
                                     i += 2
 
                                 if i < n:

@@ -54,25 +54,6 @@ _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 
 # Helper functions and tools
 
-# def fix_punctuation_marks(s):
-#     """
-#     Remove whitespaces before `,` and `;` that trigger a bug in ConfigParser
-#     when the option spans multiple lines separated by `;`
-#
-#     For instance:
-#
-#         #%% files_to_test =
-#         #%%   t93.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00 ;
-#         #%%   t93.out_ep_SBK, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#
-#     is not treated properly by ConfigParser due to ` ;` at the end of the line and
-#     only t93.out is stored in dictionary and tested by fldiff.
-#     """
-#     for mark in (",", ";"):
-#         s = (mark + " ").join(tok.rstrip() for tok in s.split(mark))
-#     return s + "\n"
-
-
 def html_colorize_text(string, code):
     return "<FONT COLOR='%s'>%s</FONT>" % (code, string)
 
@@ -141,13 +122,11 @@ def lazy__str__(func):
         return "\n".join(str(k) + " : " + str(v) for (k, v) in self.__dict__.items())
     return oncall
 
+
 # Helper functions for performing IO
 
-
 def lazy_read(fname):
-    if sys.version_info >= (3, 0):
-        # with open(fname, "rt", encoding="ISO-8859-1") as fh:
-        # with open(fname, "rt", encoding="utf-8", errors="ignore") as fh:
+    if not py2:
         with open(fname, "rt", encoding="utf-8") as fh:
             return fh.read()
 
@@ -157,7 +136,7 @@ def lazy_read(fname):
 
 
 def lazy_readlines(fname):
-    if sys.version_info >= (3, 0):
+    if not py2:
         with open(fname, "rt", encoding="utf-8") as fh:
             return fh.readlines()
     else:
@@ -3113,7 +3092,7 @@ class AbinitTestSuite(object):
         Location of the tarball file with the results in HTML format
         Returns None if the tarball has not been created.
         """
-        return egtattr(self, '_targz_fname', None)
+        return getattr(self, '_targz_fname', None)
 
     def create_targz_results(self):
         """Create the tarball file results.tar.gz in the working directory."""
@@ -3262,20 +3241,21 @@ class AbinitTestSuite(object):
             logger.info("Threaded version with nthreads = %s" % nthreads)
             from threading import Thread, Queue
 
-            def worker():
-                while True:
+            def worker(q):
+                while not q.empty():
                     test = q.get()
                     run_and_check_test(test)
                     q.task_done()
 
             q = Queue()
-            for i in range(nthreads):
-                t = Thread(target=worker)
-                t.setDaemon(True)
-                t.start()
 
             for test in self:
                 q.put(test)
+
+            for i in range(nthreads):
+                t = Thread(target=worker, args=(q,))
+                t.setDaemon(True)
+                t.start()
 
             # Block until all tasks are done. Raise QueueTimeoutError after timeout seconds.
             timeout_1test = float(runner.timebomb.timeout)

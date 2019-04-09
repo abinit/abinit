@@ -12,7 +12,7 @@ from .abinit_iterators import ITERATOR_RANKS
 re_word = re.compile(r'[a-zA-Z0-9_]+')
 
 
-PY3 = sys.version_info[0] == 3
+PY3 = sys.version_info[0] >= 3
 
 if PY3:
     string = str

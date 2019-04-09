@@ -436,7 +436,8 @@ class TestMetaConfParser(object):
         assert test == ref
 
 
-def true(v, r, t): return True
+def true(v, r, t):
+    return True
 
 
 class TestConstraint(object):
