@@ -100,6 +100,7 @@ module m_spin_mover
      procedure :: prepare_ncfile
      procedure, private ::get_Langevin_Heff
      procedure :: current_spin
+     procedure :: set_ncfile_name
   end type spin_mover_t
   !!***
 
@@ -930,7 +931,7 @@ contains
     call self%mps%finalize()
     call self%hist%finalize()
     call self%spin_ob%finalize()
-    call self%spin_ncfile%close()
+    !call self%spin_ncfile%close()
     call self%spin_ob%finalize()
   end subroutine finalize
   !!***

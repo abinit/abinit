@@ -289,7 +289,10 @@ contains
     call self%fill_supercell()
 
     call self%set_movers()
+
+    call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%spin_mover%run_time(self%pots)
+    call self%spin_mover%spin_ncfile%close()
   end subroutine run_spin_dynamics
 
   subroutine run_MvT(self)
