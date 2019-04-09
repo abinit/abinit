@@ -128,8 +128,8 @@ module m_dvdb
    logical :: use_3natom_cache = .False.
     ! True if v1scf_3natom_qibz cache is used.
 
-   integer :: stats(3) = 0
-    ! Total number of calls, number of cache hit, cache misses.
+   integer :: stats(4) = 0
+    ! Total number of calls, number of cache hit in v1scf_3natom_qibz cache, hit in key cache, cache misses.
 
    integer,allocatable :: count_qused(:)
     ! count_qused(nq)
@@ -1325,6 +1325,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
  db_iqpt = indq2db(1)
  db%qcache%count_qused(db_iqpt) = db%qcache%count_qused(db_iqpt) + 1
+ db%qcache%stats(1) = db%qcache%stats(1) + 1
 
  ! IS(q_dvdb) + g0q = q_bz
  isym = indq2db(2); itimrev = indq2db(6) + 1; g0q = indq2db(3:5)
@@ -1332,6 +1333,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
  if (db%qcache%use_3natom_cache .and. db%qcache%stored_iqibz_cplex(1) == db_iqpt .and. .not. isirr_q) then
    ! All 3 natom potentials for qibz are in cache. Symmetrize to get Sq without MPI communication.
+   db%qcache%stats(2) = db%qcache%stats(2) + 1
    cplex = db%qcache%stored_iqibz_cplex(2) 
    ABI_MALLOC(work2, (cplex, nfft, db%nspden, db%natom3))
    call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
@@ -1351,7 +1353,6 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    ! Get number of perturbations computed for this iqpt as well as cplex.
    npc = dvdb_get_pinfo(db, db_iqpt, cplex, pinfo)
    ABI_CHECK(npc /= 0, "npc == 0!")
-   db%qcache%stats(1) = db%qcache%stats(1) + 1
 
    ! Remember that the size of v1scf in qcache depends on db%my_npert
    if (allocated(db%qcache%key(db_iqpt)%v1scf)) then
@@ -1360,7 +1361,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
         ABI_MALLOC_OR_DIE(v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
         v1scf = real(db%qcache%key(db_iqpt)%v1scf, kind=QCACHE_KIND)
         incache = .True.
-        db%qcache%stats(2) = db%qcache%stats(2) + 1
+        db%qcache%stats(3) = db%qcache%stats(3) + 1
       else
         ! This to handle the unlikely event in which the caller changes ngfft!
         !MSG_WARNING("Had to free cache item due to different cplex or nfft!")
@@ -1368,7 +1369,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
       end if
    else
       !call wrtout(std_out, sjoin("Cache miss for db_iqpt. Will read it from file...", itoa(db_iqpt)))
-      db%qcache%stats(3) = db%qcache%stats(3) + 1
+      db%qcache%stats(4) = db%qcache%stats(4) + 1
    end if
  end if
 
@@ -1631,6 +1632,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
    if (qselect_dvdb(db_iqpt) == 0) cycle
 
    ! All procs are getting the same q-point. Exit when we reach maxnq
+   ! TODO: Rewrite this part.
    qcnt = 0
    do ii=1,db%nqpt
      if (allocated(db%qcache%key(ii)%v1scf)) qcnt = qcnt + 1
@@ -1832,13 +1834,15 @@ subroutine qcache_report_stats(qcache)
    write(std_out, "(2a)")ch10, " Qcache stats"
    write(std_out, "(a,i0)")" Total Number of calls: ", qcache%stats(1)
    write(std_out, "(a,i0,2x,f5.1,a)") &
-     " Cache hit: ", qcache%stats(2), (100.0_dp * qcache%stats(2)) / qcache%stats(1), "%"
+     " Cache hit in v1scf_3natom_qibz: ", qcache%stats(2), (100.0_dp * qcache%stats(2)) / qcache%stats(1), "%"
    write(std_out, "(a,i0,2x,f5.1,a)") &
-     " Cache miss: ", qcache%stats(3), (100.0_dp * qcache%stats(3)) / qcache%stats(1), "%"
-   qcache%stats = 0
+     " Cache hit in MPI-distributed cache: ", qcache%stats(3), (100.0_dp * qcache%stats(3)) / qcache%stats(1), "%"
+   write(std_out, "(a,i0,2x,f5.1,a)") &
+     " Cache miss: ", qcache%stats(4), (100.0_dp * qcache%stats(4)) / qcache%stats(1), "%"
    write(std_out, "(a)")sjoin(" Memory allocated for cache: ", ftoa(qcache%get_mbsize(), fmt="f12.1"), " [Mb]")
  end if
  write(std_out, "(a)")
+ qcache%stats = 0
 
 end subroutine qcache_report_stats
 !!***
@@ -2876,7 +2880,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
                   phre * v1r_qbz(2, ifft, ispden, ipc) + phim * v1r_qbz(1, ifft, ispden, ipc)
              end do
            end do
-
+           !call zgerc(db%nrpt, nfft, cone, emiqr, 1, vir_qbz(:,:,ispden,ipc), 1, db%v1scf_rpt(:,:,:,ispden,imyp), db%nrpt))
          end do
        end do
      end if
@@ -3010,6 +3014,14 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
        end if
      end do ! ifft
 
+     !beta = czero
+     !if (db%has_dielt_zeff .and. db%add_lr_part) then
+     !  beta = cone
+     !  ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
+     !end if
+     !call ZGEMV("T", db%nrpt, nfft, cone, db%v1scf_rpt(1,1,1,ispden,imyp), db%nrpt, eiqr, 1, &
+     !  beta, ov1r(1,1,1,ispden,imyp), 1)
+
      ! Remove the phase.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
 
@@ -3095,6 +3107,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
  iq_ibz = indq2ibz(1)
  db%ftqcache%count_qused(iq_ibz) = db%ftqcache%count_qused(iq_ibz) + 1
+ db%ftqcache%stats(1) = db%ftqcache%stats(1) + 1
 
  ! IS(q_ibz) + g0q = q_bz
  isym = indq2ibz(2); itimrev = indq2ibz(6) + 1; g0q = indq2ibz(3:5)
@@ -3102,6 +3115,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
  if (db%ftqcache%use_3natom_cache .and. db%ftqcache%stored_iqibz_cplex(1) == iq_ibz .and. .not. isirr_q) then
    ! All 3 natom potentials for qibz are in cache. Symmetrize to get Sq without MPI communication.
+   db%ftqcache%stats(2) = db%ftqcache%stats(2) + 1
    cplex = db%ftqcache%stored_iqibz_cplex(2) 
    ABI_MALLOC(work2, (cplex, nfft, db%nspden, db%natom3))
    call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
@@ -3122,8 +3136,6 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  incache = .False.
  if (db%ftqcache%maxnq > 0) then
    ! Get number of perturbations computed for this iq_ibz as well as cplex.
-   db%ftqcache%stats(1) = db%ftqcache%stats(1) + 1
-
    ! Remember that the size of v1scf in qcache depends on db%my_npert
    if (allocated(db%ftqcache%key(iq_ibz)%v1scf)) then
       if (size(db%ftqcache%key(iq_ibz)%v1scf, dim=1) == cplex .and. &
@@ -3131,8 +3143,8 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
         ! Potential in cache --> copy it in output v1scf.
         ABI_MALLOC_OR_DIE(v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
         v1scf = real(db%ftqcache%key(iq_ibz)%v1scf, kind=QCACHE_KIND)
-        db%ftqcache%stats(2) = db%ftqcache%stats(2) + 1
         incache = .True.
+        db%ftqcache%stats(3) = db%ftqcache%stats(3) + 1
       else
         ! This to handle the unlikely event in which the caller changes ngfft!
         MSG_ERROR("Had to free cache item due to different cplex or nfft!")
@@ -3140,7 +3152,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
       end if
    else
       !call wrtout(std_out, sjoin("Cache miss for iq_ibz. Will read it from file...", itoa(iq_ibz)))
-      db%ftqcache%stats(3) = db%ftqcache%stats(3) + 1
+      db%ftqcache%stats(4) = db%ftqcache%stats(4) + 1
    end if
  end if
 

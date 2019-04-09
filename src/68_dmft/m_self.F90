@@ -135,7 +135,6 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype)
  use m_crystal, only : crystal_t
  use m_oper, only : init_oper
  use m_paw_dmft, only: paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -221,7 +220,6 @@ subroutine initialize_self(self,paw_dmft,wtype)
  use m_oper, only : init_oper,loc_oper
  use m_matlu, only : print_matlu
  use m_paw_dmft, only: paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -283,7 +281,6 @@ subroutine destroy_self(self)
  use defs_basis
  use m_crystal, only : crystal_t
  use m_oper, only : destroy_oper
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -343,7 +340,6 @@ subroutine print_self(self,prtdc,paw_dmft,prtopt)
  use m_oper, only : print_oper
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : print_matlu
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -409,7 +405,6 @@ subroutine dc_self(charge_loc,cryst_struc,hu,self,dmft_dc,prtopt)
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_hu, only : hu_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -531,7 +526,6 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : copy_matlu,shift_matlu
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1140,7 +1134,6 @@ subroutine new_self(self,self_new,paw_dmft,opt_mix)
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : copy_matlu
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1245,7 +1238,6 @@ subroutine make_qmcshift_self(cryst_struc,hu,self,apply)
  use m_crystal, only : crystal_t
  use m_hu, only : hu_type
  use m_matlu, only : shift_matlu
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1342,14 +1334,6 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : matlu_type,copy_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kramerskronig_self'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1484,14 +1468,6 @@ subroutine selfreal2imag_self(selfr,self)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : matlu_type,copy_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'selfreal2imag_self'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !type

@@ -570,7 +570,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,sppoldbl1=1,timrev1=1
  integer,parameter :: igscq0=0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
- integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert, nqeff
+ integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert !, nqeff
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
  integer :: mcgq, mgscq, nband_kq
@@ -993,7 +993,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! In this case, indeed, the interpolation must be done in sigma_setup_qloop once we know the q-points contributing 
      ! to the integral and the potentials must be cached.
      comm_rpt = xmpi_comm_self
-     !comm_rpt = sigma%comm_bq
+     comm_rpt = sigma%comm_bq
      !if (.not. sigma%imag_only) comm_rpt = comm_band
      call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
