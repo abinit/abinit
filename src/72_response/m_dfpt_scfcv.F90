@@ -2378,7 +2378,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  integer :: ilm,ipert1,ispden,isppol,istr1,istwf_k
  integer :: mbd2kpsp,mbdkpsp,me,n1,n2,n3,n3xccc,n4,n5,n6
  integer :: nband_k,nfftot,npw1_k,npw_k,option
- logical :: nmxc
+ logical :: nmxc=.false.
  real(dp) :: doti,dotr
  real(dp) :: wtk_k
  character(len=500) :: message
@@ -2607,7 +2607,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 !Now, treat the local contribution
 
  ABI_ALLOCATE(vpsp1,(cplex*nfft))
- n3xccc=0;nmxc=.false.
+ n3xccc=0
  if(psps%n1xccc/=0)n3xccc=nfft
  ABI_ALLOCATE(xccc3d1,(cplex*n3xccc))
  ABI_ALLOCATE(vxc1,(cplex*nfft,nspden))
@@ -3039,7 +3039,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  integer :: istwf_k,isym,jj,master,me,n1,n2,n3,n3xccc,n4,n5,n6
  integer :: nband_k,nfftot,npw1_k,npw_k,nspinor_,option,spaceworld,optnc
  real(dp) :: doti,dotr,wtk_k
- logical :: nmxc,t_exist
+ logical :: nmxc=.false.,t_exist
  character(len=500) :: msg
  character(len=fnlen) :: fiwfddk
  type(gs_hamiltonian_type) :: gs_hamkq
