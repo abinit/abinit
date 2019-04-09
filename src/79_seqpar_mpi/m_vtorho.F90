@@ -38,6 +38,7 @@ module m_vtorho
  use m_efield
  use m_cgtools
  use m_gemm_nonlop
+ use m_hightemp
 
  use m_time,               only : timab
  use m_geometry,           only : xred2xcart
@@ -1427,6 +1428,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end do
        end do
      end do
+
+!    blanchet - Compute the free_transfactor U0.
+     call free_transfactor(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
 
      if(paw_dmft%use_dmft==1) then
        energies%e_kinetic = energies%e_kinetic -ekindmft+ekindmft2

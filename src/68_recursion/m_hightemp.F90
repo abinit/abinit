@@ -36,9 +36,8 @@ module m_hightemp
 
   implicit none
 
-  public :: mkrho_hightemp
+  public :: free_transfactor
   public :: prt_eigocc
-  private :: free_transfactor
 contains
 
 !!****f* ABINIT/prt_eigocc
@@ -164,87 +163,60 @@ end subroutine prt_eigocc
 !! CHILDREN
 !!
 !! SOURCE
-subroutine free_transfactor()
-end subroutine free_transfactor
-
-!!****f* ABINIT/mkrho_hightemp
-!! NAME
-!! mkrho_hightemp
-!!
-!! FUNCTION
-!! Make the electronic density replacing high energy bands by free electron states.
-!!
-!! TODO
-!! INPUTS
-!!
-!! TODO
-!! OUTPUT
-!!
-!! NOTES
-!! TODO Parallelization is still to be done.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-subroutine mkrho_hightemp(dtset,mpi_enreg,npwarr,occ,rhor)
+subroutine free_transfactor(eigen,eknk,mband,nband,nkpt,nsppol,wtk)
 
   ! Arguments -------------------------------
   ! Scalars
-  type(MPI_type),intent(in) :: mpi_enreg
-  type(dataset_type),intent(in) :: dtset
+  integer,intent(in) :: mband,nkpt,nsppol
   ! Arrays
-  integer,intent(in) :: npwarr(dtset%nkpt)
-  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
-  real(dp),intent(out) :: rhor(dtset%nfft,dtset%nspden)
+  integer,intent(in) :: nband(nkpt*nsppol)
+  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
+  real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
+  real(dp),intent(in) :: wtk(nkpt)
 
   ! Local variables -------------------------
   ! Scalars
-  integer :: band_cut,bdtot_index,iband,ikpt,isppol,me,n1,n2,n3,n4,n5,n6,nband_k,npw_k
+  integer :: bdtot_index,iband,ikpt,isppol,nband_k,niter
+  real(dp) :: bcut,u0
   ! Arrays
-  real(dp),allocatable :: rhoaug(:,:,:)
+  real(dp) :: eig_n(mband),ek_n(mband)
+
+  bcut=64
 
   ! *********************************************************************
-
-  band_cut = 100
-  me=mpi_enreg%me_kpt
-  bdtot_index=0
-  ! n4,n5,n6 are FFT dimensions, modified to avoid cache trashing
-  n1=dtset%ngfft(1);n2=dtset%ngfft(2);n3=dtset%ngfft(3)
-  n4=dtset%ngfft(4);n5=dtset%ngfft(5);n6=dtset%ngfft(6)
-  ABI_ALLOCATE(rhoaug,(n4,n5,n6))
-
-  ! Loop over spins
-  do isppol=1,dtset%nsppol
-    rhoaug(:,:,:)=zero
-
-    ! Loop over k-points
-    do ikpt=1,dtset%nkpt
-      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-      npw_k=npwarr(ikpt)
-
-      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
-        bdtot_index=bdtot_index+nband_k
-        cycle
-      end if
-      ! Loop over bands
+  eig_n(:)=zero
+  ek_n(:)=zero
+  bdtot_index=1
+  do isppol=1,nsppol
+    do ikpt=1,nkpt
+      nband_k=nband(ikpt+(isppol-1)*nkpt)
       do iband=1,nband_k
+        eig_n(iband)=eig_n(iband)+wtk(ikpt)*eigen(bdtot_index)
+        ek_n(iband)=ek_n(iband)+wtk(ikpt)*eknk(bdtot_index)
+        bdtot_index=bdtot_index+1
+      end do
+    end do
+  end do
 
-        ! Treating only occupied bands
-        if(abs(occ(iband+bdtot_index))>tol8) then
+  u0=zero
+  niter=0
+  do iband=bcut-bcut/10,bcut
+    u0=u0+(eig_n(iband)-ek_n(iband))
+    niter=niter+1
+  end do
+  u0=u0/niter
+  write(0,*) "Average made on ",niter," last bands until band =",bcut
+  write(0,*) "u0 =",u0
 
-          if(iband<=band_cut) then
-            ! call fourwf(1,rhoaug(:,:,:),cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
-            !   & istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-            !   & npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
-            !   & use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
-            !   & use_gpu_cuda=dtset%use_gpu_cuda)
-          end if
-        end if
-      end do ! End loop over bands
-    end do ! End loop over k-points
-  end do ! End loop over spins
-end subroutine mkrho_hightemp
+
+
+
+  ! write(60,*) "NEW SCF ITERATION..."
+  ! do iband=1,mband
+  !   write(0,*) iband, eig_n(iband) - ek_n(iband)
+  !   write(60,*) iband, eig_n(iband) - ek_n(iband)
+  ! end do
+
+end subroutine free_transfactor
 
 end module m_hightemp
