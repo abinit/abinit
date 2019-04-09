@@ -128,7 +128,7 @@ module m_dvdb
    logical :: use_3natom_cache = .False.
     ! True if v1scf_3natom_qibz cache is used.
 
-   integer :: stats(4) = 0
+   integer :: stats(4)
     ! Total number of calls, number of cache hit in v1scf_3natom_qibz cache, hit in key cache, cache misses.
 
    integer,allocatable :: count_qused(:)
@@ -1540,6 +1540,7 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
  ABI_MALLOC(qcache%itreatq, (nqpt)) 
  qcache%itreatq = 1
  qcache%use_3natom_cache = .False.
+ qcache%stats = 0
 
  qcache%max_mbsize = mbsize
  qcache%onepot_mb = two * product(ngfft(1:3)) * nspden * QCACHE_KIND * b2Mb
@@ -3205,6 +3206,16 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
        call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
+
+       ! Store all 3 natom potentials for q in IBZ in cache.
+       if (db%ftqcache%use_3natom_cache .and. db%ftqcache%stored_iqibz_cplex(1) /= iq_ibz) then
+         if (cplex /= db%ftqcache%stored_iqibz_cplex(2)) then 
+           ABI_REMALLOC(db%ftqcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))
+         end if 
+         db%ftqcache%stored_iqibz_cplex = [iq_ibz, cplex]
+         db%ftqcache%v1scf_3natom_qibz = work
+       end if
+
        ABI_FREE(work)
 
      else
@@ -3214,21 +3225,11 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
        !  db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2, db%comm_pert)
      end if
 
-     ! Store all 3 natom potentials for q in IBZ in cache.
-     if (isirr_q .and. db%ftqcache%use_3natom_cache .and. db%ftqcache%stored_iqibz_cplex(1) /= iq_ibz) then
-       if (cplex /= db%ftqcache%stored_iqibz_cplex(2)) then 
-         ABI_REMALLOC(db%ftqcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))
-       end if 
-       db%ftqcache%stored_iqibz_cplex = [iq_ibz, cplex]
-       db%ftqcache%v1scf_3natom_qibz = work
-     end if
-
      ! Reallocate v1scf with my_npert and extract data from work2.
      ABI_FREE(v1scf)
      ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
      do imyp=1,db%my_npert
-       ipc = db%my_pinfo(3, imyp)
-       v1scf(:,:,:,imyp) = work2(:,:,:,ipc)
+       v1scf(:,:,:,imyp) = work2(:,:,:,db%my_pinfo(3, imyp))
      end do
      ABI_FREE(work2)
    end if
