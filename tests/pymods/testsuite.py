@@ -3410,7 +3410,7 @@ class AbinitTestSuite(object):
                 while proc_running > 0:
                     msg = qout.get(
                         block=True,
-                        timeout=task_remaining * timeout_1test / proc_running
+                        timeout=10 * task_remaining * timeout_1test / proc_running
                     )
                     if msg['type'] == 'proc_done':
                         proc_running -= 1
@@ -3439,16 +3439,16 @@ class AbinitTestSuite(object):
             except EmptyQueueError:
                 warnings.warn("Workers have been hanging until timeout.")
                 self.terminate()
+                return
 
             finally:
                 qin.close()
+                # remove this to let python carbage collect processes and avoid
+                # Pickle to complain (it does not accept processes for security
+                # reasons)
+                del self._processes
 
-            # remove this to let python carbage collect processes and avoid
-            # Pickle to complain (it does not accept processes for security
-            # reasons)
-            del self._processes
-
-            # update local tests instances wit the results of their running in
+            # update local tests instances with the results of their running in
             # a remote process
             for test in self.tests:
                 if test.full_id in results:
