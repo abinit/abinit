@@ -331,6 +331,7 @@ subroutine invars10scup(scup_dtset,lenstr,string)
 !=====================================================================
 
 call scup_dtset_init(scup_dtset) 
+tmp_int=0 
 
 !=====================================================================
 !start reading in dimensions and non-dependent variables
