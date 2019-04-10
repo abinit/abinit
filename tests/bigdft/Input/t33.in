@@ -82,6 +82,6 @@ prteig 0
 #%% authors = T. Rangel
 #%% keywords =  NC
 #%% description = O2 in a box (NC). ABINIT routines are used (wvl_bigdft_comp=0)
-#%% Test: DIIS, potential/density mixing
+#%%   Test: DIIS, potential/density mixing
 #%% topics = Wavelets
 #%%<END TEST_INFO>

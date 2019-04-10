@@ -1388,8 +1388,8 @@ class BaseTest(object):
                 pass
             else:
                 raise ValueError(
-                    'This test have no files_to_test attribute. It is'
-                    ' forbidden unless you had "no_check = yes" to its'
+                    self.full_id + 'This test have no files_to_test attribute.'
+                    ' It is forbidden unless you had "no_check = yes" to its'
                     ' [setup] section in test configuration.'
                 )
 
