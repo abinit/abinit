@@ -3409,7 +3409,7 @@ class AbinitTestSuite(object):
             proc_running = py_nprocs
             try:
                 while proc_running > 0:
-                    msg = res_q.get(block=True, timeout=(2 * task_remaining
+                    msg = res_q.get(block=True, timeout=(1 + 2 * task_remaining
                                                          * timeout_1test
                                                          / proc_running))
                     if msg['type'] == 'proc_done':
