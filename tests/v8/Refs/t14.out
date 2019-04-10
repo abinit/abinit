@@ -73,14 +73,18 @@ dipdip_range         1         1         1
 -Opening the file /home/alex/dev/abinit_git/tests/v8/Input/t14_sys.xml
 -Reading the file /home/alex/dev/abinit_git/tests/v8/Input/t14_sys.xml with Fortran
 
+ Bound for ifc SR:
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+
 ================================================================================
  Generation of new ifc
 
  dipdip is set to one, the dipole-dipole interation is recompute.
 
- New bound for ifc (long+short):
+ Bound for ifc (LR):
 
- x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+ x=[  0  0], y=[  0  0] and z=[  0  0]
 
  Computation of new dipole-dipole interaction.
 
