@@ -3416,6 +3416,7 @@ class AbinitTestSuite(object):
                         if 'error' in msg:
                             e = msg['error']
                             if 'task' in msg:
+                                task_remaining -= 1
                                 warnings.warn(
                                     'Error append in a worker on test '
                                     '{}:\n{}: {}'.format(
@@ -3423,10 +3424,9 @@ class AbinitTestSuite(object):
                                     )
                                 )
                             else:
-                                proc_running -= 1
                                 warnings.warn(
                                     'Error append in a worker:\n{}: {}'.format(
-                                        msg['task'], e.__class__.__name__, e
+                                        e.__class__.__name__, e
                                     )
                                 )
 
