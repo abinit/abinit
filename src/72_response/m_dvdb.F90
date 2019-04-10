@@ -107,8 +107,8 @@ module m_dvdb
     ! Note this is not the size of the key array that is dimensioned with 
     ! dvdb%nqpt or nqibz depending on the type of cache in use.
 
-   !integer :: nqibz = 0 
-     ! Number of q-points in the IBZ (not necessarily equal to dvdb%nqpt especially if FT interpolation is used
+   integer :: nqpt
+     ! Number of q-points in the key array
 
    !integer :: nspden, my_npert, nfft
 
@@ -165,6 +165,8 @@ module m_dvdb
 
     procedure :: get_mbsize => qcache_get_mbsize
     ! Return the (allocated) size of the cache in Mb.
+
+    procedure :: make_room => qcache_make_room
 
  end type qcache_t
 !!***
@@ -1506,7 +1508,7 @@ end subroutine dvdb_readsym_qbz
 !!  Initialize qcache_t object from dimensions.
 !!
 !! INPUTS
-!!  nqpt
+!!  nqpt=Number of q-points (dvdb%nqpt or nqibz depending on cache type)
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  mbsize: Cache size in megabytes.
@@ -1535,14 +1537,15 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
 
 ! *************************************************************************
 
+ qcache%nqpt = nqpt
  ABI_ICALLOC(qcache%count_qused, (nqpt))
  ABI_MALLOC(qcache%key, (nqpt))
  ABI_MALLOC(qcache%itreatq, (nqpt)) 
  qcache%itreatq = 1
  qcache%use_3natom_cache = .False.
  qcache%stats = 0
-
  qcache%max_mbsize = mbsize
+
  qcache%onepot_mb = two * product(ngfft(1:3)) * nspden * QCACHE_KIND * b2Mb
  if (abs(mbsize) < tol3) then
    qcache%maxnq = 0
@@ -1712,6 +1715,7 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
  integer,parameter :: master = 0
  integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt
  real(dp) :: cpu_all, wall_all, gflops_all
+ !character(len=500) :: msg
 !arrays
  integer :: qselect(db%nqpt)
  real(dp),allocatable :: v1scf(:,:,:,:)
@@ -1720,6 +1724,8 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
 ! *************************************************************************
 
  if (db%qcache%maxnq == 0) return
+
+ !if (db%qcache%make_room(ineed_qpt, msg) /= 0) MSG_WARNING(msg)
 
  ! Take the union of the q-points inside comm.
  qselect = ineed_qpt
@@ -1889,6 +1895,80 @@ end function qcache_get_mbsize
 !!***
 
 !----------------------------------------------------------------------
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/qcache_qcache_make_room
+!! NAME
+!!  qcache_qcache_make_room
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  ineed_qpt(%nqpt)
+!!
+!! OUTPUTS
+!!  msg
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function qcache_make_room(qcache, ineed_qpt, msg) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ class(qcache_t),intent(inout) :: qcache
+ character(len=*),intent(out) :: msg
+!arrays
+ integer,intent(in) :: ineed_qpt(qcache%nqpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq, nq_remove, qcnt, count_qnew
+ real(dp) :: mbsize_now, mbsize_extra
+
+! *************************************************************************
+
+ ierr = 0; msg = ""
+ mbsize_now = qcache%get_mbsize() 
+
+ ! Count number of q-points that are not in cache and the extra memory required to allocate everything.
+ count_qnew = 0
+ do iq=1,qcache%nqpt
+   if (ineed_qpt(iq) > 0 .and. .not. allocated(qcache%key(iq)%v1scf)) count_qnew = count_qnew + 1
+ end do
+ mbsize_extra = mbsize_now + count_qnew * qcache%onepot_mb
+
+ if (mbsize_extra > qcache%max_mbsize) then
+   ! Try to deallocate nq_remove q-points provided they are not needed.
+   nq_remove = nint((mbsize_extra - qcache%max_mbsize) / qcache%onepot_mb)
+   qcnt = 0
+   do iq=1,qcache%nqpt
+     if (ineed_qpt(iq) == 0 .and. allocated(qcache%key(iq)%v1scf)) then
+       ABI_FREE(qcache%key(iq)%v1scf)
+       qcnt = qcnt + 1
+       if (qcnt == nq_remove) exit
+     end if
+   end do
+   if (iq == qcache%nqpt + 1) then
+     ierr = 1
+     msg = "Couldn't decrease cache size below input limit. Continuing anyway but we may go out of memory!"
+   end if
+ !else
+ !  ! Still below max_bsize. Make sure all required qcache entries are allocated.
+ !  do iq=1,qcache%nqpt
+ !    if (ineed_qpt(iq) > 0 .and. .not. allocated(qcache%key(iq)%v1scf)) then
+ !    end if
+ end if
+
+end function qcache_make_room
+!!***
+
+!----------------------------------------------------------------------
+
 
 !!****f* m_dvdb/v1phq_complete
 !! NAME
@@ -2641,6 +2721,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
  call wrtout(std_out, sjoin(" Building V(r,R) using ngqpt: ", ltoa(ngqpt), " q-mesh and nprocs_rpt:", itoa(db%nprocs_rpt)))
+ call wrtout(std_out, " It may take some time depending on the number of MPI procs, ngqpt and nfft points...")
 
  cryst => db%cryst
  nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3); my_qptopt = 1 !; if (present(qptopt)) my_qptopt = qptopt
@@ -2881,9 +2962,10 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
                   phre * v1r_qbz(2, ifft, ispden, ipc) + phim * v1r_qbz(1, ifft, ispden, ipc)
              end do
            end do
-           !call zgerc(db%nrpt, nfft, cone, emiqr, 1, vir_qbz(:,:,ispden,ipc), 1, db%v1scf_rpt(:,:,:,ispden,imyp), db%nrpt))
-         end do
-       end do
+           !call zgerc(db%nrpt, nfft, cone, emiqr, 1, v1r_qbz(:,:,ispden,ipc), 1, db%v1scf_rpt(:,:,:,ispden,imyp), db%nrpt)
+
+         end do ! ispden
+       end do ! imyp
      end if
 
    end do ! iqst
@@ -2968,6 +3050,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
  integer,parameter :: cplex2 = 2
  integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr
  real(dp) :: wr, wi ! cpu, wall, gflops
+ complex(dpc) :: beta
 !arrays
  integer :: symq(4,2,db%cryst%nsym)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
@@ -3021,16 +3104,16 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
      !  ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
      !end if
      !call ZGEMV("T", db%nrpt, nfft, cone, db%v1scf_rpt(1,1,1,ispden,imyp), db%nrpt, eiqr, 1, &
-     !  beta, ov1r(1,1,1,ispden,imyp), 1)
+     !  beta, ov1r(1,1,ispden,imyp), 1)
 
      ! Remove the phase.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
 
      ! Need to collect results if R-points are distributed.
      ! Collective or single depending on receiver.
-     if (db%nprocs_rpt > 1) then
-       call xmpi_sum(ov1r(:,:,ispden,imyp), comm_rpt, ierr)
-     end if
+     !if (db%nprocs_rpt > 1) then
+     call xmpi_sum(ov1r(:,:,ispden,imyp), comm_rpt, ierr)
+     !end if
    end do ! ispden
 
    ! Be careful with gamma and cplex!
@@ -3307,14 +3390,14 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
 
  do iq_ibz=1,nqibz
-   ! Ignore points reported by the oracle 
+   ! Ignore points reported by the oracle. We can still recompute them on the fly if needed.
    if (qselect_ibz(iq_ibz) == 0) cycle
    call cwtime(cpu, wall, gflops, "start")
 
    ! Interpolate my_npert potentials inside comm_rpt
    call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
 
-   ! IBZ may be distributed.
+   ! Points in the IBZ may be distributed to reduce memory.
    if (db%ftqcache%itreatq(iq_ibz) /= 0) then
      ! Allocate cache entry taking into account my_npert
      ABI_MALLOC_OR_DIE(db%ftqcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
@@ -3377,8 +3460,9 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 !scalars
  integer :: iq_ibz, cplex, ierr, qcnt
  real(dp) :: cpu_all, wall_all, gflops_all
+ !character(len=500) :: msg
 !arrays
- integer :: qselect(nqibz)
+ !integer :: qselect(nqibz)
  real(dp),allocatable :: v1scf(:,:,:,:)
  real(dp) :: tsec(2)
 
@@ -3386,14 +3470,16 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 
  if (db%ftqcache%maxnq == 0) return
 
+ !if (db%qcache%make_room(ineed_qpt, msg) /= 0) MSG_WARNING(msg)
+
  ! Take the union of the q-points inside comm_rpt.
- qselect = ineed_qpt
- call xmpi_sum(qselect, comm, ierr)
- qcnt = count(qselect > 0)
- if (qcnt == 0) then
-   call wrtout(std_out, " All qpts in Vscf(q) already in cache. No need to perform IO.", do_flush=.True.)
-   return
- end if
+ !qselect = ineed_qpt
+ !call xmpi_sum(qselect, comm, ierr)
+ !qcnt = count(qselect > 0)
+ !if (qcnt == 0) then
+ !  call wrtout(std_out, " All qpts in Vscf(q) already in cache. No need to perform IO.", do_flush=.True.)
+ !  return
+ !end if
 
  call timab(1807, 1, tsec)
 
@@ -3404,7 +3490,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
 
  do iq_ibz=1,nqibz
-   if (qselect(iq_ibz) == 0) cycle
+   if (ineed_qpt(iq_ibz) == 0) cycle
 
    ! Interpolate my_npert potentials inside comm_rpt
    call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
@@ -4070,10 +4156,12 @@ subroutine dvdb_set_pert_distrib(self, my_npert, natom3, my_pinfo, pert_table, c
  call alloc_copy(my_pinfo, self%my_pinfo)
  call alloc_copy(pert_table, self%pert_table)
 
- write(std_out, *)"Activating perturbation over perturbations:"
- write(std_out, *)"nprocs_pert: ", self%nprocs_pert
- write(std_out, *)"my_pinfo: ",self%my_pinfo
- write(std_out, *)"pert_table: ",self%pert_table
+ if (self%debug) then
+   write(std_out, *)"Activating perturbation over perturbations:"
+   write(std_out, *)"nprocs_pert: ", self%nprocs_pert
+   write(std_out, *)"my_pinfo: ",self%my_pinfo
+   write(std_out, *)"pert_table: ",self%pert_table
+ end if
 
 end subroutine dvdb_set_pert_distrib
 !!***
@@ -5638,7 +5726,6 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
                                dvdb%nspden, ipert, v1scf_rpt, v1scf, comm)
 
        !call wrtout(std_out, sjoin("Writing q-point", itoa(iq)))
-
        if (my_rank == master) then
          if (use_netcdf) then
 #ifdef HAVE_NETCDF

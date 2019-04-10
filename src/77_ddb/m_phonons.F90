@@ -3212,7 +3212,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  if (dtset%prtphbands == 0) return
 
  if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) then
-   MSG_WARNING("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. returning")
+   MSG_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
    return
  end if
 

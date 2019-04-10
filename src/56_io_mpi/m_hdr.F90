@@ -4403,7 +4403,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !Local variables-------------------------------
  integer :: ik, jj, ierr
  logical :: test, tsymrel,ttnons, tsymafm
- character(len=500) :: msg
+ character(len=5000) :: msg
 ! *************************************************************************
 
  ! Check basic dimensions
@@ -4443,7 +4443,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    ' real lattice vectors read from Header differ from the values specified in the input file', ch10, &
    ' rprimd from Hdr file   = ',ch10,(Hdr%rprimd(:,jj),jj=1,3),ch10,&
    ' rprimd from input file = ',ch10,(Dtset%rprimd_orig(:,jj,1),jj=1,3),ch10,ch10,&
-   '  Modify the lattice vectors in the input file '
+   ' Modify the lattice vectors in the input file '
    MSG_ERROR(msg)
  end if
 

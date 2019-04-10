@@ -2485,6 +2485,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtvpsp=0
    dtsets(idtset)%prtwant=0
    dtsets(idtset)%prtwf=1; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
+   !if (dtset%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    dtsets(idtset)%prtwf_full=0
    dtsets(idtset)%prtxml = 0
    do ii=1,dtsets(idtset)%natom,1

@@ -251,6 +251,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
    new%weights(ik_ibz) = wtk_folded(ik_bz)
  end do
 
+ ! TODO: Activate this part so that we can cache the q-point in the IBZ.
 #if 0
  ! Need to repack the IBZ points and rearrange the other arrays dimensioned with nibz.
  ! In principle, the best approach would be to pack in stars using crystal%symrec.

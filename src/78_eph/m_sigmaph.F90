@@ -997,7 +997,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      !if (.not. sigma%imag_only) comm_rpt = comm_band
      call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
-     ! Now build q-cache in the *dense* IBZ using qselect mask.
+     ! Now build q-cache in the *dense* IBZ using the global mask qselect and itreatq.
      ABI_CALLOC(qselect, (sigma%nqibz))
      qselect = 1
      if (sigma%imag_only .and. sigma%qint_method == 1) then
@@ -1035,14 +1035,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    !do iq_dvdb=1, dvdb%nqpt
    !  if (mod(iq_dvdb, sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_dvdb) = 1
    !end do
-   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq, comm) ! comm_qpt
+   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq, comm) 
    ABI_FREE(itreatq)
  end if
  ABI_FREE(qselect)
 
  ! Loop over k-points in Sigma_nk.
  do ikcalc=1,sigma%nkcalc
-   ! check if this kpoint and spin was already calculated
+   ! Check if this (kpoint, spin) was already calculated
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
 
@@ -1176,6 +1176,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
 if (sigma%use_ftinterp) then
+         ! Use Fourier interpolation to get DFPT potentials for qpt (hopefully in cache). 
          db_iqpt = sigma%ind_ibzk2ibz(1, iq_ibz)
          qq_ibz = sigma%qibz(:, db_iqpt)
          call dvdb%get_ftqbz(cryst, qpt, qq_ibz, sigma%ind_ibzk2ibz(:, iq_ibz), cplex, nfftf, ngfftf, v1scf, sigma%comm_pert)
@@ -3937,23 +3938,25 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
            " (nqeff / nqibz_k): ", (100.0_dp * nqeff) / self%nqibz_k, " [%]"
        end if
 
-       !if (self%me_pert == 0) then
-       !  ABI_ICALLOC(we_need_qpt, (self%nqibz))
-       !  do iq=1,nqeff
-       !    iq_ibz_k = qtab(iq)
-       !    iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
-       !    if (.not. allocated(dvdb%ftqcache%key(iq_ibz)%v1scf)) we_need_qpt(iq_ibz) = 1
-       !  end do
-       !  call xmpi_sum(we_need_qpt, self%comm_pert, ierr)
-       !  qcnt = count(we_need_qpt > 0)
-       !  if (qcnt > 0) then
-       !    mbsizes()
-       !    qcache_get_mbsize()
-       !    getmin
-       !    ABI_FREE(mbsizes)
-       !  end if
-       !  ABI_FREE(we_need_qpt)
-       !end if
+#if 0
+if (self%use_ftinterp) then
+       ABI_ICALLOC(ineed_qpt, (self%nqibz))
+       self%my_nqibz_k = 0
+       do iq=1,nqeff
+         iq_ibz_k = qtab(iq)
+         iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
+         ii = self%itreatq(iq_ibz)
+         if (ii /= 0) then.
+           !if (ii == 1 .or. (ii > 1 .and. ii == iqpos(self%qibz_k(:, iq_ibz_k)))) then
+           self%my_nqibz_k = self%my_nqibz_k + 1
+           self%myq2ibz_k(self%my_nqibz_k) = qtab(iq)
+           ineed_qpt(iq_ibz) = 1
+           !end if
+         end if
+       end do
+       ABI_FREE(ineed_qpt)
+end if
+#endif
 
        call xmpi_split_work(nqeff, self%comm_bq, q_start, q_stop, msg, ierr)
        self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
@@ -3977,6 +3980,7 @@ if (self%use_ftinterp) then
            iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
            if (.not. allocated(dvdb%ftqcache%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
          end do
+
          ! Update cache by Fourier transforming W(r,R)
          !call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
          ABI_FREE(ineed_qpt)

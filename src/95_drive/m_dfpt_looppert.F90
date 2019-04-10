@@ -1313,7 +1313,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (dtset%efmas>0.and.icase==ipert_cnt) then
      eigen0_pert(:) = eigen0(:)
    end if
-   call wrtout(std_out,ch10//' dfpt_looppert: eigenq array',"COLL")
+   !call wrtout(std_out,ch10//' dfpt_looppert: eigenq array',"COLL")
    nkpt_eff=nkpt
    if( (dtset%prtvol==0.or.dtset%prtvol==1.or.dtset%prtvol==2) .and. nkpt>nkpt_max ) nkpt_eff=nkpt_max
    band_index=0
