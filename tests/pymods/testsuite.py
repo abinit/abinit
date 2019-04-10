@@ -3237,7 +3237,7 @@ class AbinitTestSuite(object):
                     continue
 
                 files = set(test.files_to_keep)
-                save_files = [f for f in files if not has_exts(f, exclude_exts)]
+                save_files = {f for f in files if not has_exts(f, exclude_exts)}
                 # print(save_files)
 
                 # Store stdout files only if the test failed.
@@ -3251,10 +3251,10 @@ class AbinitTestSuite(object):
                     if isinstance(test, ChainOfTests):
                         for t in test:
                             # print "Removing Test Chain", t.stdout_fname
-                            save_files.remove(t.stdout_fname)
+                            save_files.discard(t.stdout_fname)
                     else:
                         # print "Removing", test.stdout_fname
-                        save_files.remove(test.stdout_fname)
+                        save_files.discard(test.stdout_fname)
 
                 for p in save_files:
                     # if not os.path.exists(os.path.join(self.workdir, p)): continue
