@@ -3349,11 +3349,13 @@ class AbinitTestSuite(object):
         elif py_nprocs > 1:
             logger.info("Threaded version with py_nprocs = %s" % py_nprocs)
             from multiprocessing import Process, Queue, Lock
+            from queue import Empty as EmptyQueueError
 
-            def proc_done(error=None):
+            def proc_done(error=None, work=None):
                 return {
                     'type': 'proc_done',
-                    'error': error
+                    'error': error,
+                    'work': work
                 }
 
             def worker(qin, qout, print_lock):
@@ -3362,9 +3364,13 @@ class AbinitTestSuite(object):
                         test = qin.get()
                         qout.put(run_and_check_test(test,
                                                     print_lock=print_lock))
-                    qout.put(proc_done())
                 except Exception as e:
-                    qout.put(proc_done(error=e))
+                    try:
+                        qout.put(proc_done(error=e, work=test.full_id))
+                    except (AttributeError, NameError):
+                        qout.put(proc_done(error=e))
+                else:
+                    qout.put(proc_done())
 
             qin = Queue()
             qout = Queue()
@@ -3385,20 +3391,45 @@ class AbinitTestSuite(object):
 
             results = {}
 
+            task_remaining = len(self.tests)
             proc_running = py_nprocs
-            while proc_running > 0:
-                msg = qout.get()
-                if msg['type'] == 'proc_done':
-                    proc_running -= 1
-                    if msg['error'] is not None:
-                        e = msg['error']
-                        print('Error append in a worker:\n',
-                              e.__class__.__name__, str(e))
-                    print(proc_running, "worker(s) remaining.")
-                elif msg['type'] == 'result':
-                    results[msg['full_id']] = msg
+            try:
+                while proc_running > 0:
+                    msg = qout.get(
+                        block=True,
+                        timeout=task_remaining * timeout_1test / proc_running
+                    )
+                    if msg['type'] == 'proc_done':
+                        proc_running -= 1
+                        if msg['error'] is not None:
+                            e = msg['error']
+                            if msg['work'] is not None:
+                                warnings.warn(
+                                    'Error append in a worker on test '
+                                    '{}:\n{}: {}'.format(
+                                        msg['work'], e.__class__.__name__, e
+                                    )
+                                )
+                            else:
+                                warnings.warn(
+                                    'Error append in a worker:\n{}: {}'.format(
+                                        msg['work'], e.__class__.__name__, e
+                                    )
+                                )
 
-            qin.close()
+                        logger.info("{} worker(s) remaining for {} tasks."
+                                    .format(proc_running, task_remaining))
+                    elif msg['type'] == 'result':
+                        results[msg['full_id']] = msg
+                        task_remaining -= 1
+
+            except EmptyQueueError:
+                warnings.warn("Workers have been hanging until timeout.")
+                self.terminate()
+
+            finally:
+                qin.close()
+
             # remove this to let python carbage collect processes and avoid
             # Pickle to complain (it does not accept processes for security
             # reasons)
@@ -3414,7 +3445,6 @@ class AbinitTestSuite(object):
 
                     test.results_load(results[test.full_id])
                 else:
-                    print(set(results.keys()))
                     raise RuntimeError((
                         "I did not get the results of the test {}. It means"
                         " that something fishy happen in the worker."
