@@ -177,6 +177,7 @@ module m_orbmag
   private :: ctocprjb
   private :: make_CCI
   private :: make_CCIV_dsdk
+  private :: make_CCIV_dpdk
   private :: make_dsdk_cprj
   private :: make_dsdk_FD
   private :: make_dsdk_nonlop
@@ -1071,7 +1072,8 @@ end subroutine rho_norm_check
 
 subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
      & mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-     & rprimd,symrec,usecprj,usepaw,xred)
+     & rprimd,symrec,usecprj,usepaw,xred,&
+     & smat_all)
 
   implicit none
 
@@ -1091,18 +1093,20 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*usepaw)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
+  real(dp),optional,target :: smat_all(2,dtorbmag%mband_occ,dtorbmag%mband_occ,dtorbmag%fnkpt,1:6,0:4)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,bdx,bdxc,bfor,bsigma,epsabg,gdir,gdx,gdxstor,gfor,gsigma
-  integer :: ikpt,isppol
+  integer :: adir,bdir,bdx,bdxc,bfor,bsigma,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
+  integer :: ikpt,ikptg,isppol
   integer :: my_nspinor,nband_k,nn,n1,n2,n3
   real(dp) :: deltab,deltag,ucvol
   complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B
   character(len=500) :: message
   !arrays
   real(dp) :: cnum(2,3),dkb(3),dkg(3),gmet(3,3),gprimd(3,3),rmet(3,3)
-  real(dp),allocatable :: smat_all_indx(:,:,:,:,:,:)
+  ! real(dp),allocatable :: smat_all_indx(:,:,:,:,:,:)
+  real(dp),pointer :: smat_all_indx(:,:,:,:,:,:)
 
   ! ***********************************************************************
   ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
@@ -1131,9 +1135,13 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   ! bdir = 1, gdir = 2 or 3 and gdx = 3,4,5,6; if bdir = 2, gdir = 3 or 1 and gdx = 5,6,1,2;
   ! if bdir = 3, gdir = 1 or 2, gdx = 1,2,3,4.
   ! This storage is mapped as gdxstor = mod(gdx+6-2*bdir,6)
-  ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
-  call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-     & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
+  if (present(smat_all)) then
+     smat_all_indx=>smat_all
+  else
+     ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
+     call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+          & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
+  end if
 
   cnum(:,:) = zero
   do adir = 1, 3
@@ -1154,7 +1162,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
            ! index of neighbor 1..6
            bdx = 2*bdir-2+bfor
            ! index of ikpt viewed from neighbor
-           bdxc = 2*bdir-2+bfor+bsigma
+           bdxc = bdx+bsigma
            dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
            deltab = sqrt(DOT_PRODUCT(dkb,dkb))
            do gfor = 1, 2
@@ -1165,33 +1173,37 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
               end if
               ! index of neighbor 1..6
               gdx = 2*gdir-2+gfor
+              gdxc = gdx + gsigma
               gdxstor=mod(gdx+6-2*bdir,6)
 
               dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
               deltag = sqrt(DOT_PRODUCT(dkg,dkg))
               do ikpt = 1, dtorbmag%fnkpt
+                 ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
                  IA=czero
                  IB=czero
                  do nn = 1, nband_k
                     do n1 = 1, nband_k
                        t1A = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0),KIND=dpc)
-                       t1B = t1A
+                       ! t1B = t1A
                        do n2 = 1, nband_k
                           t2A = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor),KIND=dpc)
-                          t3A = conjg(cmplx(smat_all_indx(1,nn,n2,ikpt,gdx,0),smat_all_indx(2,nn,n2,ikpt,gdx,0),KIND=dpc))
-                          t2B = conjg(cmplx(smat_all_indx(1,n2,n1,ikpt,bdx,0),smat_all_indx(2,n2,n1,ikpt,bdx,0),KIND=dpc))
-                          do n3 = 1, nband_k
-                             t3B = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0),KIND=dpc)
-                             t4B=conjg(cmplx(smat_all_indx(1,nn,n3,ikpt,gdx,0),smat_all_indx(2,nn,n3,ikpt,gdx,0),KIND=dpc))
-                             IB = IB + t1B*t2B*t3B*t4B
-                          end do ! end loop over n3
+                          t3A = cmplx(smat_all_indx(1,n2,nn,ikptg,gdxc,0),smat_all_indx(2,n2,nn,ikptg,gdxc,0),KIND=dpc)
+                          ! t2B = conjg(cmplx(smat_all_indx(1,n2,n1,ikpt,bdx,0),smat_all_indx(2,n2,n1,ikpt,bdx,0),KIND=dpc))
+                          ! do n3 = 1, nband_k
+                          !    t3B = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0),KIND=dpc)
+                          !    t4B=conjg(cmplx(smat_all_indx(1,nn,n3,ikpt,gdx,0),smat_all_indx(2,nn,n3,ikpt,gdx,0),KIND=dpc))
+                          !    IB = IB + t1B*t2B*t3B*t4B
+                          ! end do ! end loop over n3
                           IA = IA + t1A*t2A*t3A
                        end do ! end loop over n2
                     end do ! end loop over n1
                  end do ! end loop over nn
 
-                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA-IB)/(2.0*deltab*2.0*deltag) 
-                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA-IB)/(2.0*deltab*2.0*deltag) 
+                 ! cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA-IB)/(2.0*deltab*2.0*deltag) 
+                 ! cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA-IB)/(2.0*deltab*2.0*deltag) 
+                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA)/(2.0*deltab*2.0*deltag) 
+                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA)/(2.0*deltab*2.0*deltag) 
 
               end do ! end loop over kpts
            end do ! end loop over gfor
@@ -1225,7 +1237,11 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   write(message,'(a,a,a)')ch10,'====================================================',ch10
   call wrtout(ab_out,message,'COLL')
 
-  ABI_DEALLOCATE(smat_all_indx)
+  if(present(smat_all)) then
+     nullify(smat_all_indx)
+  else
+     ABI_DEALLOCATE(smat_all_indx) 
+  end if
 
 end subroutine chern_number
 !!***
@@ -4003,15 +4019,25 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ! bdir = 1, gdir = 2 or 3 and gdx = 3,4,5,6; if bdir = 2, gdir = 3 or 1 and gdx = 5,6,1,2;
  ! if bdir = 3, gdir = 1 or 2, gdx = 1,2,3,4.
  ! This storage is mapped as gdxstor = mod(gdx+6-2*bdir,6)
- ! call cpu_time(start_time)
+ call cpu_time(start_time)
+ write(std_out,'(a)')' orbmag progress: making <u_n1k1|S|u_n2k2>, step 1 of 6'
  ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
  call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
       & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
- ! call cpu_time(finish_time)
- ! write(std_out,'(a,es16.8)')'JWZ debug make_smat time: ',finish_time-start_time
+ call cpu_time(finish_time)
+ write(std_out,'(a,es16.8)')'JWZ debug make_smat time: ',finish_time-start_time
  
+ ! call chern number routine if necessary
+ if (dtset%orbmag .EQ. 3) then
+    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
+     & mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+     & rprimd,symrec,usecprj,psps%usepaw,xred,&
+     & smat_all=smat_all_indx)
+ end if
+
  ! compute the shifted cprj's <p_k+b|u_k>
- ! call cpu_time(start_time)
+ call cpu_time(start_time)
+ write(std_out,'(a)')' orbmag progress: making <p_k+b|u_k>, step 2 of 6'
  ABI_DATATYPE_ALLOCATE(cprj_kb_k,(6,0:4,dtset%natom,mcprj))
  ncpgrb = 0 ! no k gradients in <p_k+b|u_k>
  do bdx=1, 6
@@ -4021,39 +4047,45 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  end do
  call ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
       & istwf_k,kg,mcg,mcprj,mpi_enreg,nattyp,ncpgrb,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
- ! call cpu_time(finish_time)
- ! write(std_out,'(a,es16.8)')'JWZ debug ctocprjb time: ',finish_time-start_time
-
- ! compute the energies at each k pt
- ! call cpu_time(start_time)
- ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
- call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
-      & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
-      & vhartr,vpsp,vxc,ucvol,xred,ylm,ylmgr)
- ! call cpu_time(finish_time)
- ! write(std_out,'(a,es16.8)')'JWZ debug make_eeig time: ',finish_time-start_time
-
- ! compute the <u_kg|H_k|u_kb> matrix elements
- ! call cpu_time(start_time)
- ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
- call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
-      & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,ucvol,vhartr,vpsp,vxc,xred)
- ! call cpu_time(finish_time)
- ! write(std_out,'(a,es16.8)')'JWZ debug make_eeig123 time: ',finish_time-start_time
+ call cpu_time(finish_time)
+ write(std_out,'(a,es16.8)')'JWZ debug ctocprjb time: ',finish_time-start_time
 
  ! compute the <u_kg|dS/dk_b|u_k> matrix elements
  ! ABI_ALLOCATE(dsdk_,(2,nband_k,nband_k,dtorbmag%fnkpt,1:3))
- ! call cpu_time(start_time)
+ call cpu_time(start_time)
+ write(std_out,'(a)')' orbmag progress: making <u_n1k1|dS/dk|u_n2k>, step 5 of 6'
  ABI_ALLOCATE(dsdk,(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4))
  ! call make_dsdk_cprj(atindx1,cprj,dsdk_,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
  call make_dsdk_FD(atindx1,cprj_kb_k,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
  ! call make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
- !     & mcg,mpi_enreg,nattyp,nband_k,nfftf,npwarr,pawfgr,paw_ij,pawtab,psps,pwind,pwind_alloc,&
- !     & rmet,rprimd,ucvol,xred,ylm,ylmgr)
- ! call cpu_time(finish_time)
- ! write(std_out,'(a,es16.8)')'JWZ debug make_dsdk_FD time: ',finish_time-start_time
+ !     & mcg,mpi_enreg,nband_k,npwarr,paw_ij,pawtab,psps,pwind,pwind_alloc,&
+ !     & rmet,rprimd,xred,ylm,ylmgr)
+ call cpu_time(finish_time)
+ write(std_out,'(a,es16.8)')'JWZ debug make_dsdk time: ',finish_time-start_time
 
- ! call cpu_time(start_time)
+ 
+ ! compute the energies at each k pt
+ call cpu_time(start_time)
+ write(std_out,'(a)')' orbmag progress: making <u_n1k|H_k|u_n2k>, step 3 of 6'
+ ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
+ call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
+      & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
+      & vhartr,vpsp,vxc,ucvol,xred,ylm,ylmgr)
+ call cpu_time(finish_time)
+ write(std_out,'(a,es16.8)')'JWZ debug make_eeig time: ',finish_time-start_time
+
+ ! compute the <u_kg|H_k|u_kb> matrix elements
+ call cpu_time(start_time)
+ write(std_out,'(a)')' orbmag progress: making <u_n1k1|H_k2|u_n3k3>, step 4 of 6'
+ ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
+ call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
+      & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,ucvol,vhartr,vpsp,vxc,xred)
+ call cpu_time(finish_time)
+ write(std_out,'(a,es16.8)')'JWZ debug make_eeig123 time: ',finish_time-start_time
+
+
+ call cpu_time(start_time)
+ write(std_out,'(a)')' orbmag progress: looping over B directions, step 6 of 6'
  do adir = 1, 3
 
     call make_onsite_l(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_l_dir,pawrad,pawtab)
@@ -4068,7 +4100,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     CCI(1,adir) = real(CCI_dir)
     CCI(2,adir) = aimag(CCI_dir)
 
-    call make_CCIV_dsdk(adir,CCIV_dir,dsdk,dtorbmag,dtset,eeig,mpi_enreg,nband_k)
+    call make_CCIV_dpdk(adir,dtorbmag,eeig,nband_k,smat_all_indx,CCIV_dir)
+    ! call make_CCIV_dsdk(adir,CCIV_dir,dsdk,dtorbmag,dtset,eeig,mpi_enreg,nband_k)
     CCIV(1,adir) = real(CCIV_dir)
     CCIV(2,adir) = aimag(CCIV_dir)
 
@@ -4087,8 +4120,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     VVI(2,adir) = aimag(VVI_dir)
 
  end do ! end loop over adir
- ! call cpu_time(finish_time)
- ! write(std_out,'(a,es16.8)')'JWZ debug adir loop time: ',finish_time-start_time
+ call cpu_time(finish_time)
+ write(std_out,'(a,es16.8)')'JWZ debug adir loop time: ',finish_time-start_time
 
  ! convert terms to cartesian coordinates as needed
  ! note that terms like <dv/dk| x |dw/dk> computed in reduced coords,
@@ -4301,6 +4334,125 @@ subroutine make_CCI(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
  end do ! end loop over epsabg
 
 end subroutine make_CCI
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/make_CCIV_dpdk
+!! NAME
+!! make_CCIV_dpdk
+!!
+!! FUNCTION
+!! This routine computes term CCIV for orbital magnetization using finite difference
+!! of the density operator
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_CCIV_dpdk(adir,dtorbmag,eeig,nband_k,smat_all_indx,CCIV_dir)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: adir,nband_k
+ complex(dpc),intent(out) :: CCIV_dir
+ type(orbmag_type), intent(inout) :: dtorbmag
+
+ !arrays
+ real(dp),intent(in) :: eeig(nband_k,dtorbmag%fnkpt)
+ real(dp),intent(in) :: smat_all_indx(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: bdir,bdx,bdxc,bdxstor,bfor,bsigma,epsabg
+ integer :: gdir,gdx,gdxc,gdxstor,gfor,gsigma,ikpt,ikptb,ikptg
+ integer :: nn,n1,n2,n3
+ real(dp) :: deltab,deltag,ENK
+ complex(dpc) :: CCIV,CCIV_1,CCIV_2,CCIV_3,CCIV_4
+
+ !arrays
+ real(dp) :: dkb(3),dkg(3)
+
+ ! ***********************************************************************
+
+ CCIV_dir=czero
+ do epsabg = 1, -1, -2
+
+    if (epsabg .EQ. 1) then
+       bdir = modulo(adir,3)+1
+       gdir = modulo(adir+1,3)+1
+    else
+       bdir = modulo(adir+1,3)+1
+       gdir = modulo(adir,3)+1
+    end if
+
+    do bfor = 1, 2
+       ! bsigma = 1 for bfor = 1, bsigma = -1 for bfor = 2
+       bsigma = -2*bfor+3
+       ! index of neighbor 1..6
+       bdx = 2*bdir-2+bfor
+       ! index of ikpt viewed from neighbor
+       bdxc = 2*bdir-2+bfor+bsigma
+       bdxstor = mod(bdx+6-2*gdir,6)
+       dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
+       deltab = sqrt(DOT_PRODUCT(dkb,dkb))
+
+       do gfor = 1, 2
+          ! gsigma = 1 for gfor = 1, gsigma = -1 for gfor = 2
+          gsigma = -2*gfor+3
+          ! index of neighbor 1..6
+          gdx = 2*gdir-2+gfor
+          gdxstor = mod(gdx+6-2*bdir,6)
+          ! index of ikpt viewed from neighbor
+          gdxc = 2*gdir-2+gfor+gsigma
+          dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
+          deltag = sqrt(DOT_PRODUCT(dkg,dkg))
+
+          do ikpt = 1, dtorbmag%fnkpt
+             ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+             ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
+             CCIV = czero
+             do nn = 1, nband_k
+                ENK = eeig(nn,ikpt)
+                do n1 = 1, nband_k
+                   CCIV_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0),KIND=dpc)
+                   do n2 = 1, nband_k
+                      CCIV_2 = cmplx(smat_all_indx(1,n1,n2,ikptb,bdxc,0),smat_all_indx(2,n1,n2,ikptb,bdxc,0),KIND=dpc)
+                      do n3 = 1, nband_k
+                         CCIV_3 = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0),KIND=dpc)
+                         CCIV_4 = cmplx(smat_all_indx(1,n3,nn,ikptg,gdxc,0),smat_all_indx(2,n3,nn,ikptg,gdxc,0),KIND=dpc)
+                         CCIV = CCIV + ENK*CCIV_1*CCIV_2*CCIV_3*CCIV_4
+                      end do ! end n3
+                   end do ! end n2
+                end do ! end n1
+             end do ! end nn
+             CCIV_dir = CCIV_dir + half*j_dpc*epsabg*bsigma*gsigma*CCIV/(2.0*deltab*2.0*deltag)
+          end do ! end loop over ikpt
+       end do ! end loop over gfor
+    end do ! end loop over bfor
+ end do ! end loop over epsabg
+
+end subroutine make_CCIV_dpdk
 !!***
 
 !{\src2tex{textfont=tt}}
