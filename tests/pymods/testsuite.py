@@ -12,6 +12,7 @@ import warnings
 
 from socket import gethostname
 from subprocess import Popen, PIPE
+from multiprocessing import Process, Queue, Lock
 
 # Handle py2, py3k differences.
 py2 = sys.version_info[0] <= 2
@@ -19,10 +20,12 @@ if py2:
     import cPickle as pickle
     from StringIO import StringIO
     from ConfigParser import SafeConfigParser, NoOptionError
+    from Queue import Empty as EmptyQueueError
 else:
     import pickle
     from io import StringIO
     from configparser import ConfigParser
+    from queue import Empty as EmptyQueueError
 
 from .jobrunner import TimeBomb
 from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher,
@@ -3360,8 +3363,6 @@ class AbinitTestSuite(object):
 
         elif py_nprocs > 1:
             logger.info("Threaded version with py_nprocs = %s" % py_nprocs)
-            from multiprocessing import Process, Queue, Lock
-            from queue import Empty as EmptyQueueError
 
             def proc_done(error=None, work=None):
                 return {
