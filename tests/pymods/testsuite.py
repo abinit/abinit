@@ -3437,6 +3437,10 @@ class AbinitTestSuite(object):
                         results[msg['full_id']] = msg
                         task_remaining -= 1
 
+            except KeyboardInterrupt:
+                self.terminate()
+                raise KeyboardInterrupt()
+
             except EmptyQueueError:
                 warnings.warn(
                     ("Workers have been hanging until timeout. There were {}"
