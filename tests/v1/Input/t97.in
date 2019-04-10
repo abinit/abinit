@@ -38,6 +38,7 @@
 #%% pre_commands = w_touch abinit.exit
 #%% [files]
 #%% psp_files = 14si.pspnc 
+#%% files_to_test = t97.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
