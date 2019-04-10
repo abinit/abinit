@@ -3450,15 +3450,12 @@ class AbinitTestSuite(object):
                 self.terminate()
                 return
 
-            else:
-                # remove this to let python carbage collect processes and avoid
-                # Pickle to complain (it does not accept processes for security
-                # reasons)
-                del self._processes
-
-            finally:
-                task_q.close()
-                res_q.close()
+            # remove this to let python carbage collect processes and avoid
+            # Pickle to complain (it does not accept processes for security
+            # reasons)
+            del self._processes
+            task_q.close()
+            res_q.close()
 
             # update local tests instances with the results of their running in
             # a remote process
