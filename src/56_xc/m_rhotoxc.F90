@@ -1226,7 +1226,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    if (nspden==4)  then
      ABI_DEALLOCATE(m_norm)
    end if
-   if ((usexcnhat==0).and.(nhatdim/=0)) then
+   if (need_nhat.or.non_magnetic_xc) then
      ABI_DEALLOCATE(rhor_)
    end if
 
