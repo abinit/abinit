@@ -3364,36 +3364,37 @@ class AbinitTestSuite(object):
         elif py_nprocs > 1:
             logger.info("Threaded version with py_nprocs = %s" % py_nprocs)
 
-            def proc_done(error=None, work=None):
-                return {
-                    'type': 'proc_done',
-                    'error': error,
-                    'work': work
-                }
-
             def worker(qin, qout, print_lock):
+                done = {
+                    'type': 'proc_done'
+                }
                 try:
                     while not qin.empty():
-                        test = qin.get()
+                        test = qin.get_nowait()
                         qout.put(run_and_check_test(test,
                                                     print_lock=print_lock))
+                except EmptyQueueError:
+                    # Queue have been emptied between the call to qin.empty
+                    # and the call to qin.get
+                    pass
                 except Exception as e:
+                    done['error'] = e
                     try:
-                        qout.put(proc_done(error=e, work=test.full_id))
+                        done['task'] = test.full_id
                     except (AttributeError, NameError):
-                        qout.put(proc_done(error=e))
-                else:
-                    qout.put(proc_done())
+                        pass
+                finally:
+                    qout.put(done)
 
-            qin = Queue()
-            qout = Queue()
+            task_q = Queue()
+            res_q = Queue()
             print_lock = Lock()
 
             for test in self:
-                qin.put(test)
+                task_q.put(test)
 
             for i in range(py_nprocs):
-                p = Process(target=worker, args=(qin, qout, print_lock))
+                p = Process(target=worker, args=(task_q, res_q, print_lock))
                 self._processes.append(p)
                 p.start()
 
@@ -3408,25 +3409,25 @@ class AbinitTestSuite(object):
             proc_running = py_nprocs
             try:
                 while proc_running > 0:
-                    msg = qout.get(
-                        block=True,
-                        timeout=10 * task_remaining * timeout_1test / proc_running
-                    )
+                    msg = res_q.get(block=True, timeout=(2 * task_remaining
+                                                         * timeout_1test
+                                                         / proc_running))
                     if msg['type'] == 'proc_done':
                         proc_running -= 1
-                        if msg['error'] is not None:
+                        if 'error' in msg:
                             e = msg['error']
-                            if msg['work'] is not None:
+                            if 'task' in msg:
                                 warnings.warn(
                                     'Error append in a worker on test '
                                     '{}:\n{}: {}'.format(
-                                        msg['work'], e.__class__.__name__, e
+                                        msg['task'], e.__class__.__name__, e
                                     )
                                 )
                             else:
+                                proc_running -= 1
                                 warnings.warn(
                                     'Error append in a worker:\n{}: {}'.format(
-                                        msg['work'], e.__class__.__name__, e
+                                        msg['task'], e.__class__.__name__, e
                                     )
                                 )
 
@@ -3437,12 +3438,17 @@ class AbinitTestSuite(object):
                         task_remaining -= 1
 
             except EmptyQueueError:
-                warnings.warn("Workers have been hanging until timeout.")
+                warnings.warn(
+                    ("Workers have been hanging until timeout. There were {}"
+                     " procs working on {} tasks.").format(proc_running,
+                                                           task_remaining)
+                )
                 self.terminate()
                 return
 
             finally:
-                qin.close()
+                task_q.close()
+                res_q.close()
                 # remove this to let python carbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security
                 # reasons)
@@ -3462,8 +3468,6 @@ class AbinitTestSuite(object):
                         "I did not get the results of the test {}. It means"
                         " that something fishy happen in the worker."
                     ).format(test.full_id))
-
-            qout.close()
 
         # Run completed.
         self._executed = True
