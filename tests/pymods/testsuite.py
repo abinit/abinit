@@ -3383,8 +3383,7 @@ class AbinitTestSuite(object):
                         done['task'] = test.full_id
                     except (AttributeError, NameError):
                         pass
-                finally:
-                    qout.put(done)
+                qout.put(done)
 
             task_q = Queue()
             res_q = Queue()
@@ -3446,13 +3445,15 @@ class AbinitTestSuite(object):
                 self.terminate()
                 return
 
-            finally:
-                task_q.close()
-                res_q.close()
+            else:
                 # remove this to let python carbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security
                 # reasons)
                 del self._processes
+
+            finally:
+                task_q.close()
+                res_q.close()
 
             # update local tests instances with the results of their running in
             # a remote process
