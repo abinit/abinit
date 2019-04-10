@@ -437,6 +437,7 @@ TESTCNF_KEYWORDS = {
     "system_xml"     : (str       , ""   , "setup","The system.xml file read by multibinit"),
     "coeff_xml"      : (str       , ""   , "setup","The coeff.xml file read by multibinit"),
     "md_hist"        : (str       , ""   , "setup","The hist file file read by multibinit"),
+    "no_check"       : (_str2bool , "no" , "setup","Explicitly do not check any files"),
     # [files]
     "files_to_test"  : (_str2filestotest, "", "files", "List with the output files that are be compared with the reference results. Format:\n" +
                                                        "\t file_name, tolnlines = int, tolabs = float, tolrel = float [,fld_options = -medium]\n" +
@@ -1382,6 +1383,16 @@ class BaseTest(object):
 
         self.__dict__.update(test_info.__dict__)
 
+        if not self.files_to_test:  # no file to test
+            if self.no_check:
+                pass
+            else:
+                raise ValueError(
+                    'This test have no files_to_test attribute. It is'
+                    ' forbidden unless you had "no_check = yes" to its'
+                    ' [setup] section in test configuration.'
+                )
+
         # Save authors' second names to speed up the search.
         # Well, let's hope that we don't have authors with the same second name!
         second_names = []
@@ -1631,17 +1642,19 @@ class BaseTest(object):
     def status(self):
         """The status of the test"""
         if self._status is None:
-            all_fldstats = {f.fld_status for f in self.files_to_test}
-
-            if "failed" in all_fldstats:
-                self._status = "failed"
-            elif "passed" in all_fldstats:
-                self._status = "passed"
-            else:
-                assert all_fldstats == {"succeeded"}, (
-                    "Unexpected test status: {}".format(all_fldstats)
-                )
+            if self.no_check:
                 self._status = "succeeded"
+            else:
+                all_fldstats = {f.fld_status for f in self.files_to_test}
+                if "failed" in all_fldstats:
+                    self._status = "failed"
+                elif "passed" in all_fldstats:
+                    self._status = "passed"
+                else:
+                    assert all_fldstats == {"succeeded"}, (
+                        "Unexpected test status: {}".format(all_fldstats)
+                    )
+                    self._status = "succeeded"
 
         return self._status
 
@@ -2866,27 +2879,26 @@ class ChainOfTests(object):
     @property
     def status(self):
         if self._status is None:
-            _stats = [test._status for test in self]
+            _stats = {test.status for test in self}
             if "disabled" in _stats or "skipped" in _stats:
-                if any(s != _stats[0] for s in _stats):
-                    # print(self)
-                    # print("WARNING, expecting all(s == _stats[0] but got\n %s" % str(_stats))
-                    return "failed"
-                return _stats[0]
-
-            all_fldstats = {f.fld_status for f in self.files_to_test}
-
-            if "failed" in all_fldstats:
-                self._status = "failed"
-            elif "passed" in all_fldstats:
-                self._status = "passed"
-            elif all_fldstats != {"succeeded"}:
-                print(self)
-                print("WARNING, expecting {'succeeded'} but got\n%s"
-                      % str(all_fldstats))
-                self._status = "failed"
+                if len(_stats) > 1:  # it must be {'skipped'} or {'disabled'}
+                    self._status = 'failed'
+                else:
+                    self._status = _stats.pop()
             else:
-                self._status = "succeeded"
+                all_fldstats = {f.fld_status for f in self.files_to_test}
+
+                if "failed" in all_fldstats:
+                    self._status = "failed"
+                elif "passed" in all_fldstats:
+                    self._status = "passed"
+                elif all_fldstats != {"succeeded"}:
+                    print(self)
+                    print("WARNING, expecting {'succeeded'} but got\n%s"
+                          % str(all_fldstats))
+                    self._status = "failed"
+                else:
+                    self._status = "succeeded"
 
         return self._status
 
