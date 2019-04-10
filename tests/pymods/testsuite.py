@@ -3383,7 +3383,8 @@ class AbinitTestSuite(object):
                         done['task'] = test.full_id
                     except (AttributeError, NameError):
                         pass
-                qout.put(done)
+                finally:
+                    qout.put(done)
 
             task_q = Queue()
             res_q = Queue()
