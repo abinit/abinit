@@ -7,7 +7,7 @@
 !!  module with the type for the input of multibinit (should be clean)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (AM)
+!!  Copyright (C) 2014-2019 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -262,8 +262,6 @@ contains
 
 subroutine multibinit_dtset_init(multibinit_dtset,natom)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -434,8 +432,6 @@ end subroutine multibinit_dtset_init
 
 subroutine multibinit_dtset_free(multibinit_dtset)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(multibinit_dtset_type), intent(inout) :: multibinit_dtset
@@ -532,8 +528,6 @@ end subroutine multibinit_dtset_free
 !! SOURCE
 
 subroutine invars10(multibinit_dtset,lenstr,natom,string)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2272,8 +2266,6 @@ end subroutine invars10
 !! SOURCE
 
 subroutine outvars_multibinit (multibinit_dtset,nunit)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

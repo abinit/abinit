@@ -7,7 +7,7 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,6 +77,8 @@ MODULE m_nctk
  integer,public,parameter :: nctk_slen=256
 #endif
 
+ character(len=5),private,parameter :: NCTK_IMPLICIT_DIMS(10) = [ &
+   "one  ", "two  ", "three", "four ", "five ", "six  ", "seven", "eight", "nine ", "ten  "]
 
 !!****t* m_nctk/nctkerr_t
 !! NAME
@@ -1049,7 +1051,11 @@ integer function nctk_def_one_dim(ncid, nctkdim, defmode, prefix) result(ncerr)
  end if
 
  if (present(prefix)) then
-   dname = strcat(prefix, nctkdim%name)
+   if (any(nctkdim%name == NCTK_IMPLICIT_DIMS)) then
+     dname = nctkdim%name
+   else
+     dname = strcat(prefix, nctkdim%name)
+   end if
  else
    dname = nctkdim%name
  end if
@@ -1476,7 +1482,7 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid, prefix) re
  character(len=500) :: msg
 !arrays
  integer :: dimids(NF90_MAX_DIMS),dimvals(NF90_MAX_DIMS)
- character(len=nctk_slen) :: sarr(NF90_MAX_DIMS), string, pre, vname
+ character(len=nctk_slen) :: sarr(NF90_MAX_DIMS), string, pre, vname, dimname
  type(nctkvar_t) :: var
 
 ! *********************************************************************
@@ -1501,18 +1507,33 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid, prefix) re
  ! Parse dimension names and add prefix (if any).
  if (nn == 0) then
    cnt = 1
-   sarr(1) = strcat(pre, lstrip(string))
+   dimname = lstrip(string)
+   if (any(dimname == NCTK_IMPLICIT_DIMS)) then
+     sarr(1) = dimname
+   else
+     sarr(1) = strcat(pre, dimname)
+   end if
  else
    prev = 0; cnt = 0
    do ii=1,len_trim(string)
      if (string(ii:ii) == ",") then
        cnt = cnt + 1
-       sarr(cnt) = strcat(pre, lstrip(string(prev+1:ii-1)))
+       dimname = lstrip(string(prev+1:ii-1))
+       if (any(dimname == NCTK_IMPLICIT_DIMS)) then
+         sarr(cnt) = dimname
+       else
+         sarr(cnt) = strcat(pre, dimname)
+       end if
        prev = ii
      end if
    end do
    cnt = cnt + 1
-   sarr(cnt) = strcat(pre, lstrip(string(prev+1:ii-1)))
+   dimname = lstrip(string(prev+1:ii-1))
+   if (any(dimname == NCTK_IMPLICIT_DIMS)) then
+     sarr(cnt) = dimname
+   else
+     sarr(cnt) = strcat(pre, dimname)
+   end if
  end if
 
  ! Get dimids

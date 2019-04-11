@@ -8,7 +8,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, MM, GZ, MT, MF, XG)
+!! Copyright (C) 2009-2019 ABINIT group (MG, MM, GZ, MT, MF, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2207,7 +2207,7 @@ end function fftu_mpi_utests
 !! and for zeroing arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FF)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2907,7 +2907,7 @@ end subroutine fourwf
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3029,7 +3029,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
    else
      !call wrtout(std_out,"FFTW3 MPIFOURDP")
      call fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
-&     fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
+      fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    end if
    ! Accumulate timing and return
    call timab(260+tim_fourdp,2,tsec); return
@@ -3295,7 +3295,7 @@ end subroutine fourdp
 !! Include machine-dependent F90 routines used with fftalg=200.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (PT, XG, FF)
+!! Copyright (C) 2000-2019 ABINIT group (PT, XG, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4471,7 +4471,7 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
    if (nd1<n1.or.nd2<n2.or.nd3<n3) then
      write(message,'(a,3i0,2a,3i0,a)')&
 &     'Each of nd1,nd2,nd3=',nd1,nd2,nd3,ch10,&
-&     'must be >=      n1, n2, n3 =',n1,n2,n3,'.'
+&     'must be >= n1, n2, n3 =',n1,n2,n3,'.'
      MSG_BUG(message)
    end if
  else

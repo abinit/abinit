@@ -8,7 +8,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (GA)
+!!  Copyright (C) 2008-2019 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -198,10 +198,8 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
      ! q-point is present in the ddb. No interpolation needed.
 
      !d2cart(:,1:msize) = ddb%val(:,:,iblok)
-     d2cart(1,:,:,:,:) = reshape(ddb%val(1,:,iblok), &
-&     shape = (/3,mpert,3,mpert/))
-     d2cart(2,:,:,:,:) = reshape(ddb%val(2,:,iblok), &
-&     shape = (/3,mpert,3,mpert/))
+     d2cart(1,:,:,:,:) = reshape(ddb%val(1,:,iblok), shape = (/3,mpert,3,mpert/))
+     d2cart(2,:,:,:,:) = reshape(ddb%val(2,:,iblok), shape = (/3,mpert,3,mpert/))
    else
 
      ! Get d2cart using the interatomic forces and the
@@ -209,7 +207,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart, &
 &     crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
 &     qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
-&     Ifc%wghatm,crystal%xred,ifc%zeff)
+&     Ifc%wghatm,crystal%xred,ifc%zeff, xmpi_comm_self)
 
    end if
 
@@ -219,7 +217,6 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    ! Transform d2cart into reduced coordinates.
    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,mpert, &
 &   natom,ntypat,crystal%typat,crystal%ucvol,crystal%zion)
-
 
    ! Store the dynamical matrix into a block of the new ddb
    jblok = iqpt

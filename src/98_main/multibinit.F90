@@ -7,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (AM)
+!! Copyright (C) 1999-2019 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -146,7 +146,7 @@ program multibinit
 !set the argument of abimem_init to "2" instead of "0"
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(2)
 #endif
 
 !Initialisation of the timing
@@ -598,7 +598,7 @@ elec_eval = .FALSE.
 !****************************************************************************************
    call effective_potential_free(reference_effective_potential)
    call multibinit_dtset_free(inp)
-   call abihist_free(hist)
+   call abihist_free(hist) 
    call abihist_free(hist_tes)
    if(inp%spin_dynamics>0) then
       call spin_model_t_finalize(spin_model)

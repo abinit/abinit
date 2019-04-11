@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
+!! Copyright (C) 2009-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -330,8 +330,7 @@ end subroutine clib_show_fc_alignment
 !!  clib_rename
 !!
 !! FUNCTION
-!!  Rename a file with a new name
-!!  It uses the C rename function from stdlib
+!!  Rename a file with a new name using the rename function from C stdlib
 !!
 !! INPUTS
 !!
@@ -344,21 +343,17 @@ end subroutine clib_show_fc_alignment
 !!
 !! SOURCE
 
-subroutine clib_rename(old_fname, new_fname, ierr)
+integer function clib_rename(old_fname, new_fname) result(ierr)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: old_fname, new_fname
- integer, optional, intent(out) :: ierr
  integer :: ier
-
-!Local variables-------------------------------
 
 ! *********************************************************************
 
- ier = rename(trim(old_fname)//c_null_char, trim(new_fname)//c_null_char)
- if ( present(ierr) ) ierr = ier
+ ierr = rename(trim(old_fname)//c_null_char, trim(new_fname)//c_null_char)
 
-end subroutine clib_rename
+end function clib_rename
 !!***
 
 END MODULE m_clib

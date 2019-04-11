@@ -8,7 +8,7 @@
 !!  xmpi_ialltoallv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (MG)
+!!  Copyright (C) 2001-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,8 +35,6 @@
 !! SOURCE
 
 subroutine xmpi_ialltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(in) :: xval(:,:)
@@ -82,8 +80,6 @@ end subroutine xmpi_ialltoallv_dp2d
 
 subroutine xmpi_ialltoallv_int2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
 
- implicit none
-
 !Arguments-------------------------
  integer ABI_ASYNC, intent(in) :: xval(:,:)
  integer ABI_ASYNC, intent(inout) :: recvbuf(:,:)
@@ -127,8 +123,6 @@ end subroutine xmpi_ialltoallv_int2d
 !! SOURCE
 
 subroutine xmpi_ialltoallv_dp1d2(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(in) :: xval(:)

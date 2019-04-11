@@ -7,7 +7,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
+!! Copyright (C) 2008-2019 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -827,7 +827,6 @@ end function get_diag_cdp
 !! SOURCE
 
 pure logical function isdiagmat_int(mat) result(ans)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -6136,12 +6135,10 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  do ii=2,nomega
    if (ABS(domega-(omega(ii)-omega(ii-1))) > 0.001) then
      if (only_check/=1) then
-       msg="check cannot be performed since the frequency step is not constant"
-       MSG_WARNING(msg)
+       MSG_WARNING("Check cannot be performed since the frequency step is not constant")
        RETURN
      else
-       msg=' Cannot perform integration since frequency step is not constant'
-       MSG_ERROR(msg)
+       MSG_ERROR('Cannot perform integration since frequency step is not constant')
      end if
    end if
  end do
@@ -6149,12 +6146,10 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 !Check whether omega(1) is small or not
  if (omega(1) > 0.1/Ha_eV) then
    if (only_check/=1) then
-     msg=' Check cannot be performed since first frequency on the grid > 0.1 eV'
-     MSG_WARNING(msg)
+     MSG_WARNING('Check cannot be performed since first frequency on the grid > 0.1 eV')
      RETURN
    else
-     msg=' Cannot perform integration since first frequency on the grid > 0.1 eV'
-     MSG_ERROR(msg)
+     MSG_ERROR('Cannot perform integration since first frequency on the grid > 0.1 eV')
    end if
  end if
 

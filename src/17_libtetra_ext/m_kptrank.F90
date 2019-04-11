@@ -7,7 +7,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MVer)
+!! Copyright (C) 2010-2019 ABINIT group (MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -134,9 +134,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
  timrev = 2
  krank%time_reversal = .true.
  if (present(time_reversal)) then
-   if (.not. time_reversal) then
-     timrev = 1
-   end if
+   if (.not. time_reversal) timrev = 1
  end if
 
 !Ensure kpt(i)+one is positive, and the smallest
@@ -166,9 +164,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
      do itim = timrev, 1, -1
        do isym = 1, nsym
          symkpt = (-1)**(timrev+1) * matmul(symrec(:,:,isym), kpt(:, ikpt))
-
          call get_rank_1kpt (symkpt(:), symkptrank, krank)
-
          krank%invrank(symkptrank) = ikpt
        end do
      end do
@@ -253,8 +249,6 @@ subroutine get_rank_1kpt(kpt,rank,krank)
    redkpt(3)=-mod(-(kpt(3)-one+tol12),one)+one-tol12
  end if
  if(abs(redkpt(3))<tol12)redkpt(3)=zero
-
-
 
 ! rank = int(real(krank%max_linear_density)*(redkpt(3)+half+tol8 +&
 !&           real(krank%max_linear_density)*(redkpt(2)+half+tol8 +&

@@ -705,27 +705,27 @@ with_mpi_prefix="${MPIHOME}"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf"
+with_trio_flavor="netcdf+psml"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-#with_psml_incs="-I/usr/local/include/psml"
+with_psml_incs="-I${FALLBACKS_PATH}/xmlf90/1.5.3.1/include -I${FALLBACKS_PATH}/libpsml/1.1.7/include"
 
 # Link flags for the psml library (default is unset)
 #
-#with_psml_libs="-L/usr/local/lib/psml -lpsml"
+with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.7/lib -lpsml -L${FALLBACKS_PATH}/xmlf90/1.5.3.1/lib -lxmlf90"
 
                        # ------------------------------ #
 
 # Include flags for the NetCDF library (default is unset)
 #
-#with_netcdf_incs="-I/usr/local/include/netcdf"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -947,17 +947,17 @@ with_dft_flavor="libxc"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 

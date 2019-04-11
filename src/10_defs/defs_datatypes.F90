@@ -29,7 +29,7 @@
 !! * pspheader_type : for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (XG)
+!! Copyright (C) 2001-2019 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,6 +75,7 @@ module defs_datatypes
   integer :: nkpt                  ! number of k points
   integer :: nspinor               ! 1 for collinear, 2 for noncollinear.
   integer :: nsppol                ! number of spin-polarizations
+  integer :: ntemp                 ! Number of temperatures
   integer :: occopt                ! Occupation option, see input variable.
 
   real(dp) :: entropy              ! Entropy associated with the smearing (adimensional)
@@ -103,9 +104,17 @@ module defs_datatypes
   ! eig(mband,nkpt,nsppol)
   ! Eigenvalues of each band.
 
-  real(dp),allocatable :: lifetime(:,:,:)
-  ! lifetime(mband,nkpt,nsppol)
-  ! Lifetime of each band
+  real(dp),allocatable :: linewidth(:,:,:,:)
+  ! linewidth(itemp,mband,nkpt,nsppol)
+  ! Linewidth of each band
+
+  real(dp),allocatable :: kTmesh(:)
+  ! kTmesh(ntemp)
+  ! List of temperatures (KT units).
+
+  real(dp),allocatable :: velocity(:,:,:,:)
+  ! velocity(3,mband,nkpt,nsppol)
+  ! Group velocity of each band
 
   real(dp),allocatable :: occ(:,:,:)
   ! occ(mband,nkpt,nsppol)

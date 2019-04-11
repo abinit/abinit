@@ -8,7 +8,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!!  Copyright (C) 2009-2018 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!!  Copyright (C) 2009-2019 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -156,7 +156,6 @@ contains
 !!      exc_build_ham
 !!
 !! CHILDREN
-!!      get_bz_item,timab,wrtout,xmpi_split_work2_i4b
 !!
 !! SOURCE
 
@@ -563,17 +562,15 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    my_starts = [my_rows(1),my_cols(1)]
    my_ends   = [my_rows(2),my_cols(2)]
    !
-   ! * Announce the treatment of submatrix treated by each node.
+   ! Announce the treatment of submatrix treated by each node.
    bsize_my_block = 2*dpc*my_hsize
    write(msg,'(4(a,i0))')' Treating ',my_hsize,'/',nels,' matrix elements, from column ',my_cols(1),' up to column ',my_cols(2)
    call wrtout(std_out,msg,'PERS')
 
    if (is_resonant) then
-     write(msg,'(a,f8.1,a)')&
-&     ' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
+     write(msg,'(a,f8.1,a)')' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
    else
-     write(msg,'(a,f8.1,a)')&
-&     ' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
+     write(msg,'(a,f8.1,a)')' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
    end if
    call wrtout(std_out,msg,"COLL")
 
@@ -706,35 +703,35 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ! =======================================
          ! === Loop over the four band indeces ===
          ! =======================================
-         !
          do ic=bidx(1,2),bidx(2,2) !do ic=BSp%lumo,BSp%nbnds
 
            if (wfd%ihave_ur(ic,ik_ibz,spin1,how="Stored")) then
-             ptur_ck =>  Wfd%Wave(ic,ik_ibz,spin1)%ur
+             ptur_ck => Wfd%Wave(ic,ik_ibz,spin1)%ur
            else
              call wfd%get_ur(ic,ik_ibz,spin1,ur_ck)
              ptur_ck => ur_ck
            end if
            !
            ! Get cprj for this (c,kbz,s1) in the BZ.
-           ! * phase due to the umklapp G0 in k-q is already included.
+           ! phase due to the umklapp G0 in k-q is already included.
            if (Wfd%usepaw==1) then
              if (wfd%ihave_cprj(ic,ik_ibz,spin1,how="Stored")) then
-               ptcp_ck =>  Wfd%Wave(ic,ik_ibz,spin1)%cprj
+               ptcp_ck => Wfd%Wave(ic,ik_ibz,spin1)%cprj
              else
                call wfd%get_cprj(ic,ik_ibz,spin1,Cryst,Cp_tmp1,sorted=.FALSE.)
-               ptcp_ck =>  Cp_tmp1
+               ptcp_ck => Cp_tmp1
              end if
              call paw_symcprj_op(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,ptcp_ck,Cp_ck)
            end if
 
            do icp=bidx(1,4),bidx(2,4)  !do icp=BSp%lumo,BSp%nbnds
-             ! * Calculate matrix-elements rhxtwg_cpc
+             ! Calculate matrix-elements rhxtwg_cpc
              !
              if (ik_bz==ikp_bz) then ! Already in memory.
                rhxtwg_cpc(:) = sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npweps,rhxtwg_q0(:,icp,ic,ik_ibz,spin1),Gsph_c)
 
-             else ! Calculate matrix element from wfr.
+             else
+               ! Calculate matrix element from wfr.
                ! TODO: change the order of the loops.
 
                if (wfd%ihave_ur(icp,ikp_ibz,spin2,how="Stored")) then
@@ -745,7 +742,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                end if
 
                ! Load cprj for this (c,k,s2) in the BZ.
-               ! * Do not care about umklapp G0 in k-q as the phase is already included.
+               ! Do not care about umklapp G0 in k-q as the phase is already included.
                if (Wfd%usepaw==1) then
                  if (wfd%ihave_cprj(icp,ikp_ibz,spin2,how="Stored")) then
                    ptcp_ckp =>  Wfd%Wave(icp,ikp_ibz,spin2)%cprj
@@ -862,7 +859,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                    end if
                    !
                    ! Load cprj for this (vp,kp,s2) in the BZ.
-                   ! * Do not care about umklapp G0 in k-q as the phase is already included.
+                   ! Do not care about umklapp G0 in k-q as the phase is already included.
                    if (Wfd%usepaw==1) then
                      if (wfd%ihave_cprj(ivp,ikp_ibz,spin2,how="Stored")) then
                        ptcp_vkp =>  Wfd%Wave(ivp,ikp_ibz,spin2)%cprj
@@ -1368,19 +1365,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
            write(msg,'(2(a,i0))')" Wraparound error: iend=",iend," my_hsize=",hsize_of(sender)
            MSG_ERROR(msg)
          end if
-         if (allocated(prev_col)) then
-           ABI_FREE(prev_col)
-         end if
+         ABI_SFREE(prev_col)
          if (BSp%prep_interp) then
-           if (allocated(aprev_col)) then
-             ABI_FREE(aprev_col)
-           end if
-           if (allocated(bprev_col)) then
-             ABI_FREE(bprev_col)
-           end if
-           if (allocated(cprev_col)) then
-             ABI_FREE(cprev_col)
-           end if
+           ABI_SFREE(aprev_col)
+           ABI_SFREE(bprev_col)
+           ABI_SFREE(cprev_col)
          end if
          ABI_FREE(buffer)
          if (BSp%prep_interp) then
@@ -1399,19 +1388,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    end if ! use_mpiio
    call timab(685,2,tsec) ! exc_build_ham(write_ham)
    !
-   if (allocated(my_bsham)) then
-     ABI_FREE(my_bsham)
-   end if
+   ABI_SFREE(my_bsham)
    if (BSp%prep_interp) then
-     if (allocated(acoeffs)) then
-       ABI_FREE(acoeffs)
-     end if
-     if (allocated(bcoeffs)) then
-       ABI_FREE(bcoeffs)
-     end if
-     if (allocated(ccoeffs)) then
-       ABI_FREE(ccoeffs)
-     end if
+     ABI_SFREE(acoeffs)
+     ABI_SFREE(bcoeffs)
+     ABI_SFREE(ccoeffs)
    end if
    ABI_FREE(t_start)
    ABI_FREE(t_stop)
@@ -1616,11 +1597,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    call timab(685,2,tsec) ! exc_build_ham(write_ham)
 
    ABI_FREE(ncols_of)
-   if (allocated(my_kxssp))  then
-     ABI_FREE(my_kxssp)
-   end if
+   ABI_SFREE(my_kxssp)
  end if
- !
+
  ! Close the file.
  if (use_mpiio) then
 #ifdef HAVE_MPI_IO
@@ -1639,7 +1618,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      close(c_unt)
    end if
  end if
- !
+
  ! Free memory.
  ABI_FREE(igfftg0)
  ABI_FREE(ktabr_k)
@@ -1759,7 +1738,6 @@ end subroutine exc_build_block
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_bz_item,timab,wrtout,xmpi_split_work2_i4b
 !!
 !! SOURCE
 
@@ -2095,17 +2073,13 @@ if (nsppol==2) then
  call timab(686,2,tsec) ! exc_build_ham(exch.spin)
 
  ABI_FREE(ncols_of)
- if (allocated(my_kxssp))  then
-   ABI_FREE(my_kxssp)
- end if
+ ABI_SFREE(my_kxssp)
  end if
 
  DBG_EXIT("COLL")
 
 end subroutine exc_build_v
 !!***
-
-
 
 !!****f* m_exc_build/exc_build_ham
 !! NAME
@@ -2142,9 +2116,6 @@ end subroutine exc_build_v
 !!      bethe_salpeter
 !!
 !! CHILDREN
-!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
-!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd_change_ngfft
-!!      wfd_get_cprj,wfd_get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2232,8 +2203,8 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
 &    Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.FALSE.,BS_files%out_hcoup)
    call timab(673,2,tsec)
  end if
- !
- ! * Free memory.
+
+ ! Free memory.
  ABI_FREE(all_mgq0)
 
 100 call timab(670,2,tsec)
@@ -2271,9 +2242,6 @@ end subroutine exc_build_ham
 !!      exc_build_ham
 !!
 !! CHILDREN
-!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
-!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd_change_ngfft
-!!      wfd_get_cprj,wfd_get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 

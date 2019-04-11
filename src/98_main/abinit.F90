@@ -7,7 +7,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -118,7 +118,6 @@ program abinit
  use m_dtset,       only : chkvars, dtset_free
  use m_dtfil,       only : iofn1
  use m_outxml,      only : outxml_open, outxml_finalise
- use m_parser,      only : parsefile
  use m_out_acknowl, only : out_acknowl
  use m_timana,      only : timana
  use m_builtin_tests, only : testfi
@@ -157,7 +156,7 @@ program abinit
 ! Declarations
 ! Define "level of the routine", for debugging purposes
  integer,parameter :: level=1
- integer :: choice,dmatpuflag,ierr,iexit,ii,iounit,ios
+ integer :: choice,dmatpuflag,ierr,ii,iounit,ios
  integer :: lenstr,me,print_mem_report
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp

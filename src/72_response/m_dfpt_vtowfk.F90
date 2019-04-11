@@ -5,9 +5,8 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2019 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,16 +56,6 @@ module m_dfpt_vtowfk
 contains
 !!***
 
-
-
-
-
-
-
-
-
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/dfpt_vtowfk
 !! NAME
 !! dfpt_vtowfk
@@ -188,8 +177,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & n4,n5,n6,occ_k,pawrhoij1,prtvol,psps,resid_k,rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,&
 & ddk_f,wtk_k,nlines_done,cg1_out)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,dim_eig2rf,ibg
@@ -233,7 +220,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !scalars
  integer,parameter :: level=14,tim_fourwf=5
  integer,save :: nskip=0
- integer :: counter,iband,idir0,ierr,iexit,igs,igscq,ii,dim_dcwf,inonsc
+ integer :: counter,iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
  integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
@@ -599,20 +586,19 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !###################################################################
 
-!Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers)
- if(iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max))then
+ ! Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers)
+ if (iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) then
    write(message,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
    call wrtout(std_out,message,'PERS')
  end if
 
- if(prtvol<=2 .and. ikpt==nkpt_max+1)then
+ if (prtvol<=2 .and. ikpt==nkpt_max+1) then
    write(message,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
    call wrtout(std_out,message,'PERS')
  end if
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
-   write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,&
-&   ikpt,' max resid=',residk
+   write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
    MSG_WARNING(message)
  end if
 
@@ -678,8 +664,6 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 &               fermie1,eig0nk,eig0_kq,elph2_imagden,&
 &               iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,&
 &               nspinor,timcount,usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -818,8 +802,6 @@ end subroutine full_active_wf1
 subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fermie1,ghc,iband, &
 &          ibgq,icgq,istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,nspinor,occ,rocceig,timcount,&
 &          usepaw,wf_corrected)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

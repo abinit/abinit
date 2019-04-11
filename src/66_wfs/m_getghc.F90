@@ -7,7 +7,7 @@
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, MT)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,8 +128,6 @@ contains
 subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
 &                 prtvol,sij_opt,tim_getghc,type_calc,&
 &                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -285,8 +283,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 !  Need a Vlocal
    if (.not.associated(gs_ham%vlocal)) then
-     msg='we need Vlocal!'
-     MSG_BUG(msg)
+     MSG_BUG("We need vlocal in gs_ham!")
    end if
 
 !  fourwf can only process with one value of istwf_k
@@ -526,12 +523,10 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !  Add metaGGA contribution
    if (associated(gs_ham%vxctaulocal)) then
      if (.not.k1_eq_k2) then
-       msg='metaGGA not allowed for k/=k_^prime!'
-       MSG_BUG(msg)
+       MSG_BUG('metaGGA not allowed for k/=k_^prime!')
      end if
      if (size(gs_ham%vxctaulocal)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*4) then
-       msg='wrong sizes for vxctaulocal!'
-       MSG_BUG(msg)
+       MSG_BUG('wrong sizes for vxctaulocal!')
      end if
      ABI_ALLOCATE(ghc_mGGA,(2,npw_k2*my_nspinor*ndat))
      call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,gs_ham%istwf_k,kg_k1,kpt_k1,&
@@ -544,8 +539,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !  Add nuclear dipole moment contribution if nonzero
    if (any(abs(gs_ham%nucdipmom)>tol8)) then
      if (.not.k1_eq_k2) then
-       msg='Nuclear Dipole Moment not allowed for k/=k_^prime!'
-       MSG_BUG(msg)
+       MSG_BUG('Nuclear Dipole Moment not allowed for k/=k_^prime!')
      end if
      ABI_ALLOCATE(ghcnd,(2,npw_k2*my_nspinor*ndat))
      call getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
@@ -750,7 +744,6 @@ end subroutine getghc
 
 !----------------------------------------------------------------------
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/getghc_mGGA
 !!
 !! NAME
@@ -760,7 +753,7 @@ end subroutine getghc
 !! Compute metaGGA contribution to <G|H|C> for input vector |C> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, MT)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -801,8 +794,6 @@ end subroutine getghc
 
 subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
 &                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vxctaulocal,use_gpu_cuda)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1098,8 +1089,6 @@ end subroutine getghc_mGGA
 subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 &                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
@@ -1223,7 +1212,7 @@ end subroutine getgsc
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2018 ABINIT group (JB)
+!! Copyright (C) 2016-2019 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1293,7 +1282,6 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 #ifdef HAVE_OPENMP
    use omp_lib
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1429,8 +1417,6 @@ end subroutine multithreaded_getghc
 !! SOURCE
 
 subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

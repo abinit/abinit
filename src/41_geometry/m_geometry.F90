@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
+!! Copyright (C) 2008-2019 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2919,11 +2919,14 @@ subroutine symredcart(aprim,bprim,symcart,symred)
    end do
  end do
 
+ ! work = bprim * symred^T
+
  symcart=zero
  do kk=1,3
    do jj=1,3
      symtmp=work(jj,kk)
      do ii=1,3
+       ! symcart = aprim * work^T = aprim * symred * bprim^T
        symcart(ii,jj)=symcart(ii,jj)+aprim(ii,kk)*symtmp
      end do
    end do

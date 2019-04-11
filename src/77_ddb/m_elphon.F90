@@ -8,7 +8,7 @@
 !! elements and calculates related properties - Tc, phonon linewidths...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer, BXu, MG, JPC)
+!! Copyright (C) 2004-2019 ABINIT group (MVer, BXu, MG, JPC)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +57,7 @@ module m_elphon
  use m_fstab,           only : mkqptequiv
  use m_epweights,       only : d2c_weights, ep_el_weights, ep_fs_weights
  use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova, get_tau_k
- use m_symkpt,     only : symkpt
+ use m_symkpt,          only : symkpt
 
  implicit none
 
@@ -192,7 +192,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  integer,allocatable :: indkpt1(:)
  integer,allocatable :: FSfullpqtofull(:,:)
  integer,allocatable :: qpttoqpt(:,:,:)
- integer,allocatable :: pair2red(:,:), red2pair(:,:)
+ integer,allocatable :: pair2red(:,:), red2pair(:,:), bz2ibz_smap(:,:)
  !real(dp) :: acell_in(3),rprim_in(3,3),rprim(3,3),acell(3),
  real(dp) :: kpt(3),shiftk(3)
  real(dp),allocatable :: wtk_fullbz(:),wtk_folded(:)
@@ -559,10 +559,13 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    ABI_ALLOCATE(indkpt1,(elph_ds%k_phon%nkpt))
    ABI_ALLOCATE(wtk_fullbz,(elph_ds%k_phon%nkpt))
    ABI_ALLOCATE(wtk_folded,(elph_ds%k_phon%nkpt))
+   ABI_ALLOCATE(bz2ibz_smap, (6, elph_ds%k_phon%nkpt))
 
    wtk_fullbz(:) = one/dble(elph_ds%k_phon%nkpt) !weights normalized to unity
    call symkpt(0,cryst%gmet,indkpt1,0,elph_ds%k_phon%kpt,elph_ds%k_phon%nkpt,elph_ds%k_phon%new_nkptirr,&
-&   Cryst%nsym,Cryst%symrec,timrev,wtk_fullbz,wtk_folded)
+&   Cryst%nsym,Cryst%symrec,timrev,wtk_fullbz,wtk_folded, bz2ibz_smap, xmpi_comm_self)
+
+   ABI_FREE(bz2ibz_smap)
 
    write (message,'(2a,i0)')ch10,' Number of irreducible k-points = ',elph_ds%k_phon%new_nkptirr
    call wrtout(std_out,message,'COLL')
@@ -2918,6 +2921,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
  integer :: vacuum(3)
  integer,allocatable :: indqpt1(:)
  real(dp) :: kpt(3)
+ integer, allocatable :: bz2ibz_smap(:,:)
  real(dp),allocatable :: wtq_folded(:)
  real(dp), allocatable :: wtq(:),qpt_full(:,:),tmpshifts(:,:)
 
@@ -3026,6 +3030,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
  ABI_ALLOCATE(indqpt1,(elph_ds%nqpt_full))
  ABI_ALLOCATE(wtq_folded,(elph_ds%nqpt_full))
  ABI_ALLOCATE(wtq,(elph_ds%nqpt_full))
+ ABI_ALLOCATE(bz2ibz_smap, (6, elph_ds%nqpt_full))
 
  wtq(:) = one/dble(elph_ds%nqpt_full) !weights normalized to unity
 
@@ -3036,7 +3041,9 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
  iout=0 !do not write to ab_out
 !should we save indqpt1 for use inside elph_ds?
  call symkpt(0,crystal%gmet,indqpt1,iout,elph_ds%qpt_full,elph_ds%nqpt_full,nqpt1,crystal%nsym,crystal%symrec,&
-& timrev,wtq,wtq_folded)
+& timrev,wtq,wtq_folded, bz2ibz_smap, xmpi_comm_self)
+
+ ABI_FREE(bz2ibz_smap)
 
  write (message,'(2a,i0)')ch10,' Number of irreducible q-points = ',nqpt1
  call wrtout(std_out,message,'COLL')

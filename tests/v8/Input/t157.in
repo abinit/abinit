@@ -1,21 +1,19 @@
 # LiF Very rough 2x2x2 q-point grid; low ecut.
- ndtset 6
+ ndtset 7
 
  #mixprec 1
  boxcutmin 1.7
  timopt -1
+ prtphdos 0
  
  ecut 35.0
- #ecut 34.0
  nband 10
  tolvrs 1e-12
  #nstep 150
 
  nbdbuf 4
- #diemac 9.0
- #paral_kgb 0
 
-# Kpoints
+ # Kpoints
  ngkpt 4 4 4
  nshiftk 1
  shiftk 0 0 0
@@ -26,10 +24,12 @@
 ########################################
  tolwfr1   1e-20
  # Cancel default values
+ # nband1 10
  getwfk1   0
  nqpt1     0
  rfphon1   0
  kptopt1   1
+ prtpot1   1
 
 ##################################################
 # Dataset 2 (NSCF run to get WFK with empty states
@@ -52,9 +52,9 @@
  tolwfr3  1e-16
  iscf3 -3
 
-##############################
-# DFPT runs on a 2x2x2 q-mesh
-#############################
+#############################################
+# Dataset 4-5-6: DFPT runs on a 2x2x2 q-mesh
+#############################################
  getwfk     1
  nqpt       1
 
@@ -73,6 +73,27 @@
  qpt4 0.00000000E+00  0.00000000E+00  0.00000000E+00
  qpt5 5.00000000E-01  0.00000000E+00  0.00000000E+00
  qpt6 5.00000000E-01  5.00000000E-01  0.00000000E+00
+
+#############################################
+# Dataset 7: 
+# Use GS WFK file on (4,4,4) k-mesh to interpolate band energies on a 8x8x8 k-mesh (sigma_ngkpt)
+# with star-functions. Find pockets specified by sigma_erange and
+# produce KERANGE netcdf file with info on the k-points in the pockets
+#############################################
+optdriver7 8
+wfk_task7 "wfk_kpts_erange"
+getwfk7 1
+# Define fine k-mesh for interpolation
+sigma_ngkpt7   8 8 8 
+sigma_nshiftk7 1
+sigma_shiftk7 0 0 0
+einterp7 1 5 0 0           # Parameters for star-functions interpolation
+sigma_erange7 0.2 0.2 eV   # Select kpts in fine mesh within this energy window.
+# Cancel default values
+nqpt7     0 
+rfphon7   0 
+kptopt7   1
+#nband7   7
 
 ############################################################################################
 #                                         STRUCTURE
@@ -94,15 +115,19 @@
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = .*_intel_1[89].0_.*
-#%% test_chain = t157.in, t158.in, t159.in, t160.in
+#%% test_chain = t157.in, t158.in, t159.in, t160.in, t161.in
 #%% [files]
 #%% files_to_test = 
-#%%   t157.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1
+#%%   t157.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
+#%%   t157o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
 #%% psp_files = 03-Li.psp, 09-F.psp
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]
-#%% post_commands = ww_mv t157o_DS2_WFK t160o_DS20_WFK
+#%% post_commands = 
+#%%  ww_cp t157o_DS2_WFK t160o_DS20_WFK;
+#%%  ww_cp t157o_DS2_WFK t161o_DS20_WFK;
+#%%  ww_cp t157o_DS1_DEN t161o_DS20_DEN;
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

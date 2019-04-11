@@ -6,7 +6,7 @@
 !!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (GKA, MG)
+!!  Copyright (C) 2008-2019 ABINIT group (GKA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -127,7 +127,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0, useylmgr1=0,master=0
+ integer,parameter :: tim_getgh1c=1,berryopt0=0, useylmgr1=0,master=0
  integer :: my_rank,nproc,iomode,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor
  integer :: ib1,ib2,band,ik,ikq,timerev_q
@@ -145,7 +145,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  character(len=500) :: msg, what
  character(len=fnlen) :: fname, gkkfilnam
 !arrays
- integer :: g0_k(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
+ integer :: g0_k(3),symq(4,2,cryst%nsym)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:), wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom)
  real(dp),allocatable :: displ_cart(:,:,:),displ_red(:,:,:)
@@ -227,9 +227,9 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  wfd_istwfk = 1
 
  ! Initialize the wavefunction descriptors
- call wfd_init(wfd_k,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&
-   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_k%kptns,ngfft,&
-   dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
+ call wfd_init(wfd_k,cryst,pawtab,psps,keep_ur,mband,nband,nkpt,nsppol,bks_mask,&
+   nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_k%kptns,ngfft,&
+   dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
 
  call wfd_k%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
@@ -237,9 +237,9 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_MALLOC(wfd_istwfk, (nkpt_kq))
  wfd_istwfk = 1
 
- call wfd_init(wfd_kq,cryst,pawtab,psps,keep_ur_kq,dtset%paral_kgb,dummy_npw,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
-   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_kq%kptns,ngfft,&
-   dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
+ call wfd_init(wfd_kq,cryst,pawtab,psps,keep_ur_kq,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
+   nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_kq%kptns,ngfft,&
+   dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
 
  call wfd_kq%print(header="Wavefunctions on the q-shifted k-points grid",mode_paral='PERS')

@@ -7,7 +7,7 @@
 !!  This module contains basic tools to deal with Fortran IO
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -808,13 +808,9 @@ subroutine flush_unit(unit)
 
 !FLUSH on unconnected unit is illegal: F95 std., 9.3.5.
 #if defined HAVE_FC_FLUSH
- if (isopen) then
-   call flush(unit)
- endif
+ if (isopen) call flush(unit)
 #elif defined HAVE_FC_FLUSH_
- if (isopen) then
-   call flush_(unit)
-  end if
+ if (isopen) call flush_(unit)
 #endif
 
 end subroutine flush_unit

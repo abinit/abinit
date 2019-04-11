@@ -2,7 +2,7 @@
 authors: XG, DCA
 ---
 
-# The DFPT code
+# The DFPT (respfn) code
 
 This page complements the main [[help:abinit]], for matters related
 to responses to perturbations computed with DFPT.
@@ -81,7 +81,7 @@ The perturbations of the **electric field** type are
 
   * the application of the homogeneous electric field along the axes of the reciprocal lattice 
   * the derivative of the Hamiltonian with respect to the electronic wavevector along 
-    the axes of the Brillouin zone (which gives derivatives of wavefunctions with respect to their wavevector), 
+    the axes of the reciprocal lattice (which allows to compute derivatives of wavefunctions with respect to their wavevector), 
     an **auxiliary** quantity needed **before** the application of the homogeneous electric field. 
     The perturbation is the change of wavevector by dk in the Hamiltonian, hence the perturbation 
     is referred to as the derivative dk perturbation ("ddk" perturbation). 
@@ -89,8 +89,8 @@ The perturbations of the **electric field** type are
 Note 1
 :   the ddk perturbation is defined as the derivative with respect to k
     in reduced coordinates; this is equivalent to applying a linear perturbation
-    of strength 2*pi along the conjugate direction in real space. This statement
-    comes from the derivation of the phase factor exp(i*2*pi*k*r) with respect to
+    of strength $2\pi$ along the conjugate direction in real space. This statement
+    comes from the derivation of the phase factor $\exp(i2\pi kr)$ with respect to
     k in reduced coordinates.
 
 Note 2
@@ -130,7 +130,7 @@ while for shear strains:
 Note that the "rigid-atom" elastic constants, as output of ABINIT, are those
 obtained with **frozen** internal coordinates. The internal coordinate
 relaxation, needed to give "physical" elastic constants can be handled through
-the knowledge of the internal strain and dynamical matrix at Gamma, in ANADDB.
+the knowledge of the internal strain and dynamical matrix at $\Gamma$, in ANADDB.
 Of course, if all the internal coordinate are fixed by symmetry, all the
 internal strains vanish, and the "rigid-atom" and "physical" elastic constants are equal.  
 Limitations of the present implementation (as of v5.7):
@@ -186,7 +186,7 @@ a description of the ground-state wavefunction file names generated from the
 root names provided in the 'files' file. In the multi-dataset mode, the
 following input variables will be relevant: [[getwfk]], and [[getwfq]]. The
 file names of the ground-state wavefunction file follow the same convention as
-for the ground-state case. Thus, the corresponding section of the 
+for the ground-state case. Thus, read the 
 [[help:abinit#files-file|corresponding section]] of the abinit help file, if needed.
 
 In the case of an electric field perturbation, the output 1WF of the
@@ -203,8 +203,8 @@ The nomenclature for first-order wavefunction files is also given in the
 detail here. The root name is formed from the string of character in the third
 line of the 'files' file (for an input file) or the fourth line of the 'files'
 file (for an output file), that is complemented, in the multi-dataset mode, by
-' **_DS** ' and the dataset pertcase (the index of the perturbation). Then,
-the string ' **_1WF** ' is added, followed by pertcase. This gives, e.g., for
+' **_DS** ' and the dataset number, and then,
+the string ' **_1WF** ' is added, followed by pertcase (the index of the perturbation). This gives, e.g., for
 a 'files' file whose fourth line is '/tmp/o', for the dataset number 3, and a
 perturbation corresponding to the displacement of the second atom in the x
 direction (pertcase=4), the following name of the corresponding 1st-order
@@ -227,7 +227,7 @@ Some perturbations (including their wavevector) may be invariant for some
 symmetries. The code is able to use symmetries to skip perturbations of which a
 symmetric has already been calculated (except in the case of strain
 perturbations). ABINIT is also able to use the symmetries that keeps the
-perturbations invariant to reduce the number of k points needed for the
+perturbations invariant, to reduce the number of k points needed for the
 sampling of electronic wavefunctions in the Brillouin zone (although this
 feature is not optimal yet). There is one exception to this, the ddk
 perturbation, for which the spatial symmetries cannot be used yet.
@@ -338,7 +338,7 @@ of the ddk wavefunctions.
 
 As mentioned in the introduction, inside the response-function part of the
 code, the calculation proceeds in two steps: first the calculation of the
-first order derivative of the wavefunctions (1WF), then the combinations of
+first-order derivative of the wavefunctions (1WF), then the combinations of
 these 1WF to build the 2DTE and 3DTE.
 
 In an initialisation part, the input file and all the ground-state files are
@@ -436,7 +436,7 @@ the derivative dk perturbation. It will give the following information:
   * the 2DTE in reduced coordinates.
   * then it will use the 2DTE to perform already some analysis of the data without use the Mrgddb and Anaddb codes, namely: 
     the full dynamical matrix (cartesian coordinates, masses included) the effective charges, and the dielectric tensor, 
-    the phonon frequencies (including the analysis of the non- analyticity if we are at Gamma). 
+    the phonon frequencies (including the analysis of the non- analyticity if we are at $\Gamma$). 
     Note that phonon frequencies lower than 1.0d-8Ha (absolute value) are automatically set to zero, 
     while imaginary phonon frequencies (square roots of negative eigenvalues - indicating an instability) 
     are printed as negative (this facilitates the post-processing).

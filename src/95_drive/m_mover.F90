@@ -7,7 +7,7 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -234,7 +234,7 @@ type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
 integer :: irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: nloop,nshell,ntime,option,comm, mxhist 
+integer :: nloop,nshell,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request,unit_out
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
@@ -326,7 +326,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  comm=scfcv_args%mpi_enreg%comm_cell
  me=xmpi_comm_rank(comm)
 
- mxhist=zero 
 
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
@@ -338,7 +337,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    end if
    call abihist_bcast(hist_prev,master,comm)
 
-   mxhist = hist_prev%mxhist ! Wirte number of MD-steps into mxhist  
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
@@ -391,9 +389,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  if(specs%nhist/=-1)then   ! then .and. hist%mxhist > 3 
   nhisttot = specs%nhist! We don't need to store all the history
  endif 
- if(mxhist > 0 .and. mxhist  < 3)then
-  nhisttot = mxhist ! Less than three MD-Steps
- end if
 
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
@@ -621,11 +616,11 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
            name_file='MD_anharmonic_terms_energy.dat'
            INQUIRE(FILE=name_file,OPENED=file_opened,number=unit_out)
              if(file_opened .eqv. .TRUE.)then
-               write(unit_out,'(I7)',advance='no') itime !If wanted Write cycle to anharmonic_energy_contribution file
+               write(unit_out,'(I7)',advance='no') itime  !Write cycle to anharmonic_energy_contribution file
              endif
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
-               xred(:,:) = hist%xred(:,:,hist%mxhist) ! Fill xred with new ordering
+               xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
              end if
 
 #if defined DEV_MS_SCALEUP 
@@ -648,7 +643,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 &           filename=name_file,elec_eval=scup_dtset%scup_elec_model)
 
 !          Check if the simulation did not diverge...
-           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E2)then
+           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E5)then
 !            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
@@ -748,7 +743,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ###
 
 #if defined HAVE_NETCDF
-     if (need_writeHIST.and.me==master) then ! TODO MARCUS after lunch debug filename here
+     if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
 &       ab_mover%ntypat,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
@@ -895,7 +890,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if (skipcycle) exit
 
 !DEBUG
-!     write(std_out,*)' m_mover : will call precpred_1geo'
+!    write(std_out,*)' m_mover : will call precpred_1geo'
 !    call flush(std_out)
 !ENDDEBUG
 
@@ -1639,7 +1634,7 @@ end subroutine prtxfase
 !!  - POSABIN : values of coordinates and velocities for the next time step
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FLambert,MT)
+!! Copyright (C) 1998-2019 ABINIT group (FLambert,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

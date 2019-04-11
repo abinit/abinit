@@ -19,7 +19,7 @@
 !! than the irredubile zone defined by the point group of the crystal. The two zones coincide when q=0
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,6 +105,10 @@ module m_lgroup
    ! symafm_lg(nsym_lg)
    ! Anti-ferromagnetic character
 
+   integer,allocatable :: bz2ibz_smap(:,:)
+   ! bz2ibz_smap(nbz, 6) Mapping BZ --> IBZ.
+   ! Note that here we used the symmetries of the little group.
+
    integer, allocatable :: lgsym2glob(:, :)
    ! lgsym2glob(2, nsym_lg)
    ! Mapping isym_lg --> [isym, itime]
@@ -157,8 +161,8 @@ contains  !=====================================================
 !!  kbz(3,nkbz)=K-points in the BZ.
 !!  nkibz=Number of k-points in the IBZ
 !!  kibz(3,nkibz)=Irreducible zone.
-!!  sord=Defines how to order the points in %ibz.
-!!   ">" for increasing norm. "<" decreasing. Default: ">"
+!!  comm= MPI communicator.
+!!  sord=Defines how to order the points in %ibz. ">" for increasing norm. "<" decreasing. Default: ">"
 !!
 !! PARENTS
 !!
@@ -166,11 +170,11 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, sord) result(new)
+type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, comm, sord) result(new)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: timrev,nkibz,nkbz
+ integer,intent(in) :: timrev,nkibz,nkbz,comm
  type(crystal_t),intent(in) :: cryst
  character(len=1),optional,intent(in) :: sord
 !arrays
@@ -184,7 +188,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)
  real(dp) :: kred(3),shift(3)
- integer,allocatable :: ibz2bz(:), iperm(:)
+ integer,allocatable :: ibz2bz(:), iperm(:), inv_iperm(:)
  real(dp),allocatable :: wtk(:),wtk_folded(:), kord(:,:)
 
 ! *************************************************************************
@@ -216,8 +220,10 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  call alloc_copy(lgsym2glob(:, 1:new%nsym_lg), new%lgsym2glob)
 
  ! Check group closure.
- call chkgrp(new%nsym_lg, symafm_lg, symrec_lg, ierr)
- ABI_CHECK(ierr == 0, "Error in group closure")
+ if (debug /= 0) then
+   call chkgrp(new%nsym_lg, symafm_lg, symrec_lg, ierr)
+   ABI_CHECK(ierr == 0, "Error in group closure")
+ end if
 
  ! Find the irreducible zone with the little group operations.
  ! Do not use time-reversal since it has been manually introduced previously
@@ -226,9 +232,12 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  ABI_MALLOC(wtk, (nkbz))
  wtk = one / nkbz ! Weights sum up to one
 
+ ABI_MALLOC(new%bz2ibz_smap, (6, nkbz))
+ ! IBZ2BZ ?
+
  ! TODO: In principle here we would like to have a set that contains the initial IBZ.
  call symkpt(chksymbreak0, cryst%gmet, ibz2bz, iout0, kbz, nkbz, new%nibz,&
-   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded)
+   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded, new%bz2ibz_smap, comm)
 
  ABI_MALLOC(new%ibz, (3, new%nibz))
  ABI_MALLOC(new%weights, (new%nibz))
@@ -239,9 +248,10 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
    new%weights(ik_ibz) = wtk_folded(ik_bz)
  end do
 
- ! Here I repack the IBZ points. In principle, the best would be
- ! to pack stars using crystal%symrec. For the time being we pack shells (much easier).
- ! Use wtk as workspace to store the norm.
+#if 0
+ ! Need to repack the IBZ points and rearrange the other arrays dimensioned with nibz.
+ ! In principle, the best approach would be to pack in stars using crystal%symrec.
+ ! For the time being we pack in shells (much easier). Use wtk as workspace to store the norm.
  ksign = + one
  if (present(sord)) then
    if (sord == "<") ksign = - one
@@ -251,13 +261,14 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
    call wrap2_pmhalf(new%ibz(:, ik_ibz), kred, shift)
    wtk(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
  end do
- ABI_MALLOC(kord, (3, new%nibz))
+
  ABI_MALLOC(iperm, (new%nibz))
  iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
  call sort_dp(new%nibz, wtk, iperm, tol12)
+ !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
 
  ! Trasfer data.
- !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
+ ABI_MALLOC(kord, (3, new%nibz))
  do ik_ibz=1,new%nibz
    kord(:, ik_ibz) = new%ibz(:, iperm(ik_ibz))
    wtk_folded(ik_ibz) = new%weights(iperm(ik_ibz))
@@ -265,8 +276,23 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  new%ibz = kord(:, 1:new%nibz)
  new%weights = wtk_folded(1:new%nibz)
 
- ABI_FREE(iperm)
+ ! Rearrange bz2ibz_smap as well.
+ ABI_MALLOC(inv_iperm, (new%nibz))
+ do ik_ibz=1,new%nibz
+   inv_iperm(iperm(ik_ibz)) =  ik_ibz
+ end do
+
+ do ik_bz=1,new%nbz
+   ik_ibz = new%bz2ibz_smap(1, ik_bz)
+   !new%bz2ibz_smap(1, ik_bz) = iperm(ik_ibz)
+   new%bz2ibz_smap(1, ik_bz) = inv_iperm(ik_ibz)
+ end do
+
+ ABI_FREE(inv_iperm)
  ABI_FREE(kord)
+ ABI_FREE(iperm)
+#endif
+
  ABI_FREE(ibz2bz)
  ABI_FREE(wtk_folded)
  ABI_FREE(wtk)
@@ -367,7 +393,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
  integer :: indkk(6)
 ! *************************************************************************
 
- ! Note use_symrec
+ ! Note use_symrec and timrev0
  call listkk(dksqmax, self%gmet, indkk, self%ibz, qpt, self%nibz, 1, self%nsym_lg, &
     1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, use_symrec=.True.)
 
@@ -420,10 +446,10 @@ subroutine lgroup_print(self, title, unit, prtvol)
  if (present(title)) msg = ' ==== '//trim(adjustl(title))//' ==== '
  call wrtout(my_unt, msg)
 
- write(msg, '(3a, 2(a, i0), a)') &
+ write(msg, '(3a, 2(a, i0, a))') &
   ' Little group point: ................... ', trim(ktoa(self%point)), ch10, &
   ' Number of points in IBZ(p) ............ ', self%nibz, ch10, &
-  ' Time-reversal flag (0: No, 1: Yes) .... ', self%input_timrev
+  ' Time-reversal flag (0: No, 1: Yes) .... ', self%input_timrev, ch10
  call wrtout(my_unt, msg)
 
  if (my_prtvol /= 0) then
@@ -459,6 +485,7 @@ subroutine lgroup_free(self)
  ! integer
  ABI_SFREE(self%symrec_lg)
  ABI_SFREE(self%symafm_lg)
+ ABI_SFREE(self%bz2ibz_smap)
  ABI_SFREE(self%lgsym2glob)
  ABI_SFREE(self%symtab)
  ! real

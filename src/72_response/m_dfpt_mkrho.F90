@@ -7,7 +7,7 @@
 !! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -633,7 +633,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=14
- integer :: choice,cplex_cprj,i1,i2,i3,iexit,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij
+ integer :: choice,cplex_cprj,i1,i2,i3,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij
  logical :: my_atmtab_allocated,paral_atom
  logical :: usetimerev
  real(dp) :: im0,im1,re0,re1,valuer,diag,offdiag,weight

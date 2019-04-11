@@ -7,7 +7,7 @@
 !!  Iterative diagonalization of the BSE Hamiltonian with band-by-band conjugate gradient method
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +55,7 @@ MODULE m_exc_itdiago
  public :: exc_iterative_diago    ! Calculates eigenvalues and eigenvectors of the Resonant BSE Hamiltonian
 !!***
 
-CONTAINS  !=========================================================================================================================
+CONTAINS  !===============================================================
 !!***
 
 !!****f* m_exc_itdiago/exc_iterative_diago
@@ -109,13 +109,10 @@ CONTAINS  !=====================================================================
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -375,7 +372,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
 
        do ii=my_t1,my_t2
          ! Teter polynomial ratio, modified according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
-         xx = hexc_diagonal(ii)/den 
+         xx = hexc_diagonal(ii)/den
          poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
          fac=poly/(poly+16._dp*xx**4)
          kprc = fac*four/(three*den)
@@ -655,13 +652,10 @@ CONTAINS  !===========================================================
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -817,13 +811,10 @@ end subroutine exc_init_phi_block
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_write_phi_block(oeig_fname,use_mpio)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -980,13 +971,10 @@ end subroutine exc_write_phi_block
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_subspace_rotation()
-
- implicit none
 
 !Local variables ------------------------------
  integer :: ii,jj,ipack,ierr
@@ -1085,13 +1073,10 @@ end subroutine exc_subspace_rotation
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_cholesky_ortho()
-
- implicit none
 
 !Local variables ------------------------------
  integer :: my_info,ii,jj,ipack,ierr
@@ -1191,8 +1176,6 @@ end subroutine exc_cholesky_ortho
 
 function convergence_degree(resid)
 
- implicit none
-
 !Arguments
  integer :: convergence_degree
  real(dp),intent(in) :: resid
@@ -1226,13 +1209,10 @@ end function convergence_degree
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_check_phi_block(string)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

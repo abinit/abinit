@@ -9,7 +9,7 @@
 !!  xmpi_min is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2001-2019 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,9 +22,6 @@
 !! SOURCE
 
 subroutine xmpi_min_intv(xval,xmin,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer ,intent(in) :: xval
@@ -79,9 +76,6 @@ end subroutine xmpi_min_intv
 !!
 !! SOURCE
 subroutine xmpi_min_dpv(xval,xmin,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp),intent(in) :: xval

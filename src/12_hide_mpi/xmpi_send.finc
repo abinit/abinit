@@ -10,7 +10,7 @@
 !!  xmpi_send is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group
+!!  Copyright (C) 2001-2019 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,8 +40,6 @@
 !! SOURCE
 
 subroutine xmpi_send_char(xval,dest,tag,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  character(len=*),intent(inout) :: xval  
@@ -89,8 +87,6 @@ end subroutine xmpi_send_char
 
 subroutine xmpi_send_intv(xval,dest,tag,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(inout) :: xval
  integer,intent(in) :: dest,tag,spaceComm
@@ -137,8 +133,6 @@ subroutine xmpi_send_intv(xval,dest,tag,spaceComm,ier)
 !! SOURCE
 
 subroutine xmpi_send_int1d(xval,dest,tag,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:)
@@ -191,18 +185,6 @@ subroutine xmpi_send_int1d(xval,dest,tag,spaceComm,ier)
 !! SOURCE
 subroutine xmpi_send_int2d(xval,dest,tag,spaceComm,ier)
 
-
- use defs_basis
-#if defined HAVE_MPI2 && ! defined HAVE_MPI_INCLUDED_ONCE
- use mpi
-#endif
-
- implicit none
-
-#if defined HAVE_MPI1
- include 'mpif.h'
-#endif
-
 !Arguments-------------------------
  integer,intent(inout) :: xval(:,:)
  integer ,intent(in) :: dest,tag,spaceComm
@@ -253,19 +235,8 @@ end subroutine xmpi_send_int2d
 !!      mpi_send
 !!
 !! SOURCE
+
 subroutine xmpi_send_int3d(xval,dest,tag,spaceComm,ier)
-
-
- use defs_basis
-#if defined HAVE_MPI2 && ! defined HAVE_MPI_INCLUDED_ONCE
- use mpi
-#endif
-
- implicit none
-
-#if defined HAVE_MPI1
- include 'mpif.h'
-#endif
 
 !Arguments-------------------------
  integer,intent(inout) :: xval(:,:,:)
@@ -316,9 +287,6 @@ end subroutine xmpi_send_int3d
 
 subroutine xmpi_send_dp(xval,dest,tag,spaceComm,ier)
 
-
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval
  integer ,intent(in) :: dest,tag,spaceComm
@@ -365,8 +333,6 @@ end subroutine xmpi_send_dp
 
 subroutine xmpi_send_dp1d(xval,dest,tag,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:)
  integer ,intent(in) :: dest,tag,spaceComm
@@ -411,9 +377,8 @@ end subroutine xmpi_send_dp1d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_send_dp2d(xval,dest,tag,spaceComm,ier)
 
- implicit none
+subroutine xmpi_send_dp2d(xval,dest,tag,spaceComm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -462,9 +427,6 @@ end subroutine xmpi_send_dp2d
 !! SOURCE
 
 subroutine xmpi_send_dp3d(xval,dest,tag,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)

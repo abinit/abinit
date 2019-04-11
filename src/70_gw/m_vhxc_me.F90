@@ -7,7 +7,7 @@
 !!  Evaluate the matrix elements of $v_H$ and $v_{xc}$ and $v_U$
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +25,30 @@
 #include "abi_common.h"
 
 module m_vhxc_me
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_abicore
+ use m_errors
+ use m_xcdata
+ use libxc_functionals
+
+ use m_pawang,      only : pawang_type
+ use m_pawtab,      only : pawtab_type
+ use m_paw_an,      only : paw_an_type
+ use m_paw_ij,      only : paw_ij_type
+ use m_pawfgrtab,   only : pawfgrtab_type
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_denpot,  only : paw_mknewh0
+ use m_hide_blas,   only : xdotc
+ use m_wfd,         only : wfd_t
+ use m_crystal,     only : crystal_t
+ use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
+ use m_dtset,       only : dtset_copy, dtset_free
+ use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
+ use m_kg,          only : mkkin
+ use m_rhotoxc,     only : rhotoxc
 
  implicit none
 
@@ -108,33 +132,9 @@ contains
 
 
 subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
-&  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
-&  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
-&  taug,taur) ! optional arguments
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_errors
- use m_xcdata
- use libxc_functionals
-
- use m_pawang,      only : pawang_type
- use m_pawtab,      only : pawtab_type
- use m_paw_an,      only : paw_an_type
- use m_paw_ij,      only : paw_ij_type
- use m_pawfgrtab,   only : pawfgrtab_type
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_paw_denpot,  only : paw_mknewh0
- use m_hide_blas,   only : xdotc
- use m_wfd,         only : wfd_t
- use m_crystal,     only : crystal_t
- use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
- use m_dtset,       only : dtset_copy, dtset_free
- use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
- use m_kg,          only : mkkin
- use m_rhotoxc,     only : rhotoxc
+  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
+  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
+  taug,taur) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -406,7 +406,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      if (Mflags%has_hbare==1) then
        ABI_MALLOC(kinpw,(npw_k))
        ABI_MALLOC(kinwf2,(npw_k*nspinor))
-       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass_free,Cryst%gmet,kg_k,kinpw,kpt,Wfd%npwwfn,0,0)
+       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass_free,Cryst%gmet,kg_k,kinpw,kpt,npw_k,0,0)
        where (kinpw>HUGE(zero)*1.d-11)
          kinpw=zero
        end where

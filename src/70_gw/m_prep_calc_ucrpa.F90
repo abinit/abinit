@@ -6,7 +6,7 @@
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +77,7 @@ contains
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -802,7 +802,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
              cg_sum  => Wfd%Wave(ib,ik_ibz,spin)%ug
              cg_jb   => Wfd%Wave(jb,jk_ibz,spin)%ug
 
-             ctmp = xdotc(Wfd%npwwfn*Wfd%nspinor,cg_sum,1,cg_jb,1)
+             ctmp = xdotc(Wfd%npwarr(ik_ibz)*Wfd%nspinor,cg_sum,1,cg_jb,1)
              ovlp(1) = REAL(ctmp)
              ovlp(2) = AIMAG(ctmp)
 

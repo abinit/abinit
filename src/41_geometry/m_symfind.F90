@@ -7,7 +7,7 @@
 !!  Symmetry finder high-level API.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2017 ABINIT group (XG, RC)
+!!  Copyright (C) 2000-2019 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,7 +79,7 @@ contains
 !! spinat(3,natom)=initial spin of each atom, in unit of hbar/2.
 !! tolsym=tolerance for the symmetries
 !! typat(natom)=integer identifying type of atom.
-!! use_inversion=1 if inversion can be included in set of symmetries
+!! use_inversion=1 if inversion and improper rotations can be included in set of symmetries
 !! xred(3,natom)=reduced coordinates of atoms in terms of real space
 !!   primitive translations
 !!
@@ -131,7 +131,7 @@ contains
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
  real(dp) :: diff(3),efieldrot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),sxred0(3)
- real(dp) :: symnucdipmom2(3)
+ !real(dp) :: symnucdipmom2(3)
  real(dp) :: symnucdipmom2cart(3,3),symnucdipmom2red(3,3),symspinat2(3),symxred2(3),trialnons(3)
  real(dp),allocatable :: local_nucdipmom(:,:,:),nucdipmomcl(:,:),nucdipmomred(:,:,:)
  real(dp),allocatable :: spinatcl(:,:),spinatred(:,:)
@@ -200,7 +200,7 @@ contains
 
  ! need rprimd later to transform back to cart coords
  call matr3inv(gprimd,rprimd)
- 
+
 !Initialise with the first atom
  nclass=1
  natomcl(1)=1

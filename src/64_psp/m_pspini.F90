@@ -7,7 +7,7 @@
 !!  Initialize pseudopotential datastructures from files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH)
+!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,7 @@ contains
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -133,8 +133,6 @@ contains
 !! SOURCE
 
 subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,rprimd,comm_mpi)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -674,8 +672,6 @@ end subroutine pspini
 
 subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -815,8 +811,6 @@ end subroutine pspcor
 
 subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &  psps,vlspl,dvlspl,xcccrc,xccc1d,nctab,comm_mpi)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1405,7 +1399,7 @@ end subroutine pspatm
 !! (To be described ...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017-2018 ABINIT group (YP)
+!! Copyright (C) 2017-2019 ABINIT group (YP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1435,7 +1429,6 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  use m_errors
 
  use defs_datatypes, only : nctab_t
- implicit none
 
 !Arguments ------------------------------------
 !scalars

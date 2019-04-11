@@ -9,7 +9,7 @@
 !!  xmpi_gatherv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (MT,GG)
+!!  Copyright (C) 2001-2019 ABINIT group (MT,GG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,9 +41,8 @@
 !!  recvbuf= received buffer
 !!
 !! SOURCE
-subroutine xmpi_gatherv_int(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
 
- implicit none
+subroutine xmpi_gatherv_int(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
@@ -103,8 +102,6 @@ end subroutine xmpi_gatherv_int
 subroutine xmpi_gatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size, &
 &          buf_int_all,buf_int_size_all,buf_dp_all,buf_dp_size_all,root,&
 &          spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
 !scalars
@@ -315,8 +312,6 @@ end subroutine xmpi_gatherv_int1_dp1
 
 subroutine xmpi_gatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:,:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:,:)
@@ -373,8 +368,6 @@ end subroutine xmpi_gatherv_int2d
 
 subroutine xmpi_gatherv_dp(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:)
@@ -427,10 +420,8 @@ end subroutine xmpi_gatherv_dp
 !!  recvbuf= received buffer
 !!
 !! SOURCE
+
 subroutine xmpi_gatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
@@ -488,8 +479,6 @@ end subroutine xmpi_gatherv_dp2d
 
 subroutine xmpi_gatherv_dp3d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:)
@@ -545,8 +534,6 @@ end subroutine xmpi_gatherv_dp3d
 !! SOURCE
 
 subroutine xmpi_gatherv_dp4d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:)
@@ -604,8 +591,6 @@ end subroutine xmpi_gatherv_dp4d
 
 subroutine xmpi_gatherv_dp5d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:,:,:)
@@ -661,8 +646,6 @@ end subroutine xmpi_gatherv_dp5d
 !! SOURCE
 
 subroutine xmpi_gatherv_dp6d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:,:,:)

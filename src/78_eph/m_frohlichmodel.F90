@@ -8,7 +8,7 @@
 !!  using the Frohlich model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (XG)
+!!  Copyright (C) 2018-2019 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,8 +73,6 @@ contains
 !! SOURCE
 
 subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -191,7 +189,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 &    weight_qdir(iqdir)*zpr_q0_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
  enddo
  zpr_q0_avg=zpr_q0_avg*quarter*piinv
- zpr_q0_fact=zpr_q0_avg*two*pi*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
+ zpr_q0_fact=zpr_q0_avg*eight*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
 
 !DEBUG
 ! do iqdir=1,nqdir,513

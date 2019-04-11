@@ -9,7 +9,7 @@
 !!  xmpi_ialltoall is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (MG)
+!!  Copyright (C) 2001-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,8 +39,6 @@
 !! SOURCE
 
 subroutine xmpi_ialltoall_dp4d(xval, sendsize, recvbuf, recvsize, comm, request)
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(in) :: xval(:,:,:,:)

@@ -12,7 +12,7 @@
 !!  used in ks_ddiago for performing the direct diagonalization of the KS Hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, MT)
+!! Copyright (C) 2009-2019 ABINIT group (MG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,12 +72,12 @@ module m_hamiltonian
 !!
 !! FUNCTION
 !! This datastructure contains the information about one Hamiltonian,
-!! needed in the "getghc" routine, that apply the Hamiltonian
-!! on a wavefunction.
+!! needed in the "getghc" routine, that apply the Hamiltonian on a wavefunction.
 !! The Hamiltonian is expressed in reciprocal space:
+!!
 !!       H_k^prime,k = exp(-i.k^prime.r^prime) H exp(i.k.r)
-!! In most cases k=k^prime and the k^prime objects are simply pointers
-!! to k objects.
+!!
+!! In most cases k = k^prime and the k^prime objects are simply pointers to k objects.
 !!
 !! SOURCE
 
@@ -686,8 +686,6 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                           ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
 &                           electronpositron,fock,nucdipmom,use_gpu_cuda)           ! optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
@@ -948,8 +946,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 &                             kg_k,kpg_k,kpt_k,nucdipmom_k,npw_k,npw_fft_k,ph3d_k,&
 &                             compute_gbound,compute_ph3d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_k,npw_fft_k,istwf_k
@@ -1134,8 +1130,6 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
 &                                  kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
 &                                  ph3d_kp,compute_gbound,compute_ph3d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_kp,npw_fft_kp,istwf_kp
@@ -1267,8 +1261,6 @@ end subroutine load_kprime_hamiltonian
 !! SOURCE
 
 subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
-
-implicit none
 
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(in),target :: gs_hamk_in
@@ -1448,8 +1440,6 @@ end subroutine copy_hamiltonian
 
 subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isppol
@@ -1593,8 +1583,6 @@ end subroutine destroy_rf_hamiltonian
 
 subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 &          comm_atom,mpi_atmtab,mpi_spintab,paw_ij1,has_e1kbsc) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1745,8 +1733,6 @@ end subroutine init_rf_hamiltonian
 
 subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isppol
@@ -1817,8 +1803,6 @@ end subroutine load_spin_rf_hamiltonian
 
 subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_k
@@ -1878,8 +1862,6 @@ end subroutine load_k_rf_hamiltonian
 !! SOURCE
 
 subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1964,8 +1946,6 @@ end subroutine pawdij2ekb
 !! SOURCE
 
 subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

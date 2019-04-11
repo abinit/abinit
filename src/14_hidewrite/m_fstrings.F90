@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on Fortran strings.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, XG, MT, DC)
+!! Copyright (C) 2008-2019 ABINIT group (MG, XG, MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1261,11 +1261,11 @@ pure function ltoa_int(list) result(str)
    ! Write to temp string and copy it to str if we have enough chars.
    ! Return if MAX_SLEN is too short.
    if (ii == 1) then
-     write(temp, "(a,i0,a)")"[",list(1),","
+     write(temp, "(a,i0,a)")"[",list(1),", "
    else if (ii == sz) then
      write(temp, "(i0,a)")list(ii),"]"
    else
-     write(temp, "(i0,a)")list(ii),","
+     write(temp, "(i0,a)")list(ii),", "
    end if
 
    if (base + len_trim(temp) - 1 <= MAX_SLEN) then

@@ -8,7 +8,7 @@
 !!  character tables of the 32 point groups.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MG)
+!! Copyright (C) 2010-2019 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -538,7 +538,7 @@ subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol)
    do icls=1,Ptg%nclass
      sidx = Ptg%class_ids(1,icls)
      trace = Row%trace(sidx)
-     if (ABS(AIMAG(trace)) > 10**(-6)) then
+     if (ABS(AIMAG(trace)) > tol6) then
         write(std_out,"('|',(2f5.2))",advance="no")trace
       else
         write(std_out,"('|',(f10.2))",advance="no")REAL(trace)

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,7 +50,7 @@ contains
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2019 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,6 +152,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_gwls_sternheimer, only : gwls_sternheimer
  use m_nonlinear,        only : nonlinear
  use m_drivexc,          only : echo_xc_name
+ use m_neat,             only : neat_start_dataset
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -280,12 +281,15 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      write(message,'(2a,i2,67a)') trim(message),' ',jdtset,' ',('=',mu=1,66)
    end if
    write(message,'(3a,i5)') trim(message),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
+
+
    if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
      write(message,'(2a)') trim(message),'   -> not optimal: autoparal keyword recommended in input file'
    end if
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
+   call neat_start_dataset(jdtset, ab_out);
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)

@@ -7,7 +7,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
+!!  Copyright (C) 2008-2019 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -411,7 +411,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  call cwtime(cpu, wall, gflops, "start")
 
  tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-   dtset%shiftk, dtset%nkpt, dtset%kpt, msg, ierr)
+   dtset%shiftk, dtset%nkpt, dtset%kpt, comm, msg, ierr)
  if (ierr /= 0) then
    call destroy_tetra(tetra)
    MSG_WARNING(msg)

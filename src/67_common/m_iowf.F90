@@ -7,7 +7,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,7 +38,7 @@ MODULE m_iowf
  use m_hdr
  use m_ebands
 
- use m_time,           only : cwtime, timab
+ use m_time,           only : cwtime, cwtime_report, timab
  use m_io_tools,       only : get_unit, flush_unit, iomode2str
  use m_fstrings,       only : endswith, sjoin
  use m_numeric_tools,  only : mask2blocks
@@ -369,11 +369,11 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
                write(msg,'(a10,i5)') 'atype ',iat
                call wrtout(ab_out,msg,'COLL')
                do iproj=1,psps%lnmax
-                 write(msg,'(a10,i5,a,a10,e12.4,a,3(a10,2e12.4,a))') &
+                 write(msg,'(a10,i5,a,a10,e12.4,a,2(a10,2e12.4,a))') &
                         'projector ', iproj,ch10, &
                         'vkbsign   ', vkbsign(iproj,iat), ch10, &
-                        'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,:,iat), ch10, &
-                        'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,:,iat), ''
+                        'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,iproj,iat), ch10, &
+                        'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,iproj,iat), ''
                  call wrtout(ab_out,msg,'COLL')
                end do
              end do
@@ -401,9 +401,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 #endif
 
    call cwtime(cpu, wall, gflops, "start")
-
-   write(msg,'(4a,i0)')ch10,' outwf: write wavefunction to file ',trim(filnam),", with iomode ",iomode
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, sjoin(ch10,'  outwf: writing wavefunctions to:', trim(filnam), "with iomode:", iomode2str(iomode)))
 
    ! Create an ETSF file for the wavefunctions
    if (iomode == IO_MODE_ETSF) then
@@ -422,7 +420,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    end if
 
    call WffOpen(iomode,spaceComm,filnam,ierr,wff2,master,me0,unwff2,spaceComm_io)
-!  Conduct wavefunction output to wff2
+   ! Conduct wavefunction output to wff2
 
    ABI_ALLOCATE(kg_disk,(3,mpw))
 
@@ -673,9 +671,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    call WffClose(wff2,ierr)
    !end if
 
-   call cwtime(cpu,wall,gflops,"stop")
-   write(msg,'(a,i0,2(a,f8.2),a)')" outwf with iomode: ",iomode,", cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
-   call wrtout(std_out,msg,"PERS")
+   call cwtime_report(" WFK output", cpu, wall, gflops)
  end if ! End condition of nstep>0
 
  ! Block here because we might need to read the WFK file in the caller.
@@ -853,7 +849,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    call xmpi_land(same_layout, comm_cell)
  end if
 
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
 
  if (same_layout) then
    single_writer = .True.
@@ -1040,9 +1036,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      ABI_FREE(iter2kscgkg)
 
      done = .True.
-     call cwtime(cpu,wall,gflops,"stop")
-     write(msg,'(2(a,f8.2))')" collective ncwrite, cpu: ",cpu,", wall: ",wall
-     call wrtout(std_out,msg,"PERS")
+     call cwtime_report(" collective ncwrite", cpu, wall, gflops)
 #endif
 ! HAVE_NETCDF
    else ! single_writer
@@ -1133,9 +1127,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      call xmpi_barrier(comm_cell)
 
      done = .True.
-     call cwtime(cpu,wall,gflops,"stop")
-     write(msg,'(2(a,f8.2))')" individual ncwrite, cpu: ",cpu,", wall: ",wall
-     call wrtout(std_out,msg,"PERS")
+     call cwtime_report(" individual ncwrite", cpu, wall, gflops)
    end if
 
  else ! not same_layout
@@ -1143,7 +1135,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    if (nctk_has_mpiio) then
 #ifdef HAVE_NETCDF
      call wrtout(std_out, &
-       sjoin("scattered data. writing WFK file",trim(path),", with iomode",iomode2str(iomode)), 'PERS', do_flush=.True.)
+       sjoin("scattered data. writing WFK file",trim(path),", with iomode: ",iomode2str(iomode)), 'PERS', do_flush=.True.)
 
      ! master write the metadata.
      if (xmpi_comm_rank(comm_cell) == master) then
@@ -1289,9 +1281,6 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
            ! Each MPI proc write bcount bands with npwtot_k G-vectors starting from bstart.
            call cg2seqblocks(npwtot_k,npw_k,nband_k,cg(:,icg+1:),ind_cg_mpi_to_seq,comm_bandfft,bstart,bcount,my_cgblock)
-           !write(std_out,*)"bstart, bcount",bstart,bcount
-           !write(std_out,*)"cg(:,ig+1)",cg(:,icg+1)
-           !write(std_out,*)"my_cgblock(:,ig+1)",my_cgblock(:,1,1)
 
            ! The coefficients_of_wavefunctions on file have shape [cplex, mpw, nspinor, mband, nkpt, nsppol]
            ncerr = nf90_put_var(ncid, cg_varid, my_cgblock, start=[1,1,1,bstart,ikpt,spin], count=[2,npwtot_k,nspinor,bcount,1,1])
@@ -1308,9 +1297,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      NCF_CHECK(nf90_close(ncid))
      done = .True.
 
-     call cwtime(cpu,wall,gflops,"stop")
-     write(msg,'(2(a,f8.2))')"scattered ncwrite, cpu: ",cpu,", wall: ",wall
-     call wrtout(std_out,msg,"PERS")
+     call cwtime_report(" scattered ncwrite", cpu, wall, gflops)
 #endif
 ! HAVE_NETCDF
    end if !nctk_has_mpiio
@@ -1394,7 +1381,6 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
    end do
  end do
 
- !write(std_out,*)"in occ1"
  NCF_CHECK(nctk_set_defmode(ncid))
 
  ncerr = nctk_def_arrays(ncid, nctkarr_t('h1_matrix_elements', "dp", &

@@ -579,6 +579,12 @@ tmp_int=0
 !Y
 !Z 
 
+!=======================================================================
+!Finished reading in variables - deallocate
+!=======================================================================
+
+ ABI_DEALLOCATE(dprarr)
+ ABI_DEALLOCATE(intarr)
 
 end subroutine invars10scup
 

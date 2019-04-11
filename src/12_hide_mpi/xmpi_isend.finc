@@ -10,7 +10,7 @@
 !!  xmpi_isend is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group
+!!  Copyright (C) 2001-2019 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,8 +42,6 @@
 !! SOURCE
 
 subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
-
- implicit none
 
 !Arguments-------------------------
  integer ABI_ASYNC, intent(inout) :: xval(:)
@@ -91,10 +89,8 @@ subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(inout) :: xval(:)
@@ -142,10 +138,8 @@ end subroutine xmpi_isend_dp1d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(inout) :: xval(:,:)

@@ -8,7 +8,7 @@
 !! Uses a conjugate-gradient algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XG,DRH,XW,FJ,MT,LB)
+!!  Copyright (C) 1999-2019 ABINIT group (XG,DRH,XW,FJ,MT,LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -153,8 +153,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nbdbuf,nline_in,npw,npw1,nspinor,&
 & opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

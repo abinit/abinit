@@ -12,7 +12,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,6 +50,7 @@ MODULE m_bz_mesh
  use m_errors
  use m_abicore
  use m_sort
+ use m_xmpi
 
  use m_fstrings,       only : ltoa, itoa, sjoin, ktoa
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
@@ -2449,7 +2450,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 !arrays
  integer :: g0(3),gg(3),gmG0(3),identity(3,3),nop(Cryst%timrev),nopg0(2)
  integer :: symxpt(4,2,Cryst%nsym)
- integer,allocatable :: indkpt1(:),symafm_ltg(:),symrec_Ltg(:,:,:)
+ integer,allocatable :: indkpt1(:),symafm_ltg(:),symrec_Ltg(:,:,:),bz2ibz_smap(:,:)
  integer,pointer :: symafm(:),symrec(:,:,:)
  real(dp) :: knew(3)
  real(dp),allocatable :: ktest(:,:),wtk(:),wtk_folded(:)
@@ -2565,10 +2566,13 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  ABI_MALLOC(indkpt1,(nbz))
  ABI_MALLOC(wtk_folded,(nbz))
  ABI_MALLOC(wtk,(nbz))
+ ABI_MALLOC(bz2ibz_smap, (6, nbz))
  wtk=one; iout=0; dummy_timrev=0
 
- call symkpt(0,Cryst%gmet,indkpt1,iout,Kmesh%bz,nbz,nkibzq,Ltg%nsym_Ltg,symrec_Ltg,dummy_timrev,wtk,wtk_folded)
+ call symkpt(0,Cryst%gmet,indkpt1,iout,Kmesh%bz,nbz,nkibzq,Ltg%nsym_Ltg,symrec_Ltg,dummy_timrev,wtk,wtk_folded, &
+     bz2ibz_smap, xmpi_comm_self)
 
+ ABI_FREE(bz2ibz_smap)
  ABI_FREE(indkpt1)
  ABI_FREE(wtk)
 

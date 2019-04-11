@@ -9,7 +9,7 @@
 !!  xmpi_sum is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2001-2019 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,8 +26,6 @@
 !! SOURCE
 
 subroutine xmpi_sum_int(xval,comm,ier)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:)
@@ -88,8 +86,6 @@ end subroutine xmpi_sum_int
 
 subroutine xmpi_sum_intv(xval,comm,ier)
 
- implicit none
-
 !Arguments----------------------
  integer,intent(inout) :: xval
  integer,intent(in) :: comm
@@ -138,8 +134,6 @@ end subroutine xmpi_sum_intv
 
 subroutine xmpi_sum_intv2(xval,xsum,comm,ier)
 
- implicit none
-
 !Arguments---------------------
  integer,intent(inout) :: xval,xsum
  integer,intent(in) :: comm
@@ -184,8 +178,6 @@ end subroutine xmpi_sum_intv2
 !! SOURCE
 
 subroutine xmpi_sum_intn(xval,n1,comm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:)
@@ -248,10 +240,8 @@ end subroutine xmpi_sum_intn
 !!  xsum= receive buffer
 !!
 !! SOURCE
+
 subroutine xmpi_sum_int2t(xval,xsum,n1,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:),xsum(:)
@@ -297,10 +287,8 @@ end subroutine xmpi_sum_int2t
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_int2d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -362,9 +350,8 @@ end subroutine xmpi_sum_int2d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_int3d(xval,comm,ier)
 
- implicit none
+subroutine xmpi_sum_int3d(xval,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -427,9 +414,8 @@ end subroutine xmpi_sum_int3d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_int4d(xval,comm,ier)
 
- implicit none
+subroutine xmpi_sum_int4d(xval,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -494,11 +480,8 @@ end subroutine xmpi_sum_int4d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dp(xval,comm,ier)
-
-
- implicit none
-
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:)
@@ -561,10 +544,8 @@ end subroutine xmpi_sum_dp
 !!  None
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dpvt(xval,xsum,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp),intent(in) :: xval
@@ -622,8 +603,6 @@ end subroutine xmpi_sum_dpvt
 !! SOURCE
 subroutine xmpi_sum_dpv(xval,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp),intent(inout) :: xval
  integer ,intent(in) :: comm
@@ -674,10 +653,8 @@ end subroutine xmpi_sum_dpv
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dpn(xval,n1,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:)
@@ -719,6 +696,394 @@ end subroutine xmpi_sum_dpn
 
 !----------------------------------------------------------------------
 
+!!****f* ABINIT/xmpi_sum_sp2d
+!! NAME
+!!  xmpi_sum_sp2d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision two-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_sp2d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,nproc_space_comm
+ real(sp),allocatable :: xsum(:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+!    Accumulate xval on all proc. in comm
+
+#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2,MPI_REAL,MPI_SUM,comm,ier)
+#else
+     ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+     if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp2d')
+     call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_REAL,MPI_SUM,comm,ier)
+     xval (:,:) = xsum(:,:)
+     ABI_DEALLOCATE(xsum)
+#endif
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp2d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp3d
+!! NAME
+!!  xmpi_sum_sp3d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision three-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_sum_sp3d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,n3,nproc_space_comm
+ real(sp),allocatable :: xsum(:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+!    Accumulate xval on all proc. in comm
+
+#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_REAL,MPI_SUM,comm,ier)
+#else
+     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
+     if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp3d')
+     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_REAL,MPI_SUM,comm,ier)
+     xval (:,:,:) = xsum(:,:,:)
+     ABI_DEALLOCATE(xsum)
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp3d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp4d
+!! NAME
+!!  xmpi_sum_sp4d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision four-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+subroutine xmpi_sum_sp4d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp),DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,n3,n4,nproc_space_comm
+ real(sp),allocatable :: xsum(:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+!    Accumulate xval on all proc. in comm
+
+#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4,MPI_REAL,MPI_SUM,comm,ier)
+#else
+     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+     if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp4d')
+     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4,MPI_REAL,MPI_SUM,comm,ier)
+     xval (:,:,:,:) = xsum(:,:,:,:)
+     ABI_DEALLOCATE(xsum)
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp4d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp5d
+!! NAME
+!!  xmpi_sum_sp5d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision five-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+subroutine xmpi_sum_sp5d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,n3,n4,n5,nproc_space_comm
+ real(sp),allocatable :: xsum(:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+     n5 = size(xval,dim=5)
+!    Accumulate xval on all proc. in comm
+
+#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5,MPI_REAL,MPI_SUM,comm,ier)
+#else
+     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
+     if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp5d')
+     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5,MPI_REAL,MPI_SUM,comm,ier)
+     xval (:,:,:,:,:) = xsum(:,:,:,:,:)
+     ABI_DEALLOCATE(xsum)
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp5d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp6d
+!! NAME
+!!  xmpi_sum_sp6d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision six-dimensional arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+subroutine xmpi_sum_sp6d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,n3,n4,n5,n6,nproc_space_comm
+ real(sp), allocatable :: xsum(:,:,:,:,:,:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+     n5 = size(xval,dim=5)
+     n6 = size(xval,dim=6)
+!    Accumulate xval on all proc. in comm
+#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5*n6,MPI_REAL,MPI_SUM,comm,ier)
+#else
+     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
+     if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp6d')
+     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5*n6,MPI_REAL,MPI_SUM,comm,ier)
+     xval (:,:,:,:,:,:) = xsum(:,:,:,:,:,:)
+     ABI_DEALLOCATE(xsum)
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp6d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_sp7d
+!! NAME
+!!  xmpi_sum_sp7d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: double precision six-dimensional arrays.
+!!   
+!! INPUTS 
+!!  comm= MPI communicator
+!!   
+!! OUTPUT 
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!   
+!! SOURCE
+subroutine xmpi_sum_sp7d(xval,comm,ier)
+
+!Arguments-------------------------
+ real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,n3,n4,n5,n6,n7,nproc_space_comm
+ real(sp),allocatable :: xsum(:,:,:,:,:,:,:)
+#endif
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     n1 = size(xval,dim=1)
+     n2 = size(xval,dim=2)
+     n3 = size(xval,dim=3)
+     n4 = size(xval,dim=4)
+     n5 = size(xval,dim=5)
+     n6 = size(xval,dim=6)
+     n7 = size(xval,dim=7)
+!    Accumulate xval on all proc. in comm
+
+#if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3*n4*n5*n6*n7,MPI_REAL,MPI_SUM,comm,ier)
+#else
+     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
+     if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp7d')
+     call MPI_ALLREDUCE(xval,xsum,n1*n2*n3*n4*n5*n6*n7,MPI_REAL,MPI_SUM,comm,ier)
+     xval (:,:,:,:,:,:,:) = xsum(:,:,:,:,:,:,:)
+     ABI_DEALLOCATE(xsum)
+#endif
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_sp7d
+!!***
+
+
+
+!----------------------------------------------------------------------
+
 !!****f* ABINIT/xmpi_sum_dp2d
 !! NAME
 !!  xmpi_sum_dp2d
@@ -740,10 +1105,6 @@ end subroutine xmpi_sum_dpn
 !! SOURCE
 
 subroutine xmpi_sum_dp2d(xval,comm,ier)
-
-
- implicit none
-
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -804,10 +1165,8 @@ end subroutine xmpi_sum_dp2d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dp3d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -870,10 +1229,8 @@ end subroutine xmpi_sum_dp3d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dp4d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp),DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -937,10 +1294,8 @@ end subroutine xmpi_sum_dp4d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dp5d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
@@ -1007,10 +1362,6 @@ end subroutine xmpi_sum_dp5d
 !! SOURCE
 subroutine xmpi_sum_dp6d(xval,comm,ier)
 
-
- implicit none
-
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
  integer ,intent(in) :: comm
@@ -1074,10 +1425,8 @@ end subroutine xmpi_sum_dp6d
 !!  xval= buffer array
 !!   
 !! SOURCE
+
 subroutine xmpi_sum_dp7d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
@@ -1145,9 +1494,8 @@ end subroutine xmpi_sum_dp7d
 !!  xsum= receive buffer
 !!
 !! SOURCE
-subroutine xmpi_sum_dp2t(xval,xsum,n1,comm,ier)
 
- implicit none
+subroutine xmpi_sum_dp2t(xval,xsum,n1,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:),xsum(:)
@@ -1193,9 +1541,8 @@ end subroutine xmpi_sum_dp2t
 !!  ier= exit status, a non-zero value meaning there is an error
 !!
 !! SOURCE
-subroutine xmpi_sum_dp2d2t(xval,xsum,n,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_dp2d2t(xval,xsum,n,spaceComm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
@@ -1249,8 +1596,6 @@ end subroutine xmpi_sum_dp2d2t
 
 subroutine xmpi_sum_dp3d2t(xval,xsum,n1,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:),xsum(:,:,:)
  integer ,intent(in) :: n1
@@ -1296,9 +1641,8 @@ end subroutine xmpi_sum_dp3d2t
 !!  xsum= receive buffer
 !!
 !! SOURCE
-subroutine xmpi_sum_dp4d2t(xval,xsum,n1,comm,ier)
 
- implicit none
+subroutine xmpi_sum_dp4d2t(xval,xsum,n1,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:),xsum(:,:,:,:)
@@ -1343,9 +1687,8 @@ end subroutine xmpi_sum_dp4d2t
 !!  xval= scalar to be summed.
 !!
 !! SOURCE
-subroutine xmpi_sum_c0dc(xval,comm,ier)
 
- implicit none
+subroutine xmpi_sum_c0dc(xval,comm,ier)
 
 !Arguments-------------------------
  complex(dpc),intent(inout) :: xval
@@ -1396,10 +1739,8 @@ end subroutine xmpi_sum_c0dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c1dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:)
@@ -1460,10 +1801,8 @@ end subroutine xmpi_sum_c1dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c2dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -1525,10 +1864,8 @@ end subroutine xmpi_sum_c2dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c3dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -1591,10 +1928,8 @@ end subroutine xmpi_sum_c3dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c4dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -1657,10 +1992,8 @@ end subroutine xmpi_sum_c4dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c5dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
@@ -1721,10 +2054,8 @@ end subroutine xmpi_sum_c5dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c6dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
@@ -1788,10 +2119,8 @@ end subroutine xmpi_sum_c6dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c7dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
@@ -1859,10 +2188,8 @@ end subroutine xmpi_sum_c7dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c1cplx(xval,comm,ier)
-
-
- implicit none
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:)
@@ -1923,10 +2250,8 @@ end subroutine xmpi_sum_c1cplx
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c2cplx(xval,comm,ier)
-
-
- implicit none
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -1993,10 +2318,8 @@ end subroutine xmpi_sum_c2cplx
 !!      mpi_allreduce,xmpi_abort
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c3cplx(xval,comm,ier)
-
-
- implicit none
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -2064,11 +2387,8 @@ end subroutine xmpi_sum_c3cplx
 !!      mpi_allreduce,xmpi_abort
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c4cplx(xval,comm,ier)
-
-
- implicit none
-
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -2132,11 +2452,8 @@ end subroutine xmpi_sum_c4cplx
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c5cplx(xval,comm,ier)
-
-
- implicit none
-
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
@@ -2202,10 +2519,6 @@ end subroutine xmpi_sum_c5cplx
 !! SOURCE
 
 subroutine xmpi_sum_c6cplx(xval,comm,ier)
-
-
- implicit none
-
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)

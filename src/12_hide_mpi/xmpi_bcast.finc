@@ -9,7 +9,7 @@
 !!  xmpi_bcast is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (Rshaltaf,AR,XG)
+!!  Copyright (C) 2001-2019 ABINIT group (Rshaltaf,AR,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,9 +17,6 @@
 !! SOURCE
 
 subroutine xmpi_bcast_intv(xval,master,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(inout) :: xval
@@ -63,9 +60,6 @@ end subroutine xmpi_bcast_intv
 !!
 !! SOURCE
 subroutine xmpi_bcast_int1d(xval,master,spaceComm,ier)
-
-
- implicit none
 
 !Arguments ------------------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:)
@@ -111,10 +105,8 @@ end subroutine xmpi_bcast_int1d
 !!      mpi_bcast
 !!
 !! SOURCE
+
 subroutine xmpi_bcast_int2d(xval,master,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -165,9 +157,6 @@ end subroutine xmpi_bcast_int2d
 !!
 !! SOURCE
 subroutine xmpi_bcast_int3d(xval,master,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -220,9 +209,6 @@ end subroutine xmpi_bcast_int3d
 
 subroutine xmpi_bcast_dpv(xval,master,spaceComm,ier)
 
-
- implicit none
-
 !Arguments ------------------------------------
  real(dp),intent(inout) :: xval
  integer ,intent(in) :: spaceComm,master
@@ -266,9 +252,6 @@ end subroutine xmpi_bcast_dpv
 !!
 !! SOURCE
 subroutine xmpi_bcast_dp1d(xval,master,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:)
@@ -314,8 +297,6 @@ end subroutine xmpi_bcast_dp1d
 !! SOURCE
 
 subroutine xmpi_bcast_dp2d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -363,9 +344,6 @@ end subroutine xmpi_bcast_dp2d
 
 subroutine xmpi_bcast_dp3d(xval,master,spaceComm,ier)
 
-
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer ,intent(in) :: spaceComm,master
@@ -412,8 +390,6 @@ end subroutine xmpi_bcast_dp3d
 !! SOURCE
 
 subroutine xmpi_bcast_dp4d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -463,8 +439,6 @@ end subroutine xmpi_bcast_dp4d
 
 subroutine xmpi_bcast_dp5d(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
  integer ,intent(in) :: spaceComm,master
@@ -513,8 +487,6 @@ end subroutine xmpi_bcast_dp5d
 !! SOURCE
 
 subroutine xmpi_bcast_dp6d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
@@ -566,9 +538,6 @@ end subroutine xmpi_bcast_dp6d
 
 subroutine xmpi_bcast_spv(xval,master,spaceComm,ier)
 
-implicit none
-
-
 !Arguments-------------------------
  real(sp),intent(inout) :: xval
  integer,intent(in) :: spaceComm,master
@@ -607,8 +576,6 @@ end subroutine xmpi_bcast_spv
 !! SOURCE
 
 subroutine xmpi_bcast_sp1d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:)
@@ -654,9 +621,6 @@ end subroutine xmpi_bcast_sp1d
 !! SOURCE
 
 subroutine xmpi_bcast_sp2d(xval,master,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -704,9 +668,6 @@ end subroutine xmpi_bcast_sp2d
 
 subroutine xmpi_bcast_sp3d(xval,master,spaceComm,ier)
 
-
- implicit none
-
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer ,intent(in) :: spaceComm,master
@@ -753,9 +714,6 @@ end subroutine xmpi_bcast_sp3d
 !! SOURCE
 
 subroutine xmpi_bcast_sp4d(xval,master,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -809,9 +767,6 @@ end subroutine xmpi_bcast_sp4d
 !! SOURCE
 subroutine xmpi_bcast_cplxv(xval,master,spaceComm,ier)
 
-
-implicit none
-
 !Arguments-------------------------
  complex(spc),intent(inout) :: xval
  integer ,intent(in) :: spaceComm,master
@@ -857,9 +812,6 @@ end subroutine xmpi_bcast_cplxv
 !! SOURCE
 subroutine xmpi_bcast_cplx1d(xval,master,spaceComm,ier)
 
-
-implicit none
-
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:)
  integer ,intent(in) :: spaceComm,master
@@ -904,8 +856,6 @@ end subroutine xmpi_bcast_cplx1d
 !! SOURCE
 
 subroutine xmpi_bcast_cplx2d(xval,master,spaceComm,ier)
-
-implicit none
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -953,9 +903,6 @@ end subroutine xmpi_bcast_cplx2d
 
 subroutine xmpi_bcast_cplx3d(xval,master,spaceComm,ier)
 
-
-implicit none
-
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer ,intent(in) :: spaceComm,master
@@ -1001,8 +948,6 @@ end subroutine xmpi_bcast_cplx3d
 !!
 !! SOURCE
 subroutine xmpi_bcast_cplx4d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -1052,8 +997,6 @@ end subroutine xmpi_bcast_cplx4d
 
 subroutine xmpi_bcast_dcv(xval,master,spaceComm,ier)
 
-implicit none
-
 !Arguments-------------------------
  complex(dpc),intent(inout):: xval
  integer ,intent(in) :: spaceComm,master
@@ -1092,8 +1035,6 @@ end subroutine xmpi_bcast_dcv
 !! SOURCE
 
 subroutine xmpi_bcast_dc1d(xval,master,spaceComm,ier)
-
-implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout):: xval(:)
@@ -1141,8 +1082,6 @@ end subroutine xmpi_bcast_dc1d
 
 subroutine xmpi_bcast_dc2d(xval,master,spaceComm,ier)
 
-implicit none
-
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout):: xval(:,:)
  integer ,intent(in) :: spaceComm,master
@@ -1188,9 +1127,6 @@ end subroutine xmpi_bcast_dc2d
 !! SOURCE
 
 subroutine xmpi_bcast_dc3d(xval,master,spaceComm,ier)
-
-implicit none
-
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout):: xval(:,:,:)
@@ -1238,8 +1174,6 @@ end subroutine xmpi_bcast_dc3d
 !! SOURCE
 
 subroutine xmpi_bcast_dc4d(xval,master,spaceComm,ier)
-
-implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -1289,8 +1223,6 @@ end subroutine xmpi_bcast_dc4d
 
 subroutine xmpi_bcast_ch0d(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  character(len=*),intent(inout) :: xval
  integer,intent(in) :: spaceComm,master
@@ -1338,8 +1270,6 @@ end subroutine xmpi_bcast_ch0d
 !! SOURCE
 subroutine xmpi_bcast_ch1d(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  Character(len=*), DEV_CONTARRD intent(inout) :: xval(:)
  integer,intent(in) :: spaceComm,master
@@ -1386,8 +1316,6 @@ end subroutine xmpi_bcast_ch1d
 
 subroutine xmpi_bcast_log0d(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  logical,intent(inout) :: xval
  integer,intent(in) :: spaceComm,master
@@ -1426,8 +1354,6 @@ end subroutine xmpi_bcast_log0d
 !! SOURCE
 
 subroutine xmpi_bcast_coeffi2_1d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  type(coeffi2_type), intent(inout) :: xval(:)
@@ -1523,8 +1449,6 @@ end subroutine xmpi_bcast_coeffi2_1d
 !! SOURCE
 
 subroutine xmpi_bcast_coeff2_1d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  type(coeff2_type), intent(inout) :: xval(:)

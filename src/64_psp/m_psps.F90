@@ -8,7 +8,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2019 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1412,7 +1412,7 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
  end if
 
  call pawpsp_cg(nctab%dnvdq0,d2nvdq0,mqgrid_vl,qgrid_vl,nctab%tvalespl(:,1),mesh,valr,yp1,ypn)
- call simp_gen(yp1,mesh%rad**2 * valr, mesh); write(std_out,*)"valence charge integrates to: ",four_pi*yp1
+ call simp_gen(yp1,mesh%rad**2 * valr, mesh); write(std_out,*)" valence charge integrates to: ",four_pi*yp1
 
  ! Rescale the integral to have the correct number of valence electrons.
  ! In some cases, indeed, the radial mesh is not large enough and some valence charge is missing

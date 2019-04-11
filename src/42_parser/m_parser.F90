@@ -7,7 +7,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2019 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1614,24 +1614,18 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !end if
 
  if(errcod/=0)then
-
-   write(message, '(8a,i0,a)' ) ch10,&
-&   ' inarray : ',ch10,&
-&   '  An error occurred reading data for keyword "',trim(cs),'",',ch10,&
-&   '  looking for ',narr,' array elements.'
-   call wrtout(std_out,message,do_flush=.true.)
-
-   write(message,'(8a)')&
-&   'There is a problem with the input file : maybe  ',ch10,&
-&   'a disagreement between the declared dimension of the array,',ch10,&
-&   'and the number of data actually provided. ',ch10,&
-&   'Action: correct your input file, and especially the keywork', trim(cs)
+   write(message, '(5a,i0,10a)' ) &
+   'An error occurred reading data for keyword "',trim(cs),'",',ch10,&
+   'looking for ',narr,' array elements.', ch10, &
+   'There is a problem with the input file: maybe  ',ch10,&
+   'a disagreement between the declared dimension of the array,',ch10,&
+   'and the number of data actually provided. ',ch10,&
+   'Action: correct your input file, and especially the keyword', trim(cs)
    MSG_ERROR(message)
  end if
 
 !In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
-if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' &
-&    .or. typevarphys=='TIM')then
+if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM')then
    do
 
 !    Relative location of next blank after data
@@ -3412,11 +3406,11 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
          index_blank=index(string(index_current:),blank)+index_current-1
          if(index(' F T ',string(index_blank:index_blank+2))==0)then
            write(message, '(8a)' )&
-&           'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
-&           'This variable should be given a logical value (T or F), but the following string was found :',&
-&           string(index_blank:index_blank+2),ch10,&
-&           'Action: check your input file. You likely misused the input variable.'
-           MSG_ERROR(message)
+            'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
+            'This variable should be given a logical value (T or F), but the following string was found :',&
+            string(index_blank:index_blank+2),ch10,&
+            'Action: check your input file. You likely misused the input variable.'
+            MSG_ERROR(message)
          else
            index_blank=index_blank+2
          end if
@@ -3432,9 +3426,9 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 !        If still not admitted, then there is a problem
        else
          write(message, '(7a)' )&
-&         'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
-&         'This name is not one of the registered input variable names (see https://www.abinit.org/doc).',ch10,&
-&         'Action: check your input file. You likely mistyped the input variable.'
+         'Found the token: ',string(index_current:index_endword),' in the input file.',ch10,&
+         'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
+         'Action: check your input file. You likely mistyped the input variable.'
          MSG_ERROR(message)
        end if
      end if

@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2019 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,19 +89,11 @@ contains
 !!      bethe_salpeter
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
 &  Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -191,7 +183,6 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
    call build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm,Epren=Epren)
  end if
 
-
  DBG_EXIT("COLL")
 
 end subroutine exc_diago_driver
@@ -220,18 +211,10 @@ end subroutine exc_diago_driver
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst,elph_lifetime)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -454,8 +437,8 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
            ! Add lifetime
            if(do_ep_lifetime) then
-             exc_mat(ireh,ireh) = exc_mat(ireh,ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) &
-&                + Epren%lifetimes(1,iv,ik,isppol,itemp))
+             exc_mat(ireh,ireh) = exc_mat(ireh,ireh) - j_dpc*(Epren%linewidth(1,ic,ik,isppol,itemp) &
+&                + Epren%linewidth(1,iv,ik,isppol,itemp))
            end if
 
          end do
@@ -709,18 +692,10 @@ end subroutine exc_diago_resonant
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -866,18 +841,10 @@ end subroutine exc_print_eig
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1143,18 +1110,10 @@ end subroutine exc_diago_coupling
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

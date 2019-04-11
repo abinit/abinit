@@ -9,7 +9,7 @@
 !!  xmpi_gather is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (MT)
+!!  Copyright (C) 2001-2019 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,8 +42,6 @@
 !! SOURCE
 
 subroutine xmpi_gather_int(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
@@ -89,10 +87,8 @@ end subroutine xmpi_gather_int
 !!  recvbuf= received buffer
 !!
 !! SOURCE
+
 subroutine xmpi_gather_int2d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
@@ -138,11 +134,8 @@ end subroutine xmpi_gather_int2d
 !!  recvbuf= received buffer
 !!
 !! SOURCE
+
 subroutine xmpi_gather_dp(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
-
-
- implicit none
-
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
@@ -189,9 +182,8 @@ end subroutine xmpi_gather_dp
 !!  recvbuf= received buffer
 !!
 !! SOURCE
-subroutine xmpi_gather_dp2d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
- implicit none
+subroutine xmpi_gather_dp2d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
@@ -238,10 +230,8 @@ end subroutine xmpi_gather_dp2d
 !!  recvbuf= received buffer
 !!
 !! SOURCE
+
 subroutine xmpi_gather_dp3d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
@@ -289,11 +279,8 @@ end subroutine xmpi_gather_dp3d
 !!  recvbuf= received buffer
 !!
 !! SOURCE
+
 subroutine xmpi_gather_dp4d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
-
-
- implicit none
-
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount

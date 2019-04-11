@@ -9,7 +9,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2018 ABINIT group (MG, YG)
+!! Copyright (C) 2009-2019 ABINIT group (MG, YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -204,7 +204,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !scalars
  integer,parameter :: tim_fourdp0=0,level=40,ipert0=0,idir0=0,cplex1=1,master=0,option1=1
  integer :: band,cplex_rhoij,spin,ik_ibz,mqmem,iwarn
- integer :: has_dijU,has_dijso,gnt_option,iomode
+ integer :: has_dijU,has_dijso,gnt_option
  integer :: ik_bz,mband
  integer :: choice
  integer :: ider
@@ -217,7 +217,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  integer :: nscf,nbsc,nkxc,n3xccc
  integer :: nfftf,nfftf_tot,nfftot_osc,my_minb,my_maxb
  integer :: optene,moved_atm_inside,moved_rhor,initialized,istep,ierr
- real(dp) :: ucvol,drude_plsmf,ecore,ecut_eff,ecutdg_eff,opt_ecut,norm
+ real(dp) :: ucvol,drude_plsmf,ecore,ecut_eff,ecutdg_eff,norm
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp
  real(dp) :: compch_fft,compch_sph,gsq_osc
  real(dp) :: vxcavg
@@ -501,15 +501,11 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  bks_mask=.TRUE.
 
  ABI_MALLOC(keep_ur,(mband,Kmesh%nibz,Dtset%nsppol))
- keep_ur=.FALSE.
- if (MODULO(Dtset%gwmem,10)==1) keep_ur = .TRUE.
+ keep_ur=.FALSE.; if (MODULO(Dtset%gwmem,10)==1) keep_ur = .TRUE.
 
-!opt_ecut=zero
- opt_ecut=Dtset%ecutwfn
-
- call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,Dtset%paral_kgb,BSp%npwwfn,mband,nband,Kmesh%nibz,Dtset%nsppol,bks_mask,&
-& Dtset%nspden,Dtset%nspinor,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_osc,&
-& Gsph_x%gvec,Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,opt_ecut=opt_ecut)
+ call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Dtset%nsppol,bks_mask,&
+  Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_osc,&
+  Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
  ABI_FREE(bks_mask)
  ABI_FREE(nband)
@@ -545,15 +541,11 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    !bks_mask=.TRUE.
 
    ABI_MALLOC(keep_ur,(mband,Kmesh_dense%nibz,Dtset%nsppol))
-   keep_ur=.FALSE.
-   if (MODULO(Dtset%gwmem,10)==1) keep_ur = .TRUE.
+   keep_ur=.FALSE.; if (MODULO(Dtset%gwmem,10)==1) keep_ur = .TRUE.
 
-!  opt_ecut=zero
-   opt_ecut=Dtset%ecutwfn
-
-   call wfd_init(Wfd_dense,Cryst,Pawtab,Psps,keep_ur,Dtset%paral_kgb,BSp%npwwfn,mband,nband,Kmesh_dense%nibz,Dtset%nsppol,&
-&   bks_mask,Dtset%nspden,Dtset%nspinor,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,ngfft_osc,&
-&   Gsph_x_dense%gvec,Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,opt_ecut=opt_ecut)
+   call wfd_init(Wfd_dense,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh_dense%nibz,Dtset%nsppol,&
+    bks_mask,Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,ngfft_osc,&
+    Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
    ABI_FREE(bks_mask)
    ABI_FREE(nband)
@@ -561,8 +553,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    call wfd_dense%print(header="Wavefunctions on the dense K-mesh used for interpolation",mode_paral='PERS')
 
-   iomode = iomode_from_fname(dtfil%fnameabi_wfkfine)
-   call wfd_dense%read_wfk(Dtfil%fnameabi_wfkfine,iomode)
+   call wfd_dense%read_wfk(Dtfil%fnameabi_wfkfine, iomode_from_fname(dtfil%fnameabi_wfkfine))
 
    ! This test has been disabled (too expensive!)
    if (.False.) call wfd_dense%test_ortho(Cryst,Pawtab,unit=std_out,mode_paral="COLL")
@@ -899,7 +890,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    !W_info%drude_plsmf
 
    call screen_init(W,W_Info,Cryst,Qmesh,Gsph_c,Vcp,w_fname,mqmem,Dtset%npweps,&
-&   Dtset%iomode,ngfftf,nfftf_tot,Wfd%nsppol,Wfd%nspden,qp_aerhor,Wfd%prtvol,Wfd%comm)
+    Dtset%iomode,ngfftf,nfftf_tot,Wfd%nsppol,Wfd%nspden,qp_aerhor,Wfd%prtvol,Wfd%comm)
  end if
  call timab(654,2,tsec) ! bse(rdmkeps^-1)
  !
@@ -1105,8 +1096,6 @@ end subroutine bethe_salpeter
 
 subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
 & Cryst,Kmesh,Qmesh,KS_BSt,QP_bst,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,Wvl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2058,8 +2047,6 @@ end subroutine setup_bse
 
 subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 & Kmesh_dense,Qmesh_dense,KS_BSt_dense,QP_bst_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
