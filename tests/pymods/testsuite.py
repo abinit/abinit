@@ -2106,7 +2106,7 @@ class BaseTest(object):
         Dump the run results to pass it to a different process
         """
         return {
-            'full_id': self.full_id,
+            'id': self.id,
             'status': self.status,
             'stdout': self.stdout_fname,
             'files_to_keep': self.files_to_keep,
