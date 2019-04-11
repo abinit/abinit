@@ -2289,7 +2289,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst,itime
 ! integer :: ifirst
  real(dp):: energy,energy_harm_tot,energy_ph_htot,energy_harm_short,energy_harm_ewald
- logical :: need_anharmonic = .TRUE.,need_print=.FALSE., anh_opened
+ logical :: need_anharmonic = .TRUE.,need_print=.FALSE., anh_opened,need_elec_eval
  !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
 !Strings/Characters 
@@ -2320,6 +2320,9 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst,itime
  
  need_print=.FALSE. 
  if(present(print_file))need_print=print_file
+ 
+ need_elec_eval = .FALSE. 
+ if(present(scup_dtset))need_elec_eval=scup_dtset%scup_elec_model
 
 
  if(need_print .and. present(filename))then
@@ -2358,27 +2361,27 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst,itime
    end if
 #if defined DEV_MS_SCALEUP 
    !Pass print options to scale-up
-   itime = ii
-   if(scup_dtset%scup_elec_model)then
-      call global_set_parent_iter(itime)
-      ! Set all print options to false. 
-      call global_set_print_parameters(geom=.FALSE.,eigvals=.FALSE.,eltic=.FALSE.,&
-&              orbocc=.FALSE.,bands=.FALSE.)
-      if(modulo(ii,scup_dtset%scup_printniter) == 0)then 
-         call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,& 
-&                 scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
-      end if 
+   itime = ii 
+   if(need_elec_eval)then
+        call global_set_parent_iter(itime)
+        ! Set all print options to false. 
+        call global_set_print_parameters(geom=.FALSE.,eigvals=.FALSE.,eltic=.FALSE.,&
+&                orbocc=.FALSE.,bands=.FALSE.)
+        if(modulo(ii,scup_dtset%scup_printniter) == 0)then 
+           call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,& 
+&                   scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
+        end if 
    end if 
 #endif
    call effective_potential_evaluate(eff_pot,energy_harm_tot,energy_ph_htot,energy_harm_short,energy_harm_ewald,&
 &                                    fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.False.,verbose=.false.,&
-&                                    elec_eval=scup_dtset%scup_elec_model)
+&                                    elec_eval=need_elec_eval)
 
    call effective_potential_evaluate(eff_pot,energy,energy_ph_htot,energy_harm_short,energy_harm_ewald,& 
 &                                    fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.,&
-&                                    filename=file_anh,elec_eval=scup_dtset%scup_elec_model)
+&                                    filename=file_anh,elec_eval=need_elec_eval)
 
    if(need_print)then
      WRITE(unit_energy ,'(I10,7(F23.14))') ii,hist%etot(ii),energy_ph_htot,energy_harm_short,&
