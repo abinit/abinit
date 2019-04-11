@@ -239,8 +239,8 @@ class TestBot(object):
         Returns: (nfailed, npassed, nexecuted)
         """
         omp_nthreads = max(self.omp_num_threads, 1)
-        py_nthreads = self.ncpus // (mpi_nprocs * omp_nthreads)
-        assert py_nthreads > 0
+        py_nprocs = self.ncpus // (mpi_nprocs * omp_nthreads)
+        assert py_nprocs > 0
 
         test_suite = abitests.select_tests(suite_args, keys=self.keywords, regenerate=False)
 
@@ -256,11 +256,11 @@ class TestBot(object):
 
         # Run the tests.
         if self.has_openmp:
-            msg = "Running ntests = %s, MPI_nprocs = %s, OMP_nthreads %s, py_nthreads = %s..." % (
-                  test_suite.full_length, mpi_nprocs, omp_nthreads, py_nthreads)
+            msg = "Running ntests = %s, MPI_nprocs = %s, OMP_nthreads %s, py_nprocs = %s..." % (
+                  test_suite.full_length, mpi_nprocs, omp_nthreads, py_nprocs)
         else:
-            msg = "Running ntests = %s, MPI_nprocs = %s, py_nthreads = %s..." % (
-                  test_suite.full_length, mpi_nprocs, py_nthreads)
+            msg = "Running ntests = %s, MPI_nprocs = %s, py_nprocs = %s..." % (
+                  test_suite.full_length, mpi_nprocs, py_nprocs)
         print(msg)
 
         runner = self.seq_runner
@@ -269,7 +269,7 @@ class TestBot(object):
 
         results = test_suite.run_tests(
             self.build_env, workdir, runner,
-            nprocs=mpi_nprocs, nthreads=py_nthreads, runmode=self.runmode)
+            nprocs=mpi_nprocs, py_nprocs=py_nprocs, runmode=self.runmode)
         # Cannot use this option on the test farm because hdf5 is not thread-safe.
         # See https://www.hdfgroup.org/hdf5-quest.html#tsafe
         # etsf_check=self.etsf_check)
@@ -282,7 +282,7 @@ class TestBot(object):
         # taking into account that an input file might be executed multiple times
         # with a different environment (MPI, OMP ...)
         run_info = {}
-        # run_info = [self.build_env, workdir, runner, mpi_nprocs, py_nthreads]
+        # run_info = [self.build_env, workdir, runner, mpi_nprocs, py_nprocs]
         self.summary.merge_results(test_suite, run_info)
 
         # Push the location of the tarball file
