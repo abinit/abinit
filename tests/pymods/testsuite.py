@@ -2763,6 +2763,7 @@ class ChainOfTests(object):
         self.suite_name = tests[0].suite_name
         #
         # Consistency check.
+        self._rid = genid()
         for t in tests:
             if self.inp_dir != t.inp_dir or self.suite_name != t.suite_name:
                 raise self.Error("All tests should be located in the same directory")
