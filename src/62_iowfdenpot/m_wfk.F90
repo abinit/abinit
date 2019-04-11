@@ -2820,12 +2820,12 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, sjoin(" Reading eigenvalues from: ", fname,", with iomode = ",iomode2str(iomode)))
-
- iomode = iomode_from_fname(fname)
  my_rank = xmpi_comm_rank(comm)
+ iomode = iomode_from_fname(fname)
 
- if (my_rank==master) then
+ call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname,", with iomode: ", iomode2str(iomode)))
+
+ if (my_rank == master) then
    ! Open the file.
    sc_mode = xmpio_single
    funt = get_unit()

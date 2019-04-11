@@ -984,8 +984,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  else if (dtset%useria == 2000) then
      sigma%use_ftinterp = .True.
-     !if (all(dtset%eph_ngqpt_fine /= 0)) then
-     !if (dtset%useria == 2000 .and. all(dtset%eph_ngqpt_fine /= 0)) then
+     !if (all(dtset%eph_ngqpt_fine /= 0 .and. any(dtset%eph_ngqpt_fine /= dtset%ddb_ngqpt)) then
      ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation. 
      ! R-points are distributed inside comm_rpt
      ! Note that when R-points are distributed inside comm_bq we cannot interpolate potentials on-the-fly 
@@ -994,15 +993,16 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! to the integral and the potentials must be cached.
      comm_rpt = xmpi_comm_self
      comm_rpt = sigma%comm_bq
-     !if (.not. sigma%imag_only) comm_rpt = comm_band
+     !if (.not. sigma%imag_only) comm_rpt = sigma%comm_band
      call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
-     ! Now build q-cache in the *dense* IBZ using the global mask qselect and itreatq.
+     ! Build q-cache in the *dense* IBZ using the global mask qselect and itreatq.
      ABI_CALLOC(qselect, (sigma%nqibz))
      qselect = 1
      if (sigma%imag_only .and. sigma%qint_method == 1) then
        call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
      end if
+     ! Distribute IBZ q-points inside comm_qpt
      ABI_ICALLOC(itreatq, (sigma%nqibz))
      itreatq = 1
      !do iq_ibz=1, sigma%nqibz
@@ -2261,6 +2261,14 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end if
 
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = nprocs / new%nprocs_pert
+
+ !new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1 ! nprocs / new%nprocs_pert
+ !new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1 ! nprocs / new%nprocs_pert
+ !if (new%imag_only) then 
+ !  new%nprocs_bsum = 1 
+ !else
+ !end if
+
 #ifdef HAVE_MPI
  ! Create cartesian communicator (perturbations, bq, fft)
  ! At present, FFT parallelism is not activated.
@@ -2288,8 +2296,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! Create the communicator for the band sum / qpoint loops
  !keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.
- !call MPI_CART_SUB(comm_cart, keepdim, new%comm_bqfft, ierr)
- !call MPI_COMM_RANK(new%comm_bqfft, new%me_bqfft, ierr)
+ !call MPI_CART_SUB(comm_cart, keepdim, new%comm_qpt, ierr)
+ !call MPI_COMM_RANK(new%comm_qpt, new%me_qpt, ierr)
 
  ABI_FREE(dims)
  ABI_FREE(periods)
@@ -3970,8 +3978,7 @@ end if
        ! Recompute weights with new q-point distribution.
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
-       ! Make sure each node has the q-points we need. 
-       ! TODO: Should not break qcache_size_mb contract!
+       ! Make sure each node has the q-points we need. Try not to break qcache_size_mb contract!
        if (self%imag_only .and. self%qint_method == 1) then
 if (self%use_ftinterp) then
          ABI_ICALLOC(ineed_qpt, (self%nqibz))
@@ -3981,8 +3988,8 @@ if (self%use_ftinterp) then
            if (.not. allocated(dvdb%ftqcache%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
          end do
 
-         ! Update cache by Fourier transforming W(r,R)
-         !call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
+         ! Update cache by Fourier interpolating W(r,R)
+         call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
          ABI_FREE(ineed_qpt)
 else
          ! Find q-points needed by this MPI rank.
@@ -4466,7 +4473,7 @@ subroutine sigmaph_print(self, dtset, unt)
  if (unt == dev_null) return
 
  ! Write dimensions
- !write(unt,"(a, 2(f5.3, 1x), a)")"Computing self-energy corrections for states in energy window:", &
+ !write(unt,"(a, 2(f5.3, 1x), a)")"Computing self-energy corrections for states inside energy window:", &
  !    self%elow * Ha_eV, self%ehigh * Ha_eV, "[eV]"
  write(unt,"(a)")sjoin(" Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
  write(unt,"(a)")sjoin(" From bmin:", itoa(self%bsum_start), "to bmax:", itoa(self%bsum_stop))
