@@ -116,6 +116,8 @@ CONTAINS
 
 subroutine scup_dtset_init(scup_dtset)
 
+implicit none
+
 !Arguments -------------------------------
 !scalars
  type(scup_dtset_type),intent(inout) :: scup_dtset
@@ -300,6 +302,7 @@ end subroutine outvars_scup
 
 subroutine invars10scup(scup_dtset,lenstr,string)
 
+implicit none 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: lenstr
@@ -613,6 +616,7 @@ end subroutine invars10scup
 
 subroutine scup_kpath_new(speck,rprimd,ndivsm,scup_kpath)
 
+ implicit none
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ndivsm
@@ -687,6 +691,7 @@ end subroutine scup_kpath_new
 
 subroutine scup_kpath_print(scup_kpath)
 
+ implicit none 
 !Arguments ------------------------------------
 !scalars
 !arrays 
