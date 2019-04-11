@@ -31,7 +31,7 @@ from .jobrunner import TimeBomb
 from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher,
                     Editor)
 from .xyaptu import xcopier
-from .devtools import FileLock
+from .devtools import NoErrorFileLock
 from .memprof import AbimemParser
 from .termcolor import cprint
 
@@ -3314,325 +3314,322 @@ class AbinitTestSuite(object):
         self.workdir = workdir
 
         # Acquire the lock file.
-        self.lock = FileLock(os.path.join(self.workdir, "__run_tests_lock__"), timeout=3)
+        self.lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"),
+                                    timeout=3)
 
-        try:
-            self.lock.acquire()
-        except self.lock.Error:
-            msg = ("Timeout occured while trying to acquire lock in:\n\t%s\n"
-                   "Perhaps a previous run did not exit cleanly or another process is running in the same directory.\n"
-                   "If you are sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n" % self.workdir)
-            cprint(msg, "red")
-            return
-
-        # Remove all stale files present in workdir (except the lock!)
-        rmrf(self.workdir, exclude_paths=self.lock.lockfile)
-
-        self.nprocs = nprocs
-        self.py_nprocs = py_nprocs
-
-        def run_and_check_test(test, print_lock=NotALock()):
-            """Helper function to execute the test. Must be thread-safe."""
-
-            testdir = os.path.abspath(os.path.join(self.workdir, test.suite_name + "_" + test.id))
-
-            # Run the test
-            test.run(build_env, runner, testdir, print_lock=print_lock, nprocs=nprocs, runmode=runmode, **kwargs)
-
-            # Write HTML summary
-            with print_lock:
-                test.write_html_report()
-
-            # Remove useless files in workdir.
-            test.clean_workdir()
-
-            d = test.results_dump()
-            d['type'] = 'result'
-            return d
-
-        ##############################
-        # And now let's run the tests
-        ##############################
-        start_time = time.time()
-
-        if py_nprocs == 1:
-            logger.info("Sequential version")
-            for test in self:
-                # discard the return value because tests are directly modified
-                run_and_check_test(test)
-
-        elif py_nprocs > 1:
-            logger.info("Threaded version with py_nprocs = %s" % py_nprocs)
-
-            def worker(qin, qout, print_lock):
-                done = {
-                    'type': 'proc_done'
-                }
-                try:
-                    while not qin.empty():
-                        test = qin.get_nowait()
-                        qout.put(run_and_check_test(test,
-                                                    print_lock=print_lock))
-                except EmptyQueueError:
-                    # Queue have been emptied between the call to qin.empty
-                    # and the call to qin.get
-                    pass
-                except Exception as e:
-                    done['error'] = e
-                    try:
-                        done['task'] = test.full_id
-                    except (AttributeError, NameError):
-                        pass
-                finally:
-                    qout.put(done)
-
-            task_q = Queue()
-            res_q = Queue()
-            print_lock = Lock()
-
-            for test in self:
-                task_q.put(test)
-
-            for i in range(py_nprocs):
-                p = Process(target=worker, args=(task_q, res_q, print_lock))
-                self._processes.append(p)
-                p.start()
-
-            # Block until all tasks are done. Raise QueueTimeoutError after timeout seconds.
-            timeout_1test = float(runner.timebomb.timeout)
-            if timeout_1test <= 0.1:
-                timeout_1test = 240.
-
-            results = {}
-
-            task_remaining = len(self.tests)
-            proc_running = py_nprocs
-            try:
-                while proc_running > 0:
-                    msg = res_q.get(block=True, timeout=(1 + 2 * task_remaining
-                                                         * timeout_1test
-                                                         / proc_running))
-                    if msg['type'] == 'proc_done':
-                        proc_running -= 1
-                        if 'error' in msg:
-                            e = msg['error']
-                            if 'task' in msg:
-                                task_remaining -= 1
-                                warnings.warn(
-                                    'Error append in a worker on test '
-                                    '{}:\n{}: {}'.format(
-                                        msg['task'], e.__class__.__name__, e
-                                    )
-                                )
-                            else:
-                                warnings.warn(
-                                    'Error append in a worker:\n{}: {}'.format(
-                                        e.__class__.__name__, e
-                                    )
-                                )
-
-                        logger.info("{} worker(s) remaining for {} tasks."
-                                    .format(proc_running, task_remaining))
-                    elif msg['type'] == 'result':
-                        results[msg['id']] = msg
-                        task_remaining -= 1
-
-            except KeyboardInterrupt:
-                self.terminate()
-                raise KeyboardInterrupt()
-
-            except EmptyQueueError:
-                warnings.warn(
-                    ("Workers have been hanging until timeout. There were {}"
-                     " procs working on {} tasks.").format(proc_running,
-                                                           task_remaining)
-                )
-                self.terminate()
+        with self.lock as locked:
+            if not locked:
+                msg = ("Timeout occured while trying to acquire lock in:\n\t%s\n"
+                       "Perhaps a previous run did not exit cleanly or another process is running in the same directory.\n"
+                       "If you are sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n" % self.workdir)
+                cprint(msg, "red")
                 return
 
-            # remove this to let python carbage collect processes and avoid
-            # Pickle to complain (it does not accept processes for security
-            # reasons)
-            del self._processes
-            task_q.close()
-            res_q.close()
+            # Remove all stale files present in workdir (except the lock!)
+            rmrf(self.workdir, exclude_paths=self.lock.lockfile)
 
-            # update local tests instances with the results of their running in
-            # a remote process
-            for test in self.tests:
-                if test.id in results:
-                    # test.status = d['status']
-                    # test.stdout_fname = d['stdout']
-                    # test.files_to_keep = d['files_to_keep']
+            self.nprocs = nprocs
+            self.py_nprocs = py_nprocs
 
-                    test.results_load(results[test.id])
-                else:
-                    raise RuntimeError((
-                        "I did not get the results of the test {}. It means"
-                        " that something fishy happen in the worker."
-                    ).format(test.full_id))
+            def run_and_check_test(test, print_lock=NotALock()):
+                """Helper function to execute the test. Must be thread-safe."""
 
-        # Run completed.
-        self._executed = True
+                testdir = os.path.abspath(os.path.join(self.workdir, test.suite_name + "_" + test.id))
 
-        # Collect HTML files in a tarball
-        self.create_targz_results()
+                # Run the test
+                test.run(build_env, runner, testdir, print_lock=print_lock, nprocs=nprocs, runmode=runmode, **kwargs)
 
-        nsucc = len(self.succeeded_tests())
-        npass = len(self.passed_tests())
-        nfail = len(self.failed_tests())
-        nskip = len(self.skipped_tests())
-        ndisa = len(self.disabled_tests())
+                # Write HTML summary
+                with print_lock:
+                    test.write_html_report()
 
-        self.tot_etime = time.time() - start_time
+                # Remove useless files in workdir.
+                test.clean_workdir()
 
-        # Print summary table.
-        stats_suite = {}
-        for test in self:
-            if test.suite_name not in stats_suite:
-                d = dict.fromkeys(BaseTest._possible_status, 0)
-                d["run_etime"] = 0.0
-                d["tot_etime"] = 0.0
-                stats_suite[test.suite_name] = d
+                d = test.results_dump()
+                d['type'] = 'result'
+                return d
 
-            stats_suite[test.suite_name][test.status] += 1
-            stats_suite[test.suite_name]["run_etime"] += test.run_etime
-            stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
+            ##############################
+            # And now let's run the tests
+            ##############################
+            start_time = time.time()
 
-        suite_names = sorted(stats_suite.keys())
-
-        times = ["run_etime", "tot_etime"]
-
-        table = [["Suite"] + BaseTest._possible_status + times]
-        for suite_name in suite_names:
-            stats = stats_suite[suite_name]
-            row = [suite_name] + [str(stats[s]) for s in BaseTest._possible_status] + ["%.2f" % stats[s] for s in times]
-            table.append(row)
-
-        print("")
-        pprint_table(table)
-        print("")
-
-        executed = [t for t in self if t.status != "skipped"]
-        if executed:
-            mean_etime = sum(test.run_etime for test in executed) / len(executed)
-            dev_etime = (sum((test.run_etime - mean_etime)**2 for test in executed) / len(executed))**0.5
-
-            cprint("Completed in %.2f [s]. Average time for test=%.2f [s], stdev=%.2f [s]" % (
-                self.tot_etime, mean_etime, dev_etime), "yellow"
-            )
-
-            msg = "Summary: failed=%s, succeeded=%s, passed=%s, skipped=%s, disabled=%s" % (
-                  nfail, nsucc, npass, nskip, ndisa)
-
-            if nfail:
-                cprint(msg, "red", attrs=['underline'])
-            else:
-                cprint(msg, "green")
-
-            # Print outliers
-            if False and dev_etime > 0.0:
+            if py_nprocs == 1:
+                logger.info("Sequential version")
                 for test in self:
-                    if abs(test.run_etime) > 0.0 and abs(test.run_etime - mean_etime) > 2 * dev_etime:
-                        print("%s has run_etime %.2f s" % (test.full_id, test.run_etime))
+                    # discard the return value because tests are directly modified
+                    run_and_check_test(test)
 
-        with open(os.path.join(self.workdir, "results.txt"), "w") as fh:
-            pprint_table(table, out=fh)
+            elif py_nprocs > 1:
+                logger.info("Threaded version with py_nprocs = %s" % py_nprocs)
 
-        if hasattr(os, 'getlogin'):
-            username = os.getlogin()
-        else:
-            username = "No_username"
+                def worker(qin, qout, print_lock):
+                    done = {
+                        'type': 'proc_done'
+                    }
+                    try:
+                        while not qin.empty():
+                            test = qin.get_nowait()
+                            qout.put(run_and_check_test(test,
+                                                        print_lock=print_lock))
+                    except EmptyQueueError:
+                        # Queue have been emptied between the call to qin.empty
+                        # and the call to qin.get
+                        pass
+                    except Exception as e:
+                        done['error'] = e
+                        try:
+                            done['task'] = test.full_id
+                        except (AttributeError, NameError):
+                            pass
+                    finally:
+                        qout.put(done)
 
-        # Create the HTML index.
-        DNS = {
-            "self": self,
-            "runner": runner,
-            "user_name": username,
-            "hostname": gethostname(),
-            "test_headings": ['ID', 'Status', 'run_etime (s)', 'tot_etime (s)'],
-            "suite_headings": ['failed', 'passed', 'succeeded', 'skipped', 'disabled'],
-            # Functions and modules available in the template.
-            "time": time,
-            "pj": os.path.join,
-            "basename": os.path.basename,
-            "str2html": str2html,
-            "sec2str": sec2str,
-            "args2htmltr": args2htmltr,
-            "html_link": html_link,
-            "status2html": status2html,
-        }
+                task_q = Queue()
+                res_q = Queue()
+                print_lock = Lock()
 
-        fname = os.path.join(self.workdir, "suite_report.html")
-        fh = open(fname, "w")
+                for test in self:
+                    task_q.put(test)
 
-        header = """
-          <html>
-          <head><title>Suite Summary</title></head>
-          <body bgcolor="#FFFFFF" text="#000000">
-           <hr>
-           <h1>Suite Summary</h1>
-            <table width="100%" border="0" cellspacing="0" cellpadding="2">
-            <tr valign="top" align="left">
-             <py-open code = "for h in suite_headings:"> </py-open>
-             <th>${status2html(h)}</th>
-            <py-close/>
-            </tr>
-            <tr valign="top" align="left">
-            <py-open code = "for h in suite_headings:"> </py-open>
-             <td> ${len(self._tests_with_status(h))} </td>
-            <py-close/>
-            </tr>
-            </table>
+                for i in range(py_nprocs):
+                    p = Process(target=worker, args=(task_q, res_q, print_lock))
+                    self._processes.append(p)
+                    p.start()
+
+                # Block until all tasks are done. Raise QueueTimeoutError after timeout seconds.
+                timeout_1test = float(runner.timebomb.timeout)
+                if timeout_1test <= 0.1:
+                    timeout_1test = 240.
+
+                results = {}
+
+                task_remaining = len(self.tests)
+                proc_running = py_nprocs
+                try:
+                    while proc_running > 0:
+                        msg = res_q.get(block=True, timeout=(
+                            1 + 2 * task_remaining * timeout_1test
+                            / proc_running
+                        ))
+                        if msg['type'] == 'proc_done':
+                            proc_running -= 1
+                            if 'error' in msg:
+                                e = msg['error']
+                                if 'task' in msg:
+                                    task_remaining -= 1
+                                    warnings.warn(
+                                        'Error append in a worker on test '
+                                        '{}:\n{}: {}'.format(
+                                            msg['task'], e.__class__.__name__, e
+                                        )
+                                    )
+                                else:
+                                    warnings.warn(
+                                        'Error append in a worker:\n{}: {}'
+                                        .format(e.__class__.__name__, e)
+                                    )
+
+                            logger.info("{} worker(s) remaining for {} tasks."
+                                        .format(proc_running, task_remaining))
+                        elif msg['type'] == 'result':
+                            results[msg['id']] = msg
+                            task_remaining -= 1
+
+                except KeyboardInterrupt:
+                    self.terminate()
+                    raise KeyboardInterrupt()
+
+                except EmptyQueueError:
+                    warnings.warn(
+                        ("Workers have been hanging until timeout. There were {}"
+                         " procs working on {} tasks.").format(proc_running,
+                                                               task_remaining)
+                    )
+                    self.terminate()
+                    return
+
+                # remove this to let python carbage collect processes and avoid
+                # Pickle to complain (it does not accept processes for security
+                # reasons)
+                del self._processes
+                task_q.close()
+                res_q.close()
+
+                # update local tests instances with the results of their running in
+                # a remote process
+                for test in self.tests:
+                    if test.id in results:
+                        # test.status = d['status']
+                        # test.stdout_fname = d['stdout']
+                        # test.files_to_keep = d['files_to_keep']
+
+                        test.results_load(results[test.id])
+                    else:
+                        raise RuntimeError((
+                            "I did not get the results of the test {}. It"
+                            " means that something fishy happen in the worker."
+                        ).format(test.full_id))
+
+            # Run completed.
+            self._executed = True
+
+            # Collect HTML files in a tarball
+            self.create_targz_results()
+
+            nsucc = len(self.succeeded_tests())
+            npass = len(self.passed_tests())
+            nfail = len(self.failed_tests())
+            nskip = len(self.skipped_tests())
+            ndisa = len(self.disabled_tests())
+
+            self.tot_etime = time.time() - start_time
+
+            # Print summary table.
+            stats_suite = {}
+            for test in self:
+                if test.suite_name not in stats_suite:
+                    d = dict.fromkeys(BaseTest._possible_status, 0)
+                    d["run_etime"] = 0.0
+                    d["tot_etime"] = 0.0
+                    stats_suite[test.suite_name] = d
+
+                stats_suite[test.suite_name][test.status] += 1
+                stats_suite[test.suite_name]["run_etime"] += test.run_etime
+                stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
+
+            suite_names = sorted(stats_suite.keys())
+
+            times = ["run_etime", "tot_etime"]
+
+            table = [["Suite"] + BaseTest._possible_status + times]
+            for suite_name in suite_names:
+                stats = stats_suite[suite_name]
+                row = [suite_name] + [str(stats[s]) for s in BaseTest._possible_status] + ["%.2f" % stats[s] for s in times]
+                table.append(row)
+
+            print("")
+            pprint_table(table)
+            print("")
+
+            executed = [t for t in self if t.status != "skipped"]
+            if executed:
+                mean_etime = sum(test.run_etime for test in executed) / len(executed)
+                dev_etime = (sum((test.run_etime - mean_etime)**2 for test in executed) / len(executed))**0.5
+
+                cprint("Completed in %.2f [s]. Average time for test=%.2f [s], stdev=%.2f [s]" % (
+                    self.tot_etime, mean_etime, dev_etime), "yellow"
+                )
+
+                msg = "Summary: failed=%s, succeeded=%s, passed=%s, skipped=%s, disabled=%s" % (
+                    nfail, nsucc, npass, nskip, ndisa)
+
+                if nfail:
+                    cprint(msg, "red", attrs=['underline'])
+                else:
+                    cprint(msg, "green")
+
+                # Print outliers
+                if False and dev_etime > 0.0:
+                    for test in self:
+                        if abs(test.run_etime) > 0.0 and abs(test.run_etime - mean_etime) > 2 * dev_etime:
+                            print("%s has run_etime %.2f s" % (test.full_id, test.run_etime))
+
+            with open(os.path.join(self.workdir, "results.txt"), "w") as fh:
+                pprint_table(table, out=fh)
+
+            if hasattr(os, 'getlogin'):
+                username = os.getlogin()
+            else:
+                username = "No_username"
+
+            # Create the HTML index.
+            DNS = {
+                "self": self,
+                "runner": runner,
+                "user_name": username,
+                "hostname": gethostname(),
+                "test_headings": ['ID', 'Status', 'run_etime (s)', 'tot_etime (s)'],
+                "suite_headings": ['failed', 'passed', 'succeeded', 'skipped', 'disabled'],
+                # Functions and modules available in the template.
+                "time": time,
+                "pj": os.path.join,
+                "basename": os.path.basename,
+                "str2html": str2html,
+                "sec2str": sec2str,
+                "args2htmltr": args2htmltr,
+                "html_link": html_link,
+                "status2html": status2html,
+            }
+
+            fname = os.path.join(self.workdir, "suite_report.html")
+            fh = open(fname, "w")
+
+            header = """
+            <html>
+            <head><title>Suite Summary</title></head>
+            <body bgcolor="#FFFFFF" text="#000000">
+            <hr>
+            <h1>Suite Summary</h1>
+                <table width="100%" border="0" cellspacing="0" cellpadding="2">
+                <tr valign="top" align="left">
+                <py-open code = "for h in suite_headings:"> </py-open>
+                <th>${status2html(h)}</th>
+                <py-close/>
+                </tr>
+                <tr valign="top" align="left">
+                <py-open code = "for h in suite_headings:"> </py-open>
+                <td> ${len(self._tests_with_status(h))} </td>
+                <py-close/>
+                </tr>
+                </table>
+                <p>
+                tot_etime = ${sec2str(self.tot_etime)} <br>
+                run_etime = ${sec2str(self.run_etime)} <br>
+                no_pyprocs = ${self.py_nprocs} <br>
+                no_MPI = ${self.nprocs} <br>
+                ${str2html(str(runner))}
+            <hr>
+            """
+
+            table = """
             <p>
-            tot_etime = ${sec2str(self.tot_etime)} <br>
-            run_etime = ${sec2str(self.run_etime)} <br>
-            no_pyprocs = ${self.py_nprocs} <br>
-            no_MPI = ${self.nprocs} <br>
-            ${str2html(str(runner))}
-           <hr>
-        """
+            <h1>Test Results</h1>
+            <table width="100%" border="0" cellspacing="0" cellpadding="2">
+                <tr valign="top" align="left">
+                <py-open code = "for h in test_headings:"> </py-open>
+                <th>$h</th>
+                <py-close/>
+                </tr>
+            """
 
-        table = """
-           <p>
-           <h1>Test Results</h1>
-           <table width="100%" border="0" cellspacing="0" cellpadding="2">
-            <tr valign="top" align="left">
-             <py-open code = "for h in test_headings:"> </py-open>
-              <th>$h</th>
-             <py-close/>
-            </tr>
-        """
+            for status in BaseTest._possible_status:
+                table += self._pyhtml_table_section(status)
 
-        for status in BaseTest._possible_status:
-            table += self._pyhtml_table_section(status)
+            table += "</table>"
 
-        table += "</table>"
+            footer = """
+            <hr>
+            <h1>Suite Info</h1>
+                <py-line code = "keys = ', '.join(self.keywords)" />
+                <p>Keywords = ${keys}</p>
+                <py-line code = "cpp_vars = ', '.join(self.need_cpp_vars)"/>
+                <p>Required CPP variables = ${cpp_vars}</p>
+            <hr>
+                Automatically generated by %s on %s. Logged on as %s@%s
+            <hr>
+            </body>
+            </html> """ % (_MY_NAME, time.asctime(), username, gethostname())
 
-        footer = """
-          <hr>
-          <h1>Suite Info</h1>
-            <py-line code = "keys = ', '.join(self.keywords)" />
-            <p>Keywords = ${keys}</p>
-            <py-line code = "cpp_vars = ', '.join(self.need_cpp_vars)"/>
-            <p>Required CPP variables = ${cpp_vars}</p>
-          <hr>
-            Automatically generated by %s on %s. Logged on as %s@%s
-          <hr>
-          </body>
-          </html> """ % (_MY_NAME, time.asctime(), username, gethostname())
+            template = header + table + footer
 
-        template = header + table + footer
+            template_stream = StringIO(template)
 
-        template_stream = StringIO(template)
-
-        # Initialise an xyaptu xcopier, and call xcopy
-        xcp = xcopier(DNS, ouf=fh)
-        xcp.xcopy(template_stream)
-        fh.close()
-
-        # Release the lock.
-        self.lock.release()
+            # Initialise an xyaptu xcopier, and call xcopy
+            xcp = xcopier(DNS, ouf=fh)
+            xcp.xcopy(template_stream)
+            fh.close()
 
         return Results(self)
 

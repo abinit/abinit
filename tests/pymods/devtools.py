@@ -181,3 +181,18 @@ class FileLock(object):
             lying around.
         """
         self.release()
+
+
+class NoErrorFileLock(FileLock):
+    '''
+    A file locker that never raise a FileLockErrorin call of __enter__ but
+    return a boolean to tell wether the lock.
+    '''
+
+    def __enter__(self):
+        try:
+            self.acquire()
+        except self.Error:
+            return False
+        else:
+            return True
