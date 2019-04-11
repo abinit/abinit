@@ -1344,7 +1344,6 @@ class BaseTest(object):
         self.abenv = abenv
         self.id = test_info.make_test_id()  # The test identifier (takes into account the multi_parallel case)
         self.nprocs = 1  # Start with 1 MPI process.
-        self._unique_id = hash(self.inp_fname, self.id)
 
         # FIXME Assumes inp_fname is in the form tests/suite_name/Input/name.in
         suite_name = os.path.dirname(self.inp_fname)
@@ -2771,7 +2770,6 @@ class ChainOfTests(object):
         self._run_etime = None
         self._isok = None
         self._files_to_keep = []
-        self._unique_id = hash(self.inp_fname, self.id)
 
     def __len__(self):
         return len(self.tests)
@@ -3010,7 +3008,7 @@ class ChainOfTests(object):
         Dump the run results to pass it to a different process
         """
         return {
-            'id': self._unique_id,
+            'id': self.id,
             'status': self.status,
             'files_to_keep': self.files_to_keep,
             'tot_etime': self.tot_etime,
@@ -3462,12 +3460,12 @@ class AbinitTestSuite(object):
             # update local tests instances with the results of their running in
             # a remote process
             for test in self.tests:
-                if test._unique_id in results:
+                if test.id in results:
                     # test.status = d['status']
                     # test.stdout_fname = d['stdout']
                     # test.files_to_keep = d['files_to_keep']
 
-                    test.results_load(results[test._unique_id])
+                    test.results_load(results[test.id])
                 else:
                     raise RuntimeError((
                         "I did not get the results of the test {}. It means"
