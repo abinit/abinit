@@ -9,6 +9,7 @@ import platform
 import tarfile
 import re
 import warnings
+from base64 import b64encode
 
 from socket import gethostname
 from subprocess import Popen, PIPE
@@ -31,7 +32,7 @@ from .jobrunner import TimeBomb
 from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher,
                     Editor)
 from .xyaptu import xcopier
-from .devtools import NoErrorFileLock
+from .devtools import NoErrorFileLock, makeunique
 from .memprof import AbimemParser
 from .termcolor import cprint
 
@@ -56,6 +57,16 @@ _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 
 
 # Helper functions and tools
+
+
+@makeunique
+def genid():
+    '''
+    Produce a random sequence 12 bytes represented as 16 ascii characters.
+    The decorator ensure that output is different at each call.
+    '''
+    return b64encode(os.urandom(12)).decode('ascii')
+
 
 def html_colorize_text(string, code):
     return "<FONT COLOR='%s'>%s</FONT>" % (code, string)
@@ -1340,6 +1351,8 @@ class BaseTest(object):
     def __init__(self, test_info, abenv):
         logger.info("Initializing BaseTest from inp_fname: ", test_info.inp_fname)
 
+        self._rid = genid()
+
         self.inp_fname = os.path.abspath(test_info.inp_fname)
         self.abenv = abenv
         self.id = test_info.make_test_id()  # The test identifier (takes into account the multi_parallel case)
@@ -2106,7 +2119,7 @@ class BaseTest(object):
         Dump the run results to pass it to a different process
         """
         return {
-            'id': self.id,
+            'id': self._rid,
             'status': self.status,
             'stdout': self.stdout_fname,
             'files_to_keep': self.files_to_keep,
@@ -2753,6 +2766,7 @@ class ChainOfTests(object):
         for t in tests:
             if self.inp_dir != t.inp_dir or self.suite_name != t.suite_name:
                 raise self.Error("All tests should be located in the same directory")
+            self._rid += ':' + t._rid
 
         all_keys = [t.keywords for t in self.tests]
         self.keywords = set()
@@ -3008,7 +3022,7 @@ class ChainOfTests(object):
         Dump the run results to pass it to a different process
         """
         return {
-            'id': self.id,
+            'id': self._rid,
             'status': self.status,
             'files_to_keep': self.files_to_keep,
             'tot_etime': self.tot_etime,
@@ -3460,7 +3474,7 @@ class AbinitTestSuite(object):
                 # update local tests instances with the results of their running in
                 # a remote process
                 for test in self.tests:
-                    if test.id in results:
+                    if test._rid in results:
                         # test.status = d['status']
                         # test.stdout_fname = d['stdout']
                         # test.files_to_keep = d['files_to_keep']

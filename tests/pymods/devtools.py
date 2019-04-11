@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 import os
 import time
 import errno
+from functools import wraps
 
 
 def number_of_cpus():
@@ -13,7 +14,7 @@ def number_of_cpus():
     taken from:
     http://stackoverflow.com/questions/1006289/how-to-find-out-the-number-of-cpus-in-python
     """
-    import os,re,subprocess
+    import os, re, subprocess
 
     # Python 2.6+
     try:
@@ -196,3 +197,20 @@ class NoErrorFileLock(FileLock):
             return False
         else:
             return True
+
+
+def makeunique(gen):
+    '''
+    gen have to be random enought not to produce too often the same thing
+    '''
+    cache = set()
+
+    @wraps(gen)
+    def generator(*args):
+        s = gen(*args)
+        while s in cache:
+            s = gen(*args)
+        cache.add(s)
+        return s
+
+    return generator
