@@ -399,7 +399,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
 
  ! Note use_symrec and timrev0
  call listkk(dksqmax, self%gmet, indkk, self%ibz, qpt, self%nibz, 1, self%nsym_lg, &
-    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, use_symrec=.True.)
+    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, exit_loop=.True., use_symrec=.True.)
 
  iq_ibz = indkk(1)
  if (dksqmax > tol12) iq_ibz = -1

@@ -2664,7 +2664,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  real(dp) :: dksqmax,phre,phim
  real(dp) :: cpu_all,wall_all,gflops_all !cpu,wall,gflops,
  logical :: isirr_q, found, write_maxw
- character(len=500) :: msg
+ character(len=500) :: msg, sfmt
  type(crystal_t),pointer :: cryst
 !arrays
  integer :: qptrlatt(3,3),g0q(3)
@@ -2975,9 +2975,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      end if
      write(unt, "(a)")"# |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|"
      write(unt, "(a, 3(i0, 1x))")"# ngqpt:", ngqpt 
+     write(sfmt, "(a,i0,a)")"(es16.8, 3(f4.0,1x),", db%natom3, "(es16.8))"
      do ii=1,nrtot
        irpt = iperm(ii)
-       write(unt, "(a,es16.0,3(f4.0,1x),(es16.8))")rmod_all(ii), all_rpt(:, irpt), maxw(irpt, 1:db%natom3)
+       !write(unt, "(es16.8,3(f4.0,1x),(es16.8))")rmod_all(ii), all_rpt(:, irpt), maxw(irpt, :)
+       write(unt, sfmt)rmod_all(ii), all_rpt(:, irpt), maxw(irpt, :)
      end do
      close(unt)
      ABI_FREE(rmod_all)
@@ -3377,12 +3379,12 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz, cplex, ierr
+ integer :: iq_ibz, cplex, ierr, my_cplex, db_iqpt, imyp
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
- real(dp),allocatable :: v1scf(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), all_v1scf(:,:,:,:)
 
 ! *************************************************************************
 
@@ -3402,8 +3404,25 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
    if (qselect_ibz(iq_ibz) == 0) cycle
    call cwtime(cpu, wall, gflops, "start")
 
+   ! DEBUGGIN SECTION
+   db_iqpt = db%findq(qibz(:, iq_ibz))
+if (db_iqpt /= -1) then
+      call wrtout(std_out, "Reading V(q) from DVDB...")
+      call dvdb_readsym_allv1(db, db_iqpt, my_cplex, nfft, ngfft, all_v1scf, comm)
+      do imyp=1,db%my_npert
+        if (my_cplex == 2) then
+          v1scf(:,:,:,imyp) = all_v1scf(:,:,:,db%my_pinfo(3, imyp))
+        else
+          v1scf(1,:,:,imyp) = all_v1scf(1,:,:,db%my_pinfo(3, imyp))
+          v1scf(2,:,:,imyp) = zero
+        end if
+      end do
+      ABI_FREE(all_v1scf)
+else
+
    ! Interpolate my_npert potentials inside comm_rpt
    call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
+end if
 
    ! Points in the IBZ may be distributed to reduce memory.
    if (db%ftqcache%itreatq(iq_ibz) /= 0) then
@@ -3466,7 +3485,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz, cplex, ierr !, qcnt
+ integer :: iq_ibz, cplex, ierr, qcnt
  real(dp) :: cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
@@ -3482,8 +3501,9 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
    MSG_WARNING(msg)
  end if
 
+ qcnt = count(ineed_qpt /= 0)
  !call timab(1807, 1, tsec)
- !call wrtout(std_out, sjoin(" Need to update Vscf(q) cache.", itoa(qcnt), "q-points..."), do_flush=.True.)
+ call wrtout(std_out, sjoin(" Need to update Vscf(q) cache.", itoa(qcnt), "q-points..."), do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  cplex = 2
@@ -3492,7 +3512,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  do iq_ibz=1,nqibz
    if (ineed_qpt(iq_ibz) == 0) cycle
 
-   ! Interpolate my_npert potentials inside comm_rpt
+   ! Interpolate my_npert potentials inside comm_rpt.
    call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
 
    ! Transfer to cache.
@@ -5091,9 +5111,9 @@ subroutine dvdb_test_v1complete(db_path, dump_path, comm)
          else
            do ifft=1,nfft
              write(unt, "(6(es12.4,2x))") &
-               file_v1scf(1,ifft,ispden,pcase), symm_v1scf(1,ifft,ispden,pcase),   &
+               file_v1scf(1,ifft,ispden,pcase), symm_v1scf(1,ifft,ispden,pcase),  &
                file_v1scf(1,ifft,ispden,pcase) - symm_v1scf(1,ifft,ispden,pcase), &
-               file_v1scf(2,ifft,ispden,pcase), symm_v1scf(2,ifft,ispden,pcase),   &
+               file_v1scf(2,ifft,ispden,pcase), symm_v1scf(2,ifft,ispden,pcase),  &
                file_v1scf(2,ifft,ispden,pcase) - symm_v1scf(2,ifft,ispden,pcase)
            end do
          end if

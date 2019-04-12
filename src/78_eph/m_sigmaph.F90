@@ -986,6 +986,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  else if (dtset%useria == 2000) then
      sigma%use_ftinterp = .True.
      !if (all(dtset%eph_ngqpt_fine /= 0 .and. any(dtset%eph_ngqpt_fine /= dtset%ddb_ngqpt)) then
+     !sigma%use_ftinterp = .False.
+     !do iq_ibz=1,sigma%nqibz
+     !  if (db%findq(sigma%qibz(:, iq_ibz)) /= -1) then
+     !    sigma%use_ftinterp = .True.; exit
+     !  end if
+     !end if
+
      ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation. 
      ! R-points are distributed inside comm_rpt
      ! Note that when R-points are distributed inside comm_bq we cannot interpolate potentials on-the-fly 
@@ -1004,7 +1011,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (sigma%imag_only .and. sigma%qint_method == 1) then
        call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
      end if
-     qselect = 1
+     !qselect = 1
      ! Distribute IBZ q-points inside comm_qpt
      ABI_ICALLOC(itreatq, (sigma%nqibz))
      itreatq = 1
@@ -2456,8 +2463,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
          new%nbcalc_ks(ikcalc,spin) = bstop - new%bstart_ks(ikcalc,spin) + 1
          cnt = cnt + 1
          if (cnt < 5) then
-           write(msg,'(2(a,i0),2a,2(1x,i0))')&
-             "Not all the degenerate states for ikcalc: ",ikcalc,", spin: ",spin,ch10,&
+           write(msg,'(2(a,i0),2a,2(1x,i0))') &
+             "Not all the degenerate states for ikcalc: ",ikcalc,", spin: ",spin,ch10, &
              "were included in the bdgw set. bdgw has been automatically changed to: ",new%bstart_ks(ikcalc,spin),bstop
            MSG_COMMENT(msg)
          end if
