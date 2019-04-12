@@ -1113,9 +1113,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
       !write(6,*) "read self done"
        call selfreal2imag_self(selfr,self)
       !write(6,*) "selfreal2imag_self done"
-       write(6,*) "Fermi level is",paw_dmft%fermie
+      !  paw_dmft%fermie=hdr%fermie ! for tests
+       write(6,*) "   Fermi level is",paw_dmft%fermie
        ! selfr does not have any double couting in self%hdc 
        ! hdc from self%hdc has been put in real part of self in rw_self.
+       ! For the LDA BS: use opt_self=0 and fermie=fermie_lda
        call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,&
 &       opt_self=1,opt_nonxsum=0)
       !write(6,*) "compute green done"

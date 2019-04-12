@@ -531,7 +531,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  use m_crystal, only : crystal_t
  use m_pawang, only : pawang_type
  use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : copy_matlu,shift_matlu,diag_matlu,rotate_matlu,init_matlu,destroy_matlu,print_matlu
+ use m_matlu, only : copy_matlu,shift_matlu,diag_matlu,rotate_matlu,init_matlu,destroy_matlu,print_matlu,zero_matlu
  use m_oper, only : oper_type,init_oper,destroy_oper
  use m_datafordmft, only : compute_levels
  implicit none
@@ -545,7 +545,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  integer,intent(in),optional :: opt_rw,istep_iter,opt_imagonly
  character(len=4), optional :: opt_char
  integer, intent(in), optional :: opt_stop
- type(matlu_type), optional, intent(in) :: opt_selflimit(paw_dmft%natom)
+ type(matlu_type), optional, intent(inout) :: opt_selflimit(paw_dmft%natom)
  type(matlu_type), optional, intent(in) :: opt_hdc(paw_dmft%natom)
  type(pawang_type), optional, intent(in) :: pawang
  type(crystal_t), optional, intent(in) :: cryst_struc
@@ -569,7 +569,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  character(len=10) :: tag_iflavor
  character(len=10) :: tag_at
  character(len=4) :: chtemp
- real(dp):: xtemp,fermie_read
+ real(dp):: xtemp,fermie_read,x_r,x_i
  real(dp), allocatable:: s_r(:,:,:,:),s_i(:,:,:,:),fermie_read2(:)
 ! *********************************************************************
 
@@ -682,22 +682,42 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 #else
    open (unit=3000,file=trim(tmpmatrot),status='unknown',form='formatted')
 #endif
-   write(std_out,*) "Open file  ",trim(tmpmatrot)
+   write(std_out,*) "     Open file  ",trim(tmpmatrot)
    rewind(3000)
    do iatom=1,natom
      if(self%oper(1)%matlu(iatom)%lpawu.ne.-1) then
        ndim=2*self%oper(1)%matlu(iatom)%lpawu+1
        do isppol=1,nsppol
          if(optrw==2) then
-           write(message,*) ((eigvectmatlu(iatom,isppol)%value(im,im1),im1=1,ndim),im=1,ndim)
+           do im=1,ndim
+             do im1=1,ndim
+               write(message,*) real(eigvectmatlu(iatom,isppol)%value(im,im1)),imag(eigvectmatlu(iatom,isppol)%value(im,im1))
+               call wrtout(3000,message,'COLL')
+             enddo
+           enddo
          else if (optrw==1) then
-           read(message,*) ((eigvectmatlu(iatom,isppol)%value(im,im1),im1=1,ndim),im=1,ndim)
+           do im=1,ndim
+             do im1=1,ndim
+               read(3000,*) x_r,x_i
+               eigvectmatlu(iatom,isppol)%value(im,im1)=cmplx(x_r,x_i)
+             enddo
+           enddo
          endif
-         call wrtout(3000,message,'COLL')
        enddo
      endif
    enddo
    close(3000)
+   if(optrw==1) then
+     write(message,'(a,2x,a,i4)') ch10,&
+&      " == Print non rotated Self Limit read from Matsubara space=",ifreq
+     call wrtout(std_out,message,'COLL')
+     call print_matlu(opt_selflimit,natom,1,compl=1)
+     call rotate_matlu(opt_selflimit,eigvectmatlu,natom,3,1)
+     write(message,'(a,2x,a,i4)') ch10,&
+&      " == Print rotated Self Limit read from Matsubara space=",ifreq
+     call wrtout(std_out,message,'COLL')
+     call print_matlu(opt_selflimit,natom,1,compl=1)
+   endif
  endif
 !   - For the Tentative rotation of the self-energy file (end diag)
 
@@ -967,6 +987,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
                ! Read self energy from Maxent (imag part) on the real axis
                !----------------------------------------------------------
+               do ifreq=1,self%nw
+                 call zero_matlu(self%oper(ifreq)%matlu,natom)
+               enddo
                do ispinor=1,nspinor
                  do im=1,ndim
                    do ifreq=1,self%nw
@@ -988,8 +1011,22 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                ! Rotate back rotate_matlu
                !-----------------------------
                if(present(pawang)) then
+                 write(message,'(4x,2a)') " Rotate Back self in the original basis"
+                 call wrtout(std_out,message,'COLL')
                  do ifreq=1,self%nw
-                   call rotate_matlu(self%oper(ifreq)%matlu,eigvectmatlu,natom,3,-1)
+                   if(ifreq<20) then
+                     write(message,'(a,2x,a,i4)') ch10,&
+&                      " == Print Rotated real axis Self Energy for freq=",ifreq
+                     call wrtout(std_out,message,'COLL')
+                     call print_matlu(self%oper(ifreq)%matlu,natom,1,compl=1)
+                   endif
+                     call rotate_matlu(self%oper(ifreq)%matlu,eigvectmatlu,natom,3,-1)
+                   if(ifreq<20) then
+                     write(message,'(a,2x,a,i4)') ch10,&
+&                      " == Print Rotated back real axis Self Energy for freq=",ifreq
+                     call wrtout(std_out,message,'COLL')
+                     call print_matlu(self%oper(ifreq)%matlu,natom,1,compl=1)
+                   endif
                  enddo
                endif
 
@@ -1549,7 +1586,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  integer :: ifreq,jfreq,iidim,isppol,ispinor,ispinor1,im,im1,iatom
  real(dp), allocatable :: selftemp_re(:)
  real(dp), allocatable :: selftemp_imag(:)
- integer :: natom,ndim,nsppol,nspinor
+ integer :: natom,ndim,nsppol,nspinor,i0
  real(dp) :: delta,real_part,imag_part,slope,y0
  character(len=500) :: message
 ! *********************************************************************
@@ -1625,6 +1662,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  &                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                  self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
   &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
+!  &                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two
   !               self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
   !&                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two
   !&                       =cmplx(0.d0,0.d0,kind=dp)/two
@@ -1636,11 +1674,12 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
                write(67,*) 
                write(68,*) 
                !!!!!!!!!! Z renormalization
-               slope=(selftemp_re((self%nw+1)/2+1)-selftemp_re((self%nw+1)/2))/&
-                     (self%omega((self%nw+1)/2+1)-self%omega((self%nw+1)/2))
-               y0= selftemp_re((self%nw+1)/2)
+!               i0=389
+!               slope=(selftemp_re(i0+1)-selftemp_re(i0))/&
+!                     (self%omega(i0+1)-self%omega(i0))
+!               y0= selftemp_re(i0)
 !               do ifreq=1,self%nw
-!                 selftemp_re(ifreq)=slope * (self%omega(ifreq)-self%omega((self%nw+1)/2)) + y0
+!                 selftemp_re(ifreq)=slope * (self%omega(ifreq)-self%omega(i0)) + y0
 !                 selftemp_imag(ifreq)=zero
 !                 self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
 !  &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two

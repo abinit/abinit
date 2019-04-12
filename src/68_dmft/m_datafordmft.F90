@@ -1332,7 +1332,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
  if (iscfloc<0) then
    do jkpt=1,nkpt  ! jkpt
      call loc_oper(norm,paw_dmft,1,jkpt=jkpt)
-     write(message,'(2a,i3)') &
+     write(message,'(2a,i5)') &
 &     ch10,"  == Check: Overlap with renormalized psichi for k-point",jkpt
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm%matlu,natom,prtopt=1)

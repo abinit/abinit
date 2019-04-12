@@ -908,12 +908,13 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
    ABI_ALLOCATE(sf_corr,(green%nw))
    iall=0
    if (option==5) then
-     do isppol = 1 , nsppol
        do ikpt = 1, nkpt
          sf=czero
          do ifreq=1,green%nw
-           do ib=1,mbandc
-             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+           do isppol = 1 , nsppol
+             do ib=1,mbandc
+               sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+             enddo
            enddo
            write(message,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
            call wrtout(spfkresolved_unt,message,'COLL')
@@ -923,7 +924,6 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
        write(message,*) ch10
        call wrtout(spfkresolved_unt,message,'COLL')
-     enddo
      do isppol = 1 , nsppol
        do ikpt = 1, nkpt
          do ib=1,mbandc
