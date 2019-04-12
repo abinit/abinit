@@ -3480,7 +3480,7 @@ class AbinitTestSuite(object):
                         # test.stdout_fname = d['stdout']
                         # test.files_to_keep = d['files_to_keep']
 
-                        test.results_load(results[test.id])
+                        test.results_load(results[test._rid])
                     else:
                         raise RuntimeError((
                             "I did not get the results of the test {}. It"
