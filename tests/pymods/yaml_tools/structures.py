@@ -220,10 +220,10 @@ if has_pandas:
             def chk_ceil(b):
                 return abs(b) < ceil
 
+            o_n, s_n = other.shape[0] - 1, self.shape[0] - 1
             for key in self:
                 oserie, sserie = other[key], self[key]
                 # index -1 does not work on series
-                o_n, s_n = other.shape[1], self.shape[1]
 
                 if key in self.residues:
                     if not chk_ceil(oserie[o_n]):
