@@ -27,6 +27,7 @@ MODULE m_time
  use m_errors
  use iso_c_binding
  use m_xmpi
+ use m_clib
 #if defined HAVE_MPI2
  use mpi
 #endif
