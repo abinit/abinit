@@ -2430,7 +2430,7 @@ end subroutine fit_polynomial_coeff_computeMSD
 !!***
 
 !MARCUS_EXPERIMENTAL_SECTION 
-!!****f* m_effective_potential/testEffPot
+!!****f* m_fit_polynomiaL_coeff/testEffPot
 !! NAME
 !!  testEffPot
 !!
@@ -2545,6 +2545,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 
 
 end subroutine fit_polynomial_coeff_testEffPot
+!!***
 
 !!      m_fit_polynomial_coeff,multibinit
 !!      generelist,polynomial_coeff_free,polynomial_coeff_getname
