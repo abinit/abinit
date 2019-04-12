@@ -315,7 +315,7 @@
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-no-vec"
+#FCFLAGS_EXTRA="-O2"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
