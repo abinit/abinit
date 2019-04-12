@@ -92,9 +92,9 @@ module m_dvdb
 
 !----------------------------------------------------------------------
 
-!!****t* m_dvdb/dvdb_t
+!!****t* m_dvdb/qcache_t
 !! NAME
-!! dvdb_t
+!! qcache_t
 !!
 !! FUNCTION
 !!
@@ -2633,6 +2633,7 @@ end subroutine rotate_fqg
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
+!!  outwr_path=Filename of output file used to print max_r(W(r, R)). Ignored if empty string.
 !!  comm_rpt = MPI communicator used to distribute R-lattice points.
 !!
 !! PARENTS
@@ -2641,34 +2642,36 @@ end subroutine rotate_fqg
 !!
 !! SOURCE
 
-subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt)
+subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_path, comm_rpt)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqshift,nfft,comm_rpt
  class(dvdb_t),target,intent(inout) :: db
+ character(len=*),intent(in) :: outwr_path
 !arrays
  integer,intent(in) :: ngqpt(3),ngfft(18)
  real(dp),intent(in) :: qshift(3,nqshift)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1, timrev1=1, tim_fourdp0=0
+ integer,parameter :: sppoldbl1=1, timrev1=1, tim_fourdp0=0, master = 0
  integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
- integer :: ii,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc
+ integer :: ii,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: ifft, ierr, nrtot, my_start, my_stop
  real(dp) :: dksqmax,phre,phim
  real(dp) :: cpu_all,wall_all,gflops_all !cpu,wall,gflops,
- logical :: isirr_q, found
+ logical :: isirr_q, found, write_maxw
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
 !arrays
  integer :: qptrlatt(3,3),g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
- real(dp) :: qpt_bz(3),shift(3) !,qpt_ibz(3)
+ real(dp) :: qpt_bz(3),shift(3), sc_rprimd(3,3), sc_rmet(3, 3) !,qpt_ibz(3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:), all_rpt(:,:)
- real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:,:)
+ real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:,:) 
+ real(dp),allocatable :: maxw(:,:), rmod_all(:)
 
 ! *************************************************************************
 
@@ -2739,7 +2742,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
    ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
    db%my_rpt = all_rpt(:, my_start:my_stop)
  end if
- ABI_FREE(all_rpt)
+ 
  !ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
 
  ! Find correspondence BZ --> IBZ. Note:
@@ -2937,18 +2940,64 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ABI_CHECK(iqst == nqbz, "iqst /= nqbz")
  db%v1scf_rpt = db%v1scf_rpt / nqbz
 
+ ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
+ write_maxw = len_trim(outwr_path) > 0
+ if (write_maxw) then
+   ABI_CALLOC(maxw, (nrtot, db%natom3))
+   do imyp=1,db%my_npert
+     ipc = db%my_pinfo(3, imyp)
+     do irpt=1,db%my_nrpt
+       phre = zero
+       do ispden=1,db%nspden
+         do ifft=1,nfft
+           phre = max(phre, db%v1scf_rpt(1,irpt,ifft,ispden,imyp) ** 2 + db%v1scf_rpt(2,irpt,ifft,ispden,imyp) ** 2)
+         end do
+       end do
+       maxw(irpt - 1 + my_start, ipc) = sqrt(phre)
+     end do
+   end do
+   call xmpi_sum_master(maxw, master, db%comm, ierr)
+
+   if (xmpi_comm_rank(db%comm) == master) then
+     sc_rprimd(:, 1) = nq1 * db%cryst%rprimd(:, 1)
+     sc_rprimd(:, 2) = nq2 * db%cryst%rprimd(:, 2)
+     sc_rprimd(:, 3) = nq3 * db%cryst%rprimd(:, 3)
+     sc_rmet = matmul(transpose(sc_rprimd), sc_rprimd)
+     ABI_MALLOC(rmod_all, (nrtot))
+     do ii=1,nrtot
+       rmod_all(ii) = sqrt(dot_product(all_rpt(:, ii), matmul(sc_rmet, all_rpt(:, ii))))
+     end do
+     iperm = [(ii, ii=1,nrtot)]
+     call sort_dp(nrtot, rmod_all, iperm, tol12)
+     if (open_file(outwr_path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
+       MSG_ERROR(msg)
+     end if
+     write(unt, "(a)")"# |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|"
+     write(unt, "(a, 3(i0, 1x))")"# ngqpt:", ngqpt 
+     do ii=1,nrtot
+       irpt = iperm(ii)
+       write(unt, *)rmod_all(ii), all_rpt(:, irpt), maxw(irpt, 1:db%natom3)
+     end do
+     close(unt)
+     ABI_FREE(rmod_all)
+   end if
+
+   ABI_FREE(maxw)
+ end if
+
  !do imyp=1,db%my_npert
  !  ipc = db%my_pinfo(3, imyp)
- !  if (open_file(strcat("v1scf_pertcase", itoa(ipc)), msg, newunit=ii, form="formatted", action="write", status="unknown") /= 0) then
+ !  if (open_file(strcat("v1scf_pertcase", itoa(ipc)), msg, newunit=unt, form="formatted", &
+ !                action="write", status="unknown") /= 0) then
  !    MSG_ERROR(msg)
  !  end if 
- !  !write(ii, *)"From rank", db%me_pert
+ !  !write(unt, *)"# From rank", db%me_pert
  !  do ispden=1,db%nspden
  !    do ifft=1,nfft
- !      write(ii, *)db%v1scf_rpt(:, :, ifft, ispden, imyp)
+ !      write(unt, *)db%v1scf_rpt(:, :, ifft, ispden, imyp)
  !    end do
  !  end do
- !  close(ii)
+ !  close(unt)
  !end do
 
  ABI_FREE(emiqr)
@@ -2962,6 +3011,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ABI_FREE(nqsts)
  ABI_FREE(v1r_qbz)
  ABI_FREE(v1r_lr)
+ ABI_FREE(all_rpt)
 
  call cwtime_report(" Construction of V(r,R)", cpu_all, wall_all, gflops_all)
 
@@ -3082,6 +3132,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
    end if
  end do ! imyp
 
+ ! Set imaginary part to zero if gamma point.
  if (sum(qpt**2) < tol14) ov1r(2, :, :, :) = zero
 
  ABI_FREE(eiqr)
@@ -3414,7 +3465,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz, cplex, ierr, qcnt
+ integer :: iq_ibz, cplex, ierr !, qcnt
  real(dp) :: cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
@@ -3426,13 +3477,12 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 
  if (db%ftqcache%maxnq == 0) return
 
- if (db%qcache%make_room(ineed_qpt, msg) /= 0) then 
+ if (db%ftqcache%make_room(ineed_qpt, msg) /= 0) then 
    MSG_WARNING(msg)
  end if
 
  !call timab(1807, 1, tsec)
-
- call wrtout(std_out, sjoin(" Need to update Vscf(q) cache.", itoa(qcnt), "q-points..."), do_flush=.True.)
+ !call wrtout(std_out, sjoin(" Need to update Vscf(q) cache.", itoa(qcnt), "q-points..."), do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  cplex = 2
@@ -5128,7 +5178,7 @@ subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
  ABI_MALLOC(file_v1r, (2, nfft, db%nspden, db%natom3))
 
  comm_rpt = xmpi_comm_self
- call dvdb_ftinterp_setup(db, ngqpt, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
+ call dvdb_ftinterp_setup(db, ngqpt, 1, [zero, zero, zero], nfft, ngfft, "", comm_rpt)
 
  do iq=1,db%nqpt
    ! Read data from file

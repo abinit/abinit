@@ -599,6 +599,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(rf2_t) :: rf2
  type(hdr_type) :: pot_hdr
  character(len=500) :: msg
+ character(len=fnlen) :: path
 !arrays
  integer :: g0_k(3),g0_kq(3)
  integer :: qptrlatt(3,3)
@@ -994,7 +995,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      comm_rpt = xmpi_comm_self
      comm_rpt = sigma%comm_bq
      !if (.not. sigma%imag_only) comm_rpt = sigma%comm_band
-     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+     path = strcat(dtfil%filnam_ds(4), "_WRMAX")
+     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, path, comm_rpt)
 
      ! Build q-cache in the *dense* IBZ using the global mask qselect and itreatq.
      ABI_CALLOC(qselect, (sigma%nqibz))
@@ -2437,7 +2439,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
    !kk_ibz = ebands%kptns(:,ik_ibz)
    if (.not. isirr_k) then
-     MSG_WARNING(sjoin("For the time being the k-point must be in the IBZ but got", ktoa(kk)))
+     MSG_WARNING(sjoin("For the time being the k-point must be in the IBZ but got:", ktoa(kk)))
      ierr = ierr + 1
    end if
 
@@ -2454,7 +2456,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
          cnt = cnt + 1
          if (cnt < 5) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
-             "Not all the degenerate states for ikcalc= ",ikcalc,", spin= ",spin,ch10,&
+             "Not all the degenerate states for ikcalc: ",ikcalc,", spin: ",spin,ch10,&
              "were included in the bdgw set. bdgw has been automatically changed to: ",new%bstart_ks(ikcalc,spin),bstop
            MSG_COMMENT(msg)
          end if
