@@ -1,6 +1,2 @@
-Abort(873028357) on node 0 (rank 0 in comm 0): Fatal error in PMPI_Comm_size: Invalid communicator, error stack:
-PMPI_Comm_size(114): MPI_Comm_size(comm=0xffffffff, size=0x7ffedf588b3c) failed
-PMPI_Comm_size(71).: Invalid communicator
-Command exited with non-zero status 5
-10.35user 0.13system 0:10.51elapsed 99%CPU (0avgtext+0avgdata 166112maxresident)k
-0inputs+40outputs (0major+83403minor)pagefaults 0swaps
+2.58user 0.07system 0:02.68elapsed 99%CPU (0avgtext+0avgdata 164704maxresident)k
+0inputs+40outputs (0major+39101minor)pagefaults 0swaps

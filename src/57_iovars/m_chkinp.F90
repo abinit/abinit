@@ -3442,7 +3442,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  bandFFT
    if(dt%paral_kgb==1.and.dt%optdriver==RUNL_GSTATE) then
-     if (mod(dt%wfoptalg,10) /= 4 .and. dt%wfoptalg /= 1) then
+     if (mod(dt%wfoptalg,10) /= 4 .and. mod(dt%wfoptalg,10) /= 1) then
        write(message,'(a,i0,a,a,a,a)')&
 &       'The value of wfoptalg is found to be ',dt%wfoptalg,ch10,&
 &       'This is not allowed in the case of band-FFT parallelization.',ch10,&

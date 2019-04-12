@@ -234,7 +234,14 @@ module m_chebfiwf
  
   ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*l_nband_filter)) !*blockdim
  
-  call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft, l_mpi_enreg%me_g0, l_paw) !blockdim
+  !print *, "mpi_enreg%nproc_band", mpi_enreg%nproc_band
+  !print *, "xmpi_comm_size(xmpi_world)", xmpi_comm_size(xmpi_world)
+  !print *, "l_mpi_enreg%bandpp", l_mpi_enreg%bandpp
+  !stop
+ 
+  call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, dtset%paral_kgb, l_mpi_enreg%nproc_band, &
+                   l_mpi_enreg%bandpp, l_mpi_enreg%nproc_fft, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft, l_mpi_enreg%me_g0, l_paw) 
+                   !blockdim
  
   !###########################################################################
   !################    RUUUUUUUN    ##########################################
@@ -292,7 +299,7 @@ module m_chebfiwf
 
   ABI_FREE(l_gvnlc)
 
-  ! Free lobpcg
+  ! Free chebfi
   call chebfi_free(chebfi)
   
   !###########################################################################
@@ -342,6 +349,22 @@ module m_chebfiwf
     double precision, pointer :: gsc(:,:)
     
     call xgBlock_getSize(X,spacedim,blockdim)
+
+    print *, "spacedim X", spacedim
+    print *, "blockdim X", blockdim
+    
+    call xgBlock_getSize(AX,spacedim,blockdim)
+    
+    !print *, "spacedim AX", spacedim
+    !print *, "blockdim AX", blockdim
+    
+    call xgBlock_getSize(BX,spacedim,blockdim)
+    
+    !print *, "spacedim BX", spacedim
+    !print *, "blockdim BX", blockdim
+    
+    !stop
+
     spacedim = spacedim/l_icplx
     
     !call xgBlock_get(X,cg(:,1:blockdim*spacedim),0,spacedim)
@@ -368,7 +391,7 @@ module m_chebfiwf
         l_gs_hamk,l_gvnlc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0) 
     else
       call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),eval,blockdim,l_mpi_enreg,&
-&                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.false.)
+&                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.false.)  !already_transposed = true (previous)
     end if
   
     ! scale cg, ghc, gsc
@@ -415,8 +438,14 @@ module m_chebfiwf
     call xgBlock_getSize(X,spacedim,blockdim)
     spacedim = spacedim/l_icplx
     
+    print *, "spacedim", spacedim
+    print *, "BLOCKDIM", blockdim
+    !stop
+    
     call xgBlock_reverseMap(X,ghc_filter,l_icplx,spacedim*blockdim)
     call xgBlock_reverseMap(Bm1X,gsm1hc_filter,l_icplx,spacedim*blockdim)
+    
+    !stop
         
     ! scale back cg
     if(l_istwf == 2) then 
@@ -430,15 +459,20 @@ module m_chebfiwf
       end if
     end if
     
+    !stop
+    
     !cwaveprj dummy allocate
     if(l_paw) then
       ABI_DATATYPE_ALLOCATE(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim)) !nband_filter
       call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj) 
+      !stop
       call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), & 
-&     spacedim, blockdim, l_mpi_enreg, l_nspinor)
+&     spacedim, blockdim, l_mpi_enreg, l_nspinor)   !!ghc_filter size problem if transposed
+      !stop
     else
       gsm1hc_filter(:,:) = ghc_filter(:,:)
     end if
+    
     
     ! scale cg, ghc, gsc
     if ( l_istwf == 2 ) then

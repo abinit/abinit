@@ -476,6 +476,10 @@ end subroutine make_invovl
 
  ikpt_this_proc=bandfft_kpt_get_ikpt()
  invovl => invovl_kpt(ikpt_this_proc)
+ 
+ print *, "ham%natom", ham%natom
+ print *, "nspinor*ndat" ,nspinor*ndat  !192
+ !stop
 
  if(ham%istwf_k == 1) then
    cplx = 2
@@ -500,10 +504,11 @@ end subroutine make_invovl
  choice = 0 ! only compute cprj, nothing else
  cpopt = 0 ! compute and save cprj
  paw_opt = 3 ! S nonlocal operator
+ !stop
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
-&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
- else
+&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.false.) !already_transposed = true (previous)
+  else
    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
 &              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
@@ -545,7 +550,7 @@ end subroutine make_invovl
  paw_opt = 3
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
-&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
+&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.false.)  !already_transposed = true (previous)
  else
    call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
 &              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)

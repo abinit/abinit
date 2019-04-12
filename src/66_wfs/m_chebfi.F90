@@ -218,6 +218,10 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
        shift = shift + npw*nspinor
      end do
    end do
+! call xgBlock_map(xcgLinalg,cg_loadbalanced,SPACE_C,npw,nband,mpi_enreg"regtyt)
+!  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,debug_rank)
+!  call tester()
+!  call xgTransposer_free(xgTransposer)
 
    ! Transpose input cg into cg_alloall1. cg_alltoall1 is now (npw_filter, nband_filter)
    call timab(timer_alltoall, 1, tsec)

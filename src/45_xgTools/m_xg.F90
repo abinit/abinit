@@ -510,6 +510,8 @@ module m_xg
 
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
+      !print *, "xgBlock%cols*xgBlock%Ldim", xgBlock%cols*xgBlock%Ldim
+      !print *, "cols*rows", cols*rows
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
           write(*,*) xgBlock%cols,xgBlock%Ldim,cols,rows
           write(*,*) xgBlock%cols*xgBlock%Ldim,cols*rows
