@@ -1004,6 +1004,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (sigma%imag_only .and. sigma%qint_method == 1) then
        call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
      end if
+     qselect = 1
      ! Distribute IBZ q-points inside comm_qpt
      ABI_ICALLOC(itreatq, (sigma%nqibz))
      itreatq = 1

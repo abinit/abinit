@@ -1893,6 +1893,7 @@ integer function qcache_make_room(qcache, ineed_qpt, msg) result(ierr)
 ! *************************************************************************
 
  ierr = 0; msg = ""
+ if (qcache%max_mbsize < zero) return
  mbsize_now = qcache%get_mbsize() 
 
  ! Count the number of q-points that are not in cache and the extra memory required to allocate everything.
@@ -2976,7 +2977,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      write(unt, "(a, 3(i0, 1x))")"# ngqpt:", ngqpt 
      do ii=1,nrtot
        irpt = iperm(ii)
-       write(unt, *)rmod_all(ii), all_rpt(:, irpt), maxw(irpt, 1:db%natom3)
+       write(unt, "(a,es16.0,3(f4.0,1x),(es16.8))")rmod_all(ii), all_rpt(:, irpt), maxw(irpt, 1:db%natom3)
      end do
      close(unt)
      ABI_FREE(rmod_all)

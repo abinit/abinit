@@ -286,9 +286,9 @@ program abitk
 contains 
 !!***
 
-!!****f* abitk/get_ebands_path_cryst
+!!****f* abitk/get_path_ebands_cryst
 !! NAME
-!! get_ebands_path_cryst
+!! get_path_ebands_cryst
 !!
 !! FUNCTION
 !!
