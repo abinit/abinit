@@ -314,7 +314,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  ! Deallocate and delete the fit-date 
  call fit_data_free(fit_data)
 end subroutine opt_effpot
-
+!!***
 
 !!****f* m_opt_effpot/opt_effpotbound
 !!
@@ -671,7 +671,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   !ABI_DATATYPE_DEALLOCATE(my_coeffs)  
   call fit_data_free(fit_data)
 end subroutine opt_effpotbound
-
+!!***
 
 
 !!****f* m_opt_effpot/opt_getHOforterm
@@ -685,19 +685,18 @@ end subroutine opt_effpotbound
 !!
 !!
 !! INPUTS
-!! eff_pot: existing effective potential 
-!! order: order for which bounding terms are generated
-!!
+!! term<polynomial_coeff_type>:anharmonic term 
+!! order_range(2):start and stop order desired by user
+!! 
 !! 
 !! OUTPUT
-!! eff_pot new effective potential 
-!! 
+!! order_start:possible start order 
+!! order_stop: possible stop order 
 !!
 !! PARENTS
-!! multibinit
+!! opt_effpotbound
 !!
 !! CHILDREN
-!! opt_effpot 
 !!
 !! SOURCE
 
@@ -761,13 +760,13 @@ subroutine opt_getHOforterm(term,order_range,order_start,order_stop,comm)
      ABI_DEALLOCATE(powers) 
 
 end subroutine opt_getHOforterm
+!!***
 
 
-
-!!****f* m_opt_effpot/opt_getHOforterm
+!!****f* m_opt_effpot/opt_getCombisforterm
 !!
 !! NAME
-!! opt_effpotbound
+!! opt_getCombisforterm
 !!
 !! FUNCTION
 !! For a given order range: order_start, order_stop 
@@ -776,19 +775,20 @@ end subroutine opt_getHOforterm
 !!
 !!
 !! INPUTS
-!! eff_pot: existing effective potential 
-!! order: order for which bounding terms are generated
-!!
+!! order_start: start order for bounding terms  
+!! order_end: end order for bounding terms 
+!! ndisp: number of displacements a given term contains 
+!! 
 !! 
 !! OUTPUT
-!! eff_pot new effective potential 
+!! ncombi: total number of combinations 
+!! ncombi_order: array with number of combinations per order
 !! 
 !!
 !! PARENTS
-!! multibinit
+!! opt_effpotbound
 !!
 !! CHILDREN
-!! opt_effpot 
 !!
 !! SOURCE
 
@@ -862,12 +862,12 @@ enddo !order
 !write(*,*) 'ncombi for term is:', ncombi, 'are we happy?'
 
 end subroutine opt_getCombisforterm
-
+!!***
 
 !!****f* m_opt_effpot/opt_getHoTerms
 !!
 !! NAME
-!! opt_getOrdersforterm
+!! opt_geHoTerms
 !!
 !! FUNCTION
 !! For a term give all possible high order terms 
@@ -975,7 +975,8 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
                  !write(*,*) "what is icombi_sotp?", icombi_stop
                  ! Increase the order of the displacements 
                  do iterm_of_term=1,nterm_of_term
-                    terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) = terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
+                    terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) =&
+&                            terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
                  enddo
                  ! Check total order of term after increse
                  power_tot=0
@@ -999,7 +1000,8 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
                   do icombi2=icombi,icombi+ndisp-1
                       do jdisp=1,ndisp
                          do iterm_of_term=1,nterm_of_term
-                            terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) +2
+                            terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = &
+&                                    terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) +2
                             !write(*,*) "What's the power now?", terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp)
                          enddo                     
                       enddo !jdisp
@@ -1010,7 +1012,8 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
                       !write(*,*) "how often did I go here, hu ?"                  
                      !write(*,*) "I did at least one displacement" 
                      do iterm_of_term=1,nterm_of_term
-                        terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) = terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) - 2 
+                        terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) = &
+&                                terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) - 2 
                      enddo
                      power_tot=0
                      do jdisp2=1,ndisp 
@@ -1039,7 +1042,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
                divider2 = real(2)
                !write(*,*) 'divided', divided, 'divider2', divider2
                !Treat terms with even power f.E. ^2^2^2^2, ^4^4 etc...
-               if(mod(divided,divider2) == 0 .and. .not. equal_term_done .and. ndisp > 1)then                                                              
+               if(mod(divided,divider2) == 0 .and. .not. equal_term_done .and. ndisp > 1)then 
                   !write(*,*) "Sometimes I should be here sometimes I shouldn't" 
                   do jdisp=1,ndisp
                      do iterm_of_term=1,nterm_of_term
@@ -1064,7 +1067,32 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
       enddo !order
 
 end subroutine opt_getHoTerms
+!!***
 
+!!****f* m_opt_effpot/opt_filterdisp
+!!
+!! NAME
+!! opt_opt_filterdisp
+!!
+!! FUNCTION
+!! If a anharmonic term represents a strain-phonon coupling 
+!! delete the strain and only keep the displacement part.
+!!
+!!
+!! INPUTS
+!! term<polynomial_coeff_type>: anharmonic term to check 
+!! nterm_of_term: number of symmetry equivalent terms for term 
+!! 
+!! OUTPUT
+!! term<polynomial_coeff_type>: only the displacement part of original term 
+!!
+!! PARENTS
+!! opt_effpotbound
+!!
+!! CHILDREN
+!! m_polynomial_coeff.F90/polynomial_coeff_init 
+!!
+!! SOURCE
 
 subroutine opt_filterdisp(term,nterm_of_term,comm)
 
@@ -1112,7 +1140,8 @@ enddo
 call polynomial_coeff_init(coeff,nterm_of_term,term,terms,check=.TRUE.)
 
 end subroutine opt_filterdisp
+!!***
 
 end module m_opt_effpot
-
+!!***
      

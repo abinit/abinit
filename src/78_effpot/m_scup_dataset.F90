@@ -144,7 +144,7 @@ scup_dtset%scup_printorbocc = .FALSE.
 
 
 end subroutine  scup_dtset_init
-
+!!***
 
 !!****f* m_scup_dataset/scup_dtset_free
 !!
@@ -186,7 +186,7 @@ call kpath_free(scup_dtset%scup_kpath)
 
 
 end subroutine scup_dtset_free
-
+!!***
 
 !!****f* m_scup_dataset/outvars_scup
 !!
@@ -271,7 +271,7 @@ subroutine outvars_scup(scup_dtset,nunit)
 
 
 end subroutine outvars_scup
-
+!!***
 
 !!****f* m_scup_dataset/invars10scup
 !!
@@ -587,9 +587,9 @@ tmp_int=0
  ABI_DEALLOCATE(intarr)
 
 end subroutine invars10scup
+!!***
 
-
-!!****f* m_scup_dataset/scup_kpath_init
+!!****f* m_scup_dataset/scup_kpath_new
 !!
 !! NAME
 !! scup_kpath_init
@@ -667,6 +667,7 @@ scup_kpath%ndivs = ndivs_tmp
 ABI_DEALLOCATE(ndivs_tmp)
 
 end subroutine scup_kpath_new
+!!***
 
 !!****f* m_scup_dataset/scup_kpath_print
 !!
@@ -716,6 +717,7 @@ subroutine scup_kpath_print(scup_kpath)
  call kpath_print(scup_kpath)
 
 end subroutine scup_kpath_print
-
+!!***
 
 end module m_scup_dataset
+!!***
