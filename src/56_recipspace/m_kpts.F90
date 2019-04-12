@@ -158,7 +158,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 !Local variables-------------------------------
 !scalars
  integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
- integer :: my_nshiftk,nkpt_computed
+ integer :: my_nshiftk,nkpt_computed,ii
  integer,allocatable :: indkpt(:),bz2ibz_smap(:,:)
  real(dp) :: kptrlen
  real(dp) :: cpu, wall, gflops
@@ -182,8 +182,12 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
  if (present(bz2ibz)) then
    nkbz = size(kbz, dim=2)
-   ABI_MALLOC(bz2ibz,(6,nkbz))
-   bz2ibz = bz2ibz_smap
+   ABI_CALLOC(bz2ibz,(6,nkbz))
+   if(kptopt==1 .or. kptopt==2 .or. kptopt==4)then
+     bz2ibz = bz2ibz_smap
+   else
+     bz2ibz(1,:) = [(ii,ii=1,nkbz)]
+   end if
  endif
 
  ABI_SFREE(indkpt)
