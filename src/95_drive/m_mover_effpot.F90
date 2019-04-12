@@ -269,7 +269,7 @@ implicit none
    dtset%dmft_entropy = 0
    dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = one  ! DILATation : MaXimal value
+   dtset%dilatmx = 1.5  ! DILATation : MaXimal value
    dtset%chkdilatmx = 0 ! No check on dilatmx is needed in multibilint
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001d0 ! internal FRICTION coefficient

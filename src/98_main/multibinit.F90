@@ -460,7 +460,11 @@ elec_eval = .FALSE.
    elseif(inp%bound_model == 3)then
     write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,&
 &    'Bound Process 3: Generate equivalent high order terms',ch10            
-     call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist,comm) 
+    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,message,'COLL')
+    
+    call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist,comm) 
+   
    end if
 
 

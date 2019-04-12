@@ -245,7 +245,7 @@ character(len=fnlen) :: filename,fname_ddb, name_file
 character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg,e_d_ht,e_d_sr,e_d_lr
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
-logical :: need_scfcv_cycle = .TRUE.
+logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: change,useprtxfase
 logical :: skipcycle, file_opened
 integer :: minIndex,ii,similar,conv_retcode
@@ -407,6 +407,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
+   need_elec_eval = .FALSE.
+   if(present(scup_dtset))then 
+     need_elec_eval = scup_dtset%scup_elec_model
+   endif 
  else
    if(need_verbose)then
      write(message,'(a,a,i2,a,a,a,80a)')&
@@ -625,7 +629,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 #if defined DEV_MS_SCALEUP 
            !If we a SCALE UP effective electron model give the iteration and set print-options
-           if(scup_dtset%scup_elec_model)then
+           if(need_elec_eval)then
               call global_set_parent_iter(itime)
               ! Set all print options to false. 
               call global_set_print_parameters(geom=.FALSE.,eigvals=.FALSE.,eltic=.FALSE.,&
@@ -640,7 +644,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 &           effective_potential,scfcv_args%results_gs%etotal,e_d_ht,e_d_sr,e_d_lr,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,& 
-&           filename=name_file,elec_eval=scup_dtset%scup_elec_model)
+&           filename=name_file,elec_eval=need_elec_eval)
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E5)then

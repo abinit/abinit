@@ -655,9 +655,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
  
- write(message,'(5a)' )ch10,&
-&     ' Finished creating high-order terms',ch10,&
-&     ' Optimize initial anharmonic terms !NOT IS COMMENTED NOW!',ch10
+ write(message,'(3a)' )ch10,&
+&     ' Finished creating high-order terms',ch10  !,&
+!&     ' Optimize initial anharmonic terms !NOT IS COMMENTED NOW!',ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 

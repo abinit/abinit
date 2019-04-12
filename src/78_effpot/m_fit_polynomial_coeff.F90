@@ -1060,10 +1060,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
    if(need_verbose) then
 !  Print the standard deviation after the fit
-     write(message,'(7a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
-&                    ' Mean Standard Deviation values of the effective potential',ch10,& 
-&                    ' at the end of the fit process with respect to the training-set (meV/atm):',ch10,&
-&               ch10,'   Energy          : ',&
+     write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+&                    ' Mean Standard Deviation values at the end of the fit process (meV/atm): ',ch10,& 
+&                    '   Energy          : ',&
 &               gf_values(4,1)*Ha_EV*1000*factor ,ch10,&
 &                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
 &                    '   Forces+Stresses : ',&
