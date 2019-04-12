@@ -1300,7 +1300,6 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  real(dp) :: tratom(3)
  character(len=500) :: message
 
-! *************************************************************************
 
 
 !Initialisation of variables
@@ -1342,7 +1341,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  symrel = crystal%symrel
  tnons  = crystal%tnons
 
- tolsym8=tol20
+ tolsym8=tol14
  call symatm(indsym,natom,nsym,symrec,tnons,&
 &            tolsym8,crystal%typat,crystal%xred)
  ABI_ALLOCATE(blkval,(3,natom,3,natom,nrpt))
