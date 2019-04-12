@@ -1399,15 +1399,14 @@ class BaseTest(object):
 
         self.__dict__.update(test_info.__dict__)
 
-        if not self.files_to_test:  # no file to test
-            if self.no_check:
-                pass
-            else:
-                raise ValueError(
-                    self.full_id + 'This test have no files_to_test attribute.'
-                    ' It is forbidden unless you had "no_check = yes" to its'
-                    ' [setup] section in test configuration.'
-                )
+        if self.no_check:
+            self.files_to_test = []
+        elif not self.files_to_test:  # no file to test
+            raise ValueError(
+                self.full_id + 'This test have no files_to_test attribute.'
+                ' It is forbidden unless you had "no_check = yes" to its'
+                ' [setup] section in test configuration.'
+            )
 
         # Save authors' second names to speed up the search.
         # Well, let's hope that we don't have authors with the same second name!
