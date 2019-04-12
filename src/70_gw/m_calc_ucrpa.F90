@@ -136,7 +136,7 @@ contains
 
  complex :: nC,ualter
 
- integer :: iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,ispin
+ integer :: iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,ispin,one_orbital
  integer :: iat,im_paral,iqalloc,ib1,ib2,m1,m2,m3,m4,iqibz,mbband1,mbband2,mbband3,mbband4,spin1,spin2
  integer :: ierr,ik_bz,ik_ibz,iq_ibz,i,iG1,iG2,iG,iiG,iomega,iomega1,ispinor1,ispinor2,ispinor3,ispinor4
  integer :: lpawu_read,nkibz,nbband,nkbz,nprocs,nqalloc,nqibz,ms1,ms2,ms3,ms4,mbband,nspinor
@@ -589,6 +589,16 @@ contains
       do il3=1,wanbz%nbl_atom_wan(iatom3)
       do il4=1,wanbz%nbl_atom_wan(iatom4)
       if(il1/=il3 .or. il2/=il4)cycle
+      if (wanbz%nsppol/=1)then
+        ABI_ALLOCATE(uspin,(wanbz%nsppol**2,nomega))
+        ABI_ALLOCATE(jspin,(wanbz%nsppol**2,nomega))
+      endif
+      if (iatom1==iatom2 .and. pos1==pos2 .and. il1 == il2)then
+        one_orbital=1
+      else
+        one_orbital=0
+      endif
+      ABI_ALLOCATE(omega,(nomega))
       do spin1=1,wanbz%nsppol
       do spin2=1,wanbz%nsppol
         mbband1=2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
@@ -597,9 +607,6 @@ contains
         mbband4=2*wanbz%latom_wan(iatom4)%lcalc(il4)+1
         ABI_ALLOCATE(rhot_q_m1m3,(nspinor,nspinor,mbband1,mbband3,npw,nqibz))
         ABI_ALLOCATE(rhot_q_m2m4,(nspinor,nspinor,mbband2,mbband4,npw,nqibz))
-        ABI_ALLOCATE(uspin,(wanbz%nsppol**2,nomega))
-        ABI_ALLOCATE(jspin,(wanbz%nsppol**2,nomega))
-        ABI_ALLOCATE(omega,(nomega))
         do ispinor1=1,wanbz%nspinor
         do ispinor2=1,wanbz%nspinor
         do ispinor3=1,wanbz%nspinor
@@ -689,7 +696,7 @@ contains
       
         write(message,*)  "BARE INTERACTION"
         call wrtout(std_out,message,'COLL')
-        call checkk(V_m,1,mbband*nspinor,tol,1,0,uu,jj,"bare interaction",mbband1,mbband2,mbband3,mbband4,nspinor)
+        call checkk(V_m,1,mbband*nspinor,tol,1,0,uu,jj,"bare interaction",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
         !call print_U(mbband1,mbband2,mbband3,mbband4,nspinor,V_m)
 !  ========================================================================
 !  ------------------------------------------------------------------------
@@ -947,11 +954,11 @@ contains
           END SELECT
     ! tolerance of the symetry of screened U.
           tol=1E-2
-          call checkk(U_m,1,mbband*nspinor,tol,0,iomega,uu,jj,"UminusVbare",mbband1,mbband2,mbband3,mbband4,nspinor)
+          call checkk(U_m,1,mbband*nspinor,tol,0,iomega,uu,jj,"UminusVbare",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
           U_m=V_m+U_m
           write(message,*)  "UCRPA interaction"
           call wrtout(std_out,message,'COLL')
-          call checkk(U_m,1,mbband*nspinor,tol,1,iomega,uomega(iomega),jomega(iomega),"cRPA interaction",mbband1,mbband2,mbband3,mbband4,nspinor)
+          call checkk(U_m,1,mbband*nspinor,tol,1,iomega,uomega(iomega),jomega(iomega),"cRPA interaction",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
           if (spin1==1 .and. spin2==1) then
             ispin=1
           else if(spin1==1 .and. spin2==2) then
@@ -961,8 +968,10 @@ contains
           else
             ispin=4
           endif
-          uspin(iomega,ispin)=uomega(iomega)
-          jspin(iomega,ispin)=jomega(iomega)
+          if (wanbz%nsppol/=1)then
+            uspin(iomega,ispin)=uomega(iomega)
+            jspin(iomega,ispin)=jomega(iomega)
+          endif
           !write(message,*)ch10,"SCREENED INTERACTION"
           !call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
           !call print_U(mbband1,mbband2,mbband3,mbband4,nspinor,U_m)
@@ -1021,10 +1030,12 @@ contains
           if(nomega==1)  omega(iomega)=omegamin
         enddo
         call print_orbitals(1,1,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,2)
-        call print_uj_spin(nomega,uspin,jspin,wanbz%nsppol,omega,omegamin,omegamax)
+        call print_uj_spin(nomega,uspin,jspin,wanbz%nsppol,omega,omegamin,omegamax,one_orbital)
       endif
-      ABI_DEALLOCATE(uspin)
-      ABI_DEALLOCATE(jspin)
+      if (wanbz%nsppol/=1)then
+        ABI_DEALLOCATE(uspin)
+        ABI_DEALLOCATE(jspin)
+      endif
       ABI_DEALLOCATE(omega)
       enddo!il4
       enddo!il3
@@ -1109,10 +1120,10 @@ contains
  end if
  END FUNCTION findkmq
 
- SUBROUTINE checkk(Interaction,m_inf,m_sup,tol,prtopt,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor)
+ SUBROUTINE checkk(Interaction,m_inf,m_sup,tol,prtopt,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
  implicit none
- integer, intent(in) :: m_inf,m_sup,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor
+ integer, intent(in) :: m_inf,m_sup,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital
  complex(dpc), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
  real(dp), intent(in)    :: tol
  complex(dpc), intent(out)    :: uu,jj
@@ -1172,14 +1183,14 @@ contains
 !     call Affichage(Interaction,m_inf,m_sup,1)
 ! end if
 
- if(prtopt>0)  call Affichage(Interaction,m_inf,m_sup,1,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor)
+ if(prtopt>0)  call Affichage(Interaction,m_inf,m_sup,1,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
  END SUBROUTINE checkk
 
- SUBROUTINE Affichage(Interaction,m_inf,m_sup,option,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor)
+ SUBROUTINE Affichage(Interaction,m_inf,m_sup,option,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
   implicit none
-  integer, intent(in) :: m_inf,m_sup,option,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor
+  integer, intent(in) :: m_inf,m_sup,option,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital
   complex(dpc), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
   complex(dpc),intent(out) :: UU,JJ
   character(len=*), intent(in) :: utype
@@ -1196,19 +1207,21 @@ contains
   endif
   write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
 
-  ! if(lprint) then
-  !   write(message,*)" Diagonal ",utype
-  !   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-  ! endif
-
-  ! do m1=m_inf,m_sup
-  !   if (option.EQ.1) then
-  !     write(message,'(a,i3,14f7.3)') " ",m1,real(Interaction(m1,m1,m1,m1))
-  !     call wrtout(std_out,message,'COLL')
-  !     call wrtout(ab_out,message,'COLL')
-  !   end if
-  ! end do
-
+  if (one_orbital==1) then
+    if(lprint) then
+      write(message,*)" Diagonal ",utype
+      call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+    endif
+    
+    do m1=m_inf,m_sup
+      if (option.EQ.1) then
+        write(message,'(a,i3,14f7.3)') " ",m1,real(Interaction(m1,m1,m1,m1))
+        call wrtout(std_out,message,'COLL')
+        call wrtout(ab_out,message,'COLL')
+      end if
+    end do
+  endif
+  
   if(lprint) then
     write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
     write(message,*)" U'=U(m1,m2,m1,m2) for the ",utype
@@ -1238,79 +1251,85 @@ contains
  if(ifreq/=0) write(message,'(3a,i3,a,2f10.4,a)')'  Hubbard ',utype,' for w =',ifreq,', U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=',UU,ch10
  if(ifreq==0) write(message,'(3a,2f10.4,a)') '  Hubbard ',utype, ' U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=',UU,ch10
  call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
- ! UU1=czero
- ! do m1=m_inf,m_sup
- !     UU1=UU1+Interaction(m1,m1,m1,m1)
- ! enddo
- ! UU1=UU1/((m_sup-m_inf+1))
- ! if(ifreq/=0) write(message,'(3a,i4,a,2f10.4,2a)')&
- ! & '  (Hubbard ',utype,' for w =',ifreq,', U=1/(2l+1) \sum U(m1,m1,m1,m1)=',UU1,')',ch10
- ! if(ifreq==0) write(message,'(3a,2f10.4,2a)')' (Hubbard ',utype,' U=1/(2l+1) \sum U(m1,m1,m1,m1)=',UU1,')',ch10
- ! call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+ 
 
- if(lprint) then
+if (one_orbital==1)then
+  UU1=czero
+  do m1=1,mbband1
+    UU1=UU1+Interaction(m1,m1,m1,m1)
+  enddo
+  UU1=UU1/((mbband1))
+  if(ifreq/=0) write(message,'(3a,i4,a,2f10.4,2a)')&
+    & '  (Hubbard ',utype,' for w =',ifreq,', U=1/(2l+1) \sum U(m1,m1,m1,m1)=',UU1,')',ch10
+  if(ifreq==0) write(message,'(3a,2f10.4,2a)')' (Hubbard ',utype,' U=1/(2l+1) \sum U(m1,m1,m1,m1)=',UU1,')',ch10
+  call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+endif
+
+ if(lprint .and. one_orbital==1) then
    write(message,*)' Hund coupling J=U(m1,m1,m2,m2) for the ', utype
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
 
-   write(message,'(a,14i7)') " -",(m2,m2=1,mbband2)
+   write(message,'(a,14i7)') " -",(m2,m2=1,mbband1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    do m1=1,mbband1
      if (option.EQ.1) then
-        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m1,m2,m2)),m2=1,mbband2)
+        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m1,m2,m2)),m2=1,mbband1)
         call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
      end if
    end do
  endif
-
- ! UUmJJ=czero
- ! do m1=m_inf,m_sup
- !   do m2=m_inf,m_sup
- !      UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m2,m2,m1)
- !   enddo
- ! enddo
- ! UUmJJ=UUmJJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
- ! JJ1=UU-UUmJJ
-
-! JJ=czero
-! do m1=m_inf,m_sup
-!   do m2=m_inf,m_sup
-!     if(m1/=m2) JJ=JJ+Interaction(m1,m2,m2,m1)
-!   enddo
-! enddo
-! JJ=JJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
-
-!  write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
-! & ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=',JJ1,ch10
-!  call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-
-!  UUmJJ=czero
-!  do m1=m_inf,m_sup
-!    do m2=m_inf,m_sup
-!       UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m1,m2,m2)
-!    enddo
-!  enddo
-!  UUmJJ=UUmJJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
-!  JJ2=UU-UUmJJ
-
-
-!  if(abs(JJ1-JJ2)<0.0001) then
-!    JJ=JJ1
-!  else
-!    write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
-! &   ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=',JJ2,ch10
-!    call wrtout(std_out,message,'COLL')
-!    stop
-!  endif
-
- if(lprint) then
+ if (one_orbital==1)then
+   UUmJJ=czero
+   do m1=1,mbband1
+     do m2=1,mbband1
+       UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m2,m2,m1)
+     enddo
+   enddo
+   UUmJJ=UUmJJ/float((mbband1)*(mbband1-1))
+   JJ1=UU-UUmJJ
+   
+   
+   JJ=czero
+   do m1=1,mbband1
+     do m2=1,mbband1
+       if(m1/=m2) JJ=JJ+Interaction(m1,m2,m2,m1)
+     enddo
+   enddo
+   JJ=JJ/float((mbband1)*(mbband1-1))
+   
+   write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
+     & ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=',JJ1,ch10
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   
+   UUmJJ=czero
+   do m1=1,mbband1
+     do m2=1,mbband1
+       UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m1,m2,m2)
+     enddo
+   enddo
+   UUmJJ=UUmJJ/float((mbband1)*(mbband1-1))
+   JJ2=UU-UUmJJ
+   
+   
+   if(abs(JJ1-JJ2)<0.0001) then
+     JJ=JJ1
+   else
+     write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
+       &   ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=',JJ2,ch10
+     call wrtout(std_out,message,'COLL')
+     stop
+   endif
+ endif
+ 
+ if(lprint .and. one_orbital==1) then
    write(message,*)ch10,' Hund coupling J2=U(m1,m2,m2,m1) for the ', utype
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
 
-   write(message,'(a,14i7)') " -",(m2,m2=1,mbband2)
+   write(message,'(a,14i7)') " -",(m2,m2=1,mbband1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    do m1=1,mbband1
      if (option.EQ.1) then
-        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m2,m2,m1)),m2=1,mbband2)
+        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m2,m2,m1)),m2=1,mbband1)
         call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
      end if
    end do
@@ -1450,9 +1469,9 @@ contains
  end subroutine print_orbitals
 
 
- subroutine print_uj_spin(nomega,uspin,jspin,nsppol,omega,omegamin,omegamax)
+ subroutine print_uj_spin(nomega,uspin,jspin,nsppol,omega,omegamin,omegamax,one_orbital)
    implicit none
-   integer,intent(in) :: nomega,nsppol
+   integer,intent(in) :: nomega,nsppol,one_orbital
    complex(dpc),intent(in) :: uspin(nsppol**2,nomega)
    complex(dpc),intent(in) :: jspin(nsppol**2,nomega)
    real(dp),intent(in) :: omega(nomega)
@@ -1474,21 +1493,21 @@ contains
    write(message,'(6a)')" -omega (eV)- "," Up-Up "," Up-Down "," Down-Up "," Down-Down "," Average "
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    do iomega=1,nomega
-     !write(6,*)"Lukaku",size(omega,2),iomega
      write(message,'(a,f7.2,5f9.3)')"    ",omega(iomega)*Ha_eV,(real(uspin(ispin,iomega)),ispin=1,nsppol**2),sum(real(uspin(:,iomega)))/nsppol**2
      call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    end do
    
-   write(message,*)ch10,"Sum up of J",ch10
-   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   
-   write(message,'(6a)')" -omega (eV)- "," Up-Up "," Up-Down "," Down-Up "," Down-Down "," Average "
-   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   do iomega=1,nomega
-     write(message,'(a,f7.2,5f9.3)')"    ",omega(iomega)*Ha_eV,(real(jspin(ispin,iomega)),ispin=1,nsppol**2),sum(real(jspin(:,iomega)))/nsppol**2
+   if (one_orbital==1)then
+     write(message,*)ch10,"Sum up of J",ch10
      call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   end do
-      
+     
+     write(message,'(6a)')" -omega (eV)- "," Up-Up "," Up-Down "," Down-Up "," Down-Down "," Average "
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do iomega=1,nomega
+       write(message,'(a,f7.2,5f9.3)')"    ",omega(iomega)*Ha_eV,(real(jspin(ispin,iomega)),ispin=1,nsppol**2),sum(real(jspin(:,iomega)))/nsppol**2
+       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     end do
+   endif
  end subroutine print_uj_spin
            
  end subroutine calc_ucrpa

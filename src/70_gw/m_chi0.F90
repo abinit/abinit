@@ -1719,8 +1719,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
                    band1c=band1-wan%bandi_wan+1
                    band2c=band2-wan%bandi_wan+1 
                    do iat=1, wan%natom_wan
-                     do ispinor1=1,wan%nsppol
-                       do ispinor2=1,wan%nsppol
+                     do ispinor1=1,wan%nspinor
+                       do ispinor2=1,wan%nspinor
                          do il1=1,wan%nbl_atom_wan(iat)
                           do il2=1,wan%nbl_atom_wan(iat) 
                             do m1=1,2*wan%latom_wan(iat)%lcalc(il1)+1

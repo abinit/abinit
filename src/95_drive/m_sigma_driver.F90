@@ -3392,16 +3392,18 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  Sigp%mG0=ng0sh_opt
 
  ! G-sphere for W and Sigma_c is initialized from the SCR file.
+ write(6,*)"Test avant1"
  call gsph_init(Gsph_c,Cryst,Er%npwe,gvec=Er%gvec)
+ write(6,*)"Test après 1"
  call gsph_init(Gsph_x,Cryst,Sigp%npwx,gvec=gvec_kss)
-
+ write(6,*)"Test après 2"
  Sigp%ecuteps = Gsph_c%ecut
  Dtset%ecuteps = Sigp%ecuteps
 
  ! === Make biggest G-sphere of Sigp%npwvec vectors ===
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
  call gsph_init(Gsph_Max,Cryst,Sigp%npwvec,gvec=gvec_kss)
-
+write(6,*)"Test après 3"
 !BEGINDEBUG
  ! Make sure that the two G-spheres are equivalent.
  ierr=0

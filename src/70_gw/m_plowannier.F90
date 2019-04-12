@@ -3358,7 +3358,7 @@ subroutine init_operwan_realspace(wan,operwan_realspace)
   type(plowannier_type), intent(in) :: wan
 
 !Local variables----------------------------
-  integer :: iatom1,iatom2,n1,n2,pos1,pos2,il1,il2
+  integer :: iatom1,iatom2,n1,n2,pos1,pos2,il1,il2,ispinor1,ispinor2
  
 
   ABI_DATATYPE_ALLOCATE(operwan_realspace%atom_index,(wan%natom_wan,wan%natom_wan))
@@ -3376,7 +3376,7 @@ subroutine init_operwan_realspace(wan,operwan_realspace)
             do il2 = 1,wan%nbl_atom_wan(iatom2)
               n1=2*wan%latom_wan(iatom1)%lcalc(il1)+1
               n2=2*wan%latom_wan(iatom2)%lcalc(il2)+1
-              ABI_ALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl,(n1,n2,wan%nsppol,1,1))
+              ABI_ALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl,(n1,n2,wan%nsppol,wan%nspinor,wan%nspinor))
               operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl = czero
             end do
          end do
@@ -3464,28 +3464,32 @@ subroutine zero_operwan_realspace(wan,operwan_realspace)
   type(plowannier_type), intent(in) :: wan
 
 !Local variables----------------------------
-  integer :: isppol,iatom1,iatom2,pos1,pos2,il1,il2,im1,im2
+  integer :: isppol,iatom1,iatom2,pos1,pos2,il1,il2,im1,im2,ispinor1,ispinor2
 
 
   do isppol = 1,wan%nsppol
-    do iatom1 = 1,wan%natom_wan
-      do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-        do il1 = 1,wan%nbl_atom_wan(iatom1)
-           do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
-             do iatom2 = 1,wan%natom_wan
-               do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-                 do il2 = 1,wan%nbl_atom_wan(iatom2)
-                   do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
-                     operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)=czero
-                   enddo
-                 enddo
-               enddo
-             enddo
-           enddo
-         enddo
-       enddo
-     enddo
-   enddo
+    do ispinor1=1,wan%nspinor
+      do ispinor2=1,wan%nspinor
+        do iatom1 = 1,wan%natom_wan
+          do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+            do il1 = 1,wan%nbl_atom_wan(iatom1)
+              do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+                do iatom2 = 1,wan%natom_wan
+                  do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+                    do il2 = 1,wan%nbl_atom_wan(iatom2)
+                      do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+                        operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)=czero
+                      enddo
+                    enddo
+                  enddo
+                enddo
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
 end subroutine zero_operwan_realspace
 
 
@@ -3520,39 +3524,43 @@ subroutine compute_oper_wank2realspace(wan,operwan,operwan_realspace)
   
 
 !Local variables----------------------------
-  integer :: isppol,iatom1,pos1,il1,im1,iatom2,pos2,il2,im2,ikpt
+  integer :: isppol,iatom1,pos1,il1,im1,iatom2,pos2,il2,im2,ikpt,ispinor1,ispinor2
   character(len=500) :: mat_writing
 
   do isppol = 1,wan%nsppol
-     do iatom1 = 1,wan%natom_wan
-       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-         do il1 = 1,wan%nbl_atom_wan(iatom1)
-           do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
-             do iatom2 = 1,wan%natom_wan
-               do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-                 do il2 = 1,wan%nbl_atom_wan(iatom2)
-                   do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
-                     !sum over ikpt
-                     do ikpt = 1,wan%nkpt
-                       operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1) =&
-                         operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
-                         + real(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
-                         * wan%wtk(ikpt) * exp( cmplx(0.0,1.0) * two_pi * ( &
-                         wan%kpt(1,ikpt) * ( wan%nposition(iatom1)%pos(pos1,1) - wan%nposition(iatom2)%pos(pos2,1) )+&
-                         wan%kpt(2,ikpt) * ( wan%nposition(iatom1)%pos(pos1,2) - wan%nposition(iatom2)%pos(pos2,2) )+&
-                         wan%kpt(3,ikpt) * ( wan%nposition(iatom1)%pos(pos1,3) - wan%nposition(iatom2)%pos(pos2,3)))))
-                     end do
-                     !end of the sum
-                   end do
-                 end do
-               end do
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
- end subroutine compute_oper_wank2realspace
+    do ispinor1=1,wan%nspinor
+      do ispinor2=1,wan%nspinor
+        do iatom1 = 1,wan%natom_wan
+          do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+            do il1 = 1,wan%nbl_atom_wan(iatom1)
+              do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+                do iatom2 = 1,wan%natom_wan
+                  do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+                    do il2 = 1,wan%nbl_atom_wan(iatom2)
+                      do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+                       !sum over ikpt
+                        do ikpt = 1,wan%nkpt
+                          operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2) =&
+                            operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)&
+                            + real(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)&
+                            * wan%wtk(ikpt) * exp( cmplx(0.0,1.0) * two_pi * ( &
+                            wan%kpt(1,ikpt) * ( wan%nposition(iatom1)%pos(pos1,1) - wan%nposition(iatom2)%pos(pos2,1) )+&
+                            wan%kpt(2,ikpt) * ( wan%nposition(iatom1)%pos(pos1,2) - wan%nposition(iatom2)%pos(pos2,2) )+&
+                            wan%kpt(3,ikpt) * ( wan%nposition(iatom1)%pos(pos1,3) - wan%nposition(iatom2)%pos(pos2,3)))))
+                        end do
+                       !end of the sum
+                      end do
+                    enddo
+                  enddo
+                end do
+              end do
+            end do
+          end do
+        end do
+      end do
+    end do
+  end do
+end subroutine compute_oper_wank2realspace
 
 END MODULE m_plowannier
 !!***

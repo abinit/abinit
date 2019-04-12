@@ -1113,7 +1113,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    iqcalc = iqcalc + 1
 
    bar=REPEAT('-',80)
-   write(msg,'(4a,1x,a,i2,a,f9.6,2(",",f9.6),3a)')ch10,ch10,bar,ch10,&
+   write(msg,'(4a,1x,a,i3,a,f9.6,2(",",f9.6),3a)')ch10,ch10,bar,ch10,&
 &   ' q-point number ',label,'        q = (',(Qmesh%ibz(ii,iqibz),ii=1,3),') [r.l.u.]',ch10,bar
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
