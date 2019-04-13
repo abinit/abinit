@@ -35,6 +35,7 @@ module m_argparse
  use m_abi_linalg
  use m_fft
  use m_exit
+ use m_clib
 
  use m_build_info,      only : dump_config, abinit_version
  use m_io_tools,        only : open_file
