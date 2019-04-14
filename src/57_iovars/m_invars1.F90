@@ -1790,7 +1790,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
- if ( dtset%usedmft > 0 .and. dtset%usepawu /= 0 ) dtset%usepawu = 1
+ if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
