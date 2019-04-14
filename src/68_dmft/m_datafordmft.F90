@@ -521,6 +521,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
 
  dimpsichi=2*nsppol*nkpt*mband*my_nspinor*natom*(2*paw_dmft%maxlpawu+1)
  ABI_ALLOCATE(buffer1,(dimpsichi))
+ buffer1 = zero
  nnn=0
 !write(176,*) "beg",psichi
  do isppol=1,nsppol
