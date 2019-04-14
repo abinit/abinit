@@ -1790,16 +1790,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
- if ( dtset%usedmft > 0 ) dtset%usepawu = 1
-
- if (dtset%usepawu /= 0 ) then
-   write(msg, '(7a)' )&
-   'usedmft and usepawu are both activated ',ch10,&
-   'This is not an usual calculation:',ch10,&
-   'usepawu will be put to a value >= 10:',ch10,&
-   'LDA+U potential and energy will be put to zero'
-   MSG_WARNING(msg)
- end if
+ if ( dtset%usedmft > 0 .and. dtset%usepawu /= 0 ) dtset%usepawu = 1
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
