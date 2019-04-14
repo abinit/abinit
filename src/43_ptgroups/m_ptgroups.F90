@@ -125,7 +125,7 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: nclass,nsym
- character(len=5),intent(in) :: ptg_name
+ character(len=*),intent(in) :: ptg_name
 !arrays
  integer,allocatable,intent(out) :: sym(:,:,:),class_ids(:,:)
  character(len=5),allocatable,intent(out) :: class_names(:)

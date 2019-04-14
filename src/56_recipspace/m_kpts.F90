@@ -288,7 +288,8 @@ type(t_htetrahedron) function tetra_from_kptrlatt( &
  character(len=80) :: errorstring
 !arrays
  integer :: new_kptrlatt(3,3)
- integer,allocatable :: indkk(:,:)
+ !integer,allocatable :: indkk(:,:)
+ integer,allocatable :: bz2ibz(:,:)
  real(dp) :: rlatt(3,3),klatt(3,3)
  real(dp),allocatable :: kfull(:,:),my_kibz(:,:),my_wtk(:),new_shiftk(:,:)
 
@@ -311,7 +312,7 @@ type(t_htetrahedron) function tetra_from_kptrlatt( &
  end if
 
  call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, &
-   my_nkibz, my_kibz, my_wtk, nkfull, kfull, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
+   my_nkibz, my_kibz, my_wtk, nkfull, kfull, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk, bz2ibz=bz2ibz)
 
  ABI_FREE(my_wtk)
  new_nshiftk = size(new_shiftk, dim=2)
@@ -334,6 +335,7 @@ type(t_htetrahedron) function tetra_from_kptrlatt( &
    ierr = 2; goto 10
  end if
 
+#if 0
  ! Cosntruct full BZ and create mapping BZ --> IBZ
  ! Note:
  !   - we don't change the value of nsppol hence sppoldbl is set to 1
@@ -354,16 +356,18 @@ type(t_htetrahedron) function tetra_from_kptrlatt( &
    'new_shiftk= ',trim(ltoa(reshape(new_shiftk, [3*new_nshiftk])))
    ierr = 2; goto 10
  end if
+#endif
 
  rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
 
  !call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring, comm)
- call htetra_init(htetra, indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, my_kibz, my_nkibz, ierr, errorstring, comm)
+ call htetra_init(htetra, bz2ibz(1,:), cryst%gprimd, klatt, kfull, nkfull, my_kibz, my_nkibz, ierr, errorstring, comm)
  if (ierr /= 0) msg = errorstring
 
  10 continue
  ABI_SFREE(my_kibz)
- ABI_SFREE(indkk)
+ !ABI_SFREE(indkk)
+ ABI_SFREE(bz2ibz)
  ABI_SFREE(kfull)
  ABI_SFREE(new_shiftk)
 

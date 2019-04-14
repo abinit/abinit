@@ -68,6 +68,9 @@ type, public :: t_htetrahedron
   integer :: nkibz
   ! Number of points in the irreducible Brillouin zone
 
+  integer :: nkbz
+  ! Number of points in the full Brillouin zone
+
   real(dp)  :: vv
   ! volume of the tetrahedra
 
@@ -78,9 +81,13 @@ type, public :: t_htetrahedron
   ! weights for integration
 
   integer,allocatable :: mapping_ibz(:,:,:)
-  ! (nkibz,4,24)
+  ! (4,24,nkibz)
   ! For each kpoint in the IBZ store the indexes of the kpoints in the IBZ
   ! for the 4 summits of the 24 adjacent tetrhedra
+
+  integer,allocatable :: multiplicity(:,:)
+  ! (24,nkibz)
+  ! For the tetrahedron corresponding to one k-point in the IBZ count the multiplicity
 
 end type t_htetrahedron
 
@@ -139,13 +146,15 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 !Local variables-------------------------------
 !scalars
  type(kptrank_type) :: kptrank_t
- integer :: ikpt2,isummit,itetra
+ integer :: ikpt2,isummit,itetra,jtetra, max_tetra_count
  integer :: ikibz,ikbz,idiag,min_idiag,my_rank,nprocs
  integer :: symrankkpt
  real(dp) :: rcvol,length,min_length
  character(len=500) :: msg
 !arrays
+ integer :: tetra_ibz(4), perm(4), tetra_count(nkpt_ibz)
  integer :: tetra_shifts(3,4,24,4)  ! 3 dimensions, 4 summits, 24 tetrahedra, 4 main diagonals
+ integer :: tetra_shifts_6(3,4,6,1) ! 3 dimensions, 4 summits, 6 tetrahedra, 4 main diagonals
  integer :: main_diagonals(3,4)
  real(dp)  :: k1(3),k2(3),k3(3),diag(3)
 
@@ -538,6 +547,33 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra_shifts(:, 3,24,4) = [ -1, -1,  0]
  tetra_shifts(:, 4,24,4) = [ -1,  0,  0]
 
+ ! These shifts are taken from previous tetrahedron implmentation MJV and BXU
+ ! TODO: implement shifts for the other diagonals
+ tetra_shifts_6(:,1,1,1) = [0,0,0]
+ tetra_shifts_6(:,2,1,1) = [1,0,0]
+ tetra_shifts_6(:,3,1,1) = [0,1,0]
+ tetra_shifts_6(:,4,1,1) = [1,0,1]
+ tetra_shifts_6(:,1,2,1) = [1,0,0]
+ tetra_shifts_6(:,2,2,1) = [1,1,0]
+ tetra_shifts_6(:,3,2,1) = [0,1,0]
+ tetra_shifts_6(:,4,2,1) = [1,0,1]
+ tetra_shifts_6(:,1,3,1) = [0,1,0]
+ tetra_shifts_6(:,2,3,1) = [1,1,0]
+ tetra_shifts_6(:,3,3,1) = [1,0,1]
+ tetra_shifts_6(:,4,3,1) = [1,1,1]
+ tetra_shifts_6(:,1,4,1) = [0,0,0]
+ tetra_shifts_6(:,2,4,1) = [0,1,0]
+ tetra_shifts_6(:,3,4,1) = [0,0,1]
+ tetra_shifts_6(:,4,4,1) = [1,0,1]
+ tetra_shifts_6(:,1,5,1) = [0,0,1]
+ tetra_shifts_6(:,2,5,1) = [1,0,1]
+ tetra_shifts_6(:,3,5,1) = [0,1,0]
+ tetra_shifts_6(:,4,5,1) = [0,1,1]
+ tetra_shifts_6(:,1,6,1) = [0,1,0]
+ tetra_shifts_6(:,2,6,1) = [1,0,1]
+ tetra_shifts_6(:,3,6,1) = [0,1,1]
+ tetra_shifts_6(:,4,6,1) = [1,1,1]
+
  main_diagonals(:,1) = [ 1, 1, 1] ! 0-7
  main_diagonals(:,2) = [-1, 1, 1] ! 1-6
  main_diagonals(:,3) = [ 1,-1, 1] ! 2-5
@@ -545,10 +581,8 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  tetra%nkibz = nkpt_ibz
+ tetra%nkbz = nkpt_fullbz
  ierr = 0
-
- ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
- ABI_CALLOC(tetra%mapping_ibz,(4,24,nkpt_ibz))
 
  ! Determine the smallest diagonal in k-space
  min_length = huge(min_length)
@@ -567,25 +601,99 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ! Make full k-point rank arrays
  call mkkptrank(kpt_fullbz,nkpt_fullbz,kptrank_t)
 
+ !
+ ! HM (13/04/2019): I implement two different versions:
+ ! 1. I only use 24 tetrahedra around the IBZ k-point
+ ! following the approach of A. Togo (phonopy, spglib, kspclib).
+ ! 2. I generate tetrahedra on the full Brillouin zone
+ ! and keep track of how many are contributing to the IBZ point and the multiplicities,
+ ! these can be more than 24 tetrahedra (the maximum size is hardcoded).
+ ! This is equivalent to what Matthieu implemented but avoids large memory allocations.
+ !
+ ! The two implementations differ specially when using low k-point sampling
+ ! (the second yields the same results using IBZ or FBZ, the first one not).
+ ! For large sampling the two approaches yield similar results, with the first
+ ! one using less memory
+ !
+#if 0
+ ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
+ ABI_MALLOC(tetra%mapping_ibz,(4,24,nkpt_ibz))
+ ABI_MALLOC(tetra%multiplicity,(24,nkpt_ibz))
+ tetra%multiplicity = 1
  ! For each k-point in the IBZ
  do ikibz=1,tetra%nkibz
    !if (mod(ikibz,nprocs) /= my_rank) cycle
+   k1 = kpt_ibz(:,ikibz)
    do itetra=1,24
      do isummit=1,4
        ! Find the index of the neighbouring k-points in the BZ
-       k1(:) = kpt_ibz(:,ikibz) + tetra_shifts(1,isummit,itetra,min_idiag)*klatt(:,1) + &
-                                  tetra_shifts(2,isummit,itetra,min_idiag)*klatt(:,2) + &
-                                  tetra_shifts(3,isummit,itetra,min_idiag)*klatt(:,3)
+       k2 = k1 + tetra_shifts(1,isummit,itetra,min_idiag)*klatt(:,1) + &
+                 tetra_shifts(2,isummit,itetra,min_idiag)*klatt(:,2) + &
+                 tetra_shifts(3,isummit,itetra,min_idiag)*klatt(:,3)
        ! Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
-       call get_rank_1kpt(k1,symrankkpt,kptrank_t)
+       call get_rank_1kpt(k2,symrankkpt,kptrank_t)
        ikpt2 = kptrank_t%invrank(symrankkpt)
-       ! Check if the index is correct
-       !write(*,*) sum((kpt_fullbz(:,ikpt2)-k1)**2)
        ! Find the index of those points in the BZ and IBZ
-       tetra%mapping_ibz(isummit,itetra,ikibz) = bz2ibz(ikpt2)
+       tetra_ibz(isummit) = bz2ibz(ikpt2)
      end do
+     tetra%mapping_ibz(:,itetra,ikibz) = tetra_ibz
    end do
  end do
+#else
+ min_idiag = 1
+ tetra_count = 0
+ ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
+ ABI_CALLOC(tetra%mapping_ibz,(4,192,nkpt_ibz))
+ ABI_CALLOC(tetra%multiplicity,(192,nkpt_ibz))
+ ! For each k-point in the BZ
+ do ikbz=1,tetra%nkbz
+   k1 = kpt_fullbz(:,ikbz)
+   do itetra=1,6
+     ! Determine tetrahedron
+     do isummit=1,4
+       ! Find the index of the neighbouring k-points in the BZ
+       k2 = k1 + tetra_shifts_6(1,isummit,itetra,min_idiag)*klatt(:,1) + &
+                 tetra_shifts_6(2,isummit,itetra,min_idiag)*klatt(:,2) + &
+                 tetra_shifts_6(3,isummit,itetra,min_idiag)*klatt(:,3)
+       ! Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
+       call get_rank_1kpt(k2,symrankkpt,kptrank_t)
+       ikpt2 = kptrank_t%invrank(symrankkpt)
+       ! Find the index of those points in the BZ and IBZ
+       tetra_ibz(isummit) = bz2ibz(ikpt2)
+     end do
+     ! Sort index of irr k-point edges (need this so the comparison works)
+     call sort_4tetra_int(tetra_ibz,perm)
+     ! Loop over the summits of this tetrahedron
+     summit_loop: do isummit=1,4
+       ! Get index of this summit k-point in the IBZ
+       ikibz = tetra_ibz(isummit)
+       ! Loop over all tetrahedrons contributing to this ibz k-point
+       do jtetra=1,tetra_count(ikibz)
+         ! if tetrahedron already exists add multiplicity
+         if (tetra%mapping_ibz(1,jtetra,ikibz)/=tetra_ibz(1)) cycle
+         if (tetra%mapping_ibz(2,jtetra,ikibz)/=tetra_ibz(2)) cycle
+         if (tetra%mapping_ibz(3,jtetra,ikibz)/=tetra_ibz(3)) cycle
+         if (tetra%mapping_ibz(4,jtetra,ikibz)/=tetra_ibz(4)) cycle
+         tetra%multiplicity(jtetra,ikibz) = tetra%multiplicity(jtetra,ikibz)+1
+         cycle summit_loop
+       end do
+       ! Otherwise store new tetrahedron
+       tetra_count(ikibz) = tetra_count(ikibz)+1
+       if (tetra_count(ikibz)>192) then
+         write(*,*) 'Number of distinct tetrahedra > 192'
+         call exit(0)
+       end if
+       tetra%multiplicity(tetra_count(ikibz),ikibz) = 1
+       tetra%mapping_ibz(:,tetra_count(ikibz),ikibz) = tetra_ibz(:)
+     end do summit_loop
+   end do
+ end do
+ !write(*,*) 'max_tetra_count', maxval(tetra_count)
+ !write(*,*) 'min_tetra_count', minval(tetra_count)
+#endif
+ !write(*,*) 'nkibz', tetra%nkibz
+ !write(*,*) 'nkbz ', tetra%nkbz
+ !write(*,*) 'total tetra', count(tetra%multiplicity>0)
 
  call destroy_kptrank(kptrank_t)
  !call xmpi_sum(tetra%mapping_ibz, comm, ierr)
@@ -637,6 +745,7 @@ subroutine htetra_free(tetra)
 
  type(t_htetrahedron), intent(inout) :: tetra
  ABI_SFREE(tetra%mapping_ibz)
+ ABI_SFREE(tetra%multiplicity)
  ABI_SFREE(tetra%ibz_weights)
 
 end subroutine htetra_free
@@ -689,7 +798,7 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
 
  ! Factor of 1/6 from the volume of the tetrahedron
  ! The rest is accounted for from the kpoint weights
- volconst = max_occ/4.d0/6.d0
+ volconst = max_occ!/4.d0/6.d0
 
  ! This is output
  tweight = zero; dtweightde = zero
@@ -871,13 +980,10 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
    if (e4 < eps) then
 
      ! Heaviside
-     tweight(1,ieps) = volconst
-     tweight(2,ieps) = volconst
-     tweight(3,ieps) = volconst
-     tweight(4,ieps) = volconst
+     tweight(:,ieps:) = volconst
 
      ! Delta unchanged by this tetrahedron
-     cycle
+     exit
    end if
 
    !
@@ -933,7 +1039,8 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
 
 !Local variables-------------------------------
 !scalars
- integer :: itetra,isummit
+ real(dp) :: tweight
+ integer  :: itetra,isummit,tetra_count,tetra_total
 !arrays
  integer  :: ind_ibz(4)
  real(dp) :: eigen_1tetra(4)
@@ -944,8 +1051,11 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
  weights = zero
 
  ! For each tetrahedron that belongs to this k-point
- do itetra=1,24
+ tetra_count = count(tetra%multiplicity(:,ik_ibz)>0)
+ tetra_total = sum(tetra%multiplicity(:,ik_ibz))
+ do itetra=1,tetra_count
 
+   tweight = one*tetra%multiplicity(itetra,ik_ibz)/tetra_total
    do isummit=1,4
      ! Get mapping of each summit to eig_ibz
      ind_ibz(isummit) = tetra%mapping_ibz(isummit,itetra,ik_ibz)
@@ -961,8 +1071,8 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
    ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
    do isummit=1,4
      if (ind_ibz(isummit) /= ik_ibz) cycle
-     weights(:,1) = weights(:,1) + dtweightde_tmp(isummit,:)
-     weights(:,2) = weights(:,2) + tweight_tmp(isummit,:)
+     weights(:,1) = weights(:,1) + dtweightde_tmp(isummit,:)*tweight
+     weights(:,2) = weights(:,2) + tweight_tmp(isummit,:)   *tweight
      ! HM: This exit is important, avoids summing the same contribution more than once
      exit
    end do
@@ -1260,6 +1370,83 @@ pure subroutine sort_4tetra(list,perm)
  endif
 
 end subroutine sort_4tetra
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/sort_4tetra_int
+!! NAME
+!!  sort_4tetra_int
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+pure subroutine sort_4tetra_int(list,perm)
+
+ integer,  intent(inout) :: perm(4)
+ integer, intent(inout) :: list(4)
+
+!Local variables-------------------------------
+ integer :: ia,ib,ic,id
+ integer :: ilow1,ilow2,ihigh1,ihigh2
+ integer :: ilowest,ihighest
+ integer :: imiddle1,imiddle2
+ integer :: va,vb,vc,vd
+ integer :: vlow1,vlow2,vhigh1,vhigh2
+ integer :: vlowest,vhighest
+ integer :: vmiddle1,vmiddle2
+
+ va = list(1); ia = perm(1)
+ vb = list(2); ib = perm(2)
+ vc = list(3); ic = perm(3)
+ vd = list(4); id = perm(4)
+
+ if (va < vb) then
+     vlow1 = va; vhigh1 = vb
+     ilow1 = ia; ihigh1 = ib
+ else
+     vlow1 = vb; vhigh1 = va
+     ilow1 = ib; ihigh1 = ia
+ endif
+
+ if (vc < vd) then
+     vlow2 = vc; vhigh2 = vd
+     ilow2 = ic; ihigh2 = id
+ else
+     vlow2 = vd; vhigh2 = vc
+     ilow2 = id; ihigh2 = ic
+ endif
+
+ if (vlow1 < vlow2) then
+     vlowest  = vlow1; vmiddle1 = vlow2
+     ilowest  = ilow1; imiddle1 = ilow2
+ else
+     vlowest  = vlow2; vmiddle1 = vlow1
+     ilowest  = ilow2; imiddle1 = ilow1
+ endif
+
+ if (vhigh1 > vhigh2) then
+     vhighest = vhigh1; vmiddle2 = vhigh2
+     ihighest = ihigh1; imiddle2 = ihigh2
+ else
+     vhighest = vhigh2; vmiddle2 = vhigh1
+     ihighest = ihigh2; imiddle2 = ihigh1
+ endif
+
+ if (vmiddle1 < vmiddle2) then
+     list = [vlowest,vmiddle1,vmiddle2,vhighest]
+     perm = [ilowest,imiddle1,imiddle2,ihighest]
+ else
+     list = [vlowest,vmiddle2,vmiddle1,vhighest]
+     perm = [ilowest,imiddle2,imiddle1,ihighest]
+ endif
+
+end subroutine sort_4tetra_int
 !!***
 
 !----------------------------------------------------------------------
