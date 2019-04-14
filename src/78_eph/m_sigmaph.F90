@@ -570,7 +570,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,sppoldbl1=1,timrev1=1
  integer,parameter :: igscq0=0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
- integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert !, nqeff
+ integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
  integer :: mcgq, mgscq, nband_kq
@@ -733,8 +733,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end do
    end do
    ! Uncomment these lines to disable energy window trick and allocate all bands.
-   !call wrtout(std_out, "Storing all bands between my_bstart and my_bstop.")
-   !bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+   if (dtset%userie == 123) then
+     call wrtout(std_out, "Storing all bands between my_bstart and my_bstop.")
+     bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+   end if
  else
    bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  endif
@@ -992,6 +994,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      !    sigma%use_ftinterp = .True.; exit
      !  end if
      !end if
+     !if (sigma%use_ftinterp) then
+     !  call wrtout([std_out, ab_out], "Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
+     !end if
 
      ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation. 
      ! R-points are distributed inside comm_rpt
@@ -1001,7 +1006,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! to the integral and the potentials must be cached.
      comm_rpt = xmpi_comm_self
      comm_rpt = sigma%comm_bq
-     !if (.not. sigma%imag_only) comm_rpt = sigma%comm_band
+     !if (.not. sigma%imag_only) comm_rpt = sigma%comm_bsum
      path = strcat(dtfil%filnam_ds(4), "_WRMAX")
      call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, path, comm_rpt)
 
@@ -1012,11 +1017,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
      end if
      !qselect = 1
-     ! Distribute IBZ q-points inside comm_qpt
+     ! Distribute IBZ q-points inside comm_qpt.
      ABI_ICALLOC(itreatq, (sigma%nqibz))
      itreatq = 1
      !do iq_ibz=1, sigma%nqibz
-     !  if (mod(iq_ibz, sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_ibz) = 1
+     !  if (mod(iq_ibz,sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_ibz) = 1
      !end do
      call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, itreatq, comm)
      ABI_FREE(itreatq)
@@ -1043,7 +1048,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_ICALLOC(itreatq, (sigma%nqibz))
    itreatq = 1
    !do iq_dvdb=1, dvdb%nqpt
-   !  if (mod(iq_dvdb, sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_dvdb) = 1
+   !  if (mod(iq_dvdb,sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_dvdb) = 1
    !end do
    call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq, comm) 
    ABI_FREE(itreatq)
@@ -1186,7 +1191,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
 if (sigma%use_ftinterp) then
-         ! Use Fourier interpolation to get DFPT potentials for qpt (hopefully in cache). 
+         ! Use Fourier interpolation to get DFPT potentials for this qpt (hopefully in cache). 
          db_iqpt = sigma%ind_ibzk2ibz(1, iq_ibz)
          qq_ibz = sigma%qibz(:, db_iqpt)
          call dvdb%get_ftqbz(cryst, qpt, qq_ibz, sigma%ind_ibzk2ibz(:, iq_ibz), cplex, nfftf, ngfftf, v1scf, sigma%comm_pert)
@@ -1236,7 +1241,7 @@ end if
 
        ! Map q to qibz for tetrahedron
        if (sigma%qint_method > 0) then
-         if (.not.sigma%use_doublegrid) then
+         if (.not. sigma%use_doublegrid) then
            iq_ibz_fine = iq_ibz
            if (sigma%symsigma == 0) iq_ibz_fine = sigma%ephwg%lgk%find_ibzimage(qpt)
            ABI_CHECK(iq_ibz_fine /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
@@ -1461,7 +1466,7 @@ end if
              !cg1s_kq(:,:,:,ib_k), h1kets_kq_allperts(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
          end do
 
-         ! Compute contribution for M > sigma%nbsum using static+adiabatic approximation for self-energy.
+         ! Compute contribution for M > sigma%nbsum using static + adiabatic approximation for self-energy.
          do nu=1,natom3
            wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
            ! Get phonon occupation for all temperatures.
@@ -2039,16 +2044,6 @@ end if
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
 
- !if (allocated(dvdb%qcache%count_qused)) then
- !  nqeff = count(dvdb%qcache%count_qused /= 0)
- !  call wrtout(std_out, sjoin(" Number of qpts in IBZ used by this rank:", itoa(nqeff), &
- !     " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
- !  call xmpi_sum(dvdb%qcache%count_qused, comm, ierr)
- !  nqeff = count(dvdb%qcache%count_qused /= 0)
- !  call wrtout(std_out, sjoin(" Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
- !     " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
- !end if
-
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Free memory
@@ -2272,6 +2267,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = nprocs / new%nprocs_pert
 
+ !new%comm_qpt = xmpi_comm_t_from_value(xmpi_self)
  !new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1 ! nprocs / new%nprocs_pert
  !new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1 ! nprocs / new%nprocs_pert
  !if (new%imag_only) then 
@@ -2613,8 +2609,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
    if (dtset%useria == 567) then
      ! Uncomment this part to use all states to debug.
-     call wrtout(ab_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
-     call wrtout(std_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
+     call wrtout([std_out, ab_out], "- Setting bstart to 1 and bstop to nband for debugging purposes")
      new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
      new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
    end if
@@ -3738,7 +3733,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
      lgk_ptr => self%ephwg%lgk
    end if
 
-   call wrtout(std_out, sjoin(" Number of operations in Lgroup(k):", itoa(lgk_ptr%nsym_lg), &
+   call wrtout(std_out, sjoin(" Number of operations in little group(k):", itoa(lgk_ptr%nsym_lg), &
      "(including time-reversal symmetry)"))
    call wrtout(std_out, sjoin(" Number of q-points in the IBZ(k):", itoa(lgk_ptr%nibz)))
 
@@ -3762,7 +3757,7 @@ if (self%use_ftinterp) then
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6,2a)' )&
      "At least one of the q points in the IBZ_k could not be generated from one in the IBZ. dksqmax: ",dksqmax, ch10,&
-     'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
+     "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."
    MSG_ERROR(msg)
  end if
  ABI_REMALLOC(self%ind_ibzk2ibz, (6, self%nqibz_k))
@@ -3788,7 +3783,7 @@ else
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6,2a)' )&
        "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
-       'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
+       "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."
      MSG_ERROR(msg)
    end if
  end if
@@ -3821,7 +3816,7 @@ endif
     "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
     "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
     "Q-mesh: ",trim(ltoa(self%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
-    'Action: check your WFK file and (k, q) point input variables'
+    "Action: check your WFK file and (k, q) point input variables."
    MSG_ERROR(msg)
  end if
  ABI_FREE(kq_list)

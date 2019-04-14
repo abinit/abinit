@@ -437,10 +437,10 @@ module m_dvdb
 
  end type dvdb_t
 
- public :: dvdb_new               ! Initialize the object.
- public :: dvdb_merge_files       ! Merge a list of POT1 files.
+ public :: dvdb_new                ! Initialize the object.
 
  ! Utilities
+ public :: dvdb_merge_files        ! Merge a list of POT1 files.
  public :: dvdb_qdownsample        ! Downsample q-mesh, produce new DVDB file.
 
  ! debugging tools.
@@ -501,7 +501,6 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  new%path = path; new%comm = comm; new%iomode = IO_MODE_FORTRAN
-
 
  call wrtout(std_out, sjoin("- Analyzing DVDB file: ", path, "..."))
  call cwtime(cpu, wall, gflops, "start")
@@ -1376,13 +1375,13 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
 
    ! Store all 3 natom potentials for q in IBZ in cache.
-   !if (db%qcache%use_3natom_cache .and. db%qcache%stored_iqibz_cplex(1) /= db_iqpt .and. is_irred) then
-   !  if (cplex /= db%qcache%stored_iqibz_cplex(2)) then 
-   !    ABI_REMALLOC(db%qcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))
-   !  end if 
-   !  db%qcache%v1scf_3natom_qibz = v1scf
-   !  db%qcache%stored_iqibz_cplex = [db_iqpt, cplex]
-   !end if
+   if (db%qcache%use_3natom_cache .and. db%qcache%stored_iqibz_cplex(1) /= db_iqpt .and. isirr_q) then
+     if (cplex /= db%qcache%stored_iqibz_cplex(2)) then 
+       ABI_REMALLOC(db%qcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))
+     end if 
+     db%qcache%v1scf_3natom_qibz = v1scf
+     db%qcache%stored_iqibz_cplex = [db_iqpt, cplex]
+   end if
  end if
 
  if (.not. isirr_q) then
@@ -1409,14 +1408,23 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        do mu=1,db%natom3
          root = db%pert_table(1, mu)
          if (root == db%me_pert) then
-           imyp = db%pert_table(2, mu)
-           work(:,:,:,mu) = v1scf(:,:,:,imyp)
+           work(:,:,:,mu) = v1scf(:,:,:,db%pert_table(2, mu))
          end if
          call xmpi_ibcast(work(:,:,:,mu), root, db%comm_pert, requests(mu), ierr)
        end do
        call xmpi_waitall(requests, ierr)
        call timab(1806, 2, tsec)
 
+       ! Store all 3 natom potentials for q in IBZ in cache.
+       if (db%qcache%use_3natom_cache .and. db%qcache%stored_iqibz_cplex(1) /= db_iqpt) then
+         if (cplex /= db%qcache%stored_iqibz_cplex(2)) then 
+           ABI_REMALLOC(db%qcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))
+         end if 
+         db%qcache%v1scf_3natom_qibz = work
+         db%qcache%stored_iqibz_cplex = [db_iqpt, cplex]
+       end if
+
+       ! Now rotate.
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
        ABI_FREE(work)
@@ -1443,20 +1451,11 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        work(:,:,:,imyp) = v1scf(:,:,:,db%my_pinfo(3, imyp))
      end do
 
-     ! Store all 3 natom potentials for q in IBZ in cache.
-     !if (db%qcache%use_3natom_cache .and. db%qcache%stored_iqibz_cplex(1) /= db_iqpt .and. is_irred) then
-     !  if (cplex /= db%qcache%stored_iqibz_cplex(2)) then 
-     !    ABI_REMALLOC(db%qcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))
-     !  end if 
-     !  db%qcache%v1scf_3natom_qibz = v1scf
-     !  db%qcache%stored_iqibz_cplex = [db_iqpt, cplex]
-     !end if
-
      ABI_REMALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
      v1scf = work
      ABI_FREE(work)
    end if
- end if ! not is_irred
+ end if ! not isirr_q
 
  call timab(1802, 2, tsec)
 
@@ -1708,10 +1707,10 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
  do db_iqpt=1,db%nqpt
    if (qselect(db_iqpt) == 0) cycle
 
-   ! Read all 3*natom potentials inside comm
+   ! Read all 3*natom potentials inside comm.
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
 
-   ! Transfer to cache taking into account my_npert
+   ! Transfer to cache taking into account my_npert.
    if (ineed_qpt(db_iqpt) /= 0) then
      ABI_MALLOC_OR_DIE(db%qcache%key(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
      do imyp=1,db%my_npert
@@ -2686,6 +2685,10 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
  call wrtout(std_out, sjoin(" Building V(r,R) using ngqpt: ", ltoa(ngqpt), " q-mesh and nprocs_rpt:", itoa(db%nprocs_rpt)))
+ !call wrtout(std_out, "qshifts:")
+ !do ii=1,nqshift
+ !  call wrtout(std_out, ltoa(qshift(:, ii))
+ !end do
  call wrtout(std_out, " It may take some time depending on the number of MPI procs, ngqpt and nfft points...")
 
  cryst => db%cryst
@@ -2743,7 +2746,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
    ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
    db%my_rpt = all_rpt(:, my_start:my_stop)
  end if
- 
  !ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
 
  ! Find correspondence BZ --> IBZ. Note:
@@ -2978,10 +2980,30 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      write(sfmt, "(a,i0,a)")"(es16.8, 3(f4.0,1x),", db%natom3, "(es16.8))"
      do ii=1,nrtot
        irpt = iperm(ii)
-       !write(unt, "(es16.8,3(f4.0,1x),(es16.8))")rmod_all(ii), all_rpt(:, irpt), maxw(irpt, :)
        write(unt, sfmt)rmod_all(ii), all_rpt(:, irpt), maxw(irpt, :)
      end do
      close(unt)
+     !all_rpt = all_rpt(iperm(:))
+     !do ii=1,db%natom3
+     !  maxw(:, ii) = maxw(iperm(:), ii)
+     !end do
+!#ifdef HAVE_NETCDF
+!     NCF_CHECK(nctk_open_create(ncid, outwr_path, xmpi_comm_self))
+!     NCF_CHECK(db%cryst%ncwrite(ncid))
+!     ncerr = nctk_def_dims(ncid, [ &
+!       nctkdim_t("nrpt", nrtot), nctkdim_t("natom3", db%natom3), defmode=.True.)
+!     NCF_CHECK(ncerr)
+!     NCF_CHECK(nctk_def_arrays(ncid, [ &
+!        nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
+!        nctkarr_t("maxw", "dp", "nrpt, natom3") &
+!      ]))
+!     NCF_CHECK(nctk_set_datamode(ncid))
+!     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
+!     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
+!     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), rmod_all))
+!     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
+!     NCF_CHECK(nf90_close(ncid))
+!#endif
      ABI_FREE(rmod_all)
    end if
 
@@ -3240,29 +3262,21 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
         incache = .True.
         db%ftqcache%stats(3) = db%ftqcache%stats(3) + 1
       else
-        ! This to handle the unlikely event in which the caller changes ngfft!
-        MSG_ERROR("Had to free cache item due to different cplex or nfft!")
-        !ABI_FREE(db%ftqcache%key(iq_ibz)%v1scf)
+        MSG_ERROR("Found ifferent cplex/nfft in cache")
       end if
    else
-      !call wrtout(std_out, sjoin("Cache miss for iq_ibz. Will read it from file...", itoa(iq_ibz)))
+      !call wrtout(std_out, sjoin("Cache miss for iq_ibz. Will try to interpolate it...", itoa(iq_ibz)))
       db%ftqcache%stats(4) = db%ftqcache%stats(4) + 1
    end if
  end if
 
- !write(std_out, *)"in cache:", incache
  if (.not. incache) then
+   MSG_ERROR("For the time being incache should always be true!")
    ! Interpolate the dvscf potentials directly in the **BZ** for my_npert perturbations.
    ! This is possible only if all procs inside comm_rpt call this routine.
    ABI_MALLOC_OR_DIE(v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
-   MSG_ERROR("For the time being incache should always be true!")
    call db%ftinterp_qpt(qbz, nfft, ngfft, v1scf, db%comm_rpt)
    call timab(1809, 2, tsec); return
- end if
-
- if (db%ftqcache%maxnq > 0 .and. .not. incache) then
-   ! Entry not in cache. --> Count number of entries in qcache first.
-   NOT_IMPLEMENTED_ERROR()
  end if
 
  if (.not. isirr_q) then
@@ -3326,7 +3340,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
      end do
      ABI_FREE(work2)
    end if
- end if ! not is_irred
+ end if ! not isirr_q
 
  call timab(1809, 2, tsec)
 
@@ -3390,7 +3404,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
  call timab(1808, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, " Precomputing Vscf(q) from W(r, R) and building qcache...", do_flush=.True.)
+ call wrtout(std_out, " Precomputing Vscf(q) from W(r,R) and building qcache...", do_flush=.True.)
 
  db%ftqcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%qcache%itreatq = itreatq
@@ -3404,7 +3418,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
    if (qselect_ibz(iq_ibz) == 0) cycle
    call cwtime(cpu, wall, gflops, "start")
 
-   ! DEBUGGIN SECTION
+   ! TODO: DEBUGGING SECTION
    db_iqpt = db%findq(qibz(:, iq_ibz))
 if (db_iqpt /= -1) then
       call wrtout(std_out, "Reading V(q) from DVDB...")
@@ -3426,7 +3440,6 @@ end if
 
    ! Points in the IBZ may be distributed to reduce memory.
    if (db%ftqcache%itreatq(iq_ibz) /= 0) then
-     ! Allocate cache entry taking into account my_npert
      ABI_MALLOC_OR_DIE(db%ftqcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
      db%ftqcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
    end if
@@ -3442,8 +3455,7 @@ end if
 
  ! Compute final cache size.
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(db%ftqcache%get_mbsize(), fmt="f8.1"), " [Mb]"))
-
- call cwtime_report(" Qcache from W(r, R) + symmetrization", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" Qcache from W(r, R) + symmetrization", cpu_all, wall_all, gflops_all, end_str=ch10)
  call timab(1808, 2, tsec)
 
 end subroutine dvdb_ftqcache_build
@@ -5403,7 +5415,7 @@ end subroutine dvdb_v1r_long_range
 !! SOURCE
 
 subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf, cryst, &
-&          ngqpt_coarse, nqshift_coarse, qshift_coarse, comm, custom_qpt)
+           ngqpt_coarse, nqshift_coarse, qshift_coarse, comm, custom_qpt)
 
 !Arguments ------------------------------------
 !scalars
@@ -5622,10 +5634,8 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    end if
  end do
 
- msg = sjoin(" Number of q-points found in input DVDB", itoa(nqpt_read))
- call wrtout(ab_out, msg); call wrtout(std_out, msg)
- msg = sjoin(" Number of q-points requiring Fourier interpolation", itoa(nqpt_interpolate))
- call wrtout(ab_out, msg); call wrtout(std_out, msg)
+ call wrtout([std_out, ab_out], sjoin(" Number of q-points found in input DVDB:", itoa(nqpt_read)))
+ call wrtout([std_out, ab_out], sjoin(" Number of q-points requiring Fourier interpolation", itoa(nqpt_interpolate)))
 
  ! =================================================
  ! Open the new DVDB file and write preliminary info
@@ -5818,8 +5828,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  call hdr_free(hdr_ref)
 
  write(msg, '(2a)') "Interpolation of the electron-phonon coupling potential completed", ch10
- call wrtout(ab_out, msg, do_flush=.True.)
- call wrtout(std_out, msg, do_flush=.True.)
+ call wrtout([std_out, ab_out], msg, do_flush=.True.)
 
  call cwtime_report(" Overall time:", cpu_all, wall_all, gflops_all)
 
@@ -5873,13 +5882,12 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
  integer :: cplex, db_iqpt, npc
  integer :: nqbz, nqibz, iq, ifft, nperts_read, nfftf
  integer :: ount !, fform
- !real(dp) :: dksqmax
  character(len=500) :: msg
  type(dvdb_t), target :: dvdb
  type(crystal_t),pointer :: cryst
 !arrays
  integer :: ngfftf(18), qptrlatt(3,3)
- integer,allocatable :: iq_read(:), pinfo(:,:) !indkk(:,:),
+ integer,allocatable :: iq_read(:), pinfo(:,:) 
  real(dp) :: rhog1_g0(2)
  real(dp),allocatable :: v1scf(:,:,:), v1(:)
  real(dp),allocatable :: wtq(:), qibz(:,:), qbz(:,:)
@@ -5908,15 +5916,6 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, 1, &
                              [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
-
- ! Correspondence IBZ_coarse --> DVDB
- !ABI_MALLOC(indkk, (nqibz, 6))
- !call listkk(dksqmax, cryst%gmet, indkk, dvdb%qpts, qibz, dvdb%nqpt, nqibz, cryst%nsym, &
- !   1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True.,use_symrec=.True.)
- !ABI_FREE(indkk)
- !if (dksqmax > tol12) then
- !  MSG_ERROR("Coarse q-mesh is not a submesh of the DVDB file.")
- !end if
 
  ! =======================================
  ! Open DVDB and copy important dimensions

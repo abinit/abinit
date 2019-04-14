@@ -200,7 +200,7 @@ program mrgdv
 
  end if
 
- call wrtout(std_out," Done",'COLL')
+ call wrtout(std_out," Done")
 
  call abinit_doctor("__mrgdv")
 
