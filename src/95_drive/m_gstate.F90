@@ -273,7 +273,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: nblok,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
- integer :: cnt,spin,band,ikpt,usecg,usecprj
+ integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
@@ -440,13 +440,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_ALLOCATE(ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
    if (psps%useylm==1) then
-     option=0
-     if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) option=1 ! compute gradients of YLM
-     if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) option = 1 ! compute gradients of YLM
+     ylm_option=0
+     if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
+     if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) ylm_option = 1 ! compute gradients of YLM
+     if ((dtset%orbmag.GT.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &     psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
-&     npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
-   end if
+&     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
+  end if
  else
    ABI_ALLOCATE(ylm,(0,0))
    ABI_ALLOCATE(ylmgr,(0,0,0))

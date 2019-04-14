@@ -2055,6 +2055,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 & dtset%pawfatbnd> 0  .or. &
 & dtset%pawprtwf > 0  )
 
+ if(dtset%orbmag > 0) recompute_cprj=.TRUE.
  if (recompute_cprj) then
    usecprj=1
    mband_cprj=dtset%mband/mpi_enreg%nproc_band
