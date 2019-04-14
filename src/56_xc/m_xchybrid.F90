@@ -138,9 +138,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 
  DBG_ENTER("COLL")
 
-
- nmxc=(dtset%usepawu==4).or.(dtset%usepawu==14)
-
 !Not relevant for PAW
  if (dtset%usepaw==1) return
  if(n3xccc==0) return
@@ -170,7 +167,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Define xcdata_hybrid as well as xcdata_gga
  call xcdata_init(xcdata_hybrid,dtset=dtset)
  call xcdata_init(xcdata_gga,dtset=dtset,auxc_ixc=0,ixc=ixc_gga)
- libxc_gga_initialized=0
+ libxc_gga_initialized=0 ; nmxc=.false.
 
  nkxc=0;ndim=0;usexcnhat=0;n3xccc_null=0
  ABI_ALLOCATE(kxc_dum,(nfft,nkxc))
@@ -352,6 +349,7 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
 !integer :: i1,i2,i3,k1,n1,n2,n3
 !real(dp) :: kx,rho,rhomax,ftest
 !scalars
+ logical :: nmxc
  character(len=500) :: message
  type(dataset_type) :: dtLocal
 !arrays
@@ -379,6 +377,7 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
  call dtset_copy(dtLocal, dtset)
  dtLocal%intxc = 0
  dtLocal%ixc   = -101
+ nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
  ! Reinitialize the libxc module with the overriden values
  if (dtset%ixc<0) then
@@ -389,15 +388,13 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
  end if
 
  call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,nfft,dum,dum,0,dum,0,nkxc,0,&
-& dtset%usepawu==4.or.dtset%usepawu==14,nspden,n3xccc,&
-& 0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,dum,xccc3d)
+& nmxc,nspden,n3xccc,0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,dum,xccc3d)
 
  vxc(:,:) = vxc(:,:) + hybrid_mixing*vxc_corr(:,:)
  enxc = enxc + hybrid_mixing*enxc_corr
 
  call rhohxc(dtLocal,enxc_corr,dum,0,kxcr,mpi_enreg,dum,dum,dum,0,dum,0,nkxc,0,&
-& dtset%usepawu==4.or.dtset%usepawu==14,nspden,0,&
-& 0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,vxcavg,0)
+& nmxc,nspden,0,0,dum,rhor,rprimd,strsxc,1,dum,vxc_corr,vxcavg,0)
 
  vxc(:,:) = vxc(:,:) - hybrid_mixing*vxc_corr(:,:)
  enxc = enxc - hybrid_mixing*enxc_corr

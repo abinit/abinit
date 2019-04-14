@@ -975,7 +975,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  end if
 
 !If PAW+U and density mixing, has to update nocc_mmp
- if (psps%usepaw==1.and.dtset%usepawu>0.and.(dtset%iscf>0.or.dtset%iscf==-3)) then
+ if (psps%usepaw==1.and.dtset%usepawu/=0.and.(dtset%iscf>0.or.dtset%iscf==-3)) then
    call setnoccmmp(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
 &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&

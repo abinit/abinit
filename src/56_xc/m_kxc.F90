@@ -424,6 +424,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !real(dp) :: kx,rho,rhomax,ftest
 !scalars
  integer :: ifft,ikxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
+ logical :: non_magnetic_xc
  real(dp),parameter :: gsqcut=1._dp
  real(dp) :: enxc,rhocuttot,rhomin,vxcavg
  character(len=500) :: message
@@ -456,6 +457,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  ABI_MALLOC(vxc,(nfft,nspden))
 
  call xcdata_init(xcdata,dtset=dtset,intxc=0,ixc=ixc,nspden=nspden)
+
+ non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
  ! Reinitialize the libxc module with the overriden values
  if (dtset%ixc<0) then
@@ -512,8 +515,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = 2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,&
-&   dtset%usepawu==4.or.dtset%usepawu==14,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
@@ -568,8 +570,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = -2 !See rhotoxc.f
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,&
-&   dtset%usepawu==4.or.dtset%usepawu==14,n3xccc,&
+   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
@@ -1054,6 +1055,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  integer,parameter :: paral_kgb0=0
  integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
+ logical :: non_magnetic_xc
  real(dp) :: enxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
  character(len=500) :: msg,fname
  type(xcdata_type) :: xcdata
@@ -1090,6 +1092,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  ngfft1=ngfft(1)
  ngfft2=ngfft(2)
  ngfft3=ngfft(3)
+
+ non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
  if (ixc>=1.and.ixc<11) then ! LDA case
    nkxc= 2*min(nspden,2)-1   ! 1 or 3
@@ -1132,7 +1136,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
 !Compute the kernel.
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4.or.dtset%usepawu==14,&
+& dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
 & n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
@@ -1213,8 +1217,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
        kxcpw_r(:,:)=zero
 
-       call dfpt_mkvxc(cplex,ixc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,dum,0,dum,0,nkxc,nspden,&
-&       n3xccc,option,paral_kgb0,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
+       call dfpt_mkvxc(cplex,ixc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,dum,0,dum,0,nkxc,non_magnetic_xc,&
+&       nspden,n3xccc,option,paral_kgb0,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
 
 !      FFT the first index to --> to G space
        call fourdp(cplex,kxcpw_g(:,:),kxcpw_r(:,1),-1,MPI_enreg_seq,nfft_tot,1,ngfft,0)
@@ -1311,6 +1315,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  integer :: i1,i2,i3,ig,igp,ir,irp,n3xccc,ngfft1,ngfft2,izero !,isp
  integer :: ngfft3,nkxc,option,ikxc,ierr,nproc
  integer :: nk3xc,igrid,iqbz,my_rank,master,unt_dmp,gmgp_idx
+ logical :: non_magnetic_xc
  real(dp) :: enxc,gsqcut,ucvol !,rs,Kx,Kc
  real(dp) :: vxcavg,kappa,abs_qpg_sq,abs_qpgp_sq
  real(dp) :: difx,dify,difz,inv_kappa_sq
@@ -1366,6 +1371,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ngfft1=ngfft(1)
  ngfft2=ngfft(2)
  ngfft3=ngfft(3)
+
+ non_magnetic_xc=(abs(dtset%usepawu)==4.or.dtset%usepawu==14)
 
  if (ixc>=1.and.ixc<11) then      ! LDA case
    nkxc= 2*min(Dtset%nspden,2)-1  ! 1 or 3
@@ -1447,7 +1454,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
  call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
-& dum,0,dum,0,nkxc,nk3xc,dtset%usepawu==4.or.dtset%usepawu==14,&
+& dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
 & n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 

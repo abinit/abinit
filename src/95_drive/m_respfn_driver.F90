@@ -248,7 +248,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
- logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit,non_magnetic_xc
+ logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
+ logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
  real(dp) :: epaw,epawdc,etot,evdw,fermie,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
@@ -309,9 +310,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  call timab(132,1,tsec)
  call timab(133,1,tsec)
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Some data for parallelism
  nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1
@@ -648,14 +646,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
-   pawtab(:)%usepawu=0
-   pawtab(:)%useexexch=0
-   pawtab(:)%exchmix=zero
-!  if (dtset%usepawu>0.or.dtset%useexexch>0) then
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&   dtset%jpawu,dtset%lexexch,dtset%lpawu,ntypat,pawang,dtset%pawprtvol,pawrad,&
+&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,ntypat,pawang,dtset%pawprtvol,pawrad,&
 &   pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
-!  end if
    compch_fft=-1.d5;compch_sph=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
    usecprj=dtset%pawusecp
@@ -707,7 +700,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
    has_dijnd=0; if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
-   has_diju=0; if(dtset%usepawu==5.or.dtset%usepawu==6) has_diju=1
+   has_diju=merge(0,1,dtset%usepawu==0)
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
      has_kxc=1
      call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
@@ -890,6 +883,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  _IBM6("Before rhotoxc")
 
  call xcdata_init(xcdata,dtset=dtset)
+ non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
@@ -1250,12 +1244,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !FR non-collinear magnetism
    if (dtset%nspden==4) then
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
-&     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,dtset%nspden,&
+&     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,non_magnetic_xc,dtset%nspden,&
 &     ntypat,psps%n1xccc,dtset%paral_kgb,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
 &     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor,vxc=vxc)
    else
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
-&     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,dtset%nspden,&
+&     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,non_magnetic_xc,dtset%nspden,&
 &     ntypat,psps%n1xccc,dtset%paral_kgb,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
 &     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred)
    end if
@@ -4121,6 +4115,7 @@ end subroutine dfpt_dyfro
 !!  ngfft(3)=fft grid dimensions.
 !!  nkxc=second dimension of the kxc array
 !!   (=1 for non-spin-polarized case, =3 for spin-polarized case)
+!!  nmxc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms in cell.
 !!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
@@ -4141,7 +4136,7 @@ end subroutine dfpt_dyfro
 !!   for each type of atom, from psp
 !!  xred(3,natom)=fractional coordinates for atoms in unit cell
 !!
-!! OUTPUT
+!! OUTPUT!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  blkflgfrx1(3,natom,3,natom)=flag to indicate whether an element has been computed or not
 !!  dyfrx1(2,3,natom,3,natom)=2nd-order non-linear xc
 !!    core-correction (part1) part of the dynamical matrix
@@ -4156,7 +4151,7 @@ end subroutine dfpt_dyfro
 !! SOURCE
 
 subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,mpi_enreg,mqgrid,&
-&          natom,nfft,ngfft,nkxc,nspden,ntypat,n1xccc,paral_kgb,psps,pawtab,&
+&          natom,nfft,ngfft,nkxc,nmxc,nspden,ntypat,n1xccc,paral_kgb,psps,pawtab,&
 &          ph1d,qgrid,qphon,rfdir,rfpert,rprimd,timrev,typat,ucvol,usepaw,xcccrc,xccc1d,xred,rhor,vxc)
 
  use m_cgtools,       only : dotprod_vn
@@ -4167,6 +4162,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 !scalars
  integer,intent(in) :: ixc,mgfft,mpert,mqgrid,n1xccc,natom,nfft,nkxc,nspden,ntypat
  integer,intent(in) :: paral_kgb,timrev,usepaw
+ logical,intent(in) :: nmxc
  real(dp),intent(in) :: gsqcut,ucvol
  type(pseudopotential_type),intent(in) :: psps
  type(MPI_type),intent(in) :: mpi_enreg
@@ -4243,10 +4239,10 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
      if (nspden==4.and.present(rhor).and.present(vxc)) then
        optnc=1
        call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,dum_nhat,0,nkxc,&
-&       nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1)
+&       nmxc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1)
      else
        call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
-&       nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
+&       nmxc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
      end if
      ABI_DEALLOCATE(rhor1)
      ABI_DEALLOCATE(xcccwk1)

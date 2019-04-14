@@ -311,7 +311,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
- logical :: need_wfk,need_wf1,paral_atom,qne0,t_exist
+ logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist
  character(len=500) :: msg
  character(len=fnlen) :: fiwfddk(3)
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -526,6 +526,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  qne0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2>=tol14)
  is_metal=((dtset%occopt>=3.and.dtset%occopt<=8).or.(abs(arg)>tol8))
  is_metal_or_qne0=((is_metal).or.(qne0))
+ nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  ABI_ALLOCATE(ch1c,(2,dtset%mband,dtset%mband,nkpt_me))
  ch1c(:,:,:,:)=zero
  nzlmopt_ipert=0;nzlmopt_ipert1=0
@@ -659,18 +660,18 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          if(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) then
            option=0
            call dfpt_mkvxcstr(cplex,idir1,ipert1,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,&
-&           nhat,nhat1,nkxc,nspden,n3xccc,option,dtset%paral_kgb,dtset%qptn,rhor,rhor1,rprimd,&
+&           nhat,nhat1,nkxc,nmxc,nspden,n3xccc,option,dtset%paral_kgb,dtset%qptn,rhor,rhor1,rprimd,&
 &           usepaw,usexcnhat,vxc10,xccc3d1_idir1)
          else
 !          Non-collinear magnetism (should the second nkxc be nkxc_cur ?)
            if (nspden==4) then
              option=0
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum1,0,dum2,0,dum3,0,nkxc,&
-&             nspden,n3xccc,1,option,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,vxc,&
+&             nmxc,nspden,n3xccc,1,option,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,vxc,&
 &             vxc10,xccc3d1_idir1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
-&             nspden,n3xccc,0,dtset%paral_kgb,dtset%qptn,dum1,rprimd,0,vxc10,xccc3d1_idir1)
+&             nmxc,nspden,n3xccc,0,dtset%paral_kgb,dtset%qptn,dum1,rprimd,0,vxc10,xccc3d1_idir1)
            end if
          end if
        end if
