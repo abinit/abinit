@@ -166,7 +166,7 @@ P           mkmem          20
 
 
 ================================================================================
- STRING METHOD - TIME STEP     1
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     1
 ================================================================================
 
 
@@ -636,7 +636,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     2
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     2
 ================================================================================
 
 
@@ -1078,7 +1078,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     3
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     3
 ================================================================================
 
 
@@ -1520,7 +1520,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     4
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     4
 ================================================================================
 
 
@@ -1962,7 +1962,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     5
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     5
 ================================================================================
 
 
@@ -2404,7 +2404,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     6
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     6
 ================================================================================
 
 
@@ -2846,7 +2846,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     7
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     7
 ================================================================================
 
 
@@ -3288,7 +3288,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     8
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     8
 ================================================================================
 
 
@@ -3730,7 +3730,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     9
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     9
 ================================================================================
 
 
@@ -4172,7 +4172,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP    10
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP    10
 ================================================================================
 
 
@@ -4614,7 +4614,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP    11
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP    11
 ================================================================================
 
 
@@ -5056,7 +5056,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP    12
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP    12
 ================================================================================
 
 
@@ -5498,7 +5498,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP    13
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP    13
 ================================================================================
 
 
@@ -5940,7 +5940,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP    14
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP    14
 ================================================================================
 
 
@@ -6382,7 +6382,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP    15
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP    15
 ================================================================================
 
 

@@ -174,7 +174,7 @@ P           mkmem          20
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP     1
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP     1
 ================================================================================
 
 
@@ -751,7 +751,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP     2
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP     2
 ================================================================================
 
 
@@ -1301,7 +1301,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP     3
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP     3
 ================================================================================
 
 
@@ -1851,7 +1851,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP     4
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP     4
 ================================================================================
 
 
@@ -2401,7 +2401,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP     5
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP     5
 ================================================================================
 
 
@@ -2951,7 +2951,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP     6
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP     6
 ================================================================================
 
 
@@ -3501,7 +3501,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP     7
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP     7
 ================================================================================
 
 
@@ -4051,7 +4051,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP     8
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP     8
 ================================================================================
 
 
@@ -4601,7 +4601,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP     9
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP     9
 ================================================================================
 
 
@@ -5149,7 +5149,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP    10
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP    10
 ================================================================================
 
 
@@ -5699,7 +5699,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP    11
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP    11
 ================================================================================
 
 
@@ -6249,7 +6249,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP    12
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP    12
 ================================================================================
 
 
@@ -6798,7 +6798,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP    13
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP    13
 ================================================================================
 
 
@@ -7348,7 +7348,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP    14
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP    14
 ================================================================================
 
 
@@ -7898,7 +7898,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- NUDGED ELASTIC BAND - TIME STEP    15
+ NUDGED ELASTIC BAND (CLIMBING IMAGE + STEEPEST-DESCENT) - TIME STEP    15
 ================================================================================
 
 
