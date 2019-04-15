@@ -211,7 +211,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
  real(dp) :: alpha,rhoav,factor
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- logical :: found,iscompatibleFFT,use_tr,is_first_qcalc
+ logical :: found,iscompatibleFFT,is_dfpt=.false.,use_tr,is_first_qcalc
  logical :: add_chi0_intraband,update_energies,call_pawinit
  character(len=10) :: string
  character(len=500) :: msg
@@ -400,11 +400,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 !  * Initialize and compute data for LDA+U.
 !  paw_dmft%use_dmft=dtset%usedmft
-   if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
-     call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-&     Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+   call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
+&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
-   end if
 
    if (my_rank == master) call pawtab_print(Pawtab)
 

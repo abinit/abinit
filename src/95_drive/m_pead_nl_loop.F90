@@ -187,6 +187,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,ifft,index,ir
  integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftot,nspden,option,optorth
  integer :: pert1case,pert2case,pert3case,rdwrpaw,timrev,comm_cell
+ logical :: nmxc
  real(dp) :: ecut_eff,exc3,valuei
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i
@@ -443,9 +444,9 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
                    end if  ! i2pert <= natom
 
                    call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,rho2g1,rprimd,vhartr1)
-                   option=1
+                   option=1 ; nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
                    call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,dtset%ngfft,&
-&                   rho_dum,0,rho_dum,0,nkxc,dtset%nspden,n3xccc,option,&
+&                   rho_dum,0,rho_dum,0,nkxc,nmxc,dtset%nspden,n3xccc,option,&
 &                   dtset%paral_kgb,dtset%qptn,rho2r1,rprimd,0,vxc1,xccc3d2)
 
                    if(dtset%nsppol==1)then

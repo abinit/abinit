@@ -74,7 +74,7 @@ contains
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  nkxc=second dimension of the kxc array. If /=0,
 !!   the exchange-correlation kernel must be computed.
-!!  non_magnetic_xc= true if usepawu==4
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  n3xccc=dimension of the xccc3d array (0 or nfft or cplx*nfft).
 !!  option=0 or 1 for xc only (exc, vxc, strsxc),
 !!         2 for xc and kxc (no paramagnetic part if xcdata%nspden=1)
@@ -296,7 +296,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
- logical :: allow3,test_nhat,with_vxctau
+ logical :: allow3,test_nhat,need_nhat,need_nhatgr,with_vxctau
  character(len=500) :: message
  real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range
 !arrays
@@ -462,7 +462,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !  Thomas-Fermi-Weiszacker is a gradient correction
    if(add_tfw_) ngrad=2
 !  Test: has a compensation density to be added/substracted (PAW) ?
-   test_nhat=((nhatdim==1).and.(usexcnhat==0.or.(ngrad==2.and.nhatgrdim==1)))
+   need_nhat=(nhatdim==1.and.usexcnhat==0)
+   need_nhatgr=(nhatdim==1.and.nhatgrdim==1.and.ngrad==2)
+   test_nhat=(need_nhat.or.need_nhatgr)
 !  nspden_updn: 1 for non-polarized, 2 for polarized
    nspden_updn=min(nspden,2)
 !  nspden_eff: effective value of nspden used to compute gradients of density:
@@ -498,28 +500,28 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !  PAW: select the valence density (and magnetization) to use:
 !  link the correct density, according to usexcnhat option
-   if ((usexcnhat==1).or.(nhatdim==0)) then
+   if ((.not.need_nhat).and.(.not.non_magnetic_xc)) then
      rhor_ => rhor
    else
      ABI_ALLOCATE(rhor_,(nfft,nspden))
-     !rhor_(:,:)=rhor(:,:)-nhat(:,:)
-     do ispden=1,nspden
-       do ifft=1,nfft
-         rhor_(ifft,ispden)=rhor(ifft,ispden)-nhat(ifft,ispden)
+     if (need_nhat) then
+       do ispden=1,nspden
+         do ifft=1,nfft
+           rhor_(ifft,ispden)=rhor(ifft,ispden)-nhat(ifft,ispden)
+         end do
        end do
-     end do
+     else
+       do ispden=1,nspden
+         do ifft=1,nfft
+           rhor_(ifft,ispden)=rhor(ifft,ispden)
+         end do
+       end do
+     end if
+     if(non_magnetic_xc) then
+       if(nspden==2) rhor_(:,2)=rhor_(:,1)*half
+       if(nspden==4) rhor_(:,2:4)=zero
+     endif
    end if
-
-  if(non_magnetic_xc) then
-    if(nspden==2) then
-      rhor_(:,2)=rhor_(:,1)/two
-    endif
-    if(nspden==4) then
-      rhor_(:,2)=zero
-      rhor_(:,3)=zero
-      rhor_(:,4)=zero
-    endif
-  endif
 
 !  Some initializations for the electron-positron correlation
    if (ipositron==2) then
@@ -1224,7 +1226,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    if (nspden==4)  then
      ABI_DEALLOCATE(m_norm)
    end if
-   if ((usexcnhat==0).and.(nhatdim/=0)) then
+   if (need_nhat.or.non_magnetic_xc) then
      ABI_DEALLOCATE(rhor_)
    end if
 

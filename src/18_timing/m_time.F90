@@ -337,7 +337,7 @@ function abi_cpu_time() result(cpu)
 
 !Machine-dependent timers
 #ifdef HAVE_CCLOCK
- call cclock(cpu)
+ call clib_cclock(cpu)
 
 #elif defined HAVE_FC_CPUTIME
 !This is the F95 standard subroutine.
@@ -348,7 +348,7 @@ function abi_cpu_time() result(cpu)
  cpu = mclock()*0.01d0
 
 #elif defined HAVE_OS_MACOSX || defined FC_COMPAQ || defined FC_SUN
- cpu = etime(tmp)
+ cpu = clib_etime(tmp)
 
 #elif defined FC_FUJITSU
  call clock(cpu,0,2)

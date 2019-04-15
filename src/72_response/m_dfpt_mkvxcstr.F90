@@ -68,6 +68,7 @@ contains
 !!  nhat(nfft,nspden*nhatdim)= -PAW only- compensation density
 !!  nhat1(cplex*nfft,2nspden*usepaw)= -PAW only- 1st-order compensation density
 !!  nkxc=second dimension of the kxc array
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of xccc3d1 ; 0 if no XC core correction is used, otherwise, nfft
 !!  option=if 0, work only with strain-derivative frozen-wavefunction
@@ -95,7 +96,8 @@ contains
 !! SOURCE
 
 subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,&
-& nkxc,nspden,n3xccc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usepaw,usexcnhat,vxc1,xccc3d1)
+&                        nkxc,non_magnetic_xc,nspden,n3xccc,option,paral_kgb,qphon,&
+&                        rhor,rhor1,rprimd,usepaw,usexcnhat,vxc1,xccc3d1)
 
  implicit none
 
@@ -103,6 +105,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 !scalars
  integer,intent(in) :: cplex,idir,ipert,n3xccc,natom,nfft,nkxc,nspden,option
  integer,intent(in) :: paral_kgb,usepaw,usexcnhat
+ logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -147,7 +150,6 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    rhor1_ => rhor1
  end if
 
-
 !Inhomogeneous term for diagonal strain
  ABI_ALLOCATE(rhowk1,(nfft,nspden))
  if(option==0 .or. option==2) then
@@ -162,6 +164,11 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    else
      rhowk1(:,:)=rhor1_(:,:)
    end if
+ end if
+
+ if (non_magnetic_xc) then
+   if(nspden==2) rhowk1(:,2)=rhowk1(:,1)*half
+   if(nspden==4) rhowk1(:,2:4)=zero
  end if
 
 !Treat first LDA
@@ -221,7 +228,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 !  Rescalling needed for use in dfpt_eltfrxc for elastic tensor (not internal strain tensor).
    str_scale=one;if(option==2) str_scale=two
 
-!  FTransfer the data to spin-polarized storage
+!  Transfer the data to spin-polarized storage
    ABI_ALLOCATE(rhor1tmp,(cplex*nfft,nspden))
    if(nspden==1)then
      do ir=1,cplex*nfft

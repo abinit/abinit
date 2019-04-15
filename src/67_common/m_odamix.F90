@@ -229,8 +229,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !scalars
  integer :: cplex,iatom,ider,idir,ierr,ifft,ipert,irhoij,ispden,itypat,izero,iir,jjr,kkr
  integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nzlmopt,nk3xc,option,optxc
- logical :: with_vxctau
- logical :: non_magnetic_xc
+ logical :: nmxc,with_vxctau
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
  real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local
  character(len=500) :: message
@@ -248,15 +247,12 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  call timab(80,1,tsec)
 
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
-
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
 !To be adjusted for the call to rhotoxc
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
- nk3xc=1
+ nk3xc=1;nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
 !faire un test sur optres=1, usewvl=0, nspden=1,nhatgrdim
  if(optres/=1)then
@@ -366,7 +362,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
 !------Compute parts of total energy depending on potentials--------
@@ -408,7 +404,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      paw_ij(iatom)%has_dijhartree=0
    end do
  end if
-
 
 !When the finite-temperature VG broadening scheme is used,
 !the total entropy contribution "tsmear*entropy" has a meaning,
@@ -503,10 +498,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    energies%e_elecfield=energies%e_elecfield+eenth
 
  end if   ! berryopt==17
-
-
-
-
 
  etotal = energies%e_kinetic+ energies%e_hartree + energies%e_xc + &
 & energies%e_localpsp + energies%e_nlpsp_vfock - energies%e_fock0 + energies%e_corepsp + &
@@ -611,7 +602,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
  if (nhatgrdim>0)  then

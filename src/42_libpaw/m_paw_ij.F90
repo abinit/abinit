@@ -305,7 +305,7 @@ CONTAINS
 !!  has_dijfock=1 to allocate Paw_ij%dijfock, 0 otherwise (default)
 !!  has_dijnd=1 to allocate Paw_ij%dijnd, used only if some nucdipmom /= 0; otherwise 0 (default)
 !!  has_dijso=1 to allocate Paw_ij%dijso, used only if pawspnorb>0. 0 otherwise (default)
-!!  has_dijU=1 to allocate Paw_ij%dijU, used only if Pawtab(itypat)%usepawu>0. 0 otherwise (default).
+!!  has_dijU=1 to allocate Paw_ij%dijU, used only if Pawtab(itypat)%usepawu/=0. 0 otherwise (default).
 !!  has_dijexxc=to allocate Paw_ij%dijxx, 0 otherwise (default)
 !!  has_exexch_pot=1 to allocate potential used in PAW+(local exact exchange) formalism, 0 otherwise (default)
 !!  has_pawu_occ=1 to allocate occupations used in PAW+U formalism, 0 otherwise (default)
@@ -415,7 +415,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
   ! === Allocation for Dij local exact exchange ===
   Paw_ij(iat)%has_dijexxc=0
   if (PRESENT(has_dijexxc)) then
-    if (has_dijexxc/=0.and.Pawtab(itypat)%useexexch>0) then
+    if (has_dijexxc/=0.and.Pawtab(itypat)%useexexch/=0) then
       Paw_ij(iat)%has_dijexxc=1
       LIBPAW_ALLOCATE(Paw_ij(iat)%dijexxc,(cplex_dij*lmn2_size,ndij))
       Paw_ij(iat)%dijexxc(:,:)=zero
@@ -525,7 +525,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
   ! === Allocation for PAW+U occupations ===
   Paw_ij(iat)%has_pawu_occ=0
   if (PRESENT(has_pawu_occ)) then
-    if (has_pawu_occ/=0.and.Pawtab(itypat)%usepawu>0) then
+    if (has_pawu_occ/=0.and.Pawtab(itypat)%usepawu/=0) then
       Paw_ij(iat)%has_pawu_occ=1
       LIBPAW_ALLOCATE(Paw_ij(iat)%noccmmp,(cplex_dij,2*Pawtab(itypat)%lpawu+1,2*Pawtab(itypat)%lpawu+1,ndij))
       LIBPAW_ALLOCATE(Paw_ij(iat)%nocctot,(ndij))
@@ -537,7 +537,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
   ! === Allocation for PAW+LEXX potential ===
   Paw_ij(iat)%has_exexch_pot=0
   if (PRESENT(has_exexch_pot)) then
-    if (has_exexch_pot/=0.and.Pawtab(itypat)%useexexch>0) then
+    if (has_exexch_pot/=0.and.Pawtab(itypat)%useexexch/=0) then
       Paw_ij(iat)%has_exexch_pot=1
     ! TODO solve issue with first dimension
       LIBPAW_ALLOCATE(Paw_ij(iat)%vpawx,(1,lmn2_size,nspden))
