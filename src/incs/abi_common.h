@@ -170,7 +170,9 @@
 #define ABI_DT_FREE(ARR)         ABI_DATATYPE_DEALLOCATE(ARR)
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
+ * or allocate arrays before calling MOVE_ALLOC.
    In this case, indeed, we should not count the deallocation */
+#define ABI_MALLOC_NOCOUNT(arr, size) allocate(arr size)
 #define ABI_FREE_NOCOUNT(arr) deallocate(arr)
 
 /*

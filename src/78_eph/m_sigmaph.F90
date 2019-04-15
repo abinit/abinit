@@ -2274,11 +2274,19 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = nprocs / new%nprocs_pert
 
  !new%comm_qpt = xmpi_comm_t_from_value(xmpi_self)
- !new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1 ! nprocs / new%nprocs_pert
- !new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1 ! nprocs / new%nprocs_pert
+ !new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1 
+ !new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1 
  !if (new%imag_only) then 
- !  new%nprocs_bsum = 1 
+ !  new%nprocs_qpt = nprocs / new%nprocs_pert
  !else
+ !  nrest = nprocs / new%nprocs_pert
+ !  do bstop=nrest,1,-1
+ !     if (mod(new%nbsum, bstop) == 0 and new%nprocs_pert * (new%nbsum / bstop) == nprocs)
+ !     end if
+ !  end 
+ !end if
+ !if (new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum /= nprocs) then
+ !  MSG_ERROR("Idle processes!")
  !end if
 
 #ifdef HAVE_MPI
@@ -2691,7 +2699,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  new%use_doublegrid = .False.
  if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine == 0) .or.&
-     (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /= 0) )  then
+     (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /= 0) ) then
 
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then

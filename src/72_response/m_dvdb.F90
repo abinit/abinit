@@ -2674,7 +2674,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  real(dp) :: qpt_bz(3),shift(3), sc_rprimd(3,3), sc_rmet(3, 3) !,qpt_ibz(3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:), all_rpt(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:,:) 
- real(dp),allocatable :: maxw(:,:), rmod_all(:)
+ real(dp),allocatable :: maxw(:,:), all_rmod(:)
 
 ! *************************************************************************
 
@@ -2903,7 +2903,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
        ! Multiply by e^{iqpt_bz.r}
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
 
-       ! Substract the long-range part of the potential
+       ! Substract the long-range part of the potential.
        if (db%has_dielt_zeff .and. db%add_lr_part) then
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
@@ -2932,7 +2932,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
                   phre * v1r_qbz(2, ifft, ispden, ipc) + phim * v1r_qbz(1, ifft, ispden, ipc)
              end do
            end do
-           !call zgerc(db%my_nrpt, nfft, cone, emiqr, 1, v1r_qbz(:,:,ispden,ipc), 1, db%v1scf_rpt(:,:,:,ispden,imyp), db%my_nrpt)
+           !call zgerc(db%my_nrpt, nfft, cone, emiqr, 1, v1r_qbz(:,:,ispden,ipc), 1, &
+           !           db%v1scf_rpt(:,:,:,ispden,imyp), db%my_nrpt)
 
          end do ! ispden
        end do ! imyp
@@ -2969,12 +2970,12 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      sc_rprimd(:, 2) = nq2 * db%cryst%rprimd(:, 2)
      sc_rprimd(:, 3) = nq3 * db%cryst%rprimd(:, 3)
      sc_rmet = matmul(transpose(sc_rprimd), sc_rprimd)
-     ABI_MALLOC(rmod_all, (nrtot))
+     ABI_MALLOC(all_rmod, (nrtot))
      do ii=1,nrtot
-       rmod_all(ii) = sqrt(dot_product(all_rpt(:, ii), matmul(sc_rmet, all_rpt(:, ii))))
+       all_rmod(ii) = sqrt(dot_product(all_rpt(:, ii), matmul(sc_rmet, all_rpt(:, ii))))
      end do
      iperm = [(ii, ii=1,nrtot)]
-     call sort_dp(nrtot, rmod_all, iperm, tol12)
+     call sort_dp(nrtot, all_rmod, iperm, tol12)
      if (open_file(outwr_path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
        MSG_ERROR(msg)
      end if
@@ -2983,7 +2984,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      write(sfmt, "(a,i0,a)")"(es16.8, 3(f4.0,1x),", db%natom3, "(es16.8))"
      do ii=1,nrtot
        irpt = iperm(ii)
-       write(unt, sfmt)rmod_all(ii), all_rpt(:, irpt), maxw(irpt, :)
+       write(unt, sfmt)all_rmod(ii), all_rpt(:, irpt), maxw(irpt, :)
      end do
      close(unt)
 
@@ -3010,11 +3011,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), rmod_all))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
      NCF_CHECK(nf90_close(ncid))
 #endif
-     ABI_FREE(rmod_all)
+     ABI_FREE(all_rmod)
    end if
 
    ABI_FREE(maxw)
@@ -3148,16 +3149,13 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
      !  ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
      !end if
      !call ZGEMV("T", db%my_nrpt, nfft, cone, db%v1scf_rpt(1,1,1,ispden,imyp), db%mynrpt, eiqr, 1, &
-     !  beta, ov1r(1,1,ispden,imyp), 1)
+     !           beta, ov1r(1,1,ispden,imyp), 1)
 
      ! Remove the phase.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
 
-     ! Need to collect results if R-points are distributed.
-     ! Collective or single depending on receiver.
-     !if (db%nprocs_rpt > 1) then
-     call xmpi_sum(ov1r(:,:,ispden,imyp), comm_rpt, ierr)
-     !end if
+     ! Need to collect results if R-points are distributed (TODO Non-blocking API?)
+     if (db%nprocs_rpt > 1) call xmpi_sum(ov1r(:,:,ispden,imyp), comm_rpt, ierr)
    end do ! ispden
 
    ! Be careful with gamma and cplex!
@@ -3465,7 +3463,7 @@ end if
 
  ! Compute final cache size.
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(db%ftqcache%get_mbsize(), fmt="f8.1"), " [Mb]"))
- call cwtime_report(" Qcache from W(r, R) + symmetrization", cpu_all, wall_all, gflops_all, end_str=ch10)
+ call cwtime_report(" Qcache from W(r,R) + symmetrization", cpu_all, wall_all, gflops_all, end_str=ch10)
  call timab(1808, 2, tsec)
 
 end subroutine dvdb_ftqcache_build
