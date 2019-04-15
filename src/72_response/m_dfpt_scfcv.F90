@@ -3188,7 +3188,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      do idir1=1,3
        if (ddkfil(idir1)/=0) then
          ii = wfk_findk(ddks(idir1), kpt_rbz(:, ikpt))
-         ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1")
+         ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 : required kpt was not found in the DDK file")
        end if
      end do
 
