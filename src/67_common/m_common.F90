@@ -96,7 +96,7 @@ contains
 !!   | prtvol= control print volume
 !!   | usedmatpu=LDA+U: number of SCF steps keeping occ. matrix fixed
 !!   | usefock=1 if Fock operator is present (hence possibility of a double loop)
-!!   | usepawu=0 if no LDA+U; 1 if LDA+U
+!!   | usepawu=0 if no LDA+U; /=0 if LDA+U
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  etotal=total energy (hartree)
@@ -509,7 +509,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if (iexit/=0) quit=1
 
    ! In special cases, do not quit even if convergence is reached
-   noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu>0).and.&
+   noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu/=0).and.&
 &   (dtset%usedmatpu/=0).and.(istep<=abs(dtset%usedmatpu)).and.&
 &   (dtset%usedmatpu<0.or.initGS==0))
 

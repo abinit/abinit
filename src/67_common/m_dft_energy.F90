@@ -280,8 +280,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  integer :: nband_k,nblockbd,nfftotf,nkpg,nkxc,nk3xc,nnlout,npw_k,nspden_rhoij,option
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
  logical :: add_tfw_,paral_atom,usetimerev,with_vxctau
- logical :: wvlbigdft=.false.
- logical :: non_magnetic_xc
+ logical :: non_magnetic_xc,wvlbigdft=.false.
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
@@ -305,9 +304,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
-! Create variable for non_magnetic_xc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (dtset%usekden/=0)
@@ -353,6 +349,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  option=1;nkxc=0
  ipositron=electronpositron_calctype(electronpositron)
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
+ non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
  if (ipositron/=1) then
 

@@ -1766,9 +1766,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 !==========================================================
 !Perfom tests on meshes
 
-! initialise logical
- non_magnetic_xc=.false.
-
 !Are radial meshes for Phi and Vloc compatibles ?
 ! if (vloc_mesh%rmax<pawrad%rmax) then
 !   write(msg, '(a,a,a)' )&
@@ -1898,6 +1895,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 
 !Allocate/initialize some dummy variables
  tmp_lmselect(1)=.true.
+ non_magnetic_xc=.false.
  if (pawxcdev==0) then
    pawang_tmp%l_size_max=1;pawang_tmp%angl_size=1;pawang_tmp%ylm_size=1
    pawang_tmp%use_ls_ylm=0;pawang_tmp%gnt_option=0;pawang_tmp%ngnt=0;pawang_tmp%nsym=0

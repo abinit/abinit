@@ -350,11 +350,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
    ! Initialize and compute data for LDA+U
    !paw_dmft%use_dmft=dtset%usedmft
-   !if (dtset%usepawu>0.or.dtset%useexexch>0) then
-   !  call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-   !    dtset%jpawu,dtset%lexexch,dtset%lpawu,cryst%ntypat,pawang,dtset%pawprtvol,&
+   !call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
+   !    .false.,dtset%jpawu,dtset%lexexch,dtset%lpawu,cryst%ntypat,pawang,dtset%pawprtvol,&
    !    Pawrad,pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
-   !end if
    !ABI_CHECK(paw_dmft%use_dmft==0,"DMFT not available")
    !call destroy_sc_dmft(paw_dmft)
 
