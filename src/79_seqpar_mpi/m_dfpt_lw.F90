@@ -2112,22 +2112,22 @@ end if
    rhor1_tmp=zero
    do iq1grad=1,nq1grad
      qdir=q1grad(2,iq1grad)
-     do jatpert=1,natpert
+     do iatpert=1,natpert
 
-       rhog1_tmp(:,:)=rhog1_atdis(jatpert,:,:)
+       rhog1_tmp(:,:)=rhog1_atdis(iatpert,:,:)
        call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qdir,rhog1_tmp,vqgradhart) 
 
        !TODO:Maybe it is only necessary to compute half of these elements by symmetry
-       do iatpert=1,natpert
+       do jatpert=1,natpert
 
          !Calculate the electrostatic energy term with the first order electric field density 
          if (timrev==1) then
            do ii=1,nfft
              jj=ii*2
-             rhor1_tmp(jj-1,:)=rhor1_atdis(iatpert,ii,:)
+             rhor1_tmp(jj-1,:)=rhor1_atdis(jatpert,ii,:)
            end do
          else if (timrev==0) then
-           rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
+           rhor1_tmp(:,:)=rhor1_atdis(jatpert,:,:)
          end if
        
          call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)

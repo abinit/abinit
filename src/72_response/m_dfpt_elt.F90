@@ -2740,8 +2740,8 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
 !eta=1.2_dp*eta
 
 !Sum terms over g space:
- fac=pi**2/eta
- fac2=half/eta
+ fac=pi**2.d0/eta
+ fac2=2.d0*fac
  do ig3=-ng,ng
    do ig2=-ng,ng
      do ig1=-ng,ng
@@ -2789,7 +2789,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                      term2=gpq(mu)*gpq(nu)*gpq(iq)
                      term3=fac2*term2
                      term2=two*term2/gsq
-                     gterms=(term1-term2)/two_pi-term3*two_pi
+                     gterms=(term1-term2)-term3
                      dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)+gterms*c1r
                      dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+gterms*c1i
                    end do
