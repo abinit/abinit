@@ -657,7 +657,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ! For large sampling the two approaches yield similar results, with the first
  ! one using less memory
  !
-#if 0
+#if 1
  ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
  ABI_MALLOC(tetra%unique_tetra,(tetra%nkibz))
  do ihash=1,tetra%nkibz
@@ -830,6 +830,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    total_ntetra = total_ntetra + ntetra
  end do
  write(*,*) 'total_unique_tetra', total_ntetra
+ tetra%nunique_tetra = total_ntetra
 
  ! Count IBZ tetra
  total_ntetra = 0
@@ -838,7 +839,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    !write(*,'(i5)',advance='no') ntetra
    total_ntetra = total_ntetra + ntetra
  end do
- write(*,*) 'total_ibz_tetra', total_ntetra
+ write(*,*) 'total_ibz_tetra   ', total_ntetra
 
  ! Compute the weights
  ABI_CALLOC(tetra%ibz_weights,(tetra%nkibz))
@@ -916,7 +917,7 @@ end subroutine htetra_free
 !! SOURCE
 
 pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
-                              tweight,dtweightde)
+                              tweight,dweight)
 
 !Arguments ------------------------------------
 !scalars
@@ -925,8 +926,8 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
  real(dp) ,intent(in) :: energies(nene)
  type(t_htetrahedron), intent(in) :: tetra
 !arrays
- real(dp), intent(out) ::  tweight(4, nene)
- real(dp), intent(out) :: dtweightde(4, nene)
+ real(dp), intent(out) :: tweight(4, nene)
+ real(dp), intent(out) :: dweight(4, nene)
  real(dp),intent(in)  :: eigen_1tetra(4)
 
 !Local variables-------------------------------
@@ -949,7 +950,7 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
  volconst = max_occ!/4.d0/6.d0
 
  ! This is output
- tweight = zero; dtweightde = zero
+ tweight = zero; dweight = zero
 
  ! all notations are from Blochl PRB 49 16223 [[cite:Bloechl1994a]] Appendix B
  e1 = eigen_1tetra(1)
@@ -994,10 +995,10 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
      ! Delta
      dccde_pre = 3.d0*volconst*inv_e21*inv_e31*inv_e41
      dccde = dccde_pre*deleps1**2
-     dtweightde(1,ieps) = dccde*(4.d0-deleps1*invepsum)-cc*invepsum
-     dtweightde(2,ieps) = (dccde*deleps1+cc) * inv_e21
-     dtweightde(3,ieps) = (dccde*deleps1+cc) * inv_e31
-     dtweightde(4,ieps) = (dccde*deleps1+cc) * inv_e41
+     dweight(1,ieps) = dccde*(4.d0-deleps1*invepsum)-cc*invepsum
+     dweight(2,ieps) = (dccde*deleps1+cc) * inv_e21
+     dweight(3,ieps) = (dccde*deleps1+cc) * inv_e31
+     dweight(4,ieps) = (dccde*deleps1+cc) * inv_e41
 
      if (bcorr == 1) then
        ! bxu, correction terms based on Bloechl's paper
@@ -1008,10 +1009,10 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
        tweight(4,ieps) = tweight(4,ieps) + bcorr_fact*(-e41-e42-e43)
 
        bcorr_fact = 8.d0/40.d0*dccde_pre*deleps1
-       dtweightde(1,ieps) = dtweightde(1,ieps) + bcorr_fact*( e21+e31+e41)
-       dtweightde(2,ieps) = dtweightde(2,ieps) + bcorr_fact*(-e21+e32+e42)
-       dtweightde(3,ieps) = dtweightde(3,ieps) + bcorr_fact*(-e31-e32+e43)
-       dtweightde(4,ieps) = dtweightde(4,ieps) + bcorr_fact*(-e41-e42-e43)
+       dweight(1,ieps) = dweight(1,ieps) + bcorr_fact*( e21+e31+e41)
+       dweight(2,ieps) = dweight(2,ieps) + bcorr_fact*(-e21+e32+e42)
+       dweight(3,ieps) = dweight(3,ieps) + bcorr_fact*(-e31-e32+e43)
+       dweight(4,ieps) = dweight(4,ieps) + bcorr_fact*(-e41-e42-e43)
      end if
 
      cycle
@@ -1049,20 +1050,20 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
      dcc1de = 2.d0*cc1_pre*(     deleps1)
      dcc2de =      cc2_pre*(    -deleps1*deleps2+deleps1*deleps3+deleps2*deleps3)
      dcc3de =      cc3_pre*(2.d0*deleps2*deleps4-deleps2*deleps2)
-     dtweightde(1,ieps) = dcc1de+&
-                          ((dcc1de+dcc2de)*deleps3-(cc1+cc2))*inv_e31+&
-                          ((dcc1de+dcc2de+dcc3de)*deleps4-(cc1+cc2+cc3))*inv_e41
-     dtweightde(2,ieps) = (dcc1de+dcc2de+dcc3de)+&
-                          ((dcc2de+dcc3de)*deleps3-(cc2+cc3))*inv_e32+&
-                                         (dcc3de*deleps4-cc3)*inv_e42
-     dtweightde(3,ieps) = ((dcc1de+dcc2de)*deleps1+(cc1+cc2))*inv_e31+&
-                          ((dcc2de+dcc3de)*deleps2+(cc2+cc3))*inv_e32
-     dtweightde(4,ieps) = ((dcc1de+dcc2de+dcc3de)*deleps1+(cc1+cc2+cc3))*inv_e41+&
+     dweight(1,ieps) = dcc1de+&
+                       ((dcc1de+dcc2de)*deleps3-(cc1+cc2))*inv_e31+&
+                       ((dcc1de+dcc2de+dcc3de)*deleps4-(cc1+cc2+cc3))*inv_e41
+     dweight(2,ieps) = (dcc1de+dcc2de+dcc3de)+&
+                       ((dcc2de+dcc3de)*deleps3-(cc2+cc3))*inv_e32+&
+                                      (dcc3de*deleps4-cc3)*inv_e42
+     dweight(3,ieps) = ((dcc1de+dcc2de)*deleps1+(cc1+cc2))*inv_e31+&
+                       ((dcc2de+dcc3de)*deleps2+(cc2+cc3))*inv_e32
+     dweight(4,ieps) = ((dcc1de+dcc2de+dcc3de)*deleps1+(cc1+cc2+cc3))*inv_e41+&
                                                         (dcc3de*deleps2+cc3)*inv_e42
 
      if (bcorr == 1) then
        ! bxu, correction terms based on Bloechl's paper
-       ! The correction terms may cause the dtweightde become negative
+       ! The correction terms may cause the dweight become negative
        bcorr_fact = 4.d0/40.d0*cc1_pre*(3.d0*e21+6.d0*deleps2-3.d0*(e31+e42)*deleps2*deleps2*inv_e32*inv_e42)
        tweight(1,ieps) = tweight(1,ieps) + bcorr_fact*( e21+e31+e41)
        tweight(2,ieps) = tweight(2,ieps) + bcorr_fact*(-e21+e32+e42)
@@ -1070,10 +1071,10 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
        tweight(4,ieps) = tweight(4,ieps) + bcorr_fact*(-e41-e42-e43)
 
        bcorr_fact = 4.d0/40.d0*cc1_pre*(6.d0-6.d0*(e31+e42)*deleps2*inv_e32*inv_e42)
-       dtweightde(1,ieps) = dtweightde(1,ieps) + bcorr_fact*( e21+e31+e41)
-       dtweightde(2,ieps) = dtweightde(2,ieps) + bcorr_fact*(-e21+e32+e42)
-       dtweightde(3,ieps) = dtweightde(3,ieps) + bcorr_fact*(-e31-e32+e43)
-       dtweightde(4,ieps) = dtweightde(4,ieps) + bcorr_fact*(-e41-e42-e43)
+       dweight(1,ieps) = dweight(1,ieps) + bcorr_fact*( e21+e31+e41)
+       dweight(2,ieps) = dweight(2,ieps) + bcorr_fact*(-e21+e32+e42)
+       dweight(3,ieps) = dweight(3,ieps) + bcorr_fact*(-e31-e32+e43)
+       dweight(4,ieps) = dweight(4,ieps) + bcorr_fact*(-e41-e42-e43)
      end if
 
      cycle
@@ -1098,14 +1099,14 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
      ! Delta
      dccde = -3.d0*cc_pre*deleps4**2
      dccde_tmp = dccde*deleps4 + cc
-     dtweightde(1,ieps) = -dccde_tmp * inv_e41
-     dtweightde(2,ieps) = -dccde_tmp * inv_e42
-     dtweightde(3,ieps) = -dccde_tmp * inv_e43
-     dtweightde(4,ieps) = -4.d0*dccde + dccde_tmp*invepsum
+     dweight(1,ieps) = -dccde_tmp * inv_e41
+     dweight(2,ieps) = -dccde_tmp * inv_e42
+     dweight(3,ieps) = -dccde_tmp * inv_e43
+     dweight(4,ieps) = -4.d0*dccde + dccde_tmp*invepsum
 
      if (bcorr == 1) then
        ! bxu, correction terms based on Bloechl's paper
-       ! The correction terms may cause the dtweightde become negative
+       ! The correction terms may cause the dweight become negative
        bcorr_fact = 12.d0/40.d0*cc_pre*deleps4*deleps4
        tweight(1,ieps) = tweight(1,ieps) + bcorr_fact*( e21+e31+e41)
        tweight(2,ieps) = tweight(2,ieps) + bcorr_fact*(-e21+e32+e42)
@@ -1113,10 +1114,10 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
        tweight(4,ieps) = tweight(4,ieps) + bcorr_fact*(-e41-e42-e43)
 
        bcorr_fact = - 24.d0/40.d0*cc_pre*deleps4
-       dtweightde(1,ieps) = dtweightde(1,ieps) + bcorr_fact*( e21+e31+e41)
-       dtweightde(2,ieps) = dtweightde(2,ieps) + bcorr_fact*(-e21+e32+e42)
-       dtweightde(3,ieps) = dtweightde(3,ieps) + bcorr_fact*(-e31-e32+e43)
-       dtweightde(4,ieps) = dtweightde(4,ieps) + bcorr_fact*(-e41-e42-e43)
+       dweight(1,ieps) = dweight(1,ieps) + bcorr_fact*( e21+e31+e41)
+       dweight(2,ieps) = dweight(2,ieps) + bcorr_fact*(-e21+e32+e42)
+       dweight(3,ieps) = dweight(3,ieps) + bcorr_fact*(-e31-e32+e43)
+       dweight(4,ieps) = dweight(4,ieps) + bcorr_fact*(-e41-e42-e43)
      end if
 
      cycle
@@ -1137,7 +1138,7 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
    !
    !  if we have a fully degenerate tetrahedron,
    !  1) the tweight is a Heaviside (step) function, which is correct above, but
-   !  2) the dtweightde should contain a Dirac function
+   !  2) the dweight should contain a Dirac function
    !
  end do
 
@@ -1384,8 +1385,8 @@ end subroutine htetra_get_onewk_wvals_zinv
 !!
 !! SOURCE
 
-subroutine htetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nw,nkpt,&
-  bcorr,tweight_t,dtweightde_t,comm)
+subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
+  bcorr,tweight,dweight,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1393,37 +1394,66 @@ subroutine htetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nw,nkpt,&
  type(t_htetrahedron), intent(in) :: tetra
  real(dp) ,intent(in) :: enemax,enemin,max_occ
 !arrays
- real(dp) ,intent(in) :: eigen_in(nkpt)
- real(dp) ,intent(out) :: dtweightde_t(nw,nkpt),tweight_t(nw,nkpt)
+ real(dp) ,intent(in) :: eig_ibz(nkpt)
+ real(dp) ,intent(out) :: dweight(nw,nkpt),tweight(nw,nkpt)
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,nprocs,my_rank,ierr,ii
+ integer :: ik_ibz,multiplicity,nprocs,my_rank,ierr,ii
+ integer :: tetra_total, tetra_count, itetra, isummit, ihash
+ real :: mweight
 !arrays
  integer :: ind_ibz(4)
  real(dp) :: eigen_1tetra(4)
  real(dp) :: wvals(nw)
- real(dp), allocatable :: weights(:,:)
+ real(dp) :: dweight_tmp(4,nw),tweight_tmp(4,nw)
 
 ! *********************************************************************
 
- ABI_MALLOC(weights,(nw,2))
- tweight_t = zero; dtweightde_t = zero
+ tweight = zero; dweight = zero
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  wvals = linspace(enemin,enemax,nw)
+ tetra_total = 0
 
- ! For each irreducible Brillouin zone point
- do ik_ibz=1,tetra%nkibz
-   if (mod(ik_ibz,nprocs) /= my_rank) cycle
-   call htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, tetra%nkibz, eigen_in, weights)
+ ! For each bucket of tetrahedra
+ do ihash=1,tetra%nkibz
+   if (mod(ihash,nprocs) /= my_rank) cycle
 
-   tweight_t(:,ik_ibz)    = tweight_t(:,ik_ibz)    + weights(:,2)*tetra%ibz_weights(ik_ibz)
-   dtweightde_t(:,ik_ibz) = dtweightde_t(:,ik_ibz) + weights(:,1)*tetra%ibz_weights(ik_ibz)
+   ! For each tetrahedron that belongs to this k-point
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   do itetra=1,tetra_count
+
+     ! Get mapping of each summit to eig_ibz
+     do isummit=1,4
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       eigen_1tetra(isummit) = eig_ibz(ind_ibz(isummit))
+     end do
+
+     ! Sort energies before calling get_onetetra_
+     call sort_4tetra(eigen_1tetra, ind_ibz)
+
+     ! Get tetrahedron weights
+     call get_onetetra_(tetra, eigen_1tetra, wvals, nw, max_occ, bcorr, tweight_tmp, dweight_tmp)
+
+     ! Acumulate the contributions
+     multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
+     tetra_total = tetra_total + multiplicity
+     do isummit=1,4
+       ik_ibz = ind_ibz(isummit)
+       tweight(:,ik_ibz) = tweight(:,ik_ibz) + tweight_tmp(isummit,:)*multiplicity
+       dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:)*multiplicity
+     end do
+   end do ! itetra
  end do
- ABI_FREE(weights)
 
- call xmpi_sum(tweight_t,    comm, ierr)
- call xmpi_sum(dtweightde_t, comm, ierr)
+ ! Rescale with weights
+ do ik_ibz=1,tetra%nkibz
+   tweight(:,ik_ibz) = tweight(:,ik_ibz)*tetra%ibz_weights(ik_ibz)/tetra%ibz(ik_ibz)%tetra_total
+   dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_weights(ik_ibz)/tetra%ibz(ik_ibz)%tetra_total
+ end do
+
+ call xmpi_sum(tweight, comm, ierr)
+ call xmpi_sum(dweight, comm, ierr)
 
 end subroutine htetra_blochl_weights
 !!***
