@@ -69,7 +69,8 @@ class DataExtractor:
             if current_doc is not None:
                 # accumulate source lines
                 current_doc.lines.append(line)
-                if doc_end_re.match(line):  # reached the end of the doc
+                if self._get_metachar(line) == '.' and doc_end_re.match(line):
+                    # reached the end of the doc
                     if self.use_yaml:
                         current_doc.end = i
 
