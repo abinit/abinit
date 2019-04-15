@@ -193,7 +193,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  ! blanchet TEMPORARY DEVELOPMENT VARIABLES
 !scalars
 !arrays
- real(dp) :: rhor2(dtset%nfft,dtset%nspden,dtset%mband)
+ real(dp) :: rhor2(dtset%nfft,dtset%nspden)
  real(dp),allocatable :: rhoaug2(:,:,:)
 
 
@@ -716,6 +716,11 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      if (mpi_enreg%paral_hf==1)spaceComm=mpi_enreg%comm_kpt
      if(mpi_enreg%paral_kgb==1)spaceComm=mpi_enreg%comm_kpt
      call xmpi_sum(rhor,spaceComm,ierr)
+!    blanchet
+     call xmpi_sum(rhor2,spaceComm,ierr)
+     write(0,*) rhor(1,1)-(rhor2(1,1)+0.0000107956)
+     write(0,*) rhor(dtset%nfft/2,1)-(rhor2(dtset%nfft/2,1)+0.0000107956)
+     write(0,*) rhor(dtset%nfft,1)-(rhor2(dtset%nfft,1)+0.0000107956)
      call timab(71,2,tsec)
      call timab(48,2,tsec)
 

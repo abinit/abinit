@@ -1429,9 +1429,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end do
      end do
 
-!    blanchet - Compute the free_transfactor U0.
-     call free_transfactor(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
-
      if(paw_dmft%use_dmft==1) then
        energies%e_kinetic = energies%e_kinetic -ekindmft+ekindmft2
        if(abs(dtset%pawprtvol)>=2) then
@@ -1449,6 +1446,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call wrtout(std_out,message,'COLL')
        end if
 !       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
+     end if
+
+!    blanchet - Compute the free_transfactor U0.
+     if(dtset%useria==6661 .and. dtset%useric > 0) then
+       call free_transfactor(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%useric,dtset%wtk)
      end if
 
      if (psps%usepaw==0) then

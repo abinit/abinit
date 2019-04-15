@@ -145,15 +145,22 @@ subroutine prt_eigocc(eigen,fermie,fnameabo_eig,iout,kptns,&
   close(temp_unit)
 end subroutine prt_eigocc
 
-!!****f* ABINIT/free_transfactor
+!!****f* ABINIT/int_freedos
 !! NAME
-!! free_transfactor
+!! int_freedos
 !!
 !! FUNCTION
-!! Compute the translation factor $U_0$ that appears in the density of states of free electrons.
+!! Compute the value of the integral corresponding to the residual of density after the band cut
+!! I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon
 !!
-!! TODO
 !! INPUTS
+!! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+!! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
+!! mband=maximum number of bands
+!! nband(nkpt)=number of bands at each k point
+!! nkpt=number of k points
+!! nsppol=1 for unpolarized, 2 for spin-polarized
+!! wtk(nkpt)=k-point weights
 !!
 !! TODO
 !! OUTPUT
@@ -163,11 +170,56 @@ end subroutine prt_eigocc
 !! CHILDREN
 !!
 !! SOURCE
-subroutine free_transfactor(eigen,eknk,mband,nband,nkpt,nsppol,wtk)
+subroutine int_freedos(e_bcut,fermie,mrgrid,rprimd,tsmear,u0)
 
   ! Arguments -------------------------------
   ! Scalars
-  integer,intent(in) :: mband,nkpt,nsppol
+  integer,intent(in) :: mrgrid
+  real(dp),intent(in) :: e_bcut,fermie,tsmear,u0
+  ! Arrays
+  real(dp),intent(in) :: rprimd(3,3)
+
+  ! Local variables -------------------------
+  ! Scalars
+  real(dp) :: ucvol
+  ! Arrays
+  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+
+  ! *********************************************************************
+
+  
+
+end subroutine int_freedos
+
+!!****f* ABINIT/free_transfactor
+!! NAME
+!! free_transfactor
+!!
+!! FUNCTION
+!! Compute the translation factor $U_0$ that appears in the density of states of free electrons.
+!!
+!! INPUTS
+!! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+!! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
+!! mband=maximum number of bands
+!! nband(nkpt)=number of bands at each k point
+!! nkpt=number of k points
+!! nsppol=1 for unpolarized, 2 for spin-polarized
+!! wtk(nkpt)=k-point weights
+!!
+!! TODO
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine free_transfactor(eigen,eknk,mband,nband,nkpt,nsppol,bcut,wtk)
+
+  ! Arguments -------------------------------
+  ! Scalars
+  integer,intent(in) :: bcut,mband,nkpt,nsppol
   ! Arrays
   integer,intent(in) :: nband(nkpt*nsppol)
   real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
@@ -177,13 +229,12 @@ subroutine free_transfactor(eigen,eknk,mband,nband,nkpt,nsppol,wtk)
   ! Local variables -------------------------
   ! Scalars
   integer :: bdtot_index,iband,ikpt,isppol,nband_k,niter
-  real(dp) :: bcut,u0
+  real(dp) :: u0
   ! Arrays
   real(dp) :: eig_n(mband),ek_n(mband)
 
-  bcut=64
-
   ! *********************************************************************
+
   eig_n(:)=zero
   ek_n(:)=zero
   bdtot_index=1
@@ -207,16 +258,6 @@ subroutine free_transfactor(eigen,eknk,mband,nband,nkpt,nsppol,wtk)
   u0=u0/niter
   write(0,*) "Average made on ",niter," last bands until band =",bcut
   write(0,*) "u0 =",u0
-
-
-
-
-  ! write(60,*) "NEW SCF ITERATION..."
-  ! do iband=1,mband
-  !   write(0,*) iband, eig_n(iband) - ek_n(iband)
-  !   write(60,*) iband, eig_n(iband) - ek_n(iband)
-  ! end do
-
 end subroutine free_transfactor
 
 end module m_hightemp
