@@ -27,7 +27,7 @@ module m_sort
 
  implicit none
 
- private 
+ private
 
  public :: sort_dp       ! Sort double precision array
  public :: sort_int      ! Sort integer array
@@ -39,11 +39,10 @@ CONTAINS  !=====================================================================
 !! NAME
 !!  sort_dp
 !!
-!! FUNCTION 
+!! FUNCTION
 !!  Sort double precision array list(n) into ascending numerical order using Heapsort
 !!  algorithm, while making corresponding rearrangement of the integer
-!!  array iperm. Consider that two double precision numbers
-!!  within tolerance tol are equal.
+!!  array iperm. Consider that two double precision numbers within tolerance tol are equal.
 !!
 !! INPUTS
 !!  n        intent(in)    dimension of the list
@@ -53,7 +52,8 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  list(n)  sorted list
-!!  iperm(n) index of permutation given the right ascending order
+!!  iperm(n) index of permutation giving the right ascending order:
+!!      the i-th element of the ouput ordered list had index iperm(i) in the input list.
 !!
 !! PARENTS
 !!      atomden,cpdrv,critics,denfgr,finddistrproc,invacuum,listkk,m_bz_mesh
@@ -67,8 +67,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine sort_dp(n,list,iperm,tol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -129,7 +127,7 @@ subroutine sort_dp(n,list,iperm,tol)
    i=l
    j=l+l
 
-   do while (j<=ir) 
+   do while (j<=ir)
     if (j<ir) then
      if ( list(j)<list(j+1)-tol .or.  &
 &        (list(j)<list(j+1)+tol.and.iperm(j)<iperm(j+1))) j=j+1
@@ -161,8 +159,7 @@ end subroutine sort_dp
 !!
 !! FUNCTION
 !!   Sort integer array list(n) into ascending numerical order using Heapsort
-!!   algorithm, while making corresponding rearrangement of the integer
-!!   array iperm. 
+!!   algorithm, while making corresponding rearrangement of the integer array iperm.
 !!
 !! INPUTS
 !!  n        intent(in)    dimension of the list
@@ -172,6 +169,7 @@ end subroutine sort_dp
 !! OUTPUT
 !!  list(n)  sorted list
 !!  iperm(n) index of permutation given the right ascending order
+!!      the i-th element of the ouput ordered list had index iperm(i) in the input list.
 !!
 !! PARENTS
 !!      getng,getngrec,initmpi_img,invars2,irrzg,m_dvdb,m_hdr,m_nesting,m_wfk
@@ -183,11 +181,9 @@ end subroutine sort_dp
 
 subroutine sort_int(n,list,iperm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: n 
+ integer,intent(in) :: n
  integer,intent(inout) :: list(n),iperm(n)
 
 !Local variables-------------------------------
@@ -216,7 +212,7 @@ subroutine sort_int(n,list,iperm)
   ir=n
 
   do   ! Infinite do-loop
- 
+
    if (l>1) then
 
     l=l-1

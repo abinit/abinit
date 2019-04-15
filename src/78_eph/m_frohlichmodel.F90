@@ -74,8 +74,6 @@ contains
 
 subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst

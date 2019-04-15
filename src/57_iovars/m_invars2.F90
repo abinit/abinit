@@ -70,8 +70,8 @@ contains
 !! Initialisation phase - main input routine.
 !! Big loop on the datasets :
 !! - for each of the datasets, write one line about the crystallographic data
-!! - call invars2, that read the eventual single dataset input values ;
-!! - compute mgfft,mpw,nfft,... for this data set ;
+!! - call invars2, that read the eventual single dataset input values;
+!! - compute mgfft,mpw,nfft,... for this data set;
 !! - compute quantities for the susceptibility computation
 !! - compute the memory needs for this data set.
 !!
@@ -89,6 +89,7 @@ contains
 !!   pseudopotential file header, as well as the psp file name
 !!  string*(*)=character string containing all the input data.
 !!   Initialized previously in instrng.
+!! comm=MPI communicator
 !!
 !! OUTPUT
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
@@ -108,11 +109,11 @@ contains
 !!
 !! SOURCE
 
-subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
+subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iout,lenstr,msym,ndtset,ndtset_alloc,npsp
+ integer,intent(in) :: iout,lenstr,msym,ndtset,ndtset_alloc,npsp, comm
  character(len=*),intent(in) :: string
 !arrays
  integer,intent(in) :: mband_upper_(0:ndtset_alloc)
@@ -135,45 +136,43 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
    bravais(:)=dtsets(idtset)%bravais(:)
    mband_upper  =mband_upper_(idtset)
    usepaw=dtsets(idtset)%usepaw
-!  Allocate arrays
+   ! Allocate arrays
    ABI_ALLOCATE(zionpsp,(npsp))
    zionpsp(:)=pspheads(1:npsp)%zionpsp
 
-!  Here, nearly all the remaining input variables are initialized
-   call invars2(bravais,dtsets(idtset),iout,jdtset,lenstr,mband_upper,msym,npsp,string,usepaw,zionpsp)
+   ! Here, nearly all the remaining input variables are initialized
+   call invars2(bravais,dtsets(idtset),iout,jdtset,lenstr,mband_upper,msym,npsp,string,usepaw,zionpsp, comm)
 
    ABI_DEALLOCATE(zionpsp)
 
    call mkrdim(dtsets(idtset)%acell_orig(1:3,1),dtsets(idtset)%rprim_orig(1:3,1:3,1),rprimd)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-!  For GW or BSE calculations, we only use (npwwfn|ecutwfn) G-vectors read from the KSS file,
-!  therefore the FFT box for the density should be defined according to ecut=ecutwfn.
    if (ANY(dtsets(idtset)%optdriver == [RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE])) then
+    ! For GW or BSE calculations, we only use (npwwfn|ecutwfn) G-vectors read from the KSS file,
+    ! therefore the FFT box for the density should be defined according to ecut=ecutwfn.
 
      nshwfn=0
      call setshells(dtsets(idtset)%ecutwfn,dtsets(idtset)%npwwfn,nshwfn,&
-&     dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'wfn',ucvol)
+       dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'wfn',ucvol)
 
-!    MG: Hack to avoid portability problems under gfortran and g95:
-!    getng and getmpw are indeed quite sensitive if ecut is small
-!    and, in the GW tests, mpw and ngfft might depend on the compiler used.
-!    the problem shows up if we use npwwfn instead of ecutwfn, a good
-!    reason for removing npwwfn!
+     ! MG: Hack to avoid portability problems under gfortran and g95:
+     ! getng and getmpw are indeed quite sensitive if ecut is small
+     ! and, in the GW tests, mpw and ngfft might depend on the compiler used.
+     ! the problem shows up if we use npwwfn instead of ecutwfn, a good reason for removing npwwfn!
      dtsets(idtset)%ecutwfn=dtsets(idtset)%ecutwfn-tol14
-!    MG: This is a kind of a hack, but the problem is ecutwfn that is too much redundant!
+     ! MG: This is a kind of a hack, but the problem is ecutwfn that is too much redundant!
      dtsets(idtset)%ecut=dtsets(idtset)%ecutwfn
 
-!    Close the shell for (W|chi0)
+     ! Close the shell for (W|chi0)
      nsheps=0
      call setshells(dtsets(idtset)%ecuteps,dtsets(idtset)%npweps,nsheps,&
-&     dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'eps',ucvol)
+      dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'eps',ucvol)
 
-!    Close the shell for the exchange term.
+     ! Close the shell for the exchange term.
      nshsigx=0
      call setshells(dtsets(idtset)%ecutsigx,dtsets(idtset)%npwsigx,nshsigx,&
-&     dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'sigx',ucvol)
-
+      dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'sigx',ucvol)
    end if ! (SIGMA|SCREENING|SCGW|BSE)
 
  end do
@@ -207,6 +206,7 @@ end subroutine invars2m
 !!  Initialized previously in instrng.
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! zionpsp(npsp)=valence charge of each type of atom (coming from the psp files)
+!! comm=MPI communicator
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -223,8 +223,6 @@ end subroutine invars2m
 !! in a compressed, standardized, format
 !! At the input, they already contain a default value.
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      invars2m,m_ab7_invars_f90
 !!
@@ -236,11 +234,11 @@ end subroutine invars2m
 !!
 !! SOURCE
 
-subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepaw,zionpsp)
+subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepaw,zionpsp, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iout,jdtset,lenstr,mband,msym,npsp,usepaw
+ integer,intent(in) :: iout,jdtset,lenstr,mband,msym,npsp,usepaw, comm
  character(len=*),intent(in) :: string
  type(dataset_type),intent(inout) :: dtset
 !arrays
@@ -274,7 +272,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call timab(191,1,tsec)
 
-!Compute the maximum size of arrays intarr and dprarr
+ ! Compute the maximum size of arrays intarr and dprarr
  natom=dtset%natom
  nimage=dtset%nimage
  nkpt=dtset%nkpt
@@ -286,7 +284,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ntypalch=dtset%ntypalch
  ntyppure=dtset%ntyppure
 
- dmatsize=0
+ dmatsize=0 ! dmatpu not available for usepawu<0
  if (dtset%usepawu>0.and.dtset%usedmatpu/=0) then
    do iatom=1,natom
      lpawu=dtset%lpawu(dtset%typat(iatom))
@@ -463,8 +461,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%nfreqim=intarr(1)
  if (dtset%cd_customnimfrqs/=0) then
    write(message, '(3a)' )&
-&   'cd_customnimfrqs not equal to zero and not equal to nfreqim',ch10,&
-&   'setting nfreqim = cd_customnimfrqs'
+   'cd_customnimfrqs not equal to zero and not equal to nfreqim',ch10,&
+   'setting nfreqim = cd_customnimfrqs'
    MSG_WARNING(message)
    dtset%nfreqim = dtset%cd_customnimfrqs
  end if
@@ -487,7 +485,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freqspmax',tread,'ENE')
  if(tread==1) dtset%freqspmax=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'frohl_params',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,4,string(1:lenstr),'frohl_params',tread,'DPR')
  if(tread==1) dtset%frohl_params=dprarr(1:4)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freqspmin',tread,'ENE')
@@ -519,8 +517,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      do ifreq=1,dtset%cd_customnimfrqs-1
        if (dtset%cd_imfrqs(ifreq+1)<dtset%cd_imfrqs(ifreq)) then
          write(message, '(3a)' )&
-&         'The frequencies specified in cd_imfrqs must be strictly increasing',ch10,&
-&         'Action: Correct this in your input file'
+         'The frequencies specified in cd_imfrqs must be strictly increasing',ch10,&
+         'Action: Correct this in your input file'
          MSG_ERROR(message)
        end if
      end do
@@ -534,8 +532,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      do ifreq=1,dtset%gw_customnfreqsp-1
        if (dtset%gw_freqsp(ifreq+1)<dtset%gw_freqsp(ifreq)) then
          write(message, '(a,a,a)' )&
-&         'The frequencies specified in gw_freqsp must be strictly increasing',ch10,&
-&         'Action: Correct this in your input file'
+         'The frequencies specified in gw_freqsp must be strictly increasing',ch10,&
+         'Action: Correct this in your input file'
          MSG_ERROR(message)
        end if
      end do
@@ -1214,11 +1212,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symdynmat',tread,'INT')
  if(tread==1) dtset%symdynmat=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_restart',tread,'INT')
+ if(tread==1) dtset%eph_restart=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
  if(tread==1) dtset%eph_task=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_mustar',tread,'DPR')
  if(tread==1) dtset%eph_mustar=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_tols_idelta',tread,'DPR')
+ if (tread == 1) dtset%eph_tols_idelta = dprarr(1:2)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_intmeth',tread,'INT')
  if (tread == 1) then
@@ -1245,6 +1249,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_ngqpt_fine',tread,'INT')
  if(tread==1) dtset%eph_ngqpt_fine=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_stern',tread,'INT')
+ if(tread==1) dtset%eph_stern = intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_transport',tread,'INT')
  if(tread==1) dtset%eph_transport=intarr(1)
@@ -1790,8 +1797,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
  if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
-   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
-   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+   if (dtset%usepawu /= 0 ) then
+     write(message,'(7a)')&
+     'usedmft and usepawu are both activated ',ch10,&
+     'This is not an usual calculation:',ch10,&
+     'usepawu will be put to a value >= 10:',ch10,&
+     'LDA+U potential and energy will be put to zero'
+     MSG_WARNING(message)
+   end if
+   if (abs(dtset%usepawu)==4.or.dtset%usepawu==14)  dtset%usepawu=14
+   if (abs(dtset%usepawu)/=4.and.dtset%usepawu/=14) dtset%usepawu=10
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
@@ -1845,7 +1860,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawcpxocc',tread,'INT')
  if(tread==1) then
    dtset%pawcpxocc=intarr(1)
- else if (dtset%nspinor==2.and.(dtset%usepawu>=1.or.dtset%usedmft>0)) then
+ else if (dtset%nspinor==2.and.(dtset%usepawu/=0.or.dtset%usedmft>0)) then
    dtset%pawcpxocc=2
  else if (dtset%pawspnorb>0.and.(dtset%kptopt<=0.or.dtset%kptopt>=3)) then
    if (dtset%optdriver/=RUNL_GSTATE.or.dtset%ionmov<6.or.dtset%iscf<10) dtset%pawcpxocc=2
@@ -1967,6 +1982,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_solv=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
    if(tread==1) dtset%dmft_t2g=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_x2my2d',tread,'INT')
+   if(tread==1) dtset%dmft_x2my2d=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tolfreq',tread,'DPR')
    if(tread==1) dtset%dmft_tolfreq=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tollc',tread,'DPR')
@@ -1977,7 +1994,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmftbandi=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandf',tread,'INT')
    if(tread==1) dtset%dmftbandf=intarr(1)
-   if((dtset%dmftbandf-dtset%dmftbandi+1)<2*maxval(dtset%lpawu(:))+1.and.(dtset%dmft_t2g==0)) then
+   if((dtset%dmftbandf-dtset%dmftbandi+1)<2*maxval(dtset%lpawu(:))+1.and.&
+ &  ((dtset%dmft_t2g==0).and.(dtset%dmft_x2my2d==0))) then
      write(message, '(4a,i2,2a)' )&
      '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
 &     '   Number of bands to construct Wannier functions is not', &
@@ -2054,15 +2072,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
  end if
 
- if (dtset%usepawu>0.or.dtset%usedmft>0) then
+ if (dtset%usepawu/=0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'f4of2_sla',tread,'ENE')
-   if(tread==1)then
-     dtset%f4of2_sla(1:ntypat)=dprarr(1:ntypat)
-   end if
+   if(tread==1) dtset%f4of2_sla(1:ntypat)=dprarr(1:ntypat)
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'f6of2_sla',tread,'ENE')
-   if(tread==1)then
-     dtset%f6of2_sla(1:ntypat)=dprarr(1:ntypat)
-   end if
+   if(tread==1) dtset%f6of2_sla(1:ntypat)=dprarr(1:ntypat)
+ end if
+ if (dtset%usepawu>0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmatpuopt',tread,'INT')
    if(tread==1) dtset%dmatpuopt=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmatudiag',tread,'INT')
@@ -2295,6 +2311,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtelf',tread,'INT')
  if(tread==1) dtset%prtelf=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prteliash',tread,'INT')
+ if(tread==1) dtset%prteliash=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfc',tread,'INT')
  if(tread==1) dtset%prtfc=intarr(1)
@@ -2897,10 +2916,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call inkpts(bravais,dtset%chksymbreak,dtset%fockdownsampling,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
 & dtset%kpt(:,1:nkpt),dtset%kptns_hf(:,1:nkpthf),kptopt,dtset%kptnrm,&
-& dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym,&
+& dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,nsym, dtset%getkerange_path, &
 & nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,nsym,&
 & occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,string,&
-& dtset%symafm(1:nsym),dtset%symrel(:,:,1:nsym),vacuum,dtset%wtk(1:nkpt),&
+& dtset%symafm(1:nsym),dtset%symrel(:,:,1:nsym),vacuum,dtset%wtk(1:nkpt), comm, &
 & impose_istwf_1=ii)
 
  dtset%kptrlen=kptrlen
@@ -2945,7 +2964,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ABI_MALLOC(dtset%kptbounds, (0,0))
  end if
 
-!if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
+ ! if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
  if (tread == 1 .and. intarr(1) == -2) then
 #ifdef HAVE_NETCDF
@@ -3031,7 +3050,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      end if
    end if
 
-   if (dtset%usepawu>0.or.dtset%usedmft>0) then
+   if (dtset%usepawu/=0.or.dtset%usedmft>0) then
 
      dprarr(1:ntypat)=dtset%upawu(1:ntypat,iimage)
      call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'upawu',tread,'ENE')
@@ -3218,14 +3237,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
     ABI_CHECK(dtset%sigma_bsum_range(2) >= dtset%sigma_bsum_range(1), "sigma_bsum_range(2) must be >= (1)")
  end if
 
+ ! band range for self-energy corrections.
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_erange', tread, 'ENE')
+ if (tread == 1) dtset%sigma_erange = dprarr(1:2)
+
  ! IBZ k-points for electron self-energy given in terms of sigma_ngkpt
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'sigma_ngkpt', tread, 'INT')
 
  if (tread == 1) then
    ! sigma_ngkpt mode --> initialize shifts, provide default if not given in input
-   ! Consistency check: nkptgw must be zero
+   ! Consistency check: nkptgw must be zero, sigma_erange should not be given.
    ABI_CHECK(dtset%nkptgw == 0, "nkptgw and sigma_ngkpt are mutually exclusive.")
-   ABI_CHECK(dtset%gw_qprange /= 0, "gw_qprange must be specified when Sigma_ngkpt is used.")
 
    dtset%sigma_ngkpt = intarr(1:3)
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'sigma_nshiftk', tread, 'INT')
@@ -3249,7 +3271,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
  if (tread==1) dtset%wfk_task = str2wfktask(tolower(rmquotes(key_value)))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
-   MSG_ERROR(sjoin("wfk_task must be specified when optdriver=",itoa(dtset%optdriver)))
+   MSG_ERROR(sjoin("A valida wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if
 
  ABI_DEALLOCATE(intarr)

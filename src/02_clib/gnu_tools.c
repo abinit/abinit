@@ -34,9 +34,7 @@
  * normal use. 
  * This function is a GNU extension and generally not available on other systems. The prototype can be found in mcheck.h. 
  */
-void 
-FC_FUNC_(clib_mtrace, CLIB_MTRACE)
-  (int *ierr)
+void clib_mtrace (int *ierr)
 {
 #ifdef HAVE_MCHECK_H
   mtrace();
@@ -64,9 +62,7 @@ FC_FUNC_(clib_mtrace, CLIB_MTRACE)
  * 
  * This function is a GNU extension and generally not available on other systems. The prototype can be found in mcheck.h.
  */
-void 
-FC_FUNC_(CLIB_muntrace,CLIB_MUNTRACE) 
-  (int* ierr)
+void clib_muntrace (int* ierr)
 {
 #ifdef HAVE_MCHECK_H
   muntrace();
@@ -86,9 +82,7 @@ FC_FUNC_(CLIB_muntrace,CLIB_MUNTRACE)
  * and 0 otherwise (when it is successful).
  * function prototype: mcheck (void (*abortfn) (enum mcheck_status status))
  */
-void 
-FC_FUNC_(clib_mcheck,CLIB_MCHECK)
-  (int* ierr)
+void clib_mcheck (int* ierr)
 {
 #ifdef HAVE_MCHECK_H
   *ierr = mcheck (NULL);

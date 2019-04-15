@@ -597,7 +597,7 @@ end function cg_dznrm2
 !!
 !! SOURCE
 
-function cg_zdotc(n,x,y) result(res)
+function cg_zdotc(n, x, y) result(res)
 
 !Arguments ------------------------------------
 !scalars
@@ -708,9 +708,10 @@ function cg_zdotu(n, x, y) result(res)
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ZDOTU_BUG
  integer :: ii
-#endif
+#else
  complex(dpc) :: cres
  complex(dpc),external :: zdotu
+#endif
 
 ! *************************************************************************
 
@@ -767,8 +768,6 @@ subroutine cg_zaxpy(n,alpha,x,y)
  real(dp),intent(in) :: x(2*n)
  real(dp),intent(inout) :: y(2*n)
 
-!local variables
-! integer :: ii
 
 ! *************************************************************************
 
@@ -936,7 +935,7 @@ end subroutine cg_zgemv
 !!
 !! SOURCE
 
-subroutine cg_zgemm(transa,transb,npws,ncola,ncolb,cg_a,cg_b,cg_c,alpha,beta)
+subroutine cg_zgemm(transa, transb, npws, ncola, ncolb, cg_a, cg_b, cg_c, alpha, beta)
 
 !Arguments ------------------------------------
 !scalars
@@ -3627,7 +3626,7 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
  if(ek0<1.0d-10)then
    write(message,'(3a)')&
 &   'The mean kinetic energy of a wavefunction vanishes.',ch10,&
-&   'It is reset to 0.1Ha.'
+&   'It is reset to 0.1 Ha.'
    MSG_WARNING(message)
    ek0=0.1_dp
  end if

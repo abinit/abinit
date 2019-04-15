@@ -164,7 +164,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iexit
- logical :: non_magnetic_xc
  real(dp),intent(inout) :: etotal
  character(len=6),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -193,6 +192,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
  integer :: psp_gencond,pead,qphase_rhoij,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
  integer :: use_sym,usecprj,usexcnhat
+ logical :: is_dfpt=.true.,nmxc
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,epaw,epawdc,enxc,etot,fermie
@@ -258,9 +258,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
    write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' nonlinear : enter , debug mode '
    call wrtout(std_out,message,'COLL')
  end if
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !Check if the perturbations asked in the input file can be computed
 
@@ -697,11 +694,8 @@ end if
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
-   pawtab(:)%usepawu=0
-   pawtab(:)%useexexch=0
-   pawtab(:)%exchmix=zero
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&   dtset%jpawu,dtset%lexexch,dtset%lpawu,ntypat,pawang,dtset%pawprtvol,pawrad,&
+&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,ntypat,pawang,dtset%pawprtvol,pawrad,&
 &   pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
    compch_fft=-1.d5;compch_sph=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
@@ -733,7 +727,7 @@ end if
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
-   has_diju=0;if(dtset%usepawu==5.or.dtset%usepawu==6) has_diju=1
+   has_diju=merge(0,1,dtset%usepawu==0)
    has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
    call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    has_k3xc=1; nk3xc1=3*min(dtset%nspden,2)-2 ! LDA only
@@ -898,8 +892,9 @@ end if
  _IBM6("Before rhotoxc")
 
  call xcdata_init(xcdata,dtset=dtset)
+ nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,option,dtset%paral_kgb,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,k3xc=k3xc,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.

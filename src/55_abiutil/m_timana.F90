@@ -346,6 +346,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(192)='inkpts                          '
  names(193)='fresid                          '
 
+ names(195)='getgh1c_setup'; basic(195) = 1
+ names(196)='getgh1c'; basic(196) = 1
  names(197)='getgh1c%dfpt_cgwf               '
  names(198)='getgh1c%dfpt_nstwf              '
  names(199)='getgh1c%dfpt_nstpaw             '
@@ -845,7 +847,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1009)='initberry(MPI stuff)            '
  names(1021)='listkk                          '
 
-! CMartins : TEST for HF
+ names(1021)='listkk                          '; basic(1021) = 1
+
+! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
  names(1502)='HF_updatecgocc                  '; basic(1502)=1
  names(1503)='HF_updatecgocc-MPI              '; basic(1503)=1
@@ -985,7 +989,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1745)='    make array hermitian        '
  names(1746)='               xsum_mpi         '
  names(1747)='inv eps_m and subtract 1        '
- 
+
+ ! IFC object
+ names(1748)='ifc_fourq'; basic(1748) = 1
+ names(1749)='ewald9'; basic(1749) = 1
+
  ! chebfi2
  names(1750) = 'chebfiwf2                     '; basic(1750) = 1
  names(1751) = 'chebfi2_init                  '
@@ -1001,6 +1009,25 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1761) = 'chebfi2_swap                  '
  names(1762) = 'chebfi2_amp_f                 '
  names(1763) = 'chebfi2_alltoall              '
+
+ names(1780)='ctk_rotate'; basic(1780) = 1
+
+ ! DVDB object
+ names(1800)='dvdb_new'; basic(1800) = 1
+ names(1801)='dvdb_qcache_read'; basic(1801) = 1
+ names(1802)='dvdb_readsym_qbz'; basic(1802) = 1
+ names(1803)='dvdb_rotate_fqg'; basic(1803) = 1
+ names(1804)='v1phq_rotate'; basic(1804) = 1
+ names(1805)='dvdb_readsym_allv1'; basic(1805) = 1
+ names(1806)='dvdb_xmpi_sum'; basic(1806) = 1
+ names(1807)='dvdb_qcache_update'; basic(1807) = 1
+
+ ! SIGEPH
+ names(1900)='sigph_pre_qloop'; basic(1900) = 1
+ names(1901)='sigph_qloop_preamble'; basic(1901) = 1
+ names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
+ names(1903)='sigph_bsum'; basic(1903) = 1
+ names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
 
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
@@ -1049,8 +1076,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      write(ount,*)
      write(ount,*)'Test the timer : '
      write(ount,*)' a combined call timab(*,1,tsec) + timab(*,2,tsec) is '
-     write(ount, '(a,es14.4,a,es14.4,a)' )&
-&     '- CPU time =',timab_cpu,' sec,    Wall time =',timab_wall,' sec'
+     write(ount, '(a,es14.4,a,es14.4,a)' )'- CPU time =',timab_cpu,' sec,    Wall time =',timab_wall,' sec'
    end if
  else
    timab_cpu=zero; timab_wall=zero
@@ -1278,8 +1304,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  ftimes(1:2,118)=ftimes(1:2,124)-ftimes(1:2,125)-ftimes(1:2,166)
  nflops(118)=nflops(124)-nflops(125)-nflops(166)
 
-
-
 !Calculating Gigaflops for all cases
  do itim=1,TIMER_SIZE
    mflops(itim)=-2
@@ -1294,7 +1318,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  do itim=1,TIMER_SIZE
    if(times(1,itim)<-tol6 .or. times(2,itim)<-tol6 .or. ncount(itim)<-1 )then
      write(message, '(6a,i4,4a,es16.6,a,es16.6,a,i6,a,es16.6)' ) ch10,&
-&     ' timana : WARNING -',ch10,&
+&     ' timana: WARNING -',ch10,&
 &     '  One among cpu, wall and ncount is negative.',ch10,&
 &     '  Timing section #',itim,', name :  ',names(itim),ch10,&
 &     '  CPU =',times(1,itim),', Wall=',times(2,itim),' ncount=',ncount(itim),' flops=',nflops(itim)
@@ -1314,6 +1338,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  end do
 
  percent_limit=0.5_dp; if (timopt<0) percent_limit=0.0001_dp
+ !percent_limit=tol12
 
 !In case there is parallelism, report times for node 0
 !if (me==0 .and. nproc>1) then
