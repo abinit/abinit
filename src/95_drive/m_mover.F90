@@ -634,7 +634,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
               ! Set all print options to false. 
               call global_set_print_parameters(geom=.FALSE.,eigvals=.FALSE.,eltic=.FALSE.,&
 &                      orbocc=.FALSE.,bands=.FALSE.)
-              if(modulo(itime,scup_dtset%scup_printniter) == 0)then 
+              if(itime == 1 .or. modulo(itime,scup_dtset%scup_printniter) == 0)then 
                  call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,& 
 &                         scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
               end if 

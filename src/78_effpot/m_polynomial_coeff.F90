@@ -2002,7 +2002,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    end do
  end do
 
-! TODO MS REWRITE UNTIL HERE IN m_opt_effpot with specific atoms and rpts
 
  if(need_verbose)then
    write(message,'(1a)')' Generation of the list of all the possible coefficients'

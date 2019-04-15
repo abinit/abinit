@@ -2366,7 +2366,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst,itime
         ! Set all print options to false. 
         call global_set_print_parameters(geom=.FALSE.,eigvals=.FALSE.,eltic=.FALSE.,&
 &                orbocc=.FALSE.,bands=.FALSE.)
-        if(modulo(ii,scup_dtset%scup_printniter) == 0)then 
+        if(ii == 1 .or. modulo(ii,scup_dtset%scup_printniter) == 0)then 
            call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,& 
 &                   scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
         end if 
