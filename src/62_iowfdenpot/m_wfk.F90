@@ -672,7 +672,7 @@ subroutine wfk_close(Wfk, delete)
 
    select case (Wfk%iomode)
    case (IO_MODE_FORTRAN)
-      ABI_FCLOSE(Wfk%fh, msg)
+      close(wfk%fh)
 
 #ifdef HAVE_MPI_IO
    case (IO_MODE_MPI)

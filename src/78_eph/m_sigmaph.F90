@@ -361,7 +361,7 @@ module m_sigmaph
   ! This array is initialized inside the (ikcalc, spin) loop
 
   real(dp),allocatable :: vcar_calc(:,:,:,:)
-  ! (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
+  ! (3, max_nbcalc, nkcalc, nsppol))
   ! Diagonal elements of velocity operator in cartesian coordinates for all states in Sigma_nk.
 
   real(dp),allocatable :: linewidth_mrta(:,:)
@@ -396,7 +396,7 @@ module m_sigmaph
    ! of the corresponding point on an unitary sphere (Frohlich self-energy)
 
   real(dp),allocatable :: frohl_deltas_sphcorr(:, :, :, :)
-   ! (2, %ntemp, %max_nbcalc, natom3))
+   ! (2, ntemp, max_nbcalc, natom3))
    ! Integration of the imaginary part inside the small sphere around Gamma
    ! computed numerically with the Frohlich model by Verdi and angular integration.
    ! The first dimension stores the contributions due to +/- omega_qn
@@ -741,7 +741,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  endif
 
- !bks_mask = .True. ! Uncomment this line to have all states on each MPI rank.
+ if (dtset%userie == 124) then
+   ! Uncomment this line to have all states on each MPI rank.
+   bks_mask = .True. 
+   call wrtout(std_out, "Storing all bands for debuggin purpose.")
+ end if
 
  ! This table is needed when computing tau:
  ! k+q states outside energy window are not read hence their contribution won't be included.
@@ -1017,7 +1021,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
      end if
      !qselect = 1
-     ! Distribute IBZ q-points inside comm_qpt.
+     ! Distribute IBZ q-points inside comm_qpt. Note that we distribute IBZ and not the full BZ or the IBZ_k.
+     ! This means that the load won't be equally distributed but memory will scale with nprocs_qpt.
      ABI_ICALLOC(itreatq, (sigma%nqibz))
      itreatq = 1
      !do iq_ibz=1, sigma%nqibz
@@ -1047,6 +1052,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (.not. sigma%use_ftinterp) then
    ABI_ICALLOC(itreatq, (sigma%nqibz))
    itreatq = 1
+   ! Distribute IBZ q-points inside comm_qpt. Note that we distribute IBZ and not the full BZ or the IBZ_k.
+   ! This means that the load won't be equally distributed but memory will scale with nprocs_qpt.
    !do iq_dvdb=1, dvdb%nqpt
    !  if (mod(iq_dvdb,sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_dvdb) = 1
    !end do
@@ -1055,7 +1062,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
  ABI_FREE(qselect)
 
- ! Loop over k-points in Sigma_nk.
+ ! Loop over k-points in Sigma_nk. Loop over spin is internal we operate on nspden components at once.
  do ikcalc=1,sigma%nkcalc
    ! Check if this (kpoint, spin) was already calculated
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
@@ -1086,7 +1093,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
-   ! TODO: Spin should be treated in a more scalable way --> kcalc and bdgw should depend on spin.
+   ! TODO: Spin should be treated in a more flexible and scalable way --> kcalc and bdgw should depend on spin.
    ! Introduce other comm and cartesian dimension for spin
    do spin=1,nsppol
      ! Check if this kpoint and spin was already calculated
@@ -2250,8 +2257,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
  do cnt=natom3,2,-1
    if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-     new%nprocs_pert = cnt; new%my_npert = natom3 / cnt
-     exit
+     new%nprocs_pert = cnt; new%my_npert = natom3 / cnt; exit
    end if
  end do
  if (new%my_npert == natom3 .and. nprocs > 1) then
@@ -2260,7 +2266,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! This to deactivate parallelism over perturbations.
  !if (dtset%nppert == -1)
- if (dtset%userib == 789) then
+ if (dtset%userib == 789 .and. new%my_npert /= natom3) then
    new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
    MSG_WARNING("Deactivating parallelism over perturbations.")
  end if
@@ -2465,7 +2471,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
            MSG_COMMENT(msg)
          end if
          write(msg,'(2(a,i0),2a)') &
-           "The number of included states ",bstop,&
+           "The number of included states: ", bstop, &
            " is larger than the number of bands in the input ",dtset%nband(new%nkcalc*(spin-1)+ikcalc),ch10,&
            "Action: Increase nband."
          ABI_CHECK(bstop <= dtset%nband(new%nkcalc*(spin-1)+ikcalc), msg)
@@ -2528,13 +2534,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    do i3=-1,1
      do i2=-1,1
        do i1=-1,1
-         !do iq_ibz=1,new%nqbz
          cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
-         !kq = kk + new%qbz(:,iq_ibz)
          kq = kk + half * [i1, i2, i3]
 
-         ! TODO: g0 umklapp here can enter into play!
-         ! gmax could not be large enough!
+         ! TODO: g0 umklapp here can enter into play gmax could not be large enough!
          call get_kg(kq, istwfk1, 1.1_dp * ecut, cryst%gmet, onpw, gtmp)
          new%mpw = max(new%mpw, onpw)
          do ipw=1,onpw

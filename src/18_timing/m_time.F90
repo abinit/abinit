@@ -30,6 +30,7 @@ MODULE m_time
 #if defined HAVE_MPI2
  use mpi
 #endif
+ use m_clib
 
  use m_xpapi,    only: xpapi_flops
  use m_fstrings, only: char_count, sjoin

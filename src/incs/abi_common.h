@@ -251,8 +251,8 @@
 #define BIGDFT_NOTENABLED_ERROR() call bigdft_lib_error()
 #endif
 
-/* Write a warning if msg is not empty */
-#define MSG_WARNING_IF(msg) if (len_trim(msg)/=0) MSG_WARNING(msg)
+/* Write a warning if condition  */
+#define MSG_WARNING_IF(expr, msg) if ((expr)) MSG_WARNING(msg)
 
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
@@ -268,16 +268,6 @@
 #define NULL_FILE "NUL"
 #else
 #define NULL_FILE "/dev/null"
-#endif
-
-
-/* Macros for Fortran IO (requires m_io_tools module) */
-#ifdef DEBUG_MODE
-/* #  define ABI_FCLOSE(fort_unit, msg) close(fort_unit) */
-#  define ABI_FCLOSE(fort_unit, msg) if (close_unit(fort_unit, msg)/=0) MSG_ERROR(msg)
-#else
-/* #  define ABI_FCLOSE(fort_unit, msg) close(fort_unit) */
-#  define ABI_FCLOSE(fort_unit, msg) if (close_unit(fort_unit, msg)/=0) MSG_WARNING(msg)
 #endif
 
 

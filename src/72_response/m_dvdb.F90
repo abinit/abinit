@@ -48,7 +48,7 @@ module m_dvdb
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : open_file, file_exists, delete_file
- use m_numeric_tools, only : wrap2_pmhalf, vdiff_t, vdiff_eval, vdiff_print
+ use m_numeric_tools, only : wrap2_pmhalf, vdiff_t, vdiff_eval, vdiff_print, l2int
  use m_symtk,         only : mati3inv, littlegroup_q
  use m_geometry,      only : littlegroup_pert, irreducible_set_pert
  use m_copy,          only : alloc_copy
@@ -2660,8 +2660,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  integer :: ii,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: ifft, ierr, nrtot, my_start, my_stop
+#ifdef HAVE_NETCDF
+ integer :: ncerr, ncid
+#endif
  real(dp) :: dksqmax,phre,phim
- real(dp) :: cpu_all,wall_all,gflops_all !cpu,wall,gflops,
+ real(dp) :: cpu_all,wall_all,gflops_all
  logical :: isirr_q, found, write_maxw
  character(len=500) :: msg, sfmt
  type(crystal_t),pointer :: cryst
@@ -2746,7 +2749,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
    ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
    db%my_rpt = all_rpt(:, my_start:my_stop)
  end if
- !ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
+ MSG_WARNING_IF(db%my_nrpt == 0, "my_nrpt == 0!")
 
  ! Find correspondence BZ --> IBZ. Note:
  ! q --> -q symmetry is always used for phonons.
@@ -2983,27 +2986,34 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
        write(unt, sfmt)rmod_all(ii), all_rpt(:, irpt), maxw(irpt, :)
      end do
      close(unt)
-     !all_rpt = all_rpt(iperm(:))
-     !do ii=1,db%natom3
-     !  maxw(:, ii) = maxw(iperm(:), ii)
-     !end do
-!#ifdef HAVE_NETCDF
-!     NCF_CHECK(nctk_open_create(ncid, outwr_path, xmpi_comm_self))
-!     NCF_CHECK(db%cryst%ncwrite(ncid))
-!     ncerr = nctk_def_dims(ncid, [ &
-!       nctkdim_t("nrpt", nrtot), nctkdim_t("natom3", db%natom3), defmode=.True.)
-!     NCF_CHECK(ncerr)
-!     NCF_CHECK(nctk_def_arrays(ncid, [ &
-!        nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
-!        nctkarr_t("maxw", "dp", "nrpt, natom3") &
-!      ]))
-!     NCF_CHECK(nctk_set_datamode(ncid))
-!     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
-!     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
-!     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), rmod_all))
-!     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
-!     NCF_CHECK(nf90_close(ncid))
-!#endif
+
+     ! Write results to netcdf file.
+     all_rpt = all_rpt(:, iperm(:))
+     do ii=1,db%natom3
+       maxw(:, ii) = maxw(iperm(:), ii)
+     end do
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nctk_open_create(ncid, strcat(outwr_path, ".nc"), xmpi_comm_self))
+     NCF_CHECK(db%cryst%ncwrite(ncid))
+     ncerr = nctk_def_dims(ncid, [nctkdim_t("nrpt", nrtot), nctkdim_t("natom3", db%natom3)], defmode=.True.)
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "has_dielt_zeff", "add_lr_part", "symv1"]))
+     ncerr = nctk_def_arrays(ncid, [ &
+        nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
+        nctkarr_t("maxw", "dp", "nrpt, natom3") &
+     ])
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+       "has_dielt_zeff", "add_lr_part", "symv1" ], &
+       l2int([db%has_dielt_zeff, db%add_lr_part, db%symv1]))
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), rmod_all))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
+     NCF_CHECK(nf90_close(ncid))
+#endif
      ABI_FREE(rmod_all)
    end if
 
