@@ -350,6 +350,7 @@ class FileToTest(object):
         if self.use_yaml not in ('yes', 'no', 'only'):
             # raise ParameterError
             pass
+
         if self.use_yaml == 'yes':
             opts['use_yaml'] = True
             opts['use_fl'] = True

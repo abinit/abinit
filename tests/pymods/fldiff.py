@@ -49,12 +49,6 @@ from .yaml_tools import is_available as has_yaml
 if has_yaml:
     from .yaml_tools.driver_test_conf import DriverTestConf as YDriverConf
     from .yaml_tools.tester import Tester as YTester, Failure as YFailure
-else:
-    class YDriverConf(object):
-        def extra_info(self):
-            return ('# YAML support is not available, YAML based tests will'
-                    ' be ignored',)
-
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
@@ -95,6 +89,19 @@ def relative_truncate(f, n):
             p -= 1
         fact = ten_n / ten_p
         return floor(f * fact) / fact
+
+
+class NotDriverConf(object):
+    def __init__(self, has_yaml):
+        self.has_yaml = has_yaml
+
+    def extra_info(self):
+        if self.has_yaml:
+            return ('# YAML support is available, but is disabled for this'
+                    ' test.',)
+        else:
+            return ('# YAML support is not available, YAML based tests will'
+                    ' be ignored.',)
 
 
 class LineDifference(object):
@@ -274,7 +281,7 @@ class Result(object):
 
             else:  # any other Difference
                 assert isinstance(diff, LineDifference), \
-                        'Unknown type of Difference.'
+                    'Unknown type of Difference.'
                 if diff.lines[0] not in error_lines:
                     self.ndiff_lines += 1
                 self.success = False
@@ -401,7 +408,7 @@ class Differ(object):
             'tolerance_rel': 1.01e-10,
             'label': None,
             'use_fl': True,
-            'use_yaml': True,
+            'use_yaml': False,
             'verbose': False,
             'debug': False
         }
@@ -413,18 +420,18 @@ class Differ(object):
             self.options['tolerance_rel'] = options['tolerance']
 
         self.use_fl = self.options['use_fl']
-        self.yaml_conf = YDriverConf()
-        self.use_yaml = False
-        if has_yaml:
-            self.use_yaml = self.options['use_yaml']
-            if self.use_yaml:
-                if yaml_test and 'file' in yaml_test and yaml_test['file']:
-                    self.yaml_conf = YDriverConf.from_file(yaml_test['file'])
-                elif yaml_test and 'yaml' in yaml_test and yaml_test['yaml']:
-                    self.yaml_conf = YDriverConf(yaml_test['yaml'])
-                else:
-                    self.yaml_conf = YDriverConf()
-                self.yaml_conf.debug = self.options['debug']
+        self.use_yaml = has_yaml and self.options['use_yaml']
+
+        if self.use_yaml:
+            if yaml_test and 'file' in yaml_test and yaml_test['file']:
+                self.yaml_conf = YDriverConf.from_file(yaml_test['file'])
+            elif yaml_test and 'yaml' in yaml_test and yaml_test['yaml']:
+                self.yaml_conf = YDriverConf(yaml_test['yaml'])
+            else:
+                self.yaml_conf = YDriverConf()
+            self.yaml_conf.debug = self.options['debug']
+        else:
+            self.yaml_conf = NotDriverConf(has_yaml)
 
     def diff(self, file1, file2):
         '''
@@ -434,13 +441,10 @@ class Differ(object):
         if file1.endswith('.xml'):
             self.xml_mode = True
 
-        with open(file1, 'rt') as f:
-            lines1 = f.readlines()
+        with open(file1, 'rt') as f1, open(file2, 'rt') as f2:
+            line_diff, doc_diff = self._diff_lines(f1, f2)
 
-        with open(file2, 'rt') as f:
-            lines2 = f.readlines()
-
-        return Result(*self._diff_lines(lines1, lines2),
+        return Result(line_diff, doc_diff,
                       extra_info=self.yaml_conf.extra_info(),
                       label=self.options['label'],
                       verbose=self.options['verbose'])
