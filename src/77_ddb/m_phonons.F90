@@ -1190,7 +1190,7 @@ subroutine phdos_unittests(comm)
 !Local variables -------------------------
 !scalars
  type(crystal_t) :: crystal
- integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
+ integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=3,nqshft1=1,space_group0=0
  integer,parameter :: timrev1=1,npsp1=1
  logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
  real(dp),parameter :: max_occ1=1.d0
@@ -1228,6 +1228,10 @@ subroutine phdos_unittests(comm)
  in_qptrlatt(:,1)=[ 5,-5,-5]
  in_qptrlatt(:,2)=[-5, 5,-5]
  in_qptrlatt(:,3)=[-5,-5, 5]
+
+ !in_qptrlatt(:,1)=[ 5, 0, 0]
+ !in_qptrlatt(:,2)=[ 0, 5, 0]
+ !in_qptrlatt(:,3)=[ 0, 0, 5]
  dos_qshift(:,1) =[0.0,0.0,0.0]
 
  amu = 1
@@ -1241,7 +1245,12 @@ subroutine phdos_unittests(comm)
  rprimd(:,2) = [ 0.5, 0.0, 0.5]
  rprimd(:,3) = [ 0.5, 0.5, 0.0]
 
- call get_point_group('m-3m',nsym,nclass,symrel,class_ids,class_names,irr)
+ rprimd(:,1) = [ 1.0, 0.0, 0.0]
+ rprimd(:,2) = [ 0.0, 1.0, 0.0]
+ rprimd(:,3) = [ 0.0, 0.0, 1.0]
+
+ call get_point_group('4',nsym,nclass,symrel,class_ids,class_names,irr)
+ !call get_point_group('m-3m',nsym,nclass,symrel,class_ids,class_names,irr)
  ABI_FREE(class_ids)
  ABI_FREE(class_names)
  call irrep_free(irr)
