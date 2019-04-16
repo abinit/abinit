@@ -177,14 +177,15 @@ module m_sigmaph
   integer :: me_bq
   integer :: nprocs_bq
 
-  ! TODO: Add communicators for band/qpts
   !integer :: comm_qpt = xmpi_comm_null
-  !integer :: me_qpt = 0
-  !integer :: nprocs_qpt = 1
+  ! MPI communicator for q-points
+  !integer :: me_qpt
+  !integer :: nprocs_qpt
 
   !integer :: comm_bsum = xmpi_comm_null
-  !integer :: me_bsum = 0
-  !integer :: nprocs_bsum = 1
+  ! MPI communicator for bands in sum
+  !integer :: me_bsum
+  !integer :: nprocs_bsum
 
   integer :: coords(3)
 
@@ -2259,106 +2260,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
    new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz)
 
- ! Parallelism over perturbations.
- ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements.
- ! Perturbations are equally distributed --> Total number of CPUs should be divisible by 3 * natom
- new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
- do cnt=natom3,2,-1
-   if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-     new%nprocs_pert = cnt; new%my_npert = natom3 / cnt; exit
-   end if
- end do
- if (new%my_npert == natom3 .and. nprocs > 1) then
-   MSG_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
- end if
-
- ! This to deactivate parallelism over perturbations.
- !if (dtset%nppert == -1)
- if (dtset%userib == 789 .and. new%my_npert /= natom3) then
-   new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
-   MSG_WARNING("Deactivating parallelism over perturbations.")
- end if
-
- ! Define number of procs for q-points and bands. nprocs is division by nprocs_pert.
- new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = nprocs / new%nprocs_pert
-
- !new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1 
- !new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1 
- !if (new%imag_only) then 
- !  Just one extra MPI level for q-points.
- !  new%nprocs_qpt = nprocs / new%nprocs_pert
- !else
- !  ! Try to distribute equally nbsum as much as possible.
- !  nrest = nprocs / new%nprocs_pert
- !  do bstop=nrest,1,-1
- !     if (mod(new%nbsum, bstop) == 0 and new%nprocs_pert * (new%nbsum / bstop) == nprocs) then
- !       new%nprocs_bsum = bstop;  new%nprocs_qpt  = nrest / new%nprocs_bsum
- !       exit
- !     end if
- !  end 
- !end if
- !if (new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum /= nprocs) then
- !  MSG_ERROR("Idle processes!")
- !end if
-
-#ifdef HAVE_MPI
- ! Create 3d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in Sigma sum.
- ndims = 3
- ABI_MALLOC(dims, (ndims))
- ABI_MALLOC(periods, (ndims))
- ABI_MALLOC(keepdim, (ndims))
- periods(:) = .False.; reorder = .False.
- dims = [new%nprocs_bq, new%nprocs_pert, 1]
- call MPI_CART_CREATE(comm, ndims, dims, periods, reorder, comm_cart, ierr)
-
- ! Find the index and coordinates of the current processor
- call MPI_COMM_RANK(comm_cart, me_cart, ierr)
- call MPI_CART_COORDS(comm_cart, me_cart, ndims, new%coords, ierr)
-
- ! Create the communicator for the (band_sum, qpoint_sum) loops
- keepdim = .False.; keepdim(1) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_bq, ierr)
- call MPI_COMM_RANK(new%comm_bq, new%me_bq, ierr)
-
- ! Create the communicator to distribute perturbations.
- keepdim = .False.; keepdim(2) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%comm_pert, ierr)
- call MPI_COMM_RANK(new%comm_pert, new%me_pert, ierr)
-
- ! Create the communicator for the band sum / qpoint loops
- !keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.
- !call MPI_CART_SUB(comm_cart, keepdim, new%comm_qpt, ierr)
- !call MPI_COMM_RANK(new%comm_qpt, new%me_qpt, ierr)
-
- ABI_FREE(dims)
- ABI_FREE(periods)
- ABI_FREE(keepdim)
- ! TODO: Free comms
- !call xmpi_comm_free(comm_cart)
-#endif
-
- ! Build table with list of perturbations treated by this CPU.
- ABI_MALLOC(new%my_pinfo, (3, new%my_npert))
- ABI_MALLOC(new%pert_table, (2, natom3))
-
- do iatom=1,cryst%natom
-   do idir=1,3
-     pertcase = idir + (iatom-1) * 3
-     all_pinfo(:, pertcase) = [idir, iatom, pertcase]
-     new%pert_table(1, pertcase) = (pertcase - 1) / (natom3 / new%nprocs_pert)
-   end do
- end do
- bstart = (natom3 / new%nprocs_pert) * new%me_pert + 1
- bstop = bstart + new%my_npert - 1
- new%my_pinfo = all_pinfo(:, bstart:bstop)
-
- new%pert_table(2, :) = -1
- do ii=1,new%my_npert
-   ip = new%my_pinfo(3, ii)
-   new%pert_table(2, ip) = ii
- end do
- !write(std_out,*)"my_npert", new%my_npert, "nprocs_pert", new%nprocs_pert; write(std_out,*)"my_pinfo", new%my_pinfo
-
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  new%ntemp = nint(dtset%tmesh(3))
  ABI_CHECK(new%ntemp > 0, "ntemp <= 0")
@@ -2645,9 +2546,108 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    new%nbsum = new%bsum_stop - new%bsum_start + 1
  end if
 
+ ! === MPI SECTIONS ===
+ ! Handle Parallelism over perturbations first
+ ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements.
+ ! Perturbations are equally distributed --> Total number of CPUs should be divisible by 3 * natom
+ new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
+ do cnt=natom3,2,-1
+   if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
+     new%nprocs_pert = cnt; new%my_npert = natom3 / cnt; exit
+   end if
+ end do
+ if (new%my_npert == natom3 .and. nprocs > 1) then
+   MSG_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
+ end if
 
+ ! This to deactivate parallelism over perturbations.
+ !if (dtset%nppert == -1)
+ if (dtset%userib == 789 .and. new%my_npert /= natom3) then
+   new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
+   MSG_WARNING("Deactivating parallelism over perturbations.")
+ end if
 
+ ! Define number of procs for q-points and bands. nprocs is division by nprocs_pert.
+ new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = nprocs / new%nprocs_pert
 
+ !new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1 
+ !new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1 
+ !if (new%imag_only) then 
+ !  Just one extra MPI level for q-points.
+ !  new%nprocs_qpt = nprocs / new%nprocs_pert
+ !else
+ !  ! Try to distribute equally nbsum as much as possible.
+ !  nrest = nprocs / new%nprocs_pert
+ !  do bstop=nrest,1,-1
+ !     if (mod(new%nbsum, bstop) == 0 and new%nprocs_pert * (new%nbsum / bstop) == nprocs) then
+ !       new%nprocs_bsum = bstop;  new%nprocs_qpt  = nrest / new%nprocs_bsum
+ !       exit
+ !     end if
+ !  end 
+ !end if
+ !if (new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum /= nprocs) then
+ !  MSG_ERROR("Idle processes!")
+ !end if
+
+#ifdef HAVE_MPI
+ ! Create 3d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in Sigma sum.
+ ndims = 3
+ ABI_MALLOC(dims, (ndims))
+ ABI_MALLOC(periods, (ndims))
+ ABI_MALLOC(keepdim, (ndims))
+ periods(:) = .False.; reorder = .False.
+ dims = [new%nprocs_bq, new%nprocs_pert, 1]
+ !dims = [new%nprocs_pert, new%nprocs_qpt, new%nprocs_bsum]
+ call MPI_CART_CREATE(comm, ndims, dims, periods, reorder, comm_cart, ierr)
+
+ ! Find the index and coordinates of the current processor
+ call MPI_COMM_RANK(comm_cart, me_cart, ierr)
+ call MPI_CART_COORDS(comm_cart, me_cart, ndims, new%coords, ierr)
+
+ ! Create the communicator for the (band_sum, qpoint_sum) loops
+ keepdim = .False.; keepdim(1) = .True.
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_bq, ierr)
+ call MPI_COMM_RANK(new%comm_bq, new%me_bq, ierr)
+
+ ! Create the communicator to distribute perturbations.
+ keepdim = .False.; keepdim(2) = .True.
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_pert, ierr)
+ call MPI_COMM_RANK(new%comm_pert, new%me_pert, ierr)
+
+ ! Create the communicator for the band sum / qpoint loops
+ !keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.
+ !call MPI_CART_SUB(comm_cart, keepdim, new%comm_qpt, ierr)
+ !call MPI_COMM_RANK(new%comm_qpt, new%me_qpt, ierr)
+
+ ABI_FREE(dims)
+ ABI_FREE(periods)
+ ABI_FREE(keepdim)
+ ! TODO: Free comms
+ !call xmpi_comm_free(comm_cart)
+#endif
+
+ ! Build table with list of perturbations treated by this CPU.
+ ABI_MALLOC(new%my_pinfo, (3, new%my_npert))
+ ABI_MALLOC(new%pert_table, (2, natom3))
+
+ do iatom=1,cryst%natom
+   do idir=1,3
+     pertcase = idir + (iatom-1) * 3
+     all_pinfo(:, pertcase) = [idir, iatom, pertcase]
+     new%pert_table(1, pertcase) = (pertcase - 1) / (natom3 / new%nprocs_pert)
+   end do
+ end do
+ bstart = (natom3 / new%nprocs_pert) * new%me_pert + 1
+ bstop = bstart + new%my_npert - 1
+ new%my_pinfo = all_pinfo(:, bstart:bstop)
+
+ new%pert_table(2, :) = -1
+ do ii=1,new%my_npert
+   ip = new%my_pinfo(3, ii)
+   new%pert_table(2, ip) = ii
+ end do
+ !write(std_out,*)"my_npert", new%my_npert, "nprocs_pert", new%nprocs_pert; write(std_out,*)"my_pinfo", new%my_pinfo
+ 
  if (.not. new%imag_only) then
    ! Split bands among the procs inside comm_bq.
    call xmpi_split_work(new%nbsum, new%comm_bq, new%my_bstart, new%my_bstop, msg, ierr)
@@ -3652,7 +3652,8 @@ subroutine sigmaph_free(self)
  ! Deallocate MPI communicators
  call xmpi_comm_free(self%comm_pert)
  call xmpi_comm_free(self%comm_bq)
- !call xmpi_comm_free(self%comm_fft)
+ !call xmpi_comm_free(self%comm_qpt)
+ !call xmpi_comm_free(self%comm_bsum)
 
  ! Close netcdf file.
 #ifdef HAVE_NETCDF
