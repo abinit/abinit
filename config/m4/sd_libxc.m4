@@ -1,7 +1,7 @@
 ## Copyright (C) 2019 Yann Pouillon
 
 #
-# Flexible Data Format I/O library (LibXC)
+# Exchange-Correlation functionals library (LibXC)
 #
 
 
@@ -74,7 +74,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
   # TODO: make it switchable for the implicit case 
   AC_ARG_WITH([libxc],
     [AS_HELP_STRING([--with-libxc],
-      [Install prefix of the Flexible Data Format I/O library (e.g. /usr/local).])],
+      [Install prefix of the LibXC library (e.g. /usr/local).])],
     [ if test "${withval}" = "no" -o "${withval}" = "yes"; then
         sd_libxc_enable="${withval}"
         sd_libxc_init="yon"
