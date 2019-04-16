@@ -46,6 +46,7 @@ module m_sigmaph
  use m_kptrank
  use m_lgroup
  use m_ephwg
+ use m_sort
  use m_hdr
  use m_sigtk
  use m_eph_double_grid
@@ -1025,9 +1026,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! This means that the load won't be equally distributed but memory will scale with nprocs_qpt.
      ABI_ICALLOC(itreatq, (sigma%nqibz))
      itreatq = 1
-     !do iq_ibz=1, sigma%nqibz
-     !  if (mod(iq_ibz,sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_ibz) = 1
+     !call sort_rpts(sigma%nqibz, sigma%qibz, cryst%gmet, iperm)
+     !do ii=1,sigma%nqibz
+     !  iq_ibz = iperm(ii)
+     !  if (mod(ii, sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_ibz) = 1
      !end do
+     !ABI_FREE(iperm)
      call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, itreatq, comm)
      ABI_FREE(itreatq)
 
@@ -1054,9 +1058,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    itreatq = 1
    ! Distribute IBZ q-points inside comm_qpt. Note that we distribute IBZ and not the full BZ or the IBZ_k.
    ! This means that the load won't be equally distributed but memory will scale with nprocs_qpt.
-   !do iq_dvdb=1, dvdb%nqpt
-   !  if (mod(iq_dvdb,sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_dvdb) = 1
+   !call sort_rpts(dvdb%nqpt, dvdb%qpt, cryst%gmet, iperm)
+   !do ii=1, dvdb%nqpt
+   !  iq_dvdb = iperm(ii)
+   !  if (mod(ii,sigma%nprocs_qpt) == sigma%me_qpt) itreatq(iq_dvdb) = 1
    !end do
+   !ABI_FREE(iperm)
+   !ABI_FREE(qmods)
    call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq, comm) 
    ABI_FREE(itreatq)
  end if
@@ -2271,17 +2279,21 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    MSG_WARNING("Deactivating parallelism over perturbations.")
  end if
 
+ ! Define number of procs for q-points and bands. nprocs is division by nprocs_pert.
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = nprocs / new%nprocs_pert
 
- !new%comm_qpt = xmpi_comm_t_from_value(xmpi_self)
  !new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1 
  !new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1 
  !if (new%imag_only) then 
+ !  Just one extra MPI level for q-points.
  !  new%nprocs_qpt = nprocs / new%nprocs_pert
  !else
+ !  ! Try to distribute equally nbsum as much as possible.
  !  nrest = nprocs / new%nprocs_pert
  !  do bstop=nrest,1,-1
- !     if (mod(new%nbsum, bstop) == 0 and new%nprocs_pert * (new%nbsum / bstop) == nprocs)
+ !     if (mod(new%nbsum, bstop) == 0 and new%nprocs_pert * (new%nbsum / bstop) == nprocs) then
+ !       new%nprocs_bsum = bstop;  new%nprocs_qpt  = nrest / new%nprocs_bsum
+ !       exit
  !     end if
  !  end 
  !end if
@@ -2290,8 +2302,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !end if
 
 #ifdef HAVE_MPI
- ! Create cartesian communicator (perturbations, bq, fft)
- ! At present, FFT parallelism is not activated.
+ ! Create 3d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in Sigma sum.
  ndims = 3
  ABI_MALLOC(dims, (ndims))
  ABI_MALLOC(periods, (ndims))
@@ -2534,7 +2545,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
  ! used to symmetrize the wavefunctions in G-space.
  ! Note that we loop over the full BZ instead of the IBZ(k)
- ! This part is very slow for dense meshes should use geometrical approach...
+ ! This part is slow for very dense meshes, should try to use a geometrical approach...
 
  new%mpw = 0; new%gmax = 0; cnt = 0
  do ik=1,new%nkcalc
@@ -2544,7 +2555,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
        do i1=-1,1
          cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
          kq = kk + half * [i1, i2, i3]
-
          ! TODO: g0 umklapp here can enter into play gmax could not be large enough!
          call get_kg(kq, istwfk1, 1.1_dp * ecut, cryst%gmet, onpw, gtmp)
          new%mpw = max(new%mpw, onpw)
@@ -2612,7 +2622,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      ! Select indices for energy window.
 
      call get_bands_from_erange(ebands, new%elow, new%ehigh, new%bsum_start, new%bsum_stop)
-     new%bsum_stop = min(new%bsum_stop,mband)
+     new%bsum_stop = min(new%bsum_stop, mband)
      ABI_CHECK(new%bsum_start <= new%bsum_stop, "bsum_start > bsum_bstop")
      new%nbsum = new%bsum_stop - new%bsum_start + 1
      new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
@@ -2633,6 +2643,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      new%bsum_stop = min(dtset%sigma_bsum_range(2), mband)
    end if
    new%nbsum = new%bsum_stop - new%bsum_start + 1
+ end if
+
+
+
+
+ if (.not. new%imag_only) then
    ! Split bands among the procs inside comm_bq.
    call xmpi_split_work(new%nbsum, new%comm_bq, new%my_bstart, new%my_bstop, msg, ierr)
    if (new%my_bstart == new%nbsum + 1) then

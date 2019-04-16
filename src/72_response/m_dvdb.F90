@@ -2944,6 +2944,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
    ABI_FREE(v1r_qibz)
  end do ! iq_ibz
 
+ ABI_FREE(iperm)
  ABI_CHECK(iqst == nqbz, "iqst /= nqbz")
  db%v1scf_rpt = db%v1scf_rpt / nqbz
 
@@ -2970,12 +2971,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      sc_rprimd(:, 2) = nq2 * db%cryst%rprimd(:, 2)
      sc_rprimd(:, 3) = nq3 * db%cryst%rprimd(:, 3)
      sc_rmet = matmul(transpose(sc_rprimd), sc_rprimd)
-     ABI_MALLOC(all_rmod, (nrtot))
-     do ii=1,nrtot
-       all_rmod(ii) = sqrt(dot_product(all_rpt(:, ii), matmul(sc_rmet, all_rpt(:, ii))))
-     end do
-     iperm = [(ii, ii=1,nrtot)]
-     call sort_dp(nrtot, all_rmod, iperm, tol12)
+     call sort_rpts(nrtot, all_rpt, sc_rmet, iperm, rmod=all_rmod)
      if (open_file(outwr_path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
        MSG_ERROR(msg)
      end if
@@ -3016,6 +3012,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      NCF_CHECK(nf90_close(ncid))
 #endif
      ABI_FREE(all_rmod)
+     ABI_FREE(iperm)
    end if
 
    ABI_FREE(maxw)
@@ -3041,7 +3038,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  ABI_FREE(wtq)
  ABI_FREE(qbz)
  ABI_FREE(indqq)
- ABI_FREE(iperm)
+
  ABI_FREE(bz2ibz_sort)
  ABI_FREE(iqs_dvdb)
  ABI_FREE(nqsts)
