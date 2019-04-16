@@ -350,8 +350,8 @@ module m_chebfiwf
     
     call xgBlock_getSize(X,spacedim,blockdim)
 
-    print *, "spacedim X", spacedim
-    print *, "blockdim X", blockdim
+    !print *, "spacedim X", spacedim
+    !print *, "blockdim X", blockdim
     
     call xgBlock_getSize(AX,spacedim,blockdim)
     
@@ -391,7 +391,7 @@ module m_chebfiwf
         l_gs_hamk,l_gvnlc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0) 
     else
       call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),eval,blockdim,l_mpi_enreg,&
-&                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.false.)  !already_transposed = true (previous)
+&                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.true.)  !already_transposed = true (previous)
     end if
   
     ! scale cg, ghc, gsc

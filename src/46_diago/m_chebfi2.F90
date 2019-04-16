@@ -143,7 +143,11 @@ module m_chebfi2
     call timab(tim_init,1,tsec)
     
     chebfi%space = space
-    chebfi%neigenpairs = neigenpairs
+    !if (paral_kgb == 0) then
+      chebfi%neigenpairs = neigenpairs  !transposer sam ovo postavlja
+    !else
+      !chebfi%neigenpairs = bandpp
+    !end if
     chebfi%spacedim    = spacedim
     chebfi%tolerance   = tolerance
     chebfi%ecut        = ecut
@@ -188,12 +192,19 @@ module m_chebfi2
     neigenpairs = chebfi%neigenpairs
 
     call chebfi_free(chebfi) 
-
-    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs)
+    
+    print *, "neigenpairs", neigenpairs
+    stop
+    
+    if (chebfi%paral_kgb == 0) then
+      call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs)
+    else
+      call xg_init(chebfi%X_NP,space,spacedim,2*chebfi%bandpp)
+    end if
     
     call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)  
     call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  
-
+    
     call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom)
     call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom)
 
@@ -341,6 +352,9 @@ module m_chebfi2
     
     allocate(nline_bands(neigenpairs))
     
+    print *, neigenpairs
+    stop
+    
     call xg_init(DivResults, chebfi%space, neigenpairs, 1)
         
     tolerance = chebfi%tolerance
@@ -396,8 +410,8 @@ module m_chebfi2
       !call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, chebfi%bandpp)
       !stop
     else
-      call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, 1, spacedim, chebfi%bandpp)   !use xAXColsRows instead of AX notion
-      call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, chebfi%bandpp)
+      call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
+      call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
     end if
     
     !print *, "AAAAAAAAAAAAAAAAAAAA"
@@ -407,14 +421,20 @@ module m_chebfi2
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
     call getAX_BX(chebfi%X,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
-    
-    print *, "PROSAO NIJE SE UBIO"
-    stop
+      
+    call xmpi_barrier(chebfi%spacecom)
+    !print *, "PROSAO NIJE SE UBIO"
+    !stop
                
     !********************* Compute Rayleigh quotients for every band, and set λ − equal to the largest one *****!
     call timab(tim_RR_q, 1, tsec)
-    call chebfi_rayleighRitzQuotiens(chebfi, neigenpairs, maxeig, mineig, DivResults%self) !OK
+    !call chebfi_rayleighRitzQuotiens(chebfi, neigenpairs, maxeig, mineig, DivResults%self) !OK
+    call chebfi_rayleighRitzQuotiens(chebfi, chebfi%bandpp, maxeig, mineig, DivResults%self) !OK
     call timab(tim_RR_q, 2, tsec)
+    
+    !!TODO TODO TODO UTORAK srediti duzinu ovih nizova iznad
+    print *, "maxeig", maxeig  
+    stop
                 
     lambda_minus = maxeig
         
@@ -537,16 +557,24 @@ module m_chebfi2
     type(xg_t)::Results1
     type(xg_t)::Results2
 
+    !print *, "neigenpairs", neigenpairs
+    !stop
+
     call xg_init(Results1, chebfi%space, neigenpairs, 1)
     call xg_init(Results2, chebfi%space, neigenpairs, 1)
     
-    call xgBlock_colwiseDotProduct(chebfi%X,chebfi%AX%self,Results1%self)
+    !call xgBlock_colwiseDotProduct(chebfi%X,chebfi%AX%self,Results1%self)
+    call xgBlock_colwiseDotProduct(chebfi%X,chebfi%xAXColsRows,Results1%self)
         
     !PAW
-    call xgBlock_colwiseDotProduct(chebfi%X,chebfi%BX%self,Results2%self)
+    !call xgBlock_colwiseDotProduct(chebfi%X,chebfi%BX%self,Results2%self)
+    call xgBlock_colwiseDotProduct(chebfi%X,chebfi%xBXColsRows,Results2%self)
 
     !PAW
     call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, maxeig, maxeig_pos, mineig, mineig_pos)
+    
+    print *, "maxeig", maxeig
+    stop
         
     call xg_free(Results1)
     call xg_free(Results2)

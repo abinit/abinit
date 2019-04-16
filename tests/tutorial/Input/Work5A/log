@@ -1,4 +1,4 @@
-  ABINIT 8.11.5
+  ABINIT 8.11.6
   
   Give name for formatted input file: 
 t03.in
@@ -13,7 +13,7 @@ t03_x
  
 --- !COMMENT
 src_file: m_dtfil.F90
-src_line: 1108
+src_line: 1086
 message: |
     Output file: t03_x.out already exists.
 ...
@@ -21,13 +21,13 @@ message: |
  
 --- !COMMENT
 src_file: m_dtfil.F90
-src_line: 1132
+src_line: 1110
 message: |
-    Renaming old t03_x.out to t03_x.out0265
+    Renaming old t03_x.out to t03_x.out0280
 ...
  
 
-.Version 8.11.5 of ABINIT 
+.Version 8.11.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -42,16 +42,16 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 12 Apr 2019.
-- ( at 16h53 )
+.Starting date : Tue 16 Apr 2019.
+- ( at 15h21 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  
  === Build Information === 
-  Version       : 8.11.5
+  Version       : 8.11.6
   Build target  : x86_64_linux_intel19.0
-  Build date    : 20190412
+  Build date    : 20190415
  
  === Compiler Suite === 
   C compiler       : gnu7.3
@@ -131,12 +131,13 @@ message: |
  
        HAVE_MPI_IALLREDUCE        HAVE_MPI_IALLTOALL       HAVE_MPI_IALLTOALLV
  
-         HAVE_MPI_IGATHERV        HAVE_MPI_INTEGER16               HAVE_MPI_IO
+           HAVE_MPI_IBCAST         HAVE_MPI_IGATHERV        HAVE_MPI_INTEGER16
  
- HAVE_MPI_TYPE_CREATE_S...         HAVE_OMP_COLLAPSE               HAVE_OPENMP
+               HAVE_MPI_IO HAVE_MPI_TYPE_CREATE_S...         HAVE_OMP_COLLAPSE
  
-             HAVE_OS_LINUX         HAVE_TIMER_ABINIT              USE_MACROAVE
+               HAVE_OPENMP             HAVE_OS_LINUX         HAVE_TIMER_ABINIT
  
+              USE_MACROAVE                                                      
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 - input  file    -> t03.in
@@ -166,6 +167,7 @@ message: |
  inkpts: Sum of 1 k point weights is    1.000000
  chkneu: initialized the occupation numbers for occopt= 3, spin-unpolarized or antiferromagnetic case:
 npfft, npband, npspinor and npkpt:     1    2    1    1
+me_fft, me_band, me_spinor , me_kpt:     0    0    0    0
  mpi_setup: With nkpt_me=1 and mkmem  = 1, ground state wf handled in core.
  mpi_setup: With nkpt_me=1 and mkqmem = 1, ground state wf handled in core.
  mpi_setup: With nkpt_me=1 and mk1mem = 1, ground state wf handled in core.
@@ -561,17 +563,5 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ITER STEP NUMBER     1
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  Invovl built
- spacedim X        3888
- blockdim X          96
- spacedim AX        3888
- blockdim AX          96
- spacedim BX        3888
- blockdim BX          96
- spacedim X        3888
- blockdim X          96
- spacedim AX        3888
- blockdim AX          96
- spacedim BX        3888
- blockdim BX          96
- PROSAO NIJE SE UBIO
- PROSAO NIJE SE UBIO
+ neigenpairs         192
+ neigenpairs         192

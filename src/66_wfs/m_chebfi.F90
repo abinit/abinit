@@ -328,10 +328,25 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    end if
    resids_filter(iband) = SUM(residvec_filter**2)
  end do
- call xmpi_sum(resids_filter,mpi_enreg%comm_fft,ierr)
+ 
+ !print *, "resids_filter", resids_filter(1:10)
+ !print *, "nband_filter", nband_filter
+ !stop
+ !print *, "xmpi_sum"
+ !stop
+ 
+ !call xmpi_sum(resids_filter,mpi_enreg%comm_fft,ierr)
+ 
+ !print *, "resids_filter", resids_filter(1:10)
+ !print *, "nband_filter", nband_filter
+ !stop
+ 
  call xmpi_max(MAXVAL(eig(1:nband_filter)),maxeig,mpi_enreg%comm_band,ierr)
  call xmpi_min(MINVAL(eig(1:nband_filter)),mineig,mpi_enreg%comm_band,ierr)
  filter_low = maxeig
+ print *, "maxeig", maxeig
+ stop
+ 
  call timab(timer_update_eigen, 2, tsec)
  
  ! Decide how many iterations per band are needed
