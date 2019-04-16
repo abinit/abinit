@@ -30,7 +30,7 @@ module m_psp9
  use m_splines
  use m_errors
  use m_abicore
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  use m_psml
 #endif
 
@@ -140,7 +140,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 !Local variables-------------------------------
 !scalars
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  integer :: iln,pspindex,ipsang,irad,kk,ll
  integer :: mm,nn,nso,ii,ir,il
  integer :: nshells
@@ -157,7 +157,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  type(pawrad_type) :: mesh
 #endif
 !arrays
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  integer, allocatable :: idx_so(:),idx_sr(:)
  real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_spl(:)
  type(ps_t) :: psxml
@@ -165,7 +165,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 ! ***************************************************************************
 
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
 
  call ps_destroy(psxml)
  call psml_reader(filpsp,psxml,debug=.true.)
@@ -656,16 +656,16 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  indlmn=0 ; mmax=0 ; nproj=0
  ekb=zero ; epsatm=zero ; ffspl=zero ; qchrg=zero ; vlspl=zero ; xcccrc=zero ; xccc1d=zero
 
- if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_PSML is false
- if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_PSML is false
- if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_PSML is false
- if(.false.)write(std_out,*)mpsang ! Just to keep mpsang when HAVE_PSML is false
- if(.false.)write(std_out,*)pspso  ! Just to keep pspso when HAVE_PSML is false
- if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_PSML is false
- if(.false.)write(std_out,*)qgrid_vl ! Just to keep qgrid_vl when HAVE_PSML is false
- if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_PSML is false
- if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_PSML is false
- if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_PSML is false
+ if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)mpsang ! Just to keep mpsang when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)pspso  ! Just to keep pspso when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)qgrid_vl ! Just to keep qgrid_vl when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_LIBPSML is false
 #endif
 
 end subroutine psp9in
@@ -699,7 +699,7 @@ end subroutine psp9in
 !!
 !! SOURCE
 
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
 
 subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
 

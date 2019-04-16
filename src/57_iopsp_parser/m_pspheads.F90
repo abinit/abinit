@@ -31,7 +31,7 @@ MODULE m_pspheads
  use m_errors
  use m_hash_md5
  use m_psxml2ab
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  use m_psml
 #endif
 #if defined HAVE_BIGDFT
@@ -122,7 +122,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
  real(dp) :: psppar(0:4,0:6)
  logical :: exists
 #endif
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  character(len=3) :: atmsymb
  character(len=30) :: creator
 #endif
@@ -197,7 +197,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
      pspheads(ipsp)%pspso=0
 
    else if (usexml==1 .and. test_paw==0) then
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
      write(message,'(a,a)')  &
 &     '- inpspheads : Reading pseudopotential header in XML form from ', trim(filnam(ipsp))
      call wrtout(ab_out,message,'COLL')

@@ -37,7 +37,7 @@ dep_levels = {
   "bigdft":3,
   "etsf_io":2,
   "fft":1,
-  "psml":1,
+  "libpsml":1,
   "yaml":1,
   "libxc":1,
   "linalg":1,

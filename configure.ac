@@ -229,8 +229,14 @@ ABI_GPU_INIT
 # Note: MPI and GPU must be initialised after feature triggers
 ABI_TRIGGERS_INIT
 
+# Init LibPSML
+SD_LIBPSML_INIT([auto no-cxx optional fail])
+
 # Init LibXC
 SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
+
+# Init XMLF90
+SD_XMLF90_INIT([auto no-cxx optional fail])
 
 # ---------------------------------------------------------------------------- #
 
@@ -722,11 +728,12 @@ AM_CONDITIONAL([DO_BUILD_PSML], [test "${abi_psml_wanted}" != "" ])
 
                        # ------------------------------ #
 
-# PSML library support
-AC_MSG_CHECKING([whether to enable PSML support])
-AC_MSG_RESULT([${abi_psml_enable}])
-if test "${abi_psml_enable}" = "yes"; then
-  ABI_TRIGGER_PSML
+# XMLF90 library support
+SD_XMLF90_DETECT
+
+# LibPSML library support
+if test "${sd_xmlf90_ok}" = "yes"; then
+  SD_LIBPSML_DETECT
 fi
 
 # NetCDF library support

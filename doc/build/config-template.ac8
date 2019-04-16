@@ -975,6 +975,20 @@
 #enable_triqs_v1_4="no"
 #
 # Include flags for the TRIQS library (default is unset)
+                       # ------------------------------ #
+
+# Enable XMLF90 support (default is no)
+#
+#with_xmlf90="yes"
+
+# Fortran flags for the XMLF90 library (default is unset)
+#
+#XMLF90_FCFLAGS="-I/usr/local/include"
+
+# Link flags for the LibPSML library (default is unset)
+#
+#XMLF90_LIBS="-L/usr/local/lib -lxmlf90"
+
 #
 #with_triqs_incs="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
 
