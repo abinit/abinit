@@ -1450,7 +1450,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    blanchet - Compute the free_transfactor U0.
      if(dtset%useria==6661 .and. dtset%useric > 0) then
-       call free_transfactor(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%useric,dtset%wtk)
+       call free_transfactor(dtset%useric,eigen,eknk,energies%e_fermie,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
+&       rprimd,dtset%tsmear,dtset%wtk)
      end if
 
      if (psps%usepaw==0) then

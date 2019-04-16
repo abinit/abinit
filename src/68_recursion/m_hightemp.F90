@@ -32,7 +32,8 @@ module m_hightemp
   use m_errors
   use m_geometry
   use m_specialmsg
-  use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle
+  use m_mpinfo,         only : ptabs_fourdp, proc_distrb_cycle
+  use m_numeric_tools,  only : simpson, simpson_int
 
   implicit none
 
@@ -181,14 +182,24 @@ subroutine int_freedos(e_bcut,fermie,mrgrid,rprimd,tsmear,u0)
 
   ! Local variables -------------------------
   ! Scalars
-  real(dp) :: ucvol
+  integer :: ii
+  real(dp) :: ix,step,ucvol
   ! Arrays
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+  real(dp) :: values(mrgrid)
 
   ! *********************************************************************
 
-  
-
+  step=(1/e_bcut)/mrgrid
+  do ii=1,mrgrid
+    ix=(ii)*step
+    values(ii)=(2/(exp((1/ix-fermie)/(tsmear))+1))*((sqrt(2.))/(PI*PI))*sqrt(1/ix-u0)/(ix*ix)
+  end do
+  write(0,*) "u0=",u0
+  write(0,*) "fermie=",fermie
+  write(0,*) "e_bcut=",e_bcut
+  write(0,*) "tsmear=",tsmear
+  write(0,*) simpson(step,values)
 end subroutine int_freedos
 
 !!****f* ABINIT/free_transfactor
@@ -215,15 +226,17 @@ end subroutine int_freedos
 !! CHILDREN
 !!
 !! SOURCE
-subroutine free_transfactor(eigen,eknk,mband,nband,nkpt,nsppol,bcut,wtk)
+subroutine free_transfactor(bcut,eigen,eknk,fermie,mband,nband,nkpt,nsppol,rprimd,tsmear,wtk)
 
   ! Arguments -------------------------------
   ! Scalars
   integer,intent(in) :: bcut,mband,nkpt,nsppol
+  real(dp),intent(in) :: fermie,tsmear
   ! Arrays
   integer,intent(in) :: nband(nkpt*nsppol)
   real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
   real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
+  real(dp),intent(in) :: rprimd(3,3)
   real(dp),intent(in) :: wtk(nkpt)
 
   ! Local variables -------------------------
@@ -256,8 +269,10 @@ subroutine free_transfactor(eigen,eknk,mband,nband,nkpt,nsppol,bcut,wtk)
     niter=niter+1
   end do
   u0=u0/niter
-  write(0,*) "Average made on ",niter," last bands until band =",bcut
-  write(0,*) "u0 =",u0
+
+  call int_freedos(ek_n(bcut),fermie,1024,rprimd,tsmear,u0)
+  ! write(0,*) "Average made on ",niter," last bands until band =",bcut
+  ! write(0,*) "u0 =",u0
 end subroutine free_transfactor
 
 end module m_hightemp
