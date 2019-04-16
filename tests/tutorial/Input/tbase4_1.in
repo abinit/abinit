@@ -12,11 +12,11 @@ rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.5  0.0
 
 #Optimization of the lattice parameters
-optcell 1
+optcell 0
 ionmov  2
 ntime  10
 dilatmx 1.05
-ecutsm  0.5
+ecutsm  0
 
 #Definition of the atom types
 ntypat 1          # There is only one type of atom
@@ -57,7 +57,7 @@ toldfe 1.0d-6     # Will stop when, twice in a row, the difference
                   # differ by less than toldfe (in Hartree)
                   # This value is way too large for most realistic studies of materials
 
-
+#wfoptalg 111
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -247,10 +247,10 @@ contains
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! NOTES
 !!  Be careful to the meaning of nfft (size of FFT grids):
@@ -893,7 +893,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 !      Build inverse of overlap matrix for chebfi
-       if(psps%usepaw == 1 .and. dtset%wfoptalg == 1 .and. istep <= 1) then
+       if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
        end if
 
@@ -1846,10 +1846,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !! OUTPUT
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -1948,10 +1948,10 @@ subroutine wvl_nscf_loop()
 !!  argout(sizeout)=description
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2039,10 +2039,10 @@ subroutine wvl_nscf_loop_bigdft()
 !!  e_eigenvalues= eigenvalues energy
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2097,10 +2097,10 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2149,10 +2149,10 @@ subroutine wvl_occ()
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2201,10 +2201,10 @@ subroutine wvl_occ_bigdft()
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2296,7 +2296,7 @@ end subroutine vtorho
 !! NOTES
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      timab,xmpi_recv,xmpi_send

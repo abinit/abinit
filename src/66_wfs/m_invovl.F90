@@ -101,7 +101,7 @@ CONTAINS
 !! nkpt= number of k-points
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -135,7 +135,7 @@ CONTAINS
 !! nkpt= number of k-points
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -176,7 +176,7 @@ CONTAINS
 !! INPUTS
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -434,7 +434,7 @@ end subroutine make_invovl
 !! INPUTS
 !!
 !! PARENTS
-!!      chebfi
+!!      m_chebfi
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -476,6 +476,10 @@ end subroutine make_invovl
 
  ikpt_this_proc=bandfft_kpt_get_ikpt()
  invovl => invovl_kpt(ikpt_this_proc)
+ 
+ print *, "ham%natom", ham%natom
+ print *, "nspinor*ndat" ,nspinor*ndat  !192
+ !stop
 
  if(ham%istwf_k == 1) then
    cplx = 2
@@ -491,23 +495,25 @@ end subroutine make_invovl
  proj = zero
  sm1proj = zero
  PtPsm1proj = zero
-
+ 
  call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
  call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
-
+ 
  ! get the cprj
  choice = 0 ! only compute cprj, nothing else
  cpopt = 0 ! compute and save cprj
  paw_opt = 3 ! S nonlocal operator
+ !stop
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
-&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
- else
+&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.false.) !already_transposed = true (previous)
+  else
    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
 &              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
-
+ 
+ 
  call timab(timer_apply_inv_ovl_opernla, 2, tsec)
  call timab(timer_apply_inv_ovl_inv_s, 1, tsec)
 
@@ -520,12 +526,12 @@ end subroutine make_invovl
      shift = shift + nlmn
    end do
  end do
-
+  
  !multiply by S^1
  call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
  sm1proj = - sm1proj
  PtPsm1proj = - PtPsm1proj
-
+ 
  ! copy sm1proj to cwaveprj(:,:)
  do idat=1, ndat*nspinor
    shift = 0
@@ -544,7 +550,7 @@ end subroutine make_invovl
  paw_opt = 3
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
-&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
+&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.false.)  !already_transposed = true (previous)
  else
    call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
 &              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)

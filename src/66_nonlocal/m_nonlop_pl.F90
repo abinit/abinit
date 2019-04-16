@@ -416,7 +416,6 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
    call scalewf_nonlop(istwf_k,mpi_enreg,npwin,1,vectin)
  end if
 
-
 !Big loop on atom types.
  ia1=1
  do itypat=1,ntypat
@@ -1200,6 +1199,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !  End atom type loop, over itypat:
    ia1=ia2+1
  end do
+ 
 
 !De-allocate temporary space.
  ABI_DEALLOCATE(ekb_s)
@@ -1214,6 +1214,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  ABI_DEALLOCATE(tmpfac)
  ABI_DEALLOCATE(dgxdsfac)
  ABI_DEALLOCATE(indlmn_s)
+ 
  !if(choice==6)  then
  ABI_DEALLOCATE(dgxdis)
  ABI_DEALLOCATE(d2gxdis)
@@ -1238,7 +1239,6 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  if(istwf_k/=1) then
    call scalewf_nonlop(istwf_k,mpi_enreg,npwin,2,vectin)
  end if
-
  if (nspinor==2)  then
    ABI_DEALLOCATE(vectin_s)
    ABI_DEALLOCATE(vectout_s)
@@ -1276,6 +1276,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
      enlout(1:6)=enlout(1:6)+strssoc(:)
    end if
  end if
+ 
 
 !DEBUG
 !write(std_out,*)' nonlop_pl: exit '

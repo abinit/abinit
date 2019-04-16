@@ -1,0 +1,13 @@
+FRONTALE:
+https://saraford.net/2017/03/03/how-to-create-your-own-local-git-remote-repo-thats-not-hosted-on-a-git-server-bare-option-062/
+
+on laptop: git push frontale:abinit.git new_chebfi 
+on frontale: git clone --single-branch --branch new_chebfi abinit.git/ (first time)
+git clean -f (nth time if developed on local)
+git pull
+
+LOCAL:
+git remote add trunk git@gitlab.abinit.org:trunk/abinit.git (opciono)
+git merge trunk/develop 
+git mergetool --tool meld
+

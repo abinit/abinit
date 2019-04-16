@@ -3348,7 +3348,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if (usepaw==1) then
      write(cond_string(1), "(A)") 'usepaw'
      cond_values(1)=1
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,6,(/0,1,4,10,14,114/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,7,(/0,1,4,10,14,111,114/),iout)
    end if
 !  wfoptalg/=114 if PAW+Fock
    if (usepaw==1 .and. dt%usefock==1) then
@@ -3462,7 +3462,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  bandFFT
    if(dt%paral_kgb==1.and.dt%optdriver==RUNL_GSTATE) then
-     if (mod(dt%wfoptalg,10) /= 4 .and. dt%wfoptalg /= 1) then
+     if (mod(dt%wfoptalg,10) /= 4 .and. mod(dt%wfoptalg,10) /= 1) then
        write(message,'(a,i0,a,a,a,a)')&
 &       'The value of wfoptalg is found to be ',dt%wfoptalg,ch10,&
 &       'This is not allowed in the case of band-FFT parallelization.',ch10,&

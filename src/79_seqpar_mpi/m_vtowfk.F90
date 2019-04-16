@@ -46,6 +46,7 @@ module m_vtowfk
  use m_cgwf,        only : cgwf
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
+ use m_chebfiwf,    only : chebfiwf2
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_nonlop,      only : nonlop
@@ -185,7 +186,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: has_fock,newlobpcg
+ logical :: has_fock,newlobpcg,newchebfi
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -230,6 +231,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
+ newchebfi = (dtset%wfoptalg == 111 .and. dtset%use_gpu_cuda == 0) 
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
@@ -396,8 +398,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
 !    =========================================================================
        else if (wfopta10 == 1) then
-         call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
-&         mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+         if ( .not. newchebfi) then
+           call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+         else
+           call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k) 
+         end if            
        end if
 
 !      =========================================================================
@@ -474,7 +481,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
-   if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
+   if ((wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11) .or. dtset%ortalg>0) then
      call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
 &     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if
@@ -482,8 +489,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !  DEBUG seq==par comment next block
 !  Fix phases of all bands
-   if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
-     if ( .not. newlobpcg ) then
+   if ((xmpi_paral/=1).or.(mpi_enreg%paral_kgb/=1)) then
+     if ( .not. newlobpcg .and. .not. newchebfi) then
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
      else
        ! GSC is local to vtowfk and is completely useless since everything

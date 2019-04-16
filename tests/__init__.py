@@ -152,7 +152,7 @@ _tsuite_dirs = [
     "libxc",
     "mpiio",
     "paral",
-    #"hpc",
+    "hpc",
     #"physics",
     "seq",
     "tutomultibinit",

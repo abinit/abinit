@@ -231,7 +231,9 @@ program abinit
 !create the name of the status file, initialize the status subroutine.
 
  call timab(41,3,tsec)
+ !stop
  call iofn1(filnam,filstat,xmpi_world)
+ !stop
 
 !------------------------------------------------------------------------------
 

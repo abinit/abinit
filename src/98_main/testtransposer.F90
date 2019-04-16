@@ -59,6 +59,12 @@ program testTransposer
   double precision :: nflops, ftimes(2)
   integer :: ncount
   double precision :: times(2)
+  
+  integer :: ncols
+  integer :: nrows
+  
+  integer :: counter
+  integer :: debug_rank = 0
 
   type(xgBlock_t) :: xcgLinalg
   type(xgBlock_t) :: xcgColsRows
@@ -76,36 +82,58 @@ program testTransposer
 
   call xmpi_init()
 
-  npw = 4000+xmpi_comm_rank(xmpi_world)
-  nband = 2000
+  npw = 6+xmpi_comm_rank(xmpi_world) !4000 big !6 small
+  
+  !print *, "npw", npw
+  !stop
+  nband = 4 !2000 big !4 small
   ncycle = 20
+    
   if ( xmpi_comm_size(xmpi_world) > 1 ) then
     nCpuRows = 2
     nCpuCols = xmpi_comm_size(xmpi_world)/nCpuRows
   else
     nCpuRows = 1
     nCpuCols = 1
-  end if
-
+  end if    
 
   std_out = 6+xmpi_comm_rank(xmpi_world)
 
   allocate(cg(2,npw*nband))
   allocate(cg0(2,npw*nband))
+  
+  do counter = 1, npw*nband
+    cg(:, counter) = counter
+  end do
 
-  call random_number(cg)
+  !call random_number(cg)
   cg0(:,:) = cg(:,:)
 
   call xgBlock_map(xcgLinalg,cg,SPACE_C,npw,nband,xmpi_world)
-
+  !print *, "NPW", npw
+  !if (xmpi_comm_rank(xmpi_world) == debug_rank) then
+  !  call xgBlock_print(xcgLinalg,6)
+  !end if
+  !print *, cg
+  !stop
+  
+  call xgBlock_getSize(xcgLinalg,nrows,ncols)
+  
+  !print *, "NROWS 1", nrows
+  !print *, "NCLOS 1", ncols
+  
   write(std_out,*) " Complex all2all"
-  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
+  if (xmpi_comm_rank(xmpi_world) == debug_rank) then
+    print *, "xcgColsRows PRVI PUT:"
+    call xgBlock_print(xcgColsRows,6)
+  end if  
+  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,debug_rank)
   call tester()
   call xgTransposer_free(xgTransposer)
   call printTimes()
 
   write(std_out,*) " Complex gatherv"
-  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,2)
+  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,2,debug_rank)
   call tester()
   call xgTransposer_free(xgTransposer)
   call printTimes()
@@ -113,13 +141,13 @@ program testTransposer
   call xgBlock_map(xcgLinalg,cg,SPACE_CR,2*npw,nband,xmpi_world)
 
   write(std_out,*) " Real all2all"
-  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
+  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,debug_rank)
   call tester()
   call xgTransposer_free(xgTransposer)
   call printTimes()
 
   write(std_out,*) " Real gatherv"
-  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,2)
+  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,2,debug_rank)
   call tester()
   call xgTransposer_free(xgTransposer)
   call printTimes()
@@ -147,7 +175,7 @@ program testTransposer
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
+!!        !call xgBlock_print(xgeigen,6)
 !! NOTES
 !!
 !! INPUTS
@@ -168,14 +196,27 @@ program testTransposer
       cputime = 0
       do i=1,ncycle
         walltime = abi_wtime()
+        !if (xmpi_comm_rank(xmpi_world) == debug_rank) then
+        !  call xgBlock_print(xcgLinalg,6)
+        !end if
+        !stop     
+        if (xmpi_comm_rank(xmpi_world) == debug_rank) then
+          print *, "RANK (before transpose): ", debug_rank
+          call xgBlock_print(xcgLinalg,6)
+        end if
         call xgTransposer_transpose(xgTransposer,STATE_COLSROWS)
+        !if (xmpi_comm_rank(xmpi_world) == debug_rank) then
+          !print *, "RANK (after transpose): ", debug_rank
+          !call xgBlock_print(xcgLinalg,6)
+        !end if
+        !stop
         if ( ncpucols > 1 ) then ! for 1 both states are aliased !!
           call random_number(cg)
         end if
         !call xgBlock_scale(xcgLinalg,0.d0,1)
-        !call xgBlock_print(xgeigen,6)
+        !call xgBlock_print(xcgLinalg,6)
         call xgTransposer_transpose(xgTransposer,STATE_LINALG)
-        !call xgBlock_print(xgx0,6)
+        !call xgBlock_print(xcgLinalg,6)
         call xmpi_barrier(xmpi_world)
         walltime = abi_wtime() - walltime
         cputime = cputime + walltime

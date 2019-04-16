@@ -108,6 +108,11 @@ module m_xg
     module procedure xgBlock_gemmR
     module procedure xgBlock_gemmC
   end interface
+  
+  interface xgBlock_saxpy
+    module procedure xgBlock_saxpyR
+    module procedure xgBlock_saxpyC
+  end interface
 
  interface xgBlock_colwiseMul
    module procedure xgBlock_colwiseMulR
@@ -175,7 +180,10 @@ module m_xg
   public :: xgBlock_add
   public :: xgBlock_cshift
   public :: xgBlock_colwiseNorm2
+  public :: xgBlock_colwiseDotProduct
+  public :: xgBlock_colwiseDivision 
   public :: xgBlock_colwiseCymax
+  public :: xgBlock_saxpy
   public :: xgBlock_colwiseMul
   public :: xgBlock_scale
 
@@ -502,6 +510,8 @@ module m_xg
 
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
+      !print *, "xgBlock%cols*xgBlock%Ldim", xgBlock%cols*xgBlock%Ldim
+      !print *, "cols*rows", cols*rows
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
           write(*,*) xgBlock%cols,xgBlock%Ldim,cols,rows
           write(*,*) xgBlock%cols*xgBlock%Ldim,cols*rows
@@ -1888,6 +1898,77 @@ module m_xg
   end subroutine xgBlock_colwiseMulC
 !!***
 
+ subroutine xgBlock_saxpyR(xgBlock1, da, xgBlock2)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_saxpyR'
+!End of the abilint section
+
+    type(xgBlock_t), intent(inout) :: xgBlock1
+    double precision, intent(in   ) :: da
+    type(xgBlock_t), intent(in   ) :: xgBlock2
+
+    if ( xgBlock1%space /= xgBlock2%space ) then
+      MSG_ERROR("Must be same space for saxpy")
+      stop
+    end if
+    if ( xgBlock1%LDim /= xgBlock2%LDim ) then
+      MSG_ERROR("Must have same LDim for saxpy")
+      stop
+    end if
+    if ( xgBlock1%cols /= xgBlock2%cols ) then
+      MSG_ERROR("Must have same cols for saxpy")
+      stop
+    end if
+ 
+    select case(xgBlock1%space)
+    case (SPACE_R,SPACE_CR)
+      call daxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecR,1,xgBlock1%vecR,1)   
+    case (SPACE_C)
+      call zaxpy(xgBlock1%cols*xgBlock1%LDim,dcmplx(da,0.d0),xgBlock2%vecC,1,xgBlock1%vecC,1)
+    end select
+
+  end subroutine xgBlock_saxpyR
+  
+  
+  subroutine xgBlock_saxpyC(xgBlock1, da, xgBlock2)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_saxpyC'
+!End of the abilint section
+
+    type(xgBlock_t), intent(inout) :: xgBlock1
+    double complex, intent(in   ) :: da
+    type(xgBlock_t), intent(in   ) :: xgBlock2
+
+    if ( xgBlock1%space /= xgBlock2%space ) then
+      MSG_ERROR("Must be same space for Saxpy")
+      stop
+    end if
+    if ( xgBlock1%LDim /= xgBlock2%LDim ) then
+      MSG_ERROR("Must have same LDim for Saxpy")
+      stop
+    end if
+    if ( xgBlock1%cols /= xgBlock2%cols ) then
+      MSG_ERROR("Must have same cols for Saxpy")
+      stop
+    end if
+    if ( xgBlock1%space /= SPACE_C ) then
+      MSG_ERROR("Not correct space")
+      stop
+    end if
+
+    call zaxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecC,1,xgBlock1%vecC,1)
+
+  end subroutine xgBlock_saxpyC
+  
+
 !!****f* m_xg/xgBlock_add
 !!
 !! NAME
@@ -2013,6 +2094,143 @@ module m_xg
     end if
   end subroutine xgBlock_colwiseNorm2
 !!***
+
+
+ subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_colwiseDotProduct'
+!End of the abilint section
+
+    type(xgBlock_t) , intent(in   ) :: xgBlockA
+    type(xgBlock_t) , intent(in   ) :: xgBlockB
+    type(xgBlock_t) , intent(inout) :: dot
+    double precision, intent(  out), optional :: max_val
+    integer         , intent(  out), optional :: max_elt
+    double precision, intent(  out), optional :: min_val
+    integer         , intent(  out), optional :: min_elt 
+    integer :: icol, irow
+    double precision,external :: ddot
+    double complex,external :: zdotc		!conjugated dot product
+
+    select case(xgBlockA%space)
+    case(SPACE_R,SPACE_CR)   
+      !$omp parallel do shared(dot,xgBlockA,xgBlockB) &
+      !$omp& schedule(static)
+      do icol = 1, xgBlockA%cols
+        dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1) 
+      end do
+      !$omp end parallel do
+
+      if ( present(max_val) ) then
+        max_val = maxval(dot%vecR(1:xgBlockA%cols,1))
+      end if
+      if ( present(min_val) ) then
+        min_val = minval(dot%vecR(1:xgBlockA%cols,1))
+      end if
+      if ( present(max_elt) ) then
+        max_elt = maxloc(dot%vecR(1:xgBlockA%cols,1),dim=1)
+      end if
+      if ( present(min_elt) ) then
+        min_elt = minloc(dot%vecR(1:xgBlockA%cols,1),dim=1)
+      end if   
+      
+    case(SPACE_C)
+      !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
+      !$omp& schedule(static)
+      do icol = 1, xgBlockA%cols
+        dot%vecC(icol,1) = zdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
+      end do
+      !$omp end parallel do
+      
+      if ( present(max_val) ) then
+        max_val = maxval(dble(dot%vecC(1:xgBlockA%cols,1)))
+      end if
+      if ( present(min_val) ) then
+        min_val = minval(dble(dot%vecC(1:xgBlockA%cols,1)))
+      end if
+      if ( present(max_elt) ) then
+        max_elt = maxloc(dble(dot%vecC(1:xgBlockA%cols,1)),dim=1)
+      end if
+      if ( present(min_elt) ) then
+        min_elt = minloc(dble(dot%vecC(1:xgBlockA%cols,1)),dim=1)
+      end if   
+      
+    end select
+
+
+  end subroutine xgBlock_colwiseDotProduct
+
+
+  subroutine xgBlock_colwiseDivision(xgBlockA, xgBlockB, divResult,max_val,max_elt,min_val,min_elt)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_colwiseDivision'
+!End of the abilint section
+
+    type(xgBlock_t) , intent(in   ) :: xgBlockA
+    type(xgBlock_t) , intent(in   ) :: xgBlockB
+    type(xgBlock_t) , intent(inout) :: divResult
+    double precision, intent(inout), optional :: max_val
+    integer, dimension(2)      , intent(inout), optional :: max_elt
+    double precision, intent(inout), optional :: min_val
+    integer, dimension(2)      , intent(inout), optional :: min_elt 
+    integer :: icol, irow
+    
+
+    select case(xgBlockA%space)
+    case(SPACE_R,SPACE_CR)
+      !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
+      !$omp& schedule(static)
+      do irow = 1, xgBlockA%rows
+        divResult%vecR(irow,:) = xgBlockA%vecR(irow,:)/xgBlockB%vecR(irow,:)
+      end do
+      !$omp end parallel do
+      
+      if ( present(max_val) ) then
+        max_val = maxval(dble(divResult%vecR))
+      end if
+      if ( present(min_val) ) then
+        min_val = minval(dble(divResult%vecR))
+      end if
+      if ( present(max_elt) ) then
+        max_elt = maxloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
+      end if
+      if ( present(min_elt) ) then
+        min_elt = minloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
+      end if
+      
+    case(SPACE_C)
+      
+      !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
+      !$omp& schedule(static)
+      do irow = 1, xgBlockA%rows
+        divResult%vecC(irow,:) = xgBlockA%vecC(irow,:)/xgBlockB%vecC(irow,:)
+      end do
+      !$omp end parallel do
+      
+      if ( present(max_val) ) then
+        max_val = maxval(dble(divResult%vecC))
+      end if
+      if ( present(min_val) ) then
+        min_val = minval(dble(divResult%vecC))
+      end if
+      if ( present(max_elt) ) then
+        max_elt = maxloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
+      end if
+      if ( present(min_elt) ) then
+        min_elt = minloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols))) 
+      end if
+    end select
+    		
+  end subroutine xgBlock_colwiseDivision
+
 
 !!****f* m_xg/xgBlock_scaleR
 !!
