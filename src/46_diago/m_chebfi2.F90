@@ -193,14 +193,16 @@ module m_chebfi2
 
     call chebfi_free(chebfi) 
     
-    print *, "neigenpairs", neigenpairs
-    stop
+    !print *, "neigenpairs", neigenpairs
+    !stop
     
     if (chebfi%paral_kgb == 0) then
       call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs)
     else
       call xg_init(chebfi%X_NP,space,spacedim,2*chebfi%bandpp)
     end if
+    print *, "spacedim", spacedim
+    stop
     
     call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)  
     call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  

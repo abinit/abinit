@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1110
 message: |
-    Renaming old t03_x.out to t03_x.out0280
+    Renaming old t03_x.out to t03_x.out0284
 ...
  
 
@@ -43,7 +43,7 @@ message: |
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 16 Apr 2019.
-- ( at 15h21 )
+- ( at 16h08 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -166,8 +166,6 @@ message: |
  inkpts: Sum of 1 k point weights is    1.000000
  inkpts: Sum of 1 k point weights is    1.000000
  chkneu: initialized the occupation numbers for occopt= 3, spin-unpolarized or antiferromagnetic case:
-npfft, npband, npspinor and npkpt:     1    2    1    1
-me_fft, me_band, me_spinor , me_kpt:     0    0    0    0
  mpi_setup: With nkpt_me=1 and mkmem  = 1, ground state wf handled in core.
  mpi_setup: With nkpt_me=1 and mkqmem = 1, ground state wf handled in core.
  mpi_setup: With nkpt_me=1 and mk1mem = 1, ground state wf handled in core.
@@ -180,7 +178,7 @@ getng is called for the coarse grid:
   Augmented FFT divisions ...................    41   41   40
   FFT algorithm .............................   312
   FFT cache size ............................    16
- getmpw: optimal value of mpw= 972
+ getmpw: optimal value of mpw= 1944
 getng is called for the fine grid:
  Using supplied coarse mesh as initial guess.
  For input ecut=  1.000000E+01 best grid ngfft=      45      45      45
@@ -205,19 +203,18 @@ memory: analysis of memory needs
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       3   xclevel =       1
 -    mband =         192        mffmem =           1         mkmem =           1
-       mpw =         972          nfft =       64000          nkpt =           1
-Pmy_natom=        16
+       mpw =        1944          nfft =       64000          nkpt =           1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        45    nfftf =     91125
 ================================================================================
-P This job should need less than                      43.792 Mbytes of memory.
+P This job should need less than                      59.720 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.850 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
+_ WF disk file :      5.697 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
  
- Biggest array : pawfgrtab%gylm(gr), with     10.8401 MBytes.
- memana : allocated an array of     10.840 Mbytes, for testing purposes.
- memana: allocated      43.792Mbytes, for testing purposes. 
+ Biggest array : pawfgrtab%gylm(gr), with     21.0009 MBytes.
+ memana : allocated an array of     21.001 Mbytes, for testing purposes.
+ memana: allocated      59.720Mbytes, for testing purposes. 
  The job will continue.
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
@@ -233,7 +230,7 @@ _ WF disk file :      2.850 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -          iomode           1
             acell      1.5340000000E+01  1.5340000000E+01  1.5340000000E+01 Bohr
               amu      1.37327000E+02
-           bandpp          96
+           bandpp         192
       chksymbreak           0
      densfor_pred           6
              ecut      8.00000000E+00 Hartree
@@ -247,7 +244,6 @@ P           mkmem           1
             ngfft          40      40      40
           ngfftdg          45      45      45
              nkpt           1
--          npband           2
             nstep          40
              nsym          48
            ntypat           1
@@ -436,7 +432,7 @@ P           mkmem           1
   ==== OpenMP parallelism is ON ====
 - Max_threads:       1
 - Num_threads:       1
-- Num_procs:         6
+- Num_procs:         12
 - Dynamic:           F
 - Nested:            F
  
@@ -456,7 +452,7 @@ P           mkmem           1
  
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    2
+-   nproc =    1
  
  
 --- !COMMENT
@@ -533,8 +529,8 @@ message: |
  
   XC functional for type 1 is 7
  
- wfconv:   192 bands initialized randomly with npw=   972, for ikpt=     1
-_setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
+ wfconv:   192 bands initialized randomly with npw=  1944, for ikpt=     1
+_setup2: Arith. and geom. avg. npw (full set) are    3887.000    3887.000
  initro: for itypat=  1, take pseudo charge density from pp file
  
 ================================================================================
@@ -559,9 +555,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
    0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000  -0.00000  -0.00011  -0.00000  -0.03381 ...
    ...  only 12  components have been written...
  
+ ****** Psp strength Dij in Ha (atom     31) *****
+   0.35081   0.05411  -0.00007  -0.00007  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00001   0.00000 ...
+   0.05411   0.00714  -0.00001  -0.00001  -0.00000  -0.00001  -0.00001  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+  -0.00007  -0.00001  -0.19614  -0.00001   0.00000  -0.00071  -0.00000   0.00000  -0.00000  -0.00001   0.00001  -0.00000 ...
+  -0.00007  -0.00001  -0.00001  -0.19614   0.00000  -0.00000  -0.00071   0.00000  -0.00000  -0.00001  -0.00002  -0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.19617   0.00000   0.00000  -0.00073  -0.00002  -0.00000   0.00000  -0.00002 ...
+   0.00000  -0.00001  -0.00071  -0.00000   0.00000  -1.16581  -0.00001   0.00000  -0.00000  -0.00000   0.00001  -0.00000 ...
+   0.00000  -0.00001  -0.00000  -0.00071   0.00000  -0.00001  -1.16581   0.00000  -0.00000  -0.00000  -0.00001  -0.00000 ...
+   0.00000  -0.00000   0.00000   0.00000  -0.00073   0.00000   0.00000  -1.16585  -0.00001  -0.00000  -0.00000  -0.00001 ...
+   0.00000   0.00000  -0.00000  -0.00000  -0.00002  -0.00000  -0.00000  -0.00001  -0.03341   0.00000  -0.00000  -0.00000 ...
+  -0.00000  -0.00000  -0.00001  -0.00001  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.03341  -0.00000   0.00000 ...
+   0.00001   0.00000   0.00001  -0.00002   0.00000   0.00001  -0.00001  -0.00000  -0.00000  -0.00000  -0.03347   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000  -0.00002  -0.00000  -0.00000  -0.00001  -0.00000   0.00000   0.00000  -0.03341 ...
+   ...  only 12  components have been written...
+ 
  
  ITER STEP NUMBER     1
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  Invovl built
- neigenpairs         192
- neigenpairs         192
+ l_npw        1944
