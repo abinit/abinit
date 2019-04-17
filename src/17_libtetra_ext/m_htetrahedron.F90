@@ -114,6 +114,9 @@ type, public :: t_htetrahedron
   integer :: nkbz
   ! Number of points in the full Brillouin zone
 
+  integer :: nbuckets
+  ! Number of buckets for the hash table
+
   integer :: nunique_tetra
   ! Number of unique tetrahedron
 
@@ -199,7 +202,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  real(dp) :: rcvol,length,min_length
  character(len=500) :: msg
 !arrays
- integer,pointer :: indexes(:,:)
+ integer,pointer :: indexes(:,:), tetra_hash_count(:)
  integer :: tetra_ibz(4), tetra_mibz(0:4), tetra_count(nkpt_ibz)
  integer :: tetra_shifts(3,4,24,4)  ! 3 dimensions, 4 summits, 24 tetrahedra, 4 main diagonals
  integer :: tetra_shifts_6(3,4,6,1) ! 3 dimensions, 4 summits, 6 tetrahedra, 4 main diagonals
@@ -630,8 +633,18 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  tetra%nkibz = nkpt_ibz
  tetra%nkbz = nkpt_fullbz
+ ! HM: this value should be important for performance
+ ! more buckets means faster queries for unique tetrahedra
+ ! but more memory due to the initial size TETRA_SIZE of the buckets
+ ! when changing the number of buckets one should also change the hash function
+ ! to distribute the tetrahedra in the buckets as uniformly as possible
+ ! the simplest hash (not the best!) is:
+ ! ihash = mod(sum(tetra_ibz),nbuckts)
+ ! the value of sum(tetra_ibz) is between 1 and 4*nkibz so I use 2*nkibz nbuckets
+ tetra%nbuckets = nkpt_ibz*2
  ierr = 0
  tetra_count = 0
+ ABI_MALLOC(tetra_hash_count,(tetra%nbuckets))
 
  ! Determine the smallest diagonal in k-space
  min_length = huge(min_length)
@@ -664,14 +677,13 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ! For large sampling the two approaches yield similar results, with the first
  ! one using less memory, faster to generate and compute
  !
-#if 0
- ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
- ABI_MALLOC(tetra%unique_tetra,(tetra%nkibz))
- do ihash=1,tetra%nkibz
+ ABI_MALLOC(tetra%unique_tetra,(tetra%nbuckets))
+ do ihash=1,tetra%nbuckets
    ABI_MALLOC(tetra%unique_tetra(ihash)%indexes,(0:4,24))
    tetra%unique_tetra(ihash)%indexes = 0
  end do
- ! For each k-point in the IBZ
+#if 0
+ ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
  do ikibz=1,tetra%nkibz
    !if (mod(ikibz,nprocs) /= my_rank) cycle
    k1 = kpt_ibz(:,ikibz)
@@ -692,9 +704,9 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
      ! Store only unique tetrahedra
      ! Compute a very simple hash for each tetrahedron
-     ihash = mod(sum(tetra_ibz),tetra%nkibz)+1
+     ihash = compute_hash(tetra,tetra_ibz) !mod(sum(tetra_ibz),tetra%nbuckets)+1
      ! Loop over all tetrahedrons that contain this ikibz as first element
-     do jtetra=1,tetra_count(ihash)
+     do jtetra=1,tetra_hash_count(ihash)
        ! if tetrahedron already exists add multiplicity
        if (tetra%unique_tetra(ihash)%indexes(1,jtetra)/=tetra_ibz(1)) cycle
        if (tetra%unique_tetra(ihash)%indexes(2,jtetra)/=tetra_ibz(2)) cycle
@@ -704,29 +716,23 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
        cycle tetra_loop
      end do
      ! Otherwise store new tetrahedron
-     tetra_count(ihash) = tetra_count(ihash)+1
+     tetra_hash_count(ihash) = tetra_hash_count(ihash)+1
      max_ntetra = size(tetra%unique_tetra(ihash)%indexes,2)
      ! The contents don't fit the array so I have to resize it
-     if (tetra_count(ihash)>max_ntetra) then
+     if (tetra_hash_count(ihash)>max_ntetra) then
        ABI_MALLOC(indexes,(0:4,max_ntetra+TETRA_STEP))
        indexes(0:4,:max_ntetra) = tetra%unique_tetra(ihash)%indexes
        indexes(:,max_ntetra+1:) = 0
        ABI_FREE(tetra%unique_tetra(ihash)%indexes)
        tetra%unique_tetra(ihash)%indexes => indexes
      end if
-     tetra%unique_tetra(ihash)%indexes(1:,tetra_count(ihash)) = tetra_ibz(:)
-     tetra%unique_tetra(ihash)%indexes(0, tetra_count(ihash)) = 1
+     tetra%unique_tetra(ihash)%indexes(1:,tetra_hash_count(ihash)) = tetra_ibz(:)
+     tetra%unique_tetra(ihash)%indexes(0, tetra_hash_count(ihash)) = 1
    end do tetra_loop
  end do
 #else
  min_idiag = 1
- ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
- ABI_MALLOC(tetra%unique_tetra,(tetra%nkibz))
- do ikibz=1,tetra%nkibz
-   ABI_MALLOC(tetra%unique_tetra(ikibz)%indexes,(0:4,TETRA_SIZE))
-   tetra%unique_tetra(ikibz)%indexes=0
- end do
- ! For each k-point in the BZ
+ ! For each k-point in the BZ generate the 6 tetrahedra that tesselate a microzone
  do ikbz=1,tetra%nkbz
    k1 = kpt_fullbz(:,ikbz)
    tetra_loop: do itetra=1,6
@@ -747,9 +753,9 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
      ! Store only unique tetrahedra
      ! Compute a very simple hash for each tetrahedron
-     ihash = mod(sum(tetra_ibz),tetra%nkibz)+1
+     ihash = compute_hash(tetra,tetra_ibz) !mod(sum(tetra_ibz),tetra%nbuckets)+1
      ! Loop over all tetrahedrons that contain this ikibz as first element
-     do jtetra=1,tetra_count(ihash)
+     do jtetra=1,tetra_hash_count(ihash)
        ! if tetrahedron already exists add multiplicity
        if (tetra%unique_tetra(ihash)%indexes(1,jtetra)/=tetra_ibz(1)) cycle
        if (tetra%unique_tetra(ihash)%indexes(2,jtetra)/=tetra_ibz(2)) cycle
@@ -759,18 +765,18 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
        cycle tetra_loop
      end do
      ! Otherwise store new tetrahedron
-     tetra_count(ihash) = tetra_count(ihash)+1
+     tetra_hash_count(ihash) = tetra_hash_count(ihash)+1
      max_ntetra = size(tetra%unique_tetra(ihash)%indexes,2)
      ! The contents don't fit the array so I have to resize it
-     if (tetra_count(ihash)>max_ntetra) then
+     if (tetra_hash_count(ihash)>max_ntetra) then
        ABI_MALLOC(indexes,(0:4,max_ntetra+TETRA_STEP))
        indexes(0:4,:max_ntetra) = tetra%unique_tetra(ihash)%indexes
        indexes(:,max_ntetra+1:) = 0
        ABI_FREE(tetra%unique_tetra(ihash)%indexes)
        tetra%unique_tetra(ihash)%indexes => indexes
      end if
-     tetra%unique_tetra(ihash)%indexes(1:,tetra_count(ihash)) = tetra_ibz(:)
-     tetra%unique_tetra(ihash)%indexes(0, tetra_count(ihash)) = 1
+     tetra%unique_tetra(ihash)%indexes(1:,tetra_hash_count(ihash)) = tetra_ibz(:)
+     tetra%unique_tetra(ihash)%indexes(0, tetra_hash_count(ihash)) = 1
    end do tetra_loop
  end do
 #endif
@@ -778,7 +784,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  ! Do some maintenance: free unused memory and count tetrahedra per IBZ point
  tetra_count = 0
- do ihash=1,tetra%nkibz
+ do ihash=1,tetra%nbuckets
    ntetra = count(tetra%unique_tetra(ihash)%indexes(0,:)>0)
    ! Allocate array with right size
    ABI_MALLOC(indexes,(0:4,ntetra))
@@ -804,7 +810,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  ! Create mapping from IBZ to unique tetrahedra
  tetra_count = 0
- do ihash=1,tetra%nkibz
+ do ihash=1,tetra%nbuckets
    ntetra = size(tetra%unique_tetra(ihash)%indexes,2)
    do itetra=1,ntetra
      tetra_mibz = tetra%unique_tetra(ihash)%indexes(:,itetra)
@@ -827,7 +833,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  ! Count unique tetra
  total_ntetra = 0
- do ihash=1,tetra%nkibz
+ do ihash=1,tetra%nbuckets
    ntetra = size(tetra%unique_tetra(ihash)%indexes,2)
    total_ntetra = total_ntetra + ntetra
  end do
@@ -863,6 +869,24 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra%vv = abs(k1(1)*(k2(2)*k3(3)-k2(3)*k3(2))- &
                 k1(2)*(k2(1)*k3(3)-k2(3)*k3(1))+ &
                 k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
+
+ ABI_FREE(tetra_hash_count)
+
+ contains
+ integer function compute_hash(tetra,t) result(ihash)
+   type(t_htetrahedron),intent(in) :: tetra
+   integer,intent(in) :: t(4)
+   ihash = mod(sum(t),tetra%nbuckets)+1
+   ! TODO: should use a more general hash function that supports more buckets
+   ! Something like:
+   ! id = t(1)*nk3+t(2)*nk2+t(3)*nk1+t(4)
+   ! where nk is the number of points in the IBZ
+   ! Computing this leads to overflow so should use
+   ! mod comutation operations
+   ! (A + B) mod C = (A mod C + B mod C) mod C
+   ! (A * B) mod C = (A mod C * B mod C) mod C
+   ! A^B mod C = ( (A mod C)^B ) mod C
+ end function compute_hash
 
 end subroutine htetra_init
 !!***
@@ -922,11 +946,13 @@ end subroutine htetra_print
 subroutine htetra_free(tetra)
 
  type(t_htetrahedron), intent(inout) :: tetra
- integer :: ikibz
+ integer :: ikibz,ihash
 
+ do ihash=1,tetra%nbuckets
+   ABI_FREE(tetra%unique_tetra(ihash)%indexes)
+ end do
  do ikibz=1,tetra%nkibz
    ABI_SFREE(tetra%ibz(ikibz)%tetra)
-   ABI_FREE(tetra%unique_tetra(ikibz)%indexes)
  end do
  ABI_SFREE(tetra%ibz)
  ABI_SFREE(tetra%unique_tetra)
@@ -1459,7 +1485,7 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
  tetra_total = 0
 
  ! For each bucket of tetrahedra
- do ihash=1,tetra%nkibz
+ do ihash=1,tetra%nbuckets
    if (mod(ihash,nprocs) /= my_rank) cycle
 
    ! For each tetrahedron that belongs to this k-point
