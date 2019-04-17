@@ -140,7 +140,7 @@
 
 #  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "??", __LINE__) NEWLINE \
    ABI_CHECK(ierr == 0, "out-of-memory")
 
 #else

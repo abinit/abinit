@@ -320,6 +320,8 @@ module m_sigmaph
    ! (6, %nqibz_k))
    ! Mapping k+q --> initial IBZ. Depends on ikcalc.
 
+  !integer,allocatable :: ind_ibz2dvdb(:,:)
+
   integer,allocatable :: indq2dvdb_k(:,:)
    ! (6, %nqibz_k))
    ! Mapping qibz_k --> IBZ found in DVDB file. Used when DFPT potentials are read from DVDB file
@@ -1832,7 +1834,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Print cache stats.
      if (sigma%use_ftinterp) then
-       call dvdb%ftqcache%report_stats()
+       call dvdb%ft_qcache%report_stats()
      else
        call dvdb%qcache%report_stats()
      end if
@@ -2547,10 +2549,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! This to deactivate parallelism over perturbations for debugging.
  !if (dtset%nppert == -1)
- !if (dtset%userib == 789 .and. new%my_npert /= natom3) then
+ if (dtset%userib == 789 .and. new%my_npert /= natom3) then
    new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
    MSG_WARNING("Deactivating parallelism over perturbations.")
- !end if
+ end if
 
  ! Define number of procs for q-points and bands. nprocs is division by nprocs_pert.
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = 1
@@ -3824,7 +3826,6 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
        MSG_ERROR(msg)
      end if
    end if
-
    call cwtime_report(" IBZ_k --> DVDB", cpu, wall, gflops)
 
    ABI_REMALLOC(self%indq2dvdb_k, (6, self%nqibz_k))
@@ -4046,7 +4047,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
            do imyq=1,self%my_nqibz_k
              iq_ibz_k = self%myq2ibz_k(imyq)
              iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
-             if (.not. allocated(dvdb%ftqcache%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
+             if (.not. allocated(dvdb%ft_qcache%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
            end do
 
            ! Update cache by Fourier interpolating W(r,R)
