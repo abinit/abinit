@@ -948,12 +948,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
 
  sigma%use_ftinterp = .False.
- !if (all(dtset%eph_ngqpt_fine /= 0 .and. any(dtset%eph_ngqpt_fine /= dtset%ddb_ngqpt)) then
  !do iq_ibz=1,sigma%nqibz
- !  if (dvdbb%findq(sigma%qibz(:, iq_ibz)) /= -1) then
+ !  if (dvdb%findq(sigma%qibz(:, iq_ibz)) == -1) then
  !    sigma%use_ftinterp = .True.; exit
  !  end if
- !end if
+ !end do
+ if (all(dtset%eph_ngqpt_fine /= 0) .and. any(dtset%eph_ngqpt_fine /= dtset%ddb_ngqpt)) sigma%use_ftinterp = .True.
 
  ! FIXME: Temporary hack to interpolate dvdb only in qpoints that will be used
  if (dtset%useria == 1999) then
@@ -1007,7 +1007,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  else if (dtset%useria == 2000 .or. sigma%use_ftinterp) then
      sigma%use_ftinterp = .True.
-     !call wrtout([std_out, ab_out], "Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
+     call wrtout([std_out, ab_out], "- Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
 
      ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation. 
      ! R-points are distributed inside comm_rpt
@@ -1281,11 +1281,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
        !if (psps%useylm==1) then
-       !   optder=0; if (useylmgr==1) optder=1
-       !   call initylmg(cryst%gprimd,kg_k,kk,mkmem1,mpi_enreg,psps%mpsang,mpw,nband,mkmem1,&
-       !     [npw_k],dtset%nsppol,optder,cryst%rprimd,ylm_k,ylmgr)
-       !   call initylmg(cryst%gprimd,kg_kq,kq,mkmem1,mpi_enreg,psps%mpsang,mpw,nband,mkmem1,&
-       !     [npw_kq],dtset%nsppol,optder,cryst%rprimd,ylm_kq,ylmgr_kq)
+       !   optder = 0; if (useylmgr == 1) optder = 1
+       !   call initylmg(cryst%gprimd, kg_k, kk, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
+       !     [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
+       !   call initylmg(cryst%gprimd, kg_kq, kq, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
+       !     [npw_kq], dtset%nsppol, optder, cryst%rprimd, ylm_kq, ylmgr_kq)
        !end if
 
        if (sigma%calc_mrta) then
@@ -2547,10 +2547,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! This to deactivate parallelism over perturbations for debugging.
  !if (dtset%nppert == -1)
- !if (dtset%userib == 789 .and. new%my_npert /= natom3) then
+ if (dtset%userib == 789 .and. new%my_npert /= natom3) then
    new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
    MSG_WARNING("Deactivating parallelism over perturbations.")
- !end if
+ end if
 
  ! Define number of procs for q-points and bands. nprocs is division by nprocs_pert.
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = 1

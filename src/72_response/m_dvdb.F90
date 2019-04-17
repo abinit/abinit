@@ -3267,7 +3267,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
         incache = .True.
         db%ftqcache%stats(3) = db%ftqcache%stats(3) + 1
       else
-        MSG_ERROR("Found ifferent cplex/nfft in cache")
+        MSG_ERROR("Found different cplex/nfft in cache")
       end if
    else
       !call wrtout(std_out, sjoin("Cache miss for iq_ibz. Will try to interpolate it...", itoa(iq_ibz)))
@@ -3276,9 +3276,9 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  end if
 
  if (.not. incache) then
-   MSG_ERROR("For the time being incache should always be true!")
+   !MSG_ERROR("For the time being incache should always be true when FT interpolation is used!")
    ! Interpolate the dvscf potentials directly in the **BZ** for my_npert perturbations.
-   ! This is possible only if all procs inside comm_rpt call this routine.
+   ! This is possible only if all procs inside comm_rpt call this routine else deadlock
    ABI_MALLOC_OR_DIE(v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
    call db%ftinterp_qpt(qbz, nfft, ngfft, v1scf, db%comm_rpt)
    call timab(1809, 2, tsec); return
@@ -3426,7 +3426,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
    ! TODO: DEBUGGING SECTION
    db_iqpt = db%findq(qibz(:, iq_ibz))
 if (db_iqpt /= -1) then
-      call wrtout(std_out, "Reading V(q) from DVDB...")
+      call wrtout(std_out, " DEBUG: Reading V(q) from DVDB...")
       call dvdb_readsym_allv1(db, db_iqpt, my_cplex, nfft, ngfft, all_v1scf, comm)
       do imyp=1,db%my_npert
         if (my_cplex == 2) then
