@@ -193,24 +193,31 @@ module m_chebfi2
 
     call chebfi_free(chebfi) 
     
-    print *, "neigenpairs", neigenpairs
-    stop
+!    print *, "spacedim", spacedim
+!    print *, "neigenpairs", neigenpairs
+!    print *, "chebfi%bandpp", chebfi%bandpp
+!    stop
     
     if (chebfi%paral_kgb == 0) then
-      call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs)
+      call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs) !regular arrays
+      call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)  
+      call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  
     else
-      call xg_init(chebfi%X_NP,space,spacedim,2*chebfi%bandpp)
+      call xg_init(chebfi%X_NP,space,spacedim*chebfi%nproc_band,2*chebfi%bandpp) !transposed arrays
+      call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim*chebfi%nproc_band,chebfi%bandpp)  
+      call xg_setBlock(chebfi%X_NP,chebfi%X_prev,chebfi%bandpp+1,spacedim*chebfi%nproc_band,chebfi%bandpp)  
     end if
+    !print *, "spacedim", spacedim
+    !stop
     
-    call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)  
-    call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  
-    
+    !transposer will handle these arrays automatically
     call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom)
     call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom)
+    !stop
 
   end subroutine chebfi_allocateAll
 
-
+  !!TODO TODO TODO TODO TODO fix meminfo it is for OpenMP only
   function chebfi_memInfo(neigenpairs, spacedim, space) result(arraymem)
 
 
@@ -285,8 +292,8 @@ module m_chebfi2
     integer :: shift
     double precision :: tolerance
     !double precision :: ecut
-    double precision :: maxeig
-    double precision :: mineig
+    double precision :: maxeig, maxeig_global
+    double precision :: mineig, mineig_global
     double precision :: ampfactor
     
     type(xg_t)::DivResults
@@ -315,6 +322,7 @@ module m_chebfi2
     double precision :: radius
     
     integer :: info
+    integer :: ierr
     
     integer :: cols, rows
    
@@ -350,12 +358,13 @@ module m_chebfi2
     nline = chebfi%nline
     chebfi%eigenvalues = eigen
     
-    allocate(nline_bands(neigenpairs))
-    
-    print *, neigenpairs
-    stop
-    
-    call xg_init(DivResults, chebfi%space, neigenpairs, 1)
+    if (chebfi%paral_kgb == 0) then
+      allocate(nline_bands(neigenpairs))
+      call xg_init(DivResults, chebfi%space, neigenpairs, 1)
+    else
+      allocate(nline_bands(chebfi%bandpp))
+      call xg_init(DivResults, chebfi%space, chebfi%bandpp, 1)
+    end if
         
     tolerance = chebfi%tolerance
     lambda_plus = chebfi%ecut
@@ -428,31 +437,56 @@ module m_chebfi2
                
     !********************* Compute Rayleigh quotients for every band, and set λ − equal to the largest one *****!
     call timab(tim_RR_q, 1, tsec)
-    !call chebfi_rayleighRitzQuotiens(chebfi, neigenpairs, maxeig, mineig, DivResults%self) !OK
-    call chebfi_rayleighRitzQuotiens(chebfi, chebfi%bandpp, maxeig, mineig, DivResults%self) !OK
+    !call chebfi_rayleighRitzQuotiens(chebfi, maxeig, mineig, DivResults%self) !OK
+    call chebfi_rayleighRitzQuotiens(chebfi, maxeig, mineig, DivResults%self) !OK
     call timab(tim_RR_q, 2, tsec)
     
-    !!TODO TODO TODO UTORAK srediti duzinu ovih nizova iznad
-    print *, "maxeig", maxeig  
-    stop
+    
+    if (chebfi%paral_kgb == 1) then
+      call xmpi_max(maxeig,maxeig_global,chebfi%spacecom,ierr)
+      call xmpi_min(mineig,mineig_global,chebfi%spacecom,ierr)
+    else
+      maxeig_global = maxeig
+      mineig_global = mineig
+    end if
+    
+    !print *, "maxeig_global", maxeig_global  
+    !print *, "mineig_global", mineig_global    
+    !stop
                 
-    lambda_minus = maxeig
+    lambda_minus = maxeig_global
+    
+    !print *, "lambda_minus", lambda_minus
+    !stop
         
     nline_max = cheb_oracle1(mineig, lambda_minus, lambda_plus, 1D-16, 40)
     
-    call xgBlock_reverseMap(DivResults%self,eig,1,neigenpairs)
-
-    do iband=1, neigenpairs !TODO TODO
-!      ! nline necessary to converge to tolerance
-!      !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
-!      ! nline necessary to decrease residual by a constant factor
-!      !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%nline)
-!      !nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline), 1)
-      nline_bands(iband) = nline ! fiddle with this to use locking
-    end do
+    !print *, "nline_max", nline_max
+    !stop
+   
+    if (chebfi%paral_kgb == 0) then
+      call xgBlock_reverseMap(DivResults%self,eig,1,neigenpairs)
+      do iband=1, neigenpairs !TODO TODO
+  !      ! nline necessary to converge to tolerance
+  !      !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
+  !      ! nline necessary to decrease residual by a constant factor
+  !      !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%nline)
+  !      !nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline), 1)
+        nline_bands(iband) = nline ! fiddle with this to use locking
+      end do
+    else 
+      call xgBlock_reverseMap(DivResults%self,eig,1,chebfi%bandpp)
+      do iband=1, chebfi%bandpp !TODO TODO
+        nline_bands(iband) = nline ! fiddle with this to use locking
+      end do
+    end if
 
     center = (lambda_plus + lambda_minus)*0.5  
     radius = (lambda_plus - lambda_minus)*0.5
+    
+    !print *, "center", center
+    !print *, "radius", radius
+    !stop
                
     one_over_r = 1/radius
     two_over_r = 2/radius
@@ -468,20 +502,32 @@ module m_chebfi2
       
       !stop      
         
-      call timab(tim_swap,1,tsec)               
-      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
-      call timab(tim_swap,2,tsec)   
+      call timab(tim_swap,1,tsec)  
+      if (chebfi%paral_kgb == 0) then             
+        call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
+      else 
+        call chebfi_swapInnerBuffers(chebfi, spacedim, chebfi%bandpp)
+      end if
+      call timab(tim_swap,2,tsec) 
+      
+      !print *, "BUFFERS SWAPPED"
+      !stop  
              
       !A * ψ  
       call timab(tim_getAX_BX,1,tsec)             
-      call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
+      !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
+      call getAX_BX(chebfi%X,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
       call timab(tim_getAX_BX,2,tsec)                                     
     end do
+    
+    !print *, "LOOP FINISHED"
+    !stop
 
     call timab(tim_amp_f,1,tsec)
     call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)    !ampfactor
     call timab(tim_amp_f,2,tsec)
-    
+   
+    !print *, "AMPFACTOR FINISHED" 
     !stop
     
     !Filtering done transpose back 
@@ -535,7 +581,7 @@ module m_chebfi2
 
   end subroutine chebfi_free
 
-  subroutine chebfi_rayleighRitzQuotiens(chebfi, neigenpairs, maxeig, mineig, DivResults)
+  subroutine chebfi_rayleighRitzQuotiens(chebfi, maxeig, mineig, DivResults)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -545,7 +591,6 @@ module m_chebfi2
 !End of the abilint section
 
     type(chebfi_t) , intent(inout) :: chebfi
-    integer, intent(in) :: neigenpairs
     double precision, intent(inout) :: maxeig
     double precision, intent(inout) :: mineig
     type(xgBlock_t) , intent(inout) :: DivResults
@@ -560,8 +605,13 @@ module m_chebfi2
     !print *, "neigenpairs", neigenpairs
     !stop
 
-    call xg_init(Results1, chebfi%space, neigenpairs, 1)
-    call xg_init(Results2, chebfi%space, neigenpairs, 1)
+    if (chebfi%paral_kgb == 0) then
+      call xg_init(Results1, chebfi%space, chebfi%neigenpairs, 1)
+      call xg_init(Results2, chebfi%space, chebfi%neigenpairs, 1)
+    else
+      call xg_init(Results1, chebfi%space, chebfi%bandpp, 1)
+      call xg_init(Results2, chebfi%space, chebfi%bandpp, 1)
+    end if
     
     !call xgBlock_colwiseDotProduct(chebfi%X,chebfi%AX%self,Results1%self)
     call xgBlock_colwiseDotProduct(chebfi%X,chebfi%xAXColsRows,Results1%self)
@@ -573,8 +623,8 @@ module m_chebfi2
     !PAW
     call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, maxeig, maxeig_pos, mineig, mineig_pos)
     
-    print *, "maxeig", maxeig
-    stop
+    !print *, "maxeig", maxeig
+    !stop
         
     call xg_free(Results1)
     call xg_free(Results2)
@@ -611,26 +661,34 @@ module m_chebfi2
     if (chebfi%paw) then
       !stop
       call timab(tim_invovl, 1, tsec)
-      call getBm1X(chebfi%AX%self, chebfi%X_next) 
-      !stop
+      !call getBm1X(chebfi%AX%self, chebfi%X_next)
+      call getBm1X(chebfi%xAXColsRows, chebfi%X_next) 
       !call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !AX_swap = X_next;
       call timab(tim_invovl, 2, tsec)
     else
-      call xgBlock_copy(chebfi%AX%self,chebfi%X_next, 1, 1)
+      !call xgBlock_copy(chebfi%AX%self,chebfi%X_next, 1, 1)
+      call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1)
       !!TODO try to swap buffers in a way that last copy is avoided
       !call xgBlock_setBlock(chebfi%AX%self, chebfi%AX_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !AX_swap = AX;
       !call xgBlock_setBlock(chebfi%X_next, chebfi%XXX, 1, chebfi%spacedim, chebfi%neigenpairs) !AX_swap = AX;
     end if  
     
-  !  stop 
+    !print *, "PROSAO APPLY"
+    !stop 
             
     !ψi-1 = c * ψi-1   
     call xgBlock_scale(chebfi%X, center, 1) !scale by c
+    
+    !print *, "PROSAO SCALE"
+    !stop
             
     !(B-1 * A * ψi-1 - c * ψi-1)
     call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X)
     !call xgBlock_saxpy(chebfi%AX_swap, dble(-1.0), chebfi%X)
     !call xgBlock_saxpy(chebfi%XXX, dble(-1.0), chebfi%X)
+    
+    !print *, "PROSAO SAXPY"
+    !stop
         
     !ψi-1  = 1/c * ψi-1 
     call xgBlock_scale(chebfi%X, 1/center, 1) !counter scale by c
@@ -648,6 +706,9 @@ module m_chebfi2
       !call xgBlock_saxpy(chebfi%AX_swap, dble(-1.0), chebfi%X_prev)
       !call xgBlock_saxpy(chebfi%XXX, dble(-1.0), chebfi%X_prev)
     end if
+    
+    !print *, "ZAVRSIO POLY"
+    !stop
 
   end subroutine chebfi_computeNextOrderChebfiPolynom
 
@@ -664,7 +725,9 @@ module m_chebfi2
     type(integer) , intent(in) :: spacedim
     type(integer) , intent(in) :: neigenpairs
     
-     !WORKING
+    !print *, "SWAP START"
+    !stop
+    !WORKING
     call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !X_swap = X_prev	!      
     call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X
     call xgBlock_setBlock(chebfi%X_next, chebfi%X, 1, spacedim, neigenpairs) !X = X_next
@@ -891,31 +954,42 @@ module m_chebfi2
     type(xgBlock_t) :: AX_part
     type(xgBlock_t) :: BX_part
     
-    integer :: iband, shift
+    integer :: iband, shift, nbands
     double precision :: ampfactor
     double precision eig_per_band
     
-    do iband = 1, chebfi%neigenpairs
+    if (chebfi%paral_kgb == 0) then
+      nbands = chebfi%neigenpairs
+    else
+      nbands = chebfi%bandpp
+    end if
+    
+    !print *, "nbands", nbands
+    do iband = 1, nbands
+      print *, "iband", iband
+      
     
       if(chebfi%istwf_k == 2) then
         eig_per_band = dble(eig(iband,1))
       else
         eig_per_band = dble(eig(iband*2-1,1))
       end if
-      
+      !cheb_poly1(x, n, a, b)
       ampfactor = cheb_poly1(eig_per_band, nline_bands(iband), lambda_minus, lambda_plus) !OK
 
       if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
       !shift = chebfi%spacedim*(iband-1)
       
       call xgBlock_setBlock(chebfi%X, X_part, iband, chebfi%spacedim, 1)
-      call xgBlock_setBlock(chebfi%AX%self, AX_part, iband, chebfi%spacedim, 1) 
+      !call xgBlock_setBlock(chebfi%AX%self, AX_part, iband, chebfi%spacedim, 1) 
+      call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%spacedim, 1) 
       
       call xgBlock_scale(X_part, 1/ampfactor, 1)
       call xgBlock_scale(AX_part, 1/ampfactor, 1)	 	 
       
       if(chebfi%paw) then
-        call xgBlock_setBlock(chebfi%BX%self, BX_part, iband, chebfi%spacedim, 1) 
+        !call xgBlock_setBlock(chebfi%BX%self, BX_part, iband, chebfi%spacedim, 1) 
+        call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%spacedim, 1) 
         call xgBlock_scale(BX_part, 1/ampfactor, 1)
       end if !missing gvnlc???
     end do

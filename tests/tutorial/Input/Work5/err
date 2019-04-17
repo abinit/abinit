@@ -1,2 +1,20 @@
-2.60user 0.06system 0:02.69elapsed 99%CPU (0avgtext+0avgdata 171332maxresident)k
-0inputs+0outputs (0major+41997minor)pagefaults 0swaps
+forrtl: error (69): process interrupted (SIGINT)
+Image              PC                Routine            Line        Source             
+libifcoremt.so.5   00007F0C6C93B555  for__signal_handl     Unknown  Unknown
+libpthread-2.27.s  00007F0C7159D890  Unknown               Unknown  Unknown
+abinit             0000000001B47513  m_chebfi2_mp_cheb         527  m_chebfi2.F90
+abinit             00000000006A0A40  m_chebfiwf_mp_che         251  m_chebfiwf.F90
+abinit             0000000000693D06  m_vtowfk_mp_vtowf         405  m_vtowfk.F90
+abinit             0000000000669DA8  m_vtorho_mp_vtorh         933  m_vtorho.F90
+abinit             00000000005FC24A  m_scfcv_core_mp_s        1531  m_scfcv_core.F90
+abinit             00000000005F2079  m_scfcv_mp_scfcv_         703  m_scfcv.F90
+abinit             00000000005C609D  m_gstate_mp_gstat        1309  m_gstate.F90
+abinit             0000000000427F42  m_gstateimg_mp_gs         540  m_gstateimg.F90
+abinit             00000000004163FF  m_driver_mp_drive         693  m_driver.F90
+abinit             00000000004098AD  MAIN__                    394  abinit.F90
+abinit             0000000000408432  Unknown               Unknown  Unknown
+libc-2.27.so       00007F0C6A35EB97  __libc_start_main     Unknown  Unknown
+abinit             000000000040831A  Unknown               Unknown  Unknown
+Command exited with non-zero status 1
+43.73user 0.24system 0:44.01elapsed 99%CPU (0avgtext+0avgdata 245172maxresident)k
+0inputs+40outputs (0major+134952minor)pagefaults 0swaps
