@@ -65,9 +65,9 @@ AC_DEFUN([SD_LIBXC_INIT], [
   test -z "${sd_libxc_status}" && sd_libxc_status="optional"
   test -z "${sd_libxc_policy}" && sd_libxc_policy="fail"
   if test "${sd_libxc_enable_fc}" = "yes"; then
-    sd_libxc_libs_def="-lxcf90 -lxc"
+    test -z "${sd_libxc_libs_def}" && sd_libxc_libs_def="-lxcf90 -lxc"
   else
-    sd_libxc_libs_def="-lxc"
+    test -z "${sd_libxc_libs_def}" && sd_libxc_libs_def="-lxc"
   fi
 
   # Declare configure option
