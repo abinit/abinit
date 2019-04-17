@@ -154,7 +154,7 @@ module m_sigmaph
    ! Fist and last band included in self-energy sum without taking into account MPI distribution.
    ! nbsum = bsum_stop - bsum_start + 1
 
-  integer :: my_bstart, my_bstop
+  integer :: my_bsum_start, my_bsum_stop
    ! Initial and final band index included in self-energy sum
    ! Processor-dependent if Re-Im calculation.
    ! Processor-independent and computed at runtime on the basis of the nk states in Sigma_{nk} if imag_only
@@ -321,15 +321,14 @@ module m_sigmaph
    ! Mapping k+q --> initial IBZ. Depends on ikcalc.
 
   integer,allocatable :: indq2dvdb_k(:,:)
-   ! (6, sigma%nqibz_k))
+   ! (6, %nqibz_k))
    ! Mapping qibz_k --> IBZ found in DVDB file. Used when DFPT potentials are read from DVDB file
    ! so that we know how to access/symmetrize v1scf
    ! Depends on ikcalc.
 
   integer,allocatable :: ind_ibzk2ibz(:,:)
-   ! (6, sigma%nqibz_k))
-   ! Mapping qibz_k --> IBZ defined by eph_ngqpt_fine. Used when DFPT potentials are FT interpolated.
-   ! so that we know how to access/symmetrize v1scf
+   ! (6, %nqibz_k))
+   ! Mapping qibz_k --> IBZ defined by eph_ngqpt_fine. 
    ! Depends on ikcalc.
 
   real(dp),allocatable :: kcalc(:,:)
@@ -379,7 +378,7 @@ module m_sigmaph
    ! for fixed (kcalc, spin). Only if imag_only
 
   complex(dpc),allocatable :: cweights(:,:,:,:,:,:,:)
-  ! (nz, 2, nbcalc_ks, my_npert, my_bstart:my_bstart, my_nqibz_k, ndiv))
+  ! (nz, 2, nbcalc_ks, my_npert, my_bsum_start:my_bsum_stop, my_nqibz_k, ndiv))
   ! Weights for the q-integration of 1 / (e1 - e2 \pm w_{q, nu} + i.eta)
   ! This array is initialized inside the (ikcalc, spin) loop
 
@@ -711,7 +710,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
 
  ! Initialize the wave function descriptor.
- ! Each node has all k-points and spins and bands between my_bstart and my_bstop
+ ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
  ABI_MALLOC(nband, (nkpt, nsppol))
  ABI_MALLOC(bks_mask, (dtset%mband, nkpt, nsppol))
  ABI_MALLOC(keep_ur, (dtset%mband, nkpt ,nsppol))
@@ -732,7 +731,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call wrtout(std_out, " Including restricted set of states within energy window around bdgw states.")
    do spin=1,sigma%nsppol
      do ik_ibz=1,ebands%nkpt
-       do band=sigma%my_bstart, sigma%my_bstop
+       do band=sigma%my_bsum_start, sigma%my_bsum_stop
          eig0mk = ebands%eig(band, ik_ibz, spin)
          if (eig0mk >= sigma%elow  - sigma%winfact * sigma%wmax .and. &
              eig0mk <= sigma%ehigh + sigma%winfact * sigma%wmax) then
@@ -743,17 +742,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    end do
    ! Uncomment these lines to disable energy window trick and allocate all bands.
    if (dtset%userie == 123) then
-     call wrtout(std_out, "Storing all bands between my_bstart and my_bstop.")
-     bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+     call wrtout(std_out, " Storing all bands between my_bsum_start and my_bsum_stop.")
+     bks_mask(sigma%my_bsum_start:sigma%my_bsum_stop, : ,:) = .True.
    end if
  else
-   bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+   bks_mask(sigma%my_bsum_start:sigma%my_bsum_stop, : ,:) = .True.
  endif
 
  if (dtset%userie == 124) then
    ! Uncomment this line to have all states on each MPI rank.
    bks_mask = .True. 
-   call wrtout(std_out, "Storing all bands for debuggin purpose.")
+   call wrtout(std_out, " Storing all bands for debugging purposes.")
  end if
 
  ! This table is needed when computing tau:
@@ -948,7 +947,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%comm_pert)
  end if
 
- ! FIXME: Temporary Hack to interpolate dvdb only in qpoints that will be used
+ ! FIXME: Temporary hack to interpolate dvdb only in qpoints that will be used
  if (dtset%useria == 1999) then
    ! Calculate desired qpt mesh
    qptrlatt = 0
@@ -1051,15 +1050,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call dvdb%print(prtvol=dtset%prtvol)
 
  if (.not. sigma%use_ftinterp) then
-
    ! Need to translated itreat_qibz into dvdb_itreatq. TODO: yet another mapping DVDB --> IBZ
    ABI_ICALLOC(dvdb_itreatq, (dvdb%nqpt))
-   do iq_ibz=1,sigma%nqibz
-     if (sigma%itreat_qibz(iq_ibz) == 0) cycle
-     db_iqpt = dvdb%findq(sigma%qibz(:, iq_ibz))
-     ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in DVDB file."))
-     dvdb_itreatq(db_iqpt) = 1
-   end do
+   !do iq_ibz=1,sigma%nqibz
+   !  if (sigma%itreat_qibz(iq_ibz) == 0) cycle
+   !  db_iqpt = dvdb%findq(sigma%qibz(:, iq_ibz))
+   !  ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in DVDB file."))
+   !  dvdb_itreatq(db_iqpt) = 1
+   !end do
    dvdb_itreatq = 1
    call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, dvdb_itreatq, comm) 
    ABI_FREE(dvdb_itreatq)
@@ -1181,7 +1179,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ignore_kq = 0; ignore_ibsum_kq = 0
      do imyq=1,sigma%my_nqibz_k
        iq_ibz = sigma%myq2ibz_k(imyq)
-       qpt = sigma%qibz_k(:,iq_ibz)
+       qpt = sigma%qibz_k(:, iq_ibz)
        !qibz = sigma%qibz(:, sigma%ind_ibzk2ibz(1, iq_ibz))
        isqzero = sum(qpt**2) < tol14 !; if (isqzero) cycle
 
@@ -1216,7 +1214,6 @@ else
        else
          MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB file."))
        end if
-
 end if
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
@@ -1358,7 +1355,7 @@ end if
 
            ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
            ! TODO: Ideally, dfpt_cgwf should be modified so that we can pass cgq that is MPI distributed over nband_kq
-           do ibsum_kq=sigma%my_bstart, sigma%my_bstop
+           do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
              if (isirr_kq) then
                 call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
               else
@@ -1532,7 +1529,7 @@ end if
        ! Sum over bands
        ! ==============
        call timab(1903, 1, tsec)
-       do ibsum_kq=sigma%my_bstart, sigma%my_bstop
+       do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
 
          ! This can happen if we have loaded the wavefunctions inside the energy range.
          if (sigma%imag_only .and. sigma%qint_method == 1) then
@@ -2486,7 +2483,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !
  ! If eph_task == -4:
  !    Loops are MPI parallelized over q-points
- !    wavefunctions are not distributed but only states between my_bstart and my_bstop
+ !    wavefunctions are not distributed but only states between my_bsum_start and my_bsum_stop
  !    are allocated and read from file.
 
  new%wmax = 1.1_dp * abs(ifc%omega_minmax(2))
@@ -2514,7 +2511,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      new%bsum_start = max(dtset%sigma_bsum_range(1), 1)
      new%bsum_stop = min(dtset%sigma_bsum_range(2), mband)
      new%nbsum = new%bsum_stop - new%bsum_start + 1
-     new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
+     new%my_bsum_start = new%bsum_start; new%my_bsum_stop = new%bsum_stop
    else
      ! Compute the min/max KS energy to be included in the imaginary part.
      ! ifc%omega_minmax(2) comes froms the coarse Q-mesh of the DDB so increase it by 10%.
@@ -2526,14 +2523,14 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      new%bsum_stop = min(new%bsum_stop, mband)
      ABI_CHECK(new%bsum_start <= new%bsum_stop, "bsum_start > bsum_bstop")
      new%nbsum = new%bsum_stop - new%bsum_start + 1
-     new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
+     new%my_bsum_start = new%bsum_start; new%my_bsum_stop = new%bsum_stop
    end if
 
    if (dtset%useria == 567) then
      ! Uncomment this part to use all states to debug.
      call wrtout([std_out, ab_out], "- Setting bstart to 1 and bstop to nband for debugging purposes")
      new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
-     new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
+     new%my_bsum_start = new%bsum_start; new%my_bsum_stop = new%bsum_stop
    end if
 
  else
@@ -2579,19 +2576,19 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ! Try to distribute equally nbsum first.
    nrest = nprocs / new%nprocs_pert
    do bstop=nrest,1,-1
-      if (mod(new%nbsum, bstop) == 0 .and. mod(nprocs, new%nprocs_pert * bstop) == 0) then
-        new%nprocs_bsum = bstop; new%nprocs_qpt = nrest / new%nprocs_bsum
-        exit
-      end if
+     if (mod(new%nbsum, bstop) == 0 .and. mod(nprocs, new%nprocs_pert * bstop) == 0) then
+       new%nprocs_bsum = bstop; new%nprocs_qpt = nrest / new%nprocs_bsum
+       exit
+     end if
    end do
    ! FIXME
-   ! This to recover the previous behaviour in Re-Im
-   new%nprocs_bsum = nrest; new%nprocs_qpt = 1
+   ! This to recover the previous behaviour in Re-Im that is OK
+   !new%nprocs_bsum = nrest; new%nprocs_qpt = 1
  end if
  if (new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum /= nprocs) then
    write(msg, "(a,i0,3a, 4(a,1x,i0))")&
      "Cannot create 3d Cartesian grid with nprocs: ", nprocs, ch10, &
-     "Idle processes are not supported. The product to `nprocs_*` should be equal to nprocs.", ch10, &
+     "Idle processes are not supported. The product of `nprocs_*` should be equal to nprocs.", ch10, &
      "nprocs_pert (", new%nprocs_pert, ") x nprocs_qpt (", new%nprocs_qpt, ") x nprocs_bsum (", new%nprocs_bsum, &
      ") = ", new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum
    MSG_ERROR(msg)
@@ -2662,24 +2659,24 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  
  if (.not. new%imag_only) then
    ! Split bands among the procs inside comm_bsum.
-   call xmpi_split_work(new%nbsum, new%comm_bsum, new%my_bstart, new%my_bstop, msg, ierr)
-   if (new%my_bstart == new%nbsum + 1) then
+   call xmpi_split_work(new%nbsum, new%comm_bsum, new%my_bsum_start, new%my_bsum_stop, msg, ierr)
+   if (new%my_bsum_start == new%nbsum + 1) then
      MSG_ERROR("sigmaph code does not support idle processes! Decrease ncpus or increase nband.")
    end if
-   new%my_bstart = new%bsum_start + new%my_bstart - 1
-   new%my_bstop = new%bsum_start + new%my_bstop - 1
+   new%my_bsum_start = new%bsum_start + new%my_bsum_start - 1
+   new%my_bsum_stop = new%bsum_start + new%my_bsum_stop - 1
  end if
 
  call wrtout(std_out, sjoin(" Global bands for self-energy sum, bsum_start: ", itoa(new%bsum_start), &
    " bsum_bstop:", itoa(new%bsum_stop)))
- call wrtout(std_out, sjoin(" Allocating and treating bands from my_bstart: ", itoa(new%my_bstart), &
-   " up to my_bstop:", itoa(new%my_bstop)))
+ call wrtout(std_out, sjoin(" Allocating and treating bands from my_bsum_start: ", itoa(new%my_bsum_start), &
+   " up to my_bsum_stop:", itoa(new%my_bsum_stop)))
 
  ! Distribute DFPT potentials (IBZ q-points) inside comm_qpt. 
  ! Note that we distribute IBZ instead of the full BZ or the IBZ_k.
  ! This means that the load won't be equally distributed inside the loop over kcalc 
  ! but memory will scale with nprocs_qpt.
- ! Sort qibz points by norm and use cyclic distribution to reduce load imbalance.
+ ! What we can do here is: sorting qibz points by norm and use cyclic distribution to reduce load imbalance.
  ABI_ICALLOC(new%itreat_qibz, (new%nqibz))
  call sort_rpts(new%nqibz, new%qibz, cryst%gmet, iperm)
  do ii=1,new%nqibz
@@ -3754,8 +3751,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  write(msg, "(3(a, i0))")" Treating ", self%nbcalc_ks(ikcalc, spin), " band(s) between: ", &
    self%bstart_ks(ikcalc, spin)," and: ", self%bstart_ks(ikcalc, spin) + self%nbcalc_ks(ikcalc, spin) - 1
  call wrtout(std_out, msg)
- write(msg, "(2(a,i0))")"P Allocating and treating bands from my_bstart: ", self%my_bstart, &
-     " up to my_bstop: ", self%my_bstop
+ write(msg, "(2(a,i0))")"P Allocating and treating bands from my_bsum_start: ", self%my_bsum_start, &
+     " up to my_bsum_stop: ", self%my_bsum_stop
  call wrtout(std_out, msg)
 
  ! Prepare weights for BZ(k) integration
@@ -3803,8 +3800,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 
  call cwtime_report(" lgroup_symsigma", cpu, wall, gflops)
 
- ! Find correspondence IBZ_k --> IBZ needed for Fourier interpolation.
-if (self%use_ftinterp) then
+ ! Find correspondence IBZ_k --> IBZ
  ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
  call listkk(dksqmax, cryst%gmet, iqk2dvdb, self%qibz, self%qibz_k, self%nqibz, self%nqibz_k, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
@@ -3823,7 +3819,7 @@ if (self%use_ftinterp) then
 
  call cwtime_report(" IBZ_k --> IBZ", cpu, wall, gflops)
 
-else
+if (.not. self%use_ftinterp) then
  ! Find correspondence IBZ_k --> set of q-points in DVDB.
  ! Need to handle q_bz = S q_ibz by symmetrizing the potentials already available in the DVDB.
  !
@@ -3927,7 +3923,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: my_rank, iq_ibz_k, iq_ibz, ierr, q_start, q_stop, nprocs, imyq, iq_dvdb
+ integer :: my_rank, iq_ibz_k, iq_ibz, ierr, q_start, q_stop, nprocs, imyq, iq_dvdb, ii, cnt
  integer :: nqeff, ndiv !nbcalc_ks, 
  real(dp) :: cpu, wall, gflops !weight_q,
  logical :: qfilter
@@ -3950,10 +3946,30 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
  ! The distribution must be consistent with the WF distribution done with bks_mask
  select case (dtset%eph_task)
  case (4)
+   
+   ! Compute my number of points in IBZ(k) taking into account itreat_qibz.
+   self%my_nqibz_k = 0
+   do ii=1,2
+     if (ii == 2) then
+       ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
+     end if
+     cnt = 0
+     do iq_ibz_k=1,self%nqibz_k
+       iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
+       if (self%itreat_qibz(iq_ibz) == 0) cycle
+       if (ii == 1) self%my_nqibz_k = self%my_nqibz_k + 1
+       if (ii == 2) then
+         cnt = cnt +1
+         self%myq2ibz_k(cnt) = iq_ibz_k
+       end if
+     end do
+   end do
+
    ! Use full IBZ(k) in q-integration ==> build trivial myq2ibz_k map.
-   self%my_nqibz_k = self%nqibz_k
-   ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-   self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=1, self%nqibz_k)]
+   !self%my_nqibz_k = self%nqibz_k
+   !ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
+   !self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=1, self%nqibz_k)]
+
    if (self%qint_method == 1) call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
  case (-4)
@@ -4031,9 +4047,7 @@ end if
        ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
        if (self%my_nqibz_k /= 0) self%myq2ibz_k = qtab(q_start:q_stop)
        ABI_FREE(qtab)
-       if (my_rank == master) then
-         write(std_out, "(a, i0)")" Number of q-points treated by this MPI proc: ", self%my_nqibz_k
-       end if
+       call wrtout(std_out, sjoin(" Number of q-points treated by this MPI proc:", itoa(self%my_nqibz_k))
 
        ! Recompute weights with new q-point distribution.
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
@@ -4587,13 +4601,17 @@ subroutine sigmaph_print(self, dtset, unt)
  end do
 
  write(unt, "(a)")" === MPI parallelism ==="
- write(unt, "(2(a,i0))")"P Allocating and treating bands from my_bstart: ", self%my_bstart, &
-     " up to my_bstop: ", self%my_bstop
+ write(unt, "(2(a,i0))")"P Allocating and treating bands from my_bsum_start: ", self%my_bsum_start, &
+     " up to my_bsum_stop: ", self%my_bsum_stop
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", self%nprocs_pert
  write(unt, "(a,i0)")"P Number of perturbations treated by this CPU: ", self%my_npert
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over q-points: ", self%nprocs_qpt
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%nprocs_bsum
  !write(unt, "(a,i0)")"P Number of CPUs for parallelism over (q-points, bands): ", self%nprocs_bq
+ !write(unt, sjoin("P Global bands for self-energy sum, bsum_start: ", itoa(self%bsum_start), &
+ !  " bsum_bstop:", itoa(self%bsum_stop)))
+ !write(unt, sjoin("P Allocating and treating bands from my_bsum_start: ", itoa(self%my_bsum_start), &
+ !  " up to my_bsum_stop:", itoa(self%my_bsum_stop)))
 
 end subroutine sigmaph_print
 !!***
@@ -4738,7 +4756,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 
    ! TODO: This part should be tested.
    nz = 1; if (sigma%nwr > 0) nz = 1 + sigma%nwr
-   ABI_REMALLOC(sigma%cweights, (nz, 2, nbcalc_ks, sigma%my_npert, sigma%my_bstart:sigma%my_bstop, sigma%my_nqibz_k, ndiv))
+   ABI_REMALLOC(sigma%cweights, (nz,2,nbcalc_ks,sigma%my_npert,sigma%my_bsum_start:sigma%my_bsum_stop,sigma%my_nqibz_k,ndiv))
    ABI_MALLOC(tmp_cweights, (nz, 2, nbcalc_ks, sigma%nqibz_k))
    ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
@@ -4747,7 +4765,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    if (sigma%nwr > 0) zvals(2:sigma%nwr+1, :) = sigma%wrmesh_b(:, 1:nbcalc_ks) + sigma%ieta
    ! Loop over my bands in self-energy sum.
    ! TODO: Really slow if nz >> 1, reduce the number of ibsum_kq bands for which tetra must be used.
-   do ibsum_kq=sigma%my_bstart, sigma%my_bstop
+   do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
      ! Loop over my phonon modes
      do imyp=1,sigma%my_npert
        nu = sigma%my_pinfo(3, imyp)
@@ -5336,8 +5354,8 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
       1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6,2a)' )&
-     "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
-     'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
+     "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10, &
+     "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."
    MSG_ERROR(msg)
  end if
  call cwtime_report(" oracle_listkk_qbz_qpts", cpu, wall, gflops)
