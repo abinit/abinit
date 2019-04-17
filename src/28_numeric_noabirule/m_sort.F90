@@ -24,6 +24,7 @@ module m_sort
 
  use defs_basis
  use m_errors
+ use m_profiling_abi
 
  implicit none
 
@@ -318,6 +319,7 @@ subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod)
  do ii=1,n
    my_rmod(ii) = sqrt(dot_product(rpts(:, ii), matmul(metric, rpts(:, ii))))
  end do
+ ABI_MALLOC(iperm, (n))
  iperm = [(ii, ii=1,n)]
  call sort_dp(n, my_rmod, iperm, my_tol)
 
