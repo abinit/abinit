@@ -42,6 +42,7 @@ the '%',and '.' first-column special signs.
 from __future__ import print_function, division, unicode_literals
 import re
 from math import floor
+from threading import Thread
 
 from .data_extractor import DataExtractor
 from .yaml_tools import is_available as has_yaml
@@ -449,43 +450,54 @@ class Differ(object):
                       label=self.options['label'],
                       verbose=self.options['verbose'])
 
-    def _diff_lines(self, lines1, lines2):
-        dext = DataExtractor(self.use_yaml, xml_mode=self.xml_mode,
-                             ignore=self.options['ignore'],
-                             ignoreP=self.options['ignoreP'])
+    def _diff_lines(self, src1, src2):
 
-        lines1, documents1, _ = dext.extract(lines1)
-        doc1_corrupted_documents = dext.corrupted_docs
+        lines = [None, None]
+        documents = [None, None]
+        corrupted = [None, None]
 
-        lines2, documents2, _ = dext.extract(lines2)
-        doc2_corrupted_documents = dext.corrupted_docs
+        def extractor(src, i):
+            dext = DataExtractor(self.use_yaml, xml_mode=self.xml_mode,
+                                 ignore=self.options['ignore'],
+                                 ignoreP=self.options['ignoreP'])
+
+            lines[i], documents[i], _ = dext.extract(src)
+            corrupted[i] = dext.corrupted_docs
+
+        t1 = Thread(target=extractor, args=(src1, 0))
+        t2 = Thread(target=extractor, args=(src2, 1))
+
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
 
         if self.use_fl:
-            lines_differences = self._fldiff(lines1, lines2)
+            lines_differences = self._fldiff(*lines)
         else:
             lines_differences = []
 
         if not self.use_yaml:
             doc_differences = []
 
-        elif doc1_corrupted_documents:
+        elif corrupted[0]:
             doc_differences = [YFailure(
                 self.yaml_conf,
                 'Reference has corrupted YAML documents at line(s) {}.'
                 .format(', '.join(str(d.start + 1)
-                                  for d in doc1_corrupted_documents))
+                                  for d in corrupted[0]))
             )]
 
-        elif doc2_corrupted_documents:
+        elif corrupted[1]:
             doc_differences = [YFailure(
                 self.yaml_conf,
                 'Tested file has corrupted YAML documents at line(s) {}.'
                 .format(', '.join(str(d.start + 1)
-                                  for d in doc2_corrupted_documents))
+                                  for d in corrupted[1]))
             )]
 
         else:
-            doc_differences = self._test_doc(documents1, documents2)
+            doc_differences = self._test_doc(*documents)
 
         return lines_differences, doc_differences
 
