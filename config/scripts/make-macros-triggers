@@ -171,6 +171,8 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
   AC_SUBST(abi_@package@_init)
   AC_SUBST(abi_@package@_ok)
   AC_SUBST(abi_@package@_cppflags)
+  AC_SUBST(abi_@package@_fcflags)
+  AC_SUBST(abi_@package@_ldflags)
   AC_SUBST(abi_@package@_libs)
   AC_SUBST(abi_@package@_prefix)
   AC_SUBST(abi_fbk_@package@_ok)"""
@@ -179,6 +181,9 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
     trig_list = sorted(trig_params.keys())
 
     for pkg in trig_list:
+
+        if ( trig_params[pkg]["detector"] == "steredeg" ):
+            continue
 
         trig_substs= {"package":pkg, "name":trig_params[pkg]["name"]}
         if ( trig_params[pkg]["fallback"] == "yes" ):
@@ -242,16 +247,16 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
             trig_substs["subst_flavor"] = ""
             trig_substs["test_flavor"] = ""
 
-    # Make 2 passes of substitutions, since some substitutions contain
-    # patterns themselves
-    new_def = trig_template
-    for subst in trig_substs:
-        new_def = re.sub("@%s@" % subst,trig_substs[subst],new_def)
-    for subst in trig_substs:
-        new_def = re.sub("@%s@" % subst,trig_substs[subst],new_def)
-    if ( trig_defs != "" ):
-        trig_defs += "\n\n"
-    trig_defs += new_def
+        # Make 2 passes of substitutions, since some substitutions contain
+        # patterns themselves
+        new_def = trig_template
+        for subst in trig_substs:
+            new_def = re.sub("@%s@" % subst,trig_substs[subst],new_def)
+        for subst in trig_substs:
+            new_def = re.sub("@%s@" % subst,trig_substs[subst],new_def)
+        if ( trig_defs != "" ):
+            trig_defs += "\n\n"
+        trig_defs += new_def
 
     ret = re.sub("@DEFINITIONS@",trig_defs,ret)
 
@@ -260,7 +265,7 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
 
 
 # Summary macro
-def macro_summary(trig_list,fbk_list):
+def macro_summary(trig_params):
 
     ret = """\
 # ABI_TRIGGERS_SUMMARY()
@@ -290,11 +295,15 @@ EOF
     trig_stat  = "  +----------------+--------+--------+--------+--------+\n"
     trig_stat += "  |Feature         |Enabled |Init    |Working |Fallback|\n"
     trig_stat += "  +----------------+--------+--------+--------+--------+\n"
-    for pkg in trig_list:
-        trig_form += "  tmp_e_%s=`echo \"${abi_%s_enable}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pkg)
-        trig_form += "  tmp_i_%s=`echo \"${abi_%s_init}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pkg)
-        trig_form += "  tmp_w_%s=`echo \"${abi_%s_ok}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pkg)
-        trig_form += "  tmp_f_%s=`echo \"${abi_fbk_%s_ok}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pkg)
+    for pkg in sorted(trig_params.keys()):
+        if ( trig_params[pkg]["detector"] == "steredeg" ):
+            pfx = "sd"
+        else:
+            pfx = "abi"
+        trig_form += "  tmp_e_%s=`echo \"${%s_%s_enable}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pfx,pkg)
+        trig_form += "  tmp_i_%s=`echo \"${%s_%s_init}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pfx,pkg)
+        trig_form += "  tmp_w_%s=`echo \"${%s_%s_ok}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pfx,pkg)
+        trig_form += "  tmp_f_%s=`echo \"${%s_fbk_%s_ok}\" | awk '{printf(\"%%-8s\",[$]1);}'`\n" % (pkg,pfx,pkg)
         trig_stat += "  |%-16s|${tmp_e_%s}|${tmp_i_%s}|${tmp_w_%s}|${tmp_f_%s}|\n" % \
             (pkg,pkg,pkg,pkg,pkg)
     trig_stat += "  +----------------+--------+--------+--------+--------+"
@@ -347,6 +356,7 @@ triggers_params = {}
 for pkg in cnf.sections():
     triggers_params[pkg] = {}
     triggers_params[pkg]["compounds"] = cnf.get(pkg,"compounds").split()
+    triggers_params[pkg]["detector"] = cnf.get(pkg,"detector")
     triggers_params[pkg]["fallback"] = cnf.get(pkg,"fallback")
     triggers_params[pkg]["name"] = cnf.get(pkg,"name")
     triggers_params[pkg]["optional"] = cnf.get(pkg,"optional")
@@ -362,6 +372,6 @@ abinit_fallbacks.sort()
 # Write down macro
 m4_changed = macro_changed(triggers_params)
 m4_init = macro_init(triggers_params)
-m4_summary = macro_summary(abinit_triggers,abinit_fallbacks)
+m4_summary = macro_summary(triggers_params)
 with open(my_output, "w") as m4_file:
     m4_file.write(macros_triggers(my_name,now,m4_changed,m4_init,m4_summary))
