@@ -1811,9 +1811,6 @@ class BaseTest(object):
         etsf_check         True if netcdf files should be validated. Requires netcdf4.
                            Default: False
         ================  ====================================================================
-
-        .. warning:
-            This method must be thread-safe, DO NOT change build_env or runner.
         """
         import copy
         runner = copy.deepcopy(runner)
@@ -3347,7 +3344,7 @@ class AbinitTestSuite(object):
             self.py_nprocs = py_nprocs
 
             def run_and_check_test(test, print_lock=NotALock()):
-                """Helper function to execute the test. Must be thread-safe."""
+                """Helper function to execute the test."""
 
                 testdir = os.path.abspath(os.path.join(self.workdir, test.suite_name + "_" + test.id))
 
@@ -3400,6 +3397,8 @@ class AbinitTestSuite(object):
                             pass
                     finally:
                         qout.put(done)
+
+                py_nprocs -= 1  # reserve one for the main proc
 
                 task_q = Queue()
                 res_q = Queue()
