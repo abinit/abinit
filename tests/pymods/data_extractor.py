@@ -9,8 +9,10 @@ from .yaml_tools import Document
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
 from .yaml_tools.errors import NoIteratorDefinedError
 
-doc_start_re = re.compile(r'---( !.*)?\n?$')
-doc_end_re = re.compile(r'\.\.\.')
+# Tag is only recognised if it is a valid a word ([A-Za-z0-9_]+)
+# It won't recognise serialized tags for example
+doc_start_re = re.compile(r'---( !!?\w+)?\n?$')
+doc_end_re = re.compile(r'\.\.\.\n?$')
 
 
 class DataExtractor:
@@ -69,7 +71,7 @@ class DataExtractor:
             if current_doc is not None:
                 # accumulate source lines
                 current_doc.lines.append(line)
-                if self._get_metachar(line) == '.' and doc_end_re.match(line):
+                if self.starting('...') and doc_end_re.match(line):
                     # reached the end of the doc
                     if self.use_yaml:
                         current_doc.end = i
@@ -107,7 +109,8 @@ class DataExtractor:
                     current_doc = None  # go back to normal mode
 
             elif self._get_metachar(line) == '-':
-                if doc_start_re.match(line):  # starting a yaml doc
+                # starting a yaml doc
+                if line.startswith('---') and doc_start_re.match(line):
                     current_doc = Document(self.iterators_state.copy(),
                                            i, [line])
                 else:
