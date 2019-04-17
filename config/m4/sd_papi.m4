@@ -264,18 +264,19 @@ AC_DEFUN([_SD_PAPI_CHECK_USE], [
   AC_LANG_POP([C])
 
   # Check Fortran support
-  AC_LANG_PUSH([Fortran])
-  AC_MSG_CHECKING([whether the specified PAPI library works])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[
-#     if defined HAVE_F90PAPI_H
-#     include "f90papi.h"
-#     endif
-      call PAPIf_library_init
-    ]])], [sd_papi_has_libs="yes"], [sd_papi_has_libs="no"])
-    AC_MSG_RESULT([${sd_papi_has_libs}])
+  if test "${sd_papi_has_hdrs}" = "yes"; then
+    AC_LANG_PUSH([Fortran])
+    AC_MSG_CHECKING([whether the specified PAPI library works])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+#       if defined HAVE_F90PAPI_H
+#       include "f90papi.h"
+#       endif
+        call PAPIf_library_init
+      ]])], [sd_papi_ok="yes"], [sd_papi_ok="no"])
+    AC_MSG_RESULT([${sd_papi_ok}])
+    AC_LANG_POP([Fortran])
   fi
-  AC_LANG_POP([Fortran])
 
   # Restore environment
   SD_ESL_RESTORE_FLAGS
