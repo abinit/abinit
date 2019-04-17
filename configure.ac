@@ -229,11 +229,17 @@ ABI_GPU_INIT
 # Note: MPI and GPU must be initialised after feature triggers
 ABI_TRIGGERS_INIT
 
+# Init Levmar
+SD_LEVMAR_INIT([auto no-cxx optional fail])
+
 # Init LibPSML
 SD_LIBPSML_INIT([auto no-cxx optional fail])
 
 # Init LibXC
 SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
+
+# Init PAPI
+SD_PAPI_INIT([auto no-cxx optional fail])
 
 # Init XMLF90
 SD_XMLF90_INIT([auto no-cxx optional fail])
@@ -710,21 +716,15 @@ ABI_MSG_SECTION([Feature triggers])
                        # ------------------------------ #
 
 # PAPI library support
-AC_MSG_CHECKING([whether to enable PAPI support])
-AC_MSG_RESULT([${abi_papi_enable}])
-if test "${abi_papi_enable}" = "yes"; then
-  AC_MSG_NOTICE([disabling Abinit internal timer])
-  ABI_PERF_CHECK_PAPI
-else
-  AC_MSG_CHECKING([whether to enable the internal Abinit timer])
-  AC_MSG_RESULT([${enable_timer}])
+SD_PAPI_DETECT
+AC_MSG_CHECKING([whether to enable the internal Abinit timer])
+AC_MSG_RESULT([${enable_timer}])
+if test "${sd_papi_ok}" != "yes"; then
   if test "${enable_timer}" = "yes"; then
     AC_DEFINE([HAVE_TIMER_ABINIT], 1,
       [Define to 1 if you want to use the Abinit timer.])
   fi
 fi
-abi_psml_wanted=`echo "${with_trio_flavor}" | grep "psml"`
-AM_CONDITIONAL([DO_BUILD_PSML], [test "${abi_psml_wanted}" != "" ])
 
                        # ------------------------------ #
 
@@ -735,6 +735,7 @@ SD_XMLF90_DETECT
 if test "${sd_xmlf90_ok}" = "yes"; then
   SD_LIBPSML_DETECT
 fi
+AM_CONDITIONAL([DO_BUILD_PSML], [test "${sd_libpsml_ok}" = "yes" ])
 
 # NetCDF library support
 AC_MSG_CHECKING([whether to enable NetCDF support])
@@ -753,11 +754,7 @@ if test "${abi_etsf_io_enable}" = "yes"; then
                        # ------------------------------ #
 
 # Levmar library support
-AC_MSG_CHECKING([whether to enable Levmar support])
-AC_MSG_RESULT([${abi_levmar_enable}])
-if test "${abi_levmar_enable}" = "yes"; then
-  ABI_TRIGGER_LEVMAR
-fi
+SD_LEVMAR_DETECT
 
                        # ------------------------------ #
 
