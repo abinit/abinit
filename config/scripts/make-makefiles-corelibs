@@ -55,7 +55,7 @@ def makefile_header(name,stamp):
 
 # Initial setup
 my_name    = "make-makefiles-corelibs"
-my_configs = ["config/specs/corelibs.conf"]
+my_configs = ["config/specs/corelibs.conf", "config/specs/dependencies.conf"]
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
@@ -82,6 +82,8 @@ cnf = MyConfigParser()
 cnf.read(my_configs[0])
 abinit_corelibs = cnf.sections()
 abinit_corelibs.sort()
+dep_cnf = MyConfigParser()
+dep_cnf.read(my_configs[1])
 
 # Hard-coded libraries for check programs
 hard_chklibs = [
@@ -175,7 +177,11 @@ for lib in abinit_corelibs:
   # Dependencies
   if ( cnf.has_option(lib,"dependencies") ):
     for dep in cnf.get(lib,"dependencies").split():
-      inc += " \\\n\t@abi_%s_fcflags@" % (dep)
+      if ( (dep in dep_cnf.sections()) and \
+           (dep_cnf.get(dep, "detector") == "steredeg") ):
+        inc += " \\\n\t@sd_%s_fcflags@" % (dep)
+      else:
+        inc += " \\\n\t@abi_%s_fcflags@" % (dep)
 
   # Required basic Fortran includes (must be last!)
   inc += " \\\n\t@fc_mod_fcflags@"
