@@ -50,7 +50,7 @@ typat 31*1
 znucl 56.
 chkprim 0
 
-wfoptalg 1
+wfoptalg 111
 istwfk 2
 
 #Atomic positions

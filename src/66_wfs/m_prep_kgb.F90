@@ -667,10 +667,8 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  !print *, "2*npw*my_nspinor*blocksize", 2*npw*my_nspinor*blocksize
  !stop
  
- print *, "size(cwaveprj)", size(cwaveprj)
- print *, "hamk%natom*my_nspinor*mpi_enreg%bandpp", hamk%natom*my_nspinor*mpi_enreg%bandpp
- print *, "hamk%natom", hamk%natom
- print *, "mpi_enreg%bandpp", mpi_enreg%bandpp
+! print *, "size(cwavef)", size(cwavef)
+! print *, "2*npw*my_nspinor*blocksize", 2*npw*my_nspinor*blocksize
  !stop
  
  if (size(cwavef)/=2*npw*my_nspinor*blocksize) then
@@ -692,18 +690,18 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
      end if
    end if
  end if
- print *, "size(cwaveprj)", size(cwaveprj)
- print *, "hamk%natom*my_nspinor*mpi_enreg%bandpp", hamk%natom*my_nspinor*mpi_enreg%bandpp
- print *, "hamk%natom", hamk%natom
- print *, "mpi_enreg%bandpp", mpi_enreg%bandpp
- stop
+! print *, "size(cwaveprj)", size(cwaveprj)
+! print *, "hamk%natom*my_nspinor*mpi_enreg%bandpp", hamk%natom*my_nspinor*mpi_enreg%bandpp
+! print *, "hamk%natom", hamk%natom
+! print *, "mpi_enreg%bandpp", mpi_enreg%bandpp
+ !stop
  if(cpopt>=0) then
    if (size(cwaveprj)/=hamk%natom*my_nspinor*mpi_enreg%bandpp) then
      msg = 'Incorrect size for cwaveprj!'
      MSG_BUG(msg)
    end if
  end if
- stop
+ !stop
  ABI_ALLOCATE(sendcountsloc,(nproc_band))
  ABI_ALLOCATE(sdisplsloc   ,(nproc_band))
  ABI_ALLOCATE(recvcountsloc,(nproc_band))
