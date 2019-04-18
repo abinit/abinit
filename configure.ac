@@ -244,6 +244,9 @@ SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
 # Init PAPI
 SD_PAPI_INIT([no no-cxx optional fail])
 
+# Init TRIQS
+SD_TRIQS_INIT([no optional fail])
+
 # Init Wannier90
 SD_WANNIER90_INIT([no no-cxx optional fail], [-lwannier90])
 
@@ -782,12 +785,9 @@ AM_CONDITIONAL([DO_BUILD_01_LIBXC_EXT],
   [test "${sd_libxc_ok}" = "yes"])
 
 # TRIQS support
-AC_MSG_CHECKING([whether to enable TRIQS support])
-AC_MSG_RESULT([${abi_triqs_enable}])
-if test "${abi_triqs_enable}" = "yes"; then
-  ABI_TRIGGER_TRIQS
-fi
-AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT], [test "${abi_triqs_enable}" = "yes"])
+SD_TRIQS_DETECT
+AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT],
+  [test "${sd_triqs_enable}" = "yes" -a "${sd_triqs_ok}" = "yes"])
 
 # Wannier90 library support
 SD_WANNIER90_DETECT
