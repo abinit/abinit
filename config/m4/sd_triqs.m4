@@ -15,6 +15,7 @@
 
 AC_DEFUN([SD_TRIQS_INIT], [
   # Init
+  sd_triqs_api_version="unknown"
   sd_triqs_enable=""
   sd_triqs_enable_def=""
   sd_triqs_cppflags=""
@@ -213,6 +214,20 @@ AC_DEFUN([SD_TRIQS_DETECT], [
         LIBS="${sd_triqs_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
+
+      case "${sd_triqs_api_version}" in
+        1.4)
+          AC_DEFINE([HAVE_TRIQS_v1_4], 1,
+            [Define to 1 if you have the TRIQS 1.4 libraries.])
+          ;;
+        2.0)
+          AC_DEFINE([HAVE_TRIQS_v2_0], 1,
+            [Define to 1 if you have the TRIQS 1.4 libraries.])
+          ;;
+        *)
+          AC_MSG_ERROR([TRIQS API version ${sd_triqs_api_version} not implemented in the build system])
+          ;;
+      esac
     else
       if test "${sd_triqs_status}" = "optional" -a \
               "${sd_triqs_init}" = "def"; then
@@ -227,6 +242,8 @@ AC_DEFUN([SD_TRIQS_DETECT], [
         AC_MSG_FAILURE([invalid TRIQS configuration])
       fi
     fi
+
+
   fi
 ])
 
@@ -270,7 +287,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
       G(iw_) << 1.0 / iw_ + 2.0 / iw_ / iw_ + 3.0 / iw_ / iw_ / iw_;
       auto known_moments = array<dcomplex, 1>{0.0, 1.0};
       auto [tail, err] = fit_tail(G, known_moments);
-    ]])], [sd_triqs_ok="yes"], [sd_triqs_ok="no"])
+    ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="2.0"], [sd_triqs_ok="no"])
   AC_LANG_POP([C++])
   AC_MSG_RESULT([${sd_triqs_ok}])
 
@@ -290,7 +307,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
         auto g      = gf<imfreq>{{beta, Fermion, nw}, {1, 1}};
         placeholder<0> w_;
         g(w_) << 1 / (w_ - 3);
-      ]])], [sd_triqs_ok="yes"], [sd_triqs_ok="no"])
+      ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="1.4"], [sd_triqs_ok="no"])
     AC_LANG_POP([C++])
     AC_MSG_RESULT([${sd_triqs_ok}])
   fi
@@ -348,7 +365,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_CONFIG], [
       case "${sd_triqs_policy}" in
         fail)
           AC_MSG_ERROR([The TRIQS package is required and cannot be disabled
-                  See https://launchpad.net/triqs for details on how to
+                  See https://triqs.github.io/ for details on how to
                   install it.])
           ;;
         skip)
