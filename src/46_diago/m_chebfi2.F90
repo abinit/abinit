@@ -32,6 +32,8 @@ module m_chebfi2
   
   integer, parameter :: EIGENV = 1
   integer, parameter :: EIGENVD = 2
+  integer, parameter :: DEBUG_ROWS = 5
+  integer, parameter :: DEBUG_COLUMNS = 5
   
 #ifdef HAVE_OPENMP 
   integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
@@ -325,8 +327,9 @@ module m_chebfi2
     integer :: ierr
     
     integer :: cols, rows
-   
     
+    type(xgBlock_t) :: HELPER
+   
     double precision :: tsec(2)
                     
     interface
@@ -430,6 +433,10 @@ module m_chebfi2
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
     call getAX_BX(chebfi%X,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
+    
+    call xgBlock_setBlock(chebfi%xAXColsRows, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+    call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+    stop
       
     call xmpi_barrier(chebfi%spacecom)
     !print *, "PROSAO NIJE SE UBIO"
@@ -536,14 +543,17 @@ module m_chebfi2
       call xmpi_barrier(chebfi%spacecom)
       
       call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
-      call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG) !all_to_all
-      call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG) !all_to_all
+      !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG) !all_to_all !no need to transpose (only X)
+      !call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG) !all_to_all
       
       call xgTransposer_free(chebfi%xgTransposerX)
       call xgTransposer_free(chebfi%xgTransposerAX)
       call xgTransposer_free(chebfi%xgTransposerBX)
 
     end if
+    
+    print *, "PROSAO TRANSPOSE"
+    !stop
 
     call timab(tim_RR, 1, tsec)
     call chebfi_rayleightRitz(chebfi, nline)
@@ -795,19 +805,36 @@ module m_chebfi2
     me_g0 = chebfi%me_g0
     
     spacedim = chebfi%spacedim
-    neigenpairs = chebfi%neigenpairs
+    if (chebfi%paral_kgb == 0) then
+      neigenpairs = chebfi%neigenpairs
+    else
+      neigenpairs = chebfi%bandpp
+    end if
     
-    call xg_init(A_und_X,space,neigenpairs,neigenpairs)
-    call xg_init(B_und_X,space,neigenpairs,neigenpairs)
+    call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
+    call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
     
+    print *, "neigenpairs", neigenpairs
+    !stop
+    
+    print *, "PROSAO INIT"
+    !stop
             
-    call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self) 
+    !call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self) 
+    call xgBlock_gemm(chebfi%xAXColsRows%trans, chebfi%X%normal, 1.0d0, chebfi%xAXColsRows, chebfi%X, 0.d0, A_und_X%self) 
+    
+    print *, "PROSAO GEMM"
+    !stop
             
     if (chebfi%paw) then
-      call xgBlock_gemm(chebfi%BX%self%trans, chebfi%X%normal, 1.0d0, chebfi%BX%self, chebfi%X, 0.d0, B_und_X%self) 
+      !call xgBlock_gemm(chebfi%BX%self%trans, chebfi%X%normal, 1.0d0, chebfi%BX%self, chebfi%X, 0.d0, B_und_X%self) 
+      call xgBlock_gemm(chebfi%xBXColsRows%trans, chebfi%X%normal, 1.0d0, chebfi%xBXColsRows, chebfi%X, 0.d0, B_und_X%self) 
     else
       call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self) 
     end if
+    
+    print *, "PROSAO GEMM 2"
+    !stop
           
     if(chebfi%istwf_k == 2) then    
        call xgBlock_scale(chebfi%X, 1/sqrt2, 1)   
@@ -828,6 +855,9 @@ module m_chebfi2
          end if
        end if 
     end if
+    
+    print *, "PROSLO SKALIRANJE"
+    !stop
         
     !*********************************** EIGENVALUE A Ψ X = B Ψ XΛ **********************************************!
     
@@ -839,6 +869,11 @@ module m_chebfi2
     case default
        MSG_ERROR("Error for Eigen Solver HEGV")
     end select
+    
+    call xgBlock_print(chebfi%eigenvalues, 6)
+    print *, "info", info
+    print *, "PROSAO HEGV"
+    stop
     
         
 !    call xgBlock_reverseMap(A_und_X%self,evec,1,neigenpairs*neigenpairs)
@@ -966,7 +1001,7 @@ module m_chebfi2
     
     !print *, "nbands", nbands
     do iband = 1, nbands
-      print *, "iband", iband
+      !print *, "iband", iband
       
     
       if(chebfi%istwf_k == 2) then

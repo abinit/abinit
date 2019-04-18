@@ -957,6 +957,12 @@ module m_xg
       MSG_ERROR("Not same space")
     end if
 
+    print *, "USAO U GEMM"
+    print *, "xgBlockW%rows", xgBlockW%rows
+    print *, "xgBlockW%cols", xgBlockW%cols
+    !stop
+    !stop
+
     if ( transa == 'n' ) then
       K = xgBlockA%cols
     else
@@ -965,11 +971,20 @@ module m_xg
 
     select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
+      print *, "PRE DGEMM"
       call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
         alpha,xgBlockA%vecR, xgBlockA%LDim, &
         xgBlockB%vecR, xgBlockB%LDim, beta,xgBlockW%vecR,xgBlockW%LDim)
+      print *, "NAKON DGEMM"
+      print *, "transa", transa
+      print *, "xgBlockA%trans", xgBlockA%trans
+      print *, "xgBlockW%spacedim_comm", xgBlockW%spacedim_comm
+      !stop
       if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
-        call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
+        print *, "LUDILO"
+        call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K) !!TODO BUGGGGGGGGGGGGGGGGGGg
+        print *, "LUDILO GOTOVO"
+        !stop
       end if
     case(SPACE_C)
       calpha = dcmplx(alpha,0.d0)

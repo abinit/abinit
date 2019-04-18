@@ -225,6 +225,8 @@ module m_chebfiwf
   cptr = c_loc(eig)			
   call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
   call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1)
+  print *, "nband", nband
+  !stop
  
   !call xg_init(xgresidu,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
   ! Trick the with C to change rank of arrays (:) to (:,:)
