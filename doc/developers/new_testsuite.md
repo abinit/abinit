@@ -12,11 +12,9 @@ is also discussed.
 
 ## Presentation
 
-### A name for the project ?
+### A name for the project
 
-- ABINEAT: ABInit NEw physics Aware Testing
-- NEAT: New Abinit Testing
-- ABINUTS / NUTS: New Unit Testing System / New Unit Test Suite
+NEAT: NEw Abinit Test system
 
 ### Principle
 
@@ -95,12 +93,15 @@ participation of the ABINIT community.
 
         pip install numpy pyyaml pandas --user
 
+    If these dependencies are not available, the new test system will be
+    disable. Also you will have a warning saying so.
+
 
 ## Implementation details
 
 The most important physical results are written in the main output file (aka
 *ab_out*) inside machine-readable [YAML](https://en.wikipedia.org/wiki/YAML)
-documents.  A YAML document starts with three hyphens (---) followed by an
+documents. A YAML document starts with three hyphens (---) followed by an
 (optional) tag beginning with an exclamation mark (e.g. `!ETOT`).  Three periods
 (...) signals the end of the document.  According to this syntax, one can easily
 write a dictionary storing the different contributions to the total free energy
@@ -223,10 +224,10 @@ to define and register a python YAML object associated to the ETOT tag.
 
 The new infrastructure has been designed with extensibility and ease-of-use in
 mind. From the perspective of an Abinit developer, adding support for the
-YAML-based approach requires two steps (??):
+YAML-based approach requires two steps:
 
 1. Implement the output of the YAML document in Fortran using the pre-existent
-   API.  Associate a tag and possibly a label to the new document.
+   API. Associate a label and possibly a tag to the new document.
 2. Create a YAML configuration for the new document in tests that will produce
    it
 
@@ -259,15 +260,18 @@ More specifically:
 - the *files_to_test* section now accepts the optional argument *use_yaml*. 
   Possible values are:
   
-    * "yes" --> activate YAML based test (default)
-    * "no" -->  do not use YAML test
-    * "only" --> use YAML based test but not legacy fldiff algorithm
+  * "yes" --> activate YAML based test (default)
+  * "no" -->  do not use YAML test
+  * "only" --> use YAML based test but not legacy fldiff algorithm
 
-- a new (optional) section `[yaml_test]` is added with two possible options: 
+- a new (optional) section `[yaml_test]` is added with two possible fields: 
 
-    * *test* --> the value is used as the YAML test specification source
-    * *file* --> the value is the path to the file containing the YAML test
-specification. The path is relative to the Abinit input file.
+  * *test* --> the value is used as the YAML test specification source, it may
+  be used for really short configuration heavily relying on the default.
+  * *file* --> the value is the path to the file containing the YAML test
+  specification. The path is relative to the Abinit input file. A natural choice
+  would be to use the path "./t21.yaml" associated to the input file "t21.in"
+  unless we decide to create a dedicated directory.
 
 ### Test specification syntax
 
@@ -279,7 +283,8 @@ First we have to introduce the main concepts.
 Data tree
 : The processed data is a YAML document. Therefore it can be seen as a tree
   whose nodes have a label and leaf are scalars or special data structures
-  identified by a tag (not all tags mark a leaf)
+  identified by a tag (not all tags mark a leaf). The top-level nodes are the
+  YAML documents themselves.
 
 Config tree
 : The configuration also take the form of a tree. Its nodes are
@@ -300,6 +305,13 @@ Parameter
 : A parameter is a value that can be used by constraints to modify their
   behavior.
 
+Iteration state
+: An iteration state describe how much iterations of each possible level have
+  append in the run (ex: idtset=2, itimimage=not used, image=5, time=not used).
+  It give information on the current state of the run. Documents are implicitly
+  associated to their iteration state. These informations are available to
+  the test engine through special YAML documents using the `IterStart` tag.
+
 !!! tip
 
     To get the list of constraints and parameters, run:
@@ -308,6 +320,13 @@ Parameter
     
     and type `show *`. You can then type for example `show tol_eq` to learn more
     about a specific constraint or parameter.
+
+A few conventions on documents writing
+: The label field appear in all data document. It should be a unique identifier
+  a the scale of an _iteration state_. The tag is not necessarily unique, it 
+  describe the structure of the document and there is no need to use it unless
+  special logic have to be implemented for the document. The comment field is
+  optional but is appreciated where the purpose of the document is not obvious
 
 Let's start with a minimalistic example in which we compare the components of
 the total free energy.
@@ -428,7 +447,7 @@ and `tol_abs` defined before because they are mutually exclusive.
 
 !!! tip
 
-    Within the explore shell `show ceil` will tell you among other informations
+    Within the explore shell `show ceil` will tell you, among other informations,
     what are the constraints disabled by the use of `ceil` in the _exclude_
     field.
 
@@ -449,31 +468,51 @@ results_gs:
     tol_vec: 1.0e-5
 ```
 
+We now have a basic test that check the values that matter with a fair
+precision.
+However this isn't satisfying yet. Indeed the test _paral[86]_ like a lot
+of Abinit tests use two datasets to perform two very different computations.
+The first dataset is dedicated to the computation of a good density in DFT+LDA. 
+The second dataset use this density to start a computation with DMFT. Since the
+purpose of the two dataset are very different, different convergence criterion
+are defined in the input file. Then we would like to create different configurations
+ for each dataset. This is possible thanks to __filters__.
 
+A filter is a way to associate a specific configuration to a set of _iteration
+state_. A filter is defined in a separated section of the test configuration
+under the node `filters`. We will add the following to our config file to
+declare two filters:
 
-==TODO==
-Continue the How To with the explanations of the filters
-==END TODO==
+```yaml
+filters:
+    lda:
+        dtset: 1
+    dmft:
+        dtset: 2
+```
 
+Here we simply said that we associate the label `lda` to a filter matching all
+documents created in the first dataset and we associate the label `dmft` to a
+filter matching all document created in the second dataset. This is the simplest
+filter declaration possible. More on filters declarations in section XXX. (TODO)
 
-In some cases it is important to define different behavior depending on the
-state of iterations (dtset, image...). This is possible thanks to the so-called
-__filters__.  Filters allow users to add special constraints and parameters when
-treating documents matching a given set of dtset, image etc.  To define a
-filter, the developer uses the special node _filters_, each child of this node
-is a filter.  The label of the child defines the name of the filter and its
-children defines the set it matches. The below example uses two filters that
-simply match one specific dataset.
+Now we have to use our filters. First of all we will associate the configuration
+we already wrote to the `lda` filter so we can have a different configuration
+for the second dataset. The YAML file will now became
 
 ```yaml
 lda:
-    results_gs:
-        tol_abs: 1.0e-6
+    Etot:
+        tol_abs: 1.0e-7
+        Total energy (eV):
+            tol_abs: 1.0e-5
+            tol_rel: 1.0e-10
 
-dmft:
     results_gs:
-        cartesian forces:
-            ignore
+        tol_rel: 1.0e-8
+        convergence:
+            ceil: 3.0e-7
+        tol_vec: 1.0e-5
 
 filters:
     lda:
@@ -481,6 +520,64 @@ filters:
     dmft:
         dtset: 2
 ```
+
+By putting the configuration under the `lda` node we state that those rules only
+apply to the first dataset. We will then create a new `dmft` node and create a
+configuration following the same procedure than before. We end up with something
+like this:
+
+```yaml
+lda:
+    Etot:
+        tol_abs: 1.0e-7
+        Total energy (eV):
+            tol_abs: 1.0e-5
+            tol_rel: 1.0e-10
+
+    results_gs:
+        tol_rel: 1.0e-8
+        convergence:
+            ceil: 3.0e-7
+        tol_vec: 1.0e-5
+
+dmft:
+    tol_abs: 2.0e-8
+    tol_rel: 5.0e-9
+
+    results_gs:
+        convergence:
+            ceil: 1.0e-6
+            diffor:
+                ignore: true
+        fermie:
+            tol_abs: 1.0e-7
+            tol_rel: 1.0e-8
+
+        stress tensor:
+            ignore: true
+    Etot:
+        Total energy eV:
+            tol_abs: 1.0e-5
+            tol_rel: 1.0e-8
+
+    Etot DC:
+        tol_abs: 1.0e-7
+        Total DC energy eV:
+            tol_abs: 1.0e-5
+            tol_rel: 1.0e-8
+
+filters:
+    lda:
+        dtset: 1
+    dmft:
+        dtset: 2
+```
+
+==TODO==
+Details on the definition of a filter
+Explanation of composition of different configurations (precedence of filters,
+default config, hard reset)
+==END TODO==
 
 A filter can specify all currently known iterators: dtset, timimage, image, and time. 
 For each iterator a set of integers can be defined with three methods:
@@ -687,7 +784,7 @@ Etot:
 callback
 
 : This one require a bit of python coding since it will use a method of the
-  structure it is defined in. Suppose with have a tag `!AtomSpeeds` associated
+  structure it is defined in. Suppose we have a tag `!AtomSpeeds` associated
   to a class `AtomSpeeds` and to a document labeled `Atomic speeds` in the data
   tree. The `AtomSpeeds` class have a method `not_going_anywhere` that checks
   that the atoms are not going to try to leave the box. We would like to
@@ -695,8 +792,8 @@ callback
   the border of the box. The signature of the method have to be
   `not_going_anywhere(self, tested, d_min=DEFAULT_VALUE)` and should return
   `True`, `False` or an instance of `FailDetail` (see __Add a new constraint__
-  for explanations about those). We can then use it by with the following
-  configuration:
+  for explanations about those). Note that `self` will be the reference
+  instance. We can then use it by with the following configuration:
 
 ```yaml
 Atomic speeds:
