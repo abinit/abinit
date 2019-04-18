@@ -1098,7 +1098,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   !Local variables -------------------------
   !scalars
   integer :: adir,bdir,bdx,bdxc,bfor,bsigma,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
-  integer :: ikpt,ikptg,isppol
+  integer :: ikpt,ikptb,ikptg,isppol
   integer :: my_nspinor,nband_k,nn,n1,n2,n3
   real(dp) :: deltab,deltag,ucvol
   complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B
@@ -1179,31 +1179,34 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
               dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
               deltag = sqrt(DOT_PRODUCT(dkg,dkg))
               do ikpt = 1, dtorbmag%fnkpt
+                 ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
                  ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
                  IA=czero
                  IB=czero
                  do nn = 1, nband_k
                     do n1 = 1, nband_k
                        t1A = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0),KIND=dpc)
-                       ! t1B = t1A
+                       t1B = t1A
                        do n2 = 1, nband_k
                           t2A = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor),KIND=dpc)
                           t3A = cmplx(smat_all_indx(1,n2,nn,ikptg,gdxc,0),smat_all_indx(2,n2,nn,ikptg,gdxc,0),KIND=dpc)
-                          ! t2B = conjg(cmplx(smat_all_indx(1,n2,n1,ikpt,bdx,0),smat_all_indx(2,n2,n1,ikpt,bdx,0),KIND=dpc))
-                          ! do n3 = 1, nband_k
-                          !    t3B = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0),KIND=dpc)
-                          !    t4B=conjg(cmplx(smat_all_indx(1,nn,n3,ikpt,gdx,0),smat_all_indx(2,nn,n3,ikpt,gdx,0),KIND=dpc))
-                          !    IB = IB + t1B*t2B*t3B*t4B
-                          ! end do ! end loop over n3
+
+                          t2B = cmplx(smat_all_indx(1,n1,n2,ikptb,bdxc,0),smat_all_indx(2,n1,n2,ikptb,bdxc,0),KIND=dpc)
+                          do n3 = 1, nband_k
+                             t3B = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0),KIND=dpc)
+                             t4B = cmplx(smat_all_indx(1,n3,nn,ikptg,gdxc,0),smat_all_indx(2,n3,nn,ikptg,gdxc,0),KIND=dpc)
+                             IB = IB + t1B*t2B*t3B*t4B
+                          end do ! end loop over n3
+
                           IA = IA + t1A*t2A*t3A
                        end do ! end loop over n2
                     end do ! end loop over n1
                  end do ! end loop over nn
 
-                 ! cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA-IB)/(2.0*deltab*2.0*deltag) 
-                 ! cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA-IB)/(2.0*deltab*2.0*deltag) 
-                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA)/(2.0*deltab*2.0*deltag) 
-                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA)/(2.0*deltab*2.0*deltag) 
+                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA-IB)/(2.0*deltab*2.0*deltag) 
+                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA-IB)/(2.0*deltab*2.0*deltag) 
+                 ! cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA)/(2.0*deltab*2.0*deltag) 
+                 ! cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA)/(2.0*deltab*2.0*deltag) 
 
               end do ! end loop over kpts
            end do ! end loop over gfor
