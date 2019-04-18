@@ -60,7 +60,7 @@ AC_DEFUN([SD_BIGDFT_INIT], [
   test -z "${sd_bigdft_enable_def}" && sd_bigdft_enable_def="auto"
   test -z "${sd_bigdft_status}" && sd_bigdft_status="optional"
   test -z "${sd_bigdft_policy}" && sd_bigdft_policy="fail"
-  test -z "${sd_bigdft_libs_def}" && sd_bigdft_libs_def="-lbigdft -lpoissonsolver -labinit"
+  test -z "${sd_bigdft_libs_def}" && sd_bigdft_libs_def="-lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 
