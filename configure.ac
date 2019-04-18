@@ -233,22 +233,22 @@ ABI_TRIGGERS_INIT
 SD_BIGDFT_INIT([no no-cxx optional fail])
 
 # Init Levmar
-SD_LEVMAR_INIT([auto no-cxx optional fail])
+SD_LEVMAR_INIT([no no-cxx optional fail])
 
 # Init LibPSML
-SD_LIBPSML_INIT([auto no-cxx optional fail])
+SD_LIBPSML_INIT([no no-cxx optional fail])
 
 # Init LibXC
 SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
 
 # Init PAPI
-SD_PAPI_INIT([auto no-cxx optional fail])
+SD_PAPI_INIT([no no-cxx optional fail])
 
 # Init Wannier90
-SD_WANNIER90_INIT([auto no-cxx optional fail], [-lwannier90])
+SD_WANNIER90_INIT([no no-cxx optional fail], [-lwannier90])
 
-# Init XMLF90
-SD_XMLF90_INIT([auto no-cxx optional fail])
+# Init XMLF90 (must be done after LibPSML)
+SD_XMLF90_INIT([${sd_libpsml_enable} no-cxx optional fail])
 
 # ---------------------------------------------------------------------------- #
 
@@ -740,8 +740,19 @@ SD_XMLF90_DETECT
 # LibPSML library support
 if test "${sd_xmlf90_ok}" = "yes"; then
   SD_LIBPSML_DETECT
+else
+  if test "${sd_libpsml_enable}" = "auto"; then
+    sd_libpsml_enable="no"
+  else
+    if test "${sd_libpsml_enable}" != "no"; then
+      AC_MSG_ERROR([LibPSML support has been requested but XMLF90 does not work
+                  Please point the configuration to a working XMLF90
+                  installation or disable LibPSML support])
+    fi
+  fi
 fi
-AM_CONDITIONAL([DO_BUILD_PSML], [test "${sd_libpsml_ok}" = "yes" ])
+AM_CONDITIONAL([DO_BUILD_PSML],
+  [test "${sd_libpsml_enable}" = "yes " -a "${sd_libpsml_ok}" = "yes"])
 
 # NetCDF library support
 AC_MSG_CHECKING([whether to enable NetCDF support])
