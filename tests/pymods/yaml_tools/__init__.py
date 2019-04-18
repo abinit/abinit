@@ -28,7 +28,11 @@ except ImportError:
 
 
 if is_available:
-    Loader = yaml.SafeLoader
+    if hasattr(yaml, 'CSafeLoader'):  # use the C binding (faster) if possible
+        Loader = yaml.CSafeLoader
+    else:
+        Loader = yaml.SafeLoader
+
     from .common import Undef, IterStart
 
     def yaml_parse(content, *args, **kwargs):
