@@ -186,7 +186,7 @@ for bin in main_bins:
     bin_deps = list()
   bin_opt = bin_cnf.get(bin,"optional")
   bin_cppflags = ""
-  bin_fcflags = ""
+  bin_fcflags = "@src_incs_fcflags@"
   bin_ldflags = ""
   bin_libs = ""
 
@@ -208,12 +208,6 @@ for bin in main_bins:
     bin_libs += " @%s_%s_libs@" % (dep_pfx, dep)
 
   # Finish setting build-time parameters
-  if ( bin_cppflags != "" ):
-    bin_cppflags = "$(AM_CPPFLAGS) $(CPPFLAGS) %s" % (bin_cppflags)
-  if ( bin_fcflags != "" ):
-    bin_fcflags = "$(AM_FCFLAGS) $(FCFLAGS) %s" % (bin_fcflags)
-  if ( bin_ldflags != "" ):
-    bin_ldflags = "$(FC_LDFLAGS) %s" % (bin_ldflags)
   bin_libs += " $(FC_LIBS)"
 
   # Write results
