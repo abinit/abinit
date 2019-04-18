@@ -2550,10 +2550,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! This to deactivate parallelism over perturbations for debugging.
  !if (dtset%nppert == -1)
- if (dtset%userib == 789 .and. new%my_npert /= natom3) then
+ !if (dtset%userib == 789 .and. new%my_npert /= natom3) then
    new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
    MSG_WARNING("Deactivating parallelism over perturbations.")
- end if
+ !end if
 
  ! Define number of procs for q-points and bands. nprocs is division by nprocs_pert.
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = 1
