@@ -31,6 +31,7 @@ module m_hightemp
   use m_io_tools
   use m_errors
   use m_geometry
+  use m_special_funcs
   use m_specialmsg
   use m_mpinfo,         only : ptabs_fourdp, proc_distrb_cycle
   use m_numeric_tools,  only : simpson, simpson_int
@@ -62,7 +63,7 @@ contains
 !! nkpt=number of k points
 !! nsppol=1 for unpolarized, 2 for spin-polarized
 !! occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
-!! rprimd(3,3)=Lattive vectors in Bohr
+!! rprimd(3,3)=Lattice vectors in Bohr
 !! tsmear=smearing width (or temperature)
 !! vxcavg=average of vxc potential
 !! wtk(nkpt)=k-point weights
@@ -155,28 +156,28 @@ end subroutine prt_eigocc
 !! I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon
 !!
 !! INPUTS
-!! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-!! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
-!! mband=maximum number of bands
-!! nband(nkpt)=number of bands at each k point
-!! nkpt=number of k points
-!! nsppol=1 for unpolarized, 2 for spin-polarized
-!! wtk(nkpt)=k-point weights
+!! e_bcut=Energy of the band from where to consider only free problem
+!! fermie=fermi energy (Hartree)
+!! mrgrid=number of grid points to compute the integral
+!! rprimd(3,3)=Lattice vectors in Bohr
+!! tsmear=smearing width (or temperature)
+!! u0=Translation factor which has been computed with an average of lasts bands before bcut
 !!
-!! TODO
 !! OUTPUT
+!! freeden_part=contribution of the free electron problem (Integral of the free DOS)
 !!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-subroutine int_freedos(e_bcut,fermie,mrgrid,rprimd,tsmear,u0)
+subroutine int_freedos(e_bcut,fermie,freeden_part,mrgrid,rprimd,tsmear,u0)
 
   ! Arguments -------------------------------
   ! Scalars
   integer,intent(in) :: mrgrid
   real(dp),intent(in) :: e_bcut,fermie,tsmear,u0
+  real(dp),intent(out) :: freeden_part
   ! Arrays
   real(dp),intent(in) :: rprimd(3,3)
 
@@ -193,13 +194,9 @@ subroutine int_freedos(e_bcut,fermie,mrgrid,rprimd,tsmear,u0)
   step=(1/e_bcut)/mrgrid
   do ii=1,mrgrid
     ix=(ii)*step
-    values(ii)=(2/(exp((1/ix-fermie)/(tsmear))+1))*((sqrt(2.))/(PI*PI))*sqrt(1/ix-u0)/(ix*ix)
+    values(ii)=fermi_dirac(1./ix,fermie,tsmear)*((sqrt(2.))/(PI*PI))*sqrt(1/ix-u0)/(ix*ix)
   end do
-  write(0,*) "u0=",u0
-  write(0,*) "fermie=",fermie
-  write(0,*) "e_bcut=",e_bcut
-  write(0,*) "tsmear=",tsmear
-  write(0,*) simpson(step,values)
+  freeden_part=simpson(step,values)
 end subroutine int_freedos
 
 !!****f* ABINIT/free_transfactor
@@ -210,28 +207,33 @@ end subroutine int_freedos
 !! Compute the translation factor $U_0$ that appears in the density of states of free electrons.
 !!
 !! INPUTS
+!! bcut=band number where to consider only free problem
 !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
 !! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
+!! fermie=fermi energy (Hartree)
 !! mband=maximum number of bands
 !! nband(nkpt)=number of bands at each k point
 !! nkpt=number of k points
 !! nsppol=1 for unpolarized, 2 for spin-polarized
+!! rprimd(3,3)=Lattice vectors in Bohr
+!! tsmear=smearing width (or temperature)
 !! wtk(nkpt)=k-point weights
 !!
-!! TODO
 !! OUTPUT
+!! freeden_part=contribution of the free electron problem (Integral of the free DOS)
 !!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-subroutine free_transfactor(bcut,eigen,eknk,fermie,mband,nband,nkpt,nsppol,rprimd,tsmear,wtk)
+subroutine free_transfactor(bcut,eigen,eknk,fermie,freeden_part,mband,nband,nkpt,nsppol,rprimd,tsmear,wtk)
 
   ! Arguments -------------------------------
   ! Scalars
   integer,intent(in) :: bcut,mband,nkpt,nsppol
   real(dp),intent(in) :: fermie,tsmear
+  real(dp),intent(out) :: freeden_part
   ! Arrays
   integer,intent(in) :: nband(nkpt*nsppol)
   real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
@@ -270,9 +272,9 @@ subroutine free_transfactor(bcut,eigen,eknk,fermie,mband,nband,nkpt,nsppol,rprim
   end do
   u0=u0/niter
 
-  call int_freedos(ek_n(bcut),fermie,1024,rprimd,tsmear,u0)
-  ! write(0,*) "Average made on ",niter," last bands until band =",bcut
-  ! write(0,*) "u0 =",u0
+  call int_freedos(eig_n(bcut),fermie,freeden_part,1024,rprimd,tsmear,u0)
+  write(0,*) 'u0=',u0
+  write(0,*) 'freeden_part=',freeden_part
 end subroutine free_transfactor
 
 end module m_hightemp

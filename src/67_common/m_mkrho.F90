@@ -190,13 +190,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 ! real(dp),allocatable :: occ_nd(2, :, :)
  real(dp),allocatable :: cwavef_rot(:,:,:,:)
 
- ! blanchet TEMPORARY DEVELOPMENT VARIABLES
-!scalars
-!arrays
- real(dp) :: rhor2(dtset%nfft,dtset%nspden)
- real(dp),allocatable :: rhoaug2(:,:,:)
-
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -300,8 +293,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      ndat = 1 ; if (mpi_enreg%paral_kgb==1) ndat = mpi_enreg%bandpp
      ABI_ALLOCATE(cwavef,(2,dtset%mpw,my_nspinor))
      ABI_ALLOCATE(rhoaug,(n4,n5,n6))
-!    blanchet high energy band cut
-     if(dtset%useria==6661 .and. dtset%useric > 0) ABI_ALLOCATE(rhoaug2,(n4,n5,n6))
      ABI_ALLOCATE(wfraug,(2,n4,n5,n6*ndat))
      ABI_ALLOCATE(cwavefb,(2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor))
      if(dtset%nspden==4) then
@@ -319,8 +310,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        ikg=0
 
        rhoaug(:,:,:)=zero
-!      blanchet high energy band cut
-       if(dtset%useria==6661 .and. dtset%useric > 0) rhoaug2(:,:,:)=zero
        do ikpt=1,dtset%nkpt
 
          nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
@@ -411,16 +400,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  if(mpi_enreg%paralbd==1) tim_fourwf=6
 
 !                The same section of code is also found in vtowfk.F90 : should be rationalized !
-!                blanchet
-                 if(dtset%useria==6661 .and. dtset%useric > 0) then
-                   if(iband <= dtset%useric) then
-                     call fourwf(1,rhoaug2,cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
-&                      istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                      npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                      use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
-&                      use_gpu_cuda=dtset%use_gpu_cuda)
-                   end if
-                 end if
 
                  call fourwf(1,rhoaug,cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
 &                 istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
@@ -673,10 +652,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !      Take also into account the spin, to place it correctly in rhor.
        if(dtset%nspden==1 .or. dtset%nspden==2) then
          call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor,rhoaug,1)
-!        blanchet
-         if(dtset%useria==6661 .and. dtset%useric > 0) then
-           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor2,rhoaug2,1)
-         end if
        else if(dtset%nspden==4) then
          ispden=1
          call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor,rhoaug_up,1)
@@ -699,8 +674,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      end if
      ABI_DEALLOCATE(cwavefb)
      ABI_DEALLOCATE(rhoaug)
-!    blanchet
-     if(dtset%useria==6661 .and. dtset%useric > 0) ABI_DEALLOCATE(rhoaug2)
      ABI_DEALLOCATE(wfraug)
 
      if(allocated(cwavef_rot))  then
@@ -716,12 +689,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      if (mpi_enreg%paral_hf==1)spaceComm=mpi_enreg%comm_kpt
      if(mpi_enreg%paral_kgb==1)spaceComm=mpi_enreg%comm_kpt
      call xmpi_sum(rhor,spaceComm,ierr)
-!    blanchet
-     call xmpi_sum(rhor2,spaceComm,ierr)
-     write(0,*) 'dens : '
-     write(0,*) rhor(1,1)-rhor2(1,1)
-     write(0,*) rhor(dtset%nfft/2,1)-rhor2(dtset%nfft/2,1)
-     write(0,*) rhor(dtset%nfft,1)-rhor2(dtset%nfft,1)
      call timab(71,2,tsec)
      call timab(48,2,tsec)
 

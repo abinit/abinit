@@ -356,6 +356,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  logical :: do_last_ortho,wvlbigdft=.false.
  real(dp) :: dmft_ldaocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
+ real(dp) :: freeden_part
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
  character(len=500) :: message
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
@@ -1448,12 +1449,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
      end if
 
-!    blanchet - Compute the free_transfactor U0.
-     if(dtset%useria==6661 .and. dtset%useric > 0) then
-       call free_transfactor(dtset%useric,eigen,eknk,energies%e_fermie,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
-&       rprimd,dtset%tsmear,dtset%wtk)
-     end if
-
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
@@ -1603,7 +1598,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
    end if
 
-   ABI_DEALLOCATE(eknk)
    if (usefock) then
      ABI_DEALLOCATE(focknk)
      if (optforces>0)then
@@ -1763,6 +1757,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_DEALLOCATE(rhowfg)
  end if
 
+!blanchet - Compute the free_transfactor U0.
+ if(dtset%useria==6661) then
+   call free_transfactor(dtset%mband,eigen,eknk,energies%e_fermie,freeden_part,&
+&   dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
+&   rprimd,dtset%tsmear,dtset%wtk)
+ end if
+ ABI_DEALLOCATE(eknk)
+ 
  call timab(994,2,tsec)
 
  if (iscf==-1) then
