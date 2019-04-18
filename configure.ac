@@ -241,6 +241,9 @@ SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
 # Init PAPI
 SD_PAPI_INIT([auto no-cxx optional fail])
 
+# Init Wannier90
+SD_WANNIER90_INIT([auto no-cxx optional fail], [-lwannier90])
+
 # Init XMLF90
 SD_XMLF90_INIT([auto no-cxx optional fail])
 
@@ -773,11 +776,7 @@ fi
 AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT], [test "${abi_triqs_enable}" = "yes"])
 
 # Wannier90 library support
-AC_MSG_CHECKING([whether to enable Wannier90 support])
-AC_MSG_RESULT([${abi_wannier90_enable}])
-if test "${abi_wannier90_enable}" = "yes"; then
-  ABI_TRIGGER_WANNIER90
-fi
+SD_WANNIER90_DETECT
 
                        # ------------------------------ #
 
