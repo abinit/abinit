@@ -229,6 +229,9 @@ ABI_GPU_INIT
 # Note: MPI and GPU must be initialised after feature triggers
 ABI_TRIGGERS_INIT
 
+# Init BigDFT
+SD_BIGDFT_INIT([no no-cxx optional fail])
+
 # Init Levmar
 SD_LEVMAR_INIT([auto no-cxx optional fail])
 
@@ -781,11 +784,7 @@ SD_WANNIER90_DETECT
                        # ------------------------------ #
 
 # BigDFT library support (requires linear algebra and LibXC)
-AC_MSG_CHECKING([whether to enable BigDFT support])
-AC_MSG_RESULT([${abi_bigdft_enable}])
-if test "${abi_bigdft_enable}" = "yes"; then
-  ABI_BIGDFT_DETECT
-fi
+SD_BIGDFT_DETECT
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
