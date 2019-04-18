@@ -2533,10 +2533,11 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    new%nbsum = new%bsum_stop - new%bsum_start + 1
  end if
 
- ! === MPI SECTIONS ===
- ! Handle Parallelism over perturbations first
- ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements.
- ! Perturbations are equally distributed --> Total number of CPUs should be divisible by 3 * natom
+ ! === MPI SECTION ===
+ ! Handle parallelism over perturbations first.
+ ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements for DFPT potentials.
+ ! Ideally, perturbations are equally distributed --> total number of CPUs should be divisible by 3 * natom.
+ ! or alt least, divisible by i for i in [2, 3 * natom].
  new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
  do cnt=natom3,2,-1
    if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
@@ -2549,10 +2550,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! This to deactivate parallelism over perturbations for debugging.
  !if (dtset%nppert == -1)
- !if (dtset%userib == 789 .and. new%my_npert /= natom3) then
+ if (dtset%userib == 789 .and. new%my_npert /= natom3) then
    new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
    MSG_WARNING("Deactivating parallelism over perturbations.")
- !end if
+ end if
 
  ! Define number of procs for q-points and bands. nprocs is division by nprocs_pert.
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = 1
@@ -2734,8 +2735,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    call wrtout(std_out," EPH Interpolation: will read energies from: "//trim(wfk_fname_dense))
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
-   !TODO add a check for consistency
-   ! number of bands and kpoints (commensurability)
+   !TODO add consistency check: number of bands and kpoints (commensurability)
    ABI_CHECK(ebands_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
    new%use_doublegrid = .True.
 
@@ -3647,10 +3647,10 @@ subroutine sigmaph_free(self)
  if (allocated(self%degtab)) then
    do jj=1,size(self%degtab, dim=2)
      do ii=1,size(self%degtab, dim=1)
-        do ideg=1,size(self%degtab(ii, jj)%bids)
-          ABI_FREE(self%degtab(ii, jj)%bids(ideg)%vals)
-        end do
-        ABI_DT_FREE(self%degtab(ii, jj)%bids)
+       do ideg=1,size(self%degtab(ii, jj)%bids)
+         ABI_FREE(self%degtab(ii, jj)%bids(ideg)%vals)
+       end do
+       ABI_DT_FREE(self%degtab(ii, jj)%bids)
      end do
    end do
    ABI_DT_FREE(self%degtab)
@@ -3910,9 +3910,9 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: my_rank, iq_ibz_k, iq_ibz, ierr, q_start, q_stop, nprocs, imyq, iq_dvdb, ii, cnt, itreat
- integer :: nqeff, ndiv !nbcalc_ks, 
- real(dp) :: cpu, wall, gflops !weight_q,
+ integer :: my_rank, iq_ibz_k, iq_ibz, ierr, nprocs, imyq, iq_dvdb, ii, cnt, itreat, iq ! q_start, q_stop, 
+ integer :: nqeff, ndiv
+ real(dp) :: cpu, wall, gflops !, weight_q
  logical :: qfilter
  character(len=500) :: msg
 !arrays
@@ -3980,7 +3980,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
            " (nqeff / nqibz_k): ", (100.0_dp * nqeff) / self%nqibz_k, " [%]"
        end if
 
-#if 0
        ! Redistribute relevant q-points inside comm_qpt taking into account itreat_qibz
        ! I may need to update qcache after this operation -->  build ineed_* table.
        ! Must handle two cases: potentials from DVDB or Fourier-interpolated.
@@ -4001,7 +4000,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
            iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
            itreat = int(self%itreat_qibz(iq_ibz), kind=i4b)
            if (.not. self%use_ftinterp) iq_dvdb = self%indq2dvdb_k(1, iq_ibz_k)
-           if (itreat /= 0) then.
+           if (itreat /= 0) then
              !if (itreat == 1 .or. (itreat > 1 .and. itreat == 1 + iqpos(self%qibz_k(:, iq_ibz_k)))) then
              if (ii == 1) self%my_nqibz_k = self%my_nqibz_k + 1
              if (ii == 2) then
@@ -4016,13 +4015,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
            end if
          end do
        end do
-#endif
-
-       ! Previous algorithm
-       call xmpi_split_work(nqeff, self%comm_qpt, q_start, q_stop, msg, ierr)
-       self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
-       ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-       if (self%my_nqibz_k /= 0) self%myq2ibz_k = qtab(q_start:q_stop)
 
        ABI_FREE(qtab)
        call wrtout(std_out, sjoin(" Number of q-points treated by this MPI proc:", itoa(self%my_nqibz_k)))
@@ -4035,16 +4027,8 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
          ! Update cache by Fourier interpolating W(r,R)
          call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qibz, comm)
        else
-         ! Find q-points needed by this MPI rank.
-         ABI_ICALLOC(ineed_qdvdb, (dvdb%nqpt))
-         do imyq=1,self%my_nqibz_k
-           iq_ibz_k = self%myq2ibz_k(imyq)
-           iq_dvdb = self%indq2dvdb_k(1, iq_ibz_k)
-           if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qdvdb(iq_dvdb) = 1
-         end do
          ! Update cache. Perform collective IO inside comm if needed.
          call dvdb%qcache_update_from_file(nfftf, ngfftf, ineed_qdvdb, comm)
-         ABI_FREE(ineed_qdvdb)
        end if
 
        ABI_SFREE(ineed_qibz)
