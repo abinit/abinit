@@ -242,6 +242,9 @@ SD_LIBPSML_INIT([no no-cxx optional fail])
 SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
 
 # Init PAPI
+SD_NETCDF_INIT([auto no-cxx optional fail])
+
+# Init PAPI
 SD_PAPI_INIT([no no-cxx optional fail])
 
 # Init TRIQS
@@ -737,6 +740,13 @@ fi
 
                        # ------------------------------ #
 
+# NetCDF library support
+SD_NETCDF_DETECT
+# FIXME: quick workaround
+if test "${sd_netcdf_ok}" = "yes"; then
+  sd_netcdf_fcflags="${sd_netcdf_fcflags} ${sd_netcdf_cppflags}"
+fi
+
 # XMLF90 library support
 SD_XMLF90_DETECT
 
@@ -756,13 +766,6 @@ else
 fi
 AM_CONDITIONAL([DO_BUILD_PSML],
   [test "${sd_libpsml_enable}" = "yes " -a "${sd_libpsml_ok}" = "yes"])
-
-# NetCDF library support
-AC_MSG_CHECKING([whether to enable NetCDF support])
-AC_MSG_RESULT([${abi_netcdf_enable}])
-if test "${abi_netcdf_enable}" = "yes"; then
-  ABI_TRIGGER_NETCDF
-fi
 
 # ETSF_IO library support
 AC_MSG_CHECKING([whether to enable ETSF_IO support])
