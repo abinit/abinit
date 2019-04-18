@@ -283,7 +283,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  ! Rearrange bz2ibz_smap as well.
  ABI_MALLOC(inv_iperm, (new%nibz))
  do ik_ibz=1,new%nibz
-   inv_iperm(iperm(ik_ibz)) =  ik_ibz
+   inv_iperm(iperm(ik_ibz)) = ik_ibz
  end do
 
  do ik_bz=1,new%nbz

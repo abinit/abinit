@@ -19689,4 +19689,19 @@ This option is similar to [[dipdip]] but it acts on the DFPT potentials instead 
 """,
 ),
 
+Variable(
+    abivarname="eph_np_pqbks",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions=[5],
+    defaultval=0,
+    mnemonics="EPH Number of Processors for Perturbations, Q-points, Bands, K-points, Spin.",
+    text=r"""
+This variable defined the MPI grid of processors used for EPH calculations.
+By default, the code will generate this grid automatically using the total number of processors 
+and the dimensions of the run computed at runtime.
+""",
+),
+
 ]

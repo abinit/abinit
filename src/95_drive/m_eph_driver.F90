@@ -668,8 +668,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (allocated(efmasval)) call efmasval_free_array(efmasval)
  ABI_SFREE(kpt_efmas)
 
-!XG20180810: please do not remove. Otherwise, I get an error on my Mac.
- write(std_out,*)' eph : after free efmasval and kpt_efmas'
+ ! XG20180810: please do not remove. Otherwise, I get an error on my Mac.
+ !write(std_out,*)' eph : after free efmasval and kpt_efmas'
 
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then

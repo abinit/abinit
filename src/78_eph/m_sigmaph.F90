@@ -2534,49 +2534,67 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end if
 
  ! === MPI SECTION ===
- ! Handle parallelism over perturbations first.
- ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements for DFPT potentials.
- ! Ideally, perturbations are equally distributed --> total number of CPUs should be divisible by 3 * natom.
- ! or alt least, divisible by i for i in [2, 3 * natom].
+ ! Init for sequential execution.
  new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
- do cnt=natom3,2,-1
-   if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-     new%nprocs_pert = cnt; new%my_npert = natom3 / cnt; exit
-   end if
- end do
- if (new%my_npert == natom3 .and. nprocs > 1) then
-   MSG_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
- end if
-
- ! This to deactivate parallelism over perturbations for debugging.
- !if (dtset%nppert == -1)
- !if (dtset%userib == 789 .and. new%my_npert /= natom3) then
-   new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
-   MSG_WARNING("Deactivating parallelism over perturbations.")
- !end if
-
- ! Define number of procs for q-points and bands. nprocs is division by nprocs_pert.
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = 1
  new%comm_qpt = xmpi_comm_self; new%me_qpt = 0; new%nprocs_qpt = 1 
  new%comm_bsum = xmpi_comm_self; new%me_bsum = 0; new%nprocs_bsum = 1 
 
- if (new%imag_only) then 
-   ! Just one extra MPI level for q-points.
-   new%nprocs_qpt = nprocs / new%nprocs_pert
+ if (any(dtset%eph_np_pqbks /= 0)) then
+   ! Use parameters from input file.
+   new%nprocs_pert = dtset%eph_np_pqbks(1)
+   new%nprocs_qpt  = dtset%eph_np_pqbks(2)
+   new%nprocs_bsum = dtset%eph_np_pqbks(3)
+   new%my_npert = natom3 / new%nprocs_pert
+   ABI_CHECK(new%my_npert > 0, "nprocs_pert cannot be greater than 3 * natom.")
+   ABI_CHECK(mod(natom3, new%nprocs_pert) == 0, "nprocs_pert must divide 3 * natom.")
+   if (new%imag_only .and. new%nprocs_bsum /= 1) then
+     MSG_ERROR("nprocs_bsum should be 1 when computing Imag(Sigma)")
+   end if
  else
-   ! Try to distribute equally nbsum first.
-   nrest = nprocs / new%nprocs_pert
-   do bstop=nrest,1,-1
-     if (mod(new%nbsum, bstop) == 0 .and. mod(nprocs, new%nprocs_pert * bstop) == 0) then
-       new%nprocs_bsum = bstop; new%nprocs_qpt = nrest / new%nprocs_bsum
-       exit
+   !  
+   ! Automatic grid generation.
+   !
+   ! Handle parallelism over perturbations first.
+   ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements for DFPT potentials.
+   ! Ideally, perturbations are equally distributed --> total number of CPUs should be divisible by 3 * natom.
+   ! or at least, divisible by one integer i for i in [2, 3 * natom - 1].
+   do cnt=natom3,2,-1
+     if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
+       new%nprocs_pert = cnt; new%my_npert = natom3 / cnt; exit
      end if
    end do
-   ! This to recover the previous behaviour in Re-Im that is OK
-   !new%nprocs_bsum = nrest; new%nprocs_qpt = 1
+   if (new%my_npert == natom3 .and. nprocs > 1) then
+     MSG_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
+   end if
+
+   ! This to deactivate parallelism over perturbations for debugging.
+   !if (dtset%userib == 789 .and. new%my_npert /= natom3) then
+   !  new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
+   !  MSG_WARNING("Deactivating parallelism over perturbations.")
+   !end if
+
+   ! Define number of procs for q-points and bands. nprocs is divisible by nprocs_pert.
+   if (new%imag_only) then 
+     ! Just one extra MPI level for q-points.
+     new%nprocs_qpt = nprocs / new%nprocs_pert
+   else
+     ! Try to distribute equally nbsum first.
+     nrest = nprocs / new%nprocs_pert
+     do bstop=nrest,1,-1
+       if (mod(new%nbsum, bstop) == 0 .and. mod(nprocs, new%nprocs_pert * bstop) == 0) then
+         new%nprocs_bsum = bstop; new%nprocs_qpt = nrest / new%nprocs_bsum
+         exit
+       end if
+     end do
+     ! This to recover the previous behaviour in Re-Im that is OK
+     !new%nprocs_bsum = nrest; new%nprocs_qpt = 1
+   end if
  end if
+
+ ! Consistency check.
  if (new%nprocs_pert * new%nprocs_qpt * new%nprocs_bsum /= nprocs) then
-   write(msg, "(a,i0,3a, 4(a,1x,i0))")&
+   write(msg, "(a,i0,3a, 4(a,1x,i0))") &
      "Cannot create 3d Cartesian grid with nprocs: ", nprocs, ch10, &
      "Idle processes are not supported. The product of `nprocs_*` should be equal to nprocs.", ch10, &
      "nprocs_pert (", new%nprocs_pert, ") x nprocs_qpt (", new%nprocs_qpt, ") x nprocs_bsum (", new%nprocs_bsum, &
@@ -2662,7 +2680,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    " up to my_bsum_stop:", itoa(new%my_bsum_stop)))
 
  ! Distribute DFPT potentials (IBZ q-points) inside comm_qpt. 
- ! Note that we distribute IBZ instead of the full BZ or the IBZ_k.
+ ! Note that we distribute IBZ instead of the full BZ or the IBZ_k inside the loop over ikcalc.
  ! This means that the load won't be equally distributed but memory will scale with nprocs_qpt.
  ! To reduce load imbalance, we sort qibz points by norm and use cyclic distribution.
  ABI_ICALLOC(new%itreat_qibz, (new%nqibz))
@@ -2673,6 +2691,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end do
  !new%itreat_qibz = 1
  ABI_FREE(iperm)
+
+ call wrtout(std_out, sjoin(" Number of q-points in the IBZ treated by this proc:" ,itoa(count(new%itreat_qibz == 1))))
 
  ! ================================================================
  ! Allocate arrays used to store final results and set them to zero
@@ -4017,7 +4037,10 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        end do
 
        ABI_FREE(qtab)
-       call wrtout(std_out, sjoin(" Number of q-points treated by this MPI proc:", itoa(self%my_nqibz_k)))
+       write(msg, "(a, i0, 2a, f5.3, a)") &
+        " Number of q-points in IBZ(k) treated by this proc:", self%my_nqibz_k, ch10, &
+        " Load balancing inside comm_qpt: ", (one * self%my_nqibz_k * self%nprocs_qpt) / self%nqibz_k, " (should be ~1)"
+       call wrtout(std_out, msg)
 
        ! Recompute weights with new q-point distribution.
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)

@@ -96,8 +96,6 @@ contains
 
 subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lenstr,ndtset,ndtset_alloc
@@ -109,7 +107,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !Local variables -------------------------------
 !scalars
- integer :: blocksize,exchn2n3d,iband,idtset,iexit,ii,iikpt,iikpt_modulo
+ integer :: blocksize,exchn2n3d,iband,idtset,iexit,ii,iikpt,iikpt_modulo, prtvol
  integer :: isppol,jdtset,marr,mband_lower,mband_upper
  integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,optdriver
  integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
@@ -145,6 +143,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    ! Handy read-only variables.
    optdriver = dtsets(idtset)%optdriver
+   prtvol = dtsets(idtset)%prtvol
 
 !  Read parallel input parameters
    marr=max(5,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
@@ -651,20 +650,20 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !    mkmem/=0 to avoid i/o; mkmem==0 to use disk i/o for nkpt>=1.
      if (nkpt_me<=mkmem .and. mkmem/=0 ) then
        write(message, '(a,i0,a,a,a,i0,a)' ) &
-&       ' mpi_setup: With nkpt_me=',nkpt_me,' and ',nm_mkmem(ii),' = ',mkmem,', ground state wf handled in core.'
-       call wrtout(std_out,message,'COLL')
+        ' mpi_setup: With nkpt_me=',nkpt_me,' and ',nm_mkmem(ii),' = ',mkmem,', ground state wf handled in core.'
+       if (prtvol > 0) call wrtout(std_out,message)
        if(nkpt_me<mkmem .and. nkpt_me/=0)then
          write(message,'(3a)')' Resetting ',nm_mkmem(ii),' to nkpt_me to save memory space.'
          mkmem=nkpt_me
-         call wrtout(std_out,message,'COLL')
+         if (prtvol > 0) call wrtout(std_out,message)
        end if
      else if(mkmem/=0)then
        write(message, '(a,i0,3a,i0,5a)' ) &
-&       ' mpi_setup: With nkpt_me=',nkpt_me,'and ',nm_mkmem(ii),' = ',mkmem,&
-&       ' ground state wf require disk i/o.',ch10,&
-&       ' Resetting ',nm_mkmem(ii),' to zero to save memory space.'
+       ' mpi_setup: With nkpt_me=',nkpt_me,'and ',nm_mkmem(ii),' = ',mkmem,&
+       ' ground state wf require disk i/o.',ch10,&
+       ' Resetting ',nm_mkmem(ii),' to zero to save memory space.'
        mkmem=0
-       call wrtout(std_out,message,'COLL')
+       if (prtvol > 0) call wrtout(std_out,message)
      end if
      if(dtsets(idtset)%usewvl == 0 .or. dtsets(idtset)%usepaw==1)then
        if(ii==1)dtsets(idtset)%mkmem=mkmem
@@ -1002,8 +1001,6 @@ end subroutine mpi_setup
 !! SOURCE
 
  subroutine finddistrproc(dtsets,filnam,idtset,iexit,mband,mpi_enreg,ndtset_alloc,tread)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1868,7 +1865,6 @@ end subroutine finddistrproc
 subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,npslk,uselinalggpu)
 
  use m_abi_linalg
- implicit none
 
 !Arguments ------------------------------------
 !scalars
