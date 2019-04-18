@@ -3300,6 +3300,100 @@ class AbinitTestSuite(object):
         if len(all_full_ids) != len(set(all_full_ids)):
             raise ValueError("Cannot have more than two tests with the same full_id")
 
+    def start_workers(self, nprocs, runner):
+        '''
+        Start nprocs new processes that will get tests from a queue and run
+        them with runner and put the result of runner in a output queue.
+        Return the task/input queue (to be closed only) and the results/output
+        queue.
+        '''
+
+        print_lock = Lock()
+
+        def worker(qin, qout, print_lock):
+            done = {
+                'type': 'proc_done'
+            }
+            try:
+                while not qin.empty():
+                    test = qin.get_nowait()
+                    qout.put(runner(test, print_lock=print_lock))
+            except EmptyQueueError:
+                # Queue have been emptied between the call to qin.empty
+                # and the call to qin.get, it can happen, it is not important.
+                pass
+            except Exception as e:
+                # Any other error is reported
+                done['error'] = e
+                try:
+                    done['task'] = test.full_id
+                except (AttributeError, NameError):
+                    pass
+            finally:
+                qout.put(done)
+
+        task_q = Queue()
+        res_q = Queue()
+
+        for test in self:  # fill the queue
+            task_q.put(test)
+
+        for i in range(nprocs):  # create and start subprocesses
+            p = Process(target=worker, args=(
+                task_q, res_q, print_lock
+            ))
+            self._processes.append(p)
+            p.start()
+
+        return task_q, res_q
+
+    def wait_loop(self, nprocs, ntasks, timeout, queue):
+        results = {}
+        proc_running, task_remaining = nprocs, ntasks
+        try:
+            while proc_running > 0:
+                msg = queue.get(block=True, timeout=(
+                    1 + 2 * task_remaining * timeout
+                    / proc_running
+                ))
+                if msg['type'] == 'proc_done':
+                    proc_running -= 1
+                    if 'error' in msg:
+                        e = msg['error']
+                        if 'task' in msg:
+                            task_remaining -= 1
+                            warnings.warn(
+                                'Error append in a worker on test '
+                                '{}:\n{}: {}'.format(
+                                    msg['task'], e.__class__.__name__, e
+                                )
+                            )
+                        else:
+                            warnings.warn(
+                                'Error append in a worker:\n{}: {}'
+                                .format(e.__class__.__name__, e)
+                            )
+
+                    logger.info("{} worker(s) remaining for {} tasks."
+                                .format(proc_running, task_remaining))
+                elif msg['type'] == 'result':
+                    results[msg['id']] = msg
+                    task_remaining -= 1
+        except KeyboardInterrupt:
+            self.terminate()
+            raise KeyboardInterrupt()
+
+        except EmptyQueueError:
+            warnings.warn(
+                ("Workers have been hanging until timeout. There were {}"
+                    " procs working on {} tasks.").format(proc_running,
+                                                          task_remaining)
+            )
+            self.terminate()
+            return None
+
+        return results
+
     def run_tests(self, build_env, workdir, runner, nprocs=1, py_nprocs=1, runmode="static", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
@@ -3332,7 +3426,7 @@ class AbinitTestSuite(object):
         self.lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"),
                                     timeout=3)
 
-        with self.lock as locked:
+        with self.lock as locked:  # aquire the global file lock
             if not locked:
                 msg = ("Timeout occured while trying to acquire lock in:\n\t%s\n"
                        "Perhaps a previous run did not exit cleanly or another process is running in the same directory.\n"
@@ -3373,97 +3467,23 @@ class AbinitTestSuite(object):
             if py_nprocs == 1:
                 logger.info("Sequential version")
                 for test in self:
-                    # discard the return value because tests are directly modified
+                    # discard the return value because tests are directly
+                    # modified
                     run_and_check_test(test)
 
             elif py_nprocs > 1:
                 logger.info("Threaded version with py_nprocs = %s" % py_nprocs)
 
-                def worker(qin, qout, print_lock):
-                    done = {
-                        'type': 'proc_done'
-                    }
-                    try:
-                        while not qin.empty():
-                            test = qin.get_nowait()
-                            qout.put(run_and_check_test(test,
-                                                        print_lock=print_lock))
-                    except EmptyQueueError:
-                        # Queue have been emptied between the call to qin.empty
-                        # and the call to qin.get
-                        pass
-                    except Exception as e:
-                        done['error'] = e
-                        try:
-                            done['task'] = test.full_id
-                        except (AttributeError, NameError):
-                            pass
-                    finally:
-                        qout.put(done)
+                task_q, res_q = self.start_workers(py_nprocs,
+                                                   run_and_check_test)
 
-                task_q = Queue()
-                res_q = Queue()
-                print_lock = Lock()
-
-                for test in self:
-                    task_q.put(test)
-
-                for i in range(py_nprocs):
-                    p = Process(target=worker, args=(task_q, res_q, print_lock))
-                    self._processes.append(p)
-                    p.start()
-
-                # Block until all tasks are done. Raise QueueTimeoutError after timeout seconds.
                 timeout_1test = float(runner.timebomb.timeout)
                 if timeout_1test <= 0.1:
                     timeout_1test = 240.
 
-                results = {}
-
-                task_remaining = len(self.tests)
-                proc_running = py_nprocs
-                try:
-                    while proc_running > 0:
-                        msg = res_q.get(block=True, timeout=(
-                            1 + 2 * task_remaining * timeout_1test
-                            / proc_running
-                        ))
-                        if msg['type'] == 'proc_done':
-                            proc_running -= 1
-                            if 'error' in msg:
-                                e = msg['error']
-                                if 'task' in msg:
-                                    task_remaining -= 1
-                                    warnings.warn(
-                                        'Error append in a worker on test '
-                                        '{}:\n{}: {}'.format(
-                                            msg['task'], e.__class__.__name__, e
-                                        )
-                                    )
-                                else:
-                                    warnings.warn(
-                                        'Error append in a worker:\n{}: {}'
-                                        .format(e.__class__.__name__, e)
-                                    )
-
-                            logger.info("{} worker(s) remaining for {} tasks."
-                                        .format(proc_running, task_remaining))
-                        elif msg['type'] == 'result':
-                            results[msg['id']] = msg
-                            task_remaining -= 1
-
-                except KeyboardInterrupt:
-                    self.terminate()
-                    raise KeyboardInterrupt()
-
-                except EmptyQueueError:
-                    warnings.warn(
-                        ("Workers have been hanging until timeout. There were {}"
-                         " procs working on {} tasks.").format(proc_running,
-                                                               task_remaining)
-                    )
-                    self.terminate()
-                    return
+                # Wait for all tests to be done gathering results
+                results = self.wait_loop(py_nprocs, len(self.tests),
+                                         timeout_1test, res_q)
 
                 # remove this to let python carbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security
@@ -3475,17 +3495,12 @@ class AbinitTestSuite(object):
                 # update local tests instances with the results of their running in
                 # a remote process
                 for test in self.tests:
-                    if test._rid in results:
-                        # test.status = d['status']
-                        # test.stdout_fname = d['stdout']
-                        # test.files_to_keep = d['files_to_keep']
-
-                        test.results_load(results[test._rid])
-                    else:
+                    if test._rid not in results:
                         raise RuntimeError((
                             "I did not get the results of the test {}. It"
                             " means that something fishy happen in the worker."
                         ).format(test.full_id))
+                    test.results_load(results[test._rid])
 
             # Run completed.
             self._executed = True
