@@ -852,15 +852,15 @@ with_trio_flavor="netcdf"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="atlas"
+with_linalg_flavor=""goto""
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_incs="-I/usr/include/atlas"
+with_linalg_incs=""-I/usr/local/OpenBLAS-0.3.5_gnu74/include""
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/lib64/atlas -ltatlas -lsatlas"
+with_linalg_libs=""-L/usr/local/OpenBLAS-0.3.5_gnu74/lib/ -lopenblas -lm -lpthread -lgfortran""
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
