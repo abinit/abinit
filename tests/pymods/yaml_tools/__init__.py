@@ -31,6 +31,9 @@ if is_available:
     if hasattr(yaml, 'CSafeLoader'):  # use the C binding (faster) if possible
         Loader = yaml.CSafeLoader
     else:
+        warnings.warn('The libyaml binding is not available, tests will take'
+                      ' more time. Using python 3 may solve the problem. If it'
+                      ' doesn\'t you may have to install libyaml yourself.')
         Loader = yaml.SafeLoader
 
     from .common import Undef, IterStart
