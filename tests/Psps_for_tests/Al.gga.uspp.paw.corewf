@@ -11,7 +11,7 @@ All-electron core wavefunctions - Paw atomic data for element Al - Generated wit
 ===== Core wave functions PHI 1 =====   [phi(r)=PHI(r)/r*Ylm(th,ph)]
  1  : radial mesh index
    1   0   1                            : n,l,spin
-  -55.4062575   2.00000000E+00          : ene,occ
+  -1.10812515E+02   2.00000000E+00      : ene,occ
   0.0000000000000000E+00  2.5465968094271998E-04  5.1084058974536597E-04
   7.6855168570907949E-04  1.0278019927566567E-03  1.2886005866272676E-03
   1.5509565951393751E-03  1.8148791984791389E-03  2.0803776294823894E-03
@@ -574,7 +574,7 @@ All-electron core wavefunctions - Paw atomic data for element Al - Generated wit
 ===== Core wave functions PHI 2 =====   [phi(r)=PHI(r)/r*Ylm(th,ph)]
  1  : radial mesh index
    2   0   1                            : n,l,spin
-  -3.95851634   2.00000000E+00          : ene,occ
+  -7.91703268E+00   2.00000000E+00      : ene,occ
  -0.0000000000000000E+00 -6.5987512994716168E-05 -1.3236920707475995E-04
  -1.9914740372178533E-04 -2.6632444116022670E-04 -3.3390267103913915E-04
  -4.0188445850027472E-04 -4.7027218225276045E-04 -5.3906823464611089E-04
@@ -1137,7 +1137,7 @@ All-electron core wavefunctions - Paw atomic data for element Al - Generated wit
 ===== Core wave functions PHI 3 =====   [phi(r)=PHI(r)/r*Ylm(th,ph)]
  1  : radial mesh index
    2   1   1                            : n,l,spin
-  -2.560804385   6.00000000E+00         : ene,occ
+  -5.12160877E+00   6.00000000E+00      : ene,occ
   0.0000000000000000E+00  5.3935041001943561E-10  2.1698637457973734E-09
   4.9115813328743762E-09  8.7844745296932910E-09  1.3808834232710455E-08
   2.0005241428956645E-08  2.7394567088282240E-08  3.5997974968290333E-08

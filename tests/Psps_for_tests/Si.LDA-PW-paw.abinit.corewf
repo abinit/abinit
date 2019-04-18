@@ -11,7 +11,7 @@ All-electron core wavefunctions - Paw atomic data for element Si - Generated wit
 ===== Core wave functions PHI 1 =====   [phi(r)=PHI(r)/r*Ylm(th,ph)]
  1  : radial mesh index
    1   0   1                            : n,l,spin
-  -65.3572785   2.00000000E+00          : ene,occ
+  -1.30714557E+02   2.00000000E+00      : ene,occ
   0.0000000000000000E+00  2.8286746596920014E-04  5.6537099566431970E-04
   8.4879000780603597E-04  1.1334003456047999E-03  1.4124026736979209E-03
   1.6978690714021451E-03  1.9854904544676722E-03  2.2742669547833275E-03
@@ -566,7 +566,7 @@ All-electron core wavefunctions - Paw atomic data for element Si - Generated wit
 ===== Core wave functions PHI 2 =====   [phi(r)=PHI(r)/r*Ylm(th,ph)]
  1  : radial mesh index
    2   0   1                            : n,l,spin
-  -5.0987347   2.00000000E+00           : ene,occ
+  -1.01974694E+01   2.00000000E+00      : ene,occ
   0.0000000000000000E+00 -7.5258518263526282E-05 -1.5042019413905023E-04
  -2.2582542410375800E-04 -3.0154759753109160E-04 -3.7577771214761512E-04
  -4.5172761368742387E-04 -5.2825084477196545E-04 -6.0508138468559570E-04
@@ -1121,7 +1121,7 @@ All-electron core wavefunctions - Paw atomic data for element Si - Generated wit
 ===== Core wave functions PHI 3 =====   [phi(r)=PHI(r)/r*Ylm(th,ph)]
  1  : radial mesh index
    2   1   1                            : n,l,spin
-  -3.513568655   6.00000000E+00      : ene,occ
+  -7.02713731E+00   6.00000000E+00      : ene,occ
   0.0000000000000000E+00  2.7152034014845850E-09  9.0587309097474522E-09
   1.8378572974453762E-08  3.0416875269252693E-08  4.4987571144604530E-08
   6.2049489393469292E-08  8.1525751305035313E-08  1.0336004286636651E-07

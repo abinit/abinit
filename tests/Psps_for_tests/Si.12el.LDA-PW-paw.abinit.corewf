@@ -11,7 +11,7 @@ All-electron core wavefunctions - Paw atomic data for element Si - Generated wit
 ===== Core wave functions PHI 1 =====   [phi(r)=PHI(r)/r*Ylm(th,ph)]
  1  : radial mesh index
    1   0   1                            : n,l,spin
-  -65.3572785   2.00000000E+00          : ene,occ
+  -1.30714557E+02   2.00000000E+00      : ene,occ
   0.0000000000000000E+00  2.8286746596920014E-04  5.6537099566431970E-04
   8.4879000780603597E-04  1.1334003456047999E-03  1.4124026736979209E-03
   1.6978690714021451E-03  1.9854904544676722E-03  2.2742669547833275E-03

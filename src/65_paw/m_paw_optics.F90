@@ -633,7 +633,7 @@ CONTAINS  !=====================================================================
    write(ount)(eigen0(ib),ib=1,mband*nkpt*nsppol)
    write(ount) nphicor
    do iln=1,nphicor
-     write(ount) ncor(iln),lcor(iln),half*energy_cor(iln)
+     write(ount) ncor(iln),lcor(iln),energy_cor(iln)
    end do
  end if
 
