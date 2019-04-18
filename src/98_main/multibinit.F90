@@ -458,8 +458,10 @@ program multibinit
 !****************************************************************************************
    call effective_potential_free(reference_effective_potential)
    call multibinit_dtset_free(inp)
-   call abihist_free(hist)
-   call spin_model_t_finalize(spin_model)
+   call abihist_free(hist) 
+   if(inp%spin_dynamics>0) then
+      call spin_model_t_finalize(spin_model)
+   endif 
 !****************************************************************************************
 
    write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10

@@ -1,5 +1,5 @@
 
-.Version 8.9.4 of MULTIBINIT 
+.Version 8.11.6 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 28 Aug 2018.
-- ( at 07h39 )
+.Starting date : Wed  3 Apr 2019.
+- ( at 11h27 )
   
 -  nproc =    2
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_isokinetic/tests/paral/Input/t98_sys.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_multibini-proddev/tests/paral/Input/t98_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -60,8 +60,12 @@
 
 ================================================================================
 
--Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_isokinetic/tests/paral/Input/t98_sys.xml
--Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_isokinetic/tests/paral/Input/t98_sys.xml with Fortran
+-Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_multibini-proddev/tests/paral/Input/t98_sys.xml
+-Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_multibini-proddev/tests/paral/Input/t98_sys.xml with LibXML library
+
+ Bound for ifc SR:
+
+ x=[  0  1], y=[  0  1] and z=[ -1  1]
 
 ================================================================================
 
@@ -1498,10 +1502,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.483  and wall time      0.490 sec
++Total cpu time      0.082  and wall time      0.089 sec
 
  multibinit : the run completed succesfully.

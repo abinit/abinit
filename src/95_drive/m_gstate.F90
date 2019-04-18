@@ -273,11 +273,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: nblok,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
- integer :: cnt,spin,band,ikpt,usecg,usecprj
+ integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
- logical :: wvlbigdft=.false.,wvl_debug=.false.
+ logical :: is_dfpt=.false.,wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
  character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
@@ -440,13 +440,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_ALLOCATE(ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
    if (psps%useylm==1) then
-     option=0
-     if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) option=1 ! compute gradients of YLM
-     if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) option = 1 ! compute gradients of YLM
+     ylm_option=0
+     if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
+     if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) ylm_option = 1 ! compute gradients of YLM
+     if ((dtset%orbmag.GT.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &     psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
-&     npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
-   end if
+&     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
+  end if
  else
    ABI_ALLOCATE(ylm,(0,0))
    ABI_ALLOCATE(ylmgr,(0,0,0))
@@ -983,17 +984,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
 
 !  2-Initialize and compute data for LDA+U, EXX, or LDA+DMFT
-   pawtab(:)%usepawu=0
-   pawtab(:)%useexexch=0
-   pawtab(:)%exchmix=zero
-   if(paw_dmft%use_dmft==1) then
-     call print_sc_dmft(paw_dmft,dtset%pawprtvol)
-   end if
-   if (dtset%usepawu>0.or.dtset%useexexch>0.or.paw_dmft%use_dmft>0) then
-     call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&     args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%ntypat,pawang,dtset%pawprtvol,&
+   if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
+   call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
+&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%ntypat,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
-   end if
  end if
 
 !###########################################################

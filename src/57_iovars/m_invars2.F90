@@ -284,7 +284,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ntypalch=dtset%ntypalch
  ntyppure=dtset%ntyppure
 
- dmatsize=0
+ dmatsize=0 ! dmatpu not available for usepawu<0
  if (dtset%usepawu>0.and.dtset%usedmatpu/=0) then
    do iatom=1,natom
      lpawu=dtset%lpawu(dtset%typat(iatom))
@@ -1797,8 +1797,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
  if ( dtset%usedmft > 0  .and. dtset%nbandkss==0) then
-   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
-   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+   if (dtset%usepawu /= 0 ) then
+     write(message,'(7a)')&
+     'usedmft and usepawu are both activated ',ch10,&
+     'This is not an usual calculation:',ch10,&
+     'usepawu will be put to a value >= 10:',ch10,&
+     'LDA+U potential and energy will be put to zero'
+     MSG_WARNING(message)
+   end if
+   if (abs(dtset%usepawu)==4.or.dtset%usepawu==14)  dtset%usepawu=14
+   if (abs(dtset%usepawu)/=4.and.dtset%usepawu/=14) dtset%usepawu=10
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
@@ -1852,7 +1860,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawcpxocc',tread,'INT')
  if(tread==1) then
    dtset%pawcpxocc=intarr(1)
- else if (dtset%nspinor==2.and.(dtset%usepawu>=1.or.dtset%usedmft>0)) then
+ else if (dtset%nspinor==2.and.(dtset%usepawu/=0.or.dtset%usedmft>0)) then
    dtset%pawcpxocc=2
  else if (dtset%pawspnorb>0.and.(dtset%kptopt<=0.or.dtset%kptopt>=3)) then
    if (dtset%optdriver/=RUNL_GSTATE.or.dtset%ionmov<6.or.dtset%iscf<10) dtset%pawcpxocc=2
@@ -1974,6 +1982,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_solv=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
    if(tread==1) dtset%dmft_t2g=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_x2my2d',tread,'INT')
+   if(tread==1) dtset%dmft_x2my2d=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tolfreq',tread,'DPR')
    if(tread==1) dtset%dmft_tolfreq=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tollc',tread,'DPR')
@@ -1984,7 +1994,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmftbandi=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandf',tread,'INT')
    if(tread==1) dtset%dmftbandf=intarr(1)
-   if((dtset%dmftbandf-dtset%dmftbandi+1)<2*maxval(dtset%lpawu(:))+1.and.(dtset%dmft_t2g==0)) then
+   if((dtset%dmftbandf-dtset%dmftbandi+1)<2*maxval(dtset%lpawu(:))+1.and.&
+ &  ((dtset%dmft_t2g==0).and.(dtset%dmft_x2my2d==0))) then
      write(message, '(4a,i2,2a)' )&
      '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
 &     '   Number of bands to construct Wannier functions is not', &
@@ -2061,15 +2072,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
  end if
 
- if (dtset%usepawu>0.or.dtset%usedmft>0) then
+ if (dtset%usepawu/=0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'f4of2_sla',tread,'ENE')
-   if(tread==1)then
-     dtset%f4of2_sla(1:ntypat)=dprarr(1:ntypat)
-   end if
+   if(tread==1) dtset%f4of2_sla(1:ntypat)=dprarr(1:ntypat)
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'f6of2_sla',tread,'ENE')
-   if(tread==1)then
-     dtset%f6of2_sla(1:ntypat)=dprarr(1:ntypat)
-   end if
+   if(tread==1) dtset%f6of2_sla(1:ntypat)=dprarr(1:ntypat)
+ end if
+ if (dtset%usepawu>0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmatpuopt',tread,'INT')
    if(tread==1) dtset%dmatpuopt=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmatudiag',tread,'INT')
@@ -3041,7 +3050,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      end if
    end if
 
-   if (dtset%usepawu>0.or.dtset%usedmft>0) then
+   if (dtset%usepawu/=0.or.dtset%usedmft>0) then
 
      dprarr(1:ntypat)=dtset%upawu(1:ntypat,iimage)
      call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'upawu',tread,'ENE')

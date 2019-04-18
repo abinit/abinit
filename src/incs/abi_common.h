@@ -129,22 +129,22 @@
 /* and now the debugging macros */
 #  define ABI_ALLOCATE(ARR, SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "??", __LINE__)
 
 #  define ABI_DEALLOCATE(ARR) \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, "", __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, "??", __LINE__) NEWLINE \
    deallocate(ARR) 
 
 #  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "??", __LINE__)
 
 #  define ABI_DATATYPE_ALLOCATE(ARR,SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "??", __LINE__)
 
 #  define ABI_DATATYPE_DEALLOCATE(ARR)  \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, "", __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, "??", __LINE__) NEWLINE \
    deallocate(ARR) 
 
 #else
@@ -213,9 +213,10 @@
 #define MSG_WARNING(msg) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_)
 #define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
 #define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
-#define MSG_ERROR(msg)   call msg_hndl(msg,"ERROR", "PERS" _FILE_LINE_ARGS_)
-#define MSG_ERROR_CLASS(msg, cls)  call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
-#define MSG_BUG(msg)     call msg_hndl(msg,"BUG", "PERS" _FILE_LINE_ARGS_)
+#define MSG_ERROR(msg) call msg_hndl(msg,"ERROR", "PERS" _FILE_LINE_ARGS_)
+#define MSG_ERROR_CLASS(msg, cls) call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
+#define MSG_BUG(msg) call msg_hndl(msg,"BUG", "PERS" _FILE_LINE_ARGS_)
+#define MSG_STOP(msg) call msg_hndl(msg,"STOP", "PERS")
 
 #define MSG_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
 #define MSG_ERROR_NOSTOP(msg, ierr) \

@@ -23,7 +23,7 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t37.out, tolnlines = 1, tolabs = 0, tolrel = 0, fld_options = -medium;
-#%%   t37omega.dat, tolnlines = 2, tolabs = 1e-5, tolrel = 1.01, fld_options = -medium;
+#%%   t37omega.dat, tolnlines = 2, tolabs = 2e-5, tolrel = 1.01, fld_options = -medium;
 #%%   t37thermo.dat, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -32,4 +32,5 @@
 #%% keywords = tdep
 #%% description = 
 #%%   test TDEP 
+#%% topics = Tdep
 #%%<END TEST_INFO>
