@@ -435,7 +435,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &         firstchar,'ETOT',istep,etotal,deltae,residm,res2
        end if
      end if
-     call neat_etot_add_line(etot_yaml_doc, message)
+     if (etot_yaml_doc%length /= 0) then
+       call neat_etot_add_line(etot_yaml_doc, message)
+     end if
      call wrtout(ab_out,message,'COLL')
 
      if(mpi_enreg%paral_pert==1) then
@@ -1517,7 +1519,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
 &       '    Hartree energy  = ',energies%e_hartree,ch10,&
 &       '    XC energy       = ',exc_semilocal,ch10,&
-&       '    '//eneName//'  =',enevalue,ch10,&
+&       '    '//eneName//'  = ',enevalue,ch10,&
 &       '    PspCore energy  = ',energies%e_corepsp
        call wrtout(iout,msg,'COLL')
        call e_components%set('Hartree energy', r=energies%e_hartree)

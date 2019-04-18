@@ -67,6 +67,12 @@ class IllegalFilterNameError(ConfigError):
         super(IllegalFilterNameError, self).__init__(msg.format(name))
 
 
+class MissingCallbackError(ConfigError):
+    def __init__(self, obj, method):
+        msg = '{} does not expose a {} method.'.format(obj, method)
+        super(MissingCallbackError, self).__init__(msg)
+
+
 ###############################################################################
 class InputFileError(YAMLTestError):
     def __init__(self, line, msg):
@@ -78,7 +84,7 @@ class NoIteratorDefinedError(InputFileError):
     def __init__(self, doc):
         msg = ('No iterator have been found before the first document {}.'
                .format(doc.obj))
-        super(NoIteratorDefinedError, self).__init__(doc.start+1, msg)
+        super(NoIteratorDefinedError, self).__init__(doc.start + 1, msg)
 
 
 class NotAvailableTagError(InputFileError):

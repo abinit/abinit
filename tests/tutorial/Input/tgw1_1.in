@@ -111,9 +111,9 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% authors = Unknown
 #%% keywords = GW 
 #%% description = 
-#%% Crystalline silicon
-#%% Calculation of the GW corrections
-#%% Dataset 1: ground state calculation and calculation of the WFK file for 10 k-points in IBZ
-#%% Dataset 2: calculation of the screening (epsilon^-1 matrix for W)
-#%% Dataset 3: calculation of the Self-Energy matrix elements (GW corrections)
+#%%   Crystalline silicon
+#%%   Calculation of the GW corrections
+#%%   Dataset 1: ground state calculation and calculation of the WFK file for 10 k-points in IBZ
+#%%   Dataset 2: calculation of the screening (epsilon^-1 matrix for W)
+#%%   Dataset 3: calculation of the Self-Energy matrix elements (GW corrections)
 #%%<END TEST_INFO>

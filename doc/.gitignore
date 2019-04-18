@@ -6,8 +6,10 @@ README_xlf.md
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
-variables/multibinit.md
 variables/aim.md
+variables/anaddb.md
+variables/multibinit.md
+variables/optic.md
 variables/basic.md
 variables/bse.md
 variables/dev.md

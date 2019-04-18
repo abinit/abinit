@@ -88,6 +88,6 @@ prtden 0  prteig 0  prtwf 0
 #%% authors = M. Torrent
 #%% keywords = PAW, LDAU
 #%% description = 
-#%% NiO - LDA+U - fcc structure - anitferro - PAW
-#%% Test the use of MPI+GPU
+#%%   NiO - LDA+U - fcc structure - anitferro - PAW
+#%%   Test the use of MPI+GPU
 #%%<END TEST_INFO>
