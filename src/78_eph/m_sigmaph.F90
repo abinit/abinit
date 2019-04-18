@@ -614,7 +614,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: g0_k(3),g0_kq(3)
  integer :: qptrlatt(3,3)
  integer :: work_ngfft(18),gmax(3) !g0ibz_kq(3),
- integer(i1b),allocatable :: dvdb_itreatq(:)
+ integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
  integer,allocatable :: wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
@@ -955,7 +955,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  !    sigma%use_ftinterp = .True.; exit
  !  end if
  !end do
- if (all(dtset%eph_ngqpt_fine /= 0) .and. any(dtset%eph_ngqpt_fine /= dtset%ddb_ngqpt)) sigma%use_ftinterp = .True.
+ !if (all(dtset%eph_ngqpt_fine /= 0) .and. any(dtset%eph_ngqpt_fine /= dtset%ddb_ngqpt)) sigma%use_ftinterp = .True.
 
  ! FIXME: Temporary hack to interpolate dvdb only in qpoints that will be used
  if (dtset%useria == 1999) then
@@ -1044,17 +1044,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call dvdb%print(prtvol=dtset%prtvol)
 
  if (.not. sigma%use_ftinterp) then
-   ! Need to translated itreat_qibz into dvdb_itreatq. TODO: yet another mapping DVDB --> IBZ
-   ABI_ICALLOC(dvdb_itreatq, (dvdb%nqpt))
+   ! Need to translated itreat_qibz into itreatq_dvdb. TODO: yet another mapping DVDB --> IBZ
+   ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
    !do iq_ibz=1,sigma%nqibz
    !  if (sigma%itreat_qibz(iq_ibz) == 0) cycle
    !  db_iqpt = dvdb%findq(sigma%qibz(:, iq_ibz))
    !  ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in DVDB file."))
-   !  dvdb_itreatq(db_iqpt) = 1
+   !  itreatq_dvdb(db_iqpt) = 1
    !end do
-   dvdb_itreatq = 1
-   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, dvdb_itreatq, comm) 
-   ABI_FREE(dvdb_itreatq)
+   itreatq_dvdb = 1
+   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm) 
+   ABI_FREE(itreatq_dvdb)
  end if
  ABI_FREE(qselect)
 
@@ -2549,10 +2549,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! This to deactivate parallelism over perturbations for debugging.
  !if (dtset%nppert == -1)
- if (dtset%userib == 789 .and. new%my_npert /= natom3) then
+ !if (dtset%userib == 789 .and. new%my_npert /= natom3) then
    new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
    MSG_WARNING("Deactivating parallelism over perturbations.")
- end if
+ !end if
 
  ! Define number of procs for q-points and bands. nprocs is division by nprocs_pert.
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = 1
@@ -3910,13 +3910,13 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: my_rank, iq_ibz_k, iq_ibz, ierr, q_start, q_stop, nprocs, imyq, iq_dvdb, ii, cnt
+ integer :: my_rank, iq_ibz_k, iq_ibz, ierr, q_start, q_stop, nprocs, imyq, iq_dvdb, ii, cnt, itreat
  integer :: nqeff, ndiv !nbcalc_ks, 
  real(dp) :: cpu, wall, gflops !weight_q,
  logical :: qfilter
  character(len=500) :: msg
 !arrays
- integer,allocatable :: mask_qibz_k(:), imask(:), qtab(:), ineed_qpt(:)
+ integer,allocatable :: mask_qibz_k(:), imask(:), qtab(:), ineed_qibz(:), ineed_qdvdb(:)
 ! real(dp) :: kk(3)
 
 ! *************************************************************************
@@ -3926,48 +3926,21 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
  msg = "Standard quadrature"; if (self%qint_method == 1) msg = "tetrahedron method"
  call wrtout(std_out, sjoin(" Preparing q-loop with integration method:", msg))
  call cwtime(cpu, wall, gflops, "start")
-
  !kk = self%kcalc(:, ikcalc)
-
- ! Find number of q-points treated by this MPI rank and build redirection table.
- ! The distribution must be consistent with the WF distribution done with bks_mask
+ 
  select case (dtset%eph_task)
  case (4)
-   
-   ! Compute my number of points in IBZ(k) taking into account itreat_qibz.
-   self%my_nqibz_k = 0
-   do ii=1,2
-     if (ii == 2) then
-       ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-     end if
-     cnt = 0
-     do iq_ibz_k=1,self%nqibz_k
-       iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
-       if (self%itreat_qibz(iq_ibz) == 0) cycle
-       if (ii == 1) self%my_nqibz_k = self%my_nqibz_k + 1
-       if (ii == 2) then
-         cnt = cnt +1
-         self%myq2ibz_k(cnt) = iq_ibz_k
-       end if
-     end do
-   end do
-
-   ! Use full IBZ(k) in q-integration ==> build trivial myq2ibz_k map.
-   !self%my_nqibz_k = self%nqibz_k
-   !ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-   !self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=1, self%nqibz_k)]
-
+   call distribute_nqibz_k_nofilter()
    if (self%qint_method == 1) call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
- case (-4)
-   ! Computation of imaginary part: distribute ALL nqibz_k q-points inside comm_qpt
-   call xmpi_split_work(self%nqibz_k, self%comm_qpt, q_start, q_stop, msg, ierr)
-   self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
-   ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-   if (self%my_nqibz_k /= 0) self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=q_start, q_stop)]
+ case (-4) ! Computation of imaginary part
 
-   if (self%qint_method == 1) then
-     ! Imag with tetra --> Precompute weights with initial q-point distribution.
+   if (self%qint_method == 0) then
+     call distribute_nqibz_k_nofilter()
+
+   else if (self%qint_method == 1) then
+     ! Imag with tetra --> Precompute weights in IBZ_k.
+     call distribute_nqibz_k_nofilter()
      call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
      qfilter = any(dtset%eph_tols_idelta >= zero)
@@ -3975,7 +3948,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ! Two-pass algorithm:
        ! Select q-points with significant contribution, recompute my_nqibz_k and myq2ibz_k.
        ! Finally, recompute integration weights with new distribution.
-       ! self%deltaw_pm(2, nbcalc_ks, my_npert, bsum_start:bsum_stop, my_nqibz_k, ndiv)
+       ! %deltaw_pm(2, nbcalc_ks, my_npert, bsum_start:bsum_stop, my_nqibz_k, ndiv)
        ndiv = 1; if (self%use_doublegrid) ndiv = self%eph_doublegrid%ndiv
        ABI_ICALLOC(mask_qibz_k, (self%nqibz_k))
        do imyq=1,self%my_nqibz_k
@@ -3991,9 +3964,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        call xmpi_max(imask, mask_qibz_k, comm, ierr)
        ABI_FREE(imask)
 
-       ! Now we know the qpts in the IBZ_k contributing to Im(Sigma).
-       ! Redistribute q-points inside comm_qpt: take into account cache status, cache policy and 
-       ! try to reduce load imbalance as much as possible.
+       ! Find all qpts in the IBZ_k contributing to Im(Sigma).
        ABI_MALLOC(qtab, (self%nqibz_k))
        nqeff = 0
        do iq_ibz_k=1,self%nqibz_k
@@ -4010,29 +3981,49 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        end if
 
 #if 0
+       ! Redistribute relevant q-points inside comm_qpt taking into account itreat_qibz
+       ! I may need to update qcache after this operation -->  build ineed_* table.
+       ! Must handle two cases: potentials from DVDB or Fourier-interpolated.
        if (self%use_ftinterp) then
-         ABI_ICALLOC(ineed_qpt, (self%nqibz))
-         self%my_nqibz_k = 0
+         ABI_ICALLOC(ineed_qibz, (self%nqibz))
+       else
+         ABI_ICALLOC(ineed_qdvdb, (dvdb%nqpt))
+       end if
+
+       self%my_nqibz_k = 0
+       do ii=1,2
+         if (ii == 2) then
+           ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
+         end if
+         cnt = 0
          do iq=1,nqeff
            iq_ibz_k = qtab(iq)
            iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
-           ii = self%itreat_qibz(iq_ibz)
-           if (ii /= 0) then.
-             !if (ii == 1 .or. (ii > 1 .and. ii == iqpos(self%qibz_k(:, iq_ibz_k)))) then
-             self%my_nqibz_k = self%my_nqibz_k + 1
-             self%myq2ibz_k(self%my_nqibz_k) = qtab(iq)
-             ineed_qpt(iq_ibz) = 1
-             !end if
+           itreat = int(self%itreat_qibz(iq_ibz), kind=i4b)
+           if (.not. self%use_ftinterp) iq_dvdb = self%indq2dvdb_k(1, iq_ibz_k)
+           if (itreat /= 0) then.
+             !if (itreat == 1 .or. (itreat > 1 .and. itreat == 1 + iqpos(self%qibz_k(:, iq_ibz_k)))) then
+             if (ii == 1) self%my_nqibz_k = self%my_nqibz_k + 1
+             if (ii == 2) then
+               cnt = cnt + 1
+               self%myq2ibz_k(cnt) = qtab(iq)
+               if (self%use_ftinterp) then
+                 if (.not. allocated(dvdb%ft_qcache%key(iq_ibz)%v1scf)) ineed_qibz(iq_ibz) = 1
+               else
+                 if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qdvdb(iq_dvdb) = 1
+               end if
+             end if
            end if
          end do
-         ABI_FREE(ineed_qpt)
-       end if
+       end do
 #endif
 
+       ! Previous algorithm
        call xmpi_split_work(nqeff, self%comm_qpt, q_start, q_stop, msg, ierr)
        self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
        ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
        if (self%my_nqibz_k /= 0) self%myq2ibz_k = qtab(q_start:q_stop)
+
        ABI_FREE(qtab)
        call wrtout(std_out, sjoin(" Number of q-points treated by this MPI proc:", itoa(self%my_nqibz_k)))
 
@@ -4040,41 +4031,79 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
        ! Make sure each node has the q-points we need. Try not to break qcache_size_mb contract!
-       if (self%imag_only .and. self%qint_method == 1) then
-
-         if (self%use_ftinterp) then
-           ABI_ICALLOC(ineed_qpt, (self%nqibz))
-           do imyq=1,self%my_nqibz_k
-             iq_ibz_k = self%myq2ibz_k(imyq)
-             iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
-             if (.not. allocated(dvdb%ft_qcache%key(iq_ibz)%v1scf)) ineed_qpt(iq_ibz) = 1
-           end do
-
-           ! Update cache by Fourier interpolating W(r,R)
-           call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qpt, comm)
-           ABI_FREE(ineed_qpt)
-         else
-           ! Find q-points needed by this MPI rank.
-           ABI_ICALLOC(ineed_qpt, (dvdb%nqpt))
-           do imyq=1,self%my_nqibz_k
-             iq_ibz_k = self%myq2ibz_k(imyq)
-             iq_dvdb = self%indq2dvdb_k(1, iq_ibz_k)
-             if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qpt(iq_dvdb) = 1
-           end do
-           ! Update cache. Perform collective IO inside comm if needed.
-           call dvdb%qcache_update_from_file(nfftf, ngfftf, ineed_qpt, comm)
-           ABI_FREE(ineed_qpt)
-         end if
-
+       if (self%use_ftinterp) then
+         ! Update cache by Fourier interpolating W(r,R)
+         call dvdb%ftqcache_update_from_ft(nfftf, ngfftf, self%nqibz, self%qibz, ineed_qibz, comm)
+       else
+         ! Find q-points needed by this MPI rank.
+         ABI_ICALLOC(ineed_qdvdb, (dvdb%nqpt))
+         do imyq=1,self%my_nqibz_k
+           iq_ibz_k = self%myq2ibz_k(imyq)
+           iq_dvdb = self%indq2dvdb_k(1, iq_ibz_k)
+           if (.not. allocated(dvdb%qcache%key(iq_dvdb)%v1scf)) ineed_qdvdb(iq_dvdb) = 1
+         end do
+         ! Update cache. Perform collective IO inside comm if needed.
+         call dvdb%qcache_update_from_file(nfftf, ngfftf, ineed_qdvdb, comm)
+         ABI_FREE(ineed_qdvdb)
        end if
+
+       ABI_SFREE(ineed_qibz)
+       ABI_SFREE(ineed_qdvdb)
      end if ! qfilter
-   end if
+
+   else
+     MSG_ERROR(sjoin("Invalid eph_intmeth:", itoa(dtset%eph_intmeth)))
+   end if ! intmeth
 
  case default
    MSG_ERROR(sjoin("Invalid eph_task:", itoa(dtset%eph_task)))
  end select
 
  call cwtime_report(" Setup qloop", cpu, wall, gflops)
+
+contains 
+    
+subroutine distribute_nqibz_k_nofilter()
+  ! Find number of q-points in IBZ(k) treated by this MPI rank 
+  ! taking into account itreat_qibz and build redirection table myq2ibz_k.
+  ! The distribution must be consistent with the WF distribution done with bks_mask
+
+  self%my_nqibz_k = 0
+  do ii=1,2
+    if (ii == 2) then
+      ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
+    end if
+    cnt = 0
+    do iq_ibz_k=1,self%nqibz_k
+      iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
+      if (self%itreat_qibz(iq_ibz) == 0) cycle
+      if (ii == 1) self%my_nqibz_k = self%my_nqibz_k + 1
+      if (ii == 2) then
+        cnt = cnt + 1
+        self%myq2ibz_k(cnt) = iq_ibz_k
+      end if
+    end do
+  end do
+
+end subroutine distribute_nqibz_k_nofilter
+
+!subroutine distribute_nqibz_k_noitreatq()
+!
+! call xmpi_split_work(self%nqibz_k, self%comm_qpt, q_start, q_stop, msg, ierr)
+! self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
+! ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
+! if (self%my_nqibz_k /= 0) self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=q_start, q_stop)]
+!
+!end subroutine distribute_nqibz_k_noitreatq
+!
+!subroutine dont_distribute_nqibz_k()
+!
+! ! Use full IBZ(k) in q-integration ==> build trivial myq2ibz_k map.
+! self%my_nqibz_k = self%nqibz_k
+! ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
+! self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=1, self%nqibz_k)] 
+!
+!end subroutine dont_distribute_nqibz_k
 
 end subroutine sigmaph_setup_qloop
 !!***

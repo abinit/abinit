@@ -2687,7 +2687,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  ! with all procs inside comm_rpt to avoid deadlocks.
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
- call wrtout(std_out, sjoin(" Building V(r,R) using ngqpt: ", ltoa(ngqpt), " q-mesh and nprocs_rpt:", itoa(db%nprocs_rpt)))
+ call wrtout(std_out, sjoin(ch10, " Building V(r,R) using ngqpt: ", ltoa(ngqpt), &
+            " q-mesh with nprocs_rpt:", itoa(db%nprocs_rpt)))
  !call wrtout(std_out, "qshifts:")
  !do ii=1,nqshift
  !  call wrtout(std_out, ltoa(qshift(:, ii))
@@ -3520,7 +3521,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 
  qcnt = count(ineed_qpt /= 0)
  !call timab(1807, 1, tsec)
- call wrtout(std_out, sjoin(" Need to update Vscf(q) cache.", itoa(qcnt), "q-points..."), do_flush=.True.)
+ call wrtout(std_out, sjoin(" Need to update Vscf(q) cache.", itoa(qcnt), "q-points from FT..."), do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  cplex = 2
