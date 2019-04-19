@@ -252,6 +252,8 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  end do
 
  ! TODO: Activate this part so that we can cache the q-point in the IBZ.
+ ! Results are ok but this change is postponed because it leads to an increase
+ ! in the walltime spent in listkk likely because of the different order.
 #if 0
  ! Need to repack the IBZ points and rearrange the other arrays dimensioned with nibz.
  ! In principle, the best approach would be to pack in stars using crystal%symrec.
@@ -280,7 +282,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  new%ibz = kord(:, 1:new%nibz)
  new%weights = wtk_folded(1:new%nibz)
 
- ! Rearrange bz2ibz_smap as well.
+ ! Rearrange bz2ibz_smap as well --> need the inverse of iperm.
  ABI_MALLOC(inv_iperm, (new%nibz))
  do ik_ibz=1,new%nibz
    inv_iperm(iperm(ik_ibz)) = ik_ibz
@@ -288,7 +290,6 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 
  do ik_bz=1,new%nbz
    ik_ibz = new%bz2ibz_smap(1, ik_bz)
-   !new%bz2ibz_smap(1, ik_bz) = iperm(ik_ibz)
    new%bz2ibz_smap(1, ik_bz) = inv_iperm(ik_ibz)
  end do
 

@@ -616,7 +616,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: work_ngfft(18),gmax(3) !g0ibz_kq(3),
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
- integer,allocatable :: wfd_istwfk(:)
+ integer,allocatable :: wfd_istwfk(:), ibz2dvdb(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
@@ -942,6 +942,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+
  if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
  dvdb%symv1 = dtset%symv1scf > 0
@@ -950,12 +951,16 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
 
  sigma%use_ftinterp = .False.
- !do iq_ibz=1,sigma%nqibz
- !  if (dvdb%findq(sigma%qibz(:, iq_ibz)) == -1) then
- !    sigma%use_ftinterp = .True.; exit
- !  end if
- !end do
- !if (all(dtset%eph_ngqpt_fine /= 0) .and. any(dtset%eph_ngqpt_fine /= dtset%ddb_ngqpt)) sigma%use_ftinterp = .True.
+
+ ! Find correspondence IBZ --> set of q-points in DVDB.
+ ABI_MALLOC(ibz2dvdb, (sigma%nqibz))
+ if (dvdb%find_qpts(sigma%nqibz, sigma%qibz, ibz2dvdb, comm) /= 0) then
+   call wrtout([std_out, ab_out], "- Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
+   sigma%use_ftinterp = .True.
+ else
+   call wrtout([std_out, ab_out], "- DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
+   sigma%use_ftinterp = .False.
+ end if
 
  ! FIXME: Temporary hack to interpolate dvdb only in qpoints that will be used
  if (dtset%useria == 1999) then
@@ -1009,7 +1014,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  else if (dtset%useria == 2000 .or. sigma%use_ftinterp) then
      sigma%use_ftinterp = .True.
-     call wrtout([std_out, ab_out], "- Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
+     !call wrtout([std_out, ab_out], "- Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
 
      ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation. 
      ! R-points are distributed inside comm_rpt
@@ -1044,19 +1049,21 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call dvdb%print(prtvol=dtset%prtvol)
 
  if (.not. sigma%use_ftinterp) then
-   ! Need to translated itreat_qibz into itreatq_dvdb. TODO: yet another mapping DVDB --> IBZ
+   ! Need to translate itreat_qibz into itreatq_dvdb.
    ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
-   !do iq_ibz=1,sigma%nqibz
-   !  if (sigma%itreat_qibz(iq_ibz) == 0) cycle
-   !  db_iqpt = dvdb%findq(sigma%qibz(:, iq_ibz))
-   !  ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in DVDB file."))
-   !  itreatq_dvdb(db_iqpt) = 1
-   !end do
-   itreatq_dvdb = 1
+   do iq_ibz=1,sigma%nqibz
+     if (sigma%itreat_qibz(iq_ibz) == 0) cycle
+     db_iqpt = ibz2dvdb(iq_ibz)
+     ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in DVDB file."))
+     itreatq_dvdb(db_iqpt) = 1
+   end do
+   !itreatq_dvdb = 1
    call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm) 
    ABI_FREE(itreatq_dvdb)
  end if
+
  ABI_FREE(qselect)
+ ABI_FREE(ibz2dvdb)
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal we operate on nspden components at once.
  do ikcalc=1,sigma%nkcalc
@@ -2336,6 +2343,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      new%nbcalc_ks(ikcalc, :) = 0
      cycle ! MPI parallelism.
    end if
+   ! Note symrel and use_symrel.
    kk = new%kcalc(:,ikcalc)
    call listkk(dksqmax,cryst%gmet,indkk_k,ebands%kptns,kk,ebands%nkpt,1,cryst%nsym,&
       sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,xmpi_comm_self,exit_loop=.True., use_symrec=.False.)
@@ -2692,7 +2700,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !new%itreat_qibz = 1
  ABI_FREE(iperm)
 
- call wrtout(std_out, sjoin(" Number of q-points in the IBZ treated by this proc:" ,itoa(count(new%itreat_qibz == 1))))
+ call wrtout(std_out, sjoin("P Number of q-points in the IBZ treated by this proc: " ,itoa(count(new%itreat_qibz == 1))))
 
  ! ================================================================
  ! Allocate arrays used to store final results and set them to zero
@@ -3440,8 +3448,8 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
  nkcalc = self%nkcalc
  nkpt = ebands%nkpt
 
- ABI_MALLOC(indkk,(nkcalc,6))
- ! map ebands kpoints to sigmaph
+ ! Map ebands kpoints to sigmaph
+ ABI_MALLOC(indkk,(nkcalc, 6))
  call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, nkcalc, cryst%nsym, &
              sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
 
@@ -4039,7 +4047,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ABI_FREE(qtab)
        write(msg, "(a, i0, 2a, f5.3, a)") &
         " Number of q-points in IBZ(k) treated by this proc:", self%my_nqibz_k, ch10, &
-        " Load balancing inside comm_qpt: ", (one * self%my_nqibz_k * self%nprocs_qpt) / self%nqibz_k, " (should be ~1)"
+        " Load balance inside comm_qpt: ", (one * self%nqibz_k) / (self%my_nqibz_k * self%nprocs_qpt), " (should be ~1)"
        call wrtout(std_out, msg)
 
        ! Recompute weights with new q-point distribution.
@@ -4631,6 +4639,7 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt, "(a,i0)")"P Number of perturbations treated by this CPU: ", self%my_npert
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over q-points: ", self%nprocs_qpt
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%nprocs_bsum
+ !write(unt, "(a,i0)""P Number of q-points in the IBZ treated by this proc: " ,count(new%itreat_qibz == 1)
  !write(unt, sjoin("P Summing bands from my_bsum_start: ", itoa(self%my_bsum_start), &
  !  " up to my_bsum_stop:", itoa(self%my_bsum_stop)))
  !write(unt, sjoin("P Global bands for self-energy sum, bsum_start: ", itoa(self%bsum_start), &

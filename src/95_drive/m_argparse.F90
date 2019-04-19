@@ -192,8 +192,8 @@ type(args_t) function args_parser() result(args)
 
     else if (arg == "--gnu-mtrace") then
       if (iam_master) then
-        !call clib_mtrace(ierr)
-        if (ierr/=0 .and. iam_master) write(std_out,"(a,i0)")"clib_mtrace returned ierr: ",ierr
+        call clib_mtrace(ierr)
+        ABI_CHECK(ierr == 0, sjoin("clib_mtrace returned ierr:", itoa(ierr)))
       end if
 
     else if (arg == "--log") then

@@ -1443,16 +1443,16 @@ subroutine abinit_doctor(prefix, print_mem_report)
  if (do_mem_report == 1) then
    if ((nalloc == ndealloc) .and. (memtot == 0)) then
      write(msg,'(3a,i0,a,i0,3a,i0)')&
-&      '- MEMORY CONSUMPTION REPORT:',ch10, &
-&      '-   There were ',nalloc,' allocations and ',ndealloc,' deallocations',ch10, &
-&      '-   Remaining memory at the end of the calculation is ',memtot
+       '- MEMORY CONSUMPTION REPORT:',ch10, &
+       '-   There were ',nalloc,' allocations and ',ndealloc,' deallocations',ch10, &
+       '-   Remaining memory at the end of the calculation is ',memtot
    else
      ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
      write(msg,'(3a,i0,a,i0,3a,i0,6a)') 'MEMORY CONSUMPTION REPORT :',ch10, &
-&      '   There were ',nalloc,' allocations and ',ndealloc,' deallocations',ch10, &
-&      '   Remaining memory at the end of the calculation is ',memtot,ch10, &
-&      '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10,&
-&      '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created.',ch10,&
+       '   There were ',nalloc,' allocations and ',ndealloc,' deallocations',ch10, &
+       '   Remaining memory at the end of the calculation is ',memtot,ch10, &
+       '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10,&
+       '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created.',ch10,&
        '   Note that abimem files can easily be multiple GB in size so do not use this option normally!'
      ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
      ierr = ierr + 1
@@ -1461,12 +1461,11 @@ subroutine abinit_doctor(prefix, print_mem_report)
 
  else
    write(msg,'(3a)')&
-&    '- MEMORY CONSUMPTION REPORT :',ch10, &
-&    '- Memory profiling is activated but not yet usable when bigdft is used'
+     '- MEMORY CONSUMPTION REPORT :',ch10, &
+     '- Memory profiling is activated but not yet usable when bigdft is used'
  end if
- if (my_rank == master) then
-   call wrtout(ab_out, msg)
- end if
+ if (my_rank == master) call wrtout(ab_out, msg)
+
  ! Test whether all logical units have been closed.
  ! If you wonder why I'm doing this, remember that there's a per-user
  ! limit on the maximum number of open file descriptors. Hence descriptors
@@ -1484,9 +1483,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
    ierr = ierr + 1
  end if
 
- if (my_rank == master) then
-   call wrtout(ab_out, msg)
- end if
+ if (my_rank == master) call wrtout(ab_out, msg)
  if (ierr /= 0) then
    MSG_ERROR(errmsg)
  end if

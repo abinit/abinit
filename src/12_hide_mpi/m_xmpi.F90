@@ -1929,7 +1929,7 @@ subroutine xmpi_waitall_2d(array_of_requests, mpierr)
  ! so flat 2d array and copy in-out. See https://github.com/open-mpi/ompi/issues/587
  flat_requests = pack(array_of_requests, mask=.True.)
  call xmpi_waitall_1d(flat_requests, mpierr)
- array_of_requests = reshape(flat_requests,  shape(array_of_requests))
+ array_of_requests = reshape(flat_requests, shape(array_of_requests))
 
 end subroutine xmpi_waitall_2d
 !!***
