@@ -134,7 +134,7 @@ CONTAINS !===========================================================
    write(gflops_stg,'(i7,a)') gflops,' GFP'
  end if
 
- write(formatdev,'(a12,i4,a)'),'(a23,i4,a3,a',lenname,')'
+ write(formatdev,'(a12,i4,a)') '(a23,i4,a3,a',lenname,')'
  write (msg,formatdev)&
        & '  Device             ',device,' : ',name(1:lenname)
  call wrtout(std_out,msg,'PERS')
