@@ -434,8 +434,10 @@ module m_chebfi2
     call getAX_BX(chebfi%X,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
     
-    call xgBlock_setBlock(chebfi%xAXColsRows, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-    call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+    !!TODO TODO TODO TODO debug upper arrays, second one is not good
+    !!on nproc 2 for some reason
+    call debug_helper(chebfi%xBXColsRows, chebfi) 
+
     stop
       
     call xmpi_barrier(chebfi%spacecom)
@@ -1103,6 +1105,22 @@ module m_chebfi2
    end do
 
   end function cheb_poly1
+  
+  subroutine debug_helper(debugBlock, chebfi)
+      
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(chebfi_t) , intent(inout) :: chebfi
+    type(xgBlock_t) :: HELPER
+
+    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+    call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+ 
+    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc
+      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
+    end if
+
+  end subroutine debug_helper
   
 end module m_chebfi2
 

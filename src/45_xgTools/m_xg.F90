@@ -690,6 +690,7 @@ module m_xg
     type(c_ptr) :: cptr
 
     if ( (fcol+cols-1 ) > xgblockA%cols ) then
+      print *, "xgblockA%cols", xgblockA%cols
       MSG_ERROR("Too many columns")
     endif
     if ( rows > xgblockA%rows ) then
