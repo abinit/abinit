@@ -15,14 +15,11 @@
 
 AC_DEFUN([SD_LIBPSML_INIT], [
   # Init
-  sd_libpsml_enable=""
-  sd_libpsml_enable_def=""
   sd_libpsml_cppflags=""
-  sd_libpsml_cflags=""
-  sd_libpsml_cxxflags=""
   sd_libpsml_fcflags=""
   sd_libpsml_ldflags=""
   sd_libpsml_libs=""
+  sd_libpsml_enable=""
   sd_libpsml_init="unknown"
   sd_libpsml_ok="unknown"
 
@@ -30,10 +27,13 @@ AC_DEFUN([SD_LIBPSML_INIT], [
   sd_libpsml_options="$1"
   sd_libpsml_libs_def="$2"
   sd_libpsml_cppflags_def="$3"
-  sd_libpsml_cflags_def="$3"
-  sd_libpsml_cxxflags_def="$3"
-  sd_libpsml_fcflags_def="$3"
-  sd_libpsml_ldflags_def="$4"
+  sd_libpsml_cflags_def="$4"
+  sd_libpsml_cxxflags_def="$5"
+  sd_libpsml_fcflags_def="$6"
+  sd_libpsml_ldflags_def="$7"
+  sd_libpsml_enable_def=""
+  sd_libpsml_policy=""
+  sd_libpsml_status=""
 
   # Process options
   for kwd in ${sd_libpsml_options}; do
@@ -47,9 +47,6 @@ AC_DEFUN([SD_LIBPSML_INIT], [
       fail|skip|warn)
         sd_libpsml_policy="${kwd}"
         ;;
-      no-cxx)
-        sd_libpsml_enable_cxx="no"
-        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg LibPSML option: '${kwd}'])
         ;;
@@ -57,9 +54,9 @@ AC_DEFUN([SD_LIBPSML_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_libpsml_enable_def}" && sd_libpsml_enable_def="auto"
-  test -z "${sd_libpsml_status}" && sd_libpsml_status="optional"
+  test -z "${sd_libpsml_enable_def}" && sd_libpsml_enable_def="no"
   test -z "${sd_libpsml_policy}" && sd_libpsml_policy="fail"
+  test -z "${sd_libpsml_status}" && sd_libpsml_status="optional"
   test -z "${sd_libpsml_libs_def}" && sd_libpsml_libs_def="-lpsml"
 
   # Declare configure option
@@ -78,18 +75,13 @@ AC_DEFUN([SD_LIBPSML_INIT], [
 
   # Declare environment variables
   AC_ARG_VAR([LIBPSML_CPPFLAGS], [C preprocessing flags for LibPSML.])
-  AC_ARG_VAR([LIBPSML_CFLAGS], [C flags for LibPSML.])
-  AC_ARG_VAR([LIBPSML_CXXFLAGS], [C++ flags for LibPSML.])
   AC_ARG_VAR([LIBPSML_FCFLAGS], [Fortran flags for LibPSML.])
   AC_ARG_VAR([LIBPSML_LDFLAGS], [Linker flags for LibPSML.])
   AC_ARG_VAR([LIBPSML_LIBS], [Library flags for LibPSML.])
 
   # Detect use of environment variables
   if test "${sd_libpsml_enable}" = "yes" -o "${sd_libpsml_enable}" = "auto"; then
-    tmp_libpsml_vars="${LIBPSML_CPPFLAGS}${LIBPSML_CFLAGS}${LIBPSML_FCFLAGS}${LIBPSML_LDFLAGS}${LIBPSML_LIBS}"
-    if test "${sd_libpsml_enable_cxx}" = "yes"; then
-      tmp_libpsml_vars="${tmp_libpsml_vars}${LIBPSML_CXXFLAGS}"
-    fi
+    tmp_libpsml_vars="${LIBPSML_CPPFLAGS}${LIBPSML_FCFLAGS}${LIBPSML_LDFLAGS}${LIBPSML_LIBS}"
     if test "${sd_libpsml_init}" = "def" -a ! -z "${tmp_libpsml_vars}"; then
       sd_libpsml_enable="yes"
       sd_libpsml_init="env"
@@ -108,9 +100,6 @@ AC_DEFUN([SD_LIBPSML_INIT], [
 
       def|yon)
         sd_libpsml_cppflags="${sd_libpsml_cppflags_def}"
-        sd_libpsml_cflags="${sd_libpsml_cflags_def}"
-        test "${sd_libpsml_enable_cxx}" = "yes" && \
-          sd_libpsml_cxxflags="${sd_libpsml_cxxflags_def}"
         sd_libpsml_fcflags="${sd_libpsml_fcflags_def}"
         sd_libpsml_ldflags="${sd_libpsml_ldflags_def}"
         sd_libpsml_libs="${sd_libpsml_libs_def}"
@@ -118,9 +107,6 @@ AC_DEFUN([SD_LIBPSML_INIT], [
 
       dir)
         sd_libpsml_cppflags="-I${with_libpsml}/include"
-        sd_libpsml_cflags="${sd_libpsml_cflags_def}"
-        test "${sd_libpsml_enable_cxx}" = "yes" && \
-          sd_libpsml_cxxflags="${sd_libpsml_cxxflags_def}"
         sd_libpsml_fcflags="${sd_libpsml_fcflags_def} -I${with_libpsml}/include"
         sd_libpsml_ldflags="${sd_libpsml_ldflags_def}"
         sd_libpsml_libs="-L${with_libpsml}/lib ${sd_libpsml_libs_def}"
@@ -128,17 +114,10 @@ AC_DEFUN([SD_LIBPSML_INIT], [
 
       env)
         sd_libpsml_cppflags="${sd_libpsml_cppflags_def}"
-        sd_libpsml_cflags="${sd_libpsml_cflags_def}"
-        test "${sd_libpsml_enable_cxx}" = "yes" && \
-          sd_libpsml_cxxflags="${sd_libpsml_cxxflags_def}"
         sd_libpsml_fcflags="${sd_libpsml_fcflags_def}"
         sd_libpsml_ldflags="${sd_libpsml_ldflags_def}"
         sd_libpsml_libs="${sd_libpsml_libs_def}"
         test ! -z "${LIBPSML_CPPFLAGS}" && sd_libpsml_cppflags="${LIBPSML_CPPFLAGS}"
-        test ! -z "${LIBPSML_CFLAGS}" && sd_libpsml_cflags="${LIBPSML_CFLAGS}"
-        if test "${sd_libpsml_enable_cxx}" = "yes"; then
-          test ! -z "${LIBPSML_CXXFLAGS}" && sd_libpsml_cxxflags="${LIBPSML_CXXFLAGS}"
-        fi
         test ! -z "${LIBPSML_FCFLAGS}" && sd_libpsml_fcflags="${LIBPSML_FCFLAGS}"
         test ! -z "${LIBPSML_LDFLAGS}" && sd_libpsml_ldflags="${LIBPSML_LDFLAGS}"
         test ! -z "${LIBPSML_LIBS}" && sd_libpsml_libs="${LIBPSML_LIBS}"
@@ -158,8 +137,6 @@ AC_DEFUN([SD_LIBPSML_INIT], [
   if test "${sd_libpsml_init}" = "def" -a ! -z "${ESL_BUNDLE_PREFIX}"; then
     sd_libpsml_init="esl"
     sd_libpsml_cppflags=""
-    sd_libpsml_cflags=""
-    sd_libpsml_cxxflags=""
     sd_libpsml_fcflags=""
     sd_libpsml_ldflags=""
     sd_libpsml_libs=""
@@ -171,14 +148,12 @@ AC_DEFUN([SD_LIBPSML_INIT], [
   # Export configuration
   AC_SUBST(sd_libpsml_options)
   AC_SUBST(sd_libpsml_enable_def)
-  AC_SUBST(sd_libpsml_enable_cxx)
   AC_SUBST(sd_libpsml_policy)
   AC_SUBST(sd_libpsml_status)
   AC_SUBST(sd_libpsml_enable)
   AC_SUBST(sd_libpsml_init)
   AC_SUBST(sd_libpsml_ok)
   AC_SUBST(sd_libpsml_cppflags)
-  AC_SUBST(sd_libpsml_cflags)
   AC_SUBST(sd_libpsml_fcflags)
   AC_SUBST(sd_libpsml_ldflags)
   AC_SUBST(sd_libpsml_libs)
@@ -211,8 +186,6 @@ AC_DEFUN([SD_LIBPSML_DETECT], [
               "${sd_libpsml_init}" = "def"; then
         sd_libpsml_enable="no"
         sd_libpsml_cppflags=""
-        sd_libpsml_cflags=""
-        sd_libpsml_cxxflags=""
         sd_libpsml_fcflags=""
         sd_libpsml_ldflags=""
         sd_libpsml_libs=""
@@ -244,7 +217,6 @@ AC_DEFUN([_SD_LIBPSML_CHECK_USE], [
     SD_ESL_ADD_LIBS([${sd_libpsml_libs_def}])
   else
     CPPFLAGS="${CPPFLAGS} ${sd_xmlf90_cppflags} ${sd_libpsml_cppflags}"
-    CFLAGS="${CFLAGS} ${sd_xmlf90_cflags} ${sd_libpsml_cflags}"
     FCFLAGS="${FCFLAGS} ${sd_xmlf90_fcflags} ${sd_libpsml_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_xmlf90_ldflags} ${sd_libpsml_ldflags}"
     LIBS="${sd_libpsml_libs} ${sd_xmlf90_libs} ${LIBS}"
@@ -252,16 +224,24 @@ AC_DEFUN([_SD_LIBPSML_CHECK_USE], [
 
   # Check LibPSML Fortran API
   AC_MSG_CHECKING([whether the LibPSML Fortran interface works])
-  AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[
-      use m_psml
-      use m_psml_api
-      type(ps_t) :: psxml
-      call ps_destroy(psxml)
-    ]])], [sd_libpsml_ok="yes"], [sd_libpsml_ok="no"])
-  AC_LANG_POP([Fortran])
+  for tmp_incs in "" "-I/usr/include"; do
+    FCFLAGS="${FCFLAGS} ${tmp_incs}"
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use m_psml
+        use m_psml_api
+        type(ps_t) :: psxml
+        call ps_destroy(psxml)
+      ]])], [sd_libpsml_ok="yes"], [sd_libpsml_ok="no"])
+    AC_LANG_POP([Fortran])
+    if test "${sd_libpsml_ok}" = "yes"; then
+      test "${sd_sys_fcflags}" = "" && sd_sys_fcflags="${tmp_incs}"
+      break
+    fi
+  done
   AC_MSG_RESULT([${sd_libpsml_ok}])
+  unset tmp_incs
 
   # Restore environment
   SD_ESL_RESTORE_FLAGS
@@ -418,20 +398,6 @@ AC_DEFUN([_SD_LIBPSML_DUMP_CONFIG], [
       AC_MSG_RESULT([none])
     else
       AC_MSG_RESULT([${sd_libpsml_cppflags}])
-    fi
-    AC_MSG_CHECKING([for LibPSML C flags])
-    if test "${sd_libpsml_cflags}" = ""; then
-      AC_MSG_RESULT([none])
-    else
-      AC_MSG_RESULT([${sd_libpsml_cflags}])
-    fi
-    if test "${sd_libpsml_enable_cxx}" = "yes"; then
-      AC_MSG_CHECKING([for LibPSML C++ flags])
-      if test "${sd_libpsml_cxxflags}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_libpsml_cxxflags}])
-      fi
     fi
     AC_MSG_CHECKING([for LibPSML Fortran flags])
     if test "${sd_libpsml_fcflags}" = ""; then

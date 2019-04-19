@@ -15,27 +15,27 @@
 
 AC_DEFUN([SD_TRIQS_INIT], [
   # Init
-  sd_triqs_api_version="unknown"
-  sd_triqs_enable=""
-  sd_triqs_enable_def=""
   sd_triqs_cppflags=""
   sd_triqs_cflags=""
   sd_triqs_cxxflags=""
-  sd_triqs_fcflags=""
   sd_triqs_ldflags=""
   sd_triqs_libs=""
-  sd_triqs_fortran_ok="unknown"
+  sd_triqs_enable=""
   sd_triqs_init="unknown"
   sd_triqs_ok="unknown"
+  sd_triqs_api_version="unknown"
 
   # Set adjustable parameters
   sd_triqs_options="$1"
   sd_triqs_libs_def="$2"
   sd_triqs_cppflags_def="$3"
-  sd_triqs_cflags_def="$3"
-  sd_triqs_cxxflags_def="$3"
-  sd_triqs_fcflags_def="$3"
-  sd_triqs_ldflags_def="$4"
+  sd_triqs_cflags_def="$4"
+  sd_triqs_cxxflags_def="$5"
+  sd_triqs_fcflags_def="$6"
+  sd_triqs_ldflags_def="$7"
+  sd_triqs_enable_def=""
+  sd_triqs_policy=""
+  sd_triqs_status=""
 
   # Process options
   for kwd in ${sd_triqs_options}; do
@@ -57,8 +57,8 @@ AC_DEFUN([SD_TRIQS_INIT], [
 
   # Set reasonable defaults if not provided
   test -z "${sd_triqs_enable_def}" && sd_triqs_enable_def="auto"
-  test -z "${sd_triqs_status}" && sd_triqs_status="optional"
   test -z "${sd_triqs_policy}" && sd_triqs_policy="fail"
+  test -z "${sd_triqs_status}" && sd_triqs_status="optional"
   test -z "${sd_triqs_libs_def}" && sd_triqs_libs_def="-ltriqs -lcthyb_c"
 
   # Declare configure option
@@ -79,7 +79,6 @@ AC_DEFUN([SD_TRIQS_INIT], [
   AC_ARG_VAR([TRIQS_CPPFLAGS], [C preprocessing flags for TRIQS.])
   AC_ARG_VAR([TRIQS_CFLAGS], [C flags for TRIQS.])
   AC_ARG_VAR([TRIQS_CXXFLAGS], [C++ flags for TRIQS.])
-  AC_ARG_VAR([TRIQS_FCFLAGS], [Fortran flags for TRIQS.])
   AC_ARG_VAR([TRIQS_LDFLAGS], [Linker flags for TRIQS.])
   AC_ARG_VAR([TRIQS_LIBS], [Library flags for TRIQS.])
 
@@ -88,9 +87,6 @@ AC_DEFUN([SD_TRIQS_INIT], [
     tmp_triqs_vars="${TRIQS_CPPFLAGS}${TRIQS_CFLAGS}${TRIQS_LDFLAGS}${TRIQS_LIBS}"
     if test "${sd_triqs_enable_cxx}" = "yes"; then
       tmp_triqs_vars="${tmp_triqs_vars}${TRIQS_CXXFLAGS}"
-    fi
-    if test "${sd_triqs_enable_fc}" = "yes"; then
-      tmp_triqs_vars="${tmp_triqs_vars}${TRIQS_FCFLAGS}"
     fi
     if test "${sd_triqs_init}" = "def" -a ! -z "${tmp_triqs_vars}"; then
       sd_triqs_enable="yes"
@@ -113,8 +109,6 @@ AC_DEFUN([SD_TRIQS_INIT], [
         sd_triqs_cflags="${sd_triqs_cflags_def}"
         test "${sd_triqs_enable_cxx}" = "yes" && \
           sd_triqs_cxxflags="${sd_triqs_cxxflags_def}"
-        test "${sd_triqs_enable_fc}" = "yes" && \
-          sd_triqs_fcflags="${sd_triqs_fcflags_def}"
         sd_triqs_ldflags="${sd_triqs_ldflags_def}"
         sd_triqs_libs="${sd_triqs_libs_def}"
         ;;
@@ -124,8 +118,6 @@ AC_DEFUN([SD_TRIQS_INIT], [
         sd_triqs_cflags="${sd_triqs_cflags_def}"
         test "${sd_triqs_enable_cxx}" = "yes" && \
           sd_triqs_cxxflags="${sd_triqs_cxxflags_def}"
-        test "${sd_triqs_enable_fc}" = "yes" && \
-          sd_triqs_fcflags="${sd_triqs_fcflags_def} -I${with_triqs}/include"
         sd_triqs_ldflags="${sd_triqs_ldflags_def}"
         sd_triqs_libs="-L${with_triqs}/lib ${sd_triqs_libs_def}"
         ;;
@@ -135,17 +127,12 @@ AC_DEFUN([SD_TRIQS_INIT], [
         sd_triqs_cflags="${sd_triqs_cflags_def}"
         test "${sd_triqs_enable_cxx}" = "yes" && \
           sd_triqs_cxxflags="${sd_triqs_cxxflags_def}"
-        test "${sd_triqs_enable_fc}" = "yes" && \
-          sd_triqs_fcflags="${sd_triqs_fcflags_def}"
         sd_triqs_ldflags="${sd_triqs_ldflags_def}"
         sd_triqs_libs="${sd_triqs_libs_def}"
         test ! -z "${TRIQS_CPPFLAGS}" && sd_triqs_cppflags="${TRIQS_CPPFLAGS}"
         test ! -z "${TRIQS_CFLAGS}" && sd_triqs_cflags="${TRIQS_CFLAGS}"
         if test "${sd_triqs_enable_cxx}" = "yes"; then
           test ! -z "${TRIQS_CXXFLAGS}" && sd_triqs_cxxflags="${TRIQS_CXXFLAGS}"
-        fi
-        if test "${sd_triqs_enable_fc}" = "yes"; then
-          test ! -z "${TRIQS_FCFLAGS}" && sd_triqs_fcflags="${TRIQS_FCFLAGS}"
         fi
         test ! -z "${TRIQS_LDFLAGS}" && sd_triqs_ldflags="${TRIQS_LDFLAGS}"
         test ! -z "${TRIQS_LIBS}" && sd_triqs_libs="${TRIQS_LIBS}"
@@ -167,7 +154,6 @@ AC_DEFUN([SD_TRIQS_INIT], [
     sd_triqs_cppflags=""
     sd_triqs_cflags=""
     sd_triqs_cxxflags=""
-    sd_triqs_fcflags=""
     sd_triqs_ldflags=""
     sd_triqs_libs=""
   fi
@@ -179,7 +165,6 @@ AC_DEFUN([SD_TRIQS_INIT], [
   AC_SUBST(sd_triqs_options)
   AC_SUBST(sd_triqs_enable_def)
   AC_SUBST(sd_triqs_enable_cxx)
-  AC_SUBST(sd_triqs_enable_fc)
   AC_SUBST(sd_triqs_policy)
   AC_SUBST(sd_triqs_status)
   AC_SUBST(sd_triqs_enable)
@@ -187,7 +172,6 @@ AC_DEFUN([SD_TRIQS_INIT], [
   AC_SUBST(sd_triqs_ok)
   AC_SUBST(sd_triqs_cppflags)
   AC_SUBST(sd_triqs_cflags)
-  AC_SUBST(sd_triqs_fcflags)
   AC_SUBST(sd_triqs_ldflags)
   AC_SUBST(sd_triqs_libs)
   AC_SUBST(with_triqs)
@@ -210,7 +194,6 @@ AC_DEFUN([SD_TRIQS_DETECT], [
       if test "${sd_triqs_init}" = "esl"; then
         sd_esl_bundle_libs="${sd_triqs_libs_def} ${sd_esl_bundle_libs}"
       else
-        FCFLAGS="${FCFLAGS} ${sd_triqs_fcflags}"
         LIBS="${sd_triqs_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
@@ -235,7 +218,6 @@ AC_DEFUN([SD_TRIQS_DETECT], [
         sd_triqs_cppflags=""
         sd_triqs_cflags=""
         sd_triqs_cxxflags=""
-        sd_triqs_fcflags=""
         sd_triqs_ldflags=""
         sd_triqs_libs=""
       else
@@ -266,7 +248,6 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
   else
     CPPFLAGS="${CPPFLAGS} ${sd_triqs_cppflags}"
     CFLAGS="${CFLAGS} ${sd_triqs_cflags}"
-    FCFLAGS="${FCFLAGS} ${sd_triqs_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
     LIBS="${sd_triqs_libs} ${LIBS}"
   fi
@@ -398,13 +379,13 @@ AC_DEFUN([_SD_TRIQS_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_triqs_vars="${TRIQS_FCFLAGS}${TRIQS_LDFLAGS}${TRIQS_LIBS}"
+  tmp_triqs_vars="${TRIQS_CXXFLAGS}${TRIQS_LDFLAGS}${TRIQS_LIBS}"
   tmp_triqs_invalid="no"
   if test ! -z "${tmp_triqs_vars}" -a ! -z "${with_triqs}"; then
     case "${sd_triqs_policy}" in
       fail)
         AC_MSG_ERROR([conflicting option settings for TRIQS
-                  Please use TRIQS_FCFLAGS + TRIQS_LIBS or --with-triqs,
+                  Please use TRIQS_CXXFLAGS + TRIQS_LIBS or --with-triqs,
                   not both.])
         ;;
       skip)
@@ -423,16 +404,12 @@ AC_DEFUN([_SD_TRIQS_CHECK_CONFIG], [
     sd_triqs_init="env"
     if test "${tmp_triqs_invalid}" = "yes"; then
       tmp_triqs_invalid="no"
-      AC_MSG_NOTICE([overriding --with-triqs with TRIQS_{FCFLAGS,LDFLAGS,LIBS}])
+      AC_MSG_NOTICE([overriding --with-triqs with TRIQS_{CXXFLAGS,LDFLAGS,LIBS}])
     fi
   fi
 
   # Implicit status overrides everything
   if test "${sd_triqs_status}" = "implicit"; then
-    if test "${sd_triqs_fcflags}" != ""; then
-      sd_triqs_fcflags=""
-      AC_MSG_NOTICE([resetting TRIQS Fortran flags (implicit package)])
-    fi
     if test "${sd_triqs_ldflags}" != ""; then
       sd_triqs_ldflags=""
       AC_MSG_NOTICE([resetting TRIQS linker flags (implicit package)])
@@ -445,7 +422,6 @@ AC_DEFUN([_SD_TRIQS_CHECK_CONFIG], [
 
   # Reset build parameters if disabled
   if test "${sd_triqs_enable}" = "implicit"; then
-    sd_triqs_fcflags=""
     sd_triqs_ldflags=""
     sd_triqs_libs=""
   fi
@@ -480,14 +456,6 @@ AC_DEFUN([_SD_TRIQS_DUMP_CONFIG], [
         AC_MSG_RESULT([none])
       else
         AC_MSG_RESULT([${sd_triqs_cxxflags}])
-      fi
-    fi
-    if test "${sd_triqs_enable_fc}" = "yes"; then
-      AC_MSG_CHECKING([for TRIQS Fortran flags])
-      if test "${sd_triqs_fcflags}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_triqs_fcflags}])
       fi
     fi
     AC_MSG_CHECKING([for TRIQS linker flags])

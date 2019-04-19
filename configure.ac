@@ -205,6 +205,9 @@ AC_MSG_NOTICE([|---> all OK])
 
 ABI_MSG_SECTION([Feature triggers and architecture startup])
 
+# Init Steredeg core features
+SD_CORE_INIT
+
 # Do we want to use fallbacks? (must be first)
 ABI_FALLBACKS_INIT
 
@@ -230,13 +233,13 @@ ABI_GPU_INIT
 ABI_TRIGGERS_INIT
 
 # Init BigDFT
-SD_BIGDFT_INIT([no no-cxx optional fail])
+SD_BIGDFT_INIT([no optional fail])
 
 # Init Levmar
-SD_LEVMAR_INIT([no no-cxx optional fail])
+SD_LEVMAR_INIT([no optional fail])
 
 # Init LibPSML
-SD_LIBPSML_INIT([no no-cxx optional fail])
+SD_LIBPSML_INIT([no optional fail])
 
 # Init LibXC
 SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
@@ -245,16 +248,16 @@ SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
 SD_NETCDF_INIT([auto no-cxx optional fail])
 
 # Init PAPI
-SD_PAPI_INIT([no no-cxx optional fail])
+SD_PAPI_INIT([no optional fail])
 
 # Init TRIQS
 SD_TRIQS_INIT([no optional fail])
 
 # Init Wannier90
-SD_WANNIER90_INIT([no no-cxx optional fail], [-lwannier90])
+SD_WANNIER90_INIT([no optional fail], [-lwannier90])
 
 # Init XMLF90 (must be done after LibPSML)
-SD_XMLF90_INIT([${sd_libpsml_enable} no-cxx optional fail])
+SD_XMLF90_INIT([${sd_libpsml_enable} optional fail])
 
 # ---------------------------------------------------------------------------- #
 

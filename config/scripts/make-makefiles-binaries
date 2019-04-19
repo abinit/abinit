@@ -206,6 +206,7 @@ for bin in main_bins:
     bin_fcflags += " @%s_%s_fcflags@" % (dep_pfx, dep)
     bin_ldflags += " @%s_%s_ldflags@" % (dep_pfx, dep)
     bin_libs += " @%s_%s_libs@" % (dep_pfx, dep)
+  bin_fcflags += "@sd_sys_fcflags@"
 
   # Finish setting build-time parameters
   bin_libs += " $(FC_LIBS)"

@@ -164,7 +164,7 @@ AC_DEFUN([_SD_PFFT_CHECK_CONFIG], [
       case "${sd_pfft_policy}" in
         fail)
           AC_MSG_ERROR([The PFFT package is required and cannot be disabled
-                  See https://launchpad.net/pfft for details on how to
+                  See https://github.com/mpip/pfft for details on how to
                   install it.])
           ;;
         skip)

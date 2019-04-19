@@ -15,29 +15,33 @@
 
 AC_DEFUN([SD_NETCDF_INIT], [
   # Init
-  sd_netcdf_enable=""
-  sd_netcdf_enable_def=""
-  sd_netcdf_c_ok="unknown"
   sd_netcdf_cppflags=""
   sd_netcdf_cflags=""
   sd_netcdf_cxxflags=""
   sd_netcdf_fcflags=""
   sd_netcdf_ldflags=""
   sd_netcdf_libs=""
-  sd_netcdf_fortran_ok="unknown"
+  sd_netcdf_enable=""
   sd_netcdf_init="unknown"
+  sd_netcdf_c_ok="unknown"
+  sd_netcdf_fortran_ok="unknown"
   sd_netcdf_ok="unknown"
 
   # Set adjustable parameters
   sd_netcdf_options="$1"
   sd_netcdf_libs_def="$2"
   sd_netcdf_cppflags_def="$3"
-  sd_netcdf_cflags_def="$3"
-  sd_netcdf_cxxflags_def="$3"
-  sd_netcdf_fcflags_def="$3"
-  sd_netcdf_ldflags_def="$4"
+  sd_netcdf_cflags_def="$4"
+  sd_netcdf_cxxflags_def="$5"
+  sd_netcdf_fcflags_def="$6"
+  sd_netcdf_ldflags_def="$7"
 
   # Process options
+  sd_netcdf_enable_cxx="yes"
+  sd_netcdf_enable_def="auto"
+  sd_netcdf_enable_fc="yes"
+  sd_netcdf_policy="fail"
+  sd_netcdf_status="optional"
   for kwd in ${sd_netcdf_options}; do
     case "${kwd}" in
       auto|no|yes)
@@ -283,24 +287,32 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
   AC_MSG_RESULT([${sd_netcdf_c_ok}])
 
   # Check NetCDF Fortran API
-  if test "${sd_netcdf_c_ok}" = "yes" -a "${sd_netcdf_fc_enable}" = "yes"; then
+  if test "${sd_netcdf_c_ok}" = "yes" -a "${sd_netcdf_enable_fc}" = "yes"; then
     AC_MSG_CHECKING([whether the NetCDF Fortran interface works])
-    AC_LANG_PUSH([Fortran])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[
-        use netcdf
-        character(len=*), parameter :: path = "dummy"
-        integer :: mode, ncerr, ncid
-        ncerr = nf90_open(path,mode,ncid)
-      ]])], [sd_netcdf_fortran_ok="yes"], [sd_netcdf_fortran_ok="no"])
-    AC_LANG_POP([Fortran])
+    for tmp_incs in "" "-I/usr/include"; do
+      FCFLAGS="${FCFLAGS} ${tmp_incs}"
+      AC_LANG_PUSH([Fortran])
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+        [[
+          use netcdf
+          character(len=*), parameter :: path = "dummy"
+          integer :: mode, ncerr, ncid
+          ncerr = nf90_open(path,mode,ncid)
+        ]])], [sd_netcdf_fortran_ok="yes"], [sd_netcdf_fortran_ok="no"])
+      AC_LANG_POP([Fortran])
+      if test "${sd_netcdf_fortran_ok}" = "yes"; then
+        test "${sd_sys_fcflags}" = "" && sd_sys_fcflags="${tmp_incs}"
+        break
+      fi
+    done
     AC_MSG_RESULT([${sd_netcdf_fortran_ok}])
   fi
+  unset tmp_incs
 
   # Combine the available results
   sd_netcdf_ok="no"
-  if test "${sd_netcdf_fc_enable}" = "yes"; then
-    if test "${sd_netcdf_c_ok}" = "yes" - a \
+  if test "${sd_netcdf_enable_fc}" = "yes"; then
+    if test "${sd_netcdf_c_ok}" = "yes" -a \
             "${sd_netcdf_fortran_ok}" = "yes"; then
       sd_netcdf_ok="yes"
     fi

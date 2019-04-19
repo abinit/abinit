@@ -15,14 +15,11 @@
 
 AC_DEFUN([SD_XMLF90_INIT], [
   # Init
-  sd_xmlf90_enable=""
-  sd_xmlf90_enable_def=""
   sd_xmlf90_cppflags=""
-  sd_xmlf90_cflags=""
-  sd_xmlf90_cxxflags=""
   sd_xmlf90_fcflags=""
   sd_xmlf90_ldflags=""
   sd_xmlf90_libs=""
+  sd_xmlf90_enable=""
   sd_xmlf90_init="unknown"
   sd_xmlf90_ok="unknown"
 
@@ -30,10 +27,13 @@ AC_DEFUN([SD_XMLF90_INIT], [
   sd_xmlf90_options="$1"
   sd_xmlf90_libs_def="$2"
   sd_xmlf90_cppflags_def="$3"
-  sd_xmlf90_cflags_def="$3"
-  sd_xmlf90_cxxflags_def="$3"
-  sd_xmlf90_fcflags_def="$3"
-  sd_xmlf90_ldflags_def="$4"
+  sd_xmlf90_cflags_def="$4"
+  sd_xmlf90_cxxflags_def="$5"
+  sd_xmlf90_fcflags_def="$6"
+  sd_xmlf90_ldflags_def="$7"
+  sd_xmlf90_enable_def=""
+  sd_xmlf90_policy=""
+  sd_xmlf90_status=""
 
   # Process options
   for kwd in ${sd_xmlf90_options}; do
@@ -47,9 +47,6 @@ AC_DEFUN([SD_XMLF90_INIT], [
       fail|skip|warn)
         sd_xmlf90_policy="${kwd}"
         ;;
-      no-cxx)
-        sd_xmlf90_enable_cxx="no"
-        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg XMLF90 option: '${kwd}'])
         ;;
@@ -58,8 +55,8 @@ AC_DEFUN([SD_XMLF90_INIT], [
 
   # Set reasonable defaults if not provided
   test -z "${sd_xmlf90_enable_def}" && sd_xmlf90_enable_def="auto"
-  test -z "${sd_xmlf90_status}" && sd_xmlf90_status="optional"
   test -z "${sd_xmlf90_policy}" && sd_xmlf90_policy="fail"
+  test -z "${sd_xmlf90_status}" && sd_xmlf90_status="optional"
   test -z "${sd_xmlf90_libs_def}" && sd_xmlf90_libs_def="-lxmlf90"
 
   # Declare configure option
@@ -79,7 +76,6 @@ AC_DEFUN([SD_XMLF90_INIT], [
   # Declare environment variables
   AC_ARG_VAR([XMLF90_CPPFLAGS], [C preprocessing flags for XMLF90.])
   AC_ARG_VAR([XMLF90_CFLAGS], [C flags for XMLF90.])
-  AC_ARG_VAR([XMLF90_CXXFLAGS], [C++ flags for XMLF90.])
   AC_ARG_VAR([XMLF90_FCFLAGS], [Fortran flags for XMLF90.])
   AC_ARG_VAR([XMLF90_LDFLAGS], [Linker flags for XMLF90.])
   AC_ARG_VAR([XMLF90_LIBS], [Library flags for XMLF90.])
@@ -87,9 +83,6 @@ AC_DEFUN([SD_XMLF90_INIT], [
   # Detect use of environment variables
   if test "${sd_xmlf90_enable}" = "yes" -o "${sd_xmlf90_enable}" = "auto"; then
     tmp_xmlf90_vars="${XMLF90_CPPFLAGS}${XMLF90_CFLAGS}${XMLF90_FCFLAGS}${XMLF90_LDFLAGS}${XMLF90_LIBS}"
-    if test "${sd_xmlf90_enable_cxx}" = "yes"; then
-      tmp_xmlf90_vars="${tmp_xmlf90_vars}${XMLF90_CXXFLAGS}"
-    fi
     if test "${sd_xmlf90_init}" = "def" -a ! -z "${tmp_xmlf90_vars}"; then
       sd_xmlf90_enable="yes"
       sd_xmlf90_init="env"
@@ -108,9 +101,6 @@ AC_DEFUN([SD_XMLF90_INIT], [
 
       def|yon)
         sd_xmlf90_cppflags="${sd_xmlf90_cppflags_def}"
-        sd_xmlf90_cflags="${sd_xmlf90_cflags_def}"
-        test "${sd_xmlf90_enable_cxx}" = "yes" && \
-          sd_xmlf90_cxxflags="${sd_xmlf90_cxxflags_def}"
         sd_xmlf90_fcflags="${sd_xmlf90_fcflags_def}"
         sd_xmlf90_ldflags="${sd_xmlf90_ldflags_def}"
         sd_xmlf90_libs="${sd_xmlf90_libs_def}"
@@ -118,9 +108,6 @@ AC_DEFUN([SD_XMLF90_INIT], [
 
       dir)
         sd_xmlf90_cppflags="-I${with_xmlf90}/include"
-        sd_xmlf90_cflags="${sd_xmlf90_cflags_def}"
-        test "${sd_xmlf90_enable_cxx}" = "yes" && \
-          sd_xmlf90_cxxflags="${sd_xmlf90_cxxflags_def}"
         sd_xmlf90_fcflags="${sd_xmlf90_fcflags_def} -I${with_xmlf90}/include"
         sd_xmlf90_ldflags="${sd_xmlf90_ldflags_def}"
         sd_xmlf90_libs="-L${with_xmlf90}/lib ${sd_xmlf90_libs_def}"
@@ -128,17 +115,10 @@ AC_DEFUN([SD_XMLF90_INIT], [
 
       env)
         sd_xmlf90_cppflags="${sd_xmlf90_cppflags_def}"
-        sd_xmlf90_cflags="${sd_xmlf90_cflags_def}"
-        test "${sd_xmlf90_enable_cxx}" = "yes" && \
-          sd_xmlf90_cxxflags="${sd_xmlf90_cxxflags_def}"
         sd_xmlf90_fcflags="${sd_xmlf90_fcflags_def}"
         sd_xmlf90_ldflags="${sd_xmlf90_ldflags_def}"
         sd_xmlf90_libs="${sd_xmlf90_libs_def}"
         test ! -z "${XMLF90_CPPFLAGS}" && sd_xmlf90_cppflags="${XMLF90_CPPFLAGS}"
-        test ! -z "${XMLF90_CFLAGS}" && sd_xmlf90_cflags="${XMLF90_CFLAGS}"
-        if test "${sd_xmlf90_enable_cxx}" = "yes"; then
-          test ! -z "${XMLF90_CXXFLAGS}" && sd_xmlf90_cxxflags="${XMLF90_CXXFLAGS}"
-        fi
         test ! -z "${XMLF90_FCFLAGS}" && sd_xmlf90_fcflags="${XMLF90_FCFLAGS}"
         test ! -z "${XMLF90_LDFLAGS}" && sd_xmlf90_ldflags="${XMLF90_LDFLAGS}"
         test ! -z "${XMLF90_LIBS}" && sd_xmlf90_libs="${XMLF90_LIBS}"
@@ -158,8 +138,6 @@ AC_DEFUN([SD_XMLF90_INIT], [
   if test "${sd_xmlf90_init}" = "def" -a ! -z "${ESL_BUNDLE_PREFIX}"; then
     sd_xmlf90_init="esl"
     sd_xmlf90_cppflags=""
-    sd_xmlf90_cflags=""
-    sd_xmlf90_cxxflags=""
     sd_xmlf90_fcflags=""
     sd_xmlf90_ldflags=""
     sd_xmlf90_libs=""
@@ -171,14 +149,12 @@ AC_DEFUN([SD_XMLF90_INIT], [
   # Export configuration
   AC_SUBST(sd_xmlf90_options)
   AC_SUBST(sd_xmlf90_enable_def)
-  AC_SUBST(sd_xmlf90_enable_cxx)
   AC_SUBST(sd_xmlf90_policy)
   AC_SUBST(sd_xmlf90_status)
   AC_SUBST(sd_xmlf90_enable)
   AC_SUBST(sd_xmlf90_init)
   AC_SUBST(sd_xmlf90_ok)
   AC_SUBST(sd_xmlf90_cppflags)
-  AC_SUBST(sd_xmlf90_cflags)
   AC_SUBST(sd_xmlf90_fcflags)
   AC_SUBST(sd_xmlf90_ldflags)
   AC_SUBST(sd_xmlf90_libs)
@@ -211,8 +187,6 @@ AC_DEFUN([SD_XMLF90_DETECT], [
               "${sd_xmlf90_init}" = "def"; then
         sd_xmlf90_enable="no"
         sd_xmlf90_cppflags=""
-        sd_xmlf90_cflags=""
-        sd_xmlf90_cxxflags=""
         sd_xmlf90_fcflags=""
         sd_xmlf90_ldflags=""
         sd_xmlf90_libs=""
@@ -241,7 +215,6 @@ AC_DEFUN([_SD_XMLF90_CHECK_USE], [
     SD_ESL_ADD_LIBS([${sd_xmlf90_libs_def}])
   else
     CPPFLAGS="${CPPFLAGS} ${sd_xmlf90_cppflags}"
-    CFLAGS="${CFLAGS} ${sd_xmlf90_cflags}"
     FCFLAGS="${FCFLAGS} ${sd_xmlf90_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_xmlf90_ldflags}"
     LIBS="${sd_xmlf90_libs} ${LIBS}"
@@ -249,18 +222,26 @@ AC_DEFUN([_SD_XMLF90_CHECK_USE], [
 
   # Check XMLF90 Fortran API
   AC_MSG_CHECKING([whether the XMLF90 Fortran interface works])
-  AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[
-      use xmlf90_sax
-      character(len=80) :: fname
-      type(xml_t) :: fxml
-      integer :: iostat
-      call open_xmlfile(fname,fxml,iostat)
-      call close_xmlfile(fxml)
-    ]])], [sd_xmlf90_ok="yes"], [sd_xmlf90_ok="no"])
-  AC_LANG_POP([Fortran])
+  for tmp_incs in "" "-I/usr/include"; do
+    FCFLAGS="${FCFLAGS} ${tmp_incs}"
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use xmlf90_sax
+        character(len=80) :: fname
+        type(xml_t) :: fxml
+        integer :: iostat
+        call open_xmlfile(fname,fxml,iostat)
+        call close_xmlfile(fxml)
+      ]])], [sd_xmlf90_ok="yes"], [sd_xmlf90_ok="no"])
+    AC_LANG_POP([Fortran])
+    if test "${sd_xmlf90_ok}" = "yes"; then
+      test "${sd_sys_fcflags}" = "" && sd_sys_fcflags="${tmp_incs}"
+      break
+    fi
+  done
   AC_MSG_RESULT([${sd_xmlf90_ok}])
+  unset tmp_incs
 
   # Restore environment
   SD_ESL_RESTORE_FLAGS
@@ -417,20 +398,6 @@ AC_DEFUN([_SD_XMLF90_DUMP_CONFIG], [
       AC_MSG_RESULT([none])
     else
       AC_MSG_RESULT([${sd_xmlf90_cppflags}])
-    fi
-    AC_MSG_CHECKING([for XMLF90 C flags])
-    if test "${sd_xmlf90_cflags}" = ""; then
-      AC_MSG_RESULT([none])
-    else
-      AC_MSG_RESULT([${sd_xmlf90_cflags}])
-    fi
-    if test "${sd_xmlf90_enable_cxx}" = "yes"; then
-      AC_MSG_CHECKING([for XMLF90 C++ flags])
-      if test "${sd_xmlf90_cxxflags}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_xmlf90_cxxflags}])
-      fi
     fi
     AC_MSG_CHECKING([for XMLF90 Fortran flags])
     if test "${sd_xmlf90_fcflags}" = ""; then

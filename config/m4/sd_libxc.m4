@@ -15,26 +15,31 @@
 
 AC_DEFUN([SD_LIBXC_INIT], [
   # Init
-  sd_libxc_enable=""
-  sd_libxc_enable_def=""
   sd_libxc_cppflags=""
   sd_libxc_cflags=""
   sd_libxc_cxxflags=""
   sd_libxc_fcflags=""
   sd_libxc_ldflags=""
   sd_libxc_libs=""
-  sd_libxc_fortran_ok="unknown"
+  sd_libxc_enable=""
   sd_libxc_init="unknown"
+  sd_libxc_c_ok="unknown"
+  sd_libxc_fortran_ok="unknown"
   sd_libxc_ok="unknown"
 
   # Set adjustable parameters
   sd_libxc_options="$1"
   sd_libxc_libs_def="$2"
   sd_libxc_cppflags_def="$3"
-  sd_libxc_cflags_def="$3"
-  sd_libxc_cxxflags_def="$3"
-  sd_libxc_fcflags_def="$3"
-  sd_libxc_ldflags_def="$4"
+  sd_libxc_cflags_def="$4"
+  sd_libxc_cxxflags_def="$5"
+  sd_libxc_fcflags_def="$6"
+  sd_libxc_ldflags_def="$7"
+  sd_libxc_enable_cxx=""
+  sd_libxc_enable_def=""
+  sd_libxc_enable_fc=""
+  sd_libxc_policy=""
+  sd_libxc_status=""
 
   # Process options
   for kwd in ${sd_libxc_options}; do
@@ -61,9 +66,11 @@ AC_DEFUN([SD_LIBXC_INIT], [
   done
 
   # Set reasonable defaults if not provided
+  test -z "${sd_libxc_enable_cxx}" && sd_libxc_enable_cxx="yes"
   test -z "${sd_libxc_enable_def}" && sd_libxc_enable_def="auto"
-  test -z "${sd_libxc_status}" && sd_libxc_status="optional"
+  test -z "${sd_libxc_enable_fc}" && sd_libxc_enable_fc="yes"
   test -z "${sd_libxc_policy}" && sd_libxc_policy="fail"
+  test -z "${sd_libxc_status}" && sd_libxc_status="optional"
   if test "${sd_libxc_enable_fc}" = "yes"; then
     test -z "${sd_libxc_libs_def}" && sd_libxc_libs_def="-lxcf90 -lxc"
   else
@@ -274,12 +281,12 @@ AC_DEFUN([_SD_LIBXC_CHECK_USE], [
     [[
       int ma, mi, mu;
       xc_version(&ma, &mi, &mu);
-    ]])], [sd_libxc_ok="yes"], [sd_libxc_ok="no"])
+    ]])], [sd_libxc_c_ok="yes"], [sd_libxc_c_ok="no"])
   AC_LANG_POP([C])
-  AC_MSG_RESULT([${sd_libxc_ok}])
+  AC_MSG_RESULT([${sd_libxc_c_ok}])
 
   # Check old LibXC C API
-  if test "${sd_libxc_ok}" != "yes"; then
+  if test "${sd_libxc_c_ok}" != "yes"; then
     AC_MSG_CHECKING([whether the LibXC library has an old API])
     AC_LANG_PUSH([C])
     AC_LINK_IFELSE([AC_LANG_PROGRAM(
@@ -289,24 +296,45 @@ AC_DEFUN([_SD_LIBXC_CHECK_USE], [
       [[
         int ma, mi;
         xc_version(&ma, &mi);
-      ]])], [sd_libxc_ok="yes"], [sd_libxc_ok="no"])
+      ]])], [sd_libxc_c_ok="yes"], [sd_libxc_c_ok="no"])
     AC_LANG_POP([C])
-    AC_MSG_RESULT([${sd_libxc_ok}])
+    AC_MSG_RESULT([${sd_libxc_c_ok}])
   fi
 
   # Check LibXC Fortran API
-  if test "${sd_libxc_ok}" = "yes" -a "${sd_libxc_fc_enable}" = "yes"; then
+  if test "${sd_libxc_c_ok}" = "yes" -a "${sd_libxc_enable_fc}" = "yes"; then
     AC_MSG_CHECKING([whether the LibXC Fortran interface works])
-    AC_LANG_PUSH([Fortran])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[
-        use libxc_m
-        implicit none
-        integer :: ma, mi, mu
-        call xc_f90_version(ma, mi, mu)
-      ]])], [sd_libxc_fortran_ok="yes"], [sd_libxc_fortran_ok="no"])
-    AC_LANG_POP([Fortran])
+    for tmp_incs in "" "-I/usr/include"; do
+      FCFLAGS="${FCFLAGS} ${tmp_incs}"
+      AC_LANG_PUSH([Fortran])
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+        [[
+          use libxc_m
+          implicit none
+          integer :: ma, mi, mu
+          call xc_f90_version(ma, mi, mu)
+        ]])], [sd_libxc_fortran_ok="yes"], [sd_libxc_fortran_ok="no"])
+      AC_LANG_POP([Fortran])
+      if test "${sd_libxc_fortran_ok}" = "yes"; then
+        test "${sd_fc_sys_incpath}" = "" && sd_fc_sys_incpath="${tmp_incs}"
+        break
+      fi
+    done
     AC_MSG_RESULT([${sd_libxc_fortran_ok}])
+  fi
+  unset tmp_incs
+
+  # Combine the available results
+  sd_libxc_ok="no"
+  if test "${sd_libxc_enable_fc}" = "yes"; then
+    if test "${sd_libxc_c_ok}" = "yes" -a \
+            "${sd_libxc_fortran_ok}" = "yes"; then
+      sd_libxc_ok="yes"
+    fi
+  else
+    if test "${sd_libxc_c_ok}" = "yes"; then
+      sd_libxc_ok="yes"
+    fi
   fi
 
   # Restore environment
@@ -362,7 +390,7 @@ AC_DEFUN([_SD_LIBXC_CHECK_CONFIG], [
       case "${sd_libxc_policy}" in
         fail)
           AC_MSG_ERROR([The LibXC package is required and cannot be disabled
-                  See https://launchpad.net/libxc for details on how to
+                  See https://tddft.org/programs/libxc/ for details on how to
                   install it.])
           ;;
         skip)

@@ -15,15 +15,11 @@
 
 AC_DEFUN([SD_LEVMAR_INIT], [
   # Init
-  sd_levmar_enable=""
-  sd_levmar_enable_def=""
   sd_levmar_cppflags=""
   sd_levmar_cflags=""
-  sd_levmar_cxxflags=""
-  sd_levmar_fcflags=""
   sd_levmar_ldflags=""
   sd_levmar_libs=""
-  sd_levmar_fortran_ok="unknown"
+  sd_levmar_enable=""
   sd_levmar_init="unknown"
   sd_levmar_ok="unknown"
 
@@ -31,10 +27,13 @@ AC_DEFUN([SD_LEVMAR_INIT], [
   sd_levmar_options="$1"
   sd_levmar_libs_def="$2"
   sd_levmar_cppflags_def="$3"
-  sd_levmar_cflags_def="$3"
-  sd_levmar_cxxflags_def="$3"
-  sd_levmar_fcflags_def="$3"
-  sd_levmar_ldflags_def="$4"
+  sd_levmar_cflags_def="$4"
+  sd_levmar_cxxflags_def="$5"
+  sd_levmar_fcflags_def="$6"
+  sd_levmar_ldflags_def="$7"
+  sd_levmar_enable_def=""
+  sd_levmar_policy=""
+  sd_levmar_status=""
 
   # Process options
   for kwd in ${sd_levmar_options}; do
@@ -48,12 +47,6 @@ AC_DEFUN([SD_LEVMAR_INIT], [
       fail|skip|warn)
         sd_levmar_policy="${kwd}"
         ;;
-      no-cxx)
-        sd_levmar_enable_cxx="no"
-        ;;
-      no-fortran)
-        sd_levmar_enable_fc="no"
-        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg Levmar option: '${kwd}'])
         ;;
@@ -62,8 +55,8 @@ AC_DEFUN([SD_LEVMAR_INIT], [
 
   # Set reasonable defaults if not provided
   test -z "${sd_levmar_enable_def}" && sd_levmar_enable_def="auto"
-  test -z "${sd_levmar_status}" && sd_levmar_status="optional"
   test -z "${sd_levmar_policy}" && sd_levmar_policy="fail"
+  test -z "${sd_levmar_status}" && sd_levmar_status="optional"
   test -z "${sd_levmar_libs_def}" && sd_levmar_libs_def="-llevmar"
 
   # Declare configure option
@@ -83,20 +76,12 @@ AC_DEFUN([SD_LEVMAR_INIT], [
   # Declare environment variables
   AC_ARG_VAR([LEVMAR_CPPFLAGS], [C preprocessing flags for Levmar.])
   AC_ARG_VAR([LEVMAR_CFLAGS], [C flags for Levmar.])
-  AC_ARG_VAR([LEVMAR_CXXFLAGS], [C++ flags for Levmar.])
-  AC_ARG_VAR([LEVMAR_FCFLAGS], [Fortran flags for Levmar.])
   AC_ARG_VAR([LEVMAR_LDFLAGS], [Linker flags for Levmar.])
   AC_ARG_VAR([LEVMAR_LIBS], [Library flags for Levmar.])
 
   # Detect use of environment variables
   if test "${sd_levmar_enable}" = "yes" -o "${sd_levmar_enable}" = "auto"; then
     tmp_levmar_vars="${LEVMAR_CPPFLAGS}${LEVMAR_CFLAGS}${LEVMAR_LDFLAGS}${LEVMAR_LIBS}"
-    if test "${sd_levmar_enable_cxx}" = "yes"; then
-      tmp_levmar_vars="${tmp_levmar_vars}${LEVMAR_CXXFLAGS}"
-    fi
-    if test "${sd_levmar_enable_fc}" = "yes"; then
-      tmp_levmar_vars="${tmp_levmar_vars}${LEVMAR_FCFLAGS}"
-    fi
     if test "${sd_levmar_init}" = "def" -a ! -z "${tmp_levmar_vars}"; then
       sd_levmar_enable="yes"
       sd_levmar_init="env"
@@ -116,10 +101,6 @@ AC_DEFUN([SD_LEVMAR_INIT], [
       def|yon)
         sd_levmar_cppflags="${sd_levmar_cppflags_def}"
         sd_levmar_cflags="${sd_levmar_cflags_def}"
-        test "${sd_levmar_enable_cxx}" = "yes" && \
-          sd_levmar_cxxflags="${sd_levmar_cxxflags_def}"
-        test "${sd_levmar_enable_fc}" = "yes" && \
-          sd_levmar_fcflags="${sd_levmar_fcflags_def}"
         sd_levmar_ldflags="${sd_levmar_ldflags_def}"
         sd_levmar_libs="${sd_levmar_libs_def}"
         ;;
@@ -127,10 +108,6 @@ AC_DEFUN([SD_LEVMAR_INIT], [
       dir)
         sd_levmar_cppflags="-I${with_levmar}/include"
         sd_levmar_cflags="${sd_levmar_cflags_def}"
-        test "${sd_levmar_enable_cxx}" = "yes" && \
-          sd_levmar_cxxflags="${sd_levmar_cxxflags_def}"
-        test "${sd_levmar_enable_fc}" = "yes" && \
-          sd_levmar_fcflags="${sd_levmar_fcflags_def} -I${with_levmar}/include"
         sd_levmar_ldflags="${sd_levmar_ldflags_def}"
         sd_levmar_libs="-L${with_levmar}/lib ${sd_levmar_libs_def}"
         ;;
@@ -138,20 +115,10 @@ AC_DEFUN([SD_LEVMAR_INIT], [
       env)
         sd_levmar_cppflags="${sd_levmar_cppflags_def}"
         sd_levmar_cflags="${sd_levmar_cflags_def}"
-        test "${sd_levmar_enable_cxx}" = "yes" && \
-          sd_levmar_cxxflags="${sd_levmar_cxxflags_def}"
-        test "${sd_levmar_enable_fc}" = "yes" && \
-          sd_levmar_fcflags="${sd_levmar_fcflags_def}"
         sd_levmar_ldflags="${sd_levmar_ldflags_def}"
         sd_levmar_libs="${sd_levmar_libs_def}"
         test ! -z "${LEVMAR_CPPFLAGS}" && sd_levmar_cppflags="${LEVMAR_CPPFLAGS}"
         test ! -z "${LEVMAR_CFLAGS}" && sd_levmar_cflags="${LEVMAR_CFLAGS}"
-        if test "${sd_levmar_enable_cxx}" = "yes"; then
-          test ! -z "${LEVMAR_CXXFLAGS}" && sd_levmar_cxxflags="${LEVMAR_CXXFLAGS}"
-        fi
-        if test "${sd_levmar_enable_fc}" = "yes"; then
-          test ! -z "${LEVMAR_FCFLAGS}" && sd_levmar_fcflags="${LEVMAR_FCFLAGS}"
-        fi
         test ! -z "${LEVMAR_LDFLAGS}" && sd_levmar_ldflags="${LEVMAR_LDFLAGS}"
         test ! -z "${LEVMAR_LIBS}" && sd_levmar_libs="${LEVMAR_LIBS}"
         ;;
@@ -171,8 +138,6 @@ AC_DEFUN([SD_LEVMAR_INIT], [
     sd_levmar_init="esl"
     sd_levmar_cppflags=""
     sd_levmar_cflags=""
-    sd_levmar_cxxflags=""
-    sd_levmar_fcflags=""
     sd_levmar_ldflags=""
     sd_levmar_libs=""
   fi
@@ -183,8 +148,6 @@ AC_DEFUN([SD_LEVMAR_INIT], [
   # Export configuration
   AC_SUBST(sd_levmar_options)
   AC_SUBST(sd_levmar_enable_def)
-  AC_SUBST(sd_levmar_enable_cxx)
-  AC_SUBST(sd_levmar_enable_fc)
   AC_SUBST(sd_levmar_policy)
   AC_SUBST(sd_levmar_status)
   AC_SUBST(sd_levmar_enable)
@@ -192,7 +155,6 @@ AC_DEFUN([SD_LEVMAR_INIT], [
   AC_SUBST(sd_levmar_ok)
   AC_SUBST(sd_levmar_cppflags)
   AC_SUBST(sd_levmar_cflags)
-  AC_SUBST(sd_levmar_fcflags)
   AC_SUBST(sd_levmar_ldflags)
   AC_SUBST(sd_levmar_libs)
   AC_SUBST(with_levmar)
@@ -215,7 +177,6 @@ AC_DEFUN([SD_LEVMAR_DETECT], [
       if test "${sd_levmar_init}" = "esl"; then
         sd_esl_bundle_libs="${sd_levmar_libs_def} ${sd_esl_bundle_libs}"
       else
-        FCFLAGS="${FCFLAGS} ${sd_levmar_fcflags}"
         LIBS="${sd_levmar_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_levmar_ldflags}"
@@ -225,8 +186,6 @@ AC_DEFUN([SD_LEVMAR_DETECT], [
         sd_levmar_enable="no"
         sd_levmar_cppflags=""
         sd_levmar_cflags=""
-        sd_levmar_cxxflags=""
-        sd_levmar_fcflags=""
         sd_levmar_ldflags=""
         sd_levmar_libs=""
       else
@@ -342,8 +301,8 @@ AC_DEFUN([_SD_LEVMAR_CHECK_CONFIG], [
       case "${sd_levmar_policy}" in
         fail)
           AC_MSG_ERROR([The Levmar package is required and cannot be disabled
-                  See https://launchpad.net/levmar for details on how to
-                  install it.])
+                  See http://users.ics.forth.gr/~lourakis/levmar/ for details
+                  on how to install it.])
           ;;
         skip)
           tmp_levmar_invalid="yes"
@@ -375,13 +334,13 @@ AC_DEFUN([_SD_LEVMAR_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_levmar_vars="${LEVMAR_FCFLAGS}${LEVMAR_LDFLAGS}${LEVMAR_LIBS}"
+  tmp_levmar_vars="${LEVMAR_CFLAGS}${LEVMAR_LDFLAGS}${LEVMAR_LIBS}"
   tmp_levmar_invalid="no"
   if test ! -z "${tmp_levmar_vars}" -a ! -z "${with_levmar}"; then
     case "${sd_levmar_policy}" in
       fail)
         AC_MSG_ERROR([conflicting option settings for Levmar
-                  Please use LEVMAR_FCFLAGS + LEVMAR_LIBS or --with-levmar,
+                  Please use LEVMAR_CFLAGS + LEVMAR_LIBS or --with-levmar,
                   not both.])
         ;;
       skip)
@@ -400,16 +359,12 @@ AC_DEFUN([_SD_LEVMAR_CHECK_CONFIG], [
     sd_levmar_init="env"
     if test "${tmp_levmar_invalid}" = "yes"; then
       tmp_levmar_invalid="no"
-      AC_MSG_NOTICE([overriding --with-levmar with LEVMAR_{FCFLAGS,LDFLAGS,LIBS}])
+      AC_MSG_NOTICE([overriding --with-levmar with LEVMAR_{CPPFLAGS,CFLAGS,LDFLAGS,LIBS}])
     fi
   fi
 
   # Implicit status overrides everything
   if test "${sd_levmar_status}" = "implicit"; then
-    if test "${sd_levmar_fcflags}" != ""; then
-      sd_levmar_fcflags=""
-      AC_MSG_NOTICE([resetting Levmar Fortran flags (implicit package)])
-    fi
     if test "${sd_levmar_ldflags}" != ""; then
       sd_levmar_ldflags=""
       AC_MSG_NOTICE([resetting Levmar linker flags (implicit package)])
@@ -422,7 +377,8 @@ AC_DEFUN([_SD_LEVMAR_CHECK_CONFIG], [
 
   # Reset build parameters if disabled
   if test "${sd_levmar_enable}" = "implicit"; then
-    sd_levmar_fcflags=""
+    sd_levmar_cppflags=""
+    sd_levmar_cflags=""
     sd_levmar_ldflags=""
     sd_levmar_libs=""
   fi
@@ -450,22 +406,6 @@ AC_DEFUN([_SD_LEVMAR_DUMP_CONFIG], [
       AC_MSG_RESULT([none])
     else
       AC_MSG_RESULT([${sd_levmar_cflags}])
-    fi
-    if test "${sd_levmar_enable_cxx}" = "yes"; then
-      AC_MSG_CHECKING([for Levmar C++ flags])
-      if test "${sd_levmar_cxxflags}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_levmar_cxxflags}])
-      fi
-    fi
-    if test "${sd_levmar_enable_fc}" = "yes"; then
-      AC_MSG_CHECKING([for Levmar Fortran flags])
-      if test "${sd_levmar_fcflags}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_levmar_fcflags}])
-      fi
     fi
     AC_MSG_CHECKING([for Levmar linker flags])
     if test "${sd_levmar_ldflags}" = ""; then

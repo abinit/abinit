@@ -165,7 +165,7 @@ AC_DEFUN([_SD_FFTW3_CHECK_CONFIG], [
       case "${sd_fftw3_policy}" in
         fail)
           AC_MSG_ERROR([The FFTW3 package is required and cannot be disabled
-                  See https://launchpad.net/fftw3 for details on how to
+                  See http://www.fftw.org/ for details on how to
                   install it.])
           ;;
         skip)

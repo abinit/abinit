@@ -15,15 +15,11 @@
 
 AC_DEFUN([SD_PAPI_INIT], [
   # Init
-  sd_papi_enable=""
-  sd_papi_enable_def=""
   sd_papi_cppflags=""
   sd_papi_cflags=""
-  sd_papi_cxxflags=""
-  sd_papi_fcflags=""
   sd_papi_ldflags=""
   sd_papi_libs=""
-  sd_papi_fortran_ok="unknown"
+  sd_papi_enable=""
   sd_papi_init="unknown"
   sd_papi_ok="unknown"
 
@@ -31,10 +27,13 @@ AC_DEFUN([SD_PAPI_INIT], [
   sd_papi_options="$1"
   sd_papi_libs_def="$2"
   sd_papi_cppflags_def="$3"
-  sd_papi_cflags_def="$3"
-  sd_papi_cxxflags_def="$3"
-  sd_papi_fcflags_def="$3"
-  sd_papi_ldflags_def="$4"
+  sd_papi_cflags_def="$4"
+  sd_papi_cxxflags_def="$5"
+  sd_papi_fcflags_def="$6"
+  sd_papi_ldflags_def="$7"
+  sd_papi_enable_def=""
+  sd_papi_policy=""
+  sd_papi_status=""
 
   # Process options
   for kwd in ${sd_papi_options}; do
@@ -48,12 +47,6 @@ AC_DEFUN([SD_PAPI_INIT], [
       fail|skip|warn)
         sd_papi_policy="${kwd}"
         ;;
-      no-cxx)
-        sd_papi_enable_cxx="no"
-        ;;
-      no-fortran)
-        sd_papi_enable_fc="no"
-        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg PAPI option: '${kwd}'])
         ;;
@@ -62,8 +55,8 @@ AC_DEFUN([SD_PAPI_INIT], [
 
   # Set reasonable defaults if not provided
   test -z "${sd_papi_enable_def}" && sd_papi_enable_def="auto"
-  test -z "${sd_papi_status}" && sd_papi_status="optional"
   test -z "${sd_papi_policy}" && sd_papi_policy="fail"
+  test -z "${sd_papi_status}" && sd_papi_status="optional"
   test -z "${sd_papi_libs_def}" && sd_papi_libs_def="-lpapi"
 
   # Declare configure option
@@ -83,20 +76,12 @@ AC_DEFUN([SD_PAPI_INIT], [
   # Declare environment variables
   AC_ARG_VAR([PAPI_CPPFLAGS], [C preprocessing flags for PAPI.])
   AC_ARG_VAR([PAPI_CFLAGS], [C flags for PAPI.])
-  AC_ARG_VAR([PAPI_CXXFLAGS], [C++ flags for PAPI.])
-  AC_ARG_VAR([PAPI_FCFLAGS], [Fortran flags for PAPI.])
   AC_ARG_VAR([PAPI_LDFLAGS], [Linker flags for PAPI.])
   AC_ARG_VAR([PAPI_LIBS], [Library flags for PAPI.])
 
   # Detect use of environment variables
   if test "${sd_papi_enable}" = "yes" -o "${sd_papi_enable}" = "auto"; then
     tmp_papi_vars="${PAPI_CPPFLAGS}${PAPI_CFLAGS}${PAPI_LDFLAGS}${PAPI_LIBS}"
-    if test "${sd_papi_enable_cxx}" = "yes"; then
-      tmp_papi_vars="${tmp_papi_vars}${PAPI_CXXFLAGS}"
-    fi
-    if test "${sd_papi_enable_fc}" = "yes"; then
-      tmp_papi_vars="${tmp_papi_vars}${PAPI_FCFLAGS}"
-    fi
     if test "${sd_papi_init}" = "def" -a ! -z "${tmp_papi_vars}"; then
       sd_papi_enable="yes"
       sd_papi_init="env"
@@ -116,10 +101,6 @@ AC_DEFUN([SD_PAPI_INIT], [
       def|yon)
         sd_papi_cppflags="${sd_papi_cppflags_def}"
         sd_papi_cflags="${sd_papi_cflags_def}"
-        test "${sd_papi_enable_cxx}" = "yes" && \
-          sd_papi_cxxflags="${sd_papi_cxxflags_def}"
-        test "${sd_papi_enable_fc}" = "yes" && \
-          sd_papi_fcflags="${sd_papi_fcflags_def}"
         sd_papi_ldflags="${sd_papi_ldflags_def}"
         sd_papi_libs="${sd_papi_libs_def}"
         ;;
@@ -127,10 +108,6 @@ AC_DEFUN([SD_PAPI_INIT], [
       dir)
         sd_papi_cppflags="-I${with_papi}/include"
         sd_papi_cflags="${sd_papi_cflags_def}"
-        test "${sd_papi_enable_cxx}" = "yes" && \
-          sd_papi_cxxflags="${sd_papi_cxxflags_def}"
-        test "${sd_papi_enable_fc}" = "yes" && \
-          sd_papi_fcflags="${sd_papi_fcflags_def} -I${with_papi}/include"
         sd_papi_ldflags="${sd_papi_ldflags_def}"
         sd_papi_libs="-L${with_papi}/lib ${sd_papi_libs_def}"
         ;;
@@ -138,20 +115,10 @@ AC_DEFUN([SD_PAPI_INIT], [
       env)
         sd_papi_cppflags="${sd_papi_cppflags_def}"
         sd_papi_cflags="${sd_papi_cflags_def}"
-        test "${sd_papi_enable_cxx}" = "yes" && \
-          sd_papi_cxxflags="${sd_papi_cxxflags_def}"
-        test "${sd_papi_enable_fc}" = "yes" && \
-          sd_papi_fcflags="${sd_papi_fcflags_def}"
         sd_papi_ldflags="${sd_papi_ldflags_def}"
         sd_papi_libs="${sd_papi_libs_def}"
         test ! -z "${PAPI_CPPFLAGS}" && sd_papi_cppflags="${PAPI_CPPFLAGS}"
         test ! -z "${PAPI_CFLAGS}" && sd_papi_cflags="${PAPI_CFLAGS}"
-        if test "${sd_papi_enable_cxx}" = "yes"; then
-          test ! -z "${PAPI_CXXFLAGS}" && sd_papi_cxxflags="${PAPI_CXXFLAGS}"
-        fi
-        if test "${sd_papi_enable_fc}" = "yes"; then
-          test ! -z "${PAPI_FCFLAGS}" && sd_papi_fcflags="${PAPI_FCFLAGS}"
-        fi
         test ! -z "${PAPI_LDFLAGS}" && sd_papi_ldflags="${PAPI_LDFLAGS}"
         test ! -z "${PAPI_LIBS}" && sd_papi_libs="${PAPI_LIBS}"
         ;;
@@ -170,8 +137,6 @@ AC_DEFUN([SD_PAPI_INIT], [
   # Export configuration
   AC_SUBST(sd_papi_options)
   AC_SUBST(sd_papi_enable_def)
-  AC_SUBST(sd_papi_enable_cxx)
-  AC_SUBST(sd_papi_enable_fc)
   AC_SUBST(sd_papi_policy)
   AC_SUBST(sd_papi_status)
   AC_SUBST(sd_papi_enable)
@@ -179,7 +144,6 @@ AC_DEFUN([SD_PAPI_INIT], [
   AC_SUBST(sd_papi_ok)
   AC_SUBST(sd_papi_cppflags)
   AC_SUBST(sd_papi_cflags)
-  AC_SUBST(sd_papi_fcflags)
   AC_SUBST(sd_papi_ldflags)
   AC_SUBST(sd_papi_libs)
   AC_SUBST(with_papi)
@@ -202,7 +166,6 @@ AC_DEFUN([SD_PAPI_DETECT], [
       if test "${sd_papi_init}" = "esl"; then
         sd_esl_bundle_libs="${sd_papi_libs_def} ${sd_esl_bundle_libs}"
       else
-        FCFLAGS="${FCFLAGS} ${sd_papi_fcflags}"
         LIBS="${sd_papi_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_papi_ldflags}"
@@ -212,8 +175,6 @@ AC_DEFUN([SD_PAPI_DETECT], [
         sd_papi_enable="no"
         sd_papi_cppflags=""
         sd_papi_cflags=""
-        sd_papi_cxxflags=""
-        sd_papi_fcflags=""
         sd_papi_ldflags=""
         sd_papi_libs=""
       else
@@ -242,7 +203,6 @@ AC_DEFUN([_SD_PAPI_CHECK_USE], [
   else
     CPPFLAGS="${CPPFLAGS} ${sd_papi_cppflags}"
     CFLAGS="${CFLAGS} ${sd_papi_cflags}"
-    FCFLAGS="${FCFLAGS} ${sd_papi_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_papi_ldflags}"
     LIBS="${sd_papi_libs} ${LIBS}"
   fi
@@ -364,13 +324,13 @@ AC_DEFUN([_SD_PAPI_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_papi_vars="${PAPI_FCFLAGS}${PAPI_LDFLAGS}${PAPI_LIBS}"
+  tmp_papi_vars="${PAPI_CFLAGS}${PAPI_LDFLAGS}${PAPI_LIBS}"
   tmp_papi_invalid="no"
   if test ! -z "${tmp_papi_vars}" -a ! -z "${with_papi}"; then
     case "${sd_papi_policy}" in
       fail)
         AC_MSG_ERROR([conflicting option settings for PAPI
-                  Please use PAPI_FCFLAGS + PAPI_LIBS or --with-papi,
+                  Please use PAPI_CFLAGS + PAPI_LIBS or --with-papi,
                   not both.])
         ;;
       skip)
@@ -389,16 +349,12 @@ AC_DEFUN([_SD_PAPI_CHECK_CONFIG], [
     sd_papi_init="env"
     if test "${tmp_papi_invalid}" = "yes"; then
       tmp_papi_invalid="no"
-      AC_MSG_NOTICE([overriding --with-papi with PAPI_{FCFLAGS,LDFLAGS,LIBS}])
+      AC_MSG_NOTICE([overriding --with-papi with PAPI_{CPPFLAGS,CFLAGS,LDFLAGS,LIBS}])
     fi
   fi
 
   # Implicit status overrides everything
   if test "${sd_papi_status}" = "implicit"; then
-    if test "${sd_papi_fcflags}" != ""; then
-      sd_papi_fcflags=""
-      AC_MSG_NOTICE([resetting PAPI Fortran flags (implicit package)])
-    fi
     if test "${sd_papi_ldflags}" != ""; then
       sd_papi_ldflags=""
       AC_MSG_NOTICE([resetting PAPI linker flags (implicit package)])
@@ -411,7 +367,6 @@ AC_DEFUN([_SD_PAPI_CHECK_CONFIG], [
 
   # Reset build parameters if disabled
   if test "${sd_papi_enable}" = "implicit"; then
-    sd_papi_fcflags=""
     sd_papi_ldflags=""
     sd_papi_libs=""
   fi
@@ -439,22 +394,6 @@ AC_DEFUN([_SD_PAPI_DUMP_CONFIG], [
       AC_MSG_RESULT([none])
     else
       AC_MSG_RESULT([${sd_papi_cflags}])
-    fi
-    if test "${sd_papi_enable_cxx}" = "yes"; then
-      AC_MSG_CHECKING([for PAPI C++ flags])
-      if test "${sd_papi_cxxflags}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_papi_cxxflags}])
-      fi
-    fi
-    if test "${sd_papi_enable_fc}" = "yes"; then
-      AC_MSG_CHECKING([for PAPI Fortran flags])
-      if test "${sd_papi_fcflags}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_papi_fcflags}])
-      fi
     fi
     AC_MSG_CHECKING([for PAPI linker flags])
     if test "${sd_papi_ldflags}" = ""; then

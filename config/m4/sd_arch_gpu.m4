@@ -16,12 +16,13 @@
 
 AC_DEFUN([SD_GPU_INIT], [
   # Init
-  sd_gpu_enable=""
   sd_gpu_cppflags=""
   sd_gpu_cflags=""
   sd_gpu_fcflags=""
   sd_gpu_ldflags=""
   sd_gpu_libs=""
+  sd_gpu_enable=""
+  sd_gpu_init="unknown"
   sd_gpu_ok="unknown"
 
   # Set adjustable parameters
@@ -33,6 +34,8 @@ AC_DEFUN([SD_GPU_INIT], [
   sd_gpu_fcflags_def="$6"
   sd_gpu_ldflags_def="$7"
   sd_gpu_enable_def=""
+  sd_gpu_policy=""
+  sd_gpu_status=""
 
   # Process options
   for kwd in ${sd_gpu_options}; do
@@ -54,9 +57,9 @@ AC_DEFUN([SD_GPU_INIT], [
 
   # Set reasonable defaults if not provided
   test -z "${sd_gpu_enable_def}" && sd_gpu_enable_def="no"
-  test -z "${sd_gpu_libs_def}" && sd_gpu_libs_def="-lopencl"
-  test -z "${sd_gpu_status}" && sd_gpu_status="optional"
   test -z "${sd_gpu_policy}" && sd_gpu_policy="warn"
+  test -z "${sd_gpu_status}" && sd_gpu_status="optional"
+  test -z "${sd_gpu_libs_def}" && sd_gpu_libs_def="-lopencl"
 
   # Declare main configure option
   AC_ARG_WITH([gpu],

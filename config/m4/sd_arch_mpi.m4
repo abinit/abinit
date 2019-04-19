@@ -16,8 +16,6 @@
 
 AC_DEFUN([SD_MPI_INIT], [
   # Init
-  sd_mpi_enable=""
-  sd_mpi_enable_def=""
   sd_mpi_cppflags=""
   sd_mpi_cflags=""
   sd_mpi_fcflags=""
@@ -26,14 +24,14 @@ AC_DEFUN([SD_MPI_INIT], [
   sd_mpi_cc=""
   sd_mpi_cc_ok="unknown"
   sd_mpi_cc_set="no"
-  sd_mpi_enable_cxx="yes"
   sd_mpi_cxx=""
   sd_mpi_cxx_ok="unknown"
   sd_mpi_cxx_set="no"
-  sd_mpi_enable_fc="yes"
   sd_mpi_fc=""
   sd_mpi_fc_ok="unknown"
   sd_mpi_fc_set="no"
+  sd_mpi_enable=""
+  sd_mpi_init="unknown"
   sd_mpi_ok="unknown"
 
   # Set adjustable parameters
@@ -44,6 +42,11 @@ AC_DEFUN([SD_MPI_INIT], [
   sd_mpi_cxxflags_def="$5"
   sd_mpi_fcflags_def="$6"
   sd_mpi_ldflags_def="$7"
+  sd_mpi_enable_cxx=""
+  sd_mpi_enable_def=""
+  sd_mpi_enable_fc=""
+  sd_mpi_policy=""
+  sd_mpi_status=""
 
   # Process options
   for kwd in ${sd_mpi_options}; do
@@ -70,10 +73,12 @@ AC_DEFUN([SD_MPI_INIT], [
   done
 
   # Set reasonable defaults if not provided
+  test -z "${sd_mpi_enable_cxx}" && sd_mpi_enable_cxx="yes"
   test -z "${sd_mpi_enable_def}" && sd_mpi_enable_def="auto"
-  test -z "${sd_mpi_libs_def}" && sd_mpi_libs_def="-lmpi"
-  test -z "${sd_mpi_status}" && sd_mpi_status="optional"
+  test -z "${sd_mpi_enable_fc}" && sd_mpi_enable_fc="yes"
   test -z "${sd_mpi_policy}" && sd_mpi_policy="fail"
+  test -z "${sd_mpi_status}" && sd_mpi_status="optional"
+  test -z "${sd_mpi_libs_def}" && sd_mpi_libs_def="-lmpi"
 
   # Declare configure option
   AC_ARG_WITH([mpi],

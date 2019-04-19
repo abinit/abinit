@@ -15,14 +15,11 @@
 
 AC_DEFUN([SD_WANNIER90_INIT], [
   # Init
-  sd_wannier90_enable=""
-  sd_wannier90_enable_def=""
   sd_wannier90_cppflags=""
-  sd_wannier90_cflags=""
-  sd_wannier90_cxxflags=""
   sd_wannier90_fcflags=""
   sd_wannier90_ldflags=""
   sd_wannier90_libs=""
+  sd_wannier90_enable=""
   sd_wannier90_init="unknown"
   sd_wannier90_ok="unknown"
 
@@ -30,10 +27,13 @@ AC_DEFUN([SD_WANNIER90_INIT], [
   sd_wannier90_options="$1"
   sd_wannier90_libs_def="$2"
   sd_wannier90_cppflags_def="$3"
-  sd_wannier90_cflags_def="$3"
-  sd_wannier90_cxxflags_def="$3"
-  sd_wannier90_fcflags_def="$3"
-  sd_wannier90_ldflags_def="$4"
+  sd_wannier90_cflags_def="$4"
+  sd_wannier90_cxxflags_def="$5"
+  sd_wannier90_fcflags_def="$6"
+  sd_wannier90_ldflags_def="$7"
+  sd_wannier90_enable_def=""
+  sd_wannier90_policy=""
+  sd_wannier90_status=""
 
   # Process options
   for kwd in ${sd_wannier90_options}; do
@@ -47,9 +47,6 @@ AC_DEFUN([SD_WANNIER90_INIT], [
       fail|skip|warn)
         sd_wannier90_policy="${kwd}"
         ;;
-      no-cxx)
-        sd_wannier90_enable_cxx="no"
-        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg Wannier90 option: '${kwd}'])
         ;;
@@ -58,8 +55,8 @@ AC_DEFUN([SD_WANNIER90_INIT], [
 
   # Set reasonable defaults if not provided
   test -z "${sd_wannier90_enable_def}" && sd_wannier90_enable_def="auto"
-  test -z "${sd_wannier90_status}" && sd_wannier90_status="optional"
   test -z "${sd_wannier90_policy}" && sd_wannier90_policy="fail"
+  test -z "${sd_wannier90_status}" && sd_wannier90_status="optional"
   test -z "${sd_wannier90_libs_def}" && sd_wannier90_libs_def="-lwannier"
 
   # Declare configure option
@@ -78,18 +75,13 @@ AC_DEFUN([SD_WANNIER90_INIT], [
 
   # Declare environment variables
   AC_ARG_VAR([WANNIER90_CPPFLAGS], [C preprocessing flags for Wannier90.])
-  AC_ARG_VAR([WANNIER90_CFLAGS], [C flags for Wannier90.])
-  AC_ARG_VAR([WANNIER90_CXXFLAGS], [C++ flags for Wannier90.])
   AC_ARG_VAR([WANNIER90_FCFLAGS], [Fortran flags for Wannier90.])
   AC_ARG_VAR([WANNIER90_LDFLAGS], [Linker flags for Wannier90.])
   AC_ARG_VAR([WANNIER90_LIBS], [Library flags for Wannier90.])
 
   # Detect use of environment variables
   if test "${sd_wannier90_enable}" = "yes" -o "${sd_wannier90_enable}" = "auto"; then
-    tmp_wannier90_vars="${WANNIER90_CPPFLAGS}${WANNIER90_CFLAGS}${WANNIER90_FCFLAGS}${WANNIER90_LDFLAGS}${WANNIER90_LIBS}"
-    if test "${sd_wannier90_enable_cxx}" = "yes"; then
-      tmp_wannier90_vars="${tmp_wannier90_vars}${WANNIER90_CXXFLAGS}"
-    fi
+    tmp_wannier90_vars="${WANNIER90_CPPFLAGS}${WANNIER90_FCFLAGS}${WANNIER90_LDFLAGS}${WANNIER90_LIBS}"
     if test "${sd_wannier90_init}" = "def" -a ! -z "${tmp_wannier90_vars}"; then
       sd_wannier90_enable="yes"
       sd_wannier90_init="env"
@@ -108,9 +100,6 @@ AC_DEFUN([SD_WANNIER90_INIT], [
 
       def|yon)
         sd_wannier90_cppflags="${sd_wannier90_cppflags_def}"
-        sd_wannier90_cflags="${sd_wannier90_cflags_def}"
-        test "${sd_wannier90_enable_cxx}" = "yes" && \
-          sd_wannier90_cxxflags="${sd_wannier90_cxxflags_def}"
         sd_wannier90_fcflags="${sd_wannier90_fcflags_def}"
         sd_wannier90_ldflags="${sd_wannier90_ldflags_def}"
         sd_wannier90_libs="${sd_wannier90_libs_def}"
@@ -118,9 +107,6 @@ AC_DEFUN([SD_WANNIER90_INIT], [
 
       dir)
         sd_wannier90_cppflags="-I${with_wannier90}/include"
-        sd_wannier90_cflags="${sd_wannier90_cflags_def}"
-        test "${sd_wannier90_enable_cxx}" = "yes" && \
-          sd_wannier90_cxxflags="${sd_wannier90_cxxflags_def}"
         sd_wannier90_fcflags="${sd_wannier90_fcflags_def} -I${with_wannier90}/include"
         sd_wannier90_ldflags="${sd_wannier90_ldflags_def}"
         sd_wannier90_libs="-L${with_wannier90}/lib ${sd_wannier90_libs_def}"
@@ -128,17 +114,10 @@ AC_DEFUN([SD_WANNIER90_INIT], [
 
       env)
         sd_wannier90_cppflags="${sd_wannier90_cppflags_def}"
-        sd_wannier90_cflags="${sd_wannier90_cflags_def}"
-        test "${sd_wannier90_enable_cxx}" = "yes" && \
-          sd_wannier90_cxxflags="${sd_wannier90_cxxflags_def}"
         sd_wannier90_fcflags="${sd_wannier90_fcflags_def}"
         sd_wannier90_ldflags="${sd_wannier90_ldflags_def}"
         sd_wannier90_libs="${sd_wannier90_libs_def}"
         test ! -z "${WANNIER90_CPPFLAGS}" && sd_wannier90_cppflags="${WANNIER90_CPPFLAGS}"
-        test ! -z "${WANNIER90_CFLAGS}" && sd_wannier90_cflags="${WANNIER90_CFLAGS}"
-        if test "${sd_wannier90_enable_cxx}" = "yes"; then
-          test ! -z "${WANNIER90_CXXFLAGS}" && sd_wannier90_cxxflags="${WANNIER90_CXXFLAGS}"
-        fi
         test ! -z "${WANNIER90_FCFLAGS}" && sd_wannier90_fcflags="${WANNIER90_FCFLAGS}"
         test ! -z "${WANNIER90_LDFLAGS}" && sd_wannier90_ldflags="${WANNIER90_LDFLAGS}"
         test ! -z "${WANNIER90_LIBS}" && sd_wannier90_libs="${WANNIER90_LIBS}"
@@ -158,8 +137,6 @@ AC_DEFUN([SD_WANNIER90_INIT], [
   if test "${sd_wannier90_init}" = "def" -a ! -z "${ESL_BUNDLE_PREFIX}"; then
     sd_wannier90_init="esl"
     sd_wannier90_cppflags=""
-    sd_wannier90_cflags=""
-    sd_wannier90_cxxflags=""
     sd_wannier90_fcflags=""
     sd_wannier90_ldflags=""
     sd_wannier90_libs=""
@@ -171,14 +148,12 @@ AC_DEFUN([SD_WANNIER90_INIT], [
   # Export configuration
   AC_SUBST(sd_wannier90_options)
   AC_SUBST(sd_wannier90_enable_def)
-  AC_SUBST(sd_wannier90_enable_cxx)
   AC_SUBST(sd_wannier90_policy)
   AC_SUBST(sd_wannier90_status)
   AC_SUBST(sd_wannier90_enable)
   AC_SUBST(sd_wannier90_init)
   AC_SUBST(sd_wannier90_ok)
   AC_SUBST(sd_wannier90_cppflags)
-  AC_SUBST(sd_wannier90_cflags)
   AC_SUBST(sd_wannier90_fcflags)
   AC_SUBST(sd_wannier90_ldflags)
   AC_SUBST(sd_wannier90_libs)
@@ -211,8 +186,6 @@ AC_DEFUN([SD_WANNIER90_DETECT], [
               "${sd_wannier90_init}" = "def"; then
         sd_wannier90_enable="no"
         sd_wannier90_cppflags=""
-        sd_wannier90_cflags=""
-        sd_wannier90_cxxflags=""
         sd_wannier90_fcflags=""
         sd_wannier90_ldflags=""
         sd_wannier90_libs=""
@@ -241,7 +214,6 @@ AC_DEFUN([_SD_WANNIER90_CHECK_USE], [
     SD_ESL_ADD_LIBS([${sd_wannier90_libs_def}])
   else
     CPPFLAGS="${CPPFLAGS} ${sd_wannier90_cppflags}"
-    CFLAGS="${CFLAGS} ${sd_wannier90_cflags}"
     FCFLAGS="${FCFLAGS} ${sd_wannier90_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_wannier90_ldflags}"
     LIBS="${sd_wannier90_libs} ${LIBS}"
@@ -249,13 +221,21 @@ AC_DEFUN([_SD_WANNIER90_CHECK_USE], [
 
   # Check Wannier90 API
   AC_MSG_CHECKING([whether the Wannier90 Fortran interface works])
-  AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[
-      call wannier_run
-    ]])], [sd_wannier90_ok="yes"], [sd_wannier90_ok="no"])
-  AC_LANG_POP([Fortran])
+  for tmp_incs in "" "-I/usr/include"; do
+    FCFLAGS="${FCFLAGS} ${tmp_incs}"
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        call wannier_run
+      ]])], [sd_wannier90_ok="yes"], [sd_wannier90_ok="no"])
+    AC_LANG_POP([Fortran])
+    if test "${sd_wannier90_ok}" = "yes"; then
+      test "${sd_sys_fcflags}" = "" && sd_sys_fcflags="${tmp_incs}"
+      break
+    fi
+  done
   AC_MSG_RESULT([${sd_wannier90_ok}])
+  unset tmp_incs
 
   # Restore environment
   SD_ESL_RESTORE_FLAGS
@@ -412,20 +392,6 @@ AC_DEFUN([_SD_WANNIER90_DUMP_CONFIG], [
       AC_MSG_RESULT([none])
     else
       AC_MSG_RESULT([${sd_wannier90_cppflags}])
-    fi
-    AC_MSG_CHECKING([for Wannier90 C flags])
-    if test "${sd_wannier90_cflags}" = ""; then
-      AC_MSG_RESULT([none])
-    else
-      AC_MSG_RESULT([${sd_wannier90_cflags}])
-    fi
-    if test "${sd_wannier90_enable_cxx}" = "yes"; then
-      AC_MSG_CHECKING([for Wannier90 C++ flags])
-      if test "${sd_wannier90_cxxflags}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_wannier90_cxxflags}])
-      fi
     fi
     AC_MSG_CHECKING([for Wannier90 Fortran flags])
     if test "${sd_wannier90_fcflags}" = ""; then
