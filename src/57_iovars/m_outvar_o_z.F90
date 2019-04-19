@@ -1209,6 +1209,9 @@ contains
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
 
+ intarr(1,:)=dtsets(:)%use_yaml
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
+
 
 !###########################################################
 !### 03. Print all the input variables (V)
