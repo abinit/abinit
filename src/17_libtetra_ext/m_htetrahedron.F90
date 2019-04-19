@@ -200,7 +200,6 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  integer :: ikibz,ikbz,idiag,ihash,min_idiag,my_rank,nprocs
  integer :: symrankkpt, max_ntetra, tetra_total, total_ntetra, ntetra, hash
  real(dp) :: rcvol,length,min_length
- character(len=500) :: msg
 !arrays
  integer,pointer :: indexes(:,:), tetra_hash_count(:)
  integer :: tetra_ibz(4), tetra_mibz(0:4), tetra_count(nkpt_ibz)
@@ -1331,7 +1330,6 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nw,nkibz,eig_ibz,&
  integer :: ind_ibz(4)
  real(dp) :: wvals(nw)
  real(dp) :: eigen_1tetra(4)
- real(dp) :: tweight_tmp(nw,4),dtweightde_tmp(nw,4)
 
 ! *********************************************************************
 
@@ -1468,9 +1466,8 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,multiplicity,nprocs,my_rank,ierr,ii
+ integer :: ik_ibz,multiplicity,nprocs,my_rank,ierr
  integer :: tetra_total, tetra_count, itetra, isummit, ihash
- real :: mweight
 !arrays
  integer :: ind_ibz(4)
  real(dp) :: eigen_1tetra(4)

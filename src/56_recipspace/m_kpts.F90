@@ -158,10 +158,9 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 !Local variables-------------------------------
 !scalars
  integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
- integer :: my_nshiftk,nkpt_computed,ii
+ integer :: my_nshiftk,ii
  integer,allocatable :: indkpt(:),bz2ibz_smap(:,:)
  real(dp) :: kptrlen
- real(dp) :: cpu, wall, gflops
 !arrays
  integer,parameter :: vacuum0(3)=[0, 0, 0]
  integer :: my_kptrlatt(3,3)
@@ -169,7 +168,6 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
 ! *********************************************************************
 
-#if 1
  ! Copy kptrlatt and shifts because getkgrid can change them
  ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
  ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be in 1 and", itoa(MAX_NSHIFTK)))
@@ -192,35 +190,6 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
  ABI_SFREE(indkpt)
  ABI_SFREE(bz2ibz_smap)
-#else
-
- ! First call to getkgrid to obtain the number of points in the BZ.
- ABI_MALLOC(kibz, (3,0))
- ABI_MALLOC(wtk, (0))
-
- ! Copy kptrlatt and shifts because getkgrid can change them
- ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
- ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be in 1 and", itoa(MAX_NSHIFTK)))
- my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
- my_kptrlatt = kptrlatt
-
- call cwtime(cpu, wall, gflops, "start")
- call getkgrid(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
-   cryst%nsym,0,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,cryst%symrel,vacuum0,wtk,fullbz=kbz)
- call cwtime_report(" getkgrid1", cpu, wall, gflops)
-
- ABI_FREE(kibz)
- ABI_FREE(wtk)
-
- ! Recall getkgrid to get kibz and wtk.
- ABI_MALLOC(kibz, (3, nkibz))
- ABI_MALLOC(wtk, (nkibz))
-
- call getkgrid(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
-   cryst%nsym,nkibz,nkpt_computed,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,&
-   cryst%symafm,cryst%symrel,vacuum0,wtk,fullbz=kbz)
- call cwtime_report(" getkgrid2", cpu, wall, gflops)
-#endif
 
  nkbz = size(kbz, dim=2)
 
@@ -283,12 +252,11 @@ type(t_htetrahedron) function tetra_from_kptrlatt( &
 
 !Local variables-------------------------------
 !scalars
- integer :: nkfull,timrev,sppoldbl,my_nkibz,new_nshiftk
- real(dp) :: dksqmax
+ integer :: nkfull,my_nkibz,new_nshiftk
  character(len=80) :: errorstring
 !arrays
  integer :: new_kptrlatt(3,3)
- !integer,allocatable :: indkk(:,:)
+ integer,allocatable :: indkk(:)
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: rlatt(3,3),klatt(3,3)
  real(dp),allocatable :: kfull(:,:),my_kibz(:,:),my_wtk(:),new_shiftk(:,:)
@@ -335,39 +303,17 @@ type(t_htetrahedron) function tetra_from_kptrlatt( &
    ierr = 2; goto 10
  end if
 
-#if 0
- ! Cosntruct full BZ and create mapping BZ --> IBZ
- ! Note:
- !   - we don't change the value of nsppol hence sppoldbl is set to 1
- !   - we use symrec (operations in reciprocal space)
- !
- sppoldbl = 1; timrev = kpts_timrev_from_kptopt(kptopt)
- ABI_MALLOC(indkk, (nkfull*sppoldbl,6))
-
- ! Compute k points from input file closest to the output file
- call listkk(dksqmax,cryst%gmet,indkk,kibz,kfull,nkibz,nkfull,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrec,timrev,comm, exit_loop=.True., use_symrec=.True.)
-
- if (dksqmax > tol12) then
-   write(msg, '(3a,es16.6,6a)' )&
-   'At least one of the k points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax=',dksqmax,ch10,&
-   'new_kptrkatt= ',trim(ltoa(reshape(new_kptrlatt, [9]))),ch10,&
-   'new_shiftk= ',trim(ltoa(reshape(new_shiftk, [3*new_nshiftk])))
-   ierr = 2; goto 10
- end if
-#endif
-
  rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
 
- !call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring, comm)
- call htetra_init(htetra, bz2ibz(1,:), cryst%gprimd, klatt, kfull, nkfull, my_kibz, my_nkibz, ierr, errorstring, comm)
+ ABI_MALLOC(indkk,(nkfull))
+ indkk(:) = bz2ibz(1,:)
+ ABI_SFREE(bz2ibz)
+ call htetra_init(htetra, indkk, cryst%gprimd, klatt, kfull, nkfull, my_kibz, my_nkibz, ierr, errorstring, comm)
  if (ierr /= 0) msg = errorstring
 
  10 continue
  ABI_SFREE(my_kibz)
- !ABI_SFREE(indkk)
- ABI_SFREE(bz2ibz)
+ ABI_SFREE(indkk)
  ABI_SFREE(kfull)
  ABI_SFREE(new_shiftk)
 
@@ -1098,7 +1044,6 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  integer :: test_prime,timrev
  integer :: nkpt_use
  real(dp) :: length2,ucvol,ucvol_super
- real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
 !arrays
  integer, parameter :: prime_factor(max_number_of_prime)=(/2,3,5,7,9, 11,13,17,19,23,&
