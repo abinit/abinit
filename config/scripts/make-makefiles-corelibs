@@ -177,11 +177,18 @@ for lib in abinit_corelibs:
   # Dependencies
   if ( cnf.has_option(lib,"dependencies") ):
     for dep in cnf.get(lib,"dependencies").split():
-      if ( (dep in dep_cnf.sections()) and \
-           (dep_cnf.get(dep, "detector") == "steredeg") ):
-        inc += " \\\n\t@sd_%s_fcflags@" % (dep)
+      if ( dep in dep_cnf.sections() ):
+        if ( dep_cnf.get(dep, "detector") == "steredeg" ):
+          dep_pfx = "sd"
+        else:
+          dep_pfx = "abi"
+        dep_lngs = dep_cnf.get(dep, "languages").split()
+        if ( ("c" in dep_lngs) or ("c++" in dep_lngs) ):
+          inc += " \\\n\t@%s_%s_cppflags@" % (dep_pfx, dep)
+        if ( "fortran" in dep_lngs ):
+          inc += " \\\n\t@%s_%s_fcflags@" % (dep_pfx, dep)
       else:
-        inc += " \\\n\t@abi_%s_fcflags@" % (dep)
+        raise ValueError("invalid external dependency: '%s'" % dep)
 
   # Required basic Fortran includes (must be last!)
   inc += " \\\n\t@fc_mod_fcflags@"

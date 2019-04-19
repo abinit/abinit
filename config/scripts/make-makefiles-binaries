@@ -197,15 +197,20 @@ for bin in main_bins:
 
   # Check whether the binary may use external libraries
   for dep in bin_deps:
-    if ( (dep in dep_cnf.sections()) and \
-         (dep_cnf.get(dep, "detector") == "steredeg") ):
-      dep_pfx = "sd"
+    if ( dep in dep_cnf.sections() ):
+      if ( dep_cnf.get(dep, "detector") == "steredeg" ):
+        dep_pfx = "sd"
+      else:
+        dep_pfx = "abi"
+      dep_lngs = dep_cnf.get(dep, "languages").split()
+      if ( ("c" in dep_lngs) or ("c++" in dep_lngs) ):
+        bin_cppflags += " @%s_%s_cppflags@" % (dep_pfx, dep)
+      if ( "fortran" in dep_lngs ):
+        bin_fcflags += " @%s_%s_fcflags@" % (dep_pfx, dep)
+      bin_ldflags += " @%s_%s_ldflags@" % (dep_pfx, dep)
+      bin_libs += " @%s_%s_libs@" % (dep_pfx, dep)
     else:
-      dep_pfx = "abi"
-    bin_cppflags += " @%s_%s_cppflags@" % (dep_pfx, dep)
-    bin_fcflags += " @%s_%s_fcflags@" % (dep_pfx, dep)
-    bin_ldflags += " @%s_%s_ldflags@" % (dep_pfx, dep)
-    bin_libs += " @%s_%s_libs@" % (dep_pfx, dep)
+      raise ValueError("invalid external dependency: '%s'" % dep)
   bin_fcflags += "@sd_sys_fcflags@"
 
   # Finish setting build-time parameters
