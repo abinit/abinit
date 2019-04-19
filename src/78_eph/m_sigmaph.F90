@@ -31,6 +31,7 @@ module m_sigmaph
  use m_xmpi
  use m_errors
  use m_hide_blas
+ use m_clib
  use m_copy
  use m_ifc
  use m_ebands
@@ -1070,6 +1071,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! Check if this (kpoint, spin) was already calculated
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
+   call clib_print_mallinfo(unit=std_out)
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
@@ -4045,10 +4047,11 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        end do
 
        ABI_FREE(qtab)
-       write(msg, "(a, i0, 2a, f5.3, a)") &
-        " Number of q-points in IBZ(k) treated by this proc:", self%my_nqibz_k, ch10, &
+       write(msg, "(a, i0, 2a, f7.3, a)") &
+        " Number of q-points in IBZ(k) treated by this proc: ", self%my_nqibz_k, ch10, &
         " Load balance inside comm_qpt: ", (one * self%nqibz_k) / (self%my_nqibz_k * self%nprocs_qpt), " (should be ~1)"
        call wrtout(std_out, msg)
+       ABI_CHECK(self%my_nqibz_k /= 0, "my_nqibz_k == 0!")
 
        ! Recompute weights with new q-point distribution.
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
@@ -4639,7 +4642,7 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt, "(a,i0)")"P Number of perturbations treated by this CPU: ", self%my_npert
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over q-points: ", self%nprocs_qpt
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%nprocs_bsum
- !write(unt, "(a,i0)""P Number of q-points in the IBZ treated by this proc: " ,count(new%itreat_qibz == 1)
+ !write(unt, "(2(a,i0))""P Number of q-points in the IBZ treated by this proc: " ,count(new%itreat_qibz == 1), " of ",new%nqibz
  !write(unt, sjoin("P Summing bands from my_bsum_start: ", itoa(self%my_bsum_start), &
  !  " up to my_bsum_stop:", itoa(self%my_bsum_stop)))
  !write(unt, sjoin("P Global bands for self-energy sum, bsum_start: ", itoa(self%bsum_start), &

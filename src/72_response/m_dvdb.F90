@@ -1581,7 +1581,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii
+ integer :: db_iqpt, cplex, ierr, imyp, ipc, ii
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
@@ -1603,11 +1603,11 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
 
    ! All procs are getting the same q-point. Exit when we reach maxnq
    ! TODO: Rewrite this part.
-   qcnt = 0
-   do ii=1,db%nqpt
-     if (allocated(db%qcache%key(ii)%v1scf)) qcnt = qcnt + 1
-   end do
-   if (qcnt >= db%qcache%maxnq) exit
+   !qcnt = 0
+   !do ii=1,db%nqpt
+   !  if (allocated(db%qcache%key(ii)%v1scf)) qcnt = qcnt + 1
+   !end do
+   !if (qcnt >= db%qcache%maxnq) exit
 
    call cwtime(cpu, wall, gflops, "start")
 
@@ -1676,7 +1676,7 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
 !scalars
  integer,parameter :: master = 0
  integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt
- real(dp) :: cpu_all, wall_all, gflops_all
+ real(dp) :: cpu_all, wall_all, gflops_all, mbsize, max_mbsize
  character(len=500) :: msg
 !arrays
  integer :: qselect(db%nqpt)
@@ -1687,10 +1687,6 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
 
  if (db%qcache%maxnq == 0) return
 
- if (db%qcache%make_room(ineed_qpt, msg) /= 0) then
-   MSG_WARNING(msg)
- end if
-
  ! Take the union of the q-points inside comm because we need to perform IO inside comm
  qselect = ineed_qpt
  call xmpi_sum(qselect, comm, ierr)
@@ -1700,11 +1696,14 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
    return
  end if
 
- call timab(1807, 1, tsec)
-
  call wrtout(std_out, sjoin(" Need to update cache. Master node will read ", itoa(qcnt), "q-points. It may be slow..."), &
              do_flush=.True.)
+ call timab(1807, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+
+ if (db%qcache%make_room(ineed_qpt, msg) /= 0) then
+   MSG_WARNING(msg)
+ end if
 
  do db_iqpt=1,db%nqpt
    if (qselect(db_iqpt) == 0) cycle
@@ -1724,7 +1723,10 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
    ABI_FREE(v1scf)
  end do
 
- call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(db%qcache%get_mbsize(), fmt="f8.1"), " [Mb]"))
+ mbsize = db%ft_qcache%get_mbsize()
+ call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(mbsize, fmt="f8.1"), " [Mb]"))
+ call xmpi_max(mbsize, max_mbsize, comm, ierr)
+ call wrtout(std_out, sjoin(" Max memory inside MPI comm: ", ftoa(max_mbsize, fmt="f8.1"), " [Mb]"))
  call cwtime_report(" dvdb_qcache_update_from_file", cpu_all, wall_all, gflops_all)
  call timab(1807, 2, tsec)
 
@@ -1841,13 +1843,11 @@ pure real(dp) function qcache_get_mbsize(qcache) result(mbsize)
 ! *************************************************************************
 
  mbsize = zero; if (.not. allocated(qcache%key)) return
-
  ! Compute cache size.
  qcnt = 0
  do iq=1,size(qcache%key)
    if (allocated(qcache%key(iq)%v1scf)) qcnt = qcnt + 1
  end do
-
  mbsize = qcache%onepot_mb * qcnt
 
 end function qcache_get_mbsize
@@ -2817,7 +2817,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
 
  ! Allocate potential in the supercell (memory is distributed over nrpt and npert)
  call wrtout(std_out, sjoin(" Memory required for W(r,R): ", &
-    ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert*dp * b2Mb, fmt="f6.1"), "[Mb]"))
+    ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * dp * b2Mb, fmt="f6.1"), "[Mb]"))
  ABI_MALLOC(emiqr, (2, db%my_nrpt))
  ABI_MALLOC_OR_DIE(db%v1scf_rpt,(2, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
  db%v1scf_rpt = zero
@@ -3334,8 +3334,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
      end if
 
      ! Reallocate v1scf with my_npert and extract data from work2.
-     ABI_FREE(v1scf)
-     ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+     ABI_REMALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
      do imyp=1,db%my_npert
        v1scf(:,:,:,imyp) = work2(:,:,:,db%my_pinfo(3, imyp))
      end do
@@ -3417,6 +3416,8 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  do iq_ibz=1,nqibz
    ! Ignore points reported by the oracle. We can still recompute them on the fly if needed.
    if (qselect_ibz(iq_ibz) == 0) cycle
+   !if (itreatq(iq_ibz) == 0) cycle
+
    call cwtime(cpu, wall, gflops, "start")
 
    ! TODO: DEBUGGING SECTION
@@ -3433,6 +3434,8 @@ if (db_iqpt /= -1) then
         end if
       end do
       ABI_FREE(all_v1scf)
+     write(msg,'(2(a,i0),a)') " Reading q-point [", iq_ibz, "/", nqibz, "]"
+     call cwtime_report(msg, cpu, wall, gflops)
 else
 
    ! Interpolate my_npert potentials inside comm_rpt
@@ -3458,7 +3461,7 @@ end if
  my_mbsize = db%ft_qcache%get_mbsize()
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(my_mbsize, fmt="f8.1"), " [Mb]"))
  call xmpi_max(my_mbsize, max_mbsize, comm, ierr)
- call wrtout(std_out, sjoin(" Max Memory inside MPI comm: ", ftoa(max_mbsize, fmt="f8.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Max memory inside MPI comm: ", ftoa(max_mbsize, fmt="f8.1"), " [Mb]"))
  call cwtime_report(" Qcache from W(r,R) + symmetrization", cpu_all, wall_all, gflops_all, end_str=ch10)
  call timab(1808, 2, tsec)
 
@@ -3515,12 +3518,13 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  qcnt = count(ineed_qpt /= 0)
  if (qcnt == 0) return
 
- if (db%ft_qcache%make_room(ineed_qpt, msg) /= 0) then 
-   MSG_WARNING(msg)
- end if
  !call timab(1807, 1, tsec)
  call wrtout(std_out, sjoin(" Need to update Vscf(q) cache with: ", itoa(qcnt), "q-points from FT..."), do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+
+ if (db%ft_qcache%make_room(ineed_qpt, msg) /= 0) then 
+   MSG_WARNING(msg)
+ end if
 
  cplex = 2
  ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
@@ -3543,7 +3547,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  mbsize = db%ft_qcache%get_mbsize()
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(mbsize, fmt="f8.1"), " [Mb]"))
  call xmpi_max(mbsize, max_mbsize, comm, ierr)
- call wrtout(std_out, sjoin(" Max Memory inside MPI comm: ", ftoa(max_mbsize, fmt="f8.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Max memory inside MPI comm: ", ftoa(max_mbsize, fmt="f8.1"), " [Mb]"))
  call cwtime_report(" dvdb_ftqcache_update_from_ft", cpu_all, wall_all, gflops_all)
  !call timab(1807, 2, tsec)
 

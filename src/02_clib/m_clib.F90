@@ -31,7 +31,7 @@ MODULE m_clib
  public :: clib_cclock
  public :: clib_etime
  public :: clib_mtrace
- public :: print_mallinfo
+ public :: clib_print_mallinfo
 
 !FIXME the interfaces below have been commented out since abilint
 ! JB : because interface must have a name in abilint
@@ -147,7 +147,7 @@ contains
 !!
 !! SOURCE
 
-subroutine print_mallinfo(unit)
+subroutine clib_print_mallinfo(unit)
 
 !Arguments ------------------------------------
  integer,intent(in) :: unit
@@ -156,8 +156,9 @@ subroutine print_mallinfo(unit)
  integer(c_long) :: arena,hblkhd,usmblks,fsmblks,uordblks,fordblks
 ! *********************************************************************
 
-  call clib_mallinfo(arena,hblkhd,usmblks,fsmblks,uordblks,fordblks)
+  call clib_mallinfo(arena, hblkhd, usmblks, fsmblks, uordblks, fordblks)
 
+  write(unit, *)""
   write(unit,*)' Total space in arena            : ',arena
   write(unit,*)' Space in holding block headers  : ',hblkhd
   write(unit,*)' Space in small blocks in use    : ',usmblks
@@ -165,8 +166,9 @@ subroutine print_mallinfo(unit)
   write(unit,*)' Space in ordinary blocks in use : ',uordblks
   write(unit,*)' Space in free ordinary blocks   : ',fordblks
   write(unit,*)' End memory statistics '
+  write(unit, *)""
 
-end subroutine print_mallinfo
+end subroutine clib_print_mallinfo
 !!***
 
 !!****f* m_clib/clib_rename
