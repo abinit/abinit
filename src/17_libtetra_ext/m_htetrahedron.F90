@@ -644,7 +644,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra%nbuckets = nkpt_ibz*2
  ierr = 0
  tetra_count = 0
- ABI_MALLOC(tetra_hash_count,(tetra%nbuckets))
+ ABI_CALLOC(tetra_hash_count,(tetra%nbuckets))
 
  ! Determine the smallest diagonal in k-space
  min_length = huge(min_length)
