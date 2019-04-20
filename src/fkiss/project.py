@@ -800,11 +800,21 @@ class AbinitProject(object):
                     errors.append("%s should be below level: %s" % (repr(child), fort_file.dirlevel))
         return "\n".join(errors)
 
-    def find_allmods(self, head_path):
+    def find_allmods(self, head_path, include_files_in_dirs=True):
         """
         Traverse the *entire* graph starting from head_path.
         Return full list of `Module` objects required by head_path.
+
+        Args:
+            include_files_in_dirs: True if the dependency graph should also include
+                the Fortran modules that are located in the same directory 
+                of the dependency even if no explicit `use statement` is found.
+                This option is needed when generating `binaries.conf` because `make`
+                builds all files inside the directory instead of the minimal set 
+                required by the target.
         """
+        dir2files = self.groupby_dirname()
+
         head = self.fort_files[head_path]
         allmods, queue, visited = set(), set(), set()
         queue.add(head)
@@ -815,6 +825,16 @@ class AbinitProject(object):
                 visited.add(mod.basename)
                 allmods.add(mod)
                 queue.add(self.fort_files[mod.basename])
+
+                if include_files_in_dirs:
+                    # Include all modules inside this directory so that make 
+                    # will build objects files in all dirs in which we have at least one dependency.
+                    for other_fort_file in dir2files[fort_file.dirname]:
+                        for other_mod in other_fort_file.all_used_mods:
+                            if other_mod.basename in visited: continue
+                            visited.add(other_mod.basename)
+                            allmods.add(other_mod)
+                            queue.add(self.fort_files[other_mod.basename])
 
         return allmods
 
