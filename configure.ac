@@ -420,14 +420,15 @@ AC_CHECK_PROGS(PYTHON,[python python2.6 python2.5 python2.4])
 AC_MSG_CHECKING([for Python CPPFLAGS])
 if test "${PYTHON}" != "" -a "${PYTHON_CPPFLAGS}" = ""; then
   PYTHON_CPPFLAGS=`${PYTHON} -c "\
+from __future__ import print_function
 try:
     import distutils.sysconfig
-    print '-I' + distutils.sysconfig.get_python_inc(),
+    print('-I' + distutils.sysconfig.get_python_inc(),end=' '),
 except:
     pass
 try:
     import numpy
-    print '-I' + numpy.get_include(),
+    print('-I' + numpy.get_include()),
 except:
     pass"`
 fi
