@@ -838,7 +838,7 @@ class AbinitProject(object):
 
         return allmods
 
-    def write_binaries_conf(self, dryrun=True, verbose=0):
+    def write_binaries_conf(self, dryrun=False, verbose=0):
         """
         Write new binaries.conf file
         """
