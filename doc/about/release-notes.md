@@ -71,7 +71,7 @@ B.5 The linear combination of images is now allowed, with the new value for inpu
     The wavefunctions from the previous itimimage value (see [[ntimimage]] input variables) can be stored,
     using the new input variable [[imgwfstor]]. This allows saving CPU time at the expense of memory, in all
     the image based algorithms.  
-By X. Gonze, testing by Y. Jia..
+By X. Gonze, testing by Y. Jia.
 
 B.6 Tutorial [[tutorial:nuc]]
     has now a section for the computation of the isomer shift (Mossbauer spectroscopy) based on Fermi contact interaction.  
