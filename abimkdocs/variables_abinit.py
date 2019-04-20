@@ -915,7 +915,7 @@ by smoothing the oscillation in the high energy part of the spectrum
   * 1 --> Use the terminator function. The particular expression depends on the type of calculation:
     In the resonant-only case, the $a_i$ and $b_i$ coefficients for $i > \text{niter}$, are replaced
     by their values at $i = \text{niter}$.
-    If the coupling block is included, the terminator function described in [[cite:Rocca2008]].
+    If the coupling block is included, the terminator function is the one described in [[cite:Rocca2008]].
 """,
 ),
 
