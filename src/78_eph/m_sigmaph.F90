@@ -597,7 +597,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
  integer :: nqibz, nqbz, comm_rpt
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
- real(dp) :: cpu_setk, wall_setk, gflops_setk, gf_val
+ real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag, q0rad, out_resid
  real(dp) :: vkk_norm2
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff, cnum, sig_cplx
@@ -923,7 +923,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! Read vtrial from POT file (in principle one may store vtrial in the DVDB!)
    call wrtout(std_out, " Reading vtrial potential for Sternheimer from external file.")
    call read_rhor("foo_POT", cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
-     allow_interp=.True.)
+                  allow_interp=.True.)
    call hdr_free(pot_hdr)
  end if
 
@@ -1072,6 +1072,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
    call clib_print_mallinfo(unit=std_out)
+   write(std_out, *)"xmpi_count_requests", xmpi_count_requests
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
@@ -1179,7 +1180,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! =======================================
      ! Integration over q-points in the IBZ(k)
      ! =======================================
+     call cwtime(cpu_qloop, wall_qloop, gflops_qloop, "start")
      ignore_kq = 0; ignore_ibsum_kq = 0
+
      do imyq=1,sigma%my_nqibz_k
        iq_ibz = sigma%myq2ibz_k(imyq)
        qpt = sigma%qibz_k(:, iq_ibz)
@@ -1841,6 +1844,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
      end do ! iq_ibz (sum over q-points in IBZ_k)
 
+     call cwtime_report(" Q-loop", cpu_qloop, wall_qloop, gflops_qloop)
+
      ! Print cache stats.
      if (sigma%use_ftinterp) then
        call dvdb%ft_qcache%report_stats()
@@ -1974,7 +1979,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ABI_FREE(gdw2_mn)
        ABI_FREE(gkq0_atm)
-
        call cwtime_report(" DW completed", cpu_dw, wall_dw, gflops_dw)
      end if ! not %imag_only
 
@@ -3940,7 +3944,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: my_rank, iq_ibz_k, iq_ibz, ierr, nprocs, imyq, iq_dvdb, ii, cnt, itreat, iq ! q_start, q_stop, 
+ integer :: my_rank, iq_ibz_k, iq_ibz, ierr, nprocs, imyq, iq_dvdb, ii, cnt, itreat, iq
  integer :: nqeff, ndiv
  real(dp) :: cpu, wall, gflops !, weight_q
  logical :: qfilter
@@ -3963,8 +3967,8 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
    call distribute_nqibz_k_nofilter()
    if (self%qint_method == 1) call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
- case (-4) ! Computation of imaginary part
-
+ case (-4) 
+   ! Computation of imaginary part
    if (self%qint_method == 0) then
      call distribute_nqibz_k_nofilter()
 
@@ -4045,16 +4049,16 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
            end if
          end do
        end do
-
        ABI_FREE(qtab)
-       write(msg, "(a, i0, 2a, f7.3, a)") &
-        " Number of q-points in IBZ(k) treated by this proc: ", self%my_nqibz_k, ch10, &
-        " Load balance inside comm_qpt: ", (one * self%nqibz_k) / (self%my_nqibz_k * self%nprocs_qpt), " (should be ~1)"
-       call wrtout(std_out, msg)
-       ABI_CHECK(self%my_nqibz_k /= 0, "my_nqibz_k == 0!")
 
        ! Recompute weights with new q-point distribution.
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
+
+       write(msg, "(a,i0,2a,f7.3,a)") &
+        " Number of q-points in IBZ(k) treated by this proc: ", self%my_nqibz_k, ch10, &
+        " Load balance inside comm_qpt: ", (one * self%nqibz_k) / (self%my_nqibz_k * self%nprocs_qpt), " (should be ~1)"
+       call wrtout(std_out, msg)
+       MSG_WARNING_IF(self%my_nqibz_k == 0, "my_nqibz_k == 0")
 
        ! Make sure each node has the q-points we need. Try not to break qcache_size_mb contract!
        if (self%use_ftinterp) then
@@ -4106,7 +4110,7 @@ subroutine distribute_nqibz_k_nofilter()
 end subroutine distribute_nqibz_k_nofilter
 
 !subroutine distribute_nqibz_k_noitreatq()
-!
+! integer :: q_start, q_stop
 ! call xmpi_split_work(self%nqibz_k, self%comm_qpt, q_start, q_stop, msg, ierr)
 ! self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
 ! ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
@@ -5309,7 +5313,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  character(len=500) :: msg
  type(kptrank_type) :: kptrank
 !arrays
- integer,allocatable :: qbz_count(:), qbz2dvdb(:,:), bz2ibz(:,:)
+ integer,allocatable :: qbz_count(:), qbz2qpt(:,:), bz2ibz(:,:)
  real(dp) :: kq(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
 
@@ -5384,8 +5388,8 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  call cwtime_report(" qbz_count", cpu, wall, gflops)
 
  ! Get mapping QBZ --> QPTS q-points.
- ABI_MALLOC(qbz2dvdb, (nqbz, 6))
- call listkk(dksqmax, cryst%gmet, qbz2dvdb, qpts, qbz, nqpt, nqbz, cryst%nsym, &
+ ABI_MALLOC(qbz2qpt, (nqbz, 6))
+ call listkk(dksqmax, cryst%gmet, qbz2qpt, qpts, qbz, nqpt, nqbz, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6,2a)' )&
@@ -5395,16 +5399,16 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  end if
  call cwtime_report(" oracle_listkk_qbz_qpts", cpu, wall, gflops)
 
- ! Compute qselect using qbz2dvdb.
+ ! Compute qselect using qbz2qpt.
  qselect = 0
  do iq_bz=1,nqbz
    if (qbz_count(iq_bz) == 0) cycle
-   db_iqpt = qbz2dvdb(iq_bz, 1)
+   db_iqpt = qbz2qpt(iq_bz, 1)
    qselect(db_iqpt) = qselect(db_iqpt) + 1
  end do
 
  ABI_FREE(qbz_count)
- ABI_FREE(qbz2dvdb)
+ ABI_FREE(qbz2qpt)
  ABI_FREE(bz2ibz)
 
  cnt = count(qselect /= 0)

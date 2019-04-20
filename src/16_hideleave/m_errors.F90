@@ -1420,16 +1420,17 @@ subroutine abinit_doctor(prefix, print_mem_report)
 !scalars
  integer,parameter :: master=0
  integer :: do_mem_report, my_rank
+ character(len=500) :: msg
 #ifdef HAVE_MEM_PROFILING
  integer :: ii,ierr,unt
  integer :: nalloc,ndealloc
  integer(kind=8) :: memtot
  character(len=fnlen) :: path
- character(len=500) :: msg
  character(len=2000) :: errmsg
 #endif
 
 ! *************************************************************************
+
  do_mem_report = 1; if (present(print_mem_report)) do_mem_report = print_mem_report
  my_rank = xmpi_comm_rank(xmpi_world)
 
@@ -1491,6 +1492,16 @@ subroutine abinit_doctor(prefix, print_mem_report)
 #else
  ABI_UNUSED(prefix)
 #endif
+
+ ! Check for pending requests.
+ if (xmpi_count_requests /= 0) then
+   write(msg, "(a,i0,a)")"Leaking ", xmpi_count_requests, " MPI requests at the end of the run"
+   MSG_WARNING(msg)
+   MSG_ERROR(msg)
+#ifdef HAVE_MEM_PROFILING
+   MSG_ERROR(msg)
+#endif
+ end if
 
 end subroutine abinit_doctor
 !!***

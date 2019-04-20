@@ -154,7 +154,7 @@ type(args_t) function args_parser() result(args)
       args%dry_run = 1
 
     else if (arg == "--abimem-level") then
-      call get_command_argument(ii+1, arg)
+      call get_command_argument(ii + 1, arg)
       args%abimem_level = atoi(arg)
 
     else if (arg == "-j" .or. arg == "--omp-num-threads") then
@@ -163,7 +163,7 @@ type(args_t) function args_parser() result(args)
 
     ! timelimit handler.
     else if (arg == "-t" .or. arg == "--timelimit") then
-      call get_command_argument(ii+1, arg)
+      call get_command_argument(ii + 1, arg)
       timelimit = str2sec(arg)
       if (timelimit < zero) then
         write(std_out,*)"Wrong timelimit argument:",trim(arg)
@@ -203,7 +203,7 @@ type(args_t) function args_parser() result(args)
 
     else if (arg == "-i" .or. arg == "--input") then
       ! Redirect stdin to file.
-      call get_command_argument(ii+1, arg)
+      call get_command_argument(ii + 1, arg)
       if (iam_master) then
         close(std_in)
         if (open_file(arg, msg, unit=std_in, form='formatted', status='old', action="read") /= 0) then
@@ -213,7 +213,7 @@ type(args_t) function args_parser() result(args)
 
     !else if (arg == "-o" .or. arg == "--output") then
     !  ! Redirect stdout to file.
-    !  call get_command_argument(ii+1, arg)
+    !  call get_command_argument(ii + 1, arg)
     !  if (iam_master) then
     !  close(std_out)
     !  if (open_file(arg, msg, unit=std_out, form='formatted', status='new', action="write") /= 0) then

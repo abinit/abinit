@@ -1390,6 +1390,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  if (.not. isirr_q) then
    ! Must rotate db_iqpt to get potential for qpoint in the BZ.
    ! Be careful with the shape of output v1scf because the routine returns db%my_npert potentials.
+
    if (db%my_npert == db%natom3) then
      ABI_MALLOC(work, (cplex, nfft, db%nspden, db%natom3))
      work = v1scf
@@ -2684,7 +2685,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  ! with all procs inside comm_rpt to avoid deadlocks.
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
- call wrtout(std_out, sjoin(ch10, " Building V(r,R) using ngqpt: ", ltoa(ngqpt), &
+ call wrtout(std_out, sjoin(ch10, "Building V(r,R) using ngqpt: ", ltoa(ngqpt), &
             " q-mesh with nprocs_rpt:", itoa(db%nprocs_rpt)))
  !call wrtout(std_out, "qshifts:")
  !do ii=1,nqshift

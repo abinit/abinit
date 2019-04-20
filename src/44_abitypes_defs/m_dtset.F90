@@ -1268,222 +1268,79 @@ subroutine dtset_free(dtset)
 
  !@dataset_type
 !integer allocatable
- if (allocated(dtset%algalch))     then
-   ABI_DEALLOCATE(dtset%algalch)
- end if
- if (allocated(dtset%bdgw))        then
-   ABI_DEALLOCATE(dtset%bdgw)
- end if
-  if (allocated(dtset%bs_loband))  then
-    ABI_DEALLOCATE(dtset%bs_loband)
-  end if
-
- if (allocated(dtset%dynimage))    then
-   ABI_DEALLOCATE(dtset%dynimage)
- end if
- if (allocated(dtset%efmas_bands))        then
-   ABI_DEALLOCATE(dtset%efmas_bands)
- end if
- if (allocated(dtset%iatfix))      then
-   ABI_DEALLOCATE(dtset%iatfix)
- end if
- if (allocated(dtset%iatsph))      then
-   ABI_DEALLOCATE(dtset%iatsph)
- end if
- if (allocated(dtset%istwfk))      then
-   ABI_DEALLOCATE(dtset%istwfk)
- end if
- if (allocated(dtset%kberry))      then
-   ABI_DEALLOCATE(dtset%kberry)
- end if
- if (allocated(dtset%lexexch))     then
-   ABI_DEALLOCATE(dtset%lexexch)
- end if
- if (allocated(dtset%ldaminushalf))     then
-   ABI_DEALLOCATE(dtset%ldaminushalf)
- end if
- if (allocated(dtset%lpawu))       then
-   ABI_DEALLOCATE(dtset%lpawu)
- end if
- if (allocated(dtset%nband))       then
-   ABI_DEALLOCATE(dtset%nband)
- end if
- if (allocated(dtset%ph_freez_disp_ampl)) then
-   ABI_DEALLOCATE(dtset%ph_freez_disp_ampl)
- end if
- if (allocated(dtset%ph_qpath)) then
-   ABI_DEALLOCATE(dtset%ph_qpath)
- end if
- if (allocated(dtset%ph_qshift)) then
-   ABI_DEALLOCATE(dtset%ph_qshift)
- end if
- if (allocated(dtset%plowan_iatom))       then
-   ABI_DEALLOCATE(dtset%plowan_iatom)
- end if
- if (allocated(dtset%plowan_it))       then
-   ABI_DEALLOCATE(dtset%plowan_it)
- end if
- if (allocated(dtset%plowan_lcalc))       then
-   ABI_DEALLOCATE(dtset%plowan_lcalc)
- end if
- if (allocated(dtset%plowan_nbl))       then
-   ABI_DEALLOCATE(dtset%plowan_nbl)
- end if
- if (allocated(dtset%plowan_projcalc))       then
-   ABI_DEALLOCATE(dtset%plowan_projcalc)
- end if
- if (allocated(dtset%prtatlist))   then
-   ABI_DEALLOCATE(dtset%prtatlist)
- end if
- if (allocated(dtset%so_psp))      then
-   ABI_DEALLOCATE(dtset%so_psp)
- end if
- if (allocated(dtset%symafm))      then
-   ABI_DEALLOCATE(dtset%symafm)
- end if
- if (allocated(dtset%symrel))      then
-   ABI_DEALLOCATE(dtset%symrel)
- end if
- if (allocated(dtset%typat))       then
-   ABI_DEALLOCATE(dtset%typat)
- end if
+ ABI_SFREE(dtset%algalch)
+ ABI_SFREE(dtset%bdgw)
+ ABI_SFREE(dtset%bs_loband)
+ ABI_SFREE(dtset%dynimage)
+ ABI_SFREE(dtset%efmas_bands)
+ ABI_SFREE(dtset%iatfix)
+ ABI_SFREE(dtset%iatsph)
+ ABI_SFREE(dtset%istwfk)
+ ABI_SFREE(dtset%kberry)
+ ABI_SFREE(dtset%lexexch)
+ ABI_SFREE(dtset%ldaminushalf)
+ ABI_SFREE(dtset%lpawu)
+ ABI_SFREE(dtset%nband)
+ ABI_SFREE(dtset%ph_freez_disp_ampl)
+ ABI_SFREE(dtset%ph_qpath)
+ ABI_SFREE(dtset%ph_qshift)
+ ABI_SFREE(dtset%plowan_iatom)
+ ABI_SFREE(dtset%plowan_it)
+ ABI_SFREE(dtset%plowan_lcalc)
+ ABI_SFREE(dtset%plowan_nbl)
+ ABI_SFREE(dtset%plowan_projcalc)
+ ABI_SFREE(dtset%prtatlist)
+ ABI_SFREE(dtset%so_psp)
+ ABI_SFREE(dtset%symafm)
+ ABI_SFREE(dtset%symrel)
+ ABI_SFREE(dtset%typat)
 
 !real allocatable
- if (allocated(dtset%acell_orig))  then
-   ABI_DEALLOCATE(dtset%acell_orig)
- end if
- if (allocated(dtset%amu_orig))    then
-   ABI_DEALLOCATE(dtset%amu_orig)
- end if
- if (allocated(dtset%atvshift))    then
-   ABI_DEALLOCATE(dtset%atvshift)
- end if
- if (allocated(dtset%cd_imfrqs))   then
-   ABI_DEALLOCATE(dtset%cd_imfrqs)
- end if
- if (allocated(dtset%chempot))    then
-   ABI_DEALLOCATE(dtset%chempot)
- end if
- if (allocated(dtset%corecs))      then
-   ABI_DEALLOCATE(dtset%corecs)
- end if
- if (allocated(dtset%densty))      then
-   ABI_DEALLOCATE(dtset%densty)
- end if
- if (allocated(dtset%dmatpawu))    then
-   ABI_DEALLOCATE(dtset%dmatpawu)
- end if
- if (allocated(dtset%efmas_dirs))        then
-   ABI_DEALLOCATE(dtset%efmas_dirs)
- end if
- if (allocated(dtset%gw_qlwl))     then
-   ABI_DEALLOCATE(dtset%gw_qlwl)
- end if
- if (allocated(dtset%gw_freqsp))   then
-   ABI_DEALLOCATE(dtset%gw_freqsp)
- end if
- if (allocated(dtset%gwls_list_proj_freq))   then
-   ABI_DEALLOCATE(dtset%gwls_list_proj_freq)
- end if
- if (allocated(dtset%f4of2_sla))   then
-   ABI_DEALLOCATE(dtset%f4of2_sla)
- end if
- if (allocated(dtset%f6of2_sla))   then
-   ABI_DEALLOCATE(dtset%f6of2_sla)
- end if
- if (allocated(dtset%jpawu))       then
-   ABI_DEALLOCATE(dtset%jpawu)
- end if
- if (allocated(dtset%kpt))         then
-   ABI_DEALLOCATE(dtset%kpt)
- end if
- if (allocated(dtset%kptbounds)) then
-   ABI_DEALLOCATE(dtset%kptbounds)
- end if
- if (allocated(dtset%kptgw))       then
-   ABI_DEALLOCATE(dtset%kptgw)
- end if
- if (allocated(dtset%kptns))       then
-   ABI_DEALLOCATE(dtset%kptns)
- end if
- if (allocated(dtset%kptns_hf))       then
-   ABI_DEALLOCATE(dtset%kptns_hf)
- end if
- if (allocated(dtset%mixalch_orig))     then
-   ABI_DEALLOCATE(dtset%mixalch_orig)
- end if
- if (allocated(dtset%mixesimgf))     then
-   ABI_DEALLOCATE(dtset%mixesimgf)
- end if
- if (allocated(dtset%nucdipmom))      then
-   ABI_DEALLOCATE(dtset%nucdipmom)
- end if
- if (allocated(dtset%occ_orig))    then
-   ABI_DEALLOCATE(dtset%occ_orig)
- end if
- if (allocated(dtset%pimass))      then
-   ABI_DEALLOCATE(dtset%pimass)
- end if
- if (allocated(dtset%ptcharge))    then
-   ABI_DEALLOCATE(dtset%ptcharge)
- end if
- if (allocated(dtset%qmass))       then
-   ABI_DEALLOCATE(dtset%qmass)
- end if
- if (allocated(dtset%qptdm))       then
-   ABI_DEALLOCATE(dtset%qptdm)
- end if
- if (allocated(dtset%quadmom))     then
-   ABI_DEALLOCATE(dtset%quadmom)
- end if
- if (allocated(dtset%ratsph))      then
-   ABI_DEALLOCATE(dtset%ratsph)
- end if
- if (allocated(dtset%rprim_orig))  then
-   ABI_DEALLOCATE(dtset%rprim_orig)
- end if
- if (allocated(dtset%rprimd_orig)) then
-   ABI_DEALLOCATE(dtset%rprimd_orig)
- end if
- if (allocated(dtset%shiftk))      then
-   ABI_DEALLOCATE(dtset%shiftk)
- end if
- if (allocated(dtset%spinat)) then
-   ABI_DEALLOCATE(dtset%spinat)
- end if
- if (allocated(dtset%tnons)) then
-   ABI_DEALLOCATE(dtset%tnons)
- end if
- if (allocated(dtset%sigma_shiftk)) then
-   ABI_DEALLOCATE(dtset%sigma_shiftk)
- end if
- if (allocated(dtset%upawu)) then
-   ABI_DEALLOCATE(dtset%upawu)
- end if
- if (allocated(dtset%vel_orig))    then
-   ABI_DEALLOCATE(dtset%vel_orig)
- end if
- if (allocated(dtset%vel_cell_orig))    then
-   ABI_DEALLOCATE(dtset%vel_cell_orig)
- end if
- if (allocated(dtset%wtatcon))     then
-   ABI_DEALLOCATE(dtset%wtatcon)
- end if
- if (allocated(dtset%wtk))         then
-   ABI_DEALLOCATE(dtset%wtk)
- end if
- if (allocated(dtset%xred_orig))   then
-   ABI_DEALLOCATE(dtset%xred_orig)
- end if
- if (allocated(dtset%xredsph_extra))   then
-   ABI_DEALLOCATE(dtset%xredsph_extra)
- end if
- if (allocated(dtset%ziontypat))   then
-   ABI_DEALLOCATE(dtset%ziontypat)
- end if
- if (allocated(dtset%znucl)) then
-   ABI_DEALLOCATE(dtset%znucl)
- end if
+ ABI_SFREE(dtset%acell_orig)
+ ABI_SFREE(dtset%amu_orig)
+ ABI_SFREE(dtset%atvshift)
+ ABI_SFREE(dtset%cd_imfrqs)
+ ABI_SFREE(dtset%chempot)
+ ABI_SFREE(dtset%corecs)
+ ABI_SFREE(dtset%densty)
+ ABI_SFREE(dtset%dmatpawu)
+ ABI_SFREE(dtset%efmas_dirs)
+ ABI_SFREE(dtset%gw_qlwl)
+ ABI_SFREE(dtset%gw_freqsp)
+ ABI_SFREE(dtset%gwls_list_proj_freq)
+ ABI_SFREE(dtset%f4of2_sla)
+ ABI_SFREE(dtset%f6of2_sla)
+ ABI_SFREE(dtset%jpawu)
+ ABI_SFREE(dtset%kpt)
+ ABI_SFREE(dtset%kptbounds)
+ ABI_SFREE(dtset%kptgw)
+ ABI_SFREE(dtset%kptns)
+ ABI_SFREE(dtset%kptns_hf)
+ ABI_SFREE(dtset%mixalch_orig)
+ ABI_SFREE(dtset%mixesimgf)
+ ABI_SFREE(dtset%nucdipmom)
+ ABI_SFREE(dtset%occ_orig)
+ ABI_SFREE(dtset%pimass)
+ ABI_SFREE(dtset%ptcharge)
+ ABI_SFREE(dtset%qmass)
+ ABI_SFREE(dtset%qptdm)
+ ABI_SFREE(dtset%quadmom)
+ ABI_SFREE(dtset%ratsph)
+ ABI_SFREE(dtset%rprim_orig)
+ ABI_SFREE(dtset%rprimd_orig)
+ ABI_SFREE(dtset%shiftk)
+ ABI_SFREE(dtset%spinat)
+ ABI_SFREE(dtset%tnons)
+ ABI_SFREE(dtset%sigma_shiftk)
+ ABI_SFREE(dtset%upawu)
+ ABI_SFREE(dtset%vel_orig)
+ ABI_SFREE(dtset%vel_cell_orig)
+ ABI_SFREE(dtset%wtatcon)
+ ABI_SFREE(dtset%wtk)
+ ABI_SFREE(dtset%xred_orig)
+ ABI_SFREE(dtset%xredsph_extra)
+ ABI_SFREE(dtset%ziontypat)
+ ABI_SFREE(dtset%znucl)
 
 end subroutine dtset_free
 !!***

@@ -131,6 +131,10 @@ MODULE m_xmpi
  integer,public,parameter :: xmpio_single    =1  ! Individual IO.
  integer,public,parameter :: xmpio_collective=2  ! Collective IO.
 
+ integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
+ ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
+ ! This counter should be zero at the end of the run if all requests have been released)
+
 !----------------------------------------------------------------------
 !!***
 
@@ -1839,6 +1843,7 @@ subroutine xmpi_wait(request,mpierr)
 
  mpierr = 0
 #ifdef HAVE_MPI
+ if (request /= xmpi_request_null) xmpi_count_requests = xmpi_count_requests - 1
  call MPI_WAIT(request,status,ier)
  mpierr=ier
 #endif
@@ -1885,6 +1890,7 @@ subroutine xmpi_waitall_1d(array_of_requests, mpierr)
 
  mpierr = 0
 #ifdef HAVE_MPI
+ xmpi_count_requests = xmpi_count_requests - count(array_of_requests /= xmpi_request_null)
  call MPI_WAITALL(size(array_of_requests), array_of_requests, status, ier)
  mpierr=ier
 #endif
@@ -1945,7 +1951,7 @@ end subroutine xmpi_waitall_2d
 !!  Frees an array of communication request objects.
 !!
 !! INPUTS
-!!  requests(:)= communication request  array (array of handles)
+!!  requests(:)= communication request array (array of handles)
 !!
 !! OUTPUT
 !!  mpierr= status error
@@ -1973,6 +1979,7 @@ subroutine xmpi_request_free(requests,mpierr)
  mpierr = 0
 #ifdef HAVE_MPI
  do ii=1,size(requests)
+   if (requests(ii) /= xmpi_request_null) xmpi_count_requests = xmpi_count_requests - 1
    call MPI_REQUEST_FREE(requests(ii),ier)
  end do
  mpierr=ier
