@@ -2981,8 +2981,7 @@ end subroutine paw_setup_copy
    do ii=1,nphicor
      ncor(ii)=corestate(ii)%nn
      lcor(ii)=corestate(ii)%ll
-! for consistency with optics_paw_core there is a factor of two for energy
-     energy_cor(ii)=two*corestate(ii)%ee
+     energy_cor(ii)=corestate(ii)%ee
      do imsh=1,nmesh
        if(trim(gridwf(ii))==trim(grids(imsh)%id)) imeshae=imsh
      end do

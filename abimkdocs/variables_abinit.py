@@ -9847,7 +9847,6 @@ acting on the images.
 See [[cite:Henkelman2000]]
 
   * 2 --> **Climbing-Image NEB (CI-NEB)**.
-XG 20180813: This algorithm seems to be BROKEN.
 The CI-NEB method constitutes a small modification to the NEB method.
 Information about the shape of the MEP is retained, but a rigorous convergence
 to a saddle point is also obtained. By default the spring constants are
@@ -9868,11 +9867,11 @@ Variable(
     vartype="real",
     topics=['TransPath_useful'],
     dimensions=[2],
-    defaultval=ValueWithConditions({'[[neb_algo]] == 2': [0.02, 0.15], 'defaultval': [0.05, 0.05]}),
+    defaultval=ValueWithConditions({'[[neb_algo]] == 2': ValueWithUnit(units='Hartree/Bohr^2', value=[0.02, 0.15]), 'defaultval': ValueWithUnit(units='Hartree/Bohr^2', value=[0.05, 0.05])}),
     mnemonics="Nudged Elastic Band: SPRING constant",
     requires="[[imgmov]] == 5",
     text=r"""
-Gives the minimal and maximal values of the spring constant connecting images
+Gives the minimal and maximal values (in Hartree/Bohr^2) of the spring constant connecting images
 for the NEB method.
 In the standard "Nudged Elastic Band" method, the spring constant is constant
 along the path, but, in order to have higher resolution close to the saddle
