@@ -36,6 +36,7 @@ module m_eph_driver
  use m_hdr
  use m_crystal
  use m_ebands
+ use m_dtset
  use m_efmas_defs
  use m_ddk
  use m_ddb
@@ -147,7 +148,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !scalars
  character(len=6),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),intent(inout) :: dtset
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
 !arrays
@@ -605,6 +606,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! TODO: Make sure that all subdrivers work with useylm == 1
  ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
+
+ ! Relase nkpt-based arrays in dtset to decreased memory requirement if dense sampling.
+ ! EPH routines should not access them after this point.
+ ! TODO: In principle I should deallocate also dtset(idtset) in driver but I have to
+ ! disable the output of these arrays in outvars...
+ if (dtset%eph_task /= 6) then
+   call dtset_free_nkpt_arrays(dtset)
+ end if
+
  select case (dtset%eph_task)
  case (0)
    continue

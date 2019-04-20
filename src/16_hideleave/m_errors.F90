@@ -1508,7 +1508,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
  if (xmpi_count_requests /= 0) then
    write(msg, "(a,i0,a)")"Leaking ", xmpi_count_requests, " MPI requests at the end of the run"
    MSG_WARNING(msg)
-   MSG_ERROR(msg)
+   !MSG_ERROR(msg)
 #ifdef HAVE_MEM_PROFILING
    MSG_ERROR(msg)
 #endif

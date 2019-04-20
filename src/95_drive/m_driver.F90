@@ -139,7 +139,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
  use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
- use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
+ use m_dtset,        only : dtset_copy, dtset_free, dtset_free_nkpt_arrays, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
  use m_dtfil,        only : dtfil_init, dtfil_init_img
  use m_respfn_driver,    only : respfn
@@ -608,7 +608,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  ****************************************************************************
 !  Exchange-correlation
 
-   call echo_xc_name (dtset%ixc)
+   call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
      call libxc_functionals_init(dtset%ixc,dtset%nspden)
@@ -703,11 +703,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &     npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
 
    case(RUNL_SCREENING)
-
      call screening(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
 
    case(RUNL_SIGMA)
-
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
 
    case(RUNL_NONLINEAR)
@@ -718,12 +716,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case(6)
 
      write(message,'(3a)')&
-&     'The optdriver value 6 has been disabled since ABINITv6.0.',ch10,&
-&     'Action: modify optdriver in the input file.'
+      'The optdriver value 6 has been disabled since ABINITv6.0.',ch10,&
+      'Action: modify optdriver in the input file.'
      MSG_ERROR(message)
 
    case (RUNL_BSE)
-
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case(RUNL_GWLS)
@@ -748,14 +745,16 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case (RUNL_EPH)
+     !call dtset_free_nkpt_arrays(dtsets(idtset))
+     !call dtset_free_nkpt_arrays(dtset)
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case default
      ! Bad value for optdriver
      write(message,'(a,i0,4a)')&
-&     'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
-&     'This is not allowed. ',ch10,&
-&     'Action: modify optdriver in the input file.'
+      'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
+      'This is not allowed. ',ch10,&
+      'Action: modify optdriver in the input file.'
      MSG_ERROR(message)
    end select
 
@@ -824,13 +823,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #endif
    end if
 
-!  MG: There are routines such as GW and Berry phase that can change/compute
-!  entries in the datatype at run-time. These changes won't be visibile
-!  in the main output file since we are passing a copy of dtsets.
-!  I tried to update the results with the call below but this creates
-!  several problems in outvars since one should take into account
-!  the new dimensions (e.g. nkptgw) and their maximum value.
-!  For the time being, we continue to pass a copy of dtsets(idtset).
+   ! MG: There are routines such as GW and Berry phase that can change/compute
+   ! entries in the datatype at run-time. These changes won't be visibile
+   ! in the main output file since we are passing a copy of dtsets.
+   ! I tried to update the results with the call below but this creates
+   ! several problems in outvars since one should take into account
+   ! the new dimensions (e.g. nkptgw) and their maximum value.
+   ! For the time being, we continue to pass a copy of dtsets(idtset).
 #if 0
    call dtset_free(dtsets(idtset))
    call dtset_copy(dtsets(idtset),dtset)

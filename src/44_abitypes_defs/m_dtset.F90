@@ -39,8 +39,9 @@ MODULE m_dtset
  private
 
  public :: dtset_chkneu
- public :: dtset_copy
- public :: dtset_free
+ public :: dtset_copy              ! Copy object.
+ public :: dtset_free              ! Free dynamic memory.
+ public :: dtset_free_nkpt_arrays  ! Free arrays that depend on input nkpt (used in EPH code)
  public :: find_getdtset     ! Find the number of the dataset (iget) for a given value of a "get" variable (getvalue)
  public :: get_npert_rbz     ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
  public :: testsusmat        ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
@@ -1343,6 +1344,41 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%znucl)
 
 end subroutine dtset_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dtset/dtset_free_nkpt_arrays
+!! NAME
+!! dtset_free_nkpt_arrays
+!!
+!! FUNCTION
+!!  Free arrays that depend on input nkpt (used in EPH code, because EPH has its own 
+!!  treatmend of BZ sampling and we don't want to waste memory with large and useless arrays 
+!!  especially if very dense k-meshes are used.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dtset_free_nkpt_arrays(dtset)
+
+!Arguments ------------------------------------
+!scalars
+ type(dataset_type),intent(inout) :: dtset
+
+! *************************************************************************
+
+ ABI_SFREE(dtset%istwfk)
+ !ABI_SFREE(dtset%nband)
+ ABI_SFREE(dtset%kpt)
+ ABI_FREE(dtset%kptns)
+ ABI_FREE(dtset%occ_orig)
+ ABI_FREE(dtset%wtk)
+
+end subroutine dtset_free_nkpt_arrays
 !!***
 
 !!****f* m_dtset/find_getdtset
