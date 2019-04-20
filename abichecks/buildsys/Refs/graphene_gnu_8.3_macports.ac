@@ -963,15 +963,15 @@ with_libxc_libs="-L/opt/local/lib -lxc"
 
 # Full path to the Wannier90 executables (default is unset)
 #
-with_wannier90_bins="/opt/local/bin"
+#with_wannier90_bins="/usr/local/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-with_wannier90_incs="-I/opt/local/include"
+#with_wannier90_incs="-I/usr/local/include/wannier90"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-with_wannier90_libs="-L/opt/local/lib -lwannier"
+#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
@@ -1047,7 +1047,7 @@ with_wannier90_libs="-L/opt/local/lib -lwannier"
 
 # Enable double precision for GW calculations (gmatteo)
 #
-#enable_gw_dpc="yes"
+enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #

@@ -721,6 +721,7 @@ end subroutine die
 !!   COMMENT
 !!   WARNING
 !!   ERROR
+!!   STOP
 !!   BUG
 !!  mode_paral=Either "COLL" or "PERS".
 !!  [line] = line number of the file where problem occurred
@@ -787,6 +788,16 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
      "message: |",ch10,TRIM(indent(my_msg)),ch10,&
      "...",ch10
    call wrtout(unit_, sbuf, mode_paral)
+
+ case ('STOP')
+
+   write(sbuf,'(8a)')ch10,&
+     "--- !",TRIM(level),ch10,&
+     "message: |",ch10,TRIM(indent(my_msg)),ch10
+   call wrtout(unit_, sbuf, mode_paral)
+   if (.not.present(NOSTOP)) then
+     call abi_abort(mode_paral,print_config=.FALSE.)
+   end if
 
  ! ERROR' or 'BUG'
  case default
