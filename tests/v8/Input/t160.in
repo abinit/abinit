@@ -1,6 +1,6 @@
 # LiF Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 6
+ndtset 8
 
 getwfk   20    # Read GS wavefunctions from DS20_WFK
 getddb   20    # Read DDB files from DS20_DDB
@@ -46,7 +46,7 @@ eph_restart 1
 ############
 eph_task1  4
 gw_qprange1 4
-sigma_ngkpt 2 2 2
+sigma_ngkpt1 2 2 2
 
 ############
 # DATASET 2
@@ -60,6 +60,7 @@ eph_ngqpt_fine2 4 4 4
 ############
 eph_task3 4
 gw_qprange3 4
+sigma_ngkpt3 2 2 2
 sigma_bsum_range3 2 4
 # Use interpolated DVDB produced in dataset 2
 getdvdb3  2
@@ -70,6 +71,7 @@ eph_ngqpt_fine3 4 4 4
 ############
 eph_task4 -4
 gw_qprange4 4
+sigma_ngkpt4 2 2 2
 #sigma_bsum_range4 1 7
 eph_intmeth4 2  # Tetra are more stable when bands are selected. No long-range Lorentzian.
 # Use interpolated DVDB produced in dataset 2
@@ -97,10 +99,36 @@ ph_qpath5
 # Test erange and tolerance on tetra weigts
 eph_task6 -4
 eph_intmeth6 2  
+sigma_ngkpt6 2 2 2
 sigma_erange6  0.5 0.5 eV
 eph_tols_idelta6 1e-6 1e-6
 getdvdb6  2
 eph_ngqpt_fine6 4 4 4
+
+############
+# DATASET 7
+############
+# Build W(r,R) using 2x2x2 q-mesh and interpolate DFPT potentials to compute IM(Sigma)
+# Same parameters as previous dataset except for getdvdb
+eph_task7 -4
+eph_intmeth7 2  
+sigma_ngkpt7 2 2 2
+sigma_erange7  0.5 0.5 eV
+eph_tols_idelta7 1e-6 1e-6
+getdvdb7  20
+eph_ngqpt_fine7 4 4 4
+
+############
+# DATASET 8
+############
+# Build W(r,R) using 2x2x2 q-mesh and interpolate DFPT potentials to compute Re + Im
+# Same parameters as dataset 3 except for getdvdb
+eph_task8  4
+gw_qprange8 4
+sigma_ngkpt8 2 2 2
+sigma_bsum_range8 2 4
+eph_ngqpt_fine8 4 4 4
+getdvdb8  20
 
 ############################################################################################
 #                                         STRUCTURE

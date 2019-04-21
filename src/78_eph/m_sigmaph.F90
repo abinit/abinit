@@ -956,10 +956,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Find correspondence IBZ --> set of q-points in DVDB.
  ABI_MALLOC(ibz2dvdb, (sigma%nqibz))
  if (dvdb%find_qpts(sigma%nqibz, sigma%qibz, ibz2dvdb, comm) /= 0) then
-   call wrtout([std_out, ab_out], "- Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
+   call wrtout([std_out, ab_out], " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
    sigma%use_ftinterp = .True.
  else
-   call wrtout([std_out, ab_out], "- DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
+   call wrtout([std_out, ab_out], " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
    sigma%use_ftinterp = .False.
  end if
 
@@ -1015,8 +1015,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  else if (dtset%useria == 2000 .or. sigma%use_ftinterp) then
      sigma%use_ftinterp = .True.
-     !call wrtout([std_out, ab_out], "- Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
-
      ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation. 
      ! R-points are distributed inside comm_rpt
      ! Note that when R-points are distributed inside comm_qpt we cannot interpolate potentials on-the-fly 
@@ -4589,7 +4587,7 @@ subroutine sigmaph_print(self, dtset, unt)
  !write(unt,"(a, 2(f5.3, 1x), a)")"Computing self-energy corrections for states inside energy window:", &
  !    self%elow * Ha_eV, self%ehigh * Ha_eV, "[eV]"
  write(unt,"(a)")sjoin(" Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
- write(unt,"(a)")sjoin(" From bmin:", itoa(self%bsum_start), "to bmax:", itoa(self%bsum_stop))
+ write(unt,"(a)")sjoin(" From bsum_start:", itoa(self%bsum_start), "to bsum_stop:", itoa(self%bsum_stop))
  if (dtset%eph_stern == 1 .and. .not. self%imag_only) then
    write(unt, "(a)")" Treating high-energy bands with Sternheimer and static self-energy."
    write(unt, "(a, es16.6, a, i0)")" Tolwfr:", dtset%tolwfr, ", nline:", dtset%nline
@@ -4640,17 +4638,14 @@ subroutine sigmaph_print(self, dtset, unt)
  end do
 
  write(unt, "(a)")" === MPI parallelism ==="
- write(unt, "(2(a,i0))")"P Allocating and treating bands from my_bsum_start: ", self%my_bsum_start, &
+ write(unt, "(2(a,i0))")"P Allocating and summing bands from my_bsum_start: ", self%my_bsum_start, &
      " up to my_bsum_stop: ", self%my_bsum_stop
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", self%nprocs_pert
  write(unt, "(a,i0)")"P Number of perturbations treated by this CPU: ", self%my_npert
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over q-points: ", self%nprocs_qpt
+ write(unt, "(2(a,i0))""P Number of q-points in the IBZ treated by this proc: " , &
+     count(new%itreat_qibz == 1), " of ", new%nqibz
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%nprocs_bsum
- !write(unt, "(2(a,i0))""P Number of q-points in the IBZ treated by this proc: " ,count(new%itreat_qibz == 1), " of ",new%nqibz
- !write(unt, sjoin("P Summing bands from my_bsum_start: ", itoa(self%my_bsum_start), &
- !  " up to my_bsum_stop:", itoa(self%my_bsum_stop)))
- !write(unt, sjoin("P Global bands for self-energy sum, bsum_start: ", itoa(self%bsum_start), &
- !  " bsum_bstop:", itoa(self%bsum_stop)))
 
 end subroutine sigmaph_print
 !!***

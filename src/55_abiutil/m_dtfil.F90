@@ -1228,6 +1228,7 @@ subroutine iofn1(filnam,filstat,comm)
      end if
    end if
  end if
+ !do_write_log = .True.
 
  if (me==master) then
    !  Eventually redefine standard input and standard output

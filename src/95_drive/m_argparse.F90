@@ -198,7 +198,7 @@ type(args_t) function args_parser() result(args)
 
     else if (arg == "--log") then
        ! Enable logging
-       call abi_log_status_state(new_do_write_log=.True.,new_do_write_status=.True.)
+       call abi_log_status_state(new_do_write_log=.True., new_do_write_status=.True.)
        call libpaw_log_flag_set(.True.)
 
     else if (arg == "-i" .or. arg == "--input") then

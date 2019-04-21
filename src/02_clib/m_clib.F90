@@ -165,8 +165,7 @@ subroutine clib_print_mallinfo(unit)
   write(unit,*)' Space in free small blocks      : ',fsmblks
   write(unit,*)' Space in ordinary blocks in use : ',uordblks
   write(unit,*)' Space in free ordinary blocks   : ',fordblks
-  write(unit,*)' End memory statistics '
-  write(unit, *)""
+  write(unit,*)""
 
 end subroutine clib_print_mallinfo
 !!***

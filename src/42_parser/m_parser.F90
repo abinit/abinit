@@ -999,9 +999,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
        write(message, '(7a)' )&
-&       'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
-&       'This is confusing, so it has been forbidden.',ch10,&
-&       'Action: remove one of the two occurences.'
+       'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+       'This is confusing, so it has been forbidden.',ch10,&
+       'Action: remove one of the two occurences.'
        MSG_ERROR(message)
      end if
 
