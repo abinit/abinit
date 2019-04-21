@@ -38,7 +38,7 @@ AC_DEFUN([SD_LIBPSML_INIT], [
   # Process options
   for kwd in ${sd_libpsml_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_libpsml_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -54,10 +54,15 @@ AC_DEFUN([SD_LIBPSML_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_libpsml_enable_def}" && sd_libpsml_enable_def="no"
+  test -z "${sd_libpsml_libs_def}" && sd_libpsml_libs_def="-lpsml"
   test -z "${sd_libpsml_policy}" && sd_libpsml_policy="fail"
   test -z "${sd_libpsml_status}" && sd_libpsml_status="optional"
-  test -z "${sd_libpsml_libs_def}" && sd_libpsml_libs_def="-lpsml"
+  test -z "${sd_libpsml_enable_def}" && sd_libpsml_enable_def="no"
+  case "${sd_libpsml_status}" in
+    implicit|required)
+      sd_libpsml_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 

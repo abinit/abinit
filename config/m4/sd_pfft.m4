@@ -38,7 +38,7 @@ AC_DEFUN([SD_PFFT_INIT], [
   # Process options
   for kwd in ${sd_pfft_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_pfft_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -54,10 +54,15 @@ AC_DEFUN([SD_PFFT_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_pfft_enable_def}" && sd_pfft_enable_def="auto"
+  test -z "${sd_pfft_libs_def}" && sd_pfft_libs_def="-lpfft"
   test -z "${sd_pfft_policy}" && sd_pfft_policy="fail"
   test -z "${sd_pfft_status}" && sd_pfft_status="optional"
-  test -z "${sd_pfft_libs_def}" && sd_pfft_libs_def="-lpfft"
+  test -z "${sd_pfft_enable_def}" && sd_pfft_enable_def="no"
+  case "${sd_pfft_status}" in
+    implicit|required)
+      sd_pfft_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 

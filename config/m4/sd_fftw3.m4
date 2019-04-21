@@ -38,7 +38,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
   # Process options
   for kwd in ${sd_fftw3_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_fftw3_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -54,10 +54,15 @@ AC_DEFUN([SD_FFTW3_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_fftw3_enable_def}" && sd_fftw3_enable_def="auto"
+  test -z "${sd_fftw3_libs_def}" && sd_fftw3_libs_def="-lfftw3"
   test -z "${sd_fftw3_policy}" && sd_fftw3_policy="fail"
   test -z "${sd_fftw3_status}" && sd_fftw3_status="optional"
-  test -z "${sd_fftw3_libs_def}" && sd_fftw3_libs_def="-lfftw3"
+  test -z "${sd_fftw3_enable_def}" && sd_fftw3_enable_def="no"
+  case "${sd_fftw3_status}" in
+    implicit|required)
+      sd_fftw3_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 

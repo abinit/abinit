@@ -44,7 +44,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
   # Process options
   for kwd in ${sd_libxc_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_libxc_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -67,15 +67,20 @@ AC_DEFUN([SD_LIBXC_INIT], [
 
   # Set reasonable defaults if not provided
   test -z "${sd_libxc_enable_cxx}" && sd_libxc_enable_cxx="yes"
-  test -z "${sd_libxc_enable_def}" && sd_libxc_enable_def="auto"
   test -z "${sd_libxc_enable_fc}" && sd_libxc_enable_fc="yes"
-  test -z "${sd_libxc_policy}" && sd_libxc_policy="fail"
-  test -z "${sd_libxc_status}" && sd_libxc_status="optional"
   if test "${sd_libxc_enable_fc}" = "yes"; then
     test -z "${sd_libxc_libs_def}" && sd_libxc_libs_def="-lxcf90 -lxc"
   else
     test -z "${sd_libxc_libs_def}" && sd_libxc_libs_def="-lxc"
   fi
+  test -z "${sd_libxc_policy}" && sd_libxc_policy="fail"
+  test -z "${sd_libxc_status}" && sd_libxc_status="optional"
+  test -z "${sd_libxc_enable_def}" && sd_libxc_enable_def="no"
+  case "${sd_libxc_status}" in
+    implicit|required)
+      sd_libxc_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 

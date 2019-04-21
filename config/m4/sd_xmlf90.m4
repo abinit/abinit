@@ -38,7 +38,7 @@ AC_DEFUN([SD_XMLF90_INIT], [
   # Process options
   for kwd in ${sd_xmlf90_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_xmlf90_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -54,10 +54,15 @@ AC_DEFUN([SD_XMLF90_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_xmlf90_enable_def}" && sd_xmlf90_enable_def="auto"
+  test -z "${sd_xmlf90_libs_def}" && sd_xmlf90_libs_def="-lxmlf90"
   test -z "${sd_xmlf90_policy}" && sd_xmlf90_policy="fail"
   test -z "${sd_xmlf90_status}" && sd_xmlf90_status="optional"
-  test -z "${sd_xmlf90_libs_def}" && sd_xmlf90_libs_def="-lxmlf90"
+  test -z "${sd_xmlf90_enable_def}" && sd_xmlf90_enable_def="no"
+  case "${sd_xmlf90_status}" in
+    implicit|required)
+      sd_xmlf90_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 

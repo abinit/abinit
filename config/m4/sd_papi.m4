@@ -38,7 +38,7 @@ AC_DEFUN([SD_PAPI_INIT], [
   # Process options
   for kwd in ${sd_papi_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_papi_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -54,10 +54,15 @@ AC_DEFUN([SD_PAPI_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_papi_enable_def}" && sd_papi_enable_def="auto"
+  test -z "${sd_papi_libs_def}" && sd_papi_libs_def="-lpapi"
   test -z "${sd_papi_policy}" && sd_papi_policy="fail"
   test -z "${sd_papi_status}" && sd_papi_status="optional"
-  test -z "${sd_papi_libs_def}" && sd_papi_libs_def="-lpapi"
+  test -z "${sd_papi_enable_def}" && sd_papi_enable_def="no"
+  case "${sd_papi_status}" in
+    implicit|required)
+      sd_papi_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 

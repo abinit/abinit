@@ -38,7 +38,7 @@ AC_DEFUN([SD_LEVMAR_INIT], [
   # Process options
   for kwd in ${sd_levmar_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_levmar_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -54,10 +54,15 @@ AC_DEFUN([SD_LEVMAR_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_levmar_enable_def}" && sd_levmar_enable_def="auto"
+  test -z "${sd_levmar_libs_def}" && sd_levmar_libs_def="-llevmar"
   test -z "${sd_levmar_policy}" && sd_levmar_policy="fail"
   test -z "${sd_levmar_status}" && sd_levmar_status="optional"
-  test -z "${sd_levmar_libs_def}" && sd_levmar_libs_def="-llevmar"
+  test -z "${sd_levmar_enable_def}" && sd_levmar_enable_def="no"
+  case "${sd_levmar_status}" in
+    implicit|required)
+      sd_levmar_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 

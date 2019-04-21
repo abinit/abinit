@@ -40,7 +40,7 @@ AC_DEFUN([SD_BIGDFT_INIT], [
   # Process options
   for kwd in ${sd_bigdft_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_bigdft_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -56,10 +56,15 @@ AC_DEFUN([SD_BIGDFT_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_bigdft_enable_def}" && sd_bigdft_enable_def="auto"
+  test -z "${sd_bigdft_libs_def}" && sd_bigdft_libs_def="-lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
   test -z "${sd_bigdft_policy}" && sd_bigdft_policy="fail"
   test -z "${sd_bigdft_status}" && sd_bigdft_status="optional"
-  test -z "${sd_bigdft_libs_def}" && sd_bigdft_libs_def="-lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
+  test -z "${sd_bigdft_enable_def}" && sd_bigdft_enable_def="no"
+  case "${sd_bigdft_status}" in
+    implicit|required)
+      sd_bigdft_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 

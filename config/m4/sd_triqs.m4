@@ -40,7 +40,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
   # Process options
   for kwd in ${sd_triqs_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_triqs_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -56,10 +56,15 @@ AC_DEFUN([SD_TRIQS_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_triqs_enable_def}" && sd_triqs_enable_def="auto"
+  test -z "${sd_triqs_libs_def}" && sd_triqs_libs_def="-ltriqs -lcthyb_c"
   test -z "${sd_triqs_policy}" && sd_triqs_policy="fail"
   test -z "${sd_triqs_status}" && sd_triqs_status="optional"
-  test -z "${sd_triqs_libs_def}" && sd_triqs_libs_def="-ltriqs -lcthyb_c"
+  test -z "${sd_triqs_enable_def}" && sd_triqs_enable_def="no"
+  case "${sd_triqs_status}" in
+    implicit|required)
+      sd_triqs_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 

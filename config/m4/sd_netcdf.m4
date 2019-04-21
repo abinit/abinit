@@ -44,7 +44,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
   sd_netcdf_status="optional"
   for kwd in ${sd_netcdf_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_netcdf_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -66,14 +66,21 @@ AC_DEFUN([SD_NETCDF_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_netcdf_enable_def}" && sd_netcdf_enable_def="auto"
-  test -z "${sd_netcdf_status}" && sd_netcdf_status="optional"
-  test -z "${sd_netcdf_policy}" && sd_netcdf_policy="fail"
+  test -z "${sd_netcdf_enable_cxx}" && sd_netcdf_enable_cxx="yes"
+  test -z "${sd_netcdf_enable_fc}" && sd_netcdf_enable_fc="yes"
   if test "${sd_netcdf_enable_fc}" = "yes"; then
     test -z "${sd_netcdf_libs_def}" && sd_netcdf_libs_def="-lnetcdff -lnetcdf"
   else
     test -z "${sd_netcdf_libs_def}" && sd_netcdf_libs_def="-lnetcdf"
   fi
+  test -z "${sd_netcdf_status}" && sd_netcdf_status="optional"
+  test -z "${sd_netcdf_policy}" && sd_netcdf_policy="fail"
+  test -z "${sd_netcdf_enable_def}" && sd_netcdf_enable_def="no"
+  case "${sd_netcdf_status}" in
+    implicit|required)
+      sd_netcdf_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
   # TODO: make it switchable for the implicit case 
