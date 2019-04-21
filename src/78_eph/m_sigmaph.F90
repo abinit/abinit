@@ -4643,8 +4643,8 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", self%nprocs_pert
  write(unt, "(a,i0)")"P Number of perturbations treated by this CPU: ", self%my_npert
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over q-points: ", self%nprocs_qpt
- write(unt, "(2(a,i0))""P Number of q-points in the IBZ treated by this proc: " , &
-     count(new%itreat_qibz == 1), " of ", new%nqibz
+ write(unt, "(2(a,i0))")"P Number of q-points in the IBZ treated by this proc: " , &
+     count(self%itreat_qibz == 1), " of ", self%nqibz
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%nprocs_bsum
 
 end subroutine sigmaph_print
