@@ -16,6 +16,8 @@
 AC_DEFUN([SD_WANNIER90_INIT], [
   # Init
   sd_wannier90_cppflags=""
+  sd_wannier90_cflags=""
+  sd_wannier90_cxxflags=""
   sd_wannier90_fcflags=""
   sd_wannier90_ldflags=""
   sd_wannier90_libs=""
@@ -331,7 +333,7 @@ AC_DEFUN([_SD_WANNIER90_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_wannier90_vars="${WANNIER90_FCFLAGS}${WANNIER90_LDFLAGS}${WANNIER90_LIBS}"
+  tmp_wannier90_vars="${WANNIER90_CPPFLAGS}${WANNIER90_FCFLAGS}${WANNIER90_LDFLAGS}${WANNIER90_LIBS}"
   tmp_wannier90_invalid="no"
   if test ! -z "${tmp_wannier90_vars}" -a ! -z "${with_wannier90}"; then
     case "${sd_wannier90_policy}" in

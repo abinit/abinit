@@ -17,6 +17,8 @@ AC_DEFUN([SD_LEVMAR_INIT], [
   # Init
   sd_levmar_cppflags=""
   sd_levmar_cflags=""
+  sd_levmar_cxxflags=""
+  sd_levmar_fcflags=""
   sd_levmar_ldflags=""
   sd_levmar_libs=""
   sd_levmar_enable=""
@@ -342,7 +344,7 @@ AC_DEFUN([_SD_LEVMAR_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_levmar_vars="${LEVMAR_CFLAGS}${LEVMAR_LDFLAGS}${LEVMAR_LIBS}"
+  tmp_levmar_vars="${LEVMAR_CPPFLAGS}${LEVMAR_CFLAGS}${LEVMAR_LDFLAGS}${LEVMAR_LIBS}"
   tmp_levmar_invalid="no"
   if test ! -z "${tmp_levmar_vars}" -a ! -z "${with_levmar}"; then
     case "${sd_levmar_policy}" in

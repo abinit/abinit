@@ -24,6 +24,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
   sd_netcdf_enable=""
   sd_netcdf_init="unknown"
   sd_netcdf_c_ok="unknown"
+  sd_netcdf_cxx_ok="unknown"
   sd_netcdf_fortran_ok="unknown"
   sd_netcdf_ok="unknown"
 
@@ -293,6 +294,10 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
   AC_LANG_POP([C])
   AC_MSG_RESULT([${sd_netcdf_c_ok}])
 
+  # Check NetCDF C++ API
+  # FIXME: To be implemented
+  sd_netcdf_cxx_ok="no"
+
   # Check NetCDF Fortran API
   if test "${sd_netcdf_c_ok}" = "yes" -a "${sd_netcdf_enable_fc}" = "yes"; then
     AC_MSG_CHECKING([whether the NetCDF Fortran interface works])
@@ -317,16 +322,13 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
   unset tmp_incs
 
   # Combine the available results
-  sd_netcdf_ok="no"
+  sd_netcdf_ok="yes"
+  test "${sd_netcdf_c_ok}" != "yes" && sd_netcdf_ok="no"
+  if test "${sd_netcdf_enable_cxx}" = "yes"; then
+    test "${sd_netcdf_cxx_ok}" != "yes" && sd_netcdf_ok="no"
+  fi
   if test "${sd_netcdf_enable_fc}" = "yes"; then
-    if test "${sd_netcdf_c_ok}" = "yes" -a \
-            "${sd_netcdf_fortran_ok}" = "yes"; then
-      sd_netcdf_ok="yes"
-    fi
-  else
-    if test "${sd_netcdf_c_ok}" = "yes"; then
-      sd_netcdf_ok="yes"
-    fi
+    test "${sd_netcdf_fortran_ok}" != "yes" && sd_netcdf_ok="no"
   fi
 
   # Restore environment
@@ -415,7 +417,7 @@ AC_DEFUN([_SD_NETCDF_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_netcdf_vars="${NETCDF_FCFLAGS}${NETCDF_LDFLAGS}${NETCDF_LIBS}"
+  tmp_netcdf_vars="${NETCDF_CPPFLAGS}${NETCDF_CFLAGS}${NETCDF_FCFLAGS}${NETCDF_LDFLAGS}${NETCDF_LIBS}"
   tmp_netcdf_invalid="no"
   if test ! -z "${tmp_netcdf_vars}" -a ! -z "${with_netcdf}"; then
     case "${sd_netcdf_policy}" in

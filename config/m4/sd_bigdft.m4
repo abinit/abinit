@@ -82,15 +82,13 @@ AC_DEFUN([SD_BIGDFT_INIT], [
 
   # Declare environment variables
   AC_ARG_VAR([BIGDFT_CPPFLAGS], [C preprocessing flags for BigDFT.])
-  AC_ARG_VAR([BIGDFT_CFLAGS], [C flags for BigDFT.])
-  AC_ARG_VAR([BIGDFT_CXXFLAGS], [C++ flags for BigDFT.])
   AC_ARG_VAR([BIGDFT_FCFLAGS], [Fortran flags for BigDFT.])
   AC_ARG_VAR([BIGDFT_LDFLAGS], [Linker flags for BigDFT.])
   AC_ARG_VAR([BIGDFT_LIBS], [Library flags for BigDFT.])
 
   # Detect use of environment variables
   if test "${sd_bigdft_enable}" = "yes" -o "${sd_bigdft_enable}" = "auto"; then
-    tmp_bigdft_vars="${BIGDFT_CPPFLAGS}${BIGDFT_CFLAGS}${BIGDFT_CXXFLAGS}${BIGDFT_FCFLAGS}${BIGDFT_LDFLAGS}${BIGDFT_LIBS}"
+    tmp_bigdft_vars="${BIGDFT_CPPFLAGS}${BIGDFT_FCFLAGS}${BIGDFT_LDFLAGS}${BIGDFT_LIBS}"
     if test "${sd_bigdft_init}" = "def" -a ! -z "${tmp_bigdft_vars}"; then
       sd_bigdft_enable="yes"
       sd_bigdft_init="env"
@@ -109,8 +107,6 @@ AC_DEFUN([SD_BIGDFT_INIT], [
 
       def|yon)
         sd_bigdft_cppflags="${sd_bigdft_cppflags_def}"
-        sd_bigdft_cflags="${sd_bigdft_cflags_def}"
-        sd_bigdft_cxxflags="${sd_bigdft_cxxflags_def}"
         sd_bigdft_fcflags="${sd_bigdft_fcflags_def}"
         sd_bigdft_ldflags="${sd_bigdft_ldflags_def}"
         sd_bigdft_libs="${sd_bigdft_libs_def}"
@@ -118,8 +114,6 @@ AC_DEFUN([SD_BIGDFT_INIT], [
 
       dir)
         sd_bigdft_cppflags="-I${with_bigdft}/include"
-        sd_bigdft_cflags="${sd_bigdft_cflags_def}"
-        sd_bigdft_cxxflags="${sd_bigdft_cxxflags_def}"
         sd_bigdft_fcflags="${sd_bigdft_fcflags_def} -I${with_bigdft}/include"
         sd_bigdft_ldflags="${sd_bigdft_ldflags_def}"
         sd_bigdft_libs="-L${with_bigdft}/lib ${sd_bigdft_libs_def}"
@@ -127,14 +121,10 @@ AC_DEFUN([SD_BIGDFT_INIT], [
 
       env)
         sd_bigdft_cppflags="${sd_bigdft_cppflags_def}"
-        sd_bigdft_cflags="${sd_bigdft_cflags_def}"
-        sd_bigdft_cxxflags="${sd_bigdft_cxxflags_def}"
         sd_bigdft_fcflags="${sd_bigdft_fcflags_def}"
         sd_bigdft_ldflags="${sd_bigdft_ldflags_def}"
         sd_bigdft_libs="${sd_bigdft_libs_def}"
         test ! -z "${BIGDFT_CPPFLAGS}" && sd_bigdft_cppflags="${BIGDFT_CPPFLAGS}"
-        test ! -z "${BIGDFT_CFLAGS}" && sd_bigdft_cflags="${BIGDFT_CFLAGS}"
-        test ! -z "${BIGDFT_CXXFLAGS}" && sd_bigdft_cxxflags="${BIGDFT_CXXFLAGS}"
         test ! -z "${BIGDFT_FCFLAGS}" && sd_bigdft_fcflags="${BIGDFT_FCFLAGS}"
         test ! -z "${BIGDFT_LDFLAGS}" && sd_bigdft_ldflags="${BIGDFT_LDFLAGS}"
         test ! -z "${BIGDFT_LIBS}" && sd_bigdft_libs="${BIGDFT_LIBS}"
@@ -154,8 +144,6 @@ AC_DEFUN([SD_BIGDFT_INIT], [
   if test "${sd_bigdft_init}" = "def" -a ! -z "${ESL_BUNDLE_PREFIX}"; then
     sd_bigdft_init="esl"
     sd_bigdft_cppflags=""
-    sd_bigdft_cflags=""
-    sd_bigdft_cxxflags=""
     sd_bigdft_fcflags=""
     sd_bigdft_ldflags=""
     sd_bigdft_libs=""
@@ -173,7 +161,6 @@ AC_DEFUN([SD_BIGDFT_INIT], [
   AC_SUBST(sd_bigdft_init)
   AC_SUBST(sd_bigdft_ok)
   AC_SUBST(sd_bigdft_cppflags)
-  AC_SUBST(sd_bigdft_cflags)
   AC_SUBST(sd_bigdft_fcflags)
   AC_SUBST(sd_bigdft_ldflags)
   AC_SUBST(sd_bigdft_libs)
@@ -209,8 +196,6 @@ AC_DEFUN([SD_BIGDFT_DETECT], [
               "${sd_bigdft_init}" = "def"; then
         sd_bigdft_enable="no"
         sd_bigdft_cppflags=""
-        sd_bigdft_cflags=""
-        sd_bigdft_cxxflags=""
         sd_bigdft_fcflags=""
         sd_bigdft_ldflags=""
         sd_bigdft_libs=""
@@ -239,7 +224,6 @@ AC_DEFUN([_SD_BIGDFT_CHECK_USE], [
     SD_ESL_ADD_LIBS([${sd_bigdft_libs_def}])
   else
     CPPFLAGS="${CPPFLAGS} ${sd_linalg_cppflags} ${sd_libxc_cppflags} ${sd_bigdft_cppflags}"
-    CFLAGS="${CFLAGS} ${sd_linalg_cflags} ${sd_libxc_cflags} ${sd_bigdft_cflags}"
     FCFLAGS="${FCFLAGS} ${sd_linalg_fcflags} ${sd_libxc_fcflags} ${sd_bigdft_fcflags}"
     LDFLAGS="${LDFLAGS} ${sd_linalg_ldflags} ${sd_libxc_ldflags} ${sd_bigdft_ldflags}"
     LIBS="${sd_bigdft_libs} ${sd_libxc_libs} ${sd_linalg_libs} ${LIBS}"
@@ -356,7 +340,7 @@ AC_DEFUN([_SD_BIGDFT_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_bigdft_vars="${BIGDFT_FCFLAGS}${BIGDFT_LDFLAGS}${BIGDFT_LIBS}"
+  tmp_bigdft_vars="${BIGDFT_CPPFLAGS}${BIGDFT_FCFLAGS}${BIGDFT_LDFLAGS}${BIGDFT_LIBS}"
   tmp_bigdft_invalid="no"
   if test ! -z "${tmp_bigdft_vars}" -a ! -z "${with_bigdft}"; then
     case "${sd_bigdft_policy}" in
@@ -425,18 +409,6 @@ AC_DEFUN([_SD_BIGDFT_DUMP_CONFIG], [
       AC_MSG_RESULT([none])
     else
       AC_MSG_RESULT([${sd_bigdft_cppflags}])
-    fi
-    AC_MSG_CHECKING([for BigDFT C flags])
-    if test "${sd_bigdft_cflags}" = ""; then
-      AC_MSG_RESULT([none])
-    else
-      AC_MSG_RESULT([${sd_bigdft_cflags}])
-    fi
-    AC_MSG_CHECKING([for BigDFT C++ flags])
-    if test "${sd_bigdft_cxxflags}" = ""; then
-      AC_MSG_RESULT([none])
-     else
-      AC_MSG_RESULT([${sd_bigdft_cxxflags}])
     fi
     AC_MSG_CHECKING([for BigDFT Fortran flags])
     if test "${sd_bigdft_fcflags}" = ""; then

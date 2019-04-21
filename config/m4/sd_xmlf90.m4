@@ -16,6 +16,8 @@
 AC_DEFUN([SD_XMLF90_INIT], [
   # Init
   sd_xmlf90_cppflags=""
+  sd_xmlf90_cflags=""
+  sd_xmlf90_cxxflags=""
   sd_xmlf90_fcflags=""
   sd_xmlf90_ldflags=""
   sd_xmlf90_libs=""
@@ -80,14 +82,13 @@ AC_DEFUN([SD_XMLF90_INIT], [
 
   # Declare environment variables
   AC_ARG_VAR([XMLF90_CPPFLAGS], [C preprocessing flags for XMLF90.])
-  AC_ARG_VAR([XMLF90_CFLAGS], [C flags for XMLF90.])
   AC_ARG_VAR([XMLF90_FCFLAGS], [Fortran flags for XMLF90.])
   AC_ARG_VAR([XMLF90_LDFLAGS], [Linker flags for XMLF90.])
   AC_ARG_VAR([XMLF90_LIBS], [Library flags for XMLF90.])
 
   # Detect use of environment variables
   if test "${sd_xmlf90_enable}" = "yes" -o "${sd_xmlf90_enable}" = "auto"; then
-    tmp_xmlf90_vars="${XMLF90_CPPFLAGS}${XMLF90_CFLAGS}${XMLF90_FCFLAGS}${XMLF90_LDFLAGS}${XMLF90_LIBS}"
+    tmp_xmlf90_vars="${XMLF90_CPPFLAGS}${XMLF90_FCFLAGS}${XMLF90_LDFLAGS}${XMLF90_LIBS}"
     if test "${sd_xmlf90_init}" = "def" -a ! -z "${tmp_xmlf90_vars}"; then
       sd_xmlf90_enable="yes"
       sd_xmlf90_init="env"
@@ -337,7 +338,7 @@ AC_DEFUN([_SD_XMLF90_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_xmlf90_vars="${XMLF90_FCFLAGS}${XMLF90_LDFLAGS}${XMLF90_LIBS}"
+  tmp_xmlf90_vars="${XMLF90_CPPFLAGS}${XMLF90_FCFLAGS}${XMLF90_LDFLAGS}${XMLF90_LIBS}"
   tmp_xmlf90_invalid="no"
   if test ! -z "${tmp_xmlf90_vars}" -a ! -z "${with_xmlf90}"; then
     case "${sd_xmlf90_policy}" in

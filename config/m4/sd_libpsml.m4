@@ -16,6 +16,8 @@
 AC_DEFUN([SD_LIBPSML_INIT], [
   # Init
   sd_libpsml_cppflags=""
+  sd_libpsml_cflags=""
+  sd_libpsml_cxxflags=""
   sd_libpsml_fcflags=""
   sd_libpsml_ldflags=""
   sd_libpsml_libs=""
@@ -334,7 +336,7 @@ AC_DEFUN([_SD_LIBPSML_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_libpsml_vars="${LIBPSML_FCFLAGS}${LIBPSML_LDFLAGS}${LIBPSML_LIBS}"
+  tmp_libpsml_vars="${LIBPSML_CPPFLAGS}${LIBPSML_FCFLAGS}${LIBPSML_LDFLAGS}${LIBPSML_LIBS}"
   tmp_libpsml_invalid="no"
   if test ! -z "${tmp_libpsml_vars}" -a ! -z "${with_libpsml}"; then
     case "${sd_libpsml_policy}" in

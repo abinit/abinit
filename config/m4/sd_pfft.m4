@@ -17,6 +17,8 @@ AC_DEFUN([SD_PFFT_INIT], [
   # Init
   sd_pfft_cppflags=""
   sd_pfft_cflags=""
+  sd_pfft_cxxflags=""
+  sd_pfft_fcflags=""
   sd_pfft_ldflags=""
   sd_pfft_libs=""
   sd_pfft_enable=""
@@ -325,7 +327,7 @@ AC_DEFUN([_SD_PFFT_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_pfft_vars="${PFFT_CFLAGS}${PFFT_LDFLAGS}${PFFT_LIBS}"
+  tmp_pfft_vars="${PFFT_CPPFLAGS}${PFFT_CFLAGS}${PFFT_LDFLAGS}${PFFT_LIBS}"
   tmp_pfft_invalid="no"
   if test ! -z "${tmp_pfft_vars}" -a ! -z "${with_pfft}"; then
     case "${sd_pfft_policy}" in

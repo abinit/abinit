@@ -35,7 +35,6 @@ AC_DEFUN([SD_LIBXC_INIT], [
   sd_libxc_cxxflags_def="$5"
   sd_libxc_fcflags_def="$6"
   sd_libxc_ldflags_def="$7"
-  sd_libxc_enable_cxx=""
   sd_libxc_enable_def=""
   sd_libxc_enable_fc=""
   sd_libxc_policy=""
@@ -53,9 +52,6 @@ AC_DEFUN([SD_LIBXC_INIT], [
       fail|skip|warn)
         sd_libxc_policy="${kwd}"
         ;;
-      no-cxx)
-        sd_libxc_enable_cxx="no"
-        ;;
       no-fortran)
         sd_libxc_enable_fc="no"
         ;;
@@ -66,7 +62,6 @@ AC_DEFUN([SD_LIBXC_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_libxc_enable_cxx}" && sd_libxc_enable_cxx="yes"
   test -z "${sd_libxc_enable_fc}" && sd_libxc_enable_fc="yes"
   if test "${sd_libxc_enable_fc}" = "yes"; then
     test -z "${sd_libxc_libs_def}" && sd_libxc_libs_def="-lxcf90 -lxc"
@@ -99,7 +94,6 @@ AC_DEFUN([SD_LIBXC_INIT], [
   # Declare environment variables
   AC_ARG_VAR([LIBXC_CPPFLAGS], [C preprocessing flags for LibXC.])
   AC_ARG_VAR([LIBXC_CFLAGS], [C flags for LibXC.])
-  AC_ARG_VAR([LIBXC_CXXFLAGS], [C++ flags for LibXC.])
   AC_ARG_VAR([LIBXC_FCFLAGS], [Fortran flags for LibXC.])
   AC_ARG_VAR([LIBXC_LDFLAGS], [Linker flags for LibXC.])
   AC_ARG_VAR([LIBXC_LIBS], [Library flags for LibXC.])
@@ -107,9 +101,6 @@ AC_DEFUN([SD_LIBXC_INIT], [
   # Detect use of environment variables
   if test "${sd_libxc_enable}" = "yes" -o "${sd_libxc_enable}" = "auto"; then
     tmp_libxc_vars="${LIBXC_CPPFLAGS}${LIBXC_CFLAGS}${LIBXC_LDFLAGS}${LIBXC_LIBS}"
-    if test "${sd_libxc_enable_cxx}" = "yes"; then
-      tmp_libxc_vars="${tmp_libxc_vars}${LIBXC_CXXFLAGS}"
-    fi
     if test "${sd_libxc_enable_fc}" = "yes"; then
       tmp_libxc_vars="${tmp_libxc_vars}${LIBXC_FCFLAGS}"
     fi
@@ -132,8 +123,6 @@ AC_DEFUN([SD_LIBXC_INIT], [
       def|yon)
         sd_libxc_cppflags="${sd_libxc_cppflags_def}"
         sd_libxc_cflags="${sd_libxc_cflags_def}"
-        test "${sd_libxc_enable_cxx}" = "yes" && \
-          sd_libxc_cxxflags="${sd_libxc_cxxflags_def}"
         test "${sd_libxc_enable_fc}" = "yes" && \
           sd_libxc_fcflags="${sd_libxc_fcflags_def}"
         sd_libxc_ldflags="${sd_libxc_ldflags_def}"
@@ -143,8 +132,6 @@ AC_DEFUN([SD_LIBXC_INIT], [
       dir)
         sd_libxc_cppflags="-I${with_libxc}/include"
         sd_libxc_cflags="${sd_libxc_cflags_def}"
-        test "${sd_libxc_enable_cxx}" = "yes" && \
-          sd_libxc_cxxflags="${sd_libxc_cxxflags_def}"
         test "${sd_libxc_enable_fc}" = "yes" && \
           sd_libxc_fcflags="${sd_libxc_fcflags_def} -I${with_libxc}/include"
         sd_libxc_ldflags="${sd_libxc_ldflags_def}"
@@ -154,17 +141,12 @@ AC_DEFUN([SD_LIBXC_INIT], [
       env)
         sd_libxc_cppflags="${sd_libxc_cppflags_def}"
         sd_libxc_cflags="${sd_libxc_cflags_def}"
-        test "${sd_libxc_enable_cxx}" = "yes" && \
-          sd_libxc_cxxflags="${sd_libxc_cxxflags_def}"
         test "${sd_libxc_enable_fc}" = "yes" && \
           sd_libxc_fcflags="${sd_libxc_fcflags_def}"
         sd_libxc_ldflags="${sd_libxc_ldflags_def}"
         sd_libxc_libs="${sd_libxc_libs_def}"
         test ! -z "${LIBXC_CPPFLAGS}" && sd_libxc_cppflags="${LIBXC_CPPFLAGS}"
         test ! -z "${LIBXC_CFLAGS}" && sd_libxc_cflags="${LIBXC_CFLAGS}"
-        if test "${sd_libxc_enable_cxx}" = "yes"; then
-          test ! -z "${LIBXC_CXXFLAGS}" && sd_libxc_cxxflags="${LIBXC_CXXFLAGS}"
-        fi
         if test "${sd_libxc_enable_fc}" = "yes"; then
           test ! -z "${LIBXC_FCFLAGS}" && sd_libxc_fcflags="${LIBXC_FCFLAGS}"
         fi
@@ -187,7 +169,6 @@ AC_DEFUN([SD_LIBXC_INIT], [
     sd_libxc_init="esl"
     sd_libxc_cppflags=""
     sd_libxc_cflags=""
-    sd_libxc_cxxflags=""
     sd_libxc_fcflags=""
     sd_libxc_ldflags=""
     sd_libxc_libs=""
@@ -199,7 +180,6 @@ AC_DEFUN([SD_LIBXC_INIT], [
   # Export configuration
   AC_SUBST(sd_libxc_options)
   AC_SUBST(sd_libxc_enable_def)
-  AC_SUBST(sd_libxc_enable_cxx)
   AC_SUBST(sd_libxc_enable_fc)
   AC_SUBST(sd_libxc_policy)
   AC_SUBST(sd_libxc_status)
@@ -244,7 +224,6 @@ AC_DEFUN([SD_LIBXC_DETECT], [
         sd_libxc_enable="no"
         sd_libxc_cppflags=""
         sd_libxc_cflags=""
-        sd_libxc_cxxflags=""
         sd_libxc_fcflags=""
         sd_libxc_ldflags=""
         sd_libxc_libs=""
@@ -431,7 +410,7 @@ AC_DEFUN([_SD_LIBXC_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_libxc_vars="${LIBXC_FCFLAGS}${LIBXC_LDFLAGS}${LIBXC_LIBS}"
+  tmp_libxc_vars="${LIBXC_CPPFLAGS}${LIBXC_CFLAGS}${LIBXC_FCFLAGS}${LIBXC_LDFLAGS}${LIBXC_LIBS}"
   tmp_libxc_invalid="no"
   if test ! -z "${tmp_libxc_vars}" -a ! -z "${with_libxc}"; then
     case "${sd_libxc_policy}" in
@@ -506,14 +485,6 @@ AC_DEFUN([_SD_LIBXC_DUMP_CONFIG], [
       AC_MSG_RESULT([none])
     else
       AC_MSG_RESULT([${sd_libxc_cflags}])
-    fi
-    if test "${sd_libxc_enable_cxx}" = "yes"; then
-      AC_MSG_CHECKING([for LibXC C++ flags])
-      if test "${sd_libxc_cxxflags}" = ""; then
-        AC_MSG_RESULT([none])
-      else
-        AC_MSG_RESULT([${sd_libxc_cxxflags}])
-      fi
     fi
     if test "${sd_libxc_enable_fc}" = "yes"; then
       AC_MSG_CHECKING([for LibXC Fortran flags])

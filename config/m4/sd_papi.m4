@@ -17,6 +17,8 @@ AC_DEFUN([SD_PAPI_INIT], [
   # Init
   sd_papi_cppflags=""
   sd_papi_cflags=""
+  sd_papi_cxxflags=""
+  sd_papi_fcflags=""
   sd_papi_ldflags=""
   sd_papi_libs=""
   sd_papi_enable=""
@@ -332,7 +334,7 @@ AC_DEFUN([_SD_PAPI_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_papi_vars="${PAPI_CFLAGS}${PAPI_LDFLAGS}${PAPI_LIBS}"
+  tmp_papi_vars="${PAPI_CPPFLAGS}${PAPI_CFLAGS}${PAPI_LDFLAGS}${PAPI_LIBS}"
   tmp_papi_invalid="no"
   if test ! -z "${tmp_papi_vars}" -a ! -z "${with_papi}"; then
     case "${sd_papi_policy}" in

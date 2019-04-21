@@ -17,6 +17,8 @@ AC_DEFUN([SD_FFTW3_INIT], [
   # Init
   sd_fftw3_cppflags=""
   sd_fftw3_cflags=""
+  sd_fftw3_cxxflags=""
+  sd_fftw3_fcflags=""
   sd_fftw3_ldflags=""
   sd_fftw3_libs=""
   sd_fftw3_enable=""
@@ -343,7 +345,7 @@ AC_DEFUN([_SD_FFTW3_CHECK_CONFIG], [
   fi
 
   # Environment variables conflict with --with-* options
-  tmp_fftw3_vars="${FFTW3_CFLAGS}${FFTW3_LDFLAGS}${FFTW3_LIBS}"
+  tmp_fftw3_vars="${FFTW3_CPPFLAGS}${FFTW3_CFLAGS}${FFTW3_LDFLAGS}${FFTW3_LIBS}"
   tmp_fftw3_invalid="no"
   if test ! -z "${tmp_fftw3_vars}" -a ! -z "${with_fftw3}"; then
     case "${sd_fftw3_policy}" in

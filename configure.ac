@@ -242,7 +242,7 @@ SD_LEVMAR_INIT([optional fail])
 SD_LIBPSML_INIT([auto optional fail])
 
 # Init LibXC
-SD_LIBXC_INIT([auto no-cxx no-fortran optional fail])
+SD_LIBXC_INIT([auto no-fortran optional fail])
 
 # Init PAPI
 SD_NETCDF_INIT([auto no-cxx optional fail])
