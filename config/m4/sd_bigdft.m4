@@ -196,6 +196,9 @@ AC_DEFUN([SD_BIGDFT_DETECT], [
         LIBS="${sd_bigdft_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_bigdft_ldflags}"
+
+      AC_DEFINE([HAVE_BIGDFT], 1,
+        [Define to 1 if you have the BigDFT library.])
     else
       if test "${sd_bigdft_status}" = "optional" -a \
               "${sd_bigdft_init}" = "def"; then

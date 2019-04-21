@@ -180,6 +180,9 @@ AC_DEFUN([SD_LEVMAR_DETECT], [
         LIBS="${sd_levmar_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_levmar_ldflags}"
+
+      AC_DEFINE([HAVE_LEVMAR], 1,
+        [Define to 1 if you have the Levmar library.])
     else
       if test "${sd_levmar_status}" = "optional" -a \
               "${sd_levmar_init}" = "def"; then

@@ -180,6 +180,9 @@ AC_DEFUN([SD_PFFT_DETECT], [
         LIBS="${sd_pfft_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_pfft_ldflags}"
+
+      AC_DEFINE([HAVE_PFFT], 1,
+        [Define to 1 if you have the PFFT library.])
     else
       if test "${sd_pfft_status}" = "optional" -a \
               "${sd_pfft_init}" = "def"; then

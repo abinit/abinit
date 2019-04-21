@@ -169,6 +169,9 @@ AC_DEFUN([SD_PAPI_DETECT], [
         LIBS="${sd_papi_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_papi_ldflags}"
+
+      AC_DEFINE([HAVE_PAPI], 1,
+        [Define to 1 if you have the PAPI library.])
     else
       if test "${sd_papi_status}" = "optional" -a \
               "${sd_papi_init}" = "def"; then

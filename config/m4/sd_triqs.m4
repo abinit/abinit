@@ -198,6 +198,9 @@ AC_DEFUN([SD_TRIQS_DETECT], [
       fi
       LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
 
+      AC_DEFINE([HAVE_TRIQS], 1,
+        [Define to 1 if you have the TRIQS library.])
+
       case "${sd_triqs_api_version}" in
         1.4)
           AC_DEFINE([HAVE_TRIQS_v1_4], 1,

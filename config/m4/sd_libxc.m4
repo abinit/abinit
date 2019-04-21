@@ -230,6 +230,9 @@ AC_DEFUN([SD_LIBXC_DETECT], [
         LIBS="${sd_libxc_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_libxc_ldflags}"
+
+      AC_DEFINE([HAVE_LIBXC], 1,
+        [Define to 1 if you have the LibXC library.])
     else
       if test "${sd_libxc_status}" = "optional" -a \
               "${sd_libxc_init}" = "def"; then

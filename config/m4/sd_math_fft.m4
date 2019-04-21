@@ -93,7 +93,6 @@ AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
         sd_fft_fcflags="${sd_fftw3_fcflags}"
         sd_fft_ldflags="${sd_fftw3_ldflags}"
         sd_fft_libss="${sd_fftw3_libs}"
-        AC_DEFINE([HAVE_FFTW3], 1, [Define to 1 if you have the FFTW3 library.])
       else
         AC_MSG_ERROR([FFTW3 is not available
                     Please adjust configure options to point to a working FFTW3
@@ -109,7 +108,6 @@ AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
         sd_fft_fcflags="${sd_pfft_fcflags}"
         sd_fft_ldflags="${sd_pfft_ldflags}"
         sd_fft_libss="${sd_pfft_libs}"
-        AC_DEFINE([HAVE_PFFT], 1, [Define to 1 if you have the PFFT library.])
       else
         AC_MSG_ERROR([PFFT is not available
                     Please adjust configure options to point to a working PFFT

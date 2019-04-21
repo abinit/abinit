@@ -182,6 +182,9 @@ AC_DEFUN([SD_XMLF90_DETECT], [
         LIBS="${sd_xmlf90_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_xmlf90_ldflags}"
+
+      AC_DEFINE([HAVE_XMLF90], 1,
+        [Define to 1 if you have the XMLF90 library.])
     else
       if test "${sd_xmlf90_status}" = "optional" -a \
               "${sd_xmlf90_init}" = "def"; then

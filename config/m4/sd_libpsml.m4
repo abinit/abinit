@@ -181,6 +181,9 @@ AC_DEFUN([SD_LIBPSML_DETECT], [
         LIBS="${sd_libpsml_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_libpsml_ldflags}"
+
+      AC_DEFINE([HAVE_LIBPSML], 1,
+        [Define to 1 if you have the LibPSML library.])
     else
       if test "${sd_libpsml_status}" = "optional" -a \
               "${sd_libpsml_init}" = "def"; then
@@ -193,9 +196,6 @@ AC_DEFUN([SD_LIBPSML_DETECT], [
         AC_MSG_FAILURE([invalid LibPSML configuration])
       fi
     fi
-
-    AC_DEFINE([HAVE_LIBPSML], 1, [Define to 1 if you have the LibPSML library.])
-
   fi
 ])
 

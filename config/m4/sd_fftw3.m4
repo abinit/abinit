@@ -180,6 +180,9 @@ AC_DEFUN([SD_FFTW3_DETECT], [
         LIBS="${sd_fftw3_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_fftw3_ldflags}"
+
+      AC_DEFINE([HAVE_FFTW3], 1,
+        [Define to 1 if you have the FFTW3 library.])
     else
       if test "${sd_fftw3_status}" = "optional" -a \
               "${sd_fftw3_init}" = "def"; then

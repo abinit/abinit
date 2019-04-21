@@ -181,6 +181,9 @@ AC_DEFUN([SD_WANNIER90_DETECT], [
         LIBS="${sd_wannier90_libs} ${LIBS}"
       fi
       LDFLAGS="${LDFLAGS} ${sd_wannier90_ldflags}"
+
+      AC_DEFINE([HAVE_WANNIER90], 1,
+        [Define to 1 if you have the Wannier90 library.])
     else
       if test "${sd_wannier90_status}" = "optional" -a \
               "${sd_wannier90_init}" = "def"; then
