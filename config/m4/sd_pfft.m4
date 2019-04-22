@@ -222,23 +222,27 @@ AC_DEFUN([_SD_PFFT_CHECK_USE], [
     SD_ESL_ADD_FLAGS
     SD_ESL_ADD_LIBS([${sd_pfft_libs_def}])
   else
-    CPPFLAGS="${CPPFLAGS} ${sd_pfft_cppflags}"
-    CFLAGS="${CFLAGS} ${sd_pfft_cflags}"
-    LDFLAGS="${LDFLAGS} ${sd_pfft_ldflags}"
-    LIBS="${sd_pfft_libs} ${LIBS}"
+    CPPFLAGS="${CPPFLAGS} ${sd_fftw3_cppflags} ${sd_pfft_cppflags}"
+    CFLAGS="${CFLAGS} ${sd_fftw3_cflags} ${sd_pfft_cflags}"
+    LDFLAGS="${LDFLAGS} ${sd_fftw3_ldflags} ${sd_pfft_ldflags}"
+    LIBS="${sd_pfft_libs} ${sd_fftw3_libs} ${LIBS}"
   fi
 
-  # Check PFFT C API
+  # Check PFFT MPI C API
   AC_MSG_CHECKING([whether the PFFT library works])
-  AC_LANG_PUSH([C])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM(
-    [[
-#     include <pfft.h>
-    ]],
-    [[
-      pfft_init();
-    ]])], [sd_pfft_ok="yes"], [sd_pfft_ok="no"])
-  AC_LANG_POP([C])
+  if test "${sd_mpi_enable}" = "yes" -a "${sd_fftw3_mpi_ok}" = "yes"; then
+    AC_LANG_PUSH([C])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[
+#       include <pfft.h>
+      ]],
+      [[
+        pfft_init();
+      ]])], [sd_pfft_ok="yes"], [sd_pfft_ok="no"])
+    AC_LANG_POP([C])
+  else
+    sd_pfft_ok="no"
+  fi
   AC_MSG_RESULT([${sd_pfft_ok}])
 
   # Restore environment

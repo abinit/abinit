@@ -23,6 +23,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
   sd_fftw3_libs=""
   sd_fftw3_enable=""
   sd_fftw3_init="unknown"
+  sd_fftw3_mpi_ok="unknown"
   sd_fftw3_ok="unknown"
 
   # Set adjustable parameters
@@ -56,7 +57,11 @@ AC_DEFUN([SD_FFTW3_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_fftw3_libs_def}" && sd_fftw3_libs_def="-lfftw3"
+  if test "${sd_mpi_enable}" = "yes"; then
+    test -z "${sd_fftw3_libs_def}" && sd_fftw3_libs_def="-lfftw3_mpi -lfftw3"
+  else
+    test -z "${sd_fftw3_libs_def}" && sd_fftw3_libs_def="-lfftw3"
+  fi
   test -z "${sd_fftw3_policy}" && sd_fftw3_policy="fail"
   test -z "${sd_fftw3_status}" && sd_fftw3_status="optional"
   test -z "${sd_fftw3_enable_def}" && sd_fftw3_enable_def="no"
