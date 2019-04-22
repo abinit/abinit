@@ -829,7 +829,9 @@ class AbinitProject(object):
                 if include_files_in_dirs:
                     # Include all modules inside this directory so that make 
                     # will build objects files in all dirs in which we have at least one dependency.
+                    # Add exception for dir containing main executables.
                     for other_fort_file in dir2files[fort_file.dirname]:
+                        if fort_file.dirname.endswith("98_main"): continue
                         for other_mod in other_fort_file.all_used_mods:
                             if other_mod.basename in visited: continue
                             visited.add(other_mod.basename)
