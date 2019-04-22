@@ -21,7 +21,7 @@
 #endif
 
 #include "triqs_cthyb_qmc.hpp"
-#include "execute_python.hpp"
+#include "invoke_python.hpp"
 
 using namespace std;
 #if defined HAVE_TRIQS_v2_0
@@ -41,7 +41,7 @@ using triqs::operators::n;
 // Function to invoke python and run the script
 void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in) {
     MPI_Comm comm;
-    comm << MPI_Comm_f2c(*mpi_comm);
+    comm = MPI_Comm_f2c(*mpi_comm);
 
     int ierr, rank;
     ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -107,9 +107,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
     int rank, nprocs;
     boost::mpi::environment env;
     {
-        boost::mpi::communicator c;
-        c << MPI_Comm_f2c( *MPI_world_ptr );
-        rank=c.rank();
+	// boost::mpi::communicator c;
+    	MPI_Comm c;
+	
+        c = MPI_Comm_f2c( *MPI_world_ptr );
+	int ierr, rank;
+	ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        // rank=c.rank();
 
         MPI_Comm_size(c, &nprocs);
         std::cout << "Number of processors: " << nprocs << endl;

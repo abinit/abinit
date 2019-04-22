@@ -1,2 +1,2 @@
-EXTRA_DIST += execute_python.hpp
+EXTRA_DIST += invoke_python.hpp
 EXTRA_DIST += triqs_cthyb_qmc.hpp
