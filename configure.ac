@@ -211,6 +211,8 @@ SD_CORE_INIT
 # Do we want to use fallbacks? (must be first)
 ABI_FALLBACKS_INIT
 
+                    # ------------------------------------ #
+
 # Prepare MPI support
 ABI_MPI_INIT
 
@@ -227,6 +229,13 @@ fi
 # Prepare GPU support
 # Note: must be done after MPI
 ABI_GPU_INIT
+
+                    # ------------------------------------ #
+
+# Init main FFT controller
+SD_FFT_INIT([auto optional skip])
+
+                    # ------------------------------------ #
 
 # Init triggers parameters (must be call after we know about fallbacks)
 # Note: MPI and GPU must be initialised after feature triggers
@@ -679,6 +688,17 @@ ABI_GPU_DETECT
 # ---------------------------------------------------------------------------- #
 
 #
+# Optimized FFT support
+#
+
+ABI_MSG_SECTION([Optimized FFT support])
+
+SD_FFT_DETECT
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+#
 # Linear algebra support
 #
 
@@ -691,19 +711,6 @@ ABI_LINALG_INIT
 # Perform the actual detection separately, so that further adjustments
 # can be done after initialization
 ABI_LINALG_DETECT
-
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-
-#
-# Optimized FFT support
-#
-
-ABI_MSG_SECTION([Optimized FFT support])
-
-ABI_FFT_INIT
-
-ABI_FFT_DETECT([${abi_fft_flavor}])
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #

@@ -10,8 +10,9 @@
 
 AC_DEFUN([SD_FFT_INIT], [
   # Init
-  sd_fft_cflags=""
   sd_fft_cppflags=""
+  sd_fft_cflags=""
+  sd_fft_cxxflags=""
   sd_fft_fcflags=""
   sd_fft_ldflags=""
   sd_fft_libs=""
@@ -20,22 +21,59 @@ AC_DEFUN([SD_FFT_INIT], [
   sd_fft_ok="unknown"
 
   # Set adjustable parameters
-  sd_fft_flavors="$1"
-  sd_fft_policy="$3"
-  sd_fft_status="$2"
-  sd_fft_flavor_def=`echo "${sd_fft_flavors}" | ${AWK} '{print [$]1}'`
+  sd_fft_options="$1"
+  sd_fft_choices="$2"
+  sd_fft_enable_def=""
+  sd_fft_policy=""
+  sd_fft_status=""
 
-  # Make sure default values are correct
-  if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
-    _SD_FFT_CHECK_DEFAULTS
+  # Process options
+  for kwd in ${sd_fft_options}; do
+    case "${kwd}" in
+      auto)
+        sd_fft_enable_def="${kwd}"
+        ;;
+      implicit|required|optional)
+        sd_fft_status="${kwd}"
+        ;;
+      fail|skip|warn)
+        sd_fft_policy="${kwd}"
+        ;;
+      *)
+        AC_MSG_ERROR([invalid Steredeg FFTW3 option: '${kwd}'])
+        ;;
+    esac
+  done
+
+  # Check that proposed choices are valid
+  sd_fft_valid_choices="none fftw3 pfft"
+  if test -z "${sd_fft_choices}"; then
+    sd_fft_choices="${sd_fft_valid_choices}"
+  else
+    for tmp_flavor in ${sd_fft_choices}; do
+      tmp_flavor_valid=`echo "${sd_fft_valid_choices}" | grep "${tmp_flavor}"`
+      if test "${tmp_flavor_valid}" = ""; then
+        AC_MSG_ERROR([invalid FFT flavor: '${tmp_flavor}'])
+      fi
+    done
   fi
+  sd_fft_flavor_def=`echo "${sd_fft_choices}" | ${AWK} '{print [$]1}'`
+
+  # Set reasonable defaults if not provided
+  test -z "${sd_fft_policy}" && sd_fft_policy="fail"
+  test -z "${sd_fft_status}" && sd_fft_status="optional"
+  test -z "${sd_fft_enable_def}" && sd_fft_enable_def="no"
+  case "${sd_fft_status}" in
+    implicit|required)
+      sd_fft_enable_def="yes"
+      ;;
+  esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
   AC_ARG_WITH([fft-flavor],
     [AS_HELP_STRING([--with-fft-flavor],
-      [FFT flavor to select among fftw3, and pfft])],
-    [ tmp_fft_flavor_ok=`echo "${sd_fft_flavors}" | grep "${withval}"`
+      [FFT flavor to select among fftw3 and pfft])],
+    [ tmp_fft_flavor_ok=`echo "${sd_fft_choices}" | grep "${withval}"`
       if test "${tmp_fft_flavor_ok}" = ""; then
         AC_MSG_ERROR([invalid FFT flavor: '${withval}'])
       fi
@@ -52,21 +90,10 @@ AC_DEFUN([SD_FFT_INIT], [
   _SD_FFT_DUMP_CONFIG
 
   # Init packages for permitted flavors
-  for tmp_fft_flavor in ${sd_fft_flavors}; do
-    tmp_fft_enable="no"
-    test "${tmp_fft_flavor}" = "${sd_fft_flavor}" && tmp_fft_enable="yes"
-    case "${tmp_fft_flavor}" in
-      fftw3)
-        SD_FFTW3_INIT([${tmp_fft_enable}], [], [], [-lfftw3], [optional], [skip])
-        ;;
-      pfft)
-        SD_PFFT_INIT([${tmp_fft_enable}], [], [], [-lpfft], [optional], [skip])
-        ;;
-      *)
-        AC_MSG_ERROR([unsupported FFT flavor: '${tmp_fft_flavor}'])
-        ;;
-    esac
-  done
+  tmp_auto_option=`echo "${sd_fft_enable_def}" | grep "auto"`
+  SD_FFTW3_INIT([${tmp_auto_option} ${sd_fft_policy} ${sd_fft_status}])
+  SD_PFFT_INIT([${tmp_auto_option} ${sd_fft_policy} ${sd_fft_status}])
+  unset tmp_auto_option
 
   # Export configuration
   AC_SUBST(sd_fft_cppflags)
@@ -74,6 +101,8 @@ AC_DEFUN([SD_FFT_INIT], [
   AC_SUBST(sd_fft_fcflags)
   AC_SUBST(sd_fft_ldflags)
   AC_SUBST(sd_fft_libs)
+  AC_SUBST(sd_fft_choices)
+  AC_SUBST(sd_fft_enable)
   AC_SUBST(sd_fft_flavor)
   AC_SUBST(sd_fft_init)
   AC_SUBST(sd_fft_ok)
@@ -134,7 +163,7 @@ AC_DEFUN([SD_FFT_SELECT_FLAVOR], [
 AC_DEFUN([_SD_FFT_CHECK_CONFIG], [
   # Check consistency between trigger value and package status
   tmp_fft_invalid="no"
-  tmp_fft_flavor_chk=`echo "${sd_fft_flavors}" | grep "${sd_fft_flavor}"`
+  tmp_fft_flavor_chk=`echo "${sd_fft_choices}" | grep "${sd_fft_flavor}"`
   if test "${sd_fft_status}" = "implicit" -o \
           "${sd_fft_status}" = "required"; then
     if test "${tmp_fft_flavor_chk}" = ""; then
@@ -209,7 +238,7 @@ AC_DEFUN([_SD_FFT_CHECK_DEFAULTS], [
 
   # Default flavor must be valid
   tmp_fft_invalid="no"
-  tmp_fft_flavor_chk=`echo "${sd_fft_flavors}" | grep "${sd_fft_flavor_def}"`
+  tmp_fft_flavor_chk=`echo "${sd_fft_choices}" | grep "${sd_fft_flavor_def}"`
   if test "${tmp_fft_flavor_chk}" = ""; then
     case "${sd_fft_policy}" in
       fail)
@@ -227,7 +256,7 @@ AC_DEFUN([_SD_FFT_CHECK_DEFAULTS], [
 
   # Fix wrong flavor default
   if test "${tmp_fft_invalid}" = "yes"; then
-    sd_fft_flavor_def=`echo "${sd_fft_flavors}" | ${AWK} '{print [$]1}'`
+    sd_fft_flavor_def=`echo "${sd_fft_choices}" | ${AWK} '{print [$]1}'`
     tmp_fft_invalid="no"
     AC_MSG_NOTICE([setting sd_fft_flavor_def to '${sd_fft_flavor_def}'])
   fi
