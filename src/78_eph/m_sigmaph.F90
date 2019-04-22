@@ -31,7 +31,6 @@ module m_sigmaph
  use m_xmpi
  use m_errors
  use m_hide_blas
- use m_clib
  use m_copy
  use m_ifc
  use m_ebands
@@ -1069,8 +1068,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! Check if this (kpoint, spin) was already calculated
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
-   call clib_print_mallinfo(unit=std_out)
-   write(std_out, *)"xmpi_count_requests", xmpi_count_requests
+   call abimem_report(std_out, with_mallinfo=.False.)
+   !write(std_out, *)"xmpi_count_requests", xmpi_count_requests
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")

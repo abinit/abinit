@@ -6,6 +6,8 @@
 !!  This module is used for tracing memory allocations/deallocations
 !!  when we compile the code with --enable-memory-profiling="yes" that, 
 !!  in turn, defines the CPP macro HAVE_MEM_PROFILE in abi_common.h
+!!  The main entry point is abimem_init. abimem_record is interfaced via CPP macros
+!!  defined in abi_common
 !!
 !! COPYRIGHT
 !! Copyright (C) 2010-2019 ABINIT group (MG)
@@ -26,6 +28,7 @@
 module m_profiling_abi
 
  use defs_basis
+ use m_clib
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -44,61 +47,78 @@ module m_profiling_abi
 #define _ABORT(msg) call abimem_abort(msg, __FILE__, "UnknownFunc", __LINE__)
 
  public :: abimem_get_info
- public :: abimem_init
- public :: abimem_shutdown
- public :: abimem_set_opts
- public :: abimem_report
- public :: abimem_record               ! Central routine to be used for allocation/deallocation
- !public :: abimem_enable
- !public :: abimem_disable
- !public :: abimem_reset
+ public :: abimem_init            ! Initialize memory profiling.
+ public :: abimem_shutdown        ! Final cleanup.
+ public :: abimem_report          ! Print allocation status.
+ public :: abimem_record          ! Central routine to be used for allocation/deallocation.
+                                  ! Interfaced via CPP macros defined in abi_common.h
 
  integer,private,parameter :: slen = 500
+ character(fnlen),parameter :: NONE_STRING = "__NONE_STRING__"
 
 !!****t* m_profiling_abi/abimem_t
 !! NAME
 !!  minfo_t
 !!
 !! FUNCTION
-!!  Store information on the memory allocated at run-time
+!!  Internal datastructure storing information on the memory allocated at run-time
 !!
 !! SOURCE
 
- !Memory profiling
  type :: abimem_t
-   integer(kind=8) :: memory = int(0, kind=8)
-   integer(kind=8) :: peak = int(0, kind=8)
-   character(len=slen) :: func = "_func"
-   character(len=slen) :: vname = "_vname"
+
+   integer :: level = huge(1)
+   ! Integer selecting the operation mode
+
+   integer(i8b) :: memory = 0
+   ! Total memory allocated so far in bytes.
+
+   integer(i8b) :: peak = 0
+   ! Memory peak in bytes.
+
+   integer :: peak_fileline = -1 
+   ! Line in peak_file
+
+   integer(i8b) :: num_alloc = 0
+   ! Total numer of allocations performed so far.
+
+   integer(i8b) :: num_free = 0
+   ! Total numer of deallocations performed so far.
+
+   integer :: logunt = 99
+   ! Unit number of logfile (hardcoded)
+
+   integer :: my_rank = 0
+   ! Rank of this processor.
+
+   !real(dp),private,save :: start_time
+   ! Origin of time in seconds.
+
+   real(dp) :: last_snapshot = -one
+   ! time of the last snapshot in seconds.
+
+   real(dp) :: dt_snapshot = -one
+   ! time between two consecutive snapshots in seconds.
+
+   real(dp) :: limit_mb = 100_dp
+   ! Optional memory limit in Mb. used when level == 3
+
+   character(len=slen) :: peak_vname = "_vname"
+   ! Name of the last variable for which the memory peak occurred.
+
+   character(len=slen) :: peak_file = NONE_STRING
+   ! Name of the file in which peak occurred.
+
+   ! Selective memory tracing
+   character(fnlen) :: select_file = NONE_STRING
+
+   character(len=fnlen) :: logfile
+   ! File used for logging allocations/deallocations.
+
  end type abimem_t
 !!***
 
- ! PRIVATE STUFF
- ! Selective memory tracing
- character(fnlen),parameter :: NONE_STRING = "__NONE_STRING__"
- character(fnlen),save :: select_file = NONE_STRING
- character(fnlen),save :: select_func = NONE_STRING
-
- ! Save values for memocc_abi.
- real(dp),save :: abimem_limit = zero
- logical,save :: abimem_isinit = .False.
- integer,parameter :: logunt = 99
- character(len=fnlen),save :: abimem_file
- type(abimem_t),save :: memloc_abi, memtot_abi
- integer,save :: num_alloc = 0
- integer,save :: num_free = 0
- integer,save :: my_rank = 0
- !Debug option for memocc_abi, set in the input file
- !logical,parameter :: abimem_debug=.True.
- !logical,save :: abimem_ilog = .False.
- integer,save :: abimem_level = 0
-
- !real(dp),private,save :: start_time
-! Origin of time in seconds.
- real(dp),private,save :: last_snapshot = -one
-! time of the last snapshot in seconds.
- real(dp),private,save :: dt_snapshot = -one
-! time between two consecutive snapshots in seconds.
+ type(abimem_t),private,save :: minfo
 
 contains
 
@@ -107,109 +127,96 @@ contains
 !! abimem_init
 !!
 !! FUNCTION
+!!  Initialize memory profiling module.
 !!
 !! INPUT
 !!  level = Integer selecting the operation mode:
-!!       0 no file abimem.mocc is created, only memory allocation counters running
-!!       1 file abimem.mocc is created in a light version (only current information is written)
-!!       2 file abimem.mocc is created with full information inside (default state if not specified)
-!!       The status can only be downgraded. A stop signal is produced if status is increased
-!!  [deltat]
-!!  [filename] = If present, activate memory logging only inside filename.
-!!  [funcname] = If present, activate memory logging only inside funcname.
+!!       0 -> no file abimem.mocc is created, only memory allocation counters running
+!!       1 -> light version. Only memory peaks are written.
+!!       2 -> file abimem.mocc is created with full information inside.
+!!       3 -> Write info only if allocation/deallocation is 
+!!  [deltat]=Interval in second for snapshots.
+!!  [filename] = If present, activate memory logging only inside filename (basename).
+!!  [limit_mb]= Set memory limit in Mb if level == 1. Print allocation/deallocation only above this limit
 
- subroutine abimem_init(level, deltat, filename, funcname)
+ subroutine abimem_init(level, deltat, filename, limit_mb)
 
 !Arguments ------------------------------------
  integer, intent(in) :: level
  real(dp),optional,intent(in) :: deltat
- character(len=*),optional,intent(in) :: filename, funcname
+ real(dp),optional,intent(in) :: limit_mb
+ character(len=*),optional,intent(in) :: filename
 
 !Local variables-------------------------------
  integer :: ierr
  logical :: file_exists
+ character(len=500) :: msg
 ! *************************************************************************
 
- !if (level > abimem_level) stop 'abimem_level can be only downgraded'
- abimem_level = level
- abimem_isinit = .True.
+ minfo%level = level
  !start_time = abimem_wtime()
-
- ! Build name of file used for logging.
- my_rank = 0
-#if defined HAVE_MPI
- call MPI_COMM_RANK(MPI_COMM_WORLD, my_rank, ierr)
-#endif
- write(abimem_file,"(a,i0,a)")"abimem_rank",my_rank,".mocc"
 
  ! Optionally, selects functions or files to be profiled.
  if (present(filename)) then
-   if (len_trim(filename) > 0) select_file = filename
+   if (len_trim(filename) > 0) minfo%select_file = filename
  end if
- if (present(funcname)) then
-    if (len_trim(funcname) > 0) select_func = funcname
- endif
+
+ ! Optionally, set max limit in Mb if level == 2
+ if (present(limit_mb)) minfo%limit_mb = limit_mb
+
+ ! Build name of file used for logging.
+ minfo%my_rank = 0
+#if defined HAVE_MPI
+ call MPI_COMM_RANK(MPI_COMM_WORLD, minfo%my_rank, ierr)
+#endif
+ write(minfo%logfile,"(a,i0,a)")"abimem_rank",minfo%my_rank,".mocc"
 
  ! Clean the file if it already exists.
- ! The file should be deleted
- inquire(file=abimem_file, exist=file_exists)
+ inquire(file=minfo%logfile, exist=file_exists)
  if (file_exists) then
-   open(unit=logunt, file=abimem_file, status="old", iostat=ierr)
-   if (ierr==0) close(unit=logunt, status="delete", iostat=ierr)
+   open(unit=minfo%logunt, file=minfo%logfile, status="old", iostat=ierr)
+   if (ierr==0) close(unit=minfo%logunt, status="delete", iostat=ierr)
  end if
 
- ! Activate snapshots
+ ! Activate snapshots.
  if (present(deltat)) then
-   dt_snapshot = deltat
-   last_snapshot = zero
+   minfo%dt_snapshot = deltat
+   minfo%last_snapshot = zero
    if (deltat < 1.0e-6) then
      _ABORT("deltat is too small")
    end if
  end if
 
- select case (level)
+ select case (minfo%level)
  case (0)
    ! No action required
 
- case (1)
+ case (1, 2, 3)
    ! Compact format
-   ! TODO: Should be rewritten from scratch
-   open(unit=logunt, file=abimem_file, status='unknown', action='write', iostat=ierr)
+   open(unit=minfo%logunt, file=minfo%logfile, status='unknown', action='write', iostat=ierr)
    if (ierr /= 0) then
      _ABORT("Opening abimem file")
    end if
-   call write_header("# Compact format")
-   !write(logunt,'(a,t60,a,t90,4(1x,a12))')'# Variable name', 'Action Address Size[b] File Func', 'Line', 'Total Memory [b]'
-
- case (2)
-   ! To be used for inspecting a variable which is not deallocated
-   open(unit=logunt, file=abimem_file, status='unknown', action='write', iostat=ierr)
-   if (ierr /= 0) then
-     _ABORT("Opening abimem file")
+   if (minfo%level == 1) call write_header("# Write memory allocations larger than previous peak")
+   if (minfo%level == 2) call write_header("# To be used for inspecting a variable which is not deallocated")
+   if (minfo%level == 3) then
+     write(msg, "(a,f9.1,a)")"# Write memory allocations/deallocations larger than ", minfo%limit_mb, "(MB)"
+     call write_header(msg)
    end if
-   call write_header("# To be used for inspecting a variable which is not deallocated")
-   write(logunt,'(a,t60,a,t95,4(1x,a12))')'# Variable name', 'Action Address Size[b] File Func', 'Line', 'Total Memory [b]'
-
- case (3)
-   ! Write memory allocations larger than 1 MB
-   open(unit=logunt, file=abimem_file, status='unknown', action='write', iostat=ierr)
-   if (ierr /= 0) then
-     _ABORT("Opening abimem file")
-   end if
-   call write_header("# Write memory allocations larger than 1 MB")
-   write(std_out,'(a20,a10,a10,a20,a)') '# memorytracer:', 'total [Mb]', 'now [Mb]', 'file',':line'
-   write(logunt,'(a,t60,a,t90,4(1x,a12))')'# Variable name', 'Action Address Size[b] File Func', 'Line', 'Total Memory [b]'
 
  case default
    _ABORT("invalid abimem_level")
  end select
 
  contains 
+
  subroutine write_header(info)
    character(len=*),intent(in) :: info
-   write(logunt, "(a, i0)")"# memocc file generated by Abinit compiled with HAVE_MEM_PROFILE."
-   write(logunt, "(a)") trim(info)
-   write(logunt, "(a, i0, a)")"# {level: ", level, "}"
+   write(minfo%logunt, "(a, i0)")"# memocc file generated by Abinit compiled with HAVE_MEM_PROFILE."
+   write(minfo%logunt, "(a)") trim(info)
+   write(minfo%logunt, "(2(a,i0),a)")"# {level: ", level, ", rank: ", minfo%my_rank, "}"
+   write(minfo%logunt,'(a,t60,a)')&
+       '# Variable name', 'Action Address Size[b] File Line Total Memory [bits]'
  end subroutine write_header
 
 end subroutine abimem_init
@@ -217,7 +224,7 @@ end subroutine abimem_init
 
 !!****f* m_profiling_abi/abimem_shutdown
 !! NAME
-!! abimem_shutdowns
+!! abimem_shutdown
 !!
 !! FUNCTION
 !! Perform final cleanup of the module and close files.
@@ -231,113 +238,53 @@ subroutine abimem_shutdown()
  logical :: isopen
 ! *************************************************************************
 
- abimem_level = 0; abimem_isinit = .False.
+ minfo%level = 0
 
  ! Close the file if it's connected
- inquire(file=abimem_file, number=unt_found, opened=isopen)
- if (isopen .and. (unt_found==logunt)) close(logunt)
+ inquire(file=minfo%logfile, number=unt_found, opened=isopen)
+ if (isopen .and. unt_found == minfo%logunt) close(minfo%logunt)
 
 end subroutine abimem_shutdown
 !!***
 
-!!****f* m_profiling_abi/abimem_set_opts
+!!****f* m_profiling_abi/abimem_report
 !! NAME
-!! abimem_set_opts
+!! abimem_report
 !!
 !! FUNCTION
+!!  Print info about memory usage to unit `unt`.
+!!  Add mallinfo values if `with_mallinfo` (default: False)
 !!
 !! INPUT
-!!  level = Integer selecting the operation mode:
-!!       0 no file abimem.mocc is created, only memory allocation counters running
-!!       1 file abimem.mocc is created in a light version (only current information is written)
-!!       2 file abimem.mocc is created with full information inside (default state if not specified)
-!!       The status can only be downgraded. A stop signal is produced if status is increased
-!!  [limit]= Give a memory limit above which the code will stop properly. The unit is bytes.
-!!  [filename] = If present, activate memory logging only inside filename.
-!!  [funcname] = If present, activate memory logging only inside funcname.
-!!  [deltat]
+!!  
 
-
-subroutine abimem_set_opts(level, limit, deltat, filename, funcname)
+subroutine abimem_report(unt, with_mallinfo)
 
 !Arguments ------------------------------------
- integer, intent(in) :: level
- real(dp),optional,intent(in) :: limit
- real(dp),optional,intent(in) :: deltat
- character(len=*),optional,intent(in) :: filename, funcname
-
-! *************************************************************************
-
- abimem_level = level
-
- ! Optionally, set max limit on total memory allocated
- if (present(limit)) abimem_limit = limit
-
- ! Optionally, selects functions or files to be profiles.
- if (present(filename)) then
-   if (len_trim(filename) > 0) select_file = filename
- end if
- if (present(funcname)) then
-    if (len_trim(funcname) > 0) select_func = funcname
- endif
-
- ! Activate snapshots
- if (present(deltat)) then
-   dt_snapshot = deltat
-   last_snapshot = zero
-   if (deltat < 1.0e-6) then
-     _ABORT("deltat is too small")
-   end if
- end if
-
-end subroutine abimem_set_opts
-!!***
-
-subroutine abimem_report(unit)
-
-!Arguments ------------------------------------
- integer,optional,intent(in) :: unit
+ integer,intent(in) :: unt
+ logical,optional,intent(in) :: with_mallinfo
 
 !Local variables-------------------------------
- integer :: unt
+ integer,save :: icall = 0
+ integer(i8b),save :: prev_memory
+
 ! *************************************************************************
 
- unt = std_out; if (present(unit)) unt = unit
-
-#if 0
- if (trim(func)=='stop' .and. my_rank == 0) then
-   if (abimem_level > 0) then
-     if (abimem_level == 1) rewind(logunt)
-     write(logunt,'(a,t60,a,t90,4(1x,i12))')&
-       trim(memloc_abi%func),trim(memloc_abi%vname),&
-       memloc_abi%memory/int(1024,kind=8),memloc_abi%peak/int(1024,kind=8),&
-       memtot_abi%memory/int(1024,kind=8),&
-       (memtot_abi%peak+memloc_abi%peak-memloc_abi%memory)/int(1024,kind=8)
-     close(unit=logunt)
-   end if
-
-   write(unt,'(1x,a)')'-------------------------MEMORY CONSUMPTION REPORT-----------------------------'
-   write(unt,'(1x,2(i0,a,1x),i0)')&
-        num_alloc,' allocations and',num_free,' deallocations, remaining memory(B):',memtot_abi%memory
-   write(unt,'(1x,a,i0,a)') 'memory occupation peak: ',memtot_abi%peak/int(1048576,kind=8),' MB'
-   write(unt,'(4(1x,a))') 'for the variable ',trim(memtot_abi%vname),'in the function',trim(memtot_abi%func)
-   !here we can add a func which open the abimem.mocc file in case of some
-   !memory allocation problem, and which eliminates it for a successful run
-   f (abimem_level == 1 .and. num_alloc == num_free .and. memtot_abi%memory==int(0,kind=8)) then
-   !remove file should be put here
-   open(unit=logunt,file=abimem_file,status='unknown',action='write')
-   write(unit=logunt,fmt='()',advance='no')
-   close(unit=logunt)
-   else
-     call abimem_check(num_alloc,num_free)
-   end if
-
- else if (trim(func)/='stop') then
-   write(unt,*) "memocc_abi: ",array," ",func
-   write(unt,"(a,i0,a)") "Error[",my_rank,"]: Use memocc_abi and the word 'count' only with the word 'stop'."
-   _ABORT("Exit requested by user")
+ if (minfo%level == huge(one)) return
+ icall = icall + 1
+ write(unt,"(a)")"------------------------- MEMORY CONSUMPTION REPORT -----------------------------"
+ write(unt,"(2(a, i0))")" Allocations: ",minfo%num_alloc,", Deallocations: ", minfo%num_free
+ write(unt,"(a,f8.1,a)")" Memory allocated so far: ", minfo%memory * b2Mb, " (Mb)"
+ write(unt,"(a,f8.1,5a,i0)")" Peak: ", minfo%peak * b2Mb," (MB) for variable: ", trim(minfo%peak_vname), &
+   "at:", trim(abimem_basename(minfo%peak_file)),":",minfo%peak_fileline
+ if (icall > 1) then
+   write(unt,"(a,f8.1,a)")" Memory allocated wrt previous call: ", (minfo%memory - prev_memory) * b2Mb, " (Mb)"
  end if
-#endif
+ prev_memory = minfo%memory
+
+ if (present(with_mallinfo)) then
+   if (with_mallinfo) call clib_print_mallinfo(unit=unt)
+ end if
 
 end subroutine abimem_report
 !!***
@@ -351,18 +298,17 @@ end subroutine abimem_report
 !!  been done and the memory currently used
 !!
 !! OUTPUT
-!!  nalloc       number of allocations that have been done
-!!  ndealloc     number of deallocations that have been done
-!!  allocmemory  total memory used
+!!  nalloc: number of allocations that have been done
+!!  nfree:  number of deallocations that have been done
+!!  allocmemory:  total memory used
 
-subroutine abimem_get_info(nalloc, ndealloc, allocmemory)
+subroutine abimem_get_info(nalloc, nfree, allocmemory)
 
 !Arguments ------------------------------------
- integer(kind=8), intent(out) :: allocmemory
- integer, intent(out) :: nalloc,ndealloc
+ integer(i8b),intent(out) :: nalloc, nfree, allocmemory
 ! *************************************************************************
 
- nalloc = num_alloc; ndealloc = num_free; allocmemory = memtot_abi%memory
+ nalloc = minfo%num_alloc; nfree = minfo%num_free; allocmemory = minfo%memory
 
 end subroutine abimem_get_info
 !!***
@@ -373,153 +319,117 @@ end subroutine abimem_get_info
 !!
 !! FUNCTION
 !!  Control the memory occupation by calculating the overall size of the allocated arrays
-!!
 !!  At the end of the calculation a short report is printed on the screen,
 !!  some information can be also written on disk following the needs
 !!
-!!  The file abimem.mocc is not deleted if the final total memory is not equal to zero.
-!!  abimem_debug (parameter)
-!!    == .true.  verbose format (useful with tests/scripts/abimem.py)
-!!               then display a line per allocation or deallocation
-!!               a routine at the end parses the file
-!!    == .false. compact format
-!!
 !! PARENTS
-!!      abinit,aim,anaddb,band2eps,conducti,cut3d,dummy_tests,fftprof
-!!      fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr
-!!      multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      date_and_time,mpi_abort
 !!
 !! SOURCE
 
-subroutine abimem_record(istat, vname, addr, act, isize, file, func, line)
+subroutine abimem_record(istat, vname, addr, act, isize, file, line)
 
 !Arguments ------------------------------------
- integer, intent(in) :: istat,line
- integer(kind=8), intent(in) :: isize,addr
- character(len=*), intent(in) :: vname,act,file,func
+ integer,intent(in) :: istat,line
+ integer(i8b), intent(in) :: isize,addr
+ character(len=*), intent(in) :: vname,act,file
 
 !Local variables-------------------------------
  !integer :: ierr
  real(dp) :: now
- logical :: do_log
+ logical :: do_log, new_peak
  character(len=500) :: msg
  character(len=10)  :: i_char
 ! *************************************************************************
 
- ! Handle allocate/deallocate failures
- !if (istat /= 0) then
- !  write(msg,('(5a,i0,/,2a,/,a,i0,a)'))&
- !   'Procedure: ',trim(funcname),"@",trim(filename),":",line,&
- !   'problem of allocation of variable: ',trim(arr_name),&
- !   'Error code = ',istat,' Aborting now...'
- !  call abimem_abort(istat, msg, filename, funcname, line)
- ! end if
-
- !control of the allocation/deallocation status
+ ! Handle possible allocate/deallocate failures.
  if (istat /= 0) then
    if (isize >= 0) then
-     write(msg,*)trim(func),': problem of allocation of variable ',trim(vname),', error code= ',istat
+     write(msg,*)" Problem of allocation of variable: ",trim(vname),', error code= ',istat
      _ABORT(msg)
    else if (isize<0) then
-     write(msg,*)trim(func),': problem of deallocation of variable ',trim(vname),', error code= ',istat
+     write(msg,*)" Problem of deallocation of variable ",trim(vname),', error code= ',istat
      _ABORT(msg)
    end if
  end if
 
- ! total counter, for all the processes
- memtot_abi%memory = memtot_abi%memory + isize
- if (memtot_abi%memory > memtot_abi%peak) then
-   memtot_abi%peak = memtot_abi%memory
-   memtot_abi%func = func
-   memtot_abi%vname = vname
+ ! Increase total counter
+ minfo%memory = minfo%memory + isize
+ new_peak = .False.
+ if (isize > minfo%peak) then
+   ! New peak
+   new_peak = .True.
+   minfo%peak = isize
+   minfo%peak_vname = vname
+   minfo%peak_file = file
+   minfo%peak_fileline = line
  end if
 
  if (isize > 0) then
-   num_alloc = num_alloc + 1
+   minfo%num_alloc = minfo%num_alloc + 1
  else if (isize < 0) then
-   num_free = num_free + 1
+   minfo%num_free = minfo%num_free + 1
  end if
 
  ! This is the correct check but tests fail!
  !if (act == "A") then
- !  num_alloc = num_alloc + 1
+ !  minfo%num_alloc = minfo%num_alloc + 1
  !else if (act == "D") then
- !  num_free = num_free + 1
+ !  minfo%num_free = minfo%num_free + 1
  !else
  !  _ABORT("Wrong action: "//trim(act))
  !end if
 
  ! Check on memory limit.
- if (abimem_limit /= zero .and. memtot_abi%memory > int(real(abimem_limit,kind=8)*1073741824.d0,kind=8)) then
-   ! memory limit is in GB
-   write(msg,'(a,f7.3,2(a,i0),a,2(a,i0))')&
-     'Memory limit of ',abimem_limit,' GB reached for rank ',my_rank,', total memory is ',memtot_abi%memory,' B.',&
-     'this happened for variable '//trim(memtot_abi%vname)//' in func '//trim(memtot_abi%func)
-   _ABORT(msg)
- end if
+ ! memory limit is in GB
+ !if (minfo%mem_limit /= zero .and. minfo%memory > int(real(minfo%mem_limit,kind=8)*1073741824.d0,kind=8)) then
+ !  write(msg,'(a,f7.3,2(a,i0),2a)')&
+ !    'Memory limit of ',minfo%mem_limit,' GB reached for rank ',minfo%my_rank,', total memory is ',minfo%memory,' B.',&
+ !    'this happened for variable '//trim(vname)
+ !  _ABORT(msg)
+ !end if
 
  ! Selective memory tracing
  do_log = .True.
- if (select_file /= NONE_STRING) do_log = (select_file == file)
- if (select_func /= NONE_STRING) do_log = do_log .and. (select_func == func)
+ if (minfo%select_file /= NONE_STRING) do_log = (minfo%select_file == file)
  !do_log = (do_log .and. my_rank == 0)
 
  ! Snapshot
- if (do_log .and. last_snapshot >= zero) then
+ if (do_log .and. minfo%last_snapshot >= zero) then
    now = abimem_wtime()
-   if ((now - last_snapshot) >= dt_snapshot) then
-      last_snapshot = now
+   if (now - minfo%last_snapshot >= minfo%dt_snapshot) then
+      minfo%last_snapshot = now
    else
       do_log = .False.
    end if
  end if
 
+ ! IMPORTANT: 
+ ! Remember to change the pyton code in ~abinit/tests/pymods/memprof.py to account for changes in the format
  if (do_log) then
-   select case (abimem_level)
+   select case (minfo%level)
    case (0)
      ! No action required
 
    case (1)
-     ! Compact format
-     if (trim(memloc_abi%func) /= func) then
-       if (memloc_abi%memory /= int(0,kind=8)) then
-         rewind(logunt)
-         write(logunt,'(a,t60,a,t90,4(1x,i12))')&
-           trim(memloc_abi%func),trim(memloc_abi%vname),&
-           memloc_abi%memory/int(1024,kind=8),memloc_abi%peak/int(1024,kind=8),&
-           memtot_abi%memory/int(1024,kind=8),&
-           (memtot_abi%memory+memloc_abi%peak-memloc_abi%memory)/int(1024,kind=8)
-       end if
-       memloc_abi%func = func
-       memloc_abi%vname = vname
-       memloc_abi%memory = isize
-       memloc_abi%peak = isize
-
-     else
-       memloc_abi%memory=memloc_abi%memory+isize
-       if (memloc_abi%memory > memloc_abi%peak) then
-         memloc_abi%peak = memloc_abi%memory
-         memloc_abi%vname = vname
-       end if
+     ! Write only if we have a new peak
+     if (new_peak) then
+       write(minfo%logunt,'(a,t60,a,1x,2(i0,1x),a,1x,2(i0,1x))') &
+         trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), line, minfo%memory
      end if
 
    case (2)
      ! To be used for inspecting a variable which is not deallocated
-     write(logunt,'(a,t60,a,1x,2(i0,1x),2(a,1x),2(i0,1x))')&
-       trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), trim(func), line, memtot_abi%memory
+     write(minfo%logunt,'(a,t60,a,1x,2(i0,1x),a,1x,2(i0,1x))') &
+       trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), line, minfo%memory
 
    case (3)
-     ! Write memory allocations larger than 1 MB
-     ! Log to std_out as well as mocc.
-     if (isize > 1024**2) then
-       write(i_char,'(i0)') line
-       write(std_out,'(a,2(f9.1, 1x),3a)') 'memorytracer: ', memtot_abi%memory * b2Mb, isize * b2Mb, &
-        trim(abimem_basename(file)), ':', adjustl(i_char)
-       write(logunt,'(a,t60,a,1x,2(i0,1x),2(a,1x),2(i0,1x))')&
-         trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), trim(func), line, memtot_abi%memory
+     ! Write memory allocations larger than limit_mb
+     if (isize * b2Mb > minfo%limit_mb) then
+       write(minfo%logunt,'(a,t60,a,1x,2(i0,1x),a,1x,2(i0,1x))') &
+         trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), line, minfo%memory
      end if
 
    case default
@@ -530,34 +440,6 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, func, line)
 end subroutine abimem_record
 !!***
 
-!!****f* m_profiling_abi/abimem_check
-!! NAME
-!! abimem_check
-!!
-!! FUNCTION
-!!   Check the abimem.mocc file (verbose format)
-!!
-!! PARENTS
-!!      m_profiling_abi
-!!
-!! CHILDREN
-!!      date_and_time,mpi_abort
-!!
-!! SOURCE
-
-subroutine abimem_check(nalloc, ndealloc)
-
-!Arguments ------------------------------------
- integer, intent(in) :: nalloc,ndealloc
-! *************************************************************************
-
- if (abimem_level==2 .and. nalloc /= ndealloc) then
-   write(std_out,"(3a)")"Use the python script 'abimem.py' in ~abinit/tests/scripts to check ",trim(abimem_file)," file"
-   write(std_out,"(a)")"Note that one can use the command line option `abinit --abimem-level=2"
- end if
-
-end subroutine abimem_check
-!!***
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Private routine providing services already implemented in other higher level modules.
@@ -599,9 +481,9 @@ subroutine abimem_abort(msg, file, func, line)
 
  write(std_out,*)msg,file,func,line
 
- ! Close abimem_file if it's connected to flush io buffers and avoid file corruption
- inquire(file=abimem_file, number=unt_found, opened=isopen)
- if (isopen .and. (unt_found == logunt)) close(unit=logunt)
+ ! Close logfile if it's connected to flush io buffers and avoid file corruption
+ inquire(file=minfo%logfile, number=unt_found, opened=isopen)
+ if (isopen .and. (unt_found == minfo%logunt)) close(unit=minfo%logunt)
 
  ierr = 0
 #ifdef HAVE_MPI
