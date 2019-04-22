@@ -806,14 +806,44 @@ class AbinitProject(object):
         Return full list of `Module` objects required by head_path.
 
         Args:
-            include_files_in_dirs: True if the dependency graph should also include
+            include_files_in_dirs: True if the dependency graph should include
                 the Fortran modules that are located in the same directory 
-                of the dependency even if no explicit `use statement` is found.
+                as the dependencies even if no explicit `use statement` is found.
                 This option is needed when generating `binaries.conf` because `make`
                 builds all files inside the directory instead of the minimal set 
-                required by the target.
+                required by the target. In a nutshell, we need to find the full
+                set of dependencies of the directory.
         """
         dir2files = self.groupby_dirname()
+        allmods = self._find_allmods(head_path, dir2files=dir2files)
+        if not include_files_in_dirs: return allmods
+        #print("initial list of modules", "\n".join(mod.basename for mod in allmods), "end initial list"
+
+        # Include **all** modules inside the directories in which dependencies are located 
+        # so that make can build object files in all dirs.
+        # This step is relatively costly, so avoid scanning the same directory twice.
+        dirpaths = sorted(set(mod.dirname for mod in allmods))
+        dirpaths = [os.path.join(self.srcdir, os.path.basename(d)) for d in dirpaths]
+        visited = set()
+
+        while dirpaths:
+            dirpath = dirpaths.pop(0)
+            if dirpath in visited: continue
+            visited.add(dirpath)
+            #print("In dirpath:", dirpath)
+            for fort_file in dir2files[dirpath]:
+                #print("Adding", fort_file.basename, "in dir", fort_file.dirpath)
+                other_mods = self._find_allmods(fort_file.basename, dir2files=dir2files)
+                allmods.update(other_mods)
+                other_dirpaths = set(os.path.join(self.srcdir, os.path.basename(d)) 
+                        for d in set(mod.dirname for mod in other_mods))
+                dirpaths.extend(other_dirpaths - visited)
+
+        return allmods
+
+
+    def _find_allmods(self, head_path, dir2files=None, include_files_in_dirs=True):
+        dir2files = dir2files if dir2files is not None else self.groupby_dirname()
 
         head = self.fort_files[head_path]
         allmods, queue, visited = set(), set(), set()
@@ -825,18 +855,6 @@ class AbinitProject(object):
                 visited.add(mod.basename)
                 allmods.add(mod)
                 queue.add(self.fort_files[mod.basename])
-
-                if include_files_in_dirs:
-                    # Include all modules inside this directory so that make 
-                    # will build objects files in all dirs in which we have at least one dependency.
-                    # Add exception for dir containing main executables.
-                    for other_fort_file in dir2files[fort_file.dirname]:
-                        if fort_file.dirname.endswith("98_main"): continue
-                        for other_mod in other_fort_file.all_used_mods:
-                            if other_mod.basename in visited: continue
-                            visited.add(other_mod.basename)
-                            allmods.add(other_mod)
-                            queue.add(self.fort_files[other_mod.basename])
 
         return allmods
 
@@ -885,7 +903,8 @@ class AbinitProject(object):
                 program_paths.append((fort_file, path))
 
         for prog_file, path in program_paths:
-            allmods = self.find_allmods(path)
+            # Note include_files_in_dirs
+            allmods = self.find_allmods(path, include_files_in_dirs=True)
             dirnames = sorted(set(mod.dirname for mod in allmods), reverse=True)
             if verbose:
                 print("For program:", prog_file.name)
