@@ -66,7 +66,8 @@ module m_profiling_abi
 
  type :: abimem_t
 
-   !integer :: level = huge(1)  # TODO Reactivate this value to enforce call to abimem_t in main (see tdep)
+   !integer :: level = huge(1)  
+   ! TODO Reactivate this value to enforce call to abimem_t in main (see tdep)
    integer :: level = 0
    ! Integer selecting the operation mode
 
@@ -119,6 +120,7 @@ module m_profiling_abi
 !!***
 
  type(abimem_t),private,save :: minfo
+ ! Internal datastructure storing memory profiling data.
 
 contains
 
