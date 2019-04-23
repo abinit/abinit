@@ -267,19 +267,19 @@ subroutine abimem_report(unt, with_mallinfo)
 !Local variables-------------------------------
  integer,save :: icall = 0
  integer(i8b),save :: prev_memory
+ real(dp) :: diff_mb
 
 ! *************************************************************************
 
  if (minfo%level == huge(one)) return
  icall = icall + 1
  write(unt,"(a)")"------------------------- MEMORY CONSUMPTION REPORT -----------------------------"
- write(unt,"(2(a, i0))")" Allocations: ",minfo%num_alloc,", Deallocations: ", minfo%num_free
+ write(unt,"(3(a,i0))")" Malloc: ",minfo%num_alloc,", Free: ", minfo%num_free, ", M-F:", minfo%num_alloc - minfo%num_free
  write(unt,"(a,f8.1,a)")" Memory allocated so far: ", minfo%memory * b2Mb, " (Mb)"
  write(unt,"(a,f8.1,5a,i0)")" Peak: ", minfo%peak * b2Mb," (MB) for variable: ", trim(minfo%peak_vname), &
    "at:", trim(abimem_basename(minfo%peak_file)),":",minfo%peak_fileline
- if (icall > 1) then
-   write(unt,"(a,f8.1,a)")" Memory allocated wrt previous call: ", (minfo%memory - prev_memory) * b2Mb, " (Mb)"
- end if
+ diff_mb = zero; if (icall > 1) diff_mb = (minfo%memory - prev_memory) * b2Mb
+ write(unt,"(a,f8.1,a)")" Memory allocated wrt previous call: ", diff_mb, " (Mb)"
  prev_memory = minfo%memory
 
  if (present(with_mallinfo)) then
@@ -382,15 +382,6 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
  !  _ABORT("Wrong action: "//trim(act))
  !end if
 
- ! Check on memory limit.
- ! memory limit is in GB
- !if (minfo%mem_limit /= zero .and. minfo%memory > int(real(minfo%mem_limit,kind=8)*1073741824.d0,kind=8)) then
- !  write(msg,'(a,f7.3,2(a,i0),2a)')&
- !    'Memory limit of ',minfo%mem_limit,' GB reached for rank ',minfo%my_rank,', total memory is ',minfo%memory,' B.',&
- !    'this happened for variable '//trim(vname)
- !  _ABORT(msg)
- !end if
-
  ! Selective memory tracing
  do_log = .True.
  if (minfo%select_file /= NONE_STRING) do_log = (minfo%select_file == file)
@@ -400,6 +391,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
  if (do_log .and. minfo%last_snapshot >= zero) then
    now = abimem_wtime()
    if (now - minfo%last_snapshot >= minfo%dt_snapshot) then
+      call abimem_report(std_out)
       minfo%last_snapshot = now
    else
       do_log = .False.

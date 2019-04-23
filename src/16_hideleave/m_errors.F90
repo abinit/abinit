@@ -1459,13 +1459,13 @@ subroutine abinit_doctor(prefix, print_mem_report)
        '-   Remaining memory at the end of the calculation is ',memtot
    else
      ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
-     write(msg,'(3a,i0,a,i0,3a,i0,8a)') 'MEMORY CONSUMPTION REPORT :',ch10, &
+     write(msg,'(3a,i0,a,i0,3a,i0,8a)') 'MEMORY CONSUMPTION REPORT:',ch10, &
        '   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
-       '   Remaining memory at the end of the calculation is ',memtot,ch10, &
+       '   Remaining memory at the end of the calculation: ',memtot,ch10, &
        '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10, &
        '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created.',ch10, &
        '   Note that abimem files can easily be multiple GB in size so do not use this option normally!',ch10, &
-       '   Note that one can use the command line option `abinit --abimem-level 2` '
+       '   Note also the command line option `abinit --abimem-level 2` '
      ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
      ierr = ierr + 1
      errmsg = strcat(errmsg, ch10, msg)
@@ -1473,7 +1473,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
 
  else
    write(msg,'(3a)')&
-     '- MEMORY CONSUMPTION REPORT :',ch10, &
+     '- MEMORY CONSUMPTION REPORT:',ch10, &
      '- Memory profiling is activated but not yet usable when bigdft is used'
  end if
  if (my_rank == master) call wrtout(ab_out, msg)

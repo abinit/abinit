@@ -1378,6 +1378,8 @@ subroutine dtset_free_nkpt_arrays(dtset)
  ABI_FREE(dtset%occ_orig)
  ABI_FREE(dtset%wtk)
 
+ !ABI_FREE(dtset%kptns_hf)
+
 end subroutine dtset_free_nkpt_arrays
 !!***
 

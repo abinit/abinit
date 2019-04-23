@@ -109,13 +109,13 @@
  These macros are used to get the memory address of the objet and the memory allocated.
 
    - loc returns the address and is a language extension supported by gfortran and ifort.
-   - storage_size was introduced in F2003 
+   - storage_size was introduced in F2003 and returns the size in bits.
 
  Both loc and storage_size are polymorphic so one can use it with intrinsic types as well 
  as user-defined datatypes.
 */
 #  define _LOC(x)  int(loc(x), kind=8) 
-#  define _MEM(arr) product(int(shape(arr), kind=8)) * storage_size(arr, kind=8)/8
+#  define _MEM(arr) product(int(shape(arr), kind=8)) * storage_size(arr, kind=8)
 
 /* and now the debugging macros */
 #  define ABI_ALLOCATE(ARR, SIZE) \
