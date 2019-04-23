@@ -42,8 +42,6 @@ module m_profiling_abi
  include 'mpif.h'
 #endif
 
-#ifdef HAVE_MEM_PROFILING
-
 #define _ABORT(msg) call abimem_abort(msg, __FILE__, "UnknownFunc", __LINE__)
 
  public :: abimem_get_info
@@ -654,7 +652,5 @@ function abimem_wtime() result(wall)
 end function abimem_wtime
 !!***
 
-#endif
-! HAVE_MEM_PROFILING
 end module m_profiling_abi
 !!***
