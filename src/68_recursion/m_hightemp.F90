@@ -38,243 +38,265 @@ module m_hightemp
 
   implicit none
 
+  type,public :: hightemp_type
+    logical :: enabled
+    integer :: nbcut
+    real(dp) :: U0
+  contains
+    procedure :: init
+  end type hightemp_type
+
   public :: free_transfactor
   public :: prt_eigocc
+  private :: int_freedos
 contains
 
-!!****f* ABINIT/prt_eigocc
-!! NAME
-!! prt_eigocc
-!!
-!! FUNCTION
-!! Printing in a _EIGOCC file many informations like Fermi energy, Average Vxc, Unit cell volume,
-!! electronic temperature (tsmear when occopt=3), eigenvalues and occupation for each k-point,
-!! wheight of the k-point, number of bands, number of k-points...
-!! This file is intended to be used for custom DOS computation with external tools for example.
-!!
-!! INPUTS
-!! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-!! fermie=fermi energy (Hartree)
-!! fnameabo_eig=filename for printing of the eigenenergies
-!! iout=unit number for formatted output file
-!! kptns(3,nkpt)=k points in reduced coordinates
-!! mband=maximum number of bands
-!! nband(nkpt)=number of bands at each k point
-!! nkpt=number of k points
-!! nsppol=1 for unpolarized, 2 for spin-polarized
-!! occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
-!! rprimd(3,3)=Lattice vectors in Bohr
-!! tsmear=smearing width (or temperature)
-!! vxcavg=average of vxc potential
-!! wtk(nkpt)=k-point weights
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-subroutine prt_eigocc(eigen,fermie,fnameabo_eig,iout,kptns,&
-  & mband,nband,nkpt,nsppol,occ,rprimd,tsmear,vxcavg,wtk)
+  subroutine init(this,activate)
+    ! Arguments -------------------------------
+    ! Scalars
+    class(hightemp_type) :: this
+    integer :: activate
 
-  ! Arguments -------------------------------
-  ! Scalars
-  integer,intent(in) :: iout,mband,nkpt,nsppol
-  real(dp),intent(in) :: fermie,tsmear,vxcavg
-  character(len=*),intent(in) :: fnameabo_eig
-  ! Arrays
-  integer,intent(in) :: nband(nkpt*nsppol)
-  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),kptns(3,nkpt)
-  real(dp),intent(in) :: rprimd(3,3)
-  real(dp),intent(in) :: occ(mband*nkpt*nsppol)
-  real(dp),intent(in) :: wtk(nkpt)
+    ! *********************************************************************
 
-  ! Local variables -------------------------
-  ! Scalars
-  integer :: band_index,iband,ii,ikpt,isppol,nband_k,temp_unit
-  real(dp) :: ucvol
-  character(len=200) :: fnameabo_eigocc
-  character(len=39) :: kind_of_output
-  character(len=500) :: msg
-  ! Arrays
-  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+    this%enabled = (activate == 6661)
+    if(this%enabled) then
+      ! One should allocate attributes to the object hightemp here.
+    end if
+  end subroutine init
 
-  ! *********************************************************************
+  !!****f* ABINIT/prt_eigocc
+  !! NAME
+  !! prt_eigocc
+  !!
+  !! FUNCTION
+  !! Printing in a _EIGOCC file many informations like Fermi energy, Average Vxc, Unit cell volume,
+  !! electronic temperature (tsmear when occopt=3), eigenvalues and occupation for each k-point,
+  !! wheight of the k-point, number of bands, number of k-points...
+  !! This file is intended to be used for custom DOS computation with external tools for example.
+  !!
+  !! INPUTS
+  !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+  !! fermie=fermi energy (Hartree)
+  !! fnameabo_eig=filename for printing of the eigenenergies
+  !! iout=unit number for formatted output file
+  !! kptns(3,nkpt)=k points in reduced coordinates
+  !! mband=maximum number of bands
+  !! nband(nkpt)=number of bands at each k point
+  !! nkpt=number of k points
+  !! nsppol=1 for unpolarized, 2 for spin-polarized
+  !! occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
+  !! rprimd(3,3)=Lattice vectors in Bohr
+  !! tsmear=smearing width (or temperature)
+  !! vxcavg=average of vxc potential
+  !! wtk(nkpt)=k-point weights
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine prt_eigocc(eigen,fermie,fnameabo_eig,iout,kptns,&
+    & mband,nband,nkpt,nsppol,occ,rprimd,tsmear,vxcavg,wtk)
 
-  band_index=0
-  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+    ! Arguments -------------------------------
+    ! Scalars
+    integer,intent(in) :: iout,mband,nkpt,nsppol
+    real(dp),intent(in) :: fermie,tsmear,vxcavg
+    character(len=*),intent(in) :: fnameabo_eig
+    ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
+    real(dp),intent(in) :: eigen(mband*nkpt*nsppol),kptns(3,nkpt)
+    real(dp),intent(in) :: rprimd(3,3)
+    real(dp),intent(in) :: occ(mband*nkpt*nsppol)
+    real(dp),intent(in) :: wtk(nkpt)
 
-  fnameabo_eigocc = trim(fnameabo_eig) // trim('OCC')
-  write(msg,'(a,a)') ' prt_eigocc : about to open file ',trim(fnameabo_eigocc)
-  call wrtout(iout,msg,'COLL')
-  if (open_file(fnameabo_eigocc,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
-    MSG_ERROR(msg)
-  end if
-  rewind(temp_unit)
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: band_index,iband,ii,ikpt,isppol,nband_k,temp_unit
+    real(dp) :: ucvol
+    character(len=200) :: fnameabo_eigocc
+    character(len=39) :: kind_of_output
+    character(len=500) :: msg
+    ! Arrays
+    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
 
-  write(msg, '(a,f12.6,a,f12.6)') &
-    & ' Fermi (or HOMO) energy (hartree) =',fermie,'   Average Vxc (hartree)=',vxcavg
-  call wrtout(temp_unit,msg,'COLL')
-  write(msg, '(a,e16.8,a,f16.8,a)') &
-    & ' Unit cell volume ucvol= ',ucvol,' bohr^3, electronic temperature= ',tsmear,' Ha'
-  call wrtout(temp_unit,msg,'COLL')
+    ! *********************************************************************
 
-  ! Loop over spins
-  do isppol=1,nsppol
-    write(msg, '(a,i6,a)') ' Eigenvalues (hartree) for nkpt=',nkpt,'k points:'
+    band_index=0
+    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+    fnameabo_eigocc = trim(fnameabo_eig) // trim('OCC')
+    write(msg,'(a,a)') ' prt_eigocc : about to open file ',trim(fnameabo_eigocc)
+    call wrtout(iout,msg,'COLL')
+    if (open_file(fnameabo_eigocc,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
+      MSG_ERROR(msg)
+    end if
+    rewind(temp_unit)
+
+    write(msg, '(a,f12.6,a,f12.6)') &
+      & ' Fermi (or HOMO) energy (hartree) =',fermie,'   Average Vxc (hartree)=',vxcavg
+    call wrtout(temp_unit,msg,'COLL')
+    write(msg, '(a,e16.8,a,f16.8,a)') &
+      & ' Unit cell volume ucvol= ',ucvol,' bohr^3, electronic temperature= ',tsmear,' Ha'
     call wrtout(temp_unit,msg,'COLL')
 
-    ! Loop over k-points
-    do ikpt=1,nkpt
-      nband_k=nband(ikpt+(isppol-1)*nkpt)
-      write(msg, '(a,i6,a,i6,a,f9.5,a,3f8.4,a)') &
-        & ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=', &
-        & kptns(1:3,ikpt)+tol10,' (reduced coord)'
+    ! Loop over spins
+    do isppol=1,nsppol
+      write(msg, '(a,i6,a)') ' Eigenvalues (hartree) for nkpt=',nkpt,'k points:'
       call wrtout(temp_unit,msg,'COLL')
 
-      ! Loop over bands
-      do ii=0,(nband_k-1)/4
-        write(msg, '(4(i6,f13.8,f12.8,a,1x))') &
-          & (iband,eigen(iband+band_index),occ(iband+band_index),',',iband=1+ii*4,min(nband_k,4+ii*4))
+      ! Loop over k-points
+      do ikpt=1,nkpt
+        nband_k=nband(ikpt+(isppol-1)*nkpt)
+        write(msg, '(a,i6,a,i6,a,f9.5,a,3f8.4,a)') &
+          & ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=', &
+          & kptns(1:3,ikpt)+tol10,' (reduced coord)'
         call wrtout(temp_unit,msg,'COLL')
-      end do
 
-      band_index=band_index+nband_k
-    end do ! do ikpt=1,nkpt
-  end do ! do isppol=1,nsppol
+        ! Loop over bands
+        do ii=0,(nband_k-1)/4
+          write(msg, '(4(i6,f13.8,f12.8,a,1x))') &
+            & (iband,eigen(iband+band_index),occ(iband+band_index),',',iband=1+ii*4,min(nband_k,4+ii*4))
+          call wrtout(temp_unit,msg,'COLL')
+        end do
 
-  close(temp_unit)
-end subroutine prt_eigocc
+        band_index=band_index+nband_k
+      end do ! do ikpt=1,nkpt
+    end do ! do isppol=1,nsppol
 
-!!****f* ABINIT/int_freedos
-!! NAME
-!! int_freedos
-!!
-!! FUNCTION
-!! Compute the value of the integral corresponding to the residual of density after the band cut
-!! I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon
-!!
-!! INPUTS
-!! e_bcut=Energy of the band from where to consider only free problem
-!! fermie=fermi energy (Hartree)
-!! mrgrid=number of grid points to compute the integral
-!! rprimd(3,3)=Lattice vectors in Bohr
-!! tsmear=smearing width (or temperature)
-!! u0=Translation factor which has been computed with an average of lasts bands before bcut
-!!
-!! OUTPUT
-!! freeden_part=contribution of the free electron problem (Integral of the free DOS)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-subroutine int_freedos(e_bcut,fermie,freeden_part,mrgrid,rprimd,tsmear,u0)
+    close(temp_unit)
+  end subroutine prt_eigocc
 
-  ! Arguments -------------------------------
-  ! Scalars
-  integer,intent(in) :: mrgrid
-  real(dp),intent(in) :: e_bcut,fermie,tsmear,u0
-  real(dp),intent(out) :: freeden_part
-  ! Arrays
-  real(dp),intent(in) :: rprimd(3,3)
+  !!****f* ABINIT/int_freedos
+  !! NAME
+  !! int_freedos
+  !!
+  !! FUNCTION
+  !! Compute the value of the integral corresponding to the residual of density after the band cut
+  !! I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon
+  !!
+  !! INPUTS
+  !! e_bcut=Energy of the band from where to consider only free problem
+  !! fermie=fermi energy (Hartree)
+  !! mrgrid=number of grid points to compute the integral
+  !! rprimd(3,3)=Lattice vectors in Bohr
+  !! tsmear=smearing width (or temperature)
+  !! u0=Translation factor which has been computed with an average of lasts bands before bcut
+  !!
+  !! OUTPUT
+  !! freeden_part=contribution of the free electron problem (Integral of the free DOS)
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine int_freedos(e_bcut,fermie,freeden_part,mrgrid,rprimd,tsmear,u0)
 
-  ! Local variables -------------------------
-  ! Scalars
-  integer :: ii
-  real(dp) :: ix,step,ucvol
-  ! Arrays
-  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
-  real(dp) :: values(mrgrid)
+    ! Arguments -------------------------------
+    ! Scalars
+    integer,intent(in) :: mrgrid
+    real(dp),intent(in) :: e_bcut,fermie,tsmear,u0
+    real(dp),intent(out) :: freeden_part
+    ! Arrays
+    real(dp),intent(in) :: rprimd(3,3)
 
-  ! *********************************************************************
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: ii
+    real(dp) :: ix,step,ucvol
+    ! Arrays
+    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+    real(dp) :: values(mrgrid)
 
-  step=(1/e_bcut)/mrgrid
-  do ii=1,mrgrid
-    ix=(ii)*step
-    values(ii)=fermi_dirac(1./ix,fermie,tsmear)*((sqrt(2.))/(PI*PI))*sqrt(1/ix-u0)/(ix*ix)
-  end do
-  freeden_part=simpson(step,values)
-end subroutine int_freedos
+    ! *********************************************************************
 
-!!****f* ABINIT/free_transfactor
-!! NAME
-!! free_transfactor
-!!
-!! FUNCTION
-!! Compute the translation factor $U_0$ that appears in the density of states of free electrons.
-!!
-!! INPUTS
-!! bcut=band number where to consider only free problem
-!! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-!! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
-!! fermie=fermi energy (Hartree)
-!! mband=maximum number of bands
-!! nband(nkpt)=number of bands at each k point
-!! nkpt=number of k points
-!! nsppol=1 for unpolarized, 2 for spin-polarized
-!! rprimd(3,3)=Lattice vectors in Bohr
-!! tsmear=smearing width (or temperature)
-!! wtk(nkpt)=k-point weights
-!!
-!! OUTPUT
-!! freeden_part=contribution of the free electron problem (Integral of the free DOS)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-subroutine free_transfactor(bcut,eigen,eknk,fermie,freeden_part,mband,nband,nkpt,nsppol,rprimd,tsmear,wtk)
+    step=(1/e_bcut)/mrgrid
+    do ii=1,mrgrid
+      ix=(ii)*step
+      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*((sqrt(2.))/(PI*PI))*sqrt(1/ix-u0)/(ix*ix)
+    end do
+    freeden_part=simpson(step,values)
+  end subroutine int_freedos
 
-  ! Arguments -------------------------------
-  ! Scalars
-  integer,intent(in) :: bcut,mband,nkpt,nsppol
-  real(dp),intent(in) :: fermie,tsmear
-  real(dp),intent(out) :: freeden_part
-  ! Arrays
-  integer,intent(in) :: nband(nkpt*nsppol)
-  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
-  real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
-  real(dp),intent(in) :: rprimd(3,3)
-  real(dp),intent(in) :: wtk(nkpt)
+  !!****f* ABINIT/free_transfactor
+  !! NAME
+  !! free_transfactor
+  !!
+  !! FUNCTION
+  !! Compute the translation factor $U_0$ that appears in the density of states of free electrons.
+  !!
+  !! INPUTS
+  !! bcut=band number where to consider only free problem
+  !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+  !! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
+  !! fermie=fermi energy (Hartree)
+  !! mband=maximum number of bands
+  !! nband(nkpt)=number of bands at each k point
+  !! nkpt=number of k points
+  !! nsppol=1 for unpolarized, 2 for spin-polarized
+  !! rprimd(3,3)=Lattice vectors in Bohr
+  !! tsmear=smearing width (or temperature)
+  !! wtk(nkpt)=k-point weights
+  !!
+  !! OUTPUT
+  !! freeden_part=contribution of the free electron problem (Integral of the free DOS)
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine free_transfactor(bcut,eigen,eknk,fermie,freeden_part,mband,nband,nkpt,nsppol,rprimd,tsmear,wtk)
 
-  ! Local variables -------------------------
-  ! Scalars
-  integer :: bdtot_index,iband,ikpt,isppol,nband_k,niter
-  real(dp) :: u0
-  ! Arrays
-  real(dp) :: eig_n(mband),ek_n(mband)
+    ! Arguments -------------------------------
+    ! Scalars
+    integer,intent(in) :: bcut,mband,nkpt,nsppol
+    real(dp),intent(in) :: fermie,tsmear
+    real(dp),intent(out) :: freeden_part
+    ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
+    real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
+    real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
+    real(dp),intent(in) :: rprimd(3,3)
+    real(dp),intent(in) :: wtk(nkpt)
 
-  ! *********************************************************************
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: bdtot_index,iband,ikpt,isppol,nband_k,niter
+    real(dp) :: u0
+    ! Arrays
+    real(dp) :: eig_n(mband),ek_n(mband)
 
-  eig_n(:)=zero
-  ek_n(:)=zero
-  bdtot_index=1
-  do isppol=1,nsppol
-    do ikpt=1,nkpt
-      nband_k=nband(ikpt+(isppol-1)*nkpt)
-      do iband=1,nband_k
-        eig_n(iband)=eig_n(iband)+wtk(ikpt)*eigen(bdtot_index)
-        ek_n(iband)=ek_n(iband)+wtk(ikpt)*eknk(bdtot_index)
-        bdtot_index=bdtot_index+1
+    ! *********************************************************************
+
+    eig_n(:)=zero
+    ek_n(:)=zero
+    bdtot_index=1
+    do isppol=1,nsppol
+      do ikpt=1,nkpt
+        nband_k=nband(ikpt+(isppol-1)*nkpt)
+        do iband=1,nband_k
+          eig_n(iband)=eig_n(iband)+wtk(ikpt)*eigen(bdtot_index)
+          ek_n(iband)=ek_n(iband)+wtk(ikpt)*eknk(bdtot_index)
+          bdtot_index=bdtot_index+1
+        end do
       end do
     end do
-  end do
 
-  u0=zero
-  niter=0
-  do iband=bcut-bcut/10,bcut
-    u0=u0+(eig_n(iband)-ek_n(iband))
-    niter=niter+1
-  end do
-  u0=u0/niter
+    u0=zero
+    niter=0
+    do iband=bcut-bcut/10,bcut
+      u0=u0+(eig_n(iband)-ek_n(iband))
+      niter=niter+1
+    end do
+    u0=u0/niter
 
-  call int_freedos(eig_n(bcut),fermie,freeden_part,1024,rprimd,tsmear,u0)
-  write(0,*) 'u0=',u0
-  write(0,*) 'freeden_part=',freeden_part
-end subroutine free_transfactor
-
+    call int_freedos(eig_n(bcut),fermie,freeden_part,1024,rprimd,tsmear,u0)
+    write(0,*) 'u0=',u0
+    write(0,*) 'freeden_part=',freeden_part
+  end subroutine free_transfactor
 end module m_hightemp

@@ -116,6 +116,9 @@ module m_scfcv_core
  use m_psolver,          only : psolver_rhohxc
  use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
 
+!blanchet
+ use m_hightemp
+
  implicit none
 
  private
@@ -419,6 +422,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  type(fock_type),pointer :: fock
  type(pawcprj_type),allocatable, target :: cprj_local(:,:)
 
+ type(hightemp_type) :: hightemp
+
 ! *********************************************************************
 
  _IBM6("Hello, I'm running on IBM6")
@@ -432,6 +437,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  if (enable_timelimit_in(MY_NAME) == MY_NAME) then
    write(std_out,*)"Enabling timelimit check in function: ",trim(MY_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
  end if
+
+! Initialize hightemp object
+ call hightemp%init(dtset%useria)
 
 ! Initialise non_magnetic_xc for rhohxc
  non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
@@ -2579,8 +2587,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !    See similar section in m_energies.F90
 !    XG 20181025 This gives a variational energy in case of NCPP with all bands occupied - not yet for metals.
-     if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0 
-!    XG 20181025 I was expecting the following to give also a variational energy in case of PAW, but this is not true. 
+     if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0
+!    XG 20181025 I was expecting the following to give also a variational energy in case of PAW, but this is not true.
 !    if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_nlpsp_vfock - energies%e_fock0
 !    XG 20181025 So, the following is giving a non-variational expression ...
      if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock
