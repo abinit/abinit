@@ -2971,6 +2971,10 @@ end subroutine dfpt_flexo
            elflexowf_t4(re,iefidir,istr1dir,istr2dir,iq1dir)=2.0_dp*tmpim*ucvolinv
            elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)=0.0_dp
 
+           write(100,'(4(i5,3x),2(1x,f20.10))') iefidir,istr1dir,istr2dir,iq1dir, &
+          & elflexowf_t4(re,iefidir,istr1dir,istr2dir,iq1dir),&
+          & elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)
+
            !Compute and save individual terms in mixed coordinates
            if (prtvol==1) then
 

@@ -780,7 +780,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,useylmgr1,kg_k, &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
    & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
 
@@ -1691,7 +1691,7 @@ c0_VefielddQ_c1strain_bks=zero
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,useylmgr1,kg_k, &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
    & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS
@@ -2346,7 +2346,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,jdir,jpert,q1grad(2,iq1grad), &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,useylmgr1,kg_k, &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
    & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS

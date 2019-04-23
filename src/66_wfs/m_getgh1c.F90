@@ -1573,7 +1573,7 @@ end subroutine getgh1dqc
 !! SOURCE
 
 subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qdir,&    ! In
-&                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,&                   ! In
+&                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,nylmgr,&                   ! In
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                           ! In
 &                nkpg,nkpg1,kpg_k,kpg1_k,dqdqkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)       ! Out
 
@@ -1588,7 +1588,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: idir,ipert,istwf_k,natom,npw_k,npw1_k,qdir,useylmgr1
+ integer,intent(in) :: idir,ipert,istwf_k,natom,npw_k,npw1_k,nylmgr,qdir,useylmgr1
  integer,intent(out) :: nkpg,nkpg1
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
@@ -1598,7 +1598,8 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  integer,intent(in) :: kg_k(3,npw_k),kg1_k(3,npw1_k)
  real(dp),intent(in) :: kpoint(3),kpq(3),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
- real(dp),intent(in) :: ylmgr1_k(npw1_k,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
+! real(dp),intent(in) :: ylmgr1_k(npw1_k,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
+ real(dp),intent(in) :: ylmgr1_k(npw1_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: ylm1_k(npw1_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),allocatable,intent(out) :: dqdqkinpw(:),kinpw1(:)
  real(dp),allocatable,intent(out) :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
