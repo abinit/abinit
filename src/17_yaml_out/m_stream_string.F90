@@ -2,13 +2,19 @@
 #include "config.h"
 #endif
 
-! Provide tools to manipulate variable size strings in an incermental FIFO way
+#include "abi_common.h"
+
+! Provide tools to manipulate variable size strings in an incrrmental FIFO way
 ! Use write to incrementaly fill the string. The required memory space will be allocated
 ! automatically when needed.
-! To avoid memory flaws you have to use stream_free on the stream to free the memory space unless
+! To avoid memory leaks you have to use stream_free on the stream to free the memory space unless
 ! you already flushed it using stream_transfer, stream_to_string or stream_to_file.
-! Unlike the latter three stream_copy and stream_debug do not modify the source stream
+! Unlike the latter three methods, stream_copy and stream_debug do not modify the source stream
 module m_stream_string
+
+  use defs_basis
+  use m_errors 
+  use m_profiling_abi
   
   implicit none
 
@@ -50,7 +56,7 @@ module m_stream_string
     do while (associated(cursor))
       prev => cursor
       cursor => cursor%next
-      deallocate(prev)
+      ABI_FREE(prev)
     end do
   end subroutine stream_free
 
@@ -75,7 +81,7 @@ module m_stream_string
     offset = stream%length
 
     if (.not.associated(stream%head)) then
-      allocate(stream%head)
+      ABI_MALLOC_SCALAR(stream%head)
     end if
     cursor => stream%head
 
@@ -89,7 +95,7 @@ module m_stream_string
       cursor%chunk(offset+1:chunk_size) = string(1:room_left)
       soffset = room_left
       do while (soffset < len(string))
-        allocate(cursor%next)
+        ABI_MALLOC_SCALAR(cursor%next)
         cursor%next%chunk(1:min(chunk_size, len(string)-soffset)) = &
 &         string(soffset+1:min(soffset+chunk_size,len(string)))
         cursor => cursor%next
@@ -114,11 +120,11 @@ module m_stream_string
       ! have next pointing to nothing
       stream%head%next => NULL()
       ! free head
-      deallocate(stream%head)
+      ABI_FREE(stream%head)
       stream%head => cursor
       stream%length = stream%length - chunk_size
     else
-      deallocate(stream%head)
+      ABI_FREE(stream%head)
       stream%length = 0
     end if
   end subroutine stream_get_chunk
@@ -190,8 +196,8 @@ module m_stream_string
     cursor => src%head
     c = 1
     do while (associated(cursor))
-      write(*,*) "Chunk no", c
-      write(*,'(A)') cursor%chunk
+      write(std_out,*) "Chunk no", c
+      write(std_out,'(A)') cursor%chunk
       cursor => cursor%next
       c = c + 1
     end do

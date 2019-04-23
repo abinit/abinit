@@ -66,7 +66,7 @@ SUBROUTINE libtetrabz_dos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
   !
   IF(linterpol) THEN
      !
-     ALLOCATE(wghtd(ne*nb,1,nk_local))
+     ABI_MALLOC(wghtd, (ne*nb,1,nk_local))
      CALL libtetrabz_dos_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,ne,e0,nk_local,wghtd)
      !
      ! Interpolation
@@ -77,7 +77,8 @@ SUBROUTINE libtetrabz_dos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
         wght(1:ne*nb,kintp(1:nintp)) = wght(1:ne*nb,             kintp(1:nintp)) &
         &                    + MATMUL(wghtd(1:ne*nb,1:1,ik), wintp(1:1,1:nintp))
      END DO ! ik = 1, nk_local
-     DEALLOCATE(wghtd, kvec)
+     ABI_FREE(wghtd)
+     ABI_FREE(kvec)
      !
      IF(PRESENT(comm)) CALL libtetrabz_mpisum_dv(comm, ne*nb*PRODUCT(ngw(1:3)), wght)
      !
@@ -85,7 +86,8 @@ SUBROUTINE libtetrabz_dos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
      CALL libtetrabz_dos_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,ne,e0,nk_local,wght)
   END IF
   !
-  DEALLOCATE(ik_global, ik_local)
+  ABI_FREE(ik_global)
+  ABI_FREE(ik_local)
   !
 END SUBROUTINE libtetrabz_dos
 !
@@ -120,7 +122,7 @@ SUBROUTINE libtetrabz_intdos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
   !
   IF(linterpol) THEN
      !
-     ALLOCATE(wghtd(ne*nb,1,nk_local))
+     ABI_MALLOC(wghtd, (ne*nb,1,nk_local))
      CALL libtetrabz_intdos_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,ne,e0,nk_local,wghtd)
      !
      ! Interpolation
@@ -131,7 +133,8 @@ SUBROUTINE libtetrabz_intdos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
         wght(1:ne*nb,kintp(1:nintp)) = wght(1:ne*nb,         kintp(1:nintp)) &
         &                    + MATMUL(wghtd(1:ne*nb,1:1,ik), wintp(1:1,1:nintp))
      END DO ! ik = 1, nk_local
-     DEALLOCATE(wghtd, kvec)
+     ABI_FREE(wghtd)
+     ABI_FREE(kvec)
      !
      IF(PRESENT(comm)) CALL libtetrabz_mpisum_dv(comm, ne*nb*PRODUCT(ngw(1:3)), wght)
      !
@@ -139,7 +142,8 @@ SUBROUTINE libtetrabz_intdos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
      CALL libtetrabz_intdos_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,ne,e0,nk_local,wght)
   END IF
   !
-  DEALLOCATE(ik_global, ik_local)
+  ABI_FREE(ik_global)
+  ABI_FREE(ik_local)
   !
 END SUBROUTINE libtetrabz_intdos
 !

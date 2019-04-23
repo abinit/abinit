@@ -1374,11 +1374,11 @@ subroutine dtset_free_nkpt_arrays(dtset)
  ABI_SFREE(dtset%istwfk)
  !ABI_SFREE(dtset%nband)
  ABI_SFREE(dtset%kpt)
- ABI_FREE(dtset%kptns)
- ABI_FREE(dtset%occ_orig)
- ABI_FREE(dtset%wtk)
-
- !ABI_FREE(dtset%kptns_hf)
+ ABI_SFREE(dtset%kptns)
+ ABI_SFREE(dtset%occ_orig)
+ ABI_SFREE(dtset%wtk)
+ ! Free HF k-points as well.
+ ABI_SFREE(dtset%kptns_hf)
 
 end subroutine dtset_free_nkpt_arrays
 !!***

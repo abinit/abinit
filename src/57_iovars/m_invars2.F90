@@ -293,20 +293,21 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  end if
 
  marr=max(3*natom,&
-& nkpt*nsppol*mband,&
-& 2*dtset%nkptgw*nsppol,&
-& dmatsize,&
-& 3*nkpt,&
-& npsp,&
-& ntypat,&
-& 9*msym,&
-& 60,100,&
-& 3*dtset%nconeq*natom,&
-& nimage,&
-& 3*dtset%nqptdm,&
-& 3*dtset%natsph_extra,&
-& dtset%natvshift*nsppol*natom,&
-& 3*dtset%nzchempot*ntypat)
+   nkpt*nsppol*mband,&
+   2*dtset%nkptgw*nsppol,&
+   dmatsize,&
+   3*nkpt,&
+   npsp,&
+   ntypat,&
+   9*msym,&
+   60,100,&
+   3*dtset%nconeq*natom,&
+   nimage,&
+   3*dtset%nqptdm,&
+   3*dtset%natsph_extra,&
+   dtset%natvshift*nsppol*natom,&
+   3*dtset%nzchempot*ntypat)
+
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
@@ -314,11 +315,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
 !****   Read parameters which set remaining array dimensions ****
 
-!Note : some parameters have already been read in invars0 and invars1
+!Note: some parameters have already been read in invars0 and invars1
 !Also, some checking is needed here.
 
-!Read ngfft(1), ngfft(2), and ngfft(3),
-!then ngfft(7)=fftalg and ngfft(8)=fftcache.
+!Read ngfft(1), ngfft(2), and ngfft(3), then ngfft(7)=fftalg and ngfft(8)=fftcache.
 !Read ngfftdg(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ngfft',tread,'INT')
@@ -370,9 +370,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%ga_rules(1:dtset%ga_n_rules)=intarr(1:dtset%ga_n_rules)
      do ii=1,dtset%ga_n_rules
        if(dtset%ga_rules(ii)<0)then
-         write(message, '(a,i4,a)' )&
-&         'All values for Genetic rules must be greater than 0.',ch10,&
-&         'Action: check the values of ga_rules.'
+         write(message, '(3a)' )&
+         'All values for Genetic rules must be greater than 0.',ch10,&
+         'Action: check the values of ga_rules.'
          MSG_ERROR(message)
        end if
      end do
@@ -531,7 +531,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%gw_freqsp(1:dtset%gw_customnfreqsp)=dprarr(1:dtset%gw_customnfreqsp)
      do ifreq=1,dtset%gw_customnfreqsp-1
        if (dtset%gw_freqsp(ifreq+1)<dtset%gw_freqsp(ifreq)) then
-         write(message, '(a,a,a)' )&
+         write(message, '(3a)' )&
          'The frequencies specified in gw_freqsp must be strictly increasing',ch10,&
          'Action: Correct this in your input file'
          MSG_ERROR(message)
@@ -1563,9 +1563,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing',tread,'DPR')
    if(tread==1)then
      if(dprarr(1)<-tol14)then
-       write(message, '(5a)' )&
-&       'A negative value for hyb_mixing is not allowed, while at input hyb_mixing=',dprarr(1),ch10,&
-&       'Action: modify hyb_mixing in the input file.'
+       write(message, '(a,es16.8,2a)' )&
+       'A negative value for hyb_mixing is not allowed, while at input hyb_mixing=',dprarr(1),ch10,&
+       'Action: modify hyb_mixing in the input file.'
        MSG_ERROR(message)
      end if
      dtset%hyb_mixing=-dprarr(1) ! Note the minus sign
@@ -1574,9 +1574,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_mixing_sr',tread,'DPR')
    if(tread==1)then
      if(dprarr(1)<-tol14)then
-       write(message, '(5a)' )&
-&       'A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
-&       'Action: modify hyb_mixing_sr in the input file.'
+       write(message, '(a,es16.8,2a)' )&
+       'A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
+       'Action: modify hyb_mixing_sr in the input file.'
        MSG_ERROR(message)
      end if
      dtset%hyb_mixing_sr=-dprarr(1) ! Note the minus sign
@@ -1585,9 +1585,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_dft',tread_dft,'DPR')
    if(tread_dft==1)then
      if(dprarr(1)<-tol14)then
-       write(message, '(5a)' )&
-&       'A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
-&       'Action: modify hyb_range_dft in the input file.'
+       write(message, '(a,es16.8,2a)' )&
+       'A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
+       'Action: modify hyb_range_dft in the input file.'
        MSG_ERROR(message)
      end if
      dtset%hyb_range_dft=-dprarr(1) ! Note the minus sign
@@ -1596,9 +1596,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hyb_range_fock',tread_fock,'DPR')
    if(tread_fock==1)then
      if(dprarr(1)<-tol14)then
-       write(message, '(5a)' )&
-&       'A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
-&       'Action: modify hyb_range_fock in the input file.'
+       write(message, '(a,es16.8,2a)' )&
+       'A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
+       'Action: modify hyb_range_fock in the input file.'
        MSG_ERROR(message)
      end if
      dtset%hyb_range_fock=-dprarr(1) ! Note the minus sign
@@ -2746,8 +2746,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !check for multiple definitions of tolXXX for the present dataset
  if (itol > 1 .or. itol_gen > 1) then
    write(message, '(3a)' )&
-&   'Only one of the tolXXX variables may be defined at once.',ch10,&
-&   'Action: check values of tolvrs, toldfe, tolrff, tolwfr, and toldff.'
+   'Only one of the tolXXX variables may be defined at once.',ch10,&
+   'Action: check values of tolvrs, toldfe, tolrff, tolwfr, and toldff.'
    MSG_ERROR(message)
  end if
 
@@ -2795,8 +2795,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  end if
  if (itol > 1.or.itol_gen >1) then
    write(message, '(3a)' )&
-&   'Only one of the postolXXX variables may be defined at once.',ch10,&
-&   'Action: check values of postoldfe and postoldff.'
+   'Only one of the postolXXX variables may be defined at once.',ch10,&
+   'Action: check values of postoldfe and postoldff.'
    MSG_ERROR(message)
  end if
  if (itol==0.and.itol_gen==1) then
@@ -2846,7 +2846,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
    do ii=1,dtset%nconeq
      if(natcon(ii)<0)then
-       write(message, '(a,a,a,i4,a,i4,a,a)' )&
+       write(message, '(3a,i0,a,i0,2a)' )&
 &       'All the components of natcon must be greater than 0.',ch10,&
 &       'The component',ii,' is equal to ',natcon(ii),ch10,&
 &       'Action: check the values of natcon.'
@@ -2862,8 +2862,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      iatcon(:)=intarr(1:niatcon)
    else
      write(message, '(3a)' )&
-&     'When nconeq is positive, natcon MUST be defined.',ch10,&
-&     'Action: check the values of nconeq and natcon.'
+     'When nconeq is positive, natcon MUST be defined.',ch10,&
+     'Action: check the values of nconeq and natcon.'
      MSG_ERROR(message)
    end if
    do ii=1,niatcon
@@ -2880,8 +2880,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,3*niatcon,string(1:lenstr),'wtatcon',tread,'DPR')
    if(tread/=1)then
      write(message, '(3a)' )&
-&     'When nconeq is positive, wtatcon MUST be defined.',ch10,&
-&     'Action: check the values of nconeq and wtatcon.'
+     'When nconeq is positive, wtatcon MUST be defined.',ch10,&
+     'Action: check the values of nconeq and wtatcon.'
      MSG_ERROR(message)
    end if
    iat=0
@@ -3265,7 +3265,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (dtset%sigma_nshiftk < 1 .or. dtset%sigma_nshiftk > MAX_NSHIFTK ) then
      write(message,  '(a,i0,2a,i0,3a)' )&
      'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
-     'while it is found to be',dtset%sigma_nshiftk,'.',ch10,&
+     'while it is found to be ',dtset%sigma_nshiftk,'.',ch10,&
      'Action: change the value of sigma_nshiftk in your input file, or change kptopt.'
      MSG_ERROR(message)
    end if
@@ -3281,7 +3281,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
  if (tread==1) dtset%wfk_task = str2wfktask(tolower(rmquotes(key_value)))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
-   MSG_ERROR(sjoin("A valida wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
+   MSG_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if
 
  ABI_DEALLOCATE(intarr)

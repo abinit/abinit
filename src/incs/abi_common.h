@@ -122,6 +122,10 @@
    allocate(ARR SIZE) NEWLINE \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
 
+#  define ABI_MALLOC_SCALAR(scalar) \
+   allocate(scalar) NEWLINE \
+   call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
+
 #  define ABI_DEALLOCATE(ARR) \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__,  __LINE__) NEWLINE \
    deallocate(ARR) 
@@ -146,6 +150,7 @@
 #else
 /* macros used in production */
 #  define ABI_ALLOCATE(ARR,SIZE) allocate(ARR SIZE)
+#  define ABI_MALLOC_SCALAR(scalar) allocate(scalar)
 #  define ABI_DEALLOCATE(ARR)  deallocate(ARR)
 #  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) allocate(ARR SIZE, stat=ierr)
 #  define ABI_DATATYPE_ALLOCATE(ARR,SIZE)  allocate(ARR SIZE)
@@ -163,6 +168,7 @@
 
 /* Shorthand versions */
 #define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
+
 #define ABI_FREE(ARR) ABI_DEALLOCATE(ARR)
 #define ABI_STAT_MALLOC(ARR,SIZE,ierr) ABI_STAT_ALLOCATE(ARR,SIZE,ierr)
 

@@ -47,11 +47,12 @@ module m_profiling_abi
 #define _ABORT(msg) call abimem_abort(msg, __FILE__, "UnknownFunc", __LINE__)
 
  public :: abimem_get_info
- public :: abimem_init            ! Initialize memory profiling.
- public :: abimem_shutdown        ! Final cleanup.
- public :: abimem_report          ! Print allocation status.
- public :: abimem_record          ! Central routine to be used for allocation/deallocation.
-                                  ! Interfaced via CPP macros defined in abi_common.h
+ public :: abimem_init              ! Initialize memory profiling.
+ public :: abimem_set_snapshot_time ! Set time interface for snapshots.
+ public :: abimem_shutdown          ! Final cleanup.
+ public :: abimem_report            ! Print allocation status.
+ public :: abimem_record            ! Central routine to be used for allocation/deallocation.
+                                    ! Interfaced via CPP macros defined in abi_common.h
 
  integer,private,parameter :: slen = 500
  character(fnlen),parameter :: NONE_STRING = "__NONE_STRING__"
@@ -100,7 +101,7 @@ module m_profiling_abi
    real(dp) :: dt_snapshot = -one
    ! time between two consecutive snapshots in seconds.
 
-   real(dp) :: limit_mb = 100_dp
+   real(dp) :: limit_mb = 50_dp
    ! Optional memory limit in Mb. used when level == 3
 
    character(len=slen) :: peak_vname = "_vname"
@@ -134,16 +135,16 @@ contains
 !!       0 -> no file abimem.mocc is created, only memory allocation counters running
 !!       1 -> light version. Only memory peaks are written.
 !!       2 -> file abimem.mocc is created with full information inside.
-!!       3 -> Write info only if allocation/deallocation is 
-!!  [deltat]=Interval in second for snapshots.
+!!       3 -> Write info only if allocation/deallocation is larger that limit_mb
+!!  [delta_time]=Interval in second for snapshots. Will write report to std_out evety delta_time seconds.
 !!  [filename] = If present, activate memory logging only inside filename (basename).
-!!  [limit_mb]= Set memory limit in Mb if level == 1. Print allocation/deallocation only above this limit
+!!  [limit_mb]= Set memory limit in Mb if level == 3. Print allocation/deallocation only above this limit.
 
- subroutine abimem_init(level, deltat, filename, limit_mb)
+ subroutine abimem_init(level, delta_time, filename, limit_mb)
 
 !Arguments ------------------------------------
  integer, intent(in) :: level
- real(dp),optional,intent(in) :: deltat
+ real(dp),optional,intent(in) :: delta_time
  real(dp),optional,intent(in) :: limit_mb
  character(len=*),optional,intent(in) :: filename
 
@@ -179,11 +180,11 @@ contains
  end if
 
  ! Activate snapshots.
- if (present(deltat)) then
-   minfo%dt_snapshot = deltat
+ if (present(delta_time)) then
+   minfo%dt_snapshot = delta_time
    minfo%last_snapshot = zero
-   if (deltat < 1.0e-6) then
-     _ABORT("deltat is too small")
+   if (delta_time < 1.0e-6) then
+     _ABORT("delta_time is too small")
    end if
  end if
 
@@ -220,6 +221,33 @@ contains
  end subroutine write_header
 
 end subroutine abimem_init
+!!***
+
+!!****f* m_profiling_abi/abimem_set_snapshot_time
+!! NAME
+!! abimem_set_snapshot_time
+!!
+!! FUNCTION
+!!  Set time interface for snapshots.
+!!
+!! INPUT
+!!  delta_time=Interval in second for snapshots.
+!!
+!! INPUT
+
+subroutine abimem_set_snapshot_time(delta_time)
+
+!Arguments ------------------------------------
+ real(dp),optional,intent(in) :: delta_time
+! *************************************************************************
+
+ minfo%dt_snapshot = delta_time
+ minfo%last_snapshot = zero
+ if (delta_time < 1.0e-6) then
+   _ABORT("delta_time is too small")
+ end if
+
+end subroutine abimem_set_snapshot_time
 !!***
 
 !!****f* m_profiling_abi/abimem_shutdown
@@ -274,7 +302,7 @@ subroutine abimem_report(unt, with_mallinfo)
  if (minfo%level == huge(one)) return
  icall = icall + 1
  write(unt,"(a)")"------------------------- MEMORY CONSUMPTION REPORT -----------------------------"
- write(unt,"(3(a,i0))")" Malloc: ",minfo%num_alloc,", Free: ", minfo%num_free, ", M-F:", minfo%num_alloc - minfo%num_free
+ write(unt,"(3(a,i0))")" Malloc: ",minfo%num_alloc,", Free: ", minfo%num_free, ", M-F: ", minfo%num_alloc - minfo%num_free
  write(unt,"(a,f8.1,a)")" Memory allocated so far: ", minfo%memory * b2Mb, " (Mb)"
  write(unt,"(a,f8.1,5a,i0)")" Peak: ", minfo%peak * b2Mb," (MB) for variable: ", trim(minfo%peak_vname), &
    "at:", trim(abimem_basename(minfo%peak_file)),":",minfo%peak_fileline
@@ -387,14 +415,12 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
  if (minfo%select_file /= NONE_STRING) do_log = (minfo%select_file == file)
  !do_log = (do_log .and. my_rank == 0)
 
- ! Snapshot
+ ! Snapshot (write to std_out)
  if (do_log .and. minfo%last_snapshot >= zero) then
    now = abimem_wtime()
    if (now - minfo%last_snapshot >= minfo%dt_snapshot) then
-      call abimem_report(std_out)
-      minfo%last_snapshot = now
-   else
-      do_log = .False.
+     call abimem_report(std_out)
+     minfo%last_snapshot = now
    end if
  end if
 

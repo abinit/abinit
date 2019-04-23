@@ -21,6 +21,8 @@
 
 module m_simtet
 
+ use defs_basis
+
  implicit none
 
  private
@@ -286,7 +288,7 @@ END SUBROUTINE SIM0TWOI
         IF (DEV.LE.TOL*CDABS(AV)) GO TO 150
         CV = CV*UU
  100   CONTINUE
-       WRITE (*,9010) U, DEV, TOL
+       WRITE (std_out,9010) U, DEV, TOL
  9010  FORMAT ('***sim0ur0: U=',2(D15.8,1X),' DEV=',D14.7,' TOL=',D14.7)
        STOP '***sim0ur0: accuracy not reached'
  150   CONTINUE
@@ -333,7 +335,7 @@ END FUNCTION SIM0UR0
         CV = CV*UU
         IF (DEV.LE.TOL) GO TO 150
  100   CONTINUE
-       WRITE (*,9010) U, DEV, TOL
+       WRITE (std_out,9010) U, DEV, TOL
  9010  FORMAT ('***sim0ux0: U=',2(D15.8,1X), ' DEV=',D14.7,' TOL=',D14.7)
        STOP '***sim0ux0: accuracy not reached'
  150   CONTINUE
