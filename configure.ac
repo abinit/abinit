@@ -233,40 +233,13 @@ ABI_GPU_INIT
                     # ------------------------------------ #
 
 # Init main FFT controller
-SD_FFT_INIT([auto optional skip])
+SD_FFT_INIT([fftw3 mkl])
 
                     # ------------------------------------ #
 
 # Init triggers parameters (must be call after we know about fallbacks)
 # Note: MPI and GPU must be initialised after feature triggers
 ABI_TRIGGERS_INIT
-
-# Init BigDFT
-SD_BIGDFT_INIT([optional fail])
-
-# Init Levmar
-SD_LEVMAR_INIT([optional fail])
-
-# Init LibPSML
-SD_LIBPSML_INIT([auto optional fail])
-
-# Init LibXC
-SD_LIBXC_INIT([auto no-fortran optional fail])
-
-# Init PAPI
-SD_NETCDF_INIT([auto no-cxx optional fail])
-
-# Init PAPI
-SD_PAPI_INIT([optional fail])
-
-# Init TRIQS
-SD_TRIQS_INIT([optional fail])
-
-# Init Wannier90
-SD_WANNIER90_INIT([optional fail], [-lwannier90])
-
-# Init XMLF90
-SD_XMLF90_INIT([auto optional fail])
 
 # ---------------------------------------------------------------------------- #
 
@@ -688,12 +661,53 @@ ABI_GPU_DETECT
 # ---------------------------------------------------------------------------- #
 
 #
-# Optimized FFT support
+# Optional features - Initialization
 #
 
-ABI_MSG_SECTION([Optimized FFT support])
+ABI_MSG_SECTION([Initialization of optional features])
 
-SD_FFT_DETECT
+# Initialize linear algebra support, using the available information
+# Init BigDFT
+SD_BIGDFT_INIT([optional fail])
+
+# Init FFTW3
+SD_FFTW3_INIT([optional skip])
+
+# Init Levmar
+SD_LEVMAR_INIT([optional fail])
+
+# Init LibPSML
+SD_LIBPSML_INIT([auto optional fail])
+
+# Init LibXC
+SD_LIBXC_INIT([auto no-fortran optional fail])
+
+# Init PAPI
+SD_NETCDF_INIT([auto no-cxx optional fail])
+
+# Init PAPI
+SD_PAPI_INIT([optional fail])
+
+# Init TRIQS
+SD_TRIQS_INIT([optional fail])
+
+# Init Wannier90
+SD_WANNIER90_INIT([optional fail], [-lwannier90])
+
+# Init XMLF90
+SD_XMLF90_INIT([auto optional fail])
+
+                    # ------------------------------------ #
+
+# Initialize higher-level features using the available information
+# about other architectural aspects (compiler, OpenMP, MPI, GPU, ...)
+# and supported external packages
+
+# Linear algebra configuration
+ABI_LINALG_INIT
+
+# FFT configuration (must be done after linear algebra)
+SD_FFT_INIT
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -704,13 +718,18 @@ SD_FFT_DETECT
 
 ABI_MSG_SECTION([Linear algebra support])
 
-# Initialize linear algebra support, using the available information
-# about other architectural aspects (compiler, OpenMP, MPI, GPU, ...)
-ABI_LINALG_INIT
-
-# Perform the actual detection separately, so that further adjustments
-# can be done after initialization
 ABI_LINALG_DETECT
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+#
+# Optimized FFT support
+#
+
+ABI_MSG_SECTION([Optimized FFT support])
+
+SD_FFT_DETECT
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
