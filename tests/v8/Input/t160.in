@@ -153,7 +153,7 @@ getdvdb8  20
 #%% test_chain = t157.in, t158.in, t159.in, t160.in, t161.in
 #%% [files]
 #%% files_to_test = 
-#%%   t160.out, tolnlines = 45, tolabs = 0.4, tolrel = 5.0e-2
+#%%   t160.out, tolnlines = 45, tolabs = 0.4, tolrel = 0.1
 #%% psp_files = 03-Li.psp, 09-F.psp
 #%% [paral_info]
 #%% max_nprocs = 10
