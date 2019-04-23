@@ -1733,7 +1733,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      iq_ibz_fine = sigma%eph_doublegrid%bz2lgkibz(iq_bz_fine)
 
                      if (sigma%imag_only) then
-                       ! Note pi factor from Sokhotski–Plemelj theorem.
+                       ! Note pi factor from Sokhotski-Plemelj theorem.
                        simag = gkq2 * pi * ( &
                          (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
                          (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, jj) ) * weight

@@ -66,7 +66,8 @@ module m_profiling_abi
 
  type :: abimem_t
 
-   integer :: level = huge(1)
+   !integer :: level = huge(1)  # TODO Reactivate this value to enforce call to abimem_t in main (see tdep)
+   integer :: level = 0
    ! Integer selecting the operation mode
 
    integer(i8b) :: memory = 0
@@ -204,7 +205,8 @@ contains
    end if
 
  case default
-   _ABORT("invalid abimem_level")
+   write(msg, "(a,i0)")"Invalid value for abimem_level:", minfo%level
+   _ABORT(msg)
  end select
 
  contains 
@@ -449,7 +451,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
      end if
 
    case default
-     _ABORT("invalid abimem_level")
+     _ABORT("Invalid abimem_level")
    end select
  end if
 
