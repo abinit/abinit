@@ -1285,8 +1285,10 @@ endif
        UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m2,m2,m1)
      enddo
    enddo
-   UUmJJ=UUmJJ/float((mbband1)*(mbband1-1))
-   JJ1=UU-UUmJJ
+   if (mbband1/=1) then
+     UUmJJ=UUmJJ/float((mbband1)*(mbband1-1))
+     JJ1=UU-UUmJJ
+   endif
    
    
    JJ=czero
@@ -1295,31 +1297,34 @@ endif
        if(m1/=m2) JJ=JJ+Interaction(m1,m2,m2,m1)
      enddo
    enddo
-   JJ=JJ/float((mbband1)*(mbband1-1))
-   
+   if (mbband1/=1) then
+     JJ=JJ/float((mbband1)*(mbband1-1))
+   endif
+
    write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
      & ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=',JJ1,ch10
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    
-   UUmJJ=czero
-   do m1=1,mbband1
-     do m2=1,mbband1
-       UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m1,m2,m2)
+   if (mbband1/=1) then
+     UUmJJ=czero
+     do m1=1,mbband1
+       do m2=1,mbband1
+         UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m1,m2,m2)
+       enddo
      enddo
-   enddo
-   UUmJJ=UUmJJ/float((mbband1)*(mbband1-1))
-   JJ2=UU-UUmJJ
-   
-   
-   if(abs(JJ1-JJ2)<0.0001) then
-     JJ=JJ1
-   else
+     UUmJJ=UUmJJ/float((mbband1)*(mbband1-1))
+     JJ2=UU-UUmJJ
+     if(abs(JJ1-JJ2)<0.0001) then
+       JJ=JJ1
+     else
+     
      write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
        &   ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=',JJ2,ch10
      call wrtout(std_out,message,'COLL')
      stop
    endif
  endif
+endif
  
  if(lprint .and. one_orbital==1) then
    write(message,*)ch10,' Hund coupling J2=U(m1,m2,m2,m1) for the ', utype

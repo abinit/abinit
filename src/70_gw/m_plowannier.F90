@@ -2348,9 +2348,9 @@ end subroutine compute_coeff_plowannier
    write(unt,*)"Orbitals for atom",wan%iatom_wan(iatom)," = ",wan%latom_wan(iatom)%lcalc(:)
  enddo
  write(unt,'(a16,i2)')"Number of spin =",wan%nsppol
- write(unt,'(a19,i3)')"Number of k-points=",wan%nkpt
+ write(unt,'(a19,i4)')"Number of k-points=",wan%nkpt
  do ikpt=1,wan%nkpt
-   write(unt,'(a,2x,i2)')"ikpt =",ikpt
+   write(unt,'(a,2x,i4)')"ikpt =",ikpt
     do spin=1,wan%nsppol
       do ispinor=1,wan%nspinor
         do iband=wan%bandi_wan,wan%bandf_wan
@@ -2425,7 +2425,7 @@ end subroutine compute_coeff_plowannier
    read(unt,*)
  enddo
  read(unt,'(a16,i2)') msg, nspin
- read(unt,'(a19,i3)') msg, nkpt
+ read(unt,'(a19,i4)') msg, nkpt
  !Testing the header
  if (natom /= wan%natom_wan .OR. bandi /=wan%bandi_wan .OR. bandf /=wan%bandf_wan .OR.&
 & nbl/= sum(wan%nbl_atom_wan(:)) .OR. nspin /= wan%nsppol .OR. nkpt/=wan%nkpt ) then
