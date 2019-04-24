@@ -57,12 +57,12 @@ integer, parameter :: TETRA_STEP = 24
 !! Store a bunch of tetrahedra
 !!
 !! SOURCE
-
 type :: htetra_bucket
 
   integer,pointer :: indexes(:,:)
 
 end type htetra_bucket
+!!***
 
 !!****t* m_htetrahedron/t_htetrap
 !! NAME
@@ -72,12 +72,12 @@ end type htetra_bucket
 !! Pointer to tetrahedra
 !!
 !! SOURCE
-
 type :: tetrap
 
   integer,pointer :: p(:)
 
 end type tetrap
+!!***
 
 !!****t* m_htetrahedron/t_htetrak
 !! NAME
@@ -87,7 +87,6 @@ end type tetrap
 !! Pointer to tetrahedra associated to a k-point
 !!
 !! SOURCE
-
 type :: htetrak
 
   integer :: tetra_count
@@ -95,7 +94,7 @@ type :: htetrak
   type(tetrap),allocatable :: tetra(:)
 
 end type htetrak
-
+!!***
 
 !!****t* m_htetrahedron/t_htetrahedron
 !! NAME
@@ -105,7 +104,6 @@ end type htetrak
 !! tetrahedron geometry object
 !!
 !! SOURCE
-
 type, public :: t_htetrahedron
 
   integer :: nkibz
@@ -139,6 +137,7 @@ type, public :: t_htetrahedron
   ! indexes of the unique tetrahedra
 
 end type t_htetrahedron
+!!***
 
 public :: htetra_init            ! Initialize the object
 public :: htetra_free            ! Free memory
@@ -1334,7 +1333,7 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nw,nkibz,eig_ibz,&
 ! *********************************************************************
 
  weights = zero
- wvals = linspace(enemin,enemax,nw)
+ wvals = htetra_linspace(enemin,enemax,nw)
  call htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkibz, eig_ibz, weights)
 
 end subroutine htetra_get_onewk
@@ -1478,7 +1477,7 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 
  tweight = zero; dweight = zero
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- wvals = linspace(enemin,enemax,nw)
+ wvals = htetra_linspace(enemin,enemax,nw)
  tetra_total = 0
 
  ! For each bucket of tetrahedra
@@ -1681,9 +1680,9 @@ end subroutine sort_4tetra_int
 
 !----------------------------------------------------------------------
 
-!!****f* m_numeric_tools/linspace
+!!****f* m_numeric_tools/htetra_linspace
 !! NAME
-!!  linspace
+!!  htetra_linspace
 !!
 !! FUNCTION
 !!
@@ -1693,7 +1692,7 @@ end subroutine sort_4tetra_int
 !!
 !! SOURCE
 
-pure function linspace(start,stop,nn)
+pure function hetetra_linspace(start,stop,nn)
 
 !Arguments ------------------------------------
 !scalars
@@ -1719,7 +1718,7 @@ pure function linspace(start,stop,nn)
 
  end select
 
-end function linspace
+end function htetra_linspace
 !!***
 
 !----------------------------------------------------------------------
