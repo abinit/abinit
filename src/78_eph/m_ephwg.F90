@@ -276,7 +276,6 @@ type(ephwg_t) function ephwg_new( &
  end do
 
  ! Fourier interpolate phonon frequencies on the same mesh.
- open(unit=20,file='frohl.dat')
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
  ABI_CALLOC(new%frohl_ibz, (new%nibz, new%natom3))
  do ik=1,new%nibz
@@ -304,11 +303,10 @@ type(ephwg_t) function ephwg_new( &
      gkq2_lr(nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu)
    end do
    new%frohl_ibz(ik,:) = gkq2_lr !* fqdamp
-   write(20,*) qpt, gkq2_lr
  end do
- close(unit=20)
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
+ call xmpi_sum(new%frohl_ibz, comm, ierr)
 
 end function ephwg_new
 !!***
