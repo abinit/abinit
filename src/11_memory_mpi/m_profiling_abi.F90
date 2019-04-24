@@ -66,10 +66,10 @@ module m_profiling_abi
 
  type :: abimem_t
 
-   !integer :: level = huge(1)  
-   ! TODO Reactivate this value to enforce call to abimem_t in main (see tdep)
-   integer :: level = 0
+   integer :: level = huge(1)
    ! Integer selecting the operation mode
+   ! The initial value is set to huge so that main executables that don't call abimem_init will
+   ! produce an Error when the first alocation is performed and abimem_record is invoked.
 
    integer(i8b) :: memory = 0
    ! Total memory allocated so far in bytes.

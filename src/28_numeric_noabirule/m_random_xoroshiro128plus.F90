@@ -1,6 +1,8 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include "abi_common.h"
 ! xoroshiro128plus method random number generator
 ! adapted by hexu for usage in Abinit (downgrade to Fortran 90 and added
 ! some functions )
@@ -43,11 +45,14 @@
 !> generator is the xoroshiro128plus method.
 module m_random_xoroshiro128plus
 
+  use defs_basis
+  use m_profiling_abi
+
   implicit none
   private
 
   ! A 64 bit floating point type
-  integer, parameter :: dp = kind(0.0d0)
+  !integer, parameter :: dp = kind(0.0d0)
 
   ! A 32 bit integer type
   integer, parameter :: i4 = selected_int_kind(9)
@@ -84,6 +89,7 @@ module m_random_xoroshiro128plus
      type(rng_t), allocatable :: rngs(:)
    !contains
    !  procedure, non_overridable :: init_parallel
+   ! MG: free method not defined!!
   end type prng_t
 
 
@@ -112,7 +118,7 @@ contains
     integer, intent(in)          :: n_proc
     integer                      :: n
 
-    allocate(self%rngs(n_proc))
+    ABI_MALLOC(self%rngs, (n_proc))
     self%rngs(1) = rng
 
     do n = 2, n_proc

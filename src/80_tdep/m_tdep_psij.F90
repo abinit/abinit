@@ -520,13 +520,14 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
     end do
   end do
 ! Compute the pressure as the integral of Gamma*C_v overt T
-  allocate(tmp(ntemp)); tmp(:)=0.d0
+  ABI_MALLOC(tmp, (ntemp))
+  tmp(:)=0.d0
   do itemp=1,ntemp
 !FB    tmp(itemp)=sum(heatcapa_HA(:,itemp))
     tmp(itemp)=sum(grun_thermo_HA(:,itemp))
   end do
   call simpson_int(ntemp,10.d0,tmp,p_thermo2)
-  deallocate(tmp)
+  ABI_FREE(tmp)
 
   open(unit=20,file=trim(InVar%output_prefix)//'thermo3.dat')
   write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th_(GPa)'

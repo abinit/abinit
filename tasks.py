@@ -26,6 +26,32 @@ ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
 
 
+ALL_BINARIES = [
+    "abinit",
+    "abitk",
+    "aim",
+    "anaddb",
+    "band2eps",
+    "conducti",
+    "cut3d",
+    "dummy_tests",
+    "fftprof",
+    "fold2Bloch",
+    "ioprof",
+    "lapackprof",
+    "macroave",
+    "mrgddb",
+    "mrgdv",
+    "mrggkk",
+    "mrgscr",
+    "multibinit",
+    "optic",
+    "tdep",
+    "testtransposer",
+    "ujdet",
+]
+
+
 @contextmanager
 def cd(path):
     """
@@ -176,6 +202,21 @@ def mksite(ctx):
         ctx.run("./mksite.py serve --dirtyreload", pty=True)
         return webbrowser.open_new_tab("http://127.0.0.1:8000")
 
+
+@task
+def links(ctx):
+    """
+    Create symbolic links to Abinit executables in current working directory.
+    """
+    top = find_top_build_tree(".", with_abinit=True)
+    main98 = os.path.join(top, "src", "98_main")
+    for dest in ALL_BINARIES: 
+        if os.path.isfile(dest): continue
+        source = os.path.join(main98, dest)
+        if os.path.isfile(source):
+            os.symlink(source, dest)
+        else:
+            cprint("Cannot find `%s` in dir `%s" % (source, main98), "yellow")
 
 #def pulltrunk(ctx):
 #    ctx.run("git stash")

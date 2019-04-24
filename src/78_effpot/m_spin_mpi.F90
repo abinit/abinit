@@ -55,9 +55,9 @@ contains
 
     self%nspins = nspins
     self%nproc = xmpi_comm_size(comm)
-    call ABI_ALLOCATE(self%istart, (self%nproc))
-    call ABI_ALLOCATE(self%iend, (self%nproc))
-    call ABI_ALLOCATE(self%nspin_proc, (self%nproc))
+    ABI_ALLOCATE(self%istart, (self%nproc))
+    ABI_ALLOCATE(self%iend, (self%nproc))
+    ABI_ALLOCATE(self%nspin_proc, (self%nproc))
 
 
     n=(self%nspins-nlast)/nspins

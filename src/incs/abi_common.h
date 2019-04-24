@@ -147,6 +147,11 @@
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__) NEWLINE \
    ABI_CHECK(ierr == 0, "out-of-memory")
 
+#  define ABI_MOVE_ALLOC(from, to) \
+   call abimem_record(0, QUOTE(from), _LOC(from), "D", _MEM(from),  __FILE__, __LINE__) NEWLINE \
+   call move_alloc(from, to) NEWLINE \
+   call abimem_record(0, QUOTE(to), _LOC(to), "A", _MEM(to),  __FILE__, __LINE__)
+
 #else
 /* macros used in production */
 #  define ABI_ALLOCATE(ARR,SIZE) allocate(ARR SIZE)
@@ -158,6 +163,8 @@
 #  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
         allocate(ARR SIZE, stat=ierr) NEWLINE \
         ABI_CHECK(ierr == 0, "out-of-memory")
+
+#  define ABI_MOVE_ALLOC(from, to) call move_alloc(from, to)
 #endif
 
 /* Macros to allocate zero-initialized arrays.
@@ -177,8 +184,9 @@
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
  * or allocate arrays before calling MOVE_ALLOC.
-   In this case, indeed, we should not count the deallocation */
+   In this case, indeed, we should not count the deallocation 
 #define ABI_MALLOC_NOCOUNT(arr, size) allocate(arr size)
+*/
 #define ABI_FREE_NOCOUNT(arr) deallocate(arr)
 
 /*
