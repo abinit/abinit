@@ -8,7 +8,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV)
+!!  Copyright (C) 2008-2019 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,6 +46,7 @@ module m_spacepar
 !!***
 
 public :: hartre            ! Given rho(G), compute Hartree potential (=FFT of rho(G)/pi/(G+q)**2)
+public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space 
 public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
 public :: laplacian         ! Compute the laplacian of a function defined in real space
 public :: redgr             ! Compute reduced gradients of a real function on the usual unshifted FFT grid.
@@ -59,6 +60,277 @@ public :: rotate_rho
 !!***
 
 contains
+!!***
+
+!!****f* m_spacepar/make_vectornd
+!! NAME
+!! make_vectornd
+!!
+!! FUNCTION
+!! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
+!! in r space. This is done by computing A(G) followed by FFT.
+!!
+!! NOTES
+!! This code is copied and modified from m_spacepar/hartre where a very similar loop
+!! over G is done followed by FFT to real space
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom,&
+     & paral_kgb,rprimd,vectornd,xred)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,izero,natom,nfft,paral_kgb
+ real(dp),intent(in) :: gsqcut
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
+ real(dp),intent(out) :: vectornd(3,nfft)
+
+!Local variables-------------------------------
+ !scalars
+ integer,parameter :: im=2,re=1
+ integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig2,ig3,ig1max,ig2max,ig3max
+ integer :: ig1min,ig2min,ig3min
+ integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
+ integer :: qeq0,qeq05
+ real(dp),parameter :: tolfix=1.000000001e0_dp
+ real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs
+ real(dp) :: phase,prefac,precosph,presinph,prefacgs,ucvol
+ !arrays
+ integer :: id(3)
+ integer,allocatable :: nd_list(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gmet(3,3),gprimd(3,3),mcg(3),mcg_cart(3),rmet(3,3)
+ real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:,:),work1(:,:),work2(:,:),work3(:,:)
+
+! *************************************************************************
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ prefac = -four_pi/(ucvol*ucvol)
+
+ ! make list of atoms with nonzero nuclear dipole moments,
+ ! and convert each dipole to reduced reciprocal space coords.
+ ! in typical applications only 0 or 1 atoms have nonzero dipoles. This
+ ! code shouldn't even be called if all dipoles are zero.
+ nd_atom_tot = 0
+ do iatom = 1, natom
+    if (any(abs(nucdipmom(:,iatom))>tol8)) then
+       nd_atom_tot = nd_atom_tot + 1
+    end if
+ end do
+ ABI_ALLOCATE(nd_list,(nd_atom_tot))
+ ABI_ALLOCATE(nd_m,(3,nd_atom_tot))
+ nd_atom_tot = 0
+ do iatom = 1, natom
+    if (any(abs(nucdipmom(:,iatom))>tol8)) then
+       nd_atom_tot = nd_atom_tot + 1
+       nd_list(nd_atom_tot) = iatom
+       nd_m(:,nd_atom_tot) = MATMUL(TRANSPOSE(rprimd),nucdipmom(:,iatom))
+    end if
+ end do
+ 
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
+
+ ! Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ ! Initialize a few quantities
+ cutoff=gsqcut*tolfix
+ ! if(present(qpt))then
+ !   qpt_=qpt
+ ! else
+ !   qpt_=zero
+ ! end if
+ ! qpt_ = zero
+ ! qeq0=0
+ ! if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
+ qeq0=1
+ qeq05=0
+!  if (qeq0==0) then
+!    if (abs(abs(qpt_(1))-half)<tol12.or.abs(abs(qpt_(2))-half)<tol12.or. &
+! &   abs(abs(qpt_(3))-half)<tol12) qeq05=1
+!  end if
+
+ ! If cplex=1 then qpt_ should be 0 0 0
+!  if (cplex==1.and. qeq0/=1) then
+!    write(message,'(a,3e12.4,a,a)')&
+! &   'cplex=1 but qpt=',qpt_,ch10,&
+! &   'qpt should be 0 0 0.'
+!    MSG_BUG(message)
+!  end if
+
+ ! If FFT parallelism then qpt should not be 1/2
+!  if (nproc_fft>1.and.qeq05==1) then
+!    write(message, '(a,3e12.4,a,a)' )&
+! &   'FFT parallelism selected but qpt',qpt_,ch10,&
+! &   'qpt(i) should not be 1/2...'
+!    MSG_ERROR(message)
+!  end if
+
+ ! In order to speed the routine, precompute the components of g+q
+ ! Also check if the booked space was large enough...
+ ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ do ii=1,3
+   id(ii)=ngfft(ii)/2+2
+   do ing=1,ngfft(ii)
+     ig=ing-(ing/id(ii))*ngfft(ii)-1
+     ! gq(ii,ing)=ig+qpt_(ii)
+     gq(ii,ing)=ig
+   end do
+ end do
+ ig1max=-1;ig2max=-1;ig3max=-1
+ ig1min=n1;ig2min=n2;ig3min=n3
+
+ ABI_ALLOCATE(work1,(2,nfft))
+ ABI_ALLOCATE(work2,(2,nfft))
+ ABI_ALLOCATE(work3,(2,nfft))
+ work1=zero; work2=zero; work3=zero
+ id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+ ! Triple loop on each dimension
+ do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
+   ! Precompute some products that do not depend on i2 and i1
+   gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
+   gqgm23=gq(3,i3)*gmet(2,3)*2
+   gqgm13=gq(3,i3)*gmet(1,3)*2
+
+   do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
+     if (fftn2_distrib(i2) == me_fft) then
+       gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
+       gqgm12=gq(2,i2)*gmet(1,2)*2
+       gqg2p3=gqgm13+gqgm12
+
+       i2_local = ffti2_local(i2)
+       i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
+       ! Do the test that eliminates the Gamma point outside of the inner loop
+       ii1=1
+       if(i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0)then
+         ii1=2
+         work1(re,1+i23)=zero
+         work1(im,1+i23)=zero
+         ! ! If the value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq is given, use it
+         ! if (PRESENT(divgq0)) then
+         !   work1(re,1+i23)=rhog(re,1+i23)*divgq0*piinv
+         !   work1(im,1+i23)=rhog(im,1+i23)*divgq0*piinv
+         ! end if
+       end if
+
+       ! Final inner loop on the first dimension (note the lower limit)
+       do i1=ii1,n1
+         gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+         ii=i1+i23
+
+         if(gs .LE. cutoff)then
+           ! Identify min/max indexes (to cancel unbalanced contributions later)
+           ! Count (q+g)-vectors with similar norm
+           ! if ((qeq05==1).and.(izero==1)) then
+           !   ig1=i1-(i1/id1)*n1-1
+           !   ig1max=max(ig1max,ig1); ig1min=min(ig1min,ig1)
+           !   ig2max=max(ig2max,ig2); ig2min=min(ig2min,ig2)
+           !   ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
+           ! end if
+
+            prefacgs = prefac/gs
+            do iatom = 1, nd_atom_tot
+               nd_atom = nd_list(iatom)
+               phase = two_pi*(gq(1,i1)*xred(1,nd_atom)+gq(2,i2)*xred(2,nd_atom)+gq(3,i3)*xred(3,nd_atom))
+               presinph=prefacgs*sin(phase)
+               precosph=prefacgs*cos(phase)
+               mcg(1) =  nd_m(2,iatom)*gq(3,i3)-nd_m(3,iatom)*gq(2,i2)
+               mcg(2) = -nd_m(1,iatom)*gq(3,i3)+nd_m(3,iatom)*gq(1,i1)
+               mcg(3) =  nd_m(1,iatom)*gq(2,i2)-nd_m(2,iatom)*gq(1,i1)
+               mcg_cart = MATMUL(rprimd,mcg)
+               work1(re,ii)=work1(re,ii)+presinph*mcg_cart(1)
+               work1(im,ii)=work1(im,ii)+precosph*mcg_cart(1)
+               work2(re,ii)=work2(re,ii)+presinph*mcg_cart(2)
+               work2(im,ii)=work2(im,ii)+precosph*mcg_cart(2)
+               work3(re,ii)=work3(re,ii)+presinph*mcg_cart(3)
+               work3(im,ii)=work3(im,ii)+precosph*mcg_cart(3)
+            end do
+         else
+           ! gs>cutoff
+           work1(re,ii)=zero
+           work1(im,ii)=zero
+           work2(re,ii)=zero
+           work2(im,ii)=zero
+           work3(re,ii)=zero
+           work3(im,ii)=zero
+         end if
+
+       end do ! End loop on i1
+     end if
+   end do ! End loop on i2
+ end do ! End loop on i3
+
+ ABI_DEALLOCATE(gq)
+ ABI_DEALLOCATE(nd_list)
+ ABI_DEALLOCATE(nd_m)
+
+ if ( (izero .EQ. 1) .AND. (qeq0 .EQ. 0) ) then
+   ! Set contribution of unbalanced components to zero
+
+    call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work2,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work3,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+
+!    else if (qeq05==1) then
+!      !q=1/2; this doesn't work in parallel
+!      ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
+!      ig2=-1;if (mod(n2,2)==0) ig2=1+n2/2
+!      ig3=-1;if (mod(n3,2)==0) ig3=1+n3/2
+!      if (abs(abs(qpt_(1))-half)<tol12) then
+!        if (abs(ig1min)<abs(ig1max)) ig1=abs(ig1max)
+!        if (abs(ig1min)>abs(ig1max)) ig1=n1-abs(ig1min)
+!      end if
+!      if (abs(abs(qpt_(2))-half)<tol12) then
+!        if (abs(ig2min)<abs(ig2max)) ig2=abs(ig2max)
+!        if (abs(ig2min)>abs(ig2max)) ig2=n2-abs(ig2min)
+!      end if
+!      if (abs(abs(qpt_(3))-half)<tol12) then
+!        if (abs(ig3min)<abs(ig3max)) ig3=abs(ig3max)
+!        if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
+!      end if
+!      call zerosym(work1,2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3,&
+! &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+
+ end if
+
+ ! Fourier Transform
+ ABI_ALLOCATE(ndvecr,(cplex,nfft))
+ ndvecr=zero
+ call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(1,:)=ndvecr(1,:)
+ ABI_DEALLOCATE(work1)
+ 
+ ndvecr=zero
+ call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(2,:) = ndvecr(1,:)
+ ABI_DEALLOCATE(work2)
+ 
+ ndvecr=zero
+ call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(3,:) = ndvecr(1,:)
+ ABI_DEALLOCATE(work3)
+ ABI_DEALLOCATE(ndvecr)
+
+end subroutine make_vectornd
 !!***
 
 !!****f* m_spacepar/hartre

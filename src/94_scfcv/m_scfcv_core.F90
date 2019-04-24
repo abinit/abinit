@@ -94,7 +94,7 @@ module m_scfcv_core
  use m_outscfcv,         only : outscfcv
  use m_afterscfloop,     only : afterscfloop
  use m_extraprho,        only : extraprho
- use m_spacepar,         only : setsym
+ use m_spacepar,         only : make_vectornd,setsym
  use m_newrho,           only : newrho
  use m_newvtr,           only : newvtr
  use m_vtorho,           only : vtorho
@@ -406,7 +406,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp),allocatable :: ph1d(:,:),ph1ddiel(:,:),ph1df(:,:)
  real(dp),allocatable :: phnonsdiel(:,:,:),rhowfg(:,:),rhowfr(:,:),shiftvector(:)
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
- real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
+ real(dp),allocatable :: vectornd(:,:),vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  real(dp),allocatable :: tauresid(:,:)
@@ -1095,6 +1095,17 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        end if
        call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
+
+     !    if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
+     !    atomic position so should be done for nstep = 1 and for updated ion positions
+     if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
+        if(allocated(vectornd)) then
+           ABI_DEALLOCATE(vectornd)
+        end if
+        ABI_ALLOCATE(vectornd,(3,nfftf))
+        call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
+             & dtset%paral_kgb,rprimd,vectornd,xred)
+     endif
 
    end if ! moved_atm_inside==1 .or. istep==1
 
@@ -2203,6 +2214,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  ABI_DEALLOCATE(nvresid)
  ABI_DEALLOCATE(tauresid)
 
+ if(allocated(vectornd)) then
+    ABI_DEALLOCATE(vectornd)
+ end if
+ 
  if((nstep>0.and.dtset%iscf>0).or.dtset%iscf==-1) then
    ABI_DEALLOCATE(dielinv)
  end if

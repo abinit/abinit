@@ -537,15 +537,15 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 
 !  Add nuclear dipole moment contribution if nonzero
-   if (any(abs(gs_ham%nucdipmom)>tol8)) then
-     if (.not.k1_eq_k2) then
-       MSG_BUG('Nuclear Dipole Moment not allowed for k/=k_^prime!')
-     end if
-     ABI_ALLOCATE(ghcnd,(2,npw_k2*my_nspinor*ndat))
-     call getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
-     ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghcnd(1:2,1:npw_k2*my_nspinor*ndat)
-     ABI_DEALLOCATE(ghcnd)
-   end if ! end computation of nuclear dipole moment component
+   ! if (any(abs(gs_ham%nucdipmom)>tol8)) then
+   !   if (.not.k1_eq_k2) then
+   !     MSG_BUG('Nuclear Dipole Moment not allowed for k/=k_^prime!')
+   !   end if
+   !   ABI_ALLOCATE(ghcnd,(2,npw_k2*my_nspinor*ndat))
+   !   call getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
+   !   ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghcnd(1:2,1:npw_k2*my_nspinor*ndat)
+   !   ABI_DEALLOCATE(ghcnd)
+   ! end if ! end computation of nuclear dipole moment component
 
  end if ! type_calc
 
