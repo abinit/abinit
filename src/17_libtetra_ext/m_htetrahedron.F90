@@ -1692,14 +1692,14 @@ end subroutine sort_4tetra_int
 !!
 !! SOURCE
 
-pure function hetetra_linspace(start,stop,nn)
+pure function htetra_linspace(start,stop,nn)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
  real(dp),intent(in) :: start,stop
  real(dp) :: length
- real(dp) :: linspace(nn)
+ real(dp) :: htetra_linspace(nn)
 
 !Local variables-------------------------------
  integer :: ii
@@ -1710,7 +1710,7 @@ pure function hetetra_linspace(start,stop,nn)
  case (1:)
   length = stop-start
   do ii=1,nn
-   linspace(ii)=start+length*(ii-1)/(nn-1)
+   htetra_linspace(ii)=start+length*(ii-1)/(nn-1)
   end do
 
  case (0)
