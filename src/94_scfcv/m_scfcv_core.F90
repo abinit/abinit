@@ -422,6 +422,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  type(fock_type),pointer :: fock
  type(pawcprj_type),allocatable, target :: cprj_local(:,:)
 
+!blanchet
  type(hightemp_type) :: hightemp
 
 ! *********************************************************************
@@ -438,8 +439,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    write(std_out,*)"Enabling timelimit check in function: ",trim(MY_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
  end if
 
-! Initialize hightemp object
- call hightemp%init(dtset%useria)
+!blanchet Initialize hightemp object
+ call hightemp%init(dtset%useria==6661,dtset%userib,rprimd)
 
 ! Initialise non_magnetic_xc for rhohxc
  non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)

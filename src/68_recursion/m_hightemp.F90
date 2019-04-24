@@ -41,9 +41,10 @@ module m_hightemp
   type,public :: hightemp_type
     logical :: enabled
     integer :: nbcut
-    real(dp) :: U0
+    real(dp) :: u0,ucvol
   contains
-    procedure :: init
+    procedure :: init, free_dos
+    final :: finalize
   end type hightemp_type
 
   public :: free_transfactor
@@ -51,21 +52,110 @@ module m_hightemp
   private :: int_freedos
 contains
 
-  subroutine init(this,activate)
+  !!****f* ABINIT/m_hightemp/init
+  !! NAME
+  !! init
+  !!
+  !! FUNCTION
+  !! Initialize hightemp_type object, memory allocation of arrays...
+  !!
+  !! INPUTS
+  !! this=hightemp_type object concerned
+  !! activate=condition to activate or not the hightemp methods
+  !!
+  !! OUTPUT
+  !! this=hightemp_type object concerned
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine init(this,activate,nbcut,rprimd)
+
     ! Arguments -------------------------------
     ! Scalars
-    class(hightemp_type) :: this
-    integer :: activate
+    class(hightemp_type),intent(inout) :: this
+    logical,intent(in) :: activate
+    integer :: nbcut
+    ! Arrays
+    real(dp),intent(in) :: rprimd(3,3)
+
+    ! Local variables -------------------------
+    ! Arrays
+    real(dp) :: gprimd(3,3),rmet(3,3), gmet(3,3)
 
     ! *********************************************************************
 
-    this%enabled = (activate == 6661)
+    this%enabled = activate
     if(this%enabled) then
-      ! One should allocate attributes to the object hightemp here.
+      call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
+      this%u0=zero
+      this%nbcut=nbcut
     end if
   end subroutine init
 
-  !!****f* ABINIT/prt_eigocc
+  !!****f* ABINIT/m_hightemp/finalize
+  !! NAME
+  !! finalize
+  !!
+  !! FUNCTION
+  !! Finalize hightemp_type object, deallocation of arrays...
+  !!
+  !! INPUTS
+  !! this=hightemp_type object concerned
+  !!
+  !! OUTPUT
+  !! this=hightemp_type object concerned
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine finalize(this)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    type(hightemp_type),intent(inout) :: this
+
+    ! DEALLOCATE THINGS
+  end subroutine finalize
+
+  !!****f* ABINIT/m_hightemp/free_dos
+  !! NAME
+  !! free_dos
+  !!
+  !! FUNCTION
+  !! Returns the free density of states for a given energy (in Hartree)
+  !!
+  !! INPUTS
+  !! this=hightemp_type object concerned
+  !!
+  !! OUTPUT
+  !! this=hightemp_type object concerned
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  function free_dos(this,energy)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    class(hightemp_type),intent(in) :: this
+    real(dp),intent(in) :: energy
+    real(dp) :: free_dos
+
+    ! *********************************************************************
+
+    free_dos=sqrt(2.)*this%ucvol*sqrt(energy-this%u0)/(PI*PI)
+  end function free_dos
+
+  ! *********************************************************************
+
+  !!****f* ABINIT/m_hightemp/prt_eigocc
   !! NAME
   !! prt_eigocc
   !!
@@ -170,7 +260,7 @@ contains
     close(temp_unit)
   end subroutine prt_eigocc
 
-  !!****f* ABINIT/int_freedos
+  !!****f* ABINIT/m_hightemp/int_freedos
   !! NAME
   !! int_freedos
   !!
@@ -222,7 +312,7 @@ contains
     freeden_part=simpson(step,values)
   end subroutine int_freedos
 
-  !!****f* ABINIT/free_transfactor
+  !!****f* ABINIT/m_hightemp/free_transfactor
   !! NAME
   !! free_transfactor
   !!
@@ -250,7 +340,8 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine free_transfactor(bcut,eigen,eknk,fermie,freeden_part,mband,nband,nkpt,nsppol,rprimd,tsmear,wtk)
+  subroutine free_transfactor(bcut,eigen,eknk,fermie,freeden_part,&
+    & mband,nband,nkpt,nsppol,rprimd,tsmear,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
