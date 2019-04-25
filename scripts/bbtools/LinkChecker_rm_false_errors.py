@@ -167,7 +167,7 @@ def main(filename,home_dir=""):
       info_rc = None
       if info is not None:
         try:
-         info_rc =i no_error['info'].search(info.text)
+         info_rc = no_error['info'].search(info.text)
          norc = norc and ( info_rc != None )
         except:
          pass
