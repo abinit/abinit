@@ -114,7 +114,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),mcg(3),mcg_cart(3),rmet(3,3)
- real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:,:),work1(:,:),work2(:,:),work3(:,:)
+ real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
 
 ! *************************************************************************
 
@@ -313,20 +313,20 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  end if
 
  ! Fourier Transform
- ABI_ALLOCATE(ndvecr,(cplex,nfft))
+ ABI_ALLOCATE(ndvecr,(cplex*nfft))
  ndvecr=zero
  call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(1,:)=ndvecr(1,:)
+ vectornd(1,:)=ndvecr(:)
  ABI_DEALLOCATE(work1)
  
  ndvecr=zero
  call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(2,:) = ndvecr(1,:)
+ vectornd(2,:) = ndvecr(:)
  ABI_DEALLOCATE(work2)
  
  ndvecr=zero
  call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(3,:) = ndvecr(1,:)
+ vectornd(3,:) = ndvecr(:)
  ABI_DEALLOCATE(work3)
  ABI_DEALLOCATE(ndvecr)
 
