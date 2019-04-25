@@ -281,12 +281,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
-&           ucvol,usecprj,wffnew,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
+&           ucvol,usecprj,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,xred,&
+&           ylm,ylmgr,ylmdiel)
 
 !Arguments -------------------------------
  integer, intent(in) :: afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
  integer, intent(in) :: my_natom,natom,nfftf,nfftdiel,nkxc,npwdiel
- integer, intent(in) :: ntypat,optforces,optres,pwind_alloc,usecprj
+ integer, intent(in) :: ntypat,optforces,optres,pwind_alloc,usecprj,with_vectornd
  real(dp), intent(in) :: cpus,etotal,gsqcut,ucvol
  real(dp), intent(out) :: compch_fft,nres2,residm
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -314,7 +315,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: phnonsdiel(2,nfftdiel**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),rmet(3,3),rprimd(3,3)
- real(dp), intent(inout) :: vtrial(nfftf,dtset%nspden)
+ real(dp), intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
  real(dp), intent(inout) :: xred(3,natom)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp), intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)

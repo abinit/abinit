@@ -352,7 +352,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  integer :: spare_mem
  integer :: stress_needed,sz1,sz2,tim_mkrho,unit_out
  integer :: usecprj,usexcnhat,use_hybcomp
- integer :: my_quit,quitsum_request,timelimit_exit,usecg,wfmixalg
+ integer :: my_quit,quitsum_request,timelimit_exit,usecg,wfmixalg,with_vectornd
  integer ABI_ASYNC :: quitsum_async
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
  real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,gsqcut,hyb_mixing,hyb_mixing_sr
@@ -1099,10 +1099,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      !    if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
      !    atomic position so should be done for nstep = 1 and for updated ion positions
      if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
-        if(allocated(vectornd)) then
-           ABI_DEALLOCATE(vectornd)
-        end if
-        ABI_ALLOCATE(vectornd,(nfftf,3))
+        with_vectornd = 1
+     else
+        with_vectornd = 0
+     end if
+     if(allocated(vectornd)) then
+        ABI_DEALLOCATE(vectornd)
+     end if
+     ABI_ALLOCATE(vectornd,(with_vectornd*nfftf,3))
+     if(with_vectornd .EQ. 1) then
         call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
              & dtset%paral_kgb,rprimd,vectornd,xred)
      endif
@@ -1549,8 +1554,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     computed_forces,optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,&
 &     pawrhoij,pawtab,phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &     pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,rmet,rprimd,&
-&     susmat,symrec,taug,taur,tauresid,ucvol_local,usecprj,wffnew,vtrial,vxctau,wvl,xred,&
-&     ylm,ylmgr,ylmdiel)
+&     susmat,symrec,taug,taur,tauresid,ucvol_local,usecprj,wffnew,with_vectornd,&
+&     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
      MSG_WARNING('THOMAS FERMI')
