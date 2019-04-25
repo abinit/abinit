@@ -96,7 +96,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
- real(dp),intent(out) :: vectornd(3,nfft)
+ real(dp),intent(out) :: vectornd(nfft,3)
 
 !Local variables-------------------------------
  !scalars
@@ -316,17 +316,17 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  ABI_ALLOCATE(ndvecr,(cplex*nfft))
  ndvecr=zero
  call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(1,:)=ndvecr(:)
+ vectornd(:,1)=ndvecr(:)
  ABI_DEALLOCATE(work1)
  
  ndvecr=zero
  call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(2,:) = ndvecr(:)
+ vectornd(:,2) = ndvecr(:)
  ABI_DEALLOCATE(work2)
  
  ndvecr=zero
  call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(3,:) = ndvecr(:)
+ vectornd(:,3) = ndvecr(:)
  ABI_DEALLOCATE(work3)
  ABI_DEALLOCATE(ndvecr)
 

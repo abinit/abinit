@@ -1102,7 +1102,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
         if(allocated(vectornd)) then
            ABI_DEALLOCATE(vectornd)
         end if
-        ABI_ALLOCATE(vectornd,(3,nfftf))
+        ABI_ALLOCATE(vectornd,(nfftf,3))
         call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
              & dtset%paral_kgb,rprimd,vectornd,xred)
      endif

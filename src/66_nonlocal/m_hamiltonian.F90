@@ -361,6 +361,11 @@ module m_hamiltonian
    ! ph3d_kp(2,npw_fft_kp,matblk)
    ! 3-dim structure factors, for each atom and plane wave at k^prime
 
+  real(dp), pointer :: vectornd(:,:,:,:,:) => null()
+   ! vectornd(n4,n5,n6,nvloc,3)
+   ! vector potential of nuclear magnetic dipoles
+   ! in real space, on the augmented fft grid
+
   real(dp), pointer :: vlocal(:,:,:,:) => null()
    ! vlocal(n4,n5,n6,nvloc)
    ! local potential in real space, on the augmented fft grid
@@ -578,6 +583,7 @@ subroutine destroy_hamiltonian(Ham)
    ABI_DEALLOCATE(Ham%phkxred)
  end if
  if (associated(Ham%ekb)) nullify(Ham%ekb)
+ if (associated(Ham%vectornd)) nullify(Ham%vectornd)
  if (associated(Ham%vlocal)) nullify(Ham%vlocal)
  if (associated(Ham%vxctaulocal)) nullify(Ham%vxctaulocal)
  if (associated(Ham%xred)) nullify(Ham%xred)
@@ -1357,6 +1363,7 @@ subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
  end if
 
  call addr_copy(gs_hamk_in%xred,gs_hamk_out%xred)
+ call addr_copy(gs_hamk_in%vectornd,gs_hamk_out%vectornd)
  call addr_copy(gs_hamk_in%vlocal,gs_hamk_out%vlocal)
  call addr_copy(gs_hamk_in%vxctaulocal,gs_hamk_out%vxctaulocal)
  call addr_copy(gs_hamk_in%kinpw_k,gs_hamk_out%kinpw_k)
@@ -1416,6 +1423,7 @@ end subroutine copy_hamiltonian
 !!
 !! INPUTS
 !!  isppol=index of current spin
+!!  [vectornd(n4,n5,n6,nvloc,3)]=optional, vector potential of nuclear magnetic dipoles in real space
 !!  [vlocal(n4,n5,n6,nvloc)]=optional, local potential in real space
 !!  [vxctaulocal(n4,n5,n6,nvloc,4)]=optional, derivative of XC energy density with respect
 !!                                  to kinetic energy density in real space
@@ -1438,7 +1446,7 @@ end subroutine copy_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
+subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
@@ -1446,6 +1454,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
  logical,optional,intent(in) :: with_nonlocal
  type(gs_hamiltonian_type),intent(inout),target :: Ham
 !arrays
+ real(dp),optional,intent(in),target :: vectornd(:,:,:,:,:)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
@@ -1465,6 +1474,10 @@ subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
  if (present(vxctaulocal)) then
    ABI_CHECK(size(vxctaulocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*4,"Wrong vxctaulocal")
    Ham%vxctaulocal => vxctaulocal
+ end if
+ if (present(vectornd)) then
+   ABI_CHECK(size(vectornd)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*3,"Wrong vectornd")
+   Ham%vectornd => vectornd
  end if
 
 !Retrieve non-local factors for this spin component
