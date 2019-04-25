@@ -1060,7 +1060,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &dtset%kpt,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan)
    call compute_coeff_plowannier(crystal,cprj,dimcprj,dtset,eigen,e_fermie,&
 &   mpi_enreg,occ,wan,pawtab,psps,usecprj,dtfil%unpaw,pawrad,dtfil)
-   if (dtset%ucrpa>=1) then 
+   if (dtset%ucrpa>=1 .and. me==master) then 
      call print_plowannier(wan)
    endif
    call destroy_plowannier(wan)

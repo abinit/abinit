@@ -854,7 +854,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  !===================================
  whole_diag = 1! 1 for diagonalization of the whole matrix, 0 for each orbital
  if(dtset%plowan_compute==2)  whole_diag = 0 ! off diagonal blocks are suppressed in the hamiltonian matrix before diagonalisation
- band_struct = 1 ! 1 for plotting band struct (Wannier bands)
+ band_struct = 0 ! 1 for plotting band struct (Wannier bands)
 
  ! Select the real space calculation of Wannier function: Interpolation
  ! versus Analysis
