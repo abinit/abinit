@@ -1980,7 +1980,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !Local variables-------------------------------
 !scalars
  integer :: berryopt,iatpert,iband,idir,ii,ipert,iq1grad
- integer :: jatpert,jband,jdir,jpert,nkpg,npw_disk
+ integer :: jatpert,jband,jdir,jpert,nkpg,npw_disk,nylmgreff
  integer :: opt_gvnl1,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
  real(dp) :: cprodi,cprodr,cpu,doti,dotr,dum_lambda,gflops,wall
  character(len=500) :: msg                   
@@ -2319,6 +2319,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
 !Specific definitions
  useylmgr1=1;optlocal=1;optnl=1
+ nylmgreff=3+6*((ipert-dtset%natom)/10)
 
 !LOOP OVER HAMILTONIAN ATOMIC DISPLACEMENT PERTURBATIONS
  do jatpert= 1, natpert
@@ -2346,7 +2347,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,jdir,jpert,q1grad(2,iq1grad), &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgreff,useylmgr1,kg_k, &
    & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS
