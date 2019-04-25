@@ -40,16 +40,14 @@ module m_hightemp
 
   type,public :: hightemp_type
     logical :: enabled
-    integer :: nbcut
-    real(dp) :: u0,ucvol
+    integer :: bcut,nbcut
+    real(dp) :: ebcut,int_freedos,u0,ucvol
   contains
-    procedure :: init, free_dos
+    procedure :: compute_int_rhocontrib,compute_obj,compute_u0,init
     final :: finalize
   end type hightemp_type
 
-  public :: free_transfactor
-  public :: prt_eigocc
-  private :: int_freedos
+  public :: freedos,hightemp_addtorho,prt_eigocc
 contains
 
   !!****f* ABINIT/m_hightemp/init
@@ -71,13 +69,13 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine init(this,activate,nbcut,rprimd)
+  subroutine init(this,activate,mband,nbcut,rprimd)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
     logical,intent(in) :: activate
-    integer :: nbcut
+    integer,intent(in) :: mband,nbcut
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
@@ -90,8 +88,11 @@ contains
     this%enabled = activate
     if(this%enabled) then
       call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
-      this%u0=zero
+      this%bcut=mband
       this%nbcut=nbcut
+      this%ebcut=zero
+      this%int_freedos=zero
+      this%u0=zero
     end if
   end subroutine init
 
@@ -122,6 +123,200 @@ contains
     ! DEALLOCATE THINGS
   end subroutine finalize
 
+  !!****f* ABINIT/m_hightemp/compute_obj
+  !! NAME
+  !! compute_obj
+  !!
+  !! FUNCTION
+  !! Compute differents needed quantities for the object hightemp_type
+  !!
+  !! INPUTS
+  !! this=hightemp_type object concerned
+  !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+  !! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
+  !! fermie=fermi energy (Hartree)
+  !! mband=maximum number of bands
+  !! nband(nkpt)=number of bands at each k point
+  !! nkpt=number of k points
+  !! nsppol=1 for unpolarized, 2 for spin-polarized
+  !! tsmear=smearing width (or temperature)
+  !! wtk(nkpt)=k-point weights
+  !!
+  !! OUTPUT
+  !! this=hightemp_type object concerned
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine compute_obj(this,eigen,eknk,fermie,mband,&
+    & nband,nkpt,nsppol,tsmear,wtk)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    class(hightemp_type),intent(inout) :: this
+    integer,intent(in) :: mband,nkpt,nsppol
+    real(dp),intent(in) :: fermie,tsmear
+    ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
+    real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
+    real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
+    real(dp),intent(in) :: wtk(nkpt)
+
+    ! *********************************************************************
+
+    call this%compute_u0(eigen,eknk,mband,nband,nkpt,nsppol,wtk)
+    call this%compute_int_rhocontrib(fermie,1024,tsmear)
+
+    write(0,*) this%u0, this%int_freedos
+  end subroutine compute_obj
+
+  !!****f* ABINIT/m_hightemp/compute_u0
+  !! NAME
+  !! compute_u0
+  !!
+  !! FUNCTION
+  !! Compute the translation factor $U_0$ that appears in the density of states of free electrons.
+  !!
+  !! INPUTS
+  !! this=hightemp_type object concerned
+  !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+  !! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
+  !! mband=maximum number of bands
+  !! nband(nkpt)=number of bands at each k point
+  !! nkpt=number of k points
+  !! nsppol=1 for unpolarized, 2 for spin-polarized
+  !! wtk(nkpt)=k-point weights
+  !!
+  !! OUTPUT
+  !! this=hightemp_type object concerned
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine compute_u0(this,eigen,eknk,mband,nband,nkpt,nsppol,wtk)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    class(hightemp_type),intent(inout) :: this
+    integer,intent(in) :: mband,nkpt,nsppol
+    ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
+    real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
+    real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
+    real(dp),intent(in) :: wtk(nkpt)
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: bdtot_index,iband,ikpt,isppol,nband_k,niter
+    ! Arrays
+    real(dp) :: eig_n(mband),ek_n(mband)
+
+    ! *********************************************************************
+
+    eig_n(:)=zero
+    ek_n(:)=zero
+    bdtot_index=1
+    do isppol=1,nsppol
+      do ikpt=1,nkpt
+        nband_k=nband(ikpt+(isppol-1)*nkpt)
+        do iband=1,nband_k
+          eig_n(iband)=eig_n(iband)+wtk(ikpt)*eigen(bdtot_index)
+          ek_n(iband)=ek_n(iband)+wtk(ikpt)*eknk(bdtot_index)
+          bdtot_index=bdtot_index+1
+        end do
+      end do
+    end do
+
+    this%u0=zero
+    niter=0
+    do iband=this%bcut-this%bcut/10,this%bcut
+      this%u0=this%u0+(eig_n(iband)-ek_n(iband))
+      niter=niter+1
+    end do
+    this%u0=this%u0/niter
+    this%ebcut=eig_n(this%bcut)
+  end subroutine compute_u0
+
+  !!****f* ABINIT/m_hightemp/compute_int_rhocontrib
+  !! NAME
+  !! compute_int_rhocontrib
+  !!
+  !! FUNCTION
+  !! Compute the value of the integral corresponding to the residual of density after the band cut
+  !! I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon
+  !!
+  !! INPUTS
+  !! this=hightemp_type object concerned
+  !! fermie=fermi energy (Hartree)
+  !! mrgrid=number of grid points to compute the integral
+  !! tsmear=smearing width (or temperature)
+  !!
+  !! OUTPUT
+  !! this=hightemp_type object concerned
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine compute_int_rhocontrib(this,fermie,mrgrid,tsmear)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    class(hightemp_type),intent(inout) :: this
+    integer,intent(in) :: mrgrid
+    real(dp),intent(in) :: fermie,tsmear
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: ii
+    real(dp) :: ix,step,ucvol
+    ! Arrays
+    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+    real(dp) :: values(mrgrid)
+
+    ! *********************************************************************
+
+    step=(1/this%ebcut)/mrgrid
+    do ii=1,mrgrid
+      ix=(ii)*step
+      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,this%u0,this%ucvol)/(ix*ix)/this%ucvol
+    end do
+    this%int_freedos=simpson(step,values)
+  end subroutine compute_int_rhocontrib
+
+  subroutine compute_int_energycontrib(this,fermie,mrgrid,tsmear)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    class(hightemp_type),intent(inout) :: this
+    integer,intent(in) :: mrgrid
+    real(dp),intent(in) :: fermie,tsmear
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: ii
+    real(dp) :: ix,step,ucvol
+    ! Arrays
+    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+    real(dp) :: values(mrgrid)
+
+    ! *********************************************************************
+
+    step=(1/this%ebcut)/mrgrid
+    do ii=1,mrgrid
+      ix=(ii)*step
+      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,this%u0,this%ucvol)/(ix*ix)/this%ucvol
+    end do
+    this%int_freedos=simpson(step,values)
+  end subroutine compute_int_energycontrib
+
+  ! *********************************************************************
+
   !!****f* ABINIT/m_hightemp/free_dos
   !! NAME
   !! free_dos
@@ -140,20 +335,17 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  function free_dos(this,energy)
+  function freedos(energy,u0,ucvol)
 
     ! Arguments -------------------------------
     ! Scalars
-    class(hightemp_type),intent(in) :: this
-    real(dp),intent(in) :: energy
-    real(dp) :: free_dos
+    real(dp),intent(in) :: energy,u0,ucvol
+    real(dp) :: freedos
 
     ! *********************************************************************
 
-    free_dos=sqrt(2.)*this%ucvol*sqrt(energy-this%u0)/(PI*PI)
-  end function free_dos
-
-  ! *********************************************************************
+    freedos=sqrt(2.)*ucvol*sqrt(energy-u0)/(PI*PI)
+  end function freedos
 
   !!****f* ABINIT/m_hightemp/prt_eigocc
   !! NAME
@@ -260,134 +452,39 @@ contains
     close(temp_unit)
   end subroutine prt_eigocc
 
-  !!****f* ABINIT/m_hightemp/int_freedos
+  !!****f* ABINIT/m_hightemp/hightemp_addtorho
   !! NAME
-  !! int_freedos
+  !! hightemp_addtorho
   !!
   !! FUNCTION
-  !! Compute the value of the integral corresponding to the residual of density after the band cut
-  !! I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon
   !!
   !! INPUTS
-  !! e_bcut=Energy of the band from where to consider only free problem
-  !! fermie=fermi energy (Hartree)
-  !! mrgrid=number of grid points to compute the integral
-  !! rprimd(3,3)=Lattice vectors in Bohr
-  !! tsmear=smearing width (or temperature)
-  !! u0=Translation factor which has been computed with an average of lasts bands before bcut
   !!
   !! OUTPUT
-  !! freeden_part=contribution of the free electron problem (Integral of the free DOS)
   !!
   !! PARENTS
   !!
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine int_freedos(e_bcut,fermie,freeden_part,mrgrid,rprimd,tsmear,u0)
+  subroutine hightemp_addtorho(int_freedos,nfft,nspden,rhor)
 
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: mrgrid
-    real(dp),intent(in) :: e_bcut,fermie,tsmear,u0
-    real(dp),intent(out) :: freeden_part
+    integer,intent(in) :: nfft,nspden
+    real(dp),intent(in) :: int_freedos
     ! Arrays
-    real(dp),intent(in) :: rprimd(3,3)
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: ii
-    real(dp) :: ix,step,ucvol
-    ! Arrays
-    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
-    real(dp) :: values(mrgrid)
+    real(dp),intent(inout) :: rhor(nfft,nspden)
 
     ! *********************************************************************
 
-    step=(1/e_bcut)/mrgrid
-    do ii=1,mrgrid
-      ix=(ii)*step
-      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*((sqrt(2.))/(PI*PI))*sqrt(1/ix-u0)/(ix*ix)
-    end do
-    freeden_part=simpson(step,values)
-  end subroutine int_freedos
+    if(nspden==1) then
+      rhor(:,:)=rhor(:,:)+int_freedos
+    else if(nspden==2) then
+      rhor(:,:)=rhor(:,:)+.5*int_freedos
+    end if
 
-  !!****f* ABINIT/m_hightemp/free_transfactor
-  !! NAME
-  !! free_transfactor
-  !!
-  !! FUNCTION
-  !! Compute the translation factor $U_0$ that appears in the density of states of free electrons.
-  !!
-  !! INPUTS
-  !! bcut=band number where to consider only free problem
-  !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-  !! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
-  !! fermie=fermi energy (Hartree)
-  !! mband=maximum number of bands
-  !! nband(nkpt)=number of bands at each k point
-  !! nkpt=number of k points
-  !! nsppol=1 for unpolarized, 2 for spin-polarized
-  !! rprimd(3,3)=Lattice vectors in Bohr
-  !! tsmear=smearing width (or temperature)
-  !! wtk(nkpt)=k-point weights
-  !!
-  !! OUTPUT
-  !! freeden_part=contribution of the free electron problem (Integral of the free DOS)
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine free_transfactor(bcut,eigen,eknk,fermie,freeden_part,&
-    & mband,nband,nkpt,nsppol,rprimd,tsmear,wtk)
 
-    ! Arguments -------------------------------
-    ! Scalars
-    integer,intent(in) :: bcut,mband,nkpt,nsppol
-    real(dp),intent(in) :: fermie,tsmear
-    real(dp),intent(out) :: freeden_part
-    ! Arrays
-    integer,intent(in) :: nband(nkpt*nsppol)
-    real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
-    real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
-    real(dp),intent(in) :: rprimd(3,3)
-    real(dp),intent(in) :: wtk(nkpt)
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: bdtot_index,iband,ikpt,isppol,nband_k,niter
-    real(dp) :: u0
-    ! Arrays
-    real(dp) :: eig_n(mband),ek_n(mband)
-
-    ! *********************************************************************
-
-    eig_n(:)=zero
-    ek_n(:)=zero
-    bdtot_index=1
-    do isppol=1,nsppol
-      do ikpt=1,nkpt
-        nband_k=nband(ikpt+(isppol-1)*nkpt)
-        do iband=1,nband_k
-          eig_n(iband)=eig_n(iband)+wtk(ikpt)*eigen(bdtot_index)
-          ek_n(iband)=ek_n(iband)+wtk(ikpt)*eknk(bdtot_index)
-          bdtot_index=bdtot_index+1
-        end do
-      end do
-    end do
-
-    u0=zero
-    niter=0
-    do iband=bcut-bcut/10,bcut
-      u0=u0+(eig_n(iband)-ek_n(iband))
-      niter=niter+1
-    end do
-    u0=u0/niter
-
-    call int_freedos(eig_n(bcut),fermie,freeden_part,1024,rprimd,tsmear,u0)
-    write(0,*) 'u0=',u0
-    write(0,*) 'freeden_part=',freeden_part
-  end subroutine free_transfactor
+    ! SHOULD WE ADD A CONTRIBUTION TO RHOG ?
+  end subroutine hightemp_addtorho
 end module m_hightemp

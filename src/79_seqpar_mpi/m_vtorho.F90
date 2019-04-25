@@ -84,6 +84,9 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
 
+!blanchet
+ use m_hightemp
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
@@ -274,7 +277,7 @@ contains
 subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &           eigen,electronpositron,energies,etotal,gbound_diel,&
-&           gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&
+&           gmet,gprimd,grnl,gsqcut,hdr,hightemp,indsym,irrzon,irrzondiel,&
 &           istep,istep_mix,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &           my_natom,natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &           npwarr,npwdiel,nres2,ntypat,nvresid,occ,optforces,&
@@ -297,6 +300,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type), intent(inout) :: energies
  type(hdr_type), intent(inout) :: hdr
+!blanchet
+ type(hightemp_type) :: hightemp
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
@@ -1757,14 +1762,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_DEALLOCATE(rhowfg)
  end if
 
-!blanchet - Compute the free_transfactor U0.
- if(dtset%useria==6661) then
-   call free_transfactor(dtset%mband,eigen,eknk,energies%e_fermie,freeden_part,&
+!blanchet - Compute the free_transfactor u0 and add contribution to rho
+ if(hightemp%enabled) then
+   call hightemp%compute_obj(eigen,eknk,energies%e_fermie,&
 &   dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
-&   rprimd,dtset%tsmear,dtset%wtk)
+&   dtset%tsmear,dtset%wtk)
+   call hightemp_addtorho(hightemp%int_freedos,dtset%nfft,dtset%nspden,rhor)
  end if
+
  ABI_DEALLOCATE(eknk)
- 
+
  call timab(994,2,tsec)
 
  if (iscf==-1) then

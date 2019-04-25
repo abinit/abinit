@@ -440,7 +440,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  end if
 
 !blanchet Initialize hightemp object
- call hightemp%init(dtset%useria==6661,dtset%userib,rprimd)
+ call hightemp%init(dtset%useria==6661,dtset%mband,dtset%userib,rprimd)
 
 ! Initialise non_magnetic_xc for rhohxc
  non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
@@ -1542,7 +1542,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      call vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &     eigen,electronpositron,energies,etotal,gbound_diel,&
-&     gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&
+&     gmet,gprimd,grnl,gsqcut,hdr,hightemp,indsym,irrzon,irrzondiel,&
 &     istep,istep_mix,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &     my_natom,dtset%natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &     npwarr,npwdiel,res2,psps%ntypat,nvresid,occ,&
