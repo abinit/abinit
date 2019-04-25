@@ -139,7 +139,7 @@ def main(filename,home_dir=""):
 
     ###  precleaning ###
 
-    if ( valid == "200 OK" ):
+    if ( valid == "200 OK" ) or ( valid == "200" ):
       continue
 
     if extern.text == "1" and url.text[0:6] == "mailto" and valid == "Valid mail address syntax" :
@@ -167,13 +167,13 @@ def main(filename,home_dir=""):
       info_rc = None
       if info is not None:
         try:
-         info_rc=no_error['info'].search(info.text)
+         info_rc =i no_error['info'].search(info.text)
          norc = norc and ( info_rc != None )
         except:
          pass
   
       valid_rc = None
-      valid=child.find('valid').get("result")
+      valid_rc = child.find('valid').get("result")
       norc = norc and ( valid_rc != None )
   
       if url_rc != None and info_rc != None and valid_rc != None:
