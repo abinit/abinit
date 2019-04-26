@@ -443,7 +443,8 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
 #ifdef NEW_TETRA
  call htetra_free(self%tetra_k)
- call htetra_init(self%tetra_k, indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+ call htetra_init(self%tetra_k, indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
 #else
  call destroy_tetra(self%tetra_k)
  call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring, comm)
@@ -665,7 +666,8 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
 #ifdef NEW_TETRA
  call htetra_free(self%tetra_k)
- call htetra_init(self%tetra_k, bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
+ call htetra_init(self%tetra_k, bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
+                  self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
 #else
  call destroy_tetra(self%tetra_k)
  call init_tetra(bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring, comm)
