@@ -69,8 +69,7 @@ contains
 !!    and call it if needed. Call eventually the symmetry builder and analyser
 !!    Make the adequate transfers if the geometry
 !!    builder is not needed.
-!! 8) Initialize the fixing of atoms,
-!!    the initial velocities, and the initial atomic spin
+!! 8) Initialize the fixing of atoms, the initial velocities, and the initial atomic spin
 !!
 !! INPUTS
 !! berryopt == 4/14: electric field is on; berryopt = 6/7/16/17: electric displacement field is on
@@ -147,8 +146,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 & nucdipmom,nzchempot,pawspnorb,&
 & ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
 & symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -406,7 +403,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_atpos',txrandom,'INT')
  if(txrandom==1) random_atpos=intarr(1)
  if (random_atpos < 0 .or. random_atpos > 5) then
-   write(message,'(a,a,a)')&
+   write(message,'(3a)')&
 &   'Random positions is a variable defined between 0 and 5. Error in the input file. ',ch10,&
 &   'Action: define one of these in your input file.'
    MSG_ERROR(message)
@@ -494,8 +491,8 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  end if
 !Check that nsym is not bigger than msym
  if (nsym>msym) then
-   write(message, '(a,i0,a,i0,a,a,a,a,a)' )&
-&   'Input nsym=',nsym,' exceeds msym=',msym,'.',ch10,&
+   write(message, '(2(a,i0),5a)')&
+&   'Input nsym = ',nsym,' exceeds msym = ',msym,'.',ch10,&
 &   'This is not allowed.',ch10,&
 &   'Action: correct nsym in your input file.'
    MSG_ERROR(message)
@@ -860,7 +857,11 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 !      Find the symmetry operations: nsym, symafm, symrel and tnons.
 !      Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0;if (nspden==4) noncoll=1
-       use_inversion=1;if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) use_inversion=0
+       use_inversion=1
+       if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+         MSG_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+         use_inversion=0
+       end if
 
 !      Get field in reduced coordinates (reduced e/d field)
 
@@ -1201,8 +1202,6 @@ end subroutine ingeo
 !! SOURCE
 
 subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1855,8 +1854,6 @@ end subroutine ingeobld
 
 subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,natrd,nsym
@@ -2004,8 +2001,6 @@ end subroutine fillcell
 !! SOURCE
 
 subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

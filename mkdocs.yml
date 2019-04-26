@@ -31,6 +31,7 @@ pages:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
+    - Tdep: guide/tdep.md
     - Installation:
         - HowTo: installation.md
         - MacOSX: README_MacOSX.md
@@ -118,6 +119,7 @@ pages:
     - topics/STM.md
     - topics/Susceptibility.md
     - topics/TDDFT.md
+    - topics/Tdep.md
     - topics/TDepES.md
     - topics/Temperature.md
     - topics/TransPath.md
@@ -153,6 +155,7 @@ pages:
     - Anaddb: variables/anaddb.md
     - Multibinit: variables/multibinit.md
     - Optic: variables/optic.md
+    - Tdep: variables/tdep.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
     - Statistics: variables/varset_stats.md
@@ -222,6 +225,7 @@ pages:
     - Markdown: developers/markdown.md
     - Test Suite Howto: developers/testsuite_howto.md
     - Test Suite: developers/testsuite.md
+    - New Test Suite Project: developers/new_testsuite.md
     - HowTo for developers: developers/developers_howto.md
     - XgType: developers/XgType.md
     - Pseudos: 

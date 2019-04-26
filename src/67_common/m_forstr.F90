@@ -1273,8 +1273,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !Local variables-------------------------------
 !scalars
  integer :: cplex,ider,idir,ipert,ispden,nhatgrdim,nkxc_cur,option,me,nproc,comm,usexcnhat
- logical :: has_nkxc_gga
- logical :: non_magnetic_xc
+ logical :: has_nkxc_gga,non_magnetic_xc
  real(dp) :: dum,energy,m_norm_min,ucvol,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
@@ -1288,9 +1287,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !Compatibility tests:
  has_nkxc_gga=(nkxc==7.or.nkxc==19)
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
  if(optxc<-1.or.optxc>1)then
    write(message,'(a,i0)')' Wrong value for optxc ',optxc
@@ -1315,6 +1311,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  nkxc_cur=0
  m_norm_min=EPSILON(0.0_dp)**2
  usexcnhat=0;if (usepaw==1) usexcnhat=maxval(pawtab(1:dtset%ntypat)%usexcnhat)
+ non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  if (dtset%xclevel==1.or.optxc==0) nkxc_cur= 2*min(dtset%nspden,2)-1 ! LDA: nkxc=1,3
  if (dtset%xclevel==2.and.optxc==1)nkxc_cur=12*min(dtset%nspden,2)-5 ! GGA: nkxc=7,19
  ABI_ALLOCATE(vhres,(nfft))
@@ -1377,14 +1374,14 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
      if (dtset%nspden/=4) then
        !Note: imposing usexcnhat=1 avoid nhat to be substracted
        call dfpt_mkvxc(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
-&       nkxc,dtset%nspden,0,2,dtset%paral_kgb,qq,nresid,rprimd,1,vresid,dummy)
+&       nkxc,non_magnetic_xc,dtset%nspden,0,2,dtset%paral_kgb,qq,nresid,rprimd,1,vresid,dummy)
      else
 !FR    call routine for Non-collinear magnetism
        ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
        rhor0(:,:)=rhor(:,:)-nresid(:,:)
        !Note: imposing usexcnhat=1 avoid nhat to be substracted
        call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
-&       nkxc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
+&       nkxc,non_magnetic_xc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
        ABI_DEALLOCATE(rhor0)
      end if
 
@@ -1421,16 +1418,16 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  Compute Kxc(r).n^res(r)
 
-!  Collinear magnetism or non-polarized
    if (dtset%nspden/=4) then
+!    Collinear magnetism or non-polarized
      call dfpt_mkvxc(1,dtset%ixc,kxc_cur,mpi_enreg,nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,&
-&     nkxc_cur,dtset%nspden,0,2,dtset%paral_kgb,qq,nresid,rprimd,1,vresid,dummy)
+&     nkxc_cur,non_magnetic_xc,dtset%nspden,0,2,dtset%paral_kgb,qq,nresid,rprimd,1,vresid,dummy)
    else
-!FR      call routine for Non-collinear magnetism
+!    Non-collinear magnetism
      ABI_ALLOCATE(rhor0,(nfft,dtset%nspden))
      rhor0(:,:)=rhor(:,:)-nresid(:,:)
      call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc_cur,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat,usepaw,nhatgr,nhatgrdim,&
-&     nkxc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
+&     nkxc,non_magnetic_xc,dtset%nspden,0,2,2,dtset%paral_kgb,qq,rhor0,nresid,rprimd,1,vxc,vresid,xccc3d)
      ABI_DEALLOCATE(rhor0)
    end if
 

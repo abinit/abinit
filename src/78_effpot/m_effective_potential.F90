@@ -742,37 +742,37 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
 
-!  Generate new bound
-   !if(option==1)then
-     ! If NGQPT > NCELL "=" dipdip range
-     !if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
-&    !    (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
-&    !    (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-     !  write(msg, '(6a,3I4,3a)' )ch10,&
-&    !    ' --- !WARNING',ch10,&
-&    !    '     The range of the dipole-dipole interaction is the same than the short-range.',ch10,&
-&    !    '     So the range of the total ifc is ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
-&    !    ' ---'
-     !  call wrtout(std_out,msg,"COLL")
-     !  if (abs(min1) < abs(min1_cell)) min1 = min1_cell
-     !  if (abs(min2) < abs(min2_cell)) min2 = min2_cell
-     !  if (abs(min3) < abs(min3_cell)) min3 = min3_cell
-     !  if (abs(max1) < abs(max1_cell)) max1 = max1_cell
-     !  if (abs(max2) < abs(max2_cell)) max2 = max2_cell
-     !  if (abs(max3) < abs(max3_cell)) max3 = max3_cell
-!    !  If the cell is smaller, we redifine new cell to take into acount all atoms
-     !  call destroy_supercell(supercell)
-     !  call init_supercell(natom_uc,(/(max1-min1+1),0,0,  0,(max2-min2+1),0,  0,0,(max3-min3+1)/),&
-&    !                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
-&    !                      eff_pot%crystal%xcart,eff_pot%crystal%znucl,supercell)
-
-!    !  Store the information of the supercell of the reference structure into effective potential
-     !  call effective_potential_setSupercell(eff_pot,comm,supercell=supercell)
-     !else
-     !  min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
-     !  max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
-     !end if
-   !end if
+!!  Generate new bound
+!   !if(option==1)then
+!     ! If NGQPT > NCELL "=" dipdip range
+!     !if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
+!&    !    (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
+!&    !    (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
+!     !  write(msg, '(6a,3I4,3a)' )ch10,&
+!&    !    ' --- !WARNING',ch10,&
+!&    !    '     The range of the dipole-dipole interaction is the same than the short-range.',ch10,&
+!&    !    '     So the range of the total ifc is ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
+!&    !    ' ---'
+!     !  call wrtout(std_out,msg,"COLL")
+!     !  if (abs(min1) < abs(min1_cell)) min1 = min1_cell
+!     !  if (abs(min2) < abs(min2_cell)) min2 = min2_cell
+!     !  if (abs(min3) < abs(min3_cell)) min3 = min3_cell
+!     !  if (abs(max1) < abs(max1_cell)) max1 = max1_cell
+!     !  if (abs(max2) < abs(max2_cell)) max2 = max2_cell
+!     !  if (abs(max3) < abs(max3_cell)) max3 = max3_cell
+!!    !  If the cell is smaller, we redifine new cell to take into acount all atoms
+!     !  call destroy_supercell(supercell)
+!     !  call init_supercell(natom_uc,(/(max1-min1+1),0,0,  0,(max2-min2+1),0,  0,0,(max3-min3+1)/),&
+!&    !                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
+!&    !                      eff_pot%crystal%xcart,eff_pot%crystal%znucl,supercell)
+!
+!!    !  Store the information of the supercell of the reference structure into effective potential
+!     !  call effective_potential_setSupercell(eff_pot,comm,supercell=supercell)
+!     !else
+!     !  min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
+!     !  max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
+!     !end if
+!   !end if
 
 !  Print the new boundary
    write(msg,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' Bound for ifc (LR):',&
@@ -931,19 +931,19 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    ABI_DEALLOCATE(buff_ewald)
 
 !  Fill the short range part (calculated previously) only master
-   !if(iam_master)then
-   !  do irpt=1,ifc_tmp%nrpt
-   !    do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
-   !      if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
-&  !         eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
-&  !         eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
-&  !         any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)) > tol20)) then
-   !        ifc_tmp%short_atmfrc(:,:,:,:,irpt) = &
-&  !                             eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)
-   !      end if
-   !    end do
-   !  end do
-   !end if
+!   if(iam_master)then
+!     do irpt=1,ifc_tmp%nrpt
+!       do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
+!         if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
+!&           eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
+!&           eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
+!&           any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)) > tol20)) then
+!           ifc_tmp%short_atmfrc(:,:,:,:,irpt) = &
+!&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)
+!         end if
+!       end do
+!     end do
+!   end if
 
    
    !call xmpi_bcast(ifc_tmp%short_atmfrc, master, comm, ierr)
