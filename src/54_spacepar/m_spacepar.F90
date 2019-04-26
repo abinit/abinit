@@ -101,7 +101,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
 !Local variables-------------------------------
  !scalars
  integer,parameter :: im=2,re=1
- integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig2,ig3,ig1max,ig2max,ig3max
+ integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1,ig2,ig3,ig1max,ig2max,ig3max
  integer :: ig1min,ig2min,ig3min
  integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
  integer :: qeq0,qeq05
@@ -113,7 +113,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  integer,allocatable :: nd_list(:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gprimd(3,3),mcg(3),mcg_cart(3),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),gred(3),mcg(3),mcg_cart(3),rmet(3,3)
  real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
 
 ! *************************************************************************
@@ -234,8 +234,12 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
 
        ! Final inner loop on the first dimension (note the lower limit)
        do i1=ii1,n1
-         gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-         ii=i1+i23
+          gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+          ig1 = i1 - (i1/id1)*n1 -1 
+          ii=i1+i23
+
+          gred(1) = one*ig1; gred(2) = one*ig2; gred(3) = one*ig3
+          gs = DOT_PRODUCT(gred,MATMUL(gmet,gred))
 
          if(gs .LE. cutoff)then
            ! Identify min/max indexes (to cancel unbalanced contributions later)
@@ -250,12 +254,16 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
             prefacgs = prefac/gs
             do iatom = 1, nd_atom_tot
                nd_atom = nd_list(iatom)
-               phase = two_pi*(gq(1,i1)*xred(1,nd_atom)+gq(2,i2)*xred(2,nd_atom)+gq(3,i3)*xred(3,nd_atom))
+               ! phase = two_pi*(gq(1,i1)*xred(1,nd_atom)+gq(2,i2)*xred(2,nd_atom)+gq(3,i3)*xred(3,nd_atom))
+               phase = two_pi*DOT_PRODUCT(xred(:,nd_atom),gred(:))
                presinph=prefacgs*sin(phase)
                precosph=prefacgs*cos(phase)
-               mcg(1) =  nd_m(2,iatom)*gq(3,i3)-nd_m(3,iatom)*gq(2,i2)
-               mcg(2) = -nd_m(1,iatom)*gq(3,i3)+nd_m(3,iatom)*gq(1,i1)
-               mcg(3) =  nd_m(1,iatom)*gq(2,i2)-nd_m(2,iatom)*gq(1,i1)
+               ! mcg(1) =  nd_m(2,iatom)*gq(3,i3)-nd_m(3,iatom)*gq(2,i2)
+               ! mcg(2) = -nd_m(1,iatom)*gq(3,i3)+nd_m(3,iatom)*gq(1,i1)
+               ! mcg(3) =  nd_m(1,iatom)*gq(2,i2)-nd_m(2,iatom)*gq(1,i1)
+               mcg(1) =  nd_m(2,iatom)*gred(3) - nd_m(3,iatom)*gred(2)
+               mcg(2) = -nd_m(1,iatom)*gred(3) + nd_m(3,iatom)*gred(1)
+               mcg(3) =  nd_m(1,iatom)*gred(2) - nd_m(2,iatom)*gred(1)
                mcg_cart = MATMUL(rprimd,mcg)
                work1(re,ii)=work1(re,ii)+presinph*mcg_cart(1)
                work1(im,ii)=work1(im,ii)+precosph*mcg_cart(1)

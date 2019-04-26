@@ -164,7 +164,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp) :: enlout(ndat),lambda_ndat(ndat),tsec(2)
  real(dp),target :: nonlop_dum(1,1)
  real(dp),allocatable :: buff_wf(:,:),cwavef1(:,:),cwavef2(:,:),cwavef_fft(:,:),cwavef_fft_tr(:,:)
- real(dp),allocatable :: ghc1(:,:),ghc2(:,:),ghc3(:,:),ghc4(:,:),ghcnd(:,:),ghc_mGGA(:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:),ghc3(:,:),ghc4(:,:),ghcnd(:,:),ghc_mGGA(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: gvnlc(:,:),vlocal_tmp(:,:,:),work(:,:,:,:)
  real(dp), pointer :: kinpw_k1(:),kinpw_k2(:),kpt_k1(:),kpt_k2(:)
  real(dp), pointer :: gsc_ptr(:,:)
@@ -536,6 +536,22 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_DEALLOCATE(ghc_mGGA)
    end if
 
+   !  Add nuclear dipole moment contribution
+   if (associated(gs_ham%vectornd)) then
+     if (.not.k1_eq_k2) then
+       MSG_BUG('nuclear dipole vector potential not allowed for k/=k_^prime!')
+     end if
+     if (size(gs_ham%vectornd)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*3) then
+       MSG_BUG('wrong sizes for vectornd in getghc!')
+     end if
+     ABI_ALLOCATE(ghc_vectornd,(2,npw_k2*my_nspinor*ndat))
+     call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,gs_ham%gprimd,gs_ham%istwf_k,kg_k1,kpt_k1,&
+&     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
+&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%use_gpu_cuda)
+     ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_vectornd(1:2,1:npw_k2*my_nspinor*ndat)
+     ABI_DEALLOCATE(ghc_vectornd)
+   end if
+
 !  Add nuclear dipole moment contribution if nonzero
    ! if (any(abs(gs_ham%nucdipmom)>tol8)) then
    !   if (.not.k1_eq_k2) then
@@ -743,6 +759,325 @@ end subroutine getghc
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* ABINIT/getghc_nucdip
+!!
+!! NAME
+!! getghc_nucdip
+!!
+!! FUNCTION
+!! Compute magnetic nuclear dipole moment contribution to <G|H|C>
+!! for input vector |C> expressed in reciprocal space.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, MT, JWZ)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!! cwavef(2,npw_k*my_nspinor*ndat)=planewave coefficients of wavefunction.
+!! gbound_k(2*mgfft+4)=sphere boundary info
+!! gprimd(3,3)=dimensional reciprocal space primitive translations (b^-1)
+!! istwf_k=input parameter that describes the storage of wfs
+!! kg_k(3,npw_k)=G vec coordinates wrt recip lattice transl.
+!! kpt(3)=current k point
+!! mgfft=maximum single fft dimension
+!! mpi_enreg=informations about MPI parallelization
+!! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
+!! ndat=number of FFTs to perform in parall
+!! ngfft(18)=contain all needed information about 3D FFT
+!! npw_k=number of planewaves in basis for given k point.
+!! nvloc=number of spin components of vxctaulocal
+!! n4,n5,n6=for dimensionning of vxctaulocal
+!! use_gpu_cuda=1 if Cuda (GPU) is on
+!! vectornd(n4,n5,n6,nvloc,3)= local potential corresponding to the vector potential of the array
+!!  of nuclear magnetic dipoles, in real space, on the augmented fft grid.
+!!
+!! OUTPUT
+!!  ghc_vectornd(2,npw_k*my_nspinor*ndat)=A.p contribution to <G|H|C> for array of nuclear dipoles
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!! this code is a copied, simplied version of getghc_mGGA (see below) and should eventually be
+!! integrated into that code, to simplify maintenance
+!!
+!! PARENTS
+!!      getghc
+!!
+!! CHILDREN
+!!      fourwf
+!!
+!! SOURCE
+
+subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
+&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,use_gpu_cuda)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,use_gpu_cuda
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
+ real(dp),intent(in) :: gprimd(3,3),kpt(3)
+ real(dp),intent(inout) :: cwavef(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: ghc_vectornd(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc,3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: tim_fourwf=1
+ integer :: idat,idir,ipw,nspinortot,shift
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ real(dp) :: gp2pi1,gp2pi2,gp2pi3,kpt_cart,kg_k_cart,scale_conversion,weight=one
+ !arrays
+ real(dp) :: kg_k_vec(3),kg_k_vec_cart(3)
+ real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
+ real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:)
+ real(dp),allocatable :: lcwavef(:,:),lcwavef1(:,:),lcwavef2(:,:)
+ real(dp),allocatable :: work(:,:,:,:)
+
+! *********************************************************************
+
+ ghc_vectornd(:,:)=zero
+ if (nvloc/=1) return
+
+ nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
+ if (mpi_enreg%paral_spinor==0) then
+   shift=npw_k
+   nspinor1TreatedByThisProc=.true.
+   nspinor2TreatedByThisProc=(nspinortot==2)
+ else
+   shift=0
+   nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
+   nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
+ end if
+
+ ABI_ALLOCATE(work,(2,n4,n5,n6*ndat))
+
+ ! scale conversion from SI to atomic units,
+ ! here \alpha^2 where \alpha is the fine structure constant
+ scale_conversion = one/(InvFineStruct*InvFineStruct)
+ ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
+
+ if (nspinortot==1) then
+
+   ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
+
+!  Do it in 3 STEPs:
+!  STEP1: Compute grad of cwavef 
+   ABI_ALLOCATE(gcwavef,(2,npw_k*ndat,3))
+   ! ABI_ALLOCATE(lcwavef,(2,npw_k*ndat))
+!!$OMP PARALLEL DO
+   do idat=1,ndat
+     do ipw=1,npw_k
+        gcwavef(:,ipw+(idat-1)*npw_k,1:3)=zero
+       ! lcwavef(:,ipw+(idat-1)*npw_k)  =zero
+     end do
+   end do
+!    do idir=1,3
+!      gp2pi1=gprimd(idir,1)*two_pi
+!      gp2pi2=gprimd(idir,2)*two_pi
+!      gp2pi3=gprimd(idir,3)*two_pi
+!      kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
+! !    Multiplication by 2pi i (G+k)_idir for gradient
+! !    Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
+!      do idat=1,ndat
+!        do ipw=1,npw_k
+!          kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
+!          gcwavef(1,ipw+(idat-1)*npw_k,idir)= cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart
+!          gcwavef(2,ipw+(idat-1)*npw_k,idir)=-cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart
+!          ! lcwavef(1,ipw+(idat-1)*npw_k)=lcwavef(1,ipw+(idat-1)*npw_k)-cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart**2
+!          ! lcwavef(2,ipw+(idat-1)*npw_k)=lcwavef(2,ipw+(idat-1)*npw_k)-cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart**2
+!        end do
+!      end do
+   !    end do ! idir
+
+   do idat = 1, ndat
+      do ipw = 1, npw_k
+         kg_k_vec(1:3) = kg_k(1:3,ipw)+kpt(1:3)
+         kg_k_vec_cart(1:3) = MATMUL(gprimd,kg_k_vec)
+         do idir = 1, 3
+            gcwavef(1,ipw+(idat-1)*npw_k,idir)= cwavef(1,ipw+(idat-1)*npw_k)*two_pi*kg_k_vec_cart(idir)
+            gcwavef(2,ipw+(idat-1)*npw_k,idir)= cwavef(2,ipw+(idat-1)*npw_k)*two_pi*kg_k_vec_cart(idir)
+         end do
+      end do
+   end do
+         
+   !  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
+   ! step 2 is not relevant for vectornd because no Laplacian term
+!    call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef,ghc1,work,gbound_k,gbound_k,&
+! &   istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+! &   tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+! !!$OMP PARALLEL DO
+!    do idat=1,ndat
+!      do ipw=1,npw_k
+!        ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
+!      end do
+!    end do
+!    ABI_DEALLOCATE(lcwavef)
+!  STEP3: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+   do idir=1,3
+     call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+&     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+!!$OMP PARALLEL DO
+     do idat=1,ndat
+       do ipw=1,npw_k
+         ghc_vectornd(:,ipw+(idat-1)*npw_k)=ghc_vectornd(:,ipw+(idat-1)*npw_k)+scale_conversion*ghc1(:,ipw+(idat-1)*npw_k)
+       end do
+     end do
+   end do ! idir
+   ABI_DEALLOCATE(gcwavef)
+   ABI_DEALLOCATE(ghc1)
+
+ else ! nspinortot==2
+
+!    ABI_ALLOCATE(cwavef1,(2,npw_k*ndat))
+!    ABI_ALLOCATE(cwavef2,(2,npw_k*ndat))
+!    do idat=1,ndat
+!      do ipw=1,npw_k
+!        cwavef1(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+!        cwavef2(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+!      end do
+!    end do
+! !  call cg_zcopy(npw*ndat,cwavef(1,1),cwavef1)
+! !  call cg_zcopy(npw*ndat,cwavef(1,1+shift),cwavef2)
+
+
+!    if (nspinor1TreatedByThisProc) then
+
+!      ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
+
+! !    Do it in 3 STEPs:
+! !    STEP1: Compute grad of cwavef and Laplacian of cwavef
+!      ABI_ALLOCATE(gcwavef1,(2,npw_k*ndat,3))
+!      ABI_ALLOCATE(lcwavef1,(2,npw_k*ndat))
+! !!$OMP PARALLEL DO
+!      do idat=1,ndat
+!        do ipw=1,npw_k
+!          gcwavef1(:,ipw+(idat-1)*npw_k,1:3)=zero
+!          lcwavef1(:,ipw+(idat-1)*npw_k)=zero
+!        end do
+!      end do
+!      do idir=1,3
+!        gp2pi1=gprimd(idir,1)*two_pi
+!        gp2pi2=gprimd(idir,2)*two_pi
+!        gp2pi3=gprimd(idir,3)*two_pi
+!        kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
+! !      Multiplication by 2pi i (G+k)_idir for gradient
+! !      Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
+!        do idat=1,ndat
+!          do ipw=1,npw_k
+!            kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
+!            gcwavef1(1,ipw+(idat-1)*npw_k,idir)= cwavef1(2,ipw+(idat-1)*npw_k)*kg_k_cart
+!            gcwavef1(2,ipw+(idat-1)*npw_k,idir)=-cwavef1(1,ipw+(idat-1)*npw_k)*kg_k_cart
+!            lcwavef1(1,ipw+(idat-1)*npw_k)=lcwavef1(1,ipw+(idat-1)*npw_k)-cwavef1(1,ipw+(idat-1)*npw_k)*kg_k_cart**2
+!            lcwavef1(2,ipw+(idat-1)*npw_k)=lcwavef1(2,ipw+(idat-1)*npw_k)-cwavef1(2,ipw+(idat-1)*npw_k)*kg_k_cart**2
+!          end do
+!        end do
+!      end do ! idir
+! !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
+!      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef1,ghc1,work,gbound_k,gbound_k,&
+! &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+! &     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+! !!$OMP PARALLEL DO
+!      do idat=1,ndat
+!        do ipw=1,npw_k
+!          ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
+!        end do
+!      end do
+!      ABI_DEALLOCATE(lcwavef1)
+! !    STEP3: Compute (grad components of vxctaulocal)*(grad components of cwavef)
+!      do idir=1,3
+!        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+!        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+! &      tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+! !!$OMP PARALLEL DO
+!        do idat=1,ndat
+!          do ipw=1,npw_k
+!            ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k) = ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
+!          end do
+!        end do
+!      end do ! idir
+!      ABI_DEALLOCATE(gcwavef1)
+!      ABI_DEALLOCATE(ghc1)
+
+!    end if ! spin 1 treated by this proc
+
+!    if (nspinor2TreatedByThisProc) then
+
+!      ABI_ALLOCATE(ghc2,(2,npw_k*ndat))
+
+! !    Do it in 3 STEPs:
+! !    STEP1: Compute grad of cwavef and Laplacian of cwavef
+!      ABI_ALLOCATE(gcwavef2,(2,npw_k*ndat,3))
+!      ABI_ALLOCATE(lcwavef2,(2,npw_k*ndat))
+! !!$OMP PARALLEL DO
+!      do idat=1,ndat
+!        do ipw=1,npw_k
+!          gcwavef2(:,ipw+(idat-1)*npw_k,1:3)=zero
+!          lcwavef2(:,ipw+(idat-1)*npw_k)  =zero
+!        end do
+!      end do
+!      do idir=1,3
+!        gp2pi1=gprimd(idir,1)*two_pi
+!        gp2pi2=gprimd(idir,2)*two_pi
+!        gp2pi3=gprimd(idir,3)*two_pi
+!        kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
+! !      Multiplication by 2pi i (G+k)_idir for gradient
+! !      Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
+!        do idat=1,ndat
+!          do ipw=1,npw_k
+!            kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
+!            gcwavef2(1,ipw+(idat-1)*npw_k,idir)= cwavef2(2,ipw+(idat-1)*npw_k)*kg_k_cart
+!            gcwavef2(2,ipw+(idat-1)*npw_k,idir)=-cwavef2(1,ipw+(idat-1)*npw_k)*kg_k_cart
+!            lcwavef2(1,ipw+(idat-1)*npw_k)=lcwavef2(1,ipw+(idat-1)*npw_k)-cwavef2(1,ipw+(idat-1)*npw_k)*kg_k_cart**2
+!            lcwavef2(2,ipw+(idat-1)*npw_k)=lcwavef2(2,ipw+(idat-1)*npw_k)-cwavef2(2,ipw+(idat-1)*npw_k)*kg_k_cart**2
+!          end do
+!        end do
+!      end do ! idir
+! !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
+!      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef2,ghc2,work,gbound_k,gbound_k,&
+! &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+! &     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+! !!$OMP PARALLEL DO
+!      do idat=1,ndat
+!        do ipw=1,npw_k
+!          ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)
+!        end do
+!      end do
+!      ABI_DEALLOCATE(lcwavef2)
+! !    STEP3: Compute sum of (grad components of vxctaulocal)*(grad components of cwavef)
+!      do idir=1,3
+!        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
+!        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+! &      tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+! !!$OMP PARALLEL DO
+!        do idat=1,ndat
+!          do ipw=1,npw_k
+!            ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)
+!          end do
+!        end do
+!      end do ! idir
+
+!      ABI_DEALLOCATE(gcwavef2)
+!      ABI_DEALLOCATE(ghc2)
+
+!    end if ! spin 2 treated by this proc
+
+!    ABI_DEALLOCATE(cwavef1)
+!    ABI_DEALLOCATE(cwavef2)
+
+ end if ! npsinortot
+
+ ABI_DEALLOCATE(work)
+
+end subroutine getghc_nucdip
+!!***
 
 !!****f* ABINIT/getghc_mGGA
 !!
