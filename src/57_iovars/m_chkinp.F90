@@ -1410,6 +1410,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  String method
    if(dt%imgmov==2) then
      cond_string(1)='imgmov'      ; cond_values(1)=dt%imgmov
+!    Some restriction for the solver
      if(dt%string_algo==0)then
        cond_string(2)='string_algo' ; cond_values(2)=dt%string_algo
        call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,1,(/0/),iout)
@@ -1422,7 +1423,26 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  NEB
    if(dt%imgmov==5)then
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
+!    Some restriction for the solver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,4,(/0,1,2,3/),iout)
+!    Static image energy is needed if spring constant is variable
+     if (abs(dt%neb_spring(1)-dt%neb_spring(2))>=tol8.and.dt%istatimg==0) then
+       write(message, '(7a)' )&
+&       'When using variable NEB spring constants (which is the default for CI-NEB),',ch10,&
+&       'all the energies of the cell images are needed (including static images!).',ch10,&
+&       'You cannot use istatimg=0!',ch10,&
+&       'Action: put istatimg=1 in input file.'
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
+!    Static image energy is needed for CI-NEB or improved tangent
+     if ((dt%neb_algo==1.or.dt%neb_algo==2).and.dt%istatimg==0) then
+       write(message, '(7a)' )&
+&       'When using Improved-tangent-NEB or CI-NEB,',ch10,&
+&       'all the energies of the cell images are needed (including static images!).',ch10,&
+&       'You cannot use istatimg=0!',ch10,&
+&       'Action: put istatimg=1 in input file.'
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
    end if
 
 !  mffmem
