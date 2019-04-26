@@ -351,7 +351,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
- logical :: berryflag,computesusmat,fixed_occ
+ logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
  real(dp) :: dmft_ldaocc
@@ -369,7 +369,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vlocal_tmp(:,:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
@@ -660,6 +661,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ABI_ALLOCATE(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
    end if
 
+   has_vectornd = (with_vectornd .EQ. 1)
+   if(has_vectornd) then
+      ABI_ALLOCATE(vectornd_pac,(n4,n5,n6,gs_hamk%nvloc,3))
+   end if
+
 !  LOOP OVER SPINS
    do isppol=1,dtset%nsppol
      call timab(982,1,tsec)
@@ -705,10 +711,25 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      rhoaug(:,:,:,:)=zero
 
+     ! if vectornd is present, set it up for addition to gs_hamk similarly to how it's done for
+     ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
+     ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
+     if(has_vectornd) then
+        do idir = 1, 3
+           ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+           call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
+           ABI_DEALLOCATE(cgrvtrial)
+        end do
+     end if
+
 !    Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
      if (with_vxctau) then
        call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
+     end if
+     if (has_vectornd) then
+        call load_spin_hamiltonian(gs_hamk,isppol,vectornd=vectornd_pac)
      end if
 
      call timab(982,2,tsec)
@@ -1084,6 +1105,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_DEALLOCATE(vlocal)
    if(with_vxctau) then
      ABI_DEALLOCATE(vxctaulocal)
+   end if
+   if(has_vectornd) then
+      ABI_DEALLOCATE(vectornd_pac)
    end if
 
    call timab(988,2,tsec)
