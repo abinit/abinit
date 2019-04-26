@@ -36,7 +36,7 @@ def rm_server(keyword):
   if keyword.startswith(server):
      return keyword[len(server):]
 
-def Check_url_to_skip(e, u, v):
+def Checking_on_url_to_skip(e, u, v):
   global url_to_skip
   for ui in url_to_skip :
      #print(e,u,v)
@@ -50,13 +50,47 @@ def Check_url_to_skip(e, u, v):
     #     if extern.text == "1" and URL.find( s ) >= 0 :
     #        continue
 
-def Check_url_string_to_skip(e, u):
+def Checking_on_url_string_to_skip(e, u):
   global url_string_to_skip
   for s in url_string_to_skip :
      if e == "1" and u.find( s ) >= 0 :
          #print(s,"url_string_to_skip")
          return True
   return False
+
+def Checking_on_no_error_list(url, info, valid):
+  global no_error_list
+  #print("Enter no_error_list... %s,%s,%s" % (url.text,info,valid))
+  for no_error in no_error_list:
+
+    norc = True  # True : we consider that this is not an error
+
+    url_rc = None
+    try:
+       url_rc = no_error['url'].search(url.text)
+    except:
+       print("-- no URL NAME --")
+    norc = norc and ( url_rc != None )
+
+    info_rc = None
+    if info is not None:
+      try:
+       info_rc = no_error['info'].search(info.text)
+       norc = norc and ( info_rc != None )
+      except:
+       pass
+    else:
+       info_rc = True
+
+    valid_rc = None
+    valid_rc = no_error['valid'].search(valid)
+    norc = norc and ( valid_rc != None )
+
+    #print(" url_rc : ",url_rc," info_rc : ",info_rc,"valid_rc : ",valid_rc)
+    #print("exit with : ",url_rc != None and info_rc != None and valid_rc != None)
+    if url_rc != None and info_rc != None and valid_rc != None:
+        return True # in the exception list -> next xml entry
+  return False # may be a error
 
 # ---------------------------------------------------------------------------- #
 
@@ -72,6 +106,9 @@ no_error_list = [
     { 'url'  : re.compile('(doi|aps).org'),
       'info' : re.compile('^Redirected'),
       'valid': re.compile('^403 Forbidden')
+    },
+    { 'url'  : re.compile('jstor.org'),
+      'valid': re.compile('^403 Unauthorized')
     },
 ]
 
@@ -133,84 +170,64 @@ def main(filename,home_dir=""):
   
     url    = child.find('url')
     URL    = url.text
-    extern = child.find('extern')
     info   = child.find('infos/info')
+    extern = child.find('extern')
     valid  = child.find('valid').get("result")
 
-    ###  precleaning ###
+    ### precleaning ###
 
-    if ( valid == "200 OK" ) or ( valid == "200" ):
-      continue
+    v = re.compile("^200")   # status "200" or "200 OK"
+    if v.search(valid):
+       continue
 
-    if extern.text == "1" and url.text[0:6] == "mailto" and valid == "Valid mail address syntax" :
-            continue
+    if url.text[0:6] == "mailto" and valid == "Valid mail address syntax" :
+       continue
 
-    if Check_url_to_skip( extern.text, url.text, valid ):
-        continue
+    if Checking_on_url_to_skip( extern.text, url.text, valid ):
+       continue
 
-    if Check_url_string_to_skip( extern.text, url.text ):
-        continue
+    if Checking_on_url_string_to_skip( extern.text, url.text ):
+       continue
 
     ### fine cleaning ###
 
-    for no_error in no_error_list:
-  
-      norc = True  # True : we consider that this is not an error
-  
-      url_rc = None
-      try:
-         url_rc = no_error['url'].search(url.text)
-      except:
-         print("-- no URL NAME --")
-      norc = norc and ( url_rc != None )
-  
-      info_rc = None
-      if info is not None:
-        try:
-         info_rc = no_error['info'].search(info.text)
-         norc = norc and ( info_rc != None )
-        except:
-         pass
-  
-      valid_rc = None
-      valid_rc = child.find('valid').get("result")
-      norc = norc and ( valid_rc != None )
-  
-      if url_rc != None and info_rc != None and valid_rc != None:
-          break
+    if Checking_on_no_error_list(url, info, valid) :
+       continue
 
-      ### last chance to know if it's not a error ###
-      ### access denied ###
-      if not norc and valid == "syntax OK" :
-          r = requests.get(url.text, headers={"content-type":"text"})
-          #print(r.request.headers)
-          print("{0:12} rc = {1}".format('CHECK URL',r.status_code))
-          if r.status_code == 200 :
-             break
+    ### last chance to know if it's not a error ###
+    ### access denied  then checks with 'curl'  ###
 
-      if not norc :
-          # found a true error... : reporting on bb
-          rc += 1
-          name=child.find('name')
-          parent=child.find('parent')
-          realurl=child.find('realurl')
-          try:
-             print("{0:12} {1}".format('URL',url.text))
-          except:
-             print("{0:12} {1}".format('URL',' ** NO URL **'))
-          try:
-             print("{0:12} {1}".format('Name',name.text))
-          except:
-             print("{0:12} {1}".format('Name','** NO NAME **'))
-          print("{0:12} {1}, line {2}".format('Parent URL',rm_server(parent.text),parent.get('line')))
-          try:
-             print("{0:12} {1}".format('Infos',info.text))
-          except:
-             pass 
-          print("{0:12} {1}".format('Real URL',realurl.text))
-          print("{0:12} {1}".format('Result',valid))
-          print('--------------------')
-          break
+    Check_connection = False
+    if valid == "syntax OK" :
+        Check_connection = True
+        request = requests.get(url.text, headers={"content-type":"text"}, timeout=(2,2) )
+        #print(r.request.headers)
+        if request.status_code == 200 :
+            continue
+
+    # found a true error... : reporting on bb
+    rc += 1
+    name=child.find('name')
+    parent=child.find('parent')
+    realurl=child.find('realurl')
+    try:
+       print("{0:12} {1}".format('URL',url.text))
+    except:
+       print("{0:12} {1}".format('URL',' ** NO URL **'))
+    try:
+       print("{0:12} {1}".format('Name',name.text))
+    except:
+       print("{0:12} {1}".format('Name','** NO NAME **'))
+    print("{0:12} {1}, line {2}".format('Parent URL',rm_server(parent.text),parent.get('line')))
+    try:
+       print("{0:12} {1}".format('Infos',info.text))
+    except:
+       pass 
+    print("{0:12} {1}".format('Real URL',realurl.text))
+    print("{0:12} {1}".format('Result',valid))
+    if Check_connection : 
+          print("{0:12} {1}".format('Status CNX',request.status_code))
+    print('---------------------------')
 
   return rc
 
