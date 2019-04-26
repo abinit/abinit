@@ -2516,7 +2516,6 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
    end do
  end do
 
-
 !Do sums over real space:
  reta=sqrt(eta)
  reta3m=-eta*reta
@@ -2712,7 +2711,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: arg,arga,argb,c1i,c1r,da1,da2,da3,delag,delbg,derfc_arg
  real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
- real(dp) :: eta,fac,fac2,gdot12,gdot13,gdot23,gsq,gsum,gterms,norm1
+ real(dp) :: eta,fac,fac2,gdot12,gdot13,gdot23,gsq,gpqdq,gsum,gterms,norm1
  real(dp) :: r1,r2,r3,rdot12,rdot13,rdot23,recip,reta
  real(dp) :: reta3m,rmagn,rsq,term,term1,term2,term3
  character(len=500) :: message
@@ -2742,6 +2741,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
 !Sum terms over g space:
  fac=pi**2.d0/eta
  fac2=2.d0*fac
+ dyewdq(:,:,:,:,:,:)=zero
  do ig3=-ng,ng
    do ig2=-ng,ng
      do ig1=-ng,ng
@@ -2772,24 +2772,23 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
            do ia0=1,my_natom
              ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
              arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
-!             do ib=1,ia
-             do ib=1,my_natom
+             do ib=1,ia
                argb=two_pi*(gpq(1)*xred(1,ib)+gpq(2)*xred(2,ib)+gpq(3)*xred(3,ib))
                arg=arga-argb
                c1r=cos(arg)*term
                c1i=sin(arg)*term
 
                do iq=1,3
+                 gpqdq=gmet(iq,1)*gpq(1)+gmet(iq,2)*gpq(2)+gmet(iq,3)*gpq(3)
                  do mu=1,3
                    delag=zero; if(iq==mu) delag=one
-!                   do nu=1,mu
-                   do nu=1,3
+                   do nu=1,mu
                      delbg=zero; if(iq==nu) delbg=one
                      term1=delag*gpq(nu)+delbg*gpq(mu)
-                     term2=gpq(mu)*gpq(nu)*gpq(iq)
+                     term2=gpq(mu)*gpq(nu)*gpqdq
                      term3=fac2*term2
                      term2=two*term2/gsq
-                     gterms=(term1-term2)-term3
+                     gterms=term1-term2-term3
                      dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)+gterms*c1r
                      dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+gterms*c1i
                    end do
@@ -2811,12 +2810,10 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  norm1=4.0_dp*pi/ucvol
  do ia0=1,my_natom
    ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
-!   do ib=1,ia
-   do ib=1,my_natom
+   do ib=1,ia
      do iq=1,3
        do mu=1,3
-         do nu=1,3
-!         do nu=1,mu
+         do nu=1,mu
            dyewdq(:,mu,ia,nu,ib,iq)=dyewdq(:,mu,ia,nu,ib,iq)*norm1
          end do
        end do
@@ -2836,8 +2833,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
        c1i=sin(arg)*reta3m
        do ia0=1,my_natom
          ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
-!         do ib=1,ia
-         do ib=1,my_natom
+         do ib=1,ia
            r1=dble(ir1)+xred(1,ib)-xred(1,ia)
            r2=dble(ir2)+xred(2,ib)-xred(2,ia)
            r3=dble(ir3)+xred(3,ib)-xred(3,ia)
@@ -2869,8 +2865,8 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
                do iq=1,3               
                  do mu=1,3
-                   do nu=1,3
-!                   do nu=1,mu
+!                   do nu=1,3
+                   do nu=1,mu
                      dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)-&
 &                     c1i*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
                      dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+&
@@ -2906,18 +2902,14 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
 !write(std_out,*)' '
  do ia0=1,my_natom
    ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
-!   do ib=1,ia
-   do ib=1,my_natom
+   do ib=1,ia
      do iq=1,3               
        do mu=1,3
-!         do nu=1,mu
-         do nu=1,3
+         do nu=1,mu
            do ii=1,2
-!            write(std_out,*)dyew(ii,mu,ia,nu,ib)
              dyewdq(ii,mu,ia,nu,ib,iq)=dyewdq(ii,mu,ia,nu,ib,iq)*&
 &             zion(typat(ia))*zion(typat(ib))
            end do
-           !write(100,'(5i3,1x,2f14.8)') mu,ia,nu,ib,iq,dyewdq(:,mu,ia,nu,ib,iq)
          end do
        end do
      end do
@@ -2925,17 +2917,19 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  end do
 
 !Symmetrize with respect to the directions
-! do ia0=1,my_natom
-!   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
-!   do ib=1,ia
-!     do mu=1,3
-!       do nu=1,mu
-!         dyewdq(re,nu,ia,mu,ib)=dyewdq(re,mu,ia,nu,ib)
-!         dyewdq(im,nu,ia,mu,ib)=dyewdq(im,mu,ia,nu,ib)
-!       end do
-!     end do
-!   end do
-! end do
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq=1,3
+       do mu=1,3
+         do nu=1,mu
+           dyewdq(re,nu,ia,mu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)
+           dyewdq(im,nu,ia,mu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)
+         end do
+       end do
+     end do
+   end do
+ end do
 
 !In case of parallelism over atoms: communicate
  if (paral_atom) then
@@ -2945,16 +2939,18 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  end if
 
 !Fill the upper part of the matrix, with the hermitian conjugate
-! do ia=1,natom
-!   do ib=1,ia
-!     do nu=1,3
-!       do mu=1,3
-!         dyewdq(re,mu,ib,nu,ia)=dyewdq(re,mu,ia,nu,ib)
-!         dyewdq(im,mu,ib,nu,ia)=-dyewdq(im,mu,ia,nu,ib)
-!       end do
-!     end do
-!   end do
-! end do
+ do ia=1,natom
+   do ib=1,ia
+     do iq=1,3
+       do nu=1,3
+         do mu=1,3
+           dyewdq(re,mu,ib,nu,ia,iq)=dyewdq(re,mu,ia,nu,ib,iq)
+           dyewdq(im,mu,ib,nu,ia,iq)=-dyewdq(im,mu,ia,nu,ib,iq)
+         end do
+       end do
+     end do
+   end do
+ end do
 
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
