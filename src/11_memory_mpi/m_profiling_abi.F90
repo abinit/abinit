@@ -28,7 +28,7 @@
 module m_profiling_abi
 
  use defs_basis
- use m_clib
+ !use m_clib
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -207,7 +207,9 @@ contains
    end if
 
  case default
-   write(msg, "(a,i0)")"Invalid value for abimem_level:", minfo%level
+   write(msg, "(a,i0,2a)") &
+    "Invalid value for abimem_level:", minfo%level, ch10, &
+    "Make sure you are calling abimem_init and abinit_doctor in main!"
    _ABORT(msg)
  end select
 
@@ -313,7 +315,7 @@ subroutine abimem_report(unt, with_mallinfo)
  prev_memory = minfo%memory
 
  if (present(with_mallinfo)) then
-   if (with_mallinfo) call clib_print_mallinfo(unit=unt)
+   !if (with_mallinfo) call clib_print_mallinfo(unit=unt)
  end if
 
 end subroutine abimem_report
@@ -401,16 +403,16 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
    minfo%num_alloc = minfo%num_alloc + 1
  else if (isize < 0) then
    minfo%num_free = minfo%num_free + 1
+ else
+   ! This is the correct check but tests fail!
+   !if (act == "A") then
+   !  minfo%num_alloc = minfo%num_alloc + 1
+   !else if (act == "D") then
+   !  minfo%num_free = minfo%num_free + 1
+   !else
+   !  _ABORT("Wrong action: "//trim(act))
+   !end if
  end if
-
- ! This is the correct check but tests fail!
- !if (act == "A") then
- !  minfo%num_alloc = minfo%num_alloc + 1
- !else if (act == "D") then
- !  minfo%num_free = minfo%num_free + 1
- !else
- !  _ABORT("Wrong action: "//trim(act))
- !end if
 
  ! Selective memory tracing
  do_log = .True.

@@ -100,6 +100,11 @@
  *   ABI_DT_ALLOCATE
  *   ABI_DT_DEALLOCATE
  *
+ * To allocate scalars, use:
+ *
+ *  ABI_MALLOC_SCALAR
+ *  ABI_FREE_SCALAR
+ *
  #define HAVE_MEM_PROFILING
 */
 
@@ -112,7 +117,8 @@
    - storage_size was introduced in F2003 and returns the size in bits.
 
  Both loc and storage_size are polymorphic so one can use it with intrinsic types as well 
- as user-defined datatypes.
+ as user-defined datatypes. scalar types require a special treatment (MALLOC_SCALAR, FREE_SCALAR)
+ because shape == 0 thus it's not possible to discern with _MEM between zero-sized arrays and scalar
 */
 #  define _LOC(x)  int(loc(x), kind=8) 
 #  define _MEM(arr) product(int(shape(arr), kind=8)) * storage_size(arr, kind=8)
@@ -125,6 +131,10 @@
 #  define ABI_MALLOC_SCALAR(scalar) \
    allocate(scalar) NEWLINE \
    call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
+
+#  define ABI_FREE_SCALAR(scalar) \
+   call abimem_record(0, QUOTE(scalar), _LOC(scalar), "D", -storage_size(scalar, kind=8),  __FILE__, __LINE__) NEWLINE \
+   deallocate(scalar)
 
 #  define ABI_DEALLOCATE(ARR) \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__,  __LINE__) NEWLINE \
@@ -149,13 +159,13 @@
 
 #  define ABI_MOVE_ALLOC(from, to) \
    call abimem_record(0, QUOTE(from), _LOC(from), "D", _MEM(from),  __FILE__, __LINE__) NEWLINE \
+   if (allocated(to)) call abimem_record(0, QUOTE(to), _LOC(to), "D", _MEM(to),  __FILE__, __LINE__) NEWLINE \
    call move_alloc(from, to) NEWLINE \
    call abimem_record(0, QUOTE(to), _LOC(to), "A", _MEM(to),  __FILE__, __LINE__)
 
 #else
 /* macros used in production */
 #  define ABI_ALLOCATE(ARR,SIZE) allocate(ARR SIZE)
-#  define ABI_MALLOC_SCALAR(scalar) allocate(scalar)
 #  define ABI_DEALLOCATE(ARR)  deallocate(ARR)
 #  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) allocate(ARR SIZE, stat=ierr)
 #  define ABI_DATATYPE_ALLOCATE(ARR,SIZE)  allocate(ARR SIZE)
@@ -163,9 +173,11 @@
 #  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
         allocate(ARR SIZE, stat=ierr) NEWLINE \
         ABI_CHECK(ierr == 0, "out-of-memory")
-
+#  define ABI_MALLOC_SCALAR(scalar) allocate(scalar)
+#  define ABI_FREE_SCALAR(scalar) deallocate(scalar)
 #  define ABI_MOVE_ALLOC(from, to) call move_alloc(from, to)
 #endif
+
 
 /* Macros to allocate zero-initialized arrays.
  * defined in terms of previous macros */
@@ -177,6 +189,7 @@
 #define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
 
 #define ABI_FREE(ARR) ABI_DEALLOCATE(ARR)
+
 #define ABI_STAT_MALLOC(ARR,SIZE,ierr) ABI_STAT_ALLOCATE(ARR,SIZE,ierr)
 
 #define ABI_DT_MALLOC(ARR,SIZE)  ABI_DATATYPE_ALLOCATE(ARR,SIZE)

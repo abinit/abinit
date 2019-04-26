@@ -69,9 +69,11 @@
 #include "abi_common.h"
 
 module m_sparse_matrix
+
   use defs_basis
   use m_errors
   use m_abicore
+
   implicit none
 
   !!***
@@ -384,7 +386,7 @@ endif
        tmp=>iter
        iter=>iter%next
        if( associated(tmp)) then
-         ABI_FREE(tmp)
+         ABI_FREE_SCALAR(tmp)
        endif
     enddo
     nullify(self%first)
@@ -528,8 +530,8 @@ endif
     integer, allocatable, intent(inout)::ilist(:)
     real(dp),allocatable, intent(inout)::vallist(:)
     integer::ind=1
-    ABI_MALLOC_SCALAR(ilist(self%length))
-    ABI_MALLOC_SCALAR(vallist(self%length))
+    ABI_MALLOC(ilist, (self%length))
+    ABI_MALLOC(vallist, (self%length))
     call llist_iter_restart(self)
     do while(associated(self%iter))
        ilist(ind)=self%iter%i
