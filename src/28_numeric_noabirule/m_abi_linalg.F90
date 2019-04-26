@@ -54,7 +54,12 @@ module m_abi_linalg
  integer,save :: eigen_d_lwork=0
  integer,save :: eigen_c_lwork=0
  integer,save :: eigen_z_lwork=0
+ integer,save :: eigen_c_lrwork=0
+ integer,save :: eigen_z_lrwork=0
+ integer,save :: eigen_liwork=0
 
+ integer,save,allocatable :: eigen_iwork(:)
+ 
  real(sp),save,allocatable :: eigen_c_rwork(:)
  real(dp),save,allocatable :: eigen_z_rwork(:)
  real(sp),save,allocatable :: eigen_s_work(:)
@@ -151,8 +156,10 @@ module m_abi_linalg
     !module procedure abi_dheev
     !module procedure abi_cheev
     !module procedure abi_zheev
-    module procedure abi_dheev_alloc
-    module procedure abi_cheev_alloc
+    module procedure abi_dheev_new
+    module procedure abi_cheev_new
+!   module procedure abi_dheev_alloc
+!   module procedure abi_cheev_alloc
     module procedure abi_zheev_alloc
  end interface
  !----------------------------------------------------------------------
@@ -385,6 +392,9 @@ CONTAINS  !===========================================================
  eigen_d_lwork   = 0
  eigen_c_lwork   = 0
  eigen_z_lwork   = 0
+ eigen_c_lrwork  = 0
+ eigen_z_lrwork  = 0
+ eigen_liwork    = 0
 
  call abi_linalg_eigen_setmaxsize(max_eigen_pb_size)
 
@@ -426,56 +436,105 @@ CONTAINS  !===========================================================
 !Arguments ------------------------------------
  integer,intent(in) :: max_eigen_pb_size
 
+!Local variables ------------------------------
+#ifdef HAVE_LINALG_MAGMA
+ integer :: nb
+!integer :: magmaf_get_ssytrd_nb
+ integer :: magmaf_get_dsytrd_nb
+!integer :: magmaf_get_chetrd_nb
+ integer :: magmaf_get_zhetrd_nb
+#endif
+
 !******************************************************************
 
-!Single precision work arrays (real and complex)
  eigen_s_maxsize = max_eigen_pb_size
- eigen_s_lwork = max(1,3*eigen_s_maxsize)
+ eigen_d_maxsize = max_eigen_pb_size
+ eigen_c_maxsize = max_eigen_pb_size
+ eigen_z_maxsize = max_eigen_pb_size
+
+!Single precision WORK -- Not used yet
+ eigen_s_lwork = 1
+!eigen_s_lwork = max(eigen_s_lwork,3*eigen_s_maxsize) ! SSYEV, SSYGV, SSPEV[D], SSPGV[D]
+!eigen_s_lwork = max(eigen_s_lwork,1+6*eigen_s_maxsize+2*eigen_s_maxsize**2) ! SSYEVD SSYGVD
+!#ifdef HAVE_LINALG_MAGMA
+!nb=magmaf_get_ssytrd_nb(eigen_s_maxsize)
+!eigen_s_lwork = max(eigen_s_lwork,eigen_s_maxsize*(nb+2)) ! MAGMAF_SSYEVD, MAGMAF_SSYGVD
+!#endif
  if(allocated(eigen_s_work)) then
    ABI_DEALLOCATE(eigen_s_work)
  end if
- ABI_ALLOCATE(eigen_s_work,(max(1,eigen_s_lwork)))
+ ABI_ALLOCATE(eigen_s_work,(eigen_s_lwork))
 
- eigen_c_maxsize = max_eigen_pb_size
- eigen_c_lwork = max(1,2*eigen_c_maxsize-1)
- if(allocated(eigen_c_work)) then
-   ABI_DEALLOCATE(eigen_c_work)
- end if
-
- ABI_ALLOCATE(eigen_c_work,(max(1,eigen_c_lwork)))
- if(allocated(eigen_c_rwork)) then
-   ABI_DEALLOCATE(eigen_c_rwork)
- end if
- ABI_ALLOCATE(eigen_c_rwork,(max(1, 3*eigen_c_maxsize-2)))
-
-!Double precision work arrays (real and complex)
- eigen_d_maxsize = max_eigen_pb_size
- eigen_d_lwork = max(eigen_d_lwork,2*(2*eigen_d_maxsize - 1)) !for zh[ep][eg]v
- eigen_d_lwork = max(eigen_d_lwork,(3*eigen_d_maxsize))       !for ds[ep][eg]v
+!Double precision WORK
+ eigen_d_lwork = 1
+ eigen_d_lwork = max(eigen_d_lwork,3*eigen_d_maxsize) ! DSYEV, DSYGV, DSPEV[D], DSPGV[D]
+ eigen_d_lwork = max(eigen_d_lwork,1+6*eigen_d_maxsize+2*eigen_d_maxsize**2) ! DSYEVD, DSYGVD
 #ifdef HAVE_LINALG_MAGMA
- eigen_d_lwork = max(eigen_d_lwork,2*(2*(eigen_d_maxsize**2) + 6*eigen_d_maxsize +1))!for magma_zhe[eg]v
- eigen_d_lwork = max(eigen_d_lwork, eigen_d_maxsize**2 + 33*eigen_d_maxsize)         !for magma_dsy[eg]v
+ nb=magmaf_get_dsytrd_nb(eigen_d_maxsize)
+ eigen_d_lwork = max(eigen_d_lwork,eigen_d_maxsize*(nb+2)) ! MAGMAF_DSYEVD, MAGMAF_DSYGVD
 #endif
  if(allocated(eigen_d_work)) then
    ABI_DEALLOCATE(eigen_d_work)
  end if
- ABI_ALLOCATE(eigen_d_work,(max(1,eigen_d_lwork)))
+ ABI_ALLOCATE(eigen_d_work,(eigen_d_lwork))
 
- eigen_z_maxsize = max_eigen_pb_size
- eigen_z_lwork = max(1,2*eigen_z_maxsize-1)
+!Single complex WORK -- Not used yet
+ eigen_c_lwork = 1
+!eigen_c_lwork = max(eigen_c_lwork,2*eigen_c_maxsize) ! CHEEV, CHEGV, CHPEV[D], CHPGV[D]
+!eigen_c_lwork = max(eigen_c_lwork,2*eigen_c_maxsize+eigen_c_maxsize**2) ! CHEEVD, CHEGVD
+!#ifdef HAVE_LINALG_MAGMA
+!nb=magmaf_get_chetrd_nb(eigen_c_maxsize)
+!eigen_c_lwork = max(eigen_c_lwork,eigen_c_maxsize*(nb+1)) ! MAGMAF_CHEEVD, MAGMAF_CHEGVD
+!#endif
+ if(allocated(eigen_c_work)) then
+   ABI_DEALLOCATE(eigen_c_work)
+ end if
+ ABI_ALLOCATE(eigen_c_work,(eigen_c_lwork))
+
+!Double complex WORK
+ eigen_z_lwork = 1
+ eigen_z_lwork = max(eigen_z_lwork,2*eigen_z_maxsize) ! ZHEEV, ZHEGV, ZHPEV[D], ZHPGV[D]
+ eigen_z_lwork = max(eigen_z_lwork,2*eigen_z_maxsize+eigen_z_maxsize**2) ! ZHEEVD, ZHEGVD
+#ifdef HAVE_LINALG_MAGMA
+ nb=magmaf_get_zhetrd_nb(eigen_z_maxsize)
+ eigen_z_lwork = max(eigen_z_lwork,eigen_z_maxsize*(nb+1)) ! MAGMAF_ZHEEVD, MAGMAF_ZHEGVD
+#endif
  if(allocated(eigen_z_work)) then
    ABI_DEALLOCATE(eigen_z_work)
  end if
- ABI_ALLOCATE(eigen_z_work,(max(1,eigen_z_lwork)))
+ ABI_ALLOCATE(eigen_z_work,(eigen_z_lwork))
+
+!Single precision RWORK -- Not used yet
+ eigen_c_lrwork = 1
+!eigen_c_lrwork = max(eigen_c_lrwork,3*eigen_c_maxsize-2) ! CHEEV, CHEGV, CHPEV, CHPGV
+!eigen_c_lrwork = max(eigen_c_lrwork,1+5*eigen_c_maxsize+2*eigen_c_maxsize**2) ! CHEEVD, CHEGVD, CHPEVD, CHPGVD
+ if(allocated(eigen_c_rwork)) then
+   ABI_DEALLOCATE(eigen_c_rwork)
+ end if
+ ABI_ALLOCATE(eigen_c_rwork,(eigen_c_lrwork))
+
+!Double precision RWORK
+ eigen_z_lrwork = 1
+ eigen_z_lrwork = max(eigen_z_lrwork,3*eigen_z_maxsize-2) ! ZHEEV, ZHEGV, ZHPEV, ZHPGV
+#ifdef HAVE_LINALG_MAGMA
+!Currently, ZHE[EG]VD are used only with MAGMA
+ eigen_z_lrwork = max(eigen_z_lrwork,1+5*eigen_z_maxsize+2*eigen_z_maxsize**2) ! ZHEEVD, ZHEGVD, ZHPEVD, ZHPGVD
+#endif
  if(allocated(eigen_z_rwork)) then
    ABI_DEALLOCATE(eigen_z_rwork)
  end if
+ ABI_ALLOCATE(eigen_z_rwork,(eigen_z_lrwork))
 
+!Integer IWORK
+ eigen_liwork = 1
 #ifdef HAVE_LINALG_MAGMA
- ABI_ALLOCATE(eigen_z_rwork,(max(1, 2*(eigen_z_maxsize**2) + 5*eigen_z_maxsize + 1)))
-#else
- ABI_ALLOCATE(eigen_z_rwork,(max(1, 3*eigen_z_maxsize-2)))
+!Currently, [S/D/C/Z][SY/HE/SP/HP][E/G]VD are used only with MAGMA
+ eigen_liwork = max(eigen_liwork,3+5*max_eigen_pb_size)
 #endif
+ if(allocated(eigen_iwork)) then
+   ABI_DEALLOCATE(eigen_iwork)
+ end if
+ ABI_ALLOCATE(eigen_iwork,(eigen_liwork))
 
  end subroutine abi_linalg_eigen_setmaxsize
 !!***
@@ -554,14 +613,17 @@ CONTAINS  !===========================================================
  if(allocated(eigen_c_work)) then
    ABI_DEALLOCATE(eigen_c_work)
  end if
- if(allocated(eigen_c_rwork)) then
-   ABI_DEALLOCATE(eigen_c_rwork)
- end if
  if(allocated(eigen_z_work)) then
    ABI_DEALLOCATE(eigen_z_work)
  end if
+  if(allocated(eigen_c_rwork)) then
+   ABI_DEALLOCATE(eigen_c_rwork)
+ end if
  if(allocated(eigen_z_rwork)) then
    ABI_DEALLOCATE(eigen_z_rwork)
+ end if
+ if(allocated(eigen_iwork)) then
+   ABI_DEALLOCATE(eigen_iwork)
  end if
 
  eigen_s_maxsize = 0
@@ -572,6 +634,9 @@ CONTAINS  !===========================================================
  eigen_d_lwork   = 0
  eigen_c_lwork   = 0
  eigen_z_lwork   = 0
+ eigen_c_lrwork  = 0
+ eigen_z_lrwork  = 0
+ eigen_liwork    = 0
 
  end subroutine abi_linalg_finalize
 !!***

@@ -18,6 +18,209 @@
 
 !!***
 
+!!****f* m_abi_linalg/abi_dheev_new
+!! NAME
+!! abi_dheev_new
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! SOURCE
+!!
+  subroutine abi_dheev_new(jobz,uplo,n,a,w, &
+&       x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_dheev_new'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n
+ real(dp),target, intent(inout) :: a(n,*)  ! FIXME should be cplex * lda
+ real(dp), target,intent(out) :: w(n)
+ integer, optional, intent(in) :: istwf_k
+ integer, optional, intent(in) :: x_cplx
+ integer, optional, intent(in) :: timopt,tim_xeigen
+ integer, optional, intent(in) :: use_gpu,use_slk
+
+!Local variables-------------------------------
+ integer :: cplx_,istwf_k_,usegpu_,use_slk_
+ integer :: info,lda
+ real(dp) :: tsec(2)
+ character(len=500) :: msg
+#ifdef HAVE_LINALG_PLASMA
+ integer :: jobz_plasma_a
+ type(c_ptr) :: plasma_work
+#endif
+
+! *********************************************************************
+
+!TODO : add lda...
+! not allocate work arrays in not needed (scalapack or plasma)
+
+ if (present(tim_xeigen).and.present(timopt)) then
+   if(abs(timopt)==3) then
+     call timab(tim_xeigen,1,tsec)
+   end if
+ end if
+
+ cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ usegpu_=0;if (present(use_gpu)) usegpu_=use_gpu
+ istwf_k_=1;if (present(istwf_k)) istwf_k_=istwf_k
+ use_slk_ = 0; if(present(use_slk)) use_slk_ = 1
+ lda=n
+
+ if( n > eigen_d_maxsize ) then
+    write(msg,'(a,2i3)')' Eigen size higher than max size set!!',n,eigen_d_maxsize
+    MSG_ERROR(msg)
+ endif
+
+#ifdef HAVE_LINALG_MAGMA
+ if (usegpu_==1) then
+    if (cplx_ == 2) then
+      call magmaf_zheevd(jobz,uplo,n,a,lda,w,eigen_z_work,eigen_z_lwork,&
+&            eigen_z_rwork,eigen_z_lrwork,eigen_iwork,eigen_liwork,info)
+    else
+      call magmaf_dsyevd(jobz,uplo,n,a,lda,w,eigen_d_work,eigen_d_lwork,&
+&                        eigen_iwork,eigen_liwork,info)
+    endif
+ else
+#endif
+
+#ifdef HAVE_LINALG_SCALAPACK
+ if( use_slk_ == 1.and.( n > maxval(abi_processor%grid%dims(1:2))) )  then
+    ABI_CHECK(present(x_cplx),"x_cplx must be present")
+    call compute_eigen1(abi_communicator,abi_processor,cplx_,n,n,a,w,istwf_k_)
+    info = 0 ! This is to avoid unwanted warning but it's not clean
+ else
+#endif
+
+#ifdef HAVE_LINALG_PLASMA
+ !FDahm & LNGuyen  (November 2012) :
+ !  In Plasma v 2.4.6, eigen routines support only
+ !  the eigenvalues computation (jobz=N) and not the
+ !  full eigenvectors bases determination (jobz=V)
+ if (LSAME(jobz,'N')) then
+   jobz_plasma_a = jobz_plasma(jobz)
+   if ( cplx_ == 2 .and. present(rwork)) then
+     call PLASMA_Alloc_Workspace_zheev(n,n,plasma_work,info)
+     info = PLASMA_zheev_c(jobz_plasma_a,uplo_plasma(uplo),n,c_loc(a),lda,c_loc(w),&
+&                          plasma_work,c_loc(rwork),lwork)
+     ABI_CHECK(info==0,"PLASMA_zheev_c returned info !=0")
+     call PLASMA_Dealloc_handle(plasma_work,info)
+   else
+     call PLASMA_Alloc_Workspace_dsyev(n,n,plasma_work,info)
+     info = PLASMA_dsyev_c(jobz_plasma_a,uplo_plasma(uplo),n,c_loc(a),lda,c_loc(w),&
+&                          plasma_work,c_loc(rwork),lwork)
+     ABI_CHECK(info==0,"PLASMA_dsyev_c returned info !=0")
+     call PLASMA_Dealloc_handle(plasma_work,info)
+   endif
+ else
+#endif
+   if (cplx_ == 2) then
+     call zheev(jobz,uplo,n,a,lda,w,eigen_z_work,eigen_z_lwork,eigen_z_rwork,info)
+   else
+#ifdef FC_NAG
+     !MG: This hack needed to pass paral[25] paral[29] and mpiio on nag@petrus with np=4
+     if (n < 0) write(std_out, *)"work: ",work(1:3)
+#endif
+     call dsyev(jobz,uplo,n,a,lda,w,eigen_d_work,eigen_d_lwork,info)
+   endif
+#ifdef HAVE_LINALG_PLASMA
+ end if
+#endif
+#ifdef HAVE_LINALG_SCALAPACK
+ end if
+#endif
+#ifdef HAVE_LINALG_MAGMA
+ end if
+#endif
+
+ if(info/=0) then
+   write(msg,'(a,i0)')' Problem in abi_xheev, info= ',info
+   MSG_ERROR(msg)
+ endif
+
+ if (present(tim_xeigen).and.present(timopt)) then
+   if(abs(timopt)==3) then
+     call timab(tim_xeigen,2,tsec)
+   end if
+ end if
+
+end subroutine abi_dheev_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_cheev_new
+!! NAME
+!! abi_cheev_new
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine abi_cheev_new(jobz,uplo,n,a,lda,w)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_cheev_new'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n
+ integer, intent(in) :: lda
+ complex(spc), target, intent(inout) :: a(lda,*)
+ real(sp),target, intent(out) :: w(n)
+
+!Local variables-------------------------------
+ integer :: info
+#ifdef HAVE_LINALG_PLASMA
+ integer :: jobz_plasma_a
+ type(c_ptr) :: plasma_work
+#endif
+
+! *********************************************************************
+
+#ifdef HAVE_LINALG_PLASMA
+ !FDahm & LNGuyen  (November 2012) :
+ !  In Plasma v 2.4.6, eigen routines support only
+ !  the eigenvalues computation (jobz=N) and not the
+ ! full eigenvectors bases determination (jobz=V)
+ if (LSAME(jobz,'N')) then
+   jobz_plasma_a = jobz_plasma(jobz)
+   call PLASMA_Alloc_Workspace_cheev(n,n,plasma_work,info)
+   info = PLASMA_cheev_c(jobz_plasma_a,uplo_plasma(uplo),n,c_loc(a),lda,c_loc(w),&
+&                        plasma_work,c_loc(rwork),lwork)
+   call PLASMA_Dealloc_handle(plasma_work,info)
+ else
+#endif
+   call cheev(jobz,uplo,n,a,lda,w,eigen_c_work,eigen_c_lwork,eigen_c_rwork,info)
+#ifdef HAVE_LINALG_PLASMA
+ end if
+#endif
+
+end subroutine abi_cheev_new
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_abi_linalg/abi_dheev
 !! NAME
 !! abi_dheev
