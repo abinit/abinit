@@ -527,6 +527,8 @@ __global__ void kernel_stress_convert(double *gprimd,double *d_enlk,double *enlo
   if(threadIdx.x < 3 )
     sh_enl[threadIdx.x] += sh_enl[threadIdx.x + 3] + sh_enl[threadIdx.x + 6];
 
+  __syncthreads();
+
   if(threadIdx.x == 0 )
     sh_enl[0] += sh_enl[1] + sh_enl[2];
 
