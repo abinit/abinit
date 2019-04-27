@@ -36,8 +36,8 @@ gnu_warnings = { # ( warning_string, warno, src_excluded )
 def usage():
     print("\n Usage: warningschk test_number \n ")
 
+
 def main(warno, home_dir=""):
-  from os.path import join as pj
   debug = 0
 
   if not home_dir:
@@ -50,8 +50,9 @@ def main(warno, home_dir=""):
         home_dir = os.path.join(cwd_dir,"../../..")
 
   else:
-    inp_dir = pj(home_dir, "abichecks", "abirules", "Input")
+    inp_dir = os.path.join(home_dir, "abichecks", "abirules", "Input")
   
+  assert os.path.isdir(inp_dir)
   warno = int(warno)
   Warning      = gnu_warnings[warno][0]
   Warning_len  = len(Warning.split(" "))
@@ -62,7 +63,9 @@ def main(warno, home_dir=""):
   print( "Warning pattern : '"+Warning+"'")
   print( "**********************************************************************")
 
-  makelog = pj(home_dir, "make.log")
+  makelog = os.path.join(home_dir, "make.log")
+  if not os.path.exists(makelog):
+      raise RuntimeError("Cannot find `make.log` file in `%s`.\nUse `make -O multi -j8 > make.log 2>&1`" % home_dir)
   # make.log contains utf-8 characters
   #import io
   #logfile = io.open(makelog, "r", encoding="utf-8")
@@ -99,8 +102,7 @@ def main(warno, home_dir=""):
                       sourceline = sourceline.split(".")[0]
                   except IndexError:
                       pass
-                  pattern = pj(home_dir, "src") + "/*/"+source
-                  #pattern = '../../../src/*/'+source
+                  pattern = os.path.join(home_dir, "src") + "/*/"+source
                   path = glob.glob(pattern)
                   assert len(path) < 2
                   try:
@@ -141,8 +143,7 @@ def main(warno, home_dir=""):
           else:
               source = Buffer[4].split(":")[0]
               sourceline = Buffer[4].split(":")[1]
-              pattern = pj(home_dir, "src") + "/*/"+source
-              #pattern = '../../../src/*/'+source
+              pattern = os.path.join(home_dir, "src") + "/*/"+source
               path = glob.glob(pattern)
               source_dir = path[0].split('/')
               if debug: print ("[DEBUG] source_dir :" + source_dir[-2])

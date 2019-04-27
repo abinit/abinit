@@ -25,7 +25,7 @@ def is_srcfile(dirpath, fname):
 def main():
     top = find_abinit_src_directory()
     print("--------------------------------------------------------")
-    print(" Searching for non-ASCII characters in:", top)
+    print(" Searching for non-ASCII characters in ABINIT src files ")
     print("--------------------------------------------------------")
 
     exit_status = 0
