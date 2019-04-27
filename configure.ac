@@ -30,7 +30,9 @@ you regularly use into a file. For full instructions, please consult the
 doc/build/config-template.ac file in this directory tree.
 
 A lot more documentation on how to build and run Abinit is available on the
-Abinit Wiki. Please consult it at https://wiki.abinit.org/ whenever needed.])
+Abinit Wiki. Please consult it at https://wiki.abinit.org/ whenever needed.
+Examples of configuration files for clusters are available at https://github.com/abinit/abiconfig
+])
 
 # Initialize Autoconf
 AC_INIT([ABINIT],[8.11.6],[https://bugs.launchpad.net/abinit/],[abinit])

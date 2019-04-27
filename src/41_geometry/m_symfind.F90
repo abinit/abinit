@@ -104,8 +104,6 @@ contains
 &  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
 &  nucdipmom)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
@@ -562,8 +560,6 @@ end subroutine symfind
 
 subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: chkprim,msym,nsym
@@ -727,8 +723,6 @@ end subroutine symanal
 !! SOURCE
 
 subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1046,7 +1040,6 @@ end subroutine symbrav
 subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 
  use m_numeric_tools, only : OPERATOR(.x.)
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1472,8 +1465,6 @@ end subroutine symspgr
 !! SOURCE
 
 subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

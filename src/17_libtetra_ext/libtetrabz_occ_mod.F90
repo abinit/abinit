@@ -66,7 +66,7 @@ SUBROUTINE libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght,comm)
   !
   IF(linterpol) THEN
      !
-     ALLOCATE(wghtd(nb,1,nk_local))
+     ABI_MALLOC(wghtd, (nb,1,nk_local))
      CALL libtetrabz_occ_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,nk_local,wghtd,0d0)
      !
      ! Interpolation
@@ -77,7 +77,8 @@ SUBROUTINE libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght,comm)
         wght(1:nb,kintp(1:nintp)) = wght(1:nb,             kintp(1:nintp)) &
         &                 + MATMUL(wghtd(1:nb,1:1,ik), wintp(1:1,1:nintp))
      END DO ! ik = 1, nk_local
-     DEALLOCATE(wghtd, kvec)
+     ABI_FREE(wghtd)
+     ABI_FREE(kvec)
      !
      IF(PRESENT(comm)) CALL libtetrabz_mpisum_dv(comm, nb * PRODUCT(ngw(1:3)), wght)
      !
@@ -85,7 +86,8 @@ SUBROUTINE libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght,comm)
      CALL libtetrabz_occ_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,nk_local,wght,0d0)
   END IF
   !
-  DEALLOCATE(ik_global, ik_local)
+  ABI_FREE(ik_global)
+  ABI_FREE(ik_local)
   !
 END SUBROUTINE libtetrabz_occ
 !
@@ -123,7 +125,9 @@ SUBROUTINE libtetrabz_fermieng(ltetra,bvec,nb,nge,eig,ngw,wght,ef,nelec,comm)
      &                          nt_local,nkBZ,ik_global,ik_local,kvec)
   END IF
   !
-  IF(linterpol) ALLOCATE(wghtd(nb,1,nk_local))
+  IF(linterpol) then
+    ABI_MALLOC(wghtd, (nb,1,nk_local))
+  end if
   !
   elw = MINVAL(eig(1:nb,1:PRODUCT(nge(1:3))))
   eup = MAXVAL(eig(1:nb,1:PRODUCT(nge(1:3))))
@@ -171,13 +175,15 @@ SUBROUTINE libtetrabz_fermieng(ltetra,bvec,nb,nge,eig,ngw,wght,ef,nelec,comm)
         wght(1:nb,kintp(1:nintp)) = wght(1:nb,             kintp(1:nintp)) &
         &                 + MATMUL(wghtd(1:nb,1:1,ik), wintp(1:1,1:nintp))
      END DO ! ik = 1, nk_local
-     DEALLOCATE(wghtd, kvec)
+     ABI_FREE(wghtd)
+     ABI_FREE(kvec)
      !
      IF(PRESENT(comm)) CALL libtetrabz_mpisum_dv(comm, nb * PRODUCT(ngw(1:3)), wght)
      !
   END IF ! (linterpol)
   !
-  DEALLOCATE(ik_global, ik_local)
+  ABI_FREE(ik_global)
+  ABI_FREE(ik_local)
   !
 END SUBROUTINE libtetrabz_fermieng
 !

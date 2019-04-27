@@ -433,8 +433,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 #ifdef HAVE_MPI
    call xmpi_barrier(spaceComm)
 !  Compute mband and mpw
-   ABI_STAT_ALLOCATE(cg_disk,(2,mcg_disk), ierr)
-   ABI_CHECK(ierr==0, "out of memory in cg_disk")
+   ABI_MALLOC_OR_DIE(cg_disk,(2,mcg_disk), ierr)
 #endif
 
    band_index=0
@@ -1047,8 +1046,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      end if
 
      ABI_MALLOC(kg_k,(3,mpw))
-     ABI_STAT_MALLOC(cg_k,(2,mpw*my_nspinor*mband), ierr)
-     ABI_CHECK(ierr==0, "out of memory in cg_k")
+     ABI_MALLOC_OR_DIE(cg_k,(2,mpw*my_nspinor*mband), ierr)
 
      if (iam_master) then
        call wfk_open_write(wfk,hdr,path,formeig,iomode,get_unit(),xmpi_comm_self,write_hdr=.True.)
@@ -1482,8 +1480,7 @@ subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,coun
    call xmpi_sum_master(gbuf,rank,comm_fft,ierr)
 
    if (me_fft == rank) then
-     ABI_STAT_MALLOC(gblock, (3, count_pwblock), ierr)
-     ABI_CHECK(ierr==0, "oom in gblock")
+     ABI_MALLOC_OR_DIE(gblock, (3, count_pwblock), ierr)
      gblock = gbuf(:, :count_pwblock)
    end if
  end do
@@ -1549,8 +1546,7 @@ subroutine cg2seqblocks(npwtot_k,npw_k,nband,cg_k,gmpi2seq,comm_bandfft,bstart,b
  ! Handle sequential case.
  if (nprocs == 1) then
    bstart = 1; bcount = nband
-   ABI_STAT_MALLOC(my_cgblock, (2, npwtot_k, nband), ierr)
-   ABI_CHECK(ierr==0, "oom my_cgblock")
+   ABI_MALLOC_OR_DIE(my_cgblock, (2, npwtot_k, nband), ierr)
    my_cgblock = cg_k
    return ! DOH
  end if
@@ -1563,12 +1559,10 @@ subroutine cg2seqblocks(npwtot_k,npw_k,nband,cg_k,gmpi2seq,comm_bandfft,bstart,b
  do rank=0,nprocs-1
    nbmax = max(nbmax, bstart_rank(rank+1) - bstart_rank(rank))
  end do
- ABI_STAT_MALLOC(cgbuf, (2, npwtot_k, nbmax), ierr)
- ABI_CHECK(ierr==0, "oom cgbuf")
+ ABI_MALLOC_OR_DIE(cgbuf, (2, npwtot_k, nbmax), ierr)
 
  nbb = bstart_rank(me+1) - bstart_rank(me)
- ABI_STAT_MALLOC(my_cgblock, (2, npwtot_k, nbb), ierr)
- ABI_CHECK(ierr==0, "oom my_cgblock")
+ ABI_MALLOC_OR_DIE(my_cgblock, (2, npwtot_k, nbb), ierr)
 
  ! TODO: This should be replaced by gatherv but premature optimization....
  do rank=0,nprocs-1

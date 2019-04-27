@@ -80,7 +80,7 @@ module m_wfk
  use m_geometry,     only : metric
  use m_time,         only : cwtime, cwtime_report, asctime
  use m_fstrings,     only : sjoin, strcat, endswith, itoa, ktoa
- use m_io_tools,     only : get_unit, mvrecord, iomode_from_fname, open_file, close_unit, delete_file, file_exists
+ use m_io_tools,     only : get_unit, mvrecord, iomode_from_fname, iomode2str, open_file, close_unit, delete_file, file_exists
  use m_numeric_tools,only : mask2blocks
  use m_cgtk,         only : cgtk_rotate
  use m_fftcore,      only : get_kg, ngfft_seq
@@ -672,7 +672,7 @@ subroutine wfk_close(Wfk, delete)
 
    select case (Wfk%iomode)
    case (IO_MODE_FORTRAN)
-      ABI_FCLOSE(Wfk%fh, msg)
+      close(wfk%fh)
 
 #ifdef HAVE_MPI_IO
    case (IO_MODE_MPI)
@@ -2814,14 +2814,18 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
 !scalars
  integer,parameter :: master=0,formeig0=0
  integer :: ik_ibz,spin,my_rank,ierr,iomode,funt,sc_mode,mband
+ real(dp) :: cpu, wall, gflops
  type(wfk_t) :: Wfk
 
 !************************************************************************
 
- iomode = iomode_from_fname(fname)
+ call cwtime(cpu, wall, gflops, "start")
  my_rank = xmpi_comm_rank(comm)
+ iomode = iomode_from_fname(fname)
 
- if (my_rank==master) then
+ call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname,", with iomode: ", iomode2str(iomode)))
+
+ if (my_rank == master) then
    ! Open the file.
    sc_mode = xmpio_single
    funt = get_unit()
@@ -2862,6 +2866,8 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
    call xmpi_bcast(eigen,master,comm,ierr)
    if (present(occ)) call xmpi_bcast(occ,master,comm,ierr)
  end if
+
+ call cwtime_report(" wfk_read_eigenvalues", cpu, wall, gflops)
 
 end subroutine wfk_read_eigenvalues
 !!***
@@ -4250,8 +4256,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
            ABI_MALLOC(occ_k,(Wfk%mband))
 
            ABI_MALLOC(kg_k,(3,npw_disk))
-           ABI_STAT_MALLOC(cg_k,(2,mcg), ierr)
-           ABI_CHECK(ierr==0, "out of memory in cg_k")
+           ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
            ! Read the block of bands for this (k,s).
            call wfk_read_band_block(Wfk,[1,nband_read],ik_ibz,spin,xmpio_collective,&
@@ -4282,8 +4287,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
            ABI_MALLOC(occ_k,(nband_disk))
 
            mcg = npw_disk*Hdr%nspinor*COUNT(my_bmask)
-           ABI_STAT_MALLOC(cg_k,(2,mcg), ierr)
-           ABI_CHECK(ierr==0, "out of memory in cg_k")
+           ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
            call wfk_read_bmask(Wfk,my_bmask,ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
            !call wfk_read_band_block(Wfk,(/1,nband_read/),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
@@ -4325,8 +4329,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
            ABI_MALLOC(occ_k,(mband))
 
            ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
-           ABI_STAT_MALLOC(cg_k,(2,mcg), ierr)
-           ABI_CHECK(ierr==0, "out of memory in cg_k")
+           ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
            !
            ! Read the block of bands for this (k,s).
            call rwwf(cg_k,eig_k,formeig,headform0,icg0,ik_ibz,spin,kg_k,mband,mcg,MPI_enreg_seq,nband_read,&
@@ -4839,14 +4842,12 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
      ABI_MALLOC(eig1_k,((2*mband)**formeig*mband))
      ABI_MALLOC(occ1_k,(mband))
      ABI_MALLOC(kg1_k,(3,npw_k))
-     ABI_STAT_MALLOC(cg1_k,(2,mcg), ierr)
-     ABI_CHECK(ierr==0, "out of memory in cg1_k")
+     ABI_MALLOC_OR_DIE(cg1_k,(2,mcg), ierr)
 
      ABI_MALLOC(eig2_k,((2*mband)**formeig*mband))
      ABI_MALLOC(occ2_k,(mband))
      ABI_MALLOC(kg2_k,(3,npw_k))
-     ABI_STAT_MALLOC(cg2_k,(2,mcg), ierr)
-     ABI_CHECK(ierr==0, "out of memory in cg2_k")
+     ABI_MALLOC_OR_DIE(cg2_k,(2,mcg), ierr)
 
      ! Read the block of bands for this (k,s).
      call wfk_read_band_block(Wfk1,(/1,nband_k/),ik_ibz,spin,sc_mode,kg_k=kg1_k,eig_k=eig1_k,occ_k=occ1_k) !, cg_k=cg1_k,

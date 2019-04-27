@@ -22,15 +22,20 @@
 
 module m_sort
 
- use defs_basis, only : std_out
+ use defs_basis
  use m_errors
+ use m_profiling_abi
 
  implicit none
 
  private
 
+ ! Low-level routines
  public :: sort_dp       ! Sort double precision array
  public :: sort_int      ! Sort integer array
+
+ ! Helper functions to perform common operations.
+ public :: sort_rpts     ! Sort list of real points by |r|
 
 CONTAINS  !====================================================================================================
 !!***
@@ -45,8 +50,8 @@ CONTAINS  !=====================================================================
 !!  array iperm. Consider that two double precision numbers within tolerance tol are equal.
 !!
 !! INPUTS
-!!  n        intent(in)    dimension of the list
-!!  tol      intent(in)    numbers within tolerance are equal
+!!  n: dimension of the list
+!!  tol: numbers within tolerance are equal
 !!  list(n)  intent(inout) list of double precision numbers to be sorted
 !!  iperm(n) intent(inout) iperm(i)=i (very important)
 !!
@@ -72,13 +77,13 @@ subroutine sort_dp(n,list,iperm,tol)
 !scalars
  integer, intent(in) :: n
  integer, intent(inout) :: iperm(n)
- double precision, intent(inout) :: list(n)
- double precision, intent(in) :: tol
+ real(dp), intent(inout) :: list(n)
+ real(dp), intent(in) :: tol
 
 !Local variables-------------------------------
 !scalars
  integer :: l,ir,iap,i,j
- double precision :: ap
+ real(dp) :: ap
 
  if (n==1) then
 
@@ -162,13 +167,13 @@ end subroutine sort_dp
 !!   algorithm, while making corresponding rearrangement of the integer array iperm.
 !!
 !! INPUTS
-!!  n        intent(in)    dimension of the list
+!!  n: dimension of the list
 !!  list(n)  intent(inout) list of double precision numbers to be sorted
 !!  iperm(n) intent(inout) iperm(i)=i (very important)
 !!
 !! OUTPUT
-!!  list(n)  sorted list
-!!  iperm(n) index of permutation given the right ascending order
+!!  list(n): sorted list
+!!  iperm(n): index of permutation given the right ascending order
 !!      the i-th element of the ouput ordered list had index iperm(i) in the input list.
 !!
 !! PARENTS
@@ -263,6 +268,69 @@ end subroutine sort_int
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_sort/sort_rpts
+!! NAME
+!!  sort_rpts
+!!
+!! FUNCTION
+!!  Sort list of real space 3d-points by norm (ascending order)
+!!
+!! INPUTS
+!!  n: dimension of the list
+!!  rpts(3, n): points in reduced coordinates
+!!  metric: Metric used to compute |r|.
+!!  [tol]: numbers within tolerance are equal.
+!!
+!! OUTPUT
+!!  iperm(n) index of permutation giving the right ascending order:
+!!      the i-th element of the ordered list had index iperm(i) in rpts.
+!!  [rmod(n)]= list of sorted |r| values. 
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: n
+ integer,allocatable,intent(out) :: iperm(:)
+ real(dp),optional,allocatable,intent(out) :: rmod(:)
+ real(dp),optional,intent(in) :: tol
+!arrays 
+ real(dp),intent(in) :: rpts(3,n), metric(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: my_tol
+!arrays
+ real(dp),allocatable :: my_rmod(:)
+
+!************************************************************************
+
+ my_tol = tol12; if (present(tol)) my_tol = tol
+
+ ABI_MALLOC(my_rmod, (n))
+ do ii=1,n
+   my_rmod(ii) = sqrt(dot_product(rpts(:, ii), matmul(metric, rpts(:, ii))))
+ end do
+ ABI_MALLOC(iperm, (n))
+ iperm = [(ii, ii=1,n)]
+ call sort_dp(n, my_rmod, iperm, my_tol)
+
+ if (present(rmod)) then
+   call move_alloc(my_rmod, rmod)
+ else
+   ABI_FREE(my_rmod) 
+ end if
+
+end subroutine sort_rpts
+!!***
 
 end module m_sort
 !!***

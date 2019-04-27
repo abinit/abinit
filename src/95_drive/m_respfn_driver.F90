@@ -465,8 +465,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ireadwf0=1
 
  mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
- ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in cg")
+ ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
  ABI_ALLOCATE(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen0(:)=zero ; ask_accurate=1

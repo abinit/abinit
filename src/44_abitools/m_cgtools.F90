@@ -596,9 +596,10 @@ function cg_zdotc(n, x, y) result(res)
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ZDOTC_BUG
  integer :: ii
-#endif
+#else
  complex(dpc) :: cres
  complex(dpc),external :: zdotc
+#endif
 
 ! *************************************************************************
 
@@ -4498,12 +4499,9 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 !=====================================================
  if (istwf_k==2) then
 
-   ABI_STAT_ALLOCATE(blockvectora,(vectsize,nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in blockvectora")
-   ABI_STAT_ALLOCATE(blockvectorb,(nband_k,nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in blockvectorb")
-   ABI_STAT_ALLOCATE(blockvectorc,(vectsize,nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in blockvectorc")
+   ABI_MALLOC_OR_DIE(blockvectora,(vectsize,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorb,(nband_k,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorc,(vectsize,nband_k), ierr)
 
    do iband=1,nband_k
      if (me_g0 == 1) then
@@ -4568,8 +4566,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 
  else
 
-   ABI_STAT_ALLOCATE(work,(2,npw_k*nspinor*nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in work")
+   ABI_MALLOC_OR_DIE(work,(2,npw_k*nspinor*nband_k), ierr)
 
 !  MG: Do not remove this initialization.
 !  telast_06 stops in fxphase on inca_debug and little_buda (very very strange, due to atlas?)
