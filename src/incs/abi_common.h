@@ -158,8 +158,8 @@
    ABI_CHECK(ierr == 0, "out-of-memory")
 
 #  define ABI_MOVE_ALLOC(from, to) \
-   call abimem_record(0, QUOTE(from), _LOC(from), "D", _MEM(from),  __FILE__, __LINE__) NEWLINE \
-   if (allocated(to)) call abimem_record(0, QUOTE(to), _LOC(to), "D", _MEM(to),  __FILE__, __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(from), _LOC(from), "D", -_MEM(from),  __FILE__, __LINE__) NEWLINE \
+   if (allocated(to)) call abimem_record(0, QUOTE(to), _LOC(to), "D", -_MEM(to),  __FILE__, __LINE__) NEWLINE \
    call move_alloc(from, to) NEWLINE \
    call abimem_record(0, QUOTE(to), _LOC(to), "A", _MEM(to),  __FILE__, __LINE__)
 
