@@ -23,7 +23,7 @@
 !!
 !! SOURCE
 
-!#define NEW_TETRA
+!#define DEV_NEW_TETRA
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -38,7 +38,7 @@ module m_ephwg
  use m_errors
  use m_xmpi
  use m_copy
-#ifdef NEW_TETRA
+#ifdef DEV_NEW_TETRA
  use m_htetrahedron
 #else
  use m_tetrahedron
@@ -146,7 +146,7 @@ type, public :: ephwg_t
   type(lgroup_t) :: lgk
   ! Little group of the k-point
 
-#ifdef NEW_TETRA
+#ifdef DEV_NEW_TETRA
   type(t_htetrahedron) :: tetra_k
   ! Used to evaluate delta(w - e_{k+q} +/- phw_q) with tetrahedron method.
 #else
@@ -441,7 +441,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
-#ifdef NEW_TETRA
+#ifdef DEV_NEW_TETRA
  call htetra_free(self%tetra_k)
  call htetra_init(self%tetra_k, indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, &
                   self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
@@ -664,7 +664,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
-#ifdef NEW_TETRA
+#ifdef DEV_NEW_TETRA
  call htetra_free(self%tetra_k)
  call htetra_init(self%tetra_k, bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
                   self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
@@ -761,7 +761,7 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 
  else
    ! TODO Add routine to compute only delta
-#ifdef NEW_TETRA
+#ifdef DEV_NEW_TETRA
    call htetra_blochl_weights(self%tetra_k, pme_k(:,1), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
      bcorr, thetaw, deltaw_pm(:,:,1), comm)
    call htetra_blochl_weights(self%tetra_k, pme_k(:,2), eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
@@ -851,7 +851,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
      wme0 = eig - pme_k(iq_ibz, 2)
      deltaw_pm(:,iq_ibz,2) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
    else
-#ifdef NEW_TETRA
+#ifdef DEV_NEW_TETRA
      call htetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, max_occ1, self%nq_k, pme_k(:,1), weights)
      deltaw_pm(:,iq_ibz,1) = weights(:,1) * self%lgk%weights(iq_ibz)
      call htetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, max_occ1, self%nq_k, pme_k(:,2), weights)
@@ -923,7 +923,7 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
    eigen_in(iq) = self%phfrq_ibz(iq_ibz, nu)
  end do
 
-#ifdef NEW_TETRA
+#ifdef DEV_NEW_TETRA
  call htetra_blochl_weights(self%tetra_k, eigen_in, eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
    bcorr, dt_weights(:,:,2), dt_weights(:,:,1), comm)
 #else
@@ -1018,7 +1018,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  end do
 
  cweights = zero
-#ifdef NEW_TETRA
+#ifdef DEV_NEW_TETRA
  do iq_ibz=1,self%nq_k
    call htetra_get_onewk_wvals_zinv(self%tetra_k, iq_ibz, nz, zvals, max_occ1, self%nq_k, pme_k(:, 1), cweights(:,1,iq,iqlk))
    call htetra_get_onewk_wvals_zinv(self%tetra_k, iq_ibz, nz, zvals, max_occ1, self%nq_k, pme_k(:, 2), cweights(:,2,ib,iqlk))
@@ -1121,7 +1121,7 @@ subroutine ephwg_free(self)
  ABI_SFREE(self%eigkbs_ibz)
 
  ! types
-#ifdef NEW_TETRA
+#ifdef DEV_NEW_TETRA
  call htetra_free(self%tetra_k)
 #else
  call destroy_tetra(self%tetra_k)

@@ -961,14 +961,19 @@ subroutine htetra_free(tetra)
  type(t_htetrahedron), intent(inout) :: tetra
  integer :: ikibz,ihash
 
- do ihash=1,tetra%nbuckets
-   ABI_FREE(tetra%unique_tetra(ihash)%indexes)
- end do
- do ikibz=1,tetra%nkibz
-   ABI_SFREE(tetra%ibz(ikibz)%tetra)
- end do
- ABI_SFREE(tetra%ibz)
- ABI_SFREE(tetra%unique_tetra)
+ if (allocated(tetra%unique_tetra)) then
+   do ihash=1,tetra%nbuckets
+     ABI_SFREE_PTR(tetra%unique_tetra(ihash)%indexes)
+   end do
+   ABI_FREE(tetra%unique_tetra)
+ end if
+
+ if (allocated(tetra%ibz)) then
+   do ikibz=1,tetra%nkibz
+     ABI_SFREE(tetra%ibz(ikibz)%tetra)
+   end do
+   ABI_FREE(tetra%ibz)
+ end if
  ABI_SFREE(tetra%ibz_weights)
 
 end subroutine htetra_free
