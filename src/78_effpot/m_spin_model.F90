@@ -660,7 +660,7 @@ contains
   subroutine spin_model_t_run_MvH(self)
 
     class(spin_model_t), intent(inout) :: self
-    write(std_err, *) "MvH is not yet implemented. "
+    write(std_out, *) "MvH is not yet implemented. "
   end subroutine spin_model_t_run_MvH
   !!***
 

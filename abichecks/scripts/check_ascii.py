@@ -6,22 +6,14 @@ import os
 import re
 import sys
 
+from abirules_tools import find_abinit_src_directory
+
 __author__ = "M. Giantomassi"
 
 
 def isascii(string, verbose=False):
     """False if string contains non-ASCII characters."""
     return all(ord(c) < 128 for c in string)
-    #try:
-    #    string.decode('ascii')
-    #    return True
-    #except UnicodeDecodeError:
-    #    if verbose: print("not a ascii-encoded unicode string")
-    #    return False
-    #else:
-    #    if verbose: print("It may have been an ascii-encoded unicode string")
-    #    return False
-
 
 re_srcfile = re.compile("\.([Ff]|[Ff]90|finc|h|c|cu)$")
 
@@ -30,20 +22,12 @@ def is_srcfile(dirpath, fname):
     return re_srcfile.search(fname)
 
 
-def abinit_test_generator():
-    def test_func(abenv):
-        "Search for non-ASCII characters in the ABINIT src files"
-        top = abenv.apath_of("src")
-        try:
-            return main(top)
-        except Exception:
-            import sys
-            raise sys.exc_info()[1]  # Reraise current exception (py2.4 compliant)
+def main():
+    top = find_abinit_src_directory()
+    print("--------------------------------------------------------")
+    print(" Searching for non-ASCII characters in:", top)
+    print("--------------------------------------------------------")
 
-    return {"test_func": test_func}
-
-
-def main(top):
     exit_status = 0
     for dirpath, dirnames, files in os.walk(top):
         for src in files:
@@ -60,14 +44,4 @@ def main(top):
 
 
 if __name__ == "__main__":
-
-    if len(sys.argv) == 1:
-        top = "../../../src"
-        print("--------------------------------------------------------")
-        print(" Searching for non-ASCII characters in ABINIT src files ")
-        print("--------------------------------------------------------")
-    else:
-        top = sys.argv[1]
-
-    exit_status = main(top)
-    sys.exit(exit_status)
+    sys.exit(main())

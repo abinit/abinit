@@ -18,11 +18,9 @@ from tests.pymods.termcolor import cprint
 gnu_warnings = { # ( warning_string, warno, src_excluded )
     #3  : ( 'Unused variable', ['12_hide_mpi','64_psp','68_dmft'] ),
     3  : ( 'Unused variable', [] ),
-    #4  : ( 'Unused dummy argument',  ['64_psp'] ),
     4  : ( 'Unused dummy argument',  [] ),
     5  : ( 'Nonstandard type declaration',  ['interfaces','28_numeric_noabirule','01_macroavnew_ext','01_linalg_ext','11_memory_mpi'] ),
     6  : ( 'Same actual argument associated with INTENT', []),  
-    #7  : ( 'CHARACTER expression will be truncated in assignment',  ["57_iopsp_parser",] ),
     7  : ( 'CHARACTER expression will be truncated in assignment',  [] ),
     8  : ( 'Limit of 39 continuations exceeded',  [] ),
     9  : ( 'DOUBLE COMPLEX at (1) does not conform to the Fortran 95 standard',  ['interfaces','01_linalg_ext'] ),
@@ -34,23 +32,6 @@ gnu_warnings = { # ( warning_string, warno, src_excluded )
     15 : ( 'Nonconforming tab character', [] ),
     20 : ( 'Wunused-value', [] ),
 }
-
-def abinit_suite_generator():
-
-  def make_callable(wno):
-    def test_func(abenv):
-       try:
-         return main(wno, home_dir=abenv.home_dir)
-       except Exception:
-         import sys
-         raise sys.exc_info()[1] # Reraise current exception (py2.4 compliant)
-    test_func.__doc__ = gnu_warnings[wno][0]
-    return test_func
-
-  warnos = list(gnu_warnings.keys())
-  warnos.sort()
-  for wno in warnos:
-    yield {"test_func" : make_callable(wno)}
 
 def usage():
     print("\n Usage: warningschk test_number \n ")
@@ -190,5 +171,4 @@ if __name__ == "__main__":
   except IndexError:
     home_dir = ""
 
-  exit_status = main(warno, home_dir=home_dir) 
-  sys.exit(exit_status)
+  sys.exit(main(warno, home_dir=home_dir))
