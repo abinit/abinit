@@ -1311,7 +1311,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, itimrev, isym, npc, ierr, imyp, ipc, mu, root
+ integer :: db_iqpt, itimrev, isym, npc, ierr, imyp, mu, root
  logical :: isirr_q, incache
 !arrays
  integer :: pinfo(3,3*db%mpert), g0q(3), requests(db%natom3)
@@ -1582,7 +1582,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, cplex, ierr, imyp, ipc, ii
+ integer :: db_iqpt, cplex,  imyp, ipc !, ii
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
@@ -3092,7 +3092,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
  integer,parameter :: cplex2 = 2
  integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr
  real(dp) :: wr, wi
- complex(dpc) :: beta
+ !complex(dpc) :: beta
 !arrays
  integer :: symq(4,2,db%cryst%nsym)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
@@ -3511,7 +3511,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 !arrays
  !integer :: qselect(nqibz)
  real(dp),allocatable :: v1scf(:,:,:,:)
- real(dp) :: tsec(2)
+ !real(dp) :: tsec(2)
 
 ! *************************************************************************
 

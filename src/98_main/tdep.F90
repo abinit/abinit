@@ -78,20 +78,18 @@ program tdep
 
   implicit none
 
-  integer :: natom,jatom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ntotcoeff,ntotconst
-  integer :: ishell,stdout,katom,iqpt,iatcell,nshell_max
+  integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ntotcoeff,ntotconst
+  integer :: stdout,iqpt,nshell_max
   double precision :: U0,Free_Anh
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:)
-  double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
+  double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:)
 !FB  double precision, allocatable :: fcoeff(:,:),Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:)
   double precision, allocatable :: Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:),Pij_N(:),Pij_coeff(:,:)
   double precision, allocatable :: Psij_coeff(:,:),Psij_ref(:,:,:,:),MP_coeff(:,:)
   double precision, allocatable :: distance(:,:,:),Rlatt_cart(:,:,:),Rlatt4Abi(:,:,:)
   double precision, allocatable :: omega (:),ftot3(:,:)
-  double precision, allocatable :: dynmat(:,:,:,:,:,:)
   double precision :: qpt_cart(3)
   double complex  , allocatable :: dij(:,:),eigenV(:,:)
-  double complex  , allocatable :: Gruneisen(:)
   type(phonon_dos_type) :: PHdos
   type(Input_Variables_type) :: InVar
   type(Lattice_Variables_type) :: Lattice

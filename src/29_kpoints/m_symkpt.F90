@@ -123,7 +123,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  integer :: identi,ii,ikpt,ikpt2,ind_ikpt,ind_ikpt2,ierr
  integer :: ikpt_current_length,isym,itim,jj,nkpout,quit,tident
  real(dp) :: difk,difk1,difk2,difk3,length2trial,reduce,reduce1,reduce2,reduce3
- real(dp) :: cpu,wall,gflops
+ !real(dp) :: cpu,wall,gflops
  character(len=500) :: message
 !arrays
  integer,allocatable :: list(:),bz2ibz_idx(:)

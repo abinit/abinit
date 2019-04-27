@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -37,9 +38,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
 
-  implicit none
-
-  integer :: prtdos,nqpt,ii,jj,iqpt,iatom
+  integer :: prtdos,ii,iqpt,iatom
   integer :: msym,natom,natom_unitcell,iomega
   integer :: dos_ngqpt(3)
   integer :: count_wminmax(2)
@@ -161,8 +160,6 @@ end subroutine tdep_calc_phdos
 
 subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
 
-  implicit none
-
   integer :: iomega,itemp,iatom,itypat
   double precision :: k_B,wovert,heatcapa,entropy,internalE,freeE,expm2x,ln2shx,cothx,xx
   double precision :: Ftot,domega,MSD,Omega_m2,mass_amu,vdos
@@ -277,8 +274,6 @@ end subroutine tdep_calc_thermo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
-
-  implicit none
 
   integer :: iatom,ii,jj,kk,ll,iatcell,itypat
 ! integer :: istep

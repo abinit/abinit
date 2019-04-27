@@ -525,7 +525,7 @@ contains
     type(spin_ncfile_t) :: spin_ncfile
     character(len=4) :: post_fname
     real(dp) :: T, T_step
-    integer :: i, ii, Tfile, iostat, sublatt(self%spin_ob%nsublatt)
+    integer :: i, ii, Tfile, iostat !, sublatt(self%spin_ob%nsublatt)
     character(len=90) :: msg
     character(len=4200) :: Tmsg ! to write to var T file
     character(len=150) :: iomsg
@@ -533,7 +533,8 @@ contains
 
 
     real(dp) :: Tlist(T_nstep), chi_list(T_nstep), Cv_list(T_nstep), binderU4_list(T_nstep)
-    real(dp) :: Mst_sub_list(3, self%spin_ob%nsublatt, T_nstep), Mst_sub_norm_list(self%spin_ob%nsublatt, T_nstep)
+    !real(dp) :: Mst_sub_list(3, self%spin_ob%nsublatt, T_nstep)
+    real(dp) :: Mst_sub_norm_list(self%spin_ob%nsublatt, T_nstep)
     real(dp) ::  Mst_norm_total_list(T_nstep)
 
     Tfile=get_unit()

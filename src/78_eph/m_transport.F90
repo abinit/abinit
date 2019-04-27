@@ -427,11 +427,11 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  integer :: ntens, nvecs, nvals, edos_intmeth, ifermi, iel
  real(dp) :: vr(3)
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT
- real(dp) :: linewidth, diff, min_diff, n0, n0_dy
+ real(dp) :: linewidth
  real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
- character(len=500) :: msg
+ !character(len=500) :: msg
 
  ! create alias for dimensions
  nsppol = self%ebands%nsppol

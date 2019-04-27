@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -344,7 +345,7 @@ include 'mpif.h'
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
 #endif
-  INTEGER                                       :: iflavor
+  !INTEGER                                       :: iflavor
 #ifdef __GFORTRAN__
 !  INTEGER                                       :: pid
 !  CHARACTER(LEN=5)                              :: Cpid
@@ -674,8 +675,6 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 SUBROUTINE Ctqmcoffdiag_allocateAll(op)
 
 !Arguments ------------------------------------
-  implicit none
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: flavors
@@ -1291,16 +1290,16 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   INTEGER                                         :: itau
   DOUBLE PRECISION                                :: pi_invBeta
   DOUBLE PRECISION                                :: K
-  DOUBLE PRECISION                                :: re
-  DOUBLE PRECISION                                :: im
-  DOUBLE PRECISION                                :: det
+  !DOUBLE PRECISION                                :: re
+  !DOUBLE PRECISION                                :: im
+  !DOUBLE PRECISION                                :: det
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: F_omega
   COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE   :: F_omega_inv
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: Gomega_tmp
   TYPE(GreenHyboffdiag)                                     :: F_tmp
-  character(len=4) :: tag_proc
-  character(len=30) :: tmpfil
-  INTEGER :: unitnb
+  !character(len=4) :: tag_proc
+  !character(len=30) :: tmpfil
+  !INTEGER :: unitnb
 
   flavors    = op%flavors
 
@@ -1974,7 +1973,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   INTEGER                            :: swapUpdate2
   INTEGER                            :: old_percent
   INTEGER                            :: new_percent
-  INTEGER                            :: ipercent,ii
+  INTEGER                            :: ipercent !,ii
   INTEGER                            :: iflavor,ifl1,iflavor_d
   INTEGER                            :: isweep
 
@@ -2211,7 +2210,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   INTEGER                               :: position
   INTEGER         , DIMENSION(1:2)     :: nature ! -2 for antiseg and 1 for seg
   INTEGER                               :: i! -2 for antiseg and 1 for seg
-  INTEGER                               :: ii,it,it1
+  !INTEGER                               :: it,it1 !ii,
   DOUBLE PRECISION                      :: action
   DOUBLE PRECISION                      :: beta
   DOUBLE PRECISION                      :: time1
@@ -2655,7 +2654,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
   INTEGER               , INTENT(  OUT) :: flav_j
 !Local variables ------------------------------
   INTEGER :: flavor_i
-  INTEGER :: flavor_j,ii,it,it1,iflavor
+  INTEGER :: flavor_j !,ii,it,it1 !,iflavor
   DOUBLE PRECISION :: rnd
   DOUBLE PRECISION :: lengthi
   DOUBLE PRECISION :: lengthj
@@ -2663,10 +2662,10 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
   DOUBLE PRECISION :: overlapjc1
   DOUBLE PRECISION :: overlapic2
   DOUBLE PRECISION :: overlapjc2
-  DOUBLE PRECISION :: detic1
-  DOUBLE PRECISION :: detjc1
-  DOUBLE PRECISION :: detic2
-  DOUBLE PRECISION :: detjc2
+  !DOUBLE PRECISION :: detic1
+  !DOUBLE PRECISION :: detjc1
+  !DOUBLE PRECISION :: detic2
+  !DOUBLE PRECISION :: detjc2
   DOUBLE PRECISION :: det_ratio,detnew,detold
   DOUBLE PRECISION :: local_ratio
  ! TYPE(BathOperatoroffdiag)  :: Bathnew
@@ -3554,11 +3553,11 @@ SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: syms
 !Local variables ------------------------------
-  INTEGER :: iflavor1
-  INTEGER :: iflavor2
-  INTEGER :: flavors
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: green_tmp
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) :: n_tmp
+  !INTEGER :: iflavor1
+  !INTEGER :: iflavor2
+  !INTEGER :: flavors
+  !DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: green_tmp
+  !DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) :: n_tmp
 
 !  flavors = op%flavors
 !  IF ( SIZE(syms,1) .NE. flavors .OR. SIZE(syms,2) .NE. flavors ) THEN
@@ -3629,7 +3628,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 !Local variables ------------------------------
   !INTEGER                            :: itime
   INTEGER                            :: iflavor1
-  INTEGER                            :: iflavor1b,iflavor,iflavorbis
+  INTEGER                            :: iflavor1b !,iflavor,iflavorbis
   INTEGER                            :: iflavor2
   INTEGER                            :: iflavor3
   INTEGER                            :: flavors,tail
@@ -3638,7 +3637,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   DOUBLE PRECISION :: u2
   DOUBLE PRECISION :: u3
   DOUBLE PRECISION :: Un
-  DOUBLE PRECISION :: UUnn,omega,iw
+  DOUBLE PRECISION :: UUnn,iw !omega,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
   TYPE(GreenHyboffdiag)                     :: F_tmp

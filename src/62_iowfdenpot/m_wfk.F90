@@ -654,7 +654,7 @@ subroutine wfk_close(Wfk, delete)
 !Local variables-------------------------------
 !scalars
  integer :: ierr
- character(len=500) :: msg
+ !character(len=500) :: msg
 #ifdef HAVE_MPI_IO
  integer :: mpierr,nfrec
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
@@ -4965,7 +4965,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
 !scalars
  integer,parameter :: formeig0 = 0, master = 0
  integer :: spin, ikf, ikin, nband_k, mpw, mband, nspinor, ierr, fine_mband
- integer :: nsppol, iomode, kf_rank, npw_k, ii, my_rank, ncid, fform, fform_kerange
+ integer :: nsppol, iomode, npw_k, ii, my_rank, ncid, fform, fform_kerange
  real(dp) :: cpu, wall, gflops, mae_meV, merr
  character(len=500) :: msg
  character(len=fnlen) :: my_inpath, out_wfkpath
@@ -4975,7 +4975,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  type(hdr_type) :: fine_hdr
  type(hdr_type),pointer :: ihdr
  type(ebands_t) :: iwfk_ebands, fine_ebands
- type(wvl_internal_type) :: dummy_wvl
 !arrays
  integer,allocatable :: kf2kin(:), kg_k(:,:), kshe_mask(:,:,:)
  real(dp),allocatable :: cg_k(:,:), eig_k(:), occ_k(:), fine_eigen(:,:,:)

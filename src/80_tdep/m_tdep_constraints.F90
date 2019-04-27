@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -84,10 +85,10 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
   double precision, intent(in), optional :: proj3rd(27,27,nshell3at)
   double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
 
-  integer :: ishell,ncoeff,ncoeff_prev,iatom,jatom,katom,iatshell
+  integer :: ishell,ncoeff,ncoeff_prev,iatom,jatom,iatshell !katom,
   integer :: icoeff,iconst,nconst_loc,iconst_loc,iconst_new,isym,ntotcoeff,iat_mod
-  integer :: mu,nu,xi,alpha,beta,gama,lambda,trans,natom_unitcell,natom,ii,trans1,trans2,trans3,trans4,trans5
-  double precision :: terme,temp,terme1,terme2,terme3,terme4,terme5
+  integer :: mu,nu,xi,alpha,beta,gama,lambda,trans,natom_unitcell,natom !,ii,trans1,trans2,trans3,trans4,trans5
+  double precision :: terme,temp !,terme1,terme2,terme3,terme4,terme5
   double precision :: Levi_Civita(3,3,3)
   double precision, allocatable :: SS_ref(:,:,:,:,:),dlevi(:,:,:,:)
   double precision, allocatable :: vectin(:,:),vectout(:,:)

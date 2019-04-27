@@ -339,7 +339,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  integer :: mband, nbcalc, nsppol, ib_v, ib_c
  integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
  integer :: ii, jj, ik, bandmin, bandmax, istwf_k, idir, edos_intmeth
- integer :: my_rank, nproc, ierr, bstop, ivoigt
+ integer :: my_rank, nproc, ierr, bstop
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  real(dp) :: edos_step, edos_broad
 #ifdef HAVE_NETCDF
@@ -352,7 +352,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  type(vkbr_t) :: vkbr
  type(ebands_t) :: ebands, ebands_tmp
  type(edos_t)  :: edos
- type(jdos_t)  :: jdos
+ !type(jdos_t)  :: jdos
  type(gaps_t)  :: gaps
  type(crystal_t) :: cryst
  type(hdr_type) :: hdr_tmp, hdr
@@ -1276,7 +1276,7 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  type(mpi_type) :: mpienreg_seq
 !arrays
  integer :: npwarr(nkpt1), dummy_nband(nkpt1*nsppol1)
- integer :: idir, nkpg, nkpg1, useylmgr1, optder, nylmgr1
+ integer :: idir, nkpg, nkpg1, useylmgr1, optder !, nylmgr1
  real(dp),allocatable :: ylm_k(:,:),ylmgr1_k(:,:,:)
 
 !************************************************************************

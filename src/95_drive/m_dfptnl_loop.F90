@@ -241,7 +241,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer,parameter :: level=51
  integer :: ask_accurate,comm_cell,counter,cplex,cplex_rhoij,formeig,flag1,flag3
  integer :: has_dijfr,has_diju
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ii,ireadwf
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,ii,ireadwf
  integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat

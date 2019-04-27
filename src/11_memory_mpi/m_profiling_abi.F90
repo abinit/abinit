@@ -373,7 +373,6 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
  real(dp) :: now
  logical :: do_log, new_peak
  character(len=500) :: msg
- character(len=10)  :: i_char
 ! *************************************************************************
 
  ! Handle possible allocate/deallocate failures.

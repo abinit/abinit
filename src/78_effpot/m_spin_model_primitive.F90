@@ -610,7 +610,7 @@ contains
     integer ::  typat_primcell(self%natoms), sc_nspins,  i, counter, icell
     real(dp) :: znucl(self%natoms), tmp(3,3)
     type(supercell_type) :: scell
-    integer, allocatable ::sc_index_spin(:), sc_znucl(:), sc_iatoms(:)
+    integer, allocatable ::sc_index_spin(:), sc_iatoms(:) !sc_znucl(:), 
     integer, allocatable :: sc_ispin_prim(:), sc_rvec(:, :)
     real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
     integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom

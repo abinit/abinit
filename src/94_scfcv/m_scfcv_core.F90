@@ -341,7 +341,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !integer :: dtset_iprcel
  integer :: iatom,ider,idir,ierr,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
- integer :: ispmix,istep,istep_fock_outer,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mcprj_wvl,mband_cprj
+ integer :: ispmix,istep,istep_fock_outer,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mband_cprj
+#if defined HAVE_BIGDFT
+ integer :: mcprj_wvl,
+#endif
  integer :: me,me_wvl,mgfftdiel,mgfftf,moved_atm_inside,moved_rhor,my_nspinor,n1xccc
  integer :: n3xccc,ncpgr,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrvdw,nhatgrdim,nk3xc,nkxc
  integer :: npawmix,npwdiel,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf

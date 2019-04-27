@@ -1173,12 +1173,12 @@ end subroutine extrapwf
 !Local variables-------------------------------
 !scalars
  integer :: hermitian
- integer :: ibdmix,ibg,ibg_hist,icg,icg_hist,iband
+ integer :: ibdmix,ibg,ibg_hist,icg,icg_hist !,iband
  integer :: ierr,ikpt,indh,ind1,ind2,ind1new,inplace
  integer :: isppol,istwf_k,kk,me_distrb,mband,my_nspinor,mcprj_k
  integer :: nband_k,nbdmix,nbdmax,npw_k,ntypat
  integer :: spaceComm_band,usepaw
- real(dp) :: alpha,beta,dotr,doti
+ real(dp) :: alpha,beta !,dotr,doti
  
 !arrays
  integer,allocatable :: ipiv(:),dimcprj(:)

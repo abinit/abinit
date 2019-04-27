@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -144,9 +145,9 @@ subroutine tdep_calc_psijtot(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_ref,S
   double precision, intent(in) :: Psij_coeff(ntotcoeff,1)
   double precision, intent(inout) :: Psij_ref(3,3,3,Shell3at%nshell)
 
-  integer :: iatcell,ishell,jshell,isym,iatom,jatom,katom,eatom,fatom,gatom,ncoeff,ncoeff_prev
+  integer :: ishell,jshell,isym,jatom,katom,eatom,fatom,gatom,ncoeff,ncoeff_prev
   integer :: iatref,jatref,katref,iatshell,nshell,trans
-  integer :: ii,jj,kk,ll,kappa,alpha,beta,gama
+  integer :: ii,jj,kk,kappa !,alpha,beta,gama
   double precision, allocatable :: Psij_333(:,:,:)
 
   write(InVar%stdout,*) ' '
@@ -280,7 +281,7 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Ps
   integer :: imode,nmode,ncomp,jat_mod,jatcell,iatshell,ishell,isym,trans
   double precision :: phase
   double precision, allocatable :: Psij_333(:,:,:)
-  double complex, allocatable :: mass_mat(:,:),eigen_prod(:,:,:,:,:),Grun_shell(:,:)
+  double complex, allocatable :: eigen_prod(:,:,:,:,:),Grun_shell(:,:)
 
 ! Define quantities
   natom_unitcell=InVar%natom_unitcell
@@ -612,7 +613,7 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rla
   double precision,intent(in) :: Psij_ref(3,3,3,Shell3at%nshell)
   double precision,intent(in) :: Rlatt_cart(3,InVar%natom_unitcell,InVar%natom)
 
-  integer :: iqpt,nmode,ii,jj
+  integer :: iqpt,nmode,ii !,jj
   double precision :: qpt_cart(3)
   double complex, allocatable :: Gruneisen(:)
 

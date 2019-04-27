@@ -364,7 +364,7 @@ contains
     type(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: idx_i(:), idx_j(:)
     real(dp), intent(in) :: val(:,:,:)
-    integer :: i, j, ia, ib, nnz
+    integer :: i,  ia, ib, nnz
     !self%bilinear_nint = size(idx_i)
     !ABI_ALLOCATE(self%bilinear_i, (self%bilinear_nint))
     !ABI_ALLOCATE(self%bilinear_j, (self%bilinear_nint))
@@ -386,8 +386,8 @@ contains
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(3,self%nspins)
-    integer :: i, iatom, jatom
-    real(dp) ::  H(3,1)
+    integer :: i !, iatom, jatom
+    !real(dp) ::  H(3,1)
     !Svec=reshape(S, (/self%nspins*3/))
     !do i = 1, self%bilinear_nint, 1
     !    iatom=self%bilinear_i(i)

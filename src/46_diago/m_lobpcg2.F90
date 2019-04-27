@@ -144,8 +144,8 @@ module m_lobpcg2
     double precision :: tsec(2)
     double precision :: advice
     double precision :: advice_target
-    character(len=255) :: linalg_threads
-    integer :: ierr
+    !character(len=255) :: linalg_threads
+    !integer :: ierr
     integer :: iadvice, nthread
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads

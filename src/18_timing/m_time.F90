@@ -87,7 +87,9 @@ MODULE m_time
  real(dp),private,save :: papi_flops(TIMER_SIZE)=zero , papi_tzero(2,TIMER_SIZE)=zero
 
  ! Elapsed time and elapsed number of floating point operation since a reference
+#ifdef HAVE_PAPI
  real(dp),private,save :: papi_tottim(2,TIMER_SIZE)=zero, papi_totflops(TIMER_SIZE)=zero
+#endif
 
 CONTAINS
 !!***

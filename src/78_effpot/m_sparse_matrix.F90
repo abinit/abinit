@@ -273,8 +273,8 @@ endif
 
     class(LIL_mat) , intent(inout)::self 
     real(dp), intent(out):: mat(self%nrow,self%ncol)
-    integer:: irow, icol
-    real(dp):: val
+    integer:: irow !, icol
+    !real(dp):: val
     mat(:,:)=0.0d0
     do irow=1, self%nrow
        call llist_iter_restart(self%rows(irow))
@@ -291,8 +291,7 @@ endif
 
     type(LIL_mat) , intent(inout):: ll
     real(dp), intent(out):: mat(ll%nrow,ll%ncol)
-    integer:: irow, icol
-    real(dp):: val
+    integer:: irow
     mat(:,:)=0.0d0
     do irow=1, ll%nrow
        call llist_iter_restart(ll%rows(irow))
@@ -345,8 +344,7 @@ endif
 
     type(LIL_mat) , intent(inout):: ll
     type(CSR_mat), intent(out):: csrmat
-    integer:: irow, icol, i, nzrow, nnz
-    real(dp):: val
+    integer:: irow, i, nzrow, nnz
     !CSR_mat_initialize(A,nrow,ncol,nnz,i,j,val)
     call  CSR_mat_initialize(csrmat, ll%nrow, ll%ncol, LIL_mat_get_nnz(ll))
     i=0
@@ -595,8 +593,8 @@ endif
     type(CSR_mat), intent(in):: A
     real(dp), intent(in) :: x(A%ncol)
     real(dp), intent(out) :: y(A%nrow)
-    real(dp)::ddot
     integer::irow, i1, i2, i
+    !real(dp)::ddot
     !external ddot
     y(:)=0.0d0
     !$OMP PARALLEL DO private(i, i1, i2)
