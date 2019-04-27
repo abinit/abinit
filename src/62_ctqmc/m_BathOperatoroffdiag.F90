@@ -2,6 +2,7 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_BathOperatoroffdiag
 !! NAME
@@ -57,8 +58,6 @@ IMPLICIT NONE
  public :: BathOperatoroffdiag_getDetRemove
  public :: BathOperatoroffdiag_getDetF
  public :: BathOperatoroffdiag_getError
-
-      
 !!***
 
 !!****t* m_BathOperatoroffdiag/BathOperatoroffdiag
@@ -2209,7 +2208,7 @@ SUBROUTINE BathOperatoroffdiag_recomputeM(op,particle,flav_i,flav_j)
   INTEGER :: iflavorb,it !,it1
   INTEGER :: iflavora_imp
   INTEGER :: iflavorb_imp
-  CHARACTER(LEN=6) :: a
+  !CHARACTER(LEN=6) :: a
   DOUBLE PRECISION :: time
   DOUBLE PRECISION :: beta
   DOUBLE PRECISION :: mbeta_two

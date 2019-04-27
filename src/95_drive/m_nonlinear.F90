@@ -106,7 +106,6 @@ contains
 !!  dtfil <type(datafiles_type)> = variables related to files
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  etotal = new total energy (no meaning at output)
-!!  iexit= exit flag
 !!  mpi_enreg=informations about MPI pnarallelization
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
 !!  xred(3,natom) = reduced atomic coordinates
@@ -156,14 +155,10 @@ contains
 !!
 !! SOURCE
 
-subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
-&                    pawang,pawrad,pawtab,psps,xred)
-
- implicit none
+subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iexit
  real(dp),intent(inout) :: etotal
  character(len=6),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -877,7 +872,7 @@ end if
 
 !Set up hartree and xc potential. Compute kxc here.
  ABI_ALLOCATE(vhartr,(nfftf))
- call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,rhog,rprimd,vhartr)
 
  option=3
  nkxc=2*dtset%nspden-1 ! LDA
@@ -1371,8 +1366,6 @@ end if
 
    subroutine print_chi2(d3cart0,msg,theunit)
 
-     implicit none
-
      integer,intent(in) :: theunit
      character(len=30) :: msg
      real(dp) :: elem1,elem2
@@ -1418,8 +1411,6 @@ end if
 !! SOURCE
 
    subroutine print_dchidtau(d3cart0,msg,theunit)
-
-     implicit none
 
      integer,intent(in) :: theunit
      character(len=30) :: msg
@@ -1497,8 +1488,6 @@ end subroutine nonlinear
 subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 &  kpt3,mband,mkmem,mpi_enreg,mpw,nband,nkpt2,&
 &  nkpt3,nneigh,npwarr,nsppol,occ,pwind)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

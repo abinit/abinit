@@ -255,8 +255,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &                 strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
 &                 vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,mcprj,mgfftf,my_natom,n3xccc,nfftf,ngrvdw,nkxc,ntypat,optfor,optres
@@ -609,8 +607,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
 &  stress_needed,symrec,typat,usecprj,usefock,use_gpu_cuda,wtk,xred,ylm,ylmgr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1250,8 +1246,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &                 nkxc,nresid,n3xccc,optnc,optxc,pawang,pawfgrtab,pawrhoij,pawtab,&
 &                 rhor,rprimd,usepaw,vresid,xccc3d,xred,vxc)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: izero,my_natom,n3xccc,nfft,nkxc,optnc,optxc,usepaw
@@ -1356,7 +1350,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  Compute VH(n^res)(r)
    if (dtset%icoulomb == 0) then
-     call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,nresg,rprimd,vhres)
+     call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,nresg,rprimd,vhres)
    else
      comm=mpi_enreg%comm_cell
      nproc=xmpi_comm_size(comm)
@@ -1404,7 +1398,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
    option=2;if (dtset%xclevel==2.and.optxc==0) option=12
 
-   call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,dtset%paral_kgb,nresg,rprimd,vhres)
+   call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,nresg,rprimd,vhres)
    call xcdata_init(xcdata,dtset=dtset)
 
 !  To be adjusted for the call to rhotoxc

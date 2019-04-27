@@ -39,7 +39,7 @@ contains
 subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
 
   integer :: prtdos,ii,iqpt,iatom
-  integer :: msym,natom,natom_unitcell,iomega
+  integer :: natom,natom_unitcell,iomega
   integer :: dos_ngqpt(3)
   integer :: count_wminmax(2)
   character (len=25):: phdos_fname

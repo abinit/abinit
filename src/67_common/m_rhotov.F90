@@ -166,8 +166,6 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
 &  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n3xccc,nfft,nhatgrdim,nkxc,optene,optres,optxc,usepaw,istep
@@ -248,7 +246,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  if (ipositron/=1) then
 !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
-     call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+     call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
      !Use the proper exchange_correlation energy : either the origin one, or the auxiliary one
      ixc_current=dtset%ixc
      if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%auxc_ixc

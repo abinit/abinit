@@ -641,7 +641,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    if (dtset%eph_task == -4) then
      call wrtout(std_out, "Calling transport routine after sigmaph run...", do_flush=.True.)
-     !call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
+     !call transport(dtfil, dtset, ebands, cryst, comm)
    end if
 
  case (5, -5)
@@ -651,11 +651,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (6)
    ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model
-   call frohlichmodel(cryst, dtfil, dtset, ebands, efmasdeg, efmasval, ifc)
+   call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (7)
    ! Compute phonon limited transport from SIGEPH file
-   call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
+   call transport(dtfil, dtset, ebands, cryst, comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

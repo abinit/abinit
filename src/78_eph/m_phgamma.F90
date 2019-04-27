@@ -3781,7 +3781,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  integer :: isig,n1,n2,n3,n4,n5,n6,nspden,do_ftv1q
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
- integer :: iene, jene
+ integer :: jene
+#ifdef DEV_MJV
+ integer :: iene
+#endif
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif

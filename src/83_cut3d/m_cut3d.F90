@@ -2144,7 +2144,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
 
        call dens_in_sph(cmax,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),gmet,istwfk(ckpt),&
-&       kg_k,natom,ngfft,mpi_enreg,npw_k,paral_kgb,ph1d,ratsph_arr,ucvol)
+&       kg_k,natom,ngfft,mpi_enreg,npw_k,ph1d,ratsph_arr,ucvol)
 
        write(std_out,'(a)' )' Charge in the sphere around each atom '
        do iatom=1,natom

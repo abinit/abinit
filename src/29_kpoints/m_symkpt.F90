@@ -132,6 +132,8 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
 ! *********************************************************************
 
+ ABI_UNUSED((/comm/))
+
  if (timrev/=1 .and. timrev/=0) then
    write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
    MSG_BUG(message)

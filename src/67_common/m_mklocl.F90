@@ -135,8 +135,6 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,natom,nattyp,nfft,ngfft,nspden,ntypat,option,pawtab,ph1d,psps,qprtrb,&
 &  rhog,rhor,rprimd,ucvol,vprtrb,vpsp,wvl,wvl_den,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft,natom,nfft,nspden,ntypat,option
@@ -285,8 +283,6 @@ end subroutine mklocl
 subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,qprtrb,&
 &  rhog,ucvol,vlspl,vprtrb,vpsp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -746,8 +742,6 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
 & ntypat,n1,n2,n3,paral_kgb,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
@@ -1010,8 +1004,6 @@ end subroutine dfpt_vlocal
 subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 &  mqgrid,natom,nattyp,nfft,ngfft,ntypat,paral_kgb,ph1d,qgrid,&
 &  ucvol,vlspl,vpsp1)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

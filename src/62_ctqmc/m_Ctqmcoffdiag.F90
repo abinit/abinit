@@ -1117,7 +1117,7 @@ SUBROUTINE Ctqmcoffdiag_reset(op)
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
-  INTEGER                  :: iflavor
+  !INTEGER                  :: iflavor
   DOUBLE PRECISION         :: sweeps
 
   CALL GreenHyboffdiag_reset(op%Greens)
@@ -4229,7 +4229,7 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
   INTEGER                            :: itime
   INTEGER                            :: sp1
   INTEGER                            :: iflavor,iflavorb
-  INTEGER                            :: flavors,iflavor1,iflavor2
+  INTEGER                            :: flavors, iflavor2 !,iflavor1,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
   DOUBLE PRECISION                   :: dt
@@ -4696,7 +4696,7 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
-  INTEGER                  :: iflavor
+  !INTEGER                  :: iflavor
   INTEGER                  :: flavors
   INTEGER                  :: i
   INTEGER                  :: j

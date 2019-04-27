@@ -6,6 +6,7 @@
 #include "abi_common.h"
     
 module m_neat
+
   use defs_basis
   use m_abicore
   use m_pair_list
@@ -19,6 +20,7 @@ module m_neat
   private
   public :: neat_energies, neat_results_gs, neat_crystal, neat_start_dataset
   public :: neat_open_gw_sigma_pert, neat_gw_sigma_pert_add_line, neat_finish_gw_sigma_pert
+
   contains
 
   subroutine wrtout_stream(stream, iout)
@@ -163,7 +165,7 @@ module m_neat
 
     call wrtout_stream(stream, iout)
   end subroutine neat_results_gs
-!!*** m_neat/neat_results_gs
+!!***
 
 !!****f* m_neat/neat_crystal
 !!
@@ -185,14 +187,16 @@ module m_neat
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine neat_crystal(crystal, iout, comment)
     type(crystal_t),intent(in) :: crystal
     integer,intent(in) :: iout
     character(len=*),intent(in),optional :: comment
 
+    write(std_out, *)"Unused neat_crystal", crystal%natom, iout, trim(comment)
     
   end subroutine neat_crystal
-!!*** m_neat/neat_crystal
+!!*** 
 
 !!****f* m_neat/neat_open_gw_sigma_pert
 !!
@@ -235,7 +239,7 @@ module m_neat
     call yaml_add_tabular_line(header, stream=stream)
     
   end subroutine neat_open_gw_sigma_pert
-!!*** m_neat/neat_open_gw_sigma_pert
+!!***
 
 !!****f* m_neat/neat_gw_sigma_pert_add_line
 !!
@@ -263,7 +267,7 @@ module m_neat
 
     call yaml_add_tabular_line(line, stream=stream)
   end subroutine neat_gw_sigma_pert_add_line
-!!*** m_neat/neat_gw_sigma_pert_add_line
+!!***
 
 !!****f* m_neat/neat_finish_gw_sigma_pert
 !!
@@ -293,6 +297,7 @@ module m_neat
 
     call wrtout_stream(stream, iout)
   end subroutine neat_finish_gw_sigma_pert
-!!*** m_neat/neat_finish_gw_sigma_pert
+!!***
 
 end module m_neat
+!!***

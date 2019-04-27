@@ -2630,7 +2630,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 !    Get first-order hartree potential.
      call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,natom,nfft,ngfft,&
-&     paral_kgb,rhog,rprimd,vhartr01)
+&     rhog,rprimd,vhartr01)
 
 !    Get first-order exchange-correlation potential
      if(psps%n1xccc/=0)then
@@ -4141,10 +4141,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  ABI_ALLOCATE(rhogfermi,(2,dtset%nfft))
  if (psps%usepaw==0) then
    call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,nspden,&
-&   nsppol,nsym1,dtset%paral_kgb,phnons1,rhogfermi,rhorfermi,rprimd,symaf1,symrl1)
+&   nsppol,nsym1,phnons1,rhogfermi,rhorfermi,rprimd,symaf1,symrl1)
  else
    call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,nspden,&
-&   nsppol,nsym1,dtset%paral_kgb,phnons1,rhogfermi,rhowfr   ,rprimd,symaf1,symrl1)
+&   nsppol,nsym1,phnons1,rhogfermi,rhowfr,rprimd,symaf1,symrl1)
  end if
 
 !PAW: Build new rhoij quantities then symetrize them

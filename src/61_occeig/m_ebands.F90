@@ -5025,7 +5025,6 @@ end subroutine ebands_prtbltztrp
 !!  eigen(mband*nkpt*nsppol) = array for holding eigenvalues (hartree)
 !!  fermie = Fermi level
 !!  fname_radix = radix of file names for output
-!!  natom = number of atoms in cell.
 !!  nband = number of bands
 !!  nkpt = number of k points.
 !!  nsppol = 1 for unpolarized, 2 for spin-polarized
@@ -5037,8 +5036,6 @@ end subroutine ebands_prtbltztrp
 !! OUTPUT
 !!  (only writing, printing)
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      get_tau_k
 !!
@@ -5048,11 +5045,11 @@ end subroutine ebands_prtbltztrp
 !! SOURCE
 
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
-       natom, nband, nelec, nkpt, nspinor, nsppol, nsym, rprimd, symrel, tau_k)
+       nband, nelec, nkpt, nspinor, nsppol, nsym, rprimd, symrel, tau_k)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: natom, nsym, nband, nkpt, nsppol, nspinor, ntemper
+ integer, intent(in) :: nsym, nband, nkpt, nsppol, nspinor, ntemper
  real(dp), intent(in) :: tempermin, temperinc
  real(dp), intent(in) :: nelec
  character(len=fnlen), intent(in) :: fname_radix
@@ -5085,15 +5082,15 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
    write (iout, '(a)') "GENE                      # Format of input: generic format, with Symmetries"
    write (iout, '(a)') "0 0 0 0.0                 # iskip (not presently used) idebug setgap shiftgap"
    write (iout, '(E15.5,a,F10.4,a)') fermie(itemp)*two, " 0.0005 0.4  ", nelec, &
-&   "  # Fermilevel (Ry), energy grid spacing, energy span around Fermilevel, number of electrons"
+    "  # Fermilevel (Ry), energy grid spacing, energy span around Fermilevel, number of electrons"
    write (iout, '(a)') "CALC                      # CALC (calculate expansion coeff), NOCALC read from file"
    write (iout, '(a)') "3                         # lpfac, number of latt-points per k-point"
    write (iout, '(a)') "BOLTZ                     # run mode (only BOLTZ is supported)"
    write (iout, '(a)') ".15                       # (efcut) energy range of chemical potential"
    write (iout, '(2f8.2,a)')&
-&   tempermin+temperinc*dble(itemp),tempermin+temperinc*dble(itemp), "                  # Tmax, temperature grid spacing"
+    tempermin+temperinc*dble(itemp),tempermin+temperinc*dble(itemp), "                  # Tmax, temperature grid spacing"
    write (iout, '(2a)') "-1                        # energyrange of bands given ",&
-&   "individual DOS output sig_xxx and dos_xxx (xxx is band number)"
+    "individual DOS output sig_xxx and dos_xxx (xxx is band number)"
    write (iout, '(a)') "TETRA                     # DOS calculation method. Other possibility is TETRA"
    write (iout, '(a)') "No                        # not using model for relaxation time"
    write (iout, '(a)') "3                         # Number of doping levels coefficients will be output for"
@@ -5152,10 +5149,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 
  do isym=1, nsym
    write (iout,'(3(3I5,2x), a, I5)') &
-&   symrel(1,:,isym), &
-&   symrel(2,:,isym), &
-&   symrel(3,:,isym), &
-&   ' ! symmetry rotation matrix isym = ', isym
+    symrel(1,:,isym), symrel(2,:,isym), symrel(3,:,isym), ' ! symmetry rotation matrix isym = ', isym
  end do
  close (iout)
 

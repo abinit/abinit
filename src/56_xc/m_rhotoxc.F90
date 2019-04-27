@@ -261,8 +261,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 & add_tfw,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,option,paral_kgb
@@ -610,23 +608,23 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if ((n3xccc==0).and.(.not.test_nhat).and.(nspden_eff==nspden)) then
        if (mgga==1) then
          call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         paral_kgb,qphon,rhor_,rhonow,lrhonow=lrhonow)
+&         qphon,rhor_,rhonow,lrhonow=lrhonow)
        else
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,paral_kgb,qphon,rhor_,rhonow)
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,qphon,rhor_,rhonow)
        end if
      else if ((ishift>0).and.(test_nhat)) then
        if (mgga==1) then
          call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         paral_kgb,qphon,rhocorval,rhonow,lrhonow=lrhonow)
+&         qphon,rhocorval,rhonow,lrhonow=lrhonow)
        else
-         call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,paral_kgb,qphon,rhocorval,rhonow)
+         call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,qphon,rhocorval,rhonow)
        end if
      else
        if (mgga==1) then
          call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         paral_kgb,qphon,rhocorval,rhonow,lrhonow=lrhonow)
+&         qphon,rhocorval,rhonow,lrhonow=lrhonow)
        else
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,paral_kgb,qphon,rhocorval,rhonow)
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,qphon,rhocorval,rhonow)
        end if
      end if
 
@@ -646,7 +644,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            rhocorval(:,1)=rhocorval(:,1)+nhat(:,1)
            rhocorval(:,2)=rhocorval(:,2)+nhat_up(:)
          end if
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,nspden_eff,paral_kgb,qphon,rhocorval,rhonow)
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,nspden_eff,qphon,rhocorval,rhonow)
        end if
        if (ngrad==2.and.nhatgrdim==1.and.nspden==nspden_eff) then
          do ii=1,3
@@ -1116,10 +1114,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if (nspden/=4) then
        if(with_vxctau)then
          call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&         paral_kgb,qphon,rhonow_ptr,vxc,vxctau=vxctau)
+&         qphon,rhonow_ptr,vxc,vxctau=vxctau)
        else
          call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&         paral_kgb,qphon,rhonow_ptr,vxc)
+&         qphon,rhonow_ptr,vxc)
        end if
 
      else
@@ -1128,7 +1126,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxcrho_b_updn,(nfft,4))
        vxcrho_b_updn=zero
        call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&       paral_kgb,qphon,rhonow_ptr,vxcrho_b_updn)
+&       qphon,rhonow_ptr,vxcrho_b_updn)
        do ifft=1,nfft
          dvdn=half*(vxcrho_b_updn(ifft,1)+vxcrho_b_updn(ifft,2))
          if(m_norm(ifft)>m_norm_min) then
@@ -1160,7 +1158,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxc_apn,(nfft,nspden_apn))
        vxc_apn=zero
        call xcpot(cplex,depsxc_apn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad_apn,&
-&       nspden_apn,ngrad_apn,paral_kgb,qphon,rhonow_apn,vxc_apn)
+&       nspden_apn,ngrad_apn,qphon,rhonow_apn,vxc_apn)
        vxc(:,1)=vxc(:,1)+vxc_apn(:,1)
        if (nspden_updn==2) vxc(:,2)=vxc(:,2)+vxc_apn(:,1)
        s1=zero

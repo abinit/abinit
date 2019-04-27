@@ -128,8 +128,6 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 & pawtab,ph1d,psps,qgrid,rhor,rprimd,scf_history,ucvol,usepaw,&
 & xred_new,xred_old,ylm,zion,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,mcg,mcprj,mgfft,my_natom,mqgrid,nfft,ntypat,usepaw
@@ -353,7 +351,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
    ABI_ALLOCATE(work2,(nfft,1))
    ABI_ALLOCATE(work3,(2,nfft))
    work2(:,1)=scf_history%atmrho_last(:)
-   call jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,1,option,dtset%paral_kgb,&
+   call jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,1,option,&
 &   dtset%slabwsrad,work3,work2,rprimd,work1,dtset%slabzbeg,dtset%slabzend)
    scf_history%atmrho_last(:)=work2(:,1)
    ABI_DEALLOCATE(work1)
@@ -539,8 +537,6 @@ end subroutine extraprho
 
 subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 & nattyp,ngfft,npwarr,ntypat,pawtab,psps,rprimd,scf_history,usepaw,xred_old,ylm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1155,7 +1151,6 @@ end subroutine extrapwf
 
  !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj,cgcprj_cholesky,lincom_cgcprj
- implicit none
 
 !Arguments ------------------------------------
 !scalars

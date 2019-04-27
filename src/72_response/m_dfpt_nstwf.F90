@@ -238,7 +238,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,           only : getcprj
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -679,7 +678,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !      Get first-order Hartree potential (metric tensor contribution only)
        if (nvh1>0) then
          call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,dtset%natom,&
-&         nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr01)
+&         nfftf,ngfftf,rhog,rprimd,vhartr01)
        end if
 
 !      Get Hartree + xc + local contributions to dynamical matrix or elastic tensor
@@ -1495,7 +1494,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !      Build and symmetrize 1st-order density change due to change of overlap
        ABI_ALLOCATE(drho1wfg,(2,dtset%nfft))
        call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&       nspden,nsppol,nsym1,dtset%paral_kgb,phnons1,drho1wfg,drho1wfr(:,:,idir1),&
+&       nspden,nsppol,nsym1,phnons1,drho1wfg,drho1wfr(:,:,idir1),&
 &       rprimd,symaf1,symrl1)
        if (dtset%pawstgylm/=0) then
          option=0
@@ -1822,7 +1821,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  use m_kg,      only : mkkpg
  use m_mkffnl,  only : mkffnl
  use m_getgh1c, only : getgh1c
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2242,8 +2240,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
 &                      mband,npw_k,npw1_k,nspinor,nsppol,occ_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -138,8 +138,6 @@ contains
 subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
 &          nkxc,non_magnetic_xc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhat1dim,nhat1grdim
@@ -515,8 +513,6 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 &                    nhat1,nhat1dim,nhat1gr,nhat1grdim,nkxc,&
 &                    nspden,paral_kgb,qphon,rhor1,usexcnhat,vxc1)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nhat1dim,nhat1grdim,nkxc,nspden,paral_kgb,usexcnhat
@@ -574,7 +570,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !rho1now(:,:,2:4) contains the gradients of the first-order density
  ishift=0 ; ngrad=2
  ABI_ALLOCATE(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhor1_ptr,rho1now)
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
 
 !PAW: add "exact" gradients of compensation density
  if (test_nhat.and.usexcnhat==1) then
@@ -724,7 +720,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
  vxc1(:,:)=zero
  call xcpot(cplex,dnexcdn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,paral_kgb,qphon,rho1now,vxc1)
+& nspgrad,qphon,rho1now,vxc1)
 
 !call filterpot(paral_kgb,cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 
@@ -794,8 +790,6 @@ end subroutine dfpt_mkvxcgga
 subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
 &          nhat1gr,nhat1grdim,nkxc,non_magnetic_xc,nspden,n3xccc,optnc,option,paral_kgb,qphon,&
 &          rhor,rhor1,rprimd,usexcnhat,vxc,vxc1,xccc3d1,ixcrot)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

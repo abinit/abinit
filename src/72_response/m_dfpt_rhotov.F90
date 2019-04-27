@@ -123,8 +123,6 @@ contains
 &           non_magnetic_xc,optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
 &           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
@@ -205,7 +203,7 @@ contains
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
- call hartre(cplex,gsqcut,0,mpi_enreg,nfft,ngfft,paral_kgb,rhog1,rprimd,vhartr1_,qpt=qphon)
+ call hartre(cplex,gsqcut,0,mpi_enreg,nfft,ngfft,rhog1,rprimd,vhartr1_,qpt=qphon)
 
  if (optene>0) then
    call dotprod_vn(cplex,rhor1,ehart1,doti,nfft,nfftot,1,1,vhartr1_,ucvol)
@@ -214,7 +212,7 @@ contains
  if (optene>0) ehart01=zero
  if(ipert==natom+3 .or. ipert==natom+4) then
    ABI_ALLOCATE(vhartr01,(cplex*nfft))
-   call hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr01)
+   call hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vhartr01)
    if (optene>0) then
      call dotprod_vn(cplex,rhor1,ehart01,doti,nfft,nfftot,1,1,vhartr01,ucvol)
      ehart01=two*ehart01
@@ -423,8 +421,6 @@ end subroutine dfpt_rhotov
 !! SOURCE
 
 subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
-
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)    :: idir,nfft,cplex,nspden

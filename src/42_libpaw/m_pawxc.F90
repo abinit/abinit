@@ -5348,7 +5348,7 @@ end subroutine pawxcmpositron
  real(dp),intent(out),optional:: vxclrho(npts,nspden*mgga),vxctau(npts,nspden*mgga)
 
 !Local variables-------------------------------
- character(len=100) :: msg
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -5358,9 +5358,7 @@ end subroutine pawxcmpositron
 #elif defined HAVE_LIBXC
  call pawxc_drivexc_libxc()
 #else
- write(msg,'(5a)') 'libPAW XC driving routine only implemented in the following cases:',ch10, &
-&                  ' - ABINIT',ch10,' - libXC'
- MSG_BUG(msg)
+#error "libPAW XC driving routine requires either HAVE_LIBPAW_ABINIT or HAVE_LIBXC"
 #endif
 
  if (.false.) write(std_out,*) el_temp,xc_tb09_c,lrho(1,1),tau(1,1)

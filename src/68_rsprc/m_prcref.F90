@@ -58,7 +58,6 @@ module m_prcref
  use m_mklocl,     only : mklocl
  use m_mkcore,     only : mkcore
 
-
  implicit none
 
  private
@@ -199,8 +198,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  nattyp,nfft,nfftprc,ngfft,ngfftprc,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
 &  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred)
-
- implicit none
 
 !Arguments-------------------------------
 !scalars
@@ -636,7 +633,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(vhartr_wk,(nfft))
      option=1
 
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
 
 !    Prepare the call to rhotoxc
      call xcdata_init(xcdata,dtset=dtset)
@@ -844,8 +841,6 @@ end subroutine prcref
 &  optreal,optres,pawrhoij,ph1d,psps,rhog, rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,xred,&
 &  etotal,pawtab,wvl)
-
- implicit none
 
 !Arguments-------------------------------
 !variables used for tfvw
@@ -1268,7 +1263,7 @@ end subroutine prcref
    ABI_ALLOCATE(vhartr_wk,(nfft))
    option=1
 
-   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
+   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
 
 !  Prepare the call to rhotoxc
    call xcdata_init(xcdata,dtset=dtset)
@@ -1361,8 +1356,6 @@ end subroutine prcref_PMA
 !! SOURCE
 
 subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral_kgb,qphon,rprimd,vresid,vrespc)
-
- implicit none
 
 !Arguments-------------------------------
 !scalars
@@ -1601,8 +1594,6 @@ end subroutine moddiel
 !! SOURCE
 
 subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1966,8 +1957,6 @@ end subroutine dielmt
 
 subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 &  nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb,prtvol,susmat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2442,8 +2431,6 @@ end subroutine dieltcel
 
 subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,vresid,vrespc,base)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nspden
@@ -2522,7 +2509,9 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
 !compute deltaW                                                 **
 !******************************************************************
  vrespc=vresid !starting point
- call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,dtset%paral_kgb,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart) ! put the laplacian of the residuals into deltaW
+ ! put the laplacian of the residuals into deltaW
+ call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart) 
+
 !call laplacian(vrespc,buffer,ngfft,gprimd) ! put the laplacian of the residuals into deltaW
 !do ifft=1,nfft
 !if (buffer(ifft,1)/=deltaW(ifft,1)) then
@@ -2659,8 +2648,6 @@ end subroutine prcrskerker1
 !! SOURCE
 
 subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vrespc,natom,xred,mpi_enreg,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2851,7 +2838,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 !compute V1
 !******************************************************************
  V1=vresid
- call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,dtset%paral_kgb,rdfuncr=V1,laplacerdfuncr=deltaW)
+ call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=V1,laplacerdfuncr=deltaW)
  deltaW(:,1)= (((one/rdiemac(:))*V1(:,1))-(((rdielng(:))**2)*deltaW(:,1)))
 !deltaW(:,1)= -diemix*(((rdielng(:))**2)*deltaW(:,ispden))
  if (nspden>1) then
@@ -2969,8 +2956,6 @@ end subroutine prcrskerker2
 
 subroutine cgpr(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,dtol,itmax,v,fmin,delta)
 
- implicit none
-
 !Arguments ------------------------------------
 include "dummy_functions.inc"
 !scalars
@@ -3061,8 +3046,6 @@ end subroutine cgpr
 
 subroutine linmin(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,v,grad,fmin)
 
- implicit none
-
 !Arguments ------------------------------------
 include "dummy_functions.inc"
 !scalars
@@ -3119,8 +3102,6 @@ end subroutine linmin
 !! SOURCE
 
 subroutine bracketing (nv1,nv2,dp_dum_v2dp,v,grad,a,x,b,fa,fx,fb)
-
- implicit none
 
 !Arguments ------------------------------------
 include "dummy_functions.inc"
@@ -3230,8 +3211,6 @@ end subroutine bracketing
 !! SOURCE
 
 function brent(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,itmax,v,grad,ax,xx,bx,tol,xmin)
-
- implicit none
 
 !Arguments ------------------------------------
 include "dummy_functions.inc"

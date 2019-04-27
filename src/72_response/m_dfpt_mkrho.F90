@@ -122,8 +122,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 & nfft,ngfft,nkpt_rbz,npwarr,npwar1,nspden,nspinor,nsppol,nsym,&
 & occ_rbz,paral_kgb,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,mband,mgfft,mk1mem,mkmem,mpw,mpw1,nfft,nkpt_rbz
@@ -525,8 +523,8 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  call timab(71,2,tsec)
  call timab(48,2,tsec)
 
- call symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfft,ngfft,nspden,nsppol,nsym,paral_kgb,phnons,&
-& rhog1,rhor1,rprimd,symafm,symrel)
+ call symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfft,ngfft,nspden,nsppol,nsym,phnons,&
+             rhog1,rhor1,rprimd,symafm,symrel)
 
 !We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !we also have the spin-up density, symmetrized, in rhor1(:,2).
@@ -608,8 +606,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &                  mpi_enreg,natom,nband_k,ncpgr,npw_k,npw1_k,nspinor,occ_k,&
 &                  option,pawrhoij1,prtvol,rhoaug1,tim_fourwf,wf_corrected,&
 &                  wtk_k,comm_atom,mpi_atmtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

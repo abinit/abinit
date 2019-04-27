@@ -227,8 +227,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,vxctau,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
 & add_tfw) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,my_natom,n3xccc,nfftf,nhatgrdim,optene,usexcnhat
@@ -355,7 +353,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr)
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,rhog,rprimd,vhartr)
      call xcdata_init(xcdata,dtset=dtset)
      ABI_ALLOCATE(kxc,(1,nkxc))
 !    to be adjusted for the call to rhotoxc
@@ -948,8 +946,6 @@ end subroutine energy
 !! SOURCE
 
 subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,resid_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

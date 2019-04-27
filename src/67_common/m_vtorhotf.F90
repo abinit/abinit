@@ -250,7 +250,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
    call timab(70,1,tsec)
 
    nfftot=dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3)
-   call symrhg(1,gprimd,irrzon,mpi_enreg,nfft,nfftot,dtset%ngfft,nspden,nsppol,nsym,dtset%paral_kgb,phnons,&
+   call symrhg(1,gprimd,irrzon,mpi_enreg,nfft,nfftot,dtset%ngfft,nspden,nsppol,nsym,phnons,&
 &   rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
 
 !  We now have both rho(r) and rho(G), symmetrized, and if nsppol=2

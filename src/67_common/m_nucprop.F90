@@ -60,19 +60,12 @@ module m_nucprop
 
 contains
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/calc_efg
 !! NAME
 !! calc_efg
 !!
 !! FUNCTION
 !! calculation and output of electric field gradient tensor at each atomic site
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (JZ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
@@ -125,8 +118,6 @@ contains
        &                    paw_an,pawang,pawrad,pawrhoij,pawtab,&
        &                    ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
        &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-    implicit none
 
     !Arguments ------------------------------------
     !scalars
@@ -183,7 +174,7 @@ contains
     efg_paw(:,:,:) = zero
     efg_point_charge(:,:,:) = zero
 
-    call make_efg_el(efg_el,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor,rprimd,symrel,tnons,xred)
+    call make_efg_el(efg_el,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
 
     call make_efg_ion(efg_ion,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
 
@@ -354,12 +345,6 @@ contains
 !! FUNCTION
 !! calculation and output of Fermi-contact term at each atomic site
 !!
-!! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JWZ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !!  comm_atom=--optional-- MPI communicator over atoms
@@ -391,8 +376,6 @@ contains
 
   subroutine calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,typat,usepaw,&
        &                  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-    implicit none
 
     !Arguments ------------------------------------
     !scalars
@@ -470,19 +453,12 @@ contains
   end subroutine calc_fc
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_efg_ion
 !! NAME
 !! make_efg_ion
 !!
 !! FUNCTION
 !! compute the electric field gradient due to ionic cores
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (JWZ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! natom, number of atoms in the unit cell
@@ -523,8 +499,6 @@ contains
 !! SOURCE
 
 subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -705,19 +679,12 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
 end subroutine make_efg_ion
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_efg_el
 !! NAME
 !! make_efg_el
 !!
 !! FUNCTION
 !! compute the electric field gradient due to electron density
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (JWZ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! mpi_enreg=information about MPI parallelization
@@ -758,13 +725,11 @@ end subroutine make_efg_ion
 !!
 !! SOURCE
 
-subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor,rprimd,symrel,tnons,xred)
-
-  implicit none
+subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: natom,nfft,nspden,nsym,paral_kgb
+  integer,intent(in) :: natom,nfft,nspden,nsym
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
   integer,intent(in) :: ngfft(18),symrel(3,3,nsym)

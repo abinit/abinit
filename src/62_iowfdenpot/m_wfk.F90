@@ -4932,8 +4932,6 @@ end subroutine wfk_diff
 !!  in_wfkpath = Input WFK file with k-point list.
 !!  kerange_path = path to KERANGE.nc file.
 !!  dtset <dataset_type>=all input variables for this dataset
-!!  psps <pseudopotential_type>=all the information about psps
-!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  out_wfkpath = Output WFK file.
 !!  comm = MPI communicator.
 !!
@@ -4950,16 +4948,14 @@ end subroutine wfk_diff
 !!
 !! SOURCE
 
-subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
+subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: in_wfkpath, kerange_path
- type(pseudopotential_type),intent(in) :: psps
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm
 !arrays
- type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
