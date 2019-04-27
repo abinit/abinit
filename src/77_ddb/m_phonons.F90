@@ -982,6 +982,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
      energies = linspace(phdos%omega_min,phdos%omega_max,phdos%nomega)
 
      do iq_ibz=1,phdos%nqibz
+       if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
 
        ! Compute the weights for this q-point using tetrahedron
        do imode=1,3*natom
@@ -1190,7 +1191,7 @@ subroutine phdos_unittests(comm)
 !Local variables -------------------------
 !scalars
  type(crystal_t) :: crystal
- integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=3,nqshft1=1,space_group0=0
+ integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
  integer,parameter :: timrev1=1,npsp1=1
  logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
  real(dp),parameter :: max_occ1=1.d0
@@ -1279,6 +1280,7 @@ subroutine phdos_unittests(comm)
  ! Initialize new tetrahedra
  call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, &
                   nqibz, ierr, errstr, comm)
+ call htetra_print(htetraq)
  call cwtime_report(" init_htetra", cpu, wall, gflops)
 
  !
@@ -1301,6 +1303,7 @@ subroutine phdos_unittests(comm)
  ABI_MALLOC(idos,(nw))
  ABI_MALLOC(wdt,(nw,2))
  energies = linspace(emin,emax,nw)
+ call cwtime_report(" init", cpu, wall, gflops)
 
  ! Compute DOS using old tetrahedron implementation
  ABI_CALLOC(tweight,(nw,nqibz))
