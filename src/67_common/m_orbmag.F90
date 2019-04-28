@@ -3409,7 +3409,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  integer :: ikg1,ikgb,ikgg,ikpt,ikptb,ikptbi,ikptg,ikptgi,ilmn,jlmn,klmn
  integer :: ikpt_loc,ipw,isppol,istwf_k,itypat
  integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jpw,jsppol
- integer :: me,my_nspinor,n1,n2dim,ncpgr,ndat
+ integer :: me,my_nspinor,n1,n2dim,ncpgr,ndat,dummy_onpw
  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn,nproc,npw_kb,npw_kg,ntotcp
  integer :: prtvol,sij_opt,sourceb,sourceg,spaceComm,tagb,tagg,tim_getghc,type_calc
  real(dp) :: dkg2,dotr,doti,ecut_eff,htpisq,keg,lambda
@@ -3546,7 +3546,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                    npw_kb = npwarr(ikptbi)
                    ikgb = dtorbmag%fkgindex(ikptb)
                    ABI_ALLOCATE(kg_kb,(3,npw_kb))
-                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kb,kpointb,1,mpi_enreg,npw_kb,npw_kb)
+                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kb,kpointb,1,mpi_enreg,npw_kb,dummy_onpw)
                    ! kg_kb(:,1:npw_kb)=kg(:,ikgb+1:ikgb+npw_kb)
 
                    ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
@@ -3555,7 +3555,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                    npw_kg = npwarr(ikptgi)
                    ikgg = dtorbmag%fkgindex(ikptg)
                    ABI_ALLOCATE(kg_kg,(3,npw_kg))
-                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kg,kpointg,1,mpi_enreg,npw_kg,npw_kg)
+                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kg,kpointg,1,mpi_enreg,npw_kg,dummy_onpw)
                    ! kg_kg(:,1:npw_kg)=kg(:,ikgg+1:ikgg+npw_kg)
 
                    if(any(abs(gs_hamk%nucdipmom)>0.0)) then

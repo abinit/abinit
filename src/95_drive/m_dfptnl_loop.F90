@@ -245,7 +245,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat
  logical :: non_magnetic_xc
- real(dp) :: dummy_real,ecut_eff
+ real(dp) :: dummy_real,dummy_real2, dummy_real3, ecut_eff
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fnamewff(5)
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -640,7 +640,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                    Computation of "on-site" first-order potentials, first-order densities
                      option=1
-                     call pawdenpot(dummy_real,dummy_real,dummy_real,i2pert,dtset%ixc,natom,dtset%natom,&
+                     call pawdenpot(dummy_real,dummy_real2,dummy_real3,i2pert,dtset%ixc,natom,dtset%natom,&
 &                     nspden,psps%ntypat,dtset%nucdipmom,&
 &                     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
 &                     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&

@@ -216,7 +216,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  integer,allocatable :: symq(:,:,:),symrec(:,:,:),symaf1(:),symrc1(:,:,:),symrl1(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
- real(dp) :: dum_shiftk(3,MAX_NSHIFTK),dummy6(6),gmet(3,3),gprimd(3,3)
+ real(dp) :: dum_shiftk(3,MAX_NSHIFTK),dummy6(6),other_dummy6(6),gmet(3,3),gprimd(3,3)
  real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),dum_kptns(:,:)
@@ -846,7 +846,7 @@ end if
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
-&   dtset%qprtrb,dum_rhog,dummy6,dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+&   dtset%qprtrb,dum_rhog,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
  else
 !  Norm-cons.: compute Vloc in reciprocal space and core charge in real space

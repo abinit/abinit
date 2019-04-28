@@ -2033,7 +2033,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
  real(dp) :: vi,vr
  character(len=500) :: msg
 !arrays
- real(dp) :: rdum(1)
+ real(dp) :: rdum(1), other_rdum(1)
  real(dp),allocatable :: dijhat_idij(:),prod(:)
 
 ! *************************************************************************
@@ -2059,7 +2059,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
    end if
    LIBPAW_ALLOCATE(pawfgrtab%gylm,(nfgd,lm_size))
    pawfgrtab%gylm_allocated=2;optgr0=1
-   call pawgylm(pawfgrtab%gylm,rdum,rdum,lm_size,nfgd,optgr0,0,0,pawtab,pawfgrtab%rfgd)
+   call pawgylm(pawfgrtab%gylm,rdum,other_rdum,lm_size,nfgd,optgr0,0,0,pawtab,pawfgrtab%rfgd)
  end if
 
 !Eventually compute exp(i.q.r) factors for the current atom (if not already done)
