@@ -78,7 +78,6 @@ contains
 !!  nspden=number of spin densities
 !!  nsym=number of symmetries in space group
 !!  ntypat=number of atom types
-!!  paral_kgb
 !!  ptcharge(ntypat)=user input charges on atoms to make simple point charge calc
 !!  paw_an(my_natom) <type(paw_an_type)>=paw arrays given on angular mesh
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
@@ -100,11 +99,6 @@ contains
 !! OUTPUT
 !!  (only writing, printing)
 !!
-!! SIDE EFFECTS
-!!
-!!
-!! NOTES
-!!
 !! PARENTS
 !!      outscfcv
 !!
@@ -114,14 +108,14 @@ contains
 !!
 !! SOURCE
 
-  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nspden,nsym,ntypat,paral_kgb,&
-       &                    paw_an,pawang,pawrad,pawrhoij,pawtab,&
-       &                    ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
-       &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nspden,nsym,ntypat,&
+                      paw_an,pawang,pawrad,pawrhoij,pawtab,&
+                      ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
+                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
     !Arguments ------------------------------------
     !scalars
-    integer,intent(in) :: my_natom,natom,nfft,nspden,nsym,ntypat,paral_kgb,prtefg,usepaw
+    integer,intent(in) :: my_natom,natom,nfft,nspden,nsym,ntypat,prtefg,usepaw
     integer,optional,intent(in) :: comm_atom
     real(dp),intent(in) :: ucvol
     type(MPI_type),intent(in) :: mpi_enreg

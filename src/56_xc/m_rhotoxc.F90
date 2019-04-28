@@ -84,7 +84,6 @@ contains
 !!              by the related auxiliary GGA functional for the computation of the xc kernel (not for other quantities)
 !!         3 for xc, kxc and k3xc
 !!        -2 for xc and kxc (with paramagnetic part if xcdata%nspden=1)
-!!  paral_kgb=Flag related to the kpoint-band-fft parallelism
 !!  rhor(nfft,xcdata%nspden)=electron density in real space in electrons/bohr**3
 !!   (total in first half and spin-up in second half if xcdata%nspden=2)
 !!   (total in first comp. and magnetization in comp. 2 to 4 if xcdata%nspden=4)
@@ -257,13 +256,13 @@ contains
 !! SOURCE
 
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,paral_kgb, &
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 & add_tfw,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,option,paral_kgb
+ integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,option
  integer,intent(in) :: usexcnhat
  logical,intent(in) :: non_magnetic_xc
  logical,intent(in),optional :: add_tfw

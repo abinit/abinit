@@ -2019,8 +2019,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 !Precondition the potential residual:
 !Use a model dielectric function preconditioning, or simple mixing
  ABI_ALLOCATE(vrespc,(cplex_mix*nfftmix,dtset%nspden))
- call moddiel(cplex_mix,dielar,mpi_enreg,nfftmix,ngfftmix,dtset%nspden,ispmix,0,&
-& dtset%paral_kgb,qphon,rprimd,vresid0,vrespc)
+ call moddiel(cplex_mix,dielar,mpi_enreg,nfftmix,ngfftmix,dtset%nspden,ispmix,0,qphon,rprimd,vresid0,vrespc)
 
 !PAW only : precondition the rhoij quantities (augmentation occupancies) residuals.
 !Use a simple preconditionning with the same mixing factor
@@ -2625,7 +2624,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 !    Get first-order local potential.
      call vlocalstr(gmet,gprimd,gsqcut,istr1,mgfft,mpi_enreg,&
-&     psps%mqgrid_vl,natom,gs_hamk%nattyp,nfft,ngfft,ntypat,paral_kgb,ph1d,psps%qgrid_vl,&
+&     psps%mqgrid_vl,natom,gs_hamk%nattyp,nfft,ngfft,ntypat,ph1d,psps%qgrid_vl,&
 &     ucvol,psps%vlspl,vpsp1)
 
 !    Get first-order hartree potential.
@@ -2640,7 +2639,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
      option=0
      call dfpt_mkvxcstr(cplex,idir1,ipert1,kxc,mpi_enreg,natom,nfft,ngfft,&
-&     dummy,dummy,nkxc,nmxc,nspden,n3xccc,option,paral_kgb,qphon,rhor,rhor1,rprimd,&
+&     dummy,dummy,nkxc,nmxc,nspden,n3xccc,option,qphon,rhor,rhor1,rprimd,&
 &     0,0,vxc1,xccc3d1)
 
 !    Combines density j2 with local potential j1
@@ -3377,7 +3376,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !        Get first-order local potential and first-order pseudo core density
          call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_ff,dtset%natom,&
-&         nattyp,nfft,ngfft,dtset%ntypat,n1,n2,n3,dtset%paral_kgb,ph1d,psps%qgrid_ff,&
+&         nattyp,nfft,ngfft,dtset%ntypat,n1,n2,n3,ph1d,psps%qgrid_ff,&
 &         dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
          if(psps%n1xccc/=0)then
            call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,n1,psps%n1xccc,&
@@ -3391,11 +3390,11 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
            if (nspden==4.and.present(rhor).and.present(vxc)) then
              optnc=1
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
-&             nkxc,nmxc,nspden,n3xccc,optnc,option,dtset%paral_kgb,dtset%qptn,rhor,rhor1,&
+&             nkxc,nmxc,nspden,n3xccc,optnc,option,dtset%qptn,rhor,rhor1,&
 &             rprimd,0,vxc,vxc1,xccc3d1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,&
-&             nkxc,nmxc,nspden,n3xccc,option,dtset%paral_kgb,dtset%qptn,rhodummy,&
+&             nkxc,nmxc,nspden,n3xccc,option,dtset%qptn,rhodummy,&
 &             rprimd,0,vxc1,xccc3d1)
            end if
          else

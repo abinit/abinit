@@ -360,7 +360,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(fgga==0 .or. (fgga==1 .and. n1xccc/=0)) then
      option=0
      call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,&
-&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,mpi_enreg%paral_kgb,qphon,rhor,rhor,&
+&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,qphon,rhor,rhor,&
 &     rprimd,dtset%usepaw,usexcnhat,vxc10,xccc3d1)
      if(n1xccc/=0)then
        if(dtset%nspden==1) then
@@ -378,7 +378,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(fgga==1) then
      option=2
      call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,&
-&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,mpi_enreg%paral_kgb,qphon,rhor,rhor,&
+&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,qphon,rhor,rhor,&
 &     rprimd,dtset%usepaw,usexcnhat,vxc10,xccc3d1)
      if(n1xccc/=0)then
        if(dtset%nspden==1) then

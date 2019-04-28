@@ -120,12 +120,12 @@ contains
 subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 & kg,kg1,mband,mgfft,mkmem,mk1mem,mpi_enreg,mpw,mpw1,nband_rbz,&
 & nfft,ngfft,nkpt_rbz,npwarr,npwar1,nspden,nspinor,nsppol,nsym,&
-& occ_rbz,paral_kgb,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
+& occ_rbz,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,mband,mgfft,mk1mem,mkmem,mpw,mpw1,nfft,nkpt_rbz
- integer,intent(in) :: nspden,nspinor,nsppol,nsym,paral_kgb
+ integer,intent(in) :: nspden,nspinor,nsppol,nsym
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -167,13 +167,11 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !DBG_ENTER("COLL")
 
  if(nspden==4)then
-!  NOTE : see mkrho for the modifications needed for non-collinear treatment
-   write(message, '(a,a,a,a,a,a,a,a)' ) ch10,&
-&   ' dfpt_mkrho : WARNING -',ch10,&
-&   '  Linear-response calculations are under construction with nspden=4',ch10,&
-&   ' Action : modify value of nspden in input file unless you know what you are doing.'
-!   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+!  NOTE: see mkrho for the modifications needed for non-collinear treatment
+   write(message, '(3a)' )&
+    ' Linear-response calculations are under construction with nspden=4',ch10,&
+    ' Action: modify value of nspden in input file unless you know what you are doing.'
+   MSG_WARNING(message)
  end if
 
 !Init spaceworld

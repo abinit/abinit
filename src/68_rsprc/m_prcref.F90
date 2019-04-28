@@ -336,7 +336,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      cplex=optreal
      qphon(:)=zero
 !    Simple scalar multiplication, or model dielectric function
-     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,dtset%paral_kgb,qphon,rprimd,vresid,vrespc)
+     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
    else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
@@ -357,7 +357,7 @@ subroutine prcref(atindx,dielar,dielinv,&
          option=1
          if(modulo(dtset%iprcel,100)>=61)option=2
          call dieltcel(dielinv,gmet,kg_diel,kxc,&
-&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%paral_kgb,dtset%prtvol,susmat)
+&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%prtvol,susmat)
        end if
      end if
 
@@ -639,7 +639,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      call xcdata_init(xcdata,dtset=dtset)
      nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
      call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_DEALLOCATE(xccc3d)
 
@@ -986,7 +986,7 @@ end subroutine prcref
      cplex=optreal
      qphon(:)=zero
 !    Simple scalar multiplication, or model dielectric function
-     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,dtset%paral_kgb,qphon,rprimd,vresid,vrespc)
+     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
    else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
@@ -1007,7 +1007,7 @@ end subroutine prcref
          option=1
          if(modulo(dtset%iprcel,100)>=61)option=2
          call dieltcel(dielinv,gmet,kg_diel,kxc,&
-&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%paral_kgb,dtset%prtvol,susmat)
+&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%prtvol,susmat)
        end if
      end if
 
@@ -1270,7 +1270,7 @@ end subroutine prcref
    nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
    ABI_ALLOCATE(work,(0))
    call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(xccc3d)
@@ -1355,11 +1355,11 @@ end subroutine prcref_PMA
 !!
 !! SOURCE
 
-subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral_kgb,qphon,rprimd,vresid,vrespc)
+subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !Arguments-------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nspden,optreal,optres,paral_kgb
+ integer,intent(in) :: cplex,nfft,nspden,optreal,optres
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -1422,9 +1422,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
  magn_precon=(diemixmag>=zero) ! Set to true if magnetization has to be preconditionned
  diemixmag=abs(diemixmag)
 
-!DEBUG
 !write(std_out,*)' moddiel : diemac, diemix, diemixmag =',diemac,diemix,diemixmag
-!ENDDEBUG
 
  if(abs(diemac-1.0_dp)<1.0d-6)then
 
@@ -1955,12 +1953,11 @@ end subroutine dielmt
 !!
 !! SOURCE
 
-subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
-&  nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb,prtvol,susmat)
+subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,prtvol,susmat)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb
+ integer,intent(in) :: nfft,nkxc,npwdiel,nspden,occopt,option
  integer,intent(in) :: prtvol
 !arrays
  integer,intent(in) :: kg_diel(3,npwdiel),ngfft(18)
@@ -2276,8 +2273,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
    call wrtout(ab_out,message,'COLL')
  end if
 
- write(message, '(a,a)' )ch10,&
-& ' dieltcel : 15 largest eigenvalues of the symmetrized dielectric matrix'
+ write(message,'(2a)')ch10,' dieltcel : 15 largest eigenvalues of the symmetrized dielectric matrix'
  call wrtout(std_out,message,'COLL')
  write(message, '(a,5es12.5)' )'  1-5  :',eig_sym(npwdiel:npwdiel-4:-1)
  call wrtout(std_out,message,'COLL')
@@ -2285,8 +2281,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
  call wrtout(std_out,message,'COLL')
  write(message, '(a,5es12.5)' )'  11-15:',eig_sym(npwdiel-10:npwdiel-14:-1)
  call wrtout(std_out,message,'COLL')
- write(message, '(a,a)' )ch10,&
-& ' dieltcel : 5 smallest eigenvalues of the symmetrized dielectric matrix'
+ write(message, '(2a)' )ch10,' dieltcel : 5 smallest eigenvalues of the symmetrized dielectric matrix'
  call wrtout(std_out,message,'COLL')
  write(message, '(a,5es12.5)' )'  1-5  :',eig_sym(1:5)
  call wrtout(std_out,message,'COLL')

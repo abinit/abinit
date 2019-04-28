@@ -189,7 +189,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal
  use m_dfptnl_pert, only : dfptnl_pert
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -614,7 +613,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      end if ! psps%n1xccc/=0
 
                      call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-&                     nattyp,nfftf,ngfftf,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1df,psps%qgrid_vl,&
+&                     nattyp,nfftf,ngfftf,psps%ntypat,n1,n2,n3,ph1df,psps%qgrid_vl,&
 &                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
                    end if ! usepaw

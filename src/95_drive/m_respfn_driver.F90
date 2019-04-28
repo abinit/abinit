@@ -884,7 +884,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call xcdata_init(xcdata,dtset=dtset)
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.
@@ -4016,7 +4016,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    ABI_ALLOCATE(v_dum,(nfft))
    call mklocl_recipspace(dyfrlo_tmp1,eei,gmet,gprimd,&
 &   gr_dum,gsqcut,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-&   ntypat,option,paral_kgb,ph1d,qgrid,qprtrb,rhog,ucvol,vlspl,vprtrb,v_dum)
+&   ntypat,option,ph1d,qgrid,qprtrb,rhog,ucvol,vlspl,vprtrb,v_dum)
    do iatom=1,natom
 !    Reestablish correct order of atoms
      dyfrlo(1:3,1:3,atindx1(iatom))=dyfrlo_tmp1(1:3,1:3,iatom)
@@ -4238,10 +4238,10 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
      if (nspden==4.and.present(rhor).and.present(vxc)) then
        optnc=1
        call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,dum_nhat,0,nkxc,&
-&       nmxc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1)
+&       nmxc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1)
      else
        call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
-&       nmxc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
+&       nmxc,nspden,n3xccc,option,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
      end if
      ABI_DEALLOCATE(rhor1)
      ABI_DEALLOCATE(xcccwk1)

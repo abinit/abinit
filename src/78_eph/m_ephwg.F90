@@ -838,6 +838,7 @@ subroutine ephwg_get_dweights(self, qlklist, nqlk, nw, wvals, spin, bcorr, nbsum
  !real(dp) :: theta_tmp(nene3,4), delta_tmp(nene3,4), eigen_1tetra(4)
 
 !----------------------------------------------------------------------
+ ABI_UNUSED(comm)
 
  !
  ! This routine still has some bug

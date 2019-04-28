@@ -2328,7 +2328,7 @@ END SUBROUTINE S1D2TWOI
       DOUBLE PRECISION ZERO, ONE, PI
       DATA             ZERO/0.0D0/,ONE/1.0D0/,PI/3.141592653589793D0/
       DATA             OZERO/ 1.0D-13/
-      ABI_UNUSED(leps)
+      ABI_UNUSED(eps)
 !c      OZERO = DLAMCH('e')*10
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)

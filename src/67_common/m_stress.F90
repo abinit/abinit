@@ -179,8 +179,6 @@ contains
 &                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,ixc,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
@@ -289,7 +287,7 @@ contains
    ABI_ALLOCATE(gr_dum,(3,natom))
    ABI_ALLOCATE(v_dum,(nfft))
    call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
-&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,paral_kgb,ph1d,qgrid,&
+&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,&
 &   qprtrb_dum,rhog,ucvol,vlspl,vprtrb_dum,v_dum)
    ABI_DEALLOCATE(dyfr_dum)
    ABI_DEALLOCATE(gr_dum)
@@ -705,8 +703,6 @@ end subroutine stress
 
 subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 &                 rhog2) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

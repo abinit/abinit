@@ -231,7 +231,7 @@ contains
  option=0;if (optene==0) option=1
  if(ipert==natom+3.or.ipert==natom+4) then
    call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,&
-&   nhat1,nkxc,non_magnetic_xc,nspden,n3xccc,option,paral_kgb,qphon,rhor,rhor1,rprimd,&
+&   nhat1,nkxc,non_magnetic_xc,nspden,n3xccc,option,qphon,rhor,rhor1,rprimd,&
 &   usepaw,usexcnhat,vxc1_,xccc3d1)
  else
 ! FR EB non-collinear magnetism
@@ -241,11 +241,11 @@ contains
      nkxc_cur=nkxc ! TODO: remove nkxc_cur?
 
      call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     non_magnetic_xc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1,ixcrot=ixcrot)
+&     non_magnetic_xc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1_,xccc3d1,ixcrot=ixcrot)
 
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     non_magnetic_xc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
+&     non_magnetic_xc,nspden,n3xccc,option,qphon,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
    end if !nspden==4
  end if
 
@@ -285,10 +285,10 @@ contains
      optnc=1
      nkxc_cur=nkxc
      call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,usepaw,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     non_magnetic_xc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1,ixcrot=ixcrot)
+&     non_magnetic_xc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,rprimd,usexcnhat,vxc,vxc1val,xccc3d1,ixcrot=ixcrot)
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
-&     non_magnetic_xc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
+&     non_magnetic_xc,nspden,n3xccc,option,qphon,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
    end if !nspden==4
    vxc1_(:,:)=vxc1_(:,:)+vxc1val(:,:)
    call dotprod_vn(cplex,rhor1_,exc1,doti,nfft,nfftot,nspden,1,vxc1val,ucvol)

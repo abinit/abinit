@@ -96,13 +96,13 @@ contains
 !! SOURCE
 
 subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,&
-&                        nkxc,non_magnetic_xc,nspden,n3xccc,option,paral_kgb,qphon,&
+&                        nkxc,non_magnetic_xc,nspden,n3xccc,option,qphon,&
 &                        rhor,rhor1,rprimd,usepaw,usexcnhat,vxc1,xccc3d1)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,n3xccc,natom,nfft,nkxc,nspden,option
- integer,intent(in) :: paral_kgb,usepaw,usexcnhat
+ integer,intent(in) :: usepaw,usexcnhat
  logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -249,7 +249,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    end if
 
    call dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,nkxc,&
-&   nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
+&   nspden,qphon,rhor1tmp,str_scale,vxc1)
    ABI_DEALLOCATE(rhor1tmp)
 
  else
@@ -342,11 +342,11 @@ end subroutine dfpt_mkvxcstr
 !! SOURCE
 
 subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
-& nkxc,nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
+& nkxc,nspden,qphon,rhor1tmp,str_scale,vxc1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,istr,nfft,nkxc,nspden,paral_kgb
+ integer,intent(in) :: cplex,istr,nfft,nkxc,nspden
  real(dp) :: str_scale
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays

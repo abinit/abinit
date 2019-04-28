@@ -619,11 +619,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          else
            if(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) then
              call vlocalstr(gmet,gprimd,gsqcut,istr1,mgfftf,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-&             nattyp,nfftf,ngfftf,dtset%ntypat,dtset%paral_kgb,ph1df,psps%qgrid_vl,ucvol,&
+&             nattyp,nfftf,ngfftf,dtset%ntypat,ph1df,psps%qgrid_vl,ucvol,&
 &             psps%vlspl,vpsp1_idir1)
            else
              call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
-&             dtset%natom,nattyp,nfftf,ngfftf,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),dtset%paral_kgb,&
+&             dtset%natom,nattyp,nfftf,ngfftf,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
 &             ph1df,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_idir1,xred)
            end if
            if(psps%n1xccc/=0)then
@@ -659,18 +659,18 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          if(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) then
            option=0
            call dfpt_mkvxcstr(cplex,idir1,ipert1,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,&
-&           nhat,nhat1,nkxc,nmxc,nspden,n3xccc,option,dtset%paral_kgb,dtset%qptn,rhor,rhor1,rprimd,&
+&           nhat,nhat1,nkxc,nmxc,nspden,n3xccc,option,dtset%qptn,rhor,rhor1,rprimd,&
 &           usepaw,usexcnhat,vxc10,xccc3d1_idir1)
          else
 !          Non-collinear magnetism (should the second nkxc be nkxc_cur ?)
            if (nspden==4) then
              option=0
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum1,0,dum2,0,dum3,0,nkxc,&
-&             nmxc,nspden,n3xccc,1,option,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,vxc,&
+&             nmxc,nspden,n3xccc,1,option,dtset%qptn,dum1,dum1,rprimd,0,vxc,&
 &             vxc10,xccc3d1_idir1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
-&             nmxc,nspden,n3xccc,0,dtset%paral_kgb,dtset%qptn,dum1,rprimd,0,vxc10,xccc3d1_idir1)
+&             nmxc,nspden,n3xccc,0,dtset%qptn,dum1,rprimd,0,vxc10,xccc3d1_idir1)
            end if
          end if
        end if

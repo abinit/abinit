@@ -510,7 +510,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartree)
    call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
+&   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
 !  fx for tests.
@@ -565,7 +565,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartree)
    call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
+&   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
 
@@ -1040,7 +1040,6 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: paral_kgb0=0
  integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
  logical :: non_magnetic_xc
@@ -1125,7 +1124,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 !Compute the kernel.
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
-& n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
+& n3xccc,option,rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
@@ -1206,7 +1205,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
        kxcpw_r(:,:)=zero
 
        call dfpt_mkvxc(cplex,ixc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,dum,0,dum,0,nkxc,non_magnetic_xc,&
-&       nspden,n3xccc,option,paral_kgb0,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
+&       nspden,n3xccc,option,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
 
 !      FFT the first index to --> to G space
        call fourdp(cplex,kxcpw_g(:,:),kxcpw_r(:,1),-1,MPI_enreg_seq,nfft_tot,1,ngfft,0)
@@ -1440,7 +1439,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,rhog,Cryst%rprimd,vhartr)
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
-& n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
+& n3xccc,option,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Check for extreme (NaN) values

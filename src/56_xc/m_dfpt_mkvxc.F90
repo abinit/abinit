@@ -136,12 +136,12 @@ contains
 !! SOURCE
 
 subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
-&          nkxc,non_magnetic_xc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
+&          nkxc,non_magnetic_xc,nspden,n3xccc,option,qphon,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhat1dim,nhat1grdim
- integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat
+ integer,intent(in) :: nkxc,nspden,option,usexcnhat
  logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -413,7 +413,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    call matr3inv(rprimd,gprimd)
 
    call dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat1_,nhat1dim_,&
-&   nhat1gr_,nhat1rgdim_,nkxc,nspden,paral_kgb,qphon,rhor1_,usexcnhat,vxc1)
+&   nhat1gr_,nhat1rgdim_,nkxc,nspden,qphon,rhor1_,usexcnhat,vxc1)
 
    ABI_DEALLOCATE(rhor1_)
    if ((option==0).or.(nhat1dim==1.and.nspden==2)) then
@@ -511,11 +511,11 @@ end subroutine dfpt_mkvxc
 
 subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 &                    nhat1,nhat1dim,nhat1gr,nhat1grdim,nkxc,&
-&                    nspden,paral_kgb,qphon,rhor1,usexcnhat,vxc1)
+&                    nspden,qphon,rhor1,usexcnhat,vxc1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nhat1dim,nhat1grdim,nkxc,nspden,paral_kgb,usexcnhat
+ integer,intent(in) :: cplex,nfft,nhat1dim,nhat1grdim,nkxc,nspden,usexcnhat
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -788,13 +788,13 @@ end subroutine dfpt_mkvxcgga
 !! SOURCE
 
 subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
-&          nhat1gr,nhat1grdim,nkxc,non_magnetic_xc,nspden,n3xccc,optnc,option,paral_kgb,qphon,&
+&          nhat1gr,nhat1grdim,nkxc,non_magnetic_xc,nspden,n3xccc,optnc,option,qphon,&
 &          rhor,rhor1,rprimd,usexcnhat,vxc,vxc1,xccc3d1,ixcrot)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhatdim,nhat1dim,nhat1grdim,optnc
- integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat
+ integer,intent(in) :: nkxc,nspden,option,usexcnhat
  logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -893,7 +893,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !                 (put all nhat options to zero).
 !  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
    call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1_zero,0,nhat1gr_zero,0,&
-&   nkxc,non_magnetic_xc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
+&   nkxc,non_magnetic_xc,2,n3xccc,option,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
 
    !call test_rotations(0,1)
 
