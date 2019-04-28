@@ -270,7 +270,7 @@ program tdep
 !==========================================================================================
 !===================== Compute the phonons density of states ==============================
 !==========================================================================================
- call tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4Abi,Shell2at,Sym)
+ call tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4Abi,Shell2at,Sym)
  call tdep_destroy_shell(natom,2,Shell2at)
  ABI_FREE(Rlatt4Abi)
 

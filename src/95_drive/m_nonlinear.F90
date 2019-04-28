@@ -493,9 +493,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
-& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
-& natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
-& response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
+  ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
+   ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+   response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !Set up the basis sphere of planewaves
  ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))

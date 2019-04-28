@@ -8,8 +8,6 @@
 module m_tdep_phdos
 
   use defs_basis
-!FB  use m_nctk
-!FB  use m_xmpi
   use m_errors
   use m_abicore
   use m_phonons
@@ -23,9 +21,6 @@ module m_tdep_phdos
   use m_tdep_shell,       only : Shell_Variables_type
   use m_tdep_abitypes,    only : tdep_ifc2phij, tdep_read_ifc, tdep_write_ifc
   use m_xmpi
-!FB#ifdef HAVE_NETCDF
-!FB  use netcdf
-!FB#endif
 
   implicit none
 
@@ -36,7 +31,7 @@ module m_tdep_phdos
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
+subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
 
   integer :: prtdos,ii,iqpt,iatom
   integer :: natom,natom_unitcell,iomega
@@ -57,7 +52,6 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
   type(Symetries_Variables_type),intent(in) :: Sym
   type(crystal_t),intent(in) :: Crystal
   type(Qpoints_type),intent(in) :: Qpt
-  type(ddb_type),intent(in) :: ddb
   type(Shell_Variables_type),intent(in) :: Shell2at
 
   write(InVar%stdout,*)' '

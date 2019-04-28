@@ -220,7 +220,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !scalars
  integer,parameter :: level=14,tim_fourwf=5
  integer,save :: nskip=0
- integer :: counter,iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
+ integer :: iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
  integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
@@ -400,8 +400,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !  (often 1 for SCF calculation, =nstep for non-SCF calculations)
    do inonsc=1,nnsclo_now
 
-     counter=100*iband+inonsc
-
 !    Note that the following translation occurs in the called routine :
 !    iband->band, nband_k->nband, npw_k->npw, npw1_k->npw1
      eig0nk=eig0_k(iband)
@@ -501,9 +499,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !   BUGFIX from Max Stengel: need to initialize eloc at each inonsc iteration, in case nnonsc > 1
        eloc0_k(iband) = zero
        option=2;if (iscf_mod>0.and.inonsc==nnsclo_now) option=3
-       call dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,eloc0_k(iband),&
-&       dtfil%filstat,gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,natom,nband_k,ncpgr,&
-&       npw_k,npw1_k,nspinor,occ_k,option,pawrhoij1,prtvol,rhoaug1,tim_fourwf,tocceig,wtk_k)
+       call dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,eloc0_k(iband),&
+&       gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,natom,nband_k,ncpgr,&
+&       npw_k,npw1_k,nspinor,occ_k,option,pawrhoij1,rhoaug1,tim_fourwf,tocceig,wtk_k)
        if(ipert==natom+10.or.ipert==natom+11) eloc0_k(iband)=energy_factor*eloc0_k(iband)/two
 
        if(ipert==natom+10.or.ipert==natom+11) then

@@ -35,6 +35,7 @@
 #include "abi_common.h"
 
 module m_spin_model_primitive
+
   use iso_c_binding
   use m_dynmaic_array
   use m_mathfuncs
@@ -43,6 +44,7 @@ module m_spin_model_primitive
   use m_errors
   use m_supercell
   use m_spin_terms
+
   implicit none
 
 !!*** 
@@ -151,6 +153,7 @@ contains
 
     class(spin_model_primitive_t), intent(inout) :: self
    !TODO should something  be done here?
+    ABI_UNUSED(self%natoms)
   end subroutine spin_model_primitive_t_initialize
 
   subroutine spin_model_primitive_t_set_atoms(self, natoms, unitcell, positions, &

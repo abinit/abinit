@@ -140,8 +140,6 @@ CONTAINS
 
 subroutine pawpsp_nl(ffspl,indlmn,lmnmax,lnmax,mqgrid,qgrid,radmesh,wfll)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lmnmax,lnmax,mqgrid
@@ -306,8 +304,6 @@ end subroutine pawpsp_nl
 !! SOURCE
 
 subroutine pawpsp_lo(epsatm,mqgrid,qgrid,q2vq,radmesh,vloc,yp1,ypn,zion)
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -476,8 +472,6 @@ end subroutine pawpsp_lo
 !! SOURCE
 
 subroutine pawpsp_cg(dnqdq0,d2nqdq0,mqgrid,qgrid,nq,radmesh,nr,yp1,ypn)
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -752,8 +746,6 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
 & ncore,nmesh,pawrad,pawtab,pspversion,radmesh,save_core_msz,&
 & tncore,tnvale,tproj,tproj_mesh,usexcnhat_in,usexcnhat_out,vale_mesh,&
 & vlocopt,vlocr,vloc_mesh,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in):: funit,lmax,usexcnhat_in
@@ -1364,8 +1356,6 @@ end subroutine pawpsp_read
 subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,radmesh,phi_cor,&
 &                             filename) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: lmncmax,nphicor
  character(len=*),optional :: filename
@@ -1595,8 +1585,6 @@ end subroutine pawpsp_read_corewf
 
 subroutine pawpsp_rw_atompaw(basis_size,filpsp,wvl)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in):: basis_size
  type(wvlpaw_type),intent(in)::wvl
@@ -1720,8 +1708,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &          mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &          qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &          vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2576,8 +2562,6 @@ end subroutine pawpsp_calc
 
 subroutine pawpsp_calc_d5(mesh,mesh_size,tcoredens)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: mesh_size
  type(pawrad_type),intent(in) :: mesh
@@ -2659,8 +2643,6 @@ end subroutine pawpsp_calc_d5
 
 subroutine pawpsp_vhar2rho(radmesh,rho,vv)
 
- implicit none
-
 !Arguments ------------------------------------
  type(pawrad_type),intent(in) :: radmesh
  real(dp), intent(in) :: vv(:)
@@ -2723,8 +2705,6 @@ end subroutine pawpsp_vhar2rho
 !! SOURCE
 
 subroutine pawpsp_wvl_calc(pawtab,tnvale,usewvl,vale_mesh,vloc_mesh,vlocr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2884,8 +2864,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 & lnmax,mmax,mqgrid_ff,mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 & pawxcdev, qgrid_ff,qgrid_vl,usewvl,usexcnhat_in,vlspl,xcccrc,&
 & xclevel,xc_denpos,zion,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3726,8 +3704,6 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,ixc,&
 & pawrad,pawtab,pawxcdev,qgrid_ff,qgrid_vl,&
 & usewvl,usexcnhat_in,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in):: icoulomb,ixc
@@ -3846,8 +3822,6 @@ end subroutine pawpsp_7in
  subroutine pawpsp_wvl_sin2gauss(basis_size,mparam,nparam,&
 & param,wvl)
 
-  implicit none
-  !
 !Arguments ------------------------------------
   integer,intent(in) :: mparam,basis_size
   integer,intent(in) :: nparam(basis_size)
@@ -3999,7 +3973,6 @@ end subroutine pawpsp_7in
 
 subroutine pawpsp_read_header(funit,lloc,lmax,mmax,pspcod,pspxc,r2well,zion,znucl)
 
-implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in):: funit
@@ -4069,8 +4042,6 @@ end subroutine pawpsp_read_header
 
 subroutine pawpsp_read_header_2(funit,pspversion,basis_size,lmn_size)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in):: funit
@@ -4132,8 +4103,6 @@ end subroutine pawpsp_read_header_2
 
 
 subroutine pawpsp_wvl(filpsp,pawrad, pawtab,usewvl, wvl_ngauss, comm_mpi)
-
-implicit none
 
 !Arguments------------------------------------
 !scalars
@@ -4252,7 +4221,6 @@ end subroutine pawpsp_wvl
 subroutine pawpsp_read_header_xml(lloc,lmax,pspcod,pspxc,&
 & psxml,r2well,zion,znucl)
 
-implicit none
 !Arguments ------------------------------------
 !scalars
  type(paw_setup_t),intent(in) :: psxml
@@ -4436,7 +4404,6 @@ end subroutine pawpsp_read_header_xml
 subroutine pawpsp_read_pawheader(basis_size,lmax,lmn_size,&
 & l_size,mesh_size,pspversion,psxml,rpaw,rshp,shape_type)
 
-implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in):: lmax
@@ -4528,8 +4495,6 @@ end subroutine pawpsp_read_pawheader
 !! SOURCE
 
 subroutine pawpsp_bcast(comm_mpi,epsatm,ffspl,pawrad,pawtab,vlspl,xcccrc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm_mpi
@@ -4656,8 +4621,6 @@ subroutine pawpsp_main( &
 & filpsp,usewvl,icoulomb,ixc,xclevel,pawxcdev,usexcnhat,&
 & qgrid_ff,qgrid_vl,ffspl,vlspl,epsatm,xcccrc,zionpsp,znuclpsp,&
 & wvl_ngauss,psxml,comm_mpi,xc_denpos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4824,8 +4787,6 @@ contains
 
 subroutine pawpsp_check_xml_upf(filpsp)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in):: filpsp   ! name of the psp file
@@ -4893,10 +4854,6 @@ end subroutine pawpsp_check_xml_upf
 
 
 subroutine pawpsp_consistency()
-
-implicit none
-
-!Local variables-------------------------------
 
 ! *************************************************************************
 

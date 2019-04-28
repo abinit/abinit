@@ -356,9 +356,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
-& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
-& natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
-& response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
+  ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
+  ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+  response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !In some cases (e.g. getcell/=0), the plane wave vectors have
 ! to be generated from the original simulation cell

@@ -35,8 +35,11 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 #include "abi_common.h"
+
 module  m_spin_terms
+
   use defs_basis
   use m_errors
   use m_abicore
@@ -524,6 +527,8 @@ contains
     real(dp), intent(out):: Heff(3,self%nspins)
     real(dp) :: x(3, self%nspins) 
     integer :: i
+
+    ABI_UNUSED(dt)
     if ( temperature .gt. 1d-7) then
        !call rand_normal_ziggurat(x)
        call rand_normal_array(self%rng, x, 3*self%nspins)

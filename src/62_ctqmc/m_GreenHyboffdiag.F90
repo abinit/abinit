@@ -987,6 +987,8 @@ SUBROUTINE GreenHyboffdiag_setMuD1(op,iflavor,iflavor2,mu,d1)
 !Local variables ------------------------------------
   DOUBLE PRECISION                :: mu2
 !*********************************************************************
+
+  ABI_UNUSED((/d1/))
   
   mu2=0
   if(iflavor==iflavor2) mu2=mu
@@ -1911,6 +1913,9 @@ END SUBROUTINE GreenHyboffdiag_destroy
        real*8     :: one,two,zero,three,six,tau,xpi,delta,om !wn,
        complex*16     :: czero
 !***********************************************
+
+       ABI_UNUSED((/aa, c3/))
+       ABI_UNUSED((/lflag/))
        czero=cmplx(0.d0,0.d0)
        zero=0.d0
        one=1.d0

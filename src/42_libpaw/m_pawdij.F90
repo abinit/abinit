@@ -5541,8 +5541,6 @@ end subroutine pawdij_gather
 !! OUTPUT
 !! (Only writing)
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      m_pawdij
 !!
@@ -5576,6 +5574,8 @@ subroutine pawdij_print_dij(dij,cplex_dij,qphase,iatom,natom,nspden,nsppol,&
  real(dp),pointer :: dij2p(:),dij2p_(:)
 
 ! *************************************************************************
+
+ if (.False.) write(std_out,*)"nsppol", nsppol
 
 !Optional arguments
  my_unt   =std_out ; if (PRESENT(unit      )) my_unt   =unit

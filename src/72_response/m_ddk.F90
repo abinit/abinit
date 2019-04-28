@@ -190,6 +190,7 @@ MODULE m_ddk
   ! K-point (set in setup_spin_kpoint)
 
   real(dp) :: eig0nk
+
   real(dp) :: dfpt_sciss = zero
 
   type(gs_hamiltonian_type) :: gs_hamkq(3)
@@ -548,7 +549,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
        if (dtset%useria /= 666) then
          call wfd%copy_cg(ib_v, ik, spin, cg_v)
-         call ddkop%apply(ebands%eig(ib_v, ik, spin), mpw, npw_k, wfd%nspinor, cg_v, cwaveprj, wfd%mpi_enreg)
+         call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj, wfd%mpi_enreg)
        else
          ug_v(1:npw_k*nspinor) = wfd%wave(ib_v,ik,spin)%ug
        end if
@@ -1207,6 +1208,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
 ! *************************************************************************
 
  ABI_CHECK(dtset%usepaw == 0, "PAW not tested/implemented!")
+ ABI_UNUSED((/mpi_enreg%paral_kgb/))
 
  new%inclvkb = dtset%inclvkb
  new%usepaw = dtset%usepaw
@@ -1351,12 +1353,12 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SOURCE
 
-subroutine ddkop_apply(self, eig0nk, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
+subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
 
 !Arguments ------------------------------------
 !scalars
  class(ddkop_t),intent(inout) :: self
- integer,intent(in) :: mpw, npw_k, nspinor
+ integer,intent(in) :: npw_k, nspinor
  type(MPI_type),intent(in) :: mpi_enreg
  real(dp),intent(in) :: eig0nk
 
@@ -1376,6 +1378,7 @@ subroutine ddkop_apply(self, eig0nk, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
  real(dp),pointer :: dkinpw(:),kinpw1(:)
 
 !************************************************************************
+
  self%eig0nk = eig0nk
 
  if (self%inclvkb /= 0) then
@@ -1469,6 +1472,7 @@ function ddkop_get_velocity(self, eig0mk, istwf_k, npw_k, nspinor, me_g0, brag) 
    MSG_ERROR("PAW Not Implemented")
    ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
    ! eshiftkq = half * (eig0mk - self%eig0nk)
+   ABI_UNUSED(eig0mk)
  end if
 
 end function ddkop_get_velocity

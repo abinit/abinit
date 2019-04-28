@@ -544,14 +544,12 @@ end subroutine dfpt_mkrho
 !!  Also accumulate zero-order potential part of the 2nd-order total energy (if needed)
 !!
 !! INPUTS
-!!  counter=counter for status file
 !!  cplex=1 if 1st-order density is real, 2 if 1st-order density is complex
 !!  cwave0(2,npw*nspinor)=GS wavefunction at k, in reciprocal space
 !!  cwave1(2,npw1*nspinor)=1st-order wavefunction at k,q, in reciprocal space
 !!  cwavef(2,npw1*nspinor)=1st-order wavefunction at k,q, in reciprocal space, without correction due to occupation change
 !!  cwaveprj0(natom,nspinor*usecprj)= GS wave function at k projected with nl projectors
 !!  cwaveprj1(natom,nspinor*usecprj)= 1st-order wave function at k,q projected with nl projectors
-!!  filstat=name of the status file
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  iband=index of current band
 !!  idir=direction of the current perturbation
@@ -571,7 +569,6 @@ end subroutine dfpt_mkrho
 !!  option= 1: accumulate 1st-order density,
 !!          2: accumulate 0-order potential part of the 2nd-order total energy
 !!          3: accumulate both
-!!  prtvol=control print volume and debugging output
 !!  tim_fourwf= timing code for fourwf (5 from dfpt_vtowfk, 18 from dfpt_nstwf)
 !!  wf_corrected=flag put to 1 if cwave1 is different from cwavef (if there is a contribution from occ. change)
 !!  wtk_k=weight assigned to the k point.
@@ -601,21 +598,20 @@ end subroutine dfpt_mkrho
 !!
 !! SOURCE
 
-subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
-&                  eloc0_k,filstat,gs_hamkq,iband,idir,ipert,isppol,kptopt,&
+subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
+&                  eloc0_k,gs_hamkq,iband,idir,ipert,isppol,kptopt,&
 &                  mpi_enreg,natom,nband_k,ncpgr,npw_k,npw1_k,nspinor,occ_k,&
-&                  option,pawrhoij1,prtvol,rhoaug1,tim_fourwf,wf_corrected,&
+&                  option,pawrhoij1,rhoaug1,tim_fourwf,wf_corrected,&
 &                  wtk_k,comm_atom,mpi_atmtab)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: counter,cplex,iband,idir,ipert,isppol,kptopt,natom,nband_k
- integer,intent(in) :: ncpgr,npw_k,npw1_k,nspinor,option,prtvol,tim_fourwf,wf_corrected
+ integer,intent(in) :: cplex,iband,idir,ipert,isppol,kptopt,natom,nband_k
+ integer,intent(in) :: ncpgr,npw_k,npw1_k,nspinor,option,tim_fourwf,wf_corrected
  integer,optional,intent(in) :: comm_atom
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: wtk_k
  real(dp),intent(out) :: eloc0_k
- character(len=fnlen),intent(in) :: filstat
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays

@@ -1301,6 +1301,8 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   !character(len=30) :: tmpfil
   !INTEGER :: unitnb
 
+  ABI_UNUSED((/opt_fk/))
+
   flavors    = op%flavors
 
   samples    = op%samples

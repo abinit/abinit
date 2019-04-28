@@ -298,7 +298,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=18,tim_getgh1c=2,tim_projbd=3,formeig1=1
- integer :: bd2tot_index,bdtot_index,berryopt,bufsz,choice,cpopt,counter,cplex_rhoij,ddkcase
+ integer :: bd2tot_index,bdtot_index,berryopt,bufsz,choice,cpopt,cplex_rhoij,ddkcase
  integer :: dimffnl,dimffnl1,dimffnl1_idir1,dimylmgr1
  integer :: ia,iatom,iband,ibg,ibgq,ibg1,icg,icgq,icg1,ider,idir0,idir1,idir_cprj
  integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_me,ilmn,iorder_cprj,ipert1
@@ -1346,11 +1346,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &               mcprjq,mpi_enreg,dtset%natom,nband_k,npw1_k,nspinor,1,gs1)
 
 !              Accumulate 1st-order density due to delta_u^(j1)
-               counter=500*iband;option=1;wfcorr=0
-               call dfpt_accrho(counter,cplex,cwave0,dcwavef,dcwavef,cwaveprj0_idir1,dcwaveprj,&
-&               lambda,dtfil%filstat,gs_hamkq,iband,idir1,ipert1,isppol,dtset%kptopt,&
+               option=1;wfcorr=0
+               call dfpt_accrho(cplex,cwave0,dcwavef,dcwavef,cwaveprj0_idir1,dcwaveprj,&
+&               lambda,gs_hamkq,iband,idir1,ipert1,isppol,dtset%kptopt,&
 &               mpi_enreg,dtset%natom,nband_k,1,npw_k,npw1_k,nspinor,occ_k,option,&
-&               pawdrhoij1_unsym(:,idir1),dtset%prtvol,drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
+&               pawdrhoij1_unsym(:,idir1),drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
                call pawcprj_free(dcwaveprj)
                ABI_DEALLOCATE(dcwavef)
                ABI_DATATYPE_DEALLOCATE(dcwaveprj)

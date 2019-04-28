@@ -369,11 +369,11 @@ endif
   subroutine CSR_mat_print(csr)
 
     class(CSR_mat), intent(in) :: csr
+    ABI_UNUSED(csr%val)
     !print *, "Val: ", csr%val
     !print *, "iCol: ", csr%icol
     !print *, "row_shift:", csr%row_shift
   end subroutine CSR_mat_print
-
 
   recursive subroutine llist_finalize(self)
 

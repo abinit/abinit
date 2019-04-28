@@ -66,9 +66,9 @@ module m_spin_model
        & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
        & spin_ncfile_t_write_one_step, spin_ncfile_t_def_ob
   use m_spin_observables, only: spin_observable_t, ob_reset, ob_initialize, ob_finalize, ob_calc_observables
+
   implicit none
   !!***
-
 
   !!****t* m_spin_model/spin_model_t
   !! NAME
@@ -661,6 +661,7 @@ contains
   subroutine spin_model_t_run_MvH(self)
 
     class(spin_model_t), intent(inout) :: self
+    ABI_UNUSED(self%params%spin_dt)
     write(std_out, *) "MvH is not yet implemented. "
   end subroutine spin_model_t_run_MvH
   !!***

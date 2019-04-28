@@ -397,9 +397,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Set up for iterations
  call setup1(acell,bantot,dtset,&
-& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
-& dtset%natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
-& response,rmet,rprim,rprimd,ucvol,psps%usepaw)
+  ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
+  ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+  response,rmet,rprim,rprimd,ucvol,psps%usepaw)
 
 !In some cases (e.g. getcell/=0), the plane wave vectors have
 ! to be generated from the original simulation cell

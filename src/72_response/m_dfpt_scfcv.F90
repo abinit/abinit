@@ -3636,7 +3636,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=17
- integer :: bd2tot_index,bdtot_index,buffer_size,counter,cplex_rhoij
+ integer :: bd2tot_index,bdtot_index,buffer_size,cplex_rhoij
  integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq
  integer :: icg,icgq,ider,idir0,ierr,ii,ikg,ikg1,ikpt,ilm,ilmn,indx
  integer :: ispden,isppol,istr,istwf_k
@@ -3780,8 +3780,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !  BIG FAT k POINT LOOP
    do ikpt=1,nkpt_rbz
-
-     counter=100*ikpt+isppol
      nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
      istwf_k=istwfk_rbz(ikpt)
      npw_k=npwarr(ikpt)
@@ -4299,7 +4297,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=18
- integer :: berryopt,counter,iband,ii,indx,iorder_cprj
+ integer :: berryopt,iband,ii,indx,iorder_cprj
  integer :: ipw,me,nkpt_max,optlocal,optnl,opt_accrho,opt_corr
  integer :: opt_gvnlx1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
  real(dp) :: dotr,lambda,wtband
@@ -4367,7 +4365,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !Loop over bands
  do iband=1,nband_k
-   counter=100*iband+1
 
 !  Skip bands not treated by current proc
    if(mpi_enreg%proc_distrb(ikpt, iband,isppol)/=me) cycle
@@ -4416,11 +4413,10 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !    Accumulate contribution to density and PAW occupation matrix
 
-     call dfpt_accrho(counter,cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
-&     dtfil%filstat,gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
-&     npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,prtvol,rhoaug,tim_fourwf,&
-&     opt_corr,wtk_k)
-
+     call dfpt_accrho(cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
+       gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
+       npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,rhoaug,tim_fourwf,&
+       opt_corr,wtk_k)
    end if ! End of non-zero occupation and rocceig
 
  end do ! End loop over bands
