@@ -73,7 +73,7 @@
    end if
  end if
 
- cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ cplx_=1 ; if(present(x_cplx)) cplx_ = x_cplx
  usegpu_=0;if (present(use_gpu)) usegpu_=use_gpu
  istwf_k_=1;if (present(istwf_k)) istwf_k_=istwf_k
  use_slk_ = 0; if(present(use_slk)) use_slk_ = 1
@@ -86,21 +86,21 @@
 
 #ifdef HAVE_LINALG_MAGMA
  if (usegpu_==1) then
-    if (cplx_ == 2) then
-      call magmaf_zheevd(jobz,uplo,n,a,lda,w,eigen_z_work,eigen_z_lwork,&
-&            eigen_z_rwork,eigen_z_lrwork,eigen_iwork,eigen_liwork,info)
-    else
-      call magmaf_dsyevd(jobz,uplo,n,a,lda,w,eigen_d_work,eigen_d_lwork,&
-&                        eigen_iwork,eigen_liwork,info)
-    endif
+   if (cplx_ == 2) then
+     call magmaf_zheevd(jobz,uplo,n,a,lda,w,eigen_z_work,eigen_z_lwork, &
+&           eigen_z_rwork,eigen_z_lrwork,eigen_iwork,eigen_liwork,info)
+   else
+     call magmaf_dsyevd(jobz,uplo,n,a,lda,w,eigen_d_work,eigen_d_lwork,&
+&                       eigen_iwork,eigen_liwork,info)
+   endif
  else
 #endif
 
 #ifdef HAVE_LINALG_SCALAPACK
- if( use_slk_ == 1.and.( n > maxval(abi_processor%grid%dims(1:2))) )  then
-    ABI_CHECK(present(x_cplx),"x_cplx must be present")
-    call compute_eigen1(abi_communicator,abi_processor,cplx_,n,n,a,w,istwf_k_)
-    info = 0 ! This is to avoid unwanted warning but it's not clean
+ if (use_slk_==1.and.n>maxval(abi_processor%grid%dims(1:2)))  then
+   ABI_CHECK(present(x_cplx),"x_cplx must be present")
+   call compute_eigen1(abi_communicator,abi_processor,cplx_,n,n,a,w,istwf_k_)
+   info = 0 ! This is to avoid unwanted warning but it's not clean
  else
 #endif
 
@@ -207,7 +207,7 @@ subroutine abi_cheev_new(jobz,uplo,n,a,lda,w)
    jobz_plasma_a = jobz_plasma(jobz)
    call PLASMA_Alloc_Workspace_cheev(n,n,plasma_work,info)
    info = PLASMA_cheev_c(jobz_plasma_a,uplo_plasma(uplo),n,c_loc(a),lda,c_loc(w),&
-&                        plasma_work,c_loc(rwork),lwork)
+&                        plasma_work,c_loc(eigen_c_rwork),eigen_c_lwork,info)
    call PLASMA_Dealloc_handle(plasma_work,info)
  else
 #endif
@@ -217,6 +217,68 @@ subroutine abi_cheev_new(jobz,uplo,n,a,lda,w)
 #endif
 
 end subroutine abi_cheev_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_zheev_new
+!! NAME
+!! abi_zheev_new
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine abi_zheev_new(jobz,uplo,n,a,lda,w)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_zheev_new'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n
+ integer, intent(in) :: lda
+ complex(dpc),target,intent(inout) :: a(lda,*)
+ real(dp),target,intent(out) :: w(n)
+
+!Local variables-------------------------------
+ integer :: info
+#ifdef HAVE_LINALG_PLASMA
+ integer :: jobz_plasma_a
+ type(c_ptr) :: plasma_work
+#endif
+
+! *********************************************************************
+
+#ifdef HAVE_LINALG_PLASMA
+ !FDahm & LNGuyen  (November 2012) :
+ !  In Plasma v 2.4.6, eigen routines support only
+ ! the eigenvalues computation (jobz=N) and not the
+ ! full eigenvectors bases determination (jobz=V)
+ if (LSAME(jobz,'N')) then
+    jobz_plasma_a = jobz_plasma(jobz)
+    call PLASMA_Alloc_Workspace_zheev(n,n,plasma_work,info)
+    info = PLASMA_zheev_c(jobz_plasma_a,uplo_plasma(uplo),&
+&                         plasma_work,c_loc(eigen_z_rwork),eigen_z_lwork,info)
+    call PLASMA_Dealloc_handle(plasma_work,info)
+ else
+#endif
+   call zheev(jobz,uplo,n,a,lda,w,eigen_z_work,eigen_z_lwork,eigen_z_rwork,info)
+#ifdef HAVE_LINALG_PLASMA
+ end if
+#endif
+
+end subroutine abi_zheev_new
 !!***
 
 !----------------------------------------------------------------------

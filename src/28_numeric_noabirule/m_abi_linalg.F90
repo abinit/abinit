@@ -158,9 +158,10 @@ module m_abi_linalg
     !module procedure abi_zheev
     module procedure abi_dheev_new
     module procedure abi_cheev_new
+    module procedure abi_zheev_new
 !   module procedure abi_dheev_alloc
 !   module procedure abi_cheev_alloc
-    module procedure abi_zheev_alloc
+!   module procedure abi_zheev_alloc
  end interface
  !----------------------------------------------------------------------
  public :: abi_xhegv
@@ -168,9 +169,12 @@ module m_abi_linalg
     !module procedure abi_dhegv
     !module procedure abi_chegv
     !module procedure abi_zhegv
-    module procedure abi_dhegv_alloc
-    module procedure abi_chegv_alloc
-    module procedure abi_zhegv_alloc
+    module procedure abi_dhegv_new
+    module procedure abi_chegv_new
+    module procedure abi_zhegv_new
+!   module procedure abi_dhegv_alloc
+!   module procedure abi_chegv_alloc
+!   module procedure abi_zhegv_alloc
  end interface
  !----------------------------------------------------------------------
  public :: abi_xhpev
