@@ -33,6 +33,7 @@ sources = [
     "m_fit_polynomial_coeff.F90",
     "m_harmonics_terms.F90",
     "m_lattice_effpot.F90",
+    #"m_lattice_effpot_temporary.F90", # TODO: remove after finish lattice F03.
     "m_lattice_mover.F90",
     "m_linked_list.F90",
     "m_lwf_mover.F90",
