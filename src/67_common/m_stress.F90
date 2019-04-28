@@ -173,7 +173,7 @@ contains
 
  subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,ixc,kinstr,&
 &                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
-&                  nfft,ngfft,nlstr,nspden,nsym,ntypat,paral_kgb,psps,pawrad,pawtab,ph1d,&
+&                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
 &                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
@@ -182,7 +182,7 @@ contains
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,ixc,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
- integer,intent(in) :: nsym,ntypat,paral_kgb,prtvol,usefock,usepaw,vdw_xc
+ integer,intent(in) :: nsym,ntypat,prtvol,usefock,usepaw,vdw_xc
  real(dp),intent(in) :: eei,ehart,eii,gsqcut,vdw_tol,vdw_tol_3bt,qvpotzero
  type(efield_type),intent(in) :: dtefield
  type(pseudopotential_type),intent(in) :: psps

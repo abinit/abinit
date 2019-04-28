@@ -501,7 +501,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
 &   energies%e_hartree,energies%e_corepsp,fock,gsqcut,dtset%ixc,kinstr,mgfftf,&
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
-&   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,psps,pawrad,pawtab,ph1df,&
+&   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &   dtset%typat,dtset%usefock,psps%usepaw,&
 &   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxc_hf,psps%xccc1d,xccc3d,psps%xcccrc,xred,&

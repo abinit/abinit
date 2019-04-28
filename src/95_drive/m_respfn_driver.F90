@@ -1001,7 +1001,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrx2,dyfr_cplex,dyfr_nondiag,&
 &   gmet,gprimd,gsqcut,indsym,mgfftf,mpi_enreg,psps%mqgrid_vl,&
 &   natom,nattyp, nfftf,ngfftf,dtset%nspden,dtset%nsym,ntypat,&
-&   psps%n1xccc,n3xccc,dtset%paral_kgb,psps,pawtab,ph1df,psps%qgrid_vl,&
+&   psps%n1xccc,n3xccc,psps,pawtab,ph1df,psps%qgrid_vl,&
 &   dtset%qptn,rhog,rprimd,symq,symrec,dtset%typat,ucvol,&
 &   psps%usepaw,psps%vlspl,vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred)
 
@@ -1244,12 +1244,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (dtset%nspden==4) then
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,non_magnetic_xc,dtset%nspden,&
-&     ntypat,psps%n1xccc,dtset%paral_kgb,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
+&     ntypat,psps%n1xccc,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
 &     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor,vxc=vxc)
    else
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,non_magnetic_xc,dtset%nspden,&
-&     ntypat,psps%n1xccc,dtset%paral_kgb,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
+&     ntypat,psps%n1xccc,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
 &     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred)
    end if
  end if
@@ -3925,7 +3925,6 @@ end subroutine dfpt_gatherdy
 !!                    If NCPP, it depends on one atom
 !!                    If PAW,  it depends on two atoms
 !!
-!!
 !! PARENTS
 !!      respfn
 !!
@@ -3936,14 +3935,14 @@ end subroutine dfpt_gatherdy
 
 subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondiag,&
 &  gmet,gprimd,gsqcut,indsym,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
-&  nfft,ngfft,nspden,nsym,ntypat,n1xccc,n3xccc,paral_kgb,psps,pawtab,ph1d,qgrid,&
+&  nfft,ngfft,nspden,nsym,ntypat,n1xccc,n3xccc,psps,pawtab,ph1d,qgrid,&
 &  qphon,rhog,rprimd,symq,symrec,typat,ucvol,usepaw,vlspl,vxc,&
 &  xcccrc,xccc1d,xccc3d,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dyfr_cplex,dyfr_nondiag,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
- integer,intent(in) :: nsym,ntypat,paral_kgb,usepaw
+ integer,intent(in) :: nsym,ntypat,usepaw
  real(dp),intent(in) :: gsqcut,ucvol
  type(pseudopotential_type),intent(in) :: psps
  type(MPI_type),intent(in) :: mpi_enreg
@@ -4150,7 +4149,7 @@ end subroutine dfpt_dyfro
 !! SOURCE
 
 subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,mpi_enreg,mqgrid,&
-&          natom,nfft,ngfft,nkxc,nmxc,nspden,ntypat,n1xccc,paral_kgb,psps,pawtab,&
+&          natom,nfft,ngfft,nkxc,nmxc,nspden,ntypat,n1xccc,psps,pawtab,&
 &          ph1d,qgrid,qphon,rfdir,rfpert,rprimd,timrev,typat,ucvol,usepaw,xcccrc,xccc1d,xred,rhor,vxc)
 
  use m_cgtools,       only : dotprod_vn
@@ -4160,7 +4159,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,mgfft,mpert,mqgrid,n1xccc,natom,nfft,nkxc,nspden,ntypat
- integer,intent(in) :: paral_kgb,timrev,usepaw
+ integer,intent(in) :: timrev,usepaw
  logical,intent(in) :: nmxc
  real(dp),intent(in) :: gsqcut,ucvol
  type(pseudopotential_type),intent(in) :: psps

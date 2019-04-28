@@ -765,7 +765,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      option=1;optene=0;if (iscf_mod==-2) optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
-&     nkxc,nspden,n3xccc,nmxc,optene,option,dtset%paral_kgb,dtset%qptn,&
+&     nkxc,nspden,n3xccc,nmxc,optene,option,dtset%qptn,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
@@ -1030,7 +1030,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-&     nspden,n3xccc,nmxc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
+&     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
    end if
 
@@ -1307,7 +1307,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nkpt_rbz,nkxc,dtset%nloalg,&
 &   npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
 &   nsym1,dtset%ntypat,occ_rbz,&
-&   dtset%paral_kgb,ph1d,dtset%prtbbb,psps,dtset%qptn,rhog,&
+&   ph1d,dtset%prtbbb,psps,dtset%qptn,rhog,&
 &   rhor,rhor1,rmet,rprimd,symrc1,dtset%typat,ucvol,&
 &   wtk_rbz,xred,ylm,ylm1,ylmgr,ylmgr1)
  end if
@@ -2330,7 +2330,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 & natom,nband_rbz,nfft,ngfft,&
 & nkpt_rbz,nkxc,nloalg,npwarr,npwar1,nspden,nspinor,nsppol,&
 & nsym1,ntypat,occ_rbz,&
-& paral_kgb,ph1d,prtbbb,psps,qphon,rhog,&
+& ph1d,prtbbb,psps,qphon,rhog,&
 & rhor,rhor1,rmet,rprimd,symrc1,typat,ucvol,&
 & wtk_rbz,&
 & xred,ylm,ylm1,ylmgr,ylmgr1)
@@ -2342,7 +2342,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  integer,intent(in) :: cplex,idir,ipert,mband,mgfft,mk1mem
  integer,intent(in) :: mkmem,mpert,mpsang,mpw,mpw1,natom,nfft,nkpt_rbz
  integer,intent(in) :: nkxc,nspden,nspinor,nsppol,nsym1,ntypat
- integer,intent(in) :: paral_kgb,prtbbb
+ integer,intent(in) :: prtbbb
  real(dp),intent(in) :: ecut,ecutsm,effmass_free,gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps

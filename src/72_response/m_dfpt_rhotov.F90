@@ -80,7 +80,6 @@ contains
 !!         1: the contributions to the 2nd order energy are computed
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept
 !!         1: the new value of the trial potential is computed in place of the input value
-!!  paral_kgb=flag controlling (k,g,bands) parallelization
 !!  qphon(3)=reduced coordinates for the phonon wavelength
 !!  rhog(2,nfft)=array for Fourier transform of GS electron density
 !!  rhog1(2,nfft)=RF electron density in reciprocal space
@@ -120,13 +119,13 @@ contains
 
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
-&           non_magnetic_xc,optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
+&           non_magnetic_xc,optene,optres,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
 &           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
- integer,intent(in) :: optene,optres,paral_kgb,usepaw,usexcnhat,ixcrot
+ integer,intent(in) :: optene,optres,usepaw,usexcnhat,ixcrot
  logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: ehart01
