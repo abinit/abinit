@@ -344,7 +344,7 @@ endif
 
     type(LIL_mat) , intent(inout):: ll
     type(CSR_mat), intent(out):: csrmat
-    integer:: irow, i, nzrow, nnz
+    integer:: irow, i, nzrow !, nnz
     !CSR_mat_initialize(A,nrow,ncol,nnz,i,j,val)
     call  CSR_mat_initialize(csrmat, ll%nrow, ll%ncol, LIL_mat_get_nnz(ll))
     i=0

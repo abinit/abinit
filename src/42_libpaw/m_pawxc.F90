@@ -5358,10 +5358,12 @@ end subroutine pawxcmpositron
 #elif defined HAVE_LIBXC
  call pawxc_drivexc_libxc()
 #else
-#error "libPAW XC driving routine requires either HAVE_LIBPAW_ABINIT or HAVE_LIBXC"
+ write(msg,'(5a)') 'libPAW XC driving routine only implemented in the following cases:',ch10, &
+                  ' - ABINIT',ch10,' - libXC'
+ MSG_BUG(msg)
 #endif
 
- if (.false.) write(std_out,*) el_temp,xc_tb09_c,lrho(1,1),tau(1,1)
+ if (.false.) write(std_out,*) el_temp,xc_tb09_c,lrho(1,1),tau(1,1), trim(msg)
 !!***
 
 contains

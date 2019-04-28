@@ -3561,6 +3561,8 @@ SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
   !DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: green_tmp
   !DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) :: n_tmp
 
+  ABI_UNUSED((/syms(1,1), op%swap/))
+
 !  flavors = op%flavors
 !  IF ( SIZE(syms,1) .NE. flavors .OR. SIZE(syms,2) .NE. flavors ) THEN
 !    CALL WARNALL("Ctqmcoffdiag_symmetrizeGreen : wrong opt_sym -> not symmetrizing")

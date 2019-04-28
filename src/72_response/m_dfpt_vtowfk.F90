@@ -686,6 +686,7 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+ ABI_UNUSED(mpi_enreg%comm_cell)
 
  call timab(214+timcount,1,tsec)
 

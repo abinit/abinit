@@ -101,6 +101,8 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !FB  double precision, allocatable :: const_rot3rd(:,:,:,:,:,:)
   !double precision, allocatable :: const_rot3rd(:,:,:,:,:,:,:,:)
 
+  ABI_UNUSED(shell3at%nshell)
+
   natom_unitcell=InVar%natom_unitcell
   natom         =InVar%natom
 

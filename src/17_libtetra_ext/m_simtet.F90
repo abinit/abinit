@@ -419,6 +419,8 @@ SUBROUTINE SIM1ONEI(U, AS, LEPS, SIM1, SIM1I)
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(as)
+
       CZERO = (0.0D0,0.0D0)
       CONE = (1.0D0,0.0D0)
 !C ------------------------------------------------------------------
@@ -510,6 +512,7 @@ SUBROUTINE SIM1TWOI(U, AS, LEPS, SIM, SIMI)
       DOUBLE PRECISION ZERO, ONE
       DATA  ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(as)
       CZERO = (0.0D0,0.0D0)
       CONE = (1.0D0,0.0D0)
       CTWO = (2.0D0,0.0D0)
@@ -1645,6 +1648,7 @@ SUBROUTINE  S2D2ONEI(U,AS,LEPS, SIM2, SIM2I)
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
       CTWO  = (2.0D0,0.0D0)
@@ -2145,6 +2149,8 @@ END SUBROUTINE S1D0TWOI
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(as)
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
 !C ------------------------------------------------------------------
@@ -2181,6 +2187,8 @@ SUBROUTINE S1D1TWOI(U,AS,LEPS, SIM, SIMI)
       DOUBLE PRECISION ZERO, ONE
       DATA  ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(as)
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
 !C -----------------------------------------------------------------
@@ -2222,6 +2230,7 @@ SUBROUTINE  S1D2ONEI(U,AS,LEPS,SIM2,SIM2I)
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
       CIMAG = (0.0D0,1.0D0)
@@ -2262,6 +2271,7 @@ SUBROUTINE S1D2TWOI(U,AS,LEPS, SIM, SIMI)
       DOUBLE PRECISION ZERO, ONE
       DATA  ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
 !C   -----------------------------------------------------------------
@@ -2318,6 +2328,7 @@ END SUBROUTINE S1D2TWOI
       DOUBLE PRECISION ZERO, ONE, PI
       DATA             ZERO/0.0D0/,ONE/1.0D0/,PI/3.141592653589793D0/
       DATA             OZERO/ 1.0D-13/
+      ABI_UNUSED(leps)
 !c      OZERO = DLAMCH('e')*10
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)

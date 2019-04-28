@@ -14,7 +14,6 @@ module m_tdep_readwrite
   use m_abihist
   use m_abimover, only : abimover
 
-
  implicit none
 
   type Input_Variables_type
@@ -111,8 +110,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_print_Aknowledgments(InVar)
 
-  implicit none 
-
   type(Input_Variables_type) :: InVar
   integer :: stdout
   stdout = InVar%stdout
@@ -155,7 +152,6 @@ contains
 #if defined HAVE_NETCDF
  use netcdf
 #endif
-  implicit none 
 
   integer :: ii,jj,tmp,istep,iatom,this_istep
   character (len=30):: string,NormalMode,DebugMode,Impose_Symetry,Use_ideal_positions

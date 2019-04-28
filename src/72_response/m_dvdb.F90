@@ -1319,6 +1319,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
+ ABI_UNUSED(qbz(1))
 
  ! Keep track of total time spent.
  call timab(1802, 1, tsec)
@@ -3220,6 +3221,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
+ ABI_UNUSED(comm)
 
  ! Keep track of total time spent.
  call timab(1809, 1, tsec)

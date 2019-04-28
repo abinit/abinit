@@ -808,7 +808,6 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
 #ifdef DEV_MJV
  integer :: iene, jene
 #endif
- integer :: ierr
  real(dp) :: spinfact
  character(len=500) :: msg
  !arrays

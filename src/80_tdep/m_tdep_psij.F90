@@ -38,8 +38,6 @@ contains
 !====================================================================================================
 subroutine tdep_calc_psijfcoeff(CoeffMoore,InVar,proj,Shell3at,Sym,ucart)
 
-  implicit none
-
   type(Input_Variables_type),intent(in) :: InVar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell3at
@@ -134,8 +132,6 @@ end subroutine tdep_calc_psijfcoeff
 
 !=====================================================================================================
 subroutine tdep_calc_psijtot(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_ref,Shell3at,Sym)
-
-  implicit none
 
   type(Input_Variables_type),intent(in) :: InVar
   type(Symetries_Variables_type),intent(in) :: Sym
@@ -263,8 +259,6 @@ end subroutine tdep_calc_psijtot
 !=====================================================================================================
 subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Psij_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
 
-  implicit none
-
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(in) :: Shell3at
@@ -282,6 +276,8 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Ps
   double precision :: phase
   double precision, allocatable :: Psij_333(:,:,:)
   double complex, allocatable :: eigen_prod(:,:,:,:,:),Grun_shell(:,:)
+
+  ABI_UNUSED(Lattice%brav)
 
 ! Define quantities
   natom_unitcell=InVar%natom_unitcell
@@ -350,8 +346,6 @@ end subroutine tdep_calc_gruneisen
 !=====================================================================================================
 subroutine tdep_build_psij333(isym,InVar,Psij_ref,Psij_333,Sym,trans)
 
-  implicit none
-
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: InVar
   double precision, intent(in) :: Psij_ref(3,3,3)
@@ -362,6 +356,7 @@ subroutine tdep_build_psij333(isym,InVar,Psij_ref,Psij_333,Sym,trans)
   integer :: ii,jj,kk,ee,ff,gg,mu,nu,xi
   double precision :: Psij_tmp(3,3,3)
 
+  ABI_UNUSED(invar%natom)
 
 ! Transform in the new basis wrt S_ref
   Psij_333(:,:,:)=zero
@@ -403,8 +398,6 @@ end subroutine tdep_build_psij333
 
 !=====================================================================================================
 subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref,Rlatt_cart,Shell3at,Sym)
-
-  implicit none
 
   type(crystal_t),intent(in) :: Crystal
   type(ddb_type),intent(in) :: DDB
@@ -600,8 +593,6 @@ end subroutine tdep_calc_alpha_gamma
 
 !=====================================================================================================
 subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rlatt_cart,Shell3at,Sym)
-
-  implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: InVar

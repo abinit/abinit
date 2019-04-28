@@ -224,8 +224,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &  eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: dim_eigbrd,dim_eig2nkq,dyfr_cplex,dyfr_nondiag,mk1mem,mkmem,mkqmem,mpert
  integer, intent(in) :: nfftf,nkpt,nkxc,nspden,nsym,prtbbb,timrev,usecprj,usevdw
@@ -2513,8 +2511,6 @@ end subroutine dfpt_looppert
 
 subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz, npwarr, npwar1, phasecg)
 
- implicit none
-
 !Arguments -------------------------------
  ! scalars
  integer, intent(in) :: mcg, mcgq, timrev
@@ -2725,8 +2721,6 @@ end subroutine getcgqphase
 subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
 &  ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,enl0,enl1,eovl1,epaw1,evdw,exc1,iout,ipert,natom,&
 &  usepaw,usevdw)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3033,8 +3027,6 @@ end subroutine dfpt_prtene
 
 subroutine eigen_meandege(eigen0,eigenresp,eigenresp_mean,mband,nband,nkpt,nsppol,option)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,nkpt,nsppol,option
@@ -3134,8 +3126,6 @@ end subroutine eigen_meandege
 
 subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
 
- implicit none
-
 !Arguments ------------------------------------
  integer , intent(in)    :: ipert,idir,cplex,nfft,nspden,nkxc
  real(dp), intent(in)    :: vxc0(nfft,nspden),rhor0(nfft,nspden)
@@ -3150,6 +3140,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
  real(dp) :: mdir(3),fdir(3)
 
 ! *************************************************************************
+ ABI_UNUSED(ipert)
 
  if (nspden==2) then
 

@@ -665,7 +665,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  real(dp) :: eig_nk, mu_e, linewidth, fact
  real(dp) :: max_occ, kT, wtk
 
- ABI_UNUSED((/dtset%natom/))
+ ABI_UNUSED((/dtset%natom, comm/))
 
  ABI_MALLOC(self%mobility_mu,(2,self%nsppol,3,3,self%ntemp+1))
 

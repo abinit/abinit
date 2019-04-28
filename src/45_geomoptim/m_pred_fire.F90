@@ -97,11 +97,10 @@ contains
 !! SOURCE
 subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
-
 !Arguments ------------------------------------
 !scalars
  type(abimover),intent(in) :: ab_mover
- type(ab_xfh_type),intent(inout)    :: ab_xfh
+ type(ab_xfh_type),intent(inout) :: ab_xfh
  type(abiforstr),intent(in) :: forstr
  type(abihist),intent(inout) :: hist
  integer, intent(in) :: ionmov
@@ -152,7 +151,7 @@ real(dp), allocatable, save:: vin_prev(:)
 ! velocity but correspoing to vin&vout, for ion&cell relaxation
 real(dp),allocatable,save :: vel_ioncell(:)
 
-
+ ABI_UNUSED((/ionmov, ab_xfh%mxfh/))
 
 !***************************************************************************
 !Beginning of executable session

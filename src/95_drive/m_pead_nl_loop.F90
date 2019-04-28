@@ -786,6 +786,8 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 
 !***********************************************************************
 
+ ABI_UNUSED(dtfil%ireadwf)
+
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
 
@@ -1121,11 +1123,13 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !
 !---- Local variables : structured datatypes
 
+
 #if defined HAVE_MPI
 integer :: status1(MPI_STATUS_SIZE)
 spaceComm=mpi_enreg%comm_cell
 #endif
 
+ ABI_UNUSED(dtfil%ireadwf)
 
 ! ***********************************************************************
 

@@ -1880,6 +1880,8 @@ SUBROUTINE BathOperatoroffdiag_printM_matrix(op,ostream)
   CHARACTER(LEN=22)              :: string2
   CHARACTER(LEN=4 )              :: size
 
+  ABI_UNUSED(ostream)
+
   WRITE(size,'(I4)') op%sumtails
   string ='(i2,x,i3,a,'//TRIM(ADJUSTL(size))//'(E5.2,1x))'
   string2 ='(6x,'//TRIM(ADJUSTL(size))//'(i6))'

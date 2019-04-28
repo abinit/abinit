@@ -196,7 +196,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_nonlop,     only : nonlop
  use m_fourier_interpol, only : transgrid
  use m_cgprj,     only : getcprj
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -292,6 +291,9 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !***********************************************************************
 
  DBG_ENTER("COLL")
+
+ ABI_UNUSED(dtfil%ireadwf)
+
 
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
