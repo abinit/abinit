@@ -353,8 +353,8 @@ end subroutine def_observable_var
     ! put vars
     ncerr=nf90_put_var(self%ncid, qpoint_id, params%spin_qpoint)
     ncerr=nf90_put_var(self%ncid, ncell_id, params%ncell)
-    ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature/Ha_K)
-    ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt/Time_Sec)
+    ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature*Ha_K)
+    ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt*Time_Sec)
     ncerr=nf90_put_var(self%ncid, mfield_id, params%spin_mag_field/Bfield_Tesla)
 #endif
   end subroutine write_parameters
