@@ -21,7 +21,8 @@
 
 module m_simtet
 
- use defs_basis
+  use defs_basis
+  use m_errors, only: unused_var
 
  implicit none
 
