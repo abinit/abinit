@@ -1301,6 +1301,8 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
      if (ind_ibz(isummit) /= ik_ibz) cycle
      weights(:,1) = weights(:,1) + dtweightde_tmp(isummit,:)*tweight
      weights(:,2) = weights(:,2) + tweight_tmp(isummit,:)   *tweight
+     ! HM: This exit is important, avoids summing the same contribution more than once
+     exit
    end do
  end do ! itetra
 
@@ -1431,6 +1433,8 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
        if (ind_ibz(isummit) /= ik_ibz) cycle
        cweights(iz,1) = cweights(iz,1) + verl(isummit)* tweight
        cweights(iz,2) = cweights(iz,2) + verli(isummit)*tweight
+       ! HM: This exit is important, avoids summing the same contribution more than once
+       exit
      end do
    end do
  end do ! itetra
