@@ -1635,13 +1635,9 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  if (Dtset%usepaw==1) call pawrhoij_free(Pawrhoij)
  ABI_DT_FREE(Pawrhoij)
 
- ! === Find optimal value for G-sphere enlargment due to oscillator matrix elements ===
-
+ ! Find optimal value for G-sphere enlargment due to oscillator matrix elements
  ! We will split k-points over processors
- call xmpi_split_work(Kmesh%nbz,comm,my_k1,my_k2,msg,ierr)
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work(Kmesh%nbz, comm, my_k1, my_k2)
 
  ! If there is no work to do, just skip the computation
  if (my_k2-my_k1+1 <= 0) then

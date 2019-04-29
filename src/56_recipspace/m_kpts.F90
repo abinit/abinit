@@ -598,7 +598,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  ABI_ALLOCATE(isort,(l3*nkpt1))
  isort = 0
 
- call xmpi_split_work(nkpt1, comm, isk_start, isk_stop, msg, ierr)
+ call xmpi_split_work(nkpt1, comm, isk_start, isk_stop)
  !write(std_out,*)' List of kpt1 vectors'; write(std_out,*)' Length of the kpt1 vectors:'
 
  do ikpt1=isk_start,isk_stop
@@ -652,7 +652,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  tmp_indkk = 0
 
  ! Split loop in contiguous blocks
- call xmpi_split_work(sppoldbl * nkpt2, comm, isk_start, isk_stop, msg, ierr)
+ call xmpi_split_work(sppoldbl * nkpt2, comm, isk_start, isk_stop)
 
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2

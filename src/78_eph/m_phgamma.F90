@@ -4240,7 +4240,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      ! =========================
      ! Integration over FS(spin)
      ! =========================
-     call xmpi_split_work(fs%nkfs,comm,my_kstart,my_kstop,msg,ierr)
+     call xmpi_split_work(fs%nkfs,comm,my_kstart,my_kstop)
 
      do ik_bz=my_kstart,my_kstop
        ! The k-point and the symmetries relating the BZ points to the IBZ.

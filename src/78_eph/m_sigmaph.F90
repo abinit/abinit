@@ -1872,7 +1872,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Integral over IBZ(k). Distributed inside comm_bq
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
        if (sigma%symsigma == +1) nq = sigma%nqibz_k
-       call xmpi_split_work(nq, sigma%comm_bq, q_start, q_stop, msg, ierr)
+       call xmpi_split_work(nq, sigma%comm_bq, q_start, q_stop)
 
        do iq_ibz=q_start,q_stop
          if (abs(sigma%symsigma) == 1) then
@@ -2677,7 +2677,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  
  if (.not. new%imag_only) then
    ! Split bands among the procs inside comm_bsum.
-   call xmpi_split_work(new%nbsum, new%comm_bsum, new%my_bsum_start, new%my_bsum_stop, msg, ierr)
+   call xmpi_split_work(new%nbsum, new%comm_bsum, new%my_bsum_start, new%my_bsum_stop)
    if (new%my_bsum_start == new%nbsum + 1) then
      MSG_ERROR("sigmaph code does not support idle processes! Decrease ncpus or increase nband.")
    end if
@@ -4108,7 +4108,7 @@ end subroutine distribute_nqibz_k_nofilter
 
 !subroutine distribute_nqibz_k_noitreatq()
 ! integer :: q_start, q_stop
-! call xmpi_split_work(self%nqibz_k, self%comm_qpt, q_start, q_stop, msg, ierr)
+! call xmpi_split_work(self%nqibz_k, self%comm_qpt, q_start, q_stop)
 ! self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
 ! ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
 ! if (self%my_nqibz_k /= 0) self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=q_start, q_stop)]

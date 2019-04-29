@@ -1051,7 +1051,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
  ! Each proc works on a contigous block of shells, then we have to gather the results.
  ABI_MALLOC(sh_start, (0:nprocs-1))
  ABI_MALLOC(sh_stop, (0:nprocs-1))
- call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop, msg, ierr)
+ call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop)
 
  ABI_MALLOC(cnorm, (msize))
  nstars = 0

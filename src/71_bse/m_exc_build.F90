@@ -522,10 +522,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    nels=nels_block(block)
    ABI_MALLOC(t_start,(0:nproc-1))
    ABI_MALLOC(t_stop,(0:nproc-1))
-   call xmpi_split_work2_i8b(nels,nproc,t_start,t_stop,msg,ierr)
-   if (ierr/=0) then
-     MSG_WARNING(msg)
-   end if
+   call xmpi_split_work2_i8b(nels,nproc,t_start,t_stop)
 
    ABI_MALLOC(hsize_of,(0:nproc-1))
    hsize_of=0
@@ -1409,10 +1406,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    ! Here the calculation of the block is parallelized over columns.
    ABI_MALLOC(col_start,(0:nproc-1))
    ABI_MALLOC(col_stop,(0:nproc-1))
-   call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop,msg,ierr) !check this but it should be OK.
-   if (ierr/=0) then
-     MSG_WARNING(msg)
-   end if
+   call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop)
 
    my_cols(1) = col_start(my_rank)
    my_cols(2) = col_stop (my_rank)
@@ -1971,10 +1965,7 @@ if (nsppol==2) then
  ! Here the calculation of the block is parallelized over columns.
  ABI_MALLOC(col_start,(0:nproc-1))
  ABI_MALLOC(col_stop,(0:nproc-1))
- call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop,msg,ierr) !check this but it should be OK.
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work2_i4b(neh2,nproc,col_start,col_stop) !check this but it should be OK.
 
  my_cols(1) = col_start(my_rank)
  my_cols(2) = col_stop (my_rank)

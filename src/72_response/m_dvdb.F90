@@ -2742,7 +2742,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  end do
 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero 
- call xmpi_split_work(nrtot, db%comm_rpt, my_start, my_stop, msg, ierr)
+ call xmpi_split_work(nrtot, db%comm_rpt, my_start, my_stop)
  db%my_nrpt = 0
  if (my_stop >= my_start) then
    db%my_nrpt = my_stop - my_start + 1
