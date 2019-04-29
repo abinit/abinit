@@ -492,7 +492,7 @@ enable_mpi="yes"
 enable_mpi_io="yes"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
-# change the default values of iomode)
+# change the default values of iomode)   
 # Beware that not all the features of Abinit support MPI-IO,
 # This options is mainly used by developers for debugging purposes.
 #
@@ -519,7 +519,8 @@ enable_mpi_io="yes"
 # Convenience option: try to set MPI parameters by looking into the
 # specified directory (default is unset)
 #
-# Notes:#
+# Notes:
+#
 #   * the build system expects to find subdirectories named bin/, lib/,
 #     include/ under the prefix;
 #
@@ -720,15 +721,15 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-#with_netcdf_incs="-I/usr/local/include/netcdf"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
-# change the default values of iomode)
+# change the default values of iomode)   
 #
 #enable_netcdf_default="no"
 
@@ -952,11 +953,11 @@ with_dft_flavor="libxc"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc -lxcf90"
 
                        # ------------------------------ #
 
@@ -990,7 +991,7 @@ with_dft_flavor="libxc"
 
 # Link with TRIQS library (for CTQMC and rotationally invariant interaction)
 #    (default is no)
-#    Different versions of TRIQS have differents API. Choose your installed
+#    Different versions of TRIQS have differents API. Choose your installed 
 #    version.
 #
 #enable_triqs_v2_0="no"
@@ -1103,3 +1104,4 @@ enable_maintainer_checks="no"
 # DviPDF flags
 #
 #PDFFLAGS=""
+
