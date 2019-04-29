@@ -1177,7 +1177,7 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
 
      ! Delta
      dccde = -3.d0*cc_pre*deleps4**2
-     dccde_tmp = dccde*deleps4 + cc
+     dccde_tmp = dccde*deleps4 - cc
      dweight(1,ieps) = -dccde_tmp * inv_e41
      dweight(2,ieps) = -dccde_tmp * inv_e42
      dweight(3,ieps) = -dccde_tmp * inv_e43
@@ -1301,8 +1301,6 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
      if (ind_ibz(isummit) /= ik_ibz) cycle
      weights(:,1) = weights(:,1) + dtweightde_tmp(isummit,:)*tweight
      weights(:,2) = weights(:,2) + tweight_tmp(isummit,:)   *tweight
-     ! HM: This exit is important, avoids summing the same contribution more than once
-     exit
    end do
  end do ! itetra
 
@@ -1433,8 +1431,6 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
        if (ind_ibz(isummit) /= ik_ibz) cycle
        cweights(iz,1) = cweights(iz,1) + verl(isummit)* tweight
        cweights(iz,2) = cweights(iz,2) + verli(isummit)*tweight
-       ! HM: This exit is important, avoids summing the same contribution more than once
-       exit
      end do
    end do
  end do ! itetra
