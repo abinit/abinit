@@ -784,7 +784,8 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
       do iatom=1,nmode/3
         write(52,'(a,i4)') "    - # atom ", iatom
         do idir=1,3
-          write(52,'(a,f18.9,a,f18.9,a)') "      - [",real(Eigen2nd%eigenvec((iatom-1)*3+idir,imode,iqpt)),',',aimag(Eigen2nd%eigenvec((iatom-1)*3+idir,imode,iqpt)),']'
+          write(52,'(a,f18.9,a,f18.9,a)') "      - [",real(Eigen2nd%eigenvec((iatom-1)*3+idir,imode,iqpt)),','&
+&           ,aimag(Eigen2nd%eigenvec((iatom-1)*3+idir,imode,iqpt)),']'
         end do
       end do
     end do !nmode  
