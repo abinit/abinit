@@ -2874,11 +2874,11 @@ end subroutine make_dsdk_cprj
 subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
      & nattyp,nband_k,nfftf,npwarr,&
      & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
-     & vhartr,vpsp,vxc,ucvol,xred,ylm,ylmgr)
+     & ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: mcg,mcprj,nband_k,nfftf
+ integer,intent(in) :: mcg,mcprj,nband_k,nfftf,with_vectornd
  real(dp),intent(in) :: ucvol
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -2891,6 +2891,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden),xred(3,dtset%natom)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
  real(dp),intent(out) :: eeig(nband_k,dtset%nkpt)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
@@ -2902,6 +2903,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  integer :: ierr,icg,icprj,ider,idir,ikg,ikg1,ikpt,ilm,isppol,istwf_k
  integer :: me,my_nspinor,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn
  integer :: nproc,npw_k,npw_k_,prtvol,sij_opt,spaceComm,tim_getghc,type_calc
+ logical :: has_vectornd
  real(dp) :: ecut_eff,lambda
  type(gs_hamiltonian_type) :: gs_hamk
 
@@ -2911,7 +2913,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  real(dp),allocatable :: buffer1(:),buffer2(:),cgrvtrial(:,:),cwavef(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:)
- real(dp),allocatable :: ph3d(:,:,:),vlocal(:,:,:,:),vtrial(:,:)
+ real(dp),allocatable :: ph3d(:,:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  complex(dpc),allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cwaveprj(:,:)
@@ -2931,6 +2933,8 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  ngfft4=dtset%ngfft(4) ; ngfft5=dtset%ngfft(5) ; ngfft6=dtset%ngfft(6)
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
  exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
+
+ has_vectornd = (with_vectornd .EQ. 1)
 
  ! input parameters for calls to getghc at ikpt
  cpopt = 4 ! was 4
@@ -2958,14 +2962,34 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
 
  ABI_ALLOCATE(vlocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
- call fftpac(isppol,mpi_enreg,dtset%nspden,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vlocal,2)
+ call fftpac(isppol,mpi_enreg,dtset%nspden,&
+      & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vlocal,2)
 
  ABI_DEALLOCATE(cgrvtrial)
  ABI_DEALLOCATE(vtrial)
 
+ ! if vectornd is present, set it up for addition to gs_hamk similarly to how it's done for
+ ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
+ ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
+ if(has_vectornd) then
+    ABI_ALLOCATE(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,3))
+    ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+    do idir = 1, 3
+       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+       call fftpac(isppol,mpi_enreg,dtset%nspden,&
+            & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
+    end do
+    ABI_DEALLOCATE(cgrvtrial)
+ end if
+
  ! add vlocal 
  call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
 
+ ! add vectornd if available
+ if(has_vectornd) then
+    call load_spin_hamiltonian(gs_hamk,isppol,vectornd=vectornd_pac)
+ end if
+ 
  ncpgr = cprj(1,1)%ncpgr
  ABI_ALLOCATE(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'R')
@@ -3024,20 +3048,20 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
          &         psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
     
     !     compute and load nuclear dipole Hamiltonian at current k point
-    if(any(abs(gs_hamk%nucdipmom)>0.0)) then
-       if(allocated(nucdipmom_k)) then
-          ABI_DEALLOCATE(nucdipmom_k)
-       end if
-       ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
-       call mknucdipmom_k(gmet,kg_k,kpoint,dtset%natom,gs_hamk%nucdipmom,&
-            &           nucdipmom_k,npw_k,rprimd,ucvol,xred)
-       if(allocated(gs_hamk%nucdipmom_k)) then
-          ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
-       end if
-       ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_k*(npw_k+1)/2))
-       call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
-       ABI_DEALLOCATE(nucdipmom_k)
-    end if
+    ! if(any(abs(gs_hamk%nucdipmom)>0.0)) then
+    !    if(allocated(nucdipmom_k)) then
+    !       ABI_DEALLOCATE(nucdipmom_k)
+    !    end if
+    !    ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
+    !    call mknucdipmom_k(gmet,kg_k,kpoint,dtset%natom,gs_hamk%nucdipmom,&
+    !         &           nucdipmom_k,npw_k,rprimd,ucvol,xred)
+    !    if(allocated(gs_hamk%nucdipmom_k)) then
+    !       ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
+    !    end if
+    !    ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_k*(npw_k+1)/2))
+    !    call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+    !    ABI_DEALLOCATE(nucdipmom_k)
+    ! end if
     
     ! Load k-dependent part in the Hamiltonian datastructure
     !  - Compute 3D phase factors
@@ -3065,6 +3089,8 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
             &           prtvol,sij_opt,tim_getghc,type_calc)
        eeig(nn,ikpt) = DOT_PRODUCT(cwavef(1,1:npw_k),ghc(1,1:npw_k)) &
             &           + DOT_PRODUCT(cwavef(2,1:npw_k),ghc(2,1:npw_k))
+
+       write(std_out,'(a,i4,i4,es16.8)')'JWZ debug ikpt nn ENK ',ikpt,nn,eeig(nn,ikpt)
 
     end do
 
@@ -3096,7 +3122,10 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     ABI_DEALLOCATE(buffer2)
  end if
 
-
+ if (has_vectornd) then
+    ABI_DEALLOCATE(vectornd_pac)
+ end if
+ 
  ABI_DEALLOCATE(vlocal)
  call destroy_hamiltonian(gs_hamk)
 
@@ -3561,20 +3590,20 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                    call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kg,kpointg,1,mpi_enreg,npw_kg,dummy_onpw)
                    ! kg_kg(:,1:npw_kg)=kg(:,ikgg+1:ikgg+npw_kg)
 
-                   if(any(abs(gs_hamk%nucdipmom)>0.0)) then
-                      if(allocated(nucdipmom_k)) then
-                         ABI_DEALLOCATE(nucdipmom_k)
-                      end if
-                      ABI_ALLOCATE(nucdipmom_k,(npw_kb*(npw_kb+1)/2))
-                      call mknucdipmom_k(gmet,kg_kb,kpointb,dtset%natom,gs_hamk%nucdipmom,&
-                           &           nucdipmom_k,npw_kb,rprimd,ucvol,xred)
-                      if(allocated(gs_hamk%nucdipmom_k)) then
-                         ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
-                      end if
-                      ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_kb*(npw_kb+1)/2))
-                      call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
-                      ABI_DEALLOCATE(nucdipmom_k)
-                   end if
+                   ! if(any(abs(gs_hamk%nucdipmom)>0.0)) then
+                   !    if(allocated(nucdipmom_k)) then
+                   !       ABI_DEALLOCATE(nucdipmom_k)
+                   !    end if
+                   !    ABI_ALLOCATE(nucdipmom_k,(npw_kb*(npw_kb+1)/2))
+                   !    call mknucdipmom_k(gmet,kg_kb,kpointb,dtset%natom,gs_hamk%nucdipmom,&
+                   !         &           nucdipmom_k,npw_kb,rprimd,ucvol,xred)
+                   !    if(allocated(gs_hamk%nucdipmom_k)) then
+                   !       ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
+                   !    end if
+                   !    ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_kb*(npw_kb+1)/2))
+                   !    call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+                   !    ABI_DEALLOCATE(nucdipmom_k)
+                   ! end if
 
                    ! this is minimal Hamiltonian information, to apply vlocal (and only vlocal) to |u_kb>
                    nkpg = 0
@@ -3920,11 +3949,12 @@ end subroutine make_eeig123
 
 subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
      & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
-     & pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
+     & pwind,pwind_alloc,rprimd,symrec,usecprj,vectornd,&
+     & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: mcg,mcprj,nfftf,pwind_alloc,usecprj
+ integer,intent(in) :: mcg,mcprj,nfftf,pwind_alloc,usecprj,with_vectornd
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
  type(orbmag_type), intent(inout) :: dtorbmag
@@ -3939,6 +3969,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden),xred(3,dtset%natom)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
@@ -4041,7 +4072,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
  call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
       & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
-      & vhartr,vpsp,vxc,ucvol,xred,ylm,ylmgr)
+      & ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')'JWZ debug make_eeig time: ',finish_time-start_time
 

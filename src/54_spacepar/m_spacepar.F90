@@ -291,7 +291,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  ABI_DEALLOCATE(nd_list)
  ABI_DEALLOCATE(nd_m)
 
- if ( (izero .EQ. 1) .AND. (qeq0 .EQ. 0) ) then
+ if ( (izero .EQ. 1) .AND. (qeq0 .EQ. 1) ) then
    ! Set contribution of unbalanced components to zero
 
     call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)

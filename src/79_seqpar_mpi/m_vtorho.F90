@@ -194,6 +194,8 @@ contains
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj=1 if cprj datastructure is stored in memory
 !!  wffnew,unit numbers for wf disk files.
+!!  with_vectornd = 1 if vectornd allocated
+!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
 !!  vxctau=(only for meta-GGA): derivative of XC energy density with respect to
 !!    kinetic energy density (depsxcdtau). The arrays vxctau(nfft,nspden,4) contains also
