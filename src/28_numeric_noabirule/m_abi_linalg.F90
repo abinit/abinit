@@ -182,10 +182,14 @@ module m_abi_linalg
     !module procedure abi_dhpev
     !module procedure abi_chpev
     !module procedure abi_zhpev
-    module procedure abi_dhpev_alloc_1d
-    module procedure abi_dhpev_alloc_2d
-    module procedure abi_chpev_alloc
-    module procedure abi_zhpev_alloc
+    module procedure abi_dhpev_1d_new
+    module procedure abi_dhpev_2d_new
+    module procedure abi_chpev_new
+    module procedure abi_zhpev_new
+!   module procedure abi_dhpev_alloc_1d
+!   module procedure abi_dhpev_alloc_2d
+!   module procedure abi_chpev_alloc
+!   module procedure abi_zhpev_alloc
  end interface
  !----------------------------------------------------------------------
  public :: abi_xhpgv
@@ -193,10 +197,14 @@ module m_abi_linalg
     !module procedure abi_dhpgv
     !module procedure abi_chpgv
     !module procedure abi_zhpgv
-    module procedure abi_dhpgv_alloc_1d
-    module procedure abi_dhpgv_alloc_2d
-    module procedure abi_chpgv_alloc
-    module procedure abi_zhpgv_alloc
+    module procedure abi_dhpgv_1d_new
+    module procedure abi_dhpgv_2d_new
+    module procedure abi_chpgv_new
+    module procedure abi_zhpgv_new
+!   module procedure abi_dhpgv_alloc_1d
+!   module procedure abi_dhpgv_alloc_2d
+!   module procedure abi_chpgv_alloc
+!   module procedure abi_zhpgv_alloc
  end interface
  !----------------------------------------------------------------------
  interface abi_xpotrf

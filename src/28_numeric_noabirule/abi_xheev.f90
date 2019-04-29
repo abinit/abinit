@@ -146,7 +146,7 @@
 #endif
 
  if(info/=0) then
-   write(msg,'(a,i0)')' Problem in abi_xheev, info= ',info
+   write(msg,'(a,i0)')' Problem in abi_dheev, info= ',info
    MSG_ERROR(msg)
  endif
 
@@ -216,6 +216,8 @@ subroutine abi_cheev_new(jobz,uplo,n,a,lda,w)
  end if
 #endif
 
+ ABI_CHECK(info==0,"cheev returned info !=0")
+
 end subroutine abi_cheev_new
 !!***
 
@@ -277,6 +279,8 @@ subroutine abi_zheev_new(jobz,uplo,n,a,lda,w)
 #ifdef HAVE_LINALG_PLASMA
  end if
 #endif
+
+ ABI_CHECK(info==0,"zheev returned info !=0")
 
 end subroutine abi_zheev_new
 !!***
