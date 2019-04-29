@@ -383,12 +383,12 @@ end subroutine make_vectornd
 !!
 !! SOURCE
 
-subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr,&
+subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 &  divgq0,qpt) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,izero,nfft,paral_kgb
+ integer,intent(in) :: cplex,izero,nfft
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -422,8 +422,8 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  ! Check that cplex has an allowed value
  if(cplex/=1 .and. cplex/=2)then
    write(message, '(a,i0,a,a)' )&
-&   'From the calling routine, cplex=',cplex,ch10,&
-&   'but the only value allowed are 1 and 2.'
+   'From the calling routine, cplex=',cplex,ch10,&
+   'but the only value allowed are 1 and 2.'
    MSG_BUG(message)
  end if
 
@@ -446,23 +446,22 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  if(qpt_(1)**2+qpt_(2)**2+qpt_(3)**2<1.d-15) qeq0=1
  qeq05=0
  if (qeq0==0) then
-   if (abs(abs(qpt_(1))-half)<tol12.or.abs(abs(qpt_(2))-half)<tol12.or. &
-&   abs(abs(qpt_(3))-half)<tol12) qeq05=1
+   if (abs(abs(qpt_(1))-half)<tol12.or.abs(abs(qpt_(2))-half)<tol12.or.abs(abs(qpt_(3))-half)<tol12) qeq05=1
  end if
 
  ! If cplex=1 then qpt_ should be 0 0 0
  if (cplex==1.and. qeq0/=1) then
    write(message,'(a,3e12.4,a,a)')&
-&   'cplex=1 but qpt=',qpt_,ch10,&
-&   'qpt should be 0 0 0.'
+   'cplex=1 but qpt=',qpt_,ch10,&
+   'qpt should be 0 0 0.'
    MSG_BUG(message)
  end if
 
  ! If FFT parallelism then qpt should not be 1/2
  if (nproc_fft>1.and.qeq05==1) then
    write(message, '(a,3e12.4,a,a)' )&
-&   'FFT parallelism selected but qpt',qpt_,ch10,&
-&   'qpt(i) should not be 1/2...'
+   'FFT parallelism selected but qpt',qpt_,ch10,&
+   'qpt(i) should not be 1/2...'
    MSG_ERROR(message)
  end if
 
@@ -567,7 +566,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
        if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
      end if
      call zerosym(work1,2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3,&
-&     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
    end if
  end if
 
@@ -809,7 +808,6 @@ end subroutine meanvalue_g
 !!  nfft=number of points of the fft grid
 !!  nfunc=number of functions on the grid for which the laplacian is to be calculated
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  paral_kgb=flag controlling (k,g,bands) parallelization
 !!  (optional) rdfuncr(nfft,nfunc)=real(dp) discretized functions in real space
 !!  rdfuncg_in TO BE DESCRIBED SB 090901
 !!  laplacerdfuncg_in TO BE DESCRIBED SB 090901
@@ -831,12 +829,12 @@ end subroutine meanvalue_g
 !!
 !! SOURCE
 
-subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
+subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,rdfuncr,&
 &  laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nfunc,paral_kgb
+ integer,intent(in) :: nfft,nfunc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -1009,11 +1007,11 @@ end subroutine laplacian
 !!
 !! SOURCE
 
-subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
+subroutine redgr(frin,frredgr,mpi_enreg,nfft,ngfft)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,paral_kgb
+ integer,intent(in) :: nfft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -1159,12 +1157,11 @@ end subroutine redgr
 !!
 !! SOURCE
 
-subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
-&  paral_kgb,rhog,rprimd,vhartr1)
+subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vhartr1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: idir,ipert,natom,nfft,paral_kgb
+ integer,intent(in) :: idir,ipert,natom,nfft
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1355,12 +1352,12 @@ end subroutine hartrestr
 !!
 !! SOURCE
 
-subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,paral_kgb,&
+subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,&
 &                 phnons,rhog,rhor,rprimd,symafm,symrel)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nfftot,nspden,nsppol,nsym,paral_kgb
+ integer,intent(in) :: cplex,nfft,nfftot,nspden,nsppol,nsym
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: irrzon(nfftot**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4)),ngfft(18)

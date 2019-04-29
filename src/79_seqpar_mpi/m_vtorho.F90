@@ -1601,10 +1601,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(994,1,tsec)
        if (psps%usepaw==0) then
          call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,&
-&         dtset%nsppol,dtset%nsym,dtset%paral_kgb,phnons,rhog  ,rhor  ,rprimd,dtset%symafm,dtset%symrel)
+&         dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
        else
          call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,&
-&         dtset%nsppol,dtset%nsym,dtset%paral_kgb,phnons,rhowfg,rhowfr,rprimd,dtset%symafm,dtset%symrel)
+&         dtset%nsppol,dtset%nsym,phnons,rhowfg,rhowfr,rprimd,dtset%symafm,dtset%symrel)
        end if
        call timab(994,2,tsec)
 !      We now have both rho(r) and rho(G), symmetrized, and if dtset%nsppol=2

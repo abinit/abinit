@@ -1300,15 +1300,13 @@ subroutine initmpi_grid(mpi_enreg)
      call xmpi_comm_free(commcart_4d)
    end if
 
-!  Write some data
-   write(msg,'(a,4i5)') 'npfft, npband, npspinor and npkpt: ',&
-&   mpi_enreg%nproc_fft,mpi_enreg%nproc_band, &
-&   mpi_enreg%nproc_spinor,mpi_enreg%nproc_kpt
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(a,4i5)') 'me_fft, me_band, me_spinor , me_kpt: ',&
-&   mpi_enreg%me_fft,mpi_enreg%me_band,&
-&   mpi_enreg%me_spinor, mpi_enreg%me_kpt
-   call wrtout(std_out,msg,'COLL')
+   !Write some data
+   !write(msg,'(a,4i5)') 'npfft, npband, npspinor and npkpt: ',&
+   !mpi_enreg%nproc_fft,mpi_enreg%nproc_band, mpi_enreg%nproc_spinor,mpi_enreg%nproc_kpt
+   !call wrtout(std_out,msg,'COLL')
+   !write(msg,'(a,4i5)') 'me_fft, me_band, me_spinor , me_kpt: ',&
+   !mpi_enreg%me_fft,mpi_enreg%me_band,mpi_enreg%me_spinor, mpi_enreg%me_kpt
+   !call wrtout(std_out,msg,'COLL')
 
  else ! paral_hf==1
 !* Option Hartree-Fock is active and more than 1 processor is dedicated to the parallelization over occupied states.

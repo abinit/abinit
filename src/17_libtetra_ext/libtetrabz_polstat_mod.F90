@@ -27,6 +27,9 @@
 ! SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 !
 MODULE libtetrabz_polstat_mod
+
+  use defs_basis
+  use m_errors
   !
   IMPLICIT NONE
   !
@@ -66,7 +69,7 @@ SUBROUTINE libtetrabz_polstat(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
   !
   IF(linterpol) THEN
      !
-     ALLOCATE(wghtd(nb*nb,1,nk_local))
+     ABI_MALLOC(wghtd, (nb*nb,1,nk_local))
      CALL libtetrabz_polstat_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig1,eig2,nk_local,wghtd)
      !
      ! Interpolation
@@ -77,7 +80,8 @@ SUBROUTINE libtetrabz_polstat(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
         wght(1:nb*nb,kintp(1:nintp)) = wght(1:nb*nb,             kintp(1:nintp)) &
         &                    + MATMUL(wghtd(1:nb*nb,1:1,ik), wintp(1:1,1:nintp))
      END DO ! ik = 1, nk_local
-     DEALLOCATE(wghtd, kvec)
+     ABI_FREE(wghtd)
+     ABI_FREE(kvec)
      !
      IF(PRESENT(comm)) CALL libtetrabz_mpisum_dv(comm, nb*nb*PRODUCT(ngw(1:3)), wght)
      !
@@ -85,7 +89,8 @@ SUBROUTINE libtetrabz_polstat(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
      CALL libtetrabz_polstat_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig1,eig2,nk_local,wght)
   END IF
   !
-  DEALLOCATE(ik_global, ik_local)
+  ABI_FREE(ik_global)
+  ABI_FREE(ik_local)
   !
 END SUBROUTINE libtetrabz_polstat
 !
@@ -416,9 +421,9 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
            w1(indx(1)) = libtetrabz_polstat_1222(e(1),e(4),ln(1),ln(4))
            !
            IF(ANY(w1(1:4) < 0d0)) THEN
-              WRITE(*,'(100e15.5)') e(1:4)
-              WRITE(*,'(100e15.5)') w1(indx(1:4))
-              STOP "weighting 4=3=2"
+              WRITE(std_out,'(100e15.5)') e(1:4)
+              WRITE(std_out,'(100e15.5)') w1(indx(1:4))
+              MSG_ERROR("weighting 4=3=2")
            END IF
            !
         END IF
@@ -432,9 +437,9 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
         w1(indx(1)) = w1(indx(2))
         !
         IF(ANY(w1(1:4) < 0d0)) THEN
-           WRITE(*,'(100e15.5)') e(1:4)
-           WRITE(*,'(100e15.5)') w1(indx(1:4))
-           STOP "weighting 4=3 2=1"
+           WRITE(std_out,'(100e15.5)') e(1:4)
+           WRITE(std_out,'(100e15.5)') w1(indx(1:4))
+           MSG_ERROR("weighting 4=3 2=1")
         END IF
         !
      ELSE
@@ -447,9 +452,9 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
         w1(indx(1)) = libtetrabz_polstat_1233(e(1),e(2),e(4),ln(1),ln(2),ln(4))
         !
         IF(ANY(w1(1:4) < 0d0)) THEN
-           WRITE(*,'(100e15.5)') e(1:4)
-           WRITE(*,'(100e15.5)') w1(indx(1:4))
-           STOP "weighting 4=3"
+           WRITE(std_out,'(100e15.5)') e(1:4)
+           WRITE(std_out,'(100e15.5)') w1(indx(1:4))
+           MSG_ERROR("weighting 4=3")
         END IF
         !
      END IF
@@ -464,9 +469,9 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
         w1(indx(1)) = w1(indx(3))
         !
         IF(ANY(w1(1:4) < 0d0)) THEN
-           WRITE(*,'(100e15.5)') e(1:4)
-           WRITE(*,'(100e15.5)') w1(indx(1:4))
-           STOP "weighting 3=2=1"
+           WRITE(std_out,'(100e15.5)') e(1:4)
+           WRITE(std_out,'(100e15.5)') w1(indx(1:4))
+           MSG_ERROR("weighting 3=2=1")
         END IF
         !
      ELSE
@@ -479,9 +484,9 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
         w1(indx(1)) = libtetrabz_polstat_1233(e(1),e(4),e(3),ln(1),ln(4),ln(3))
         !
         IF(ANY(w1(1:4) < 0d0)) THEN
-           WRITE(*,'(100e15.5)') e(1:4)
-           WRITE(*,'(100e15.5)') w1(indx(1:4))
-           STOP "weighting 3=2"
+           WRITE(std_out,'(100e15.5)') e(1:4)
+           WRITE(std_out,'(100e15.5)') w1(indx(1:4))
+           MSG_ERROR("weighting 3=2")
         END IF
         !
      END IF
@@ -495,9 +500,9 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
      w1(indx(1)) = w1(indx(2))
      !
      IF(ANY(w1(1:4) < 0d0)) THEN
-        WRITE(*,'(100e15.5)') e(1:4)
-        WRITE(*,'(100e15.5)') w1(indx(1:4))
-        STOP "weighting 2=1"
+        WRITE(std_out,'(100e15.5)') e(1:4)
+        WRITE(std_out,'(100e15.5)') w1(indx(1:4))
+        MSG_ERROR("weighting 2=1")
      END IF
      !
   ELSE
@@ -510,9 +515,9 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
      w1(indx(1)) = libtetrabz_polstat_1234(e(1),e(2),e(3),e(4),ln(1),ln(2),ln(3),ln(4))
      !
      IF(ANY(w1(1:4) < 0d0)) THEN
-        WRITE(*,'(100e15.5)') e(1:4)
-        WRITE(*,'(100e15.5)') w1(indx(1:4))
-        STOP "weighting"
+        WRITE(std_out,'(100e15.5)') e(1:4)
+        WRITE(std_out,'(100e15.5)') w1(indx(1:4))
+        MSG_ERROR("weighting")
      END IF
      !
   END IF

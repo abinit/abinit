@@ -153,8 +153,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 & paw_ij,pawang,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,pawxcdev,spnorbscl,xclevel,xc_denpos,ucvol,znucl,&
 & electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr) ! optional arguments
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ipert,ixc,my_natom,natom,nspden,ntypat,nzlmopt,option,pawprtvol
@@ -182,11 +180,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  integer, parameter :: PAWU_FLL=1,PAWU_AMF=2
  integer :: cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc
  integer :: iatom,iatom_tot,idum,ierr,ii,ipositron,iq,iq0_dij,iq0_rhoij
- integer :: irhoij,ispden,itypat,itypat0
- integer :: jrhoij,kklmn,klmn,klmnq,lm_size,lmn2_size,mesh_size
+ integer :: itypat,itypat0 !irhoij,ispden,jrhoij,
+ integer :: lm_size,lmn2_size,mesh_size
  integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nsppol,opt_compch,pawu_algo,pawu_dblec
  integer :: qphase,usecore,usetcore,usepawu,usexcnhat,usenhat,usefock
- logical :: cplex_eq_two,keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc
+ logical :: keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc
  logical :: non_magnetic_xc,paral_atom,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
@@ -1101,8 +1099,6 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
 &          opt_compch,opt_dens,opt_l,opt_print,pawang,pawprtvol,pawrad,pawrhoij,pawtab,rho1,trho1,&
 &          one_over_rad2) ! optional
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,iatom,lm_size,nspden,nzlmopt,opt_compch,opt_dens,opt_l,opt_print,pawprtvol
@@ -1505,9 +1501,6 @@ end subroutine pawdensities
 !! SOURCE
 
 subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab,epaw_im)
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1683,8 +1676,6 @@ end subroutine pawaccenergy
 
 subroutine pawaccenergy_nospin(epaw,pawrhoij,dij,cplex_dij,qphase_dij,pawtab,epaw_im)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,qphase_dij
@@ -1771,8 +1762,6 @@ end subroutine pawaccenergy_nospin
 subroutine paw_mknewh0(my_natom,nsppol,nspden,nfftf,pawspnorb,pawprtvol,Cryst,&
 &          Pawtab,Paw_an,Paw_ij,Pawang,Pawfgrtab,vxc,vxc_val,vtrial,&
 &          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -210,8 +210,6 @@ CONTAINS  !=====================================================================
 
   subroutine destroy_orbmag(dtorbmag)
 
-    implicit none
-
     !Arguments ------------------------------------
     !array
     type(orbmag_type),intent(inout) :: dtorbmag
@@ -313,8 +311,6 @@ CONTAINS  !=====================================================================
 subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
      &                     pawtab,psps,pwind,pwind_alloc,pwnsfac,&
      &                     rprimd,symrec,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -918,8 +914,6 @@ end subroutine initorbmag
 subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
      & npwarr,pawtab,usecprj,usepaw)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: mcg,mcprj,usecprj,usepaw
@@ -1075,8 +1069,6 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
      & rprimd,symrec,usecprj,usepaw,xred,&
      & smat_all)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: mcg,mcprj,pwind_alloc,usecprj,usepaw
@@ -1101,7 +1093,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   integer :: ikpt,ikptb,ikptg,isppol
   integer :: my_nspinor,nband_k,nn,n1,n2,n3
   real(dp) :: deltab,deltag,ucvol
-  complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B
+  complex(dpc) :: IA,IB,t1A,t2A,t3A !,t1B,t2B,t3B,t4B
   character(len=500) :: message
   !arrays
   real(dp) :: cnum(2,3),dkb(3),dkg(3),gmet(3,3),gprimd(3,3),rmet(3,3)
@@ -1284,8 +1276,6 @@ end subroutine chern_number
 
 subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
      & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all,symrec,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1745,8 +1735,6 @@ end subroutine make_smat
 
 subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: idir,nband_k
@@ -1835,8 +1823,6 @@ end subroutine make_onsite_l_k
 !! SOURCE
 
 subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_l,pawrad,pawtab)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1945,8 +1931,6 @@ end subroutine make_onsite_l
 
 subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
      & istwf_k,kg,mcg,mcprj,mpi_enreg,nattyp,ncpgr,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -2183,8 +2167,6 @@ end subroutine ctocprjb
 
 subroutine make_dsdk_FD(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: nband_k,mcprj
@@ -2387,8 +2369,6 @@ end subroutine make_dsdk_FD
 subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
      & mcg,mpi_enreg,nband_k,npwarr,paw_ij,pawtab,psps,pwind,pwind_alloc,&
      & rmet,rprimd,xred,ylm,ylmgr)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -2747,8 +2727,6 @@ end subroutine make_dsdk_nonlop
 
 subroutine make_dsdk_cprj(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: nband_k,mcprj
@@ -2897,8 +2875,6 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
      & nattyp,nband_k,nfftf,npwarr,&
      & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
      & vhartr,vpsp,vxc,ucvol,xred,ylm,ylmgr)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -3171,8 +3147,6 @@ end subroutine make_eeig
 subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
      & mcprj,mpi_enreg,nattyp,nband_k,pawtab,S1trace)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: adir,mcprj,nband_k
@@ -3297,8 +3271,6 @@ end subroutine make_S1trace
 
 subroutine make_CCIV_dsdk(adir,CCIV,dsdk,dtorbmag,dtset,eeig,mpi_enreg,nband_k)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: adir,nband_k
@@ -3412,8 +3384,6 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
      & paw_ij,pawfgr,pawtab,psps,&
      & rprimd,symrec,ucvol,vhartr,vpsp,vxc,xred)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: mcg,mcprj,nband_k,nfftf
@@ -3442,7 +3412,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  integer :: ikg1,ikgb,ikgg,ikpt,ikptb,ikptbi,ikptg,ikptgi,ilmn,jlmn,klmn
  integer :: ikpt_loc,ipw,isppol,istwf_k,itypat
  integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jpw,jsppol
- integer :: me,my_nspinor,n1,n2dim,ncpgr,ndat
+ integer :: me,my_nspinor,n1,n2dim,ncpgr,ndat,dummy_onpw
  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn,nproc,npw_kb,npw_kg,ntotcp
  integer :: prtvol,sij_opt,sourceb,sourceg,spaceComm,tagb,tagg,tim_getghc,type_calc
  real(dp) :: dkg2,dotr,doti,ecut_eff,htpisq,keg,lambda
@@ -3579,7 +3549,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                    npw_kb = npwarr(ikptbi)
                    ikgb = dtorbmag%fkgindex(ikptb)
                    ABI_ALLOCATE(kg_kb,(3,npw_kb))
-                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kb,kpointb,1,mpi_enreg,npw_kb,npw_kb)
+                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kb,kpointb,1,mpi_enreg,npw_kb,dummy_onpw)
                    ! kg_kb(:,1:npw_kb)=kg(:,ikgb+1:ikgb+npw_kb)
 
                    ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
@@ -3588,7 +3558,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                    npw_kg = npwarr(ikptgi)
                    ikgg = dtorbmag%fkgindex(ikptg)
                    ABI_ALLOCATE(kg_kg,(3,npw_kg))
-                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kg,kpointg,1,mpi_enreg,npw_kg,npw_kg)
+                   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_kg,kpointg,1,mpi_enreg,npw_kg,dummy_onpw)
                    ! kg_kg(:,1:npw_kg)=kg(:,ikgg+1:ikgg+npw_kg)
 
                    if(any(abs(gs_hamk%nucdipmom)>0.0)) then
@@ -3952,8 +3922,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
      & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      & pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: mcg,mcprj,nfftf,pwind_alloc,usecprj
@@ -4258,8 +4226,6 @@ end subroutine orbmag
 
 subroutine make_CCI(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: adir,nband_k
@@ -4372,8 +4338,6 @@ end subroutine make_CCI
 !! SOURCE
 
 subroutine make_CCIV_dpdk(adir,dtorbmag,eeig,nband_k,smat_all_indx,CCIV_dir)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -4491,8 +4455,6 @@ end subroutine make_CCIV_dpdk
 
 subroutine make_VVII(adir,dtorbmag,eeig,nband_k,smat_all_indx,VVII_dir)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: adir,nband_k
@@ -4606,8 +4568,6 @@ end subroutine make_VVII
 
 subroutine make_VVIII(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
      & pawtab,smat_all_indx,VVIII_dir)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -4843,8 +4803,6 @@ end subroutine make_VVIII
 
 subroutine make_VVI(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
      & pawtab,smat_all_indx,VVI_dir)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

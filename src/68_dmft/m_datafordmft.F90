@@ -124,7 +124,6 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
  use m_paw_dmft, only: paw_dmft_type
  use m_mpinfo,   only : proc_distrb_cycle
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -154,7 +153,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
  integer :: iat,iatom,ib,iband,ibandc,ibg,icat,icount_proj_ilmn,idijeff,ierr,ierrr,ikpt
  integer :: ilmn,im,im1,iorder_cprj,ispinor,ispinor1,isppol,itypat,ilmn1
  integer :: jj1,ldim,lmn_size,lpawu
- integer :: m1,m1_x2my2d,m1_x2my2d_mod,m1_t2g,m1_t2g_mod,maxnproju,me,natom,nband_k,nband_k_cprj
+ integer :: m1,m1_x2my2d,m1_t2g,m1_t2g_mod,maxnproju,me,natom,nband_k,nband_k_cprj
  integer :: nbandi,nbandf,nnn,nprocband,nsploop,option,opt_renorm,spaceComm,unt
  real(dp) :: ph0phiint_used
  character(len=500) :: message
@@ -781,7 +780,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 
  use m_abicore
  use m_io_tools,  only : open_file
- implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt,my_nspinor,nsppol,ntypat
@@ -952,7 +951,6 @@ subroutine psichi_check(dtset,nattyp,nkpt,my_nspinor,&
  use m_abicore
 
  use m_matlu, only: matlu_type,init_matlu,sym_matlu
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1088,7 +1086,6 @@ end subroutine datafordmft
  use m_paw_dmft, only : paw_dmft_type
  use m_oper, only : oper_type,loc_oper
  use m_matlu, only : sym_matlu, print_matlu, checkdiag_matlu
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1208,7 +1205,6 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
  use m_crystal, only : crystal_t
  use m_oper, only : init_oper,oper_type,identity_oper,loc_oper,destroy_oper,diff_oper
  use m_matlu, only : matlu_type,sym_matlu,print_matlu
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1388,7 +1384,6 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
  use m_oper, only : init_oper,oper_type,identity_oper,loc_oper,destroy_oper
  use m_matlu, only : gather_matlu,sym_matlu,print_matlu,add_matlu
  use m_matrix, only : invsqrt_matrix
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nkpt
@@ -1404,7 +1399,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
  integer :: diag,iatom,ib,ikpt1,im,im1,ispinor,ispinor1,isppol,isppol1,jc,jc1
  integer :: tndim
  integer :: natom,mbandc,ndim,nspinor,nsppol,iortho,natomcor
- integer :: itot,itot1,iatom1,ndim1,dimoverlap,iatomcor,iatomcor1
+ integer :: itot,itot1,dimoverlap,iatomcor
  real(dp) :: pawprtvol
  type(oper_type) :: norm1,norm2,norm3
  character(len=500) :: message
@@ -1787,7 +1782,6 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
  use m_matlu, only : matlu_type,init_matlu,add_matlu,destroy_matlu,print_matlu,sym_matlu
  use m_paw_dmft, only: paw_dmft_type
  use m_pawang, only : pawang_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -130,10 +130,13 @@ module m_lgroup
 
    procedure :: findq_ibzk => lgroup_findq_ibzk
    ! Find the index of the point in the IBZ(k).
+
    procedure :: find_ibzimage => lgroup_find_ibzimage
    ! Find the symmetrical image in the IBZ(k) of a qpoint in the BZ.
+
    procedure :: print => lgroup_print
    ! Print the object
+
    procedure :: free => lgroup_free
    ! Free memory.
 
@@ -183,8 +186,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 !Local variables ------------------------------
 !scalars
  integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0,debug=0
- integer :: otimrev_k,ierr,itim,isym,nsym_lg,ik_ibz,ik_bz
- real(dp) :: ksign
+ integer :: otimrev_k,ierr,itim,isym,ik_ibz,ik_bz,ksign
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)
  real(dp) :: kred(3),shift(3)
@@ -248,50 +250,54 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
    new%weights(ik_ibz) = wtk_folded(ik_bz)
  end do
 
-#if 0
+ ! TODO: Activate this part so that we can cache the q-point in the IBZ.
+ ! Results are ok but this change is postponed because it leads to an increase
+ ! in the walltime spent in listkk likely because of the different order.
+
  ! Need to repack the IBZ points and rearrange the other arrays dimensioned with nibz.
  ! In principle, the best approach would be to pack in stars using crystal%symrec.
  ! For the time being we pack in shells (much easier). Use wtk as workspace to store the norm.
- ksign = + one
+ ksign = 0
  if (present(sord)) then
-   if (sord == "<") ksign = - one
+   if (sord == "<") ksign = -1
+   if (sord == ">") ksign = +1
  end if
 
- do ik_ibz=1,new%nibz
-   call wrap2_pmhalf(new%ibz(:, ik_ibz), kred, shift)
-   wtk(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
- end do
+ if (ksign /= 0) then
+   do ik_ibz=1,new%nibz
+     call wrap2_pmhalf(new%ibz(:, ik_ibz), kred, shift)
+     wtk(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
+   end do
 
- ABI_MALLOC(iperm, (new%nibz))
- iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
- call sort_dp(new%nibz, wtk, iperm, tol12)
- !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
+   ABI_MALLOC(iperm, (new%nibz))
+   iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
+   call sort_dp(new%nibz, wtk, iperm, tol12)
+   !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
 
- ! Trasfer data.
- ABI_MALLOC(kord, (3, new%nibz))
- do ik_ibz=1,new%nibz
-   kord(:, ik_ibz) = new%ibz(:, iperm(ik_ibz))
-   wtk_folded(ik_ibz) = new%weights(iperm(ik_ibz))
- end do
- new%ibz = kord(:, 1:new%nibz)
- new%weights = wtk_folded(1:new%nibz)
+   ! Trasfer data.
+   ABI_MALLOC(kord, (3, new%nibz))
+   do ik_ibz=1,new%nibz
+     kord(:, ik_ibz) = new%ibz(:, iperm(ik_ibz))
+     wtk_folded(ik_ibz) = new%weights(iperm(ik_ibz))
+   end do
+   new%ibz = kord(:, 1:new%nibz)
+   new%weights = wtk_folded(1:new%nibz)
 
- ! Rearrange bz2ibz_smap as well.
- ABI_MALLOC(inv_iperm, (new%nibz))
- do ik_ibz=1,new%nibz
-   inv_iperm(iperm(ik_ibz)) =  ik_ibz
- end do
+   ! Rearrange bz2ibz_smap as well --> need the inverse of iperm.
+   ABI_MALLOC(inv_iperm, (new%nibz))
+   do ik_ibz=1,new%nibz
+     inv_iperm(iperm(ik_ibz)) = ik_ibz
+   end do
 
- do ik_bz=1,new%nbz
-   ik_ibz = new%bz2ibz_smap(1, ik_bz)
-   !new%bz2ibz_smap(1, ik_bz) = iperm(ik_ibz)
-   new%bz2ibz_smap(1, ik_bz) = inv_iperm(ik_ibz)
- end do
+   do ik_bz=1,new%nbz
+     ik_ibz = new%bz2ibz_smap(1, ik_bz)
+     new%bz2ibz_smap(1, ik_bz) = inv_iperm(ik_ibz)
+   end do
 
- ABI_FREE(inv_iperm)
- ABI_FREE(kord)
- ABI_FREE(iperm)
-#endif
+   ABI_FREE(inv_iperm)
+   ABI_FREE(kord)
+   ABI_FREE(iperm)
+ end if
 
  ABI_FREE(ibz2bz)
  ABI_FREE(wtk_folded)
@@ -395,7 +401,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
 
  ! Note use_symrec and timrev0
  call listkk(dksqmax, self%gmet, indkk, self%ibz, qpt, self%nibz, 1, self%nsym_lg, &
-    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, use_symrec=.True.)
+    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, exit_loop=.True., use_symrec=.True.)
 
  iq_ibz = indkk(1)
  if (dksqmax > tol12) iq_ibz = -1

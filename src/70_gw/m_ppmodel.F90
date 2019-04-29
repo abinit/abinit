@@ -640,14 +640,9 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
  do iq_ibz=1,dim_q
    !%if (keep_q(iq_ibz)) then
 #if 1
-   ABI_STAT_MALLOC(PPm%bigomegatwsq(iq_ibz)%vals, (PPm%npwc,PPm%dm2_botsq), ierr)
-   ABI_CHECK(ierr==0, "out of memory bigomegatwsq")
-   !
-   ABI_STAT_MALLOC(PPm%omegatw(iq_ibz)%vals, (PPm%npwc,PPm%dm2_otq), ierr)
-   ABI_CHECK(ierr==0, "out of memory omegatw")
-   !
-   ABI_STAT_MALLOC(PPm%eigpot(iq_ibz)%vals, (PPm%dm_eig,PPm%dm_eig), ierr)
-   ABI_CHECK(ierr==0, "out of memory eigpot")
+   ABI_MALLOC_OR_DIE(PPm%bigomegatwsq(iq_ibz)%vals, (PPm%npwc,PPm%dm2_botsq), ierr)
+   ABI_MALLOC_OR_DIE(PPm%omegatw(iq_ibz)%vals, (PPm%npwc,PPm%dm2_otq), ierr)
+   ABI_MALLOC_OR_DIE(PPm%eigpot(iq_ibz)%vals, (PPm%dm_eig,PPm%dm_eig), ierr)
    !%endif
 #else
    call ppm_mallocq(PPm,iq_ibz)
@@ -1159,9 +1154,7 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
      ABI_MALLOC(rwork,(3*PPm%npwc-2))
      ABI_MALLOC(eigvec,(PPm%npwc,PPm%npwc))
 
-     ABI_STAT_MALLOC(Adpp,(PPm%npwc*(PPm%npwc+1)/2), ierr)
-     ABI_CHECK(ierr==0, "out of memory in Adpp")
-
+     ABI_MALLOC_OR_DIE(Adpp,(PPm%npwc*(PPm%npwc+1)/2), ierr)
      write(std_out,*) 'in hermitian'
 
      idx=0
@@ -1397,8 +1390,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftf(2),ngfftf(3),'all')
  !
  ! === Calculate qratio(npwec,npvec) = (q+G).(q+Gp)/|q+G|^2 ===
- ABI_STAT_MALLOC(qratio,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in qratio")
+ ABI_MALLOC_OR_DIE(qratio,(npwc,npwc), ierr)
 
  call cqratio(npwc,gvec,qpt,gmet,gprimd,qratio)
  !
@@ -1418,8 +1410,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
  !
  ! Calculate the FFT index of each (G-Gp) vector and assign
  ! the value of the correspondent density simultaneously
- ABI_STAT_MALLOC(rhogg,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "out of memory rhogg")
+ ABI_MALLOC_OR_DIE(rhogg,(npwc,npwc), ierr)
 
  ierr=0
  do ig=1,npwc
@@ -1449,8 +1440,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
  ! unsymmetrized epsm1 -> epsm1=|q+Gp|/|q+G|*epsm1
  ABI_MALLOC(qplusg,(npwc))
  ABI_MALLOC(temp,(npwc,npwc))
- ABI_STAT_MALLOC(omegatwsq,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'out of memory in omegatwsq')
+ ABI_MALLOC_OR_DIE(omegatwsq,(npwc,npwc), ierr)
 
  temp = -epsm1(:,:)
  !
@@ -1626,8 +1616,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ABI_MALLOC(rhog_dp,(2,nfftf))
  ABI_MALLOC(rhog,(nfftf))
 
- ABI_STAT_MALLOC(rhogg,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "out of memory in rhogg")
+ ABI_MALLOC_OR_DIE(rhogg,(npwc,npwc), ierr)
  !
  ! === Compute the density in G space rhog(r)--> rho(G) ===
  ! FIXME this has to be fixed, rho(G) should be passed instead of doing FFT for each q
@@ -1662,8 +1651,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  end if
  !
  ! mm(G,Gp) = (q+G) \cdot (q+Gp) n(G-Gp)
- ABI_STAT_MALLOC(mm,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'out of memory in mm')
+ ABI_MALLOC_OR_DIE(mm,(npwc,npwc), ierr)
 
  do ig=1,npwc
    if (qiszero) then
@@ -1697,8 +1685,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ! Use only the static epsm1 i.e., only the w=0 part (eps(:,:,1,:))
  ABI_MALLOC(eigval,(npwc))
 
- ABI_STAT_MALLOC(eigvec,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'eigvec out of memory')
+ ABI_MALLOC_OR_DIE(eigvec,(npwc,npwc), ierr)
 
  ABI_MALLOC(zz,(npwc))
  zz=czero
@@ -1706,8 +1693,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ABI_MALLOC(qplusg,(npwc))
 
  ! Store the susceptibility matrix in upper mode before calling zhpev.
- ABI_STAT_MALLOC(matr,(npwc*(npwc+1)/2), ierr)
- ABI_CHECK(ierr==0, 'matr of memory')
+ ABI_MALLOC_OR_DIE(matr,(npwc*(npwc+1)/2), ierr)
 
  idx=1
  do ii=1,npwc
@@ -1886,8 +1872,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ABI_MALLOC(rhog_dp,(2,nfftf))
  ABI_MALLOC(rhog,(nfftf))
 
- ABI_STAT_MALLOC(rhogg,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'rhogg out of memory')
+ ABI_MALLOC_OR_DIE(rhogg,(npwc,npwc), ierr)
  !
  ! Conduct FFT tho(r)-->rhog(G)
  ! FIXME this has to be fixed, rho(G) should be passed instead of doing FFT for each q
@@ -1928,8 +1913,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ABI_FREE(rhog)
  !
  ! Now we have rhogg, calculate the M matrix (q+G1).(q+G2) n(G1-G2)
- ABI_STAT_MALLOC(mm,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'mm out of memory')
+ ABI_MALLOC_OR_DIE(mm,(npwc,npwc), ierr)
 
  do ig=1,npwc
    gpq(:)=gvec(:,ig)+qpt
@@ -1946,11 +1930,9 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  end do !ig
 
  !MG TODO too much memory in chi, we can do all this stuff inside a loop
- ABI_STAT_MALLOC(chitmp,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'chitmp out of memory')
+ ABI_MALLOC_OR_DIE(chitmp,(npwc,npwc), ierr)
 
- ABI_STAT_MALLOC(chi,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'chi out of memory')
+ ABI_MALLOC_OR_DIE(chi,(npwc,npwc), ierr)
 
  ABI_MALLOC(qplusg,(npwc))
  !
@@ -1974,14 +1956,9 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ! === Solve chi*X = Lambda M*X where Lambda=-1/em(q)**2 ===
  ABI_MALLOC(eigval,(npwc))
 
- ABI_STAT_MALLOC(eigvec,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "eigvec out-of-memory")
-
- ABI_STAT_MALLOC(mtemp,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "mtemp out-of-memory")
-
- ABI_STAT_MALLOC(chitmps,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "chitmps out-of-memory")
+ ABI_MALLOC_OR_DIE(eigvec,(npwc,npwc), ierr)
+ ABI_MALLOC_OR_DIE(mtemp,(npwc,npwc), ierr)
+ ABI_MALLOC_OR_DIE(chitmps,(npwc,npwc), ierr)
  !
  ! Copy chi and mm into working arrays
  chitmps(:,:)=chi(:,:)
@@ -1997,8 +1974,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ! === Calculate the plasmon pole parameters ===
  ABI_MALLOC(tmp1,(npwc))
 
- ABI_STAT_MALLOC(zz2,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "zz2 out-of-memory")
+ ABI_MALLOC_OR_DIE(zz2,(npwc,npwc), ierr)
  !
  ! good check:
  ! the lowest plasmon energy on gamma should be
@@ -2470,22 +2446,19 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
    ! Allocate memory if not done yet.
    if (PPm%bigomegatwsq_qbz_stat==PPM_ISPOINTER) then
       nullify(PPm%bigomegatwsq_qbz)
-      ABI_STAT_MALLOC(PPm%bigomegatwsq_qbz%vals, (PPm%npwc,PPm%dm2_botsq), ierr)
-      ABI_CHECK(ierr==0, "out of memory bigomegatwsq")
+      ABI_MALLOC_OR_DIE(PPm%bigomegatwsq_qbz%vals, (PPm%npwc,PPm%dm2_botsq), ierr)
       PPm%bigomegatwsq_qbz_stat=PPM_ISALLOCATED
    end if
 
    if (PPm%omegatw_qbz_stat==PPM_ISPOINTER) then
       nullify(PPm%omegatw_qbz)
-      ABI_STAT_MALLOC(PPm%omegatw_qbz%vals,(PPm%npwc,PPm%dm2_otq), ierr)
-      ABI_CHECK(ierr==0, "out of memory omegatw")
+      ABI_MALLOC_OR_DIE(PPm%omegatw_qbz%vals,(PPm%npwc,PPm%dm2_otq), ierr)
       PPm%omegatw_qbz_stat=PPM_ISALLOCATED
    end if
 
    if (PPm%eigpot_qbz_stat==PPM_ISPOINTER) then
      nullify(PPm%eigpot_qbz)
-     ABI_STAT_MALLOC(PPm%eigpot_qbz%vals,(PPm%dm_eig,PPm%dm_eig), ierr)
-     ABI_CHECK(ierr==0, "out of memory eigpot")
+     ABI_MALLOC_OR_DIE(PPm%eigpot_qbz%vals,(PPm%dm_eig,PPm%dm_eig), ierr)
      PPm%eigpot_qbz_stat=PPM_ISALLOCATED
    end if
    !
