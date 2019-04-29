@@ -1093,7 +1093,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
   integer :: ikpt,ikptb,ikptg,isppol
   integer :: my_nspinor,nband_k,nn,n1,n2,n3
   real(dp) :: deltab,deltag,ucvol
-  complex(dpc) :: IA,IB,t1A,t2A,t3A !,t1B,t2B,t3B,t4B
+  complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B
   character(len=500) :: message
   !arrays
   real(dp) :: cnum(2,3),dkb(3),dkg(3),gmet(3,3),gprimd(3,3),rmet(3,3)
