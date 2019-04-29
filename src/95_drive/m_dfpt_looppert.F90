@@ -1081,8 +1081,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
      MSG_ERROR(message)
    end if
-   ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in cg")
+   ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
    ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
@@ -1232,16 +1231,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      MSG_ERROR(message)
    end if
 
-   ABI_STAT_ALLOCATE(cgq,(2,mcgq), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in cgq")
+   ABI_MALLOC_OR_DIE(cgq,(2,mcgq), ierr)
    ABI_ALLOCATE(eigenq,(dtset%mband*nkpt_rbz*dtset%nsppol))
    if (.not.kramers_deg) then
-     !ABI_STAT_ALLOCATE(cg_pq,(2,mcgq), ierr)
-     !ABI_CHECK(ierr==0, "out-of-memory in cgmq")
+     !ABI_MALLOC_OR_DIE(cg_pq,(2,mcgq), ierr)
      !ABI_ALLOCATE(eigen_pq,(dtset%mband*nkpt_rbz*dtset%nsppol))
      mcgmq=mpw1_mq*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
-     ABI_STAT_ALLOCATE(cg_mq,(2,mcgmq), ierr)
-     ABI_CHECK(ierr==0, "out-of-memory in cgmq")
+     ABI_MALLOC_OR_DIE(cg_mq,(2,mcgmq), ierr)
      ABI_ALLOCATE(eigen_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
    end if
 
@@ -1317,7 +1313,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (dtset%efmas>0.and.icase==ipert_cnt) then
      eigen0_pert(:) = eigen0(:)
    end if
-   call wrtout(std_out,ch10//' dfpt_looppert: eigenq array',"COLL")
+   !call wrtout(std_out,ch10//' dfpt_looppert: eigenq array',"COLL")
    nkpt_eff=nkpt
    if( (dtset%prtvol==0.or.dtset%prtvol==1.or.dtset%prtvol==2) .and. nkpt>nkpt_max ) nkpt_eff=nkpt_max
    band_index=0
@@ -1429,12 +1425,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
      MSG_ERROR(message)
    end if
-   ABI_STAT_ALLOCATE(cg1,(2,mcg1), ierr)
-   ABI_CHECK(ierr==0, "out of memory in cg1")
+   ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    if (.not.kramers_deg) then
      mcg1mq=mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
-     ABI_STAT_ALLOCATE(cg1_mq,(2,mcg1mq), ierr)
-     ABI_CHECK(ierr==0, "out of memory in cg1_mq")
+     ABI_MALLOC_OR_DIE(cg1_mq,(2,mcg1mq), ierr)
    end if
 
    ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
@@ -1873,8 +1867,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        end if
        if (.not.associated(eigen1_pert)) then
          ABI_ALLOCATE(eigen1_pert,(2*dtset%mband**2*nkpt*dtset%nsppol,3,mpert))
-         ABI_STAT_ALLOCATE(cg1_pert,(2,mpw1*nspinor*dtset%mband*mk1mem_rbz*nsppol*dim_eig2rf,3,mpert),ierr)
-         ABI_CHECK(ierr==0, "out-of-memory in cg1_pert")
+         ABI_MALLOC_OR_DIE(cg1_pert,(2,mpw1*nspinor*dtset%mband*mk1mem_rbz*nsppol*dim_eig2rf,3,mpert),ierr)
          ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
          ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
          ABI_ALLOCATE(kpt_rbz_pert,(3,nkpt_rbz))
@@ -1961,8 +1954,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 #ifdef HAVE_NETCDF
      ! Reshape eigen1 into gkk for netCDF output
-     ABI_STAT_ALLOCATE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
-     ABI_CHECK(ierr==0, "out-of-memory in gkk")
+     ABI_MALLOC_OR_DIE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
      gkk(:,:,:,:,:) = zero
      mband = dtset%mband
      band_index = 0

@@ -216,6 +216,9 @@ MODULE m_crystal
    procedure :: adata_type
    ! Return atomic data from the itypat index.
 
+   !procedure :: compare => crystal_compare
+   ! Compare two structures, write warning messages if they differ
+
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
@@ -559,7 +562,7 @@ end subroutine crystal_free
 !!
 !! SOURCE
 
-subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
+subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -586,8 +589,8 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,msg,my_mode)
  do nu=1,3
    write(msg,'(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)')&
-    'R(',nu,')=',Cryst%rprimd(:,nu)+tol10,&
-    'G(',nu,')=',Cryst%gprimd(:,nu)+tol10 !tol10 is used to be consistent with metric.F90
+    'R(',nu,')=',Cryst%rprimd(:,nu)+tol10, &
+    'G(',nu,')=',Cryst%gprimd(:,nu)+tol10  ! tol10 is used to be consistent with metric.F90
    call wrtout(my_unt,msg,my_mode)
  end do
 

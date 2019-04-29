@@ -113,7 +113,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: jdichomax=20,level=111
- integer :: i1,i2,i3,ierr,iexit,ifft,ii,ir,iscf,jdicho
+ integer :: i1,i2,i3,ierr,ifft,ii,ir,iscf,jdicho
  integer :: me_fft,n1,n2,n3,nfftot,nproc_fft,prtvol
  real(dp),save :: cktf,fermie_tol,nelect_mid
  real(dp) :: dnelect_mid_dx,dxrtnewt,eektemp,eektf,feektemp,feektf
@@ -124,7 +124,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: betamumoinsV(:),rhor_mid(:),rhor_middx(:)
-!no_abirules
 
 ! *************************************************************************
 

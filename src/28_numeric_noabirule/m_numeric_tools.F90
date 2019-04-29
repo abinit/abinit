@@ -259,12 +259,12 @@ MODULE m_numeric_tools
 
  type,public :: vdiff_t
 
-   real(dp) :: int_adiff      ! \int |f1-f2| dr
-   real(dp) :: mean_adiff     ! Mean {|f1-f2|}
-   real(dp) :: stdev_adiff    ! Standard deviation of {|f1-f2|}
-   real(dp) :: min_adiff      ! Min {|f1-f2|}
-   real(dp) :: max_adiff      ! Max {|f1-f2|}
-   real(dp) :: l1_rerr        ! (\int |f1-f2| dr) / (\int |f2| dr)
+   real(dp) :: int_adiff = zero     ! \int |f1-f2| dr
+   real(dp) :: mean_adiff = zero    ! Mean {|f1-f2|}
+   real(dp) :: stdev_adiff = zero   ! Standard deviation of {|f1-f2|}
+   real(dp) :: min_adiff = zero     ! Min {|f1-f2|}
+   real(dp) :: max_adiff = zero     ! Max {|f1-f2|}
+   real(dp) :: l1_rerr = zero       ! (\int |f1-f2| dr) / (\int |f2| dr)
 
  end type vdiff_t
 
@@ -5444,6 +5444,7 @@ end subroutine rhophi
 !!  cplex=1 if f1 and f2 are real, 2 for complex.
 !!  nr=Number of points in the mesh.
 !!  f1(cplex,nr), f2(cplex,nr)=Vectors with values
+!!  [vd_max]= Compute max value of the different entries.
 !!
 !! OUTPUT
 !!  vdiff_t object
@@ -5452,14 +5453,13 @@ end subroutine rhophi
 !!
 !! SOURCE
 
-pure function vdiff_eval(cplex,nr,f1,f2,volume) result(vd)
-
+type(vdiff_t) function vdiff_eval(cplex, nr, f1, f2, volume, vd_max) result(vd)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nr
  real(dp),intent(in) :: volume
- type(vdiff_t) :: vd
+ type(vdiff_t),optional,intent(inout) :: vd_max
 !arrays
  real(dp),intent(in) :: f1(cplex,nr),f2(cplex,nr)
 
@@ -5498,6 +5498,15 @@ pure function vdiff_eval(cplex,nr,f1,f2,volume) result(vd)
  vd%stdev_adiff = stats%stdev
  vd%min_adiff = stats%min
  vd%max_adiff = stats%max
+
+ if (present(vd_max)) then
+   vd_max%int_adiff =   max(vd_max%int_adiff, vd%int_adiff)
+   vd_max%mean_adiff =  max(vd_max%mean_adiff, vd%mean_adiff)
+   vd_max%stdev_adiff = max(vd_max%stdev_adiff, vd%stdev_adiff)
+   vd_max%min_adiff =   max(vd_max%min_adiff, vd%min_adiff)
+   vd_max%max_adiff =   max(vd_max%max_adiff, vd%max_adiff)
+   vd_max%l1_rerr =     max(vd_max%l1_rerr, vd%L1_rerr)
+ end if
 
 end function vdiff_eval
 !!***
