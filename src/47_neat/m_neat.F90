@@ -19,8 +19,22 @@ module m_neat
   public :: neat_energies, neat_results_gs, neat_crystal, neat_start_iter
   public :: neat_open_gw_sigma_pert, neat_gw_sigma_pert_add_line, neat_finish_gw_sigma_pert
   public :: neat_etot_add_line, neat_open_etot, neat_finish_etot
-  public :: stream_string
+  public :: stream_string, enable_yaml
+
+  logical :: enable = .false., switch_lock = .false.
+
   contains
+
+  ! Can only be called once, then it lock. This is to prevent unconsistent
+  ! behaviour with activating and disabling on demand (the parser on the python
+  ! side won't like it)
+  subroutine enable_yaml(yes)
+    logical, intent(in) :: yes
+    if (.not. switch_lock) then
+      enable = yes
+      switch_lock = .true.
+    end if
+  end subroutine enable_yaml
 
   subroutine wrtout_stream(stream, iout)
     type(stream_string),intent(inout) :: stream
@@ -28,8 +42,10 @@ module m_neat
 
     character(len=stream%length) :: s
 
-    call stream%to_string(s)
-    call wrtout(iout, s, 'COLL')
+    if (enable) then
+      call stream%to_string(s)
+      call wrtout(iout, s, 'COLL')
+    endif
   end subroutine wrtout_stream
 
 !!***f* m_neat/neat_start_iter
