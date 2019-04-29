@@ -860,7 +860,8 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
 
  ! scale conversion from SI to atomic units,
  ! here \alpha^2 where \alpha is the fine structure constant
- scale_conversion = one/(InvFineStruct*InvFineStruct)
+ ! scale_conversion = one/(InvFineStruct*InvFineStruct)
+ scale_conversion = FineStructureConstant2
  ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
 
  if (nspinortot==1) then
@@ -872,12 +873,13 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
    ABI_ALLOCATE(gcwavef,(2,npw_k*ndat,3))
    ! ABI_ALLOCATE(lcwavef,(2,npw_k*ndat))
 !!$OMP PARALLEL DO
-   do idat=1,ndat
-     do ipw=1,npw_k
-        gcwavef(:,ipw+(idat-1)*npw_k,1:3)=zero
-       ! lcwavef(:,ipw+(idat-1)*npw_k)  =zero
-     end do
-   end do
+   ! do idat=1,ndat
+   !   do ipw=1,npw_k
+   !      gcwavef(:,ipw+(idat-1)*npw_k,1:3)=zero
+   !     ! lcwavef(:,ipw+(idat-1)*npw_k)  =zero
+   !   end do
+   ! end do
+   gcwavef = zero
 !    do idir=1,3
 !      gp2pi1=gprimd(idir,1)*two_pi
 !      gp2pi2=gprimd(idir,2)*two_pi
@@ -901,11 +903,12 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
          kg_k_vec(1:3) = kg_k(1:3,ipw)+kpt(1:3)
          kg_k_vec_cart(1:3) = MATMUL(gprimd,kg_k_vec)
          do idir = 1, 3
-            gcwavef(1,ipw+(idat-1)*npw_k,idir)= cwavef(1,ipw+(idat-1)*npw_k)*two_pi*kg_k_vec_cart(idir)
-            gcwavef(2,ipw+(idat-1)*npw_k,idir)= cwavef(2,ipw+(idat-1)*npw_k)*two_pi*kg_k_vec_cart(idir)
+            gcwavef(1,ipw+(idat-1)*npw_k,idir)= cwavef(1,ipw+(idat-1)*npw_k)*kg_k_vec_cart(idir)
+            gcwavef(2,ipw+(idat-1)*npw_k,idir)= cwavef(2,ipw+(idat-1)*npw_k)*kg_k_vec_cart(idir)
          end do
       end do
    end do
+   gcwavef = gcwavef*two_pi
          
    !  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
    ! step 2 is not relevant for vectornd because no Laplacian term
@@ -926,9 +929,13 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
 &     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
      do idat=1,ndat
-       do ipw=1,npw_k
-         ghc_vectornd(:,ipw+(idat-1)*npw_k)=ghc_vectornd(:,ipw+(idat-1)*npw_k)+scale_conversion*ghc1(:,ipw+(idat-1)*npw_k)
-       end do
+        call DAXPY(npw_k,scale_conversion,ghc1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
+             & ghc_vectornd(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
+        call DAXPY(npw_k,scale_conversion,ghc1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
+             & ghc_vectornd(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
+       ! do ipw=1,npw_k
+       !   ghc_vectornd(:,ipw+(idat-1)*npw_k)=ghc_vectornd(:,ipw+(idat-1)*npw_k)+scale_conversion*ghc1(:,ipw+(idat-1)*npw_k)
+       ! end do
      end do
    end do ! idir
    ABI_DEALLOCATE(gcwavef)

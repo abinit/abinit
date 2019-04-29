@@ -3089,9 +3089,6 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
             &           prtvol,sij_opt,tim_getghc,type_calc)
        eeig(nn,ikpt) = DOT_PRODUCT(cwavef(1,1:npw_k),ghc(1,1:npw_k)) &
             &           + DOT_PRODUCT(cwavef(2,1:npw_k),ghc(2,1:npw_k))
-
-       write(std_out,'(a,i4,i4,es16.8)')'JWZ debug ikpt nn ENK ',ikpt,nn,eeig(nn,ikpt)
-
     end do
 
     icg = icg + npw_k*nband_k
