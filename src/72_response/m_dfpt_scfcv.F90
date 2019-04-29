@@ -384,7 +384,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !scalars
  integer,parameter :: level=12,response=1
  integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
- integer :: has_dijfr,has_diju,iatom,ider,idir_dum,idir_paw1,ierr,iexit,errid,denpot
+ integer :: has_dijfr,has_diju,iatom,ider,idir_dum,idir_paw1,ierr,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,istep_fock_outer,istep_mix,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
@@ -3638,7 +3638,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer,parameter :: level=17
  integer :: bd2tot_index,bdtot_index,buffer_size,counter,cplex_rhoij
  integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq
- integer :: icg,icgq,ider,idir0,ierr,iexit,ii,ikg,ikg1,ikpt,ilm,ilmn,indx
+ integer :: icg,icgq,ider,idir0,ierr,ii,ikg,ikg1,ikpt,ilm,ilmn,indx
  integer :: ispden,isppol,istr,istwf_k
  integer :: mbd2kpsp,mcgq,mcgq_disk,mcprjq,mcprjq_disk
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,npw1_k,npw_k,nspden_rhoij
@@ -4299,7 +4299,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=18
- integer :: berryopt,counter,iband,iexit,ii,indx,iorder_cprj
+ integer :: berryopt,counter,iband,ii,indx,iorder_cprj
  integer :: ipw,me,nkpt_max,optlocal,optnl,opt_accrho,opt_corr
  integer :: opt_gvnlx1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
  real(dp) :: dotr,lambda,wtband
@@ -4315,8 +4315,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !Check arguments validity
  if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4.and.ipert/=gs_hamkq%natom+5) then !SPr rfmagn deb
-   msg='  wrong ipert argument !'
-   MSG_BUG(msg)
+   MSG_BUG('wrong ipert argument !')
  end if
  if (cplex/=1) then
    MSG_BUG('wrong cplex/=1 argument !')

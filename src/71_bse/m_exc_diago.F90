@@ -319,11 +319,9 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  call wrtout(std_out,msg,"COLL")
  call wrtout(ab_out,msg,"COLL")
 
- ABI_STAT_MALLOC(exc_ene,(exc_size), ierr)
- ABI_CHECK(ierr==0, 'out of memory: excitonic eigenvalues')
+ ABI_MALLOC_OR_DIE(exc_ene,(exc_size), ierr)
 
- ABI_STAT_MALLOC(exc_ene_c,(exc_size), ierr)
- ABI_CHECK(ierr==0,'out of memory: excitonic complex eigenvalues')
+ ABI_MALLOC_OR_DIE(exc_ene_c,(exc_size), ierr)
 
  do_ep_renorm = .FALSE.
  ntemp = 1
@@ -353,12 +351,10 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    write(msg,'(a,f8.1,a)')' Allocating excitonic hamiltonian.  Memory required: ',exc_size**2*dpc*b2Mb,' Mb.'
    call wrtout(std_out,msg,"COLL",do_flush=.True.)
 
-   ABI_STAT_MALLOC(exc_mat,(exc_size,exc_size), ierr)
-   ABI_CHECK(ierr==0, 'out of memory: excitonic hamiltonian')
+   ABI_MALLOC_OR_DIE(exc_mat,(exc_size,exc_size), ierr)
 
    if (do_ep_renorm) then
-     ABI_STAT_MALLOC(exc_vl,(exc_size,exc_size),ierr)
-     ABI_CHECK(ierr==0,'out of memory for left eigenvectors !')
+     ABI_MALLOC_OR_DIE(exc_vl,(exc_size,exc_size),ierr)
    end if
    !exc_mat = HUGE(zero)
    !
@@ -461,8 +457,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
      else
        call wrtout(std_out," Partial diagonalization with XHEEVX... ","COLL")
        abstol=zero; il=1; iu=nstates
-       ABI_STAT_MALLOC(exc_vec,(exc_size,nstates),ierr)
-       ABI_CHECK(ierr==0,"out of memory in exc_vec")
+       ABI_MALLOC_OR_DIE(exc_vec,(exc_size,nstates),ierr)
        call xheevx("Vectors","Index","Upper",exc_size,exc_mat,vl,vu,il,iu,abstol,mene_found,exc_ene,exc_vec,exc_size)
        exc_mat(:,1:nstates) = exc_vec
        exc_ene_c(:) = exc_ene(:)
@@ -906,8 +901,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  write(msg,'(a,f9.2,a)')' Allocating full excitonic Hamiltonian. Memory requested: ',bsize_ham*b2Gb,' Gb. '
  call wrtout(std_out,msg,"COLL")
 
- ABI_STAT_MALLOC(exc_ham,(exc_size,exc_size), ierr)
- ABI_CHECK(ierr==0, 'out of memory: full excitonic hamiltonian')
+ ABI_MALLOC_OR_DIE(exc_ham,(exc_size,exc_size), ierr)
 
  write(msg,'(3a,f8.1,3a,f8.1,a)')&
 &  ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
@@ -915,8 +909,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 &  ' Memory-space requested: ',bsize_ham*b2Gb,' Gb. '
  call wrtout(std_out,msg,"COLL")
 
- ABI_STAT_MALLOC(exc_ene,(exc_size), ierr)
- ABI_CHECK(ierr==0, 'out of memory: exc_ene')
+ ABI_MALLOC_OR_DIE(exc_ene,(exc_size), ierr)
 
  if (BS_files%in_hreso /= BSE_NOFILE) then
    hreso_fname = BS_files%in_hreso
@@ -994,8 +987,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  ! ======================================================
  ! ==== Calculate right eigenvectors and eigenvalues ====
  ! ======================================================
- ABI_STAT_MALLOC(exc_rvect,(exc_size,exc_size), ierr)
- ABI_CHECK(ierr==0, "out of memory: excitonic eigenvectors")
+ ABI_MALLOC_OR_DIE(exc_rvect,(exc_size,exc_size), ierr)
 
  if (do_full_diago) then
    call wrtout(std_out,"Complete direct diagonalization with xgeev...","COLL")
@@ -1049,8 +1041,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  ABI_FREE(exc_ene)
 
- ABI_STAT_MALLOC(ovlp,(nstates,nstates), ierr)
- ABI_CHECK(ierr==0, 'out of memory in ovlp matrix')
+ ABI_MALLOC_OR_DIE(ovlp,(nstates,nstates), ierr)
 
  call wrtout(std_out,' Calculating overlap matrix... ',"COLL")
 
@@ -1205,8 +1196,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  if (.not.use_scalapack .and. my_rank/=master) GOTO 10
 
- ABI_STAT_MALLOC(exc_ene,(exc_size), ierr)
- ABI_CHECK(ierr==0, 'out of memory: exc_ene')
+ ABI_MALLOC_OR_DIE(exc_ene,(exc_size), ierr)
 
  SELECT CASE (use_scalapack)
 
@@ -1219,11 +1209,9 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    write(msg,'(a,f9.2,a)')' Allocating full excitonic Hamiltonian. Memory requested: ',2*bsize_ham*b2Gb,' Gb. '
    call wrtout(std_out,msg,"COLL")
 
-   ABI_STAT_MALLOC(exc_ham,(exc_size,exc_size), ierr)
-   ABI_CHECK(ierr==0, 'out of memory: full excitonic hamiltonian')
+   ABI_MALLOC_OR_DIE(exc_ham,(exc_size,exc_size), ierr)
 
-   ABI_STAT_MALLOC(fmat,(exc_size,exc_size), ierr)
-   ABI_CHECK(ierr==0, 'out of memory: fmat')
+   ABI_MALLOC_OR_DIE(fmat,(exc_size,exc_size), ierr)
 
    write(msg,'(3a,f8.1,3a,f8.1,a)')&
 &    ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
@@ -1288,8 +1276,7 @@ write(666)exc_ham
      call xhegv(itype,"Vectors","Upper",exc_size,fmat,exc_ham,exc_ene)
    else
      call wrtout(std_out," Partial diagonalization with XHEGVX... ","COLL")
-     ABI_STAT_MALLOC(exc_rvect,(exc_size,nstates), ierr)
-     ABI_CHECK(ierr==0, "out of memory: excitonic eigenvectors")
+     ABI_MALLOC_OR_DIE(exc_rvect,(exc_size,nstates), ierr)
      il=1; iu=1; abstol=zero
      call xhegvx(itype,"Vectors","All","Upper",exc_size,fmat,exc_ham,vl,vu,il,iu,abstol,neig_found,exc_ene,exc_rvect,exc_size)
    end if
@@ -1322,8 +1309,7 @@ write(666)exc_ham
    write(888)exc_ene
 #endif
 
-   ABI_STAT_MALLOC(ovlp,(nstates,nstates), ierr)
-   ABI_CHECK(ierr==0, 'out of memory in ovlp matrix')
+   ABI_MALLOC_OR_DIE(ovlp,(nstates,nstates), ierr)
 
    call wrtout(std_out,' Calculating overlap matrix...',"COLL")
 
@@ -1416,8 +1402,7 @@ write(668,*)ovlp
    ABI_CHECK_MPI(mpi_err,"MPI_TYPE_FREE")
    !
    ! Read my portion of the R,-R* sublocks and store the values in a temporary buffer.
-   ABI_STAT_MALLOC(tmp_cbuffer,(my_nel), ierr)
-   ABI_CHECK(ierr==0, " out of memory tmp_cbuffer")
+   ABI_MALLOC_OR_DIE(tmp_cbuffer,(my_nel), ierr)
 
    call xmpi_barrier(comm)
 
@@ -1480,8 +1465,7 @@ write(668,*)ovlp
    ABI_CHECK_MPI(mpi_err,"MPI_TYPE_FREE")
    !
    ! Read my portion of the C-C* blocks and store the values in a temporary buffer.
-   ABI_STAT_MALLOC(tmp_cbuffer,(my_nel), ierr)
-   ABI_CHECK(ierr==0, " out of memory tmp_cbuffer")
+   ABI_MALLOC_OR_DIE(tmp_cbuffer,(my_nel), ierr)
 
    call MPI_FILE_READ_ALL(mpi_fh, tmp_cbuffer, my_nel, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpi_err)
    ABI_CHECK_MPI(mpi_err,"READ_ALL")

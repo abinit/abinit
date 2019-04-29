@@ -488,7 +488,7 @@ All the independent perturbations are available
  Interpolation of the electron-phonon coupling potential
 
  From coarse q-mesh: [2,2,2] to: [8,8,8]
- Number of q-points found in input DVDB 3
+ Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 26
 Interpolation of the electron-phonon coupling potential completed
 
@@ -602,7 +602,7 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Number of bands in e-ph self-energy sum: 4
- From bmin: 2 to bmax: 5
+ From bsum_start: 2 to bsum_stop: 5
  Symsigma: 1 Timrev: 1
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Tetrahedron method
@@ -626,10 +626,13 @@ All the independent perturbations are available
    5     1  [-2.5000E-01,  1.2500E-01,  0.0000E+00]   4    4
    6     1  [-1.2500E-01,  1.2500E-01,  0.0000E+00]   4    4
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 2 up to my_bstop: 5
+P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 29 of 29
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -668,8 +671,8 @@ K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 ============================================================================================
 K-point: [ 1.2500E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.343    0.898      0.4    0.000
-   4  -0.343    0.898      0.4    0.000
+   3  -0.343    0.899      0.4    0.000
+   4  -0.343    0.899      0.4    0.000
 ============================================================================================
 K-point: [-2.5000E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS

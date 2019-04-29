@@ -523,26 +523,25 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
    !eph_doublegrid%bz2lgkibz(:)=indkk(:,1)
    do ii=1,self%nbz
       if (indkk(ii,1).ne.eph_doublegrid%bz2lgkibz(ii)) then
-        write(*,*) ii
-        write(*,*) eph_doublegrid%kpts_dense(:,ii)
-        write(*,*) ii, '-->', indkk(ii,1)
-        write(*,*) self%lgk%ibz(:,indkk(ii,1)), indkk(ii,2), indkk(ii,6)
+        write(std_out,*) ii
+        write(std_out,*) eph_doublegrid%kpts_dense(:,ii)
+        write(std_out,*) ii, '-->', indkk(ii,1)
+        write(std_out,*) self%lgk%ibz(:,indkk(ii,1)), indkk(ii,2), indkk(ii,6)
         !check listkk stuff
         kpt = (1-2*indkk(ii,6))*matmul(transpose(cryst%symrel(:,:,indkk(ii,2))),self%lgk%ibz(:,indkk(ii,1)))
         call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
         call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
         call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
-        write(*,*) wrap_kpt
-
-        write(*,*) ii, '-->', eph_doublegrid%bz2lgkibz(ii)
-        write(*,*) self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)), mapping(ii,1), mapping(ii,2)
+        write(std_out,*) wrap_kpt
+        write(std_out,*) ii, '-->', eph_doublegrid%bz2lgkibz(ii)
+        write(std_out,*) self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)), mapping(ii,1), mapping(ii,2)
         !check double grid stuff
         kpt = (1-2*mapping(ii,2))*matmul(transpose(cryst%symrel(:,:,mapping(ii,1))),self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)))
         call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
         call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
         call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
-        write(*,*) wrap_kpt
-        write(*,*)
+        write(std_out,*) wrap_kpt
+        write(std_out,*)
       end if
       ABI_CHECK(indkk(ii,1)==eph_doublegrid%bz2lgkibz(ii),'Unmatching indexes')
    enddo

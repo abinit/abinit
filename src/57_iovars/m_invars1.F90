@@ -2476,6 +2476,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtvpsp=0
    dtsets(idtset)%prtwant=0
    dtsets(idtset)%prtwf=1; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
+   !if (dtset%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    dtsets(idtset)%prtwf_full=0
    dtsets(idtset)%prtxml = 0
    do ii=1,dtsets(idtset)%natom,1
@@ -2643,12 +2644,12 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%bs_freq_mesh = [zero,zero,0.01_dp/Ha_eV]
 
 !  Interpolation
-   dtsets(idtset)%bs_interp_method=1 ! YG interpolation
-   dtsets(idtset)%bs_interp_mode=0 ! No interpolation
-   dtsets(idtset)%bs_interp_prep=0 ! Do not prepare interp
-   dtsets(idtset)%bs_interp_kmult=(/zero,zero,zero/)
-   dtsets(idtset)%bs_interp_m3_width=one
-   dtsets(idtset)%bs_interp_rl_nb=1
+   dtsets(idtset)%bs_interp_method = 1 ! YG interpolation
+   dtsets(idtset)%bs_interp_mode = 0 ! No interpolation
+   dtsets(idtset)%bs_interp_prep = 0 ! Do not prepare interp
+   dtsets(idtset)%bs_interp_kmult = 0
+   dtsets(idtset)%bs_interp_m3_width = one
+   dtsets(idtset)%bs_interp_rl_nb = 1
 
 !  END VARIABLES FOR @Bethe-Salpeter.
 

@@ -106,7 +106,6 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  use m_abicore
  use m_errors
  use m_sort
- !use m_time
 
 !Arguments -------------------------------
 !scalars

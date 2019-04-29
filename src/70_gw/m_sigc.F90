@@ -550,8 +550,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
  if ( ANY(mod10== [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
    if (.not.(mod10==SIG_GW_CD.and.Er%mqmem==0)) then
-     ABI_STAT_MALLOC(epsm1_qbz, (npwc, npwc, Er%nomega), ierr)
-     ABI_CHECK(ierr==0, "out-of-memory in epsm1_qbz")
+     ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, Er%nomega), ierr)
    end if
  end if
 
@@ -559,8 +558,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! the Hermitian and the anti-Hermitian part have to be symmetrized in a different way.
  !if (mod10==SIG_QPGW_CD) then
  if (mod10==SIG_QPGW_CD) then
-   ABI_STAT_MALLOC(epsm1_trcc_qbz, (npwc, npwc, Er%nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in epsm1_trcc_qbz")
+   ABI_MALLOC_OR_DIE(epsm1_trcc_qbz, (npwc, npwc, Er%nomega), ierr)
    ABI_MALLOC(epsm1_tmp, (npwc, npwc))
  end if
 
