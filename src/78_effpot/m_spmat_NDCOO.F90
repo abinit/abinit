@@ -57,7 +57,7 @@ module m_spmat_NDCOO
      procedure :: get_ind_inz
      procedure :: get_ind
      procedure :: group_by_1dim
-     procedure :: mv
+     procedure :: mv1vec
      procedure :: print
   end type ndcoo_mat_t
 
@@ -254,14 +254,14 @@ contains
   end subroutine print
 
   ! matrix vector product. 
-  subroutine mv(self, vec, i, res)
+  subroutine mv1vec(self, vec, i, res)
     class(ndcoo_mat_t), intent(inout) :: self
     real(dp), intent(in) :: vec(:)
     integer ,intent(in) :: i               !
     class(ndcoo_mat_t), intent(inout) :: res ! result
     integer :: iind
     !TODO: to be implemented
-  end subroutine mv
+  end subroutine mv1vec
 
   ! matrix vector vector  product. matrix should be dim3.
   ! n(vector)=ndim-1
