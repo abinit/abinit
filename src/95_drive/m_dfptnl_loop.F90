@@ -245,6 +245,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat
+ logical :: non_magnetic_xc
  real(dp) :: dummy_real,ecut_eff
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fnamewff(5)
@@ -367,7 +368,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    call paw_ij_nullify(paw_ij1_i2pert)
 
    has_dijfr=1
-   has_diju=0; if(dtset%usepawu==5.or.dtset%usepawu==6) has_diju=1
+   has_diju=merge(0,1,dtset%usepawu==0)
 
    call paw_an_init(paw_an1_i2pert,dtset%natom,dtset%ntypat,0,0,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,&
@@ -386,6 +387,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  end if ! PAW
 
  n3xccc=0;if(psps%n1xccc/=0)n3xccc=nfftf
+ non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
 !Loop over the perturbations j1, j2, j3
 
@@ -620,7 +622,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                    option=1;optene=0
                    call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,&
 &                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
-&                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,&
+&                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,non_magnetic_xc,optene,option,dtset%paral_kgb,&
 &                   dtset%qptn,rhog,rho2g1,rhor,rho2r1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_i2pert,&
 &                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot)
 

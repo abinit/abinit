@@ -21,9 +21,6 @@
 
 subroutine xmpi_max_int0d_i4b(xval,xmax,comm,ier)
 
-
- implicit none
-
 !Arguments-------------------------
  integer ,intent(in) :: xval
  integer, intent(out) :: xmax
@@ -64,9 +61,6 @@ end subroutine xmpi_max_int0d_i4b
 
 subroutine xmpi_max_int0d_i8b(xval,xmax,comm,ier)
 
-
- implicit none
-
 !Arguments-------------------------
  integer(i8b) ,intent(in) :: xval
  integer(i8b), intent(out) :: xmax
@@ -100,8 +94,6 @@ end subroutine xmpi_max_int0d_i8b
 !! SOURCE
 
 subroutine xmpi_max_int(xval,xmax,comm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
@@ -152,8 +144,6 @@ end subroutine xmpi_max_int
 
 subroutine xmpi_max_dpv(xval,xmax,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp),intent(in) :: xval
  real(dp),intent(out) :: xmax
@@ -199,8 +189,6 @@ end subroutine xmpi_max_dpv
 !! SOURCE
 
 subroutine xmpi_max_dp0d_ip(ioval,comm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp),intent(inout) :: ioval

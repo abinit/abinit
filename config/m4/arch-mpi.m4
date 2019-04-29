@@ -313,6 +313,66 @@ AC_DEFUN([_ABI_MPI_CHECK_CREATE_TYPE_STRUCT],[
 
                     ########################################
 
+# _ABI_MPI_CHECK_IBCAST()
+# -----------------------------------
+#
+# Checks whether the MPI library supports MPI_IBCAST (MPI3)
+#
+AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
+  dnl Set default values
+  abi_mpi_ibcast_ok="no"
+
+  dnl Try to compile a Fortran program
+  AC_MSG_CHECKING([whether the MPI library supports MPI_IBCAST (MPI3)])
+
+  dnl We assume a MPI implementation that provides the mpi module
+
+  dnl Back-up build environment
+  ABI_ENV_BACKUP
+                                                                                            
+  dnl Prepare build environment
+  CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+  LDFLAGS="${FC_LDFLAGS}"
+  LIBS="${FC_LIBS} ${lib_mpi_libs}"
+
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[  
+      use mpi
+
+      integer,parameter :: siz=5
+      integer :: buffer(siz)
+      integer :: comm, root, request, ierr
+
+      ! Prototype
+      !  MPI_IBCAST(buffer, count, datatype, root, comm, request, ierr)
+      !  INOUT buffer	starting address of buffer (choice)
+      !  IN count	number of entries in buffer (non-negative integer)
+      !  IN datatype	data type of buffer (handle)
+      !  IN root	rank of broadcast root (integer)
+      !  IN comm	communicator (handle)
+      !  OUT request	communication request (handle)
+
+      call MPI_IBCAST(buffer, siz, MPI_INTEGER, root, comm, request, ierr) 
+
+    ]])], [abi_mpi_ibcast_ok="yes"], [abi_mpi_ibcast_ok="no"])
+  AC_LANG_POP
+                                                                                            
+  dnl Restore build environment
+  ABI_ENV_RESTORE
+
+  AC_MSG_RESULT([${abi_mpi_ibcast_ok}])
+
+  if test "${abi_mpi_ibcast_ok}" = "yes"; then
+    AC_DEFINE([HAVE_MPI_IBCAST],1,
+      [Define to 1 if your MPI library supports MPI_IBCAST.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
+  fi
+
+]) # _ABI_MPI_CHECK_IBCAST     
+
+                    ########################################
 
 # _ABI_MPI_CHECK_IALLTOALL()
 # -----------------------------------
@@ -365,6 +425,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALL],[
   if test "${abi_mpi_ialltoall_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IALLTOALL],1,
       [Define to 1 if your MPI library supports MPI_IALLTOALL.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IALLTOALL     
@@ -424,6 +486,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALLV],[
   if test "${abi_mpi_ialltoallv_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IALLTOALLV],1,
       [Define to 1 if your MPI library supports MPI_IALLTOALLV.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IALLTOALLV
@@ -461,12 +525,16 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
       integer,parameter :: siz=5,group_size=3
       integer :: SENDBUF(siz), RECVBUF(siz)
-      integer :: SENDCOUNTS(group_size),  SDISPLS(group_size), RECVCOUNTS(group_size),RDISPLS(group_size)
-      integer :: SENDTYPE, RECVTYPE
-      integer :: COMM, REQUEST, IERROR
+      integer :: SDISPLS(group_size), RECVCOUNTS(group_size),RDISPLS(group_size)
+      integer :: SENDCOUNTS, SENDTYPE, RECVTYPE
+      integer :: ROOT=0, COMM, REQUEST, IERROR
 
       call MPI_IGATHERV(SENDBUF,SENDCOUNTS,SENDTYPE,&
-        RECVBUF,RECVCOUNTS,RDISPLS,RECVTYPE,0,COMM,REQUEST,IERR)
+        RECVBUF,RECVCOUNTS,RDISPLS,RECVTYPE,ROOT,COMM,REQUEST,IERROR)
+
+      !int MPI_Igatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf,
+      !                 const int recvcounts[], const int displs[], MPI_Datatype recvtype, int root,
+      !                 MPI_Comm comm, MPI_Request * request)
 
     ]])], [abi_mpi_igatherv_ok="yes"], [abi_mpi_igatherv_ok="no"])
   AC_LANG_POP
@@ -479,6 +547,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
   if test "${abi_mpi_igatherv_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IGATHERV],1,
       [Define to 1 if your MPI library supports MPI_IGATHERV.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IGATHERV
@@ -535,6 +605,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE],[
   if test "${abi_mpi_iallreduce_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IALLREDUCE],1,
       [Define to 1 if your MPI library supports MPI_IALLREDUCE.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IALLREDUCE     
@@ -933,6 +1005,7 @@ AC_DEFUN([ABI_MPI_DETECT],[
       _ABI_MPI_CHECK_CREATE_TYPE_STRUCT()
 
       dnl Check MPI3 extensions (very) important for HPC.
+      _ABI_MPI_CHECK_IBCAST()
       _ABI_MPI_CHECK_IALLTOALL()
       _ABI_MPI_CHECK_IALLTOALLV()
       _ABI_MPI_CHECK_IGATHERV()

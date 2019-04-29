@@ -60,6 +60,7 @@ module m_effective_potential
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc, dfpt_phfrq
+
  implicit none
 
  public :: effective_potential_distributeResidualForces
@@ -627,7 +628,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  integer :: ia,i1,i2,i3,ii,ierr,irpt,irpt2,irpt_ref,min1,min2,min3
  integer :: min1_cell,min2_cell,min3_cell,max1_cell,max2_cell,max3_cell
  integer :: max1,max2,max3,my_rank,natom_uc
- integer :: nproc,second_coordinate,size,sumg0
+ integer :: nproc,second_coordinate,size_tmp,sumg0
  integer :: my_nrpt,nrpt_alone
  real(dp) :: ucvol
  character(len=500) :: msg
@@ -642,6 +643,9 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
  type(supercell_type) :: supercell
  type(ifc_type) :: ifc_tmp
+ integer, allocatable :: full_cell(:,:)
+ integer :: full_nrpt
+ real(dp), allocatable :: full_cell_atmfrc(:,:,:,:,:), full_cell_short_atmfrc(:,:,:,:,:), full_cell_ewald_atmfrc(:,:,:,:,:)
 
 ! *************************************************************************
 
@@ -685,6 +689,10 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  max1 = maxval(eff_pot%harmonics_terms%ifcs%cell(1,:))
  max2 = maxval(eff_pot%harmonics_terms%ifcs%cell(2,:))
  max3 = maxval(eff_pot%harmonics_terms%ifcs%cell(3,:))
+   write(msg,'(5a,2I3,a,2I3,a,2I3,a)') ch10,' Bound for ifc SR:',&
+&    ch10,ch10, " x=[",min1,max1,"], y=[",min2,max2,"] and z=[",min3,max3,"]"
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
  if(option==0) then
    if(((max1-min1+1)/=ncell(1).and.&
@@ -725,6 +733,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    min2_cell = 0; max2_cell = 0
    min3_cell = 0; max3_cell = 0
 
+   ! ncell
    call findBound_supercell(min1_cell,max1_cell,ncell(1))
    call findBound_supercell(min2_cell,max2_cell,ncell(2))
    call findBound_supercell(min3_cell,max3_cell,ncell(3))
@@ -734,48 +743,49 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
 
-!  Generate new bound
-   if(option==1)then
-     if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
-&        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
-&        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(msg, '(6a,3I4,3a)' )ch10,&
-&        ' --- !WARNING',ch10,&
-&        '     The range of the dipole-dipole interaction is the same than the short-range.',ch10,&
-&        '     So the range of the total ifc is ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
-&        ' ---'
-       call wrtout(std_out,msg,"COLL")
-       if (abs(min1) < abs(min1_cell)) min1 = min1_cell
-       if (abs(min2) < abs(min2_cell)) min2 = min2_cell
-       if (abs(min3) < abs(min3_cell)) min3 = min3_cell
-       if (abs(max1) < abs(max1_cell)) max1 = max1_cell
-       if (abs(max2) < abs(max2_cell)) max2 = max2_cell
-       if (abs(max3) < abs(max3_cell)) max3 = max3_cell
-!      If the cell is smaller, we redifine new cell to take into acount all atoms
-       call destroy_supercell(supercell)
-       call init_supercell(natom_uc,(/(max1-min1+1),0,0,  0,(max2-min2+1),0,  0,0,(max3-min3+1)/),&
-&                          eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
-&                          eff_pot%crystal%xcart,eff_pot%crystal%znucl,supercell)
-
-!      Store the information of the supercell of the reference structure into effective potential
-       call effective_potential_setSupercell(eff_pot,comm,supercell=supercell)
-     else
-       min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
-       max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
-     end if
-   end if
+!!  Generate new bound
+!   !if(option==1)then
+!     ! If NGQPT > NCELL "=" dipdip range
+!     !if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
+!&    !    (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
+!&    !    (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
+!     !  write(msg, '(6a,3I4,3a)' )ch10,&
+!&    !    ' --- !WARNING',ch10,&
+!&    !    '     The range of the dipole-dipole interaction is the same than the short-range.',ch10,&
+!&    !    '     So the range of the total ifc is ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
+!&    !    ' ---'
+!     !  call wrtout(std_out,msg,"COLL")
+!     !  if (abs(min1) < abs(min1_cell)) min1 = min1_cell
+!     !  if (abs(min2) < abs(min2_cell)) min2 = min2_cell
+!     !  if (abs(min3) < abs(min3_cell)) min3 = min3_cell
+!     !  if (abs(max1) < abs(max1_cell)) max1 = max1_cell
+!     !  if (abs(max2) < abs(max2_cell)) max2 = max2_cell
+!     !  if (abs(max3) < abs(max3_cell)) max3 = max3_cell
+!!    !  If the cell is smaller, we redifine new cell to take into acount all atoms
+!     !  call destroy_supercell(supercell)
+!     !  call init_supercell(natom_uc,(/(max1-min1+1),0,0,  0,(max2-min2+1),0,  0,0,(max3-min3+1)/),&
+!&    !                      eff_pot%crystal%rprimd,eff_pot%crystal%typat,&
+!&    !                      eff_pot%crystal%xcart,eff_pot%crystal%znucl,supercell)
+!
+!!    !  Store the information of the supercell of the reference structure into effective potential
+!     !  call effective_potential_setSupercell(eff_pot,comm,supercell=supercell)
+!     !else
+!     !  min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
+!     !  max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
+!     !end if
+!   !end if
 
 !  Print the new boundary
-   write(msg,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' New bound for ifc (long+short):',&
-&    ch10,ch10, " x=[",min1,max1,"], y=[",min2,max2,"] and z=[",min3,max3,"]",ch10,ch10,&
+   write(msg,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' Bound for ifc (LR):',&
+&    ch10,ch10, " x=[",min1_cell,max1_cell,"], y=[",min2_cell,max2_cell,"] and z=[",min3_cell,max3_cell,"]",ch10,ch10,&
 &    " Computation of new dipole-dipole interaction."
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
 
 !  Count the new number of ifc
-   do i1=min1,max1
-     do i2=min2,max2
-       do i3=min3,max3
+   do i1=min1_cell,max1_cell
+     do i2=min2_cell,max2_cell
+       do i3=min3_cell,max3_cell
          irpt = irpt +1
          if(i1==0.and.i2==0.and.i3==0) irpt_ref = irpt
        end do
@@ -825,9 +835,9 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 
    irpt = 0
    ii = 0
-   do i1=min1,max1
-     do i2=min2,max2
-       do i3=min3,max3
+   do i1=min1_cell,max1_cell
+     do i2=min2_cell,max2_cell
+       do i3=min3_cell,max3_cell
          ii = ii +1
          ifc_tmp%cell(1,ii) = i1; ifc_tmp%cell(2,ii) = i2; ifc_tmp%cell(3,ii) = i3;
          if(any(my_irpt==ii))then
@@ -914,37 +924,74 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
      bufdisp(ii) = bufdisp(ii-1) + bufsize(ii-1)
    end do
 
-   size = 3*natom_uc*3*natom_uc*my_nrpt
-   call xmpi_allgatherv(buff_ewald(1,:,:,:,:,:),size,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
+   size_tmp = 3*natom_uc*3*natom_uc*my_nrpt
+   call xmpi_allgatherv(buff_ewald(1,:,:,:,:,:),size_tmp,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
 
    ABI_DEALLOCATE(bufsize)
    ABI_DEALLOCATE(bufdisp)
    ABI_DEALLOCATE(buff_ewald)
 
 !  Fill the short range part (calculated previously) only master
-   if(iam_master)then
-     do irpt=1,ifc_tmp%nrpt
-       do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
-         if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
-&           eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
-&           eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
-&           any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)) > tol20)) then
-           ifc_tmp%short_atmfrc(:,:,:,:,irpt) = &
-&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)
-         end if
-       end do
-     end do
-   end if
+!   if(iam_master)then
+!     do irpt=1,ifc_tmp%nrpt
+!       do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
+!         if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
+!&           eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
+!&           eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
+!&           any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)) > tol20)) then
+!           ifc_tmp%short_atmfrc(:,:,:,:,irpt) = &
+!&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2)
+!         end if
+!       end do
+!     end do
+!   end if
 
-   call xmpi_bcast(ifc_tmp%short_atmfrc, master, comm, ierr)
+   
+   !call xmpi_bcast(ifc_tmp%short_atmfrc, master, comm, ierr)
+   ! Maybe useless
+   call xmpi_bcast(eff_pot%harmonics_terms%ifcs%short_atmfrc, master, comm, ierr)
 
 !  Compute total ifc
-   ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
+   !ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
+   ! Set the full cell according to the largest box
+   full_nrpt = max(ifc_tmp%nrpt,eff_pot%harmonics_terms%ifcs%nrpt)
+   ABI_ALLOCATE(full_cell,(3,full_nrpt))
+   ABI_CALLOC(full_cell_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
+   ABI_CALLOC(full_cell_short_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
+   ABI_CALLOC(full_cell_ewald_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
+   if ( full_nrpt == ifc_tmp%nrpt ) then
+     full_cell = ifc_tmp%cell
+   else
+     full_cell = eff_pot%harmonics_terms%ifcs%cell
+   end if
+
+   ! Copy LR into total_atmfrc
+   do irpt=1,ifc_tmp%nrpt ! LR IRPT
+     do irpt2=1, full_nrpt
+       if(  ifc_tmp%cell(1,irpt)==full_cell(1,irpt2).and.&
+&           ifc_tmp%cell(2,irpt)==full_cell(2,irpt2).and.&
+&           ifc_tmp%cell(3,irpt)==full_cell(3,irpt2) ) then
+         full_cell_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+         full_cell_ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+       end if
+     end do
+   end do
+   ! Copy SR into total_atmfrc
+   do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! SR IRPT
+     do irpt2=1, full_nrpt
+     if(  eff_pot%harmonics_terms%ifcs%cell(1,irpt)==full_cell(1,irpt2).and.&
+&         eff_pot%harmonics_terms%ifcs%cell(2,irpt)==full_cell(2,irpt2).and.&
+&         eff_pot%harmonics_terms%ifcs%cell(3,irpt)==full_cell(3,irpt2) ) then
+         full_cell_atmfrc(:,:,:,:,irpt2) = full_cell_atmfrc(:,:,:,:,irpt2) + eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt)
+         full_cell_short_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt)
+       end if
+     end do
+   end do
 
 !  Count the rpt inferior to the tolerance
    irpt2 = 0
-   do irpt=1,ifc_tmp%nrpt
-     if(any(abs(ifc_tmp%atmfrc(:,:,:,:,irpt)) > tol20))then
+   do irpt=1,full_nrpt
+     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol20))then
        irpt2 = irpt2 + 1
      end if
    end do
@@ -964,18 +1011,25 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
     ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%cell,(3,irpt2))
 
     irpt2 = 0
-    do irpt = 1,ifc_tmp%nrpt
-     if(any(abs(ifc_tmp%atmfrc(:,:,:,:,irpt)) > tol20))then
+    do irpt = 1,full_nrpt
+     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol20))then
        irpt2 = irpt2 + 1
-       eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt2) = ifc_tmp%atmfrc(:,:,:,:,irpt)
-       eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2) = ifc_tmp%short_atmfrc(:,:,:,:,irpt)
-       eff_pot%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
-       eff_pot%harmonics_terms%ifcs%cell(:,irpt2) = ifc_tmp%cell(:,irpt)
+       eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt2) = full_cell_atmfrc(:,:,:,:,irpt)
+       eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2) = full_cell_short_atmfrc(:,:,:,:,irpt)
+       eff_pot%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,irpt2) = full_cell_ewald_atmfrc(:,:,:,:,irpt)
+       eff_pot%harmonics_terms%ifcs%cell(:,irpt2) = full_cell(:,irpt)
      end if
    end do
 
 !  Free temporary ifc
    call ifc_free(ifc_tmp)
+   !ABI_DEALLOCATE(wghatm)
+   !Deallocate temporary arrays
+   ABI_DEALLOCATE(full_cell)
+   ABI_DEALLOCATE(full_cell_atmfrc) ! Allocate and set to 0
+   ABI_DEALLOCATE(full_cell_short_atmfrc) ! Allocate and set to 0
+   ABI_DEALLOCATE(full_cell_ewald_atmfrc) ! Allocate and set to 0
+
  end if
 
  if(asr >= 0) then

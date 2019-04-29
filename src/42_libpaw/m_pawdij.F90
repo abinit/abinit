@@ -200,8 +200,12 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !Local variables ---------------------------------------
 !scalars
+!Possible algos for PAW+U: 1=using occupation matrix n_i,,2=using PAW matrix rho_ij
+ integer, parameter :: PAWU_ALGO_1=1,PAWU_ALGO_2=2
+ integer, parameter :: PAWU_FLL=1,PAWU_AMF=2
  integer :: cplex_dij,iatom,iatom_tot,idij,ipositron,itypat,klmn,klmn1,lm_size,lmn2_size
- integer :: lpawu,my_comm_atom,my_comm_grid,natvshift_,ndij,nsploop,nsppol,qphase,usexcnhat
+ integer :: lpawu,my_comm_atom,my_comm_grid,natvshift_,ndij,nsploop,nsppol
+ integer :: pawu_algo,pawu_dblec,qphase,usepawu,usexcnhat
  logical :: dij_available,dij_need,dij_prereq
  logical :: dij0_available,dij0_need,dij0_prereq
  logical :: dijexxc_available,dijexxc_need,dijexxc_prereq
@@ -216,7 +220,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijxcval_available,dijxcval_need,dijxcval_prereq
  logical :: dijU_available,dijU_need,dijU_prereq
  logical :: has_nucdipmom,my_atmtab_allocated
- logical :: need_to_print,paral_atom,pawu_new_algo,v_dijhat_allocated
+ logical :: need_to_print,paral_atom,v_dijhat_allocated
  real(dp) :: hyb_mixing_,hyb_mixing_sr_
  character(len=500) :: msg
 !arrays
@@ -358,9 +362,11 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    lm_size=paw_an(iatom)%lm_size
    lmn2_size=paw_ij(iatom)%lmn2_size
    ndij=paw_ij(iatom)%ndij
+   usepawu=pawtab(itypat)%usepawu
+   pawu_algo=merge(PAWU_ALGO_1,PAWU_ALGO_2,ipert<=0.and.usepawu>=0)
+   pawu_dblec=merge(PAWU_FLL,PAWU_AMF,abs(usepawu)==1.or.abs(usepawu)==4)
    need_to_print=((abs(pawprtvol)>=1).and. &
 &   (iatom_tot==1.or.iatom_tot==natom.or.pawprtvol<0))
-   pawu_new_algo=(pawtab(itypat)%usepawu==5.or.pawtab(itypat)%usepawu==6)
 
 !  === Determine which conditions and prerequisites are fulfilled for Dij ===
 
@@ -389,12 +395,11 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    dijso_prereq=(paw_ij(iatom)%has_dijso==2.or.&
 &               (paw_an(iatom)%has_vhartree>0.and.paw_an(iatom)%has_vxc>0))
 !  DijU: not available for positron; only for LDA+U
-   dijU_available=(pawtab(itypat)%usepawu>0.and.ipositron/=1.and. &
-&                 (ipert<=0.or.pawu_new_algo))
+   dijU_available=(pawtab(itypat)%usepawu/=0.and.ipositron/=1)
    dijU_prereq=(paw_ij(iatom)%has_dijU==2.or.paw_ij(iatom)%has_pawu_occ>0.or. &
-&               (pawu_new_algo.and.paw_ij(iatom)%has_dijU>0))
+&              (paw_ij(iatom)%has_dijU>0))
 !  DijExxc: not available for RF, positron; only for local exact exch. ; Vxc_ex needed
-   dijexxc_available=(pawtab(itypat)%useexexch>0.and.ipert<=0.and.ipositron/=1)
+   dijexxc_available=(pawtab(itypat)%useexexch/=0.and.ipert<=0.and.ipositron/=1)
    dijexxc_prereq=(paw_ij(iatom)%has_dijexxc==2.or.paw_ij(iatom)%has_exexch_pot>0)
 !  DijXC^hat: not available for RF ; Vxc needed
    dijxchat_available=(ipert<=0)
@@ -625,7 +630,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !    ===== Need to compute Dij0
        dij0(:)=pawtab(itypat)%dij0(:)
        if (ipositron==1) dij0(:)=two*pawtab(itypat)%kij(:)-dij0(:)
-       if (pawtab(itypat)%usepawu==5) dij0(:)=dij0(:)+pawtab(itypat)%euij_fll(:)
+       if (pawu_algo==PAWU_ALGO_2.and.pawu_dblec==PAWU_FLL) dij0(:)=dij0(:)+pawtab(itypat)%euij_fll(:)
        if (dij0_need) paw_ij(iatom)%dij0(:)=dij0(:)
      end if
 
@@ -840,13 +845,13 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Need to compute DijU
        LIBPAW_ALLOCATE(dijpawu,(cplex_dij*qphase*lmn2_size,ndij))
-       if (pawu_new_algo) then
+       if (pawu_algo==PAWU_ALGO_2) then
          call pawdiju_euijkl(dijpawu,cplex_dij,qphase,ndij,pawrhoij(iatom),pawtab(itypat))
        else
          lpawu=pawtab(itypat)%lpawu
          LIBPAW_POINTER_ALLOCATE(vpawu,(cplex_dij,lpawu*2+1,lpawu*2+1,ndij))
-         if (pawtab(itypat)%usepawu>=10) vpawu=zero ! if dmft, do not apply U in LDA+U
-         if (pawtab(itypat)%usepawu< 10) then
+         if (usepawu>=10) vpawu=zero ! if dmft, do not apply U in LDA+U
+         if (usepawu< 10) then
            call pawpupot(cplex_dij,ndij,paw_ij(iatom)%noccmmp,paw_ij(iatom)%nocctot,&
 &                        pawprtvol,pawtab(itypat),vpawu)
          end if
@@ -4121,6 +4126,10 @@ end subroutine pawdijfr
  end if
  if (size(nocctot,1)/=ndij) then
    msg='invalid size for nocctot !'
+   MSG_BUG(msg)
+ end if
+ if(pawtab%usepawu<0) then
+   msg = "usepawu<0 not allowed!"
    MSG_BUG(msg)
  end if
 

@@ -31,20 +31,11 @@
 # endif
 #endif
 
-/** #define DEBUG_MODE   **/
-
 #if defined(HAVE_FC_LONG_LINES) || defined(__INTEL_COMPILER) || defined(FC_NAG) || !defined(HAVE_FC_MACRO_NEWLINE)
 # define NEWLINE ;
 #else
 # define NEWLINE \newline
 #endif
-
-/**
-#ifdef FC_NAG
-#  undef HAVE_FC_LONG_LINES
-#  define HAVE_FC_LONG_LINES
-#endif
-**/
 
 /*
  * These macros are used to pass information on the file and the line to the children if the compiler supports long lines.
@@ -118,51 +109,66 @@
  These macros are used to get the memory address of the objet and the memory allocated.
 
    - loc returns the address and is a language extension supported by gfortran and ifort.
-   - storage_size was introduced in F2003 
+   - storage_size was introduced in F2003 and returns the size in bits.
 
  Both loc and storage_size are polymorphic so one can use it with intrinsic types as well 
  as user-defined datatypes.
 */
 #  define _LOC(x)  int(loc(x), kind=8) 
-#  define _MEM(arr) product(int(shape(arr), kind=8)) * storage_size(arr, kind=8)/8
+#  define _MEM(arr) product(int(shape(arr), kind=8)) * storage_size(arr, kind=8)
 
 /* and now the debugging macros */
 #  define ABI_ALLOCATE(ARR, SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
+
+#  define ABI_MALLOC_SCALAR(scalar) \
+   allocate(scalar) NEWLINE \
+   call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
 
 #  define ABI_DEALLOCATE(ARR) \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, "", __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__,  __LINE__) NEWLINE \
    deallocate(ARR) 
 
 #  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
 
 #  define ABI_DATATYPE_ALLOCATE(ARR,SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, "", __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
 
 #  define ABI_DATATYPE_DEALLOCATE(ARR)  \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, "", __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, __LINE__) NEWLINE \
    deallocate(ARR) 
+
+#  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
+   allocate(ARR SIZE, stat=ierr) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__) NEWLINE \
+   ABI_CHECK(ierr == 0, "out-of-memory")
 
 #else
 /* macros used in production */
 #  define ABI_ALLOCATE(ARR,SIZE) allocate(ARR SIZE)
+#  define ABI_MALLOC_SCALAR(scalar) allocate(scalar)
 #  define ABI_DEALLOCATE(ARR)  deallocate(ARR)
 #  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) allocate(ARR SIZE, stat=ierr)
 #  define ABI_DATATYPE_ALLOCATE(ARR,SIZE)  allocate(ARR SIZE)
 #  define ABI_DATATYPE_DEALLOCATE(ARR)   deallocate(ARR)
+#  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
+        allocate(ARR SIZE, stat=ierr) NEWLINE \
+        ABI_CHECK(ierr == 0, "out-of-memory")
 #endif
 
-/* Macros to allocate zero-initializes arrays.
+/* Macros to allocate zero-initialized arrays.
  * defined in terms of previous macros */
 #define ABI_CALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
 #define ABI_ICALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = 0
+#define ABI_CALLOC_OR_DIE(ARR,SIZE,ierr) ABI_MALLOC_OR_DIE(ARR, SIZE, ierr) NEWLINE ARR = zero
 
 /* Shorthand versions */
 #define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
+
 #define ABI_FREE(ARR) ABI_DEALLOCATE(ARR)
 #define ABI_STAT_MALLOC(ARR,SIZE,ierr) ABI_STAT_ALLOCATE(ARR,SIZE,ierr)
 
@@ -170,7 +176,9 @@
 #define ABI_DT_FREE(ARR)         ABI_DATATYPE_DEALLOCATE(ARR)
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
+ * or allocate arrays before calling MOVE_ALLOC.
    In this case, indeed, we should not count the deallocation */
+#define ABI_MALLOC_NOCOUNT(arr, size) allocate(arr size)
 #define ABI_FREE_NOCOUNT(arr) deallocate(arr)
 
 /*
@@ -179,9 +187,11 @@
  * Caveat: pointers must use ABI_PTR_FREE_IF
  *
 */
-#define ABI_MALLOC_IFNOT(ARR) if (.not. allocated(ARR)) then NEWLINE ABI_MALLOC(ARR) NEWLINE endif
+#define ABI_MALLOC_IFNOT(ARR, SIZE) if (.not. allocated(ARR)) then NEWLINE ABI_MALLOC(ARR, SIZE) NEWLINE endif
 #define ABI_SFREE(ARR) if (allocated(ARR)) then NEWLINE ABI_FREE(ARR) NEWLINE endif
 #define ABI_SFREE_PTR(PTR) if (associated(PTR)) then NEWLINE ABI_FREE(PTR) NEWLINE endif
+#define ABI_REMALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_MALLOC(ARR, SIZE)
+#define ABI_RECALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_CALLOC(ARR, SIZE)
 
 /* Macros used in debug mode */
 #ifdef DEBUG_MODE
@@ -209,13 +219,18 @@
 /* Macro for basic messages */
 #define MSG_COMMENT(msg) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_)
 #define MSG_WARNING(msg) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_)
-#define MSG_ERROR(msg)   call msg_hndl(msg,"ERROR", "PERS" _FILE_LINE_ARGS_)
-#define MSG_ERROR_CLASS(msg, cls)  call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
-#define MSG_BUG(msg)     call msg_hndl(msg,"BUG", "PERS" _FILE_LINE_ARGS_)
+#define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define MSG_ERROR(msg) call msg_hndl(msg,"ERROR", "PERS" _FILE_LINE_ARGS_)
+#define MSG_ERROR_CLASS(msg, cls) call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
+#define MSG_BUG(msg) call msg_hndl(msg,"BUG", "PERS" _FILE_LINE_ARGS_)
+#define MSG_STOP(msg) call msg_hndl(msg,"STOP", "PERS")
 
 #define MSG_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
-#define MSG_ERROR_NOSTOP(msg,ierr) \
+#define MSG_ERROR_NOSTOP(msg, ierr) \
    ierr=ierr+1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_)
+#define MSG_ERROR_NOSTOP_IF(condition, msg, ierr) \
+   if (condition)  then NEWLINE MSG_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
 #define ETSF_CHECK_ERROR(lstat,Error_data)   if (.not. lstat) call abietsf_msg_hndl(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
 #define ETSF_WARN(lstat,Error_data) call abietsf_warn(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
@@ -245,8 +260,8 @@
 #define BIGDFT_NOTENABLED_ERROR() call bigdft_lib_error()
 #endif
 
-/* Write a warning if msg is not empty */
-#define MSG_WARNING_IF(msg) if (len_trim(msg)/=0) MSG_WARNING(msg)
+/* Write a warning if condition  */
+#define MSG_WARNING_IF(expr, msg) if ((expr)) MSG_WARNING(msg)
 
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
@@ -262,16 +277,6 @@
 #define NULL_FILE "NUL"
 #else
 #define NULL_FILE "/dev/null"
-#endif
-
-
-/* Macros for Fortran IO (requires m_io_tools module) */
-#ifdef DEBUG_MODE
-/* #  define ABI_FCLOSE(fort_unit, msg) close(fort_unit) */
-#  define ABI_FCLOSE(fort_unit, msg) if (close_unit(fort_unit, msg)/=0) MSG_ERROR(msg)
-#else
-/* #  define ABI_FCLOSE(fort_unit, msg) close(fort_unit) */
-#  define ABI_FCLOSE(fort_unit, msg) if (close_unit(fort_unit, msg)/=0) MSG_WARNING(msg)
 #endif
 
 

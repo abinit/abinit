@@ -10,7 +10,7 @@ The merge request #408 is the first MR not reported in these release notes. Then
 
 The list of contributors includes:
 B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bruneval, Wei Chen, M. Cote, 
-J. Denier, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, Xu He, F. Jollet, 
+J. Denier, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, Xu He, Y. Jia, F. Jollet, 
 A. Lherbier, A. Martin, H. Miranda, F. Naccarato, G. Petretto, N. Pike,
 S. Ponce, Y. Pouillon, S. Prokhorenko, F. Ricci, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete, J. Zwanziger.
 
@@ -71,7 +71,7 @@ B.5 The linear combination of images is now allowed, with the new value for inpu
     The wavefunctions from the previous itimimage value (see [[ntimimage]] input variables) can be stored,
     using the new input variable [[imgwfstor]]. This allows saving CPU time at the expense of memory, in all
     the image based algorithms.  
-By X. Gonze.
+By X. Gonze, testing by Y. Jia.
 
 B.6 Tutorial [[tutorial:nuc]]
     has now a section for the computation of the isomer shift (Mossbauer spectroscopy) based on Fermi contact interaction.  
@@ -126,9 +126,6 @@ D.4 New input variables [[prtefmas]], [[irdefmas]] and [[getefmas]], to deal wit
 
 D.5 The spin dynamics has been implemented in multibinit.   
     By He Xu.
-
-D.5 Automatic test [[test:v8_37]] for TDep application.   
-    By J. Bieder.
 
 D.6 New value for input variable [[usepawu]]=4.
     The FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without polarization in the exchange correlation functional.  

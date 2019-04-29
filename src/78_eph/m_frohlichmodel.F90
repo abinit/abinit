@@ -74,8 +74,6 @@ contains
 
 subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst
@@ -94,10 +92,10 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  integer :: jband,lwork,nphi,nqdir,ntheta
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
  real(dp) :: zpr_frohlich,zpr_q0_avg,zpr_q0_fact
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
- real(dp) :: kpt(3),unit_r(3)
+ real(dp) :: kpt(3)
  real(dp), allocatable :: eigenval(:), rwork(:), unit_qdir(:,:)
  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:)
  real(dp), allocatable :: gq_points_th(:),gq_weights_th(:)
