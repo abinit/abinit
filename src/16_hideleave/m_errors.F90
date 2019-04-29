@@ -721,12 +721,14 @@ end subroutine die
 !!   COMMENT
 !!   WARNING
 !!   ERROR
+!!   STOP
 !!   BUG
-!!  line=line number of the file where problem occurred
-!!  file=name of the f90 file containing the caller
 !!  mode_paral=Either "COLL" or "PERS".
-!!  NODUMP= (optional) if present dump config before stopping
-!!  NOSTOP= (optional) if present don't stop even in the case of an error or a bug
+!!  [line] = line number of the file where problem occurred
+!!  [file] = name of the f90 file containing the caller
+!!  [NODUMP]= if present dump config before stopping
+!!  [NOSTOP]= if present don't stop even in the case of an error or a bug
+!!  [unit]= Unit number (defaults to std_out)
 !!
 !! OUTPUT
 !!
@@ -738,29 +740,33 @@ end subroutine die
 !!
 !! SOURCE
 
-subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
+subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
 
 !Arguments ------------------------------------
- integer,optional,intent(in) :: line
+ integer,optional,intent(in) :: line, unit
  logical,optional,intent(in) :: NODUMP,NOSTOP
  character(len=*),intent(in) :: level,message
  character(len=*),optional,intent(in) :: file
  character(len=*),intent(in) :: mode_paral
 
 !Local variables-------------------------------
- integer :: f90line,ierr
+ integer :: f90line,ierr,unit_
  character(len=10) :: lnum
  character(len=500) :: f90name
  character(len=LEN(message)) :: my_msg
  character(len=MAX(4*LEN(message),2000)) :: sbuf ! Increase size and keep fingers crossed!
 
 ! *********************************************************************
+ unit_ = std_out; if (present(unit)) unit_ = unit
 
  if (PRESENT(line)) then
    f90line=line
  else
    f90line=0
  end if
+ ! TODO: fldiff.py should ignore f90line when comparing files (we don't want to
+ ! update ref files if a new line is added to F90 source file!
+ if (unit_ == ab_out) f90line = 0
  write(lnum,"(i0)")f90line
 
  if (PRESENT(file)) then
@@ -781,7 +787,17 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
      "src_line: ",f90line,ch10,&
      "message: |",ch10,TRIM(indent(my_msg)),ch10,&
      "...",ch10
-   call wrtout(std_out,sbuf,mode_paral)
+   call wrtout(unit_, sbuf, mode_paral)
+
+ case ('STOP')
+
+   write(sbuf,'(8a)')ch10,&
+     "--- !",TRIM(level),ch10,&
+     "message: |",ch10,TRIM(indent(my_msg)),ch10
+   call wrtout(unit_, sbuf, mode_paral)
+   if (.not.present(NOSTOP)) then
+     call abi_abort(mode_paral,print_config=.FALSE.)
+   end if
 
  ! ERROR' or 'BUG'
  case default
@@ -801,7 +817,7 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
      "mpi_rank: ",xmpi_comm_rank(xmpi_world),ch10,&
      "message: |",ch10,TRIM(indent(my_msg)),ch10,&
      "...",ch10
-   call wrtout(std_out,sbuf,mode_paral)
+   call wrtout(unit_, sbuf, mode_paral)
 
    if (.not.present(NOSTOP)) then
      ! The first MPI proc that gets here, writes the ABI_MPIABORTFILE with the message!
@@ -1415,16 +1431,16 @@ subroutine abinit_doctor(prefix, print_mem_report)
 !scalars
  integer,parameter :: master=0
  integer :: do_mem_report, my_rank
+ character(len=500) :: msg
 #ifdef HAVE_MEM_PROFILING
  integer :: ii,ierr,unt
- integer :: nalloc,ndealloc
- integer(kind=8) :: memtot
+ integer(i8b) :: memtot, nalloc, nfree
  character(len=fnlen) :: path
- character(len=500) :: msg
  character(len=2000) :: errmsg
 #endif
 
 ! *************************************************************************
+
  do_mem_report = 1; if (present(print_mem_report)) do_mem_report = print_mem_report
  my_rank = xmpi_comm_rank(xmpi_world)
 
@@ -1432,23 +1448,24 @@ subroutine abinit_doctor(prefix, print_mem_report)
  errmsg = ""; ierr = 0
 
  ! Test on memory leaks.
- call abimem_get_info(nalloc, ndealloc, memtot)
+ call abimem_get_info(nalloc, nfree, memtot)
  call abimem_shutdown()
 
  if (do_mem_report == 1) then
-   if ((nalloc == ndealloc) .and. (memtot == 0)) then
+   if (nalloc == nfree .and. memtot == 0) then
      write(msg,'(3a,i0,a,i0,3a,i0)')&
-&      '- MEMORY CONSUMPTION REPORT:',ch10, &
-&      '-   There were ',nalloc,' allocations and ',ndealloc,' deallocations',ch10, &
-&      '-   Remaining memory at the end of the calculation is ',memtot
+       '- MEMORY CONSUMPTION REPORT:',ch10, &
+       '-   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
+       '-   Remaining memory at the end of the calculation is ',memtot
    else
      ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
-     write(msg,'(3a,i0,a,i0,3a,i0,6a)') 'MEMORY CONSUMPTION REPORT :',ch10, &
-&      '   There were ',nalloc,' allocations and ',ndealloc,' deallocations',ch10, &
-&      '   Remaining memory at the end of the calculation is ',memtot,ch10, &
-&      '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10,&
-&      '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created.',ch10,&
-       '   Note that abimem files can easily be multiple GB in size so do not use this option normally!'
+     write(msg,'(3a,i0,a,i0,3a,i0,8a)') 'MEMORY CONSUMPTION REPORT:',ch10, &
+       '   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
+       '   Remaining memory at the end of the calculation: ',memtot,ch10, &
+       '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10, &
+       '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created.',ch10, &
+       '   Note that abimem files can easily be multiple GB in size so do not use this option normally!',ch10, &
+       '   Note also the command line option `abinit --abimem-level 2` '
      ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
      ierr = ierr + 1
      errmsg = strcat(errmsg, ch10, msg)
@@ -1456,12 +1473,11 @@ subroutine abinit_doctor(prefix, print_mem_report)
 
  else
    write(msg,'(3a)')&
-&    '- MEMORY CONSUMPTION REPORT :',ch10, &
-&    '- Memory profiling is activated but not yet usable when bigdft is used'
+     '- MEMORY CONSUMPTION REPORT:',ch10, &
+     '- Memory profiling is activated but not yet usable when bigdft is used'
  end if
- if (my_rank == master) then
-   call wrtout(ab_out, msg)
- end if
+ if (my_rank == master) call wrtout(ab_out, msg)
+
  ! Test whether all logical units have been closed.
  ! If you wonder why I'm doing this, remember that there's a per-user
  ! limit on the maximum number of open file descriptors. Hence descriptors
@@ -1479,9 +1495,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
    ierr = ierr + 1
  end if
 
- if (my_rank == master) then
-   call wrtout(ab_out, msg)
- end if
+ if (my_rank == master) call wrtout(ab_out, msg)
  if (ierr /= 0) then
    MSG_ERROR(errmsg)
  end if
@@ -1489,6 +1503,16 @@ subroutine abinit_doctor(prefix, print_mem_report)
 #else
  ABI_UNUSED(prefix)
 #endif
+
+ ! Check for pending requests.
+ if (xmpi_count_requests /= 0) then
+   write(msg, "(a,i0,a)")"Leaking ", xmpi_count_requests, " MPI requests at the end of the run"
+   MSG_WARNING(msg)
+   !MSG_ERROR(msg)
+#ifdef HAVE_MEM_PROFILING
+   MSG_ERROR(msg)
+#endif
+ end if
 
 end subroutine abinit_doctor
 !!***

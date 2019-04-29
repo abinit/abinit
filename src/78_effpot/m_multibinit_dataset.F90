@@ -254,8 +254,6 @@ contains
 
 subroutine multibinit_dtset_init(multibinit_dtset,natom)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -423,8 +421,6 @@ end subroutine multibinit_dtset_init
 
 subroutine multibinit_dtset_free(multibinit_dtset)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(multibinit_dtset_type), intent(inout) :: multibinit_dtset
@@ -513,8 +509,6 @@ end subroutine multibinit_dtset_free
 !! SOURCE
 
 subroutine invars10(multibinit_dtset,lenstr,natom,string)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2181,8 +2175,6 @@ end subroutine invars10
 !! SOURCE
 
 subroutine outvars_multibinit (multibinit_dtset,nunit)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

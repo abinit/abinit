@@ -237,8 +237,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
- logical :: computediel
- logical :: non_magnetic_xc
+ logical :: computediel,non_magnetic_xc
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -259,9 +258,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 
@@ -644,7 +640,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !    Prepare the call to rhotoxc
      call xcdata_init(xcdata,dtset=dtset)
-     nk3xc=1
+     nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
      call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
 &     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
@@ -888,8 +884,7 @@ end subroutine prcref
  real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
- logical :: computediel
- logical :: non_magnetic_xc
+ logical :: computediel,non_magnetic_xc
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -915,9 +910,6 @@ end subroutine prcref
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 
@@ -1280,7 +1272,7 @@ end subroutine prcref
 
 !  Prepare the call to rhotoxc
    call xcdata_init(xcdata,dtset=dtset)
-   nk3xc=1
+   nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
    ABI_ALLOCATE(work,(0))
    call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
 &   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&

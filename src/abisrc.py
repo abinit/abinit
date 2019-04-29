@@ -251,7 +251,7 @@ def main():
     # After this point I operate an AbinitProject instance.
     # Load the object from pickle first and then check if we need to parse the source files again.
     needs_reload = True
-    if not options.regenerate and os.path.exists(AbinitProject.DEFAULT_PICKLE_FILE):
+    if not options.regenerate and os.path.exists(AbinitProject.get_default_pickle_file()):
         proj = AbinitProject.pickle_load()
         needs_reload = proj.needs_reload()
         if needs_reload:
@@ -269,6 +269,9 @@ def main():
         if retcode != 0:
             cprint("validate returned retcode: %s. Aborting now" % retcode, "red")
             return retcode
+
+        #all_mods = proj.find_allmods("dummy_tests.F90")
+        #for mod in all_mods: print(mod.basename)
 
         proj.write_binaries_conf(verbose=options.verbose, dryrun=False)
         proj.write_buildsys_files(verbose=options.verbose, dryrun=False)

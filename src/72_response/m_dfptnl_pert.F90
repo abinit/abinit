@@ -588,9 +588,9 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !    Load k-dependent part in the 1st-order Hamiltonian datastructure
      call load_k_rf_hamiltonian(rf_hamkq_i2pert,npw_k=npw_k,dkinpw_k=dkinpw)
 
-     ABI_STAT_ALLOCATE(dudk,  (2,nband_k*size_wf), ierr)
-     ABI_STAT_ALLOCATE(dudkde,(2,nband_k*size_wf), ierr)
-     ABI_STAT_ALLOCATE(eig1_k_i2pert,(2*nband_k), ierr)
+     ABI_MALLOC_OR_DIE(dudk,  (2,nband_k*size_wf), ierr)
+     ABI_MALLOC_OR_DIE(dudkde,(2,nband_k*size_wf), ierr)
+     ABI_MALLOC_OR_DIE(eig1_k_i2pert,(2*nband_k), ierr)
      ABI_ALLOCATE(eig1_k_stored,(2*nband_k**2))
      ABI_ALLOCATE(cgi,(2,size_wf))
      ABI_ALLOCATE(cwave_right,(2,size_wf))
@@ -633,8 +633,8 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
      offset_eig0 = mband*(ikpt-1+nkpt*(isppol-1))
      eig0_k(:) = eigen0(1+offset_eig0:mband+offset_eig0)
 
-     ABI_STAT_ALLOCATE(h_cwave,(2,size_wf), ierr)
-     ABI_STAT_ALLOCATE(s_cwave,(2,size_wf), ierr)
+     ABI_MALLOC_OR_DIE(h_cwave,(2,size_wf), ierr)
+     ABI_MALLOC_OR_DIE(s_cwave,(2,size_wf), ierr)
 
 !    Allocate work spaces when debug_mode is activated
      has_cprj_jband=.false.

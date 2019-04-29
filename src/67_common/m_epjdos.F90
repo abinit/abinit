@@ -242,21 +242,17 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
  end if
 
  ! Check allocations status as these arrays are not distributed and the wavefunctions are still in memory.
- ABI_STAT_MALLOC(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
- ABI_CHECK(ierr==0, "out of memory in new%fractions")
+ ABI_MALLOC_OR_DIE(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
  new%fractions = zero
 
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
-   ABI_STAT_MALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fractions_m")
+   ABI_MALLOC_OR_DIE(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
    new%fractions_m = zero
  end if
 
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
-   ABI_STAT_MALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fraction_paw1")
-   ABI_STAT_MALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fraction_pawt1")
+   ABI_MALLOC_OR_DIE(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
+   ABI_MALLOC_OR_DIE(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
    new%fractions_paw1 = zero; new%fractions_pawt1 = zero
  end if
 
@@ -411,7 +407,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  call cwtime(cpu, wall, gflops, "start")
 
  tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-   dtset%shiftk, dtset%nkpt, dtset%kpt, msg, ierr)
+   dtset%shiftk, dtset%nkpt, dtset%kpt, comm, msg, ierr)
  if (ierr /= 0) then
    call destroy_tetra(tetra)
    MSG_WARNING(msg)
@@ -940,8 +936,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
 
  ! Workspace array (used to reduce the number of MPI communications)
  ! One could reduce a bit the memory requirement by using non-blocking operations ...
- ABI_STAT_MALLOC(values, (nradintmax, nspinor, mlang**2, natsph), ierr)
- ABI_CHECK(ierr==0, "oom in values")
+ ABI_MALLOC_OR_DIE(values, (nradintmax, nspinor, mlang**2, natsph), ierr)
  values = czero
 
  my_nspinor = max(1,nspinor/mpi_enreg%nproc_spinor)

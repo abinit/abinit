@@ -1845,12 +1845,10 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 !  ----------------------------------------------
 
 !  Build map; for better performance, map must be in increasing order
-   ABI_STAT_ALLOCATE(map,(2*npwso*nband_block), ierr)
-   ABI_CHECK(ierr==0, "out of memory in map")
+   ABI_MALLOC_OR_DIE(map,(2*npwso*nband_block), ierr)
 
    ABI_STAT_ALLOCATE(buf,(2*npwso*nband_block), ierr)
-   msg = "out of memory in wavefunction buffer. Try to decrease MAXBAND in WffReadWrite_mpio"
-   ABI_CHECK(ierr==0, msg)
+   ABI_CHECK(ierr==0, "out of memory in wavefunction buffer. Try to decrease MAXBAND in WffReadWrite_mpio")
 
    if (rdwr==1) then
 !    If reading, only build map

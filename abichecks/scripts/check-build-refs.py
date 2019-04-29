@@ -27,7 +27,8 @@ def abinit_test_generator():
   return {"test_func" : test_func}
 
 def getstatusoutput(cmd):
-    """    Return (status, output) of executing cmd in a shell.
+    """
+    Return (status, output) of executing cmd in a shell.
 
     Execute the string 'cmd' in a shell with 'check_output' and
     return a 2-tuple (status, output). Universal newlines mode is used,
@@ -88,6 +89,7 @@ def main(home_dir=""):
   # Report any mismatch
   if nerr > 0:
     sys.stderr.write("%s: reporting wrongly generated build examples\n\n" % (os.path.basename(sys.argv[0])))
+    sys.stderr.write("Reference files are in ~abinit/abichecks/buildsys")
     sys.stderr.write("X: D=Difference detected / M=Missing File\n\n")
     sys.stderr.write("%s  %-64s\n" % ("X","File"))
     sys.stderr.write("%s  %s\n" % ("-","-" * 64))
