@@ -997,6 +997,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 !arrays
  real(dp) :: ework(4, 2)
  real(dp),allocatable :: pme_k(:,:)
+ complex(dp),allocatable :: cweights_tmp(:,:,:)
  integer :: ind_ibz(4)
  !complex(dpc) :: SIM0, SIM0I
  complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(4,nz)
@@ -1019,10 +1020,20 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 
  cweights = zero
 #ifdef DEV_NEW_TETRA
- do iq_ibz=1,self%nq_k
-   call htetra_get_onewk_wvals_zinv(self%tetra_k, iq_ibz, nz, zvals, max_occ1, self%nq_k, pme_k(:, 1), cweights(:,1,iq,iqlk))
-   call htetra_get_onewk_wvals_zinv(self%tetra_k, iq_ibz, nz, zvals, max_occ1, self%nq_k, pme_k(:, 2), cweights(:,2,ib,iqlk))
+ ABI_MALLOC(cweights_tmp,(2,nz,self%nq_k))
+ do ib=1,nbcalc
+   do ii=1,2
+     call htetra_blochl_weights_zinv(self%tetra_k, pme_k(:, ii), nz, zvals(:,ib), &
+                                      max_occ1, self%nq_k, 1, cweights_tmp, comm)
+     do iq=1,self%nq_k
+       ! HM: this is awkward but I avoid adding optional arguments in htetra_blochl_weights_zinv
+       ! and keep the same interface as tetra_blochl_weights
+       weight = one/self%tetra_k%ibz_weights(iq)*self%tetra_k%ibz(iq)%tetra_total
+       cweights(:,ii,ib,iq) = cweights_tmp(1,:,iq)*self%tetra_k%vv*weight
+     end do
+   end do
  end do
+ ABI_FREE(cweights_tmp)
 #else
  do itetra = 1, self%tetra_k%ntetra
    if (mod(itetra, nprocs) /= my_rank) cycle ! MPI parallelism

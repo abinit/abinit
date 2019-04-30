@@ -147,6 +147,7 @@ public :: htetra_get_onewk       ! Calculate integration weights and their deriv
 public :: htetra_get_onewk_wvals ! Similar to tetra_get_onewk_wvals but receives arbitrary list of frequency points.
 public :: htetra_get_onewk_wvals_zinv ! Calculate integration weights for 1/(z-E(k)) for a single k-point in the IBZ.
 public :: htetra_blochl_weights  ! And interface to help to facilitate the transition to the new tetrahedron implementation
+public :: htetra_blochl_weights_zinv
 !!***
 
 contains
@@ -1424,7 +1425,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  ! For each tetrahedron that belongs to this k-point
  tetra_count = tetra%ibz(ik_ibz)%tetra_count
  tetra_total = tetra%ibz(ik_ibz)%tetra_total
- do itetra=1,24
+ do itetra=1,tetra_count
 
    tweight = one*tetra%ibz(ik_ibz)%tetra(itetra)%p(0)/tetra_total
    do isummit=1,4
@@ -1439,7 +1440,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
      call SIM0TWOI(VERL, VERLI, VERM)
      do isummit=1,4
        if (ind_ibz(isummit) /= ik_ibz) cycle
-       cweights(iz,1) = cweights(iz,1) + verl(isummit)* tweight
+       cweights(iz,1) = cweights(iz,1) + verl(isummit) *tweight
        cweights(iz,2) = cweights(iz,2) + verli(isummit)*tweight
        ! HM: This exit is important, avoids summing the same contribution more than once
        exit
@@ -1463,7 +1464,8 @@ end subroutine htetra_get_onewk_wvals_zinv
 !!   gaussian smearing weights using htetra_get_onewk_wvals. However this requires
 !!   some refactoring of the code. I provide this routine to make it easier
 !!   to transition to the new tetrahedron implementation without refactoring.
-!!   New implementations should try to use htetra_get_onewk_wvals.
+!!   Looping over tetrahedra (i.e. using tetra_blochl_weights) is currently faster
+!!   than looping over k-points.
 !!
 !! INPUTS
 !!
@@ -1490,7 +1492,7 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 !Local variables-------------------------------
 !scalars
  integer :: ik_ibz,multiplicity,nprocs,my_rank,ierr
- integer :: tetra_total, tetra_count, itetra, isummit, ihash
+ integer :: tetra_count, itetra, isummit, ihash
 !arrays
  integer :: ind_ibz(4)
  real(dp) :: eigen_1tetra(4)
@@ -1502,7 +1504,6 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
  tweight = zero; dweight = zero
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  wvals = linspace(enemin,enemax,nw)
- tetra_total = 0
 
  ! For each bucket of tetrahedra
  do ihash=1,tetra%nbuckets
@@ -1526,7 +1527,6 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 
      ! Acumulate the contributions
      multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
-     tetra_total = tetra_total + multiplicity
      do isummit=1,4
        ik_ibz = ind_ibz(isummit)
        tweight(:,ik_ibz) = tweight(:,ik_ibz) + tweight_tmp(isummit,:)*multiplicity
@@ -1546,6 +1546,96 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 
 end subroutine htetra_blochl_weights
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_htetrahedron/htetra_blochl_weights_zinv
+!! NAME
+!!  htetra_blochl_weights_zinv
+!!
+!! FUNCTION
+!!   The same as htetra_get_onewk_wvals_zinv but looping over tetrahedra
+!!   which is more efficient
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine htetra_blochl_weights_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,&
+  opt,cweight,comm)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nz,nkpt,opt,comm
+ type(t_htetrahedron), intent(in) :: tetra
+ real(dp) ,intent(in) :: max_occ
+!arrays
+ real(dp) ,intent(in) :: eig_ibz(nkpt)
+ complex(dp),intent(in)  :: zvals(nz)
+ complex(dp),intent(out) :: cweight(2,nz,nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ik_ibz,iz,multiplicity,nprocs,my_rank,ierr
+ integer :: tetra_count, itetra, isummit, ihash
+!arrays
+ integer :: ind_ibz(4)
+ real(dp) :: eigen_1tetra(4)
+ complex(dp) :: verl(4), verli(4), verm(4)
+! *********************************************************************
+
+ cweight = zero
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ ! For each bucket of tetrahedra
+ do ihash=1,tetra%nbuckets
+   if (mod(ihash,nprocs) /= my_rank) cycle
+
+   ! For each tetrahedron that belongs to this k-point
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   do itetra=1,tetra_count
+
+     ! Get mapping of each summit to eig_ibz
+     do isummit=1,4
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       eigen_1tetra(isummit) = eig_ibz(ind_ibz(isummit))
+     end do
+
+     ! Get multiplicity
+     multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
+
+     ! Loop over frequencies
+     do iz=1,nz
+       verm = zvals(iz) - eigen_1tetra
+       ! Get tetrahedron weights
+       call SIM0TWOI(VERL, VERLI, VERM)
+
+       ! Acumulate the contributions
+       do isummit=1,4
+         ik_ibz = ind_ibz(isummit)
+         cweight(1,iz,ik_ibz) = cweight(1,iz,ik_ibz) + verl(isummit)*multiplicity
+         cweight(2,iz,ik_ibz) = cweight(2,iz,ik_ibz) + verli(isummit)*multiplicity
+       end do
+     end do ! iz
+   end do ! itetra
+ end do
+
+ ! Rescale with weights
+ do ik_ibz=1,tetra%nkibz
+   cweight(:,:,ik_ibz) = cweight(:,:,ik_ibz)*tetra%ibz_weights(ik_ibz)/tetra%ibz(ik_ibz)%tetra_total
+ end do
+
+ call xmpi_sum(cweight, comm, ierr)
+
+end subroutine htetra_blochl_weights_zinv
+!!***
+
 
 !----------------------------------------------------------------------
 

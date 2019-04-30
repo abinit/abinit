@@ -134,6 +134,17 @@ module m_hashtable
     end do
   end subroutine hashtable_cleanup
 
+  integer function hashtable_size(self) result(bsize)
+    type(hashtable_t) ::  self
+    integer :: ibucket
+    ! Return the size of the hashtable in bytes
+    bsize = storage_size(self%buckets)*self%nbuckets
+    do ibucket=1,self%nbuckets
+      bsize = bsize + storage_size(self%buckets(ibucket)%items)*size(self%buckets(ibucket)%items,2)*2
+    end do
+    bsize = bsize/8
+  end function hashtable_size
+
   subroutine hashtable_free(self)
     type(hashtable_t) ::  self
     integer :: ibucket
@@ -144,5 +155,6 @@ module m_hashtable
       deallocate(self%buckets)
     end if
   end subroutine hashtable_free
+
 end module m_hashtable
 !!***
