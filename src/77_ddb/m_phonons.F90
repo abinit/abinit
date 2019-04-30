@@ -1213,7 +1213,7 @@ subroutine phdos_unittests(comm)
  real(dp) :: amu(1),qpt(3),xred(3,1),znucl(1),zion(1)
  real(dp) :: rprimd(3,3),rlatt(3,3),qlatt(3,3)
  real(dp),allocatable :: tnons(:,:)
- real(dp),allocatable :: tweight(:,:),dtweightde(:,:)
+ real(dp),allocatable :: tweight(:,:),dweight(:,:)
  real(dp),allocatable :: qbz(:,:),qibz(:,:)
  real(dp),allocatable :: wtq_ibz(:), wdt(:,:)
  real(dp),allocatable :: energies(:),eigen(:)
@@ -1226,13 +1226,13 @@ subroutine phdos_unittests(comm)
  call wrtout(std_out,'0. Initialize')
 
  ! Create a regular grid
- in_qptrlatt(:,1)=[ 5,-5,-5]
- in_qptrlatt(:,2)=[-5, 5,-5]
- in_qptrlatt(:,3)=[-5,-5, 5]
+ in_qptrlatt(:,1)=[ 50,-50,-50]
+ in_qptrlatt(:,2)=[-50, 50,-50]
+ in_qptrlatt(:,3)=[-50,-50, 50]
 
- !in_qptrlatt(:,1)=[ 5, 0, 0]
- !in_qptrlatt(:,2)=[ 0, 5, 0]
- !in_qptrlatt(:,3)=[ 0, 0, 5]
+ in_qptrlatt(:,1)=[ 100, 0, 0]
+ in_qptrlatt(:,2)=[ 0, 100, 0]
+ in_qptrlatt(:,3)=[ 0, 0, 100]
  dos_qshift(:,1) =[0.0,0.0,0.0]
 
  amu = 1
@@ -1246,12 +1246,12 @@ subroutine phdos_unittests(comm)
  rprimd(:,2) = [ 0.5, 0.0, 0.5]
  rprimd(:,3) = [ 0.5, 0.5, 0.0]
 
- rprimd(:,1) = [ 1.0, 0.0, 0.0]
- rprimd(:,2) = [ 0.0, 1.0, 0.0]
- rprimd(:,3) = [ 0.0, 0.0, 1.0]
+ !rprimd(:,1) = [ 1.0, 0.0, 0.0]
+ !rprimd(:,2) = [ 0.0, 1.0, 0.0]
+ !rprimd(:,3) = [ 0.0, 0.0, 1.0]
 
- call get_point_group('4',nsym,nclass,symrel,class_ids,class_names,irr)
- !call get_point_group('m-3m',nsym,nclass,symrel,class_ids,class_names,irr)
+ !call get_point_group('4',nsym,nclass,symrel,class_ids,class_names,irr)
+ call get_point_group('m-3m',nsym,nclass,symrel,class_ids,class_names,irr)
  ABI_FREE(class_ids)
  ABI_FREE(class_names)
  call irrep_free(irr)
@@ -1307,10 +1307,14 @@ subroutine phdos_unittests(comm)
 
  ! Compute DOS using old tetrahedron implementation
  ABI_CALLOC(tweight,(nw,nqibz))
- ABI_CALLOC(dtweightde,(nw,nqibz))
+ ABI_CALLOC(dweight,(nw,nqibz))
  call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dtweightde,comm)
- dos(:)  = sum(dtweightde,2)
+                           nqibz,bcorr0,tweight,dweight,comm)
+ !do iqibz=1,nqibz
+ !  dweight(:,iqibz) = dweight(:,iqibz)*abs(one/eigen(iqibz))
+ !  tweight(:,iqibz) = tweight(:,iqibz)*abs(one/eigen(iqibz))
+ !end do
+ dos(:)  = sum(dweight,2)
  idos(:) = sum(tweight,2)
  call ctrap(nw,dos,dosdeltae,dos_int)
  write(*,*) "dos_int", dos_int, idos(nw)
@@ -1319,8 +1323,12 @@ subroutine phdos_unittests(comm)
 
  ! Compute DOS using new tetrahedron implementation
  call htetra_blochl_weights(htetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dtweightde,comm)
- dos(:)  = sum(dtweightde,2)
+                           nqibz,bcorr0,tweight,dweight,comm)
+ !do iqibz=1,nqibz
+ !  dweight(:,iqibz) = dweight(:,iqibz)*abs(one/eigen(iqibz))
+ !  tweight(:,iqibz) = tweight(:,iqibz)*abs(one/eigen(iqibz))
+ !end do
+ dos(:)  = sum(dweight,2)
  idos(:) = sum(tweight,2)
  call ctrap(nw,dos,dosdeltae,dos_int)
  write(*,*) "dos_int", dos_int, idos(nw)
@@ -1330,6 +1338,7 @@ subroutine phdos_unittests(comm)
  dos = zero; idos = zero
  do iqibz=1,nqibz
    call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
+   !wdt(:,:) = wdt(:,:)*abs(one/eigen(iqibz))
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
@@ -1341,6 +1350,7 @@ subroutine phdos_unittests(comm)
  dos = zero; idos = zero
  do iqibz=1,nqibz
    call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   !wdt(:,:) = wdt(:,:)*abs(one/eigen(iqibz))
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
@@ -1357,16 +1367,16 @@ subroutine phdos_unittests(comm)
 
  ! Compute DOS using old tetrahedron implementation
  call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dtweightde,comm)
- dos(:)  = sum(dtweightde,2)
+                           nqibz,bcorr0,tweight,dweight,comm)
+ dos(:)  = sum(dweight,2)
  idos(:) = sum(tweight,2)
  call cwtime_report(" tetra_blochl", cpu, wall, gflops)
  call write_file('flat_tetra.dat', nw, energies, idos, dos)
 
  ! Compute DOS using new tetrahedron implementation
  call htetra_blochl_weights(htetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dtweightde,comm)
- dos(:)  = sum(dtweightde,2)
+                           nqibz,bcorr0,tweight,dweight,comm)
+ dos(:)  = sum(dweight,2)
  idos(:) = sum(tweight,2)
  call cwtime_report(" htetra_blochl", cpu, wall, gflops)
  call write_file('flat_htetra.dat', nw, energies, idos, dos)
@@ -1395,7 +1405,7 @@ subroutine phdos_unittests(comm)
  ABI_SFREE(eigen)
  ABI_SFREE(wdt)
  ABI_SFREE(tweight)
- ABI_SFREE(dtweightde)
+ ABI_SFREE(dweight)
  ABI_SFREE(wtq_ibz)
  ABI_SFREE(dos)
  ABI_SFREE(idos)
