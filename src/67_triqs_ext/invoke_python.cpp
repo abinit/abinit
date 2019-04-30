@@ -8,8 +8,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <mpi.h>
+#include <stdexcept>
+#include <string>
+#include <fstream>
+
 #include "invoke_python.hpp"
 
+using namespace std;
 
 
 //--------------------
@@ -99,3 +105,60 @@ int close_python_interpreter() {
 
  return 0;
 }
+
+
+
+/******************
+ * ****************/
+
+// Function to invoke python and run the script
+void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in) {
+	MPI_Comm comm;
+	comm = MPI_Comm_f2c(*mpi_comm);
+
+	int ierr, rank;
+	ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	if (rank == 0) fprintf(stdout, "invoke_python_triqs: beginning\n");
+
+	// Path to the TRIQS python interpreter path and impurity solver script
+	string triqs_filename = string(filapp_in) += "_TRIQS_script.py";
+	string triqs_python_path = string(filapp_in) += "_TRIQS_python_lib";
+	triqs_python_path = "./" + triqs_python_path;
+
+	// Check whether python_lib exists
+	if (!ifstream(triqs_python_path.c_str())) {
+		throw invalid_argument("The _TRIQS_python_lib file does not exist! TRIQS cannot be called.");
+		exit(0);
+	}
+
+	// Launch python
+	init_python_interpreter(triqs_python_path.c_str());
+	if (rank == 0) fprintf(stdout, "invoke_python_triqs: interpreter initialized\n");
+
+	// Execute script
+	fprintf(stdout, "Reading python script: %s\n", triqs_filename.c_str());
+
+	// Check whether the file exists
+	if (!ifstream(triqs_filename.c_str())) {
+		throw invalid_argument("The _TRIQS.py file does not exist! TRIQS cannot be called.");
+		exit(0);
+	}
+
+	execute_python_file(triqs_filename.c_str());
+	if (rank == 0) fprintf(stdout, "invoke_python_triqs: script runned\n");
+
+	int final;
+	MPI_Finalized(&final);
+	if (final) {
+		fprintf(stderr, "MPI is finalized on node %i\n", rank);
+	}
+
+	// Close python
+	close_python_interpreter();
+	MPI_Barrier(MPI_COMM_WORLD);
+}
+
+

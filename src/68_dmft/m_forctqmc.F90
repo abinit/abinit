@@ -159,8 +159,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
- use netcdf !If calling TRIQS via python invokation, write a .nc file
 #endif
+ use netcdf !If calling TRIQS via python invokation, write a .nc file
+ use INVOKE_PYTHON
+
  use ISO_C_BINDING
  implicit none
 
