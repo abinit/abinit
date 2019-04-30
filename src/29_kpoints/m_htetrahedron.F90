@@ -37,7 +37,8 @@ module m_htetrahedron
 
  use defs_basis
  use m_abicore
- use m_kptrank
+ use m_hkptrank
+ use m_numeric_tools,   only : linspace
  use m_simtet,          only : sim0onei, SIM0TWOI
  use m_xmpi
 
@@ -199,11 +200,12 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
 !Local variables-------------------------------
 !scalars
- type(kptrank_type) :: kptrank_t
+ !type(octree_t) :: oct
+ type(hkptrank_t) :: kptrank
  integer :: iopt
  integer :: ikpt2,isummit,itetra,jtetra
  integer :: ikibz,ikbz,idiag,ihash,min_idiag,my_rank,nprocs
- integer :: symrankkpt, max_ntetra, tetra_total, total_ntetra, ntetra
+ integer :: max_ntetra, tetra_total, total_ntetra, ntetra
  real(dp) :: rcvol,length,min_length
 !arrays
  integer,pointer :: indexes(:,:), tetra_hash_count(:)
@@ -665,7 +667,8 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  ! HM TODO: Avoid mkkptrank and map the k-point grid to indexes
  ! Make full k-point rank arrays
- call mkkptrank(kpt_fullbz,nkpt_fullbz,kptrank_t)
+ !oct = octree_init(kpt_fullbz,2**4,[-one,-one,-one],[two,two,two])
+ call hkptrank_init(kptrank,kpt_fullbz,nkpt_fullbz)
 
  !
  ! HM (13/04/2019): I implement two different versions:
@@ -700,8 +703,10 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
                    tetra_shifts(2,isummit,itetra,min_idiag)*klatt(:,2) + &
                    tetra_shifts(3,isummit,itetra,min_idiag)*klatt(:,3)
          ! Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
-         call get_rank_1kpt(k2,symrankkpt,kptrank_t)
-         ikpt2 = kptrank_t%invrank(symrankkpt)
+         !ikpt2 = octree_find(oct,k2,dist)
+         !ikpt2 = octree_find_nearest_pbc(oct,k2,dist,shift)
+         !if (dist>tol12) call exit(1)
+         ikpt2 = hkptrank_get_index(kptrank,k2)
          ! Find the index of those points in the BZ and IBZ
          tetra_ibz(isummit) = bz2ibz(ikpt2)
        end do
@@ -749,8 +754,10 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
                    tetra_shifts_6(2,isummit,itetra,min_idiag)*klatt(:,2) + &
                    tetra_shifts_6(3,isummit,itetra,min_idiag)*klatt(:,3)
          ! Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
-         call get_rank_1kpt(k2,symrankkpt,kptrank_t)
-         ikpt2 = kptrank_t%invrank(symrankkpt)
+         !ikpt2 = octree_find(oct,k2,dist)
+         !ikpt2 = octree_find_nearest_pbc(oct,k2,dist,shift)
+         !if (dist>tol12) call exit(1)
+         ikpt2 = hkptrank_get_index(kptrank,k2)
          ! Find the index of those points in the BZ and IBZ
          tetra_ibz(isummit) = bz2ibz(ikpt2)
        end do
@@ -793,7 +800,8 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
                         '2. Generate tetrahedra in the FBZ a map to IBZ (default)'
    return
  end select
- call destroy_kptrank(kptrank_t)
+ !ierr = octree_free(oct)
+ call hkptrank_free(kptrank)
 
  ! Do some maintenance: free unused memory and count tetrahedra per IBZ point
  tetra_count = 0
@@ -1349,7 +1357,7 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nw,nkibz,eig_ibz,&
 ! *********************************************************************
 
  weights = zero
- wvals = htetra_linspace(enemin,enemax,nw)
+ wvals = linspace(enemin,enemax,nw)
  call htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkibz, eig_ibz, weights)
 
 end subroutine htetra_get_onewk
@@ -1493,7 +1501,7 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 
  tweight = zero; dweight = zero
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- wvals = htetra_linspace(enemin,enemax,nw)
+ wvals = linspace(enemin,enemax,nw)
  tetra_total = 0
 
  ! For each bucket of tetrahedra
@@ -1693,51 +1701,6 @@ pure subroutine sort_4tetra_int(list)
 
 end subroutine sort_4tetra_int
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_numeric_tools/htetra_linspace
-!! NAME
-!!  htetra_linspace
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-pure function htetra_linspace(start,stop,nn)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nn
- real(dp),intent(in) :: start,stop
- real(dp) :: length
- real(dp) :: htetra_linspace(nn)
-
-!Local variables-------------------------------
- integer :: ii
-! *********************************************************************
-
- select case (nn)
-
- case (1:)
-  length = stop-start
-  do ii=1,nn
-   htetra_linspace(ii)=start+length*(ii-1)/(nn-1)
-  end do
-
- case (0)
-  RETURN
-
- end select
-
-end function htetra_linspace
-!!***
-
-!----------------------------------------------------------------------
 
 end module m_htetrahedron
 !!***
