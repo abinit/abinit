@@ -41,9 +41,10 @@ module m_hightemp
   type,public :: hightemp_type
     logical :: enabled
     integer :: bcut,nbcut
-    real(dp) :: ebcut,int_freedos,u0,ucvol
+    real(dp) :: ebcut,int_energycontrib,int_rhocontrib,u0,ucvol
   contains
-    procedure :: compute_int_rhocontrib,compute_obj,compute_u0,init
+    procedure :: compute_int_energycontrib,compute_int_rhocontrib
+    procedure :: compute_obj,compute_u0,init
     final :: finalize
   end type hightemp_type
 
@@ -91,7 +92,8 @@ contains
       this%bcut=mband
       this%nbcut=nbcut
       this%ebcut=zero
-      this%int_freedos=zero
+      this%int_energycontrib=zero
+      this%int_rhocontrib=zero
       this%u0=zero
     end if
   end subroutine init
@@ -168,8 +170,9 @@ contains
 
     call this%compute_u0(eigen,eknk,mband,nband,nkpt,nsppol,wtk)
     call this%compute_int_rhocontrib(fermie,1024,tsmear)
+    call this%compute_int_energycontrib(fermie,1024,tsmear)
 
-    write(0,*) this%u0, this%int_freedos
+    write(0,*) this%u0, this%int_rhocontrib
   end subroutine compute_obj
 
   !!****f* ABINIT/m_hightemp/compute_u0
@@ -276,7 +279,6 @@ contains
     integer :: ii
     real(dp) :: ix,step,ucvol
     ! Arrays
-    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
     real(dp) :: values(mrgrid)
 
     ! *********************************************************************
@@ -286,9 +288,31 @@ contains
       ix=(ii)*step
       values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,this%u0,this%ucvol)/(ix*ix)/this%ucvol
     end do
-    this%int_freedos=simpson(step,values)
+    this%int_rhocontrib=simpson(step,values)
   end subroutine compute_int_rhocontrib
 
+  !!****f* ABINIT/m_hightemp/compute_int_energycontrib
+  !! NAME
+  !! compute_int_energycontrib
+  !!
+  !! FUNCTION
+  !! Compute the value of the integral corresponding to the residual of energy after the band cut
+  !! I = \Omega\int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}(\epsilon - U_0)^{3/2}d \epsilon
+  !!
+  !! INPUTS
+  !! this=hightemp_type object concerned
+  !! fermie=fermi energy (Hartree)
+  !! mrgrid=number of grid points to compute the integral
+  !! tsmear=smearing width (or temperature)
+  !!
+  !! OUTPUT
+  !! this=hightemp_type object concerned
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
   subroutine compute_int_energycontrib(this,fermie,mrgrid,tsmear)
 
     ! Arguments -------------------------------
@@ -302,7 +326,6 @@ contains
     integer :: ii
     real(dp) :: ix,step,ucvol
     ! Arrays
-    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
     real(dp) :: values(mrgrid)
 
     ! *********************************************************************
@@ -310,9 +333,11 @@ contains
     step=(1/this%ebcut)/mrgrid
     do ii=1,mrgrid
       ix=(ii)*step
-      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,this%u0,this%ucvol)/(ix*ix)/this%ucvol
+      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,this%u0,this%ucvol)*(1/ix-this%u0)/(ix*ix)
     end do
-    this%int_freedos=simpson(step,values)
+    this%int_energycontrib=simpson(step,values)
+
+    write(0,*) this%int_energycontrib
   end subroutine compute_int_energycontrib
 
   ! *********************************************************************
@@ -467,24 +492,51 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_addtorho(int_freedos,nfft,nspden,rhor)
+  subroutine hightemp_addtorho(int_rhocontrib,nfft,nspden,rhor)
 
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: nfft,nspden
-    real(dp),intent(in) :: int_freedos
+    real(dp),intent(in) :: int_rhocontrib
     ! Arrays
     real(dp),intent(inout) :: rhor(nfft,nspden)
 
     ! *********************************************************************
 
     if(nspden==1) then
-      rhor(:,:)=rhor(:,:)+int_freedos
+      rhor(:,:)=rhor(:,:)+int_rhocontrib
     else if(nspden==2) then
-      rhor(:,:)=rhor(:,:)+.5*int_freedos
+      rhor(:,:)=rhor(:,:)+.5*int_rhocontrib
     end if
-
 
     ! SHOULD WE ADD A CONTRIBUTION TO RHOG ?
   end subroutine hightemp_addtorho
+
+  !!****f* ABINIT/m_hightemp/hightemp_addtorho
+  !! NAME
+  !! hightemp_addtorho
+  !!
+  !! FUNCTION
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine hightemp_addtoenergy(int_energycontrib,etotal)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: int_energycontrib
+    real(dp),intent(inout) :: etotal
+
+    ! *********************************************************************
+
+    etotal=etotal+int_energycontrib
+  end subroutine hightemp_addtoenergy
+
 end module m_hightemp

@@ -1626,7 +1626,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     elast,electronpositron,energies,&
 &     etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
-&     grxc,gsqcut,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
+&     grxc,gsqcut,hightemp,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
 &     nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,psps%ntypat,nvresid,n1xccc,n3xccc,&
 &     optene,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &     ph1df,red_ptot,psps,rhog,rhor,rmet,rprimd,symrec,synlgr,ucvol,&
@@ -1834,7 +1834,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &       elast,electronpositron,energies,&
 &       etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
-&       grxc,gsqcut,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
+&       grxc,gsqcut,hightemp,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
 &       nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,dtset%ntypat,nvresid,n1xccc, &
 &       n3xccc,0,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,&
 &       pawtab,ph1df,red_ptot,psps,rhog,rhor,rmet,rprimd,symrec,synlgr,ucvol,&
@@ -2429,7 +2429,7 @@ end subroutine scfcv_core
 subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  elast,electronpositron,energies,&
 &  etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,gresid,grewtn,grhf,grnl,grvdw,&
-&  grxc,gsqcut,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
+&  grxc,gsqcut,hightemp,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
 &  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
@@ -2448,6 +2448,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
+ type(hightemp_type),intent(in) :: hightemp
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl
@@ -2623,6 +2624,10 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      if (optene==1) electronpositron%e0=etotal-energies%edc_electronpositron
      etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
    end if
+
+   write(0,*) etotal
+   if(hightemp%enabled) call hightemp_addtoenergy(hightemp%int_energycontrib,etotal)
+   write(0,*) etotal
 
 !  Compute energy residual
    deltae=etotal-elast

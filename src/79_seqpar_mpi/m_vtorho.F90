@@ -301,7 +301,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(energies_type), intent(inout) :: energies
  type(hdr_type), intent(inout) :: hdr
 !blanchet
- type(hightemp_type) :: hightemp
+ type(hightemp_type), intent(out) :: hightemp
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
@@ -1767,7 +1767,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    call hightemp%compute_obj(eigen,eknk,energies%e_fermie,&
 &   dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
 &   dtset%tsmear,dtset%wtk)
-   call hightemp_addtorho(hightemp%int_freedos,dtset%nfft,dtset%nspden,rhor)
+   call hightemp_addtorho(hightemp%int_rhocontrib,dtset%nfft,dtset%nspden,rhor)
  end if
 
  ABI_DEALLOCATE(eknk)
