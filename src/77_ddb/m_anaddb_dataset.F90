@@ -1023,7 +1023,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%prtdos=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtdos',tread,'INT')
  if(tread==1) anaddb_dtset%prtdos = intarr(1)
- if(anaddb_dtset%prtdos < 0 .or. anaddb_dtset%prtdos > 3) then
+ if(anaddb_dtset%prtdos < 0 .or. anaddb_dtset%prtdos > 2) then
    write(message, '(a,i0,5a)' )&
 &   'prtdos is ',anaddb_dtset%prtdos,', but the only allowed values',ch10,&
 &   'are 0 (no output) or 1 (gaussians) or 2 (tetrahedra) ',ch10,&
