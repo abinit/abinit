@@ -3443,26 +3443,27 @@ end subroutine dfpt_flexoout
            d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpim
 
            !Calculate and write the q-gradient of the dynamical matrix (twice
-           !the Energy derivative, see Gonze and Lee 1997)
-           ddmdq_red(re,iatpert,jatpert,iq1grad)=two*tmpre
-           ddmdq_red(im,iatpert,jatpert,iq1grad)=two*tmpim
+           !the Energy derivative, see Gonze and Lee 1997) in the form of first
+           !moment of IFC in real space
+           ddmdq_red(re,iatpert,jatpert,iq1grad)=-two*tmpim
+           ddmdq_red(im,iatpert,jatpert,iq1grad)=two*tmpre
 
            if (prtvol==1) then
              !Write individual contributions 
              write(71,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & two*ddmdqwf_t1(:,iatpert,jatpert,iq1grad)
+           & -two*ddmdqwf_t1(:,iatpert,jatpert,iq1grad)
 
              write(72,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & two*ddmdqwf_t2(:,iatpert,jatpert,iq1grad)
+           & -two*ddmdqwf_t2(:,iatpert,jatpert,iq1grad)
 
              write(73,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & two*ddmdqwf_t3(:,iatpert,jatpert,iq1grad)
+           & -two*ddmdqwf_t3(:,iatpert,jatpert,iq1grad)
 
              write(74,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & dyewdq(:,iatdir,iatom,jatdir,jatom,iq1dir)
+           & -dyewdq(:,iatdir,iatom,jatdir,jatom,iq1dir)
 
              write(76,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & two*ddmdq_qgradhart(:,iatpert,jatpert,iq1grad)
+           & -two*ddmdq_qgradhart(:,iatpert,jatpert,iq1grad)
            end if
 
          end if
@@ -3492,26 +3493,27 @@ end subroutine dfpt_flexoout
            d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpim
 
            !Calculate and write the q-gradient of the dynamical matrix (twice
-           !the Energy derivative, see Gonze and Lee 1997)
-           ddmdq_red(re,iatpert,jatpert,iq1grad)=zero
-           ddmdq_red(im,iatpert,jatpert,iq1grad)=two*tmpim
+           !the Energy derivative, see Gonze and Lee 1997) in the form of first
+           !moment of IFC in real space
+           ddmdq_red(re,iatpert,jatpert,iq1grad)=-two*tmpim
+           ddmdq_red(im,iatpert,jatpert,iq1grad)=zero
 
            if (prtvol==1) then
              !Write individual contributions 
              write(71,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & zero, two*ddmdqwf_t1(im,iatpert,jatpert,iq1grad)
+           & -two*ddmdqwf_t1(im,iatpert,jatpert,iq1grad)
 
              write(72,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & zero, two*ddmdqwf_t2(im,iatpert,jatpert,iq1grad)
+           & -two*ddmdqwf_t2(im,iatpert,jatpert,iq1grad)
 
              write(73,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & zero, two*ddmdqwf_t3(im,iatpert,jatpert,iq1grad)
+           & -two*ddmdqwf_t3(im,iatpert,jatpert,iq1grad)
 
              write(74,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & zero, dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
+           & -dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
 
              write(76,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & zero, two*ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)
+           & -two*ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)
            end if
 
          end if
@@ -3624,7 +3626,7 @@ end subroutine dfpt_flexoout
 
 !Write the tensor in cartesian coordinates
  write(ab_out,*)' '
- write(ab_out,*)' q-gradient of dynamical matrix, in cartesian coordinates,'
+ write(ab_out,*)' First moment of real space IFC, in cartesian coordinates,'
  write(ab_out,*)' iatom   iatddir   jatom   jatddir   qgrdir           real part          imaginary part'
  do iq1dir=1,3
    do jatdir=1,3
