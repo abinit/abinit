@@ -26,10 +26,10 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
     vname: Variable name.
     prt: Address of variable.
     action: "A" for allocation, "D" for deallocation.
-    size: Size of allocation in bytes.
+    size: Size of allocation in bits.
     file: Name of Fortran file in which allocation/deallocation is performed.
     line: Line number in file.
-    tot_memory: Total memory in bytes allocated so far.
+    tot_memory: Total memory in bits allocated so far.
     """
 
     @classmethod
@@ -68,7 +68,7 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
     def size_mb(self):
         """Size in Megabytes."""
         sign = {"A": +1, "D": -1}[self.action]
-        return sign* self.size / 1024 ** 2
+        return sign* self.size / (8 * 1024 ** 2)
 
     #@property
     #def basename(self):
@@ -261,13 +261,12 @@ class AbimemParser(object):
         """
         Plot total allocated memory in Mb.
         """
-        memory = [e.tot_memory / 1024**2 for e in self.yield_all_entries()]
+        memory = [e.tot_memory / ( 8 * 1024**2) for e in self.yield_all_entries()]
         import matplotlib.pyplot as plt
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
         ax.plot(memory)
         ax.grid(True)
-        #ax.set_xlabel('Energy (eV)')
         ax.set_ylabel("Total Memory [Mb]")
         if show: plt.show()
         return fig
