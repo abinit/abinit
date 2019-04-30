@@ -992,7 +992,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  integer,parameter :: master=0
  integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,iq,nprocs, my_rank, ierr, iqlk
  real(dp),parameter :: max_occ1=one
- real(dp) :: volconst_mult
+ real(dp) :: volconst_mult, weight
  logical :: use_bzsum_
 !arrays
  real(dp) :: ework(4, 2)
