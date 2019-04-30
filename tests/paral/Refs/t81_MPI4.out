@@ -1,5 +1,5 @@
 
-.Version 8.10.0 of MULTIBINIT 
+.Version 8.11.6 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 27 Sep 2018.
-- ( at 13h20 )
+.Starting date : Wed  3 Apr 2019.
+- ( at 11h30 )
   
 -  nproc =    4
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/paral/Input/t81_ddb.in
+-/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_multibini-proddev/tests/paral/Input/t81_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -157,6 +157,10 @@
 
 
 
+ Bound for ifc SR:
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+
 ================================================================================
 
  Impose acoustic sum rule on total ifc
@@ -170,7 +174,7 @@
 ================================================================================
 
 -Reading the file the HIST file :
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/paral/Input/t81_HIST
+-/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_multibini-proddev/tests/paral/Input/t81_HIST
 
 
 ================================================================================
@@ -219,10 +223,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.7
 
 ================================================================================
 
-+Total cpu time      9.660  and wall time      9.678 sec
++Total cpu time     10.882  and wall time     10.916 sec
 
  multibinit : the run completed succesfully.

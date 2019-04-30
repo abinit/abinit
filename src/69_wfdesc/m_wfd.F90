@@ -22,7 +22,7 @@
 
 #include "abi_common.h"
 
-MODULE m_wfd
+module m_wfd
 
  use defs_basis
  use defs_datatypes
@@ -816,8 +816,8 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 !Local variables ------------------------------
 !scalars
  integer,parameter :: nfft0=0,mpw0=0,ikg0=0
- integer :: ig,ik_ibz,spin,band,mpw,exchn2n3d,istwf_k,npw_k,iatom,itypat,iat !,how_manyb
- real(dp) :: ug_size,ur_size,cprj_size,gsq
+ integer :: ik_ibz,spin,band,mpw,exchn2n3d,istwf_k,npw_k,iatom,itypat,iat !,how_manyb
+ real(dp) :: ug_size,ur_size,cprj_size
  logical :: iscompatibleFFT
  character(len=500) :: msg
 !arrays
@@ -3995,10 +3995,8 @@ subroutine wfd_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_dist
 
 !************************************************************************
 
- ABI_STAT_MALLOC(whocan_k ,(Wfd%mband,Wfd%nproc), ierr)
- ABI_CHECK(ierr==0, "out of memory in whocan_k")
- ABI_STAT_MALLOC(whocan_kp,(Wfd%mband,Wfd%nproc), ierr)
- ABI_CHECK(ierr==0, "out of memory in whocan_kp")
+ ABI_MALLOC_OR_DIE(whocan_k ,(Wfd%mband,Wfd%nproc), ierr)
+ ABI_MALLOC_OR_DIE(whocan_kp,(Wfd%mband,Wfd%nproc), ierr)
  whocan_k =0 !  Will be set to 1 if this node can calculate something containing (k,b)
  whocan_kp=0 !  Will be set to 1 if this node can calculate something containing (kp,bp)
 
@@ -4812,8 +4810,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
      ! Try to allocate all u(g) first,
      ! TODO If not enough memory fallback to a blocked algorithm.
      cgsize = Wfd%nspinor * npw_k * how_manyb
-     ABI_STAT_MALLOC(cg_k, (2,cgsize), ierr)
-     ABI_CHECK(ierr==0, "out of memory in cg_k")
+     ABI_MALLOC_OR_DIE(cg_k, (2,cgsize), ierr)
 
      ! Extract the set of u(g) for this (kpoint,spin)
      ! This works only if all the bands are on the same node.
@@ -4863,6 +4860,9 @@ end subroutine wfd_write_wfk
 !!  wfk_fname=Name of the WFK file.
 !!  iomode=Option specifying the fileformat as well as the IO mode to be used.
 !!
+!! OUTPUT
+!!  [out_hdr]=Header of the WFK file.
+!!
 !! SIDE EFFECTS
 !!  Wfd<wfd_t>=All the states owned by this node whose status is (STORED|ALLOCATED) read.
 !!
@@ -4874,13 +4874,14 @@ end subroutine wfd_write_wfk
 !!
 !! SOURCE
 
-subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
+subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iomode
  character(len=*),intent(in) :: wfk_fname
  class(wfd_t),intent(inout) :: Wfd
+ type(Hdr_type),optional,intent(out) :: out_hdr
 
 !Local variables ------------------------------
 !scalars
@@ -4918,6 +4919,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
 
  wfk_unt = get_unit()
  call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,wfk_unt,Wfd%comm,Hdr_out=Hdr)
+ if (present(out_hdr)) call hdr_copy(hdr, out_hdr)
 
  ! TODO: Perform consistency check btw Hdr and Wfd.
  ! Output the header of the GS wavefunction file.
@@ -4976,8 +4978,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
       ABI_MALLOC(eig_k,((2*Wfk%mband)**formeig0*Wfk%mband))
 
       ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
-      ABI_STAT_MALLOC(cg_k,(2,mcg), ierr)
-      ABI_CHECK(ierr==0, "out of memory in cg_k")
+      ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
       call wfk_read_band_block(Wfk, [1,nband_wfd] , ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
 
@@ -5052,8 +5053,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
       ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
 
       mcg = npw_disk*Wfd%nspinor*COUNT(my_readmask(:,ik_ibz,spin))
-      ABI_STAT_MALLOC(cg_k,(2,mcg), ierr)
-      ABI_CHECK(ierr==0, "out of memory in cg_k")
+      ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
       call wfk_read_bmask(Wfk,my_readmask(:,ik_ibz,spin),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k)
 
@@ -5906,7 +5906,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  ABI_MALLOC(rhog,(2,cplex*nfftf))
 
  call symrhg(cplex,Cryst%gprimd,irrzon,Wfd%MPI_enreg,nfftf,nfftotf,ngfftf,Wfd%nspden,Wfd%nsppol,&
-&  Cryst%nsym,Wfd%paral_kgb,phnons,rhog,rhor,Cryst%rprimd,Cryst%symafm,Cryst%symrel)
+             Cryst%nsym,phnons,rhog,rhor,Cryst%rprimd,Cryst%symafm,Cryst%symrel)
 
  ABI_FREE(rhog)
  ABI_FREE(phnons)
@@ -6102,7 +6102,6 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  real(dp) :: occup,wtk_k
  character(len=500) :: msg
 !arrays
- integer,allocatable :: idum(:)
  !real(dp) :: tsec(2)
  character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -6198,5 +6197,5 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 end subroutine wfd_pawrhoij
 !!***
 
-END MODULE m_wfd
+end module m_wfd
 !!***

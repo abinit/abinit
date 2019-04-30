@@ -92,8 +92,6 @@ CONTAINS
 
 subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,rfgd)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: lm_size,nfgd,optgr0,optgr1,optgr2
@@ -968,8 +966,6 @@ end subroutine pawgylm
 
 subroutine pawgylmg(gprimd,gylmg,kg,kpg,kpt,lmax,nkpg,npw,ntypat,pawtab,ylm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lmax,nkpg,npw,ntypat
@@ -1085,10 +1081,7 @@ end subroutine pawgylmg
 subroutine pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,rcut,rfgd,rprimd,ucvol,xred, &
 &                      fft_distrib,fft_index,me_fft) ! optional arguments
 
- implicit none
-
 !Arguments ---------------------------------------------
-
 !scalars
  integer,intent(in) :: n1,n2,n3
  integer,intent(out) :: nfgd
@@ -1245,10 +1238,7 @@ end subroutine pawrfgd_fft
 subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
 &                      nfgd,rcut,rloc,rfgd,shift,xcart)
 
- implicit none
-
 !Arguments ---------------------------------------------
-
 !scalars
  integer,intent(in) :: i3s,n1,n1i,n2,n2i,n3,n3pi,shift
  integer,intent(out) :: nfgd
@@ -1354,7 +1344,6 @@ subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
 !!****f* m_paw_finegrid/my_ind_positions
  subroutine my_ind_positions(periodic,i,n,j,go)
 
-   implicit none
    integer,intent(in) :: i,n
    logical,intent(in) :: periodic
    integer,intent(out) :: j
@@ -1370,7 +1359,6 @@ subroutine pawrfgd_wvl(geocode,hh,ifftsph,i3s,n1,n1i,n2,n2i,n3,n3pi,&
 !!****f* m_paw_finegrid/my_ext_buffers
    subroutine my_ext_buffers(periodic,nl,nr)
 
-  implicit none
   logical, intent(in) :: periodic
   integer, intent(out) :: nl,nr
   if (periodic) then
@@ -1414,8 +1402,6 @@ end subroutine pawrfgd_wvl
 !! SOURCE
 
 subroutine pawexpiqr(expiqr,gprimd,nfgd,qphon,rfgd,xred)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

@@ -350,13 +350,11 @@ contains
 !!
 !! SOURCE
 
-subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE)
-
- implicit none
+subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE
+ integer, intent(in) :: mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE
  type(fock_BZ_type) , intent(inout) :: fockbz
 
 !Local variables-------------------------------
@@ -434,8 +432,6 @@ subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6
  ABI_ALLOCATE(fockbz%npwarr,(mkpt))
  fockbz%npwarr=0
 
-
-
 end subroutine fockbz_create
 !!***
 
@@ -479,8 +475,6 @@ end subroutine fockbz_create
 !! SOURCE
 
 subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -671,7 +665,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    if(dtset%userie==1729)use_ACE=0 ! Hidden possibility to disable ACE
 
    fockcommon%use_ACE=use_ACE
-   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,dtset%natom,n4,n5,n6,use_ACE)
+   call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
@@ -1163,8 +1157,6 @@ end subroutine fock_init
 
 subroutine fock_updateikpt(fock,ikpt,isppol)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: ikpt,isppol
  type(fock_common_type),pointer :: fock
@@ -1214,8 +1206,6 @@ end subroutine fock_updateikpt
 
 subroutine fock_set_ieigen(fock,iband)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: iband
  type(fock_common_type),pointer :: fock
@@ -1256,8 +1246,6 @@ end subroutine fock_set_ieigen
 !! SOURCE
 subroutine fock_destroy(fock)
 
- implicit none
-
 !Arguments ------------------------------------
  type(fock_type),pointer :: fock
 
@@ -1275,8 +1263,6 @@ subroutine fock_destroy(fock)
 end subroutine fock_destroy
 
 subroutine fock_common_destroy(fock)
-
- implicit none
 
 !Arguments ------------------------------------
  type(fock_common_type),pointer :: fock
@@ -1335,8 +1321,6 @@ end subroutine fock_common_destroy
 
 
 subroutine fock_BZ_destroy(fock)
-
- implicit none
 
 !Arguments ------------------------------------
  type(fock_BZ_type),pointer :: fock
@@ -1445,8 +1429,6 @@ end subroutine fock_BZ_destroy
 
 subroutine fock_ACE_destroy(fockACE)
 
- implicit none
-
 !Arguments ------------------------------------
  type(fock_ACE_type),pointer :: fockACE(:,:)
 !Local variables-------------------------------
@@ -1501,8 +1483,6 @@ end subroutine fock_ACE_destroy
 
 subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,nband
@@ -1516,6 +1496,8 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
  integer :: iband
 
 ! *************************************************************************
+
+ ABI_UNUSED(fock_energy)
 
  do iband=1,nband
 
@@ -1531,7 +1513,6 @@ subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
 !     endif
    end if
  end do
-
 
 end subroutine fock_calc_ene
 !!***
@@ -1562,8 +1543,6 @@ end subroutine fock_calc_ene
 !! SOURCE
 
 subroutine fock_update_exc(fock_energy,xc_energy,xcdc_energy)
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: fock_energy
@@ -1629,8 +1608,6 @@ end subroutine fock_update_exc
 
 subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 &                              mpi_enreg,nattyp,npwarr,occ,ucvol)
-
- implicit none
 
 !scalars
  integer, intent(in) :: mcg,mcprj
@@ -1999,8 +1976,6 @@ end subroutine fock_updatecwaveocc
 
 integer function fock_set_getghc_call(fock, new) result(old)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: new
@@ -2028,8 +2003,6 @@ end function fock_set_getghc_call
 !! SOURCE
 
 pure integer function fock_get_getghc_call(fock)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2070,8 +2043,6 @@ end function fock_get_getghc_call
 !! SOURCE
 
 subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2156,8 +2127,6 @@ end subroutine fock_print
 !! SOURCE
 
 subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2362,8 +2331,6 @@ end subroutine bare_vqg
 subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
 &                 rhog2) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -39,7 +39,7 @@ module m_skw
 
  use m_fstrings,       only : itoa, sjoin, ktoa, yesno, ftoa
  use m_special_funcs,  only : abi_derfc
- use m_time,           only : cwtime
+ use m_time,           only : cwtime, cwtime_report
  use m_numeric_tools,  only : imax_loc, vdiff_t, vdiff_eval, vdiff_print
  use m_bz_mesh,        only : isamek
  use m_gsphere,        only : get_irredg
@@ -241,8 +241,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    ABI_FREE(r2vals)
  end do
  nr = new%nr
- call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" find_rstar_gen: cpu: ",cpu,", wall: ",wall
+ call cwtime_report(" find_rstar_gen", cpu, wall, gflops)
 
  if (my_rank == master) call new%print(std_out)
 
@@ -309,8 +308,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    ABI_CHECK(ierr == 0, sjoin("ZHESV returned:", itoa(ierr)))
    ABI_FREE(work)
  end if
- call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" ZHESV call: cpu: ",cpu,", wall: ",wall
+ call cwtime_report(" ZHESV", cpu, wall, gflops)
 
  ! Compute coefficients
  ABI_MALLOC(new%coefs, (nr,bcount,nsppol))
@@ -357,7 +355,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  fmt = sjoin("(a,", itoa(bcount), "(es12.4))")
  bstop = bstart + bcount - 1
  mare = zero; mae_meV = zero; cnt = 0
- call wrtout(std_out, ch10//"Comparing ab-initio energies with SKW interpolated results...")
+ call wrtout(std_out, ch10//" Comparing ab-initio energies with SKW interpolated results...")
  do spin=1,nsppol
    do ik=1,nkpt
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi parallelism.
@@ -377,7 +375,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
        rval = (eig(bstart+ib-1,ik,spin) - oeig(ib)) * Ha_meV
        write(std_out,"(a,es12.4,2a)") &
          " SKW maxerr: ", rval, &
-         " [meV], kpt: ", sjoin(ktoa(kpts(:,ik)), "band:",itoa(bstart+ib-1),", spin: ", itoa(spin))
+         " (meV), kpt: ", sjoin(ktoa(kpts(:,ik)), "band:",itoa(bstart+ib-1),", spin: ", itoa(spin))
        !write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
        !write(std_out,fmt)"-- int ", oeig * Ha_meV
        !call vdiff_print(vdiff_eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one))
@@ -389,16 +387,15 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  ! Issue warning if error too large.
  list2 = [mare, mae_meV]; call xmpi_sum(list2, comm, ierr); mare = list2(1); mae_meV = list2(2)
  cnt = bcount * nkpt * nsppol; mare = mare / cnt; mae_meV = mae_meV / cnt
- write(std_out,"(2(a,es12.4),a)")" MARE: ",mare, ", MAE: ", mae_meV, " [meV]"
+ write(std_out,"(2(a,es12.4),a,/)")" MARE: ",mare, ", MAE: ", mae_meV, " (meV)"
  if (mae_meV > ten) then
    write(msg,"(2a,2(a,es12.4),a)") &
-     "Large error in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, " [meV]"
+     "Large error in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, " (meV)"
    call wrtout(ab_out, msg)
    MSG_WARNING(msg)
  end if
 
- call cwtime(cpu_tot, wall_tot, gflops_tot, "stop")
- write(std_out,"(2(a,f6.2))")" skw_new: cpu: ",cpu_tot,", wall: ",wall_tot
+ call cwtime_report(" skw_new", cpu_tot, wall_tot, gflops_tot, end_str=ch10)
 
 end function skw_new
 !!***
@@ -1054,7 +1051,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
  ! Each proc works on a contigous block of shells, then we have to gather the results.
  ABI_MALLOC(sh_start, (0:nprocs-1))
  ABI_MALLOC(sh_stop, (0:nprocs-1))
- call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop, msg, ierr)
+ call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop)
 
  ABI_MALLOC(cnorm, (msize))
  nstars = 0

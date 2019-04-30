@@ -273,11 +273,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: nblok,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
- integer :: cnt,spin,band,ikpt,usecg,usecprj
+ integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
- logical :: wvlbigdft=.false.,wvl_debug=.false.
+ logical :: is_dfpt=.false.,wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
  character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
@@ -397,9 +397,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Set up for iterations
  call setup1(acell,bantot,dtset,&
-& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
-& dtset%natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
-& response,rmet,rprim,rprimd,ucvol,psps%usepaw)
+  ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
+  ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+  response,rmet,rprim,rprimd,ucvol,psps%usepaw)
 
 !In some cases (e.g. getcell/=0), the plane wave vectors have
 ! to be generated from the original simulation cell
@@ -440,13 +440,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_ALLOCATE(ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
    if (psps%useylm==1) then
-     option=0
-     if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) option=1 ! compute gradients of YLM
-     if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) option = 1 ! compute gradients of YLM
+     ylm_option=0
+     if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
+     if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) ylm_option = 1 ! compute gradients of YLM
+     if ((dtset%orbmag.GT.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &     psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
-&     npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
-   end if
+&     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
+  end if
  else
    ABI_ALLOCATE(ylm,(0,0))
    ABI_ALLOCATE(ylmgr,(0,0,0))
@@ -698,8 +699,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    cg => scf_history%cg(:,:,1)
    eigen => scf_history%eigen(:,1)
  else
-   ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
-   ABI_CHECK(ierr==0, "out of memory in cg")
+   ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
    ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
 
@@ -983,17 +983,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
 
 !  2-Initialize and compute data for LDA+U, EXX, or LDA+DMFT
-   pawtab(:)%usepawu=0
-   pawtab(:)%useexexch=0
-   pawtab(:)%exchmix=zero
-   if(paw_dmft%use_dmft==1) then
-     call print_sc_dmft(paw_dmft,dtset%pawprtvol)
-   end if
-   if (dtset%usepawu>0.or.dtset%useexexch>0.or.paw_dmft%use_dmft>0) then
-     call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&     args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%ntypat,pawang,dtset%pawprtvol,&
+   if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
+   call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
+&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%ntypat,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
-   end if
  end if
 
 !###########################################################
@@ -1137,7 +1130,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        if (dtset%usewvl == 0) then
          call initro(atindx,dtset%densty,gmet,gsqcut_eff,psps%usepaw,&
 &         mgfftf,mpi_enreg,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,&
-&         ngfftf,dtset%nspden,psps%ntypat,dtset%paral_kgb,psps,pawtab,ph1df,&
+&         ngfftf,dtset%nspden,psps%ntypat,psps,pawtab,ph1df,&
 &         psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,psps%usepaw,&
 &         dtset%ziontypat,dtset%znucl)
 !        Update initialized density taking into account jellium slab
@@ -1145,7 +1138,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
            option=2
            ABI_ALLOCATE(work,(nfftf))
            call jellium(gmet,gsqcut_eff,mpi_enreg,nfftf,ngfftf,dtset%nspden,&
-&           option,dtset%paral_kgb,dtset%slabwsrad,rhog,rhor,rprimd,work,dtset%slabzbeg,dtset%slabzend)
+&           option,dtset%slabwsrad,rhog,rhor,rprimd,work,dtset%slabzbeg,dtset%slabzend)
            ABI_DEALLOCATE(work)
          end if ! of usejell
 !        Kinetic energy density initialized to zero (used only in metaGGAs ... )
@@ -1224,7 +1217,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_ALLOCATE(spinat_dum,(3,dtset%natom))
      spinat_dum=zero
      call initro(atindx,dtset%densty,gmet,gsqcut_eff,psps%usepaw,mgfftf,mpi_enreg,&
-&     psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,1,psps%ntypat,dtset%paral_kgb,psps,pawtab,&
+&     psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,1,psps%ntypat,psps,pawtab,&
 &     ph1df,psps%qgrid_vl,rhowfg,rhowfr,spinat_dum,ucvol,&
 &     psps%usepaw,dtset%ziontypat,dtset%znucl)
      scf_history%atmrho_last(:)=rhowfr(:,1)
@@ -1423,17 +1416,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
     occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
 
    ! Generate WFK with k-mesh from WFK containing list of k-points inside pockets.
-   if (dtset%kerange_path /= ABI_NOFILE) then
-     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%kerange_path, dtset, psps, pawtab, "foo_WFK.nc", comm)
+   if (dtset%getkerange_path /= ABI_NOFILE) then
+     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_path, dtset, comm)
    end if
 
    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
    !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN')
  end if
 
- if (dtset%prtwf==2) then
-   call outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
- end if
+ if (dtset%prtwf==2) call outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
 
 !Restore the original rprimd in hdr
  hdr%rprimd=rprimd

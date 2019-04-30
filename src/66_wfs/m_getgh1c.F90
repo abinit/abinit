@@ -152,7 +152,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  integer :: tim_fourwf,tim_nonlop,usecprj
  logical :: compute_conjugate,has_kin,usevnl2
  real(dp) :: weight
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: enlout(1),tsec(2),svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: cwave_sp(:,:),cwavef1(:,:),cwavef2(:,:)

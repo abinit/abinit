@@ -970,7 +970,7 @@ program anaddb
 
  if (iam_master) close(ab_out)
 
- 100 call xmpi_end()
+ call xmpi_end()
 
  end program anaddb
 !!***

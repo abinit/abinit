@@ -64,6 +64,7 @@ tests/TestBot_MPI*/*
 /aclocal.m4
 /autom4te.cache
 /build
+/_build*
 /configure
 /config.dump
 /config.dump.in
@@ -212,14 +213,12 @@ mkdocs_plugins/dist
 /src/98_main/aim
 /src/98_main/anaddb
 /src/98_main/band2eps
-/src/98_main/bsepostproc
+/src/98_main/abitk
 /src/98_main/conducti
 /src/98_main/cut3d
 /src/98_main/fftprof
 /src/98_main/ioprof
-/src/98_main/kss2wfk
 /src/98_main/lapackprof
-/src/98_main/lwf
 /src/98_main/macroave
 /src/98_main/mrgddb
 /src/98_main/mrgdv
@@ -228,7 +227,6 @@ mkdocs_plugins/dist
 /src/98_main/multibinit
 src/98_main/tdep
 src/98_main/dummy_tests
-/src/98_main/newsp
 /src/98_main/optic
 src/98_main/tdep
 /src/98_main/ujdet
@@ -298,7 +296,7 @@ scripts/*/*/dist
 src/tags
 build2-debug-s
 .prev_run.pickle
-_project.pickle
+_project*.pickle
 buildbot.ac
 tests/Analysis*
 tests/report.log

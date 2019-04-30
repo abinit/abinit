@@ -15,10 +15,6 @@ except AttributeError:
     pass
 from shutil import rmtree
 
-# ---------------------------------------------------------------------------- #
-def abitest(abenv, *args, **kwargs):
-  return main(home_dir=abenv.home_dir)
-
 def main(home_dir=""):
   # create tarball
   sys.stdout.write("Creating tarball...\n")
@@ -95,5 +91,4 @@ if __name__ == "__main__":
   else:
     home_dir = sys.argv[1] 
 
-  exit_status = main(home_dir)
-  sys.exit(exit_status)
+  sys.exit(main(home_dir))

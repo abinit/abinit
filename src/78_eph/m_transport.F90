@@ -55,7 +55,7 @@ module m_transport
  private
 !!****
 
- public :: transport !! main entry point for transport calculations
+ public :: transport ! main entry point for transport calculations
 !!****
 
 !----------------------------------------------------------------------
@@ -189,38 +189,24 @@ contains  !=====================================================
 !!
 !! FUNCTION
 !! General driver to compute transport properties
-!! wk0_path=String with the path to the GS unperturbed WFK file.
-!! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
-!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
-!! pawang<pawang_type)>=PAW angular mesh and related data.
-!! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
-!! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
-!! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
 !!
 !! INPUTS
 !!
 !! SOURCE
 
-subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawfgr, pawang, pawrad, pawtab, psps, comm)
+subroutine transport(dtfil, dtset, ebands, cryst, comm)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: wfk0_path
  integer, intent(in) :: comm
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- type(pseudopotential_type),intent(in) :: psps
- type(pawang_type),intent(in) :: pawang
- type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
- type(pawfgr_type),intent(in) :: pawfgr
 !arrays
- integer,intent(in) :: ngfft(18),ngfftf(18)
 
 !Local variables ------------------------------
  type(sigmaph_t) :: sigmaph
@@ -233,11 +219,15 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
  character(len=fnlen) :: path
  character(len=500) :: msg
 
+! *************************************************************************
+
+ ABI_UNUSED((/comm, cryst%natom/))
+
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, 'Transport computation driver')
 
- sigmaph = sigmaph_read(dtset,dtfil,xmpi_comm_self,msg,ierr,&
-                        keep_open=.true.,extrael_fermie=extrael_fermie)
+ !path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ sigmaph = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  if (ierr/=0) MSG_ERROR(msg)
 
  ! Intialize transport
@@ -382,12 +372,12 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands,extr
 
      if (abs(nelect - tmp_ebands%nelect) > tol6) then
        ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
-       ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
+       ! for finite doping it's hard to find nelect that exactly matches ebands%nelect.
        ! in this case we print a warning
        write(msg,'(3(a,f10.6))')&
          'Calculated number of electrons nelect = ',nelect,&
          ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,' for T = ',new%kTmesh(itemp)
-       if (new%kTmesh(itemp) == 0) then
+       if (new%kTmesh(itemp) == zero) then
          MSG_WARNING(msg)
        else
          MSG_ERROR(msg)
@@ -427,11 +417,11 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  integer :: ntens, nvecs, nvals, edos_intmeth, ifermi, iel
  real(dp) :: vr(3)
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT
- real(dp) :: linewidth, diff, min_diff, n0, n0_dy, fact0
+ real(dp) :: linewidth, fact0
  real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
- character(len=500) :: msg
+ !character(len=500) :: msg
 
  ! create alias for dimensions
  nsppol = self%ebands%nsppol
@@ -531,10 +521,8 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 
  ! Handle out of range condition.
  if (ifermi == 0 .or. ifermi == self%nw) then
-   write(msg,"(a)")&
-    "Bisection could not find energy index of the Fermi level!"
-   MSG_ERROR(msg)
-   return
+   MSG_ERROR("Bisection could not find energy index of the Fermi level!")
+   !return
  end if
 
  self%mobility = 0
@@ -672,6 +660,8 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0
  real(dp) :: max_occ, kT, wtk
 
+ ABI_UNUSED((/dtset%natom, comm/))
+
  ABI_MALLOC(self%mobility_mu,(2,self%nsppol,3,3,self%ntemp+1))
 
  ! create alias for dimensions
@@ -732,7 +722,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
            vv_tens(ii, jj) = vr(ii) * vr(jj)
          end do
        end do
-       ! Symmtrize tensor
+       ! Symmetrize tensor
        vv_tens = symmetrize_tensor(cryst,vv_tens)
        ! Multiply by the lifetime
        do itemp=1,self%ntemp

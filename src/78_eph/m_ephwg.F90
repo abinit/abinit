@@ -12,7 +12,7 @@
 !!    2.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG, HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -493,15 +493,15 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: sppoldbl1=1,timrev0=0
- integer :: ierr,ii,ik_idx,ik_bz,isym
- real(dp) :: dksqmax
+ integer :: ierr,ii,ik_idx
+ !real(dp) :: dksqmax
  character(len=80) :: errorstring
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(crystal_t),pointer :: cryst
 !arrays
- integer,allocatable :: indkk(:,:), lgkibz2bz(:), lgkibz2ibz(:), lgkibz2ibzkq(:)
- integer,allocatable :: bz2lgkibz(:), bz2lgkibzkq(:), bz2bz(:), mapping(:,:)
- real(dp) :: kpt_sym(3), kpt(3), wrap_kpt(3), shift
+ integer,allocatable :: lgkibz2bz(:) !indkk(:,:),
+ integer,allocatable :: bz2lgkibz(:), bz2lgkibzkq(:) !, bz2bz(:), mapping(:,:)
+ !real(dp) :: kpt(3), wrap_kpt(3), shift
 !----------------------------------------------------------------------
 
  cryst => self%cryst
@@ -829,6 +829,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
  real(dp) :: pme_k(self%nq_k,2), weights(neig,2)
 
 !----------------------------------------------------------------------
+ ABI_UNUSED(comm)
 
  ib = band - self%bstart + 1
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -913,7 +914,7 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
  integer :: iq, iq_ibz, ie, ii
  real(dp),parameter :: max_occ1 = one
 !arrays
- real(dp) :: thetaw(nene, self%nq_k), eigen_in(self%nq_k)
+ real(dp) :: eigen_in(self%nq_k) !thetaw(nene, self%nq_k),
 
 !----------------------------------------------------------------------
 

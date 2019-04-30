@@ -131,6 +131,10 @@ MODULE m_xmpi
  integer,public,parameter :: xmpio_single    =1  ! Individual IO.
  integer,public,parameter :: xmpio_collective=2  ! Collective IO.
 
+ integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
+ ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
+ ! This counter should be zero at the end of the run if all requests have been released)
+
 !----------------------------------------------------------------------
 !!***
 
@@ -1839,6 +1843,7 @@ subroutine xmpi_wait(request,mpierr)
 
  mpierr = 0
 #ifdef HAVE_MPI
+ if (request /= xmpi_request_null) xmpi_count_requests = xmpi_count_requests - 1
  call MPI_WAIT(request,status,ier)
  mpierr=ier
 #endif
@@ -1885,6 +1890,7 @@ subroutine xmpi_waitall_1d(array_of_requests, mpierr)
 
  mpierr = 0
 #ifdef HAVE_MPI
+ xmpi_count_requests = xmpi_count_requests - count(array_of_requests /= xmpi_request_null)
  call MPI_WAITALL(size(array_of_requests), array_of_requests, status, ier)
  mpierr=ier
 #endif
@@ -1929,7 +1935,7 @@ subroutine xmpi_waitall_2d(array_of_requests, mpierr)
  ! so flat 2d array and copy in-out. See https://github.com/open-mpi/ompi/issues/587
  flat_requests = pack(array_of_requests, mask=.True.)
  call xmpi_waitall_1d(flat_requests, mpierr)
- array_of_requests = reshape(flat_requests,  shape(array_of_requests))
+ array_of_requests = reshape(flat_requests, shape(array_of_requests))
 
 end subroutine xmpi_waitall_2d
 !!***
@@ -1945,7 +1951,7 @@ end subroutine xmpi_waitall_2d
 !!  Frees an array of communication request objects.
 !!
 !! INPUTS
-!!  requests(:)= communication request  array (array of handles)
+!!  requests(:)= communication request array (array of handles)
 !!
 !! OUTPUT
 !!  mpierr= status error
@@ -1973,6 +1979,7 @@ subroutine xmpi_request_free(requests,mpierr)
  mpierr = 0
 #ifdef HAVE_MPI
  do ii=1,size(requests)
+   if (requests(ii) /= xmpi_request_null) xmpi_count_requests = xmpi_count_requests - 1
    call MPI_REQUEST_FREE(requests(ii),ier)
  end do
  mpierr=ier
@@ -2091,7 +2098,8 @@ end subroutine xmpi_comm_set_errhandler
 !!  split_work_i4b
 !!
 !! FUNCTION
-!!  Splits the number of tasks, ntasks, among nprocs processors. Used for the MPI parallelization of simple loops.
+!!  Splits the number of tasks, ntasks, among nprocs processors. 
+!!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS
 !!  ntasks=number of tasks
@@ -2099,15 +2107,12 @@ end subroutine xmpi_comm_set_errhandler
 !!
 !! OUTPUT
 !!  my_start,my_stop= indices defining the initial and final task for this processor
-!!  warn_msg=String containing a possible warning message if the distribution is not optima.
-!!  ierr=Error status
-!!    +1 if ntasks is not divisible by nprocs.
-!!    +2 if ntasks>nprocs.
 !!
 !! NOTES
-!!  If nprocs>ntasks then:
-!!    my_start=ntasks+1
-!!    my_stop=ntask
+!!  If nprocs > ntasks then:
+!!
+!!    my_start = ntasks + 1
+!!    my_stop = ntask
 !!
 !!  In this particular case, loops of the form
 !!
@@ -2121,41 +2126,24 @@ end subroutine xmpi_comm_set_errhandler
 !!
 !! SOURCE
 
-subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop,warn_msg,ierr)
+subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop)
 
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,comm
- integer,intent(out) :: my_start,my_stop,ierr
- character(len=500) :: warn_msg
+ integer,intent(out) :: my_start, my_stop
 
 !Local variables-------------------------------
  integer :: res,nprocs,my_rank,block_p1,block
 
 ! *************************************************************************
 
- nprocs  = xmpi_comm_size(comm)
- my_rank = xmpi_comm_rank(comm)
+ nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  block   = ntasks/nprocs
  res     = MOD(ntasks,nprocs)
  block_p1= block+1
 
- warn_msg = ""; ierr=0
- if (res/=0) then
-   write(warn_msg,'(4a,i0,a,i0)')ch10,&
-    'xmpi_split_work: ',ch10,&
-    'The number of tasks= ',ntasks,' is not divisible by nprocs= ',nprocs
-   ierr=1
- end if
- if (block==0) then
-   write(warn_msg,'(4a,i0,a,i0,2a)')ch10,&
-    'xmpi_split_work: ',ch10,&
-    'The number of processors= ',nprocs,' is larger than number of tasks= ',ntasks,ch10,&
-    'This is a waste'
-    ierr=2
- end if
-
- if (my_rank<res) then
+ if (my_rank < res) then
    my_start =  my_rank   *block_p1+1
    my_stop  = (my_rank+1)*block_p1
  else
@@ -2179,7 +2167,7 @@ end subroutine xmpi_split_work_i4b
 !!  Namely CPU with rank ii has to perform all the tasks between
 !!  istart(ii+1) and istop(ii+1). Note the Fortran convention of using
 !!  1 as first index of the array.
-!!  Note, moreover, that if a proc has rank>ntasks then :
+!!  Note, moreover, that if a proc has rank > ntasks then:
 !!   istart(rank+1)=ntasks+1
 !!   istop(rank+1)=ntask
 !!
@@ -2198,10 +2186,6 @@ end subroutine xmpi_split_work_i4b
 !!
 !! OUTPUT
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
-!!  ierr=Error status.
-!!  warn_msg=String containing the warning message.
-!!    +1 if ntasks is not divisible by nprocs.
-!!    +2 if ntasks>nprocs.
 !!
 !! PARENTS
 !!      exc_build_block,m_screening,m_skw,setup_screening
@@ -2211,13 +2195,11 @@ end subroutine xmpi_split_work_i4b
 !!
 !! SOURCE
 
-subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop,warn_msg,ierr)
+subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop)
 
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,nprocs
- integer,intent(out) :: ierr
  integer,intent(inout) :: istart(nprocs),istop(nprocs)
- character(len=500),intent(out) :: warn_msg
 
 !Local variables-------------------------------
  integer :: res,irank,block,block_tmp
@@ -2227,21 +2209,6 @@ subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop,warn_msg,ierr)
  block_tmp = ntasks/nprocs
  res       = MOD(ntasks,nprocs)
  block     = block_tmp+1
-
- warn_msg = ""; ierr=0
- if (res/=0) then
-   write(warn_msg,'(a,i0,a,i0,2a)')&
-    'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
-    'parallelism is not efficient '
-   ierr=+1
- end if
-
- if (block_tmp==0) then
-   write(warn_msg,'(a,i0,a,i0,2a)')&
-    'The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
-    'This is a waste '
-   ierr=+2
- end if
 
  do irank=0,nprocs-1
    if (irank<res) then
@@ -2271,10 +2238,6 @@ end subroutine xmpi_split_work2_i4b
 !!
 !! OUTPUT
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
-!!  ierr=Error status.
-!!  warn_msg=String containing the warning message.
-!!    +1 if ntasks is not divisible by nprocs.
-!!    +2 if ntasks>nprocs.
 !!
 !! PARENTS
 !!      exc_build_block,m_shirley
@@ -2284,14 +2247,12 @@ end subroutine xmpi_split_work2_i4b
 !!
 !! SOURCE
 
-subroutine xmpi_split_work2_i8b(ntasks,nprocs,istart,istop,warn_msg,ierr)
+subroutine xmpi_split_work2_i8b(ntasks,nprocs,istart,istop)
 
 !Arguments ------------------------------------
  integer,intent(in)  :: nprocs
  integer(i8b),intent(in)  :: ntasks
- integer,intent(out) :: ierr
  integer(i8b),intent(inout) :: istart(nprocs),istop(nprocs)
- character(len=500),intent(out) :: warn_msg
 
 !Local variables-------------------------------
  integer(i8b) :: res,irank,block,block_tmp
@@ -2301,21 +2262,6 @@ subroutine xmpi_split_work2_i8b(ntasks,nprocs,istart,istop,warn_msg,ierr)
  block_tmp = ntasks/nprocs
  res       = MOD(ntasks,INT(nprocs,KIND=i8b))
  block     = block_tmp+1
-
- warn_msg = ""; ierr=0
- if (res/=0) then
-   write(warn_msg,'(a,i0,a,i0,2a)')&
-    'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
-    'parallelism is not efficient '
-   ierr=+1
- end if
- !
- if (block_tmp==0) then
-   write(warn_msg,'(a,i0,a,i0,2a)')&
-    ' The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
-    ' This is a waste '
-   ierr=+2
- end if
 
  do irank=0,nprocs-1
    if (irank<res) then

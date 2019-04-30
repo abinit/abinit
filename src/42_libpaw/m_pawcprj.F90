@@ -141,8 +141,6 @@ CONTAINS
 
  subroutine pawcprj_alloc(cprj,ncpgr,nlmn)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncpgr
@@ -221,8 +219,6 @@ end subroutine pawcprj_alloc
 
  subroutine pawcprj_free(cprj)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -272,8 +268,6 @@ end subroutine pawcprj_free
 !! SOURCE
 
  subroutine pawcprj_set_zero(cprj)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -334,8 +328,6 @@ end subroutine pawcprj_set_zero
 
  subroutine pawcprj_copy(cprj_in,cprj_out,&
 &                    icpgr) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -442,8 +434,6 @@ end subroutine pawcprj_copy
 !! SOURCE
 
  subroutine pawcprj_axpby(alpha,beta,cprjx,cprjy)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -566,8 +556,6 @@ end subroutine pawcprj_axpby
 !! SOURCE
 
  subroutine pawcprj_zaxpby(alpha,beta,cprjx,cprjy)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -740,8 +728,6 @@ end subroutine pawcprj_zaxpby
 &                       isym,itim,kpt,lmax,lmnmax,mband,natom,nband,nspinor,nsym,ntypat,&
 &                       typat,zarot)
 
- implicit none
-
 !Arguments---------------------------
 !scalars
  integer,intent(in) :: iband,isym,itim,lmax,lmnmax,mband
@@ -870,8 +856,6 @@ end subroutine pawcprj_zaxpby
 
  subroutine pawcprj_conjg(cprj)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -940,8 +924,6 @@ end subroutine pawcprj_conjg
 !! SOURCE
 
  subroutine pawcprj_lincom(alpha,cprj_in,cprj_out,nn)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1042,8 +1024,6 @@ end subroutine pawcprj_lincom
 
  subroutine pawcprj_output(cprj)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalar
 !arrays
@@ -1133,8 +1113,6 @@ end subroutine pawcprj_output
  subroutine pawcprj_get(atind,cprj_k,cprj,dimcp,iband1,ibg,ikpt,iorder,isppol,mband,&
 &                    mkmem,natom,nband,nband_k,nspinor,nsppol,uncp,&
 &                    icpgr,ncpgr,mpicomm,proc_distrb) ! optionals arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1361,8 +1339,6 @@ end subroutine pawcprj_get
 &           mkmem,natom,nband,nband_k,nlmn,nspinor,nsppol,uncp,&
 &           mpicomm,mpi_comm_band,proc_distrb,to_be_gathered) ! Optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iband1,ibg,ikpt,iorder,isppol,dimcp,mband,mkmem
@@ -1563,8 +1539,6 @@ end subroutine pawcprj_put
 
  subroutine pawcprj_reorder(cprj,atm_indx)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -1664,8 +1638,6 @@ end subroutine pawcprj_reorder
 !! SOURCE
 
 subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,receiver,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1797,8 +1769,6 @@ end subroutine pawcprj_mpi_exch
 
 subroutine pawcprj_mpi_send(natom,n2dim,nlmn,ncpgr,cprj_out,receiver,spaceComm,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,n2dim,ncpgr
@@ -1911,8 +1881,6 @@ end subroutine pawcprj_mpi_send
 
 subroutine pawcprj_mpi_recv(natom,n2dim,nlmn,ncpgr,cprj_in,sender,spaceComm,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,n2dim,ncpgr
@@ -2016,8 +1984,6 @@ end subroutine pawcprj_mpi_recv
 
 subroutine pawcprj_mpi_sum(cprj,spaceComm,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: spaceComm
@@ -2118,8 +2084,6 @@ end subroutine pawcprj_mpi_sum
 
 subroutine pawcprj_mpi_allgather(cprj_loc,cprj_gat,natom,n2dim,nlmn,ncpgr,nproc,spaceComm,ierr,&
 &                                rank_ordered)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2250,8 +2214,6 @@ end subroutine pawcprj_mpi_allgather
 
 subroutine pawcprj_bcast(Cprj,natom,n2dim,nlmn,ncpgr,master,spaceComm,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,n2dim,ncpgr,master,spaceComm
@@ -2370,8 +2332,6 @@ end subroutine pawcprj_bcast
 !! SOURCE
 
  subroutine pawcprj_transpose(cprjin,cprjout,cprj_bandpp,natom,nband,nspinor,spaceComm)
-
- implicit none
 
 !Arguments-------------------------------------
 !scalars
@@ -2622,8 +2582,6 @@ end subroutine pawcprj_bcast
  subroutine pawcprj_gather_spin(cprj,cprj_gat,natom,n2size,nspinor,nspinortot,&
 &                            spaceComm_spin,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nspinor,nspinortot,n2size
@@ -2744,8 +2702,6 @@ end subroutine pawcprj_bcast
 
 subroutine pawcprj_getdim(dimcprj,natom,nattyp,ntypat,typat,Pawtab,sort_mode)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: natom,ntypat
  character(len=*),intent(in) :: sort_mode
@@ -2811,8 +2767,6 @@ end subroutine pawcprj_getdim
 !! SOURCE
 
 function paw_overlap(cprj1,cprj2,typat,pawtab,spinor_comm) result(onsite)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2983,8 +2937,6 @@ end subroutine pawcprj_pack
 !! SOURCE
 
 subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

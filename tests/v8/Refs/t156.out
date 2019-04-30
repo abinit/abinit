@@ -418,28 +418,31 @@ All the independent perturbations are available
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 0
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 1
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -554,29 +557,32 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Using double grid technique with ndiv: 27
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 0
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 1
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Using double grid technique with ndiv: 27
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -695,28 +701,31 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 0
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 1
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -837,29 +846,32 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Using double grid technique with ndiv: 27
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 0
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 1
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Using double grid technique with ndiv: 27
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -979,28 +991,31 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 0
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 1
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -1113,28 +1128,31 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
-Symsigma: 1 Timrev: 1
-Imaginary shift in the denominator (zcut): 0.100 [eV]
-Method for q-space integration: Standard quadrature
-Only the Imaginary part of Sigma will be computed.
-Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 0
-Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
-Ab-initio q-mesh from DDB file: [2,2,2]
-Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
-Number of q-points in the IBZ: 3
-asr: 1 dipdip: 1 symdynmat: 1
-No special treatment of Frohlich divergence in gkq for q --> 0
-Number of k-points for self-energy corrections: 1
-List of K-points for self-energy corrections:
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:

@@ -35,7 +35,7 @@
 ! Reference files should be updated
 !#define DEV_NEW_HDR
 
-MODULE m_hdr
+module m_hdr
 
  use defs_basis
  use m_build_info
@@ -177,7 +177,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(49) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(50) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -257,7 +257,8 @@ MODULE m_hdr
    abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
    abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data"), &
    abifile_t(varname="no_fftdatar_write", fform=6000, ext="ABIWAN", class="data"), &
-   abifile_t(varname="None", fform=6001, ext="KERANGE", class="data") &
+   abifile_t(varname="None", fform=6001, ext="KERANGE", class="data"), &
+   abifile_t(varname="None", fform=6002, ext="SIGEPH", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -1850,6 +1851,7 @@ end subroutine hdr_io_int
 !!        if 4, echo the header to formatted file
 !!  fform=kind of the array in the file
 !!  [unit]=unit number of the formatted file [DEFAULT: std_out]
+!!  [header]=Optional title.
 !!
 !! OUTPUT
 !!  Only writing
@@ -1864,13 +1866,14 @@ end subroutine hdr_io_int
 !!
 !! SOURCE
 
-subroutine hdr_echo(Hdr,fform,rdwr,unit)
+subroutine hdr_echo(hdr, fform, rdwr, unit, header)
 
 !Arguments ------------------------------------
  integer,intent(inout) :: fform
  integer,intent(in) :: rdwr
  integer,optional,intent(in) :: unit
  type(hdr_type),intent(inout) :: hdr
+ character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
  integer,parameter :: max_ns=6
@@ -1882,6 +1885,7 @@ subroutine hdr_echo(Hdr,fform,rdwr,unit)
  ount = std_out; if (present(unit)) ount = unit; if (ount == dev_null) return
 
  write(ount,'(a)')' ==============================================================================='
+ if (present(header)) write(ount, "(a)")ch10//' === '//trim(adjustl(header))//' === '
  if (rdwr==3) write(ount, '(a)' ) ' ECHO of part of the ABINIT file header '
  if (rdwr==4) write(ount, '(a)' ) ' ECHO of the ABINIT file header '
  write(ount, '(a)' ) ' '
@@ -1976,7 +1980,6 @@ subroutine hdr_echo(Hdr,fform,rdwr,unit)
      else
        write(ount,'(a,i3)' ) '  lmnmax  =', hdr%lmn_size(ipsp)
      end if
-
    end do
 
    write(ount, '(a)' ) ' '
@@ -3985,29 +3988,29 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
 !NEW_HDR
  if (any(hdr%kptrlatt /= hdr0%kptrlatt)) then
-    write(msg,"(2(a,9(i0,1x)))")"input kptrlatt= ",hdr%kptrlatt," /= disk file kptrlatt=",hdr0%kptrlatt
+    write(msg,"(2(a,9(i0,1x)))")"input kptrlatt = ",hdr%kptrlatt," /= disk file kptrlatt = ",hdr0%kptrlatt
     MSG_COMMENT(msg)
  end if
  if (hdr%kptopt /= hdr0%kptopt) then
-    MSG_COMMENT(sjoin("input kptopt=",itoa(hdr%kptopt)," /= disk file kptopt=",itoa(hdr0%kptopt)))
+    MSG_COMMENT(sjoin("input kptopt = ", itoa(hdr%kptopt)," /= disk file kptopt = ", itoa(hdr0%kptopt)))
  end if
  if (hdr%pawcpxocc /= hdr0%pawcpxocc) then
-    MSG_WARNING(sjoin("input pawcpxocc=",itoa(hdr%pawcpxocc)," /= disk file pawcpxocc=",itoa(hdr0%pawcpxocc)))
+    MSG_WARNING(sjoin("input pawcpxocc = ", itoa(hdr%pawcpxocc)," /= disk file pawcpxocc = ", itoa(hdr0%pawcpxocc)))
  end if
  if (hdr%icoulomb /= hdr0%icoulomb) then
-    MSG_WARNING(sjoin("input icoulomb=",itoa(hdr%icoulomb)," /= disk file icoulomb=",itoa(hdr0%icoulomb)))
+    MSG_WARNING(sjoin("input icoulomb = ", itoa(hdr%icoulomb)," /= disk file icoulomb = ", itoa(hdr0%icoulomb)))
  end if
 
  if (abs(hdr%nelect - hdr0%nelect) > tol6) then
-    MSG_WARNING(sjoin("input nelect=",ftoa(hdr%nelect)," /= disk file nelect=",ftoa(hdr0%nelect)))
+    MSG_WARNING(sjoin("input nelect = ", ftoa(hdr%nelect)," /= disk file nelect = ",ftoa(hdr0%nelect)))
  end if
  if (abs(hdr%charge - hdr0%charge) > tol6) then
-    MSG_WARNING(sjoin("input charge=",ftoa(hdr%charge)," /= disk file charge=",ftoa(hdr0%charge)))
+    MSG_WARNING(sjoin("input charge = ", ftoa(hdr%charge)," /= disk file charge = ", ftoa(hdr0%charge)))
  end if
 
  if (hdr%ntypat==hdr0%ntypat) then
    if (any(abs(hdr%amu - hdr0%amu) > tol6)) then
-      MSG_WARNING(sjoin("input amu=",ltoa(hdr%amu)," /= disk file amu=",ltoa(hdr0%amu)))
+      MSG_WARNING(sjoin("input amu = ",ltoa(hdr%amu)," /= disk file amu = ",ltoa(hdr0%amu)))
    end if
  end if
 !end NEW_HDR
@@ -4398,14 +4401,13 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  type(Dataset_type),intent(in) :: Dtset
 
 !Local variables-------------------------------
- integer :: ik,jj,ierr
- logical :: test
- logical :: tsymrel,ttnons,tsymafm
- character(len=500) :: msg
+ integer :: ik, jj, ierr
+ logical :: test, tsymrel,ttnons, tsymafm
+ character(len=5000) :: msg
 ! *************************************************************************
 
  ! Check basic dimensions
- ierr=0
+ ierr = 0
  call compare_int('natom',  Hdr%natom,  Dtset%natom,  ierr)
  call compare_int('nkpt',   Hdr%nkpt,   Dtset%nkpt,   ierr)
  call compare_int('npsp',   Hdr%npsp,   Dtset%npsp,   ierr)
@@ -4436,12 +4438,12 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  ABI_CHECK(test,'Mismatch in typat')
 
  ! Check if the lattice from the input file agrees with that read from the KSS file
- if ( (ANY(ABS(Hdr%rprimd-Dtset%rprimd_orig(1:3,1:3,1))>tol6)) ) then
+ if ( (ANY(ABS(Hdr%rprimd - Dtset%rprimd_orig(1:3,1:3,1)) > tol6)) ) then
    write(msg,'(5a,3(3es16.6),3a,3(3es16.6),3a)')ch10,&
    ' real lattice vectors read from Header differ from the values specified in the input file', ch10, &
    ' rprimd from Hdr file   = ',ch10,(Hdr%rprimd(:,jj),jj=1,3),ch10,&
    ' rprimd from input file = ',ch10,(Dtset%rprimd_orig(:,jj,1),jj=1,3),ch10,ch10,&
-   '  Modify the lattice vectors in the input file '
+   ' Modify the lattice vectors in the input file '
    MSG_ERROR(msg)
  end if
 
@@ -4555,17 +4557,13 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 
  ! Check istwfk storage
  if ( (ANY(Hdr%istwfk(:)/=Dtset%istwfk(1:Dtset%nkpt))) ) then
-   write(msg,'(9a)')ch10,&
-   ' hdr_vs_dtset : ERROR - ',ch10,&
-   '  istwfk read from Header ',ch10,&
-   '  differ from the values specified in the input file',ch10,&
-   '  Hdr | input ',ch10
-   call wrtout(std_out,msg,'COLL')
-   do ik=1,Dtset%nkpt
-     write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)
-     call wrtout(std_out,msg,'COLL')
-   end do
-   MSG_ERROR('Modify istwfk in the input file')
+   MSG_COMMENT('istwfk read from Header differs from the values specified in the input file (this is not critical)')
+   !call wrtout(std_out, "  Hdr | input ")
+   !do ik=1,Dtset%nkpt
+   !  write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)
+   !  call wrtout(std_out,msg,'COLL')
+   !end do
+   !MSG_ERROR('Modify istwfk in the input file.')
  end if
 
  CONTAINS
@@ -4579,7 +4577,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!  Compare two int value and may raise an exception on error.
 !!
 !! INPUTS
-!!  name=Name of the variable
+!!  vname=Name of the variable
 !!  iexp= expected value.
 !!  ifound=the actuval value
 !!
@@ -4594,28 +4592,24 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!
 !! SOURCE
 
- subroutine compare_int(name,iexp,ifound,ierr)
+ subroutine compare_int(vname, iexp, ifound, ierr)
 
 !Arguments ------------------------------------
  integer,intent(in) :: iexp,ifound
  integer,intent(inout) :: ierr
- character(len=*),intent(in) :: name
+ character(len=*),intent(in) :: vname
 
 !Local variables-------------------------------
- logical :: leq
  character(len=500) :: msg
+
 ! *************************************************************************
 
-   leq=(iexp==ifound)
-
-   if (.not.leq) then
-     write(msg,'(4a,i6,a,i6)')ch10,&
-     ' hdr_vs_dtset : WARNING - Mismatch in '//TRIM(name),ch10,&
-     '  Expected = ',iexp,' Found = ',ifound
-     call wrtout(std_out,msg,'COLL')
-     ! Increase ierr to signal we should stop in the caller.
-     ierr=ierr+1
-   end if
+ if (.not. iexp == ifound) then
+   write(msg,'(3a,i0,a,i0)')' Mismatch in '//trim(vname),' Expected = ', iexp, ' Found = ', ifound
+   call wrtout(std_out, msg)
+   ! Increase ierr to signal we should stop in the caller.
+   ierr = ierr + 1
+ end if
 
  end subroutine compare_int
 !!***

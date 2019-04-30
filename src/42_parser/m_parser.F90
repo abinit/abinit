@@ -999,9 +999,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
        write(message, '(7a)' )&
-&       'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
-&       'This is confusing, so it has been forbidden.',ch10,&
-&       'Action: remove one of the two occurences.'
+       'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+       'This is confusing, so it has been forbidden.',ch10,&
+       'Action: remove one of the two occurences.'
        MSG_ERROR(message)
      end if
 
@@ -1614,24 +1614,18 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 !end if
 
  if(errcod/=0)then
-
-   write(message, '(8a,i0,a)' ) ch10,&
-&   ' inarray : ',ch10,&
-&   '  An error occurred reading data for keyword "',trim(cs),'",',ch10,&
-&   '  looking for ',narr,' array elements.'
-   call wrtout(std_out,message,do_flush=.true.)
-
-   write(message,'(8a)')&
-&   'There is a problem with the input file : maybe  ',ch10,&
-&   'a disagreement between the declared dimension of the array,',ch10,&
-&   'and the number of data actually provided. ',ch10,&
-&   'Action: correct your input file, and especially the keywork', trim(cs)
+   write(message, '(5a,i0,10a)' ) &
+   'An error occurred reading data for keyword "',trim(cs),'",',ch10,&
+   'looking for ',narr,' array elements.', ch10, &
+   'There is a problem with the input file: maybe  ',ch10,&
+   'a disagreement between the declared dimension of the array,',ch10,&
+   'and the number of data actually provided. ',ch10,&
+   'Action: correct your input file, and especially the keyword', trim(cs)
    MSG_ERROR(message)
  end if
 
 !In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
-if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' &
-&    .or. typevarphys=='TIM')then
+if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM')then
    do
 
 !    Relative location of next blank after data
@@ -2688,7 +2682,7 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 & '  The value of the input variable ',trim(input_name),' is ',input_value,', while it must be'
  if(minmax_flag==2)then
    write(message, '(3a,20(i0,1x))' ) trim(message),ch10,&
-   '  different from one of the following:',list_values(1:list_number)
+   '  different from one of the following: ',list_values(1:list_number)
  else if(list_number>1 .or. &
 &   minmax_flag==0 .or. list_values(1)/=minmax_value )then
 !  The following format restricts list_values to be between -99 and 999
@@ -2696,8 +2690,7 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
      write(message, '(3a,40(i0,1x))' ) trim(message),ch10,&
      '  equal to one of the following: ',list_values(1:list_number)
    else
-     write(message, '(3a,40(i0,1x))' ) trim(message),ch10,&
-     '  equal to ',list_values(1)
+     write(message, '(3a,40(i0,1x))' ) trim(message),ch10,'  equal to ',list_values(1)
    end if
    if(minmax_flag==1)then
 !    The following format restricts minmax_value to be between -99 and 999

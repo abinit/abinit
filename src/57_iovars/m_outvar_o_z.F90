@@ -1006,6 +1006,9 @@ contains
  intarr(1,:)=dtsets(:)%symsigma
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symsigma','INT',0)
 
+ intarr(1,:)=dtsets(:)%symv1scf
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symv1scf','INT',0)
+
 !###########################################################
 !### 03. Print all the input variables (T)
 !##

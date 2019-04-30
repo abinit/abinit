@@ -211,9 +211,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  ! Costruct crystal and ebands from the GS WFK file.
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
- if (dtset%wfk_task /= WFK_TASK_KLIST2MESH) then
-   call hdr_vs_dtset(wfk0_hdr, dtset)
- end if
+ call hdr_vs_dtset(wfk0_hdr, dtset)
 
  cryst = hdr_get_crystal(wfk0_hdr, timrev2)
  call crystal_print(cryst,header="crystal structure from WFK file")
@@ -352,11 +350,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
    ! Initialize and compute data for LDA+U
    !paw_dmft%use_dmft=dtset%usedmft
-   !if (dtset%usepawu>0.or.dtset%useexexch>0) then
-   !  call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-   !    dtset%jpawu,dtset%lexexch,dtset%lpawu,cryst%ntypat,pawang,dtset%pawprtvol,&
+   !call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
+   !    .false.,dtset%jpawu,dtset%lexexch,dtset%lpawu,cryst%ntypat,pawang,dtset%pawprtvol,&
    !    Pawrad,pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
-   !end if
    !ABI_CHECK(paw_dmft%use_dmft==0,"DMFT not available")
    !call destroy_sc_dmft(paw_dmft)
 
@@ -365,7 +361,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(wfk0_hdr%pawrhoij,pawrhoij)
 
-   ! Variables/arrays related to the fine FFT grid ===
+   ! Variables/arrays related to the fine FFT grid.
    ABI_DT_MALLOC(pawfgrtab,(cryst%natom))
    call pawtab_get_lsize(pawtab,l_size_atm,cryst%natom,cryst%typat)
    cplex=1
@@ -413,10 +409,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      !call destroy_tetra(tetra)
    end if
    call xmpi_barrier(comm)
-
- case (WFK_TASK_KLIST2MESH)
-    wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-    call wfk_klist2mesh(wfk0_path, "Tmp/o_DS2_KERANGE.nc", dtset, psps, pawtab, wfkfull_path, comm)
 
  case (WFK_TASK_KPTS_ERANGE)
    call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)
