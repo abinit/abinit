@@ -32,7 +32,7 @@ MODULE m_forctqmc
 
  use defs_basis
  use m_nctk
- use hdr
+ use m_hdr
 #ifdef HAVE_NETCDF
   use netcdf !If calling TRIQS via python invokation, write a .nc file
 #endif
