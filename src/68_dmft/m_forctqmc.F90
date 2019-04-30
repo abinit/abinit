@@ -31,9 +31,9 @@
 MODULE m_forctqmc
 
  use defs_basis
- #ifdef HAVE_NETCDF
+#ifdef HAVE_NETCDF
   use netcdf !If calling TRIQS via python invokation, write a .nc file
- #endif
+#endif
 
  implicit none
 
