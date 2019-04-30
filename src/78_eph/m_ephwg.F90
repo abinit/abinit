@@ -303,6 +303,7 @@ type(ephwg_t) function ephwg_new( &
      gkq2_lr(nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu)
    end do
    new%frohl_ibz(ik,:) = gkq2_lr !* fqdamp
+   if (sum(qpt**2) < tol14) new%frohl_ibz(ik,:3) = 0
  end do
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
