@@ -23,7 +23,7 @@
 !!
 !! SOURCE
 
-!#define DEV_NEW_TETRA
+#define DEV_NEW_TETRA
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
