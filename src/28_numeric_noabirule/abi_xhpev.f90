@@ -9,7 +9,7 @@
 !!  symmetric or hermitian matrix A in packed storage
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS),MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@
 !!
 !! SOURCE
 
-  subroutine abi_dhpev_1d_new(jobz,uplo,n,a,w,z,istwf_k,use_slk)
+  subroutine abi_dhpev_1d_new(jobz,uplo,n,a,w,z,ldz,istwf_k,use_slk)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -43,7 +43,7 @@
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
+ integer, intent(in) :: n,ldz
  real(dp), intent(inout) :: a(:)
  real(dp), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
@@ -51,8 +51,7 @@
  integer, optional, intent(in) :: use_slk
 
 !Local variables-------------------------------
- integer :: info,ldz,use_slk_,istwf_k_
- character(len=500) :: msg
+ integer :: info,use_slk_,istwf_k_
 #ifdef HAVE_LINALG_SCALAPACK
  type(matrix_scalapack) :: sca_a,sca_ev
  real(dp),allocatable :: tmp_evec(:,:)
@@ -61,16 +60,14 @@
 
 ! *********************************************************************
 
- if (n > eigen_d_maxsize) then
-   write(msg,'(a,2i3)')' Eigen size higher than max size set!!',n,eigen_d_maxsize
-   MSG_ERROR(msg)
- endif
+ ABI_CHECK(lapack_full_storage,"BUG(1) in abi_dhpev (storage)!")
+ ABI_CHECK(lapack_double_precision,"BUG(2) in abi_dhpev (precision)!")
+ ABI_CHECK(n<=eigen_d_maxsize,"BUG(3) in abi_dhpev (maxsize)!")
+
  info = 0 ! to avoid unwanted warnings but scalapack doesn't check return
 
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-
- ldz = n
 
 #ifdef HAVE_LINALG_SCALAPACK
  if (use_slk_ == 1) then
@@ -95,7 +92,6 @@
    ABI_DEALLOCATE(tmp_evec)
   else
 #endif
-
    if (istwf_k_ /= 2) then
      call zhpev(jobz,uplo,n,a,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
    else
@@ -105,67 +101,10 @@
 #ifdef HAVE_LINALG_SCALAPACK
   end if
 #endif
-  if (info/=0) then
-    write(msg,'(a,i3)')' Problem in abi_dhpev, info= ',info
-    MSG_WARNING(msg)
-  endif
+
+ ABI_CHECK(info==0,"dhpev returned info!=0!")
 
 end subroutine abi_dhpev_1d_new
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_dhpev_2d_new
-!! NAME
-!! abi_dhpe_2d_new
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! SOURCE
-
- subroutine abi_dhpev_2d_new(jobz,uplo,n,a,w,z,istwf_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev_2d_new'
-
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- real(dp), intent(inout) :: a(:,:)
- real(dp), intent(out) :: z(:,:)
- real(dp), intent(out) :: w(:)
- integer, optional, intent(in) :: istwf_k
-
-!Local variables-------------------------------
- integer :: ldz
- integer :: info
- integer :: istwf_k_
-
- ! *********************************************************************
-
- istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
- ldz=n
-
- if (istwf_k_ /= 2) then
-    call zhpev(jobz,uplo,n,a,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
- else
-    call dspev(jobz,uplo,n,a,w,z,ldz,eigen_d_work,info)
- endif
-
- ABI_CHECK(info==0,"[z,d]hpev returned info !=0")
-
-end subroutine abi_dhpev_2d_new
 !!***
 
 !----------------------------------------------------------------------
@@ -182,7 +121,7 @@ end subroutine abi_dhpev_2d_new
 !!
 !! SOURCE
 
-  subroutine abi_chpev_new(jobz,uplo,n,a,w,z)
+  subroutine abi_chpev_new(jobz,uplo,n,a,w,z,ldz)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -195,21 +134,39 @@ end subroutine abi_dhpev_2d_new
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
+ integer, intent(in) :: n,ldz
  complex(spc), intent(inout) :: a(:,:)
  complex(spc), intent(out) :: z(:,:)
  real(sp), intent(out) :: w(:)
 
 !Local variables-------------------------------
- integer :: ldz
  integer :: info
+ real(sp),pointer :: rwork(:)
+ complex(spc),pointer :: work(:)
 
 ! *********************************************************************
 
- ldz=n
- call chpev(jobz,uplo,n,a,w,z,ldz,eigen_c_work,eigen_c_rwork,info)
+ ABI_CHECK(lapack_full_storage,"BUG(1) in abi_chpev (storage)!")
+ ABI_CHECK(lapack_single_precision,"BUG(2) in abi_chpev (precision)!")
+ ABI_CHECK(n<=eigen_c_maxsize,"BUG(3) in abi_chpev (maxsize)!")
 
- ABI_CHECK(info==0,"chpev returned info !=0")
+ work => eigen_c_work ; rwork => eigen_c_rwork
+
+ if (eigen_c_lwork==0) then
+   ABI_ALLOCATE(work,(2*n-1))
+ end if
+ if (eigen_c_lrwork==0) then
+   ABI_ALLOCATE(rwork,(3*n-2))
+ end if
+ call chpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
+ if (eigen_c_lwork==0) then
+   ABI_DEALLOCATE(work)
+ end if
+ if (eigen_c_lrwork==0) then
+   ABI_DEALLOCATE(rwork)
+ end if
+
+ ABI_CHECK(info==0,"abi_chpev returned info!=0!")
 
 end subroutine abi_chpev_new
 !!***
@@ -228,7 +185,7 @@ end subroutine abi_chpev_new
 !!
 !! SOURCE
 
-  subroutine abi_zhpev_new(jobz,uplo,n,a,w,z)
+  subroutine abi_zhpev_new(jobz,uplo,n,a,w,z,ldz)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -241,21 +198,39 @@ end subroutine abi_chpev_new
 !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
+ integer, intent(in) :: n,ldz
  complex(dpc), intent(inout) :: a(:,:)
  complex(dpc), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
 
 !Local variables-------------------------------
- integer :: ldz
  integer :: info
+ real(dp),pointer :: rwork(:)
+ complex(dpc),pointer :: work(:)
 
 ! *********************************************************************
 
- ldz=n
- call zhpev(jobz,uplo,n,a,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
+ ABI_CHECK(lapack_full_storage,"BUG(1) in abi_zhpev (storage)!")
+ ABI_CHECK(lapack_double_precision,"BUG(2) in abi_zhpev (precision)!")
+ ABI_CHECK(n<=eigen_z_maxsize,"BUG(3) in abi_zhpev (maxsize)!")
 
- ABI_CHECK(info==0,"zhpev returned info !=0")
+ work => eigen_z_work ; rwork => eigen_z_rwork
+
+ if (eigen_z_lwork==0) then
+   ABI_ALLOCATE(work,(2*n-1))
+ end if
+ if (eigen_z_lrwork==0) then
+   ABI_ALLOCATE(rwork,(3*n-2))
+ end if
+ call zhpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
+ if (eigen_z_lwork==0) then
+   ABI_DEALLOCATE(work)
+ end if
+ if (eigen_z_lrwork==0) then
+   ABI_DEALLOCATE(rwork)
+ end if
+
+ ABI_CHECK(info==0,"abi_zhpev returned info!=0!")
 
 end subroutine abi_zhpev_new
 !!***

@@ -12,7 +12,7 @@
 !!  stored in packed format  and B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2018 ABINIT group (LNguyen,FDahm (CS),MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@
 !!
 !! SOURCE
 !!
-  subroutine abi_dhpgv_1d_new(itype,jobz,uplo,n,a,b,w,z,istwf_k,use_slk)
+  subroutine abi_dhpgv_1d_new(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -47,7 +47,7 @@
  integer :: itype
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
+ integer, intent(in) :: n,ldz
  real(dp), intent(inout) :: a(:)
  real(dp), intent(inout) :: b(:)
  real(dp), intent(out) :: z(:,:)
@@ -56,8 +56,7 @@
  integer, optional, intent(in) :: use_slk
 
 !Local variables-------------------------------
- integer :: info,ldz,use_slk_,istwf_k_
- character(len=500) :: msg
+ integer :: info,use_slk_,istwf_k_
 #ifdef HAVE_LINALG_SCALAPACK
  type(matrix_scalapack) :: sca_a,sca_b,sca_ev
  integer :: ierr
@@ -65,16 +64,14 @@
 
 ! *********************************************************************
 
- if( n > eigen_d_maxsize ) then
-   write(msg,'(a,2i3)')' Eigen size higher than max size set!!',n,eigen_d_maxsize
-   MSG_ERROR(msg)
- endif
+ ABI_CHECK(lapack_full_storage,"BUG(1) in abi_dhpgv (storage)!")
+ ABI_CHECK(lapack_double_precision,"BUG(2) in abi_dhpgv (precision)!")
+ ABI_CHECK(n<=eigen_d_maxsize,"BUG(3) in abi_dhpgv (maxsize)!")
+
  info = 0 !to avoid unwanted warning when info is not set by scalapack
 
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-
- ldz = n
 
 #ifdef HAVE_LINALG_SCALAPACK
  if (use_slk_ == 1) then
@@ -108,69 +105,10 @@
 #ifdef HAVE_LINALG_SCALAPACK
  end if
 #endif
- if (info/=0) then
-   write(msg,'(a,i0)')' Problem in abi_dhpgv, info= ',info
-   MSG_ERROR(msg)
- endif
+
+ ABI_CHECK(info==0,"abi_dhpgv returned info!=0!")
 
 end subroutine abi_dhpgv_1d_new
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_dhpgv_2d_new
-!! NAME
-!! abi_dhpgv_2d_new
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! SOURCE
-
-  subroutine abi_dhpgv_2d_new(itype,jobz,uplo,n,a,b,w,z,istwf_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpgv_2d_new'
-
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- integer,intent(in) :: itype
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- real(dp), intent(inout) :: a(:,:)
- real(dp), intent(inout) :: b(:,:)
- real(dp), intent(out) :: z(:,:)
- real(dp), intent(out) :: w(:)
- integer, optional, intent(in) :: istwf_k
-
-!Local variables-------------------------------
- integer :: ldz
- integer :: info
- integer :: istwf_k_
-
-! *********************************************************************
-
- istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
- ldz=n
-
- if (istwf_k_ /= 2) then
-   call zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,eigen_z_work,eigen_z_work,info)
- else
-   call dspgv(itype,jobz,uplo,n,a,b,w,z,ldz,eigen_d_work,info)
- endif
-
- ABI_CHECK(info==0,"[z,d]hpgv returned info !=0")
-
-end subroutine abi_dhpgv_2d_new
 !!***
 
 !----------------------------------------------------------------------
@@ -187,7 +125,7 @@ end subroutine abi_dhpgv_2d_new
 !!
 !! SOURCE
 !!
-  subroutine abi_chpgv_new(itype,jobz,uplo,n,a,b,w,z)
+  subroutine abi_chpgv_new(itype,jobz,uplo,n,a,b,w,z,ldz)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -201,22 +139,40 @@ end subroutine abi_dhpgv_2d_new
  integer,intent(in) :: itype
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
+ integer, intent(in) :: n,ldz
  complex(spc), intent(inout) :: a(:,:)
  complex(spc), intent(inout) :: b(:,:)
  complex(spc), intent(out) :: z(:,:)
  real(sp), intent(out) :: w(:)
 
 !Local variables-------------------------------
- integer :: ldz
  integer :: info
+ real(sp),pointer :: rwork(:)
+ complex(spc),pointer :: work(:)
 
 ! *********************************************************************
 
- ldz=n
- call chpgv(itype,jobz,uplo,n,a,b,w,z,ldz,eigen_c_work,eigen_c_rwork,info)
+ ABI_CHECK(lapack_full_storage,"BUG(1) in abi_chpgv (storage)!")
+ ABI_CHECK(lapack_single_precision,"BUG(2) in abi_chpgv (precision)!")
+ ABI_CHECK(n<=eigen_c_maxsize,"BUG(3) in abi_chpgv (maxsize)!")
 
- ABI_CHECK(info==0,"chpgv returned info !=0")
+ work => eigen_c_work ; rwork => eigen_c_rwork
+
+ if (eigen_c_lwork==0) then
+   ABI_ALLOCATE(work,(2*n-1))
+ end if
+ if (eigen_c_lrwork==0) then
+   ABI_ALLOCATE(rwork,(3*n-2))
+ end if
+ call chpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
+ if (eigen_c_lwork==0) then
+   ABI_DEALLOCATE(work)
+ end if
+ if (eigen_c_lrwork==0) then
+   ABI_DEALLOCATE(rwork)
+ end if
+
+ ABI_CHECK(info==0,"abi_chpgv returned info!=0!")
 
 end subroutine abi_chpgv_new
 !!***
@@ -235,7 +191,7 @@ end subroutine abi_chpgv_new
 !!
 !! SOURCE
 
-subroutine abi_zhpgv_new(itype,jobz,uplo,n,a,b,w,z)
+subroutine abi_zhpgv_new(itype,jobz,uplo,n,a,b,w,z,ldz)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -247,7 +203,7 @@ subroutine abi_zhpgv_new(itype,jobz,uplo,n,a,b,w,z)
 
 !Arguments ------------------------------------
  integer,intent(in) :: itype
- integer, intent(in) :: n
+ integer, intent(in) :: n,ldz
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  complex(dpc), intent(inout) :: a(:,:)
@@ -256,14 +212,33 @@ subroutine abi_zhpgv_new(itype,jobz,uplo,n,a,b,w,z)
  real(dp), intent(out) :: w(:)
 
 !Local variables-------------------------------
- integer :: ldz
  integer :: info
+ real(dp),pointer :: rwork(:)
+ complex(dpc),pointer :: work(:)
 
 ! *********************************************************************
 
- call zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
+ ABI_CHECK(lapack_full_storage,"BUG(1) in abi_zhpgv (storage)!")
+ ABI_CHECK(lapack_double_precision,"BUG(2) in abi_zhpgv (precision)!")
+ ABI_CHECK(n<=eigen_z_maxsize,"BUG(3) in abi_zhpgv (maxsize)!")
 
- ABI_CHECK(info==0,"zhpgv returned info !=0")
+ work => eigen_z_work ; rwork => eigen_z_rwork
+
+ if (eigen_z_lwork==0) then
+   ABI_ALLOCATE(work,(2*n-1))
+ end if
+ if (eigen_z_lrwork==0) then
+   ABI_ALLOCATE(rwork,(3*n-2))
+ end if
+ call zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
+ if (eigen_z_lwork==0) then
+   ABI_DEALLOCATE(work)
+ end if
+ if (eigen_z_lrwork==0) then
+   ABI_DEALLOCATE(rwork)
+ end if
+
+ ABI_CHECK(info==0,"abi_zhpgv returned info!=0!")
 
 end subroutine abi_zhpgv_new
 !!***

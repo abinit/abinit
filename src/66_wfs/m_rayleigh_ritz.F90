@@ -186,7 +186,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  call timab(timer_subdiago, 1, tsec)
  ABI_ALLOCATE(evec, (cplx*nband, nband))
 
- call abi_xhpgv(1,'V','U',nband,subham,subovl,eig,evec,istwf_k=istwf_k,use_slk=mpi_enreg%paral_kgb)
+ call abi_xhpgv(1,'V','U',nband,subham,subovl,eig,evec,nband,istwf_k=istwf_k,use_slk=mpi_enreg%paral_kgb)
 
  ABI_DEALLOCATE(subham)
  ABI_DEALLOCATE(subovl)
