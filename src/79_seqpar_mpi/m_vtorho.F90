@@ -1268,7 +1268,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
 
 !        ==  allocate paw_dmft%psichi and paw_dmft%eigen_lda
-         call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+         call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,&
+&         dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !        ==  gather crystal structure date into data "cryst_struc"
@@ -1284,7 +1285,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call init_oper(paw_dmft,lda_occup)
          call flush_unit(std_out)
          call timab(620,1,tsec)
-         call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,&
+         call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,iscf,&
 &         lda_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
 &         dtset%nkpt,my_nspinor,dtset%nsppol,occ,&
 &         paw_dmft,paw_ij,pawang,pawtab,psps,usecprj_local,dtfil%unpaw)
@@ -1582,10 +1583,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(994,1,tsec)
        if (psps%usepaw==0) then
          call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,&
-&         dtset%nsppol,dtset%nsym,dtset%paral_kgb,phnons,rhog  ,rhor  ,rprimd,dtset%symafm,dtset%symrel)
+&         dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
        else
          call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,&
-&         dtset%nsppol,dtset%nsym,dtset%paral_kgb,phnons,rhowfg,rhowfr,rprimd,dtset%symafm,dtset%symrel)
+&         dtset%nsppol,dtset%nsym,phnons,rhowfg,rhowfr,rprimd,dtset%symafm,dtset%symrel)
        end if
        call timab(994,2,tsec)
 !      We now have both rho(r) and rho(G), symmetrized, and if dtset%nsppol=2

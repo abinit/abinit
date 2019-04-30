@@ -211,7 +211,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
  real(dp) :: alpha,rhoav,factor
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- logical :: found,iscompatibleFFT,use_tr,is_first_qcalc
+ logical :: found,iscompatibleFFT,is_dfpt=.false.,use_tr,is_first_qcalc
  logical :: add_chi0_intraband,update_energies,call_pawinit
  character(len=10) :: string
  character(len=500) :: msg
@@ -400,11 +400,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 !  * Initialize and compute data for LDA+U.
 !  paw_dmft%use_dmft=dtset%usedmft
-   if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
-     call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-&     Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+   call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
+&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
-   end if
 
    if (my_rank == master) call pawtab_print(Pawtab)
 
@@ -1065,8 +1063,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  write(msg,'(a,f12.1,a)')' Memory required for chi0 matrix= ',two*gwpc*Ep%npwe**2*Ep%nI*Ep%nJ*Ep%nomega*b2Mb," [Mb]."
  call wrtout(std_out,msg,'COLL')
- ABI_STAT_MALLOC(chi0,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
- ABI_CHECK(ierr==0, "Out of memory in chi0")
+ ABI_MALLOC_OR_DIE(chi0,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
 !
 !============================== END OF THE INITIALIZATION PART ===========================
 !
@@ -1126,8 +1123,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      add_chi0_intraband=.FALSE. !add_chi0_intraband=.TRUE.
      if (add_chi0_intraband .and. ebands_has_metal_scheme(QP_BSt)) then
 
-       ABI_STAT_MALLOC(chi0intra,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
-       ABI_CHECK(ierr==0, "Out of memory in chi0intra")
+       ABI_MALLOC_OR_DIE(chi0intra,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
 
        ABI_MALLOC(chi0intra_lwing,(Ep%npwe*Ep%nI,Ep%nomega,3))
        ABI_MALLOC(chi0intra_uwing,(Ep%npwe*Ep%nJ,Ep%nomega,3))
@@ -2625,8 +2621,7 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 
 
  ABI_ALLOCATE(chi0_diag,(Ep%npwe))
- ABI_STAT_ALLOCATE(chitmp,(Ep%npwe,Ep%npwe), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in chitmp")
+ ABI_MALLOC_OR_DIE(chitmp,(Ep%npwe,Ep%npwe), ierr)
 
  do io=2,Ep%nomega
 

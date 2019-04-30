@@ -939,7 +939,7 @@ end subroutine print_Sigma_QPSC
 !! Main creation method for the sigma_t data type.
 !!
 !! INPUTS
-!! usepawu=1 if we used LDA+U as starting point (only for PAW)
+!! usepawu= /=0 if we used LDA+U as starting point (only for PAW)
 !!
 !! OUTPUT
 !!

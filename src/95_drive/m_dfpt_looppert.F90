@@ -224,8 +224,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &  eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: dim_eigbrd,dim_eig2nkq,dyfr_cplex,dyfr_nondiag,mk1mem,mkmem,mkqmem,mpert
  integer, intent(in) :: nfftf,nkpt,nkxc,nspden,nsym,prtbbb,timrev,usecprj,usevdw
@@ -1081,8 +1079,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
      MSG_ERROR(message)
    end if
-   ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in cg")
+   ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
    ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
@@ -1232,16 +1229,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      MSG_ERROR(message)
    end if
 
-   ABI_STAT_ALLOCATE(cgq,(2,mcgq), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in cgq")
+   ABI_MALLOC_OR_DIE(cgq,(2,mcgq), ierr)
    ABI_ALLOCATE(eigenq,(dtset%mband*nkpt_rbz*dtset%nsppol))
    if (.not.kramers_deg) then
-     !ABI_STAT_ALLOCATE(cg_pq,(2,mcgq), ierr)
-     !ABI_CHECK(ierr==0, "out-of-memory in cgmq")
+     !ABI_MALLOC_OR_DIE(cg_pq,(2,mcgq), ierr)
      !ABI_ALLOCATE(eigen_pq,(dtset%mband*nkpt_rbz*dtset%nsppol))
      mcgmq=mpw1_mq*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
-     ABI_STAT_ALLOCATE(cg_mq,(2,mcgmq), ierr)
-     ABI_CHECK(ierr==0, "out-of-memory in cgmq")
+     ABI_MALLOC_OR_DIE(cg_mq,(2,mcgmq), ierr)
      ABI_ALLOCATE(eigen_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
    end if
 
@@ -1317,7 +1311,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (dtset%efmas>0.and.icase==ipert_cnt) then
      eigen0_pert(:) = eigen0(:)
    end if
-   call wrtout(std_out,ch10//' dfpt_looppert: eigenq array',"COLL")
+   !call wrtout(std_out,ch10//' dfpt_looppert: eigenq array',"COLL")
    nkpt_eff=nkpt
    if( (dtset%prtvol==0.or.dtset%prtvol==1.or.dtset%prtvol==2) .and. nkpt>nkpt_max ) nkpt_eff=nkpt_max
    band_index=0
@@ -1429,12 +1423,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
      MSG_ERROR(message)
    end if
-   ABI_STAT_ALLOCATE(cg1,(2,mcg1), ierr)
-   ABI_CHECK(ierr==0, "out of memory in cg1")
+   ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    if (.not.kramers_deg) then
      mcg1mq=mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
-     ABI_STAT_ALLOCATE(cg1_mq,(2,mcg1mq), ierr)
-     ABI_CHECK(ierr==0, "out of memory in cg1_mq")
+     ABI_MALLOC_OR_DIE(cg1_mq,(2,mcg1mq), ierr)
    end if
 
    ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
@@ -1585,11 +1577,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if(ipert==dtset%natom+3 .or. ipert==dtset%natom+4) then
 !      Section for strain perturbation
        call vlocalstr(gmet,gprimd,gsqcut,istr,mgfftf,mpi_enreg,&
-&       psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,dtset%paral_kgb,ph1df,psps%qgrid_vl,&
+&       psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,ph1df,psps%qgrid_vl,&
 &       ucvol,psps%vlspl,vpsp1)
      else
        call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-&       nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),dtset%paral_kgb,ph1df,psps%qgrid_vl,&
+&       nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&
 &       dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
        !SPr: need vpsp1 for -q as well, but for magnetic field it's zero, to be done later
      end if
@@ -1766,20 +1758,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          ABI_ALLOCATE(rho1wfg,(2,dtset%nfft))
          ABI_ALLOCATE(rho1wfr,(dtset%nfft,nspden))
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-&         kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-&         dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-&         occ_rbz,dtset%paral_kgb,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,ucvol,&
-&         wtk_rbz)
+           kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
          call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
          ABI_DEALLOCATE(rho1wfg)
          ABI_DEALLOCATE(rho1wfr)
        else
          !SPr: need to modify dfpt_mkrho to taken into account q,-q and set proper formulas when +q and -q spinors are related
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-&         kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-&         dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-&         occ_rbz,dtset%paral_kgb,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,ucvol,&
-&         wtk_rbz)
+           kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
        end if
 
      else if (.not. found_eq_gkk) then
@@ -1873,8 +1863,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        end if
        if (.not.associated(eigen1_pert)) then
          ABI_ALLOCATE(eigen1_pert,(2*dtset%mband**2*nkpt*dtset%nsppol,3,mpert))
-         ABI_STAT_ALLOCATE(cg1_pert,(2,mpw1*nspinor*dtset%mband*mk1mem_rbz*nsppol*dim_eig2rf,3,mpert),ierr)
-         ABI_CHECK(ierr==0, "out-of-memory in cg1_pert")
+         ABI_MALLOC_OR_DIE(cg1_pert,(2,mpw1*nspinor*dtset%mband*mk1mem_rbz*nsppol*dim_eig2rf,3,mpert),ierr)
          ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
          ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
          ABI_ALLOCATE(kpt_rbz_pert,(3,nkpt_rbz))
@@ -1961,8 +1950,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 #ifdef HAVE_NETCDF
      ! Reshape eigen1 into gkk for netCDF output
-     ABI_STAT_ALLOCATE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
-     ABI_CHECK(ierr==0, "out-of-memory in gkk")
+     ABI_MALLOC_OR_DIE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
      gkk(:,:,:,:,:) = zero
      mband = dtset%mband
      band_index = 0
@@ -2521,8 +2509,6 @@ end subroutine dfpt_looppert
 
 subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz, npwarr, npwar1, phasecg)
 
- implicit none
-
 !Arguments -------------------------------
  ! scalars
  integer, intent(in) :: mcg, mcgq, timrev
@@ -2733,8 +2719,6 @@ end subroutine getcgqphase
 subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
 &  ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,enl0,enl1,eovl1,epaw1,evdw,exc1,iout,ipert,natom,&
 &  usepaw,usevdw)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3041,8 +3025,6 @@ end subroutine dfpt_prtene
 
 subroutine eigen_meandege(eigen0,eigenresp,eigenresp_mean,mband,nband,nkpt,nsppol,option)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,nkpt,nsppol,option
@@ -3142,8 +3124,6 @@ end subroutine eigen_meandege
 
 subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
 
- implicit none
-
 !Arguments ------------------------------------
  integer , intent(in)    :: ipert,idir,cplex,nfft,nspden,nkxc
  real(dp), intent(in)    :: vxc0(nfft,nspden),rhor0(nfft,nspden)
@@ -3158,6 +3138,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
  real(dp) :: mdir(3),fdir(3)
 
 ! *************************************************************************
+ ABI_UNUSED(ipert)
 
  if (nspden==2) then
 

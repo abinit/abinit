@@ -118,7 +118,6 @@ module m_xgTransposer
     integer :: nrows
     integer :: ierr
     integer :: icol
-    integer :: icplx
     character(len=500) :: message
     double precision :: tsec(2)
 
@@ -217,7 +216,7 @@ module m_xgTransposer
     integer             , intent(in   ) :: ncpuCols
     integer :: commColsRows
 #if defined HAVE_MPI
-    integer :: coordInGrid(2),sizeGrid(2)
+    integer :: sizeGrid(2) !coordInGrid(2),
     logical :: periodic(2), selectDim(2), reorder
     integer :: ierr
 
@@ -289,7 +288,7 @@ module m_xgTransposer
   subroutine xgTransposer_makeXgBlock(xgTransposer)
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
-    integer :: cols, rows
+    !integer :: cols, rows
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
@@ -368,7 +367,7 @@ module m_xgTransposer
    type(xgTransposer_t), intent(inout) :: xgTransposer
    double precision, allocatable, target :: sendbuf(:,:)
    double precision, pointer :: recvbuf(:,:)
-   double precision, pointer :: buffer(:,:)
+   !double precision, pointer :: buffer(:,:)
    integer, allocatable :: sendcounts(:), recvcounts(:)
    integer, allocatable :: sdispls(:), rdispls(:)
    integer :: ncpu, comm, me
@@ -376,9 +375,8 @@ module m_xgTransposer
    integer :: ncolsColsRows
    integer :: nrowsLinalgMe
    integer :: icpu, ierr
-   integer :: myrequest
-   integer, allocatable :: request(:), status(:)
-   type(xgBlock_t) :: xgBlock_toTransposed
+   !integer :: myrequest
+   !integer, allocatable :: request(:), status(:)
    type(ptr_t), allocatable :: sendptrbuf(:)
    integer, pointer :: nrowsLinalg(:)
    double precision :: tsec(2)
@@ -499,7 +497,7 @@ module m_xgTransposer
    type(xgTransposer_t), intent(inout) :: xgTransposer
    double precision, pointer :: sendbuf(:,:)
    double precision, allocatable :: recvbuf(:,:)
-   double precision, allocatable :: buffer(:,:)
+   !double precision, allocatable :: buffer(:,:)
    integer, allocatable :: sendcounts(:), recvcounts(:)
    integer, allocatable :: sdispls(:), rdispls(:)
    integer :: ncpu, comm, me
@@ -507,8 +505,8 @@ module m_xgTransposer
    integer :: ncolsColsRows
    integer :: nrowsLinalgMe
    integer :: icpu,ierr
-   integer :: myrequest
-   integer, allocatable :: request(:), status(:)
+   !integer :: myrequest
+   !integer, allocatable :: request(:), status(:)
    type(xgBlock_t) :: xgBlock_toTransposed
    type(ptr_t), allocatable :: sendptrbuf(:)
    integer, pointer :: nrowsLinalg(:)

@@ -196,6 +196,7 @@ type dataset_type
  integer :: dmft_read_occnd
  integer :: dmft_solv
  integer :: dmft_t2g
+ integer :: dmft_x2my2d
  integer :: dmftbandi
  integer :: dmftbandf
  integer :: dmftcheck
@@ -938,6 +939,7 @@ type dataset_type
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
 
  integer :: eph_ngqpt_fine(3)
+ integer :: eph_np_pqbks(5) = 0
 
  integer :: eph_stern = 0
  integer :: eph_transport
@@ -950,6 +952,8 @@ type dataset_type
  real(dp) :: ddb_shiftq(3)
 
  integer :: mixprec = 0
+ integer :: symv1scf = 0
+ integer :: dvdb_add_lr = 1
 
  integer :: sigma_bsum_range(2) = 0
 

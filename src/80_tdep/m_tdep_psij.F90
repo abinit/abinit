@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -36,8 +37,6 @@ contains
 
 !====================================================================================================
 subroutine tdep_calc_psijfcoeff(CoeffMoore,InVar,proj,Shell3at,Sym,ucart)
-
-  implicit none
 
   type(Input_Variables_type),intent(in) :: InVar
   type(Symetries_Variables_type),intent(in) :: Sym
@@ -134,8 +133,6 @@ end subroutine tdep_calc_psijfcoeff
 !=====================================================================================================
 subroutine tdep_calc_psijtot(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_ref,Shell3at,Sym)
 
-  implicit none
-
   type(Input_Variables_type),intent(in) :: InVar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell3at
@@ -144,9 +141,9 @@ subroutine tdep_calc_psijtot(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_ref,S
   double precision, intent(in) :: Psij_coeff(ntotcoeff,1)
   double precision, intent(inout) :: Psij_ref(3,3,3,Shell3at%nshell)
 
-  integer :: iatcell,ishell,jshell,isym,iatom,jatom,katom,eatom,fatom,gatom,ncoeff,ncoeff_prev
+  integer :: ishell,jshell,isym,jatom,katom,eatom,fatom,gatom,ncoeff,ncoeff_prev
   integer :: iatref,jatref,katref,iatshell,nshell,trans
-  integer :: ii,jj,kk,ll,kappa,alpha,beta,gama
+  integer :: ii,jj,kk,kappa !,alpha,beta,gama
   double precision, allocatable :: Psij_333(:,:,:)
 
   write(InVar%stdout,*) ' '
@@ -262,8 +259,6 @@ end subroutine tdep_calc_psijtot
 !=====================================================================================================
 subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Psij_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
 
-  implicit none
-
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(in) :: Shell3at
@@ -280,7 +275,9 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Ps
   integer :: imode,nmode,ncomp,jat_mod,jatcell,iatshell,ishell,isym,trans
   double precision :: phase
   double precision, allocatable :: Psij_333(:,:,:)
-  double complex, allocatable :: mass_mat(:,:),eigen_prod(:,:,:,:,:),Grun_shell(:,:)
+  double complex, allocatable :: eigen_prod(:,:,:,:,:),Grun_shell(:,:)
+
+  ABI_UNUSED(Lattice%brav)
 
 ! Define quantities
   natom_unitcell=InVar%natom_unitcell
@@ -349,8 +346,6 @@ end subroutine tdep_calc_gruneisen
 !=====================================================================================================
 subroutine tdep_build_psij333(isym,InVar,Psij_ref,Psij_333,Sym,trans)
 
-  implicit none
-
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: InVar
   double precision, intent(in) :: Psij_ref(3,3,3)
@@ -361,6 +356,7 @@ subroutine tdep_build_psij333(isym,InVar,Psij_ref,Psij_333,Sym,trans)
   integer :: ii,jj,kk,ee,ff,gg,mu,nu,xi
   double precision :: Psij_tmp(3,3,3)
 
+  ABI_UNUSED(invar%natom)
 
 ! Transform in the new basis wrt S_ref
   Psij_333(:,:,:)=zero
@@ -402,8 +398,6 @@ end subroutine tdep_build_psij333
 
 !=====================================================================================================
 subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref,Rlatt_cart,Shell3at,Sym)
-
-  implicit none
 
   type(crystal_t),intent(in) :: Crystal
   type(ddb_type),intent(in) :: DDB
@@ -520,13 +514,14 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
     end do
   end do
 ! Compute the pressure as the integral of Gamma*C_v overt T
-  allocate(tmp(ntemp)); tmp(:)=0.d0
+  ABI_MALLOC(tmp, (ntemp))
+  tmp(:)=0.d0
   do itemp=1,ntemp
 !FB    tmp(itemp)=sum(heatcapa_HA(:,itemp))
     tmp(itemp)=sum(grun_thermo_HA(:,itemp))
   end do
   call simpson_int(ntemp,10.d0,tmp,p_thermo2)
-  deallocate(tmp)
+  ABI_FREE(tmp)
 
   open(unit=20,file=trim(InVar%output_prefix)//'thermo3.dat')
   write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th_(GPa)'
@@ -599,8 +594,6 @@ end subroutine tdep_calc_alpha_gamma
 !=====================================================================================================
 subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rlatt_cart,Shell3at,Sym)
 
-  implicit none
-
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(in) :: Shell3at
@@ -611,7 +604,7 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rla
   double precision,intent(in) :: Psij_ref(3,3,3,Shell3at%nshell)
   double precision,intent(in) :: Rlatt_cart(3,InVar%natom_unitcell,InVar%natom)
 
-  integer :: iqpt,nmode,ii,jj
+  integer :: iqpt,nmode,ii !,jj
   double precision :: qpt_cart(3)
   double complex, allocatable :: Gruneisen(:)
 
