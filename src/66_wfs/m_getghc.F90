@@ -831,12 +831,12 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
  integer,parameter :: tim_fourwf=1
  integer :: idat,idir,ipw,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: gp2pi1,gp2pi2,gp2pi3,kpt_cart,kg_k_cart,scale_conversion,weight=one
+ real(dp) :: gp2pi1,gp2pi2,gp2pi3,scale_conversion,weight=one
  !arrays
- real(dp) :: kg_k_vec(3),kg_k_vec_cart(3)
+ real(dp) :: kg_k_vec(3),kpt_cart(3)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
- real(dp),allocatable :: ghc1(:,:),ghc2(:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kg_k_vec_cart(:,:)
  real(dp),allocatable :: lcwavef(:,:),lcwavef1(:,:),lcwavef2(:,:)
  real(dp),allocatable :: work(:,:,:,:)
 
@@ -860,82 +860,52 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
 
  ! scale conversion from SI to atomic units,
  ! here \alpha^2 where \alpha is the fine structure constant
- ! scale_conversion = one/(InvFineStruct*InvFineStruct)
- scale_conversion = FineStructureConstant2
- ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
-
+  scale_conversion = FineStructureConstant2
+ 
  if (nspinortot==1) then
 
    ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
 
-!  Do it in 3 STEPs:
+!  Do it in 2 STEPs:
 !  STEP1: Compute grad of cwavef 
    ABI_ALLOCATE(gcwavef,(2,npw_k*ndat,3))
-   ! ABI_ALLOCATE(lcwavef,(2,npw_k*ndat))
-!!$OMP PARALLEL DO
-   ! do idat=1,ndat
-   !   do ipw=1,npw_k
-   !      gcwavef(:,ipw+(idat-1)*npw_k,1:3)=zero
-   !     ! lcwavef(:,ipw+(idat-1)*npw_k)  =zero
-   !   end do
-   ! end do
-   gcwavef = zero
-!    do idir=1,3
-!      gp2pi1=gprimd(idir,1)*two_pi
-!      gp2pi2=gprimd(idir,2)*two_pi
-!      gp2pi3=gprimd(idir,3)*two_pi
-!      kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
-! !    Multiplication by 2pi i (G+k)_idir for gradient
-! !    Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
-!      do idat=1,ndat
-!        do ipw=1,npw_k
-!          kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
-!          gcwavef(1,ipw+(idat-1)*npw_k,idir)= cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart
-!          gcwavef(2,ipw+(idat-1)*npw_k,idir)=-cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart
-!          ! lcwavef(1,ipw+(idat-1)*npw_k)=lcwavef(1,ipw+(idat-1)*npw_k)-cwavef(1,ipw+(idat-1)*npw_k)*kg_k_cart**2
-!          ! lcwavef(2,ipw+(idat-1)*npw_k)=lcwavef(2,ipw+(idat-1)*npw_k)-cwavef(2,ipw+(idat-1)*npw_k)*kg_k_cart**2
-!        end do
-!      end do
-   !    end do ! idir
 
-   do idat = 1, ndat
-      do ipw = 1, npw_k
-         kg_k_vec(1:3) = kg_k(1:3,ipw)+kpt(1:3)
-         kg_k_vec_cart(1:3) = MATMUL(gprimd,kg_k_vec)
-         do idir = 1, 3
-            gcwavef(1,ipw+(idat-1)*npw_k,idir)= cwavef(1,ipw+(idat-1)*npw_k)*kg_k_vec_cart(idir)
-            gcwavef(2,ipw+(idat-1)*npw_k,idir)= cwavef(2,ipw+(idat-1)*npw_k)*kg_k_vec_cart(idir)
-         end do
+   gcwavef = zero
+
+   ! convert kpt to cartesian
+   kpt_cart(:)=MATMUL(gprimd,kpt(:))
+
+   ! convert G to cartesian, add kpt to get (k + G) in cartesian
+   ABI_ALLOCATE(kg_k_vec_cart,(npw_k,3))
+   do ipw = 1, npw_k
+      kg_k_vec_cart(ipw,:) = MATMUL(gprimd,kg_k(:,ipw))+kpt_cart(:)
+   end do
+
+   ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
+   do idir = 1, 3
+      do idat = 1, ndat
+         gcwavef(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
+              & cwavef(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kg_k_vec_cart(1:npw_k,idir)
+         gcwavef(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
+              & cwavef(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kg_k_vec_cart(1:npw_k,idir)
       end do
    end do
+   ABI_DEALLOCATE(kg_k_vec_cart)
    gcwavef = gcwavef*two_pi
          
-   !  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
-   ! step 2 is not relevant for vectornd because no Laplacian term
-!    call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef,ghc1,work,gbound_k,gbound_k,&
-! &   istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-! &   tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-! !!$OMP PARALLEL DO
-!    do idat=1,ndat
-!      do ipw=1,npw_k
-!        ghc_mGGA(:,ipw+(idat-1)*npw_k)=ghc_mGGA(:,ipw+(idat-1)*npw_k)-half*ghc1(:,ipw+(idat-1)*npw_k)
-!      end do
-!    end do
-!    ABI_DEALLOCATE(lcwavef)
-!  STEP3: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+!  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
    do idir=1,3
      call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
      istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
 &     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
+     ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
+     ! should be faster than explicit loop over ipw as npw_k gets large
      do idat=1,ndat
         call DAXPY(npw_k,scale_conversion,ghc1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
              & ghc_vectornd(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
         call DAXPY(npw_k,scale_conversion,ghc1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
              & ghc_vectornd(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
-       ! do ipw=1,npw_k
-       !   ghc_vectornd(:,ipw+(idat-1)*npw_k)=ghc_vectornd(:,ipw+(idat-1)*npw_k)+scale_conversion*ghc1(:,ipw+(idat-1)*npw_k)
-       ! end do
      end do
    end do ! idir
    ABI_DEALLOCATE(gcwavef)
