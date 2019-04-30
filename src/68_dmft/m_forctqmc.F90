@@ -31,6 +31,8 @@
 MODULE m_forctqmc
 
  use defs_basis
+ use m_abicore
+ use m_errors
  use m_nctk
  use m_hdr
 #ifdef HAVE_NETCDF
