@@ -30,7 +30,7 @@ using namespace std;
  R (*F)(__VA_ARGS__);                                   \
  *(void**)(&F) = dlsym(libpython_handle, AS_STRING(F)); \
  if ((error = dlerror()) != NULL) {                     \
-  fprintf(stderr, "%\n", error);                        \
+  fprintf(stderr, "%s\n", error);                        \
   return 1;                                             \
  }
 
