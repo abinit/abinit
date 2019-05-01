@@ -42,7 +42,7 @@ module m_profiling_abi
  include 'mpif.h'
 #endif
 
-#define _ABORT(msg) call abimem_abort(msg, __FILE__, "UnknownFunc", __LINE__)
+#define _ABORT(msg) call abimem_abort(msg, __FILE__, __LINE__)
 
  public :: abimem_get_info
  public :: abimem_init              ! Initialize memory profiling.
@@ -101,7 +101,7 @@ module m_profiling_abi
    real(dp) :: dt_snapshot = -one
    ! time between two consecutive snapshots in seconds.
 
-   real(dp) :: limit_mb = 50_dp
+   real(dp) :: limit_mb = 20_dp
    ! Optional memory limit in Mb. used when level == 3
 
    character(len=slen) :: peak_vname = "_vname"
@@ -448,7 +448,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
 
    case (3)
      ! Write memory allocations larger than limit_mb
-     if (isize * b2Mb > minfo%limit_mb) then
+     if (abs(isize * b2Mb) > minfo%limit_mb) then
        write(minfo%logunt,'(a,t60,a,1x,2(i0,1x),a,1x,2(i0,1x))') &
          trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), line, minfo%memory
      end if
@@ -476,7 +476,6 @@ end subroutine abimem_record
 !! INPUT
 !!  msg=Error message
 !!  file=File name
-!!  func=Function name.
 !!  line=Line number
 !!
 !! PARENTS
@@ -486,11 +485,11 @@ end subroutine abimem_record
 !!
 !! SOURCE
 
-subroutine abimem_abort(msg, file, func, line)
+subroutine abimem_abort(msg, file, line)
 
 !Arguments ------------------------------------
  integer,intent(in) :: line
- character(len=*),intent(in) :: msg,file,func
+ character(len=*),intent(in) :: msg,file
 
 !Local variables-------------------------------
  integer :: ierr
@@ -500,7 +499,7 @@ subroutine abimem_abort(msg, file, func, line)
  logical :: isopen
 ! *************************************************************************
 
- write(std_out,*)msg,file,func,line
+ write(std_out,*)trim(msg),", file: ", trim(file), ", line: ", line
 
  ! Close logfile if it's connected to flush io buffers and avoid file corruption
  inquire(file=minfo%logfile, number=unt_found, opened=isopen)
@@ -603,7 +602,6 @@ function abimem_wtime() result(wall)
  character(len=8)   :: date
  character(len=10)  :: time
  character(len=5)   :: zone
- character(len=500) :: msg
 !arrays
  integer :: values(8)
 #endif
@@ -637,8 +635,7 @@ function abimem_wtime() result(wall)
      month_now=month_now+12
    end if
    if(month_now<=month_init)then
-     msg = 'Problem with month and year numbers.'
-     _ABORT(msg)
+     _ABORT('Problem with month and year numbers.')
    end if
    do months=month_init,month_now-1
      wall=wall+86400.0d0*nday(months)

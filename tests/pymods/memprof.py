@@ -2,13 +2,15 @@ from __future__ import print_function, division, unicode_literals
 
 from pprint import pprint
 from itertools import groupby
-from functools import wraps
 from collections import namedtuple, deque
 # OrderedDict was added in 2.7. ibm6 still uses python2.6
 try:
     from collections import OrderedDict
 except ImportError:
     from .ordereddict import OrderedDict
+
+from .plotting import add_fig_kwargs, get_ax_fig_plt
+from .tools import lazy_property
 
 
 def group_entries_bylocus(entries):
@@ -64,35 +66,46 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
             return "<var=%s, %s@%s:%s, size_mb=%.3f>" %  (
               self.vname, self.action, self.file, self.line, self.size_mb)
 
-    @property
+    @lazy_property
     def size_mb(self):
         """Size in Megabytes."""
         sign = {"A": +1, "D": -1}[self.action]
-        return sign* self.size / (8 * 1024 ** 2)
+        return sign * self.size / (8 * 1024 ** 2)
 
-    #@property
-    #def basename(self):
-    #    return self.vname.split("%")[-1]
+    @lazy_property
+    def tot_memory_mb(self):
+        """Total memory in Mb."""
+        return self.tot_memory / (8 * 1024 ** 2)
 
-    @property
+    @lazy_property
     def isalloc(self):
         """True if entry represents an allocation."""
         return self.action == "A"
 
-    @property
+    @lazy_property
     def isfree(self):
         """True if entry represents a deallocation."""
         return self.action == "D"
 
-    @property
+    @lazy_property
     def iszerosized(self):
         """True if this is a zero-sized alloc/free."""
         return self.size == 0
 
-    @property
+    @lazy_property
     def locus(self):
-        """Location of the entry. This is unique."""
+        """Location of the entry. This is (hopefully) unique."""
         return "%s:%s" % (self.file, self.line)
+        #return "%s%s@%s:%s" % (self.action, self.vname, self.file, self.line)
+
+    #def __hash__(self):
+    #    return hash(self.locus) + hash(other.size)
+
+    #def __eq__(self, other):
+    #    return self.locus == other.locus and self.size == other.size
+
+    #def __neq__(self, other):
+    #    return not (self == other)
 
     def frees_onheap(self, other):
         if (not self.isfree) or other.isalloc: return False
@@ -106,49 +119,19 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         return True
 
 
-class Heap(dict):
-
-    def show(self):
-        print("=== HEAP OF LEN %s ===" % len(self))
-        if not self: return
-        # for p, elist in self.items():
-        pprint(self, indent=4)
-        print("")
-
-    def pop_alloc(self, entry):
-        if not entry.isfree: return 0
-        elist = self.get[entry.ptr]
-        if elist is None: return 0
-        for i, olde in elist:
-            if entry.size + olde.size != 0:
-                elist.pop(i)
-                return 1
-        return 0
-
-
-class Stack(dict):
-
-    def show(self):
-        print("=== STACK OF LEN %s ===)" % len(self))
-        if not self: return
-        pprint(self)
-        print("")
-
-
-
-class AbimemParser(object):
+class AbimemFile(object):
     def __init__(self, path):
         self.path = path
 
-    #def __str__(self):
-    #    lines = []
-    #    app = lines.append
-    #    return "\n".join(lines)
+    def __str__(self):
+        return self.to_string()
 
-    def summarize(self):
-        with open(self.path, "rt") as fh:
-            l = fh.read()
-            print(l)
+    def to_string(self):
+        lines = []
+        app = lines.append
+        df = self.find_intensive()
+        app(df.to_string())
+        return "\n".join(lines)
 
     def find_small_allocs(self, nbytes=160):
         """Zero sized allocations are not counted."""
@@ -161,42 +144,59 @@ class AbimemParser(object):
                 if 0 < e.size <= nbytes: smalles.append(e)
 
         pprint(smalles)
-
         return smalles
 
     def find_intensive(self, threshold=2000):
         """
         Find intensive spots i.e. variables that are allocated/freed many times.
         """
-        d = {}
-        with open(self.path, "rt") as fh:
-            for lineno, line in enumerate(fh):
-                if line.startswith("#"): continue
-                e = Entry.from_line(line)
-                loc = e.locus
-                if loc not in d:
-                    d[loc] = [e]
-                else:
-                    d[loc].append(e)
+        df = self.dataframe
+        index, rows = [], []
+        for locus, g in self.dataframe.groupby(by="locus"):
+            malloc_mb = g[g["action"] == "A"].size_mb.sum()
+            free_mb = g[g["action"] == "D"].size_mb.sum()
+            nalloc = len(g["action"] == "A")
+            nfree = len(g["action"] == "D")
+            rows.append(OrderedDict([
+                ("malloc_mb", malloc_mb),
+                ("free_mb", free_mb),
+                #("diff_mb", malloc_mb + free_mb),
+                ("nalloc", nalloc),
+                ("nfree", nfree),
+                #("npall", nalloc - nfree),
+            ]))
+            index.append(locus)
 
-        # Remove entries below the threshold and perform DSU sort
-        dsu_list = [(elist, len(elist)) for _, elist in d.items() if len(elist) >= threshold]
-        intensive = [t[0] for t in sorted(dsu_list, key=lambda x: x[1], reverse=True)]
+        import pandas as pd
+        df = pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
+        return df.sort_values(by="malloc_mb", ascending=False)
 
-        for elist in intensive:
-            loc = elist[0].locus
-            # assert all(e.locus == loc for e in elist)
-            print("[%s] has %s allocations/frees" % (loc, len(elist)))
+        #d = {}
+        #with open(self.path, "rt") as fh:
+        #    for lineno, line in enumerate(fh):
+        #        if line.startswith("#"): continue
+        #        e = Entry.from_line(line)
+        #        loc = e.locus
+        #        if loc not in d:
+        #            d[loc] = [e]
+        #        else:
+        #            d[loc].append(e)
 
-        return intensive
+        ## Remove entries below the threshold and perform DSU sort
+        #dsu_list = [(elist, len(elist)) for _, elist in d.items() if len(elist) >= threshold]
+        #intensive = [t[0] for t in sorted(dsu_list, key=lambda x: x[1], reverse=True)]
 
-    #def show_peaks(self):
+        #for elist in intensive:
+        #    loc = elist[0].locus
+        #    # assert all(e.locus == loc for e in elist)
+        #    print("[%s] has %s allocations/frees" % (loc, len(elist)))
+        #return intensive
 
     def find_zerosized(self):
         """Find zero-sized allocations."""
         elist = []
         eapp = elist.append
-        for e in self.yield_all_entries():
+        for e in self.all_entries:
             if e.size == 0: eapp(e)
 
         if elist:
@@ -207,9 +207,10 @@ class AbimemParser(object):
         return elist
 
     def find_weird_ptrs(self):
+        """Find negative or zero pointers."""
         elist = []
         eapp = elist.append
-        for e in self.yield_all_entries():
+        for e in self.all_entries:
             if e.ptr <= 0: eapp(e)
 
         if elist:
@@ -219,62 +220,137 @@ class AbimemParser(object):
             print("No weird entries found")
         return elist
 
-    def yield_all_entries(self):
+    @lazy_property
+    def all_entries(self):
+        """Parse file and create List of Entries."""
+        all_entries = []
+        app = all_entries.append
         with open(self.path, "rt") as fh:
             for lineno, line in enumerate(fh):
                 # skip header line of abimem files
                 if line.startswith("#"): continue
                 try:
-                    yield Entry.from_line(line)
+                    app(Entry.from_line(line))
                 except Exception as exc:
                     print("Error while parsing lineno %d, line:\n%s" % (lineno, line))
                     raise exc
 
-    def find_peaks(self, maxlen=20):
+        return all_entries
+
+    def find_peaks(self, maxlen=30):
         """
         Find peaks in the allocation with the corresponding variable.
         """
-        # the deque is bounded to the specified maximum length. Once a bounded length deque is full,
+        # The deque is bounded to the specified maximum length. Once a bounded length deque is full,
         # when new items are added, a corresponding number of items are discarded from the opposite end.
         peaks = deque(maxlen=maxlen)
 
-        for e in self.yield_all_entries():
-            size = e.size
-            if size == 0 or not e.isalloc: continue
-
+        visited = set()
+        for e in self.all_entries:
+            # Avoid redundant entries (locus, mem)
+            #k = (e.locus, e.size)
+            k = e.locus
+            if e.size == 0 or not e.isalloc or k in visited: continue
             if len(peaks) == 0:
-                peaks.append(e); continue
-
-            # TODO: Should remove redundant entries.
-            if size > peaks[0].size:
                 peaks.append(e)
+                visited.add(k)
+                continue
+
+            if e.size > peaks[0].size:
+                peaks.append(e)
+                visited.add(k)
                 peaks = deque(sorted(peaks, key=lambda x: x.size), maxlen=maxlen)
 
         peaks = deque(sorted(peaks, key=lambda x: x.size, reverse=True), maxlen=maxlen)
-
-        for peak in peaks:
-            print(peak)
-
         return peaks
 
-    def plot_memory_usage(self, show=True):
+    @lazy_property
+    def dataframe(self):
         """
-        Plot total allocated memory in Mb.
+        Return a |pandas-DataFrame| with all entries.
         """
-        memory = [e.tot_memory / ( 8 * 1024**2) for e in self.yield_all_entries()]
-        import matplotlib.pyplot as plt
-        fig = plt.figure()
-        ax = fig.add_subplot(1,1,1)
+        import pandas as pd
+        rows, index = [], []
+        for e in self.all_entries:
+            rows.append(OrderedDict([
+                ("vname", e.vname),
+                ("file", e.file),
+                ("line", e.line),
+                ("locus", e.locus),
+                ("action", e.action),
+                ("size_mb", e.size_mb),
+                ("tot_memory_mb", e.tot_memory_mb),
+                ("ptr", e.ptr),
+            ]))
+            index.append(e.locus) 
+
+        return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
+
+    @add_fig_kwargs
+    def plot_memory_usage(self, ax=None, **kwargs):
+        """
+        Plot total allocated memory in Mb on axis `ax`.
+        """
+        memory = [e.tot_memory_mb for e in self.all_entries]
+        ax, fig, plt = get_ax_fig_plt(ax=ax)
         ax.plot(memory)
         ax.grid(True)
         ax.set_ylabel("Total Memory [Mb]")
-        if show: plt.show()
         return fig
 
-    #def get_dataframe(self):
-    #    import pandas as pd
-    #    frame = pd.DataFrame()
-    #    return frame
+    @add_fig_kwargs
+    def plot_peaks(self, ax=None, maxlen=30, fontsize=6, **kwargs):
+        """
+        Args:
+            fontsize: fontsize for legends and titles
+
+        Returns: |matplotlib-Figure|
+        """
+        ax, fig, plt = get_ax_fig_plt(ax=ax)
+        peaks = self.find_peaks(maxlen=maxlen)
+        data = [e.size_mb for e in peaks]
+        names = ["%s\n%s" % (e.vname, e.locus) for e in peaks]
+        xs = list(range(len(data)))
+        ax.bar(xs, data)
+        ax.grid(True)
+        ax.set_xticks(xs)
+        ax.set_xticklabels(names, fontsize=fontsize, rotation=45) 
+        ax.set_ylabel("Memory [Mb]")
+        return fig
+
+    #@add_fig_kwargs
+    def get_hotspot_files_df(self, ax=None, fontsize=6, **kwargs):
+        ax, fig, plt = get_ax_fig_plt(ax=ax)
+        index, rows = [], []
+        for filename, g in self.dataframe.groupby(by="file"):
+            #print(g)
+            malloc_mb = g[g["action"] == "A"].size_mb.sum()
+            free_mb = g[g["action"] == "D"].size_mb.sum()
+            nalloc = len(g["action"] == "A")
+            nfree = len(g["action"] == "D")
+            rows.append(OrderedDict([
+                ("malloc_mb", malloc_mb),
+                ("free_mb", free_mb),
+                #("diff_mb", malloc_mb + free_mb),
+                ("nalloc", nalloc),
+                ("nfree", nfree),
+                #("npall", nalloc - nfree),
+            ]))
+            index.append(filename)
+
+        import pandas as pd
+        df = pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
+        return df.sort_values(by="malloc_mb", ascending=False)
+
+    def expose(self, slide_mode=False, slide_timeout=None, **kwargs):
+        """
+        Shows a predefined list of matplotlib figures with minimal input from the user.
+        """
+        from abipy.tools.plotting import MplExpose
+        with MplExpose(slide_mode=slide_mode, slide_timeout=slide_mode, verbose=1) as e:
+            e(self.plot_memory_usage(show=False))
+            e(self.plot_peaks(show=False))
+
 
     def find_memleaks(self):
         """
@@ -289,7 +365,6 @@ class AbimemParser(object):
                 if line.startswith("#"): continue
                 #print(line)
                 newe = Entry.from_line(line)
-
                 p = newe.ptr
                 if newe.size == 0: continue
                 # Store new entry in list if the ptr is not in d
@@ -384,3 +459,32 @@ class AbimemParser(object):
             pprint(reallocs)
 
         return len(heap) + len(stack) + len(reallocs)
+
+
+class Heap(dict):
+
+    def show(self):
+        print("=== HEAP OF LEN %s ===" % len(self))
+        if not self: return
+        # for p, elist in self.items():
+        pprint(self, indent=4)
+        print("")
+
+    def pop_alloc(self, entry):
+        if not entry.isfree: return 0
+        elist = self.get[entry.ptr]
+        if elist is None: return 0
+        for i, olde in elist:
+            if entry.size + olde.size != 0:
+                elist.pop(i)
+                return 1
+        return 0
+
+
+class Stack(dict):
+
+    def show(self):
+        print("=== STACK OF LEN %s ===)" % len(self))
+        if not self: return
+        pprint(self)
+        print("")

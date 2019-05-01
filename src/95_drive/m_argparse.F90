@@ -41,7 +41,7 @@ module m_argparse
  use m_io_tools,        only : open_file
  use m_cppopts_dumper,  only : dump_cpp_options
  use m_optim_dumper,    only : dump_optim
- use m_fstrings,        only : atoi, itoa, firstchar, startswith, sjoin
+ use m_fstrings,        only : atoi, atof, itoa, firstchar, startswith, sjoin
  use m_time,            only : str2sec
  use m_libpaw_tools,    only : libpaw_log_flag_set
 
@@ -77,15 +77,18 @@ module m_argparse
 
  type,public :: args_t
 
-   integer :: exit=0
+   integer :: exit = 0
      ! /=0 to exit after having parsed the command line options.
 
-   integer :: abimem_level=0
+   integer :: abimem_level = 0
 
-   integer :: dry_run=0
+   integer :: dry_run = 0
      ! /= 0 to exit after the validation of the input file.
 
-   character(len=500) :: cmdline=""
+   real(dp) :: abimem_limit_mb = 20_dp
+     ! Optional memory limit in Mb. used when abime_level == 3
+
+   character(len=500) :: cmdline = ""
      ! The entire command line
 
  end type args_t
@@ -156,6 +159,10 @@ type(args_t) function args_parser() result(args)
     else if (arg == "--abimem-level") then
       call get_command_argument(ii + 1, arg)
       args%abimem_level = atoi(arg)
+
+    else if (arg == "--abimem-limit_mv") then
+      call get_command_argument(ii + 1, arg)
+      args%abimem_limit_mb = atof(arg)
 
     else if (arg == "-j" .or. arg == "--omp-num-threads") then
       call get_command_argument(ii+1, arg)
