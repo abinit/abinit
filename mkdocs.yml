@@ -386,3 +386,4 @@ extra:
         #netcdf: https://www.unidata.ucar.edu/software/netcdf/docs/faq.html#whatisit
         #YAML: https://en.wikipedia.org/wiki/YAML
         #JSON: https://en.wikipedia.org/wiki/JSON
+        aTDEP: '<span style="font-variant:small-caps;">a</span>-TDEP'

@@ -21,6 +21,282 @@
 
 !!***
 
+!!****f* m_abi_linalg/abi_dhegv_new
+!! NAME
+!! abi_dhegv_new
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! SOURCE
+!!
+
+  subroutine abi_dhegv_new(itype,jobz,uplo,n,a,b,w, &
+&       x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_dhegv_new'
+!End of the abilint section
+
+ implicit none
+!Arguments ------------------------------------
+ integer, intent(in) :: itype
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n
+ real(dp), target, intent(inout) :: a(n,*) ! FIXME should be cplex * lda
+ real(dp), target, intent(inout) :: b(n,*)
+ real(dp),target,intent(out) :: w(n)
+ integer, optional, intent(in) :: x_cplx
+ integer, optional, intent(in) :: istwf_k
+ integer, optional, intent(in) :: timopt,tim_xeigen
+ integer, optional, intent(in) :: use_gpu,use_slk
+
+!Local variables ------------------------------------
+ integer :: cplx_,istwf_k_,usegpu_,use_slk_
+ integer :: info,lda,ldb
+ real(dp) :: tsec(2)
+ character(len=500) :: msg
+#ifdef HAVE_LINALG_PLASMA
+ integer :: jobz_plasma_a
+ type(c_ptr) :: plasma_work
+#endif
+
+! *********************************************************************
+
+!TODO : add lda,ldb...
+! not allocate work arrays in not needed (scalapack or plasma)
+
+ if (present(tim_xeigen).and.present(timopt)) then
+    if(abs(timopt)==3) then
+      call timab(tim_xeigen,1,tsec)
+    end if
+ end if
+
+ cplx_=1 ; if(present(x_cplx)) cplx_ = x_cplx
+ usegpu_=0; if (present(use_gpu)) usegpu_=use_gpu
+ use_slk_=0; if (present(use_slk)) use_slk_=use_slk
+ istwf_k_=1; if (present(istwf_k)) istwf_k_=istwf_k
+ lda=n ; ldb=n
+
+ if( n > eigen_d_maxsize ) then
+    write(msg,'(a,2i3)')' Eigen size higher than max size set!!',n,eigen_d_maxsize
+    MSG_ERROR(msg)
+ endif
+
+#ifdef HAVE_LINALG_MAGMA
+ if (usegpu_==1) then
+   if (cplx_ == 2) then
+     call magmaf_zhegvd(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_z_work,eigen_z_lwork, &
+&           eigen_z_rwork,eigen_z_lrwork,eigen_iwork,eigen_liwork,info)
+   else
+     call magmaf_dsygvd(jobz,uplo,n,a,lda,w,eigen_d_work,eigen_d_lwork,&
+&                        eigen_iwork,eigen_liwork,info)
+   endif
+ else
+#endif
+
+#ifdef HAVE_LINALG_SCALAPACK
+ if(use_slk_ == 1) then
+   ABI_CHECK(present(x_cplx),"x_cplx must be present")
+   call compute_eigen2(abi_communicator,abi_processor,cplx_,n,n,a,b,w,istwf_k_)
+   info = 0 ! This is to avoid unwanted warning but it's not clean
+ else
+#endif
+
+#ifdef HAVE_LINALG_PLASMA
+ !FDahm & LNGuyen  (November 2012) :
+ !  In Plasma v 2.4.6, eigen routines support only
+ !  the eigenvalues computation (jobz=N) and not the
+ ! full eigenvectors bases determination (jobz=V)
+ if (LSAME(jobz,'N')) then
+   jobz_plasma_a = jobz_plasma(jobz)
+   MSG_ERROR("This code is broken")
+   if (cplx_ == 2) then
+     call PLASMA_Alloc_Workspace_zhegv(n,n,plasma_work,info)
+!    info = PLASMA_zhegv_c(itype,jobz_plasma_a,uplo_plasma(uplo),n,c_loc(a),lda,&
+!&          c_loc(b),ldb,c_loc(w),plasma_work,c_loc(rwork),lwork)
+     call PLASMA_Dealloc_handle(plasma_work,info)
+   else
+     call PLASMA_Alloc_Workspace_dsygv(n,n,plasma_work,info)
+!    info = PLASMA_dsygv_c(itype,jobz_plasma_a,uplo_plasma(uplo),n,c_loc(a),lda,&
+!&          c_loc(b),ldb,c_loc(w),plasma_work,c_loc(lwork),lwork)
+     call PLASMA_Dealloc_handle(plasma_work,info)
+   endif
+ else
+#endif
+ if (cplx_ == 2) then
+   call zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_z_work,eigen_z_lwork,eigen_z_rwork,info)
+ else
+   call dsygv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_d_work,eigen_d_lwork,info)
+ endif
+#ifdef HAVE_LINALG_PLASMA
+ end if
+#endif
+#ifdef HAVE_LINALG_SCALAPACK
+ end if
+#endif
+#ifdef HAVE_LINALG_MAGMA
+ end if
+#endif
+
+ if(info/=0) then
+   write(msg,'(a,i3)')' Problem in abi_dhegv, info= ',info
+   MSG_ERROR(msg)
+ endif
+
+ if (present(tim_xeigen).and.present(timopt)) then
+   if(abs(timopt)==3) then
+     call timab(tim_xeigen,2,tsec)
+   end if
+ end if
+
+end subroutine abi_dhegv_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_chegv_new
+!! NAME
+!! abi_chegv_new
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! SOURCE
+!!
+subroutine abi_chegv_new(itype,jobz,uplo,n,a,lda,b,ldb,w)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_chegv_new'
+!End of the abilint section
+
+ implicit none
+
+ !Arguments ------------------------------------
+ integer,intent(in) :: itype
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n
+ integer, intent(in) :: lda
+ integer, intent(in) :: ldb
+ complex(spc),target, intent(inout) :: a(lda,*)
+ complex(spc),target, intent(inout) :: b(ldb,*)
+ real(sp), intent(out) :: w(n)
+
+!Local variables-------------------------------
+ integer :: info
+#ifdef HAVE_LINALG_PLASMA
+ integer :: jobz_plasma_a
+ type(c_ptr) :: plasma_work
+#endif
+
+! *********************************************************************
+
+#ifdef HAVE_LINALG_PLASMA
+ !FDahm & LNGuyen  (November 2012) :
+ !  In Plasma v 2.4.6, eigen routines support only
+ !  the eigenvalues computation (jobz=N) and not the
+ !  full eigenvectors bases determination (jobz=V)
+ if (LSAME(jobz,'N')) then
+   jobz_plasma_a = jobz_plasma(jobz)
+   call PLASMA_Alloc_Workspace_chegv(n,n,plasma_work,info)
+   MSG_ERROR("This code is broken")
+!  call PLASMA_chegv(itype,jobz_plasma_a,uplo_plasma(uplo),n,a,lda,b,ldb,w,&
+!&                   plasma_work,c_loc(eigen_c_rwork),eigen_c_lwork,info)
+   call PLASMA_Dealloc_handle(plasma_work,info)
+ else
+#endif
+   call chegv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_c_work,eigen_c_lwork,eigen_c_rwork,info)
+#ifdef HAVE_LINALG_PLASMA
+ end if
+#endif
+
+ ABI_CHECK(info==0,"chegv returned info !=0")
+
+end subroutine abi_chegv_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_zhegv_new
+!! NAME
+!! abi_zhegv_new
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!!
+!! SOURCE
+
+subroutine abi_zhegv_new(itype,jobz,uplo,n,a,lda,b,ldb,w)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_zhegv_new'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: itype
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n
+ integer, intent(in) :: lda
+ integer, intent(in) :: ldb
+ complex(dpc), target,intent(inout) :: a(lda,*)
+ complex(dpc), target,intent(inout) :: b(ldb,*)
+ real(dp), intent(out) :: w(n)
+
+!Local variables-------------------------------
+ integer :: info
+#ifdef HAVE_LINALG_PLASMA
+ integer :: jobz_plasma_a
+ type(c_ptr) :: plasma_work
+#endif
+
+! *********************************************************************
+
+#ifdef HAVE_LINALG_PLASMA
+ !FDahm & LNGuyen  (November 2012) :
+ !  In Plasma v 2.4.6, eigen routines support only
+ !  the eigenvalues computation (jobz=N) and not the
+ ! full eigenvectors bases determination (jobz=V)
+ if (LSAME(jobz,'N')) then
+   jobz_plasma_a = jobz_plasma(jobz)
+   call PLASMA_Alloc_Workspace_zhegv(n,n,plasma_work,info)
+   MSG_ERROR("This code is broken")
+!  call PLASMA_zhegv(itype,jobz_plasma_a,uplo_plasma(uplo),n,a,lda,b,ldb,w,&
+!&                   plasma_work,c_loc(eigen_c_rwork),eigen_c_lwork,info)
+   call PLASMA_Dealloc_handle(plasma_work,info)
+ else
+#endif
+   call zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_z_work,eigen_z_lwork,eigen_z_rwork,info)
+#ifdef HAVE_LINALG_PLASMA
+ end if
+#endif
+
+ ABI_CHECK(info==0,"zhegv returned info !=0")
+
+end subroutine abi_zhegv_new
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_abi_linalg/abi_dhegv
 !! NAME
@@ -173,6 +449,8 @@
 end subroutine abi_dhegv
 !!***
 
+!----------------------------------------------------------------------
+
 !!****f* m_abi_linalg/abi_dhegv_alloc
 !! NAME
 !! abi_dhegv_alloc
@@ -210,6 +488,8 @@ end subroutine abi_dhegv
 
 end subroutine abi_dhegv_alloc
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_abi_linalg/abi_chegv
 !! NAME
@@ -272,6 +552,8 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w,work,lwork,rwork,info)
 end subroutine abi_chegv
 !!***
 
+!----------------------------------------------------------------------
+
 !!****f* m_abi_linalg/abi_chegv_alloc
 !! NAME
 !! abi_chegv_alloc
@@ -306,6 +588,8 @@ end subroutine abi_chegv
 
 end subroutine abi_chegv_alloc
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_abi_linalg/abi_zhegv
 !! NAME
@@ -370,6 +654,8 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,work,lwork,rwork,info)
 
 end subroutine abi_zhegv
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_abi_linalg/abi_zhegv_alloc
 !! NAME
