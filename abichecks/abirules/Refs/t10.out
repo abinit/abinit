@@ -1,7 +1,7 @@
 **********************************************************************
 Warning pattern : 'at (1) defined but not used'
 **********************************************************************
-dummy_tests.F90 = line: 106, [31mwarn:  Label 100 at (1) defined but not used[0m
+dummy_tests.F90 = line: 98, [31mwarn:  Label 100 at (1) defined but not used[0m
 [31m  ->  100 call xmpi_end()
   ->    1[0m
 **********************************************************************

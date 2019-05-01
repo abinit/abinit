@@ -36,8 +36,6 @@
 
 subroutine xmpi_ialltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
 
- implicit none
-
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(in) :: xval(:,:)
  real(dp) ABI_ASYNC, intent(inout) :: recvbuf(:,:)
@@ -53,7 +51,8 @@ subroutine xmpi_ialltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,c
 #ifdef HAVE_MPI_IALLTOALLV
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_IALLTOALLV(xval,sendcnts,sdispls,MPI_DOUBLE_PRECISION,recvbuf,&
-&    recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,request,ierr)
+     recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,request,ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
    return
  end if
 #endif
@@ -82,8 +81,6 @@ end subroutine xmpi_ialltoallv_dp2d
 
 subroutine xmpi_ialltoallv_int2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
 
- implicit none
-
 !Arguments-------------------------
  integer ABI_ASYNC, intent(in) :: xval(:,:)
  integer ABI_ASYNC, intent(inout) :: recvbuf(:,:)
@@ -99,7 +96,8 @@ subroutine xmpi_ialltoallv_int2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,
 #ifdef HAVE_MPI_IALLTOALLV
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_IALLTOALLV(xval,sendcnts,sdispls,MPI_INTEGER,recvbuf,&
-&   recvcnts,rdispls,MPI_INTEGER,comm,request,ierr)
+    recvcnts,rdispls,MPI_INTEGER,comm,request,ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
    return
  end if
 #endif
@@ -128,8 +126,6 @@ end subroutine xmpi_ialltoallv_int2d
 
 subroutine xmpi_ialltoallv_dp1d2(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
 
- implicit none
-
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(in) :: xval(:)
  real(dp) ABI_ASYNC, intent(inout) :: recvbuf(:)
@@ -145,7 +141,8 @@ subroutine xmpi_ialltoallv_dp1d2(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,
 #ifdef HAVE_MPI_IALLTOALLV
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_IALLTOALLV(xval,sendcnts,sdispls,MPI_DOUBLE_PRECISION,recvbuf,&
-&   recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,request,ierr)
+    recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,request,ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
    return
  end if
 #endif

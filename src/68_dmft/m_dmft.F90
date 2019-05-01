@@ -107,11 +107,11 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 &                    print_green,printocc_green,&
 &                    integrate_green,copy_green,compute_green,&
 &                    check_fourier_green,local_ks_green,fermi_green
- use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper
+ use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper!,upfold_oper,init_oper,destroy_oper,print_oper
  use m_self, only : self_type,initialize_self,destroy_self,print_self,dc_self,rw_self,new_self,make_qmcshift_self
  use m_hu, only : hu_type,init_hu,destroy_hu
  use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_ldau_energy
- use m_matlu, only : print_matlu,sym_matlu
+ use m_matlu, only : print_matlu,sym_matlu!,identity_matlu
  use m_datafordmft, only : psichi_renormalization
  implicit none
 
@@ -131,7 +131,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  real(dp) :: tsec(2)
 !scalars
  integer :: check,idmftloop,istep_iter,spaceComm,my_rank,opt_renorm
- integer :: itypat
+ integer :: itypat,natomcor,iatom
  logical :: etot_var
  character(len=200) :: char_enddmft
 ! type
@@ -141,6 +141,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  type(green_type) :: weiss
  type(self_type) :: self
  type(self_type) :: self_new
+ !type(oper_type) :: self_minus_hdc_oper
  type(energy_type) :: energies_dmft
  type(energy_type) :: energies_tmp
  character(len=500) :: message
@@ -215,11 +216,32 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !== Orthonormalize psichi
 !----------------------------------------------------------------------
  call timab(621,1,tsec)
+ natomcor=0
+ do iatom=1,paw_dmft%natom
+   if(paw_dmft%lpawu(iatom).ne.-1) then
+     natomcor=natomcor+1
+   end if
+ end do
  opt_renorm=3
- if(paw_dmft%nspinor==2.and.paw_dmft%dmft_solv==5) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
+! write(6,*) "natomcor",natomcor
+! if(natomcor>1) opt_renorm=2
+ if(paw_dmft%nspinor==2.and.paw_dmft%dmft_solv==8) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
                                                                 ! ought to be  generalized  in the  future
  if(paw_dmft%dmft_solv/=-1) then
    call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)
+
+
+   ! check that loc_oper(upfold_oper)=I
+   !  call init_oper(paw_dmft,self_minus_hdc_oper)
+   !  call identity_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom)
+   !  call print_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,1)
+   !  call upfold_oper(self_minus_hdc_oper,paw_dmft,1)
+   !  call print_oper(self_minus_hdc_oper,9,paw_dmft,3)
+   !  call loc_oper(self_minus_hdc_oper,paw_dmft,1)
+   !  call sym_matlu(cryst_struc,self_minus_hdc_oper%matlu,pawang)
+   !  call print_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,1)
+   !  call destroy_oper(self_minus_hdc_oper)
+
 
 !  ===========================================================================
 !  ==  re-construct LDA green function with new psichis
@@ -258,7 +280,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !== define Interaction from input upawu and jpawu
 !----------------------------------------------------------------------
  ABI_DATATYPE_ALLOCATE(hu,(cryst_struc%ntypat))
- call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g)
+ call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call initialize_self(self,paw_dmft)
 
  ! Set Hu in density representation for calculation of entropy if needed...
@@ -530,7 +552,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  call destroy_green(green)
 !todo_ab rotate back density matrix into unnormalized basis just for
 !printout
- call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g)
+ call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call destroy_self(self)
  call destroy_energy(energies_dmft,paw_dmft)
 

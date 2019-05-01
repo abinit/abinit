@@ -166,8 +166,8 @@ module defs_basis
 !Real precision
  real(dp), parameter :: greatest_real = huge(one)
  real(dp), parameter :: smallest_real = -greatest_real
- !real(dp), parameter :: tol1= 0.1_dp
- !real(dp), parameter :: tol2= 0.01_dp
+ real(dp), parameter :: tol1= 0.1_dp
+ real(dp), parameter :: tol2= 0.01_dp
  real(dp), parameter :: tol3= 0.001_dp
  real(dp), parameter :: tol4= 0.0001_dp
  real(dp), parameter :: tol5= 0.00001_dp
@@ -206,6 +206,7 @@ module defs_basis
  real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree, in meV
  real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree, in Kelvin
  real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree, in THz
+ real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree, in s
  real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree, in J
  real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge, in Coulomb
  real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
@@ -281,6 +282,8 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_PAW_AEPSI = 3
  integer,public,parameter :: WFK_TASK_EINTERP   = 4
  integer,public,parameter :: WFK_TASK_DDK       = 5
+ integer,public,parameter :: WFK_TASK_DDK_DIAGO = 6
+ integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -390,8 +393,6 @@ CONTAINS  !=====================================================================
 
  subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
@@ -432,8 +433,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -525,12 +524,9 @@ end subroutine print_kinds
 !!
 !! SOURCE
 
- integer pure function str2wfktask(str) result(wfk_task)
-
- implicit none
+integer pure function str2wfktask(str) result(wfk_task)
 
 !Arguments ------------------------------------
-!scalars
  character(len=*),intent(in) :: str
 
 !************************************************************************
@@ -546,11 +542,15 @@ end subroutine print_kinds
    wfk_task = WFK_TASK_EINTERP
  case ("wfk_ddk")
    wfk_task = WFK_TASK_DDK
+ case ("wfk_ddk_diago")
+   wfk_task = WFK_TASK_DDK_DIAGO
+ case ("wfk_kpts_erange")
+   wfk_task = WFK_TASK_KPTS_ERANGE
  case default
    wfk_task = WFK_TASK_NONE
  end select
 
- end function str2wfktask
+end function str2wfktask
 !!***
 
 !----------------------------------------------------------------------

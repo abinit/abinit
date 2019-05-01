@@ -69,8 +69,6 @@ CONTAINS  !===========================================================
 
 subroutine invsqrt_matrix(matrix,tndim)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tndim 
@@ -221,8 +219,6 @@ end subroutine invsqrt_matrix
 
 subroutine blockdiago_fordsyev(matrix,tndim,eig)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tndim
@@ -232,19 +228,18 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
 
 !Local variables-------------------------------
 !scalars
- integer :: im1,im2,im3,info,lwork,im4,im5,indice_formax,shift
+ integer :: im1,im2,im3,info,lwork,im4,indice_formax,shift !im5,
  character(len=500) :: message
  real(dp):: tmpx,maxvalue
  integer(dp):: tmpi,newstarting,current_dege,prtopt
 !arrays
- real(dp),allocatable :: rwork(:)
  real(dp),allocatable :: work(:)
  real(dp),allocatable :: Permutcol(:,:)
  real(dp),allocatable :: Apermutcol(:,:)
  real(dp),allocatable :: Apermutline(:,:)
  real(dp),allocatable :: Apermutlineback(:,:)
  real(dp),allocatable :: Permutline(:,:)
- real(dp),allocatable :: matrix_save(:,:),W(:)
+ real(dp),allocatable :: matrix_save(:,:) !,W(:)
  integer,allocatable :: nonnul(:)
  integer,allocatable :: nonnuldege(:)
  logical :: testdege,swap
@@ -583,8 +578,6 @@ end subroutine blockdiago_fordsyev
 
 subroutine blockdiago_forzheev(matrix,tndim,eig)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tndim
@@ -606,7 +599,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  complex(dpc),allocatable :: Apermutline(:,:)
  complex(dpc),allocatable :: Apermutlineback(:,:)
  real(dp),allocatable :: Permutline(:,:)
- complex(dpc),allocatable :: matrix_save(:,:),W(:)
+ complex(dpc),allocatable :: matrix_save(:,:) !,W(:)
  integer,allocatable :: nonnul(:)
  
 ! *************************************************************************

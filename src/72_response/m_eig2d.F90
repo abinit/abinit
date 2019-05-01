@@ -1401,11 +1401,9 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  end if
 
  if(ieig2rf == 4 ) then
-   ABI_STAT_ALLOCATE(fan,(2*mband*nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq,mband), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in fan")
+   ABI_MALLOC_OR_DIE(fan,(2*mband*nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq,mband), ierr)
    fan(:,:,:,:,:,:,:) = zero
-   ABI_STAT_ALLOCATE(eig2nkq_tmp,(2,mband*nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in eig2nkq_tmp")
+   ABI_MALLOC_OR_DIE(eig2nkq_tmp,(2,mband*nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq), ierr)
    eig2nkq_tmp(:,:,:,:,:,:,:) = zero
 !  This is not efficient because double the memory. Alternative: use buffer and
 !  print part by part.
@@ -1417,11 +1415,9 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  end if
 
  if(ieig2rf == 5 ) then
-   ABI_STAT_ALLOCATE(gkk,(2*mband*nsppol,dtset%nkpt,3,natom,mband), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in gkk")
+   ABI_MALLOC_OR_DIE(gkk,(2*mband*nsppol,dtset%nkpt,3,natom,mband), ierr)
    gkk(:,:,:,:,:) = zero
-   ABI_STAT_ALLOCATE(eig2nkq_tmp,(2,mband*nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in eig2nkq_tmp")
+   ABI_MALLOC_OR_DIE(eig2nkq_tmp,(2,mband*nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq), ierr)
    eig2nkq_tmp(:,:,:,:,:,:,:) = zero
 !  This is not efficient because double the memory. Alternative: use buffer and
 !  print part by part.
