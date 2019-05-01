@@ -76,9 +76,12 @@ subroutine nf_check(istatus)
 implicit none
 integer, intent (in) :: istatus
 
-if (istatus /= nf90_noerr) then
-    write(*,*) trim(adjustl(nf90_strerror(istatus)))
-end if
+#ifdef HAVE_NETCDF
+ if (istatus /= nf90_noerr) then
+     write(*,*) trim(adjustl(nf90_strerror(istatus)))
+ end if
+#endif
+
 end subroutine nf_check
 
 
@@ -1630,6 +1633,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          !Calling interfaced TRIQS solver subroutine from src/67_triqs_ext package
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
         if (paw_dmft%dmft_solv==9) then
+#ifndef HAVE_NETCDF
+            write(message,'(2a)') ch10,' NETCDF requiered! ABINIT communicates with the python script through netcdf.'
+            call wrtout(std_out,message,'COLL')
+            MSG_ERROR(message)   
+#else
             ! Creating the NETCDF file
             print*, "    Creating NETCDF file: dft_for_triqs.nc"
             call nf_check(nf90_create("dft_for_triqs.nc", NF90_CLOBBER, ncid))
@@ -1772,6 +1780,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
             ABI_DEALLOCATE(new_im_g_iw)
             ABI_DEALLOCATE(new_g_tau)
             ABI_DEALLOCATE(new_gl)
+#endif
         else
             call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,  &
  &           nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
