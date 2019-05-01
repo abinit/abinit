@@ -131,7 +131,7 @@
    else
 #ifdef FC_NAG
      !MG: This hack needed to pass paral[25] paral[29] and mpiio on nag@petrus with np=4
-     if (n < 0) write(std_out, *)"work: ",work(1:3)
+     if (n < 0) write(std_out, *)"work: ",eigen_d_work(1:3)
 #endif
      call dsyev(jobz,uplo,n,a,lda,w,eigen_d_work,eigen_d_lwork,info)
    endif
@@ -417,7 +417,7 @@ end subroutine abi_zheev_new
    else
 #ifdef FC_NAG
       ! MG: This hack needed to pass paral[25] paral[29] and mpiio on nag@petrus with np=4
-      if (n < 0) write(std_out, *)"work: ",work(1:3)
+      if (n < 0) write(std_out, *)"work: ",eigen_d_work(1:3)
 #endif
       call dsyev(jobz,uplo,n,a,lda,w,work,lwork,info)
    endif
