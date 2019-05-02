@@ -1372,6 +1372,7 @@ class BaseTest(object):
         self._status = None
         self._isok = None
         self.stdout_fname = None
+        self._print_lock = None
         if os.path.basename(self.inp_fname).startswith("-"):
             self._status = "disabled"
 
@@ -1455,6 +1456,16 @@ class BaseTest(object):
 
     def stderr_read(self):
         return lazy_read(self.stderr_fname)
+
+    def cprint(self, msg='', color=None):
+        if self._print_lock is not None:
+            self._print_lock.aquire()
+        if color:
+            cprint(msg, color)
+        else:
+            print(msg)
+        if self._print_lock is not None:
+            self._print_lock.release()
 
     @property
     def has_empty_stderr(self):
@@ -1790,7 +1801,7 @@ class BaseTest(object):
                     return True
         return False
 
-    def run(self, build_env, runner, workdir, print_lock, nprocs=1,
+    def run(self, build_env, runner, workdir, print_lock=None, nprocs=1,
             runmode="static", **kwargs):
         """
         Run the test with nprocs MPI nodes in the build environment build_env using the `JobRunner` runner.
@@ -1819,6 +1830,8 @@ class BaseTest(object):
         import copy
         runner = copy.deepcopy(runner)
         start_time = time.time()
+
+        self._print_lock = print_lock
 
         workdir = os.path.abspath(workdir)
         if not os.path.exists(workdir):
@@ -1866,8 +1879,7 @@ class BaseTest(object):
         if self._status == "disabled":
             msg = self.full_id + ": Disabled"
             can_run = False
-            with print_lock:
-                cprint(msg, status2txtcolor[self._status])
+            self.cprint(msg, status2txtcolor[self._status])
 
         # Here we get the number of MPI nodes for test.
         self.nprocs, self.skip_msg = self.compute_nprocs(self.build_env, nprocs, runmode=runmode)
@@ -1875,25 +1887,22 @@ class BaseTest(object):
         if self.skip_msg:
             self._status = "skipped"
             msg = self.full_id + ": Skipped."
-            with print_lock:
-                cprint(msg, status2txtcolor[self._status])
-                for l in self.skip_msg.splitlines():
-                    cprint("\t" + l, status2txtcolor[self._status])
-                print()
+            self.cprint(msg, status2txtcolor[self._status])
+            for l in self.skip_msg.splitlines():
+                self.cprint("\t" + l, status2txtcolor[self._status])
+            self.cprint()
             can_run = False
 
         if self.skip_host():
             self._status = "skipped"
             msg = self.full_id + ": Skipped: this hostname has been excluded."
-            with print_lock:
-                cprint(msg, status2txtcolor[self._status])
+            self.cprint(msg, status2txtcolor[self._status])
             can_run = False
 
         if self.skip_buildbot_builder():
             self._status = "skipped"
             msg = self.full_id + ": Skipped: this buildbot builder has been excluded."
-            with print_lock:
-                cprint(msg, status2txtcolor[self._status])
+            self.cprint(msg, status2txtcolor[self._status])
             can_run = False
 
         self.run_etime = 0.0
@@ -1939,8 +1948,7 @@ class BaseTest(object):
                 self.exceptions.extend(runner.exceptions)
                 if not self.expected_failure:
                     for exc in runner.exceptions:
-                        with print_lock:
-                            print(exc)
+                        self.cprint(exc)
 
             # Execute post_commands in workdir.
             for cmd_str in self.post_commands:
@@ -1968,15 +1976,13 @@ class BaseTest(object):
                 self.fld_isok = self.fld_isok and isok
 
                 msg = ": ".join([self.full_id, msg])
-                with print_lock:
-                    cprint(msg, status2txtcolor[status])
+                self.cprint(msg, status2txtcolor[status])
 
             # Check if the test is expected to fail.
             if runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
                 msg = (self.full_id + "Test was not expected to fail but subprocesses returned %s" % runner.retcode)
-                with print_lock:
-                    cprint(msg, status2txtcolor["failed"])
+                self.cprint(msg, status2txtcolor["failed"])
 
             # If pedantic, stderr must be empty unless the test is expected to fail!
             if self.pedantic and not self.expected_failure:
@@ -1999,8 +2005,7 @@ class BaseTest(object):
                         # TODO: Not very clean, I should introduce a new status and a setter method.
                         self._status = "failed"
                         msg = " ".join([self.full_id, "VALGRIND ERROR:", parser.error_report])
-                        with print_lock:
-                            cprint(msg, status2txtcolor["failed"])
+                        self.cprint(msg, status2txtcolor["failed"])
 
                 except Exception as exc:
                     self.exceptions.append(exc)
@@ -2011,26 +2016,23 @@ class BaseTest(object):
                 try:
                     errout = self.stderr_read()
                     if errout:
-                        with print_lock:
-                            cprint(errout, status2txtcolor["failed"])
+                        self.cprint(errout, status2txtcolor["failed"])
 
                     # Extract YAML error message from ABORTFILE or stdout.
                     abort_file = os.path.join(self.workdir, "__ABI_MPIABORTFILE__")
                     if os.path.exists(abort_file):
                         f = open(abort_file, "r")
-                        with print_lock:
-                            print(12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
-                            cprint(f.read(), status2txtcolor["failed"])
-                            f.close()
+                        self.cprint(12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
+                        self.cprint(f.read(), status2txtcolor["failed"])
+                        f.close()
                     else:
                         yamlerr = read_yaml_errmsg(self.stdout_fname)
                         if yamlerr:
-                            with print_lock:
-                                print("YAML Error found in the stdout of", self)
-                                cprint(yamlerr, status2txtcolor["failed"])
+                            self.cprint("YAML Error found in the stdout of "
+                                        + repr(self))
+                            self.cprint(yamlerr, status2txtcolor["failed"])
                         else:
-                            with print_lock:
-                                print("No YAML Error found in", self)
+                            self.cprint("No YAML Error found in " + repr(self))
 
                 except Exception as exc:
                     self.exceptions.append(exc)
@@ -2038,8 +2040,7 @@ class BaseTest(object):
             if kwargs.get("abimem_check", False):
                 paths = [os.path.join(self.workdir, f) for f in os.listdir(self.workdir)
                          if f.startswith("abimem") and f.endswith(".mocc")]
-                with print_lock:
-                    print("Found %s abimem files" % len(paths))
+                self.cprint("Found %s abimem files" % len(paths))
                 # abimem_retcode = 0
                 for path in paths:
                     parser = AbimemParser(path)
@@ -2073,11 +2074,9 @@ class BaseTest(object):
 
                             if elist:
                                 all_errors.append(elist)
-                                with print_lock:
-                                    cprint("%s [FAILED]" % p, "red")
+                                self.cprint("%s [FAILED]" % p, "red")
                             else:
-                                with print_lock:
-                                    cprint("%s [OK]" % p, "green")
+                                self.cprint("%s [OK]" % p, "green")
 
                     nc_retcode = len(all_errors)
 
@@ -2093,11 +2092,9 @@ class BaseTest(object):
                     self._status = "failed"
                     # Store the exception and continue.
                     self.exceptions.append(Exception(errmsg))
-                    with print_lock:
-                        print(errmsg)
+                    self.cprint(errmsg)
                 else:
-                    with print_lock:
-                        cprint("netcdf validation [OK]", "green")
+                    self.cprint("netcdf validation [OK]", "green")
 
         self._executed = True
         self.tot_etime = time.time() - start_time
@@ -3453,17 +3450,16 @@ class AbinitTestSuite(object):
             self.nprocs = nprocs
             self.py_nprocs = py_nprocs
 
-            def run_and_check_test(test, print_lock=NotALock()):
+            def run_and_check_test(test, print_lock=None):
                 """Helper function to execute the test. Must be thread-safe."""
 
                 testdir = os.path.abspath(os.path.join(self.workdir, test.suite_name + "_" + test.id))
 
                 # Run the test
-                test.run(build_env, runner, testdir, print_lock=print_lock, nprocs=nprocs, runmode=runmode, **kwargs)
+                test.run(build_env, runner, testdir, print_lock=None, nprocs=nprocs, runmode=runmode, **kwargs)
 
                 # Write HTML summary
-                with print_lock:
-                    test.write_html_report()
+                test.write_html_report()
 
                 # Remove useless files in workdir.
                 test.clean_workdir()
