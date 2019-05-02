@@ -998,7 +998,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 !arrays
  real(dp) :: ework(4, 2)
  real(dp),allocatable :: pme_k(:,:)
- complex(dp),allocatable :: cweights_tmp(:,:,:)
+ complex(dp),allocatable :: cweights_tmp(:,:)
  integer :: ind_ibz(4)
  !complex(dpc) :: SIM0, SIM0I
  complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(4,nz)
@@ -1021,13 +1021,13 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 
  cweights = zero
 #ifdef DEV_NEW_TETRA
- ABI_MALLOC(cweights_tmp,(2,nz,self%nq_k))
+ ABI_MALLOC(cweights_tmp,(nz,self%nq_k))
  do ib=1,nbcalc
    do ii=1,2
-     call htetra_blochl_weights_zinv(self%tetra_k, pme_k(:, ii), nz, zvals(:,ib), &
-                                      max_occ1, self%nq_k, 1, cweights_tmp, comm)
+     call htetra_weights_wvals_zinv(self%tetra_k, pme_k(:, ii), nz, zvals(:,ib), &
+                                    max_occ1, self%nq_k, 1, cweights_tmp, comm)
      do iq=1,self%nq_k
-       cweights(:,ii,ib,iq) = cweights_tmp(1,:,iq)
+       cweights(:,ii,ib,iq) = cweights_tmp(:,iq)
      end do
    end do
  end do

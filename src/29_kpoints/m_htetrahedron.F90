@@ -123,8 +123,8 @@ public :: htetra_print           ! Print information about tetrahedron object
 public :: htetra_get_onewk       ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
 public :: htetra_get_onewk_wvals ! Similar to tetra_get_onewk_wvals but receives arbitrary list of frequency points.
 public :: htetra_get_onewk_wvals_zinv ! Calculate integration weights for 1/(z-E(k)) for a single k-point in the IBZ.
+public :: htetra_weights_wvals_zinv ! Same as above but return the weight on all the kpoints by looping over tetrahedra
 public :: htetra_blochl_weights  ! And interface to help to facilitate the transition to the new tetrahedron implementation
-public :: htetra_blochl_weights_zinv
 !!***
 
 contains
@@ -797,7 +797,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  do ihash=1,tetra%nbuckets
    ! Count tetrahedra in this bucket
    ntetra = count(tetra%unique_tetra(ihash)%indexes(0,:)>0)
-   tetra%nunique_tetra = tetra%nunique_tetra + 1
+   tetra%nunique_tetra = tetra%nunique_tetra + ntetra
    ! Allocate array with right size
    ABI_MALLOC(indexes,(0:4,ntetra))
    indexes = tetra%unique_tetra(ihash)%indexes(:,:ntetra)
@@ -810,7 +810,6 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ABI_MALLOC(tetra%tetra_total,(tetra%nkibz))
  tetra%tetra_count = 0
  tetra%tetra_total = 0
- tetra%nibz_tetra = 0
  do ihash=1,tetra%nbuckets
    ntetra = size(tetra%unique_tetra(ihash)%indexes,2)
    do itetra=1,ntetra
@@ -819,10 +818,10 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
        ikibz = tetra_mibz(isummit)
        tetra%tetra_total(ikibz) = tetra%tetra_total(ikibz) + tetra_mibz(0)
        tetra%tetra_count(ikibz) = tetra%tetra_count(ikibz) + 1
-       tetra%nibz_tetra = tetra%nibz_tetra + 1
      end do
    end do
  end do
+ tetra%nibz_tetra = sum(tetra%tetra_count)
 
  ! HM: This was being allocated here, however this is only used when we loop over kpoints
  ! I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
@@ -1062,7 +1061,7 @@ pure subroutine get_onetetra_blochl(tetra,eigen_1tetra,energies,nene,max_occ,bco
 
  ! Factor of 1/6 from the volume of the tetrahedron
  ! The rest is accounted for from the kpoint weights
- volconst = max_occ/4.d0!/6.d0
+ volconst = max_occ!/4.d0!/6.d0
 
  ! This is output
  tweight = zero; dweight = zero
@@ -1575,8 +1574,8 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
    dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
   end do
  case(2)
-   tweight = tweight*tetra%vv
-   dweight = dweight*tetra%vv
+   tweight = tweight*tetra%vv/4.d0
+   dweight = dweight*tetra%vv/4.d0
  end select
 
  call xmpi_sum(tweight, comm, ierr)
@@ -1587,9 +1586,9 @@ end subroutine htetra_blochl_weights
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_blochl_weights_zinv
+!!****f* m_htetrahedron/htetra_blochl_weights_wvals_zinv
 !! NAME
-!!  htetra_blochl_weights_zinv
+!!  htetra_blochl_weights_wvals_zinv
 !!
 !! FUNCTION
 !!   The same as htetra_get_onewk_wvals_zinv but looping over tetrahedra
@@ -1605,8 +1604,7 @@ end subroutine htetra_blochl_weights
 !!
 !! SOURCE
 
-subroutine htetra_blochl_weights_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,&
-  opt,cweight,comm)
+subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cweight,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1616,7 +1614,7 @@ subroutine htetra_blochl_weights_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,&
 !arrays
  real(dp) ,intent(in) :: eig_ibz(nkpt)
  complex(dp),intent(in)  :: zvals(nz)
- complex(dp),intent(out) :: cweight(2,nz,nkpt)
+ complex(dp),intent(out) :: cweight(nz,nkpt)
 
 !Local variables-------------------------------
 !scalars
@@ -1657,8 +1655,7 @@ subroutine htetra_blochl_weights_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,&
        ! Acumulate the contributions
        do isummit=1,4
          ik_ibz = ind_ibz(isummit)
-         cweight(1,iz,ik_ibz) = cweight(1,iz,ik_ibz) + verl(isummit) *multiplicity
-         cweight(2,iz,ik_ibz) = cweight(2,iz,ik_ibz) + verli(isummit)*multiplicity
+         cweight(iz,ik_ibz) = cweight(iz,ik_ibz) + verl(isummit) *multiplicity
        end do
      end do ! iz
    end do ! itetra
@@ -1668,7 +1665,7 @@ subroutine htetra_blochl_weights_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,&
  select case(tetra%opt)
  case(1)
   do ik_ibz=1,tetra%nkibz
-   cweight(:,:,ik_ibz) = cweight(:,:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
+   cweight(:,ik_ibz) = cweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
   end do
  case(2)
    cweight = cweight*tetra%vv
@@ -1676,7 +1673,7 @@ subroutine htetra_blochl_weights_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,&
 
  call xmpi_sum(cweight, comm, ierr)
 
-end subroutine htetra_blochl_weights_zinv
+end subroutine htetra_weights_wvals_zinv
 !!***
 
 
