@@ -79,7 +79,7 @@
 
 #ifdef HAVE_LINALG_MAGMA
  if (usegpu_==1) then
-   ABI_CHECK((.not.lapack_divide_conquer),"BUG(4) in abi_dhegv (d&c)!")
+   ABI_CHECK((lapack_divide_conquer),"BUG(4) in abi_dhegv (d&c)!")
    if (cplx_ == 2) then
      call magmaf_zhegvd(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_z_work,eigen_z_lwork, &
 &           eigen_z_rwork,eigen_z_lrwork,eigen_iwork,eigen_liwork,info)
@@ -92,7 +92,7 @@
 
 #ifdef HAVE_LINALG_SCALAPACK
  if(use_slk_ == 1) then
-   ABI_CHECK((.not.lapack_divide_conquer),"BUG(5) in abi_dhegv (x_cplx)!")
+   ABI_CHECK(present(x_cplx),"BUG(5) in abi_dhegv (x_cplx)!")
    call compute_eigen2(abi_communicator,abi_processor,cplx_,n,n,a,b,w,istwf_k_)
    info = 0 ! This is to avoid unwanted warning but it's not clean
  else
@@ -119,6 +119,10 @@
  if (cplx_ == 2) then
    call zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_z_work,eigen_z_lwork,eigen_z_rwork,info)
  else
+#ifdef FC_NAG
+     !MG: This hack needed to pass paral[25] paral[29] and mpiio on nag@petrus with np=4
+     if (n < 0) write(std_out, *)"work: ",eigen_d_work(1:3)
+#endif
    call dsygv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_d_work,eigen_d_lwork,info)
  endif
 #ifdef HAVE_LINALG_PLASMA

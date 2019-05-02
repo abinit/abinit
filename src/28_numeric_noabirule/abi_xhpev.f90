@@ -60,7 +60,7 @@
 
 ! *********************************************************************
 
- ABI_CHECK(lapack_full_storage,"BUG(1) in abi_dhpev (storage)!")
+ ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_dhpev (storage)!")
  ABI_CHECK(lapack_double_precision,"BUG(2) in abi_dhpev (precision)!")
  ABI_CHECK(n<=eigen_d_maxsize,"BUG(3) in abi_dhpev (maxsize)!")
 
@@ -146,7 +146,7 @@ end subroutine abi_dhpev
 
 ! *********************************************************************
 
- ABI_CHECK(lapack_full_storage,"BUG(1) in abi_chpev (storage)!")
+ ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_chpev (storage)!")
  ABI_CHECK(lapack_single_precision,"BUG(2) in abi_chpev (precision)!")
  ABI_CHECK(n<=eigen_c_maxsize,"BUG(3) in abi_chpev (maxsize)!")
 
@@ -210,7 +210,7 @@ end subroutine abi_chpev
 
 ! *********************************************************************
 
- ABI_CHECK(lapack_full_storage,"BUG(1) in abi_zhpev (storage)!")
+ ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_zhpev (storage)!")
  ABI_CHECK(lapack_double_precision,"BUG(2) in abi_zhpev (precision)!")
  ABI_CHECK(n<=eigen_z_maxsize,"BUG(3) in abi_zhpev (maxsize)!")
 

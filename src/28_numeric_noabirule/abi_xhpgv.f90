@@ -64,7 +64,7 @@
 
 ! *********************************************************************
 
- ABI_CHECK(lapack_full_storage,"BUG(1) in abi_dhpgv (storage)!")
+ ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_dhpgv (storage)!")
  ABI_CHECK(lapack_double_precision,"BUG(2) in abi_dhpgv (precision)!")
  ABI_CHECK(n<=eigen_d_maxsize,"BUG(3) in abi_dhpgv (maxsize)!")
 
@@ -152,7 +152,7 @@ end subroutine abi_dhpgv
 
 ! *********************************************************************
 
- ABI_CHECK(lapack_full_storage,"BUG(1) in abi_chpgv (storage)!")
+ ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_chpgv (storage)!")
  ABI_CHECK(lapack_single_precision,"BUG(2) in abi_chpgv (precision)!")
  ABI_CHECK(n<=eigen_c_maxsize,"BUG(3) in abi_chpgv (maxsize)!")
 
@@ -218,7 +218,7 @@ subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
 
 ! *********************************************************************
 
- ABI_CHECK(lapack_full_storage,"BUG(1) in abi_zhpgv (storage)!")
+ ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_zhpgv (storage)!")
  ABI_CHECK(lapack_double_precision,"BUG(2) in abi_zhpgv (precision)!")
  ABI_CHECK(n<=eigen_z_maxsize,"BUG(3) in abi_zhpgv (maxsize)!")
 
