@@ -468,14 +468,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  dmatpuopt
-   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==4.or.dt%usepawu==10.or.dt%usepawu==14) then
-     cond_string(1)='usepawu' ; cond_values(1)=1
+   if (dt%usepawu>0) then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmatpuopt',dt%dmatpuopt,10,(/1,2,3,4,5,6,7,8,9,10/),iout)
    end if
 
 !  dmatudiag
-   if (dt%usepawu==1.or.dt%usepawu==2.or.dt%usepawu==3.or.dt%usepawu==4.or.dt%usepawu==10.or.dt%usepawu==14) then
-     cond_string(1)='usepawu' ; cond_values(1)=1
+   if (dt%usepawu>0) then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmatudiag',dt%dmatudiag,3,(/0,1,2/),iout)
    end if
 
@@ -525,7 +525,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_charge_prec',dt%dmft_charge_prec,1,tol20,iout)
        if(dt%usepawu==14) then
-         cond_string(1)='usepawu' ; cond_values(1)=14
+         cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,1,(/5/),iout)
        endif
        cond_string(1)='usedmft' ; cond_values(1)=1
@@ -1150,12 +1150,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_ge(2,2,cond_string,cond_values,ierr,'iscf',dt%iscf,10,iout)
    end if
 
-!  When usepawu=4, iscf must be <=9 (the reason needs to be studied)
-   if (dt%usepawu==4) then
-     cond_string(1)='usepawu' ; cond_values(1)=4
-     call chkint_le(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,9,iout)
-   end if
-
 !  istatimg
    call chkint_eq(0,0,cond_string,cond_values,ierr,'istatimg',dt%istatimg,2,(/0,1/),iout)
    if (dt%string_algo==2) then
@@ -1416,6 +1410,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  String method
    if(dt%imgmov==2) then
      cond_string(1)='imgmov'      ; cond_values(1)=dt%imgmov
+!    Some restriction for the solver
      if(dt%string_algo==0)then
        cond_string(2)='string_algo' ; cond_values(2)=dt%string_algo
        call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,1,(/0/),iout)
@@ -1428,7 +1423,26 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  NEB
    if(dt%imgmov==5)then
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
+!    Some restriction for the solver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,4,(/0,1,2,3/),iout)
+!    Static image energy is needed if spring constant is variable
+     if (abs(dt%neb_spring(1)-dt%neb_spring(2))>=tol8.and.dt%istatimg==0) then
+       write(message, '(7a)' )&
+&       'When using variable NEB spring constants (which is the default for CI-NEB),',ch10,&
+&       'all the energies of the cell images are needed (including static images!).',ch10,&
+&       'You cannot use istatimg=0!',ch10,&
+&       'Action: put istatimg=1 in input file.'
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
+!    Static image energy is needed for CI-NEB or improved tangent
+     if ((dt%neb_algo==1.or.dt%neb_algo==2).and.dt%istatimg==0) then
+       write(message, '(7a)' )&
+&       'When using Improved-tangent-NEB or CI-NEB,',ch10,&
+&       'all the energies of the cell images are needed (including static images!).',ch10,&
+&       'You cannot use istatimg=0!',ch10,&
+&       'Action: put istatimg=1 in input file.'
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
    end if
 
 !  mffmem
@@ -1842,9 +1856,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='rfstrs' ; cond_values(1)=dt%rfstrs
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',nspinor,1,(/1/),iout)
    end if
-!  When usepawu=2, nspinor must be 1
-   if(dt%usepawu==2)then
-     cond_string(1)='usepawu' ; cond_values(1)=2
+!  When usepawu=2 or -2, nspinor must be 1
+   if(abs(dt%usepawu)==2)then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
 !    Make sure that nspinor is 1
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',nspinor,1,(/1/),iout)
    end if
@@ -2162,20 +2176,29 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
   ! only values of 0 (default) 1, 2, 3 are allowed
   call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
-   if(dt%orbmag .NE. 0) then
+  if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
-   end if
-  ! only kptopt 4 and 3 are allowed
-   if(dt%orbmag .NE. 0) then
+  end if
+  ! only kptopt 4 and 3 are allowed for Chern number
+  if((dt%orbmag.EQ.1).OR.(dt%orbmag.EQ.3)) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/3,4/),iout)
-   end if
-  ! nproc > 1 implementation for chern_number but not for orbmag yet
-   if(dt%orbmag .GT. 1) then
+  end if
+  ! only kptopt 3 is allowed for orbmag
+  if(dt%orbmag.GT.1) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'nproc',nproc,1,(/1/),iout)
-   end if
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,1,(/3/),iout)
+  end if
+  ! only kpt parallelism is allowed at present
+  if(dt%orbmag .GT. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
+  end if
+  if(dt%orbmag .GT. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
+  end if
   ! require usexcnhat 0
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
@@ -2250,7 +2273,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  pawcpxocc
    if (usepaw==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'pawcpxocc',dt%pawcpxocc,2,(/1,2/),iout)
-     if (dt%usepawu>=1.and.nspinor==2.and.dt%pawcpxocc==1) then
+     if (dt%usepawu/=0.and.nspinor==2.and.dt%pawcpxocc==1) then
        write(message, '(5a)' )&
 &       'When non-collinear magnetism is activated ,',ch10,&
 &       'and LDA+U activated ',ch10,&
@@ -3039,7 +3062,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  usedmatpu
-   if (usepaw==1.and.dt%usepawu==1) then
+   if (usepaw==1.and.dt%usepawu>0) then
 !    abs(dt%usedmatpu)<=nstep
      cond_string(1)='nstep' ; cond_values(1)=dt%nstep
      call chkint_le(1,1,cond_string,cond_values,ierr,'abs(usedmatpu)',abs(dt%usedmatpu),dt%nstep,iout)
@@ -3054,6 +3077,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
          end if
        end do
      end if
+   end if
+   !usedmatpu not allowed with experimental usepawu<0
+   if (usepaw==1.and.dt%usepawu<0) then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usedmatpu',dt%usedmatpu,1,(/0/),iout)
+   end if
+   !usedmatpu only allowed for GS
+   if (usepaw==1.and.dt%usedmatpu/=0.and.dt%optdriver/=RUNL_GSTATE) then
+     message='usedmatpu/=0 is only allowed for Ground-State calculations!'
+     MSG_ERROR_NOSTOP(message,ierr)
    end if
 
 !  usedmft
@@ -3119,7 +3152,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  usepawu and lpawu
 !  PAW+U and restrictions
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,9,(/0,1,2,3,4,5,6,10,14/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,11,(/-4,-3,-2,-1,0,1,2,3,4,10,14/),iout)
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/1/),iout)
@@ -3137,12 +3170,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  useexexch AND usepawu
 !  Restriction when use together
-   if(dt%useexexch>0.and.dt%usepawu>0)then
+   if(dt%useexexch/=0.and.dt%usepawu/=0)then
      do itypat=1,dt%ntypat
        if (dt%lpawu(itypat)/=dt%lexexch(itypat).and.&
 &       dt%lpawu(itypat)/=-1.and.dt%lexexch(itypat)/=-1) then
          write(message, '(5a,i2,3a)' )&
-&         'When PAW+U (usepawu>0) and local exact-exchange (useexexch>0)',ch10,&
+&         'When PAW+U (usepawu/=0) and local exact-exchange (useexexch/=0)',ch10,&
 &         'are selected together, they must apply on the same',ch10,&
 &         'angular momentum (lpawu/=lexexch forbidden, here for typat=',itypat,') !',ch10,&
 &         'Action: correct your input file.'
@@ -3153,7 +3186,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  usedmft/usepawu and lpawu
 !  Restriction when use together
-   if(dt%usedmft>0.or.dt%usepawu>0)then
+   if(dt%usedmft>0.or.dt%usepawu/=0)then
      nlpawu=0
      do itypat=1,dt%ntypat
        if (dt%lpawu(itypat)/=-1) then

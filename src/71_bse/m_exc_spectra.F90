@@ -958,8 +958,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 
  ABI_MALLOC(fa,(nstates,BSp%nq))
  ABI_MALLOC(fap,(nstates,BSp%nq))
- ABI_STAT_MALLOC(Ami,(exc_size), ierr)
- ABI_CHECK(ierr==0, " out-of-memory Ami")
+ ABI_MALLOC_OR_DIE(Ami,(exc_size), ierr)
 
  do mi=1,nstates ! Loop on excitonic eigenvalues mi
    read(eig_unt, err=10, iomsg=errmsg) Ami(:)

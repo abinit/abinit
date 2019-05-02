@@ -63,6 +63,7 @@ module m_effective_potential
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc, dfpt_phfrq
+
  implicit none
 
  public :: effective_potential_distributeResidualForces

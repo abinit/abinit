@@ -238,7 +238,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,           only : getcprj
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -299,7 +298,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=18,tim_getgh1c=2,tim_projbd=3,formeig1=1
- integer :: bd2tot_index,bdtot_index,berryopt,bufsz,choice,cpopt,counter,cplex_rhoij,ddkcase
+ integer :: bd2tot_index,bdtot_index,berryopt,bufsz,choice,cpopt,cplex_rhoij,ddkcase
  integer :: dimffnl,dimffnl1,dimffnl1_idir1,dimylmgr1
  integer :: ia,iatom,iband,ibg,ibgq,ibg1,icg,icgq,icg1,ider,idir0,idir1,idir_cprj
  integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_me,ilmn,iorder_cprj,ipert1
@@ -311,7 +310,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
- logical :: need_wfk,need_wf1,paral_atom,qne0,t_exist
+ logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist
  character(len=500) :: msg
  character(len=fnlen) :: fiwfddk(3)
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -526,6 +525,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  qne0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2>=tol14)
  is_metal=((dtset%occopt>=3.and.dtset%occopt<=8).or.(abs(arg)>tol8))
  is_metal_or_qne0=((is_metal).or.(qne0))
+ nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  ABI_ALLOCATE(ch1c,(2,dtset%mband,dtset%mband,nkpt_me))
  ch1c(:,:,:,:)=zero
  nzlmopt_ipert=0;nzlmopt_ipert1=0
@@ -619,11 +619,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          else
            if(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) then
              call vlocalstr(gmet,gprimd,gsqcut,istr1,mgfftf,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-&             nattyp,nfftf,ngfftf,dtset%ntypat,dtset%paral_kgb,ph1df,psps%qgrid_vl,ucvol,&
+&             nattyp,nfftf,ngfftf,dtset%ntypat,ph1df,psps%qgrid_vl,ucvol,&
 &             psps%vlspl,vpsp1_idir1)
            else
              call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
-&             dtset%natom,nattyp,nfftf,ngfftf,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),dtset%paral_kgb,&
+&             dtset%natom,nattyp,nfftf,ngfftf,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
 &             ph1df,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_idir1,xred)
            end if
            if(psps%n1xccc/=0)then
@@ -659,18 +659,18 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          if(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) then
            option=0
            call dfpt_mkvxcstr(cplex,idir1,ipert1,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,&
-&           nhat,nhat1,nkxc,nspden,n3xccc,option,dtset%paral_kgb,dtset%qptn,rhor,rhor1,rprimd,&
+&           nhat,nhat1,nkxc,nmxc,nspden,n3xccc,option,dtset%qptn,rhor,rhor1,rprimd,&
 &           usepaw,usexcnhat,vxc10,xccc3d1_idir1)
          else
 !          Non-collinear magnetism (should the second nkxc be nkxc_cur ?)
            if (nspden==4) then
              option=0
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum1,0,dum2,0,dum3,0,nkxc,&
-&             nspden,n3xccc,1,option,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,vxc,&
+&             nmxc,nspden,n3xccc,1,option,dtset%qptn,dum1,dum1,rprimd,0,vxc,&
 &             vxc10,xccc3d1_idir1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
-&             nspden,n3xccc,0,dtset%paral_kgb,dtset%qptn,dum1,rprimd,0,vxc10,xccc3d1_idir1)
+&             nmxc,nspden,n3xccc,0,dtset%qptn,dum1,rprimd,0,vxc10,xccc3d1_idir1)
            end if
          end if
        end if
@@ -678,7 +678,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !      Get first-order Hartree potential (metric tensor contribution only)
        if (nvh1>0) then
          call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,dtset%natom,&
-&         nfftf,ngfftf,dtset%paral_kgb,rhog,rprimd,vhartr01)
+&         nfftf,ngfftf,rhog,rprimd,vhartr01)
        end if
 
 !      Get Hartree + xc + local contributions to dynamical matrix or elastic tensor
@@ -1346,11 +1346,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &               mcprjq,mpi_enreg,dtset%natom,nband_k,npw1_k,nspinor,1,gs1)
 
 !              Accumulate 1st-order density due to delta_u^(j1)
-               counter=500*iband;option=1;wfcorr=0
-               call dfpt_accrho(counter,cplex,cwave0,dcwavef,dcwavef,cwaveprj0_idir1,dcwaveprj,&
-&               lambda,dtfil%filstat,gs_hamkq,iband,idir1,ipert1,isppol,dtset%kptopt,&
+               option=1;wfcorr=0
+               call dfpt_accrho(cplex,cwave0,dcwavef,dcwavef,cwaveprj0_idir1,dcwaveprj,&
+&               lambda,gs_hamkq,iband,idir1,ipert1,isppol,dtset%kptopt,&
 &               mpi_enreg,dtset%natom,nband_k,1,npw_k,npw1_k,nspinor,occ_k,option,&
-&               pawdrhoij1_unsym(:,idir1),dtset%prtvol,drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
+&               pawdrhoij1_unsym(:,idir1),drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
                call pawcprj_free(dcwaveprj)
                ABI_DEALLOCATE(dcwavef)
                ABI_DATATYPE_DEALLOCATE(dcwaveprj)
@@ -1494,7 +1494,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !      Build and symmetrize 1st-order density change due to change of overlap
        ABI_ALLOCATE(drho1wfg,(2,dtset%nfft))
        call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&       nspden,nsppol,nsym1,dtset%paral_kgb,phnons1,drho1wfg,drho1wfr(:,:,idir1),&
+&       nspden,nsppol,nsym1,phnons1,drho1wfg,drho1wfr(:,:,idir1),&
 &       rprimd,symaf1,symrl1)
        if (dtset%pawstgylm/=0) then
          option=0
@@ -1821,7 +1821,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  use m_kg,      only : mkkpg
  use m_mkffnl,  only : mkffnl
  use m_getgh1c, only : getgh1c
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2241,8 +2240,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 subroutine gaugetransfo(cg_k,cwavef,cwavef_d,eig_k,eig1_k,iband,nband_k, &
 &                      mband,npw_k,npw1_k,nspinor,nsppol,occ_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -31,7 +31,11 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include "abi_common.h"
+
 module m_spin_mover
+
   use defs_basis
   use m_errors
   use m_abicore
@@ -409,6 +413,7 @@ contains
   subroutine spin_mover_t_finalize(self)
 
     class(spin_mover_t), intent(inout):: self
+    ABI_UNUSED((/self%nspins/))
   end subroutine spin_mover_t_finalize
   !!***
 

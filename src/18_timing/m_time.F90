@@ -30,6 +30,7 @@ MODULE m_time
 #if defined HAVE_MPI2
  use mpi
 #endif
+ use m_clib
 
  use m_xpapi,    only: xpapi_flops
  use m_fstrings, only: char_count, sjoin
@@ -86,7 +87,9 @@ MODULE m_time
  real(dp),private,save :: papi_flops(TIMER_SIZE)=zero , papi_tzero(2,TIMER_SIZE)=zero
 
  ! Elapsed time and elapsed number of floating point operation since a reference
+#ifdef HAVE_PAPI
  real(dp),private,save :: papi_tottim(2,TIMER_SIZE)=zero, papi_totflops(TIMER_SIZE)=zero
+#endif
 
 CONTAINS
 !!***
@@ -336,7 +339,7 @@ function abi_cpu_time() result(cpu)
 
 !Machine-dependent timers
 #ifdef HAVE_CCLOCK
- call cclock(cpu)
+ call clib_cclock(cpu)
 
 #elif defined HAVE_FC_CPUTIME
 !This is the F95 standard subroutine.
@@ -347,7 +350,7 @@ function abi_cpu_time() result(cpu)
  cpu = mclock()*0.01d0
 
 #elif defined HAVE_OS_MACOSX || defined FC_COMPAQ || defined FC_SUN
- cpu = etime(tmp)
+ cpu = clib_etime(tmp)
 
 #elif defined FC_FUJITSU
  call clock(cpu,0,2)
@@ -603,7 +606,7 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
    avg_type = ""
  end if
  if (present(pre_str)) call wrtout(std_out, pre_str)
- call wrtout(std_out, sjoin(tag, "completed. cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall), avg_type), &
+ call wrtout(std_out, sjoin(tag, "done. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
      do_flush=.True.)
  if (present(end_str)) call wrtout(std_out, end_str)
  call cwtime(cpu, wall, gflops, "start")

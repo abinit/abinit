@@ -192,7 +192,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
    if (iblok /= 0) then
      ! DEBUG
-     write(*,*) 'DDB found in file for qpt=', qpt
+     !write(*,*) 'DDB found in file for qpt=', qpt
      ! END DEBUG
 
      ! q-point is present in the ddb. No interpolation needed.
