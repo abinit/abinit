@@ -69,7 +69,8 @@ def intense(options):
     """Find routines with intensive allocations."""
     retcode = 0
     for memfile in options.memfiles:
-        intensive = memfile.find_intensive() #threshold=options.threshold)
+        intens = memfile.find_intensive() #threshold=options.threshold)
+        print(intens)
         df = memfile.get_hotspot_files_df()
         print(df)
     return retcode
@@ -79,7 +80,7 @@ def peaks(options):
     """Find memory peaks."""
     retcode = 0
     for memfile in options.memfiles:
-        for i, peak in enumerate(memfile.find_peaks(maxlen=30)):
+        for i, peak in enumerate(memfile.get_peaks(maxlen=30)):
             print("[%d] %s" % (i, peak))
         memfile.plot_peaks()
 
@@ -114,6 +115,7 @@ def ipython(options):
     # Start ipython shell with namespace
     # Use embed because I don't know how to show a header with start_ipython.
     import IPython
+    abifile == options.memfiles[0]
     IPython.embed(header="""
 The Abinit file is bound to the `parsers` variable.
 Use `abifile.<TAB>` to list available methods.

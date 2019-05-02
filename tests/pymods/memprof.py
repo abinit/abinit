@@ -237,7 +237,7 @@ class AbimemFile(object):
 
         return all_entries
 
-    def find_peaks(self, maxlen=30):
+    def get_peaks(self, maxlen=30):
         """
         Find peaks in the allocation with the corresponding variable.
         """
@@ -307,7 +307,7 @@ class AbimemFile(object):
         Returns: |matplotlib-Figure|
         """
         ax, fig, plt = get_ax_fig_plt(ax=ax)
-        peaks = self.find_peaks(maxlen=maxlen)
+        peaks = self.get_peaks(maxlen=maxlen)
         data = [e.size_mb for e in peaks]
         names = ["%s\n%s" % (e.vname, e.locus) for e in peaks]
         xs = list(range(len(data)))

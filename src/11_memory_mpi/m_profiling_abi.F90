@@ -92,6 +92,9 @@ module m_profiling_abi
    integer :: my_rank = 0
    ! Rank of this processor.
 
+   logical :: iwrite = .False.
+   ! True if this MPI rank should write to file.
+
    !real(dp),private,save :: start_time
    ! Origin of time in seconds.
 
@@ -137,11 +140,12 @@ contains
 !!       1 -> light version. Only memory peaks are written.
 !!       2 -> file abimem.mocc is created with full information inside.
 !!       3 -> Write info only if allocation/deallocation is larger that limit_mb
+!!    NOTE: By default, only master node writes, use negative values to make all MPI procs write info to disk.
 !!  [delta_time]=Interval in second for snapshots. Will write report to std_out evety delta_time seconds.
 !!  [filename] = If present, activate memory logging only inside filename (basename).
 !!  [limit_mb]= Set memory limit in Mb if level == 3. Print allocation/deallocation only above this limit.
 
- subroutine abimem_init(level, delta_time, filename, limit_mb)
+subroutine abimem_init(level, delta_time, filename, limit_mb)
 
 !Arguments ------------------------------------
  integer, intent(in) :: level
@@ -163,7 +167,7 @@ contains
    if (len_trim(filename) > 0) minfo%select_file = filename
  end if
 
- ! Optionally, set max limit in Mb if level == 2
+ ! Optionally, set max limit in Mb used if level == 2
  if (present(limit_mb)) minfo%limit_mb = limit_mb
 
  ! Build name of file used for logging.
@@ -189,22 +193,26 @@ contains
    end if
  end if
 
- select case (minfo%level)
+ select case (abs(minfo%level))
  case (0)
    ! No action required
 
  case (1, 2, 3)
-   ! Compact format
-   open(unit=minfo%logunt, file=minfo%logfile, status='unknown', action='write', iostat=ierr)
-   if (ierr /= 0) then
-     _ABORT("Opening abimem file")
-   end if
-   if (minfo%level == 1) call write_header("# Write memory allocations larger than previous peak")
-   if (minfo%level == 2) call write_header("# To be used for inspecting a variable which is not deallocated")
-   if (minfo%level == 3) then
-     write(msg, "(a,f9.1,a)")"# Write memory allocations/deallocations larger than ", minfo%limit_mb, "(MB)"
-     call write_header(msg)
-   end if
+   minfo%iwrite = .False.
+   if (minfo%my_rank == 0) minfo%iwrite = .True.
+   if (minfo%level < 0) minfo%iwrite = .False.
+   if (minfo%iwrite) then
+     open(unit=minfo%logunt, file=minfo%logfile, status='unknown', action='write', iostat=ierr)
+     if (ierr /= 0) then
+       _ABORT("Opening abimem file")
+     end if
+     if (minfo%level == 1) call write_header("# Write memory allocations larger than previous peak")
+     if (minfo%level == 2) call write_header("# To be used for inspecting a variable which is not deallocated")
+     if (minfo%level == 3) then
+       write(msg, "(a,f9.1,a)")"# Write memory allocations/deallocations larger than ", minfo%limit_mb, "(MB)"
+       call write_header(msg)
+     end if
+  end if
 
  case default
    write(msg, "(a,i0,2a)") &
@@ -370,7 +378,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
 
 !Local variables-------------------------------
  !integer :: ierr
- real(dp) :: now
+ !real(dp) :: now
  logical :: do_log, new_peak
  character(len=500) :: msg
 ! *************************************************************************
@@ -416,16 +424,16 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
  ! Selective memory tracing
  do_log = .True.
  if (minfo%select_file /= NONE_STRING) do_log = (minfo%select_file == file)
- !do_log = (do_log .and. my_rank == 0)
+ do_log = do_log .and. minfo%iwrite
 
  ! Snapshot (write to std_out)
- if (do_log .and. minfo%last_snapshot >= zero) then
-   now = abimem_wtime()
-   if (now - minfo%last_snapshot >= minfo%dt_snapshot) then
-     call abimem_report(std_out)
-     minfo%last_snapshot = now
-   end if
- end if
+ !if (do_log .and. minfo%last_snapshot >= zero) then
+ !  now = abimem_wtime()
+ !  if (now - minfo%last_snapshot >= minfo%dt_snapshot) then
+ !    call abimem_report(std_out)
+ !    minfo%last_snapshot = now
+ !  end if
+ !end if
 
  ! IMPORTANT: 
  ! Remember to change the pyton code in ~abinit/tests/pymods/memprof.py to account for changes in the format
