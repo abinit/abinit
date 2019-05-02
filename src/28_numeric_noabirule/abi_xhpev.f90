@@ -102,7 +102,7 @@
   end if
 #endif
 
- ABI_CHECK(info==0,"dhpev returned info!=0!")
+ ABI_CHECK(info==0,"dhpev returned info!=0")
 
 end subroutine abi_dhpev
 !!***

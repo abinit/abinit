@@ -180,11 +180,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer,parameter :: level=2,mdtset=9999
  integer,save :: paw_size_old=-1
  integer :: idtset,ierr,iexit,iget_cell,iget_occ,iget_vel,iget_xcart,iget_xred
- integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk
+ integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk,linalg_max_size
  integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol
  real(dp) :: etotal
  character(len=500) :: message
  character(len=500) :: dilatmx_errmsg
+ logical :: linalg_full_storage,linalg_packed_storage
+ logical :: linalg_single_precision,linalg_double_precision
  logical :: converged,results_gathered,test_img,use_results_all
  type(dataset_type) :: dtset
  type(datafiles_type) :: dtfil
@@ -675,8 +677,14 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ! Set precision for FFT libs.
    ii = fftcore_set_mixprec(dtset%mixprec)
 
-!  linalg initialisation:
-   call abi_linalg_init(mpi_enregs(idtset)%comm_bandspinorfft,dtset%np_slk,3*maxval(dtset%nband(:)), mpi_enregs(idtset)%me)
+!  linalg initialisation
+   linalg_max_size=merge(maxval(dtset%nband(:)),0,dtset%optdriver==RUNL_GSTATE)
+   if (dtset%wfoptalg==4.or.dtset%wfoptalg==14.or.dtset%use_gpu_cuda/=0) linalg_max_size=3*linalg_max_size
+   linalg_full_storage=(dtset%wfoptalg==4.or.dtset%wfoptalg==14) ; linalg_packed_storage=.true. 
+   linalg_single_precision=.false. ; linalg_single_precision=.true.
+   call abi_linalg_init(mpi_enregs(idtset)%comm_bandspinorfft,dtset%np_slk,linalg_max_size,mpi_enregs(idtset)%me_cell,&
+&                       opt_lapack_full_storage=linalg_full_storage,opt_lapack_packed_storage=linalg_packed_storage,&
+&                       opt_lapack_single_precision=linalg_single_precision,opt_lapack_double_precision=linalg_double_precision)
 
    call timab(642,2,tsec)
 
