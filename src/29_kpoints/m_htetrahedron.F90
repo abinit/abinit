@@ -841,8 +841,6 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra%vv = abs(k1(1)*(k2(2)*k3(3)-k2(3)*k3(2))- &
                 k1(2)*(k2(1)*k3(3)-k2(3)*k3(1))+ &
                 k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
- ! HM: ! The volume constant is volume/4. I change vv here
- tetra%vv = tetra%vv/4.d0
 
  contains
  integer function compute_hash(tetra,t) result(ihash)
@@ -1063,7 +1061,7 @@ pure subroutine get_onetetra_blochl(tetra,eigen_1tetra,energies,nene,max_occ,bco
 
  ! Factor of 1/6 from the volume of the tetrahedron
  ! The rest is accounted for from the kpoint weights
- volconst = max_occ!/4.d0/6.d0
+ volconst = max_occ/4.d0!/6.d0
 
  ! This is output
  tweight = zero; dweight = zero
