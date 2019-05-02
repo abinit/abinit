@@ -9,7 +9,7 @@
 !!  symmetric or hermitian matrix A in packed storage
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2019 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,9 +18,9 @@
 
 !!***
 
-!!****f* m_abi_linalg/abi_dhpev_1d_new
+!!****f* m_abi_linalg/abi_dhpev
 !! NAME
-!! abi_dhpev_1d_new
+!! abi_dhpev
 !!
 !! FUNCTION
 !!
@@ -30,12 +30,12 @@
 !!
 !! SOURCE
 
-  subroutine abi_dhpev_1d_new(jobz,uplo,n,a,w,z,istwf_k,use_slk)
+  subroutine abi_dhpev(jobz,uplo,n,a,w,z,ldz,istwf_k,use_slk)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev_1_newd'
+#define ABI_FUNC 'abi_dhpev'
 
 !End of the abilint section
 
@@ -43,7 +43,7 @@
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
+ integer, intent(in) :: n,ldz
  real(dp), intent(inout) :: a(:)
  real(dp), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
@@ -51,8 +51,7 @@
  integer, optional, intent(in) :: use_slk
 
 !Local variables-------------------------------
- integer :: info,ldz,use_slk_,istwf_k_
- character(len=500) :: msg
+ integer :: info,use_slk_,istwf_k_
 #ifdef HAVE_LINALG_SCALAPACK
  type(matrix_scalapack) :: sca_a,sca_ev
  real(dp),allocatable :: tmp_evec(:,:)
@@ -61,16 +60,14 @@
 
 ! *********************************************************************
 
- if (n > eigen_d_maxsize) then
-   write(msg,'(a,2i3)')' Eigen size higher than max size set!!',n,eigen_d_maxsize
-   MSG_ERROR(msg)
- endif
+ ABI_CHECK(lapack_full_storage,"BUG(1) in abi_dhpev (storage)!")
+ ABI_CHECK(lapack_double_precision,"BUG(2) in abi_dhpev (precision)!")
+ ABI_CHECK(n<=eigen_d_maxsize,"BUG(3) in abi_dhpev (maxsize)!")
+
  info = 0 ! to avoid unwanted warnings but scalapack doesn't check return
 
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-
- ldz = n
 
 #ifdef HAVE_LINALG_SCALAPACK
  if (use_slk_ == 1) then
@@ -95,7 +92,6 @@
    ABI_DEALLOCATE(tmp_evec)
   else
 #endif
-
    if (istwf_k_ /= 2) then
      call zhpev(jobz,uplo,n,a,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
    else
@@ -105,338 +101,10 @@
 #ifdef HAVE_LINALG_SCALAPACK
   end if
 #endif
-  if (info/=0) then
-    write(msg,'(a,i3)')' Problem in abi_dhpev, info= ',info
-    MSG_WARNING(msg)
-  endif
 
-end subroutine abi_dhpev_1d_new
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_dhpev_2d_new
-!! NAME
-!! abi_dhpe_2d_new
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! SOURCE
-
- subroutine abi_dhpev_2d_new(jobz,uplo,n,a,w,z,istwf_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev_2d_new'
-
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- real(dp), intent(inout) :: a(:,:)
- real(dp), intent(out) :: z(:,:)
- real(dp), intent(out) :: w(:)
- integer, optional, intent(in) :: istwf_k
-
-!Local variables-------------------------------
- integer :: ldz
- integer :: info
- integer :: istwf_k_
-
- ! *********************************************************************
-
- istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
- ldz=n
-
- if (istwf_k_ /= 2) then
-    call zhpev(jobz,uplo,n,a,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
- else
-    call dspev(jobz,uplo,n,a,w,z,ldz,eigen_d_work,info)
- endif
-
- ABI_CHECK(info==0,"[z,d]hpev returned info !=0")
-
-end subroutine abi_dhpev_2d_new
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_chpev_new
-!! NAME
-!! abi_chpev_new
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! SOURCE
-
-  subroutine abi_chpev_new(jobz,uplo,n,a,w,z)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpev_new'
-!End of the abilint section
-
- implicit none
-
- !Arguments ------------------------------------
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- complex(spc), intent(inout) :: a(:,:)
- complex(spc), intent(out) :: z(:,:)
- real(sp), intent(out) :: w(:)
-
-!Local variables-------------------------------
- integer :: ldz
- integer :: info
-
-! *********************************************************************
-
- ldz=n
- call chpev(jobz,uplo,n,a,w,z,ldz,eigen_c_work,eigen_c_rwork,info)
-
- ABI_CHECK(info==0,"chpev returned info !=0")
-
-end subroutine abi_chpev_new
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_zhpev_new
-!! NAME
-!! abi_zhpev_new
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! SOURCE
-
-  subroutine abi_zhpev_new(jobz,uplo,n,a,w,z)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpev_new'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- complex(dpc), intent(inout) :: a(:,:)
- complex(dpc), intent(out) :: z(:,:)
- real(dp), intent(out) :: w(:)
-
-!Local variables-------------------------------
- integer :: ldz
- integer :: info
-
-! *********************************************************************
-
- ldz=n
- call zhpev(jobz,uplo,n,a,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
-
- ABI_CHECK(info==0,"zhpev returned info !=0")
-
-end subroutine abi_zhpev_new
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_dhpev
-!! NAME
-!! abi_dhpev
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! SOURCE
-
-  subroutine abi_dhpev(jobz,uplo,n,a,w,z,ldz,work,info,rwork,istwf_k)
-
- implicit none
-
- !Arguments ------------------------------------
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- integer, intent(in) :: ldz
- real(dp) :: a(*)
- real(dp) :: z(*)
- real(dp), intent(inout) :: work(*)
- real(dp),optional, intent(inout) :: rwork(*)
- real(dp) :: w(*)
- integer, intent(out) :: info
- !Optional Arguments ------------------------------------
- integer, optional, intent(in) :: istwf_k
-
-!Local Arguments ------------------------------------
- integer :: istwf_k_
-
- ! *********************************************************************
-
- istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-
- ! MG: FIXME: THIS IS BROKEN: rwork and istwfk_k!
- !if ( present(istwf_k) .and. (istwf_k .ne. 2) .and. present(rwork)) then
- if (istwf_k_ /= 2) then
-    ABI_CHECK(present(rwork),"rwork must be present")
-    call zhpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
- else
-    call dspev(jobz,uplo,n,a,w,z,ldz,work(1:3*n),info)
- endif
+ ABI_CHECK(info==0,"dhpev returned info!=0!")
 
 end subroutine abi_dhpev
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_dhpev_alloc_1d
-!! NAME
-!! abi_dhpev_alloc_1d
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! SOURCE
-
-  subroutine abi_dhpev_alloc_1d(jobz,uplo,n,a,w,z,istwf_k,use_slk)
-
- implicit none
- !Arguments ------------------------------------
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- real(dp), intent(inout) :: a(:)
- real(dp), intent(out) :: w(:)
- real(dp), intent(out) :: z(:,:)
- integer, optional, intent(in) :: istwf_k
- integer, optional, intent(in) :: use_slk
-
- !Local Arguments ------------------------------------
- character(len=500) :: msg
- integer :: info,use_slk_,istwf_k_
-#ifdef HAVE_LINALG_SCALAPACK
- type(matrix_scalapack)    :: sca_a,sca_ev
- real(dp),allocatable :: tmp_evec(:,:)
- integer :: dim_evec1,ierr
-#endif
-
-! *********************************************************************
- ! write(*,*) "ENTERING abi_dhpev_alloc_1d n=",n
- if( n > eigen_d_maxsize ) then
-    write(msg,'(a,2i3)')' Eigen size higher than max size set!!',n,eigen_d_maxsize
-    MSG_ERROR(msg)
- endif
- info = 0 ! to avoid unwanted warnings but scalapack doesn't check return
-
- use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
- istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-
-#ifdef HAVE_LINALG_SCALAPACK
- if (use_slk_ == 1) then
-   ! if istwfk=1, then dim_evec1=2*n and if istwfk=2, dim_evec1=n
-   dim_evec1= 2*n/istwf_k_
-   ABI_ALLOCATE(tmp_evec,(dim_evec1,n))
-   tmp_evec = 0._dp
-   call init_matrix_scalapack(sca_a,n,n,abi_processor,istwf_k_,10)
-   call init_matrix_scalapack(sca_ev,n,n,abi_processor,istwf_k_,10)
-
-#ifdef HAVE_LINALG_ELPA
-   call matrix_from_global_sym(sca_a,a,istwf_k_)
-#else
-   call matrix_from_global(sca_a,a,istwf_k_)
-#endif
-   call compute_eigen_problem(abi_processor,sca_a,&
-&        sca_ev,w,abi_communicator,istwf_k_)
-
-   call matrix_to_global(sca_a,a,istwf_k_)
-   call matrix_to_reference(sca_ev,tmp_evec,istwf_k_)
-
-   call xmpi_sum(tmp_evec,z,dim_evec1*n,abi_communicator,ierr)
-
-   CALL destruction_matrix_scalapack(sca_a)
-   CALL destruction_matrix_scalapack(sca_ev)
-   ABI_DEALLOCATE(tmp_evec)
-  else
-#endif
-    call abi_dhpev(jobz,uplo,n,a,w,z,n,eigen_d_work,info,&
-&     rwork=eigen_z_rwork,istwf_k=istwf_k_)
-#ifdef HAVE_LINALG_SCALAPACK
-  end if
-#endif
-  if(info/=0) then
-     write(msg,'(a,i3)')' Problem in abi_xhpev, info= ',info
-     MSG_WARNING(msg)
-  endif
-
-end subroutine abi_dhpev_alloc_1d
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_dhpev_alloc_2d
-!! NAME
-!! abi_dhpev_alloc_2d
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! SOURCE
-
- subroutine abi_dhpev_alloc_2d(jobz,uplo,n,a,w,z,istwf_k)
-
- implicit none
-
-!Arguments ------------------------------------
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- real(dp), intent(inout) :: a(:,:)
- real(dp), intent(out) :: w(:)
- real(dp), intent(out) :: z(:,:)
- integer :: info
- integer, optional, intent(in) :: istwf_k
-
-!Local Arguments ------------------------------------
- integer :: istwf_k_
-
- ! *********************************************************************
-
- istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-
- call abi_dhpev(jobz,uplo,n,a,w,z,n,eigen_d_work,info,&
-&  rwork=eigen_z_rwork,istwf_k=istwf_k_)
-
-end subroutine abi_dhpev_alloc_2d
 !!***
 
 !----------------------------------------------------------------------
@@ -453,61 +121,54 @@ end subroutine abi_dhpev_alloc_2d
 !!
 !! SOURCE
 
-  subroutine abi_chpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
+  subroutine abi_chpev(jobz,uplo,n,a,w,z,ldz)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_chpev'
+!End of the abilint section
 
  implicit none
 
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- integer, intent(in) :: ldz
+ integer, intent(in) :: n,ldz
  complex(spc), intent(inout) :: a(:,:)
  complex(spc), intent(out) :: z(:,:)
- complex(spc), intent(inout) :: work(:)
- real(sp), intent(inout) :: rwork(:)
  real(sp), intent(out) :: w(:)
- integer, intent(out) :: info
+
+!Local variables-------------------------------
+ integer :: info
+ real(sp),pointer :: rwork(:)
+ complex(spc),pointer :: work(:)
 
 ! *********************************************************************
 
+ ABI_CHECK(lapack_full_storage,"BUG(1) in abi_chpev (storage)!")
+ ABI_CHECK(lapack_single_precision,"BUG(2) in abi_chpev (precision)!")
+ ABI_CHECK(n<=eigen_c_maxsize,"BUG(3) in abi_chpev (maxsize)!")
+
+ work => eigen_c_work ; rwork => eigen_c_rwork
+
+ if (eigen_c_lwork==0) then
+   ABI_ALLOCATE(work,(2*n-1))
+ end if
+ if (eigen_c_lrwork==0) then
+   ABI_ALLOCATE(rwork,(3*n-2))
+ end if
  call chpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
+ if (eigen_c_lwork==0) then
+   ABI_DEALLOCATE(work)
+ end if
+ if (eigen_c_lrwork==0) then
+   ABI_DEALLOCATE(rwork)
+ end if
+
+ ABI_CHECK(info==0,"abi_chpev returned info!=0!")
 
 end subroutine abi_chpev
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_chpev_alloc
-!! NAME
-!! abi_chpev_alloc
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! SOURCE
-
- subroutine abi_chpev_alloc(jobz,uplo,n,a,w,z)
-
- implicit none
-
-!Arguments ------------------------------------
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- complex(spc), intent(inout) :: a(:,:)
- complex(spc), intent(out) :: z(:,:)
- real(sp), intent(out) :: w(n)
- integer :: info
-
-! *********************************************************************
-
- call abi_chpev(jobz,uplo,n,a,w,z,n,eigen_c_work,eigen_c_rwork,info)
-
-end subroutine abi_chpev_alloc
 !!***
 
 !----------------------------------------------------------------------
@@ -524,61 +185,52 @@ end subroutine abi_chpev_alloc
 !!
 !! SOURCE
 
-  subroutine abi_zhpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
+  subroutine abi_zhpev(jobz,uplo,n,a,w,z,ldz)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abi_zhpev'
+!End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- integer, intent(in) :: ldz
+ integer, intent(in) :: n,ldz
  complex(dpc), intent(inout) :: a(:,:)
  complex(dpc), intent(out) :: z(:,:)
- complex(dpc), intent(inout) :: work(:)
- real(dp), intent(inout) :: rwork(:)
- real(dp), intent(out) :: w(n)
- integer, intent(out) :: info
+ real(dp), intent(out) :: w(:)
+
+!Local variables-------------------------------
+ integer :: info
+ real(dp),pointer :: rwork(:)
+ complex(dpc),pointer :: work(:)
 
 ! *********************************************************************
 
+ ABI_CHECK(lapack_full_storage,"BUG(1) in abi_zhpev (storage)!")
+ ABI_CHECK(lapack_double_precision,"BUG(2) in abi_zhpev (precision)!")
+ ABI_CHECK(n<=eigen_z_maxsize,"BUG(3) in abi_zhpev (maxsize)!")
+
+ work => eigen_z_work ; rwork => eigen_z_rwork
+
+ if (eigen_z_lwork==0) then
+   ABI_ALLOCATE(work,(2*n-1))
+ end if
+ if (eigen_z_lrwork==0) then
+   ABI_ALLOCATE(rwork,(3*n-2))
+ end if
  call zhpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
+ if (eigen_z_lwork==0) then
+   ABI_DEALLOCATE(work)
+ end if
+ if (eigen_z_lrwork==0) then
+   ABI_DEALLOCATE(rwork)
+ end if
+
+ ABI_CHECK(info==0,"abi_zhpev returned info!=0!")
 
 end subroutine abi_zhpev
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_abi_linalg/abi_zhpev_alloc
-!! NAME
-!! abi_zhpev_alloc
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
- subroutine abi_zhpev_alloc(jobz,uplo,n,a,w,z)
-
- implicit none
-
-!Arguments ------------------------------------
- character(len=1), intent(in) :: jobz
- character(len=1), intent(in) :: uplo
- integer, intent(in) :: n
- complex(dpc), intent(inout) :: a(:,:)
- complex(dpc), intent(out) :: z(:,:)
- real(dp), intent(out) :: w(n)
- integer :: info
-
-! *********************************************************************
-
- call abi_zhpev(jobz,uplo,n,a,w,z,n,eigen_z_work,eigen_z_rwork,info)
-
-end subroutine abi_zhpev_alloc
 !!***

@@ -8,7 +8,7 @@
 !! with support of different external library (scalapack, elpa, plasma, magma, ... )
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (LNguyen,FDahm)
+!!  Copyright (C) 2012-2019 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,11 +30,9 @@ module m_abi_linalg
   use m_xomp
   use m_slk
   use iso_c_binding
-
 #ifdef HAVE_LINALG_ELPA
  use m_elpa
 #endif
-
 #ifdef HAVE_LINALG_PLASMA
  use plasma, except_dp => dp, except_sp => sp
 #endif
@@ -51,7 +49,14 @@ module m_abi_linalg
  private
 !!***
 
- ! Working arrays for eigen problem
+!Working arrays for eigen problem
+
+ logical,save :: lapack_single_precision=.false.
+ logical,save :: lapack_double_precision=.false.
+ logical,save :: lapack_full_storage    =.false.
+ logical,save :: lapack_packed_storage  =.false.
+ logical,save :: lapack_divide_conquer  =.false.
+
  integer,save :: eigen_s_maxsize=0
  integer,save :: eigen_d_maxsize=0
  integer,save :: eigen_c_maxsize=0
@@ -65,15 +70,15 @@ module m_abi_linalg
  integer,save :: eigen_z_lrwork=0
  integer,save :: eigen_liwork=0
 
- integer,save,allocatable :: eigen_iwork(:)
- 
- real(sp),save,allocatable :: eigen_c_rwork(:)
- real(dp),save,allocatable :: eigen_z_rwork(:)
- real(sp),save,allocatable :: eigen_s_work(:)
- real(dp),save,allocatable :: eigen_d_work(:)
+ integer,save,target,allocatable :: eigen_iwork(:)
 
- complex(spc),save,allocatable :: eigen_c_work(:)
- complex(dpc),save,allocatable :: eigen_z_work(:)
+ real(sp),save,target,allocatable :: eigen_c_rwork(:)
+ real(dp),save,target,allocatable :: eigen_z_rwork(:)
+ real(sp),save,target,allocatable :: eigen_s_work(:)
+ real(dp),save,target,allocatable :: eigen_d_work(:)
+
+ complex(spc),save,target,allocatable :: eigen_c_work(:)
+ complex(dpc),save,target,allocatable :: eigen_z_work(:)
 
 #ifdef HAVE_LINALG_SCALAPACK
  type(processor_scalapack),save,public :: abi_processor
@@ -81,11 +86,13 @@ module m_abi_linalg
  integer,save,public :: abi_complement_communicator
 #endif
 
-! This flag enables the PLASMA version in the BLAS/LAPACK wrappers.
-! Set to True in linalg_allow_plasma
+!This flag enables the PLASMA version in the BLAS/LAPACK wrappers.
+!Set to True in linalg_allow_plasma
  public :: linalg_allow_plasma
-
  logical,private,save :: XPLASMA_ISON = .False.
+#ifdef HAVE_LINALG_PLASMA
+ type(c_ptr) :: plasma_work
+#endif
 
 !----------------------------------------------------------------------
 !!***
@@ -160,58 +167,30 @@ module m_abi_linalg
  !LAPACK INTERFACE
  public :: abi_xheev
  interface abi_xheev
-    !module procedure abi_dheev
-    !module procedure abi_cheev
-    !module procedure abi_zheev
-    module procedure abi_dheev_new
-    module procedure abi_cheev_new
-    module procedure abi_zheev_new
-!   module procedure abi_dheev_alloc
-!   module procedure abi_cheev_alloc
-!   module procedure abi_zheev_alloc
+    module procedure abi_dheev
+    module procedure abi_cheev
+    module procedure abi_zheev
  end interface
  !----------------------------------------------------------------------
  public :: abi_xhegv
  interface abi_xhegv
-    !module procedure abi_dhegv
-    !module procedure abi_chegv
-    !module procedure abi_zhegv
-    module procedure abi_dhegv_new
-    module procedure abi_chegv_new
-    module procedure abi_zhegv_new
-!   module procedure abi_dhegv_alloc
-!   module procedure abi_chegv_alloc
-!   module procedure abi_zhegv_alloc
+    module procedure abi_dhegv
+    module procedure abi_chegv
+    module procedure abi_zhegv
  end interface
  !----------------------------------------------------------------------
  public :: abi_xhpev
  interface abi_xhpev
-    !module procedure abi_dhpev
-    !module procedure abi_chpev
-    !module procedure abi_zhpev
-    module procedure abi_dhpev_1d_new
-    module procedure abi_dhpev_2d_new
-    module procedure abi_chpev_new
-    module procedure abi_zhpev_new
-!   module procedure abi_dhpev_alloc_1d
-!   module procedure abi_dhpev_alloc_2d
-!   module procedure abi_chpev_alloc
-!   module procedure abi_zhpev_alloc
+    module procedure abi_dhpev
+    module procedure abi_chpev
+    module procedure abi_zhpev
  end interface
  !----------------------------------------------------------------------
  public :: abi_xhpgv
  interface abi_xhpgv
-    !module procedure abi_dhpgv
-    !module procedure abi_chpgv
-    !module procedure abi_zhpgv
-    module procedure abi_dhpgv_1d_new
-    module procedure abi_dhpgv_2d_new
-    module procedure abi_chpgv_new
-    module procedure abi_zhpgv_new
-!   module procedure abi_dhpgv_alloc_1d
-!   module procedure abi_dhpgv_alloc_2d
-!   module procedure abi_chpgv_alloc
-!   module procedure abi_zhpgv_alloc
+    module procedure abi_dhpgv
+    module procedure abi_chpgv
+    module procedure abi_zhpgv
  end interface
  !----------------------------------------------------------------------
  interface abi_xpotrf
@@ -293,6 +272,17 @@ CONTAINS  !===========================================================
 !! Initalization of linear algebra environnement
 !!
 !! INPUTS
+!! comm_scalapack= communicator to be used in case of Scalapack
+!! eigen_group_size= max. # of MPI processes to be sused in case of Scalalapck
+!! max_eigen_pb_size= max. size of eienproblem during calculation
+!! my_rank= rank of current MPI process
+!! === Optional arguments (flags, default=False) ===
+!!  opt_only_scalapack= if only scalapack has to be initialized here (other libraries ignored)
+!!  opt_lapack_single_precision= if single precision Lapack is in use
+!!  opt_lapack_double_precision= if double precision Lapack is in use
+!!  opt_lapack_full_storage= if full-storage Lapack routines have to be used (xheev, xhegv, xsyev, xsygv)
+!!  opt_lapack_packed_storage= if packed-storage Lapack routines have to be used (xhpev, xhpgv, xspev, xspgv)
+
 !!
 !! PARENTS
 !!      compute_kgb_indicator,driver
@@ -302,11 +292,16 @@ CONTAINS  !===========================================================
 !! SOURCE
 !!
  subroutine abi_linalg_init(comm_scalapack,eigen_group_size,max_eigen_pb_size,my_rank,&
-&                           only_scalapack) ! optional parameter
+&                           opt_lapack_single_precision,&
+&                           opt_lapack_double_precision,&
+&                           opt_lapack_full_storage,&
+&                           opt_lapack_packed_storage,&
+&                           opt_only_scalapack)! Optional arguments
 
 #if defined HAVE_MPI2
   use mpi
 #endif
+
  implicit none
 
 #if defined HAVE_MPI1
@@ -315,7 +310,9 @@ CONTAINS  !===========================================================
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm_scalapack,eigen_group_size,max_eigen_pb_size,my_rank
- logical,intent(in),optional :: only_scalapack
+ logical,intent(in),optional :: opt_lapack_full_storage,opt_lapack_packed_storage
+ logical,intent(in),optional :: opt_lapack_single_precision,opt_lapack_double_precision
+ logical,intent(in),optional :: opt_only_scalapack
 
 !Local variables ------------------------------
 #ifdef HAVE_LINALG_SCALAPACK
@@ -336,7 +333,6 @@ CONTAINS  !===========================================================
  if (eigen_group_size>0) then
    abi_communicator = comm_scalapack
    rank=xmpi_comm_rank(comm_scalapack)
-
    ! We create abi_communicator using a cartesian grid, and store its complement
    commsize = MIN(eigen_group_size, xmpi_comm_size(comm_scalapack))
    sizecart = (/commsize, xmpi_comm_size(comm_scalapack)/commsize/)
@@ -347,15 +343,14 @@ CONTAINS  !===========================================================
    call MPI_CART_SUB(commcart, keepdim, abi_communicator,abi_info1)
    keepdim = (/.false., .true./)
    call MPI_CART_SUB(commcart, keepdim, abi_complement_communicator,abi_info1)
-
    call init_scalapack(abi_processor,abi_communicator)
  else
    abi_communicator=xmpi_comm_null
    abi_complement_communicator = xmpi_comm_null
  end if
 #endif
- if (present(only_scalapack)) then
-   if (only_scalapack) return
+ if (present(opt_only_scalapack)) then
+   if (opt_only_scalapack) return
  end if
 
 #ifdef HAVE_LINALG_ELPA
@@ -369,12 +364,10 @@ CONTAINS  !===========================================================
 !  to avoid conflicts between mpi process due to plasma
  num_cores=xomp_get_max_threads()
  num_cores_node=xomp_get_num_cores_node()
-
  if (num_cores_node == 0) then ! This means that OMP is not enabled.
    num_cores_node = 1
    MSG_WARNING("You are using PLASMA but OpenMP is not enabled in Abinit!")
  end if
-
  ABI_ALLOCATE(affinity,(num_cores))
  do core_id =1,num_cores
    affinity(core_id) = MOD(my_rank*num_cores + (core_id-1), num_cores_node)
@@ -407,6 +400,22 @@ CONTAINS  !===========================================================
  eigen_c_lrwork  = 0
  eigen_z_lrwork  = 0
  eigen_liwork    = 0
+
+!Optional arguments
+ lapack_full_storage=.False. ; lapack_packed_storage=.False.
+ lapack_single_precision=.False. ; lapack_double_precision=.False.
+ if (present(opt_lapack_full_storage))    lapack_full_storage    =opt_lapack_full_storage
+ if (present(opt_lapack_packed_storage))  lapack_packed_storage  =opt_lapack_packed_storage
+ if (present(opt_lapack_single_precision))lapack_single_precision=opt_lapack_single_precision
+ if (present(opt_lapack_double_precision))lapack_double_precision=opt_lapack_double_precision
+
+ lapack_divide_conquer=.false.
+#ifdef HAVE_LINALG_MAGMA
+ lapack_divide_conquer=.true.
+#endif
+#ifdef HAVE_LINALG_PLASMA
+ lapack_divide_conquer=.true.
+#endif
 
  call abi_linalg_eigen_setmaxsize(max_eigen_pb_size)
 
@@ -444,9 +453,9 @@ CONTAINS  !===========================================================
 !Local variables ------------------------------
 #ifdef HAVE_LINALG_MAGMA
  integer :: nb
-!integer :: magmaf_get_ssytrd_nb
+ integer :: magmaf_get_ssytrd_nb
  integer :: magmaf_get_dsytrd_nb
-!integer :: magmaf_get_chetrd_nb
+ integer :: magmaf_get_chetrd_nb
  integer :: magmaf_get_zhetrd_nb
 #endif
 
@@ -457,85 +466,181 @@ CONTAINS  !===========================================================
  eigen_c_maxsize = max_eigen_pb_size
  eigen_z_maxsize = max_eigen_pb_size
 
-!Single precision WORK -- Not used yet
- eigen_s_lwork = 1
-!eigen_s_lwork = max(eigen_s_lwork,3*eigen_s_maxsize) ! SSYEV, SSYGV, SSPEV[D], SSPGV[D]
-!eigen_s_lwork = max(eigen_s_lwork,1+6*eigen_s_maxsize+2*eigen_s_maxsize**2) ! SSYEVD SSYGVD
-!#ifdef HAVE_LINALG_MAGMA
-!nb=magmaf_get_ssytrd_nb(eigen_s_maxsize)
-!eigen_s_lwork = max(eigen_s_lwork,eigen_s_maxsize*(nb+2)) ! MAGMAF_SSYEVD, MAGMAF_SSYGVD
-!#endif
+!Single precision WORK
+ eigen_s_lwork = 0
+ if (eigen_s_maxsize>0) then
+   if (lapack_single_precision) then
+     if (lapack_full_storage) then
+       eigen_s_lwork = max(eigen_s_lwork,3*eigen_s_maxsize-1) ! SSYEV, SSYGV
+     end if
+     if (lapack_packed_storage) then
+       eigen_s_lwork = max(eigen_s_lwork,3*eigen_s_maxsize) ! SSPEV[D], SSPGV[D]
+     end if
+     if (lapack_divide_conquer) then
+       eigen_s_lwork = max(eigen_s_lwork,1+6*eigen_s_maxsize+2*eigen_s_maxsize**2) ! SSYEVD, SSYGVD
+     end if
+#if defined HAVE_LINALG_MAGMA
+     if (lapack_full_storage.and.lapack_divide_conquer) then
+       nb=magmaf_get_ssytrd_nb(eigen_s_maxsize)
+       eigen_s_lwork = max(eigen_s_lwork,eigen_s_maxsize*(nb+2)) ! MAGMAF_SSYEVD, MAGMAF_SSYGVD
+     end if
+#elif defined HAVE_LINALG_SCALAPACK
+     eigen_s_lwork = 0
+#elif defined HAVE_LINALG_PLASMA
+     if (lapack_full_storage.and.lapack_divide_conquer) then
+       eigen_s_lwork = max(eigen_s_lwork,eigen_s_maxsize**2) ! PLASMA_SSYEV
+     end if
+#endif
+   end if
+ end if
  if(allocated(eigen_s_work)) then
    ABI_DEALLOCATE(eigen_s_work)
  end if
  ABI_ALLOCATE(eigen_s_work,(eigen_s_lwork))
 
 !Double precision WORK
- eigen_d_lwork = 1
- eigen_d_lwork = max(eigen_d_lwork,3*eigen_d_maxsize) ! DSYEV, DSYGV, DSPEV[D], DSPGV[D]
- eigen_d_lwork = max(eigen_d_lwork,1+6*eigen_d_maxsize+2*eigen_d_maxsize**2) ! DSYEVD, DSYGVD
-#ifdef HAVE_LINALG_MAGMA
- nb=magmaf_get_dsytrd_nb(eigen_d_maxsize)
- eigen_d_lwork = max(eigen_d_lwork,eigen_d_maxsize*(nb+2)) ! MAGMAF_DSYEVD, MAGMAF_DSYGVD
+ eigen_d_lwork = 0
+ if (eigen_d_maxsize>0) then
+   if (lapack_double_precision) then
+     if (lapack_full_storage) then
+       eigen_d_lwork = max(eigen_d_lwork,3*eigen_d_maxsize-1) ! DSYEV, DSYGV
+     end if
+     if (lapack_packed_storage) then
+       eigen_d_lwork = max(eigen_d_lwork,3*eigen_d_maxsize) ! DSPEV[D], DSPGV[D]
+     end if
+     if (lapack_divide_conquer) then
+       eigen_d_lwork = max(eigen_d_lwork,1+6*eigen_d_maxsize+2*eigen_d_maxsize**2) ! DSYEVD, DSYGVD
+     end if
+#if defined HAVE_LINALG_MAGMA
+     if (lapack_full_storage.and.lapack_divide_conquer) then
+       nb=magmaf_get_dsytrd_nb(eigen_d_maxsize)
+       eigen_d_lwork = max(eigen_d_lwork,eigen_d_maxsize*(nb+2)) ! MAGMAF_DSYEVD, MAGMAF_DSYGVD
+     end if
+#elif defined HAVE_LINALG_SCALAPACK
+     eigen_d_lwork = 0
+#elif defined HAVE_LINALG_PLASMA
+       if (lapack_full_storage.and.lapack_divide_conquer) then
+	 eigen_d_lwork = max(eigen_d_lwork,eigen_d_maxsize**2) ! PLASMA_DSYEV
+       end if
 #endif
+   end if
+ end if
  if(allocated(eigen_d_work)) then
    ABI_DEALLOCATE(eigen_d_work)
  end if
  ABI_ALLOCATE(eigen_d_work,(eigen_d_lwork))
 
-!Single complex WORK -- Not used yet
- eigen_c_lwork = 1
-!eigen_c_lwork = max(eigen_c_lwork,2*eigen_c_maxsize) ! CHEEV, CHEGV, CHPEV[D], CHPGV[D]
-!eigen_c_lwork = max(eigen_c_lwork,2*eigen_c_maxsize+eigen_c_maxsize**2) ! CHEEVD, CHEGVD
-!#ifdef HAVE_LINALG_MAGMA
-!nb=magmaf_get_chetrd_nb(eigen_c_maxsize)
-!eigen_c_lwork = max(eigen_c_lwork,eigen_c_maxsize*(nb+1)) ! MAGMAF_CHEEVD, MAGMAF_CHEGVD
-!#endif
+!Single complex WORK
+ eigen_c_lwork = 0
+ if (eigen_c_maxsize>0) then
+   if (lapack_single_precision) then
+     if (lapack_full_storage) then
+       eigen_c_lwork = max(eigen_c_lwork,2*eigen_c_maxsize-1) ! CHEEV, CHEGV
+     end if
+     if (lapack_packed_storage) then
+       eigen_c_lwork = max(eigen_c_lwork,2*eigen_c_maxsize) ! CHPEV[D], CHPGV[D]
+     end if
+     if (lapack_divide_conquer) then
+       eigen_c_lwork = max(eigen_c_lwork,2*eigen_c_maxsize+eigen_c_maxsize**2) ! CHEEVD, CHEGVD
+     end if
+#if defined HAVE_LINALG_MAGMA
+     if (lapack_full_storage.and.lapack_divide_conquer) then
+       nb=magmaf_get_chetrd_nb(eigen_c_maxsize)
+       eigen_c_lwork = max(eigen_c_lwork,eigen_c_maxsize*(nb+1)) ! MAGMAF_CHEEVD, MAGMAF_CHEGVD
+     end if
+#elif defined HAVE_LINALG_SCALAPACK
+     eigen_c_lwork = 0
+#elif defined HAVE_LINALG_PLASMA
+     if (lapack_full_storage.and.lapack_divide_conquer) then
+       eigen_c_lwork = max(eigen_c_lwork,eigen_c_maxsize**2) ! PLASMA_CHEEV
+     end if
+#endif
+   end if
+ end if
  if(allocated(eigen_c_work)) then
    ABI_DEALLOCATE(eigen_c_work)
  end if
  ABI_ALLOCATE(eigen_c_work,(eigen_c_lwork))
 
 !Double complex WORK
- eigen_z_lwork = 1
- eigen_z_lwork = max(eigen_z_lwork,2*eigen_z_maxsize) ! ZHEEV, ZHEGV, ZHPEV[D], ZHPGV[D]
- eigen_z_lwork = max(eigen_z_lwork,2*eigen_z_maxsize+eigen_z_maxsize**2) ! ZHEEVD, ZHEGVD
-#ifdef HAVE_LINALG_MAGMA
- nb=magmaf_get_zhetrd_nb(eigen_z_maxsize)
- eigen_z_lwork = max(eigen_z_lwork,eigen_z_maxsize*(nb+1)) ! MAGMAF_ZHEEVD, MAGMAF_ZHEGVD
+ eigen_z_lwork = 0
+ if (eigen_z_maxsize>0) then
+   if (lapack_double_precision) then
+     if (lapack_full_storage) then
+       eigen_z_lwork = max(eigen_z_lwork,2*eigen_z_maxsize-1) ! ZHEEV, ZHEGV
+     end if
+     if (lapack_packed_storage) then
+       eigen_z_lwork = max(eigen_z_lwork,2*eigen_z_maxsize) ! ZHPEV[D], ZHPGV[D]
+     end if
+     if (lapack_divide_conquer) then
+       eigen_z_lwork = max(eigen_z_lwork,2*eigen_z_maxsize+eigen_z_maxsize**2) ! ZHEEVD, ZHEGVD
+     end if
+#if defined HAVE_LINALG_MAGMA
+     if (lapack_full_storage.and.lapack_divide_conquer) then
+       nb=magmaf_get_zhetrd_nb(eigen_z_maxsize)
+       eigen_z_lwork = max(eigen_z_lwork,eigen_z_maxsize*(nb+1)) ! MAGMAF_ZHEEVD, MAGMAF_ZHEGVD
+     end if
+#elif defined HAVE_LINALG_SCALAPACK
+     eigen_z_lwork = 0
+#elif defined HAVE_LINALG_PLASMA
+       if (lapack_full_storage.and.lapack_divide_conquer) then
+	 eigen_z_lwork = max(eigen_z_lwork,eigen_z_maxsize**2) ! PLASMA_ZHEEV
+       end if
 #endif
+   end if
+ end if
  if(allocated(eigen_z_work)) then
    ABI_DEALLOCATE(eigen_z_work)
  end if
  ABI_ALLOCATE(eigen_z_work,(eigen_z_lwork))
 
-!Single precision RWORK -- Not used yet
- eigen_c_lrwork = 1
-!eigen_c_lrwork = max(eigen_c_lrwork,3*eigen_c_maxsize-2) ! CHEEV, CHEGV, CHPEV, CHPGV
-!eigen_c_lrwork = max(eigen_c_lrwork,1+5*eigen_c_maxsize+2*eigen_c_maxsize**2) ! CHEEVD, CHEGVD, CHPEVD, CHPGVD
+!Single precision RWORK
+ eigen_c_lrwork = 0
+ if (eigen_c_maxsize>0) then
+   if (lapack_single_precision) then
+     if (lapack_full_storage.or.lapack_packed_storage) then
+       eigen_c_lrwork = max(eigen_c_lrwork,3*eigen_c_maxsize-2) ! CHEEV, CHEGV, CHPEV, CHPGV
+     end if
+     if (lapack_divide_conquer) then
+       eigen_c_lrwork = max(eigen_c_lrwork,1+5*eigen_c_maxsize+2*eigen_c_maxsize**2) ! CHEEVD, CHEGVD, CHPEVD, CHPGVD
+     end if
+   end if
+#if defined HAVE_LINALG_SCALAPACK && ! defined HAVE_LINALG_MAGMA
+    eigen_c_lrwork = 0
+#endif
+ end if
  if(allocated(eigen_c_rwork)) then
    ABI_DEALLOCATE(eigen_c_rwork)
  end if
  ABI_ALLOCATE(eigen_c_rwork,(eigen_c_lrwork))
 
 !Double precision RWORK
- eigen_z_lrwork = 1
- eigen_z_lrwork = max(eigen_z_lrwork,3*eigen_z_maxsize-2) ! ZHEEV, ZHEGV, ZHPEV, ZHPGV
-#ifdef HAVE_LINALG_MAGMA
-!Currently, ZHE[EG]VD are used only with MAGMA
- eigen_z_lrwork = max(eigen_z_lrwork,1+5*eigen_z_maxsize+2*eigen_z_maxsize**2) ! ZHEEVD, ZHEGVD, ZHPEVD, ZHPGVD
+ eigen_z_lrwork = 0
+ if (eigen_z_maxsize>0) then
+   if (lapack_double_precision) then
+     if (lapack_full_storage.or.lapack_packed_storage) then
+       eigen_z_lrwork = max(eigen_z_lrwork,3*eigen_z_maxsize-2) ! ZHEEV, ZHEGV, ZHPEV, ZHPGV
+     end if
+     if (lapack_divide_conquer) then
+       eigen_z_lrwork = max(eigen_z_lrwork,1+5*eigen_z_maxsize+2*eigen_z_maxsize**2) ! ZHEEVD, ZHEGVD, ZHPEVD, ZHPGVD
+     end if
+   end if
+#if defined HAVE_LINALG_SCALAPACK && ! defined HAVE_LINALG_MAGMA
+    eigen_z_lrwork = 0
 #endif
+ end if
  if(allocated(eigen_z_rwork)) then
    ABI_DEALLOCATE(eigen_z_rwork)
  end if
  ABI_ALLOCATE(eigen_z_rwork,(eigen_z_lrwork))
 
 !Integer IWORK
- eigen_liwork = 1
-#ifdef HAVE_LINALG_MAGMA
-!Currently, [S/D/C/Z][SY/HE/SP/HP][E/G]VD are used only with MAGMA
- eigen_liwork = max(eigen_liwork,3+5*max_eigen_pb_size)
-#endif
+ eigen_liwork = 0
+ if (max_eigen_pb_size>0) then
+   if (lapack_divide_conquer) then
+     eigen_liwork = max(eigen_liwork,3+5*max_eigen_pb_size)
+   end if
+ end if
  if(allocated(eigen_iwork)) then
    ABI_DEALLOCATE(eigen_iwork)
  end if
@@ -551,6 +656,8 @@ CONTAINS  !===========================================================
 !! FUNCTION
 !!
 !! INPUTS
+!! === Optional argument (flag, default=False) ===
+!!  opt_only_scalapack= if only scalapack has to be finalized here (other libraries ignored)
 !!
 !! PARENTS
 !!      compute_kgb_indicator,driver
@@ -559,12 +666,12 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 !!
- subroutine abi_linalg_finalize(only_scalapack) ! optional argument
+ subroutine abi_linalg_finalize(opt_only_scalapack) ! optional argument
 
  implicit none
 
 !Arguments ------------------------------------
- logical,intent(in),optional :: only_scalapack
+ logical,intent(in),optional :: opt_only_scalapack
 
 !Local variables ------------------------------
 #ifdef HAVE_LINALG_PLASMA
@@ -579,8 +686,8 @@ CONTAINS  !===========================================================
    call end_scalapack(abi_processor)
  end if
 #endif
- if (present(only_scalapack)) then
-   if (only_scalapack) return
+ if (present(opt_only_scalapack)) then
+   if (opt_only_scalapack) return
  end if
 
 #ifdef HAVE_LINALG_ELPA
@@ -635,6 +742,12 @@ CONTAINS  !===========================================================
  eigen_c_lrwork  = 0
  eigen_z_lrwork  = 0
  eigen_liwork    = 0
+
+ lapack_full_storage=.False.
+ lapack_packed_storage=.False.
+ lapack_single_precision=.False.
+ lapack_double_precision=.False.
+ lapack_divide_conquer=.false.
 
  end subroutine abi_linalg_finalize
 !!***
