@@ -3341,16 +3341,12 @@ class AbinitTestSuite(object):
             task_q.put(test)
 
         for i in range(nprocs - 1):  # create and start subprocesses
-            p = Process(target=worker, args=(
-                task_q, res_q, print_lock
-            ))
+            p = Process(target=worker, args=(task_q, res_q, print_lock))
             self._processes.append(p)
             p.start()
 
         # Add the worker as a thread of the main process
-        t = Thread(target=worker, args=(
-            task_q, res_q, print_lock, True
-        ))
+        t = Thread(target=worker, args=(task_q, res_q, print_lock, True))
         # make it daemon so it will die if the main process is interupted early
         t.daemon = True
 
@@ -3359,6 +3355,10 @@ class AbinitTestSuite(object):
         return task_q, res_q
 
     def wait_loop(self, nprocs, ntasks, timeout, queue):
+        '''
+        Wait for all tests to be done by workers. Receives tests results from
+        queue and update the local tests objects.
+        '''
         results = {}
         proc_running, task_remaining = nprocs, ntasks
         try:
@@ -3373,10 +3373,8 @@ class AbinitTestSuite(object):
                         if 'task' in msg:
                             task_remaining -= 1
                             warnings.warn(
-                                'Error append in a worker on test '
-                                '{}:\n{}: {}'.format(
-                                    msg['task'], e.__class__.__name__, e
-                                )
+                                'Error append in a worker on test {}:\n{}: {}'
+                                .format(msg['task'], e.__class__.__name__, e)
                             )
                         else:
                             warnings.warn(
@@ -3438,9 +3436,14 @@ class AbinitTestSuite(object):
 
         with self.lock as locked:  # aquire the global file lock
             if not locked:
-                msg = ("Timeout occured while trying to acquire lock in:\n\t%s\n"
-                       "Perhaps a previous run did not exit cleanly or another process is running in the same directory.\n"
-                       "If you are sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n" % self.workdir)
+                msg = (
+                    "Timeout occured while trying to acquire lock in:\n\t{}\n"
+                    "Perhaps a previous run did not exit cleanly or another "
+                    "process is running in the same directory.\n If you are"
+                    "sure no other process is in execution, remove the "
+                    "directory with `rm -rf` and rerun.\n"
+                ).format(self.workdir)
+
                 cprint(msg, "red")
                 return
 
@@ -3495,7 +3498,7 @@ class AbinitTestSuite(object):
                 results = self.wait_loop(py_nprocs, len(self.tests),
                                          timeout_1test, res_q)
 
-                # remove this to let python carbage collect processes and avoid
+                # remove this to let python garbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security
                 # reasons)
                 del self._processes
@@ -3506,6 +3509,7 @@ class AbinitTestSuite(object):
                 # a remote process
                 for test in self.tests:
                     if test._rid not in results:
+                        # This error will only happen if there is a bug
                         raise RuntimeError((
                             "I did not get the results of the test {}. It"
                             " means that something fishy happen in the worker."
