@@ -1029,7 +1029,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
      do iq=1,self%nq_k
        ! HM: this is awkward but I avoid adding optional arguments in htetra_blochl_weights_zinv
        ! and keep the same interface as tetra_blochl_weights
-       weight = one/self%tetra_k%ibz_weights(iq)*self%tetra_k%ibz(iq)%tetra_total
+       weight = one/self%tetra_k%ibz_weights(iq)*self%tetra_k%tetra_total(iq)
        cweights(:,ii,ib,iq) = cweights_tmp(1,:,iq)*self%tetra_k%vv*weight
      end do
    end do
