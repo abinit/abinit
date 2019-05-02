@@ -14,6 +14,7 @@ from base64 import b64encode
 from socket import gethostname
 from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue, Lock
+from threading import Thread
 
 # Handle py2, py3k differences.
 py2 = sys.version_info[0] <= 2
@@ -3071,6 +3072,7 @@ class AbinitTestSuite(object):
             )
 
         self._executed = False
+        self._kill_me = False
         self.abenv = abenv
         self.exceptions = []
         self._processes = []
@@ -3310,12 +3312,12 @@ class AbinitTestSuite(object):
 
         print_lock = Lock()
 
-        def worker(qin, qout, print_lock):
+        def worker(qin, qout, print_lock, thread_mode=False):
             done = {
                 'type': 'proc_done'
             }
             try:
-                while not qin.empty():
+                while not qin.empty() and not (thread_mode and self._kill_me):
                     test = qin.get_nowait()
                     qout.put(runner(test, print_lock=print_lock))
             except EmptyQueueError:
@@ -3338,12 +3340,21 @@ class AbinitTestSuite(object):
         for test in self:  # fill the queue
             task_q.put(test)
 
-        for i in range(nprocs):  # create and start subprocesses
+        for i in range(nprocs - 1):  # create and start subprocesses
             p = Process(target=worker, args=(
                 task_q, res_q, print_lock
             ))
             self._processes.append(p)
             p.start()
+
+        # Add the worker as a thread of the main process
+        t = Thread(target=worker, args=(
+            task_q, res_q, print_lock, True
+        ))
+        # make it daemon so it will die if the main process is interupted early
+        t.daemon = True
+
+        t.start()
 
         return task_q, res_q
 
@@ -3353,8 +3364,7 @@ class AbinitTestSuite(object):
         try:
             while proc_running > 0:
                 msg = queue.get(block=True, timeout=(
-                    1 + 2 * task_remaining * timeout
-                    / proc_running
+                    1 + 2 * task_remaining * timeout / proc_running
                 ))
                 if msg['type'] == 'proc_done':
                     proc_running -= 1
@@ -3385,16 +3395,16 @@ class AbinitTestSuite(object):
 
         except EmptyQueueError:
             warnings.warn(
-                ("Workers have been hanging until timeout. There were {}"
-                    " procs working on {} tasks.").format(proc_running,
-                                                          task_remaining)
+                ("Workers have been hanging until timeout. There were {} procs"
+                 " working on {} tasks.").format(proc_running, task_remaining)
             )
             self.terminate()
             return None
 
         return results
 
-    def run_tests(self, build_env, workdir, runner, nprocs=1, py_nprocs=1, runmode="static", **kwargs):
+    def run_tests(self, build_env, workdir, runner, nprocs=1, py_nprocs=1,
+                  runmode="static", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
@@ -3472,7 +3482,7 @@ class AbinitTestSuite(object):
                     run_and_check_test(test)
 
             elif py_nprocs > 1:
-                logger.info("Threaded version with py_nprocs = %s" % py_nprocs)
+                logger.info("Parallel version with py_nprocs = %s" % py_nprocs)
 
                 task_q, res_q = self.start_workers(py_nprocs,
                                                    run_and_check_test)
@@ -3669,6 +3679,7 @@ class AbinitTestSuite(object):
         '''
         for p in self._processes:
             p.terminate()
+        self._kill_me = True
         del self._processes
 
     @staticmethod

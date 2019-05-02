@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 try:
     from ConfigParser import SafeConfigParser, NoOptionError
 except ImportError:  # The ConfigParser module has been renamed to configparser in Python 3
-    from configparser import SafeConfigParser, NoOptionError
+    from configparser import ConfigParser as SafeConfigParser, NoOptionError
 
 # Add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir, x = os.path.split(absp(__file__))
