@@ -30,12 +30,19 @@ module m_abi_linalg
   use m_xomp
   use m_slk
   use iso_c_binding
+
 #ifdef HAVE_LINALG_ELPA
  use m_elpa
 #endif
+
 #ifdef HAVE_LINALG_PLASMA
  use plasma, except_dp => dp, except_sp => sp
 #endif
+
+#if defined HAVE_GPU_CUDA
+ use m_gpu_toolbox
+#endif
+
  use m_time,  only : timab
  
 

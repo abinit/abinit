@@ -13,7 +13,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! interfaces_17_gpu_toolbox.F90
+!! m_gpu_toolbox.F90
 !! m_gpu_detect.F90
 !! m_initcuda.F90
 !!

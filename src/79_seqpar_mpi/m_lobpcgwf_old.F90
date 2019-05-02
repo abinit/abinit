@@ -228,7 +228,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use_lapack_gpu=use_linalg_gpu
 #endif
  if(use_linalg_gpu==1) then
-!  call gpu_linalg_init()
    call alloc_on_gpu(A_gpu,cplx*dp*vectsize*blocksize)
    call alloc_on_gpu(C_gpu,cplx*dp*vectsize*blocksize)
    call alloc_on_gpu(blockvectorr_gpu,cplx*dp*vectsize*blocksize)
