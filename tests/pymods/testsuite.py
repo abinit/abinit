@@ -3043,14 +3043,6 @@ class ChainOfTests(object):
         return [test._get_one_backtrace() for test in self]
 
 
-class NotALock(object):
-    def __enter__(self):
-        pass
-
-    def __exit__(self, *args):
-        pass
-
-
 class AbinitTestSuite(object):
     """
     List of BaseTest instances. Provide methods to:
@@ -3307,8 +3299,6 @@ class AbinitTestSuite(object):
         queue.
         '''
 
-        print_lock = Lock()
-
         def worker(qin, qout, print_lock, thread_mode=False):
             done = {
                 'type': 'proc_done'
@@ -3331,6 +3321,7 @@ class AbinitTestSuite(object):
             finally:
                 qout.put(done)
 
+        print_lock = Lock()
         task_q = Queue()
         res_q = Queue()
 
@@ -3456,7 +3447,8 @@ class AbinitTestSuite(object):
                 testdir = os.path.abspath(os.path.join(self.workdir, test.suite_name + "_" + test.id))
 
                 # Run the test
-                test.run(build_env, runner, testdir, print_lock=None, nprocs=nprocs, runmode=runmode, **kwargs)
+                test.run(build_env, runner, testdir, print_lock=print_lock,
+                         nprocs=nprocs, runmode=runmode, **kwargs)
 
                 # Write HTML summary
                 test.write_html_report()
