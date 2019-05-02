@@ -95,8 +95,6 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
 &                         opt_pack,opt_prtvol,pack2ij,test_value,Ha_or_eV, &
 &                         mode_paral,opt_sym,asym_ij) ! Optional arguments
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: adim,cplex,ndim,opt_l,opt_pack,opt_prtvol,unit,Ha_or_eV

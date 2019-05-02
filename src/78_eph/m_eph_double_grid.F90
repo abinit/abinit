@@ -196,7 +196,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  integer,parameter :: sppoldbl1=1,timrev1=1
  integer :: i_dense,i_coarse,this_dense,i_subdense,i1,i2,i3,ii,jj,kk
  integer :: nkpt_coarse(3), nkpt_dense(3), interp_kmult(3), interp_side(3)
- integer,allocatable :: indkk(:,:)
+ !integer,allocatable :: indkk(:,:)
  real(dp):: shift !,dksqmax
 
  nkpt_coarse(1) = kptrlatt_coarse(1,1)

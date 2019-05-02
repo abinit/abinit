@@ -1018,6 +1018,8 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
 
 ! ************************************************************************
 
+ ABI_UNUSED((/comm/))
+
  natom3 = cryst%natom * 3
 
  ! Generate the analytical part from the interatomic forces

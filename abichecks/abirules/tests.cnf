@@ -48,7 +48,6 @@ Suite of various tests of the conformance of source routines to abirules
 # fn5 = tNNN
 # fn6-fn9, psp1-psp4 = none
 #
-#02 chkinpvars   # Would be nice to be able to activate this test ...
 03 warnchk 3
 04 warnchk 4
 05 warnchk 5

@@ -224,8 +224,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &  eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: dim_eigbrd,dim_eig2nkq,dyfr_cplex,dyfr_nondiag,mk1mem,mkmem,mkqmem,mpert
  integer, intent(in) :: nfftf,nkpt,nkxc,nspden,nsym,prtbbb,timrev,usecprj,usevdw
@@ -1579,11 +1577,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if(ipert==dtset%natom+3 .or. ipert==dtset%natom+4) then
 !      Section for strain perturbation
        call vlocalstr(gmet,gprimd,gsqcut,istr,mgfftf,mpi_enreg,&
-&       psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,dtset%paral_kgb,ph1df,psps%qgrid_vl,&
+&       psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,ph1df,psps%qgrid_vl,&
 &       ucvol,psps%vlspl,vpsp1)
      else
        call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-&       nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),dtset%paral_kgb,ph1df,psps%qgrid_vl,&
+&       nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&
 &       dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
        !SPr: need vpsp1 for -q as well, but for magnetic field it's zero, to be done later
      end if
@@ -1760,20 +1758,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          ABI_ALLOCATE(rho1wfg,(2,dtset%nfft))
          ABI_ALLOCATE(rho1wfr,(dtset%nfft,nspden))
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-&         kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-&         dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-&         occ_rbz,dtset%paral_kgb,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,ucvol,&
-&         wtk_rbz)
+           kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
          call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
          ABI_DEALLOCATE(rho1wfg)
          ABI_DEALLOCATE(rho1wfr)
        else
          !SPr: need to modify dfpt_mkrho to taken into account q,-q and set proper formulas when +q and -q spinors are related
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-&         kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-&         dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-&         occ_rbz,dtset%paral_kgb,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,ucvol,&
-&         wtk_rbz)
+           kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
        end if
 
      else if (.not. found_eq_gkk) then
@@ -2513,8 +2509,6 @@ end subroutine dfpt_looppert
 
 subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz, npwarr, npwar1, phasecg)
 
- implicit none
-
 !Arguments -------------------------------
  ! scalars
  integer, intent(in) :: mcg, mcgq, timrev
@@ -2725,8 +2719,6 @@ end subroutine getcgqphase
 subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
 &  ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,enl0,enl1,eovl1,epaw1,evdw,exc1,iout,ipert,natom,&
 &  usepaw,usevdw)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3033,8 +3025,6 @@ end subroutine dfpt_prtene
 
 subroutine eigen_meandege(eigen0,eigenresp,eigenresp_mean,mband,nband,nkpt,nsppol,option)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,nkpt,nsppol,option
@@ -3134,8 +3124,6 @@ end subroutine eigen_meandege
 
 subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkxc)
 
- implicit none
-
 !Arguments ------------------------------------
  integer , intent(in)    :: ipert,idir,cplex,nfft,nspden,nkxc
  real(dp), intent(in)    :: vxc0(nfft,nspden),rhor0(nfft,nspden)
@@ -3150,6 +3138,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
  real(dp) :: mdir(3),fdir(3)
 
 ! *************************************************************************
+ ABI_UNUSED(ipert)
 
  if (nspden==2) then
 

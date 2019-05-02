@@ -193,8 +193,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &                    rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 &                    filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nimage
@@ -281,7 +279,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  type(abihist),allocatable :: hist(:),hist_prev(:)
  type(results_img_type),pointer :: results_img(:,:),res_img(:)
  type(scf_history_type),allocatable :: scf_history(:)
- type(abiforstr) :: preconforstr ! Preconditioned forces and stress ... Only needed to deallocate an internal matrix in prec_simple
+ !type(abiforstr) :: preconforstr ! Preconditioned forces and stress ... Only needed to deallocate an internal matrix in prec_simple
 
 ! ***********************************************************************
 
@@ -837,8 +835,6 @@ end subroutine gstateimg
 subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot,&
 &                 prt_all_images,prtvolimg,resimg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nimage_tot,dynimage(nimage_tot),imgmov,iout,nimage,prtvolimg !vz_d
@@ -1043,7 +1039,6 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  use m_predict_steepest, only : predict_steepest
  use m_predict_pimd,    only : predict_pimd
  use m_predict_string, only : predict_string
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1193,8 +1188,6 @@ end subroutine predictimg
 subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 &                       ntimimage_stored,results_img)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage_eff,ndynimage,nimage,ntimimage_stored
@@ -1274,8 +1267,6 @@ end subroutine predict_copy
 !! SOURCE
 
 subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

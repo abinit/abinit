@@ -386,7 +386,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
  integer :: has_dijfr,has_diju,iatom,ider,idir_dum,idir_paw1,ierr,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
- integer :: istep,istep_fock_outer,istep_mix,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
+ integer :: istep,istep_fock_outer,istep_mix,itypat,izero,me,mgfftdiel,mvdum !lmn2_size,
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
  integer :: optene,optfr,option,optres,prtfor,qphase_rhoij,quit,quit_sum,qzero
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
@@ -765,7 +765,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      option=1;optene=0;if (iscf_mod==-2) optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
-&     nkxc,nspden,n3xccc,nmxc,optene,option,dtset%paral_kgb,dtset%qptn,&
+&     nkxc,nspden,n3xccc,nmxc,optene,option,dtset%qptn,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
@@ -1030,7 +1030,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-&     nspden,n3xccc,nmxc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
+&     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
    end if
 
@@ -1307,7 +1307,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nkpt_rbz,nkxc,dtset%nloalg,&
 &   npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
 &   nsym1,dtset%ntypat,occ_rbz,&
-&   dtset%paral_kgb,ph1d,dtset%prtbbb,psps,dtset%qptn,rhog,&
+&   ph1d,dtset%prtbbb,psps,dtset%qptn,rhog,&
 &   rhor,rhor1,rmet,rprimd,symrc1,dtset%typat,ucvol,&
 &   wtk_rbz,xred,ylm,ylm1,ylmgr,ylmgr1)
  end if
@@ -2019,8 +2019,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 !Precondition the potential residual:
 !Use a model dielectric function preconditioning, or simple mixing
  ABI_ALLOCATE(vrespc,(cplex_mix*nfftmix,dtset%nspden))
- call moddiel(cplex_mix,dielar,mpi_enreg,nfftmix,ngfftmix,dtset%nspden,ispmix,0,&
-& dtset%paral_kgb,qphon,rprimd,vresid0,vrespc)
+ call moddiel(cplex_mix,dielar,mpi_enreg,nfftmix,ngfftmix,dtset%nspden,ispmix,0,qphon,rprimd,vresid0,vrespc)
 
 !PAW only : precondition the rhoij quantities (augmentation occupancies) residuals.
 !Use a simple preconditionning with the same mixing factor
@@ -2331,7 +2330,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 & natom,nband_rbz,nfft,ngfft,&
 & nkpt_rbz,nkxc,nloalg,npwarr,npwar1,nspden,nspinor,nsppol,&
 & nsym1,ntypat,occ_rbz,&
-& paral_kgb,ph1d,prtbbb,psps,qphon,rhog,&
+& ph1d,prtbbb,psps,qphon,rhog,&
 & rhor,rhor1,rmet,rprimd,symrc1,typat,ucvol,&
 & wtk_rbz,&
 & xred,ylm,ylm1,ylmgr,ylmgr1)
@@ -2343,7 +2342,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  integer,intent(in) :: cplex,idir,ipert,mband,mgfft,mk1mem
  integer,intent(in) :: mkmem,mpert,mpsang,mpw,mpw1,natom,nfft,nkpt_rbz
  integer,intent(in) :: nkxc,nspden,nspinor,nsppol,nsym1,ntypat
- integer,intent(in) :: paral_kgb,prtbbb
+ integer,intent(in) :: prtbbb
  real(dp),intent(in) :: ecut,ecutsm,effmass_free,gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
@@ -2625,12 +2624,12 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 !    Get first-order local potential.
      call vlocalstr(gmet,gprimd,gsqcut,istr1,mgfft,mpi_enreg,&
-&     psps%mqgrid_vl,natom,gs_hamk%nattyp,nfft,ngfft,ntypat,paral_kgb,ph1d,psps%qgrid_vl,&
+&     psps%mqgrid_vl,natom,gs_hamk%nattyp,nfft,ngfft,ntypat,ph1d,psps%qgrid_vl,&
 &     ucvol,psps%vlspl,vpsp1)
 
 !    Get first-order hartree potential.
      call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,natom,nfft,ngfft,&
-&     paral_kgb,rhog,rprimd,vhartr01)
+&     rhog,rprimd,vhartr01)
 
 !    Get first-order exchange-correlation potential
      if(psps%n1xccc/=0)then
@@ -2640,7 +2639,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
      option=0
      call dfpt_mkvxcstr(cplex,idir1,ipert1,kxc,mpi_enreg,natom,nfft,ngfft,&
-&     dummy,dummy,nkxc,nmxc,nspden,n3xccc,option,paral_kgb,qphon,rhor,rhor1,rprimd,&
+&     dummy,dummy,nkxc,nmxc,nspden,n3xccc,option,qphon,rhor,rhor1,rprimd,&
 &     0,0,vxc1,xccc3d1)
 
 !    Combines density j2 with local potential j1
@@ -3377,7 +3376,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !        Get first-order local potential and first-order pseudo core density
          call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_ff,dtset%natom,&
-&         nattyp,nfft,ngfft,dtset%ntypat,n1,n2,n3,dtset%paral_kgb,ph1d,psps%qgrid_ff,&
+&         nattyp,nfft,ngfft,dtset%ntypat,n1,n2,n3,ph1d,psps%qgrid_ff,&
 &         dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
          if(psps%n1xccc/=0)then
            call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,n1,psps%n1xccc,&
@@ -3391,11 +3390,11 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
            if (nspden==4.and.present(rhor).and.present(vxc)) then
              optnc=1
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
-&             nkxc,nmxc,nspden,n3xccc,optnc,option,dtset%paral_kgb,dtset%qptn,rhor,rhor1,&
+&             nkxc,nmxc,nspden,n3xccc,optnc,option,dtset%qptn,rhor,rhor1,&
 &             rprimd,0,vxc,vxc1,xccc3d1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,&
-&             nkxc,nmxc,nspden,n3xccc,option,dtset%paral_kgb,dtset%qptn,rhodummy,&
+&             nkxc,nmxc,nspden,n3xccc,option,dtset%qptn,rhodummy,&
 &             rprimd,0,vxc1,xccc3d1)
            end if
          else
@@ -3636,7 +3635,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=17
- integer :: bd2tot_index,bdtot_index,buffer_size,counter,cplex_rhoij
+ integer :: bd2tot_index,bdtot_index,buffer_size,cplex_rhoij
  integer :: dimffnl1,dimffnlk,iatom,iband,ibg,ibgq
  integer :: icg,icgq,ider,idir0,ierr,ii,ikg,ikg1,ikpt,ilm,ilmn,indx
  integer :: ispden,isppol,istr,istwf_k
@@ -3780,8 +3779,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !  BIG FAT k POINT LOOP
    do ikpt=1,nkpt_rbz
-
-     counter=100*ikpt+isppol
      nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
      istwf_k=istwfk_rbz(ikpt)
      npw_k=npwarr(ikpt)
@@ -4141,10 +4138,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  ABI_ALLOCATE(rhogfermi,(2,dtset%nfft))
  if (psps%usepaw==0) then
    call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,nspden,&
-&   nsppol,nsym1,dtset%paral_kgb,phnons1,rhogfermi,rhorfermi,rprimd,symaf1,symrl1)
+&   nsppol,nsym1,phnons1,rhogfermi,rhorfermi,rprimd,symaf1,symrl1)
  else
    call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,nspden,&
-&   nsppol,nsym1,dtset%paral_kgb,phnons1,rhogfermi,rhowfr   ,rprimd,symaf1,symrl1)
+&   nsppol,nsym1,phnons1,rhogfermi,rhowfr,rprimd,symaf1,symrl1)
  end if
 
 !PAW: Build new rhoij quantities then symetrize them
@@ -4299,7 +4296,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=18
- integer :: berryopt,counter,iband,ii,indx,iorder_cprj
+ integer :: berryopt,iband,ii,indx,iorder_cprj
  integer :: ipw,me,nkpt_max,optlocal,optnl,opt_accrho,opt_corr
  integer :: opt_gvnlx1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
  real(dp) :: dotr,lambda,wtband
@@ -4367,7 +4364,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !Loop over bands
  do iband=1,nband_k
-   counter=100*iband+1
 
 !  Skip bands not treated by current proc
    if(mpi_enreg%proc_distrb(ikpt, iband,isppol)/=me) cycle
@@ -4416,11 +4412,10 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !    Accumulate contribution to density and PAW occupation matrix
 
-     call dfpt_accrho(counter,cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
-&     dtfil%filstat,gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
-&     npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,prtvol,rhoaug,tim_fourwf,&
-&     opt_corr,wtk_k)
-
+     call dfpt_accrho(cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
+       gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
+       npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,rhoaug,tim_fourwf,&
+       opt_corr,wtk_k)
    end if ! End of non-zero occupation and rocceig
 
  end do ! End loop over bands

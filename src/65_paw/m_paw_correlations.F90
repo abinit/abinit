@@ -122,8 +122,6 @@ CONTAINS  !=====================================================================
 &           ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
 &           ucrpa) ! optional argument
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: dmatpuopt,ntypat,pawprtvol,use_dmft,useexexch,usepawu
@@ -140,13 +138,13 @@ CONTAINS  !=====================================================================
 
 !Local variables ---------------------------------------
 !scalars
- integer :: icount,icountp,il,ilmn,ilmnp,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
- integer :: klm0u,klm0x,klma,klmb,klmn,klmna,klmnb,klmn0,klmn0p,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
+ integer :: icount,il,ilmn,ilmnp,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
+ integer :: klm0u,klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lmpawu,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
  integer :: mesh_size,int_meshsz,mkyc,sig,sigp,sz1
  logical :: compute_euijkl,compute_euij_fll
- real(dp) :: ak,fact,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
+ real(dp) :: ak,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
  character(len=500) :: message
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
@@ -887,8 +885,6 @@ CONTAINS  !=====================================================================
  subroutine pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
  &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft) ! optional arguments (DMFT)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: iatom,pawprtvol
@@ -1239,8 +1235,6 @@ CONTAINS  !=====================================================================
 
  subroutine pawxenergy(eexex,pawprtvol,pawrhoij,pawtab)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: pawprtvol
@@ -1400,8 +1394,6 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawprtvol,pawrhoij,pawtab,&
 &                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -2287,8 +2279,6 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 &                       mpi_comm_read,my_natom,natom,ntypat,pawrhoij,pawtab,typat,&
 &                       mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: initialized,istep,mpi_comm_read,my_natom,natom,ntypat
@@ -2634,7 +2624,6 @@ end subroutine setrhoijpbe0
 
  subroutine calc_ubare(itypatcor,lpawu,pawang,pawrad,pawtab,rmax)
 
- implicit none
 !Arguments ------------------------------------
  integer, intent(in)   :: itypatcor,lpawu
  type(pawang_type),intent(in) :: pawang

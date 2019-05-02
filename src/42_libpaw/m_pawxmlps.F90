@@ -615,8 +615,7 @@ select case(name)
 
          value = getValue(attributes,"state")
          if (value == "" ) then
-           msg="Cannot determine ae_partial_wave state"
-           MSG_ERROR(msg)
+           MSG_ERROR("Cannot determine ae_partial_wave state")
          end if
          paw_setuploc%ae_partial_wave(iaewf)%state=trim(value)
 
@@ -1139,8 +1138,6 @@ end subroutine pawdata_chunk
 
 subroutine paw_setup_free(paw_setupin)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(paw_setup_t),intent(inout) :: paw_setupin
@@ -1266,8 +1263,6 @@ end subroutine paw_setup_free
 !! SOURCE
 
 subroutine paw_setup_copy(paw_setupin,paw_setupout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1505,8 +1500,6 @@ end subroutine paw_setup_copy
 
  subroutine paw_rdfromline(keyword,line,output,ierr)
 
- implicit none
-
 !Arguments ---------------------------------------------
   character(len=*), intent(in) :: keyword,line
   character(len=*), intent(out) :: output
@@ -1557,16 +1550,14 @@ end subroutine paw_setup_copy
 
  subroutine rdpawpsxml_header(ecut_tmp,filename,paw_setup)
 
- implicit none
-
 !Arguments ---------------------------------------------
  
  character (len=fnlen),intent(in) :: filename
  real(dp), intent(inout) :: ecut_tmp(3,2)
  type(paw_setup_t),intent(inout) :: paw_setup
 !Local variables ---------------------------------------
- integer :: funit,iaewf,ii,ipswf,iproj,ir,igrid,ival,ierr,ishpf,lmax,mesh_size,igauss,iprojfit
- logical :: endfile,found,endgauss
+ integer :: funit,ii,ir,igrid,ival,ierr,ishpf,lmax,mesh_size
+ logical :: endfile,found
  character(len=100) :: msg
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg
@@ -1945,8 +1936,6 @@ end subroutine paw_setup_copy
 !! SOURCE
 
  subroutine rdpawpsxml(filename,paw_setup)
-
- implicit none
 
 !Arguments ---------------------------------------------
  character (len=fnlen),intent(in) :: filename
@@ -2688,8 +2677,6 @@ end subroutine paw_setup_copy
 !! SOURCE
 
  subroutine rdpawpsxml_core(energy_cor,filename,lcor,ncor,nphicor,pawrad,phi_cor)
-
- implicit none
 
 !Arguments ---------------------------------------------
  character (len=fnlen),intent(in) :: filename

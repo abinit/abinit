@@ -123,6 +123,8 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
 !******************************************************************
 
+ ABI_UNUSED(comm)
+
  marr=max(9,ndtset_alloc,2)
  ABI_ALLOCATE(dprarr,(marr))
  ABI_ALLOCATE(intarr,(marr))

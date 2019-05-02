@@ -69,9 +69,11 @@
 #include "abi_common.h"
 
 module m_sparse_matrix
+
   use defs_basis
   use m_errors
   use m_abicore
+
   implicit none
 
   !!***
@@ -136,18 +138,16 @@ contains
 
     type(dense_mat), intent(inout) :: self
     integer, intent(in):: nrow, ncol
-    integer:: err
     self%nrow=nrow
     self%ncol=ncol
-    allocate(self%mat(nrow, ncol), stat=err)
+    ABI_MALLOC(self%mat, (nrow, ncol))
     self%mat(:,:)=0.0d0
   end subroutine dense_mat_initialize
 
   subroutine dense_mat_finalize(self)
 
     type(dense_mat), intent(inout) :: self
-    integer :: err
-    if (allocated(self%mat)) deallocate(self%mat, stat=err)
+    ABI_SFREE(self%mat)
     self%ncol=0
     self%nrow=0
   end subroutine dense_mat_finalize
@@ -186,10 +186,9 @@ contains
     integer, intent(in) :: nnz, nrow, ncol
     integer , intent(in), optional :: i(:), j(:)
     real(dp), intent(in), optional:: val(:)
-    integer :: err
-    allocate(A%i(nnz), stat=err)
-    allocate(A%j(nnz), stat=err)
-    allocate(A%val(nnz), stat=err)
+    ABI_MALLOC(A%i, (nnz))
+    ABI_MALLOC(A%j, (nnz))
+    ABI_MALLOC(A%val, (nnz))
     A%nrow=nrow
     A%ncol=ncol
     A%nnz=nnz
@@ -235,10 +234,10 @@ endif
     integer :: i
 
     if (allocated(self%rows)) then
-    do i=1, self%nrow, 1
-          call llist_finalize(self%rows(i))
-    end do
-    ABI_DEALLOCATE(self%rows)
+      do i=1, self%nrow, 1
+        call llist_finalize(self%rows(i))
+      end do
+      ABI_FREE(self%rows)
     endif
     self%ncol=0
     self%nrow=0
@@ -274,13 +273,13 @@ endif
 
     class(LIL_mat) , intent(inout)::self 
     real(dp), intent(out):: mat(self%nrow,self%ncol)
-    integer:: irow, icol
-    real(dp):: val
+    integer:: irow !, icol
+    !real(dp):: val
     mat(:,:)=0.0d0
     do irow=1, self%nrow
        call llist_iter_restart(self%rows(irow))
        do while(associated(self%rows(irow)%iter))
-          !print*, "Irow: " ,irow, "Icol: ", self%rows(irow)%iter%i, "  val: ", self%rows(irow)%iter%val
+          !write(std_out,*) "Irow: " ,irow, "Icol: ", self%rows(irow)%iter%i, "  val: ", self%rows(irow)%iter%val
           !TODO print with wrtout
           self%rows(irow)%iter=>self%rows(irow)%iter%next
        enddo
@@ -292,8 +291,7 @@ endif
 
     type(LIL_mat) , intent(inout):: ll
     real(dp), intent(out):: mat(ll%nrow,ll%ncol)
-    integer:: irow, icol
-    real(dp):: val
+    integer:: irow
     mat(:,:)=0.0d0
     do irow=1, ll%nrow
        call llist_iter_restart(ll%rows(irow))
@@ -329,7 +327,7 @@ endif
        call llist_iter_restart(ll%rows(irow))
     do while(associated(ll%rows(irow)%iter))
         counter=counter+1
-          !print*, "I: ", self%iter%i, "  val: ", self%iter%val
+          !write(std_out,*) "I: ", self%iter%i, "  val: ", self%iter%val
           !mat(irow, ll%rows(irow)%iter%i)=ll%rows(irow)%iter%val
           !ll%rows(irow)%iter=>ll%rows(irow)%iter%next
           !COO_mat_insert(COO, irow, ll%rows(irow)%iter%i, ll%rows(irow)%iter%val )
@@ -346,8 +344,7 @@ endif
 
     type(LIL_mat) , intent(inout):: ll
     type(CSR_mat), intent(out):: csrmat
-    integer:: irow, icol, i, nzrow, nnz
-    real(dp):: val
+    integer:: irow, i, nzrow !, nnz
     !CSR_mat_initialize(A,nrow,ncol,nnz,i,j,val)
     call  CSR_mat_initialize(csrmat, ll%nrow, ll%ncol, LIL_mat_get_nnz(ll))
     i=0
@@ -372,11 +369,11 @@ endif
   subroutine CSR_mat_print(csr)
 
     class(CSR_mat), intent(in) :: csr
+    ABI_UNUSED(csr%val)
     !print *, "Val: ", csr%val
     !print *, "iCol: ", csr%icol
     !print *, "row_shift:", csr%row_shift
   end subroutine CSR_mat_print
-
 
   recursive subroutine llist_finalize(self)
 
@@ -387,7 +384,7 @@ endif
        tmp=>iter
        iter=>iter%next
        if( associated(tmp)) then
-          deallocate(tmp)
+         ABI_FREE_SCALAR(tmp)
        endif
     enddo
     nullify(self%first)
@@ -401,10 +398,10 @@ endif
     integer, intent(in)::i
     real(dp), intent(in)::val
     if(.not. associated(self%last)) then
-       allocate(self%first)
+       ABI_MALLOC_SCALAR(self%first)
        self%last=>self%first
     else
-       allocate(self%last%next)
+       ABI_MALLOC_SCALAR(self%last%next)
        self%last=>self%last%next
     endif
     self%last%i=i
@@ -432,7 +429,7 @@ endif
     if(.not.associated(ptr%next)) then
        call llist_append(self,i,val)
     else
-       allocate(tmp)
+       ABI_MALLOC_SCALAR(tmp)
        tmp%i=i
        tmp%val=val
        tmp%next=>ptr%next
@@ -448,7 +445,7 @@ endif
     integer, intent(in) :: i
     real(dp), intent(in):: val
     type(lnode), pointer:: tmp=>null()
-    allocate(tmp)
+    ABI_MALLOC_SCALAR(tmp)
     tmp%i=i
     tmp%val=val
     tmp%next=>self%first
@@ -504,7 +501,7 @@ endif
           call llist_append(self,i,val)
           return
        else
-          print*, "cannot find proper place to insert"
+          write(std_out, *) "cannot find proper place to insert"
        endif
     endif
 
@@ -517,9 +514,9 @@ endif
 
     type(llist), intent(inout)::self
     call llist_iter_restart(self)
-    print*, "linkedlist of length ", self%length
+    write(std_out,*) "linkedlist of length ", self%length
     do while(associated(self%iter))
-       print*, "I: ", self%iter%i, "  val: ", self%iter%val
+       write(std_out,*) "I: ", self%iter%i, "  val: ", self%iter%val
        self%iter=>self%iter%next
     enddo
   end subroutine llist_print_all
@@ -531,8 +528,8 @@ endif
     integer, allocatable, intent(inout)::ilist(:)
     real(dp),allocatable, intent(inout)::vallist(:)
     integer::ind=1
-    allocate(ilist(self%length))
-    allocate(vallist(self%length))
+    ABI_MALLOC(ilist, (self%length))
+    ABI_MALLOC(vallist, (self%length))
     call llist_iter_restart(self)
     do while(associated(self%iter))
        ilist(ind)=self%iter%i
@@ -548,15 +545,9 @@ endif
     A%ncol=0
     A%nrow=0
     A%nnz=0
-    if(allocated(A%icol)) then
-      ABI_DEALLOCATE(A%icol)
-    endif
-    if(allocated(A%row_shift)) then
-      ABI_DEALLOCATE(A%row_shift)
-    endif
-        if(allocated(A%val)) then
-      ABI_DEALLOCATE(A%val)
-    endif
+    ABI_SFREE(A%icol)
+    ABI_SFREE(A%row_shift)
+    ABI_SFREE(A%val)
   end subroutine CSR_mat_finalize
 
 
@@ -602,8 +593,8 @@ endif
     type(CSR_mat), intent(in):: A
     real(dp), intent(in) :: x(A%ncol)
     real(dp), intent(out) :: y(A%nrow)
-    real(dp)::ddot
     integer::irow, i1, i2, i
+    !real(dp)::ddot
     !external ddot
     y(:)=0.0d0
     !$OMP PARALLEL DO private(i, i1, i2)

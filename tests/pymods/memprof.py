@@ -26,7 +26,7 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
     vname: Variable name.
     prt: Address of variable.
     action: "A" for allocation, "D" for deallocation.
-    size: size of allocation in bytes.
+    size: Size of allocation in bytes.
     file: Name of Fortran file in which allocation/deallocation is performed.
     line: Line number in file.
     tot_memory: Total memory in bytes allocated so far.
@@ -58,16 +58,17 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
 
     def to_repr(self, with_addr=True):
         if with_addr:
-            return "<var=%s, %s@%s:%s, addr=%s, size_mb=%d>" % (
+            return "<var=%s, %s@%s:%s, addr=%s, size_mb=%.3f>" % (
               self.vname, self.action, self.file, self.line, hex(self.ptr), self.size_mb)
         else:
-            return "<var=%s, %s@%s:%s, size_mb=%d>" %  (
+            return "<var=%s, %s@%s:%s, size_mb=%.3f>" %  (
               self.vname, self.action, self.file, self.line, self.size_mb)
 
     @property
     def size_mb(self):
         """Size in Megabytes."""
-        return self.size / 1024 ** 2
+        sign = {"A": +1, "D": -1}[self.action]
+        return sign* self.size / 1024 ** 2
 
     #@property
     #def basename(self):
@@ -164,6 +165,9 @@ class AbimemParser(object):
         return smalles
 
     def find_intensive(self, threshold=2000):
+        """
+        Find intensive spots i.e. variables that are allocated/freed many times.
+        """
         d = {}
         with open(self.path, "rt") as fh:
             for lineno, line in enumerate(fh):
@@ -189,6 +193,7 @@ class AbimemParser(object):
     #def show_peaks(self):
 
     def find_zerosized(self):
+        """Find zero-sized allocations."""
         elist = []
         eapp = elist.append
         for e in self.yield_all_entries():
@@ -226,6 +231,9 @@ class AbimemParser(object):
                     raise exc
 
     def find_peaks(self, maxlen=20):
+        """
+        Find peaks in the allocation with the corresponding variable.
+        """
         # the deque is bounded to the specified maximum length. Once a bounded length deque is full,
         # when new items are added, a corresponding number of items are discarded from the opposite end.
         peaks = deque(maxlen=maxlen)
@@ -250,6 +258,9 @@ class AbimemParser(object):
         return peaks
 
     def plot_memory_usage(self, show=True):
+        """
+        Plot total allocated memory in Mb.
+        """
         memory = [e.tot_memory / 1024**2 for e in self.yield_all_entries()]
         import matplotlib.pyplot as plt
         fig = plt.figure()
@@ -267,6 +278,10 @@ class AbimemParser(object):
     #    return frame
 
     def find_memleaks(self):
+        """
+        Try to find memory leaks using the address of the arrays and the action
+        performed (allocation/free).
+        """
         heap, stack = Heap(), Stack()
         reallocs = []
 

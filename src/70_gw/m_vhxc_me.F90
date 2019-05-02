@@ -263,7 +263,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  call xcdata_init(xcdata,dtset=Dtset)
 
  call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
 & strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
 
  ! FABIEN's development
@@ -298,12 +298,12 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
    if(ixc_sigma<0)then
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
      call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
    else
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
    end if
 
