@@ -8,6 +8,8 @@ import os
 import re
 import sys
 
+from abirules_tools import find_abinit_src_directory
+
 # Files that will be checked.
 re_srcfile = re.compile("\.([Ff]|[Ff]90|finc)$")
 
@@ -56,18 +58,13 @@ def wrong_string(string):
     else:
       return ""
 
-def abinit_test_generator():
-  def test_func(abenv):
-     """Search for inlined CPP macros in ABINIT src files"""
-     top = abenv.apath_of("src")
-     try:
-       return main(top)
-     except Exception:
-       import sys
-       raise sys.exc_info()[1] # Reraise current exception (py2.4 compliant)
-  return {"test_func" : test_func}
 
-def main(top):
+def main():
+  print("-------------------------------------------------------")
+  print(" Searching for inlined CPP macros in ABINIT src files  ")
+  print("-------------------------------------------------------")
+  top = find_abinit_src_directory()
+  assert os.path.exists(top)
   exit_status = 0
   for dirpath, dirnames, files in os.walk(top):
     for src in files:
@@ -109,14 +106,4 @@ def main(top):
   return exit_status
 
 if __name__ == "__main__":
-
-  if len(sys.argv) == 1: 
-    top = "../../../src"
-    print("-------------------------------------------------------")
-    print(" Searching for inlined CPP macros in ABINIT src files  ")
-    print("-------------------------------------------------------")
-  else:
-    top = sys.argv[1] 
-
-  exit_status = main(top)
-  sys.exit(exit_status)
+  sys.exit(main())

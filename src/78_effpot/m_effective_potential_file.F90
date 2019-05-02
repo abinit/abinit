@@ -3477,8 +3477,8 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3)
  integer :: ncell(3),scale_cell(3)
  integer,allocatable  :: shift(:,:)
- integer,allocatable  :: blkval(:),list_map(:)
- real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:)
+ integer,allocatable  :: list_map(:) !blkval(:),
+ real(dp),allocatable :: xred_ref(:,:) ! xred_hist(:,:),
  real(dp),allocatable :: list_dist(:),list_reddist(:,:),list_absdist(:,:)
  character(len=500) :: msg
  type(abihist) :: hist_tmp

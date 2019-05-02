@@ -10,6 +10,9 @@ Example:
 Can be executed everywhere inside the Abinit directory, including build directories.
 """
 import os
+import sys
+PY2 = sys.version_info[0] <= 2
+
 import webbrowser
 
 from contextlib import contextmanager
@@ -24,6 +27,32 @@ from tests.pymods.termcolor import cprint
 
 ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
+
+
+ALL_BINARIES = [
+    "abinit",
+    "abitk",
+    "aim",
+    "anaddb",
+    "band2eps",
+    "conducti",
+    "cut3d",
+    "dummy_tests",
+    "fftprof",
+    "fold2Bloch",
+    "ioprof",
+    "lapackprof",
+    "macroave",
+    "mrgddb",
+    "mrgdv",
+    "mrggkk",
+    "mrgscr",
+    "multibinit",
+    "optic",
+    "tdep",
+    "testtransposer",
+    "ujdet",
+]
 
 
 @contextmanager
@@ -115,13 +144,11 @@ def makemake(ctx):
         ctx.run("./config/scripts/makemake", pty=True)
 
 
-
 @task
 def makedeep(ctx, jobs="auto"):
     """makemake && make clean && make"""
     makemake(ctx)
     make(ctk, jobs=jobs, clean=True)
-
 
 
 @task
@@ -131,19 +158,23 @@ def abichecks(ctx):
     retcode = 0
     with cd(ABINIT_ROOTDIR):
         script_dir = os.path.join("abichecks", "scripts")
-        exclude = ["check-input-vars.py", "check-libpaw.py", "warningschk.py"]
+        exclude = ["check-libpaw.py", "warningschk.py", "abirules_tools.py", "__init__.py"]
         for py_script in [f for f in os.listdir(script_dir) if f.endswith(".py")]:
             if py_script in exclude: continue
             py_script = os.path.join(script_dir, py_script)
-            print("Running", py_script, "... ", end="")
+            #if PY2:
+            print("Running", py_script, "... ")
+            #else:
+            #    print("Running", py_script, "... ", end="")
             start = time.time()
-            result = ctx.run(py_script, pty=True)
+            result = ctx.run(py_script, warn=True, pty=True)
+            #print(result.ok)
             msg, color = ("[OK]", "green") if result.ok else ("[FAILED]", "red")
             cprint("%s (%.2f s)" % (msg, time.time() - start), color=color)
             if not result.ok: retcode += 1
 
     if retcode != 0:
-        cprint("%d FAILED TESTS", "red")
+        cprint("%d FAILED TESTS" % retcode, "red")
     else:
         cprint("ALL TESTS OK", "green")
 
@@ -176,6 +207,21 @@ def mksite(ctx):
         ctx.run("./mksite.py serve --dirtyreload", pty=True)
         return webbrowser.open_new_tab("http://127.0.0.1:8000")
 
+
+@task
+def links(ctx):
+    """
+    Create symbolic links to Abinit executables in current working directory.
+    """
+    top = find_top_build_tree(".", with_abinit=True)
+    main98 = os.path.join(top, "src", "98_main")
+    for dest in ALL_BINARIES: 
+        if os.path.isfile(dest): continue
+        source = os.path.join(main98, dest)
+        if os.path.isfile(source):
+            os.symlink(source, dest)
+        else:
+            cprint("Cannot find `%s` in dir `%s" % (source, main98), "yellow")
 
 #def pulltrunk(ctx):
 #    ctx.run("git stash")

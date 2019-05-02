@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -5,7 +6,7 @@
 
 module m_mathfuncs
 
-  use defs_basis, only: dp, PI
+  use defs_basis, only: dp, PI, std_out
   use m_errors
   use m_abicore
   !use ziggurat
@@ -43,7 +44,7 @@ contains
   subroutine set_random_seed(seed)
 
       integer , intent(in) :: seed(:)
-      print*, "Warning! Currently I'm not sure about how this function  &
+      write(std_out,*) "Warning! Currently I'm not sure about how this function  &
       &(set_random_seed,which calls RANDOM_SEED) works. Do test it!"
       call RANDOM_SEED(put=seed(:))
   end subroutine set_random_seed
