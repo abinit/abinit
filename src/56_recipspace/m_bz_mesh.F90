@@ -2073,8 +2073,7 @@ subroutine findnq(nkbz,kbz,nsym,symrec,symafm,nqibz,timrev)
  nqallm=1000
  do
    memory_exhausted=0
-   ABI_STAT_MALLOC(qall,(3,nqallm), ierr)
-   ABI_CHECK(ierr==0, 'out-of-memory qall')
+   ABI_MALLOC_OR_DIE(qall,(3,nqallm), ierr)
    nqall=0
 
    ! Loop over all k-points in BZ, forming k-k1.

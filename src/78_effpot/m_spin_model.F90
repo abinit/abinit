@@ -66,9 +66,9 @@ module m_spin_model
        & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
        & spin_ncfile_t_write_one_step, spin_ncfile_t_def_ob
   use m_spin_observables, only: spin_observable_t, ob_reset, ob_initialize, ob_finalize, ob_calc_observables
+
   implicit none
   !!***
-
 
   !!****t* m_spin_model/spin_model_t
   !! NAME
@@ -525,7 +525,7 @@ contains
     type(spin_ncfile_t) :: spin_ncfile
     character(len=4) :: post_fname
     real(dp) :: T, T_step
-    integer :: i, ii, Tfile, iostat, sublatt(self%spin_ob%nsublatt)
+    integer :: i, ii, Tfile, iostat !, sublatt(self%spin_ob%nsublatt)
     character(len=90) :: msg
     character(len=4200) :: Tmsg ! to write to var T file
     character(len=150) :: iomsg
@@ -533,7 +533,8 @@ contains
 
 
     real(dp) :: Tlist(T_nstep), chi_list(T_nstep), Cv_list(T_nstep), binderU4_list(T_nstep)
-    real(dp) :: Mst_sub_list(3, self%spin_ob%nsublatt, T_nstep), Mst_sub_norm_list(self%spin_ob%nsublatt, T_nstep)
+    !real(dp) :: Mst_sub_list(3, self%spin_ob%nsublatt, T_nstep)
+    real(dp) :: Mst_sub_norm_list(self%spin_ob%nsublatt, T_nstep)
     real(dp) ::  Mst_norm_total_list(T_nstep)
 
     Tfile=get_unit()
@@ -660,7 +661,8 @@ contains
   subroutine spin_model_t_run_MvH(self)
 
     class(spin_model_t), intent(inout) :: self
-    write(std_err, *) "MvH is not yet implemented. "
+    ABI_UNUSED(self%params%spin_dt)
+    write(std_out, *) "MvH is not yet implemented. "
   end subroutine spin_model_t_run_MvH
   !!***
 

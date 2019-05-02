@@ -82,8 +82,6 @@ CONTAINS !===========================================================
 
 subroutine atompaw_shpfun(ll,mesh,norm,pawtab,shapefunc)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ll
@@ -203,8 +201,6 @@ end subroutine atompaw_shpfun
 
  subroutine atompaw_shapebes(al,ql,ll,rc)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: ll
@@ -268,8 +264,6 @@ end subroutine atompaw_shapebes
 !! SOURCE
 
  subroutine atompaw_vhnzc(ncore,radmesh_core,vhnzc,znucl)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -341,8 +335,6 @@ end subroutine atompaw_shapebes
  subroutine atompaw_dij0(indlmn,kij,lmnmax,ncore,opt_init,pawtab,&
 &                        radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: lmnmax,opt_init
@@ -359,7 +351,7 @@ end subroutine atompaw_shapebes
  integer :: il,ilm,iln,ilmn,j0lmn,jl,jlm,jln,jlmn,klmn,lmn2_size,meshsz,meshsz_core
  integer :: meshsz_vhtnzc,meshsz_vmh
  real(dp) :: intg,intvh,yp1,ypn
- real(dp),allocatable :: ff(:),ff1(:),r2k(:),shpf(:),vhnzc(:),vhtnzc_sph(:),work1(:),work2(:)
+ real(dp),allocatable :: ff(:),r2k(:),shpf(:),vhnzc(:),vhtnzc_sph(:),work1(:),work2(:)
 
 ! *********************************************************************
 
@@ -541,8 +533,6 @@ end subroutine atompaw_shapebes
 
  subroutine atompaw_kij(indlmn,kij,lmnmax,ncore,opt_init,opt_vhnzc,pawtab, &
 &                       radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

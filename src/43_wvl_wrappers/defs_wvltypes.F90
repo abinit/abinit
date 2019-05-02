@@ -269,7 +269,6 @@ subroutine nullify_wvl_data(wvl)
 ! *************************************************************************
 
 #if defined HAVE_BIGDFT
-
  DBG_ENTER("COLL")
 
 !1)   wvl_projectors_type: projectors
@@ -347,9 +346,10 @@ pure function comms_cubic_null() result(comms)
    nullify(comms%nvctr_par)
  end function comms_cubic_null
 !!***
-#endif
 
- !ABI_UNUSED(wvl%den%symObj)
+#else
+ ABI_UNUSED(wvl%projectors%nlpsp)
+#endif
 
 end subroutine nullify_wvl_data
 !!***

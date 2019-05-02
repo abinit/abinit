@@ -281,6 +281,8 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
 
 ! *************************************************************************
 
+ ABI_UNUSED((/dtset%natom/))
+
  call wrtout(std_out, " Including direct and fundamental KS gap in Sigma_nk")
  ABI_CHECK(maxval(gaps%ierr) == 0, "qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
@@ -552,7 +554,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0, pertcase0 = 0, image1 = 1
- integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, ierr, nkpt_inerange, gap_err, unt, ncid, cnt, ncerr
+ integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, nkpt_inerange, gap_err, unt, ncid, cnt, ncerr
  real(dp) :: ee, cmin, vmax
  character(len=500) :: msg
  character(len=fnlen) :: path

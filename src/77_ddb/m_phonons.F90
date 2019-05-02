@@ -774,8 +774,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
    ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
    ! this may change in the future if Matteo refactorizes the tetra weights as sums over k instead of sums over bands
    ABI_CALLOC(full_phfrq, (3*natom, phdos%nqibz))
-   ABI_STAT_MALLOC(full_eigvec, (2, 3, natom, 3*natom, phdos%nqibz), ierr)
-   ABI_CHECK(ierr == 0, 'out-of-memory in full_eigvec')
+   ABI_MALLOC_OR_DIE(full_eigvec, (2, 3, natom, 3*natom, phdos%nqibz), ierr)
    full_eigvec = zero
  end if ! tetra
  ABI_FREE(new_shiftq)
@@ -1178,17 +1177,12 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
  ABI_FREE(qshft)
 
  ! allocate arrays with all of the q, omega, and displacement vectors
- ABI_STAT_MALLOC(phfrq_allq, (3*Crystal%natom*nqibz), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
- ABI_STAT_MALLOC(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_MALLOC_OR_DIE(phfrq_allq, (3*Crystal%natom*nqibz), ierr)
+ ABI_MALLOC_OR_DIE(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
 
- ABI_STAT_MALLOC(phfrq, (3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
- ABI_STAT_MALLOC(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
- ABI_STAT_MALLOC(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_MALLOC_OR_DIE(phfrq, (3*Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
 
  ! loop over q to get all frequencies and displacement vectors
  ABI_ALLOCATE(modeindex, (nqibz*3*Crystal%natom))
@@ -1218,7 +1212,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
 
  ! precalculate phase factors???
 
- ABI_STAT_MALLOC(phdispl1, (2, 3, Crystal%natom), ierr)
+ ABI_MALLOC(phdispl1, (2, 3, Crystal%natom))
  ! for all modes at all q in whole list, sorted
  modesign=one
  do imode = 1, 3*Crystal%natom*nqibz
@@ -1360,17 +1354,12 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
  ABI_FREE(qshft)
 
  ! allocate arrays wzith all of the q, omega, and displacement vectors
- ABI_STAT_MALLOC(phfrq_allq, (3*Crystal%natom, nqibz), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
- ABI_STAT_MALLOC(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_MALLOC_OR_DIE(phfrq_allq, (3*Crystal%natom, nqibz), ierr)
+ ABI_MALLOC_OR_DIE(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
 
- ABI_STAT_MALLOC(phfrq, (3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
- ABI_STAT_MALLOC(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
- ABI_STAT_MALLOC(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_MALLOC_OR_DIE(phfrq, (3*Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
 
  ! loop over q to get all frequencies and displacement vectors
  imode = 0
@@ -1391,7 +1380,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
 
  ! precalculate phase factors???
 
- ABI_STAT_MALLOC(phdispl1, (2, 3, Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(phdispl1, (2, 3, Crystal%natom), ierr)
 
  ! for all modes at all q in whole list, sorted
  do iq = 1, nqibz
@@ -3223,7 +3212,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  if (dtset%prtphbands == 0) return
 
  if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) then
-   MSG_WARNING("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. returning")
+   MSG_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
    return
  end if
 
