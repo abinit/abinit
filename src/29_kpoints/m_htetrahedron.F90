@@ -37,7 +37,7 @@ module m_htetrahedron
 
  use defs_basis
  use m_abicore
- use m_hkptrank
+ use m_kptrank
  use m_numeric_tools,   only : linspace
  use m_simtet,          only : sim0onei, SIM0TWOI
  use m_xmpi
@@ -202,7 +202,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 !Local variables-------------------------------
 !scalars
  !type(octree_t) :: oct
- type(hkptrank_t) :: kptrank
+ type(kptrank_type) :: kptrank
  integer :: iopt
  integer :: ikpt2,isummit,itetra,jtetra
  integer :: ikibz,ikbz,idiag,ihash,min_idiag,my_rank,nprocs
@@ -669,7 +669,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ! HM TODO: Avoid mkkptrank and map the k-point grid to indexes
  ! Make full k-point rank arrays
  !oct = octree_init(kpt_fullbz,2**4,[-one,-one,-one],[two,two,two])
- call hkptrank_init(kptrank,kpt_fullbz,nkpt_fullbz)
+ call mkkptrank(kpt_fullbz,nkpt_fullbz,kptrank)
 
  !
  ! HM (13/04/2019): I implement two different versions:
@@ -707,7 +707,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
          !ikpt2 = octree_find(oct,k2,dist)
          !ikpt2 = octree_find_nearest_pbc(oct,k2,dist,shift)
          !if (dist>tol12) call exit(1)
-         ikpt2 = hkptrank_get_index(kptrank,k2)
+         ikpt2 = kptrank_index(kptrank,k2)
          ! Find the index of those points in the BZ and IBZ
          tetra_ibz(isummit) = bz2ibz(ikpt2)
        end do
@@ -758,7 +758,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
          !ikpt2 = octree_find(oct,k2,dist)
          !ikpt2 = octree_find_nearest_pbc(oct,k2,dist,shift)
          !if (dist>tol12) call exit(1)
-         ikpt2 = hkptrank_get_index(kptrank,k2)
+         ikpt2 = kptrank_index(kptrank,k2)
          ! Find the index of those points in the BZ and IBZ
          tetra_ibz(isummit) = bz2ibz(ikpt2)
        end do
@@ -802,7 +802,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    return
  end select
  !ierr = octree_free(oct)
- call hkptrank_free(kptrank)
+ call destroy_kptrank(kptrank)
 
  ! Do some maintenance: free unused memory and count tetrahedra per IBZ point
  tetra_count = 0
@@ -990,9 +990,9 @@ end subroutine htetra_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/get_onetetra_
+!!****f* m_htetrahedron/get_onetetra_blochl
 !! NAME
-!! get_onetetra_
+!! get_onetetra_blochl
 !!
 !! FUNCTION
 !! Private function to calculate the contributions to the weights due to a single tetrahedron.
@@ -1004,7 +1004,7 @@ end subroutine htetra_free
 !!
 !! SOURCE
 
-pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
+pure subroutine get_onetetra_blochl(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
                               tweight,dweight)
 
 !Arguments ------------------------------------
@@ -1230,7 +1230,7 @@ pure subroutine get_onetetra_(tetra,eigen_1tetra,energies,nene,max_occ,bcorr, &
    !
  end do
 
-end subroutine get_onetetra_
+end subroutine get_onetetra_blochl
 !!***
 
 !----------------------------------------------------------------------
@@ -1299,11 +1299,11 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
      eigen_1tetra(isummit) = eig_ibz(ind_ibz(isummit))
    end do
 
-   ! Sort energies before calling get_onetetra_
+   ! Sort energies before calling get_onetetra_blochl
    !call sort_tetra(4, eigen_1tetra, ind_ibz, tol14)
    call sort_4tetra(eigen_1tetra, ind_ibz)
    ! HM: Here we should only compute what we will use!
-   call get_onetetra_(tetra, eigen_1tetra, wvals, nw, max_occ, bcorr, tweight_tmp, dtweightde_tmp)
+   call get_onetetra_blochl(tetra, eigen_1tetra, wvals, nw, max_occ, bcorr, tweight_tmp, dtweightde_tmp)
 
    ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
    do isummit=1,4
@@ -1519,11 +1519,11 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
        eigen_1tetra(isummit) = eig_ibz(ind_ibz(isummit))
      end do
 
-     ! Sort energies before calling get_onetetra_
+     ! Sort energies before calling get_onetetra_blochl
      call sort_4tetra(eigen_1tetra, ind_ibz)
 
      ! Get tetrahedron weights
-     call get_onetetra_(tetra, eigen_1tetra, wvals, nw, max_occ, bcorr, tweight_tmp, dweight_tmp)
+     call get_onetetra_blochl(tetra, eigen_1tetra, wvals, nw, max_occ, bcorr, tweight_tmp, dweight_tmp)
 
      ! Acumulate the contributions
      multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
