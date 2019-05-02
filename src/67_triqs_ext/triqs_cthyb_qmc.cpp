@@ -9,8 +9,6 @@
 #include <triqs/gfs.hpp>
 #include <stdlib.h>
 #include <stdio.h>
-//#include <stdexcept>
-//#include <string>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -21,7 +19,6 @@
 #endif
 
 #include "triqs_cthyb_qmc.hpp"
-//#include "invoke_python.hpp"
 
 using namespace std;
 #if defined HAVE_TRIQS_v2_0
@@ -43,7 +40,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
                      int n_orbitals, int n_freq, int n_tau,         /*integer*/
                      int n_l, int n_cycles_, int cycle_length,      /*integer*/
                      int ntherm, int verbo, int seed,               /*integer*/
-		             double beta_,                                  /*double*/
+		     double beta_,                                  /*double*/
                      double *epsi, double *umat_ij,                 /*pointers*/
                      double *umat_ijkl,                             /*pointers*/
                      std::complex<double> *f_iw_ptr,                /*pointers*/
@@ -52,22 +49,17 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
                      MPI_Fint *MPI_world_ptr ){                     /*pointers*/
   
     cout.setf(ios::fixed);
-    cout << "Inside of ctqmc_triqs_run" << endl;
     //Initialize Boost mpi environment
     int rank, nprocs;
     boost::mpi::environment env;
     {
-	cout << "Inside boost::mpi::environment." << endl;
 	boost::mpi::communicator comm;
-	cout << "?" << endl;
 	comm << MPI_Comm_f2c( *MPI_world_ptr );
-	cout << "!" << endl;
         rank=comm.rank();
 
         MPI_Comm_size(comm, &nprocs);
         std::cout << "Number of processors: " << nprocs << endl;
     }
-    cout << "Passed MPI." << endl;
   
     // Parameters relay from Fortran and default values affectation
     double beta = beta_;                //Temperature inverse 

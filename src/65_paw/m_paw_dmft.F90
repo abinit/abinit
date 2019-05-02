@@ -251,8 +251,6 @@ MODULE m_paw_dmft
 
   character(len=fnlen) :: filapp
 
-  character(len=fnlen) :: filapp_in
-
   character(len=fnlen) :: filnamei
 
   real(dp) :: temp

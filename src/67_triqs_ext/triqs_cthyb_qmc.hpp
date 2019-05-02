@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include <complex>
-#include <string>
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/utility/real_or_complex.hpp>  //ADDED for compatibility with TRIQS 1.4
 
