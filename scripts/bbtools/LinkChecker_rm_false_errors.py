@@ -178,14 +178,17 @@ def main(filename,home_dir=""):
 
     ### check for duplicate entry except for FAKE_URL
 
-    if not ("FAKE_URL" in URL) :
-        if URL in urls :
-           continue
-        else: 
-           urls.add(URL)
-    else:
-        if not ("index.html" in parent.text) :
-           continue
+    try:
+      if not ("FAKE_URL" in URL) :
+          if URL in urls :
+             continue
+          else: 
+             urls.add(URL)
+      else:
+          if not ("index.html" in parent.text) :
+             continue
+    except:
+      pass
 
     ### precleaning ###
 
