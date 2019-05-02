@@ -65,36 +65,6 @@ type :: htetra_bucket
 end type htetra_bucket
 !!***
 
-!!****t* m_htetrahedron/t_htetrap
-!! NAME
-!! t_htetrap
-!!
-!! FUNCTION
-!! Pointer to tetrahedra
-!!
-!! SOURCE
-type :: tetrap
-
-  integer,pointer :: p(:)
-
-end type tetrap
-!!***
-
-!!****t* m_htetrahedron/t_htetrak
-!! NAME
-!! t_htetrak
-!!
-!! FUNCTION
-!! Pointer to tetrahedra associated to a k-point
-!!
-!! SOURCE
-type :: htetrak
-
-  type(tetrap),allocatable :: tetra(:)
-
-end type htetrak
-!!***
-
 !!****t* m_htetrahedron/t_htetrahedron
 !! NAME
 !! t_htetrahedron
@@ -104,6 +74,9 @@ end type htetrak
 !!
 !! SOURCE
 type, public :: t_htetrahedron
+
+  integer :: opt
+  ! Option for the generation of tetrahedra
 
   integer :: nkibz
   ! Number of points in the irreducible Brillouin zone
@@ -126,16 +99,16 @@ type, public :: t_htetrahedron
   integer,allocatable :: tetra_count(:)
   ! Inequivalent tetrahedra per kpoint (number of irred tetra)
 
+  integer,allocatable :: ibz_multiplicity(:)
+  ! Multiplicity of each k-point
+
   real(dp)  :: vv
   ! volume of the tetrahedra
 
   real(dp) :: klatt(3, 3)
   ! reciprocal of lattice vectors for full kpoint grid
 
-  real(dp),allocatable :: ibz_weights(:)
-  ! weights for integration
-
-  type(htetrak),allocatable :: ibz(:)
+  type(htetra_bucket),allocatable :: ibz(:)
   ! indexes of the tetrahedra for each k-point
 
   type(htetra_bucket),allocatable :: unique_tetra(:)
@@ -207,17 +180,17 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 !scalars
  !type(octree_t) :: oct
  type(kptrank_type) :: kptrank
- integer :: iopt
  integer :: ikpt2,isummit,itetra,jtetra
  integer :: ikibz,ikbz,idiag,ihash,min_idiag,my_rank,nprocs
- integer :: max_ntetra, total_ntetra, ntetra
+ integer :: max_ntetra, ntetra
  real(dp) :: rcvol,length,min_length
 !arrays
  integer,pointer :: indexes(:,:), tetra_hash_count(:)
- integer :: tetra_ibz(4), tetra_mibz(0:4), tetra_count(nkpt_ibz)
+ integer :: tetra_ibz(4)
  integer :: tetra_shifts(3,4,24,4)  ! 3 dimensions, 4 summits, 24 tetrahedra, 4 main diagonals
  integer :: tetra_shifts_6(3,4,6,1) ! 3 dimensions, 4 summits, 6 tetrahedra, 4 main diagonals
  integer :: main_diagonals(3,4)
+ integer :: tetra_mibz(0:4)
  real(dp)  :: k1(3),k2(3),k3(3),diag(3)
 
 ! *********************************************************************
@@ -656,7 +629,6 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ! but with more memory allocated
  tetra%nbuckets = nkpt_ibz
  ierr = 0
- tetra_count = 0
  ABI_CALLOC(tetra_hash_count,(tetra%nbuckets))
 
  ! Determine the smallest diagonal in k-space
@@ -696,8 +668,8 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    ABI_MALLOC(tetra%unique_tetra(ihash)%indexes,(0:4,24))
    tetra%unique_tetra(ihash)%indexes = 0
  end do
- iopt = 2; if (present(opt)) iopt = opt
- select case(iopt)
+ tetra%opt = 2; if (present(opt)) tetra%opt = opt
+ select case(tetra%opt)
  case(1)
    ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
    do ikibz=1,tetra%nkibz
@@ -747,6 +719,15 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
        tetra%unique_tetra(ihash)%indexes(1:,tetra_hash_count(ihash)) = tetra_ibz(:)
        tetra%unique_tetra(ihash)%indexes(0, tetra_hash_count(ihash)) = 1
      end do tetra_loop1
+   end do
+   ! HM: The multiplicity of the tetrahedrons computed so far is wrong because we are using IBZ
+   ! I compute the k-point multiplicity so I can fix this later on
+   ! Only needed in blochl_weights* interface for looping over tetrahedra.
+   ! in the onewk routines the weight is known outside
+   ABI_CALLOC(tetra%ibz_multiplicity,(tetra%nkibz))
+   do ikbz=1,nkpt_fullbz
+     ikibz = bz2ibz(ikbz)
+     tetra%ibz_multiplicity(ikibz) = tetra%ibz_multiplicity(ikibz) + 1
    end do
  case(2)
    min_idiag = 1
@@ -808,38 +789,37 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    return
  end select
  !ierr = octree_free(oct)
+ ABI_FREE(tetra_hash_count)
  call destroy_kptrank(kptrank)
 
- ! Do some maintenance: free unused memory and count tetrahedra per IBZ point
- ABI_MALLOC(tetra%tetra_count,(tetra%nkibz))
- tetra%tetra_count = 0
+ ! Do some maintenance: free unused memory and count unique tetrahedra per IBZ point
+ tetra%nunique_tetra = 0
  do ihash=1,tetra%nbuckets
+   ! Count tetrahedra in this bucket
    ntetra = count(tetra%unique_tetra(ihash)%indexes(0,:)>0)
+   tetra%nunique_tetra = tetra%nunique_tetra + 1
    ! Allocate array with right size
    ABI_MALLOC(indexes,(0:4,ntetra))
    indexes = tetra%unique_tetra(ihash)%indexes(:,:ntetra)
    ABI_FREE(tetra%unique_tetra(ihash)%indexes)
    tetra%unique_tetra(ihash)%indexes => indexes
-   ! Count number of tetrahedra per IBZ point
-   do itetra=1,ntetra
-     tetra_mibz = tetra%unique_tetra(ihash)%indexes(:,itetra)
-     do isummit=1,4
-       ikibz = tetra_mibz(isummit)
-       tetra%tetra_count(ikibz) = tetra%tetra_count(ikibz) + 1
-     end do
-   end do
  end do
 
  ! Sum the multiplicity
+ ABI_MALLOC(tetra%tetra_count,(tetra%nkibz))
  ABI_MALLOC(tetra%tetra_total,(tetra%nkibz))
+ tetra%tetra_count = 0
  tetra%tetra_total = 0
+ tetra%nibz_tetra = 0
  do ihash=1,tetra%nbuckets
    ntetra = size(tetra%unique_tetra(ihash)%indexes,2)
    do itetra=1,ntetra
      tetra_mibz = tetra%unique_tetra(ihash)%indexes(:,itetra)
      do isummit=1,4
        ikibz = tetra_mibz(isummit)
-       tetra%tetra_total(ikibz) = tetra%tetra_total(ikibz)+tetra_mibz(0)
+       tetra%tetra_total(ikibz) = tetra%tetra_total(ikibz) + tetra_mibz(0)
+       tetra%tetra_count(ikibz) = tetra%tetra_count(ikibz) + 1
+       tetra%nibz_tetra = tetra%nibz_tetra + 1
      end do
    end do
  end do
@@ -848,25 +828,6 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ! I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
  !call htetra_init_mapping_ibz(tetra)
 
- ! Count unique tetra
- total_ntetra = 0
- do ihash=1,tetra%nbuckets
-   total_ntetra = total_ntetra + size(tetra%unique_tetra(ihash)%indexes,2)
- end do
- tetra%nunique_tetra = total_ntetra
-
- ! Count IBZ tetra
- tetra%nibz_tetra = sum(tetra%tetra_count)
-
- ! Compute the weights
- ABI_CALLOC(tetra%ibz_weights,(tetra%nkibz))
- do ikbz=1,nkpt_fullbz
-   ikibz = bz2ibz(ikbz)
-   tetra%ibz_weights(ikibz) = tetra%ibz_weights(ikibz) + 1
- end do
- tetra%ibz_weights = tetra%ibz_weights / nkpt_fullbz
-
- ! HM TODO: Need to check where this will be used!
  ! Calculate the volume of the tetrahedra
  rcvol = abs(gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3))- &
              gprimd(2,1)*(gprimd(1,2)*gprimd(3,3)-gprimd(3,2)*gprimd(1,3))+ &
@@ -880,8 +841,8 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  tetra%vv = abs(k1(1)*(k2(2)*k3(3)-k2(3)*k3(2))- &
                 k1(2)*(k2(1)*k3(3)-k2(3)*k3(1))+ &
                 k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
-
- ABI_FREE(tetra_hash_count)
+ ! HM: ! The volume constant is volume/4. I change vv here
+ tetra%vv = tetra%vv/4.d0
 
  contains
  integer function compute_hash(tetra,t) result(ihash)
@@ -910,7 +871,7 @@ end subroutine htetra_init
 !!
 !! FUNCTION
 !!  The mapping to th IBZ is has its own allocation routine.
-!! I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
+!!  I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
 !!
 !! PARENTS
 !!
@@ -923,10 +884,13 @@ subroutine htetra_init_mapping_ibz(tetra)
  integer :: ikibz, itetra, isummit, ihash, ntetra
  integer :: tetra_count(tetra%nkibz),tetra_mibz(0:4)
 
+ ! Only execute the following if not yet alocated
+ if (allocated(tetra%ibz)) return
+
  ! Allocate IBZ to tetrahedron mapping
  ABI_MALLOC(tetra%ibz,(tetra%nkibz))
  do ikibz=1,tetra%nkibz
-   ABI_MALLOC(tetra%ibz(ikibz)%tetra,(tetra%tetra_count(ikibz)))
+   ABI_MALLOC(tetra%ibz(ikibz)%indexes,(2,tetra%tetra_count(ikibz)))
  end do
 
  ! Create mapping from IBZ to unique tetrahedra
@@ -938,11 +902,39 @@ subroutine htetra_init_mapping_ibz(tetra)
      do isummit=1,4
        ikibz = tetra_mibz(isummit)
        tetra_count(ikibz) = tetra_count(ikibz) + 1
-       tetra%ibz(ikibz)%tetra(tetra_count(ikibz))%p(0:4) => tetra%unique_tetra(ihash)%indexes(:,itetra)
+       tetra%ibz(ikibz)%indexes(1,tetra_count(ikibz)) = ihash
+       tetra%ibz(ikibz)%indexes(2,tetra_count(ikibz)) = itetra
      end do
    end do
  end do
 
+end subroutine
+!!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_htetrahedron/htetra_print
+!! NAME
+!! htetra_print
+!!
+!! FUNCTION
+!!  Get the itetra tetrahedron contributing to the IBZ sum
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+pure subroutine tetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
+ type(t_htetrahedron), intent(in) :: tetra
+ integer,intent(in) :: ikibz, itetra
+ integer,intent(out) :: tetra_mibz(0:4)
+ integer :: ihash, jtetra
+
+ ihash  = tetra%ibz(ikibz)%indexes(1,itetra)
+ jtetra = tetra%ibz(ikibz)%indexes(2,itetra)
+ tetra_mibz = tetra%unique_tetra(ihash)%indexes(:,jtetra)
 end subroutine
 !!***
 
@@ -964,18 +956,18 @@ end subroutine
 subroutine htetra_print(self)
 
  type(t_htetrahedron), intent(in) :: self
- integer  :: pointer_size_bits
  real(dp) :: total_size, unique_tetra_size, ibz_pointer_size
 
  unique_tetra_size = self%nunique_tetra*5*four/1024/1024
- pointer_size_bits = storage_size(self%ibz(1)%tetra(1)%p)
- ibz_pointer_size  = one*self%nibz_tetra*pointer_size_bits/8/1024/1024
- total_size        = ibz_pointer_size+unique_tetra_size
+ total_size        = unique_tetra_size
  write(std_out,'(a,i12)')     'unique_tetra      ', self%nunique_tetra
  write(std_out,'(a,f12.1,a)') 'unique_tetra_size ', unique_tetra_size, ' [Mb]'
- write(std_out,'(a,i12)')     'ibz_tetra         ', self%nibz_tetra
- write(std_out,'(a,i12,a)')   'pointer_size      ', pointer_size_bits, ' bits'
- write(std_out,'(a,f12.1,a)') 'ibz_pointer_size  ', ibz_pointer_size, ' [Mb]'
+ if (allocated(self%ibz)) then
+   ibz_pointer_size  = self%nibz_tetra*2*four/1024/1024
+   write(std_out,'(a,i12)')     'ibz_tetra         ', self%nibz_tetra
+   write(std_out,'(a,f12.1,a)') 'ibz_tetra_size    ', ibz_pointer_size, ' [Mb]'
+   total_size = total_size + ibz_pointer_size
+ end if
  write(std_out,'(a,f12.1,a)') 'total size        ', total_size, ' [Mb]'
 
 end subroutine htetra_print
@@ -1005,6 +997,7 @@ subroutine htetra_free(tetra)
 
  ABI_SFREE(tetra%tetra_count)
  ABI_SFREE(tetra%tetra_total)
+ ABI_SFREE(tetra%ibz_multiplicity)
 
  if (allocated(tetra%unique_tetra)) then
    do ihash=1,tetra%nbuckets
@@ -1015,11 +1008,10 @@ subroutine htetra_free(tetra)
 
  if (allocated(tetra%ibz)) then
    do ikibz=1,tetra%nkibz
-     ABI_SFREE(tetra%ibz(ikibz)%tetra)
+     ABI_SFREE_PTR(tetra%ibz(ikibz)%indexes)
    end do
    ABI_FREE(tetra%ibz)
  end if
- ABI_SFREE(tetra%ibz_weights)
 
 end subroutine htetra_free
 !!***
@@ -1315,7 +1307,7 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
  real(dp) :: tweight
  integer  :: itetra,isummit,tetra_count,tetra_total
 !arrays
- integer  :: ind_ibz(4)
+ integer  :: ind_ibz(4),tetra_mibz(0:4)
  real(dp) :: eigen_1tetra(4)
  real(dp) :: tweight_tmp(4,nw),dtweightde_tmp(4,nw)
 
@@ -1330,10 +1322,11 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkib
  tetra_total = tetra%tetra_total(ik_ibz)
  do itetra=1,tetra_count
 
-   tweight = one*tetra%ibz(ik_ibz)%tetra(itetra)%p(0)/tetra_total
+   call tetra_get_ibz(tetra,ik_ibz,itetra,tetra_mibz)
+   tweight = one*tetra_mibz(0)/tetra_total
    do isummit=1,4
      ! Get mapping of each summit to eig_ibz
-     ind_ibz(isummit) = tetra%ibz(ik_ibz)%tetra(itetra)%p(isummit)
+     ind_ibz(isummit) = tetra_mibz(isummit)
      eigen_1tetra(isummit) = eig_ibz(ind_ibz(isummit))
    end do
 
@@ -1452,7 +1445,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  integer  :: itetra,isummit,tetra_total,tetra_count,iz
  real(dp) :: tweight
 !arrays
- integer  :: ind_ibz(4)
+ integer  :: ind_ibz(4),tetra_mibz(0:4)
  real(dp) :: eigen_1tetra(4)
  complex(dp) :: verm(4), verl(4), verli(4)
 ! *********************************************************************
@@ -1466,10 +1459,11 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  tetra_total = tetra%tetra_total(ik_ibz)
  do itetra=1,tetra_count
 
-   tweight = one*tetra%ibz(ik_ibz)%tetra(itetra)%p(0)/tetra_total
+   call tetra_get_ibz(tetra,ik_ibz,itetra,tetra_mibz)
+   tweight = one*tetra_mibz(0)/tetra_total
    do isummit=1,4
      ! Get mapping of each summit to eig_ibz
-     ind_ibz(isummit) = tetra%ibz(ik_ibz)%tetra(itetra)%p(isummit)
+     ind_ibz(isummit) = tetra_mibz(isummit)
      eigen_1tetra(isummit) = eig_ibz(ind_ibz(isummit))
    end do
 
@@ -1574,11 +1568,17 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
    end do ! itetra
  end do
 
- ! Rescale with weights
- do ik_ibz=1,tetra%nkibz
-   tweight(:,ik_ibz) = tweight(:,ik_ibz)*tetra%ibz_weights(ik_ibz)/tetra%tetra_total(ik_ibz)
-   dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_weights(ik_ibz)/tetra%tetra_total(ik_ibz)
- end do
+ ! Rescale weights
+ select case(tetra%opt)
+ case(1)
+  do ik_ibz=1,tetra%nkibz
+   tweight(:,ik_ibz) = tweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
+   dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
+  end do
+ case(2)
+   tweight = tweight*tetra%vv
+   dweight = dweight*tetra%vv
+ end select
 
  call xmpi_sum(tweight, comm, ierr)
  call xmpi_sum(dweight, comm, ierr)
@@ -1658,17 +1658,22 @@ subroutine htetra_blochl_weights_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,&
        ! Acumulate the contributions
        do isummit=1,4
          ik_ibz = ind_ibz(isummit)
-         cweight(1,iz,ik_ibz) = cweight(1,iz,ik_ibz) + verl(isummit)*multiplicity
+         cweight(1,iz,ik_ibz) = cweight(1,iz,ik_ibz) + verl(isummit) *multiplicity
          cweight(2,iz,ik_ibz) = cweight(2,iz,ik_ibz) + verli(isummit)*multiplicity
        end do
      end do ! iz
    end do ! itetra
  end do
 
- ! Rescale with weights
- do ik_ibz=1,tetra%nkibz
-   cweight(:,:,ik_ibz) = cweight(:,:,ik_ibz)*tetra%ibz_weights(ik_ibz)/tetra%tetra_total(ik_ibz)
- end do
+ ! Rescale weights
+ select case(tetra%opt)
+ case(1)
+  do ik_ibz=1,tetra%nkibz
+   cweight(:,:,ik_ibz) = cweight(:,:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
+  end do
+ case(2)
+   cweight = cweight*tetra%vv
+ end select
 
  call xmpi_sum(cweight, comm, ierr)
 
