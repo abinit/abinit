@@ -103,7 +103,7 @@ def Checking_on_no_error_list(url, info, valid):
 #    ConnectionError: ('Connection aborted.'
 
 no_error_list = [
-    { 'url'  : re.compile('(doi|aps).org'),
+    { 'url'  : re.compile('(doi|aps|stacks.iop).org'),
       'info' : re.compile('^Redirected'),
       'valid': re.compile('^403 Forbidden')
     },
@@ -166,13 +166,26 @@ def main(filename,home_dir=""):
   tree = etree.parse(filename)
   
   rc=0
+  urls=set()
   for child in tree.xpath("/linkchecker/urldata"):
   
     url    = child.find('url')
+    parent = child.find('parent')
     URL    = url.text
     info   = child.find('infos/info')
     extern = child.find('extern')
     valid  = child.find('valid').get("result")
+
+    ### check for duplicate entry except for FAKE_URL
+
+    if not ("FAKE_URL" in URL) :
+        if URL in urls :
+           continue
+        else: 
+           urls.add(URL)
+    else:
+        if not ("index.html" in parent.text) :
+           continue
 
     ### precleaning ###
 

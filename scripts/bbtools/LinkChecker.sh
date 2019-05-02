@@ -10,6 +10,13 @@
 
 #set -e
 
+if [ ! -d "site" ]; then
+  # Control will enter here if $DIRECTORY doesn't exist.
+  echo -e "\n****  something went wrong during the creation of the site **** \n"
+  exit 999
+fi
+
+
 export PATH=/home/buildbot/miniconda3/envs/abimkdocs/bin:/home/buildbot/miniconda3/bin:/home/buildbot/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
 #conda info --envs
 echo -e "***  Enter in abimkdocs envs...\n"
@@ -34,7 +41,6 @@ echo -e "\n***  Starting linkchecker...\n"
 echo "cmd : linkchecker -v --no-status --check-extern -o xml --ignore-url=.*fonts.gstatic.com http://localhost:8000/ > ../linkchecker_ext.log"
 
 linkchecker -v --no-status --check-extern --timeout 15 -o xml --ignore-url=.*fonts.gstatic.com http://localhost:8000/ > ../linkchecker_ext.log 2> ../linkchecker_ext.err        
-
 echo -e "\n***  Stopping SimpleHTTPServer...\n"
 kill %1
 sleep 1
