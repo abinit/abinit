@@ -554,7 +554,7 @@ end subroutine init_sc_dmft
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 !!
 
-subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnmetmp_app_in, amei, nspinor, paw_dmft, pawtab, psps, typat)
+subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor, paw_dmft, pawtab, psps, typat)
 
  use defs_abitypes
  use m_splines
@@ -571,11 +571,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnmetmp_app_in, 
  type(pawtab_type),intent(in)  :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type),intent(inout) :: paw_dmft
  character(len=fnlen), intent(in) :: fnametmp_app
-<<<<<<< HEAD
- character(len=fnlen), intent(in) :: fnametmp_app_in
-=======
  character(len=fnlen), intent(in) :: fnamei
->>>>>>> bb9a7d075f93c3d64d9fcb6b8a9a6ce424f0701e
 !arrays
  integer,intent(in) :: typat(dtset%natom)
  real(dp),intent(in),target :: dmatpawu(:,:,:,:)
@@ -634,7 +630,6 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnmetmp_app_in, 
    paw_dmft%nelectval= dtset%nelect-float(paw_dmft%dmftbandi-1)*paw_dmft%nsppol
  endif
  paw_dmft%filapp= fnametmp_app
- paw_dmft%filapp_in = fnametmp_app_in
  paw_dmft%filnamei= fnamei
  paw_dmft%natpawu=dtset%natpawu
  paw_dmft%natom=dtset%natom

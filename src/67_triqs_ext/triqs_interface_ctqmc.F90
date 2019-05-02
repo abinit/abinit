@@ -45,12 +45,6 @@ MODULE TRIQS_CTQMC
  
     end subroutine Ctqmc_triqs_run
    
-    ! subroutine Invoke_python_triqs (comm, filapp_in) bind(c)
-    !   use iso_c_binding
-    !   integer, value, intent(in) :: comm
-    !   character(kind=c_char) :: filapp_in(*)
-    ! end subroutine Invoke_python_triqs
- 
   end interface
 
 
