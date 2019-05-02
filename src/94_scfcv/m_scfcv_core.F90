@@ -2627,9 +2627,9 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
    end if
 
-   write(0,*) etotal
+   ! write(0,*) etotal
    if(hightemp%enabled) call hightemp_addtoenergy(hightemp%int_energycontrib,etotal)
-   write(0,*) etotal
+   ! write(0,*) etotal
 
 !  Compute energy residual
    deltae=etotal-elast

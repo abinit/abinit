@@ -405,18 +405,18 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine prt_eigocc(eigen,fermie,fnameabo_eig,iout,kptns,&
-    & mband,nband,nkpt,nsppol,occ,rprimd,tsmear,vxcavg,wtk)
+  subroutine prt_eigocc(eigen,etotal,fermie,fnameabo_eig,iout,kptns,&
+    & mband,nband,nkpt,nsppol,occ,rprimd,strten,tsmear,vxcavg,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: iout,mband,nkpt,nsppol
-    real(dp),intent(in) :: fermie,tsmear,vxcavg
+    real(dp),intent(in) :: etotal,fermie,tsmear,vxcavg
     character(len=*),intent(in) :: fnameabo_eig
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol),kptns(3,nkpt)
-    real(dp),intent(in) :: rprimd(3,3)
+    real(dp),intent(in) :: rprimd(3,3),strten(6)
     real(dp),intent(in) :: occ(mband*nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
 
@@ -443,11 +443,13 @@ contains
     end if
     rewind(temp_unit)
 
-    write(msg, '(a,f12.6,a,f12.6)') &
-      & ' Fermi (or HOMO) energy (hartree) =',fermie,'   Average Vxc (hartree)=',vxcavg
+    write(msg, '(a,f12.6,a,f12.6,a,ES16.8,a)') &
+      & ' Fermi (or HOMO) energy (hartree)= ',fermie,'   Average Vxc (hartree)=',vxcavg,&
+      & ', Total energy= ',etotal, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
-    write(msg, '(a,e16.8,a,f16.8,a)') &
-      & ' Unit cell volume ucvol= ',ucvol,' bohr^3, electronic temperature= ',tsmear,' Ha'
+    write(msg, '(a,e16.8,a,f16.8,a,a,ES12.4,a)') &
+      & ' Unit cell volume ucvol= ',ucvol,' bohr^3, Electronic temperature= ',tsmear,' Ha',&
+      & ', Pressure= ',-(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa'
     call wrtout(temp_unit,msg,'COLL')
 
     ! Loop over spins
@@ -465,7 +467,7 @@ contains
 
         ! Loop over bands
         do ii=0,(nband_k-1)/4
-          write(msg, '(4(i6,f13.8,f12.8,a,1x))') &
+          write(msg, '(4(i6,ES12.4,ES12.4,a,1x))') &
             & (iband,eigen(iband+band_index),occ(iband+band_index),',',iband=1+ii*4,min(nband_k,4+ii*4))
           call wrtout(temp_unit,msg,'COLL')
         end do

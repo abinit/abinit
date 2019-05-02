@@ -103,6 +103,7 @@ module m_gstate
  use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
+ use m_hightemp,         only : prt_eigocc
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -1454,6 +1455,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
 & resid,rhor,rprimd,results_gs%vxcavg,xred)
 
+ call prt_eigocc(eigen,results_gs%etotal,results_gs%energies%e_fermie,dtfil%fnameabo_eig,std_out,&
+& dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,occ,rprimd,results_gs%strten,&
+& dtset%tsmear,results_gs%vxcavg,dtset%wtk)
+
  if ( (dtset%iscf>=0 .or. dtset%iscf==-3) .and. dtset%prtstm==0) then
    call prtene(dtset,results_gs%energies,ab_out,psps%usepaw)
  end if
@@ -1916,8 +1921,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
   & mpi_enreg,nfft,ngfft,occ,prtfor,&
   & resid,rhor,rprimd,vxcavg,xred)
 
- use m_hightemp,         only : prt_eigocc
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -2027,10 +2030,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 &     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
-
-!    Print in a file eigenvalues and occupations (m_hightemp)
-     call prt_eigocc(eigen,fermie,fnameabo_eig,std_out,dtset%kptns,&
-&     dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,occ,rprimd,dtset%tsmear,vxcavg,dtset%wtk)
    end if
 
 #if defined HAVE_NETCDF
