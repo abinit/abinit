@@ -906,7 +906,7 @@ subroutine htetra_init_mapping_ibz(tetra)
    end do
  end do
 
-end subroutine
+end subroutine htetra_init_mapping_ibz
 !!***
 
 
@@ -917,13 +917,14 @@ end subroutine
 !! htetra_print
 !!
 !! FUNCTION
-!!  Get the itetra tetrahedron contributing to the IBZ sum
+!!  Get the itetra tetrahedron contributing to the ikibz k-point
 !!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
 pure subroutine tetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
  type(t_htetrahedron), intent(in) :: tetra
  integer,intent(in) :: ikibz, itetra
@@ -933,7 +934,7 @@ pure subroutine tetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
  ihash  = tetra%ibz(ikibz)%indexes(1,itetra)
  jtetra = tetra%ibz(ikibz)%indexes(2,itetra)
  tetra_mibz = tetra%unique_tetra(ihash)%indexes(:,jtetra)
-end subroutine
+end subroutine tetra_get_ibz
 !!***
 
 !----------------------------------------------------------------------
@@ -943,7 +944,7 @@ end subroutine
 !! htetra_print
 !!
 !! FUNCTION
-!! write information about the tetrahedra object
+!!  write information about the tetrahedra object
 !!
 !! PARENTS
 !!
