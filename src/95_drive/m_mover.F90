@@ -625,6 +625,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
+               hist%ihist = 1 
              end if
 
 #if defined DEV_MS_SCALEUP 
@@ -639,7 +640,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 &                         scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
               end if 
            end if
-#endif 
+#endif
+
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,e_d_ht,e_d_sr,e_d_lr,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
