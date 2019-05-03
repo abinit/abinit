@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (C) 2010-2018 ABINIT Group (Jean-Michel Beuken)
+# Copyright (C) 2010-2019 ABINIT Group (Jean-Michel Beuken)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -27,8 +27,7 @@ pip install -q -r requirements.txt &> /dev/null
 
 echo -e "\n***  Starting SimpleHTTPServer...\n"
 cd site
-sudo netstat -tapn | grep 8000
-#python2 ../web.py &>stderr &
+#sudo netstat -tapn | grep 8000
 ~/bin/web.py &>stderr &
 jobs
 sleep 1
@@ -41,6 +40,7 @@ echo -e "\n***  Starting linkchecker...\n"
 echo "cmd : linkchecker -v --no-status --check-extern -o xml --ignore-url=.*fonts.gstatic.com http://localhost:8000/ > ../linkchecker_ext.log"
 
 linkchecker -v --no-status --check-extern --timeout 15 -o xml --ignore-url=.*fonts.gstatic.com http://localhost:8000/ > ../linkchecker_ext.log 2> ../linkchecker_ext.err        
+
 echo -e "\n***  Stopping SimpleHTTPServer...\n"
 kill %1
 sleep 1

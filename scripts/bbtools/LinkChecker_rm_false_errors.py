@@ -23,14 +23,15 @@ import requests
 
 # ---------------------------------------------------------------------------- #
 
-#
-# Functions
-#
-
 #all_tags = [ 'url','name','parent','realurl','extern','dlsize','checktime','level','infos','valid' ]
 #printable_tags = [ 'url', 'name', 'parent', 'realurl', 'valid' ]
 
-server="http://localhost:8000"
+debug = False
+server = "http://localhost:8000"
+
+#
+# Functions
+#
 
 def rm_server(keyword):
   if keyword.startswith(server):
@@ -39,16 +40,11 @@ def rm_server(keyword):
 def Checking_on_url_to_skip(e, u, v):
   global url_to_skip
   for ui in url_to_skip :
-     #print(e,u,v)
-     #print(ui)
      if e == "1" and ui == u and  ( v == "syntax OK" or v == "filtered" ) :
          #print("url_to_skip")
          return True
   return False
 
-    #  for s in url_string_to_skip :
-    #     if extern.text == "1" and URL.find( s ) >= 0 :
-    #        continue
 
 def Checking_on_url_string_to_skip(e, u):
   global url_string_to_skip
@@ -86,8 +82,6 @@ def Checking_on_no_error_list(url, info, valid):
     valid_rc = no_error['valid'].search(valid)
     norc = norc and ( valid_rc != None )
 
-    #print(" url_rc : ",url_rc," info_rc : ",info_rc,"valid_rc : ",valid_rc)
-    #print("exit with : ",url_rc != None and info_rc != None and valid_rc != None)
     if url_rc != None and info_rc != None and valid_rc != None:
         return True # in the exception list -> next xml entry
   return False # may be a error
@@ -95,12 +89,13 @@ def Checking_on_no_error_list(url, info, valid):
 # ---------------------------------------------------------------------------- #
 
 # Types of error :
-#    Error: 403 Forbidden'
-#    Error: 404 Not Found'
-#    Error: 504 Gateway Time-out'
-#    Error: 502 Bad Gateway'
-#    Error: ReadTimeout:'
-#    ConnectionError: ('Connection aborted.'
+#    Error: 401 Unauthorized
+#    Error: 403 Forbidden
+#    Error: 404 Not Found
+#    Error: 504 Gateway Time-out
+#    Error: 502 Bad Gateway
+#    Error: ReadTimeout:
+#    ConnectionError: ('Connection aborted.
 
 no_error_list = [
     { 'url'  : re.compile('(doi|aps|stacks.iop).org'),
@@ -216,10 +211,16 @@ def main(filename,home_dir=""):
     Check_connection = False
     if valid == "syntax OK" :
         Check_connection = True
-        request = requests.get(url.text, headers={"content-type":"text"}, timeout=(2,2) )
-        #print(r.request.headers)
-        if request.status_code == 200 :
-            continue
+        if debug : print("check cnx : ",url.text)
+        try: 
+           request = requests.get(url.text, headers={"content-type":"text"}, timeout=(2,2) )
+        except (requests.Timeout, requests.ConnectionError, KeyError) as e:
+           if debug : print('failed to connect to website ({})'.format(e))
+           continue
+        if request.status_code == 200 :  # OK
+           continue
+        if request.status_code == 403 :  # cnx ok but Forbidden for robot
+           continue
 
     # found a true error... : reporting on bb
     rc += 1
