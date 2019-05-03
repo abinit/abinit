@@ -565,9 +565,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    call wrtout(std_out,msg,'PERS')
 
    if (is_resonant) then
-     write(msg,'(a,f8.1,a)')' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
+     write(msg,'(a,f8.1,a)')' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' [Mb] <<< MEM'
    else
-     write(msg,'(a,f8.1,a)')' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' Mb. '
+     write(msg,'(a,f8.1,a)')' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' [Mb] <<< MEM'
    end if
    call wrtout(std_out,msg,"COLL")
 
