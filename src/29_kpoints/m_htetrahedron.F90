@@ -1030,14 +1030,12 @@ end subroutine htetra_free
 !!
 !! SOURCE
 
-pure subroutine get_onetetra_blochl(tetra,eig,energies,nene,max_occ,bcorr,tweight,dweight)
+pure subroutine get_onetetra_blochl(eig,energies,nene,bcorr,tweight,dweight)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)   :: nene,bcorr
- real(dp) ,intent(in) :: max_occ
  real(dp) ,intent(in) :: energies(nene)
- type(t_htetrahedron), intent(in) :: tetra
 !arrays
  real(dp), intent(out) :: tweight(4, nene)
  real(dp), intent(out) :: dweight(4, nene)
@@ -1054,13 +1052,9 @@ pure subroutine get_onetetra_blochl(tetra,eig,energies,nene,max_occ,bcorr,tweigh
  real(dp) :: invepsum, cc_pre, dccde_pre
  real(dp) :: cc1_pre, cc2_pre, cc3_pre
  real(dp) :: dccde_tmp
- real(dp) :: bcorr_fact,volconst
+ real(dp) :: bcorr_fact
 
 ! *********************************************************************
-
- ! Factor of 1/6 from the volume of the tetrahedron
- ! The rest is accounted for from the kpoint weights
- volconst = max_occ!/4.d0!/6.d0
 
  ! This is output
  tweight = zero; dweight = zero
@@ -1099,14 +1093,14 @@ pure subroutine get_onetetra_blochl(tetra,eig,energies,nene,max_occ,bcorr,tweigh
      invepsum = inv_e21+inv_e31+inv_e41
 
      ! Heaviside
-     cc = volconst*inv_e21*inv_e31*inv_e41*deleps1**3
+     cc = inv_e21*inv_e31*inv_e41*deleps1**3
      tweight(1,ieps) = cc*(4.d0-deleps1*invepsum)
      tweight(2,ieps) = cc*deleps1*inv_e21
      tweight(3,ieps) = cc*deleps1*inv_e31
      tweight(4,ieps) = cc*deleps1*inv_e41
 
      ! Delta
-     dccde_pre = 3.d0*volconst*inv_e21*inv_e31*inv_e41
+     dccde_pre = 3.d0*inv_e21*inv_e31*inv_e41
      dccde = dccde_pre*deleps1**2
      dweight(1,ieps) = dccde*(4.d0-deleps1*invepsum)-cc*invepsum
      dweight(2,ieps) = (dccde*deleps1+cc) * inv_e21
@@ -1139,9 +1133,9 @@ pure subroutine get_onetetra_blochl(tetra,eig,energies,nene,max_occ,bcorr,tweigh
      deleps2 = eps-e2
      deleps3 = e3-eps
      deleps4 = e4-eps
-     cc1_pre = volconst*inv_e31*inv_e41
-     cc2_pre = volconst*inv_e41*inv_e32*inv_e31
-     cc3_pre = volconst*inv_e42*inv_e32*inv_e41
+     cc1_pre = inv_e31*inv_e41
+     cc2_pre = inv_e41*inv_e32*inv_e31
+     cc3_pre = inv_e42*inv_e32*inv_e41
 
      ! Heaviside
      cc1 = cc1_pre*deleps1*deleps1
@@ -1201,12 +1195,12 @@ pure subroutine get_onetetra_blochl(tetra,eig,energies,nene,max_occ,bcorr,tweigh
      invepsum = inv_e41+inv_e42+inv_e43
 
      ! Heaviside
-     cc_pre = volconst*inv_e41*inv_e42*inv_e43
+     cc_pre = inv_e41*inv_e42*inv_e43
      cc = cc_pre*deleps4**3
-     tweight(1,ieps) = volconst - deleps4*cc*inv_e41
-     tweight(2,ieps) = volconst - deleps4*cc*inv_e42
-     tweight(3,ieps) = volconst - deleps4*cc*inv_e43
-     tweight(4,ieps) = volconst - cc*(4.d0-deleps4*invepsum)
+     tweight(1,ieps) = one - deleps4*cc*inv_e41
+     tweight(2,ieps) = one - deleps4*cc*inv_e42
+     tweight(3,ieps) = one - deleps4*cc*inv_e43
+     tweight(4,ieps) = one - cc*(4.d0-deleps4*invepsum)
 
      ! Delta
      dccde = -3.d0*cc_pre*deleps4**2
@@ -1241,7 +1235,7 @@ pure subroutine get_onetetra_blochl(tetra,eig,energies,nene,max_occ,bcorr,tweigh
    if (e4 < eps) then
 
      ! Heaviside
-     tweight(:,ieps:) = volconst
+     tweight(:,ieps:) = one
 
      ! Delta unchanged by this tetrahedron
      exit
@@ -1575,7 +1569,7 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
    ! HM: Here we should only compute what we will use!
    select case (opt)
    case(0:1)
-     call get_onetetra_blochl(tetra, eig, wvals, nw, max_occ, opt, tweight_tmp, dweight_tmp)
+     call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
    case(2)
      call get_ontetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
      tweight_tmp = zero
@@ -1584,8 +1578,8 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
    ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
    do isummit=1,4
      if (ind_ibz(isummit) /= ik_ibz) cycle
-     weights(:,1) = weights(:,1) + dweight_tmp(isummit,:)*tweight
-     weights(:,2) = weights(:,2) + tweight_tmp(isummit,:)*tweight
+     weights(:,1) = weights(:,1) + dweight_tmp(isummit,:)*tweight*max_occ
+     weights(:,2) = weights(:,2) + tweight_tmp(isummit,:)*tweight*max_occ
      ! HM: This exit is important, avoids summing the same contribution more than once
      exit
    end do
@@ -1724,7 +1718,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
 
      do isummit=1,4
        if (ind_ibz(isummit) /= ik_ibz) cycle
-       cweights(iz) = cweights(iz) + cw(isummit) *tweight
+       cweights(iz) = cweights(iz) + cw(isummit) *tweight*max_occ
        ! HM: This exit is important, avoids summing the same contribution more than once
        exit
      end do
@@ -1808,7 +1802,7 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
      ! Get tetrahedron weights
      select case (opt)
      case(0:1)
-       call get_onetetra_blochl(tetra, eig, wvals, nw, max_occ, opt, tweight_tmp, dweight_tmp)
+       call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
      case(2)
        call get_ontetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
        tweight_tmp = zero
@@ -1818,8 +1812,8 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
      multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
      do isummit=1,4
        ik_ibz = ind_ibz(isummit)
-       tweight(:,ik_ibz) = tweight(:,ik_ibz) + tweight_tmp(isummit,:)*multiplicity
-       dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:)*multiplicity
+       tweight(:,ik_ibz) = tweight(:,ik_ibz) + tweight_tmp(isummit,:)*multiplicity*max_occ
+       dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:)*multiplicity*max_occ
      end do
    end do ! itetra
  end do
@@ -1918,7 +1912,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
        ! Acumulate the contributions
        do isummit=1,4
          ik_ibz = ind_ibz(isummit)
-         cweight(iz,ik_ibz) = cweight(iz,ik_ibz) + cw(isummit) *multiplicity
+         cweight(iz,ik_ibz) = cweight(iz,ik_ibz) + cw(isummit)*multiplicity*max_occ
        end do
      end do ! iz
    end do ! itetra

@@ -220,9 +220,6 @@ integer function hkptrank_get_index(krank,kpt) result(ikpt)
 !Local variables-------------------------------
 !scalars
  integer :: ierr, irank
- character(len=500) :: msg
-!arrays
- double precision :: redkpt(3)
 
 ! *************************************************************************
 

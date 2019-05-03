@@ -1191,7 +1191,7 @@ subroutine phdos_unittests(comm)
  integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
  integer,parameter :: timrev1=1,npsp1=1
  real(dp),parameter :: max_occ1=1.d0
- integer :: nqibz,iqibz,nqbz,ierr,natom,nprocs
+ integer :: nqibz,iqibz,nqbz,ierr,natom
  integer :: nw,ntypat,nsym,nclass
  real(dp) :: cpu, wall, gflops
  real(dp) :: dosdeltae, emin, emax, qnorm, dos_int
@@ -1224,6 +1224,9 @@ subroutine phdos_unittests(comm)
  rprimd(:,1) = [ 0.0, 0.5, 0.5]
  rprimd(:,2) = [ 0.5, 0.0, 0.5]
  rprimd(:,3) = [ 0.5, 0.5, 0.0]
+ !rprimd(:,1) = [ 1.0, 0.0, 0.0]
+ !rprimd(:,2) = [ 0.0, 1.0, 0.0]
+ !rprimd(:,3) = [ 0.0, 0.0, 1.0]
  crystal = crystal_from_pointgroup('m-3m',rprimd)
 
  ! Create a regular grid
@@ -1252,7 +1255,8 @@ subroutine phdos_unittests(comm)
  ABI_MALLOC(eig,(nqibz))
  ABI_MALLOC(mat,(nqibz))
  do iqibz=1,nqibz
-   qnorm = normv(qibz(:,iqibz),crystal%gmet,'G')
+   qnorm = normv(qibz(:,iqibz),crystal%gmet,'R')
+   ! The DOS for this function goes as sqrt(w-0.5)*two_pi
    eig(iqibz) = qnorm**2+half
    mat(iqibz) = abs(one/eig(iqibz))
    mat(iqibz) = 1!abs(one/eig(iqibz))
@@ -1449,7 +1453,7 @@ subroutine phdos_unittests(comm)
   character(len=*) :: pointgroup
   logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
   real(dp) :: rprimd(3,3)
-  real(dp) :: amu(1),qpt(3),xred(3,1),znucl(1),zion(1)
+  real(dp) :: amu(1),xred(3,1),znucl(1),zion(1)
   type(irrep_t),allocatable :: irr(:)
   character(len=5),allocatable :: class_names(:)
   integer,allocatable :: symrel(:,:,:),symafm(:),class_ids(:,:)
@@ -1487,11 +1491,10 @@ subroutine phdos_unittests(comm)
   character(len=500) :: msg
   integer :: iw,funit
 
-  if (open_file(fname,msg,newunit=funit,status="old",action="write") /= 0) then
+  if (open_file(fname,msg,newunit=funit,action="write") /= 0) then
     MSG_ERROR(msg)
   end if
 
-  open(unit=funit,file=fname)
   do iw=1,nw
     write(funit,*) energies(iw), idos(iw), dos(iw)
   end do

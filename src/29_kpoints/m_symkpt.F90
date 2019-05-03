@@ -464,18 +464,18 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 !Local variables -------------------------
 !scalars
  integer :: identi,ii,ikpt,ikpt2,ind_ikpt,ind_ikpt2,ierr
- integer :: ikpt_current_length,isym,itim,jj,nkpout,quit,tident
+ integer :: isym,itim,jj,nkpout,tident
  integer :: istart, istop
- real(dp) :: difk,difk1,difk2,difk3,length2trial,reduce,reduce1,reduce2,reduce3
- real(dp) :: cpu,wall,gflops
+ real(dp) :: difk,reduce
  real(dp) :: length1, length_sym
  character(len=500) :: message
 !arrays
  integer,allocatable :: list(:),bz2ibz_idx(:)
- real(dp) :: gmetkpt(3),ksym(3),kpt1(3),kpt2(3)
+ real(dp) :: ksym(3),kpt1(3),kpt2(3)
  real(dp),allocatable :: length2(:)
 
 ! *********************************************************************
+ ABI_UNUSED(comm)
 
  if (timrev/=1 .and. timrev/=0) then
    write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev

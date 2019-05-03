@@ -252,14 +252,14 @@ type(t_htetrahedron) function tetra_from_kptrlatt( &
 
 !Local variables-------------------------------
 !scalars
- integer :: nkfull,my_nkibz,new_nshiftk
+ integer :: nkfull,new_nshiftk
  character(len=80) :: errorstring
 !arrays
  integer :: new_kptrlatt(3,3)
  integer,allocatable :: indkk(:)
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: rlatt(3,3),klatt(3,3)
- real(dp),allocatable :: kfull(:,:),my_kibz(:,:),my_wtk(:),new_shiftk(:,:)
+ real(dp),allocatable :: kfull(:,:),new_shiftk(:,:)
 
 ! *************************************************************************
 
@@ -279,22 +279,12 @@ type(t_htetrahedron) function tetra_from_kptrlatt( &
    ierr = 1; goto 10
  end if
 
- call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, &
-   my_nkibz, my_kibz, my_wtk, nkfull, kfull, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk, bz2ibz=bz2ibz)
-
- ABI_FREE(my_wtk)
- new_nshiftk = size(new_shiftk, dim=2)
-
- if (my_nkibz /= nkibz) then
-   msg = sjoin("Input nkibz:", itoa(nkibz), "does not agree with computed value:", itoa(my_nkibz))
-   ierr = 1; goto 10
- end if
-
  ! Do not support new_nshiftk > 1: lattice must be decomposed into boxes
  ! and this is not always possible (I think) with bizarre shifts
  ! normally at this point we have incorporated everything into
  ! new_kptrlatt, and only 1 shift is needed (in particular for MP grids).
- if (new_nshiftk > 1) then
+ !if (new_nshiftk > 1) then
+ if (nshiftk > 1) then
    write(msg, "(9a)") &
      'Cannot create tetrahedron object...',ch10, &
      'Only simple lattices are supported. Action: use nshiftk=1.',ch10, &
@@ -308,11 +298,10 @@ type(t_htetrahedron) function tetra_from_kptrlatt( &
  ABI_MALLOC(indkk,(nkfull))
  indkk(:) = bz2ibz(1,:)
  ABI_SFREE(bz2ibz)
- call htetra_init(htetra, indkk, cryst%gprimd, klatt, kfull, nkfull, my_kibz, my_nkibz, ierr, errorstring, comm)
+ call htetra_init(htetra, indkk, cryst%gprimd, klatt, kfull, nkfull, kibz, nkibz, ierr, errorstring, comm)
  if (ierr /= 0) msg = errorstring
 
  10 continue
- ABI_SFREE(my_kibz)
  ABI_SFREE(indkk)
  ABI_SFREE(kfull)
  ABI_SFREE(new_shiftk)
