@@ -1402,11 +1402,12 @@ end subroutine get_ontetratra_lambinvigneron
 pure subroutine get_ontetetra_lambinvigneron_imag(eig,energies,nene,wt)
  ! dispersion values at the corners of the tetrahedron
  real(dp), intent(in), dimension(4) :: eig
+ ! number of energies
+ integer, intent(in) :: nene
  ! energy to evaulate the weights at
  real(dp), intent(in) :: energies(nene)
  ! integration weights
  real(dp), intent(out) :: wt(4,nene)
- integer, intent(in) :: nene
 
  integer :: ie
  real(dp) :: z
