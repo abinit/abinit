@@ -443,31 +443,42 @@ contains
     end if
     rewind(temp_unit)
 
-    write(msg, '(a,f12.6,a,f12.6,a,ES16.8,a)') &
-      & ' Fermi (or HOMO) energy (hartree)= ',fermie,'   Average Vxc (hartree)=',vxcavg,&
-      & ', Total energy= ',etotal, ' Ha'
+    ! write(msg, '(a,f12.6,a,f12.6,a,ES16.8,a)') &
+    !   & ' Fermi (or HOMO) energy (hartree)= ',fermie,'   Average Vxc (hartree)=',vxcavg,&
+    !   & ', Total energy= ',etotal, ' Ha'
+    ! call wrtout(temp_unit,msg,'COLL')
+    ! write(msg, '(a,e16.8,a,f16.8,a,a,ES12.4,a)') &
+    !   & ' Unit cell volume ucvol= ',ucvol,' bohr^3, Electronic temperature= ',tsmear,' Ha',&
+    !   & ', Pressure= ',-(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa'
+    ! call wrtout(temp_unit,msg,'COLL')
+
+    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
+      & ' Chemical potential = ',fermie,' Ha         Average Vxc        = ',vxcavg,&
+      & ' Ha         Total energy       = ',etotal, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
-    write(msg, '(a,e16.8,a,f16.8,a,a,ES12.4,a)') &
-      & ' Unit cell volume ucvol= ',ucvol,' bohr^3, Electronic temperature= ',tsmear,' Ha',&
-      & ', Pressure= ',-(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa'
+    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
+      & ' Unit cell vol      = ',ucvol,' Bohr^3     Elec. temperature  = ',tsmear,&
+      & ' Ha         Pressure           = ',-(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa'
     call wrtout(temp_unit,msg,'COLL')
 
     ! Loop over spins
     do isppol=1,nsppol
-      write(msg, '(a,i6,a)') ' Eigenvalues (hartree) for nkpt=',nkpt,'k points:'
+      ! write(msg, '(a,i6,a)') ' Eigenvalues (hartree) for nkpt=',nkpt,'k points:'
+      write(msg, '(a,i12,a,i12)') ' Number of kpts     = ',nkpt,'            Number of bands    = ',&
+      & mband
       call wrtout(temp_unit,msg,'COLL')
 
       ! Loop over k-points
       do ikpt=1,nkpt
         nband_k=nband(ikpt+(isppol-1)*nkpt)
         write(msg, '(a,i6,a,i6,a,f9.5,a,3f8.4,a)') &
-          & ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=', &
-          & kptns(1:3,ikpt)+tol10,' (reduced coord)'
+          & ' ------- ikpt = ',ikpt,'      nband = ',nband_k,'     ikpt weight = ',wtk(ikpt)+tol10,&
+          & '      Reduced coordinates : ',kptns(1:3,ikpt)+tol10,' -------'
         call wrtout(temp_unit,msg,'COLL')
 
         ! Loop over bands
         do ii=0,(nband_k-1)/4
-          write(msg, '(4(i6,ES12.4,ES12.4,a,1x))') &
+          write(msg, '(4(i6,ES12.4,ES13.5,a,1x))') &
             & (iband,eigen(iband+band_index),occ(iband+band_index),',',iband=1+ii*4,min(nband_k,4+ii*4))
           call wrtout(temp_unit,msg,'COLL')
         end do
