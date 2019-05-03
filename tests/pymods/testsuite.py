@@ -3335,7 +3335,7 @@ class AbinitTestSuite(object):
         for test in self:  # fill the queue
             task_q.put(test)
 
-        for _ in nprocs:  # one end signal for each worker
+        for _ in range(nprocs):  # one end signal for each worker
             task_q.put(None)
 
         for i in range(nprocs - 1):  # create and start subprocesses
