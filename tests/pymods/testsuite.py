@@ -3307,14 +3307,17 @@ class AbinitTestSuite(object):
             done = {
                 'type': 'proc_done'
             }
+            all_done = False
             try:
-                while not qin.empty() and not (thread_mode and self._kill_me):
-                    test = qin.get_nowait()
-                    qout.put(runner(test, print_lock=print_lock))
+                while not all_done and not (thread_mode and self._kill_me):
+                    test = qin.get(block=True, timeout=2)
+                    if test is None:  # reached the end
+                        all_done = True
+                    else:
+                        qout.put(runner(test, print_lock=print_lock))
             except EmptyQueueError:
-                # Queue have been emptied between the call to qin.empty
-                # and the call to qin.get, it can happen, it is not important.
-                pass
+                # If that happen it is a probably a bug
+                done['error'] = 'Queue is unexpectedly empty.'
             except Exception as e:
                 # Any other error is reported
                 done['error'] = e
@@ -3331,6 +3334,9 @@ class AbinitTestSuite(object):
 
         for test in self:  # fill the queue
             task_q.put(test)
+
+        for _ in nprocs:  # one end signal for each worker
+            task_q.put(None)
 
         for i in range(nprocs - 1):  # create and start subprocesses
             p = Process(target=worker, args=(task_q, res_q, print_lock))
