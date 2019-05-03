@@ -13,16 +13,6 @@ from .plotting import add_fig_kwargs, get_ax_fig_plt
 from .tools import lazy_property
 
 
-def group_entries_bylocus(entries):
-    d = {}
-    for e in entries:
-        if e.locus not in d:
-            d[e.locus] = [e]
-        else:
-            d[e.locus].append(e)
-    return d
-
-
 class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memory")):
     """
     vname: Variable name.
@@ -95,17 +85,17 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
     @lazy_property
     def locus(self):
         """Location of the entry. This is (hopefully) unique."""
-        return "%s:%s" % (self.file, self.line)
-        #return "%s%s@%s:%s" % (self.action, self.vname, self.file, self.line)
+        #return "%s:%s" % (self.file, self.line)
+        return "%s:%s@%s:%s" % (self.action, self.vname, self.file, self.line)
 
-    #def __hash__(self):
-    #    return hash(self.locus) + hash(other.size)
+    def __hash__(self):
+        return hash(self.locus, self.size) 
 
-    #def __eq__(self, other):
-    #    return self.locus == other.locus and self.size == other.size
+    def __eq__(self, other):
+        return self.locus == other.locus and self.size == other.size
 
-    #def __neq__(self, other):
-    #    return not (self == other)
+    def __neq__(self, other):
+        return not (self == other)
 
     def frees_onheap(self, other):
         if (not self.isfree) or other.isalloc: return False
@@ -129,68 +119,40 @@ class AbimemFile(object):
     def to_string(self):
         lines = []
         app = lines.append
-        df = self.find_intensive()
+        df = self.get_intense_dataframe()
         app(df.to_string())
         return "\n".join(lines)
 
     def find_small_allocs(self, nbytes=160):
         """Zero sized allocations are not counted."""
         smalles = []
-        with open(self.path, "rt") as fh:
-            for lineno, line in enumerate(fh):
-                if line.startswith("#"): continue
-                e = Entry.from_line(line)
-                if not e.isalloc: continue
-                if 0 < e.size <= nbytes: smalles.append(e)
+        for e in self.all_entries:
+            if not e.isalloc: continue
+            if 0 < e.size <= nbytes: smalles.append(e)
 
         pprint(smalles)
         return smalles
 
-    def find_intensive(self, threshold=2000):
+    def get_intense_dataframe(self):
         """
         Find intensive spots i.e. variables that are allocated/freed many times.
         """
         df = self.dataframe
         index, rows = [], []
         for locus, g in self.dataframe.groupby(by="locus"):
-            malloc_mb = g[g["action"] == "A"].size_mb.sum()
-            free_mb = g[g["action"] == "D"].size_mb.sum()
-            nalloc = len(g["action"] == "A")
-            nfree = len(g["action"] == "D")
+            this_action = g.action.values[0]
+            assert all(g.action.values == this_action)
+            malloc_mb = g.size_mb.sum()
             rows.append(OrderedDict([
+                ("ncalls", len(g)),
                 ("malloc_mb", malloc_mb),
-                ("free_mb", free_mb),
-                #("diff_mb", malloc_mb + free_mb),
-                ("nalloc", nalloc),
-                ("nfree", nfree),
-                #("npall", nalloc - nfree),
+                ("mem_per_call_mb", malloc_mb / len(g)),
             ]))
             index.append(locus)
 
         import pandas as pd
         df = pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
-        return df.sort_values(by="malloc_mb", ascending=False)
-
-        #d = {}
-        #with open(self.path, "rt") as fh:
-        #    for lineno, line in enumerate(fh):
-        #        if line.startswith("#"): continue
-        #        e = Entry.from_line(line)
-        #        loc = e.locus
-        #        if loc not in d:
-        #            d[loc] = [e]
-        #        else:
-        #            d[loc].append(e)
-
-        ## Remove entries below the threshold and perform DSU sort
-        #dsu_list = [(elist, len(elist)) for _, elist in d.items() if len(elist) >= threshold]
-        #intensive = [t[0] for t in sorted(dsu_list, key=lambda x: x[1], reverse=True)]
-
-        #for elist in intensive:
-        #    loc = elist[0].locus
-        #    # assert all(e.locus == loc for e in elist)
-        #    print("[%s] has %s allocations/frees" % (loc, len(elist)))
-        #return intensive
+        return df.sort_values(by="ncalls", ascending=False)
 
     def find_zerosized(self):
         """Find zero-sized allocations."""
@@ -247,7 +209,7 @@ class AbimemFile(object):
 
         visited = set()
         for e in self.all_entries:
-            # Avoid redundant entries (locus, mem)
+            # Avoid redundant entries:
             #k = (e.locus, e.size)
             k = e.locus
             if e.size == 0 or not e.isalloc or k in visited: continue
@@ -259,6 +221,7 @@ class AbimemFile(object):
             if e.size > peaks[0].size:
                 peaks.append(e)
                 visited.add(k)
+                # Keep peaks sorted
                 peaks = deque(sorted(peaks, key=lambda x: x.size), maxlen=maxlen)
 
         peaks = deque(sorted(peaks, key=lambda x: x.size, reverse=True), maxlen=maxlen)
@@ -273,10 +236,10 @@ class AbimemFile(object):
         rows, index = [], []
         for e in self.all_entries:
             rows.append(OrderedDict([
+                ("locus", e.locus),
                 ("vname", e.vname),
                 ("file", e.file),
                 ("line", e.line),
-                ("locus", e.locus),
                 ("action", e.action),
                 ("size_mb", e.size_mb),
                 ("tot_memory_mb", e.tot_memory_mb),
@@ -314,16 +277,15 @@ class AbimemFile(object):
         ax.bar(xs, data)
         ax.grid(True)
         ax.set_xticks(xs)
-        ax.set_xticklabels(names, fontsize=fontsize, rotation=45) 
+        ax.set_xticklabels(names, fontsize=fontsize, rotation=25) 
         ax.set_ylabel("Memory [Mb]")
         return fig
 
     #@add_fig_kwargs
-    def get_hotspot_files_df(self, ax=None, fontsize=6, **kwargs):
+    def get_hotspots_dataframe(self, ax=None, fontsize=6, **kwargs):
         ax, fig, plt = get_ax_fig_plt(ax=ax)
         index, rows = [], []
         for filename, g in self.dataframe.groupby(by="file"):
-            #print(g)
             malloc_mb = g[g["action"] == "A"].size_mb.sum()
             free_mb = g[g["action"] == "D"].size_mb.sum()
             nalloc = len(g["action"] == "A")
@@ -351,79 +313,75 @@ class AbimemFile(object):
             e(self.plot_memory_usage(show=False))
             e(self.plot_peaks(show=False))
 
-
-    def find_memleaks(self):
+    def find_memleaks(self, verbose=0):
         """
-        Try to find memory leaks using the address of the arrays and the action
-        performed (allocation/free).
+        Try to find memory leaks using the address of the arrays and the action performed (allocation/free).
         """
         heap, stack = Heap(), Stack()
         reallocs = []
 
-        with open(self.path, "rt") as fh:
-            for lineno, line in enumerate(fh):
-                if line.startswith("#"): continue
-                #print(line)
-                newe = Entry.from_line(line)
-                p = newe.ptr
-                if newe.size == 0: continue
-                # Store new entry in list if the ptr is not in d
-                # else we check if there's an allocation that matches a previous allocation
-                # (zero-sized arrays are not included)
-                # else there's a possible memory leak or some undected problems.
-                if p not in heap:
-                    if newe.isalloc:
-                        heap[p] = [newe]
-                    # isfree found but ptr has not been allocated:
-                    else:
-                        # Likely comes from a reallocation
-                        reallocs.append(newe)
-
+        for newe in self.all_entries:
+            p = newe.ptr
+            if newe.size == 0: continue
+            # Store new entry in list if the ptr is not in d
+            # else we check if there's an allocation that matches a previous allocation
+            # (zero-sized arrays are not included)
+            # else there's a possible memory leak or some undected problems.
+            if p not in heap:
+                if newe.isalloc:
+                    heap[p] = [newe]
+                # isfree found but ptr has not been allocated:
                 else:
-                    if newe.isfree and len(heap[p]) == 1 and heap[p][0].size + newe.size == 0:
-                        heap.pop(p)
-                    else:
-                        # In principle this should never happen but there are exceptions:
-                        #
-                        # 1) The compiler could decide to put the allocatable on the stack
-                        #    In this case the ptr reported by gfortran is 0.
-                        #
-                        # 2) The allocatable variable is "reallocated" by the compiler (F2003).
-                        #    Example:
-                        #
-                        #    allocate(foo(2,1))           ! p0 = &foo
-                        #    foo = reshape([0,0], [2,1])  ! p1 = &foo. Reallocation of the LHS.
-                        #                                 ! Use foo(:) to avoid that
-                        #    deallocate(foo)              ! p2 = &foo
-                        #
-                        #    In this case, p2 != p0
+                    # Likely comes from a reallocation
+                    reallocs.append(newe)
+
+            else:
+                if newe.isfree and len(heap[p]) == 1 and heap[p][0].size + newe.size == 0:
+                    heap.pop(p)
+                else:
+                    # In principle this should never happen but there are exceptions:
+                    #
+                    # 1) The compiler could decide to put the allocatable on the stack
+                    #    In this case the ptr reported by gfortran is 0.
+                    #
+                    # 2) The allocatable variable is "reallocated" by the compiler (F2003).
+                    #    Example:
+                    #
+                    #    allocate(foo(2,1))           ! p0 = &foo
+                    #    foo = reshape([0,0], [2,1])  ! p1 = &foo. Reallocation of the LHS.
+                    #                                 ! Use foo(:) to avoid that
+                    #    deallocate(foo)              ! p2 = &foo
+                    #
+                    #    In this case, p2 != p0
+                    if verbose:
                         print("WARN:", newe.ptr, newe, "ptr already on the heap ", len(heap[p]), \
-                           " sizes = ", heap[p][0].size, newe.size)
-                        #print("HEAP:", heap[newe.ptr])
-                        locus = newe.locus
-                        if locus not in stack:
-                            stack[locus] = [newe]
-                        else:
-                            #if newe.ptr != 0: print(newe)
-                            stack_loc = stack[locus]
-                            ifind = -1
-                            for i, olde in enumerate(stack_loc):
-                                if newe.frees_onstack(olde):
-                                    ifind = i
-                                    break
+                              " sizes = ", heap[p][0].size, newe.size)
+                    #print("HEAP:", heap[newe.ptr])
 
-                            if ifind != -1:
-                                stack_loc.pop(ifind)
-                            #else:
-                            #    print(newe)
+                    locus = newe.locus
+                    if locus not in stack:
+                        stack[locus] = [newe]
+                    else:
+                        #if newe.ptr != 0: print(newe)
+                        stack_loc = stack[locus]
+                        ifind = -1
+                        for i, olde in enumerate(stack_loc):
+                            if newe.frees_onstack(olde):
+                                ifind = i
+                                break
 
-                        #if p == 0:
-                        #    stack[p] = newe
+                        if ifind != -1:
+                            stack_loc.pop(ifind)
                         #else:
-                        #    print("varname", newe.vname, "in heap with size ",newe.size)
-                        #    for weirde in heap[p]:
-                        #        print("\tweird entry:", weirde)
-                        #    heap[p].append(newe)
+                        #    print(newe)
+
+                    #if p == 0:
+                    #    stack[p] = newe
+                    #else:
+                    #    print("varname", newe.vname, "in heap with size ",newe.size)
+                    #    for weirde in heap[p]:
+                    #        print("\tweird entry:", weirde)
+                    #    heap[p].append(newe)
 
         if False and heap:
             # Possible memory leaks.
@@ -454,7 +412,7 @@ class AbimemFile(object):
 
         if heap: heap.show()
         if stack: stack.show()
-        if reallocs:
+        if verbose and reallocs:
             print("Possible reallocations:")
             pprint(reallocs)
 
@@ -484,7 +442,7 @@ class Heap(dict):
 class Stack(dict):
 
     def show(self):
-        print("=== STACK OF LEN %s ===)" % len(self))
+        print("=== STACK OF LEN %s ===" % len(self))
         if not self: return
         pprint(self)
         print("")

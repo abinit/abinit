@@ -19716,7 +19716,7 @@ the discussion to the different calculations activated by [[eph_task]].
 
 The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
 needed for the DFPT potentials.
-The maximum valus for (**np**) is 3 * [[natom]] and the workload is equally distributed provided **np** 
+The maximum valus for **np** is 3 * [[natom]] and the workload is equally distributed provided **np** 
 divides 3 * [[natom]] equally. 
 Using **np** == [[natom]] usually gives good parallel efficiency.
 

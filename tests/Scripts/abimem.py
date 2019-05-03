@@ -69,10 +69,10 @@ def intense(options):
     """Find routines with intensive allocations."""
     retcode = 0
     for memfile in options.memfiles:
-        intens = memfile.find_intensive() #threshold=options.threshold)
+        intens = memfile.get_intense_dataframe()
         print(intens)
-        df = memfile.get_hotspot_files_df()
-        print(df)
+        #df = memfile.get_hotspots_dataframe()
+        #print(df)
     return retcode
 
 
