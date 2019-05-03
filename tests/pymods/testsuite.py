@@ -1336,6 +1336,17 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
     return out_tests
 
 
+class NotALock:
+    '''
+    NOP context manager
+    '''
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *args):
+        pass
+
+
 class BaseTestError(Exception):
     """Base Error class raised by Test objects"""
 
@@ -1373,7 +1384,7 @@ class BaseTest(object):
         self._status = None
         self._isok = None
         self.stdout_fname = None
-        self._print_lock = None
+        self._print_lock = NotALock()
         if os.path.basename(self.inp_fname).startswith("-"):
             self._status = "disabled"
 
@@ -1459,12 +1470,6 @@ class BaseTest(object):
         return lazy_read(self.stderr_fname)
 
     def cprint(self, msg='', color=None):
-        if self._print_lock is None:
-            @contextmanager
-            def not_a_lock():
-                yield None
-            self._print_lock = not_a_lock
-
         with self._print_lock:
             if color is not None:
                 cprint(msg, color)
@@ -1835,7 +1840,8 @@ class BaseTest(object):
         runner = copy.deepcopy(runner)
         start_time = time.time()
 
-        self._print_lock = print_lock
+        if print_lock is not None:
+            self._print_lock = print_lock
 
         workdir = os.path.abspath(workdir)
         if not os.path.exists(workdir):
