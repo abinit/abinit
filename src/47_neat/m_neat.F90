@@ -48,6 +48,8 @@ module m_neat
       call stream%to_string(s)
       call wrtout(iout, s, 'COLL')
     endif
+
+    call stream%free()
   end subroutine wrtout_stream
 
 !!***f* m_neat/neat_start_iter
