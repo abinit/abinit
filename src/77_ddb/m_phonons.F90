@@ -739,8 +739,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  real(dp) :: msqd_atom_tmp(3,3),temp_33(3,3)
  real(dp) :: symcart(3,3,crystal%nsym)
  real(dp) :: syme2_xyza(3, crystal%natom)
- real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:),new_shiftq(:,:)
- real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),tmp_phfrq(:),tweight(:,:)
+ real(dp),allocatable :: full_eigvec(:,:,:,:,:),full_phfrq(:,:),new_shiftq(:,:)
+ real(dp),allocatable :: qbz(:,:),qibz(:,:),tmp_phfrq(:)
  real(dp),allocatable :: wtq_ibz(:),xvals(:), gvals_wtq(:), wdt(:,:)
  real(dp),allocatable :: energies(:)
 
@@ -1192,81 +1192,45 @@ subroutine phdos_unittests(comm)
  type(crystal_t) :: crystal
  integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
  integer,parameter :: timrev1=1,npsp1=1
- logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
  real(dp),parameter :: max_occ1=1.d0
- integer :: nqibz,iqbz,iqibz,nqbz,ierr,natom,nomega,nprocs, my_rank, ncid
- integer :: iw,nw,ntypat,nsym,nclass
+ integer :: nqibz,iqibz,nqbz,ierr,natom,nprocs
+ integer :: nw,ntypat,nsym,nclass
  real(dp) :: cpu, wall, gflops
  real(dp) :: dosdeltae, emin, emax, qnorm, dos_int
- character(len=500) :: msg
  character(len=80) :: errstr
  type(t_tetrahedron) :: tetraq
  type(t_htetrahedron) :: htetraq
-!arrays
- type(irrep_t),allocatable :: irr(:)
- character(len=5),allocatable :: class_names(:)
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3),typat(1)
- integer,allocatable :: symrel(:,:,:),symafm(:),class_ids(:,:)
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: dos_qshift(3,nqshft1)
- real(dp) :: amu(1),qpt(3),xred(3,1),znucl(1),zion(1)
  real(dp) :: rprimd(3,3),rlatt(3,3),qlatt(3,3)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: tweight(:,:),dweight(:,:)
  real(dp),allocatable :: qbz(:,:),qibz(:,:)
  real(dp),allocatable :: wtq_ibz(:), wdt(:,:)
- real(dp),allocatable :: energies(:),eigen(:)
+ real(dp),allocatable :: energies(:),eig(:),mat(:)
  real(dp),allocatable :: dos(:),idos(:)
 
 ! *********************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
  call wrtout(std_out,'DOS unit tests')
+ !
+ ! 0. Intialize
+ !
  call wrtout(std_out,'0. Initialize')
 
- ! Create a regular grid
- in_qptrlatt(:,1)=[ 50,-50,-50]
- in_qptrlatt(:,2)=[-50, 50,-50]
- in_qptrlatt(:,3)=[-50,-50, 50]
-
- in_qptrlatt(:,1)=[ 100, 0, 0]
- in_qptrlatt(:,2)=[ 0, 100, 0]
- in_qptrlatt(:,3)=[ 0, 0, 100]
- dos_qshift(:,1) =[0.0,0.0,0.0]
-
- amu = 1
- natom = 1
- ntypat = 1
- typat = 1
- znucl=1
- zion=1
- xred(:,1) = [0,0,0]
+ ! Create fake crystal
  rprimd(:,1) = [ 0.0, 0.5, 0.5]
  rprimd(:,2) = [ 0.5, 0.0, 0.5]
  rprimd(:,3) = [ 0.5, 0.5, 0.0]
+ crystal = crystal_from_pointgroup('m-3m',rprimd)
 
- !rprimd(:,1) = [ 1.0, 0.0, 0.0]
- !rprimd(:,2) = [ 0.0, 1.0, 0.0]
- !rprimd(:,3) = [ 0.0, 0.0, 1.0]
-
- !call get_point_group('4',nsym,nclass,symrel,class_ids,class_names,irr)
- call get_point_group('m-3m',nsym,nclass,symrel,class_ids,class_names,irr)
- ABI_FREE(class_ids)
- ABI_FREE(class_names)
- call irrep_free(irr)
- ABI_DT_FREE(irr)
-
- ABI_MALLOC(symafm,(nsym))
- symafm = 1
- ABI_MALLOC(tnons,(3,nsym))
- tnons = 0
-
- call crystal_init(amu,crystal,space_group0,natom,npsp1,ntypat,nsym,rprimd,typat,xred,&
-                   zion,znucl,timrev1,use_antiferro_true,remove_inv_false,"test",&
-                   symrel=symrel,symafm=symafm,tnons=tnons)
- ABI_FREE(symrel)
- ABI_FREE(tnons)
- ABI_FREE(symafm)
+ ! Create a regular grid
+ in_qptrlatt(:,1)=[ 20, 0, 0]
+ in_qptrlatt(:,2)=[ 0, 20, 0]
+ in_qptrlatt(:,3)=[ 0, 0, 20]
+ dos_qshift(:,1) =[0.0,0.0,0.0]
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
@@ -1279,21 +1243,23 @@ subroutine phdos_unittests(comm)
  ! Initialize new tetrahedra
  call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, &
                   nqibz, ierr, errstr, comm)
- call htetra_print(htetraq)
  call cwtime_report(" init_htetra", cpu, wall, gflops)
 
  !
  ! 1. Compute energies of a parabolic band
  !
  call wrtout(std_out,'1. Parabolic Band')
- ABI_MALLOC(eigen,(nqibz))
+ ABI_MALLOC(eig,(nqibz))
+ ABI_MALLOC(mat,(nqibz))
  do iqibz=1,nqibz
    qnorm = normv(qibz(:,iqibz),crystal%gmet,'G')
-   eigen(iqibz) = qnorm+half
+   eig(iqibz) = qnorm**2+half
+   mat(iqibz) = abs(one/eig(iqibz))
+   mat(iqibz) = 1!abs(one/eig(iqibz))
  end do
 
  ! Prepare DOS calculation
- emax = maxval(eigen)+1.d0
+ emax = maxval(eig)+1.d0
  emin = 0.d0
  nw = 500
  dosdeltae = (emax-emin)/(nw-1)
@@ -1304,40 +1270,99 @@ subroutine phdos_unittests(comm)
  energies = linspace(emin,emax,nw)
  call cwtime_report(" init", cpu, wall, gflops)
 
- ! Compute DOS using old tetrahedron implementation
- ABI_CALLOC(tweight,(nw,nqibz))
- ABI_CALLOC(dweight,(nw,nqibz))
- call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dweight,comm)
- !do iqibz=1,nqibz
- !  dweight(:,iqibz) = dweight(:,iqibz)*abs(one/eigen(iqibz))
- !  tweight(:,iqibz) = tweight(:,iqibz)*abs(one/eigen(iqibz))
- !end do
- dos(:)  = sum(dweight,2)
- idos(:) = sum(tweight,2)
- call ctrap(nw,dos,dosdeltae,dos_int)
- write(*,*) "dos_int", dos_int, idos(nw)
- call cwtime_report(" tetra_blochl   ", cpu, wall, gflops)
- call write_file('parabola_tetra.dat', nw, energies, idos, dos)
+ ! Compute DOS using tetrahedron implementation
+ test_delta: block
+   ABI_CALLOC(tweight,(nw,nqibz))
+   ABI_CALLOC(dweight,(nw,nqibz))
+   call tetra_blochl_weights(tetraq,eig,emin,emax,max_occ1,nw,&
+                             nqibz,bcorr0,tweight,dweight,comm)
+   do iqibz=1,nqibz
+     dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
+     tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
+   end do
+   dos(:)  = sum(dweight,2)
+   idos(:) = sum(tweight,2)
+   call ctrap(nw,dos,dosdeltae,dos_int)
+   write(*,*) "dos_int", dos_int, idos(nw)
+   call cwtime_report(" tetra_blochl   ", cpu, wall, gflops)
+   call write_file('parabola_tetra.dat', nw, energies, idos, dos)
+
+   ! Compute blochl weights
+   call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+                             nqibz,bcorr0,tweight,dweight,comm)
+   do iqibz=1,nqibz
+     dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
+     tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
+   end do
+   dos(:)  = sum(dweight,2)
+   idos(:) = sum(tweight,2)
+   call ctrap(nw,dos,dosdeltae,dos_int)
+   write(*,*) "dos_int", dos_int, idos(nw)
+   call cwtime_report(" htetra_blochl   ", cpu, wall, gflops)
+   call write_file('parabola_htetra.dat', nw, energies, idos, dos)
+
+   ! Compute blochl weights
+   call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+                             nqibz,1,tweight,dweight,comm)
+   do iqibz=1,nqibz
+     dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
+     tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
+   end do
+   dos(:)  = sum(dweight,2)
+   idos(:) = sum(tweight,2)
+   call ctrap(nw,dos,dosdeltae,dos_int)
+   write(*,*) "dos_int", dos_int, idos(nw)
+   call cwtime_report(" htetra_blochl_corr   ", cpu, wall, gflops)
+   call write_file('parabola_htetra_corr.dat', nw, energies, idos, dos)
+
+   ! Compute weights using LV integration from TDEP
+   call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+                             nqibz,2,tweight,dweight,comm)
+   do iqibz=1,nqibz
+     dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
+     tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
+   end do
+   dos(:)  = sum(dweight,2)
+   idos(:) = sum(tweight,2)
+   call ctrap(nw,dos,dosdeltae,dos_int)
+   write(*,*) "dos_int", dos_int, idos(nw)
+   call cwtime_report(" htetra_blochl_lv   ", cpu, wall, gflops)
+   call write_file('parabola_htetra_lv.dat', nw, energies, idos, dos)
+
+ end block test_delta
 
  ! Compute DOS using new tetrahedron implementation
- call htetra_blochl_weights(htetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dweight,comm)
- !do iqibz=1,nqibz
- !  dweight(:,iqibz) = dweight(:,iqibz)*abs(one/eigen(iqibz))
- !  tweight(:,iqibz) = tweight(:,iqibz)*abs(one/eigen(iqibz))
- !end do
- dos(:)  = sum(dweight,2)
- idos(:) = sum(tweight,2)
- call ctrap(nw,dos,dosdeltae,dos_int)
- write(*,*) "dos_int", dos_int, idos(nw)
- call cwtime_report(" htetra_blochl   ", cpu, wall, gflops)
- call write_file('parabola_htetra.dat', nw, energies, idos, dos)
+ test_zinv: block
+   complex(dp) :: cenergies(nw)
+   complex(dp) :: cweight(nw,nqibz)
+   cenergies = energies
+
+   ! Use SIMTET routines
+   call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
+                                   nqibz,1,cweight,comm)
+   dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
+   idos(:) =  sum(real(cweight(:,:)),2)
+   call ctrap(nw,dos,dosdeltae,dos_int)
+   write(*,*) "dos_int", dos_int, idos(nw)
+   call cwtime_report(" htetra_weights_wvals_zinv_simtet   ", cpu, wall, gflops)
+   call write_file('parabola_zinv_simtet.dat', nw, energies, idos, dos)
+
+   ! Use LV integration from TDEP
+   call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
+                                   nqibz,2,cweight,comm)
+   dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
+   idos(:) =  sum(real(cweight(:,:)),2)
+   call ctrap(nw,dos,dosdeltae,dos_int)
+   write(*,*) "dos_int", dos_int, idos(nw)
+   call cwtime_report(" htetra_weights_wvals_zinv_lv   ", cpu, wall, gflops)
+   call write_file('parabola_zinv_lv.dat', nw, energies, idos, dos)
+
+ end block test_zinv
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
-   !wdt(:,:) = wdt(:,:)*abs(one/eigen(iqibz))
+   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
+   wdt(:,:) = wdt(:,:)*mat(iqibz)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
@@ -1348,8 +1373,8 @@ subroutine phdos_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
-   !wdt(:,:) = wdt(:,:)*abs(one/eigen(iqibz))
+   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
+   wdt(:,:) = wdt(:,:)*mat(iqibz)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
@@ -1357,15 +1382,16 @@ subroutine phdos_unittests(comm)
  write(*,*) "dos_int", dos_int, idos(nw)
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
  call write_file('parabola_htetra_onewk.dat', nw, energies, idos, dos)
+ call htetra_print(htetraq)
 
  !
  ! 2. Compute energies for a flat band
  !
  call wrtout(std_out,'2. Flat Band')
- eigen = 0.5
+ eig = 0.5
 
  ! Compute DOS using old tetrahedron implementation
- call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
+ call tetra_blochl_weights(tetraq,eig,emin,emax,max_occ1,nw,&
                            nqibz,bcorr0,tweight,dweight,comm)
  dos(:)  = sum(dweight,2)
  idos(:) = sum(tweight,2)
@@ -1373,7 +1399,7 @@ subroutine phdos_unittests(comm)
  call write_file('flat_tetra.dat', nw, energies, idos, dos)
 
  ! Compute DOS using new tetrahedron implementation
- call htetra_blochl_weights(htetraq,eigen,emin,emax,max_occ1,nw,&
+ call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
                            nqibz,bcorr0,tweight,dweight,comm)
  dos(:)  = sum(dweight,2)
  idos(:) = sum(tweight,2)
@@ -1382,7 +1408,7 @@ subroutine phdos_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
+   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eig,wdt)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
@@ -1391,17 +1417,22 @@ subroutine phdos_unittests(comm)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
+   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eig,emin,emax,max_occ1,wdt)
    dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
  call write_file('flat_htetra_onewk.dat', nw, energies, idos, dos)
 
+ !
+ ! 3. Compute tetrahedron for simple TB FCC
+ !
+ !TODO
 
  ! Free memory
  ABI_SFREE(energies)
- ABI_SFREE(eigen)
+ ABI_SFREE(eig)
+ ABI_SFREE(mat)
  ABI_SFREE(wdt)
  ABI_SFREE(tweight)
  ABI_SFREE(dweight)
@@ -1416,18 +1447,59 @@ subroutine phdos_unittests(comm)
  call destroy_tetra(tetraq)
 
  contains
+
+ type(crystal_t) function crystal_from_pointgroup(pointgroup,rprimd) result(crystal)
+  ! Create a crystal structure obeying with a user defined point group
+  character(len=*) :: pointgroup
+  logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
+  real(dp) :: rprimd(3,3)
+  real(dp) :: amu(1),qpt(3),xred(3,1),znucl(1),zion(1)
+  type(irrep_t),allocatable :: irr(:)
+  character(len=5),allocatable :: class_names(:)
+  integer,allocatable :: symrel(:,:,:),symafm(:),class_ids(:,:)
+
+  call get_point_group(pointgroup,nsym,nclass,symrel,class_ids,class_names,irr)
+  ABI_FREE(class_ids)
+  ABI_FREE(class_names)
+  call irrep_free(irr)
+  ABI_DT_FREE(irr)
+
+  ABI_MALLOC(symafm,(nsym))
+  symafm = 1
+  ABI_MALLOC(tnons,(3,nsym))
+  tnons = 0
+
+  amu = 1
+  natom = 1
+  ntypat = 1
+  typat = 1
+  znucl=1
+  zion=1
+  xred(:,1) = [0,0,0]
+  call crystal_init(amu,crystal,space_group0,natom,npsp1,ntypat,nsym,rprimd,typat,xred,&
+                    zion,znucl,timrev1,use_antiferro_true,remove_inv_false,"test",&
+                    symrel=symrel,symafm=symafm,tnons=tnons)
+  ABI_FREE(symrel)
+  ABI_FREE(tnons)
+  ABI_FREE(symafm)
+ end function crystal_from_pointgroup
+
  subroutine write_file(fname,nw,energies,idos,dos)
+  integer,intent(in) :: nw
+  character(len=*), intent(in) :: fname
+  real(dp),intent(in) :: energies(nw),dos(nw),idos(nw)
+  character(len=500) :: msg
+  integer :: iw,funit
 
- integer,intent(in) :: nw
- character(len=*), intent(in) :: fname
- real(dp),intent(in) :: energies(nw),dos(nw),idos(nw)
- integer :: iw
+  if (open_file(fname,msg,newunit=funit,status="old",action="write") /= 0) then
+    MSG_ERROR(msg)
+  end if
 
- open(unit=20,file=fname)
- do iw=1,nw
-   write(20,*) energies(iw), idos(iw), dos(iw)
- end do
- close(unit=20)
+  open(unit=funit,file=fname)
+  do iw=1,nw
+    write(funit,*) energies(iw), idos(iw), dos(iw)
+  end do
+  close(unit=funit)
 
  end subroutine write_file
 
