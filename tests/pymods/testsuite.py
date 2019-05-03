@@ -15,6 +15,7 @@ from socket import gethostname
 from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue, Lock
 from threading import Thread
+from contextlib import contextmanager
 
 # Handle py2, py3k differences.
 py2 = sys.version_info[0] <= 2
@@ -1458,14 +1459,17 @@ class BaseTest(object):
         return lazy_read(self.stderr_fname)
 
     def cprint(self, msg='', color=None):
-        if self._print_lock is not None:
-            self._print_lock.aquire()
-        if color:
-            cprint(msg, color)
-        else:
-            print(msg)
-        if self._print_lock is not None:
-            self._print_lock.release()
+        if self._print_lock is None:
+            @contextmanager
+            def not_a_lock():
+                yield None
+            self._print_lock = not_a_lock
+
+        with self._print_lock:
+            if color is not None:
+                cprint(msg, color)
+            else:
+                print(msg)
 
     @property
     def has_empty_stderr(self):
