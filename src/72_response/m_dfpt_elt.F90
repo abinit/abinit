@@ -139,8 +139,6 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 & nattyp,nfft,ngfft,ngfftf,nhat,nkxc,n3xccc,pawtab,ph1d,psps,rhor,rprimd,&
 & usexcnhat,vxc,xccc3d,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
 !scalars
@@ -290,7 +288,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(n1xccc/=0) then
      work(:)=work(:)+xccc3d(:)
    end if
-   call redgr (work,workgr,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb)
+   call redgr (work,workgr,mpi_enreg,nfft,ngfft)
    do ifft=1,nfft
      rho0_redgr(:,ifft,1)=workgr(ifft,:)
    end do
@@ -299,7 +297,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
      if(n1xccc/=0) then
        work(:)=work(:)+xccc3d(:)
      end if
-     call redgr(work,workgr,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb)
+     call redgr(work,workgr,mpi_enreg,nfft,ngfft)
      do ifft=1,nfft
        rho0_redgr(:,ifft,2)=workgr(ifft,:)
      end do
@@ -362,7 +360,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(fgga==0 .or. (fgga==1 .and. n1xccc/=0)) then
      option=0
      call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,&
-&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,mpi_enreg%paral_kgb,qphon,rhor,rhor,&
+&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,qphon,rhor,rhor,&
 &     rprimd,dtset%usepaw,usexcnhat,vxc10,xccc3d1)
      if(n1xccc/=0)then
        if(dtset%nspden==1) then
@@ -380,7 +378,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(fgga==1) then
      option=2
      call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,&
-&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,mpi_enreg%paral_kgb,qphon,rhor,rhor,&
+&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,qphon,rhor,rhor,&
 &     rprimd,dtset%usepaw,usexcnhat,vxc10,xccc3d1)
      if(n1xccc/=0)then
        if(dtset%nspden==1) then
@@ -714,8 +712,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 & n1,n1xccc,n2,n3,rprimd,typat,ucvol,vxc_core,vxc10_core,vxc1is_core,&
 & xcccrc,xccc1d,xred, &
 & mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1055,8 +1051,6 @@ end subroutine eltxccore
 
 subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,ph1d,qgrid,rhog,vlspl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1404,8 +1398,6 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 &  istwfk,kg,kptns,mband,mgfft,mkmem,mpi_enreg,&
 &  mpw,nband,nkpt,ngfft,npwarr,nspinor,nsppol,occ,rprimd,wtk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mgfft,mkmem,mpw,nkpt,nspinor,nsppol
@@ -1590,8 +1582,6 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 &            istwfk,kg_k,kpt,npw,nspinor)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwfk,npw,nspinor
@@ -1755,8 +1745,6 @@ end subroutine dfpt_eltfrkin
 !! SOURCE
 
 subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1969,8 +1957,6 @@ end subroutine dfpt_eltfrhar
 subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 &                 typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2390,8 +2376,6 @@ end subroutine elt_ewald
 
 subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

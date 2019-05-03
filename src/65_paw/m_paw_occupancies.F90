@@ -110,8 +110,6 @@ CONTAINS  !=====================================================================
  subroutine pawmkrhoij(atindx,atindx1,cprj,dimcprj,istwfk,kptopt,mband,mband_cprj,mcprj,mkmem,mpi_enreg,&
 &                      natom,nband,nkpt,nspinor,nsppol,occ,paral_kgb,paw_dmft,pawrhoij,unpaw,usewvl,wtk)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: kptopt,mband,mband_cprj,mcprj,mkmem,natom,nkpt,nspinor,nsppol
@@ -139,7 +137,7 @@ CONTAINS  !=====================================================================
  character(len=500) :: msg
 
 !arrays
- integer :: idum(0), n2buff
+ integer :: n2buff
  integer, allocatable :: req_correl(:,:,:)
  real(dp) :: occup(2)
  real(dp) ABI_ASYNC, allocatable :: buffer_cprj_correl(:,:,:)
@@ -565,8 +563,6 @@ end subroutine pawmkrhoij
  subroutine pawaccrhoij(atindx,cplex,cwaveprj,cwaveprj1,ipert,isppol,my_natom,natom,&
 &                       nspinor,occ_k,option,pawrhoij,usetimerev,wtk_k,occ_k_2, &
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1165,8 +1161,6 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
 &                    ntypat,pawrhoij,pawspnorb,pawtab,qphase,spinat,typat,&
 &                    ngrhoij,nlmnmix,use_rhoij_,use_rhoijres,& ! optional arguments
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

@@ -295,8 +295,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 & xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
@@ -580,9 +578,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    ABI_ALLOCATE(qphon,(3))
    qphon(:)=zero
    if(dtset%prtlden/=0) then
-     call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,dtset%paral_kgb,qphon,rhor,rhonow,lrhonow=lrhor)
+     call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow,lrhonow=lrhor)
    else
-     call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,dtset%paral_kgb,qphon,rhor,rhonow)
+     call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow)
    end if
    ABI_DEALLOCATE(qphon)
 
@@ -712,7 +710,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        call wrtout(ab_out,message,'COLL')
        ABI_ALLOCATE(qphon,(3))
        qphon(:)=zero
-       call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,dtset%paral_kgb,qphon,rhor,rhonow)
+       call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow)
        ABI_DEALLOCATE(qphon)
 !      Copy gradient which has been output in rhonow to grhor (and free rhonow)
        ABI_ALLOCATE(grhor,(nfftf,dtset%nspden,3))

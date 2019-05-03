@@ -268,8 +268,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  hsize = SUM(BSp%nreh); if (BSp%use_coupling>0) hsize=2*hsize
  nvec=1
 
- ABI_STAT_MALLOC(vec_list,(hsize,nvec), ierr)
- ABI_CHECK(ierr==0, "out of memory in vec_list")
+ ABI_MALLOC_OR_DIE(vec_list,(hsize,nvec), ierr)
 
  ABI_MALLOC(vec_idx,(nvec))
  vec_idx = (/(ii, ii=1,nvec)/)
@@ -494,8 +493,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
  ABI_CHECK(nfftot==PRODUCT(ngfft(1:3)),"Mismatch in FFT size")
 
 !allocate and load wavefunctions in real space
- ABI_STAT_MALLOC(wfr,(nfftot*Wfd%nspinor,BSp%nbnds,Wfd%nkibz), ierr)
- ABI_CHECK(ierr==0, "out of memory: exc_den, wfr")
+ ABI_MALLOC_OR_DIE(wfr,(nfftot*Wfd%nspinor,BSp%nbnds,Wfd%nkibz), ierr)
 
  spin=1 ! SPIN support is missing.
 
@@ -550,8 +548,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
 
  close(eig_unt)
 
- ABI_STAT_MALLOC(wfrk,(nfftot,BSp%nbnds), ierr)
- ABI_CHECK(ierr==0, 'out of memory: exc_den, wfrk')
+ ABI_MALLOC_OR_DIE(wfrk,(nfftot,BSp%nbnds), ierr)
 
 !calculate ground state density
  n0(:) = zero

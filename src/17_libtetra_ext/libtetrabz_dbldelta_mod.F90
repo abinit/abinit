@@ -66,7 +66,7 @@ SUBROUTINE libtetrabz_dbldelta(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
   !
   IF(linterpol) THEN
      !
-     ALLOCATE(wghtd(nb*nb,1,nk_local))
+     ABI_MALLOC(wghtd, (nb*nb,1,nk_local))
      CALL libtetrabz_dbldelta_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig1,eig2,nk_local,wghtd)
      !
      ! Interpolation
@@ -77,7 +77,8 @@ SUBROUTINE libtetrabz_dbldelta(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
         wght(1:nb*nb,kintp(1:nintp)) = wght(1:nb*nb,             kintp(1:nintp)) &
         &                    + MATMUL(wghtd(1:nb*nb,1:1,ik), wintp(1:1,1:nintp))
      END DO ! ik = 1, nk_local
-     DEALLOCATE(wghtd, kvec)
+     ABI_FREE(wghtd)
+     ABI_FREE(kvec)
      !
      IF(PRESENT(comm)) CALL libtetrabz_mpisum_dv(comm, nb*nb*PRODUCT(ngw(1:3)), wght)
      !
@@ -85,7 +86,8 @@ SUBROUTINE libtetrabz_dbldelta(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
      CALL libtetrabz_dbldelta_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig1,eig2,nk_local,wght)
   END IF
   !
-  DEALLOCATE(ik_global, ik_local)
+  ABI_FREE(ik_global)
+  ABI_FREE(ik_local)
   !
 END SUBROUTINE libtetrabz_dbldelta
 !

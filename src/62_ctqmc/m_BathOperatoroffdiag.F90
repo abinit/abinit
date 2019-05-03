@@ -1,6 +1,8 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_BathOperatoroffdiag
 !! NAME
@@ -56,8 +58,6 @@ IMPLICIT NONE
  public :: BathOperatoroffdiag_getDetRemove
  public :: BathOperatoroffdiag_getDetF
  public :: BathOperatoroffdiag_getError
-
-      
 !!***
 
 !!****t* m_BathOperatoroffdiag/BathOperatoroffdiag
@@ -246,7 +246,7 @@ SUBROUTINE BathOperatoroffdiag_init(op, flavors, samples, beta, iTech,opt_nondia
   DOUBLE PRECISION  , INTENT(IN   ) :: beta
 !Local variables ------------------------------
   INTEGER           , INTENT(IN   ) :: iTech
-  INTEGER                           :: it
+  !INTEGER                           :: it
 
   op%MAddFlag     = .FALSE.
   op%MRemoveFlag  = .FALSE.
@@ -704,7 +704,7 @@ DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getDetRemove(op,position)
 !Local arguments-------------------------------
   INTEGER           , INTENT(IN   ) :: position  
   INTEGER                           :: ABSposition  
-  INTEGER                           :: tail,it,it1
+  INTEGER                           :: tail !,it,it1
 
   IF ( op%activeFlavor .LE. 0 ) &
     CALL ERROR("BathOperatoroffdiag_getDetRemove : no active hybrid fun  ")
@@ -918,7 +918,7 @@ SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle)
   INTEGER :: count
   INTEGER :: i
   INTEGER :: j
-  INTEGER :: p,it,it1
+  INTEGER :: p,it !,it1
 
 
 
@@ -1324,7 +1324,7 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
   INTEGER                              :: m
   INTEGER                              :: count
   INTEGER                              :: i
-  INTEGER                              :: j,it,it1
+  INTEGER                              :: j,it !,it1
   INTEGER                              :: p
   DOUBLE PRECISION                   :: invStilde
   DOUBLE PRECISION                   :: invStilde2
@@ -1874,12 +1874,13 @@ SUBROUTINE BathOperatoroffdiag_printM_matrix(op,ostream)
   TYPE(BathOperatoroffdiag), INTENT(IN) :: op
   INTEGER, OPTIONAL , INTENT(IN) :: ostream
 !Local variables ------------------------------
-  INTEGER                        :: ostream_val
   INTEGER                        :: iflavor1
   INTEGER                        :: i1,it1,it2
   CHARACTER(LEN=22)              :: string
   CHARACTER(LEN=22)              :: string2
   CHARACTER(LEN=4 )              :: size
+
+  ABI_UNUSED(ostream)
 
   WRITE(size,'(I4)') op%sumtails
   string ='(i2,x,i3,a,'//TRIM(ADJUSTL(size))//'(E5.2,1x))'
@@ -2046,7 +2047,7 @@ SUBROUTINE BathOperatoroffdiag_checkM(op,particle)
   INTEGER :: iCdag
   INTEGER :: aF
   INTEGER :: iflavora
-  INTEGER :: iflavorb,it,it1
+  INTEGER :: iflavorb,it !,it1
   CHARACTER(LEN=6) :: a
   DOUBLE PRECISION :: time
   DOUBLE PRECISION :: beta
@@ -2201,27 +2202,22 @@ SUBROUTINE BathOperatoroffdiag_recomputeM(op,particle,flav_i,flav_j)
   INTEGER :: flav_i,flav_j
 !Local variables ------------------------------
 !  TYPE(MatrixHyb)                    :: checkMatrix
-  LOGICAL :: checkTau
   INTEGER :: tail
   INTEGER :: iC
   INTEGER :: iCdag
   INTEGER :: aF
   INTEGER :: iflavora
-  INTEGER :: iflavorb,it,it1
+  INTEGER :: iflavorb,it !,it1
   INTEGER :: iflavora_imp
   INTEGER :: iflavorb_imp
-  CHARACTER(LEN=6) :: a
+  !CHARACTER(LEN=6) :: a
   DOUBLE PRECISION :: time
   DOUBLE PRECISION :: beta
   DOUBLE PRECISION :: mbeta_two
-  DOUBLE PRECISION :: errorabs
-  DOUBLE PRECISION :: errormax
-  DOUBLE PRECISION :: error1
-  DOUBLE PRECISION :: errorrel
   DOUBLE PRECISION :: tc
   DOUBLE PRECISION :: tCdag
-  DOUBLE PRECISION :: sumMmat
-  DOUBLE PRECISION :: sumCheck
+  !DOUBLE PRECISION :: sumMmat
+  !DOUBLE PRECISION :: sumCheck
 #include "BathOperatoroffdiag_hybrid.h"
 
   aF = op%activeFlavor

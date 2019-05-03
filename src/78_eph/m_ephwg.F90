@@ -476,15 +476,15 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: sppoldbl1=1,timrev0=0
- integer :: ierr,ii,ik_idx,ik_bz,isym
- real(dp) :: dksqmax
+ integer :: ierr,ii,ik_idx
+ !real(dp) :: dksqmax
  character(len=80) :: errorstring
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(crystal_t),pointer :: cryst
 !arrays
- integer,allocatable :: indkk(:,:), lgkibz2bz(:), lgkibz2ibz(:), lgkibz2ibzkq(:)
- integer,allocatable :: bz2lgkibz(:), bz2lgkibzkq(:), bz2bz(:), mapping(:,:)
- real(dp) :: kpt_sym(3), kpt(3), wrap_kpt(3), shift
+ integer,allocatable :: lgkibz2bz(:) !indkk(:,:), 
+ integer,allocatable :: bz2lgkibz(:), bz2lgkibzkq(:) !, bz2bz(:), mapping(:,:)
+ !real(dp) :: kpt(3), wrap_kpt(3), shift
 !----------------------------------------------------------------------
 
  cryst => self%cryst
@@ -523,26 +523,25 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
    !eph_doublegrid%bz2lgkibz(:)=indkk(:,1)
    do ii=1,self%nbz
       if (indkk(ii,1).ne.eph_doublegrid%bz2lgkibz(ii)) then
-        write(*,*) ii
-        write(*,*) eph_doublegrid%kpts_dense(:,ii)
-        write(*,*) ii, '-->', indkk(ii,1)
-        write(*,*) self%lgk%ibz(:,indkk(ii,1)), indkk(ii,2), indkk(ii,6)
+        write(std_out,*) ii
+        write(std_out,*) eph_doublegrid%kpts_dense(:,ii)
+        write(std_out,*) ii, '-->', indkk(ii,1)
+        write(std_out,*) self%lgk%ibz(:,indkk(ii,1)), indkk(ii,2), indkk(ii,6)
         !check listkk stuff
         kpt = (1-2*indkk(ii,6))*matmul(transpose(cryst%symrel(:,:,indkk(ii,2))),self%lgk%ibz(:,indkk(ii,1)))
         call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
         call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
         call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
-        write(*,*) wrap_kpt
-
-        write(*,*) ii, '-->', eph_doublegrid%bz2lgkibz(ii)
-        write(*,*) self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)), mapping(ii,1), mapping(ii,2)
+        write(std_out,*) wrap_kpt
+        write(std_out,*) ii, '-->', eph_doublegrid%bz2lgkibz(ii)
+        write(std_out,*) self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)), mapping(ii,1), mapping(ii,2)
         !check double grid stuff
         kpt = (1-2*mapping(ii,2))*matmul(transpose(cryst%symrel(:,:,mapping(ii,1))),self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)))
         call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
         call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
         call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
-        write(*,*) wrap_kpt
-        write(*,*)
+        write(std_out,*) wrap_kpt
+        write(std_out,*)
       end if
       ABI_CHECK(indkk(ii,1)==eph_doublegrid%bz2lgkibz(ii),'Unmatching indexes')
    enddo
@@ -828,17 +827,18 @@ subroutine ephwg_get_dweights(self, qlklist, nqlk, nw, wvals, spin, bcorr, nbsum
 !scalars
  integer,parameter :: nene3=3
  real(dp),parameter :: max_occ1 = one
- integer :: iq, iq_ibz, ikpq_ibz, ib, ib_k, ie, iw, nu, ii, jj, kk
- integer :: ntetra, itetra, iqlk, iqlk_microzone
+ integer :: iq, iq_ibz, ikpq_ibz, ib, nu, ii, jj, kk
+ integer :: ntetra, itetra, iqlk
 !arrays
- integer :: ind_ibz(4), counter, mappingsize
+ integer :: ind_ibz(4), mappingsize
  integer,allocatable :: tetra_mask(:), mapping(:)
  real(dp) :: tmp_deltaw_pm(nw,2,4)
- real(dp) :: pme_k(4, 2), weights(nw, 2)
- real(dp) :: enemin, enemax
- real(dp) :: theta_tmp(nene3,4), delta_tmp(nene3,4), eigen_1tetra(4)
+ real(dp) :: pme_k(4, 2) !, weights(nw, 2)
+ !real(dp) :: enemin, enemax
+ !real(dp) :: theta_tmp(nene3,4), delta_tmp(nene3,4), eigen_1tetra(4)
 
 !----------------------------------------------------------------------
+ ABI_UNUSED(comm)
 
  !
  ! This routine still has some bug
@@ -955,7 +955,7 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
  integer :: iq, iq_ibz, ie, ii
  real(dp),parameter :: max_occ1 = one
 !arrays
- real(dp) :: thetaw(nene, self%nq_k), eigen_in(self%nq_k)
+ real(dp) :: eigen_in(self%nq_k) !thetaw(nene, self%nq_k), 
 
 !----------------------------------------------------------------------
 
