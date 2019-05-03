@@ -46,14 +46,12 @@ module m_phonons
  use m_supercell
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
- use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_symtk,           only : matr3inv
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type
  use m_geometry,        only : mkrdim, symredcart, normv
  use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph
- use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
  use m_ifc,             only : ifc_type, ifc_fourq, ifc_calcnwrite_nana_terms
  use m_anaddb_dataset,  only : anaddb_dataset_type
@@ -1210,6 +1208,8 @@ subroutine phdos_unittests(comm)
  real(dp),allocatable :: wtq_ibz(:), wdt(:,:)
  real(dp),allocatable :: energies(:),eig(:),mat(:)
  real(dp),allocatable :: dos(:),idos(:)
+ complex(dp),allocatable :: cenergies(:)
+ complex(dp),allocatable :: cweight(:,:)
 
 ! *********************************************************************
 
@@ -1271,93 +1271,87 @@ subroutine phdos_unittests(comm)
  call cwtime_report(" init", cpu, wall, gflops)
 
  ! Compute DOS using tetrahedron implementation
- test_delta: block
-   ABI_CALLOC(tweight,(nw,nqibz))
-   ABI_CALLOC(dweight,(nw,nqibz))
-   call tetra_blochl_weights(tetraq,eig,emin,emax,max_occ1,nw,&
-                             nqibz,bcorr0,tweight,dweight,comm)
-   do iqibz=1,nqibz
-     dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
-     tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
-   end do
-   dos(:)  = sum(dweight,2)
-   idos(:) = sum(tweight,2)
-   call ctrap(nw,dos,dosdeltae,dos_int)
-   write(*,*) "dos_int", dos_int, idos(nw)
-   call cwtime_report(" tetra_blochl   ", cpu, wall, gflops)
-   call write_file('parabola_tetra.dat', nw, energies, idos, dos)
+ ABI_CALLOC(tweight,(nw,nqibz))
+ ABI_CALLOC(dweight,(nw,nqibz))
+ call tetra_blochl_weights(tetraq,eig,emin,emax,max_occ1,nw,&
+                           nqibz,bcorr0,tweight,dweight,comm)
+ do iqibz=1,nqibz
+   dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
+   tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
+ end do
+ dos(:)  = sum(dweight,2)
+ idos(:) = sum(tweight,2)
+ call ctrap(nw,dos,dosdeltae,dos_int)
+ write(*,*) "dos_int", dos_int, idos(nw)
+ call cwtime_report(" tetra_blochl   ", cpu, wall, gflops)
+ call write_file('parabola_tetra.dat', nw, energies, idos, dos)
 
-   ! Compute blochl weights
-   call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
-                             nqibz,bcorr0,tweight,dweight,comm)
-   do iqibz=1,nqibz
-     dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
-     tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
-   end do
-   dos(:)  = sum(dweight,2)
-   idos(:) = sum(tweight,2)
-   call ctrap(nw,dos,dosdeltae,dos_int)
-   write(*,*) "dos_int", dos_int, idos(nw)
-   call cwtime_report(" htetra_blochl   ", cpu, wall, gflops)
-   call write_file('parabola_htetra.dat', nw, energies, idos, dos)
+ ! Compute blochl weights
+ call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+                           nqibz,bcorr0,tweight,dweight,comm)
+ do iqibz=1,nqibz
+   dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
+   tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
+ end do
+ dos(:)  = sum(dweight,2)
+ idos(:) = sum(tweight,2)
+ call ctrap(nw,dos,dosdeltae,dos_int)
+ write(*,*) "dos_int", dos_int, idos(nw)
+ call cwtime_report(" htetra_blochl   ", cpu, wall, gflops)
+ call write_file('parabola_htetra.dat', nw, energies, idos, dos)
 
-   ! Compute blochl weights
-   call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
-                             nqibz,1,tweight,dweight,comm)
-   do iqibz=1,nqibz
-     dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
-     tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
-   end do
-   dos(:)  = sum(dweight,2)
-   idos(:) = sum(tweight,2)
-   call ctrap(nw,dos,dosdeltae,dos_int)
-   write(*,*) "dos_int", dos_int, idos(nw)
-   call cwtime_report(" htetra_blochl_corr   ", cpu, wall, gflops)
-   call write_file('parabola_htetra_corr.dat', nw, energies, idos, dos)
+ ! Compute blochl weights
+ call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+                           nqibz,1,tweight,dweight,comm)
+ do iqibz=1,nqibz
+   dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
+   tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
+ end do
+ dos(:)  = sum(dweight,2)
+ idos(:) = sum(tweight,2)
+ call ctrap(nw,dos,dosdeltae,dos_int)
+ write(*,*) "dos_int", dos_int, idos(nw)
+ call cwtime_report(" htetra_blochl_corr   ", cpu, wall, gflops)
+ call write_file('parabola_htetra_corr.dat', nw, energies, idos, dos)
 
-   ! Compute weights using LV integration from TDEP
-   call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
-                             nqibz,2,tweight,dweight,comm)
-   do iqibz=1,nqibz
-     dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
-     tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
-   end do
-   dos(:)  = sum(dweight,2)
-   idos(:) = sum(tweight,2)
-   call ctrap(nw,dos,dosdeltae,dos_int)
-   write(*,*) "dos_int", dos_int, idos(nw)
-   call cwtime_report(" htetra_blochl_lv   ", cpu, wall, gflops)
-   call write_file('parabola_htetra_lv.dat', nw, energies, idos, dos)
-
- end block test_delta
+ ! Compute weights using LV integration from TDEP
+ call htetra_blochl_weights(htetraq,eig,emin,emax,max_occ1,nw,&
+                           nqibz,2,tweight,dweight,comm)
+ do iqibz=1,nqibz
+   dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
+   tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
+ end do
+ dos(:)  = sum(dweight,2)
+ idos(:) = sum(tweight,2)
+ call ctrap(nw,dos,dosdeltae,dos_int)
+ write(*,*) "dos_int", dos_int, idos(nw)
+ call cwtime_report(" htetra_blochl_lv   ", cpu, wall, gflops)
+ call write_file('parabola_htetra_lv.dat', nw, energies, idos, dos)
 
  ! Compute DOS using new tetrahedron implementation
- test_zinv: block
-   complex(dp) :: cenergies(nw)
-   complex(dp) :: cweight(nw,nqibz)
-   cenergies = energies
+ ABI_MALLOC(cenergies,(nw))
+ ABI_MALLOC(cweight,(nw,nqibz))
+ cenergies = energies
 
-   ! Use SIMTET routines
-   call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
-                                   nqibz,1,cweight,comm)
-   dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
-   idos(:) =  sum(real(cweight(:,:)),2)
-   call ctrap(nw,dos,dosdeltae,dos_int)
-   write(*,*) "dos_int", dos_int, idos(nw)
-   call cwtime_report(" htetra_weights_wvals_zinv_simtet   ", cpu, wall, gflops)
-   call write_file('parabola_zinv_simtet.dat', nw, energies, idos, dos)
+ ! Use SIMTET routines
+ call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
+                                 nqibz,1,cweight,comm)
+ dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
+ idos(:) =  sum(real(cweight(:,:)),2)
+ call ctrap(nw,dos,dosdeltae,dos_int)
+ write(*,*) "dos_int", dos_int, idos(nw)
+ call cwtime_report(" htetra_weights_wvals_zinv_simtet   ", cpu, wall, gflops)
+ call write_file('parabola_zinv_simtet.dat', nw, energies, idos, dos)
 
-   ! Use LV integration from TDEP
-   call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
-                                   nqibz,2,cweight,comm)
-   dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
-   idos(:) =  sum(real(cweight(:,:)),2)
-   call ctrap(nw,dos,dosdeltae,dos_int)
-   write(*,*) "dos_int", dos_int, idos(nw)
-   call cwtime_report(" htetra_weights_wvals_zinv_lv   ", cpu, wall, gflops)
-   call write_file('parabola_zinv_lv.dat', nw, energies, idos, dos)
-
- end block test_zinv
+ ! Use LV integration from TDEP
+ call htetra_weights_wvals_zinv(htetraq,eig,nw,cenergies,max_occ1,&
+                                 nqibz,2,cweight,comm)
+ dos(:)  = -sum(aimag(cweight(:,:)),2)/pi
+ idos(:) =  sum(real(cweight(:,:)),2)
+ call ctrap(nw,dos,dosdeltae,dos_int)
+ write(*,*) "dos_int", dos_int, idos(nw)
+ call cwtime_report(" htetra_weights_wvals_zinv_lv   ", cpu, wall, gflops)
+ call write_file('parabola_zinv_lv.dat', nw, energies, idos, dos)
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
@@ -1442,6 +1436,8 @@ subroutine phdos_unittests(comm)
  ABI_SFREE(qbz)
  ABI_SFREE(qibz)
  ABI_SFREE(bz2ibz)
+ ABI_SFREE(cenergies)
+ ABI_SFREE(cweight)
  call crystal%free()
  call htetra_free(htetraq)
  call destroy_tetra(tetraq)
