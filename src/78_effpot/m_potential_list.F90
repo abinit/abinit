@@ -95,9 +95,6 @@ contains
     self%size=0
     self%capacity=0
     self%label="ListPotential"
-    call xmpi_bcast(self%size, master, comm, ierr)
-    call xmpi_bcast(self%capacity, master, comm, ierr)
-    call xmpi_bcast(self%label, master, comm, ierr)
   end subroutine initialize
 
   subroutine set_supercell(self, supercell)

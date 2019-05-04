@@ -45,7 +45,6 @@ module m_spin_primitive_potential
   use m_dynamic_array, only: int2d_array_type
   use m_supercell_maker, only: supercell_maker_t
   use m_spmat_ndcoo, only: ndcoo_mat_t
-  use m_multibinit_global
   use m_spin_potential, only: spin_potential_t
   implicit none
   private

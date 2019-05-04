@@ -54,7 +54,6 @@ module m_multibinit_main
   use m_effective_potential
   use m_fit_polynomial_coeff
   use m_multibinit_dataset
-  use m_multibinit_global
   use m_effective_potential_file
   !use m_spin_model, only: spin_model_t
   use m_abihist
@@ -108,6 +107,10 @@ contains
     integer :: filetype,ii,lenstr
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
 
   !To automate a maximum calculation, multibinit reads the number of atoms
@@ -461,7 +464,6 @@ program multibinit
   use m_dtfil,      only : isfile
 
 
-  use m_multibinit_global
   use m_multibinit_dataset
   !use m_generate_training_set, only : generate_training_set
   use m_compute_anharmonics, only : compute_anharmonics
@@ -494,8 +496,6 @@ program multibinit
   !Initialize MPI
   call xmpi_init()
 
-  !MPI variables
-  call init_multibinit_global()
 
   ! Parse command line arguments.
   !args = args_parser(); if (args%exit /= 0) goto 100

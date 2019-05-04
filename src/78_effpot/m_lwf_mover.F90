@@ -38,7 +38,6 @@ module m_lwf_mover
   use m_errors
   use m_abicore
   use m_xmpi
-  use m_multibinit_global
   use m_mpi_scheduler, only: mpi_scheduler_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t

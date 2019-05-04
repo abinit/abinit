@@ -35,8 +35,8 @@ module m_primitive_potential_list
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_multibinit_global
 
+  use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset , only: multibinit_dtset_type
   use m_unitcell, only: unitcell_t
   use m_supercell_maker, only: supercell_maker_t
@@ -121,6 +121,11 @@ contains
   subroutine finalize(self)
     class(primitive_potential_list_t), intent(inout):: self
     integer :: i
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
     call xmpi_bcast(self%size, master, comm, ierr)
     do i=1, self%size
        call self%data(i)%obj%finalize()
@@ -147,6 +152,10 @@ contains
     class(primitive_potential_t), target, intent(inout) :: pot
     type(primitive_potential_pointer_t), allocatable :: temp(:)
     integer :: err
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
     self%size=self%size + 1
     if(self%size==1) then
        self%capacity=8
