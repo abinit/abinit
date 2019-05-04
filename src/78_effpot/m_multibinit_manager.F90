@@ -40,7 +40,6 @@ module m_multibinit_manager
 
   use m_init10, only: init10
   use m_mathfuncs, only: diag
-  use m_multibinit_global
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
        outvars_multibinit, multibinit_dtset_free
   use m_unitcell, only : unitcell_t
@@ -56,6 +55,7 @@ module m_multibinit_manager
   use m_spin_potential, only : spin_potential_t
   use m_lattice_mover, only : lattice_mover_t
   use m_spin_mover, only : spin_mover_t
+  use m_mpi_scheduler, only: init_mpi_info
   ! TODO : should these be moved into spin mover?
   use m_spin_ncfile, only: spin_ncfile_t
 
@@ -106,6 +106,12 @@ contains
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen), intent(inout) :: filenames(17)
     type(multibinit_dtset_type), target, optional, intent(in) :: params
+    integer:: ierr
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     !TODO: remove params as argument. It is here because the params are read
     ! in the multibinit_main function. Once we use multibinit_main2, remove it.
     if (present(params)) then
@@ -158,7 +164,10 @@ contains
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
     character(len=strlen) :: string
-    integer:: ierr
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
     !To automate a maximum calculation, multibinit reads the number of atoms
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
     !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
@@ -217,6 +226,13 @@ contains
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
     type(spin_primitive_potential_t), pointer :: spin_pot
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
+
     !class(primitive_potential_t), pointer :: t
     call self%unitcell%initialize()
     ! latt : TODO

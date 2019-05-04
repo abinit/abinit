@@ -31,7 +31,7 @@ module m_multibinit_supercell
   use defs_basis
   use m_abicore
   use m_errors
-  use m_multibinit_global
+  use m_mpi_scheduler, only: init_mpi_info
   use m_xmpi
   implicit none
   private
@@ -68,6 +68,11 @@ contains
   subroutine initialize(self, natom, nspin, nlwf)
     class(mb_supercell_t),intent(inout) :: self
     integer, intent(in), optional :: nspin, natom, nlwf
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
 
     if (present(nspin)) then
        if (iam_master) self%nspin=nspin
@@ -87,6 +92,11 @@ contains
     real(dp), intent(in)::pos(:,:), ms(:), gyro_ratio(:), damping(:)
     !Local variables-------------------------------
     integer :: nspin
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     nspin=self%nspin
 
     if (iam_master) self%spin_positions(:,:)=pos(:,:)

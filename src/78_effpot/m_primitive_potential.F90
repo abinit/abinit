@@ -40,6 +40,7 @@ module m_primitive_potential
   use m_supercell_maker, only: supercell_maker_t
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
+  use m_mpi_scheduler, only: init_mpi_info
   implicit none
   private
 !!***

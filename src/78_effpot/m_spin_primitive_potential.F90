@@ -36,7 +36,7 @@ module m_spin_primitive_potential
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_multibinit_global
+  use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_io_xml, only: xml_read_spin, xml_free_spin
   use m_unitcell, only: unitcell_t
@@ -105,6 +105,12 @@ contains
          spinat(3,natoms), gyroratios(nspin), damping_factors(nspin)
     integer :: iatom, ispin
     real(dp) :: ms(nspin), spin_positions(3, nspin)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
     if (iam_master) then
@@ -129,6 +135,11 @@ contains
     character(len=500) :: message
     integer :: ii
     logical:: use_sia, use_exchange, use_dmi, use_bi
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
 
     if (iam_master) then
        xml_fname=fnames(3)
@@ -158,6 +169,11 @@ contains
     real(dp), intent(in) :: val(3,3)
     real(dp) :: v
     integer :: indR, iv, jv
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     if(iam_master) then
        call self%Rlist%push_unique(R, position=indR)
        do jv=1,3
@@ -174,6 +190,12 @@ contains
     integer, intent(in) :: n, ilist(n), jlist(n), Rlist(3,n)
     real(dp), intent(in) :: vallist(3, 3,n)
     integer :: idx
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     if (iam_master) then
        do idx = 1, n
           call self%set_bilinear_1term(ilist(idx), jlist(idx), Rlist(:,idx), vallist(:,:, idx))
@@ -187,6 +209,12 @@ contains
     real(dp), intent(in) :: vallist(:,:)
     integer :: idx
     real(dp) :: bivallist(3,3, n)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     if(iam_master) then
        bivallist(:,:,:)=0.0d0
        do idx = 1, n, 1
@@ -205,6 +233,12 @@ contains
     real(dp), intent(in) :: vallist(:,:)
     integer :: idx
     real(dp) :: bivallist(3,3, n), D(3)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     if(iam_master) then
        bivallist(:,:,:)=0.0d0
        do idx=1,n, 1
@@ -227,6 +261,11 @@ contains
     real(dp), intent(in) :: k1list(:), k1dirlist(:, :)
     integer :: idx, Rlist(3, n)
     real(dp) :: bivallist(3,3, n)
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     if (iam_master) then
        bivallist(:,:,:)=0.0d0
        Rlist(:, :)=0.0d0
@@ -246,6 +285,11 @@ contains
     real(dp)::  in_sia_k1amp(self%nspin), in_sia_k1dir(3, self%nspin)
 
     integer :: i
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
 
     if(iam_master) then
        write(*,'(A28)') "Adding SIA terms from input"
@@ -288,6 +332,11 @@ contains
          bi_vallist(:)=>null()
 
     real(dp) :: uc(3,3)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
 
     if (iam_master) then
        write(*,'(A58)') "Reading parameters from xml file and setting up spin model"
@@ -424,6 +473,11 @@ contains
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
     integer, allocatable :: i_sc(:), j_sc(:), Rj_sc(:, :)
     real(dp) :: val_sc(scmaker%ncells)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
     call xmpi_bcast(sc_nspin, master, comm, ierr)
@@ -453,48 +507,5 @@ contains
        endif
     end select
   end subroutine fill_supercell
-
-  subroutine print_terms(self)
-    class(spin_primitive_potential_t) :: self
-    integer :: i, ii, jj,  R(3)
-    character(len=80) :: msg
-    real(dp) :: tmp(3, 3)
-  !   msg=repeat("=", 34)
-  !   write(msg, '(A34, 1X, A10, 1x, A34)') msg, 'spin terms', msg
-  !   call wrtout(std_out,msg,'COLL')
-
-  !   write(msg, '(1X, A16, 2X, I5.3)') 'Number of terms:',  self%coeff
-  !   call wrtout(std_out,msg,'COLL')
-
-  !   do i=1, self%total_nnz
-  !      do ii=1,3
-  !         R(ii)=self%total_Rlist(ii)%data(i)
-  !         do jj=1, 3
-  !            tmp(jj, ii)=self%total_val_list(jj, ii)%data(i)
-  !         enddo
-  !      enddo
-
-  !      msg=repeat("-", 64)
-  !      write(msg, '(1X, A64)') msg
-  !      call wrtout(std_out,msg,'COLL')
-  !      call wrtout(ab_out, msg, 'COLL')
-
-  !      write(msg, "(2X, A3, I5.4, 2X, A3, I5.4, 5X, A3, I4.2, I5.2, I5.2)")  & 
-  !           'i =', self%total_ilist%data(i), 'j =', self%total_jlist%data(i), 'R =', R
-  !      call wrtout(std_out,msg,'COLL')
-  !      call wrtout(ab_out, msg, 'COLL')
-  !      write(msg, "(2X, A16)") 'Matrix Form (Ha)'
-  !      call wrtout(std_out,msg,'COLL')
-  !      call wrtout(ab_out, msg, 'COLL')
-  !      do ii=1, 3
-  !         write(msg, "(3ES21.12)") tmp(ii, :)
-  !         call wrtout(std_out,msg,'COLL')
-  !         call wrtout(ab_out, msg, 'COLL')
-  !      end do
-  !   end do
-  !   msg=repeat("=", 80)
-  !   call wrtout(std_out,msg,'COLL')
-  !   call wrtout(ab_out, msg, 'COLL')
-  end subroutine print_terms
 
 end module m_spin_primitive_potential

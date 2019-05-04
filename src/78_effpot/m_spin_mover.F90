@@ -39,8 +39,7 @@ module m_spin_mover
   use m_abicore
   use m_xmpi
   use m_io_tools, only : get_unit, open_file, close_unit
-  use m_multibinit_global
-  use m_mpi_scheduler, only: mpi_scheduler_t
+  use m_mpi_scheduler, only: mpi_scheduler_t, init_mpi_info
   use m_mathfuncs, only : cross
   use m_spin_observables , only : spin_observable_t
   use m_spin_potential, only:  spin_potential_t
@@ -130,6 +129,11 @@ contains
     type(mb_supercell_t), target :: supercell
     !real(dp):: damping(self%supercell%nspin)
     integer :: i, nspin
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
     self%params=>params
     self%supercell=>supercell
     if (iam_master) then
@@ -233,6 +237,15 @@ contains
     integer :: i, m
     real(dp) :: S(3, self%nspin)
     character(len=500) :: msg
+
+    
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
+    
+
     if(iam_master) then
        if (present(mode)) then
           m=mode
@@ -273,6 +286,11 @@ contains
    class(spin_mover_t), intent(inout) :: self
    type(multibinit_dtset_type) :: params
    character(len=*), intent(in) :: fname
+
+   integer :: master, my_rank, comm, nproc, ierr
+   logical :: iam_master
+   call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
    if(iam_master) then
       call self%spin_ncfile%initialize( trim(fname), params%spin_write_traj)
       call self%spin_ncfile%def_spindynamics_var(self%hist )
@@ -288,6 +306,14 @@ contains
   subroutine set_temperature(self, temperature)
     class(spin_mover_t), intent(inout) :: self
     real(dp), optional, intent(in) ::  temperature
+
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
+
     if(present(temperature)) self%temperature=temperature
     call xmpi_bcast(self%temperature, master, comm, ierr)
     if(self%method==3) then
@@ -350,6 +376,10 @@ contains
     real(dp), intent(out) :: S_out(3,self%nspin), etot
     integer :: i
     real(dp) :: dSdt(3), Htmp(3), Ri(3)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     ! predict
     etot=0.0
@@ -422,6 +452,12 @@ contains
     real(dp) :: Htmp(3)
     integer :: i
 
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
+
     ! predict
     S_out(:,:)=0.0_dp
     etot=0.0
@@ -469,6 +505,11 @@ contains
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp) :: S_out(3,self%nspin), etot
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     if(present(spin)) MSG_ERROR("spin should not be input for spin mover.")
     if(iam_master) self%Stmp=self%hist%get_S()
     if(self%method==1) then
@@ -522,6 +563,10 @@ contains
     real(dp):: t
     integer :: counter, i, ii
     character(len=80) :: msg, msg_empty
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     t=0.0
     counter=0
@@ -692,6 +737,13 @@ contains
     real(dp), allocatable :: Tlist(:), chi_list(:), Cv_list(:), binderU4_list(:)
     real(dp), allocatable :: Mst_sub_norm_list(:, :)
     real(dp), allocatable ::  Mst_norm_total_list(:)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
+
     if (iam_master) then
        T_start=self%params%spin_temperature_start
        T_end=self%params%spin_temperature_end

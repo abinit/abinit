@@ -38,7 +38,7 @@ module m_potential_list
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_multibinit_global
+  use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_multibinit_supercell, only: mb_supercell_t
@@ -89,6 +89,9 @@ contains
 
   subroutine initialize(self)
     class (potential_list_t), intent(inout) :: self
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%size=0
     self%capacity=0
     self%label="ListPotential"

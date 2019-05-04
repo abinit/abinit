@@ -37,7 +37,7 @@ module m_supercell_maker
   use m_xmpi
   use m_symtk,    only : matr3inv
   use m_mathfuncs , only: mat33det, binsearch_left_integerlist
-  use m_multibinit_global
+  use m_mpi_scheduler, only: init_mpi_info
   use m_supercell
   implicit none
   private
@@ -82,6 +82,11 @@ contains
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: sc_matrix(3, 3)
     real(dp) :: tmp(3,3)
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     self%scmat(:,:)=sc_matrix
     call xmpi_bcast(self%scmat, master, comm, ierr)
     self%ncells=abs(mat33det(self%scmat))

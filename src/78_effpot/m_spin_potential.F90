@@ -41,7 +41,7 @@ module  m_spin_potential
   use m_errors
   use m_abicore
   use m_xmpi
-  use m_multibinit_global
+  use m_mpi_scheduler, only: mb_mpi_info_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_supercell, only: mb_supercell_t
   use m_spmat_coo, only: coo_mat_t
@@ -69,6 +69,7 @@ module  m_spin_potential
      ! vector for calculating effective field
      real(dp), allocatable :: Htmp(:, :)
      real(dp), allocatable :: ms(:)
+     type(mb_mpi_info_t) :: mpiinfo
    CONTAINS
      procedure :: initialize
      procedure :: finalize
@@ -95,12 +96,18 @@ contains
     !scalars
     class(spin_potential_t), intent(inout) :: self
     integer :: nspin
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    
     self%label="SpinPotential"
     self%has_spin=.True.
     self%has_displacement=.False.
     self%has_strain=.False.
     self%is_null=.False.
     self%nspin=nspin
+
     call xmpi_bcast(self%nspin, master, comm, ierr)
 
     ABI_ALLOCATE( self%ms, (self%nspin))
@@ -119,6 +126,10 @@ contains
   subroutine set_supercell(self, supercell)
     class(spin_potential_t), intent(inout) :: self
     type(mb_supercell_t), target, intent(inout) :: supercell
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+ 
     self%supercell=>supercell
     self%ms(:)=supercell%ms(:)
     call xmpi_bcast(self%ms, master, comm, ierr)
@@ -161,6 +172,9 @@ contains
     type(multibinit_dtset_type) :: params
     real(dp) :: tmp(3, self%nspin)
     integer :: i
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if(iam_master) then
        do i=1, self%nspin
           tmp(:, i)=params%spin_mag_field(:)
@@ -173,6 +187,9 @@ contains
   subroutine set_external_hfield(self, external_hfield)
     class(spin_potential_t), intent(inout) :: self
     real(dp), intent(in) :: external_hfield(:,:)
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%has_external_hfield = .true.
     self%external_hfield = external_hfield
     call xmpi_bcast(self%has_external_hfield, master, comm, ierr)
@@ -189,6 +206,9 @@ contains
     class(spin_potential_t), intent(inout) :: self
     integer, intent(in) :: i, j
     real(dp), intent(in) :: val
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if(iam_master) then
        call self%coeff_coo%add_entry(ind=[i,j],val=val)
     endif
@@ -199,6 +219,10 @@ contains
     integer, intent(in) :: ilist(:), jlist(:)
     real(dp), intent(in) :: vallist(:)
     integer :: i
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
     if (iam_master) then
        do i = 1, size(ilist)
           call self%coeff_coo%add_entry(ind=[ilist(i),jlist(i)],val=vallist(i))
@@ -213,6 +237,12 @@ contains
     integer, intent(in) :: ispin, jspin
     real(dp), intent(in) :: val(:,:)
     integer :: ia, ib
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     if(iam_master) then
        do ia = 1, 3, 1
           do ib=1, 3, 1
@@ -225,6 +255,11 @@ contains
 
   subroutine prepare_csr_matrix(self)
     class(spin_potential_t), intent(inout) :: self
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     if (.not. self%csr_mat_ready) then
        if(iam_master) then
           call coo_to_csr(self%coeff_coo, self%bilinear_csr_mat)
@@ -271,6 +306,11 @@ contains
     real(dp), intent(inout):: Heff(3,self%nspin)
     real(dp), intent(inout) :: energy
     integer :: i, j
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
 
     self%Htmp(:,:)=0.0_dp
     call self%calc_bilinear_term_Heff(S,self%Htmp)
@@ -304,6 +344,11 @@ contains
     real(dp), intent(inout):: S(3,self%nspin)
     real(dp), intent(inout) :: energy
     integer :: i, j
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     if (.not. self%csr_mat_ready) then
        call coo_to_csr(self%coeff_coo, self%bilinear_csr_mat)
        call self%bilinear_csr_mat%sync()

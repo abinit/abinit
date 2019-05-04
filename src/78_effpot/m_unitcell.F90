@@ -30,7 +30,7 @@ module m_unitcell
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_multibinit_global
+  use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_supercell, only: mb_supercell_t
   use m_supercell_maker , only: supercell_maker_t
   use m_multibinit_dataset, only : multibinit_dtset_type
@@ -100,6 +100,11 @@ contains
     class(unitcell_t) , intent(inout):: self
     integer, intent(in) :: nspin
     real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), damping_factor(nspin)
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     self%has_spin=.True.
     call xmpi_bcast(self%has_spin,master, comm, ierr)
     call self%spin%initialize(nspin, ms, spin_positions, gyro_ratio, damping_factor)
@@ -166,6 +171,11 @@ contains
     class(unitcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
     real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), damping_factor(nspin)
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
     ABI_ALLOCATE(self%spin_positions, (3, self%nspin))
@@ -206,6 +216,11 @@ contains
     type(supercell_maker_t), intent(inout):: sc_maker
     type(mb_supercell_t), intent(inout) :: supercell
     integer :: i, nspin
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+
     nspin=sc_maker%ncells*self%nspin
     call supercell%initialize(nspin=nspin)
     if(iam_master) then

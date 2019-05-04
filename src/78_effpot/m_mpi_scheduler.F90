@@ -41,6 +41,15 @@ module m_mpi_scheduler
 !!***
 
   private
+
+  type, public :: mb_mpi_info_t
+     integer :: master =0
+     logical :: iam_master =.False.
+     integer :: my_rank, comm, nproc, ierr
+   contains
+     procedure :: initialize => mb_mpi_info_t_initialize
+  end type mb_mpi_info_t
+
   type, public :: mpi_scheduler_t
      integer :: nproc, ntasks, irank, comm, istart, iend, ntask, nblock
      ! ntasks:  total number of tasks
@@ -63,7 +72,32 @@ module m_mpi_scheduler
      procedure :: gatherv_dp2d ! helper function to gather 2d real(dp) array from nodes.
   end type mpi_scheduler_t
 
+  public :: init_mpi_info
+
 contains
+  !integer :: master, my_rank, comm, nproc, ierr
+  !logical :: iam_master
+  !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+  subroutine init_mpi_info(master, iam_master, my_rank, comm, nproc)
+   integer, intent(inout) :: master 
+   logical, intent(inout) :: iam_master 
+   integer, intent(inout) :: my_rank, comm, nproc
+   comm = xmpi_world
+   nproc = xmpi_comm_size(comm)
+   my_rank = xmpi_comm_rank(comm)
+   iam_master = (my_rank == master)
+  end subroutine init_mpi_info
+
+
+  subroutine mb_mpi_info_t_initialize(self)
+    class (mb_mpi_info_t):: self
+    self%comm = xmpi_world
+    self%nproc = xmpi_comm_size(self%comm)
+    self%my_rank = xmpi_comm_rank(self%comm)
+    self%iam_master = (self%my_rank == self%master)
+  end subroutine mb_mpi_info_t_initialize
+
+
   subroutine mpi_scheduler_t_initialize(self, ntasks, comm, nblock)
     ! assign ntasks to ranks in mpi comm.
     ! ntask: number of tasks
