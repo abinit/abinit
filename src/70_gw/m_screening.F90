@@ -935,8 +935,8 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
    if (Er%mqmem>0) then
      ! In-core solution.
-     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb]'
-     call wrtout(std_out,msg,'PERS')
+     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
+     call wrtout(std_out,msg)
      ABI_MALLOC_OR_DIE(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
 
      if (iomode == IO_MODE_MPI) then
@@ -2715,7 +2715,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  real(dp) :: qpg2_nrm
  complex(dpc) :: ph_mqbzt
  logical :: is_qeq0,isirred
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: umklp(3)

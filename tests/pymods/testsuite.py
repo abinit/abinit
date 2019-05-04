@@ -29,7 +29,7 @@ from .tools import (RestrictedShell,  StringColorizer, unzip, tail_file,
                     pprint_table, Patcher, Editor)
 from .xyaptu import xcopier
 from .devtools import FileLock
-from .memprof import AbimemParser
+from .memprof import AbimemFile
 from .termcolor import cprint
 
 from .fldiff import Differ as FlDiffer
@@ -2106,8 +2106,8 @@ class BaseTest(object):
                 print("Found %s abimem files" % len(paths))
                 #abimem_retcode = 0
                 for path in paths:
-                    parser = AbimemParser(path)
-                    parser.find_memleaks()
+                    memfile = AbimemFile(path)
+                    memfile.find_memleaks()
                     #if rc: parser.show_errors()
                     #abimem_retcode += rc
 
