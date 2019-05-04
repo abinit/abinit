@@ -39,7 +39,6 @@ sources = [
     "m_mathfuncs.F90",
     "m_mpi_scheduler.F90",
     "m_multibinit_dataset.F90",
-    "m_multibinit_global.F90",
     "m_multibinit_io_xml.F90",
     "m_multibinit_main.F90",
     "m_multibinit_manager.F90",
