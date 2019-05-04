@@ -911,9 +911,9 @@ end subroutine htetra_init_mapping_ibz
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_print
+!!****f* m_htetrahedron/htetra_get_ibz
 !! NAME
-!! htetra_print
+!! htetra_get_ibz
 !!
 !! FUNCTION
 !!  Get the itetra tetrahedron contributing to the ikibz k-point
@@ -924,7 +924,7 @@ end subroutine htetra_init_mapping_ibz
 !!
 !! SOURCE
 
-pure subroutine tetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
+pure subroutine htetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
  type(t_htetrahedron), intent(in) :: tetra
  integer,intent(in) :: ikibz, itetra
  integer,intent(out) :: tetra_mibz(0:4)
@@ -933,7 +933,7 @@ pure subroutine tetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
  ihash  = tetra%ibz(ikibz)%indexes(1,itetra)
  jtetra = tetra%ibz(ikibz)%indexes(2,itetra)
  tetra_mibz = tetra%unique_tetra(ihash)%indexes(:,jtetra)
-end subroutine tetra_get_ibz
+end subroutine htetra_get_ibz
 !!***
 
 !----------------------------------------------------------------------
@@ -1554,7 +1554,7 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
  tetra_total = tetra%tetra_total(ik_ibz)
  do itetra=1,tetra_count
 
-   call tetra_get_ibz(tetra,ik_ibz,itetra,tetra_mibz)
+   call htetra_get_ibz(tetra,ik_ibz,itetra,tetra_mibz)
    tweight = one*tetra_mibz(0)/tetra_total
    do isummit=1,4
      ! Get mapping of each summit to eig_ibz
@@ -1698,7 +1698,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  tetra_total = tetra%tetra_total(ik_ibz)
  do itetra=1,tetra_count
 
-   call tetra_get_ibz(tetra,ik_ibz,itetra,tetra_mibz)
+   call htetra_get_ibz(tetra,ik_ibz,itetra,tetra_mibz)
    tweight = one*tetra_mibz(0)/tetra_total
    do isummit=1,4
      ! Get mapping of each summit to eig_ibz
