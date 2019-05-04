@@ -72,8 +72,9 @@
  istwf_k_=1;if (present(istwf_k)) istwf_k_=istwf_k
  use_slk_ = 0; if(present(use_slk)) use_slk_ = use_slk
 
-#ifdef HAVE_LINALG_MAGMA
- if (usegpu_==1) then
+!===== MAGMA
+ if (ABI_LINALG_MAGMA_ISON.and.usegpu_==1) then
+#if defined HAVE_LINALG_MAGMA
    ABI_CHECK((lapack_divide_conquer),"BUG(4) in abi_dheev (d&c)!")
    if (cplx_ == 2) then
      call magmaf_zheevd(jobz,uplo,n,a,lda,w,eigen_z_work,eigen_z_lwork, &
@@ -82,23 +83,23 @@
      call magmaf_dsyevd(jobz,uplo,n,a,lda,w,eigen_d_work,eigen_d_lwork,&
 &                       eigen_iwork,eigen_liwork,info)
    endif
- else
 #endif
 
-#ifdef HAVE_LINALG_SCALAPACK
- if (use_slk_==1.and.n>maxval(abi_processor%grid%dims(1:2)))  then
+!===== SCALAPACK
+ else if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>maxval(abi_processor%grid%dims(1:2)))  then
+#if defined HAVE_LINALG_SCALAPACK
    ABI_CHECK(present(x_cplx),"BUG(5) in abi_dheev (x_cplx)!")
    call compute_eigen1(abi_communicator,abi_processor,cplx_,n,n,a,w,istwf_k_)
    info = 0 ! This is to avoid unwanted warning but it's not clean
- else
 #endif
 
-#ifdef HAVE_LINALG_PLASMA
+!===== PLASMA
  !FDahm & LNGuyen  (November 2012) :
  !  In Plasma v 2.4.6, eigen routines support only
  !  the eigenvalues computation (jobz=N) and not the
  !  full eigenvectors bases determination (jobz=V)
- if (LSAME(jobz,'N')) then
+ else if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
+#if defined HAVE_LINALG_PLASMA
    jobz_plasma_a = jobz_plasma(jobz)
    if (cplx_ == 2) then
      call PLASMA_Alloc_Workspace_zheev(n,n,plasma_work,info)
@@ -110,31 +111,22 @@
 &                          plasma_work,c_loc(eigen_d_work),n)
    endif
    call PLASMA_Dealloc_handle(plasma_work,info)
- else
 #endif
+
+!===== LAPACK
+ else
    if (cplx_ == 2) then
      call zheev(jobz,uplo,n,a,lda,w,eigen_z_work,eigen_z_lwork,eigen_z_rwork,info)
    else
-#ifdef FC_NAG
-     !MG: This hack needed to pass paral[25] paral[29] and mpiio on nag@petrus with np=4
-     if (n < 0) write(std_out, *)"work: ",eigen_d_work(1:3)
-#endif
      call dsyev(jobz,uplo,n,a,lda,w,eigen_d_work,eigen_d_lwork,info)
    endif
-#ifdef HAVE_LINALG_PLASMA
  end if
-#endif
-#ifdef HAVE_LINALG_SCALAPACK
- end if
-#endif
-#ifdef HAVE_LINALG_MAGMA
- end if
-#endif
 
  if (present(tim_xeigen).and.present(timopt)) then
    if(abs(timopt)==3) call timab(tim_xeigen,2,tsec)
  end if
 
+ write(100,*) eigen_z_lwork,ABI_LINALG_SCALAPACK_ISON,use_slk_;flush(100)
  ABI_CHECK(info==0,"abi_dheev returned info!=0!")
 
 end subroutine abi_dheev
@@ -183,12 +175,13 @@ subroutine abi_cheev(jobz,uplo,n,a,lda,w)
  work => eigen_c_work ; rwork => eigen_c_rwork
  lwork=eigen_c_lwork
 
-#ifdef HAVE_LINALG_PLASMA
+!===== PLASMA
  !FDahm & LNGuyen  (November 2012) :
  !  In Plasma v 2.4.6, eigen routines support only
  !  the eigenvalues computation (jobz=N) and not the
  ! full eigenvectors bases determination (jobz=V)
- if (LSAME(jobz,'N')) then
+ if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
+#if defined HAVE_LINALG_PLASMA
    if (eigen_c_lwork==0) then
      ABI_ALLOCATE(work,(n**2))
    end if
@@ -199,9 +192,10 @@ subroutine abi_cheev(jobz,uplo,n,a,lda,w)
    if (eigen_c_lwork==0) then
      ABI_DEALLOCATE(work)
    end if
- else
 #endif
 
+!===== LAPACK
+ else
    if (eigen_c_lwork==0) then
      lwork=2*n-1
      ABI_ALLOCATE(work,(lwork))
@@ -216,9 +210,7 @@ subroutine abi_cheev(jobz,uplo,n,a,lda,w)
    if (eigen_c_lrwork==0) then
      ABI_DEALLOCATE(rwork)
    end if
-#ifdef HAVE_LINALG_PLASMA
  end if
-#endif
 
  ABI_CHECK(info==0,"abi_cheev returned info!=!0")
 
@@ -270,12 +262,13 @@ subroutine abi_zheev(jobz,uplo,n,a,lda,w)
  work => eigen_z_work ; rwork => eigen_z_rwork
  lwork=eigen_z_lwork
 
-#ifdef HAVE_LINALG_PLASMA
+!===== PLASMA
  !FDahm & LNGuyen  (November 2012) :
  !  In Plasma v 2.4.6, eigen routines support only
  ! the eigenvalues computation (jobz=N) and not the
  ! full eigenvectors bases determination (jobz=V)
- if (LSAME(jobz,'N')) then
+ if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
+#if defined HAVE_LINALG_PLASMA
    if (eigen_z_lwork==0) then
      ABI_ALLOCATE(work,(n**2))
    end if
@@ -286,9 +279,10 @@ subroutine abi_zheev(jobz,uplo,n,a,lda,w)
    if (eigen_z_lwork==0) then
      ABI_DEALLOCATE(work)
    end if
- else
 #endif
 
+!===== LAPACK
+ else
    if (eigen_z_lwork==0) then
      lwork=2*n-1
      ABI_ALLOCATE(work,(lwork))
@@ -303,9 +297,7 @@ subroutine abi_zheev(jobz,uplo,n,a,lda,w)
    if (eigen_z_lrwork==0) then
      ABI_DEALLOCATE(rwork)
    end if
-#ifdef HAVE_LINALG_PLASMA
  end if
-#endif
 
  ABI_CHECK(info==0,"abi_zheev returned info !=0!")
 

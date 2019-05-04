@@ -69,8 +69,9 @@
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
 
-#ifdef HAVE_LINALG_SCALAPACK
- if (use_slk_ == 1) then
+!===== SCALAPACK
+ if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1)  then
+#if defined HAVE_LINALG_SCALAPACK
    ! if istwfk=1, then dim_evec1=2*n and if istwfk=2, dim_evec1=n
    dim_evec1= 2*n/istwf_k_
    ABI_ALLOCATE(tmp_evec,(dim_evec1,n))
@@ -90,17 +91,16 @@
    CALL destruction_matrix_scalapack(sca_a)
    CALL destruction_matrix_scalapack(sca_ev)
    ABI_DEALLOCATE(tmp_evec)
-  else
 #endif
+
+!===== LAPACK
+ else
    if (istwf_k_ /= 2) then
      call zhpev(jobz,uplo,n,a,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
    else
      call dspev(jobz,uplo,n,a,w,z,ldz,eigen_d_work,info)
-  endif
-
-#ifdef HAVE_LINALG_SCALAPACK
-  end if
-#endif
+   end if
+ end if
 
  ABI_CHECK(info==0,"dhpev returned info!=0")
 
@@ -152,6 +152,7 @@ end subroutine abi_dhpev
 
  work => eigen_c_work ; rwork => eigen_c_rwork
 
+!===== LAPACK
  if (eigen_c_lwork==0) then
    ABI_ALLOCATE(work,(2*n-1))
  end if
@@ -216,6 +217,7 @@ end subroutine abi_chpev
 
  work => eigen_z_work ; rwork => eigen_z_rwork
 
+!===== LAPACK
  if (eigen_z_lwork==0) then
    ABI_ALLOCATE(work,(2*n-1))
  end if

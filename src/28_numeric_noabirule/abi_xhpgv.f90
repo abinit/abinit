@@ -73,8 +73,9 @@
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
 
-#ifdef HAVE_LINALG_SCALAPACK
- if (use_slk_ == 1) then
+!===== SCALAPACK
+ if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1)  then
+#if defined HAVE_LINALG_SCALAPACK
    z = zero
    call init_matrix_scalapack(sca_a,n,n,abi_processor,istwf_k_,10)
    call init_matrix_scalapack(sca_b,n,n,abi_processor,istwf_k_,10)
@@ -94,17 +95,16 @@
    call xmpi_sum(z,abi_communicator,ierr)
    CALL destruction_matrix_scalapack(sca_a)
    CALL destruction_matrix_scalapack(sca_ev)
- else
 #endif
+
+!===== LAPACK
+ else
    if (istwf_k_/=2) then
      call zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
    else
      call dspgv(itype,jobz,uplo,n,a,b,w,z,ldz,eigen_d_work,info)
    endif
-
-#ifdef HAVE_LINALG_SCALAPACK
  end if
-#endif
 
  ABI_CHECK(info==0,"abi_dhpgv returned info!=0!")
 
@@ -158,6 +158,7 @@ end subroutine abi_dhpgv
 
  work => eigen_c_work ; rwork => eigen_c_rwork
 
+!===== LAPACK
  if (eigen_c_lwork==0) then
    ABI_ALLOCATE(work,(2*n-1))
  end if
@@ -224,6 +225,7 @@ subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
 
  work => eigen_z_work ; rwork => eigen_z_rwork
 
+!===== LAPACK
  if (eigen_z_lwork==0) then
    ABI_ALLOCATE(work,(2*n-1))
  end if

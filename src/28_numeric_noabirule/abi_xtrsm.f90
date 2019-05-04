@@ -60,7 +60,7 @@ subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
  call timab(TIMAB_XTRSM,1,tsec)
 #endif
 
- if (XPLASMA_ISON) then
+ if (ABI_LINALG_PLASMA_ISON) then
 #ifdef HAVE_LINALG_PLASMA
    info = PLASMA_ztrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(transa),diag_plasma(diag),&
 &     m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
@@ -117,7 +117,7 @@ end subroutine abi_ztrsm
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
 
- if (XPLASMA_ISON) then
+ if (ABI_LINALG_PLASMA_ISON) then
 #ifdef HAVE_LINALG_PLASMA
    if(cplx_ == 2) then
       info = PLASMA_ztrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
@@ -182,7 +182,7 @@ end subroutine abi_dtrsm
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
 
- if (XPLASMA_ISON) then
+ if (ABI_LINALG_PLASMA_ISON) then
 #ifdef HAVE_LINALG_PLASMA
    if(cplx_ == 2) then
       info = PLASMA_ztrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
@@ -243,7 +243,7 @@ end subroutine abi_d2ztrsm
  call timab(TIMAB_XTRSM,1,tsec)
 #endif
 
- if (XPLASMA_ISON) then
+ if (ABI_LINALG_PLASMA_ISON) then
 #ifdef HAVE_LINALG_PLASMA
    info = PLASMA_ztrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
 &    m,n,alpha,c_loc(a),lda,c_loc(b),ldb)

@@ -77,8 +77,9 @@
  use_slk_=0; if (present(use_slk)) use_slk_=use_slk
  istwf_k_=1; if (present(istwf_k)) istwf_k_=istwf_k
 
-#ifdef HAVE_LINALG_MAGMA
- if (usegpu_==1) then
+!===== MAGMA
+ if (ABI_LINALG_MAGMA_ISON.and.usegpu_==1) then
+#if defined HAVE_LINALG_MAGMA
    ABI_CHECK((lapack_divide_conquer),"BUG(4) in abi_dhegv (d&c)!")
    if (cplx_ == 2) then
      call magmaf_zhegvd(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_z_work,eigen_z_lwork, &
@@ -87,23 +88,23 @@
      call magmaf_dsygvd(jobz,uplo,n,a,lda,w,eigen_d_work,eigen_d_lwork,&
 &                        eigen_iwork,eigen_liwork,info)
    endif
- else
 #endif
 
-#ifdef HAVE_LINALG_SCALAPACK
- if(use_slk_ == 1) then
+!===== SCALAPACK
+ else if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_ == 1) then
+#if defined HAVE_LINALG_SCALAPACK
    ABI_CHECK(present(x_cplx),"BUG(5) in abi_dhegv (x_cplx)!")
    call compute_eigen2(abi_communicator,abi_processor,cplx_,n,n,a,b,w,istwf_k_)
    info = 0 ! This is to avoid unwanted warning but it's not clean
- else
 #endif
 
-#ifdef HAVE_LINALG_PLASMA
+!===== PLASMA
  !FDahm & LNGuyen  (November 2012) :
  !  In Plasma v 2.4.6, eigen routines support only
  !  the eigenvalues computation (jobz=N) and not the
  ! full eigenvectors bases determination (jobz=V)
- if (LSAME(jobz,'N')) then
+ else if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
+#if defined HAVE_LINALG_PLASMA
    if (cplx_ == 2) then
      call PLASMA_Alloc_Workspace_zhegv(n,n,plasma_work,info)
      info = PLASMA_zhegv_c(itype,jobz_plasma(jobz),uplo_plasma(uplo),n,c_loc(a),lda,&
@@ -114,26 +115,16 @@
 &                          c_loc(b),ldb,c_loc(w),plasma_work,c_loc(eigen_d_work),n)
    endif
    call PLASMA_Dealloc_handle(plasma_work,info)
+#endif
+
+!===== LAPACK
  else
-#endif
- if (cplx_ == 2) then
-   call zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_z_work,eigen_z_lwork,eigen_z_rwork,info)
- else
-#ifdef FC_NAG
-     !MG: This hack needed to pass paral[25] paral[29] and mpiio on nag@petrus with np=4
-     if (n < 0) write(std_out, *)"work: ",eigen_d_work(1:3)
-#endif
-   call dsygv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_d_work,eigen_d_lwork,info)
- endif
-#ifdef HAVE_LINALG_PLASMA
+   if (cplx_ == 2) then
+     call zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_z_work,eigen_z_lwork,eigen_z_rwork,info)
+   else
+     call dsygv(itype,jobz,uplo,n,a,lda,b,ldb,w,eigen_d_work,eigen_d_lwork,info)
+   endif
  end if
-#endif
-#ifdef HAVE_LINALG_SCALAPACK
- end if
-#endif
-#ifdef HAVE_LINALG_MAGMA
- end if
-#endif
 
  if (present(tim_xeigen).and.present(timopt)) then
    if(abs(timopt)==3) call timab(tim_xeigen,2,tsec)
@@ -191,12 +182,13 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  work => eigen_c_work ; rwork => eigen_c_rwork
  lwork=eigen_c_lwork
 
-#ifdef HAVE_LINALG_PLASMA
+!===== PLASMA
  !FDahm & LNGuyen  (November 2012) :
  !  In Plasma v 2.4.6, eigen routines support only
  !  the eigenvalues computation (jobz=N) and not the
  !  full eigenvectors bases determination (jobz=V)
- if (LSAME(jobz,'N')) then
+ if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
+#if defined HAVE_LINALG_PLASMA
    if (eigen_c_lwork==0) then
      ABI_ALLOCATE(work,(n**2))
    end if
@@ -207,9 +199,10 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
    if (eigen_c_lwork==0) then
      ABI_DEALLOCATE(work)
    end if
- else
 #endif
 
+!===== LAPACK
+ else
    if (eigen_c_lwork==0) then
      lwork=2*n-1
      ABI_ALLOCATE(work,(lwork))
@@ -224,9 +217,7 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
    if (eigen_c_lrwork==0) then
      ABI_DEALLOCATE(rwork)
    end if
-#ifdef HAVE_LINALG_PLASMA
  end if
-#endif
 
  ABI_CHECK(info==0,"abi_chegv returned info!=0!")
 
@@ -281,12 +272,13 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  work => eigen_z_work ; rwork => eigen_z_rwork
  lwork=eigen_z_lwork
 
-#ifdef HAVE_LINALG_PLASMA
+!===== PLASMA
  !FDahm & LNGuyen  (November 2012) :
  !  In Plasma v 2.4.6, eigen routines support only
  !  the eigenvalues computation (jobz=N) and not the
  ! full eigenvectors bases determination (jobz=V)
- if (LSAME(jobz,'N')) then
+ if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
+#if defined HAVE_LINALG_PLASMA
    if (eigen_z_lwork==0) then
      ABI_ALLOCATE(work,(n**2))
    end if
@@ -297,9 +289,10 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
    if (eigen_z_lwork==0) then
      ABI_DEALLOCATE(work)
    end if
- else
 #endif
 
+!===== LAPACK
+ else
    if (eigen_z_lwork==0) then
      lwork=2*n-1
      ABI_ALLOCATE(work,(lwork))
@@ -314,9 +307,7 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
    if (eigen_z_lrwork==0) then
      ABI_DEALLOCATE(rwork)
    end if
-#ifdef HAVE_LINALG_PLASMA
  end if
-#endif
 
  ABI_CHECK(info==0,"abi_zhegv returned info!=0!")
 

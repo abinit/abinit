@@ -1961,7 +1961,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
  integer,parameter :: max_number_of_npslk=10,max_number_of_iter=10
  integer :: blocksize,bigorder,ierr,ii,islk,islk1,iter,jj,keep_gpu
  integer :: kgb_comm,my_rank,np_slk,np_slk_max,np_slk_best,nranks
- integer :: use_lapack_gpu,use_slk,vectsize
+ integer :: use_lapack_gpu,use_slk,vectsize,wfoptalg
  real(dp) :: min_eigen,min_ortho,time_xeigen,time_xortho
  character(len=500) :: message
 !arrays
@@ -2047,10 +2047,9 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !    Initialize linalg parameters for this np_slk value
 !    For the first np_slk value, everything is initialized
 !    For the following np_slk values, only Scalapack parameters are updated
-     call abi_linalg_init(kgb_comm,np_slk,bigorder,my_rank,&
-&                         opt_only_scalapack=(islk>islk1),&
-&                         opt_lapack_double_precision=.true.,&
-&                         opt_lapack_full_storage=.true.)
+     wfoptalg=14 ! Simulate use of LOBPCG
+     call abi_linalg_init(bigorder,RUNL_GSTATE,wfoptalg,1,&
+&                         use_lapack_gpu,use_slk,np_slk,kgb_comm)
 
 !    We could do mband/blocksize iter as in lobpcg but it's too long
      do iter=1,max_number_of_iter
@@ -2097,7 +2096,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !    Finalize linalg parameters for this np_slk value
 !    For the last np_slk value, everything is finalized
 !    For the previous np_slk values, only Scalapack parameters are updated
-     call abi_linalg_finalize(opt_only_scalapack=(islk<np_slk_max))
+     call abi_linalg_finalize()
 
      time_xortho= time_xortho*mband/blocksize
      time_xeigen= time_xeigen*mband/blocksize
