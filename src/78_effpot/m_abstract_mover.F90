@@ -102,7 +102,6 @@ contains
   subroutine calc_observables(self)
     ! call functions to calculate observables.
     class(abstract_mover_t), intent(inout) :: self
-
     MSG_ERROR("calc_observables not implemented for this mover")
   end subroutine calc_observables
 
@@ -112,11 +111,11 @@ contains
     MSG_ERROR("write_hist not implemented for this mover")
   end subroutine write_hist
 
-  subroutine get_state(self, position, strain, spin, ihist)
+  subroutine get_state(self, displacement, strain, spin, ihist)
     ! get the state of the ihist(th) step. ihist can be 0 (current), -1 (last), ... -maxhist..
     !Note that the params are optional so it will be returned only if asked for.
     class(abstract_mover_t), intent(in):: self
-    real(dp), optional, intent(inout) :: position, strain, spin
+    real(dp), optional, intent(inout) :: displacement, strain, spin
     integer, optional, intent(in):: ihist
     MSG_ERROR("get_state not implemented for this mover")
   end subroutine get_state
