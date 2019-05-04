@@ -74,12 +74,12 @@
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
 
 !===== SCALAPACK
- if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1)  then
+ if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize)  then
 #if defined HAVE_LINALG_SCALAPACK
    z = zero
-   call init_matrix_scalapack(sca_a,n,n,abi_processor,istwf_k_,10)
-   call init_matrix_scalapack(sca_b,n,n,abi_processor,istwf_k_,10)
-   call init_matrix_scalapack(sca_ev,n,n,abi_processor,istwf_k_,10)
+   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_,10)
+   call init_matrix_scalapack(sca_b,n,n,slk_processor,istwf_k_,10)
+   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_,10)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
    call matrix_from_global_sym(sca_b,b,istwf_k_)
@@ -87,14 +87,14 @@
    call matrix_from_global(sca_a,a,istwf_k_)
    call matrix_from_global(sca_b,b,istwf_k_)
 #endif
-   call compute_generalized_eigen_problem(abi_processor,sca_a,sca_b,&
-&       sca_ev,w,abi_communicator,istwf_k_)
+   call compute_generalized_eigen_problem(slk_processor,sca_a,sca_b,&
+&       sca_ev,w,slk_communicator,istwf_k_)
    call matrix_to_global(sca_a,a,istwf_k_)
    call matrix_to_global(sca_b,b,istwf_k_)
    call matrix_to_reference(sca_ev,z,istwf_k_)
-   call xmpi_sum(z,abi_communicator,ierr)
-   CALL destruction_matrix_scalapack(sca_a)
-   CALL destruction_matrix_scalapack(sca_ev)
+   call xmpi_sum(z,slk_communicator,ierr)
+   call destruction_matrix_scalapack(sca_a)
+   call destruction_matrix_scalapack(sca_ev)
 #endif
 
 !===== LAPACK

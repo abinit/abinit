@@ -83,10 +83,12 @@ module m_abi_linalg
  real(dp),save,target,allocatable :: eigen_d_work(:)
  complex(spc),save,target,allocatable :: eigen_c_work(:)
  complex(dpc),save,target,allocatable :: eigen_z_work(:)
- integer,save,public :: abi_communicator=xmpi_comm_null
- integer,save,public :: abi_complement_communicator=xmpi_comm_null
+
+ integer,save,private :: slk_minsize=1
+ integer,save,public :: slk_communicator=xmpi_comm_null
+ integer,save,public :: slk_complement_communicator=xmpi_comm_null
 #ifdef HAVE_LINALG_SCALAPACK
- type(processor_scalapack),save,public :: abi_processor
+ type(processor_scalapack),save,public :: slk_processor
 #endif
 
 !Plasma can be activated via command line
@@ -315,8 +317,10 @@ CONTAINS  !===========================================================
  ABI_LINALG_SCALAPACK_ISON=.False.
  ABI_LINALG_MAGMA_ISON=.False.
  ABI_LINALG_PLASMA_ISON=.False.
- abi_communicator=xmpi_comm_null
- abi_complement_communicator=xmpi_comm_null
+ slk_communicator=xmpi_comm_null
+ slk_complement_communicator=xmpi_comm_null
+ slk_minsize=1
+
 !Exit here if we don't use this abi_linalg module
  if (.not.abi_linalg_in_use) return
 
@@ -336,21 +340,22 @@ CONTAINS  !===========================================================
  eigen_z_maxsize = max_eigen_pb_size_eff
  need_work_space=.true.
 
-#ifdef HAVE_LINALG_SCALAPACK
+#if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI
  if ((paral_kgb==1.or.use_slk==1).and.np_slk>0) then
    rank=xmpi_comm_rank(comm_scalapack)
-   ! We create abi_communicator using a cartesian grid, and store its complement
+   ! We create slk_communicator using a cartesian grid, and store its complement
    commsize = MIN(np_slk, xmpi_comm_size(comm_scalapack))
    sizecart = (/commsize, xmpi_comm_size(comm_scalapack)/commsize/)
    periodic = (/.true.,.true./) ; reorder = .false.
    call MPI_CART_CREATE(comm_scalapack,2,sizecart,periodic,reorder,commcart,abi_info1)
    keepdim = (/.true., .false./)
-   call MPI_CART_SUB(commcart, keepdim, abi_communicator,abi_info1)
+   call MPI_CART_SUB(commcart, keepdim, slk_communicator,abi_info1)
    keepdim = (/.false., .true./)
-   call MPI_CART_SUB(commcart, keepdim, abi_complement_communicator,abi_info1)
-   call init_scalapack(abi_processor,abi_communicator)
-   ABI_LINALG_SCALAPACK_ISON = .true.
+   call MPI_CART_SUB(commcart, keepdim, slk_complement_communicator,abi_info1)
+   call init_scalapack(slk_processor,slk_communicator)
+   slk_minsize=maxval(slk_processor%grid%dims(1:2))
    need_work_space=(use_slk/=1) ! In this case we never use the work arrays
+   ABI_LINALG_SCALAPACK_ISON = .true.
  end if
 #else
  ABI_UNUSED(comm_scalapack)
@@ -671,11 +676,12 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_LINALG_SCALAPACK
  if (ABI_LINALG_SCALAPACK_ISON) then
-   call end_scalapack(abi_processor)
-   call xmpi_comm_free(abi_communicator)
-   call xmpi_comm_free(abi_complement_communicator)
-   abi_communicator=xmpi_comm_null
-   abi_complement_communicator=xmpi_comm_null
+   call end_scalapack(slk_processor)
+   call xmpi_comm_free(slk_communicator)
+   call xmpi_comm_free(slk_complement_communicator)
+   slk_communicator=xmpi_comm_null
+   slk_complement_communicator=xmpi_comm_null
+   slk_minsize=1
  end if
 #endif
 

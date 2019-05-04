@@ -91,10 +91,10 @@
 #endif
 
 !===== SCALAPACK
- else if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_ == 1) then
+ else if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize) then
 #if defined HAVE_LINALG_SCALAPACK
    ABI_CHECK(present(x_cplx),"BUG(5) in abi_dhegv (x_cplx)!")
-   call compute_eigen2(abi_communicator,abi_processor,cplx_,n,n,a,b,w,istwf_k_)
+   call compute_eigen2(slk_communicator,slk_processor,cplx_,n,n,a,b,w,istwf_k_)
    info = 0 ! This is to avoid unwanted warning but it's not clean
 #endif
 

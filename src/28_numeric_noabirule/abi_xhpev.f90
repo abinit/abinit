@@ -70,32 +70,32 @@
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
 
 !===== SCALAPACK
- if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1)  then
+ if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize)  then
 #if defined HAVE_LINALG_SCALAPACK
    ! if istwfk=1, then dim_evec1=2*n and if istwfk=2, dim_evec1=n
    dim_evec1= 2*n/istwf_k_
    ABI_ALLOCATE(tmp_evec,(dim_evec1,n))
    tmp_evec = zero
-   call init_matrix_scalapack(sca_a,n,n,abi_processor,istwf_k_,10)
-   call init_matrix_scalapack(sca_ev,n,n,abi_processor,istwf_k_,10)
+   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_,10)
+   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_,10)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
 #else
    call matrix_from_global(sca_a,a,istwf_k_)
 #endif
-   call compute_eigen_problem(abi_processor,sca_a,&
-&        sca_ev,w,abi_communicator,istwf_k_)
+   call compute_eigen_problem(slk_processor,sca_a,&
+&        sca_ev,w,slk_communicator,istwf_k_)
    call matrix_to_global(sca_a,a,istwf_k_)
    call matrix_to_reference(sca_ev,tmp_evec,istwf_k_)
-   call xmpi_sum(tmp_evec,z,dim_evec1*n,abi_communicator,ierr)
-   CALL destruction_matrix_scalapack(sca_a)
-   CALL destruction_matrix_scalapack(sca_ev)
+   call xmpi_sum(tmp_evec,z,dim_evec1*n,slk_communicator,ierr)
+   call destruction_matrix_scalapack(sca_a)
+   call destruction_matrix_scalapack(sca_ev)
    ABI_DEALLOCATE(tmp_evec)
 #endif
 
 !===== LAPACK
  else
-   if (istwf_k_ /= 2) then
+   if (istwf_k_/=2) then
      call zhpev(jobz,uplo,n,a,w,z,ldz,eigen_z_work,eigen_z_rwork,info)
    else
      call dspev(jobz,uplo,n,a,w,z,ldz,eigen_d_work,info)
