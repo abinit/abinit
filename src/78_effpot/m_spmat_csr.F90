@@ -141,10 +141,6 @@ contains
 
     ! TODO: no need to send all the data to all the
     ! only the corresponding row data.
-    !call mpi_bcast(self%icol, self%nnz, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    !call mpi_bcast(self%row_shift, self%nrow+1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    !call mpi_bcast(self%val, self%nnz, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-
     call xmpi_bcast(self%icol, 0, xmpi_world, ierr)
     call xmpi_bcast(self%row_shift, 0, xmpi_world, ierr)
     call xmpi_bcast(self%val, 0, xmpi_world, ierr)
@@ -191,14 +187,16 @@ contains
   end subroutine CSR_mat_t_mv
 
 
-  subroutine CSR_mat_t_mv_mpi(self, x, b)
+  subroutine CSR_mat_t_mv_mpi(self, x, b, bcastx, syncb)
     class(CSR_mat_t), intent(in) :: self
     real(dp), intent(inout) :: x(self%ncol)
+    logical, intent(in) :: bcastx, syncb
     real(dp), intent(out) :: b(self%nrow)
     !real(dp):: my_b(self%nrow)
     integer :: ierr, irow,  i1, i2, i
-    !call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    call xmpi_bcast(x, 0, xmpi_world, ierr)
+    if (bcastx) then
+        call xmpi_bcast(x, 0, xmpi_world, ierr)
+    end if
     !if (.not. iam_master) b(:)=0.0_dp
     !my_b(:)=0.0_dp
     b(:)=0.0_dp
@@ -211,7 +209,9 @@ contains
     enddo
     ! TODO : use gather instead of reduce.
     !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
-    call xmpi_sum_master(b, 0, xmpi_world, ierr )
+    if (syncb) then
+       call xmpi_sum_master(b, 0, xmpi_world, ierr )
+    endif
   end subroutine CSR_mat_t_mv_mpi
 
   subroutine CSR_mat_t_mv_select_row(self, nrow, id_row, x, y)

@@ -41,7 +41,7 @@ module  m_spin_potential
   use m_errors
   use m_abicore
   use m_xmpi
-  use m_mpi_scheduler, only: mb_mpi_info_t, init_mpi_info
+  use m_mpi_scheduler, only: mb_mpi_info_t, init_mpi_info, mpi_scheduler_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_supercell, only: mb_supercell_t
   use m_spmat_coo, only: coo_mat_t
@@ -71,6 +71,7 @@ module  m_spin_potential
      real(dp), allocatable :: Htmp(:, :)
      real(dp), allocatable :: ms(:)
      type(mb_mpi_info_t) :: mpiinfo
+     type(mpi_scheduler_t) :: mps
    CONTAINS
      procedure :: initialize
      procedure :: finalize
@@ -81,7 +82,7 @@ module  m_spin_potential
      procedure :: calc_bilinear_term_Heff
      procedure :: calc_external_Heff
      procedure :: calculate => spin_potential_t_calculate
-     procedure :: get_energy => spin_potential_t_get_energy
+     !procedure :: get_energy => spin_potential_t_get_energy
      procedure :: get_delta_E => spin_potential_t_get_delta_E
      procedure :: add_bilinear_term
      procedure :: add_bilinear_term_spin_block
@@ -101,7 +102,7 @@ contains
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-    
+    call self%mps%initialize(nspin, comm)
     self%label="SpinPotential"
     self%has_spin=.True.
     self%has_displacement=.False.
@@ -200,7 +201,10 @@ contains
   subroutine calc_external_Heff(self, Heff)
     class(spin_potential_t), intent(inout) :: self
     real(dp), intent(out) :: Heff(:,:)
-    Heff(:,:)= Heff(:,:) +self%external_hfield(:,:)
+    integer :: i
+     do i= self%mps%istart, self%mps%iend
+       Heff(:, i)=Heff(:,i) + self%external_hfield(:, i)
+    end do
   end subroutine calc_external_Heff
 
   subroutine add_bilinear_term(self, i,j, val)
@@ -243,7 +247,6 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-
     if(iam_master) then
        do ia = 1, 3, 1
           do ib=1, 3, 1
@@ -258,10 +261,9 @@ contains
     class(spin_potential_t), intent(inout) :: self
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
 
     if (.not. self%csr_mat_ready) then
+       call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
        if(iam_master) then
           call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
           call self%coeff_coo%finalize()
@@ -280,8 +282,8 @@ contains
     integer :: i
     !call self%bilinear_csr_mat%mv(S ,Heff)
     call self%prepare_csr_matrix()
-    call self%bilinear_csr_mat%mv_mpi(S ,Heff)
-    do i =1, self%nspin
+    call self%bilinear_csr_mat%mv_mpi(x=S ,b=Heff, bcastx=.False., syncb=.False.)
+    do i= self%mps%istart, self%mps%iend
        Heff(:, i)=Heff(:,i)/self%ms(i)*2.0_dp
     end do
   end subroutine calc_bilinear_term_Heff
@@ -295,8 +297,8 @@ contains
     ! calculate if required
     if (present(bfield) .and. present(energy)) then
        call self%get_Heff(spin, bfield, energy)
-    else
-       call self%get_energy(spin, energy)
+    !else
+    !   call self%get_energy(spin, energy)
     end if
   end subroutine spin_potential_t_calculate
 
@@ -306,70 +308,78 @@ contains
     real(dp), intent(inout):: S(3,self%nspin)
     real(dp), intent(inout):: Heff(3,self%nspin)
     real(dp), intent(inout) :: energy
+    real(dp) :: etmp
     integer :: i, j
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-
-
     self%Htmp(:,:)=0.0_dp
+    etmp=0.0_dp
+
+
+    ! calculate energy from bilinear terms (all the above ones)
     call self%calc_bilinear_term_Heff(S,self%Htmp)
-    Heff=Heff+self%Htmp
+    do i= self%mps%istart, self%mps%iend
+       Heff(:,i)=Heff(:,i)+self%Htmp(:,i)
+       do j=1, 3
+          etmp=etmp-(self%Htmp(j, i)*S(j,i)*self%ms(i))*0.5_dp
+       end do
+    enddo
     if(iam_master) then
        if (self%has_dipdip) then
           continue
           ! TODO implement dipdip and add it
        endif
-       ! calculate energy from bilinear terms (all the above ones)
-       do i=1, self%nspin
-          do j=1, 3
-             energy=energy-(Heff(j, i)*S(j,i)*self%ms(i))*0.5_dp
-          end do
-       end do
-       if (self%has_external_hfield) then
-          call self%calc_external_Heff(self%Htmp)
-          Heff = Heff+self%Htmp
-          do i=1, self%nspin
-             do j=1, 3
-                energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
-             end do
-          end do
-       endif
     endif
+
+
+    ! linear terms
+    if (self%has_external_hfield) then
+       call self%calc_external_Heff(self%Htmp)
+        do i= self%mps%istart, self%mps%iend
+           Heff(:,i)=Heff(:,i)+self%Htmp(:,i)
+           do j=1, 3
+              etmp=etmp-(self%Htmp(j, i)*S(j,i)*self%ms(i))
+           end do
+        enddo
+    endif
+
+    call xmpi_sum_master(etmp, 0, xmpi_world, ierr )
+    energy=energy+etmp
 
   end subroutine spin_potential_t_total_Heff
 
-  subroutine spin_potential_t_get_energy(self, S, energy)
-    class(spin_potential_t), intent(inout) :: self
-    real(dp), intent(inout):: S(3,self%nspin)
-    real(dp), intent(inout) :: energy
-    integer :: i, j
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-    if (.not. self%csr_mat_ready) then
-       call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
-       call self%bilinear_csr_mat%sync()
-       self%csr_mat_ready=.True.
-    endif
-    call self%bilinear_csr_mat%mv_mpi(S ,self%Htmp)
-    if(iam_master) then
-       energy=energy - sum(sum(self%Htmp* S, dim=1))
-    endif
-    if(iam_master) then
-       if (self%has_external_hfield) then
-          call self%calc_external_Heff(self%Htmp)
-          do i=1, self%nspin
-             do j=1, 3
-                energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
-             end do
-          end do
-       endif
-    end if
-  end subroutine spin_potential_t_get_energy
+!  subroutine spin_potential_t_get_energy(self, S, energy)
+!    class(spin_potential_t), intent(inout) :: self
+!    real(dp), intent(inout):: S(3,self%nspin)
+!    real(dp), intent(inout) :: energy
+!    integer :: i, j
+!    integer :: master, my_rank, comm, nproc, ierr
+!    logical :: iam_master
+!    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+!
+!
+!    if (.not. self%csr_mat_ready) then
+!       call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
+!       call self%bilinear_csr_mat%sync()
+!       self%csr_mat_ready=.True.
+!    endif
+!    call self%bilinear_csr_mat%mv_mpi(S ,self%Htmp)
+!    if(iam_master) then
+!       energy=energy - sum(sum(self%Htmp* S, dim=1))
+!    endif
+!    if(iam_master) then
+!       if (self%has_external_hfield) then
+!          call self%calc_external_Heff(self%Htmp)
+!          do i=1, self%nspin
+!             do j=1, 3
+!                energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
+!             end do
+!          end do
+!       endif
+!    end if
+!  end subroutine spin_potential_t_get_energy
 
 
   subroutine spin_potential_t_get_delta_E(self, S, ispin, Snew, deltaE)
@@ -426,6 +436,8 @@ contains
     if (.not. self%csr_mat_ready) then
        call self%coeff_coo%finalize()
     end if
+
+    call self%mps%finalize()
 
   end subroutine finalize
 

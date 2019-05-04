@@ -236,16 +236,12 @@ contains
     class(spin_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
     integer :: i, m
-    real(dp) :: S(3, self%nspin)
     character(len=500) :: msg
 
     
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-    
 
     if(iam_master) then
        if (present(mode)) then
@@ -255,18 +251,18 @@ contains
        end if
     if(m==2) then
        ! set all spin to z direction.
-       S(1,:)=0.0d0
-       S(2,:)=0.0d0
-       S(3,:)=1.0d0
+       self%Stmp(1,:)=0.0d0
+       self%Stmp(2,:)=0.0d0
+       self%Stmp(3,:)=1.0d0
     else if (m==1) then
        ! randomize S using uniform random number
        write(msg,*) "Initial spin set to random value."
        call wrtout(ab_out,msg,'COLL')
        call wrtout(std_out,msg,'COLL')
-       call random_number(S)
-       S=S-0.5
+       call random_number(self%Stmp)
+       self%Stmp=self%Stmp-0.5
        do i=1, self%nspin
-          S(:,i)=S(:,i)/sqrt(sum(S(:, i)**2))
+          self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
        end do
     else
        write(msg,*) "Error: Set initial spin: mode should be 2(FM) or 1 (random). Others are not yet implemented."
@@ -274,9 +270,10 @@ contains
        call wrtout(std_out,msg,'COLL')
 
     end if
-    call self%hist%set_vars(S=S, Snorm=self%supercell%ms, &
+    call self%hist%set_vars(S=self%Stmp, Snorm=self%supercell%ms, &
          &  time=0.0_dp, ihist_latt=0, inc=.True.)
    endif
+   call xmpi_bcast(self%Stmp, 0, comm, ierr)
  end subroutine set_initial_state
 
 
@@ -398,8 +395,8 @@ contains
     end do
     call self%mps%gatherv_dp2d(S_out, 3, buffer=self%buffer)
     call xmpi_bcast(S_out, master, comm, ierr)
-    ! correction
 
+    ! correction
     self%Htmp(:,:)=0.0
     etot=0.0
     call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_out, bfield=self%Htmp, energy=etot)
@@ -426,7 +423,7 @@ contains
     B(:)=Heff(:)/Bnorm
     w=Bnorm*dt
     sinw=sin(w)
-    cosw=sqrt(1.0_dp- sinw*sinw)
+    cosw=cos(w)
     u=1.0d0-cosw
     R(1,1)=B(1)*B(1)*u+cosw
     R(2,1)=B(1)*B(2)*u+B(3)*sinw
@@ -512,7 +509,6 @@ contains
 
 
     if(present(spin)) MSG_ERROR("spin should not be input for spin mover.")
-    if(iam_master) self%Stmp=self%hist%get_S()
     if(self%method==1) then
        call self%run_one_step_HeunP(effpot=effpot, S_in=self%Stmp, S_out=S_out, etot=etot, &
             displacement=displacement, strain=strain, lwf=lwf)
@@ -525,6 +521,7 @@ contains
        endif
        call self%run_one_step_MC(effpot, self%Stmp, S_out, etot)
     end if
+    self%Stmp(:,:)=S_out
     ! do not inc until time is set to hist.
     if(iam_master) then
        call self%hist%set_vars( S=S_out, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
@@ -792,7 +789,6 @@ contains
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
           if(i==0) then
              call self%set_initial_state()
-             !call self%hist%inc1()
           else
              call self%hist%inc1()
           endif
