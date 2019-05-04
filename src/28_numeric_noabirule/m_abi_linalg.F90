@@ -682,8 +682,8 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_LINALG_SCALAPACK
  if (abi_communicator/=xmpi_comm_null) then
-   call xmpi_comm_free(abi_communicator)
    call end_scalapack(abi_processor)
+   call xmpi_comm_free(abi_communicator)
  end if
 #endif
  if (present(opt_only_scalapack)) then
