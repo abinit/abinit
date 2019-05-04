@@ -48,6 +48,7 @@ module m_unitcell
 
   type, public :: unitcell_spin_t
      integer :: nspin
+     real(dp) :: rprimd(3,3)
      real(dp), allocatable :: ms(:)
      real(dp), allocatable :: gyro_ratio(:)
      real(dp), allocatable :: damping_factor(:)
@@ -74,6 +75,7 @@ module m_unitcell
      type(unitcell_lattice_t) :: lattice
      type(unitcell_spin_t) :: spin
      type(unitcell_lwf_t) :: lwf
+     ! shared 
    contains
      procedure:: initialize
      procedure :: finalize
@@ -228,7 +230,8 @@ contains
        call sc_maker%repeat(self%gyro_ratio, supercell%gyro_ratio)
        call sc_maker%repeat(self%damping_factor, supercell%gilbert_damping)
        call sc_maker%repeat([(i ,i=1, self%nspin)], supercell%ispin_prim)
-       call sc_maker%trans_xred(self%spin_positions, supercell%spin_positions)
+       supercell%rprimd(:,:)=sc_maker%sc_cell(self%rprimd)
+       call sc_maker%trans_xcart(self%rprimd, self%spin_positions, supercell%spin_positions)
        call sc_maker%rvec_for_each(self%nspin, supercell%rvec)
     end if
     call xmpi_bcast(supercell%nspin, master, comm, ierr)
@@ -238,6 +241,7 @@ contains
     call xmpi_bcast(supercell%ispin_prim, master, comm, ierr)
     call xmpi_bcast(supercell%spin_positions, master, comm, ierr)
     call xmpi_bcast(supercell%rvec, master, comm, ierr)
+    call xmpi_bcast(supercell%rprimd, master, comm, ierr)
   end subroutine spin_fill_supercell
 
 

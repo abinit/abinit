@@ -41,12 +41,13 @@ module  m_spin_potential
   use m_errors
   use m_abicore
   use m_xmpi
-  use m_mpi_scheduler, only: mb_mpi_info_t
+  use m_mpi_scheduler, only: mb_mpi_info_t, init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_supercell, only: mb_supercell_t
   use m_spmat_coo, only: coo_mat_t
+  use m_spmat_lil, only: lil_mat_t
   use m_spmat_csr, only : CSR_mat_t
-  use m_spmat_convert, only : coo_to_csr
+  use m_spmat_convert, only : spmat_convert
   use m_abstract_potential, only : abstract_potential_t
   implicit none
   !!***
@@ -61,7 +62,7 @@ module  m_spin_potential
      real(dp), allocatable :: external_hfield(:,:)
 
      ! Exchange/DMI/dipdip stored like COO sparse matrix form.
-     type(coo_mat_t) :: coeff_coo
+     type(lil_mat_t) :: coeff_coo
      logical :: csr_mat_ready= .False.
      type(CSR_mat_t) :: bilinear_csr_mat
      ! 3, 3, ninit
@@ -262,7 +263,7 @@ contains
 
     if (.not. self%csr_mat_ready) then
        if(iam_master) then
-          call coo_to_csr(self%coeff_coo, self%bilinear_csr_mat)
+          call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
           call self%coeff_coo%finalize()
        endif
        call self%bilinear_csr_mat%sync()
@@ -350,7 +351,7 @@ contains
 
 
     if (.not. self%csr_mat_ready) then
-       call coo_to_csr(self%coeff_coo, self%bilinear_csr_mat)
+       call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
        call self%bilinear_csr_mat%sync()
        self%csr_mat_ready=.True.
     endif
@@ -393,7 +394,7 @@ contains
     S(:, ispin)= S(:, ispin)+ dS
 
        if (.not. self%csr_mat_ready) then
-          call coo_to_csr(self%coeff_coo, self%bilinear_csr_mat)
+          call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
           self%csr_mat_ready=.True.
        endif
        call self%bilinear_csr_mat%mv_select_row(3, [3*ispin-2, 3*ispin-1, 3*ispin], S, tmp)

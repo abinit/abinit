@@ -56,6 +56,7 @@ module m_spmat_NDCOO
      procedure :: get_ind_inz
      procedure :: get_ind
      procedure :: group_by_1dim
+     procedure :: mv1vec
      procedure :: print
   end type ndcoo_mat_t
 
@@ -248,6 +249,36 @@ contains
     end do
 
   end subroutine print
+
+  ! matrix vector product. 
+  subroutine mv1vec(self, vec, i, res)
+    class(ndcoo_mat_t), intent(inout) :: self
+    real(dp), intent(in) :: vec(:)
+    integer ,intent(in) :: i               !
+    class(ndcoo_mat_t), intent(inout) :: res ! result
+    integer :: iind
+    !TODO: to be implemented
+  end subroutine mv1vec
+
+  ! matrix vector vector  product. matrix should be dim3.
+  ! n(vector)=ndim-1
+  ! which returns a vecor
+  ! res_r = \sum_ij M_{ijr} V_i V_j
+  ! i, j, r can be in any order.
+  subroutine vec_product(self, iv, veci, jv, vecj, rv, res)
+    class(ndcoo_mat_t), intent(inout) :: self
+    real(dp), intent(in) :: veci(:), vecj(:)
+    integer ,intent(in) :: iv, jv, rv               !
+    real(dp), intent(inout) :: res(:)
+    integer :: iind, iiv, ijv, irv
+    do iind =1 , self%nnz
+      iiv=self%ind%data(iv, iind)
+      ijv=self%ind%data(jv, iind)
+      irv=self%ind%data(rv, iind)
+      res(irv) = res(irv) + self%val%data(iind) * veci(iiv)*vecj(ijv)
+    end do
+  end subroutine vec_product
+
 
   subroutine test_ndcoo()
     type(ndcoo_mat_t) :: m

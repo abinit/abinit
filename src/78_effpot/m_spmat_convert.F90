@@ -40,9 +40,21 @@ module m_spmat_convert
   use m_spmat_lil
   use m_spmat_csr
   use m_spmat_coo
+  use m_spmat_lco
   implicit none
 !!****m*
   public
+  interface spmat_convert
+     !procedure  dense_to_LIL
+     procedure  LIL_to_dense
+     procedure  LIL_to_COO
+     procedure  LIL_to_CSR
+     procedure dense_to_CSR
+     procedure dense_to_COO
+     procedure  COO_to_CSR
+     procedure LCO_to_CSR
+  end interface spmat_convert
+ 
 contains
   subroutine dense_to_LIL(mat, ll)
     ! check shape
@@ -184,6 +196,15 @@ contains
     if(allocated(istartend)) ABI_DEALLOCATE(istartend)
   end subroutine COO_to_CSR
 
+  subroutine LCO_to_CSR(lco, csr)
+    type(LCO_mat_t), intent(inout) :: lco
+    type(CSR_mat_t), intent(inout) :: csr
+    integer :: ngroup
+    integer, allocatable :: i1_list(:), istartend(:)
+    integer :: row_nz(lco%mshape(1))
+    integer :: i, irow
+
+  end subroutine LCO_to_CSR
 
   subroutine spmat_convert_unittest()
     real(dp) ::mat(4,4), x(4), b(4)

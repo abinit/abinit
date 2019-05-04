@@ -50,6 +50,7 @@ module m_spmat_lil
      procedure :: initialize => lil_mat_t_initialize
      procedure :: finalize => lil_mat_t_finalize
      procedure :: insert => lil_mat_t_insert
+     procedure :: add_entry
      procedure :: get_nnz => lil_mat_t_get_nnz
      procedure :: print => LIL_mat_t_print
     end type LIL_mat_t
@@ -90,6 +91,15 @@ module m_spmat_lil
        call llist_sorted_insert(self%rows(irow), icol, val, mode)
     end if
   end subroutine LIL_mat_t_insert
+
+  subroutine add_entry(self, ind, val)
+    class(LIL_mat_t) , intent(inout):: self
+    integer, intent(in):: ind(self%ndim)
+    real(dp), intent(in):: val
+    if(abs(val)>tiny(0.0d0)) then
+       call llist_sorted_insert(self%rows(ind(1)), ind(2), val, mode=1)
+    end if
+  end subroutine add_entry
 
 
   subroutine LIL_mat_t_print(self, mat)

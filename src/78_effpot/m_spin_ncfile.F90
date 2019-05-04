@@ -283,35 +283,25 @@ end subroutine def_observable_var
     ! sc_matric
 
 #if defined HAVE_NETCDF
-    ! ncerr=nf90_redef(self%ncid)
+     ncerr=nf90_redef(self%ncid)
 
     ! call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id,&
     !      & NF90_DOUBLE, "rprimd", "primitive cell vectors in real space with&
     !      & units", "bohr")
-    ! call ab_define_var(self%ncid, (/self%three, self%nspin/), pos_id,&
-    !      & NF90_DOUBLE, "xcart_spin","position of spin in cartesian&
-    !      & coordinates", "bohr")
-    ! call ab_define_var(self%ncid, (/ self%nspin/), ispin_prim_id, NF90_INT,&
-    !      & "ispin_prim", "index of spin in primitive cell", "dimensionless")
-    ! call ab_define_var(self%ncid, (/self%three, self%nspin/), rvec_id,&
-    !      & NF90_INT, "Rvec", "R vector for spin in supercell", "dimensionless")
-    ! call ab_define_var(self%ncid, (/ self%nspin/), iatoms_id, NF90_INT,&
-    !      & "iatoms", "indices of atoms with spin", "dimensionless")
+    call ab_define_var(self%ncid, (/self%three, self%nspin/), pos_id,&
+         & NF90_DOUBLE, "xcart_spin","position of spin in cartesian&
+         & coordinates", "bohr")
+    call ab_define_var(self%ncid, (/self%three, self%nspin/), rvec_id,&
+          & NF90_INT, "Rvec", "R vector for spin in supercell", "dimensionless")
+    call ab_define_var(self%ncid, (/self%nspin/), ispin_prim_id,&
+          & NF90_INT, "ispin_prim", "index of spin in primitive cell", "dimensionless")
 
-    ! !ncerr=nf90_def_var(self%ncid, "unitcell", NF90_DOUBLE, [self%three,
-    ! !self%three], unitcell_id)
-    ! !ncerr=nf90_def_var(self%ncid, "xred", NF90_DOUBLE, [self%three,
-    ! !self%nspin], pos_id)
-    ! !ncerr=nf90_def_var(self%ncid, "ispin_prim", NF90_INT, [self%nspin],
-    ! !ispin_prim_id)
-    ! !ncerr=nf90_def_var(self%ncid, "rvec", NF90_INT, [self%three,self%nspin],
-    ! !rvec_id)
-    ! ncerr=nf90_enddef(self%ncid)
+    ncerr=nf90_enddef(self%ncid)
 
-    ! ncerr=nf90_put_var(self%ncid, rprimd_id, scell%cell)
-    ! ncerr=nf90_put_var(self%ncid, pos_id, scell%pos)
-    ! ncerr=nf90_put_var(self%ncid, ispin_prim_id, scell%ispin_prim)
-    ! ncerr=nf90_put_var(self%ncid, rvec_id, scell%rvec)
+    !ncerr=nf90_put_var(self%ncid, rprimd_id, scell%cell)
+    ncerr=nf90_put_var(self%ncid, pos_id, supercell%spin_positions)
+    ncerr=nf90_put_var(self%ncid, ispin_prim_id, supercell%ispin_prim)
+    ncerr=nf90_put_var(self%ncid, rvec_id, supercell%rvec)
     ! ncerr=nf90_put_var(self%ncid, iatoms_id, scell%iatoms)
 #endif
   end subroutine write_supercell

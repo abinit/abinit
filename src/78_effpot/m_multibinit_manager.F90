@@ -106,7 +106,6 @@ contains
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen), intent(inout) :: filenames(17)
     type(multibinit_dtset_type), target, optional, intent(in) :: params
-    integer:: ierr
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -305,7 +304,10 @@ contains
     call self%fill_supercell()
 
     call self%set_movers()
+
+    call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%spin_mover%run_time(self%pots)
+    call self%spin_mover%spin_ncfile%close()
   end subroutine run_spin_dynamics
 
   subroutine run_MvT(self)
