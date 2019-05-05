@@ -359,6 +359,8 @@ CONTAINS  !===========================================================
  end if
 #else
  ABI_UNUSED(comm_scalapack)
+ ABI_UNUSED(paral_kgb)
+ ABI_UNUSED(use_slk)
  ABI_UNUSED(np_slk)
 #endif
  

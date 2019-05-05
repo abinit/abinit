@@ -126,7 +126,6 @@
    if(abs(timopt)==3) call timab(tim_xeigen,2,tsec)
  end if
 
- write(100,*) eigen_z_lwork,ABI_LINALG_SCALAPACK_ISON,use_slk_;flush(100)
  ABI_CHECK(info==0,"abi_dheev returned info!=0!")
 
 end subroutine abi_dheev
