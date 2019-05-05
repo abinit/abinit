@@ -333,7 +333,6 @@ contains
        endif
     endif
 
-
     ! linear terms
     if (self%has_external_hfield) then
        call self%calc_external_Heff(self%Htmp)

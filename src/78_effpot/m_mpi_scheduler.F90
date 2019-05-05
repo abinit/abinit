@@ -36,9 +36,10 @@ module m_mpi_scheduler
   use m_xmpi
   use m_errors
   use m_abicore
- 
+
   implicit none
 !!***
+
 
   private
 
@@ -70,6 +71,10 @@ module m_mpi_scheduler
      procedure :: get_ntask
      procedure :: gatherv_dp1d ! helper function to gather 1d real(dp) array from nodes.
      procedure :: gatherv_dp2d ! helper function to gather 2d real(dp) array from nodes.
+     procedure :: allgatherv_dp1d ! helper function to gather 1d real(dp) array from nodes.
+     procedure :: allgatherv_dp2d ! helper function to gather 2d real(dp) array from nodes.
+    ! procedure :: allgatherv_dp2d_inplace ! helper function to gather 2d real(dp) array from nodes.
+
   end type mpi_scheduler_t
 
   public :: init_mpi_info
@@ -92,6 +97,7 @@ contains
 
   subroutine mb_mpi_info_t_initialize(self)
     class (mb_mpi_info_t):: self
+    self%master = 0     
     self%comm = xmpi_world
     self%nproc = xmpi_comm_size(self%comm)
     self%my_rank = xmpi_comm_rank(self%comm)
@@ -246,6 +252,54 @@ contains
          & 0, self%comm, ierr)
     data(:,:)=buffer(:,:)
   end subroutine gatherv_dp2d
+
+  subroutine allgatherv_dp1d(self, data, buffer)
+    class(mpi_scheduler_t), intent(inout) :: self
+    real(dp), intent(inout) :: data(self%ntasks)
+    real(dp), intent(inout) :: buffer(self%ntasks)
+    integer :: ierr
+    call xmpi_allgatherv(data(self%istart: self%iend), &
+         & self%ntask, &
+         & buffer,&
+         & self%ntask_list, &
+         & self%istart_list-1, &
+         & self%comm, ierr )
+  data(:)=buffer(:)
+  end subroutine allgatherv_dp1d
+
+
+
+  subroutine allgatherv_dp2d(self, data, nrow, buffer)
+    class(mpi_scheduler_t), intent(inout) :: self
+    integer, intent(in) :: nrow
+    real(dp), intent(inout) :: data(nrow,self%ntasks), buffer(nrow, self%ntasks)
+    integer :: ierr
+
+    !xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+    call xmpi_allgatherv(data(:,self%istart:self%iend), &
+         & self%ntask*nrow, &
+         & buffer, &
+         & self%ntask_list*nrow, &
+         & (self%istart_list-1)*nrow, &
+         & self%comm, ierr)
+    data(:,:)=buffer(:,:)
+  end subroutine allgatherv_dp2d
+
+
+!  subroutine allgatherv_dp2d_inplace(self, data, nrow)
+!    class(mpi_scheduler_t), intent(inout) :: self
+!    integer, intent(in) :: nrow
+!    real(dp), intent(inout) :: data(nrow,self%ntasks)
+!    integer :: ierr
+!
+!    !xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+!    call xmpi_allgatherv(xmpi_in_place, &
+!         & self%ntask*nrow, &
+!         & data, &
+!         & self%ntask_list*nrow, &
+!         & (self%istart_list-1)*nrow, &
+!         & self%comm, ierr)
+!  end subroutine allgatherv_dp2d_inplace
 
 
   subroutine mpi_scheduler_t_finalize(self)

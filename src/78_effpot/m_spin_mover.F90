@@ -75,7 +75,7 @@ module m_spin_mover
   type, public, extends(abstract_mover_t) :: spin_mover_t
      integer :: nspin, method
      real(dp) :: dt, total_time, temperature, pre_time
-     real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:)
+     real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:), Stmp2(:,:)
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:), buffer(:,:)
      type(rng_t) :: rng
      type(spin_hist_t) :: hist
@@ -174,6 +174,7 @@ contains
     ABI_ALLOCATE(self%Htmp, (3,self%nspin) )
     ABI_ALLOCATE(self%Hrotate, (3,self%nspin) )
     ABI_ALLOCATE(self%Stmp, (3,self%nspin) )
+    ABI_ALLOCATE(self%Stmp2, (3,self%nspin) )
     ABI_ALLOCATE(self%buffer, (3,self%nspin) )
     ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
 
@@ -224,8 +225,13 @@ contains
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
     character(len=fnlen), intent(in) :: fname
-    call self%prepare_ncfile(params, trim(fname)//'_spinhist.nc')
-    call self%spin_ncfile%write_one_step(self%hist)
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    if (iam_master) then
+      call self%prepare_ncfile(params, trim(fname)//'_spinhist.nc')
+      call self%spin_ncfile%write_one_step(self%hist)
+    endif
   end subroutine set_ncfile_name
 
 
@@ -310,8 +316,6 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-
-
     if(present(temperature)) self%temperature=temperature
     call xmpi_bcast(self%temperature, master, comm, ierr)
     if(self%method==3) then
@@ -375,15 +379,14 @@ contains
     integer :: i
     real(dp) :: dSdt(3), Htmp(3), Ri(3)
 
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    !integer :: master, my_rank, comm, nproc, ierr
+    !logical :: iam_master
+    !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     ! predict
     etot=0.0
     self%Heff_tmp(:,:)=0.0
     call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf, spin=S_in, bfield=self%Heff_tmp, energy=etot)
-    call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
        Htmp=self%Heff_tmp(:,i)+self%H_lang(:,i)
@@ -393,14 +396,12 @@ contains
        Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
        S_out(:,i)=Ri
     end do
-    call self%mps%gatherv_dp2d(S_out, 3, buffer=self%buffer)
-    call xmpi_bcast(S_out, master, comm, ierr)
+    call self%mps%allgatherv_dp2d(S_out, 3, buffer=self%buffer)
 
     ! correction
     self%Htmp(:,:)=0.0
     etot=0.0
     call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_out, bfield=self%Htmp, energy=etot)
-    call xmpi_bcast(self%Htmp, master, comm, ierr)
     do i=self%mps%istart, self%mps%iend
        Htmp=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp+self%H_lang(:,i)
        Ri = cross(S_in(:,i),Htmp)
@@ -409,8 +410,7 @@ contains
        Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
        S_out(:,i)=Ri
     end do
-    call self%mps%gatherv_dp2d(S_out, 3, buffer=self%buffer)
-    call xmpi_bcast(S_out, master, comm, ierr)
+    call self%mps%allgatherv_dp2d(S_out, 3, buffer=self%Stmp)
   end subroutine spin_mover_t_run_one_step_HeunP
 !!***
 
@@ -450,19 +450,12 @@ contains
     real(dp) :: Htmp(3)
     integer :: i
 
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-
     ! predict
     S_out(:,:)=0.0_dp
     etot=0.0
     self%Heff_tmp(:,:)=0.0_dp
     call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_in, &
          bfield=self%Heff_tmp, energy=etot)
-    call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
        Htmp=self%Heff_tmp(:,i)+self%H_lang(:,i)
@@ -470,23 +463,20 @@ contains
        self%Hrotate(:,i) = self%gamma_L(i) * (Htmp + self%damping(i)* cross(S_in(:,i), Htmp))
        S_out(:,i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
-    call self%mps%gatherv_dp2d(S_out, 3, self%buffer)
-    call xmpi_bcast(S_out, master, comm, ierr)
+    call self%mps%allgatherv_dp2d(S_out, 3, self%buffer)
 
     ! correction
     self%Htmp(:,:)=0.0_dp
     etot=0.0
     call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf, spin=S_out, &
          bfield=self%Htmp, energy=etot)
-    call xmpi_bcast(self%Htmp, master, comm, ierr)
 
     do i=self%mps%istart, self%mps%iend
        Htmp=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp + self%H_lang(:,i)
        self%Hrotate(:,i) = self%gamma_L(i) * (Htmp + self%damping(i)* cross(S_in(:,i), Htmp))
        S_out(:, i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
-    call self%mps%gatherv_dp2d(S_out, 3, self%buffer)
-    call xmpi_bcast(S_out, master, comm, ierr)
+    call self%mps%allgatherv_dp2d(S_out, 3, S_in)
   end subroutine spin_mover_t_run_one_step_DM
 
   subroutine spin_mover_t_run_one_step_MC(self, effpot, S_in, S_out, etot, displacement, strain,  lwf)
@@ -502,29 +492,26 @@ contains
     class(spin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
-    real(dp) :: S_out(3,self%nspin), etot
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
+    real(dp) ::  etot
 
     if(present(spin)) MSG_ERROR("spin should not be input for spin mover.")
     if(self%method==1) then
-       call self%run_one_step_HeunP(effpot=effpot, S_in=self%Stmp, S_out=S_out, etot=etot, &
+       call self%run_one_step_HeunP(effpot=effpot, S_in=self%Stmp, S_out=self%Stmp2, etot=etot, &
             displacement=displacement, strain=strain, lwf=lwf)
     else if (self%method==2) then
-       call self%run_one_step_DM(effpot=effpot, S_in=self%Stmp, S_out=S_out, etot=etot,&
+       call self%run_one_step_DM(effpot=effpot, S_in=self%Stmp, S_out=self%Stmp2, etot=etot,&
             displacement=displacement, strain=strain, lwf=lwf)
     else if (self%method==3) then
        if(present(displacement) .or. present(strain) .or. present(lwf)) then
           MSG_ERROR("Monte carlo not implemented for lattice and lwf yet.")
        endif
-       call self%run_one_step_MC(effpot, self%Stmp, S_out, etot)
+       call self%run_one_step_MC(effpot, self%Stmp, self%Stmp2, etot)
     end if
-    self%Stmp(:,:)=S_out
+    self%Stmp(:,:)=self%Stmp2(:,:)
     ! do not inc until time is set to hist.
-    if(iam_master) then
-       call self%hist%set_vars( S=S_out, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
+    !if (iam_master) then
+    if(self%mps%irank==0) then
+       call self%hist%set_vars(S=self%Stmp, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
     end if
   end subroutine spin_mover_t_run_one_step
 
@@ -740,8 +727,6 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-
-
     if (iam_master) then
        T_start=self%params%spin_temperature_start
        T_end=self%params%spin_temperature_end
@@ -749,7 +734,11 @@ contains
        Tfile=get_unit()
        Tfname = trim(ncfile_prefix)//'.varT'
        iostat=open_file(file=Tfname, unit=Tfile, iomsg=iomsg )
-       T_step=(T_end-T_start)/(T_nstep-1)
+       if (T_nstep<=1) then
+          T_step=0.0
+       else
+          T_step=(T_end-T_start)/(T_nstep-1)
+       endif
        write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
             & "Starting temperature dependent calculations. T from ", &
             & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
