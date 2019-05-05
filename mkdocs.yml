@@ -237,6 +237,7 @@ pages:
         - psp8: developers/psp8_info.md
     - Code stats: developers/codestats.md
     - Autoconf_examples: developers/autoconf_examples.md
+    - Test Page for linkcheck: developers/testlink.md
     #- External Resources: developers/external_resources.md
 - About:
     - Release Notes: about/release-notes.md

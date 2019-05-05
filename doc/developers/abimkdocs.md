@@ -4,7 +4,7 @@ authors: MG, XG
 
 This page describes the details of the documentation system of Abinit and how to contribute to it. 
 
-Most of the documentation is written in [Markdown](https://en.wwikipedia.org/wiki/Markdown)
+Most of the documentation is written in [Markdown](https://en.wikipedia.org/wiki/Markdown)
 a lightweight markup language with plain text 
 [formatting syntax](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 The documentation includes the User Guide, the Abinit tutorial, the topics, the release notes
