@@ -827,6 +827,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
  real(dp) :: wme0(neig)
 !arrays
  real(dp) :: pme_k(self%nq_k,2), weights(neig,2)
+ real(dp) :: tweight_dummy(neig,self%nq_k)
 
 !----------------------------------------------------------------------
  ABI_UNUSED(comm)
@@ -843,6 +844,21 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
    pme_k(iq,2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
+#ifdef DEV_NEW_TETRA
+ ! Compute the tetrahedron or gaussian weights
+ if (present(broad)) then
+   do iq_ibz=1,self%nq_k
+     if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
+     wme0 = eig - pme_k(iq_ibz, 1)
+     deltaw_pm(:,iq_ibz,1) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
+     wme0 = eig - pme_k(iq_ibz, 2)
+     deltaw_pm(:,iq_ibz,2) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
+   end do
+ else
+   call htetra_wvals_weights(self%tetra_k,pme_k(:,1),neig,eig,max_occ1,self%nq_k,bcorr,tweight_dummy,deltaw_pm(:,:,1),comm)
+   call htetra_wvals_weights(self%tetra_k,pme_k(:,2),neig,eig,max_occ1,self%nq_k,bcorr,tweight_dummy,deltaw_pm(:,:,2),comm)
+ end if
+#else
  ! Compute the tetrahedron or gaussian weights
  do iq_ibz=1,self%nq_k
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
@@ -852,19 +868,13 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
      wme0 = eig - pme_k(iq_ibz, 2)
      deltaw_pm(:,iq_ibz,2) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
    else
-#ifdef DEV_NEW_TETRA
-     call htetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, max_occ1, self%nq_k, pme_k(:,1), weights)
-     deltaw_pm(:,iq_ibz,1) = weights(:,1) * self%lgk%weights(iq_ibz)
-     call htetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, max_occ1, self%nq_k, pme_k(:,2), weights)
-     deltaw_pm(:,iq_ibz,2) = weights(:,1) * self%lgk%weights(iq_ibz)
-#else
      call tetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, self%nq_k, pme_k(:,1), weights, tol6)
      deltaw_pm(:,iq_ibz,1) = weights(:,1) * self%lgk%weights(iq_ibz)
      call tetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, self%nq_k, pme_k(:,2), weights, tol6)
      deltaw_pm(:,iq_ibz,2) = weights(:,1) * self%lgk%weights(iq_ibz)
-#endif
    end if
  end do
+#endif
 
  call xmpi_sum(deltaw_pm, comm, ierr)
 

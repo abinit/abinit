@@ -124,6 +124,7 @@ public :: htetra_get_onewk       ! Calculate integration weights and their deriv
 public :: htetra_get_onewk_wvals ! Similar to tetra_get_onewk_wvals but receives arbitrary list of frequency points.
 public :: htetra_get_onewk_wvals_zinv ! Calculate integration weights for 1/(z-E(k)) for a single k-point in the IBZ.
 public :: htetra_weights_wvals_zinv ! Same as above but return the weight on all the kpoints by looping over tetrahedra
+public :: htetra_wvals_weights   ! Compute delta or theta on a list of energies for all kpoints
 public :: htetra_blochl_weights  ! And interface to help to facilitate the transition to the new tetrahedron implementation
 !!***
 
@@ -1797,7 +1798,8 @@ end subroutine htetra_get_delta_mask
 !!  htetra_wvals_weights
 !!
 !! FUNCTION
-!!   Emulates the behaviour of the previous tetrahedron implementation.
+!!   Emulates the behaviour of the previous tetrahedron implementation but
+!!   taking a list of energies as input.
 !!   HM: I find that in many routines its better to change the implementation
 !!   and accumulate the tetrahedron weights in the same way as the
 !!   gaussian smearing weights using htetra_get_onewk_wvals. However this requires
@@ -1816,8 +1818,7 @@ end subroutine htetra_get_delta_mask
 !!
 !! SOURCE
 
-subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,&
-  opt,tweight,dweight,comm)
+subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,dweight,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1825,13 +1826,14 @@ subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,&
  type(t_htetrahedron), intent(in) :: tetra
  real(dp) ,intent(in) :: max_occ
 !arrays
- real(dp) ,intent(in) :: eig_ibz(nkpt)
- real(dp) ,intent(out) :: dweight(nw,nkpt),tweight(nw,nkpt)
+ real(dp),intent(in) :: eig_ibz(nkpt)
+ real(dp),intent(out) :: dweight(nw,nkpt),tweight(nw,nkpt)
 
 !Local variables-------------------------------
 !scalars
  integer :: ik_ibz,multiplicity,nprocs,my_rank,ierr
  integer :: tetra_count, itetra, isummit, ihash
+ real(dp) :: weight
 !arrays
  integer :: ind_ibz(4)
  real(dp) :: eig(4)
@@ -1882,10 +1884,11 @@ subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,&
  ! Rescale weights
  select case(tetra%opt)
  case(1)
-  do ik_ibz=1,tetra%nkibz
-   tweight(:,ik_ibz) = tweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
-   dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
-  end do
+   do ik_ibz=1,tetra%nkibz
+     weight = tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
+     tweight(:,ik_ibz) = tweight(:,ik_ibz)*weight
+     dweight(:,ik_ibz) = dweight(:,ik_ibz)*weight
+   end do
  case(2)
    tweight = tweight*tetra%vv/4.d0
    dweight = dweight*tetra%vv/4.d0
@@ -1905,13 +1908,6 @@ end subroutine htetra_wvals_weights
 !!
 !! FUNCTION
 !!   Emulates the behaviour of the previous tetrahedron implementation.
-!!   HM: I find that in many routines its better to change the implementation
-!!   and accumulate the tetrahedron weights in the same way as the
-!!   gaussian smearing weights using htetra_get_onewk_wvals. However this requires
-!!   some refactoring of the code. I provide this routine to make it easier
-!!   to transition to the new tetrahedron implementation without refactoring.
-!!   Looping over tetrahedra (i.e. using tetra_blochl_weights) is currently faster
-!!   than looping over k-points.
 !!
 !! INPUTS
 !!
@@ -2031,9 +2027,9 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
  ! Rescale weights
  select case(tetra%opt)
  case(1)
-  do ik_ibz=1,tetra%nkibz
-   cweight(:,ik_ibz) = cweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
-  end do
+   do ik_ibz=1,tetra%nkibz
+     cweight(:,ik_ibz) = cweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
+   end do
  case(2)
    cweight = cweight*tetra%vv
  end select
