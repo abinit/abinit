@@ -1154,9 +1154,9 @@ pure subroutine get_onetetra_blochl(eig,energies,nene,bcorr,tweight,dweight)
                                    (cc3)*deleps2*inv_e42
 
      ! Delta
-     dcc1de = 2.d0*cc1_pre*(     deleps1)
-     dcc2de =      cc2_pre*(    -deleps1*deleps2+deleps1*deleps3+deleps2*deleps3)
-     dcc3de =      cc3_pre*(2.d0*deleps2*deleps4-deleps2*deleps2)
+     dcc1de = cc1_pre*(2.d0*deleps1)
+     dcc2de = cc2_pre*(    -deleps1*deleps2+deleps1*deleps3+deleps2*deleps3)
+     dcc3de = cc3_pre*(2.d0*deleps2*deleps4-deleps2*deleps2)
      dweight(1,ieps) = dcc1de+&
                        ((dcc1de+dcc2de)*deleps3-(cc1+cc2))*inv_e31+&
                        ((dcc1de+dcc2de+dcc3de)*deleps4-(cc1+cc2+cc3))*inv_e41
@@ -1730,9 +1730,71 @@ end subroutine htetra_get_onewk_wvals_zinv
 
 !----------------------------------------------------------------------
 
-!!****f* m_htetrahedron/htetra_blochl_weights
+!!****f* m_htetrahedron/htetra_get_delta_mask
 !! NAME
-!!  htetra_blochl_weights
+!!  htetra_get_delta_mask
+!!
+!! FUNCTION
+!!  Get a mask for the kpoints where the delta is finite
+!!
+
+subroutine htetra_get_delta_mask(tetra,eig_ibz,wvals,nw,nkpt,kmask,comm)
+!Arguments
+ integer,intent(in) :: nw,nkpt,comm
+ type(t_htetrahedron), intent(in) :: tetra
+ real(dp),intent(in) :: wvals(nw)
+ real(dp),intent(in) :: eig_ibz(nkpt)
+ integer,intent(out) :: kmask(nkpt)
+
+!Local variables-------------------------------
+ integer :: ik_ibz,nprocs,my_rank,ierr
+ integer :: tetra_count, itetra, isummit, ihash
+ integer :: contrib
+ real(dp) :: emin,emax
+ integer :: ind_ibz(4)
+ real(dp) :: eig(4)
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ kmask = 0
+ ! For each bucket of tetrahedra
+ do ihash=1,tetra%nbuckets
+   if (mod(ihash,nprocs) /= my_rank) cycle
+
+   ! For each tetrahedron
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   do itetra=1,tetra_count
+
+     ! Get mapping of each summit to eig_ibz
+     do isummit=1,4
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       eig(isummit) = eig_ibz(ind_ibz(isummit))
+     end do
+
+     ! Determine the energy range of the tetrahedra
+     emin = minval(eig)
+     emax = maxval(eig)
+
+     ! Check if any value in wvals is betwen emin and emax
+     contrib = 0; if (any(emin<wvals.and.wvals<emax)) contrib = 1
+
+     ! Compute the union
+     do isummit=1,4
+       ik_ibz = ind_ibz(isummit)
+       kmask(ik_ibz) = kmask(ik_ibz) + contrib
+     end do
+   end do ! itetra
+ end do
+
+ call xmpi_sum(kmask, comm, ierr)
+
+end subroutine htetra_get_delta_mask
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_htetrahedron/htetra_wvals_weights
+!! NAME
+!!  htetra_wvals_weights
 !!
 !! FUNCTION
 !!   Emulates the behaviour of the previous tetrahedron implementation.
@@ -1754,14 +1816,14 @@ end subroutine htetra_get_onewk_wvals_zinv
 !!
 !! SOURCE
 
-subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
+subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,&
   opt,tweight,dweight,comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nw,nkpt,opt,comm
  type(t_htetrahedron), intent(in) :: tetra
- real(dp) ,intent(in) :: enemax,enemin,max_occ
+ real(dp) ,intent(in) :: max_occ
 !arrays
  real(dp) ,intent(in) :: eig_ibz(nkpt)
  real(dp) ,intent(out) :: dweight(nw,nkpt),tweight(nw,nkpt)
@@ -1780,13 +1842,12 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 
  tweight = zero; dweight = zero
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- wvals = linspace(enemin,enemax,nw)
 
  ! For each bucket of tetrahedra
  do ihash=1,tetra%nbuckets
    if (mod(ihash,nprocs) /= my_rank) cycle
 
-   ! For each tetrahedron that belongs to this k-point
+   ! For each tetrahedron
    tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
    do itetra=1,tetra_count
 
@@ -1832,6 +1893,55 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 
  call xmpi_sum(tweight, comm, ierr)
  call xmpi_sum(dweight, comm, ierr)
+
+end subroutine htetra_wvals_weights
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_htetrahedron/htetra_blochl_weights
+!! NAME
+!!  htetra_blochl_weights
+!!
+!! FUNCTION
+!!   Emulates the behaviour of the previous tetrahedron implementation.
+!!   HM: I find that in many routines its better to change the implementation
+!!   and accumulate the tetrahedron weights in the same way as the
+!!   gaussian smearing weights using htetra_get_onewk_wvals. However this requires
+!!   some refactoring of the code. I provide this routine to make it easier
+!!   to transition to the new tetrahedron implementation without refactoring.
+!!   Looping over tetrahedra (i.e. using tetra_blochl_weights) is currently faster
+!!   than looping over k-points.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
+  opt,tweight,dweight,comm)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nw,nkpt,opt,comm
+ type(t_htetrahedron), intent(in) :: tetra
+ real(dp) ,intent(in) :: enemax,enemin,max_occ
+!arrays
+ real(dp) ,intent(in) :: eig_ibz(nkpt)
+ real(dp) ,intent(out) :: dweight(nw,nkpt),tweight(nw,nkpt)
+
+!Local variables-------------------------------
+ real(dp) :: wvals(nw)
+
+! *********************************************************************
+
+ wvals = linspace(enemin,enemax,nw)
+ call htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,dweight,comm)
 
 end subroutine htetra_blochl_weights
 !!***
