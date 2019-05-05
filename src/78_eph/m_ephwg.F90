@@ -827,7 +827,6 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
  real(dp) :: wme0(neig)
 !arrays
  real(dp) :: pme_k(self%nq_k,2), weights(neig,2)
- real(dp) :: tweight_dummy(neig,self%nq_k)
 
 !----------------------------------------------------------------------
  ABI_UNUSED(comm)
@@ -855,8 +854,8 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
      deltaw_pm(:,iq_ibz,2) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
    end do
  else
-   call htetra_wvals_weights(self%tetra_k,pme_k(:,1),neig,eig,max_occ1,self%nq_k,bcorr,tweight_dummy,deltaw_pm(:,:,1),comm)
-   call htetra_wvals_weights(self%tetra_k,pme_k(:,2),neig,eig,max_occ1,self%nq_k,bcorr,tweight_dummy,deltaw_pm(:,:,2),comm)
+   call htetra_wvals_weights_delta(self%tetra_k,pme_k(:,1),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,1),comm)
+   call htetra_wvals_weights_delta(self%tetra_k,pme_k(:,2),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,2),comm)
  end if
 #else
  ! Compute the tetrahedron or gaussian weights

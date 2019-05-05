@@ -4693,9 +4693,10 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 !Local variables ------------------------------
 !scalars
  integer :: nu, ibsum_kq, ik_ibz, bstart_ks, nbcalc_ks, my_rank, natom3 !, ierr
- integer :: nprocs, imyp, imyq, ndiv, bsum_start, bsum_stop, ib_k
+ integer :: nprocs, imyp, imyq, ndiv, bsum_start, bsum_stop, ib_k, band_ks
  integer :: iq_ibz_fine,iq_bz_fine,iq_ibz,jj, nz
  real(dp) :: weight, cpu,wall, gflops
+ real(dp) :: eig0nk
 !arrays
  real(dp) :: kk(3), kq(3), qpt(3), dpm(2)
  real(dp),allocatable :: tmp_deltaw_pm(:,:,:)
@@ -4721,7 +4722,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    sigma%deltaw_pm = zero
 
    ! Temporary weights (on the fine IBZ_k mesh if double grid is used)
-   ABI_MALLOC(tmp_deltaw_pm, (nbcalc_ks, sigma%ephwg%nq_k, 2))
+   ABI_MALLOC(tmp_deltaw_pm, (1, sigma%ephwg%nq_k, 2))
 
    ! loop over bands to sum
    do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
@@ -4729,13 +4730,20 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
     do imyp=1,sigma%my_npert
       nu = sigma%my_pinfo(3, imyp)
 
+      ! HM: This one should be faster but uses more memory, I compute for each ib instead
       ! Compute weights inside comm_bq
-      call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, nbcalc_ks, &
-                                        ebands%eig(bstart_ks:bstart_ks+nbcalc_ks, ik_ibz, spin), &
-                                        sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
+      !call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, nbcalc_ks, &
+      !                                  ebands%eig(bstart_ks:bstart_ks+nbcalc_ks, ik_ibz, spin), &
+      !                                  sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
 
       ! loop over bands in self-energy matrix elements.
       do ib_k=1,nbcalc_ks
+        band_ks = ib_k + bstart_ks - 1
+        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+
+        ! Compute weights inside comm_bq
+        call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, 1, [eig0nk], &
+                                          sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
 
         ! For all the q-points that I am going to calculate
         do imyq=1,sigma%my_nqibz_k
@@ -4750,12 +4758,14 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
               iq_bz_fine = sigma%eph_doublegrid%mapping(3,jj)
               iq_ibz_fine = sigma%eph_doublegrid%bz2lgkibz(iq_bz_fine)
               weight = sigma%ephwg%lgk%weights(iq_ibz_fine)
-              dpm = tmp_deltaw_pm(ib_k, iq_ibz_fine, :)
+              !dpm = tmp_deltaw_pm(ib_k, iq_ibz_fine, :)
+              dpm = tmp_deltaw_pm(1, iq_ibz_fine, :)
               sigma%deltaw_pm(:, ib_k, imyp, ibsum_kq, imyq, jj) = dpm / weight
             end do
           else
             weight = sigma%ephwg%lgk%weights(iq_ibz)
-            dpm = tmp_deltaw_pm(ib_k, iq_ibz, :)
+            !dpm = tmp_deltaw_pm(ib_k, iq_ibz, :)
+            dpm = tmp_deltaw_pm(1, iq_ibz, :)
             sigma%deltaw_pm(:, ib_k, imyp, ibsum_kq, imyq, 1) = dpm / weight
           end if
 

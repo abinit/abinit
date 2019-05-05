@@ -124,7 +124,8 @@ public :: htetra_get_onewk       ! Calculate integration weights and their deriv
 public :: htetra_get_onewk_wvals ! Similar to tetra_get_onewk_wvals but receives arbitrary list of frequency points.
 public :: htetra_get_onewk_wvals_zinv ! Calculate integration weights for 1/(z-E(k)) for a single k-point in the IBZ.
 public :: htetra_weights_wvals_zinv ! Same as above but return the weight on all the kpoints by looping over tetrahedra
-public :: htetra_wvals_weights   ! Compute delta or theta on a list of energies for all kpoints
+public :: htetra_wvals_weights   ! Compute delta and theta on a list of energies for all kpoints
+public :: htetra_wvals_weights_delta ! Compute delta on a list of energies for all kpoints
 public :: htetra_blochl_weights  ! And interface to help to facilitate the transition to the new tetrahedron implementation
 !!***
 
@@ -1252,9 +1253,9 @@ pure subroutine get_onetetra_blochl(eig,energies,nene,bcorr,tweight,dweight)
 end subroutine get_onetetra_blochl
 !!***
 
-!!****f* m_htetrahedron/get_ontetratra_lambinvigneron
+!!****f* m_htetrahedron/get_ontetra_lambinvigneron
 !! NAME
-!! get_ontetratra_lambinvigneron
+!! get_ontetra_lambinvigneron
 !!
 !! FUNCTION
 !!  Compute the complex weights according to:
@@ -1272,7 +1273,7 @@ end subroutine get_onetetra_blochl
 !!
 !! SOURCE
 
-pure subroutine get_ontetratra_lambinvigneron(eig,z,cw)
+pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
     ! dispersion values at the corners of the tetrahedron
     real(dp), intent(in) :: eig(4)
     ! energy to evaulate the weights at
@@ -1371,7 +1372,7 @@ pure subroutine get_ontetratra_lambinvigneron(eig,z,cw)
     ! HM:check this
     cw = cw * two
 
-end subroutine get_ontetratra_lambinvigneron
+end subroutine get_ontetra_lambinvigneron
 !!***
 
 !!****f* m_htetrahedron/get_ontetratra_lambinvigneron_imag
@@ -1714,7 +1715,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
        verm = zvals(iz) - eig
        call SIM0TWOI(cw, VERLI, VERM)
      case(2)
-       call get_ontetratra_lambinvigneron(eig,zvals(iz),cw)
+       call get_ontetra_lambinvigneron(eig,zvals(iz),cw)
      end select
 
      do isummit=1,4
@@ -1818,7 +1819,7 @@ end subroutine htetra_get_delta_mask
 !!
 !! SOURCE
 
-subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,dweight,comm)
+subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dweight,tweight,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1833,7 +1834,6 @@ subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,
 !scalars
  integer :: ik_ibz,multiplicity,nprocs,my_rank,ierr
  integer :: tetra_count, itetra, isummit, ihash
- real(dp) :: weight
 !arrays
  integer :: ind_ibz(4)
  real(dp) :: eig(4)
@@ -1875,7 +1875,96 @@ subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,
      multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
      do isummit=1,4
        ik_ibz = ind_ibz(isummit)
+       dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:)*multiplicity*max_occ
        tweight(:,ik_ibz) = tweight(:,ik_ibz) + tweight_tmp(isummit,:)*multiplicity*max_occ
+     end do
+   end do ! itetra
+ end do
+
+ ! Rescale weights
+ select case(tetra%opt)
+ case(1)
+   do ik_ibz=1,tetra%nkibz
+     dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%tetra_total(ik_ibz)/tetra%nkbz
+     tweight(:,ik_ibz) = tweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%tetra_total(ik_ibz)/tetra%nkbz
+   end do
+ case(2)
+   dweight = dweight*tetra%vv/4.0_dp
+   tweight = tweight*tetra%vv/4.0_dp
+ end select
+
+ call xmpi_sum(dweight, comm, ierr)
+ call xmpi_sum(tweight, comm, ierr)
+
+end subroutine htetra_wvals_weights
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_htetrahedron/htetra_wvals_weights_delta
+!! NAME
+!!  htetra_wvals_weights_delta
+!!
+!! FUNCTION
+!!  Same as above but computing only delta for performance and memory
+!!  HM: Should find a clean way to avoid copy paste routine
+!!
+
+subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dweight,comm)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nw,nkpt,opt,comm
+ type(t_htetrahedron), intent(in) :: tetra
+ real(dp) ,intent(in) :: max_occ
+!arrays
+ real(dp),intent(in) :: eig_ibz(nkpt)
+ real(dp),intent(out) :: dweight(nw,nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ik_ibz,multiplicity,nprocs,my_rank,ierr
+ integer :: tetra_count, itetra, isummit, ihash
+!arrays
+ integer :: ind_ibz(4)
+ real(dp) :: eig(4)
+ real(dp) :: wvals(nw)
+ real(dp) :: dweight_tmp(4,nw),tweight_tmp(4,nw)
+
+! *********************************************************************
+
+ dweight = zero
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ ! For each bucket of tetrahedra
+ do ihash=1,tetra%nbuckets
+   if (mod(ihash,nprocs) /= my_rank) cycle
+
+   ! For each tetrahedron
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   do itetra=1,tetra_count
+
+     ! Get mapping of each summit to eig_ibz
+     do isummit=1,4
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       eig(isummit) = eig_ibz(ind_ibz(isummit))
+     end do
+
+     ! Sort energies before calling get_onetetra_blochl
+     call sort_4tetra(eig, ind_ibz)
+
+     ! Get tetrahedron weights
+     select case (opt)
+     case(0:1)
+       call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
+     case(2)
+       call get_ontetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
+     end select
+
+     ! Acumulate the contributions
+     multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
+     do isummit=1,4
+       ik_ibz = ind_ibz(isummit)
        dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:)*multiplicity*max_occ
      end do
    end do ! itetra
@@ -1885,19 +1974,15 @@ subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,
  select case(tetra%opt)
  case(1)
    do ik_ibz=1,tetra%nkibz
-     weight = tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
-     tweight(:,ik_ibz) = tweight(:,ik_ibz)*weight
-     dweight(:,ik_ibz) = dweight(:,ik_ibz)*weight
+     dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%tetra_total(ik_ibz)/tetra%nkbz
    end do
  case(2)
-   tweight = tweight*tetra%vv/4.d0
-   dweight = dweight*tetra%vv/4.d0
+   dweight = dweight*tetra%vv/4.0_dp
  end select
 
- call xmpi_sum(tweight, comm, ierr)
  call xmpi_sum(dweight, comm, ierr)
 
-end subroutine htetra_wvals_weights
+end subroutine htetra_wvals_weights_delta
 !!***
 
 !----------------------------------------------------------------------
@@ -1920,11 +2005,11 @@ end subroutine htetra_wvals_weights
 !! SOURCE
 
 subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
-  opt,tweight,dweight,comm)
+  bcorr,tweight,dweight,comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nw,nkpt,opt,comm
+ integer,intent(in) :: nw,nkpt,bcorr,comm
  type(t_htetrahedron), intent(in) :: tetra
  real(dp) ,intent(in) :: enemax,enemin,max_occ
 !arrays
@@ -1937,7 +2022,7 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 ! *********************************************************************
 
  wvals = linspace(enemin,enemax,nw)
- call htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,dweight,comm)
+ call htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,bcorr,tweight,dweight,comm)
 
 end subroutine htetra_blochl_weights
 !!***
@@ -2012,7 +2097,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
          verm = zvals(iz) - eig
          call SIM0TWOI(cw, VERLI, VERM)
        case(2)
-         call get_ontetratra_lambinvigneron(eig,zvals(iz),cw)
+         call get_ontetra_lambinvigneron(eig,zvals(iz),cw)
        end select
 
        ! Acumulate the contributions
