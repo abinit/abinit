@@ -1012,6 +1012,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (sigma%nprocs_pert > 1) then 
      call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%comm_pert)
    end if
+   if (dvdb%find_qpts(sigma%nqibz, sigma%qibz, ibz2dvdb, comm) /= 0) then
+     MSG_ERROR(" Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
+   end if
 
  else if (dtset%useria == 2000 .or. sigma%use_ftinterp) then
      sigma%use_ftinterp = .True.
