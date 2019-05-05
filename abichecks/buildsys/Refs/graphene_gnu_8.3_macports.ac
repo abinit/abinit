@@ -929,15 +929,15 @@ with_dft_flavor="libxc+wannier90+atompaw"
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="/opt/local/bin"
+#with_atompaw_bins="/usr/local/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I/opt/local/include"
+#with_atompaw_incs="-I/usr/local/include/atompaw"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L/opt/local/lib -latompaw"
+#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
 
                        # ------------------------------ #
 
