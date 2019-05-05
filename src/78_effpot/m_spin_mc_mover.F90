@@ -94,7 +94,7 @@
      class(spin_mc_t) :: self
      class(rng_t) :: rng
      class(abstract_potential_t), intent(inout) :: effpot
-     real(dp) :: S_out(3,self%nspin), etot, r
+     real(dp) :: etot, r
      integer :: i, j
      r=self%attempt(rng, effpot)
      !print *, "r", r
@@ -106,21 +106,19 @@
      end if
    end subroutine run_one_step
 
-   subroutine run_MC(self, rng, effpot, S_in, S_out, etot)
+   subroutine run_MC(self, rng, effpot, S_in, etot)
      class(spin_mc_t), intent(inout) :: self
      type(rng_t) :: rng
      class(abstract_potential_t), intent(inout) :: effpot
      real(dp), intent(inout) :: S_in(3,self%nspin)
-     real(dp), intent(out) :: S_out(3,self%nspin), etot
+     real(dp), intent(out) ::  etot
      integer :: i
      self%S(:,:)=S_in(:,:)
-     !print*, "S_in", S_in
      call effpot%calculate(spin=S_in, energy=self%energy)
-     !print *, self%energy
      do i = 1, self%nstep
         call self%run_one_step(rng, effpot)
      end do
-     S_out(:, :)=self%S(:,:)
+     S_in(:, :)=self%S(:,:)
      etot=self%energy
    end subroutine run_MC
 

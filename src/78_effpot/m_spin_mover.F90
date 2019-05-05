@@ -359,7 +359,6 @@ contains
   !! S_in : input spin. (3*nspin)
   !!
   !! OUTPUT
-  !! S_out: output spin (3*nspin)
   !! etot: energy (scalar)
   !!
   !! PARENTS
@@ -367,7 +366,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, S_out, etot, displacement, strain, lwf)
+  subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, etot, displacement, strain, lwf)
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
     class(abstract_potential_t), intent(inout) :: effpot
@@ -375,7 +374,7 @@ contains
     real(dp), optional, intent(inout):: displacement(:,:), &
          strain(:,:), lwf(:)
     real(dp), intent(inout) :: S_in(3,self%nspin)
-    real(dp), intent(out) :: S_out(3,self%nspin), etot
+    real(dp), intent(out) ::  etot
     integer :: i
     real(dp) :: dSdt(3), Htmp(3), Ri(3)
 
@@ -394,23 +393,23 @@ contains
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
        Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
-       S_out(:,i)=Ri
+       self%Stmp2(:,i)=Ri
     end do
-    call self%mps%allgatherv_dp2d(S_out, 3, buffer=self%buffer)
+    call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)
 
     ! correction
     self%Htmp(:,:)=0.0
     etot=0.0
-    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_out, bfield=self%Htmp, energy=etot)
+    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=self%Stmp2, bfield=self%Htmp, energy=etot)
     do i=self%mps%istart, self%mps%iend
        Htmp=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp+self%H_lang(:,i)
        Ri = cross(S_in(:,i),Htmp)
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
        Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
-       S_out(:,i)=Ri
+       self%Stmp(:,i)=Ri
     end do
-    call self%mps%allgatherv_dp2d(S_out, 3, buffer=self%Stmp)
+    call self%mps%allgatherv_dp2d(self%Stmp, 3, buffer=self%buffer)
   end subroutine spin_mover_t_run_one_step_HeunP
 !!***
 
@@ -439,19 +438,19 @@ contains
     S_out=matmul(R, S_in)
   end function rotate_S_DM
 
-  subroutine spin_mover_t_run_one_step_DM(self, effpot, S_in, S_out, etot, displacement, strain, lwf)
+  subroutine spin_mover_t_run_one_step_DM(self, effpot, S_in, etot, displacement, strain, lwf)
     ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:)
     real(dp), intent(inout) :: S_in(3,self%nspin)
-    real(dp), intent(out) :: S_out(3,self%nspin), etot
+    real(dp), intent(out) ::  etot
     real(dp) :: Htmp(3)
     integer :: i
 
     ! predict
-    S_out(:,:)=0.0_dp
+    self%Stmp2(:,:)=0.0_dp
     etot=0.0
     self%Heff_tmp(:,:)=0.0_dp
     call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf,spin=S_in, &
@@ -461,31 +460,31 @@ contains
        Htmp=self%Heff_tmp(:,i)+self%H_lang(:,i)
        ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
        self%Hrotate(:,i) = self%gamma_L(i) * (Htmp + self%damping(i)* cross(S_in(:,i), Htmp))
-       S_out(:,i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
+       self%Stmp2(:,i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
-    call self%mps%allgatherv_dp2d(S_out, 3, self%buffer)
+    call self%mps%allgatherv_dp2d(self%Stmp2, 3, self%buffer)
 
     ! correction
     self%Htmp(:,:)=0.0_dp
     etot=0.0
-    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf, spin=S_out, &
+    call effpot%calculate(displacement=displacement, strain=strain, lwf=lwf, spin=self%Stmp2, &
          bfield=self%Htmp, energy=etot)
 
     do i=self%mps%istart, self%mps%iend
        Htmp=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp + self%H_lang(:,i)
        self%Hrotate(:,i) = self%gamma_L(i) * (Htmp + self%damping(i)* cross(S_in(:,i), Htmp))
-       S_out(:, i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
+       self%Stmp(:, i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
-    call self%mps%allgatherv_dp2d(S_out, 3, S_in)
+    call self%mps%allgatherv_dp2d(self%Stmp, 3, self%buffer)
   end subroutine spin_mover_t_run_one_step_DM
 
-  subroutine spin_mover_t_run_one_step_MC(self, effpot, S_in, S_out, etot, displacement, strain,  lwf)
+  subroutine spin_mover_t_run_one_step_MC(self, effpot, S_in,  etot, displacement, strain,  lwf)
     class(spin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:, :), strain(:,:), lwf(:)
     real(dp), intent(inout) :: S_in(3,self%nspin)
-    real(dp), intent(out) :: S_out(3,self%nspin), etot
-    call self%spin_mc%run_MC(self%rng, effpot, S_in, S_out, etot)
+    real(dp), intent(out) ::  etot
+    call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
   end subroutine spin_mover_t_run_one_step_MC
 
   subroutine spin_mover_t_run_one_step(self, effpot, displacement, strain, spin, lwf)
@@ -496,18 +495,17 @@ contains
 
     if(present(spin)) MSG_ERROR("spin should not be input for spin mover.")
     if(self%method==1) then
-       call self%run_one_step_HeunP(effpot=effpot, S_in=self%Stmp, S_out=self%Stmp2, etot=etot, &
+       call self%run_one_step_HeunP(effpot=effpot, S_in=self%Stmp, etot=etot, &
             displacement=displacement, strain=strain, lwf=lwf)
     else if (self%method==2) then
-       call self%run_one_step_DM(effpot=effpot, S_in=self%Stmp, S_out=self%Stmp2, etot=etot,&
+       call self%run_one_step_DM(effpot=effpot, S_in=self%Stmp, etot=etot,&
             displacement=displacement, strain=strain, lwf=lwf)
     else if (self%method==3) then
        if(present(displacement) .or. present(strain) .or. present(lwf)) then
           MSG_ERROR("Monte carlo not implemented for lattice and lwf yet.")
        endif
-       call self%run_one_step_MC(effpot, self%Stmp, self%Stmp2, etot)
+       call self%run_one_step_MC(effpot, self%Stmp, etot)
     end if
-    self%Stmp(:,:)=self%Stmp2(:,:)
     ! do not inc until time is set to hist.
     !if (iam_master) then
     if(self%mps%irank==0) then
