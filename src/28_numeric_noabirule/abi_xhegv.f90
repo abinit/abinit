@@ -112,7 +112,7 @@
        lwork_=int(real(cwk_(1))) ; lrwork_=int(rwk_(1)) ; liwork_=iwk_(1)
        ABI_ALLOCATE(iwork,(liwork_))
        call magmaf_zhegvd(itype,jobz,uplo,n,a,lda,b,ldb,w, &
-&            work(1:2*lwork_),lwork_,rwork(1:lrwork_),lrwork_,iwork(1:liwork),liwork,info)
+&            work(1:2*lwork_),lwork_,rwork(1:lrwork_),lrwork_,iwork(1:liwork),liwork_,info)
        ABI_DEALLOCATE(iwork)
     else
        !old
@@ -124,7 +124,7 @@
        lwork_=int(rwk_(1)) ; liwork_=iwk_(1)
        ABI_ALLOCATE(iwork,(liwork_))
        call magmaf_dsygvd(itype,jobz,uplo,n,a,lda,b,ldb,w,&
-&            work(1:lwork_),lwork_,iwork(1:liwork),liwork,info)
+&            work(1:lwork_),lwork_,iwork(1:liwork),liwork_,info)
        ABI_DEALLOCATE(iwork)
     endif
  else
