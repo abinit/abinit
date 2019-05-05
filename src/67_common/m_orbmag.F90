@@ -2969,7 +2969,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  ABI_DEALLOCATE(vtrial)
 
  ! if vectornd is present, set it up for addition to gs_hamk similarly to how it's done for
- ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
+ ! vtrial. Note that it must be done for the three directions. Also, the following
  ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
  if(has_vectornd) then
     ABI_ALLOCATE(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,3))
@@ -2988,7 +2988,6 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  ! add vectornd if available
  if(has_vectornd) then
     call load_spin_hamiltonian(gs_hamk,isppol,vectornd=vectornd_pac)
-    ABI_DEALLOCATE(vectornd_pac)
  end if
  
  ncpgr = cprj(1,1)%ncpgr
@@ -3120,8 +3119,11 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     ABI_DEALLOCATE(buffer2)
  end if
 
- ABI_DEALLOCATE(vlocal)
  call destroy_hamiltonian(gs_hamk)
+ ABI_DEALLOCATE(vlocal)
+ if(has_vectornd) then
+    ABI_DEALLOCATE(vectornd_pac)
+ end if
 
  ABI_DEALLOCATE(kg_k)
  ABI_DEALLOCATE(kinpw)
@@ -3448,9 +3450,9 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  !arrays
  integer :: nattyp_dum(dtset%ntypat)
  integer,allocatable :: dimlmn(:),gbound_kg(:,:),kg_kb(:,:),kg_kg(:,:),pwind_bg(:)
- real(dp) ::dkb(3),dkg(3),dkbg(3),kpt_cart(3),kpointb(3),kpointg(3),rhodum(1)
+ real(dp) ::dkb(3),dkg(3),dkbg(3),kpointb(3),kpointg(3),rhodum(1)
  real(dp),allocatable :: bra(:,:),cwavef(:,:),gcwavef(:,:,:),ghc(:,:),ghc1(:,:),gsc(:,:),gvnlc(:,:),kpg_k_dummy(:,:)
- real(dp),allocatable :: kg_k_vec_cart(:,:)
+ real(dp),allocatable :: kgkpg(:,:)
  real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqb(:,:),cgqg(:,:),cgrvtrial(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:),work(:,:,:,:)
  complex(dpc),allocatable :: nucdipmom_k(:)
@@ -3766,7 +3768,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                                ! The following approach is based on the bra <u_kg| expansion, because
                                ! these G vectors are unshifted (indexed by ipw, not jpw). So we are using
                                ! k+G_left = (k-kg) + (kg+G_left) = -dkg + (kg+G_left). When squared we obtain
-                               ! |kg+G_left|^2 - 2*dkg*(kg+G_left) + |dkg|^2. In this way we only use the G_left
+                               ! |kg+G_left|^2 - 2*dkg.(kg+G_left) + |dkg|^2. In this way we only use the G_left
                                ! expansion vectors, with no shift, for each k point.
 
                                ! normal kinetic energy for bra
@@ -3788,7 +3790,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                          end do ! end loop over ipw
 
                          ! ! apply onsite terms through cprjk+b
-                         ! now have <bra|T+vlocal+Dij|cwavef>
+                         ! after this have <bra|T+vlocal+Dij|cwavef>
                          cgdijcb = czero
                          do iatom = 1, dtset%natom
                             itypat = dtset%typat(iatom)
@@ -3816,33 +3818,30 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
 
                          ! add  alpha^2 A.p for nuclear dipoles if present.
                          ! Do this similarly to the kinetic energy above. Standard expression
-                         ! would be <bra|alpha^2 A 2\pi(ikpt + G_right)|cwavef> where A is contained
+                         ! would be <bra|alpha^2 A.2\pi(ikpt + G_right)|cwavef> where A is contained
                          ! in vectornd_pac and applied in real space with fourwf. However, as outlined
                          ! above in kinetic energy section, it's easier to apply to the left and get
-                         ! <bra|alpha^2 2\pi(kg - dkg + G_left) A |cwavef>
+                         ! <bra|alpha^2 2\pi(kg - dkg + G_left).A |cwavef>
                          if(has_vectornd) then
                             ABI_ALLOCATE(gcwavef,(2,npw_kg*ndat,3))
                             gcwavef = zero
                             
-                            ! convert kptg - dkg to cartesian
-                            kpt_cart(:)=MATMUL(gprimd,(kpointg(:) - dkg(:)) )
-
-                            ! convert G to cartesian, add kpt_cart to get (k + G) in cartesian
-                            ABI_ALLOCATE(kg_k_vec_cart,(npw_kg,3))
+                            ! obtain (kg - dkg + G)
+                            ABI_ALLOCATE(kgkpg,(npw_kg,3))
                             do ipw = 1, npw_kg
-                               kg_k_vec_cart(ipw,:) = MATMUL(gprimd,kg_kg(:,ipw))+kpt_cart(:)
+                               kgkpg(ipw,:) =  kpointg(:) - dkg(:) + kg_kg(:,ipw)
                             end do
 
                             ! make 2\pi(k+G)c(G)|bra> by element-wise multiplication
                             do idir = 1, 3
                                do idat = 1, ndat
                                   gcwavef(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg,idir) = &
-                                       & bra(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kg_k_vec_cart(1:npw_kg,idir)
+                                       & bra(1,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kgkpg(1:npw_kg,idir)
                                   gcwavef(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg,idir) = &
-                                       & bra(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kg_k_vec_cart(1:npw_kg,idir)
+                                       & bra(2,1+(idat-1)*npw_kg:npw_kg+(idat-1)*npw_kg)*kgkpg(1:npw_kg,idir)
                                end do
                             end do
-                            ABI_DEALLOCATE(kg_k_vec_cart)
+                            ABI_DEALLOCATE(kgkpg)
                             gcwavef = gcwavef*two_pi
 
                             ! now apply vector potential in real space through fourwf

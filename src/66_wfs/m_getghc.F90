@@ -833,10 +833,9 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: gp2pi1,gp2pi2,gp2pi3,scale_conversion,weight=one
  !arrays
- real(dp) :: kg_k_vec(3),kpt_cart(3)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
- real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kg_k_vec_cart(:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:)
  real(dp),allocatable :: lcwavef(:,:),lcwavef1(:,:),lcwavef2(:,:)
  real(dp),allocatable :: work(:,:,:,:)
 
@@ -872,25 +871,22 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
 
    gcwavef = zero
 
-   ! convert kpt to cartesian
-   kpt_cart(:)=MATMUL(gprimd,kpt(:))
-
-   ! convert G to cartesian, add kpt to get (k + G) in cartesian
-   ABI_ALLOCATE(kg_k_vec_cart,(npw_k,3))
+   ! compute k + G. Note these are in reduced coords
+   ABI_ALLOCATE(kgkpk,(npw_k,3))
    do ipw = 1, npw_k
-      kg_k_vec_cart(ipw,:) = MATMUL(gprimd,kg_k(:,ipw))+kpt_cart(:)
+      kgkpk(ipw,:) = kpt(:) + kg_k(:,ipw)
    end do
 
    ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
    do idir = 1, 3
       do idat = 1, ndat
          gcwavef(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-              & cwavef(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kg_k_vec_cart(1:npw_k,idir)
+              & cwavef(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
          gcwavef(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
-              & cwavef(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kg_k_vec_cart(1:npw_k,idir)
+              & cwavef(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
       end do
    end do
-   ABI_DEALLOCATE(kg_k_vec_cart)
+   ABI_DEALLOCATE(kgkpk)
    gcwavef = gcwavef*two_pi
          
 !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)

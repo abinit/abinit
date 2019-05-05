@@ -113,17 +113,16 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  integer,allocatable :: nd_list(:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gprimd(3,3),gred(3),mcg(3),mcg_cart(3),rmet(3,3)
+ real(dp) :: gcart(3),gmet(3,3),gprimd(3,3),gred(3),mcg(3),mcg_cart(3),rmet(3,3)
+ real(dp) :: AGre_red(3),AGre_cart(3),AGim_red(3),AGim_cart(3)
  real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
 
 ! *************************************************************************
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- prefac = -four_pi/(ucvol*ucvol)
 
- ! make list of atoms with nonzero nuclear dipole moments,
- ! and convert each dipole to reduced reciprocal space coords.
+ ! make list of atoms with nonzero nuclear dipole moments
  ! in typical applications only 0 or 1 atoms have nonzero dipoles. This
  ! code shouldn't even be called if all dipoles are zero.
  nd_atom_tot = 0
@@ -132,6 +131,9 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
        nd_atom_tot = nd_atom_tot + 1
     end if
  end do
+
+ ! note that nucdipmom is input as vectors in atomic units referenced
+ ! to cartesian coordinates
  ABI_ALLOCATE(nd_list,(nd_atom_tot))
  ABI_ALLOCATE(nd_m,(3,nd_atom_tot))
  nd_atom_tot = 0
@@ -139,12 +141,14 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
     if (any(abs(nucdipmom(:,iatom))>tol8)) then
        nd_atom_tot = nd_atom_tot + 1
        nd_list(nd_atom_tot) = iatom
-       nd_m(:,nd_atom_tot) = MATMUL(TRANSPOSE(rprimd),nucdipmom(:,iatom))
+       nd_m(:,nd_atom_tot) = nucdipmom(:,iatom)
     end if
  end do
  
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
+
+ prefac = -four_pi/ucvol
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -239,6 +243,8 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
           ii=i1+i23
 
           gred(1) = one*ig1; gred(2) = one*ig2; gred(3) = one*ig3
+          ! obtain \vec{G} in cartesian coordinates
+          gcart(1:3) = MATMUL(gprimd,gred)
           gs = DOT_PRODUCT(gred,MATMUL(gmet,gred))
 
          if(gs .LE. cutoff)then
@@ -254,23 +260,33 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
             prefacgs = prefac/gs
             do iatom = 1, nd_atom_tot
                nd_atom = nd_list(iatom)
-               ! phase = two_pi*(gq(1,i1)*xred(1,nd_atom)+gq(2,i2)*xred(2,nd_atom)+gq(3,i3)*xred(3,nd_atom))
                phase = two_pi*DOT_PRODUCT(xred(:,nd_atom),gred(:))
                presinph=prefacgs*sin(phase)
                precosph=prefacgs*cos(phase)
-               ! mcg(1) =  nd_m(2,iatom)*gq(3,i3)-nd_m(3,iatom)*gq(2,i2)
-               ! mcg(2) = -nd_m(1,iatom)*gq(3,i3)+nd_m(3,iatom)*gq(1,i1)
-               ! mcg(3) =  nd_m(1,iatom)*gq(2,i2)-nd_m(2,iatom)*gq(1,i1)
-               mcg(1) =  nd_m(2,iatom)*gred(3) - nd_m(3,iatom)*gred(2)
-               mcg(2) = -nd_m(1,iatom)*gred(3) + nd_m(3,iatom)*gred(1)
-               mcg(3) =  nd_m(1,iatom)*gred(2) - nd_m(2,iatom)*gred(1)
-               mcg_cart = MATMUL(rprimd,mcg)
-               work1(re,ii)=work1(re,ii)+presinph*mcg_cart(1)
-               work1(im,ii)=work1(im,ii)+precosph*mcg_cart(1)
-               work2(re,ii)=work2(re,ii)+presinph*mcg_cart(2)
-               work2(im,ii)=work2(im,ii)+precosph*mcg_cart(2)
-               work3(re,ii)=work3(re,ii)+presinph*mcg_cart(3)
-               work3(im,ii)=work3(im,ii)+precosph*mcg_cart(3)
+
+               ! cross product m x G
+               mcg_cart(1) =  nd_m(2,iatom)*gcart(3) - nd_m(3,iatom)*gcart(2)
+               mcg_cart(2) = -nd_m(1,iatom)*gcart(3) + nd_m(3,iatom)*gcart(1)
+               mcg_cart(3) =  nd_m(1,iatom)*gcart(2) - nd_m(2,iatom)*gcart(1)
+
+               ! Re(A(G)), in cartesian coordinates
+               AGre_cart = presinph*mcg_cart
+
+               ! refer back to recip space
+               AGre_red = MATMUL(TRANSPOSE(gprimd),AGre_cart)
+
+               ! Im(A(G)), in cartesian coordinates
+               AGim_cart = precosph*mcg_cart
+
+               ! refer back to recip space
+               AGim_red = MATMUL(TRANSPOSE(gprimd),AGim_cart)
+
+               work1(re,ii) = AGre_red(1)
+               work2(re,ii) = AGre_red(2)
+               work3(re,ii) = AGre_red(3)
+               work1(im,ii) = AGim_red(1)
+               work2(im,ii) = AGim_red(2)
+               work3(im,ii) = AGim_red(3)
             end do
          else
            ! gs>cutoff
