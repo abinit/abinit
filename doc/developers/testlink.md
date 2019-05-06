@@ -4,19 +4,19 @@ authors: JMB, XG
 
 This page contains some link errors that must be detected by LinkChecker
 
-## Errors on abiref.bib file 
+## Errors in abiref.bib file 
 
-entry Testlink2019 : link error : dx.doi.orgg instead of dx.doi.orgg
+entry [[cite:Testlink2019]] : link error ->  dx.doi.orgg instead of dx.doi.org
 
-entry Testlink2019a : diff between doi (10.1103) and url (10.1102) 
+entry [[cite:Testlink2019a]] : diff between doi (10.1103) and url (10.1102) 
 
-entry Testlink2019b : diff between doi (physrevb.87.085322) and url (physrevb.87.085323)
+entry [[cite:Testlink2019b]] : diff between doi (physrevb.87.085322) and url (physrevb.87.085323)
 
 ## Citation error
 
-Error on citation ('c' at the end of 'Testlink2019c' ) : [[cite:Testlink2019c]]
+Error in citation ('c' at the end of 'Testlink2019c' ) : [[cite:Testlink2019c]]
 
-## External link broken
+## Broken external links
 
 Error in link 'en.wwikipedia.org' ( 2 'ww' ) :  [[https://en.wwikipedia.org/wiki/Markdown]]
 
