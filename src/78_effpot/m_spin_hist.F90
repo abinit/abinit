@@ -201,7 +201,6 @@ contains
     self%natoms=0
     self%has_latt=has_latt
 
-    !print *, "initialize HIST spin"
     ABI_ALLOCATE(self%heff, (3, nspin, mxhist))
     ABI_ALLOCATE(self%snorm, (nspin, mxhist))
     ABI_ALLOCATE(self%S, (3, nspin, mxhist))
@@ -229,7 +228,6 @@ contains
     self%S(:,:,:)=zero
     self%dSdt(:,:,:)=zero
     self%snorm(:,:)=zero
-    !print *, "Initialization spin hist finished"
   end subroutine initialize
 !!***
 
@@ -552,7 +550,6 @@ contains
     logical, intent(in), optional :: inc
     integer :: ihist
     ihist=self%ihist
-    !print *, "set spin hist vars: ihist=", ihist
     if(present(inc)) then
        if (inc) then
           call self%inc1()

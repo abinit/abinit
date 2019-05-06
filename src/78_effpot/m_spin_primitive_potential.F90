@@ -290,7 +290,7 @@ contains
 
 
     if(iam_master) then
-       write(*,'(A28)') "Adding SIA terms from input"
+       write(std_out,'(A28)') "Adding SIA terms from input"
        do i =1, self%nspin
           in_sia_ind(i)=i
           in_sia_k1amp(i)=input_sia_k1amp
@@ -337,8 +337,8 @@ contains
 
 
     if (iam_master) then
-       write(*,'(A58)') "Reading parameters from xml file and setting up spin model"
-       write(*,'(A80)') " "
+       write(std_out,'(A58)') "Reading parameters from xml file and setting up spin model"
+       write(std_out,'(A80)') " "
        call xml_read_spin(xml_fname, ref_energy, p_unitcell,                 &
             natoms, p_masses, nspin, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
             exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
@@ -382,9 +382,9 @@ contains
        uni_amplitude_list(:) = uni_amplitude_list(:) * eV_Ha
        bi_vallist(:) = bi_vallist(:) * eV_Ha
        
-       write(*,'(A80)') " "
-       write(*,'(A21)') "Setting up spin model"
-       write(*,'(A15)') "Setting system"
+       write(std_out,'(A80)') " "
+       write(std_out,'(A21)') "Setting up spin model"
+       write(std_out,'(A15)') "Setting system"
        uc(:,:)=transpose(reshape(unitcell, [3,3]))
        !call set_atoms(self,)
     endif
@@ -401,12 +401,12 @@ contains
        end if
 
        if(uexc .and. exc_nnz>0) then
-          write(*,'(A23)') "Setting exchange terms"
+          write(std_out,'(A23)') "Setting exchange terms"
           call self%set_exchange(exc_nnz,exc_ilist,exc_jlist,&
                reshape(exc_Rlist, (/3, exc_nnz /)), &
                reshape(exc_vallist, (/3, exc_nnz/)))
        else
-        if (.not. uexc)  write(*, '(A38)') " Exchange term from xml file not used."
+        if (.not. uexc)  write(std_out, '(A38)') " Exchange term from xml file not used."
        endif
 
        if(.not. present(use_dmi))  then
@@ -415,13 +415,12 @@ contains
           udmi=use_dmi
        end if
        if (udmi .and. dmi_nnz>0) then
-          write(*,'(A18)') "Setting DMI terms"
+          write(std_out,'(A18)') "Setting DMI terms"
           call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
                Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
                vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
-          write(*,'(A27)') " Setting uniaxial SIA terms"
        else
-          if (.not. udmi) print *, " DMI term from xml file not used"
+          if (.not. udmi) write(std_out, 'A(35)') " DMI term from xml file not used"
        end if
 
        if(.not. present(use_sia)) then
@@ -430,11 +429,11 @@ contains
           usia=use_sia
        end if
        if (usia .and. uni_nnz>0) then
-          write(*,'(A18)') "Setting SIA terms"
+          write(std_out,'(A18)') "Setting SIA terms"
           call self%set_sia(uni_nnz, uni_ilist, uni_amplitude_list, &
                reshape(uni_direction_list, [3, uni_nnz]) )
        else
-         if(.not. usia) print *, " SIA term in xml file not used"
+         if(.not. usia) write(std_out,'(A34)') " SIA term in xml file not used"
        end if
        if(.not. present(use_bi)) then
           ubi=.True.
@@ -442,7 +441,7 @@ contains
           ubi=use_bi
        endif
        if (ubi .and. bi_nnz>0) then
-          write(*,'(A23)') "Setting bilinear terms"
+          write(std_out,'(A23)') "Setting bilinear terms"
           call self%set_bilinear(bi_nnz, bi_ilist, bi_jlist,  &
                Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
                vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))

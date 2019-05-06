@@ -52,7 +52,7 @@ module m_spmat_lil
      procedure :: insert => lil_mat_t_insert
      procedure :: add_entry
      procedure :: get_nnz => lil_mat_t_get_nnz
-     procedure :: print => LIL_mat_t_print
+     !procedure :: print => LIL_mat_t_print
     end type LIL_mat_t
 
   contains
@@ -102,23 +102,23 @@ module m_spmat_lil
   end subroutine add_entry
 
 
-  subroutine LIL_mat_t_print(self, mat)
-
-    class(LIL_mat_t) , intent(inout)::self 
-    real(dp), intent(out):: mat(self%nrow,self%ncol)
-    integer:: irow, icol
-    real(dp):: val
-    mat(:,:)=0.0d0
-    do irow=1, self%nrow
-       call llist_iter_restart(self%rows(irow))
-       do while(associated(self%rows(irow)%iter))
-          !print*, "Irow: " ,irow, "Icol: ", self%rows(irow)%iter%i, "  val: ", self%rows(irow)%iter%val
-          !TODO print with wrtout
-          self%rows(irow)%iter=>self%rows(irow)%iter%next
-       enddo
-    enddo
-  end subroutine LIL_mat_t_print
-
+!  subroutine LIL_mat_t_print(self, mat)
+!
+!    class(LIL_mat_t) , intent(inout)::self 
+!    real(dp), intent(out):: mat(self%nrow,self%ncol)
+!    integer:: irow, icol
+!    real(dp):: val
+!    mat(:,:)=0.0d0
+!    do irow=1, self%nrow
+!       call llist_iter_restart(self%rows(irow))
+!       do while(associated(self%rows(irow)%iter))
+!          !print*, "Irow: " ,irow, "Icol: ", self%rows(irow)%iter%i, "  val: ", self%rows(irow)%iter%val
+!          !TODO print with wrtout
+!          self%rows(irow)%iter=>self%rows(irow)%iter%next
+!       enddo
+!    enddo
+!  end subroutine LIL_mat_t_print
+!
  
   function LIL_mat_t_get_nnz(ll) result(nnz)
 

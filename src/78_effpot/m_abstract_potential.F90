@@ -55,7 +55,6 @@ module m_abstract_potential
      logical :: has_lwf = .False.
      logical :: is_null=.True.   ! if is_null, this term does not exist.
      type(mb_supercell_t) ,pointer :: supercell => null()
-     !real(dp), allocatable :: ms(:)
      character (len=200) :: label="Abstract Potential"
    contains
      procedure :: set_supercell   ! set_supercell

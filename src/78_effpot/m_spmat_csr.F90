@@ -59,7 +59,7 @@ module m_spmat_csr
      procedure :: sync ! sync data to all mpi ranks
      procedure :: mv_mpi => csr_mat_t_mv_mpi ! mpi version of mv
      procedure :: mv_select_row =>csr_mat_t_mv_select_row ! mv of selected rows
-     procedure :: print
+     !procedure :: print
   end type CSR_mat_t
 contains
 
@@ -86,7 +86,7 @@ contains
 
     iproc=xmpi_comm_rank(xmpi_world)
     if (iproc/=0) then
-       print *, "This function should be only used on root node"
+       MSG_ERROR("This function (CSR_MAT%set) should be only used on root node")
     end if
 
     self%nnz=nnz
@@ -231,11 +231,11 @@ contains
     end do
   end subroutine CSR_mat_t_mv_select_row
 
-  subroutine print(self)
-    class(CSR_mat_t), intent(in) :: self
-    print *, "icol:", self%icol
-    print *, "row_shift:", self%row_shift
-    print *, "val:", self%val
-  end subroutine print
+!  subroutine print(self)
+!    class(CSR_mat_t), intent(in) :: self
+!    print *, "icol:", self%icol
+!    print *, "row_shift:", self%row_shift
+!    print *, "val:", self%val
+!  end subroutine print
 
 end module m_spmat_csr

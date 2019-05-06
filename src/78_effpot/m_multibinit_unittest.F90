@@ -49,27 +49,26 @@ contains
 
   subroutine mb_test_main()
     ! test 1
-    print*, "Unit test1: Supercell maker"
     call mb_test1()
-    print*, "End Unit test1: Supercell maker"
-    print*, "================================="
+    write(std_out, *) "End Unit test1: Supercell maker"
+    write(std_out, *) "================================="
 
     ! test2
-    print *, "Unit test2: Dynamic array"
+    write(std_out, *) "Unit test2: Dynamic array"
     call dynamic_array_unittest()
-    print *, "End Unit test2"
+    write(std_out, *) "End Unit test2"
     print*, "================================="
 
     ! test4
-    print *, "ndcoo matrix test"
+    write(std_out, *) "ndcoo matrix test"
     call test_ndcoo()
-    print *, "End ndcoo matrix test"
+    write(std_out, *) "End ndcoo matrix test"
     print*, "================================="
 
 
-    print *, "spmat convert test"
+    write(std_out, *) "spmat convert test"
     call spmat_convert_unittest()
-    print *, "End spmat convert test"
+    write(std_out, *) "End spmat convert test"
     print*, "================================="
   end subroutine mb_test_main
 

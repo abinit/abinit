@@ -97,7 +97,6 @@
      real(dp) :: etot, r
      integer :: i, j
      r=self%attempt(rng, effpot)
-     !print *, "r", r
      if(rng%rand_unif_01()< min(1.0_dp, r) ) then
         self%naccept=self%naccept+1
         call self%accept()
@@ -175,7 +174,6 @@
      real(dp), intent(out) :: Snew(3)
      integer :: move
      move=rng%rand_choice(3)
-     !print *, "choice of move", move
      select case (move)
      case (1)
         call move_angle(rng, Sold, Snew, angle)

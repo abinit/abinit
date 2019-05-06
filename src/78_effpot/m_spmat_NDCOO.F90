@@ -57,7 +57,7 @@ module m_spmat_NDCOO
      procedure :: get_ind
      procedure :: group_by_1dim
      procedure :: mv1vec
-     procedure :: print
+     !procedure :: print
   end type ndcoo_mat_t
 
   public:: test_ndcoo
@@ -241,14 +241,6 @@ contains
     ilist(:)=self%ind%data(dim, 1:self%nnz)
   end function get_ind
 
-  subroutine print(self)
-    class(ndcoo_mat_t), intent(inout) :: self
-    integer :: i
-    do i=1, self%nnz
-       print *, self%ind%data(:, i), ":  ", self%val%data(i)
-    end do
-
-  end subroutine print
 
   ! matrix vector product. 
   subroutine mv1vec(self, vec, i, res)
@@ -291,16 +283,16 @@ contains
     call m%add_entry(ind=[3, 2,1], val=0.5d0)
     call m%add_entry(ind=[1, 1,2], val=0.5d0)
     call m%add_entry(ind=[2,5,1], val=0.0d0)
-    call m%print()
+    !call m%print()
     call m%sort_indices()
     call m%sum_duplicates()
-    print *, "After sum"
-    call m%print()
-    print *, "Grouping"
+    !print *, "After sum"
+    !call m%print()
+    !print *, "Grouping"
     call m%group_by_1dim(ngroup, i1list, ise)
-    print *,  "ngroup: ", ngroup
-    print *, "i1list: ", i1list
-    print *, "ise: ", ise
+    !print *,  "ngroup: ", ngroup
+    !print *, "i1list: ", i1list
+    !print *, "ise: ", ise
     if(allocated(i1list)) ABI_DEALLOCATE(i1list)
     if(allocated(ise)) ABI_DEALLOCATE(ise)
   end subroutine test_ndcoo

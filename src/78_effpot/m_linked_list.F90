@@ -95,7 +95,6 @@ module m_linked_list
     self%last%val=val
     self%last%next=>null()
     self%length = self%length+1
-    !print *, 'length', self%length
   end subroutine llist_append
 
   subroutine llist_iter_restart(self)
@@ -149,22 +148,12 @@ module m_linked_list
     class(llist):: self
     integer, intent(in) :: i, mode
     real(dp), intent(in):: val
-    !print *, "debug insert"
-    !print *, "first i", self%first%i
-    !print *, "last i", self%last%i
-    !print *, i
     call llist_iter_restart(self)
     if(.not.associated(self%last)) then
-       !print *, "append"
-       ! no element in list
        call llist_append(self,i,val)
-       !print *, self%last%i
-       !print *, self%last%val
     else if (i<self%first%i) then
-       !print *, "insert head"
        call llist_insert_head(self, i, val)
     else
-       !print *, "insert middle"
        do while(associated(self%iter))
           ! at the begining i<i0
           ! before the end,
@@ -187,7 +176,7 @@ module m_linked_list
           call llist_append(self,i,val)
           return
        else
-          print*, "cannot find proper place to insert"
+          MSG_BUG("m_linked_list cannot find proper place to insert")
        endif
     endif
 
@@ -196,16 +185,15 @@ module m_linked_list
 
   end subroutine llist_sorted_insert
 
-  subroutine llist_print_all(self)
-
-    class(llist), intent(inout)::self
-    call llist_iter_restart(self)
-    print*, "linkedlist of length ", self%length
-    do while(associated(self%iter))
-       print*, "I: ", self%iter%i, "  val: ", self%iter%val
-       self%iter=>self%iter%next
-    enddo
-  end subroutine llist_print_all
+!  subroutine llist_print_all(self)
+!
+!    class(llist), intent(inout)::self
+!    call llist_iter_restart(self)
+!    do while(associated(self%iter))
+!       !print*, "I: ", self%iter%i, "  val: ", self%iter%val
+!       self%iter=>self%iter%next
+!    enddo
+!  end subroutine llist_print_all
 
 
   subroutine llist_get_data(self, ilist, vallist)

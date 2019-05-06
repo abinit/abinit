@@ -453,15 +453,14 @@ subroutine insertion_sort_int_test()
   call insertion_sort_int(a, order)
   a2=[3,6,2,4, 3, 5, 0, 9]
   call insertion_sort_int(a2)
-  print *, a2
 end subroutine insertion_sort_int_test
 
 subroutine int2d_array_test()
   type(int2d_array_type) :: t
   integer :: i
-  print *, array_morethan([2,1,4], [1,1,2], 3)
-  print *, array_morethan([2,1,4], [1,2,2], 3)
-  print *, array_morethan([1,2,2], [2,1,4], 3)
+  array_morethan([2,1,4], [1,1,2], 3)
+  array_morethan([2,1,4], [1,2,2], 3)
+  array_morethan([1,2,2], [2,1,4], 3)
   call t%push_unique([1,1,2])
   call t%push_unique([1,2,2])
   call t%push_unique([1,1,2])
@@ -469,9 +468,6 @@ subroutine int2d_array_test()
   call t%push_unique([-1, 3, 3])
   call t%push_unique([2,1, 4])
   call t%sort()
-  do i=1, t%size
-     print *, t%data(:, i)
-  end do
 end subroutine int2d_array_test
 
 subroutine dynamic_array_unittest()
