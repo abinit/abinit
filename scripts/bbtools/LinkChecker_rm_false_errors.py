@@ -179,9 +179,9 @@ def main(filename,home_dir=""):
              continue
           else: 
              urls.add(URL)
-      else:
-          if not ("index.html" in parent.text) :
-             continue
+      #else:
+      #    if not ("index.html" in parent.text) :
+      #       continue
     except:
       pass
 
