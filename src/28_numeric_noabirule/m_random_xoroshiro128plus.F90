@@ -1,10 +1,13 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include "abi_common.h"
 ! xoroshiro128plus method random number generator
 ! adapted by hexu for usage in Abinit (downgrade to Fortran 90 and added
 ! some functions )
-! TODO: move this to 28_numeric_noabirule?
+! (Fortran 2003 re-enabled)
 
 !** License for the xoroshiro128plus random number generator **
 !
@@ -43,11 +46,14 @@
 !> generator is the xoroshiro128plus method.
 module m_random_xoroshiro128plus
 
+  use defs_basis
+  use m_profiling_abi
+
   implicit none
   private
 
   ! A 64 bit floating point type
-  integer, parameter :: dp = kind(0.0d0)
+  !integer, parameter :: dp = kind(0.0d0)
 
   ! A 32 bit integer type
   integer, parameter :: i4 = selected_int_kind(9)
@@ -84,7 +90,8 @@ module m_random_xoroshiro128plus
   type prng_t
      type(rng_t), allocatable :: rngs(:)
    contains
-     procedure, non_overridable :: init_parallel
+     procedure, non_overridable :: initialize => init_parallel
+     procedure, non_overridable :: finalize => finalize_parallel
   end type prng_t
 
 
@@ -106,22 +113,29 @@ module m_random_xoroshiro128plus
 contains
 
   !> Initialize a collection of rng's for parallel use
-  subroutine init_parallel(self, n_proc, rng)
+  subroutine init_parallel(self, n_proc, seed)
 
     class(prng_t), intent(inout) :: self
-    type(rng_t), intent(inout)   :: rng
+    integer(i8), optional, intent(in)     :: seed(2)
     integer, intent(in)          :: n_proc
     integer                      :: n
 
-    allocate(self%rngs(n_proc))
-    self%rngs(1) = rng
-
+    ABI_MALLOC(self%rngs, (n_proc))
+    if (.present. seed) then
+      call self%rng(1)%set_seed(seed)
+    endif
     do n = 2, n_proc
        self%rngs(n) = self%rngs(n-1)
-       !call self%rngs(n)%jump()
-       call jump(self%rngs(n))
+       call self%rngs(n)%jump()
     end do
   end subroutine init_parallel
+
+
+  !> Finalize prng_t
+  subroutine finalize_parallel(self)
+    class(prng_t), intent(inout) :: self
+    ABI_FREE(self%rngs)
+  end subroutine finalize_parallel
 
   !> Set a seed for the rng
   subroutine set_seed(self, the_seed)

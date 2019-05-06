@@ -953,7 +953,7 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
   fflush(stderr);
 }
   
-void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_max){
+void effpot_xml_getDimCoeff(char *filename,int *ncoeff,int *nterm_max,int *ndisp_max){
   int icoeff,idisp,iterm;
   int count1,count2;
   xmlDocPtr doc;

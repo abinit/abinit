@@ -531,7 +531,9 @@ class FortranKissParser(HasRegex):
         self.macros = {} if macros is None else macros
 
     def parse_file(self, path, include_files=False):
-
+        """
+        Parse Fortran file in `path`. Include external files if `include_files`.
+        """
         with io.open(path, "rt", encoding="utf8") as fh:
             # Include Fortran files?
             if include_files:
@@ -547,6 +549,10 @@ class FortranKissParser(HasRegex):
                 string = "\n".join(lines)
             else:
                 string = fh.read()
+
+            if string and string[0] == "#":
+                raise ValueError("Found `#` as first character in file `%s`\n" % path +
+                                 "Please avoid it because it has a special meaning and it confuses ctags")
 
             return self.parse_string(string, path=path)
 

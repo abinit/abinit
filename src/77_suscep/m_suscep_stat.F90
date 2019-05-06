@@ -167,8 +167,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 &  susmat,symafm,symrel,tnons,typat,ucvol,unpaw,usecprj,usepaw,usetimerev,&
 &  wtk,ylmdiel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lmax_diel,mband,mcg,mcprj,mgfftdiel,mkmem,mpw,natom,neglect_pawhat
@@ -206,7 +204,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  integer :: ispinor,istwf_k,isym,j1,j2,j3,jj,jsp,k1,k2,k3
  integer :: my_nspinor,nband_k,nband_loc,ndiel1,ndiel2,ndiel3,ndiel4,ndiel5,ndiel6
  integer :: nkpg_diel,npw_k,npwsp,nspden_eff,nspden_tmp,nsym1,nsym2
- integer :: paral_kgb_diel,spaceComm,t1,t2,testocc
+ integer :: spaceComm,t1,t2,testocc
  real(dp) :: ai,ai2,ar,ar2,diegap,dielam,emax,invnsym
  real(dp) :: invnsym1,invnsym2,phi1,phi12,phi2,phr1,phr12
  real(dp) :: phr2,sumdocc,weight
@@ -427,7 +425,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 &       gbound_diel,gylmg_diel,icg,ikpt,&
 &       isp,istwf_k,kg_diel,kg_k,lmax_diel,mband,mcg,mgfftdiel,mpi_enreg,&
 &       natom,nband_k,ndiel4,ndiel5,ndiel6,neglect_pawhat,ngfftdiel,nkpt,&
-&       npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,paral_kgb_diel,&
+&       npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,&
 &       pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &       susmat,typat,ucvol,usepaw,wtk)
      end if
@@ -480,7 +478,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !      (note symrhg also make the reverse FFT, to get symmetrized density;
 !      this is useless here, and should be made an option)
        call symrhg(1,gprimd,irrzondiel,mpi_enreg_diel,nfftdiel,nfftdiel,ngfftdiel,&
-&       nspden_tmp,1,nsym,paral_kgb_diel,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel)
+&       nspden_tmp,1,nsym,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel)
 
        do ipw2=1,npwdiel
          j1=kg_diel(1,ipw2) ; j2=kg_diel(2,ipw2) ; j3=kg_diel(3,ipw2)
@@ -903,8 +901,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 &  npwdiel,npw_k_mpi,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,&
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
-
- implicit none
 
 !Arguments ------------------------------------
 !This type is defined in defs_mpi
@@ -1494,18 +1490,16 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 &  gbound_diel,gylmg_diel,icg,ikpt,isp,istwf_k,kg_diel,kg_k,&
 &  lmax_diel,mband,mcg,mgfftdiel,mpi_enreg,&
 &  natom,nband_k,ndiel4,ndiel5,ndiel6,neglect_pawhat,ngfftdiel,nkpt,&
-&  npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,paral_kgb,&
+&  npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,&
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bdtot_index,extrap,icg,ikpt,isp,istwf_k,lmax_diel,mband,mcg
  integer,intent(in) :: mgfftdiel,natom,nband_k,ndiel4,ndiel5,ndiel6,neglect_pawhat
  integer,intent(in) :: nkpt,npw_k,npwdiel,nspden,nspden_eff,nspinor
- integer,intent(in) :: nsppol,ntypat,occopt,paral_kgb,usepaw
+ integer,intent(in) :: nsppol,ntypat,occopt,usepaw
  real(dp),intent(in) :: ucvol
  real(dp),intent(inout) :: sumdocc
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1542,11 +1536,6 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
  real(dp),allocatable :: wfrspa2(:,:,:,:,:,:)
 
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,*)' suskmm : enter '
-!if(.true.)stop
-!ENDDEBUG
 
  call timab(760,1,tsec)
  call timab(761,1,tsec)

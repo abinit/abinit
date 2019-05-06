@@ -1311,7 +1311,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, itimrev, isym, npc, ierr, imyp, ipc, mu, root
+ integer :: db_iqpt, itimrev, isym, npc, ierr, imyp, mu, root
  logical :: isirr_q, incache
 !arrays
  integer :: pinfo(3,3*db%mpert), g0q(3), requests(db%natom3)
@@ -1319,6 +1319,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
+ ABI_UNUSED(qbz(1))
 
  ! Keep track of total time spent.
  call timab(1802, 1, tsec)
@@ -1582,7 +1583,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, cplex, ierr, imyp, ipc, ii
+ integer :: db_iqpt, cplex,  imyp, ipc !, ii
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
@@ -2484,7 +2485,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 
  ABI_MALLOC(v1g, (2,nfft))
  call symrhg(cplex,cryst%gprimd,irrzon1,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym1,&
-    mpi_enreg%paral_kgb,phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1)
+    phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1)
 
  ABI_FREE(irrzon1)
  ABI_FREE(phnons1)
@@ -3092,7 +3093,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
  integer,parameter :: cplex2 = 2
  integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr
  real(dp) :: wr, wi
- complex(dpc) :: beta
+ !complex(dpc) :: beta
 !arrays
  integer :: symq(4,2,db%cryst%nsym)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
@@ -3220,6 +3221,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
+ ABI_UNUSED(comm)
 
  ! Keep track of total time spent.
  call timab(1809, 1, tsec)
@@ -3511,7 +3513,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 !arrays
  !integer :: qselect(nqibz)
  real(dp),allocatable :: v1scf(:,:,:,:)
- real(dp) :: tsec(2)
+ !real(dp) :: tsec(2)
 
 ! *************************************************************************
 

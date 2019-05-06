@@ -9,7 +9,10 @@
 !! real_array_type for real(dp) and int_array_type for integer.
 !! they have push (but no pop) and finalize methods.
 !! TODO hexu: Is this already implemented somewhere in abinit.
-!! If not, should this file  be moved to the place to make it more general usable?
+!! If not, should this file be moved to the place to make it more general usable?
+!!
+!! MG: Yes, this module should be moved to a lower level directory so that one can reuse it in other 
+!! parts of the code.
 !!
 !!
 !! COPYRIGHT
@@ -124,16 +127,16 @@ subroutine real_array_type_push(self, val)
     class(real_array_type), intent(inout):: self
     real(dp) :: val
     real(dp), allocatable :: temp(:)
-    integer :: err
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ALLOCATE(self%data(self%capacity), stat=err)
+      ABI_MALLOC(self%data, (self%capacity))
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ALLOCATE(temp(self%capacity), stat=err)
+      ABI_MALLOC(temp, (self%capacity))
       temp(:self%size-1) = self%data
-      call move_alloc(temp, self%data) !temp gets deallocated
+      !temp gets deallocated
+      ABI_MOVE_ALLOC(temp, self%data) 
     end if
     self%data(self%size)=val
 
@@ -161,9 +164,7 @@ end subroutine real_array_type_push
 subroutine real_array_type_finalize(self)
 
   class(real_array_type), intent(inout):: self
-  if ( allocated(self%data) ) then
-      DEALLOCATE(self%data)
-  end if
+  ABI_SFREE(self%data)
   self%size=0
   self%capacity=0
 
@@ -192,17 +193,18 @@ end subroutine real_array_type_finalize
 subroutine int_array_type_push(self, val)
 
     class(int_array_type), intent(inout):: self
-    integer :: val, err
+    integer :: val
     integer, allocatable :: temp(:)
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ALLOCATE(self%data(self%capacity), stat=err)
+      ABI_MALLOC(self%data, (self%capacity))
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ALLOCATE(temp(self%capacity), stat=err)
+      ABI_MALLOC(temp, (self%capacity))
       temp(:self%size-1) = self%data
-      call move_alloc(temp, self%data) !temp gets deallocated
+      !temp gets deallocated
+      ABI_MOVE_ALLOC(temp, self%data) 
     end if
     self%data(self%size)=val
 
@@ -281,9 +283,7 @@ end subroutine int_array_type_sort
 subroutine int_array_type_finalize(self)
 
   class(int_array_type), intent(inout):: self
-  if ( allocated(self%data) ) then
-      DEALLOCATE(self%data)
-  end if
+  ABI_SFREE(self%data)
   self%size=0
   self%capacity=0
 

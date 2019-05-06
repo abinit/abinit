@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -344,7 +345,7 @@ include 'mpif.h'
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
 #endif
-  INTEGER                                       :: iflavor
+  !INTEGER                                       :: iflavor
 #ifdef __GFORTRAN__
 !  INTEGER                                       :: pid
 !  CHARACTER(LEN=5)                              :: Cpid
@@ -432,7 +433,7 @@ include 'mpif.h'
 !  op%seg_sign     = 0.d0
 !  op%anti_sign    = 0.d0
   op%stats(:)     = 0.d0
- ! write(6,*) "op%stats",op%stats
+ ! write(std_out,*) "op%stats",op%stats
   op%signvalue    = 1.d0
 !  op%signvaluecurrent    = 0.d0
 !  op%signvaluemeas = 0.d0
@@ -517,7 +518,7 @@ SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
     op%setU = .TRUE.
   END IF
 !  op%mu = op%mu + op%Impurity%shift_mu
-!sui!write(6,*) "op%opt_nondiag",op%opt_nondiag
+!sui!write(std_out,*) "op%opt_nondiag",op%opt_nondiag
   CALL BathOperatoroffdiag_init(op%Bath, op%flavors, op%samples, op%beta, INT(buffer(9)), op%opt_nondiag)
 
   op%para = .TRUE.
@@ -563,7 +564,7 @@ SUBROUTINE Ctqmcoffdiag_setSweeps(op,sweeps)
   DOUBLE PRECISION  , INTENT(IN   ) :: sweeps
 
   op%sweeps = NINT(sweeps / DBLE(op%size))
-!  !write(6,*) op%sweeps,NINT(sweeps / DBLE(op%size)),ANINT(sweeps/DBLE(op%size))
+!  !write(std_out,*) op%sweeps,NINT(sweeps / DBLE(op%size)),ANINT(sweeps/DBLE(op%size))
   IF ( DBLE(op%sweeps) .NE. ANINT(sweeps/DBLE(op%size)) ) &
     CALL ERROR("Ctqmcoffdiag_setSweeps : sweeps is negative or too big     ")
   IF ( op%sweeps .LT. 2*CTQMC_SLICE1 ) THEN  !202
@@ -674,8 +675,6 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 SUBROUTINE Ctqmcoffdiag_allocateAll(op)
 
 !Arguments ------------------------------------
-  implicit none
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: flavors
@@ -1118,7 +1117,7 @@ SUBROUTINE Ctqmcoffdiag_reset(op)
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
-  INTEGER                  :: iflavor
+  !INTEGER                  :: iflavor
   DOUBLE PRECISION         :: sweeps
 
   CALL GreenHyboffdiag_reset(op%Greens)
@@ -1291,23 +1290,25 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   INTEGER                                         :: itau
   DOUBLE PRECISION                                :: pi_invBeta
   DOUBLE PRECISION                                :: K
-  DOUBLE PRECISION                                :: re
-  DOUBLE PRECISION                                :: im
-  DOUBLE PRECISION                                :: det
+  !DOUBLE PRECISION                                :: re
+  !DOUBLE PRECISION                                :: im
+  !DOUBLE PRECISION                                :: det
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: F_omega
   COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE   :: F_omega_inv
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: Gomega_tmp
   TYPE(GreenHyboffdiag)                                     :: F_tmp
-  character(len=4) :: tag_proc
-  character(len=30) :: tmpfil
-  INTEGER :: unitnb
+  !character(len=4) :: tag_proc
+  !character(len=30) :: tmpfil
+  !INTEGER :: unitnb
+
+  ABI_UNUSED((/opt_fk/))
 
   flavors    = op%flavors
 
   samples    = op%samples
   pi_invBeta = ACOS(-1.d0) / op%beta
   op%Wmax=SIZE(Gomega,1)
-!sui!write(6,*) "op%Wmax",op%Wmax
+!sui!write(std_out,*) "op%Wmax",op%Wmax
   !=================================
   ! --- Initialize F_tmp 
   !=================================
@@ -1414,7 +1415,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      !  for test: Fourier of G0(iwn)
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   !sui!write(6,*) "opt_fk=0"
+   !sui!write(std_out,*) "opt_fk=0"
      CALL GreenHyboffdiag_setOperW(F_tmp,F_omega)
   ! IF ( op%rank .EQ. 0 ) THEN
   !    DO iflavor = 1, flavors
@@ -1470,7 +1471,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
      !      enddo
      !        write(436,*) 
      !    END DO
-     !  !sui!write(6,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
+     !  !sui!write(std_out,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
      !  END DO
      !ENDIF
      !call flush(436)
@@ -1613,7 +1614,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   ! --- For all iflavor and iflavor2, do the Fourier transformation to
   ! --- have (F(\tau))
   !CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
-   write(6,*) "WARNING opt_hybri_limit==1"
+   write(std_out,*) "WARNING opt_hybri_limit==1"
  ! CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=0)
   CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=1)
  ! CALL GreenHyboffdiag_backFourier(F_tmp)
@@ -1828,19 +1829,19 @@ include 'mpif.h'
     op%opt_spectra = opt_spectra
 
   op%modGlobalMove(1) = max(op%sweeps,op%thermalization)+1 ! No Global Move
-!!sui!write(6,*) "op%sweeps",op%thermalization,op%sweeps,opt_gMove
+!!sui!write(std_out,*) "op%sweeps",op%thermalization,op%sweeps,opt_gMove
   op%modGlobalMove(2) = 0
   IF ( PRESENT ( opt_gMove ) ) THEN
     IF ( opt_gMove .LE. 0 .OR. opt_gMove .GT. op%sweeps ) THEN
      ! op%modGlobalMove(1) = op%sweeps+1
       op%modGlobalMove(1) = max(op%sweeps,op%thermalization)+1 ! No Global Move
-      !write(6,*) "op%sweeps",op%sweeps, op%modGlobalMove(1)
+      !write(std_out,*) "op%sweeps",op%sweeps, op%modGlobalMove(1)
       CALL WARNALL("Ctqmcoffdiag_run : global moves option is <= 0 or > sweeps/cpu -> No global Moves")
     ELSE 
       op%modGlobalMove(1) = opt_gMove 
     END IF
   END IF
-!sui!write(6,*) "op%sweeps",op%thermalization,op%sweeps
+!sui!write(std_out,*) "op%sweeps",op%thermalization,op%sweeps
 
   CALL Ctqmcoffdiag_allocateOpt(op)
   
@@ -1870,8 +1871,8 @@ include 'mpif.h'
   !=================================
   ! STARTING THERMALIZATION 
   !=================================
-  !write(6,*) "sweeps before thermalization",op%sweeps
-  !write(6,*) "op%stats",op%stats
+  !write(std_out,*) "sweeps before thermalization",op%sweeps
+  !write(std_out,*) "op%stats",op%stats
   CALL Ctqmcoffdiag_loop(op,op%thermalization,ilatex)
   !=================================
   ! ENDING   THERMALIZATION 
@@ -1898,8 +1899,8 @@ include 'mpif.h'
   !=================================
   ! STARTING CTQMC          
   !=================================
-  !write(6,*) "sweeps before loop",op%sweeps
-  !write(6,*) "op%stats",op%stats
+  !write(std_out,*) "sweeps before loop",op%sweeps
+  !write(std_out,*) "op%stats",op%stats
   CALL Ctqmcoffdiag_loop(op,op%sweeps,ilatex)
   !=================================
   ! ENDING   CTQMC          
@@ -1912,7 +1913,7 @@ include 'mpif.h'
   END IF
 
   op%done     = .TRUE.
-!sui!write(6,*) "op%stats en of ctqmc_run",op%stats
+!sui!write(std_out,*) "op%stats en of ctqmc_run",op%stats
 
 END SUBROUTINE Ctqmcoffdiag_run
 !!***
@@ -1974,7 +1975,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   INTEGER                            :: swapUpdate2
   INTEGER                            :: old_percent
   INTEGER                            :: new_percent
-  INTEGER                            :: ipercent,ii
+  INTEGER                            :: ipercent !,ii
   INTEGER                            :: iflavor,ifl1,iflavor_d
   INTEGER                            :: isweep
 
@@ -2031,24 +2032,24 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   END IF
 
   total = DBLE(itotal)
-  !write(6,*) "itotal",itotal
+  !write(std_out,*) "itotal",itotal
   indDensity = 1
-  !write(6,*) "op%stats",op%stats
+  !write(std_out,*) "op%stats",op%stats
   DO isweep = 1, itotal
-  !ii if(op%prtopt==1) write(6,*) "======== Isweep = ",isweep
+  !ii if(op%prtopt==1) write(std_out,*) "======== Isweep = ",isweep
     !updated_seg=.FALSE.
     DO iflavor = 1, flavors
-     ! if(isweep==itotal) write(6,*) "    Iflavor = ",iflavor,op%Impurity%Particles(iflavor)%tail
-   !ii if(op%prtopt==1)  write(6,*) "      ===Iflavor = ",iflavor
+     ! if(isweep==itotal) write(std_out,*) "    Iflavor = ",iflavor,op%Impurity%Particles(iflavor)%tail
+   !ii if(op%prtopt==1)  write(std_out,*) "      ===Iflavor = ",iflavor
       op%Impurity%activeFlavor=iflavor
       op%Bath%activeFlavor=iflavor ; op%Bath%MAddFlag= .FALSE. ; op%Bath%MRemoveFlag = .FALSE.
 
-      !write(6,*) "before tryaddremove"
+      !write(std_out,*) "before tryaddremove"
 
       ! For iflavor, Try a move
       !==========================
       CALL Ctqmcoffdiag_tryAddRemove(op,updated_seg)
-    !sui!write(6,*) "after tryaddremove",updated_seg
+    !sui!write(std_out,*) "after tryaddremove",updated_seg
 
       updated = updated_seg .OR.  updated_swap(iflavor).OR.(isweep==1)
       updated_swap(iflavor) = .FALSE.
@@ -2068,9 +2069,9 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
     !END DO
 
     IF ( MOD(isweep,modGlobalMove) .EQ. 0 ) THEN
-  ! !sui!write(6,*) "isweep,modGlobalMove,inside",isweep,modGlobalMove
+  ! !sui!write(std_out,*) "isweep,modGlobalMove,inside",isweep,modGlobalMove
       CALL Ctqmcoffdiag_trySwap(op,swapUpdate1, swapUpdate2)
-     ! !write(6,*) "no global move yet for non diag hybridization"
+     ! !write(std_out,*) "no global move yet for non diag hybridization"
       IF ( swapUpdate1 .NE. 0 .AND. swapUpdate2 .NE. 0 ) THEN
         updated_swap(swapUpdate1) = .TRUE.
         updated_swap(swapUpdate2) = .TRUE.
@@ -2211,7 +2212,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   INTEGER                               :: position
   INTEGER         , DIMENSION(1:2)     :: nature ! -2 for antiseg and 1 for seg
   INTEGER                               :: i! -2 for antiseg and 1 for seg
-  INTEGER                               :: ii,it,it1
+  !INTEGER                               :: it,it1 !ii,
   DOUBLE PRECISION                      :: action
   DOUBLE PRECISION                      :: beta
   DOUBLE PRECISION                      :: time1
@@ -2229,7 +2230,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   IF ( .NOT. op%set ) &
     CALL ERROR("Ctqmcoffdiag_trySegment : QMC not set                       ")
 
-        !write(6,*) "      TryAddRemove start"
+        !write(std_out,*) "      TryAddRemove start"
   nature(1) = CTQMC_SEGME
   nature(2) = CTQMC_ANTIS
   beta      = op%beta
@@ -2237,7 +2238,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   updated = .FALSE.
   tailint  = (op%Impurity%particles(op%Impurity%activeFlavor)%tail)
   tail  = DBLE(tailint)
-  !write(6,*) "op%Impurity%particles(op%Impurity%activeFlavor)%tail",op%Impurity%activeFlavor,tail
+  !write(std_out,*) "op%Impurity%particles(op%Impurity%activeFlavor)%tail",op%Impurity%activeFlavor,tail
 
 
   !=====================================
@@ -2249,16 +2250,16 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 !      -----  2: antisegment    signe=-1  ( CTQMC_ANTIS = -2 )
 !    NB: Sign(a,b) = sign(b) * a
 
- !prt!if(op%prtopt==1) write(6,*) "       ==Starting configuration",i
- !prt!if(op%prtopt==1) write(6,*) "        = Segments:"
+ !prt!if(op%prtopt==1) write(std_out,*) "       ==Starting configuration",i
+ !prt!if(op%prtopt==1) write(std_out,*) "        = Segments:"
     tailint  = (op%Impurity%particles(op%Impurity%activeFlavor)%tail)
 !prt!    do ii=0, op%Impurity%Particles(op%Impurity%activeFlavor)%tail
- !prt!if(op%prtopt==1)  write(6,*) ii, op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,1), &
+ !prt!if(op%prtopt==1)  write(std_out,*) ii, op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,1), &
 !prt!&                    op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,2)
 !prt!    enddo
-  !sui!write(6,*) "        = M Matrix",op%Bath%sumtails
+  !sui!write(std_out,*) "        = M Matrix",op%Bath%sumtails
 !prt!    do it=1,op%Bath%sumtails
-    !sui!write(6,'(a,3x,500e10.3)') "        M start",(op%Bath%M%mat(it,it1),it1=1,op%Bath%sumtails)
+    !sui!write(std_out,'(a,3x,500e10.3)') "        M start",(op%Bath%M%mat(it,it1),it1=1,op%Bath%sumtails)
 !prt!    enddo
     CALL OurRng(op%seed,action)
 
@@ -2266,7 +2267,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
     ! Add segment/antisegment
     !==========================
     IF ( action .LT. .5d0 ) THEN ! Add a segment or antisegment
-     !ii  write(6,*) "        =try: Segment added of type",i,op%prtopt
+     !ii  write(std_out,*) "        =try: Segment added of type",i,op%prtopt
 
       ! Select time1 (>0) in [0,beta]
       !==============================
@@ -2280,7 +2281,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
       ! ImpurityOperator_getAvailableTime < 0 for an antisegment (signe<0) -> time_avail>0
       !====================================================================
       time_avail = ImpurityOperator_getAvailableTime(op%Impurity,time1,position) * signe
-     !ii  write(6,*) "        =try: time_avail",time_avail,time1
+     !ii  write(std_out,*) "        =try: time_avail",time_avail,time1
       IF ( time_avail .GT. 0.d0 ) THEN
 
         ! Time2 is  the length of the proposed new (anti)segment
@@ -2292,7 +2293,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         ! time2 > time1 
         !====================================================================
         time2     = time1 + time2 * time_avail
-      !sui!write(6,*) tailint+1,time1,time2,position
+      !sui!write(std_out,*) tailint+1,time1,time2,position
 !        CALL CdagC_init(CdagC_1,time1,time2)
 
         ! CdagC_1 gives the stard/end times for the proposed new segment/antisegment
@@ -2308,8 +2309,8 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         CdagC_1(C_   ) = ((1.d0+signe)*time2+(1.d0-signe)*time1)*0.5d0
 !        length    = CdagC_length(CdagC_1)
         length    = CdagC_1(C_   ) - CdagC_1(Cdag_)
-        !write(6,*) "      try : times", CdagC_1(C_   ),CdagC_1(Cdag_)
-        !write(6,*) "      length", length
+        !write(std_out,*) "      try : times", CdagC_1(C_   ),CdagC_1(Cdag_)
+        !write(std_out,*) "      length", length
 
 !      -----  Computes the determinant ratio
         det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles) 
@@ -2318,14 +2319,14 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
         signdetprev  = ImpurityOperator_getsign(op%Impurity, time2, i, action, position)
 
-        !write(6,*) "      overlap   ", overlap
+        !write(std_out,*) "      overlap   ", overlap
         CALL OurRng(op%seed,time1)
-        !write(6,*) "      Rnd", time1
+        !write(std_out,*) "      Rnd", time1
         signdet=1.d0
         det_ratio=det_ratio*signdetprev
                  
         IF ( det_ratio .LT. 0.d0 ) THEN
-        !sui!write(6,*) "         NEGATIVE DET",det_ratio,signdetprev
+        !sui!write(std_out,*) "         NEGATIVE DET",det_ratio,signdetprev
           det_ratio   = - det_ratio
           sign_det_ratio=-1
           op%stats(nature(i)+CTQMC_DETSI) = op%stats(nature(i)+CTQMC_DETSI) + 1.d0
@@ -2334,12 +2335,12 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
           sign_det_ratio=1
        !  op%signvaluecurrent=+1.d0
          ! signdet=-1.d0
-        !sui!write(6,*) "                  DET",det_ratio,signdetprev
+        !sui!write(std_out,*) "                  DET",det_ratio,signdetprev
         END IF
-      !ii  write(6,*) "                  DET",det_ratio
+      !ii  write(std_out,*) "                  DET",det_ratio
        ! op%signvaluemeas=op%signvaluemeas+1.d0
-        !write(6,*) "        .................",(time1 * (tail + 1.d0 )),beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap)
-        !write(6,*) "        .................",beta , time_avail , op%mu(op%Impurity%activeFlavor),op%Impurity%activeFlavor
+        !write(std_out,*) "        .................",(time1 * (tail + 1.d0 )),beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap)
+        !write(std_out,*) "        .................",beta , time_avail , op%mu(op%Impurity%activeFlavor),op%Impurity%activeFlavor
 
         IF ( (time1 * (tail + 1.d0 )) &
              .LT. (beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap) ) ) THEN
@@ -2655,7 +2656,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
   INTEGER               , INTENT(  OUT) :: flav_j
 !Local variables ------------------------------
   INTEGER :: flavor_i
-  INTEGER :: flavor_j,ii,it,it1,iflavor
+  INTEGER :: flavor_j !,ii,it,it1 !,iflavor
   DOUBLE PRECISION :: rnd
   DOUBLE PRECISION :: lengthi
   DOUBLE PRECISION :: lengthj
@@ -2663,10 +2664,10 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
   DOUBLE PRECISION :: overlapjc1
   DOUBLE PRECISION :: overlapic2
   DOUBLE PRECISION :: overlapjc2
-  DOUBLE PRECISION :: detic1
-  DOUBLE PRECISION :: detjc1
-  DOUBLE PRECISION :: detic2
-  DOUBLE PRECISION :: detjc2
+  !DOUBLE PRECISION :: detic1
+  !DOUBLE PRECISION :: detjc1
+  !DOUBLE PRECISION :: detic2
+  !DOUBLE PRECISION :: detjc2
   DOUBLE PRECISION :: det_ratio,detnew,detold
   DOUBLE PRECISION :: local_ratio
  ! TYPE(BathOperatoroffdiag)  :: Bathnew
@@ -3554,11 +3555,13 @@ SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: syms
 !Local variables ------------------------------
-  INTEGER :: iflavor1
-  INTEGER :: iflavor2
-  INTEGER :: flavors
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: green_tmp
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) :: n_tmp
+  !INTEGER :: iflavor1
+  !INTEGER :: iflavor2
+  !INTEGER :: flavors
+  !DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: green_tmp
+  !DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) :: n_tmp
+
+  ABI_UNUSED((/syms(1,1), op%swap/))
 
 !  flavors = op%flavors
 !  IF ( SIZE(syms,1) .NE. flavors .OR. SIZE(syms,2) .NE. flavors ) THEN
@@ -3629,7 +3632,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 !Local variables ------------------------------
   !INTEGER                            :: itime
   INTEGER                            :: iflavor1
-  INTEGER                            :: iflavor1b,iflavor,iflavorbis
+  INTEGER                            :: iflavor1b !,iflavor,iflavorbis
   INTEGER                            :: iflavor2
   INTEGER                            :: iflavor3
   INTEGER                            :: flavors,tail
@@ -3638,7 +3641,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   DOUBLE PRECISION :: u2
   DOUBLE PRECISION :: u3
   DOUBLE PRECISION :: Un
-  DOUBLE PRECISION :: UUnn,omega,iw
+  DOUBLE PRECISION :: UUnn,iw !omega,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
   TYPE(GreenHyboffdiag)                     :: F_tmp
@@ -4230,7 +4233,7 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
   INTEGER                            :: itime
   INTEGER                            :: sp1
   INTEGER                            :: iflavor,iflavorb
-  INTEGER                            :: flavors,iflavor1,iflavor2
+  INTEGER                            :: flavors, iflavor2 !,iflavor1,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
   DOUBLE PRECISION                   :: dt
@@ -4697,7 +4700,7 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
-  INTEGER                  :: iflavor
+  !INTEGER                  :: iflavor
   INTEGER                  :: flavors
   INTEGER                  :: i
   INTEGER                  :: j

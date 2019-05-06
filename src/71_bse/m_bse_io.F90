@@ -1449,7 +1449,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 
 !Local variables ------------------------------
 !scalars
- integer :: ncid,ncerr,cmplx_id,nband_id,nkbz_id,nsppol_id,nq_id,xyz_id
+ integer :: ncid,cmplx_id,nband_id,nkbz_id,nsppol_id,nq_id,xyz_id
  integer :: minb_id,maxb_id,ome_id,iq,is,ik,ib,jb
  integer :: dimOME(6),dimKPT(2),dimQPT(2),dimSCA(0),start6(6),count6(6)
  real(dp) :: complex2(2)
