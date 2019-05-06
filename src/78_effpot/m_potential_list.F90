@@ -59,7 +59,7 @@ module m_potential_list
   !!
   !! SOURCE
   type, private:: effpot_pointer_t ! pointer to effpot
-     class(abstract_potential_t) , pointer :: obj=>null()
+     class(abstract_potential_t) , pointer :: ptr=>null()
   end type effpot_pointer_t
   !!***
 
@@ -74,14 +74,16 @@ module m_potential_list
   !! SOURCE
   type, public, extends(abstract_potential_t) :: potential_list_t
      integer :: size, capacity
-     type(effpot_pointer_t), allocatable :: data(:)
+     type(effpot_pointer_t), allocatable :: list(:)
    contains
-     procedure :: initialize
-     procedure :: set_supercell
+     procedure :: initialize ! make an empty list
+     procedure :: ipot       ! return the i'th potential
+     procedure :: set_supercell ! pointer to supercell and set_supercell for all pot in list
      procedure :: finalize
-     procedure :: append
-     procedure :: calculate
-     procedure :: get_delta_E
+     procedure :: append  ! add a potential to the list
+     procedure :: calculate ! each potential in list do calculate and then sum.
+     procedure :: get_delta_E ! currently only used in spin potential, 
+                              ! to calculate energy difference when one spin changes.
   end type potential_list_t
   !!***
 
@@ -97,13 +99,23 @@ contains
     self%label="ListPotential"
   end subroutine initialize
 
+  ! return the i'th potential in the list
+  ! Unfortunately, fortran does not allow things  call potlist%ipot(i)%method...
+  ! So this is not really useful?
+  function ipot(self, i)
+    class (potential_list_t), target, intent(in) :: self
+    integer, intent(in) :: i
+    class(abstract_potential_t), pointer :: ipot
+    ipot=>self%list(i)%ptr
+  end function ipot
+  
   subroutine set_supercell(self, supercell)
     class (potential_list_t), intent(inout) :: self
     type (mb_supercell_t), target, intent(inout) :: supercell
     integer :: i
     self%supercell => supercell
     do i=1, self%size
-       call self%data(i)%obj%set_supercell(supercell)
+       call self%list(i)%ptr%set_supercell(supercell)
     end do
   end subroutine set_supercell
 
@@ -111,12 +123,12 @@ contains
     class (potential_list_t) ,intent(inout) :: self
     integer :: i
     do i=1, self%size
-       call self%data(i)%obj%finalize()
-       !if(associated(self%data(i)%obj)) deallocate(self%data(i)%obj)
-       nullify(self%data(i)%obj)
+       call self%list(i)%ptr%finalize()
+       !if(associated(self%list(i)%ptr)) deallocate(self%list(i)%ptr)
+       nullify(self%list(i)%ptr)
     end do
-    if (allocated(self%data)) then
-       ABI_DEALLOCATE(self%data)
+    if (allocated(self%list)) then
+       ABI_DEALLOCATE(self%list)
     end if
     self%size=0
     self%capacity=0
@@ -136,14 +148,14 @@ contains
     self%size=self%size + 1
     if(self%size==1) then
        self%capacity=8
-       ABI_ALLOCATE(self%data, (self%capacity))
+       ABI_ALLOCATE(self%list, (self%capacity))
     else if ( self%size>self%capacity ) then
        self%capacity = self%size + self%size / 4 + 8
        ALLOCATE(temp(self%capacity), stat=err)
-       temp(:self%size-1) = self%data(:)
-       call move_alloc(temp, self%data) !temp gets deallocated
+       temp(:self%size-1) = self%list(:)
+       call move_alloc(temp, self%list) !temp gets deallocated
     end if
-    self%data(self%size)%obj=>effpot
+    self%list(self%size)%ptr=>effpot
     self%is_null= (self%is_null .and. effpot%is_null)
     self%has_spin= (self%has_spin .or. effpot%has_spin)
     self%has_displacement= (self%has_displacement .or. effpot%has_displacement)
@@ -166,7 +178,7 @@ contains
     if(present(bfield)) bfield(:,:)=0.0d0
     if(present(lwf_force)) lwf_force(:)=0.0d0
     do i=1, self%size
-       call self%data(i)%obj%calculate(displacement=displacement, strain=strain, &
+       call self%list(i)%ptr%calculate(displacement=displacement, strain=strain, &
             & spin=spin, lwf=lwf, force=force, stress=stress, bfield=bfield, &
             lwf_force=lwf_force, energy=energy)
     end do
@@ -181,7 +193,7 @@ contains
     real(dp), intent(inout) :: deltaE
     integer :: i
     do i=1, self%size
-       call self%data(i)%obj%get_delta_E(S=S, ispin=ispin, Snew=Snew, deltaE=deltaE)
+       call self%list(i)%ptr%get_delta_E(S=S, ispin=ispin, Snew=Snew, deltaE=deltaE)
     end do
     end subroutine get_delta_E
 
