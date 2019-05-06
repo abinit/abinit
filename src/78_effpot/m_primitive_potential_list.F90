@@ -84,7 +84,7 @@ contains
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
     type(abstract_potential_t), pointer :: tmp
-    allocate(abstract_potential_t:: tmp)
+    ABI_MALLOC_SCALAR(abstract_potential_t::tmp)
     !call tmp%initialize(....)
     ! set tmp
     nullify(tmp)
@@ -163,9 +163,9 @@ contains
        ABI_ALLOCATE(self%data, (self%capacity))
     else if ( self%size>self%capacity ) then
        self%capacity = self%size + self%size / 4 + 8
-       ALLOCATE(temp(self%capacity), stat=err)
+       ABI_MALLOC(temp(self%capacity), stat=err)
        temp(1:self%size-1) = self%data(:)
-       call move_alloc(temp, self%data) !temp gets deallocated
+       ABI_MOVE_ALLOC(temp, self%data) !temp gets deallocated
     end if
 
     call xmpi_barrier(comm)
@@ -194,7 +194,7 @@ contains
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     type(potential_list_t), pointer :: tmp
-    allocate(tmp)
+    ABI_MALLOC_SCALAR(tmp)
     call self%fill_supercell_list( sc_maker, tmp)
     ! call tmp%initialize(....)
     ! set tmp

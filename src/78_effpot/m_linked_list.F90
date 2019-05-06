@@ -71,7 +71,7 @@ module m_linked_list
        tmp=>iter
        iter=>iter%next
        if( associated(tmp)) then
-          deallocate(tmp)
+          ABI_FREE_SCALAR(tmp)
        endif
     enddo
     nullify(self%first)
@@ -85,10 +85,10 @@ module m_linked_list
     integer, intent(in)::i
     real(dp), intent(in)::val
     if(.not. associated(self%last)) then
-       allocate(self%first)
+       ABI_MALLOC_SCALAR(self%first)
        self%last=>self%first
     else
-       allocate(self%last%next)
+       ABI_MALLOC_SCALAR(self%last%next)
        self%last=>self%last%next
     endif
     self%last%i=i
@@ -115,7 +115,7 @@ module m_linked_list
     if(.not.associated(ptr%next)) then
        call llist_append(self,i,val)
     else
-       allocate(tmp)
+       ABI_MALLOC_SCALAR(tmp)
        tmp%i=i
        tmp%val=val
        tmp%next=>ptr%next
@@ -130,7 +130,7 @@ module m_linked_list
     integer, intent(in) :: i
     real(dp), intent(in):: val
     type(lnode), pointer:: tmp=>null()
-    allocate(tmp)
+    ABI_MALLOC_SCALAR(tmp)
     tmp%i=i
     tmp%val=val
     tmp%next=>self%first
@@ -180,8 +180,6 @@ module m_linked_list
        endif
     endif
 
-    !allocate(self%last%next)
-    !self%last=>self%last%next
 
   end subroutine llist_sorted_insert
 
@@ -202,8 +200,8 @@ module m_linked_list
     integer, allocatable, intent(inout)::ilist(:)
     real(dp),allocatable, intent(inout)::vallist(:)
     integer::ind=1
-    allocate(ilist(self%length))
-    allocate(vallist(self%length))
+    ABI_ALLOCATE(ilist,(self%length))
+    ABI_ALLOCATE(vallist, (self%length))
     call llist_iter_restart(self)
     do while(associated(self%iter))
        ilist(ind)=self%iter%i
