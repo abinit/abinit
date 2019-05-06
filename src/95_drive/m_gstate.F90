@@ -398,9 +398,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Set up for iterations
  call setup1(acell,bantot,dtset,&
-& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
-& dtset%natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
-& response,rmet,rprim,rprimd,ucvol,psps%usepaw)
+  ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
+  ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+  response,rmet,rprim,rprimd,ucvol,psps%usepaw)
 
 !In some cases (e.g. getcell/=0), the plane wave vectors have
 ! to be generated from the original simulation cell
@@ -700,8 +700,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    cg => scf_history%cg(:,:,1)
    eigen => scf_history%eigen(:,1)
  else
-   ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
-   ABI_CHECK(ierr==0, "out of memory in cg")
+   ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
    ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
 
@@ -1132,7 +1131,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        if (dtset%usewvl == 0) then
          call initro(atindx,dtset%densty,gmet,gsqcut_eff,psps%usepaw,&
 &         mgfftf,mpi_enreg,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,&
-&         ngfftf,dtset%nspden,psps%ntypat,dtset%paral_kgb,psps,pawtab,ph1df,&
+&         ngfftf,dtset%nspden,psps%ntypat,psps,pawtab,ph1df,&
 &         psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,psps%usepaw,&
 &         dtset%ziontypat,dtset%znucl)
 !        Update initialized density taking into account jellium slab
@@ -1140,7 +1139,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
            option=2
            ABI_ALLOCATE(work,(nfftf))
            call jellium(gmet,gsqcut_eff,mpi_enreg,nfftf,ngfftf,dtset%nspden,&
-&           option,dtset%paral_kgb,dtset%slabwsrad,rhog,rhor,rprimd,work,dtset%slabzbeg,dtset%slabzend)
+&           option,dtset%slabwsrad,rhog,rhor,rprimd,work,dtset%slabzbeg,dtset%slabzend)
            ABI_DEALLOCATE(work)
          end if ! of usejell
 !        Kinetic energy density initialized to zero (used only in metaGGAs ... )
@@ -1219,7 +1218,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_ALLOCATE(spinat_dum,(3,dtset%natom))
      spinat_dum=zero
      call initro(atindx,dtset%densty,gmet,gsqcut_eff,psps%usepaw,mgfftf,mpi_enreg,&
-&     psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,1,psps%ntypat,dtset%paral_kgb,psps,pawtab,&
+&     psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,1,psps%ntypat,psps,pawtab,&
 &     ph1df,psps%qgrid_vl,rhowfg,rhowfr,spinat_dum,ucvol,&
 &     psps%usepaw,dtset%ziontypat,dtset%znucl)
      scf_history%atmrho_last(:)=rhowfr(:,1)
@@ -1419,7 +1418,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    ! Generate WFK with k-mesh from WFK containing list of k-points inside pockets.
    if (dtset%getkerange_path /= ABI_NOFILE) then
-     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_path, dtset, psps, pawtab, comm)
+     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_path, dtset, comm)
    end if
 
    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)

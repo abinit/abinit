@@ -3915,8 +3915,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,new_wght,nptws,nreq
- integer :: idir
+ integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,nptws,nreq,idir
  real(dp) :: factor,sumwght,normsq,proj
  character(len=500) :: message
 !arrays

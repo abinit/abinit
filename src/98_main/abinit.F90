@@ -255,10 +255,10 @@ program abinit
    call dump_cpp_options(std_out)
    ! Write names of files
    write(message, '(a,a,a,a,a,a,a,a,a,a,a,a)' )&
-&   '- input  file    -> ',trim(filnam(1)),ch10,&
-&   '- output file    -> ',trim(filnam(2)),ch10,&
-&   '- root for input  files -> ',trim(filnam(3)),ch10,&
-&   '- root for output files -> ',trim(filnam(4)),ch10
+    '- input  file    -> ',trim(filnam(1)),ch10,&
+    '- output file    -> ',trim(filnam(2)),ch10,&
+    '- root for input  files -> ',trim(filnam(3)),ch10,&
+    '- root for output files -> ',trim(filnam(4)),ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
@@ -615,7 +615,7 @@ program abinit
 
  call xpapi_shutdown()
 
- !Writes information on file about the memory before ending mpi module, if memory profiling is enabled
+ ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam(4), print_mem_report=print_mem_report)
 
  call flush_unit(std_out)

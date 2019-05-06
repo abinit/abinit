@@ -320,7 +320,7 @@
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FCFLAGS="-O1 -g -ffree-line-length-none -ffree-form"
+FCFLAGS="-O0 -g -ffree-line-length-none -ffree-form"
 
 # Fortran flags for fixed-form source files
 #

@@ -1,7 +1,7 @@
 **********************************************************************
 Warning pattern : 'CHARACTER expression will be truncated in assignment'
 **********************************************************************
-dummy_tests.F90 = line: 100, [31mcode: dummy_string="This is too long !"[0m
+dummy_tests.F90 = line: 92, [31mcode: dummy_string="This is too long !"[0m
 **********************************************************************
 Warning count = 1
 **********************************************************************

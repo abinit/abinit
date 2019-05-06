@@ -96,15 +96,13 @@ contains
 !! SOURCE
 
 subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,&
-&                        nkxc,non_magnetic_xc,nspden,n3xccc,option,paral_kgb,qphon,&
+&                        nkxc,non_magnetic_xc,nspden,n3xccc,option,qphon,&
 &                        rhor,rhor1,rprimd,usepaw,usexcnhat,vxc1,xccc3d1)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,n3xccc,natom,nfft,nkxc,nspden,option
- integer,intent(in) :: paral_kgb,usepaw,usexcnhat
+ integer,intent(in) :: usepaw,usexcnhat
  logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -251,7 +249,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    end if
 
    call dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,nkxc,&
-&   nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
+&   nspden,qphon,rhor1tmp,str_scale,vxc1)
    ABI_DEALLOCATE(rhor1tmp)
 
  else
@@ -344,13 +342,11 @@ end subroutine dfpt_mkvxcstr
 !! SOURCE
 
 subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
-& nkxc,nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
-
- implicit none
+& nkxc,nspden,qphon,rhor1tmp,str_scale,vxc1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,istr,nfft,nkxc,nspden,paral_kgb
+ integer,intent(in) :: cplex,istr,nfft,nkxc,nspden
  real(dp) :: str_scale
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -393,7 +389,7 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 !rho1now(:,:,2:4) contains the gradients of the first-order density
  ishift=0 ; ngrad=2
  ABI_ALLOCATE(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhor1tmp,rho1now)
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1tmp,rho1now)
 
 !Calculate the 1st-order contribution to grad(n) from the strain derivative
 !  acting on the gradient operator acting on the GS charge density,
@@ -511,7 +507,7 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 
  vxc1(:,:)=zero
  call xcpot(cplex,dnexcdn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,paral_kgb,qphon,rho1now,vxc1)
+& nspgrad,qphon,rho1now,vxc1)
 
 !if you uncomment the following line, you will have to modify
 !the original function call to pass in gmet and gsqcut

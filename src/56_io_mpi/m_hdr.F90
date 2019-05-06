@@ -35,7 +35,7 @@
 ! Reference files should be updated
 !#define DEV_NEW_HDR
 
-MODULE m_hdr
+module m_hdr
 
  use defs_basis
  use m_build_info
@@ -177,7 +177,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(49) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(50) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -257,7 +257,8 @@ MODULE m_hdr
    abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
    abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data"), &
    abifile_t(varname="no_fftdatar_write", fform=6000, ext="ABIWAN", class="data"), &
-   abifile_t(varname="None", fform=6001, ext="KERANGE", class="data") &
+   abifile_t(varname="None", fform=6001, ext="KERANGE", class="data"), &
+   abifile_t(varname="None", fform=6002, ext="SIGEPH", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -4402,7 +4403,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !Local variables-------------------------------
  integer :: ik, jj, ierr
  logical :: test, tsymrel,ttnons, tsymafm
- character(len=500) :: msg
+ character(len=5000) :: msg
 ! *************************************************************************
 
  ! Check basic dimensions
@@ -4442,7 +4443,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    ' real lattice vectors read from Header differ from the values specified in the input file', ch10, &
    ' rprimd from Hdr file   = ',ch10,(Hdr%rprimd(:,jj),jj=1,3),ch10,&
    ' rprimd from input file = ',ch10,(Dtset%rprimd_orig(:,jj,1),jj=1,3),ch10,ch10,&
-   '  Modify the lattice vectors in the input file '
+   ' Modify the lattice vectors in the input file '
    MSG_ERROR(msg)
  end if
 
@@ -4576,7 +4577,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!  Compare two int value and may raise an exception on error.
 !!
 !! INPUTS
-!!  name=Name of the variable
+!!  vname=Name of the variable
 !!  iexp= expected value.
 !!  ifound=the actuval value
 !!
@@ -4591,27 +4592,23 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!
 !! SOURCE
 
- subroutine compare_int(name,iexp,ifound,ierr)
+ subroutine compare_int(vname, iexp, ifound, ierr)
 
 !Arguments ------------------------------------
  integer,intent(in) :: iexp,ifound
  integer,intent(inout) :: ierr
- character(len=*),intent(in) :: name
+ character(len=*),intent(in) :: vname
 
 !Local variables-------------------------------
- logical :: leq
  character(len=500) :: msg
 
 ! *************************************************************************
 
- leq = (iexp == ifound)
- if (.not.leq) then
-   write(msg,'(4a,i6,a,i6)')ch10,&
-   ' hdr_vs_dtset: WARNING - Mismatch in '//TRIM(name),ch10,&
-   '  Expected = ',iexp,' Found = ',ifound
-   call wrtout(std_out,msg,'COLL')
+ if (.not. iexp == ifound) then
+   write(msg,'(3a,i0,a,i0)')' Mismatch in '//trim(vname),' Expected = ', iexp, ' Found = ', ifound
+   call wrtout(std_out, msg)
    ! Increase ierr to signal we should stop in the caller.
-   ierr=ierr + 1
+   ierr = ierr + 1
  end if
 
  end subroutine compare_int

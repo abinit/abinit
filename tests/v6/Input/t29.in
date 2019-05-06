@@ -5,9 +5,8 @@ ntimimage 15
 nimage 7
 imgmov 5
 chksymbreak 0
-fxcartfactor 10.0
+fxcartfactor 5.0
 tolimg 1.d-5
-istatimg 0
 
 dynimage  0 5*1 0   # Will do relaxation only for the four internal images
 
@@ -59,6 +58,5 @@ ngkpt 4 4 4
 #%%   Test the CI-NEB method : 7 images, exploring the transition
 #%%   path. Use the climbing image method to refine the position of the saddle point. 
 #%%   Except the number of images, similar to test 22 (but with NEB).
-#%%   NOTE : This algorithm (neb_algo=2) seems to be BROKEN !
 #%% topics = TransPath
 #%%<END TEST_INFO>

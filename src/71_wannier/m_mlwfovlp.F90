@@ -174,18 +174,17 @@ contains
  integer :: lmn_size,lproj,lwanniersetup,mwan,mgfft,n1
 #if defined HAVE_WANNIER90
  integer :: kk
-#endif
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr, nrpts
  character(len=fnlen) :: abiwan_fname
  integer :: have_disentangled_spin(nsppol)
  integer,allocatable :: irvec(:,:),ndegen(:)
 #endif
+#endif
  integer :: n1tmp,n2,n2tmp,n3,n3tmp,n4,n5,n6,nband_k
  integer :: nntot,npw_k,num_nnmax,spacing
  integer :: tim_fourwf
  integer :: master,max_num_bands,nprocs,spaceComm,rank
-!integer :: j,k,l
  integer  :: nwan(nsppol),nband_inc(nsppol),num_bands(nsppol)
  real(dp) :: weight
 #if defined HAVE_WANNIER90
@@ -227,6 +226,8 @@ contains
 #endif
 
 !************************************************************************
+
+ ABI_UNUSED((/crystal%natom, ebands%nkpt, hdr%nkpt/))
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !1) Initialize variables and allocations
