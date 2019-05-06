@@ -55,7 +55,7 @@ module m_polynomail_potential
      integer(kind(null_nature)), allocatable :: nature(:)
      integer :: order=0
      ! abstract_matrix :: coeff ! TODO : add this after abstract matrix is made.
-     type(NDCOO_mat_t) :: coeff
+     ! type(NDCOO_mat_t) :: coeff
    contains
      procedure :: initialize
      procedure :: finalize
@@ -75,7 +75,7 @@ contains
     if (find_int(nature, strain)/=0) self%has_strain=.True.
     if (find_int(nature, spin)/=0) self%has_spin=.True.
     if (find_int(nature, lwf)/=0) self%has_lwf=.True.
-    call self%coeff%initialize(mshape=mshape)
+    !call self%coeff%initialize(mshape=mshape)
     self%label="PolynomialPotential"
   end subroutine initialize
 
@@ -84,7 +84,7 @@ contains
     if (allocated(self%nature)) then
        ABI_DEALLOCATE(self%nature)
     end if
-    call self%coeff%finalize()
+    !call self%coeff%finalize()
     self%order=0
     call self%abstract_potential_t%finalize()
   end subroutine finalize
