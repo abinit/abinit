@@ -507,7 +507,7 @@ contains
        call self%run_one_step_MC(effpot, self%Stmp, etot)
     end if
     ! do not inc until time is set to hist.
-    !if (iam_master) then
+    ! run one step does not know about time. So it will be done in the outer loop.
     if(self%mps%irank==0) then
        call self%hist%set_vars(S=self%Stmp, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
     end if
