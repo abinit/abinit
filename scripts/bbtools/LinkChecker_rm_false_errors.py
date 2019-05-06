@@ -20,11 +20,15 @@ import os
 import re
 from lxml import etree
 import requests
+import argparse
 
 # ---------------------------------------------------------------------------- #
 
 #all_tags = [ 'url','name','parent','realurl','extern','dlsize','checktime','level','infos','valid' ]
 #printable_tags = [ 'url', 'name', 'parent', 'realurl', 'valid' ]
+
+version_info = (1, 0, 0)
+version = '.'.join(str(c) for c in version_info)
 
 debug = False
 server = "http://localhost:8000"
@@ -294,7 +298,6 @@ def main(filename,home_dir=""):
     # found a true error... : reporting on bb
     rc += 1
     name=child.find('name')
-    parent=child.find('parent')
     realurl=child.find('realurl')
     try:
        print("{0:12} {1}".format('URL',url.text))
@@ -321,17 +324,20 @@ def main(filename,home_dir=""):
 # ---------------------------------------------------------------------------- #
 
 if __name__ == "__main__":
-  
-  try:
-    filename = sys.argv[1]
-  except:
-    print("filename missing...")
-    sys.exit(1)
 
-  if len(sys.argv) == 2:
-    home_dir = "."
-  else:
-    home_dir = sys.argv[2]
+  parser = argparse.ArgumentParser(description='Remove false errors')
+  parser.add_argument('--verbose', '-v', action='count',
+                      help='increase verbosity. Specify multiple times')
+  parser.add_argument('--version', action='version',
+                      version='%(prog)s {}'.format(version),
+                      help='show the version number and exit')
+  parser.add_argument('filename', help='input file (xml format)'),
+  parser.add_argument('home_dir', nargs='?', default=os.getcwd())
+
+  args = parser.parse_args()
+
+  filename = args.filename
+  home_dir = args.home_dir
 
   exit_status = main(filename,home_dir)
   sys.exit(exit_status)
