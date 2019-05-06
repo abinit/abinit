@@ -78,7 +78,7 @@ integer, intent (in) :: istatus
 
 #ifdef HAVE_NETCDF
  if (istatus /= nf90_noerr) then
-     write(*,*) trim(adjustl(nf90_strerror(istatus)))
+     write(std_err,*) trim(adjustl(nf90_strerror(istatus)))
  end if
 #endif
 
@@ -228,11 +228,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
  logical(kind=1) :: rot_inv = .false.
  logical(kind=1) :: leg_measure = .true.
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+!#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  logical(kind=1) :: hist = .false.
  logical(kind=1) :: wrt_files = .true.
  logical(kind=1) :: tot_not = .true.
-#endif
+!#endif
 
  integer :: nfreq,unt,unt2
  integer :: ntau ! >= 2*nfreq + 1
@@ -1633,7 +1633,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            levels_ptr     = C_LOC( levels_ctqmc )
 
          !Calling interfaced TRIQS solver subroutine from src/67_triqs_ext package
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
         if (paw_dmft%dmft_solv==9) then
 #ifndef HAVE_NETCDF
             write(message,'(2a)') ch10,' NETCDF requiered! ABINIT communicates with the python script through netcdf.'
@@ -1641,7 +1640,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
             MSG_ERROR(message)   
 #else
             ! Creating the NETCDF file
-            print*, "    Creating NETCDF file: dft_for_triqs.nc"
+            write(std_out, '(2a)') ch10, "    Creating NETCDF file: dft_for_triqs.nc"
             call nf_check(nf90_create("dft_for_triqs.nc", NF90_CLOBBER, ncid))
 
             ! Defining the dimensions of the variables to write in the NETCDF file
@@ -1766,7 +1765,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
             do iflavor1=1, nflavor
              do iflavor2=1, nflavor
               do ifreq=1, paw_dmft%dmft_nwli
-               gw_tmp_nd(ifreq, iflavor1, iflavor2) = new_re_g_iw(iflavor1, iflavor2, ifreq) + i*new_im_g_iw(iflavor1, iflavor2, ifreq)
+               gw_tmp_nd(ifreq, iflavor1, iflavor2) = new_re_g_iw(iflavor1, iflavor2, ifreq) &
+                       + i*new_im_g_iw(iflavor1, iflavor2, ifreq)
               end do
               do itau=1, paw_dmft%dmftqmc_l
                gtmp_nd(itau, iflavor1, iflavor2) = new_g_tau(iflavor1, iflavor2, itau)
@@ -1783,6 +1783,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
             ABI_DEALLOCATE(new_g_tau)
             ABI_DEALLOCATE(new_gl)
 #endif
+#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
         else
             call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,  &
  &           nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
@@ -1790,8 +1791,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  &           verbosity_solver, paw_dmft%dmftqmc_seed,beta,                              &
  &           levels_ptr,  u_mat_ij_ptr, u_mat_ijkl_ptr, fw1_nd_ptr,                     &
  &           g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
-        end if
 #endif
+        end if
 
              !WRITE(*,*) "Hello Debug"
              !call xmpi_barrier(paw_dmft%spacecomm) !Resynch all processus after calling Impurity solver from TRIQS
