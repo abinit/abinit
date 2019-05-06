@@ -1,15 +1,15 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_spin_mover
+!!****m* ABINIT/m_lattice_mover
 !! NAME
-!! m_spin_mover
+!! m_lattice_mover
 !!
 !! FUNCTION
-!! This module contains the spin mover.
+!! This module contains the lattice mover.
 !!
 !!
 !! Datatypes:
 !!
-!! * spin_mover_t: defines the base api of movers.
+!! * lattice_mover_t: defines the lattice movers
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.
