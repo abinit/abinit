@@ -97,7 +97,7 @@ subroutine invsqrt_matrix(matrix,tndim)
 #endif
 
  DBG_ENTER("COLL")
- pawprtvol=4
+ pawprtvol=2
 
  ABI_ALLOCATE(initialmatrix,(tndim,tndim))
  initialmatrix=matrix

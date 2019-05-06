@@ -1114,7 +1114,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call selfreal2imag_self(selfr,self)
       !write(6,*) "selfreal2imag_self done"
       !  paw_dmft%fermie=hdr%fermie ! for tests
-       write(6,*) "   Fermi level is",paw_dmft%fermie
+       write(std_out,*) "    Fermi level is",paw_dmft%fermie
        ! selfr does not have any double couting in self%hdc 
        ! hdc from self%hdc has been put in real part of self in rw_self.
        ! For the LDA BS: use opt_self=0 and fermie=fermie_lda
