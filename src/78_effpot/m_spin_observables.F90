@@ -216,14 +216,13 @@ contains
 
   subroutine get_traj_obs(self)
     class(spin_observable_t) :: self
-  subroutine get_thermo_obs(self )
-    ABI_UNUSED(self)
+    ABI_UNUSED(self%nspin)
   end subroutine get_traj_obs
 
   subroutine get_thermo_obs(self )
     class(spin_observable_t) :: self
     real(dp) :: avgm
-    ABI_UNUSED(self)
+    ABI_UNUSED(self%nspin)
     ! Cv
     self%avg_E_t = (self%avg_E_t*self%ntime + self%energy)/(self%ntime+1)
     self%avg_E2_t = (self%avg_E2_t*self%ntime + self%energy**2)/(self%ntime+1)
@@ -253,7 +252,7 @@ contains
 
   subroutine get_correlation_obs(self)
     class(spin_observable_t) :: self
-    ABI_UNUSED(self)
+    ABI_UNUSED(self%nspin)
   end subroutine get_correlation_obs
 
   subroutine get_observables(self, S, Snorm, energy)

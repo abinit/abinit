@@ -458,9 +458,6 @@ end subroutine insertion_sort_int_test
 subroutine int2d_array_test()
   type(int2d_array_type) :: t
   integer :: i
-  array_morethan([2,1,4], [1,1,2], 3)
-  array_morethan([2,1,4], [1,2,2], 3)
-  array_morethan([1,2,2], [2,1,4], 3)
   call t%push_unique([1,1,2])
   call t%push_unique([1,2,2])
   call t%push_unique([1,1,2])

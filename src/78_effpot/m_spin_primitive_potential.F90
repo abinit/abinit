@@ -415,12 +415,12 @@ contains
           udmi=use_dmi
        end if
        if (udmi .and. dmi_nnz>0) then
-          write(std_out,'(A18)') "Setting DMI terms"
+          write(std_out,'(A19)') "Setting DMI terms."
           call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
                Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
                vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
        else
-          if (.not. udmi) write(std_out, 'A(35)') " DMI term from xml file not used"
+          if (.not. udmi) write(std_out, '(A35)') " DMI term from xml file not used."
        end if
 
        if(.not. present(use_sia)) then
@@ -433,7 +433,7 @@ contains
           call self%set_sia(uni_nnz, uni_ilist, uni_amplitude_list, &
                reshape(uni_direction_list, [3, uni_nnz]) )
        else
-         if(.not. usia) write(std_out,'(A34)') " SIA term in xml file not used"
+         if(.not. usia) write(std_out,'(A34)') " SIA term in xml file not used."
        end if
        if(.not. present(use_bi)) then
           ubi=.True.
@@ -441,12 +441,12 @@ contains
           ubi=use_bi
        endif
        if (ubi .and. bi_nnz>0) then
-          write(std_out,'(A23)') "Setting bilinear terms"
+          write(std_out,'(A23)') "Setting bilinear terms."
           call self%set_bilinear(bi_nnz, bi_ilist, bi_jlist,  &
                Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
                vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
        else
-          if(.not. ubi) print *, " Bilinear term in xml file not used"
+          if(.not. ubi) print *, " Bilinear term in xml file not used."
        endif
     endif
 

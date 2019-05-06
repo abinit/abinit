@@ -971,7 +971,6 @@ contains
     call self%spin_ob%finalize()
     !call self%spin_ncfile%close()
     call self%spin_ob%finalize()
-    ABI_UNUSED((/self%nspins/))
   end subroutine finalize
   !!***
 

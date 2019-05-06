@@ -152,7 +152,6 @@ contains
     class(primitive_potential_list_t), intent(inout):: self
     class(primitive_potential_t), target, intent(inout) :: pot
     type(primitive_potential_pointer_t), allocatable :: temp(:)
-    integer :: err
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -163,7 +162,7 @@ contains
        ABI_ALLOCATE(self%data, (self%capacity))
     else if ( self%size>self%capacity ) then
        self%capacity = self%size + self%size / 4 + 8
-       ABI_MALLOC(temp(self%capacity), stat=err)
+       ABI_MALLOC(temp, (self%capacity))
        temp(1:self%size-1) = self%data(:)
        ABI_MOVE_ALLOC(temp, self%data) !temp gets deallocated
     end if

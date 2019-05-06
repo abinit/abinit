@@ -175,7 +175,7 @@ contains
     real(dp), intent(out) :: b(self%nrow)
     integer::irow, i1, i2, i
     b(:)=0.0d0
-    !!$OMP PARALLEL DO private(i, i1, i2)
+    !$OMP PARALLEL DO private(i, i1, i2)
     do irow=1, self%nrow
         i1=self%row_shift(irow)
         i2=self%row_shift(irow+1)-1
@@ -183,7 +183,7 @@ contains
             b(irow)=b(irow)+ self%val(i)*x(self%icol(i))
         end do
     enddo
-    !!$OMP END PARALLEL DO
+    !$OMP END PARALLEL DO
   end subroutine CSR_mat_t_mv
 
 
@@ -207,7 +207,7 @@ contains
           b(irow)=b(irow)+ self%val(i)*x(self%icol(i))
        end do
     enddo
-    ! TODO : use gather instead of reduce.
+    ! TODO : use gather instead of reduce?
     !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
     if (syncb) then
        call xmpi_sum_master(b, 0, xmpi_world, ierr )

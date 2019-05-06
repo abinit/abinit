@@ -113,6 +113,8 @@ module m_random_xoroshiro128plus
 contains
 
   !> Initialize a collection of rng's for parallel use
+  !> this can be used with openmp, each thread need an 
+  !> different rng.
   subroutine init_parallel(self, n_proc, seed)
 
     class(prng_t), intent(inout) :: self
@@ -121,8 +123,8 @@ contains
     integer                      :: n
 
     ABI_MALLOC(self%rngs, (n_proc))
-    if (.present. seed) then
-      call self%rng(1)%set_seed(seed)
+    if (present(seed)) then
+      call self%rngs(1)%set_seed(seed)
     endif
     do n = 2, n_proc
        self%rngs(n) = self%rngs(n-1)
