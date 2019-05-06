@@ -1385,6 +1385,10 @@ class BaseTest(object):
         self._isok = None
         self.stdout_fname = None
         self._print_lock = NotALock()
+
+        self.had_timeout = False
+        self.force_skip = False
+
         if os.path.basename(self.inp_fname).startswith("-"):
             self._status = "disabled"
 
@@ -1759,6 +1763,9 @@ class BaseTest(object):
         if nprocs in self.exclude_nprocs:
             eapp("nprocs: %s in exclude_nprocs: %s" % (nprocs, self.exclude_nprocs))
 
+        if self.force_skip:
+            eapp("forced to be skipped by the chain of test.")
+
         err_msg = "\n".join(errors)
         if err_msg:
             real_nprocs = 0
@@ -1991,10 +1998,12 @@ class BaseTest(object):
             # Check if the test is expected to fail.
             if runner.retcode == 124:
                 self._status = "failed"
+                self.had_timeout = True
                 msg = self.full_id + "test has reached timeout and has been killed (SIGTERM)."
                 self.cprint(msg, status2txtcolor["failed"])
             elif runner.retcode == 137:
                 self._status = "failed"
+                self.had_timeout = True
                 msg = self.full_id + "test has reached timeout and has been killed (SIGKILL)."
                 self.cprint(msg, status2txtcolor["failed"])
             elif runner.retcode != 0 and not self.expected_failure:
@@ -3019,8 +3028,14 @@ class ChainOfTests(object):
             os.mkdir(workdir)
         self.workdir = workdir
 
+        fail_all = False
+
         for test in self:
+            if fail_all:
+                test.force_skip = True
             test.run(build_env, runner, workdir=self.workdir, nprocs=nprocs, **kwargs)
+            if test.had_timeout:
+                fail_all = True
 
     def results_load(self, d):
         """
