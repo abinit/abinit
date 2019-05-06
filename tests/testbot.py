@@ -239,7 +239,7 @@ class TestBot(object):
         Returns: (nfailed, npassed, nexecuted)
         """
         omp_nthreads = max(self.omp_num_threads, 1)
-        py_nprocs = self.ncpus // mpi_nprocs
+        py_nprocs = self.ncpus // (mpi_nprocs * omp_nthreads)
         assert py_nprocs > 0
 
         test_suite = abitests.select_tests(suite_args, keys=self.keywords, regenerate=False)
