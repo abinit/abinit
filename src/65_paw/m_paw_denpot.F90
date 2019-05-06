@@ -180,11 +180,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  integer, parameter :: PAWU_FLL=1,PAWU_AMF=2
  integer :: cplex,cplex_dij,cplex_rhoij,has_kxc,has_k3xc
  integer :: iatom,iatom_tot,idum,ierr,ii,ipositron,iq,iq0_dij,iq0_rhoij
- integer :: irhoij,ispden,itypat,itypat0
- integer :: jrhoij,kklmn,klmn,klmnq,lm_size,lmn2_size,mesh_size
+ integer :: itypat,itypat0 !irhoij,ispden,jrhoij,
+ integer :: lm_size,lmn2_size,mesh_size
  integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nsppol,opt_compch,pawu_algo,pawu_dblec
  integer :: qphase,usecore,usetcore,usepawu,usexcnhat,usenhat,usefock
- logical :: cplex_eq_two,keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc
+ logical :: keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc
  logical :: non_magnetic_xc,paral_atom,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2

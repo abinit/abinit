@@ -32,8 +32,11 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 #include "abi_common.h"
+
 module m_spin_mover
+
   use defs_basis
   use m_errors
   use m_abicore
@@ -968,6 +971,7 @@ contains
     call self%spin_ob%finalize()
     !call self%spin_ncfile%close()
     call self%spin_ob%finalize()
+    ABI_UNUSED((/self%nspins/))
   end subroutine finalize
   !!***
 
