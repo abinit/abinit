@@ -54,7 +54,10 @@ program tdep
   use defs_basis
   use m_abicore
   use m_phonons
-  use m_xmpi,             only : xmpi_init, xmpi_end
+  use m_xmpi
+  use m_io_tools
+  use m_errors
+
   use m_ifc,              only : ifc_type
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
@@ -73,26 +76,20 @@ program tdep
 &                                tdep_destroy_shell
   use m_tdep_constraints, only : tdep_calc_constraints, tdep_check_constraints
 
-#ifdef HAVE_NETCDF
-  use netcdf
-#endif
-  use m_io_tools
   implicit none
 
-  integer :: natom,jatom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ntotcoeff,ntotconst
-  integer :: ishell,stdout,katom,iqpt,iatcell,nshell_max
+  integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ntotcoeff,ntotconst
+  integer :: stdout,iqpt,nshell_max
   double precision :: U0,Free_Anh
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:)
-  double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
+  double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:)
 !FB  double precision, allocatable :: fcoeff(:,:),Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:)
   double precision, allocatable :: Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:),Pij_N(:),Pij_coeff(:,:)
   double precision, allocatable :: Psij_coeff(:,:),Psij_ref(:,:,:,:),MP_coeff(:,:)
   double precision, allocatable :: distance(:,:,:),Rlatt_cart(:,:,:),Rlatt4Abi(:,:,:)
   double precision, allocatable :: omega (:),ftot3(:,:)
-  double precision, allocatable :: dynmat(:,:,:,:,:,:)
   double precision :: qpt_cart(3)
   double complex  , allocatable :: dij(:,:),eigenV(:,:)
-  double complex  , allocatable :: Gruneisen(:)
   type(phonon_dos_type) :: PHdos
   type(Input_Variables_type) :: InVar
   type(Lattice_Variables_type) :: Lattice
@@ -111,6 +108,13 @@ program tdep
 !===================== Initialization & Reading  ==========================================
 !==========================================================================================
  call xmpi_init()
+
+ ! Initialize memory profiling if it is activated
+ ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
+ ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+#ifdef HAVE_MEM_PROFILING
+ call abimem_init(0)
+#endif
 
 ! Read input values from the input.in input file
  call tdep_ReadEcho(InVar)
@@ -266,7 +270,7 @@ program tdep
 !==========================================================================================
 !===================== Compute the phonons density of states ==============================
 !==========================================================================================
- call tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4Abi,Shell2at,Sym)
+ call tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4Abi,Shell2at,Sym)
  call tdep_destroy_shell(natom,2,Shell2at)
  ABI_FREE(Rlatt4Abi)
 
@@ -364,6 +368,9 @@ program tdep
 !================= Write the last informations (aknowledgments...)  =======================
 !==========================================================================================
  call tdep_print_Aknowledgments(InVar)
+
+ call abinit_doctor("__fftprof")
+
  call xmpi_end()
 
  end program tdep

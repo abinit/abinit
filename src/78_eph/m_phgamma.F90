@@ -805,13 +805,14 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
 !scalars
  integer,parameter :: qtor0=0
  integer :: natom3,nu1
+#ifdef DEV_MJV
  integer :: iene, jene
- integer :: ierr
+#endif
  real(dp) :: spinfact
  character(len=500) :: msg
  !arrays
  real(dp) :: displ_red(2,gams%natom3,gams%natom3)
- real(dp) :: img(gams%natom3),gam_now(2,gams%natom3**2)
+ real(dp) :: img(gams%natom3)
  real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
  real(dp) :: pheigvec(2*(3*cryst%natom)**2)
 
@@ -1277,7 +1278,6 @@ subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gam
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
  real(dp) :: displ_red(2,gams%natom3,gams%natom3)
  real(dp) :: img(gams%natom3)
- real(dp) :: gam_now(2,gams%natom3,gams%natom3)
  real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3),tmp_gam2(2,gams%natom3,gams%natom3)
  real(dp) :: pheigvec(2*(3*cryst%natom)**2)
 
@@ -1975,10 +1975,14 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  integer,parameter :: bcorr0=0,master=0
  integer :: my_qptopt,iq_ibz,nqibz,ount,ii,my_rank,nproc,cnt
  integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz
+#ifdef DEV_MJV
  integer :: iene, jene, itemp, ntemp, jene_jump
+#endif
  real(dp) :: cpu,wall,gflops
  real(dp) :: lambda_iso,omega,omega_log,xx,omega_min,omega_max,ww,mustar,tc_macmill
+#ifdef DEV_MJV
  real(dp) :: temp_el, min_temp, delta_temp, chempot, ene1, ene2, G0
+#endif
  logical :: do_qintp
  character(len=500) :: msg
  type(t_tetrahedron) :: tetra
@@ -1986,10 +1990,12 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  integer :: qptrlatt(3,3),new_qptrlatt(3,3)
  real(dp),allocatable :: my_qshift(:,:)
  real(dp) :: phfrq(gams%natom3),gamma_ph(gams%natom3),lambda_ph(gams%natom3)
+#ifdef DEV_MJV
  real(dp) :: invphfrq(gams%natom3)
  real(dp) :: gamma_ph_ee(gams%nene,gams%nene,gams%natom3,gams%nsppol)
  real(dp) :: tmp_gam1(2,gams%natom3,gams%natom3)
  real(dp) :: tmp_gam2(2,gams%natom3,gams%natom3)
+#endif
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
  real(dp),allocatable :: tmp_a2f(:)
  real(dp), ABI_CONTIGUOUS pointer :: a2f_1d(:)
@@ -1997,7 +2003,9 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  real(dp),allocatable :: a2f_1mom(:),a2flogmom(:),a2flogmom_int(:),wdt(:,:)
  real(dp),allocatable :: lambda_tetra(:,:,:),phfreq_tetra(:,:)
  real(dp),allocatable :: tmp_gaussian(:,:)
+#ifdef DEV_MJV
  real(dp), allocatable :: a2feew_partial(:), a2feew_partial_int(:), a2feew_w(:), a2feew_w_int(:)
+#endif
 
 ! *********************************************************************
 
@@ -2816,7 +2824,7 @@ subroutine a2fw_ee_write(a2f,basename)
 
 !Local variables -------------------------
 !scalars
- integer :: iw,spin,unt,ii,mu
+ integer :: iw,spin,unt,ii
  integer :: iene, jene
  real(dp) :: ene1,ene2
  character(len=500) :: msg
@@ -3772,7 +3780,10 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  integer :: isig,n1,n2,n3,n4,n5,n6,nspden,do_ftv1q
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
- integer :: iene, jene
+ integer :: jene
+#ifdef DEV_MJV
+ integer :: iene
+#endif
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
@@ -3796,9 +3807,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:)
  integer :: indkk_kq(1,6)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), phfrq(3*cryst%natom),lf(2),rg(2),res(2)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
- real(dp) :: temp_tgam(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2) !phfrq(3*cryst%natom),
+ !real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  real(dp) :: sigmas(2),wminmax(2)
  real(dp) :: n0(ebands%nsppol)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)

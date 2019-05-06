@@ -4292,12 +4292,11 @@ end subroutine zerosym
 !!
 !! SOURCE
 
-subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
-
+subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,isign,nfft,paral_kgb,tim_fourdp
+ integer,intent(in) :: cplex,isign,nfft,tim_fourdp
  type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft(18)

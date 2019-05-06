@@ -139,8 +139,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
 &                option) !optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,tim_mkrho
@@ -730,7 +728,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  select case (ioption)
  case(0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-   dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+               phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
    if(ioption==1)then
 !$OMP PARALLEL DO
      do ifft=1,dtset%nfft
@@ -772,7 +770,6 @@ end subroutine mkrho
 !!***
 
 !!****f* m_mkrho/initro
-!!
 !! NAME
 !! initro
 !!
@@ -820,13 +817,11 @@ end subroutine mkrho
 !! SOURCE
 
 subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
-&  nfft,ngfft,nspden,ntypat,paral_kgb,psps,pawtab,ph1d,qgrid,rhog,rhor,spinat,ucvol,usepaw,zion,znucl)
-
- implicit none
+&  nfft,ngfft,nspden,ntypat,psps,pawtab,ph1d,qgrid,rhog,rhor,spinat,ucvol,usepaw,zion,znucl)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,mgfft,mqgrid,natom,nfft,nspden,ntypat,paral_kgb
+ integer,intent(in) :: izero,mgfft,mqgrid,natom,nfft,nspden,ntypat
  integer,intent(in) :: usepaw
  real(dp),intent(in) :: gsqcut,ucvol
  type(mpi_type),intent(in) :: mpi_enreg
@@ -1263,8 +1258,6 @@ end subroutine initro
 !! SOURCE
 
 subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1909,8 +1902,6 @@ end subroutine prtrhomxmn
 subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 &                       rhor_atm,typat,rprimd,xred,prtvol,file_prefix)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nfft,nspden,ntypat,prtvol
@@ -2146,8 +2137,6 @@ end subroutine read_atomden
 
 subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_pos, &
 &                  natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -209,7 +209,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
 !Local variables-------------------------------
 !scalars
  integer :: ialltetra,ikpt2,ikpt_full,isummit,itetra,jalltetra,jsummit
- integer :: ii,jj,maxibz,ikibz,nkpt_ibz, my_rank, nprocs
+ integer :: ii,jj,ikibz,nkpt_ibz, my_rank, nprocs
  integer :: symrankkpt,mtetra,itmp,ntetra_irred
  real(dp) :: shift1,shift2,shift3, rcvol,hashfactor
  !real :: cpu_start, cpu_stop

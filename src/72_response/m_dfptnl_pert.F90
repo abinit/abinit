@@ -196,7 +196,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_nonlop,     only : nonlop
  use m_fourier_interpol, only : transgrid
  use m_cgprj,     only : getcprj
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -253,7 +252,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !scalars
  logical :: has_cprj_jband,compute_conjugate,compute_rho21
  integer,parameter :: level=52,tim_nonlop=0
- integer :: bandtot,choice,counter,cplex_cprj,cplex_loc,cplex_rhoij,cpopt,dimffnl1,iband,icg0,ider,ierr,iexit
+ integer :: bandtot,choice,counter,cplex_cprj,cplex_loc,cplex_rhoij,cpopt,dimffnl1,iband,icg0,ider,ierr
  integer :: idir0,idir_getgh2c,idir_phon,idir_elfd,ipert_phon,ipert_elfd
  integer :: ia,iatm,ibg,ii,ikg,ikg1,ikpt,ifft,ifft_re,ifft_im,ilm,isppol,istwf_k,jband
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
@@ -292,6 +291,9 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !***********************************************************************
 
  DBG_ENTER("COLL")
+
+ ABI_UNUSED(dtfil%ireadwf)
+
 
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell

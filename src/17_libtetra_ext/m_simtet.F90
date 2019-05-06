@@ -414,11 +414,13 @@ SUBROUTINE SIM1ONEI(U, AS, LEPS, SIM1, SIM1I)
       DOUBLE COMPLEX   R0(3), QR0(3)
       DOUBLE COMPLEX   S0(3), QS0(3)
       DOUBLE COMPLEX   AV, BV, CV, DU, G(5)
-      INTEGER          I, K, N
+      INTEGER          I, K !, N
       DOUBLE COMPLEX   CZERO, CONE
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(as)
+
       CZERO = (0.0D0,0.0D0)
       CONE = (1.0D0,0.0D0)
 !C ------------------------------------------------------------------
@@ -510,6 +512,7 @@ SUBROUTINE SIM1TWOI(U, AS, LEPS, SIM, SIMI)
       DOUBLE PRECISION ZERO, ONE
       DATA  ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(as)
       CZERO = (0.0D0,0.0D0)
       CONE = (1.0D0,0.0D0)
       CTWO = (2.0D0,0.0D0)
@@ -605,7 +608,7 @@ END SUBROUTINE SIM1TWOI
       DOUBLE COMPLEX   S0(3), QS0(3)
       DOUBLE COMPLEX   AV, BV, CV, DV, G(5)
       DOUBLE COMPLEX   UD
-      INTEGER          I, K, N
+      INTEGER          I, K !, N
       DOUBLE COMPLEX   CZERO, CONE, CTWO
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
@@ -765,7 +768,7 @@ END SUBROUTINE SIM2TWOI
       DOUBLE COMPLEX   R0(3), QR0(3)
       DOUBLE COMPLEX   S0(3), QS0(3)
       DOUBLE COMPLEX   AV, BV, CV, DV, UD, G(5)
-      INTEGER          I,  K, N
+      INTEGER          I,  K !, N
       DOUBLE COMPLEX   CZERO, CONE, CTWO, CIMAG
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
@@ -939,7 +942,7 @@ SUBROUTINE  SIM4ONEI(U,AS,LEPS,SIM4,SIM4I)
       DOUBLE COMPLEX   S0(3), QS0(3)
       DOUBLE COMPLEX   QAS(3)
       DOUBLE COMPLEX   AV, BV, CV, UD,  G(5)
-      INTEGER          I, K, N
+      INTEGER          I, K !, N
       DOUBLE COMPLEX   CZERO, CONE, CTWO, CIMAG
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
@@ -1489,11 +1492,13 @@ SUBROUTINE S2D1ONEI(U,AS,LEPS, SIM1, SIM1I)
       !EXTERNAL         SIM0UX0
       DOUBLE COMPLEX   X0(2), DX0(4), R0(2), S0(2)
       DOUBLE COMPLEX   QX0(1), QR0(1), QS0(1)
-      DOUBLE COMPLEX   AV, BV, CV, DU, G(5)
-      INTEGER          I, K, N
+      DOUBLE COMPLEX   AV, BV, DU, G(5)
+      INTEGER          I, K
       DOUBLE COMPLEX   CZERO, CONE
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
+
+      ABI_UNUSED((/as(1)/))
 !C
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
@@ -1565,6 +1570,8 @@ SUBROUTINE S2D1TWOI(U,AS,LEPS, SIM, SIMI)
       DOUBLE PRECISION ZERO, ONE
       DATA  ZERO/0.0D0/, ONE/1.0D0/
 !C
+
+      ABI_UNUSED((/as/))
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
       CTWO  = (2.0D0,0.0D0)
@@ -1632,15 +1639,16 @@ SUBROUTINE  S2D2ONEI(U,AS,LEPS, SIM2, SIM2I)
 !c
       !DOUBLE COMPLEX   SIM0UX0
       !EXTERNAL         SIM0UX0
-      DOUBLE COMPLEX   X0(2), R0(2), S0(2), DX0(4)
+      DOUBLE COMPLEX   X0(2), R0(2), S0(2) !, DX0(4)
 !c      DOUBLE COMPLEX   QX0(1), QR0(1), QS0(1)
-      DOUBLE COMPLEX   AV, BV, CV, DV, G(5)
-      DOUBLE COMPLEX   UD
-      INTEGER          I, K, N
+      DOUBLE COMPLEX   AV, BV, CV !, G(5)
+      !DOUBLE COMPLEX   UD
+      INTEGER          I !, K, N
       DOUBLE COMPLEX   CZERO, CONE, CTWO
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
       CTWO  = (2.0D0,0.0D0)
@@ -1690,6 +1698,8 @@ END SUBROUTINE S2D2ONEI
       DOUBLE PRECISION ZERO, ONE
       DATA  ZERO/0.0D0/, ONE/1.0D0/
 !C
+
+      ABI_UNUSED((/leps/))
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
 !C   -----------------------------------------------------------------
@@ -2139,6 +2149,8 @@ END SUBROUTINE S1D0TWOI
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(as)
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
 !C ------------------------------------------------------------------
@@ -2175,6 +2187,8 @@ SUBROUTINE S1D1TWOI(U,AS,LEPS, SIM, SIMI)
       DOUBLE PRECISION ZERO, ONE
       DATA  ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(as)
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
 !C -----------------------------------------------------------------
@@ -2216,6 +2230,7 @@ SUBROUTINE  S1D2ONEI(U,AS,LEPS,SIM2,SIM2I)
       DOUBLE PRECISION ZERO, ONE
       DATA             ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
       CIMAG = (0.0D0,1.0D0)
@@ -2251,11 +2266,12 @@ SUBROUTINE S1D2TWOI(U,AS,LEPS, SIM, SIMI)
 !c
       DOUBLE COMPLEX X0(2), R2(2), S2(2)
       DOUBLE COMPLEX AV
-      INTEGER        I
+      !INTEGER        I
       DOUBLE COMPLEX   CZERO, CONE
       DOUBLE PRECISION ZERO, ONE
       DATA  ZERO/0.0D0/, ONE/1.0D0/
 !C
+      ABI_UNUSED(leps)
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
 !C   -----------------------------------------------------------------
@@ -2307,11 +2323,12 @@ END SUBROUTINE S1D2TWOI
 !C
       LOGICAL          LWONE(1)
       DOUBLE PRECISION AL(1), AIW, OZERO
-      INTEGER          I, II, K
+      INTEGER          I, II !, K
       DOUBLE COMPLEX   CZERO, CONE
       DOUBLE PRECISION ZERO, ONE, PI
       DATA             ZERO/0.0D0/,ONE/1.0D0/,PI/3.141592653589793D0/
       DATA             OZERO/ 1.0D-13/
+      ABI_UNUSED(eps)
 !c      OZERO = DLAMCH('e')*10
       CZERO = (0.0D0,0.0D0)
       CONE  = (1.0D0,0.0D0)
