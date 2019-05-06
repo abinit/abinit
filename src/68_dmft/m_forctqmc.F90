@@ -162,11 +162,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use m_paw_numeric, only : jbessel=>paw_jbessel
  use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
 
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+#ifdef HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
 #endif
+#ifdef HAVE_MPI
  use INVOKE_PYTHON
-
+#endif
  use ISO_C_BINDING
  implicit none
 
