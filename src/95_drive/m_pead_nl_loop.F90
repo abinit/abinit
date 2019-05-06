@@ -432,7 +432,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
                    if (i2pert <= natom) then
 
                      call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,natom,&
-&                     nattyp,nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1d,psps%qgrid_vl,&
+&                     nattyp,nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
 &                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
                      if (psps%n1xccc/=0) then
@@ -443,11 +443,11 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                    end if  ! i2pert <= natom
 
-                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,rho2g1,rprimd,vhartr1)
+                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,rho2g1,rprimd,vhartr1)
                    option=1 ; nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
                    call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,dtset%ngfft,&
 &                   rho_dum,0,rho_dum,0,nkxc,nmxc,dtset%nspden,n3xccc,option,&
-&                   dtset%paral_kgb,dtset%qptn,rho2r1,rprimd,0,vxc1,xccc3d2)
+&                   dtset%qptn,rho2r1,rprimd,0,vxc1,xccc3d2)
 
                    if(dtset%nsppol==1)then
                      if(cplex==1)then
@@ -786,6 +786,8 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 
 !***********************************************************************
 
+ ABI_UNUSED(dtfil%ireadwf)
+
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
 
@@ -1121,11 +1123,13 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !
 !---- Local variables : structured datatypes
 
+
 #if defined HAVE_MPI
 integer :: status1(MPI_STATUS_SIZE)
 spaceComm=mpi_enreg%comm_cell
 #endif
 
+ ABI_UNUSED(dtfil%ireadwf)
 
 ! ***********************************************************************
 

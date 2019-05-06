@@ -1173,7 +1173,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%prtefg > 0) then
    call timab(967,1,tsec)
    call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nspden,dtset%nsym,ntypat,&
-&   dtset%paral_kgb,paw_an,pawang,pawrad,pawrhoij,pawtab,&
+&   paw_an,pawang,pawrad,pawrhoij,pawtab,&
 &   dtset%ptcharge,dtset%prtefg,dtset%quadmom,rhor,rprimd,dtset%symrel,&
 &   dtset%tnons,dtset%typat,ucvol,psps%usepaw,xred,psps%zionpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)

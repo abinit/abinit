@@ -654,7 +654,7 @@ subroutine wfk_close(Wfk, delete)
 !Local variables-------------------------------
 !scalars
  integer :: ierr
- character(len=500) :: msg
+ !character(len=500) :: msg
 #ifdef HAVE_MPI_IO
  integer :: mpierr,nfrec
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
@@ -4932,8 +4932,6 @@ end subroutine wfk_diff
 !!  in_wfkpath = Input WFK file with k-point list.
 !!  kerange_path = path to KERANGE.nc file.
 !!  dtset <dataset_type>=all input variables for this dataset
-!!  psps <pseudopotential_type>=all the information about psps
-!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  out_wfkpath = Output WFK file.
 !!  comm = MPI communicator.
 !!
@@ -4950,22 +4948,20 @@ end subroutine wfk_diff
 !!
 !! SOURCE
 
-subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
+subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: in_wfkpath, kerange_path
- type(pseudopotential_type),intent(in) :: psps
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm
 !arrays
- type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0 = 0, master = 0
  integer :: spin, ikf, ikin, nband_k, mpw, mband, nspinor, ierr, fine_mband
- integer :: nsppol, iomode, kf_rank, npw_k, ii, my_rank, ncid, fform, fform_kerange
+ integer :: nsppol, iomode, npw_k, ii, my_rank, ncid, fform, fform_kerange
  real(dp) :: cpu, wall, gflops, mae_meV, merr
  character(len=500) :: msg
  character(len=fnlen) :: my_inpath, out_wfkpath
@@ -4975,7 +4971,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, comm)
  type(hdr_type) :: fine_hdr
  type(hdr_type),pointer :: ihdr
  type(ebands_t) :: iwfk_ebands, fine_ebands
- type(wvl_internal_type) :: dummy_wvl
 !arrays
  integer,allocatable :: kf2kin(:), kg_k(:,:), kshe_mask(:,:,:)
  real(dp),allocatable :: cg_k(:,:), eig_k(:), occ_k(:), fine_eigen(:,:,:)

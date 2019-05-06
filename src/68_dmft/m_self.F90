@@ -1342,11 +1342,11 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  type(matlu_type),intent(in) :: selfhdc(self%hdc%natom)
 
 !Local variables-------------------------------
- integer :: ifreq,jfreq,iidim,isppol,ispinor,ispinor1,im,im1,iatom
+ integer :: ifreq,jfreq,isppol,ispinor,ispinor1,im,im1,iatom
  real(dp), allocatable :: selftemp_re(:)
  real(dp), allocatable :: selftemp_imag(:)
  integer :: natom,ndim,nsppol,nspinor
- real(dp) :: delta,real_part,imag_part,slope,y0
+ real(dp) :: delta,slope,y0
 ! *********************************************************************
  delta=0.0000000
  ABI_ALLOCATE(selftemp_re,(self%nw))
@@ -1475,10 +1475,10 @@ subroutine selfreal2imag_self(selfr,self)
  type(self_type),intent(inout) :: self
 
 !Local variables-------------------------------
- integer :: ifreq,jfreq,iidim,isppol,ispinor,ispinor1,im,im1,iatom
+ integer :: ifreq,jfreq,isppol,ispinor,ispinor1,im,im1,iatom
  complex(dpc), allocatable :: selftempmatsub(:)
  integer :: natom,ndim,nsppol,nspinor
- real(dp) :: delta,real_part,imag_part
+ real(dp) :: delta
 ! *********************************************************************
  delta=0.0000000
  ABI_ALLOCATE(selftempmatsub,(self%nw))
