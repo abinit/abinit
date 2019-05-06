@@ -659,9 +659,9 @@ class AbinitTestInfoParser(object):
             cprint("Exception while parsing: %s\n%s" % (inp_fname, exc), "red")
             for l in lines:
                 print(l, end="")
-            cprint("A common problem is inapropriate indentation. The rules is"
+            cprint("A common problem is inappropriate indentation. The rules is"
                    ": do not indent options more than section title, indent "
-                   " lines that belong to the option above." , "red")
+                   "lines that belong to the option above.", "red")
             raise exc
 
         # Consistency check
