@@ -133,8 +133,6 @@ contains
 &  kg,kxc,mband,mgfftdiel,mkmem,mpi_enreg,mpw,nfft,ngfftdiel,nkpt,nkxc,&
 &  npwarr,nspinor,nsppol,occ,ucvol,wffnew)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: mband,mgfftdiel,mkmem,mpw,nfft,nkpt,nkxc,nsppol
  integer, intent(in) :: nspinor
@@ -1081,7 +1079,7 @@ contains
 !      &            '   vhartr(1) :,',vhartr(1)
 !      ENDDEBUG
 
-       call hartre(cplex,gsqcut,0,mpi_enreg,nfftdiel,ngfftdiel,dtset%paral_kgb,rhog,rprimd,vhartr)
+       call hartre(cplex,gsqcut,0,mpi_enreg,nfftdiel,ngfftdiel,rhog,rprimd,vhartr)
 
 !      DEBUG
 !      write(message,'(a,i3)')'After Hartree, on proc ',me_loc

@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -752,7 +753,7 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
   character(len=*) :: Prefix
 ! type(Lattice_Variables_type),intent(in) :: Lattice
 
-  integer :: ii,iqpt,imode,nmode
+  integer :: ii,iqpt,imode,nmode,idir,iatom
   double precision :: distance
   
   nmode=size(Eigen2nd%eigenval,dim=1)
@@ -779,7 +780,15 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
     write(52,'(a)')    '  band:'
     do imode=1,nmode
       write(52,'(a,i4)')    '  - #',imode
-      write(52,'(a,f15.6)') '    frequency:',Eigen2nd%eigenval(imode,iqpt)
+      write(52,'(a,f15.6)') '    frequency:',Eigen2nd%eigenval(imode,iqpt)*Ha_THz
+      write(52,'(a)') '    eigenvector:'
+      do iatom=1,nmode/3
+        write(52,'(a,i4)') "    - # atom ", iatom
+        do idir=1,3
+          write(52,'(a,f18.9,a,f18.9,a)') "      - [",real(Eigen2nd%eigenvec((iatom-1)*3+idir,imode,iqpt)),','&
+&           ,aimag(Eigen2nd%eigenvec((iatom-1)*3+idir,imode,iqpt)),']'
+        end do
+      end do
     end do !nmode  
     write(52,'(a)') ''
   end do

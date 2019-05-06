@@ -135,7 +135,6 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
  use m_matlu, only : init_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -236,7 +235,6 @@ subroutine destroy_oper(oper)
  use m_crystal, only : crystal_t
  use m_matlu, only : destroy_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -290,7 +288,6 @@ subroutine copy_oper(oper1,oper2)
  use defs_basis
  use m_matlu, only : copy_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -355,7 +352,6 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  use m_matlu, only : print_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -500,7 +496,6 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : inverse_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -587,7 +582,6 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -702,7 +696,6 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -718,6 +711,8 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
  integer, allocatable :: procb2(:)
  character(len=500) :: message
 ! *********************************************************************
+
+ ABI_UNUSED(prt)
  ABI_ALLOCATE(procb2,(oper%nkpt))
  if(present(procb).and.present(iproc)) then
    paral=1
@@ -817,7 +812,6 @@ subroutine identity_oper(oper,option)
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -905,7 +899,6 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
  use m_crystal, only : crystal_t
  use m_matlu, only : diff_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -976,7 +969,6 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc)
  use defs_basis
  use m_matlu, only : trace_matlu
  use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1044,7 +1036,6 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc)
  use defs_basis
  use m_errors
  use m_matlu, only : prod_matlu
- implicit none
 
 !Arguments ------------------------------------
 !type

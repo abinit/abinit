@@ -44,7 +44,6 @@ module m_mover
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
- use m_crystal,            only : crystal_t, crystal_init
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron,   only : electronpositron_type
@@ -73,6 +72,7 @@ module m_mover
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef 
+
  implicit none
 
  private
@@ -198,8 +198,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
 & effective_potential,filename_ddb,verbose,writeHIST)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
 type(scfcv_t),intent(inout) :: scfcv_args
@@ -226,12 +224,12 @@ type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
-integer :: irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: nloop,nshell,ntime,option,comm
+integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
+integer :: ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request,unit_out
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
-character(len=500) :: dilatmx_errmsg
+!character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename,fname_ddb
@@ -244,7 +242,6 @@ logical :: skipcycle, file_opened
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
-type(crystal_t) :: crystal
 logical :: file_exists
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
@@ -1016,8 +1013,6 @@ contains
 
 subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,tolmxf)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itime,natom,ntime,optcell
@@ -1138,8 +1133,6 @@ end subroutine fconv
 
 subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itime,itime_hist,ntime
@@ -1237,8 +1230,6 @@ end subroutine mover
 !! SOURCE
 
 subroutine prtxfase(ab_mover,hist,itime,iout,pos)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1504,8 +1495,6 @@ implicit none
 
 subroutine gettag(atlist,index,natom,prtallatoms,tag)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
   logical,intent(in) :: prtallatoms
@@ -1564,8 +1553,6 @@ implicit none
 
 
 subroutine prtnatom(atlist,iout,message,natom,prtallatoms,thearray)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1661,7 +1648,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
  use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
- implicit none
 
 !Arguments ------------------------------------
 !scalars

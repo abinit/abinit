@@ -85,8 +85,6 @@ CONTAINS  !=====================================================================
 
 subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -306,8 +304,6 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 &                 electronpositron,& ! optional argument
 &                 mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_natom
@@ -323,9 +319,9 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: natmax=2
- integer :: cplex_dij,group1,group2,iat,iatom,ierr,ii,im1,im2,ipositron,irhoij,ispden
- integer :: i_unitfi,itypat,jrhoij,ll,llp,me_atom,my_comm_atom,natprt,ndij,nspden,nsppol
- integer :: sz1,sz2,unitfi,unt
+ integer :: cplex_dij,group1,group2,iat,iatom,ierr,ii,im1,im2,ipositron,ispden
+ integer :: i_unitfi,itypat,ll,llp,me_atom,my_comm_atom,natprt,ndij,nspden,nsppol
+ integer :: unitfi,unt
  real(dp) :: mnorm,mx,my,mz,ntot,valmx,localm
  logical :: my_atmtab_allocated,paral_atom,useexexch,usepawu
  type(pawang_type):: pawang_dum

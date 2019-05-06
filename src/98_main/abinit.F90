@@ -613,7 +613,7 @@ program abinit
 
  call xpapi_shutdown()
 
- !Writes information on file about the memory before ending mpi module, if memory profiling is enabled
+ ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam(4), print_mem_report=print_mem_report)
 
  call flush_unit(std_out)
