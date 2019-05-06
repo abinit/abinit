@@ -3323,7 +3323,9 @@ class AbinitTestSuite(object):
                         qout.put(runner(test, print_lock=print_lock))
             except EmptyQueueError:
                 # If that happen it is a probably a bug
-                done['error'] = 'Queue is unexpectedly empty.'
+                done['error'] = RuntimeError(
+                    'Task queue is unexpectedly empty.'
+                )
             except Exception as e:
                 # Any other error is reported
                 done['error'] = e
