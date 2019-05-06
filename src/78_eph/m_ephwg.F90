@@ -821,7 +821,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
 
 !Local variables-------------------------------
 !scalars
- integer :: iq,iq_ibz,ikpq_ibz,ib,ie
+ integer :: iq,iq_ibz,ikpq_ibz,ib
  integer :: nprocs, my_rank, ierr
  real(dp),parameter :: max_occ1 = one
  real(dp) :: wme0(neig)
@@ -829,7 +829,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
  real(dp) :: pme_k(self%nq_k,2), weights(neig,2)
 
 !----------------------------------------------------------------------
- ABI_UNUSED(comm)
+ ABI_UNUSED(weights)
 
  ib = band - self%bstart + 1
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1002,7 +1002,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  integer,parameter :: master=0
  integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,iq,nprocs, my_rank, ierr, iqlk
  real(dp),parameter :: max_occ1=one
- real(dp) :: volconst_mult, weight
+ real(dp) :: volconst_mult
  logical :: use_bzsum_
 !arrays
  real(dp) :: ework(4, 2)
