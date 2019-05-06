@@ -54,6 +54,7 @@ def Checking_on_url_string_to_skip(e, u):
          return True
   return False
 
+
 def Checking_on_no_error_list(url, info, valid):
   global no_error_list
   #print("Enter no_error_list... %s,%s,%s" % (url.text,info,valid))
@@ -86,6 +87,47 @@ def Checking_on_no_error_list(url, info, valid):
         return True # in the exception list -> next xml entry
   return False # may be a error
 
+
+def Checking_on_false_error_list(url, valid, parent, cnx):
+  global false_error_list
+
+  try:
+     URL=url.text
+  except:
+     return False
+
+  for false_error in false_error_list:
+
+    url_rc = None
+    try:
+       url_rc = false_error['url'].search(URL)
+    except:
+       url_rc = True
+
+    valid_rc = None
+    try:
+       valid_rc = false_error['valid'].search(valid)
+    except:
+       valid_rc = True
+
+    parent_rc = None
+    try:
+       parent_rc = false_error['parent'].search(parent)
+    except:
+       parent_rc = True
+
+    if cnx == 0:
+       if url_rc != None and valid_rc != None and parent_rc != None:
+          return True # is a false error
+    else:
+       if url_rc != None and valid_rc != None and parent_rc != None and cnx == 404:
+          #print("found a false error...")
+          return True # is a false error
+
+  return False # may be a error
+
+# ---------------------------------------------------------------------------- #
+
 # ---------------------------------------------------------------------------- #
 
 # Types of error :
@@ -104,6 +146,25 @@ no_error_list = [
     },
     { 'url'  : re.compile('jstor.org'),
       'valid': re.compile('^403 Unauthorized')
+    },
+]
+
+false_error_list = [
+    { 'url'  : re.compile('(dx.doi.orgg|en.wwikipedia.org)'),
+      'valid': re.compile('^ConnectionError'),
+    },
+    { 'url'  : re.compile('10.1102/physrevb.27.4760'),
+      'cnx'  : 404
+    },
+    { 'url'  : re.compile('10.1103/physrevb.87.085323'),
+      'cnx'  : 404
+    },
+    { 'url'   : re.compile('abiconfigg'),
+      'parent': re.compile('testlink/'),
+      'cnx'   : 404
+    },
+    { 'url'   : re.compile('FAKE_URL'),
+      'parent': re.compile('testlink/')
     },
 ]
 
@@ -160,7 +221,8 @@ def main(filename,home_dir=""):
   #
   tree = etree.parse(filename)
   
-  rc=0
+  rc=0 # true error counter 
+  frc=0 # false error counter
   urls=set()
   for child in tree.xpath("/linkchecker/urldata"):
   
@@ -209,18 +271,25 @@ def main(filename,home_dir=""):
     ### access denied  then checks with 'curl'  ###
 
     Check_connection = False
+    cnx_status = 0
     if valid == "syntax OK" :
         Check_connection = True
         if debug : print("check cnx : ",url.text)
         try: 
            request = requests.get(url.text, headers={"content-type":"text"}, timeout=(2,2) )
+           cnx_status = request.status_code
         except (requests.Timeout, requests.ConnectionError, KeyError) as e:
            if debug : print('failed to connect to website ({})'.format(e))
            continue
-        if request.status_code == 200 :  # OK
+        if cnx_status == 200 :  # OK
            continue
-        if request.status_code == 403 :  # cnx ok but Forbidden for robot
+        if cnx_status == 403 :  # cnx ok but Forbidden for robot
            continue
+    
+    # check if the error is a "false" error
+    if Checking_on_false_error_list(url=url, valid=valid, parent=parent.text, cnx=cnx_status) :
+        frc += 1
+        continue
 
     # found a true error... : reporting on bb
     rc += 1
@@ -246,6 +315,7 @@ def main(filename,home_dir=""):
           print("{0:12} {1}".format('Status CNX',request.status_code))
     print('---------------------------')
 
+  print('false errors found : ',frc,' ( must be : 7 )')
   return rc
 
 # ---------------------------------------------------------------------------- #
