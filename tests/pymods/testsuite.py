@@ -1989,7 +1989,15 @@ class BaseTest(object):
                 self.cprint(msg, status2txtcolor[status])
 
             # Check if the test is expected to fail.
-            if runner.retcode != 0 and not self.expected_failure:
+            if runner.retcode == 124:
+                self._status = "failed"
+                msg = self.full_id + "test has reached timeout and has been killed (SIGTERM)."
+                self.cprint(msg, status2txtcolor["failed"])
+            elif runner.retcode == 137:
+                self._status = "failed"
+                msg = self.full_id + "test has reached timeout and has been killed (SIGKILL)."
+                self.cprint(msg, status2txtcolor["failed"])
+            elif runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
                 msg = (self.full_id + "Test was not expected to fail but subprocesses returned %s" % runner.retcode)
                 self.cprint(msg, status2txtcolor["failed"])
