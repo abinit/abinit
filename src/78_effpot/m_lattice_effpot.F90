@@ -1,3 +1,30 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_potential
+!! NAME
+!! m_lattice_effpot
+!!
+!! FUNCTION
+!! place holder for lattice potential
+!!
+!!
+!! Datatypes:
+!!
+!! * lattice_potential_t
+!!
+!! Subroutines:
+!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2019 ABINIT group (TO, hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
