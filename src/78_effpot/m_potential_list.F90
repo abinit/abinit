@@ -38,7 +38,7 @@ module m_potential_list
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_multibinit_global
+  use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_multibinit_supercell, only: mb_supercell_t
@@ -76,13 +76,14 @@ module m_potential_list
      integer :: size, capacity
      type(effpot_pointer_t), allocatable :: list(:)
    contains
-     procedure :: initialize
-     procedure :: ipot
-     procedure :: set_supercell
+     procedure :: initialize ! make an empty list
+     procedure :: ipot       ! return the i'th potential
+     procedure :: set_supercell ! pointer to supercell and set_supercell for all pot in list
      procedure :: finalize
-     procedure :: append
-     procedure :: calculate
-     procedure :: get_delta_E
+     procedure :: append  ! add a potential to the list
+     procedure :: calculate ! each potential in list do calculate and then sum.
+     procedure :: get_delta_E ! currently only used in spin potential, 
+                              ! to calculate energy difference when one spin changes.
   end type potential_list_t
   !!***
 
@@ -90,18 +91,24 @@ contains
 
   subroutine initialize(self)
     class (potential_list_t), intent(inout) :: self
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%size=0
     self%capacity=0
     self%label="ListPotential"
   end subroutine initialize
 
-  function ipot(self, i) result(p)
-    class (potential_list_t), intent(in) :: self
-    class(abstract_potential_t), pointer  :: p
-    integer :: i
-    p=>self%list(i)%ptr
+  ! return the i'th potential in the list
+  ! Unfortunately, fortran does not allow things  call potlist%ipot(i)%method...
+  ! So this is not really useful?
+  function ipot(self, i)
+    class (potential_list_t), target, intent(in) :: self
+    integer, intent(in) :: i
+    class(abstract_potential_t), pointer :: ipot
+    ipot=>self%list(i)%ptr
   end function ipot
-
+  
   subroutine set_supercell(self, supercell)
     class (potential_list_t), intent(inout) :: self
     type (mb_supercell_t), target, intent(inout) :: supercell
@@ -117,7 +124,6 @@ contains
     integer :: i
     do i=1, self%size
        call self%list(i)%ptr%finalize()
-       ! intel compilers do not allow (need) this
        !if(associated(self%list(i)%ptr)) deallocate(self%list(i)%ptr)
        nullify(self%list(i)%ptr)
     end do
@@ -130,7 +136,6 @@ contains
     self%has_displacement=.False.
     self%has_strain=.False.
     self%has_spin=.False.
-    self%has_lwf=.False.
   end subroutine finalize
 
 
@@ -175,7 +180,7 @@ contains
     do i=1, self%size
        call self%list(i)%ptr%calculate(displacement=displacement, strain=strain, &
             & spin=spin, lwf=lwf, force=force, stress=stress, bfield=bfield, &
-           & lwf_force=lwf_force, energy=energy)
+            lwf_force=lwf_force, energy=energy)
     end do
   end subroutine calculate
 
