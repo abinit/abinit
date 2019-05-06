@@ -22,12 +22,12 @@ py2 = sys.version_info[0] <= 2
 if py2:
     import cPickle as pickle
     from StringIO import StringIO
-    from ConfigParser import SafeConfigParser, NoOptionError
+    from ConfigParser import SafeConfigParser, NoOptionError, ParsingError as CPError
     from Queue import Empty as EmptyQueueError
 else:
     import pickle
     from io import StringIO
-    from configparser import ConfigParser
+    from configparser import ConfigParser, ParsingError as CPError
     from queue import Empty as EmptyQueueError
 
 from .jobrunner import TimeBomb
@@ -655,10 +655,13 @@ class AbinitTestInfoParser(object):
 
         try:
             self.parser.read_string("".join(lines), source=inp_fname)
-        except Exception as exc:
+        except CPError as exc:
             cprint("Exception while parsing: %s\n%s" % (inp_fname, exc), "red")
             for l in lines:
                 print(l, end="")
+            cprint("A common problem is inapropriate indentation. The rules is"
+                   ": do not indent options more than section title, indent "
+                   " lines that belong to the option above." , "red")
             raise exc
 
         # Consistency check
