@@ -4,6 +4,7 @@
  * See https://github.com/parcollet/execute_python
  * ******************/
 
+#ifdef HAVE_MPI
 // starts the interpreter
 // the location of the PythonLibrary must be in the var env_var
 int init_python_interpreter_from_env(const char* env_var);
@@ -20,3 +21,4 @@ int close_python_interpreter();
 extern "C"{
     void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in);
 }
+#endif

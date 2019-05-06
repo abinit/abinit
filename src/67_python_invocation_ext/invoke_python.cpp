@@ -4,6 +4,7 @@
  * See https://github.com/parcollet/execute_python
  * ******************/
 
+#ifdef HAVE_MPI
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -161,4 +162,5 @@ void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in) {
 	MPI_Barrier(MPI_COMM_WORLD);
 }
 
+#endif
 
