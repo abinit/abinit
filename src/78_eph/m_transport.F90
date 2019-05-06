@@ -55,7 +55,7 @@ module m_transport
  private
 !!****
 
- public :: transport !! main entry point for transport calculations
+ public :: transport ! main entry point for transport calculations
 !!****
 
 !----------------------------------------------------------------------
@@ -189,38 +189,24 @@ contains  !=====================================================
 !!
 !! FUNCTION
 !! General driver to compute transport properties
-!! wk0_path=String with the path to the GS unperturbed WFK file.
-!! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
-!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
-!! pawang<pawang_type)>=PAW angular mesh and related data.
-!! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
-!! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
-!! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
 !!
 !! INPUTS
 !!
 !! SOURCE
 
-subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawfgr, pawang, pawrad, pawtab, psps, comm)
+subroutine transport(dtfil, dtset, ebands, cryst, comm)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: wfk0_path
  integer, intent(in) :: comm
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- type(pseudopotential_type),intent(in) :: psps
- type(pawang_type),intent(in) :: pawang
- type(pawfgr_type),intent(in) :: pawfgr
 !arrays
- integer,intent(in) :: ngfft(18),ngfftf(18)
- type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables ------------------------------
  type(sigmaph_t) :: sigmaph
@@ -232,6 +218,10 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
 #endif
  character(len=fnlen) :: path
  character(len=500) :: msg
+
+! *************************************************************************
+
+ ABI_UNUSED((/comm, cryst%natom/))
 
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, 'Transport computation driver')
@@ -427,11 +417,11 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  integer :: ntens, nvecs, nvals, edos_intmeth, ifermi, iel
  real(dp) :: vr(3)
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT
- real(dp) :: linewidth, diff, min_diff, n0, n0_dy
+ real(dp) :: linewidth
  real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
- character(len=500) :: msg
+ !character(len=500) :: msg
 
  ! create alias for dimensions
  nsppol = self%ebands%nsppol
@@ -674,6 +664,8 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  real(dp) :: vr(3), vv_tens(3,3)
  real(dp) :: eig_nk, mu_e, linewidth, fact
  real(dp) :: max_occ, kT, wtk
+
+ ABI_UNUSED((/dtset%natom, comm/))
 
  ABI_MALLOC(self%mobility_mu,(2,self%nsppol,3,3,self%ntemp+1))
 

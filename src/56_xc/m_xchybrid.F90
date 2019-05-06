@@ -105,8 +105,6 @@ contains
 subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,strsxc,vxcavg,xccc3d,vxc,grxc,xcccrc,xccc1d,&
 &                           xred,n1xccc,optstr)
 
- implicit none
-
 !Arguments -------------------------------------------------------------
 !scalars
  integer,intent(in) :: nfft,n3xccc
@@ -179,7 +177,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
    call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&   n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,&
+&   n3xccc_null,option,rhor,rprimd,&
 &   strsxc,usexcnhat,vxc,vxcavg,xccc3d_null,xcdata_hybrid)
 
 !  Initialize GGA functional
@@ -191,11 +189,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d,xcdata_gga)
    end if
    enxc=enxc+enxc_corr
@@ -206,11 +204,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Substract Vxc^GGA(rho_val)
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
+&     n3xccc_null,option,rhor,rprimd,strsxc_corr,usexcnhat,&
 &     vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc_null,option,dtset%paral_kgb,rhor,rprimd,strsxc_corr,usexcnhat,&
+&     n3xccc_null,option,rhor,rprimd,strsxc_corr,usexcnhat,&
 &     vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    end if
    enxc=enxc-enxc_corr
@@ -239,11 +237,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Add Vxc^GGA(rho_core+rho_val)
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,&
+&     n3xccc,option,&
 &     rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,&
+&     n3xccc,option,&
 &     rhor,rprimd,strsxc_corr,usexcnhat,vxc_corr,vxcavg_corr,xccc3d_null,xcdata_gga)
    end if
    option=2
@@ -263,11 +261,11 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    option=0
    if (ixc_gga<0) then
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga,xc_funcs=xc_funcs_gga)
    else
      call rhotoxc(enxc_corr,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
-&     n3xccc,option,dtset%paral_kgb,rhor,rprimd,&
+&     n3xccc,option,rhor,rprimd,&
 &     strsxc_corr,usexcnhat,vxc,vxcavg_corr,xccc3d,xcdata_gga)
    end if
  end if
@@ -326,8 +324,6 @@ end subroutine xchybrid_ncpp_cc
 !! SOURCE
 
 subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hybrid_mixing,vxc,enxc)
-
- implicit none
 
 !Arguments -------------------------------------------------------------
 !scalars

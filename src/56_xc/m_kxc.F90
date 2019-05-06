@@ -113,8 +113,6 @@ CONTAINS  !=====================================================================
 
 subroutine kxc_rpa(gsq,krpa,npw,option,rcut_coulomb)
 
- implicit none
-
 !Arguments -------------------------------------------------------------
 !scalars
  integer,intent(in) :: npw,option
@@ -204,8 +202,6 @@ end subroutine kxc_rpa
 !! SOURCE
 
 subroutine kxc_local(ispxc,kg_diel,kxc,kxcg,nfft,ngfft,npwdiel,nspden,option)
-
- implicit none
 
 !Arguments -------------------------------------------------------------
 !scalars
@@ -402,8 +398,6 @@ end subroutine kxc_local
 
 subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocut,rprimd)
 
- implicit none
-
 !Arguments -------------------------------------------------------------
 !scalars
  integer,intent(in) :: ixc,nfft,nspden,option
@@ -514,9 +508,9 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    optionrhoxc = 2 !See rhotoxc.f
 
-   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
+   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartree)
    call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
+&   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
 !  fx for tests.
@@ -569,9 +563,9 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    optionrhoxc = -2 !See rhotoxc.f
 
-   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartree)
+   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartree)
    call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&   optionrhoxc,dtset%paral_kgb,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
+&   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
 
@@ -655,8 +649,6 @@ end subroutine kxc_alda
 !! SOURCE
 
 subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -876,13 +868,11 @@ end subroutine kxc_pgg
 !!
 !! SOURCE
 
-subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,paral_kgb,rhor,rhocut)
-
- implicit none
+subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
 
 !Arguments -------------------------------------------------------------
 !scalars
- integer,intent(in) :: ixceok,nfft,nspden,paral_kgb
+ integer,intent(in) :: ixceok,nfft,nspden
  real(dp),intent(in) :: rhocut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1037,8 +1027,6 @@ end subroutine kxc_eok
 
 subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kxcg,gvec,comm,dbg_mode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,npw,nfft_tot,nspden,dim_kxcg,comm
@@ -1052,7 +1040,6 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: paral_kgb0=0
  integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
  logical :: non_magnetic_xc
@@ -1132,12 +1119,12 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    call libxc_functionals_init(ixc,Dtset%nspden)
  end if
 
- call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft_tot,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
+ call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft_tot,ngfft,rhog,Cryst%rprimd,vhartr)
 
 !Compute the kernel.
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
-& n3xccc,option,Dtset%paral_kgb,rhor,Cryst%rprimd,&
+& n3xccc,option,rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
@@ -1218,7 +1205,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
        kxcpw_r(:,:)=zero
 
        call dfpt_mkvxc(cplex,ixc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,dum,0,dum,0,nkxc,non_magnetic_xc,&
-&       nspden,n3xccc,option,paral_kgb0,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
+&       nspden,n3xccc,option,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
 
 !      FFT the first index to --> to G space
        call fourdp(cplex,kxcpw_g(:,:),kxcpw_r(:,1),-1,MPI_enreg_seq,nfft_tot,1,ngfft,0)
@@ -1293,8 +1280,6 @@ end subroutine kxc_driver
 subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 &                  npw,nqibz,qibz,fxc_ADA,gvec,comm,kappa_init,dbg_mode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,nfft,nspden,npw,comm
@@ -1311,7 +1296,6 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: paral_kgb0=0
  integer :: i1,i2,i3,ig,igp,ir,irp,n3xccc,ngfft1,ngfft2,izero !,isp
  integer :: ngfft3,nkxc,option,ikxc,ierr,nproc
  integer :: nk3xc,igrid,iqbz,my_rank,master,unt_dmp,gmgp_idx
@@ -1452,10 +1436,10 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    call libxc_functionals_init(ixc,Dtset%nspden)
  end if
 
- call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,dtset%paral_kgb,rhog,Cryst%rprimd,vhartr)
+ call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,rhog,Cryst%rprimd,vhartr)
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
-& n3xccc,option,dtset%paral_kgb,my_rhor,Cryst%rprimd,&
+& n3xccc,option,my_rhor,Cryst%rprimd,&
 & strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Check for extreme (NaN) values
@@ -1656,7 +1640,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 &         EXP(j_dpc*abs_qpgp_sq)
        end do
      end do
-     call fourdp_6d(2,dummy,-1,MPI_enreg_seq,nfft,ngfft,paral_kgb0,0)
+     call fourdp_6d(2,dummy,-1,MPI_enreg_seq,nfft,ngfft, 0)
      do ig=1,npw
        do igp=1,npw
          FT_fxc_ADA_ggpq(ig,igp,iqbz) = dummy(ig_idx_fft(ig),ig_idx_fft(igp))

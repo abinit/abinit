@@ -1233,11 +1233,11 @@ end subroutine recip_ylm
 !! SOURCE
 
 subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
-&                       paral_kgb,ph1d,rmax,ucvol)
+&                       ph1d,rmax,ucvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istwfk,natom,npw_k,paral_kgb
+ integer,intent(in) :: istwfk,natom,npw_k
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays

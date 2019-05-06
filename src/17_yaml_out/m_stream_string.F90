@@ -1,10 +1,11 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "abi_common.h"
 
-! Provide tools to manipulate variable size strings in an incrrmental FIFO way
+! Provide tools to manipulate variable size strings in an incremental FIFO way
 ! Use write to incrementaly fill the string. The required memory space will be allocated
 ! automatically when needed.
 ! To avoid memory leaks you have to use stream_free on the stream to free the memory space unless
@@ -56,7 +57,7 @@ module m_stream_string
     do while (associated(cursor))
       prev => cursor
       cursor => cursor%next
-      ABI_FREE(prev)
+      ABI_FREE_SCALAR(prev)
     end do
   end subroutine stream_free
 
@@ -120,11 +121,11 @@ module m_stream_string
       ! have next pointing to nothing
       stream%head%next => NULL()
       ! free head
-      ABI_FREE(stream%head)
+      ABI_FREE_SCALAR(stream%head)
       stream%head => cursor
       stream%length = stream%length - chunk_size
     else
-      ABI_FREE(stream%head)
+      ABI_FREE_SCALAR(stream%head)
       stream%length = 0
     end if
   end subroutine stream_get_chunk

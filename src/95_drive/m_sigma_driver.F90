@@ -214,7 +214,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp5=5,master=0,cplex1=1
- integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij,band
+ integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij !,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount
  integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus
@@ -290,7 +290,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:)
  type(esymm_t),target,allocatable :: KS_sym(:,:)
  type(esymm_t),pointer :: QP_sym(:,:)
- type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
+ type(pawcprj_type),allocatable :: Cp1(:,:) !,Cp2(:,:)
  type(littlegroup_t),allocatable :: Ltg_k(:)
  type(Paw_an_type),allocatable :: KS_paw_an(:),QP_paw_an(:)
  type(Paw_ij_type),allocatable :: KS_paw_ij(:),QP_paw_ij(:)

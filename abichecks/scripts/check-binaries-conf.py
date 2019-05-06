@@ -9,6 +9,8 @@
 #
 from __future__ import unicode_literals, division, print_function, absolute_import
 
+from abirules_tools import find_abinit_toplevel_directory
+
 try:
     from ConfigParser import ConfigParser,NoOptionError
 except ImportError:
@@ -49,40 +51,18 @@ dep_levels = {
   "xml":0  # Comment hexu: Please check. 
 }
 
-# ---------------------------------------------------------------------------- #
-
-def abinit_test_generator():
-  def test_func(abenv):
-     "Check binaries configuration"
-     try:
-       return main(abenv.home_dir)
-     except Exception:
-       import sys
-       raise sys.exc_info()[1] # Reraise current exception (py2.4 compliant)
-  return {"test_func" : test_func}
-
-#
-# Main program
-#
-def main(home_dir):
-  from os.path import join as pj
-
-  # Check if we are in the top of the ABINIT source tree
-  my_name = os.path.basename(__file__) + ".main"
-  if ( not os.path.exists( pj(home_dir,"configure.ac") ) or
-       not os.path.exists( pj(home_dir,"src/98_main/abinit.F90")) ):
-    print("%s: You must be in the top of an ABINIT source tree." % my_name)
-    print("%s: Aborting now." % my_name)
-    sys.exit(1)
+def main():
+  home_dir = find_abinit_toplevel_directory()
 
   # Init
   cnf_bin = MyConfigParser()
-  cnf_fname = pj(home_dir,"config/specs/binaries.conf")
+  cnf_fname = os.path.join(home_dir, "config/specs/binaries.conf")
+  assert os.path.exists(cnf_fname)
   cnf_bin.read(cnf_fname)
   bin_list = cnf_bin.sections()
   bin_list.sort()
-  dep_order = dict()
-  lib_order = dict()
+  dep_order = {}
+  lib_order = {}
   re_num = re.compile("[0-9][0-9]_")
 
   # Check order of dependencies and libraries
@@ -90,17 +70,17 @@ def main(home_dir):
     if cnf_bin.has_option(prg,"dependencies"):
       bin_deps = cnf_bin.get(prg,"dependencies").split()
     else:
-      bin_deps = list()
+      bin_deps = []
     dep_old = 100
     dep_new = 100
     for dep in bin_deps:
       if dep in dep_levels:
         dep_new = dep_levels[dep]
       else:
-        sys.stderr.write("%s: Error: unregistered dependency '%s'\n" %  (my_name,dep))
+        sys.stderr.write("Error: unregistered dependency '%s'\n" %  dep)
         sys.exit(10)
       if dep_new > dep_old:
-        if not prg in dep_order:
+        if prg not in dep_order:
           dep_order[prg] = list()
         dep_order[prg].append(dep)
       dep_old = dep_new
@@ -115,7 +95,7 @@ def main(home_dir):
       if re_num.match(lib):
         lib_new = int(re.sub("_.*","",lib))
         if lib_new > lib_old:
-          if not prg in lib_order:
+          if prg not in lib_order:
             lib_order[prg] = list()
           lib_order[prg].append(lib)
       lib_old = lib_new
@@ -143,11 +123,6 @@ def main(home_dir):
 
   return nerr
 
-if __name__ == "__main__":
-  if len(sys.argv) == 1: 
-    home_dir = "."
-  else:
-    home_dir = sys.argv[1] 
 
-  exit_status = main(home_dir)
-  sys.exit(exit_status)
+if __name__ == "__main__":
+  sys.exit(main())

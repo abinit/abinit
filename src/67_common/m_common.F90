@@ -54,6 +54,8 @@ module m_common
  use m_energies,          only : energies_type, energies_eval_eint
  use m_pair_list,         only : pair_list
  use m_neat,              only : neat_energies
+ use m_geometry,          only : mkrdim, metric
+ use m_kg,                only : getcut
  use m_parser,            only : parsefile
  use m_invars1,           only : invars0, invars1m, indefo
  use m_invars2
@@ -1005,16 +1007,13 @@ end subroutine scprqt
 !! SOURCE
 
 subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
-&  gprimd,gsqcut_eff,gsqcutc_eff,natom,ngfft,ngfftc,nkpt,nsppol,&
+&  gprimd,gsqcut_eff,gsqcutc_eff,ngfft,ngfftc,nkpt,nsppol,&
 &  response,rmet,rprim,rprimd,ucvol,usepaw)
-
- use m_geometry,   only : mkrdim, metric
- use m_kg,         only : getcut
 
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
- integer,intent(in) :: natom,nkpt,nsppol
+ integer,intent(in) :: nkpt,nsppol
  integer,intent(in) :: response,usepaw
  integer,intent(out) :: bantot
  real(dp),intent(in) :: ecut_eff,ecutc_eff
@@ -1086,9 +1085,9 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  ! Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
  if (boxcut<2.0_dp.and.dtset%intxc==1) then
    write(message, '(a,es12.4,a,a,a,a,a)' )&
-&   'boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
-&   'Need larger ngfft to use intxc=1.',ch10,&
-&   'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
+   'boxcut= ',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
+   'Need larger ngfft to use intxc=1.',ch10,&
+   'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
    MSG_ERROR(message)
  end if
 

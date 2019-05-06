@@ -266,7 +266,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(65)='forstrnps:synchr                '
  names(66)='vtorho:synchro                  '; basic(66)=1
  names(67)='wfsinp:synchro                  '
- names(68)='scfcv_core(mix den - newrho)     '
+ names(68)='scfcv_core(mix den - newrho)    '
  names(69)='forces                          '; basic(69)=1 ! Actually, should not be basic !
  names(70)='vtorho(symrhg)                  '
  names(71)='mkrho :MPIrhor                  '
