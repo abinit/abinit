@@ -1639,6 +1639,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
             call wrtout(std_out,message,'COLL')
             MSG_ERROR(message)   
 #else
+#ifndef HAVE_MPI
+            write(message,'(2a)') ch10,' MPI requiered! For some reasons, MPI is necessitate (actually for some reasons, mpich and
+            not openmpi) to communicate with TRIQS.'
+            call wrtout(std_out,message,'COLL')
+            MSG_ERROR(message)
+#else
             ! Creating the NETCDF file
             write(std_out, '(2a)') ch10, "    Creating NETCDF file: dft_for_triqs.nc"
             call nf_check(nf90_create("dft_for_triqs.nc", NF90_CLOBBER, ncid))
@@ -1782,6 +1788,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
             ABI_DEALLOCATE(new_im_g_iw)
             ABI_DEALLOCATE(new_g_tau)
             ABI_DEALLOCATE(new_gl)
+#endif
 #endif
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
         else
