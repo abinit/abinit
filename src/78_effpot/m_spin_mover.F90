@@ -99,7 +99,7 @@ module m_spin_mover
      procedure :: run_time => spin_mover_t_run_time
      procedure :: run_MvT
      procedure :: set_temperature
-     procedure :: prepare_ncfile
+     procedure, private :: prepare_ncfile
      procedure, private ::get_Langevin_Heff
      procedure :: current_spin
      procedure :: set_ncfile_name

@@ -31,7 +31,7 @@
 
 #include "abi_common.h"
 
-module m_polynomail_potential
+module m_polynomial_potential
   use defs_basis
   use m_abicore
   use m_errors
@@ -109,4 +109,4 @@ contains
   end subroutine calculate
 
 
-end module m_polynomail_potential
+end module m_polynomial_potential

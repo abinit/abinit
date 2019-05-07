@@ -51,12 +51,20 @@ module m_abstract_mover
      ! interact with hist file.
      type(mb_supercell_t), pointer:: supercell=>null()
      character (len=200) :: label="Abstract Mover"
+     ! temperature
+     ! ntime
+     ! dt
+     ! nthermalization
+     ! rng
+
    contains
      !procedure:: initialize       ! perhaps each effpot type should have own 
      !procedure :: finalize
      procedure :: set_params
      procedure :: set_initial_state ! initial state
      procedure:: run_one_step 
+     !procedure:: run_time
+     !procedure:: run_temperature
      procedure :: reset            ! reset the mover
      procedure :: calc_observables ! call functions to calculate observables
      procedure :: write_hist       ! write hist file

@@ -141,7 +141,7 @@ contains
     call self%lattice_mover%finalize()
     if(.not. self%use_external_params) then
        call multibinit_dtset_free(self%params)
-       ! TODO: Intel compilers complains but it should not. Uncomment when know why.
+       ! TODO: Intel compilers complains but it should not. Uncomment when knowing why.
        !deallocate(self%params)
     endif
     nullify(self%params)
