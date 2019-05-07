@@ -17,7 +17,6 @@ Variable(
     dimensions=['[[tdep:ntypat]]'],
     defaultval="[[tdep:ntypat]]*0.d0",
     mnemonics="Atomic masses in Mass Units",
-    text="""
     text=r"""
 Defines the masses in atomic mass units for each kind of atom. See the ABINIT variable [[amu]] for more details. (Only required when the NetCDF file is absent).
 """,

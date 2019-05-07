@@ -158,7 +158,6 @@ pages:
     - Tdep: variables/tdep.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
-    - Tdep: variables/tdep.md
     - Statistics: variables/varset_stats.md
 - Tutorial:
     - Overview: tutorial/index.md
