@@ -1,0 +1,15 @@
+/02_clib
+/10_defs
+/11_memory_mpi
+/12_hide_mpi
+/14_hidewrite
+/16_hideleave
+/17_libtetra_ext
+/18_timing
+/21_hashfuncs
+/27_toolbox_oop
+/28_numeric_noabirule
+/29_kpoints
+/32_util
+/41_xc_lowlevel
+/42_libpaw
