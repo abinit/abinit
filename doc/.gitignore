@@ -6,6 +6,8 @@ README_xlf.md
 developers/autoconf_examples.md
 variables/aim.md
 variables/anaddb.md
+variables/multibinit.md
+variables/aim.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -29,6 +31,8 @@ variables/tdep.md
 variables/varset_stats.md
 variables/vdw.md
 variables/w90.md
+variables/tdep.md
+variables/anaddb.md
 topics/Abipy.md
 topics/APPA.md
 topics/Artificial.md
