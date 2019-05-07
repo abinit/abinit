@@ -33,7 +33,7 @@ using namespace std;
  R (*F)(__VA_ARGS__);                                   \
  *(void**)(&F) = dlsym(libpython_handle, AS_STRING(F)); \
  if ((error = dlerror()) != NULL) {                     \
-  fprintf(stderr, "%s\n", error);                        \
+  fprintf(stderr, "%s\n", error);                       \
   return 1;                                             \
  }
 
@@ -163,6 +163,8 @@ void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in) {
 	close_python_interpreter();
 	MPI_Barrier(MPI_COMM_WORLD);
 }
-
+#else
+void invoke_python_triqs(int comm, char* filapp_in) {
+	// Should never get here
+}
 #endif
-

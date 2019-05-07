@@ -10,7 +10,6 @@
 !
 ! =====================================================================
 
-#if defined HAVE_MPI
 MODULE INVOKE_PYTHON
 
   implicit none
@@ -35,4 +34,3 @@ MODULE INVOKE_PYTHON
 
 
 END MODULE INVOKE_PYTHON
-#endif
