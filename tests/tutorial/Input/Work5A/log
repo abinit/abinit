@@ -1,4 +1,4 @@
-  ABINIT 8.11.6
+  ABINIT 8.11.7
   
   Give name for formatted input file: 
 t03.in
@@ -13,7 +13,7 @@ t03_x
  
 --- !COMMENT
 src_file: m_dtfil.F90
-src_line: 1086
+src_line: 1082
 message: |
     Output file: t03_x.out already exists.
 ...
@@ -21,13 +21,13 @@ message: |
  
 --- !COMMENT
 src_file: m_dtfil.F90
-src_line: 1110
+src_line: 1106
 message: |
-    Renaming old t03_x.out to t03_x.out0013
+    Renaming old t03_x.out to t03_x.out0084
 ...
  
 
-.Version 8.11.6 of ABINIT 
+.Version 8.11.7 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -42,20 +42,20 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 19 Apr 2019.
-- ( at 15h02 )
+.Starting date : Tue  7 May 2019.
+- ( at 15h57 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  
  === Build Information === 
-  Version       : 8.11.6
+  Version       : 8.11.7
   Build target  : x86_64_linux_intel19.0
-  Build date    : 20190419
+  Build date    : 20190506
  
  === Compiler Suite === 
-  C compiler       : gnu7.3
-  C++ compiler     : gnu7.3
+  C compiler       : gnu7.4
+  C++ compiler     : gnu7.4
   Fortran compiler : intel19.0
   CFLAGS           :  -g -O2 -mtune=native -march=native
   CXXFLAGS         :  -g -O2 -mtune=native -march=native
@@ -133,11 +133,11 @@ message: |
  
            HAVE_MPI_IBCAST         HAVE_MPI_IGATHERV        HAVE_MPI_INTEGER16
  
-               HAVE_MPI_IO HAVE_MPI_TYPE_CREATE_S...         HAVE_OMP_COLLAPSE
+               HAVE_MPI_IO HAVE_MPI_TYPE_CREATE_S...                HAVE_NUMPY
  
-               HAVE_OPENMP             HAVE_OS_LINUX         HAVE_TIMER_ABINIT
+         HAVE_OMP_COLLAPSE               HAVE_OPENMP             HAVE_OS_LINUX
  
-              USE_MACROAVE                                                      
+         HAVE_TIMER_ABINIT              USE_MACROAVE                            
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 - input  file    -> t03.in
@@ -166,11 +166,6 @@ message: |
  inkpts: Sum of 1 k point weights is    1.000000
  inkpts: Sum of 1 k point weights is    1.000000
  chkneu: initialized the occupation numbers for occopt= 3, spin-unpolarized or antiferromagnetic case:
-npfft, npband, npspinor and npkpt:     1    2    1    1
-me_fft, me_band, me_spinor , me_kpt:     0    0    0    0
- mpi_setup: With nkpt_me=1 and mkmem  = 1, ground state wf handled in core.
- mpi_setup: With nkpt_me=1 and mkqmem = 1, ground state wf handled in core.
- mpi_setup: With nkpt_me=1 and mk1mem = 1, ground state wf handled in core.
 getng is called for the coarse grid:
  For input ecut=  8.000000E+00 best grid ngfft=      40      40      40
        max ecut=  8.388398E+00
@@ -227,7 +222,7 @@ _ WF disk file :      2.850 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    6
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
@@ -314,6 +309,7 @@ P           mkmem           1
                        0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
                        0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
                        0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
+           timopt          -3
            toldfe      1.00000000E-05 Hartree
            tsmear      2.00000000E-03 Hartree
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
@@ -434,7 +430,7 @@ P           mkmem           1
  CHARACTER: Data type name: CHARACTER             Kind value: 1
 
   ==== OpenMP parallelism is ON ====
-- Max_threads:       6
+- Max_threads:       1
 - Num_threads:       1
 - Num_procs:         6
 - Dynamic:           F
@@ -564,4 +560,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  Invovl built
  nband         192
+ l_icplx*l_npw*l_nspinor        1944
+ l_mpi_enreg%nproc_band           2
+ chebfi%nproc_band           2
+ spacedim*chebfi%nproc_band        3888
+ 2*chebfi%bandpp         192
+ debugBlock%rows        1944
+ debugBlock%cols         192
  nband         192
+ l_icplx*l_npw*l_nspinor        1944
+ l_mpi_enreg%nproc_band           2
+ chebfi%nproc_band           2
+ spacedim*chebfi%nproc_band        3888
+ 2*chebfi%bandpp         192
+ debugBlock%rows        1944
+ debugBlock%cols         192

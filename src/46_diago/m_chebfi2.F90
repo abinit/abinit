@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -32,8 +33,8 @@ module m_chebfi2
   
   integer, parameter :: EIGENV = 1
   integer, parameter :: EIGENVD = 2
-  integer, parameter :: DEBUG_ROWS = 5
-  integer, parameter :: DEBUG_COLUMNS = 5
+  integer, parameter :: DEBUG_ROWS = 20
+  integer, parameter :: DEBUG_COLUMNS = 2
   
 #ifdef HAVE_OPENMP 
   integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
@@ -164,6 +165,8 @@ module m_chebfi2
     chebfi%me_g0 = me_g0
     chebfi%paw = paw
     
+    !print *, "chebfi%nproc_band", chebfi%nproc_band
+    !stop
     
     !SHOULD HERE I DO ADVICE TARGET AND BLOCK CALCULATIONS???
 
@@ -205,6 +208,10 @@ module m_chebfi2
       call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)  
       call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  
     else
+      print *, "chebfi%nproc_band", chebfi%nproc_band
+      print *, "spacedim*chebfi%nproc_band", spacedim*chebfi%nproc_band
+      print *, "2*chebfi%bandpp", 2*chebfi%bandpp
+      !stop
       call xg_init(chebfi%X_NP,space,spacedim*chebfi%nproc_band,2*chebfi%bandpp) !transposed arrays
       call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim*chebfi%nproc_band,chebfi%bandpp)  
       call xg_setBlock(chebfi%X_NP,chebfi%X_prev,chebfi%bandpp+1,spacedim*chebfi%nproc_band,chebfi%bandpp)  
@@ -375,6 +382,11 @@ module m_chebfi2
     
     ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
 
+    call debug_helper(chebfi%X, chebfi) 
+    stop
+    
+    print *, "AJDE" 
+
     ! Transpose
     if (chebfi%paral_kgb == 1) then
       
@@ -385,9 +397,9 @@ module m_chebfi2
       !print *, "nCpuCols", nCpuCols
       
       !all stride arrays are hidden inside transposer
-      !call xgTransposer_init(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,0)
+      call xgTransposer_init(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,0)
       
-      call xgTransposer_init(chebfi%xgTransposerX,X0,chebfi%X,nCpuRows,nCpuCols,STATE_LINALG,1,0)
+      !call xgTransposer_init(chebfi%xgTransposerX,X0,chebfi%X,nCpuRows,nCpuCols,STATE_LINALG,1,0)
       
  !     call xgBlock_getSize(chebfi%X,rows,cols)
       
@@ -407,6 +419,8 @@ module m_chebfi2
       
       !print *, "SSSSSSSSSSSSSS"
       call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS) !all_to_all
+      call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !all_to_all
+      call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS) 
       
       !print *, "BBBBBBBBBBBBBB"
                         
@@ -422,21 +436,25 @@ module m_chebfi2
       !call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, chebfi%bandpp)
       !stop
     else
+      call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, 1, spacedim, neigenpairs)   !use xXColsRows instead of X notion
       call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
       call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
     end if
     
     !print *, "AAAAAAAAAAAAAAAAAAAA"
     !stop
+    call debug_helper(chebfi%xXColsRows, chebfi) 
+    stop
+   
    
     call timab(tim_getAX_BX,1,tsec)         
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
-    call getAX_BX(chebfi%X,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
+    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
     
     !!TODO TODO TODO TODO debug upper arrays, second one is not good
     !!on nproc 2 for some reason
-    call debug_helper(chebfi%xBXColsRows, chebfi) 
+    call debug_helper(chebfi%xAXColsRows, chebfi) 
 
     stop
       
@@ -446,11 +464,10 @@ module m_chebfi2
                
     !********************* Compute Rayleigh quotients for every band, and set λ − equal to the largest one *****!
     call timab(tim_RR_q, 1, tsec)
-    !call chebfi_rayleighRitzQuotiens(chebfi, maxeig, mineig, DivResults%self) !OK
     call chebfi_rayleighRitzQuotiens(chebfi, maxeig, mineig, DivResults%self) !OK
     call timab(tim_RR_q, 2, tsec)
     
-    
+    !stop
     if (chebfi%paral_kgb == 1) then
       call xmpi_max(maxeig,maxeig_global,chebfi%spacecom,ierr)
       call xmpi_min(mineig,mineig_global,chebfi%spacecom,ierr)
@@ -459,8 +476,8 @@ module m_chebfi2
       mineig_global = mineig
     end if
     
-    !print *, "maxeig_global", maxeig_global  
-    !print *, "mineig_global", mineig_global    
+    print *, "maxeig_global", maxeig_global  
+    print *, "mineig_global", mineig_global    
     !stop
                 
     lambda_minus = maxeig_global
@@ -470,7 +487,7 @@ module m_chebfi2
         
     nline_max = cheb_oracle1(mineig, lambda_minus, lambda_plus, 1D-16, 40)
     
-    !print *, "nline_max", nline_max
+    print *, "nline_max", nline_max
     !stop
    
     if (chebfi%paral_kgb == 0) then
@@ -493,8 +510,8 @@ module m_chebfi2
     center = (lambda_plus + lambda_minus)*0.5  
     radius = (lambda_plus - lambda_minus)*0.5
     
-    !print *, "center", center
-    !print *, "radius", radius
+    print *, "center", center
+    print *, "radius", radius
     !stop
                
     one_over_r = 1/radius
@@ -510,12 +527,17 @@ module m_chebfi2
       call timab(tim_next_p,2,tsec)   
       
       !stop      
-        
+      !call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA  
+      !print *, "PROSAO SVE"
+      !stop
+      !print *, "spacedim swap", spacedim
+      !stop
+       
       call timab(tim_swap,1,tsec)  
       if (chebfi%paral_kgb == 0) then             
         call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
       else 
-        call chebfi_swapInnerBuffers(chebfi, spacedim, chebfi%bandpp)
+        call chebfi_swapInnerBuffers(chebfi, spacedim*chebfi%nproc_band, chebfi%bandpp)
       end if
       call timab(tim_swap,2,tsec) 
       
@@ -525,8 +547,12 @@ module m_chebfi2
       !A * ψ  
       call timab(tim_getAX_BX,1,tsec)             
       !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
-      call getAX_BX(chebfi%X,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
-      call timab(tim_getAX_BX,2,tsec)                                     
+      !stop
+      call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
+      !print *, "NIJE SE RASPAO"
+      !stop
+      call timab(tim_getAX_BX,2,tsec)  
+      
     end do
     
     !print *, "LOOP FINISHED"
@@ -545,8 +571,8 @@ module m_chebfi2
       call xmpi_barrier(chebfi%spacecom)
       
       call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
-      !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG) !all_to_all !no need to transpose (only X)
-      !call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG) !all_to_all
+      call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !all_to_all !no need to transpose (only X)
+      call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS) !all_to_all
       
       call xgTransposer_free(chebfi%xgTransposerX)
       call xgTransposer_free(chebfi%xgTransposerAX)
@@ -554,8 +580,12 @@ module m_chebfi2
 
     end if
     
-    print *, "PROSAO TRANSPOSE"
+    !print *, "PROSAO TRANSPOSE"
     !stop
+    
+    call debug_helper(chebfi%X, chebfi) 
+
+    stop
 
     call timab(tim_RR, 1, tsec)
     call chebfi_rayleightRitz(chebfi, nline)
@@ -626,11 +656,13 @@ module m_chebfi2
     end if
     
     !call xgBlock_colwiseDotProduct(chebfi%X,chebfi%AX%self,Results1%self)
-    call xgBlock_colwiseDotProduct(chebfi%X,chebfi%xAXColsRows,Results1%self)
+    !call xgBlock_colwiseDotProduct(chebfi%X,chebfi%xAXColsRows,Results1%self)
+    call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xAXColsRows,Results1%self)
         
     !PAW
     !call xgBlock_colwiseDotProduct(chebfi%X,chebfi%BX%self,Results2%self)
-    call xgBlock_colwiseDotProduct(chebfi%X,chebfi%xBXColsRows,Results2%self)
+    !call xgBlock_colwiseDotProduct(chebfi%X,chebfi%xBXColsRows,Results2%self)
+    call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xBXColsRows,Results2%self)
 
     !PAW
     call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, maxeig, maxeig_pos, mineig, mineig_pos)
@@ -689,13 +721,14 @@ module m_chebfi2
     !stop 
             
     !ψi-1 = c * ψi-1   
-    call xgBlock_scale(chebfi%X, center, 1) !scale by c
-    
+    !call xgBlock_scale(chebfi%X, center, 1) !scale by c
+    call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by c
     !print *, "PROSAO SCALE"
     !stop
             
     !(B-1 * A * ψi-1 - c * ψi-1)
-    call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X)
+    !call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X)
+    call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows)  
     !call xgBlock_saxpy(chebfi%AX_swap, dble(-1.0), chebfi%X)
     !call xgBlock_saxpy(chebfi%XXX, dble(-1.0), chebfi%X)
     
@@ -703,7 +736,8 @@ module m_chebfi2
     !stop
         
     !ψi-1  = 1/c * ψi-1 
-    call xgBlock_scale(chebfi%X, 1/center, 1) !counter scale by c
+    !call xgBlock_scale(chebfi%X, 1/center, 1) !counter scale by c
+    call xgBlock_scale(chebfi%xXColsRows, 1/center, 1) !counter scale by c
     
     if (iline == 0) then  
       call xgBlock_scale(chebfi%X_next, one_over_r, 1) 
@@ -739,10 +773,19 @@ module m_chebfi2
     
     !print *, "SWAP START"
     !stop
-    !WORKING
-    call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !X_swap = X_prev	!      
-    call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X
-    call xgBlock_setBlock(chebfi%X_next, chebfi%X, 1, spacedim, neigenpairs) !X = X_next
+    !WORKING OPENMP
+!    call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !X_swap = X_prev	      
+!    call xgBlock_setBlock(chebfi%X, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = X
+!    call xgBlock_setBlock(chebfi%X_next, chebfi%X, 1, spacedim, neigenpairs) !X = X_next
+!    call xgBlock_setBlock(chebfi%X_swap, chebfi%X_next, 1, spacedim, neigenpairs) !X_next = X_swap
+    
+    !MPI
+    !print *, "spacedim", spacedim
+    !print *, "neigenpairs", neigenpairs
+    !stop
+    call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !X_swap = X_prev     
+    call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = xXColsRows
+    call xgBlock_setBlock(chebfi%X_next, chebfi%xXColsRows, 1, spacedim, neigenpairs) !xXColsRows = X_next
     call xgBlock_setBlock(chebfi%X_swap, chebfi%X_next, 1, spacedim, neigenpairs) !X_next = X_swap
     
     !!TODO try to swap buffers in a way that last copy is avoided
@@ -875,7 +918,7 @@ module m_chebfi2
     call xgBlock_print(chebfi%eigenvalues, 6)
     print *, "info", info
     print *, "PROSAO HEGV"
-    stop
+    !stop
     
         
 !    call xgBlock_reverseMap(A_und_X%self,evec,1,neigenpairs*neigenpairs)
@@ -1017,7 +1060,7 @@ module m_chebfi2
       if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
       !shift = chebfi%spacedim*(iband-1)
       
-      call xgBlock_setBlock(chebfi%X, X_part, iband, chebfi%spacedim, 1)
+      call xgBlock_setBlock(chebfi%xXColsRows, X_part, iband, chebfi%spacedim, 1)
       !call xgBlock_setBlock(chebfi%AX%self, AX_part, iband, chebfi%spacedim, 1) 
       call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%spacedim, 1) 
       
@@ -1119,6 +1162,9 @@ module m_chebfi2
       call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
       call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
     end if
+    
+    print *, "debugBlock%rows", rows(debugBlock)
+    print *, "debugBlock%cols", cols(debugBlock)
 
   end subroutine debug_helper
   

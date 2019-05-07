@@ -375,7 +375,10 @@ module m_xgTransposer
       if ( xgTransposer%mpiData(MPI_COLS)%size == 1 ) then
         xgTransposer%xgBlock_colsrows = xgTransposer%xgBlock_linalg
       else
-        !print *, "HEREEEEEEE"
+        print *, "HEREEEEEEE"
+        print *, "xgTransposer%ncolsColsRows", xgTransposer%ncolsColsRows
+        print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
+ 
         !stop
         ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
         !print *, "xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows", xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows

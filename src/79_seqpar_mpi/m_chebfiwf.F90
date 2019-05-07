@@ -240,6 +240,10 @@ module m_chebfiwf
   !print *, "xmpi_comm_size(xmpi_world)", xmpi_comm_size(xmpi_world)
   !print *, "l_mpi_enreg%bandpp", l_mpi_enreg%bandpp
   !stop
+  
+  print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
+  print *, "l_mpi_enreg%nproc_band", l_mpi_enreg%nproc_band
+  !stop
  
   call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, dtset%paral_kgb, l_mpi_enreg%nproc_band, &
                    l_mpi_enreg%bandpp, l_mpi_enreg%nproc_fft, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft, l_mpi_enreg%me_g0, l_paw) 
@@ -352,15 +356,15 @@ module m_chebfiwf
     
     call xgBlock_getSize(X,spacedim,blockdim)
 
-    !print *, "spacedim X", spacedim
-    !print *, "blockdim X", blockdim
+    print *, "spacedim X", spacedim
+    print *, "blockdim X", blockdim
     
-    call xgBlock_getSize(AX,spacedim,blockdim)
+    !call xgBlock_getSize(AX,spacedim,blockdim)
     
     !print *, "spacedim AX", spacedim
     !print *, "blockdim AX", blockdim
     
-    call xgBlock_getSize(BX,spacedim,blockdim)
+    !call xgBlock_getSize(BX,spacedim,blockdim)
     
     !print *, "spacedim BX", spacedim
     !print *, "blockdim BX", blockdim
@@ -392,6 +396,9 @@ module m_chebfiwf
       call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,& 
         l_gs_hamk,l_gvnlc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0) 
     else
+      !print *, "blockdim", blockdim
+      !print *, "spacedim", spacedim
+      !stop
       call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),eval,blockdim,l_mpi_enreg,&
 &                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.true.)  !already_transposed = true (previous)
     end if

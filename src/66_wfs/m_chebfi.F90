@@ -34,6 +34,8 @@ module m_chebfi
  use m_abi_linalg
  use m_rayleigh_ritz
  use m_invovl
+ 
+ use m_xg
 
  use m_time,          only : timab
  use m_cgtools,       only : dotprod_g
@@ -167,6 +169,9 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  integer, parameter :: timer_subdiago = 1604, timer_subham = 1605, timer_ortho = 1606, timer_getghc = 1607
  integer, parameter :: timer_residuals = 1608, timer_update_eigen = 1609, timer_sync = 1610
 
+  type(xgBlock_t) :: xgx0
+  
+
 ! *************************************************************************
 
  !======================================================================================================
@@ -183,6 +188,12 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  pcon = (27+kinpw*(18+kinpw*(12+8*kinpw))) / (27+kinpw*(18+kinpw*(12+8*kinpw)) + 16*kinpw**4)
 
  ghc=zero; gvnlxc=zero
+
+ call xgBlock_map(xgx0,cg,SPACE_CR,2*npw*nspinor,nband,mpi_enreg%comm_bandspinorfft) 
+ call debug_helper(xgx0, mpi_enreg%comm_bandspinorfft, mpi_enreg%bandpp) 
+ stop
+
+ print *, "AJDE" 
 
  ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
  if (dtset%paral_kgb == 1) then
@@ -277,8 +288,10 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    cpopt = -1
  end if
 
-
-
+ call xgBlock_map(xgx0,cg_filter,SPACE_CR,2*npw_filter*nspinor,nband_filter,mpi_enreg%comm_bandspinorfft) 
+    
+ call debug_helper(xgx0, mpi_enreg%comm_bandspinorfft, mpi_enreg%bandpp) 
+ stop
  !======================================================================================================
  ! Data in npfft x npband distribution. First getghc, update eigenvalues and residuals
  !======================================================================================================
@@ -730,6 +743,31 @@ function cheb_oracle(x, a, b, tol, nmax) result(n)
 
 end function cheb_oracle
 !!***
+
+ subroutine debug_helper(debugBlock, comm, bandpp)
+      
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(integer) , intent(in) :: comm
+    type(integer), intent(in) :: bandpp
+    type(xgBlock_t) :: HELPER
+    
+    integer, parameter :: DEBUG_ROWS = 20
+    integer, parameter :: DEBUG_COLUMNS = 2
+
+    !print *, "xmpi_comm_rank(comm)", xmpi_comm_rank(comm)
+    
+    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+    call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)) 
+ 
+    if (xmpi_comm_size(comm) == 1) then !only one MPI proc
+      call xgBlock_setBlock(debugBlock, HELPER, bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)+1) 
+    end if
+    
+    print *, "debugBlock%rows", rows(debugBlock)
+    print *, "debugBlock%cols", cols(debugBlock)
+
+  end subroutine debug_helper
 
 end module m_chebfi
 !!***

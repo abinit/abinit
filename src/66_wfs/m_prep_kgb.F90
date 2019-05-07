@@ -165,6 +165,11 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 !Check sizes
  mcg=2*gs_hamk%npw_fft_k*my_nspinor*bandpp
  if (do_transpose) mcg=2*gs_hamk%npw_k*my_nspinor*blocksize
+ 
+ !print *, "bandpp", bandpp
+ !print *, "mcg", mcg
+ !stop
+ 
  if (size(cwavef)<mcg) then
    msg='wrong size for cwavef!'
    MSG_BUG(msg)
@@ -234,6 +239,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
    gvnlxc_alltoall1(:,:)=zero
    cwavef_alltoall1(:,:)=zero
    gwavef_alltoall1(:,:)=zero
+   print *, "USAO OVDE"
+   !stop
  end if
  ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_ALLOCATE(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
@@ -262,6 +269,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
    end if
    call timab(545,2,tsec)
  else
+   print *, "CHEAT"
+   !stop
    ! Here, we cheat, and use DCOPY to bypass some compiler's overzealous bound-checking
    ! (ndatarecv*my_nspinor*bandpp might be greater than the declared size of cwavef)
    call DCOPY(2*ndatarecv*my_nspinor*bandpp, cwavef, 1, cwavef_alltoall2, 1)
@@ -278,12 +287,15 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 
 !====================================================================
  if ((.not.(flag_inv_sym)) .and. (bandpp==1)) then
+   print *, "flag_inv_sym 1"
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.my_nspinor==2)then
      call timab(632,3,tsec)
 !    Sort to have all ispinor=1 first, then all ispinor=2
      call prep_sort_wavef_spin(nproc_band,my_nspinor,ndatarecv,recvcounts,rdispls,index_wavef_spband)
      cwavef_alltoall2(:,:)=cwavef_alltoall1(:,index_wavef_spband)
      call timab(632,2,tsec)
+     !print *, "prep sort"
+     !stop
    end if
 
    call timab(635,3,tsec)
@@ -304,7 +316,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------------
 !  Computation of the index to class the waves functions below bandpp
 !  -------------------------------------------------------------
-
+   print *, "flag_inv_sym 2"
+   !stop
    if(do_transpose) then
      call timab(632,3,tsec)
      call prep_index_wavef_bandpp(nproc_band,bandpp,&
@@ -338,11 +351,12 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 
 
  else if (flag_inv_sym) then
-
+   print *, "flag_inv_sym 3"
 !  -------------------------------------------------------------
 !  Computation of the index to class the waves functions below bandpp
 !  -------------------------------------------------------------
    if(do_transpose) then
+     !print *, "do_transpose"
      call timab(632,3,tsec)
      call prep_index_wavef_bandpp(nproc_band,bandpp,&
 &     my_nspinor,ndatarecv,&
@@ -354,6 +368,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------
      cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
    end if
+   !stop
 
 !  ------------------------------------------------------------
 !  We associate the waves functions by two
@@ -367,6 +382,9 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 &   ewavef_alltoall_sym,&
 &   index_wavef_send)
 
+   print *, "ndatarecv_tot", ndatarecv_tot
+   print *, "bandpp_sym", bandpp_sym
+  ! stop
 !  ------------------------------------------------------------
 !  Allocation
 !  ------------------------------------------------------------

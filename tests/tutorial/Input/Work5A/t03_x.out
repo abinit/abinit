@@ -1,5 +1,5 @@
 
-.Version 8.11.6 of ABINIT 
+.Version 8.11.7 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 19 Apr 2019.
-- ( at 15h02 )
+.Starting date : Tue  7 May 2019.
+- ( at 15h57 )
   
 - input  file    -> t03.in
 - output file    -> t03_x.out
@@ -51,7 +51,7 @@ _ WF disk file :      2.850 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    6
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
@@ -138,6 +138,7 @@ P           mkmem           1
                        0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
                        0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
                        0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
+           timopt          -3
            toldfe      1.00000000E-05 Hartree
            tsmear      2.00000000E-03 Hartree
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
