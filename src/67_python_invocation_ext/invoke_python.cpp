@@ -18,11 +18,13 @@
 #include <string>
 #include <fstream>
 
+#if defined HAVE_MPI
+#include <mpi.h>
+#endif
+
 #include "invoke_python.hpp"
 
 #if defined HAVE_MPI
-#include <mpi.h>
-
 using namespace std;
 
 
