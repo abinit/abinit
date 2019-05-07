@@ -51,7 +51,7 @@ module m_lattice_mover
      ! call functions to calculate observables.
      ! interact with hist file.
    contains
-     procedure:: initialize       ! perhaps each effpot type should have own 
+     !procedure:: initialize       ! perhaps each effpot type should have own 
      procedure :: finalize
      procedure :: set_params
      procedure :: set_initial_state ! initial state
