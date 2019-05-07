@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_spin_potential
+!!****m* ABINIT/m_lattice_effpot
 !! NAME
 !! m_lattice_effpot
 !!
@@ -39,6 +39,7 @@ module m_lattice_effpot
 
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only : abstract_potential_t
+!!***
 
   implicit none
   private

@@ -40,6 +40,7 @@ module m_lattice_mover
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
+!!***
 
   implicit none
   private
