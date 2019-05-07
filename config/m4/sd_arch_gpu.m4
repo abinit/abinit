@@ -27,7 +27,7 @@ AC_DEFUN([SD_GPU_INIT], [
 
   # Set adjustable parameters
   sd_gpu_options="$1"
-  sd_gpu_libs_defs="$2"
+  sd_gpu_libs_def="$2"
   sd_gpu_cppflags_def="$3"
   sd_gpu_cflags_def="$4"
   sd_gpu_cxxflags_def="$5"
