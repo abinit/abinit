@@ -412,7 +412,7 @@ contains
                Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
                vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
        else
-          if(.not. ubi) write(std_out, '(A38)'), " Bilinear term in xml file not used."
+          if(.not. ubi) write(std_out, '(A38)') " Bilinear term in xml file not used."
        endif
     endif
 
