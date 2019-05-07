@@ -103,9 +103,9 @@ subroutine fill_supercell(self, scmaker, scpot)
 
   subroutine save_to_file(self, fname)
     class(primitive_potential_t), intent(inout) :: self
-    character(*), intent(in) :: fname
+    character(len=fnlen), intent(in) :: fname
     ABI_UNUSED_A(self)
-    ABI_UNUSED_A(fname)
+    !ABI_UNUSED_A(fname)
   end subroutine save_to_file
 
 end module m_primitive_potential
