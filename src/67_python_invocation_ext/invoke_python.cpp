@@ -5,6 +5,7 @@
  * ******************/
 
 #ifdef HAVE_MPI
+
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
