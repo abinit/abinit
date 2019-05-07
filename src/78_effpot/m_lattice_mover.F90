@@ -51,7 +51,7 @@ module m_lattice_mover
      ! call functions to calculate observables.
      ! interact with hist file.
    contains
-     !procedure:: initialize       ! perhaps each effpot type should have own 
+     procedure:: initialize       ! perhaps each effpot type should have own 
      procedure :: finalize
      procedure :: set_params
      procedure :: set_initial_state ! initial state
@@ -63,15 +63,15 @@ module m_lattice_mover
 
 contains
 
-!  subroutine initialize(self, params, fnames)
-!    class(lattice_mover_t), intent(inout) :: self
-!    type(multibinit_dtset_type), intent(in) :: params
-!    character(*), intent(in) :: fnames(:)
-!    ABI_UNUSED_A(self)
-!    ABI_UNUSED_A(params)
-!    ABI_UNUSED_A(fnames)
-!
-!  end subroutine initialize
+  subroutine initialize(self, params, fnames)
+    class(lattice_mover_t), intent(inout) :: self
+    type(multibinit_dtset_type), intent(in) :: params
+    character(len=fnlen), intent(in) :: fnames(:)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
+    ABI_UNUSED_A(fnames)
+
+  end subroutine initialize
 
   subroutine finalize(self)
     class(lattice_mover_t), intent(inout) :: self
