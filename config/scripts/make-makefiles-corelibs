@@ -277,7 +277,7 @@ for lib in abinit_corelibs:
     for chk in checkers:
       # FIXME: hard-coded for now
       makefile += "\n%s_SOURCES = %s.F90" % (chk,chk)
-      makefile += "\n%s_CPPFLAGS = @lib_netcdf_incs@ @lib_etsf_io_incs@ @lib_linalg_incs@ -I$(top_srcdir)/src/incs" % \
+      makefile += "\n%s_CPPFLAGS = @lib_netcdf_incs@ @lib_etsf_io_incs@ @lib_linalg_incs@ -I$(top_srcdir)/shared/common/src/incs -I$(top_srcdir)/src/incs" % \
        (chk)
       makefile += "\n%s_LDADD = \\\n\tlib%s.a" % (chk,lib)
       for elc in checkers[chk] + hard_chklibs:

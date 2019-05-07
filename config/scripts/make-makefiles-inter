@@ -194,3 +194,23 @@ add = "config/makefiles/src.am"
 if ( os.path.exists(add) ):
   mf.write(sep + open(add, "rt").read())
 mf.close()
+
+# Write shared intermediate Makefile.am files
+with open("shared/Makefile.am", "w") as mf_shared:
+  mf_shared.write("SUBDIRS = common\n")
+with open("shared/common/Makefile.am", "w") as mf_common:
+  mf_common.write("SUBDIRS = src\n")
+with open("shared/common/src/Makefile.am", "w") as mf_common_src:
+  mf_common_src.write("SUBDIRS = incs mods\n")
+with open("shared/common/src/incs/Makefile.am", "w") as mf_incs:
+  inc_files = [item for item in os.listdir("shared/common/src/incs") \
+    if ( (not item in ["Makefile", "Makefile.am", "Makefile.in"]) and \
+         (not vimswp.match(item)) )]
+  makefile  = "all-local:\n\t@echo \"There is no buildable file here\"\n\n"
+  makefile += "EXTRA_DIST = \\\n\t" + " \\\n\t".join(inc_files) + "\n"
+  mf_incs.write(makefile)
+with open("shared/common/src/mods/Makefile.am", "w") as mf_mods:
+  makefile  = "all-local:\n\t@echo \"There is no buildable file here\"\n\n"
+  makefile += "CLEANFILES = *.mod\n"
+  mf_mods.write(makefile)
+
