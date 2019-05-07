@@ -548,7 +548,7 @@ class AbinitProject(object):
         def is_internal(name):
             return not any(name.startswith(s) for s in
                 set(("mpi_", "dfftw_", "mkl_", "papif_", "plasma_", "elpa", "etsf_io_", "blacs_",
-                     "libpaw_", "gsl_", "gpu_", "xc_", "bigdft_")))
+                     "libpaw_", "gpu_", "xc_", "bigdft_")))
 
         miss = filter(is_internal, miss)
         from .check_linalg_calls import blas_routines, lapack_routines

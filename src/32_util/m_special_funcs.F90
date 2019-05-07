@@ -929,24 +929,13 @@ end function abi_derfc
 !!      pspnl_hgh_rec,pspnl_operat_rec,vso_realspace_local
 !!
 !! CHILDREN
-!!      gsl_f90_sf_gamma
 !!
 !! SOURCE
 
 subroutine GAMMA_FUNCTION(X,GA)
 
-#ifdef HAVE_GSL
-! in case we have gsl, no need to use explicit function, just wrap the
-!  call to the GSL C function in 01_gsl_ext/
+  implicit none
 
-  ! arguments
-
-  real(dp),intent(in) :: x
-  real(dp),intent(out) :: ga
-
-  call gsl_f90_sf_gamma(x,ga)
-
-#else
 !       ====================================================
 !       Purpose: This program computes the gamma function
 !                Gamma(x) using subroutine GAMMA
@@ -1046,9 +1035,6 @@ subroutine GAMMA_FUNCTION(X,GA)
     end if
   end if
   return
-
-#endif
-!  end preproc for presence of GSL
 
 end subroutine GAMMA_FUNCTION
 !!***

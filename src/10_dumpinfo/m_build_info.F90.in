@@ -93,8 +93,6 @@ module m_build_info
 &   "@lib_fft_flavor@"
   character(len=*),parameter :: linalg_flavor     = &
 &   "@lib_linalg_flavor@"
-  character(len=*),parameter :: math_flavor       = &
-&   "@lib_math_flavor@"
   character(len=*),parameter :: timer_flavor      = &
 &   "@lib_timer_flavor@"
   character(len=*),parameter :: trio_flavor       = &
@@ -189,7 +187,6 @@ subroutine dump_config(my_unit)
   write(my_unit,'(2a)')'  DFT flavor    : ',trim(dft_flavor)
   write(my_unit,'(2a)')'  FFT flavor    : ',trim(fft_flavor)
   write(my_unit,'(2a)')'  LINALG flavor : ',trim(linalg_flavor)
-  write(my_unit,'(2a)')'  MATH flavor   : ',trim(math_flavor)
   write(my_unit,'(2a)')'  TIMER flavor  : ',trim(timer_flavor)
   write(my_unit,'(2a)')'  TRIO flavor   : ',trim(trio_flavor)
   write(my_unit,*)
