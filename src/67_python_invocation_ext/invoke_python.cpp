@@ -4,18 +4,19 @@
  * See https://github.com/parcollet/execute_python
  * ******************/
 
-#ifdef HAVE_MPI
 
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <mpi.h>
 #include <stdexcept>
 #include <string>
 #include <fstream>
 
 #include "invoke_python.hpp"
+
+#if defined HAVE_MPI
+#include <mpi.h>
 
 using namespace std;
 

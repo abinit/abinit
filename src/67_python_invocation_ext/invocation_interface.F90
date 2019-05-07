@@ -10,7 +10,7 @@
 !
 ! =====================================================================
 
-#ifdef HAVE_MPI
+#if defined HAVE_MPI
 MODULE INVOKE_PYTHON
 
   implicit none
