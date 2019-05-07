@@ -47,7 +47,7 @@ module m_spin_lattice_coupling_effpot
 !!***
   private
 
-  type, public, extends(polynomical_potential_t) :: slc_Oiju_t
+  type, public, extends(polynomial_potential_t) :: slc_Oiju_t
    !contains
      !procedure, public :: initialize => Oiju_initialize
      !procedure, public :: finalize => Oiju_finalize
@@ -62,15 +62,15 @@ module m_spin_lattice_coupling_effpot
   end type slc_Tijuv_t
 
 
-  type, public, extends(base_spin_lattice_coupling_effpot_t) :: spin_lattice_coupling_effpot_t
+  type, public, extends(abstract_potential_t) :: spin_lattice_coupling_effpot_t
      type(slc_Oiju_t):: Oiju
      type(slc_Tijuv_t) :: Tijuv
-   contains
-     procedure, public :: initialize => slc_initialize
-     procedure, public :: finalize => slc_finalize
+   !contains
+     !procedure, public :: initialize => slc_initialize
+     !procedure, public :: finalize => slc_finalize
      !procedure, public :: get_force => slc_get_force
      !procedure, public :: get_bfield => slc_get_bfield
-     procedure, public :: calculate=> slc_calculate
+     !procedure, public :: calculate=> slc_calculate
   end type spin_lattice_coupling_effpot_t
 
 
