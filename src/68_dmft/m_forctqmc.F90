@@ -1641,8 +1641,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
             MSG_ERROR(message)
 #else
 #ifndef HAVE_MPI
-            write(message,'(2a)') ch10,' MPI requiered! For some reasons, MPI is necessitate (actually for some reasons, mpich'//
-                + ' and not openmpi) to communicate with TRIQS.'
+            write(message,'(2a)') ch10,' MPI requiered! For some reasons, MPI is necessitated (mpich) to communicate with TRIQS.'
             call wrtout(std_out,message,'COLL')
             MSG_ERROR(message)
 #else
