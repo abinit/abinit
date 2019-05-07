@@ -1,7 +1,7 @@
 ## Copyright (C) 2019 Yann Pouillon
 
 #
-# MPI support for Steredeg
+# MPI detection with Steredeg
 #
 
 
@@ -51,7 +51,7 @@ AC_DEFUN([SD_MPI_INIT], [
   # Process options
   for kwd in ${sd_mpi_options}; do
     case "${kwd}" in
-      auto|no|yes)
+      auto)
         sd_mpi_enable_def="${kwd}"
         ;;
       implicit|required|optional)
@@ -73,12 +73,17 @@ AC_DEFUN([SD_MPI_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_mpi_enable_cxx}" && sd_mpi_enable_cxx="yes"
-  test -z "${sd_mpi_enable_def}" && sd_mpi_enable_def="auto"
-  test -z "${sd_mpi_enable_fc}" && sd_mpi_enable_fc="yes"
+  test -z "${sd_mpi_libs_def}" && sd_mpi_libs_def="-lmpi"
   test -z "${sd_mpi_policy}" && sd_mpi_policy="fail"
   test -z "${sd_mpi_status}" && sd_mpi_status="optional"
-  test -z "${sd_mpi_libs_def}" && sd_mpi_libs_def="-lmpi"
+  test -z "${sd_mpi_enable_def}" && sd_mpi_enable_def="no"
+  case "${sd_mpi_status}" in
+    implicit|required)
+      sd_mpi_enable_def="yes"
+      ;;
+  esac
+  test -z "${sd_mpi_enable_cxx}" && sd_mpi_enable_cxx="yes"
+  test -z "${sd_mpi_enable_fc}" && sd_mpi_enable_fc="yes"
 
   # Declare configure option
   AC_ARG_WITH([mpi],
@@ -104,15 +109,21 @@ AC_DEFUN([SD_MPI_INIT], [
 
   # Detect use of environment variables
   if test "${sd_mpi_enable}" = "yes" -o "${sd_mpi_enable}" = "auto"; then
+    tmp_compil_vars="${CC}"
     tmp_mpi_vars="${MPI_CPPFLAGS}${MPI_CFLAGS}${MPI_LDFLAGS}${MPI_LIBS}"
     if test "${sd_mpi_enable_cxx}" = "yes"; then
+      tmp_compil_vars="${tmp_compil_vars}${CXX}"
       tmp_mpi_vars="${tmp_mpi_vars}${MPI_CXXFLAGS}"
     fi
     if test "${sd_mpi_enable_fc}" = "yes"; then
+      tmp_compil_vars="${tmp_compil_vars}${FC}"
       tmp_mpi_vars="${tmp_mpi_vars}${MPI_FCFLAGS}"
     fi
     if test "${sd_mpi_init}" = "def" -a ! -z "${tmp_mpi_vars}"; then
       sd_mpi_enable="yes"
+      sd_mpi_init="env"
+    fi
+    if test "${sd_mpi_init}" = "def" -a ! -z "${tmp_compil_vars}"; then
       sd_mpi_init="env"
     fi
   fi
@@ -179,13 +190,22 @@ AC_DEFUN([SD_MPI_INIT], [
 
     # Look for MPI compilers
     if test "${sd_mpi_init}" != "env"; then
+      tmp_mpi_keep_libs=""
       _SD_MPI_INIT_CC
+      tmp_mpi_keep_libs="${tmp_mpi_keep_libs}${sd_mpi_cc_set}"
       if test "${sd_mpi_enable_cxx}" = "yes"; then
         _SD_MPI_INIT_CXX
+        tmp_mpi_keep_libs="${tmp_mpi_keep_libs}${sd_mpi_cxx_set}"
       fi
       if test "${sd_mpi_enable_fc}" = "yes"; then
         _SD_MPI_INIT_FC
+        tmp_mpi_keep_libs="${tmp_mpi_keep_libs}${sd_mpi_fc_set}"
       fi
+      tmp_mpi_keep_libs=`echo "${tmp_mpi_keep_libs}" | grep "no"`
+      if test "${tmp_mpi_keep_libs}" = ""; then
+        sd_mpi_libs=""
+      fi
+      unset tmp_mpi_keep_libs
     fi
 
   fi
@@ -213,6 +233,7 @@ AC_DEFUN([SD_MPI_INIT], [
   AC_SUBST(with_mpi)
 
   # Clean-up
+  unset tmp_compil_vars
   unset tmp_mpi_vars
 ]) # SD_MPI_INIT
 
@@ -734,18 +755,26 @@ AC_DEFUN([_SD_MPI_DUMP_CONFIG], [
     AC_MSG_RESULT([${sd_mpi_init}])
     AC_MSG_CHECKING([whether the MPI C compiler is set])
     AC_MSG_RESULT([${sd_mpi_cc_set}])
-    AC_MSG_CHECKING([whether the MPI C++ compiler is set])
-    AC_MSG_RESULT([${sd_mpi_cxx_set}])
-    AC_MSG_CHECKING([whether the MPI Fortran compiler is set])
-    AC_MSG_RESULT([${sd_mpi_fc_set}])
+    if test "${sd_mpi_enable_cxx}" = "yes"; then
+      AC_MSG_CHECKING([whether the MPI C++ compiler is set])
+      AC_MSG_RESULT([${sd_mpi_cxx_set}])
+    fi
+    if test "${sd_mpi_enable_fc}" = "yes"; then
+      AC_MSG_CHECKING([whether the MPI Fortran compiler is set])
+      AC_MSG_RESULT([${sd_mpi_fc_set}])
+    fi
     AC_MSG_CHECKING([for MPI C preprocessing flags])
     AC_MSG_RESULT([${sd_mpi_cppflags}])
     AC_MSG_CHECKING([for MPI C flags])
     AC_MSG_RESULT([${sd_mpi_cflags}])
-    AC_MSG_CHECKING([for MPI C++ flags])
-    AC_MSG_RESULT([${sd_mpi_cxxflags}])
-    AC_MSG_CHECKING([for MPI Fortran flags])
-    AC_MSG_RESULT([${sd_mpi_fcflags}])
+    if test "${sd_mpi_enable_cxx}" = "yes"; then
+      AC_MSG_CHECKING([for MPI C++ flags])
+      AC_MSG_RESULT([${sd_mpi_cxxflags}])
+    fi
+    if test "${sd_mpi_enable_fc}" = "yes"; then
+      AC_MSG_CHECKING([for MPI Fortran flags])
+      AC_MSG_RESULT([${sd_mpi_fcflags}])
+    fi
     AC_MSG_CHECKING([for MPI linker flags])
     AC_MSG_RESULT([${sd_mpi_ldflags}])
     AC_MSG_CHECKING([for MPI library flags])
