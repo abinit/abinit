@@ -45,7 +45,7 @@ module m_lattice_effpot
   private
   type ,public, extends(abstract_potential_t) :: lattice_effpot_t
    contains
-     procedure :: initialize
+     !procedure :: initialize
      procedure :: finalize
      procedure :: set_params
      !procedure :: set_deformation
@@ -55,16 +55,6 @@ module m_lattice_effpot
   end type lattice_effpot_t
 
 contains
-
-  subroutine initialize(self, params, fnames)
-    class(lattice_effpot_t), intent(inout) :: self
-    type(multibinit_dtset_type), intent(inout) :: params
-    character(*), intent(in) :: fnames(:)
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(params)
-    ABI_UNUSED_A(fnames)
-    MSG_ERROR("initialize for lattice_effpot not yet implemented")
-  end subroutine initialize
 
   subroutine finalize(self)
     class(lattice_effpot_t), intent(inout) :: self
