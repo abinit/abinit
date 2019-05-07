@@ -149,6 +149,8 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
  prefac = -four_pi/ucvol
+ ! JWZ this additional prefactor needs to be checked
+ prefac = prefac/two_pi
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)

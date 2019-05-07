@@ -3047,23 +3047,6 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
          &         npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
          &         psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
     
-    !     compute and load nuclear dipole Hamiltonian at current k point
-    ! if(any(abs(gs_hamk%nucdipmom)>0.0)) then
-    !    if(allocated(nucdipmom_k)) then
-    !       ABI_DEALLOCATE(nucdipmom_k)
-    !    end if
-    !    ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
-    !    call mknucdipmom_k(gmet,kg_k,kpoint,dtset%natom,gs_hamk%nucdipmom,&
-    !         &           nucdipmom_k,npw_k,rprimd,ucvol,xred)
-    !    if(allocated(gs_hamk%nucdipmom_k)) then
-    !       ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
-    !    end if
-    !    ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_k*(npw_k+1)/2))
-    !    call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
-    !    ABI_DEALLOCATE(nucdipmom_k)
-    ! end if
-    
-    ! Load k-dependent part in the Hamiltonian datastructure
     !  - Compute 3D phase factors
     !  - Prepare various tabs in case of band-FFT parallelism
     !  - Load k-dependent quantities in the Hamiltonian
@@ -3889,7 +3872,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                             ABI_DEALLOCATE(gbound_kg)
                             ABI_DEALLOCATE(gcwavef)
                             
-                         end if
+                         end if ! end check on has_vectornd
                          
                       end do ! end loop over n1
                    end do ! end loop over nn
