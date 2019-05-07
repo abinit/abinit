@@ -60,34 +60,26 @@ contains
     class(lattice_effpot_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(inout) :: params
     character(*), intent(in) :: fnames(:)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
+    ABI_UNUSED_A(fnames)
     MSG_ERROR("initialize for lattice_effpot not yet implemented")
   end subroutine initialize
 
   subroutine finalize(self)
     class(lattice_effpot_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
     MSG_ERROR("finalize for lattice_effpot not yet implemented")
   end subroutine finalize
 
   subroutine set_params(self, params)
     class(lattice_effpot_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
     MSG_ERROR("set_params for lattice_effpot not yet implemented")
   end subroutine set_params
 
-  ! subroutine set_deformation(self, displacements, strain )
-  !   class(lattice_effpot_t), intent(inout) :: self
-  !   real(dp), intent(in) :: displacements(:,:), strain(:,:)
-  ! end subroutine set_deformation
-
-  ! subroutine get_force(self, force)
-  !   class(lattice_effpot_t), intent(inout) :: self
-  !   real(dp), intent(out) :: force(:,:)
-  ! end subroutine get_force
-
-  ! subroutine get_stress(self, stress )
-  !   class(lattice_effpot_t), intent(inout) :: self
-  !   real(dp), intent(out) :: stress(:,:)
-  ! end subroutine get_stress
 
   subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
     class(lattice_effpot_t), intent(inout) :: self  ! the effpot may save the states.
@@ -102,6 +94,17 @@ contains
     if (present(energy)) then
        energy=zero
     end if
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(force)
+    ABI_UNUSED_A(stress)
+    ABI_UNUSED_A(bfield)
+    ABI_UNUSED_A(lwf_force)
+    ABI_UNUSED_A(energy)
+
     MSG_ERROR("calculate for lattice_effpot not yet implemented.")
   end subroutine calculate
 

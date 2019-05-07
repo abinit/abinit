@@ -72,7 +72,9 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-
+    ! TODO: lattice
+    ABI_UNUSED(natom)
+    ABI_UNUSED(nlwf)
 
     if (present(nspin)) then
        if (iam_master) self%nspin=nspin

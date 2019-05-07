@@ -107,6 +107,7 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     
+    ABI_UNUSED_A(unitcell)
 
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)

@@ -129,6 +129,7 @@
    subroutine reject(self)
      class(spin_mc_t), intent(inout) :: self
      ! do nothing.
+     ABI_UNUSED_A(self)
    end subroutine reject
 
    function attempt(self,rng, effpot) result(r)

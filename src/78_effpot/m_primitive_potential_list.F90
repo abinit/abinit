@@ -87,6 +87,10 @@ contains
     ABI_MALLOC_SCALAR(abstract_potential_t::tmp)
     !call tmp%initialize(....)
     ! set tmp
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(scmaker)
+    ABI_UNUSED_A(scpot)
+
     nullify(tmp)
   end subroutine fill_supercell
 
@@ -97,6 +101,11 @@ contains
     class(primitive_potential_list_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
+    ABI_UNUSED_A(fnames)
+
+
   end subroutine load_from_files
 
   !-------------------------------------------------------------------!
@@ -105,6 +114,10 @@ contains
   subroutine save_to_file(self, fname)
     class(primitive_potential_list_t), intent(inout) :: self
     character(*), intent(in) :: fname
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(fname)
+
+
   end subroutine save_to_file
 
 

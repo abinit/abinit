@@ -69,6 +69,8 @@ contains
   subroutine set_supercell(self, supercell)
     class(abstract_potential_t), intent(inout) :: self
     type(mb_supercell_t), target, intent(inout) :: supercell
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(supercell)
     MSG_ERROR("Every potential should override this set_supercell method to avoid mistake.")
   end subroutine set_supercell
 
@@ -82,6 +84,8 @@ contains
   subroutine set_params(self, params)
     class(abstract_potential_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
     MSG_ERROR("Every potential should override this method set_params to avoid mistakes")
   end subroutine set_params
 
@@ -120,6 +124,17 @@ contains
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     ! if present in input
     ! calculate if required
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(force)
+    ABI_UNUSED_A(stress)
+    ABI_UNUSED_A(bfield)
+    ABI_UNUSED_A(lwf_force)
+    ABI_UNUSED_A(energy)
+
     MSG_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 
@@ -130,6 +145,11 @@ contains
     real(dp), intent(inout) :: S(:,:),  Snew(:)
     integer, intent(in) :: ispin
     real(dp), intent(inout) :: deltaE
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(S)
+    ABI_UNUSED_A(ispin)
+    ABI_UNUSED_A(Snew)
+    ABI_UNUSED_A(deltaE)
     MSG_ERROR("get_delta_E not implemented for this effpot.")
   end subroutine get_delta_E
 

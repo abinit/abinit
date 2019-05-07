@@ -487,7 +487,10 @@ contains
     real(dp), optional, intent(inout) :: displacement(:, :), strain(:,:), lwf(:)
     real(dp), intent(inout) :: S_in(3,self%nspin)
     real(dp), intent(out) ::  etot
-    call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
+    if(present(displacement) .or. present(lwf) .or. present(strain)) then
+       MSG_BUG("Monte carlo only implemented for spin only.")
+       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
+    end if
   end subroutine spin_mover_t_run_one_step_MC
 
   subroutine spin_mover_t_run_one_step(self, effpot, displacement, strain, spin, lwf)

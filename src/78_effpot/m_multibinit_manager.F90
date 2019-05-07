@@ -270,6 +270,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine fit_lattice_model(self)
     class(mb_manager_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
     !TODO:
   end subroutine fit_lattice_model
 
