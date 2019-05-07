@@ -43,7 +43,7 @@ module m_vtorhorec
  use m_fft,              only : fourdp
 
 #ifdef HAVE_GPU_CUDA
- use m_initcuda,       only : cudap
+ use m_gpu_toolbox
  use m_hidecudarec
  use m_xredistribute
 #endif
