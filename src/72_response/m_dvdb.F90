@@ -33,9 +33,6 @@ module m_dvdb
  use m_abicore
  use m_errors
  use m_xmpi
-#ifdef HAVE_MPI
- use mpi
-#endif
  use m_distribfft
  use m_nctk
  use m_sort
