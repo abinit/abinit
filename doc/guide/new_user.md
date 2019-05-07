@@ -260,8 +260,8 @@ input file, are listed below:
 [[rfelfd]]
 :       when /= 0: will do response calculation to electric field
 
-[[rfphon]]:
-    when = 1: will do response calculation to atomic displacements
+[[rfphon]]
+:       when = 1: will do response calculation to atomic displacements
 
 **Specification of the numerical convergency of the calculation:**
 

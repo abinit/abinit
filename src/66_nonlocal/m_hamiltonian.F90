@@ -49,6 +49,10 @@ module m_hamiltonian
  use m_kg,                only : ph1d3d, getph
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
 #if defined HAVE_FC_ISO_C_BINDING
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif
