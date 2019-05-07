@@ -1,3 +1,8 @@
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /********************
  * Modified from the file execute_python.c of
  * Olivier Parcollet's project: execute_python.
@@ -166,5 +171,6 @@ void invoke_python_triqs(MPI_Fint *mpi_comm, char* filapp_in) {
 #else
 void invoke_python_triqs(int comm, char* filapp_in) {
 	// Should never get here
+	fprintf(stdout, "SHOULD NOT BE HERE!\n");
 }
 #endif

@@ -1,3 +1,8 @@
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /********************
  * Modified from the file execute_python.h of
  * Olivier Parcollet's project: execute_python.

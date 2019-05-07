@@ -1642,7 +1642,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 #else
 #ifndef HAVE_MPI
             write(message,'(2a)') ch10,' MPI requiered! For some reasons, MPI is necessitate (actually for some reasons, mpich and'&
-                &'not openmpi) to communicate with TRIQS.'
+&               &'not openmpi) to communicate with TRIQS.'
             call wrtout(std_out,message,'COLL')
             MSG_ERROR(message)
 #else
@@ -1773,7 +1773,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
              do iflavor2=1, nflavor
               do ifreq=1, paw_dmft%dmft_nwli
                gw_tmp_nd(ifreq, iflavor1, iflavor2) = new_re_g_iw(iflavor1, iflavor2, ifreq) &
-                       + i*new_im_g_iw(iflavor1, iflavor2, ifreq)
+&                       + i*new_im_g_iw(iflavor1, iflavor2, ifreq)
               end do
               do itau=1, paw_dmft%dmftqmc_l
                gtmp_nd(itau, iflavor1, iflavor2) = new_g_tau(iflavor1, iflavor2, itau)
