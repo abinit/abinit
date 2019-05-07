@@ -46,7 +46,7 @@ subroutine abi_dpotrf(uplo,n,a,lda,info)
 ! *********************************************************************
 
 #ifdef HAVE_LINALG_PLASMA
- if (XPLASMA_ISON) then
+ if (ABI_LINALG_PLASMA_ISON) then
    ! write(std_out,*) "  abi_dpotrf => PLASMA dpotrf will be called "
    call PLASMA_dpotrf(uplo_plasma(uplo),n,a,lda,info)
    return
@@ -118,7 +118,7 @@ subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
 
 #ifdef HAVE_LINALG_PLASMA
- if (XPLASMA_ISON) then
+ if (ABI_LINALG_PLASMA_ISON) then
    if(cplx_ == 2) then
       info = PLASMA_zpotrf_c(uplo_plasma(uplo),n,c_loc(a),lda)
    else
@@ -161,7 +161,7 @@ subroutine abi_zpotrf(uplo,n,a,lda,info)
 ! *********************************************************************
 
 #ifdef HAVE_LINALG_PLASMA
- if (XPLASMA_ISON) then
+ if (ABI_LINALG_PLASMA_ISON) then
    ! write(*,*) "  abi_zpotrf => PLASMA zpotrf will be called "
    call PLASMA_zpotrf(uplo_plasma(uplo),n,a,lda,info)
    return

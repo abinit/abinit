@@ -43,8 +43,9 @@ module m_invars1
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
  use m_symtk,   only : mati3det
+
 #if defined HAVE_GPU_CUDA
- use m_initcuda, only : Get_ndevice
+ use m_gpu_toolbox
 #endif
 
  implicit none

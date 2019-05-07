@@ -64,7 +64,7 @@
  call timab(TIMAB_XGEMM,1,tsec)
 #endif
 
- if (XPLASMA_ISON) then
+ if (ABI_LINALG_PLASMA_ISON) then
    info = -1
 #ifdef HAVE_LINALG_PLASMA
    !write(std_out,*)"Will call PLASMA_zgemm_c"
@@ -136,7 +136,7 @@ subroutine abi_d2zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
 
- if (XPLASMA_ISON) then
+ if (ABI_LINALG_PLASMA_ISON) then
    info = -1
 #ifdef HAVE_LINALG_PLASMA
    !write(std_out,*) "Will call plasma_[zd]gemm"

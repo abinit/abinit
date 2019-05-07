@@ -125,9 +125,11 @@ program abinit
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
  use m_driver,       only : driver
+
 #ifdef HAVE_GPU_CUDA
- use m_initcuda,     only: setdevice_cuda, unsetdevice_cuda
+ use m_gpu_toolbox
 #endif
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
 #endif
