@@ -9,8 +9,7 @@
  */
 
 #include <stdio.h>
-#include <string.h>
-#include "gpu_four_header.h"
+#include <abi_gpu_header.h>
 
 static __host__ int version_2_cores(int major, int minor);
 
@@ -163,7 +162,7 @@ void  get_dev_info_(int* device,
   *clockrate = deviceProp.clockRate/1000000.;
   *nprocs = deviceProp.multiProcessorCount;
   *ncores = version_2_cores(deviceProp.major,deviceProp.minor);
-  *gflops = deviceProp.multiProcessorCount*version_2_cores(deviceProp.major,deviceProp.minor)*deviceProp.clockRate/1000000;
+  *gflops = int(deviceProp.multiProcessorCount*version_2_cores(deviceProp.major,deviceProp.minor)*(deviceProp.clockRate/1000000.));
   *constmem = deviceProp.totalConstMem;
   *sharemem =  deviceProp.sharedMemPerBlock;
   *regist = deviceProp.regsPerBlock;
@@ -217,6 +216,12 @@ int version_2_cores(int major, int minor)
         { 0x32, 192}, // Kepler Generation (SM 3.2) GK10x class
         { 0x35, 192}, // Kepler Generation (SM 3.5) GK11x class
         { 0x50, 128}, // Maxwell Generation (SM 5.0) GM10x class
+        { 0x60, 64 }, // Pascal Generation (SM 6.0) GP100 class
+        { 0x61, 128}, // Pascal Generation (SM 6.1) GP10x class
+        { 0x62, 128}, // Pascal Generation (SM 6.2) GP10x class
+        { 0x70, 64 }, // Volta Generation (SM 7.0) GV100 class
+        { 0x72, 64 }, // Volta Generation (SM 7.2) AGX class
+        { 0x75, 64 }, // Turing Generation (SM 7.5) RTX class
         {   -1, -1 }
     };
     int index = 0;

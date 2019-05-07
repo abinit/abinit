@@ -9,9 +9,7 @@
  *
  */
 
-#include "cuda_common.h"
-#include "cuda_header.h"
-#include "cuda_rec_head.h"
+#include "stdio.h"
 
 /*=========================================================================*/
 /*_________________________TIMING IN CUDA ROUTINES_________________________*/
@@ -50,7 +48,7 @@ void calc_cuda_time_(cudaEvent_t* stop,cudaEvent_t* start,float* time_ms)
    cudaThreadSynchronize();
 #else
    cudaDeviceSynchronize();
-#endif   
+#endif
    *time_ms = 0.;
    stop_cuda_tm_(stop);
    cudaEventElapsedTime(time_ms,*start,*stop);
