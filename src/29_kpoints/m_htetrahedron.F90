@@ -1819,7 +1819,7 @@ end subroutine htetra_get_delta_mask
 !!
 !! SOURCE
 
-subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dweight,tweight,comm)
+subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,dweight,comm)
 
 !Arguments ------------------------------------
 !scalars
