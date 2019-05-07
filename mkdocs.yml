@@ -158,6 +158,7 @@ pages:
     - Tdep: variables/tdep.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
+    - Tdep: variables/tdep.md
     - Statistics: variables/varset_stats.md
 - Tutorial:
     - Overview: tutorial/index.md
@@ -386,3 +387,4 @@ extra:
         #netcdf: https://www.unidata.ucar.edu/software/netcdf/docs/faq.html#whatisit
         #YAML: https://en.wikipedia.org/wiki/YAML
         #JSON: https://en.wikipedia.org/wiki/JSON
+        aTDEP: '<span style="font-variant:small-caps;">a</span>-TDEP'
