@@ -52,7 +52,7 @@ module m_spmat_convert
      procedure dense_to_CSR
      procedure dense_to_COO
      procedure  COO_to_CSR
-     procedure LCO_to_CSR
+     !procedure LCO_to_CSR
   end interface spmat_convert
  
 contains
@@ -74,8 +74,7 @@ contains
 
     class(LIL_mat_t) , intent(inout):: ll
     real(dp), intent(out):: mat(ll%nrow,ll%ncol)
-    integer:: irow, icol
-    real(dp):: val
+    integer:: irow
     mat(:,:)=0.0d0
     do irow=1, ll%nrow
        call llist_iter_restart(ll%rows(irow))
@@ -90,7 +89,7 @@ contains
   subroutine LIL_to_COO(ll, COO)
     class(LIL_mat_t) , intent(inout):: ll
     class(COO_mat_t), intent(out):: COO
-    integer ::  counter, irow
+    integer ::  irow
     call  COO%initialize(mshape=ll%mshape)
     do irow=1, ll%nrow
        call llist_iter_restart(ll%rows(irow))
@@ -105,8 +104,7 @@ contains
   subroutine LIL_to_CSR(ll, csrmat)
     type(LIL_mat_t) , intent(inout):: ll
     type(CSR_mat_t), intent(inout):: csrmat
-    integer:: irow, icol, i, nzrow, nnz
-    real(dp):: val
+    integer:: irow,  i, nzrow
     call  csrmat%initialize([ll%nrow, ll%ncol])
     call csrmat%set(nnz=ll%get_nnz())
     i=0
@@ -157,7 +155,7 @@ contains
   subroutine dense_to_coo(mat, coo)
     real(dp), intent(in) :: mat(:,:)
     type(coo_mat_t), intent(inout) :: coo
-    integer:: i, j, ncol, nrow
+    integer:: i, j
     call coo%initialize(shape(mat))
     do j=1, size(mat, dim=2)
        do i=1, size(mat, dim=1)
@@ -192,19 +190,22 @@ contains
     do i=2, csr%nrow+1
        csr%row_shift(i)= csr%row_shift(i-1)+row_nz(i-1)
     end do
-    if(allocated(i1_list)) ABI_DEALLOCATE(i1_list)
-    if(allocated(istartend)) ABI_DEALLOCATE(istartend)
+    if(allocated(i1_list)) then
+       ABI_DEALLOCATE(i1_list)
+    endif
+    if(allocated(istartend)) then
+       ABI_DEALLOCATE(istartend)
+    endif
   end subroutine COO_to_CSR
 
-  subroutine LCO_to_CSR(lco, csr)
-    type(LCO_mat_t), intent(inout) :: lco
-    type(CSR_mat_t), intent(inout) :: csr
-    integer :: ngroup
-    integer, allocatable :: i1_list(:), istartend(:)
-    integer :: row_nz(lco%mshape(1))
-    integer :: i, irow
-
-  end subroutine LCO_to_CSR
+!  subroutine LCO_to_CSR(lco, csr)
+!    type(LCO_mat_t), intent(inout) :: lco
+!    type(CSR_mat_t), intent(inout) :: csr
+!    integer, allocatable :: i1_list(:), istartend(:)
+!    integer :: row_nz(lco%mshape(1))
+!    integer :: i, irow
+!
+!  end subroutine LCO_to_CSR
 
   subroutine spmat_convert_unittest()
     real(dp) ::mat(4,4), x(4), b(4)
@@ -224,17 +225,13 @@ contains
 
     x=[1,2,3,4]
     b=matmul(mat, x)
-    print *, "b from dense mv", b
     b=0
     call csr%mv(x, b)
-    print *, "b from csr mv", b
     b=0
     call csr2%mv(x, b)
-    print *, "b from csr mv", b
 
     b=0
     call csr2%mv(x, b)
-    print *, "b from csr mv", b
 
 
 

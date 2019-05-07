@@ -77,9 +77,10 @@ contains
     real(dp), intent(inout) :: x(:)
     real(dp), intent(out) :: b(:)
     !real(dp):: my_b(self%nrow)
-    integer :: ierr, irow, icol
+    integer :: ierr
     call xmpi_bcast(x, 0, xmpi_world, ierr)
     b(:)=0.0_dp
+    ABI_UNUSED_A(self)
 
     ! TODO implement.
     MSG_ERROR("mpi COO mv Not implemented yet")

@@ -94,8 +94,7 @@
      class(spin_mc_t) :: self
      class(rng_t) :: rng
      class(abstract_potential_t), intent(inout) :: effpot
-     real(dp) :: etot, r
-     integer :: i, j
+     real(dp) :: r
      r=self%attempt(rng, effpot)
      if(rng%rand_unif_01()< min(1.0_dp, r) ) then
         self%naccept=self%naccept+1

@@ -91,9 +91,6 @@ contains
 
   subroutine initialize(self)
     class (potential_list_t), intent(inout) :: self
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%size=0
     self%capacity=0
     self%label="ListPotential"

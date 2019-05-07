@@ -248,8 +248,12 @@ contains
     real(dp), intent(in) :: vec(:)
     integer ,intent(in) :: i               !
     class(ndcoo_mat_t), intent(inout) :: res ! result
-    integer :: iind
+    !integer :: iind
     !TODO: to be implemented
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(vec)
+    ABI_UNUSED_A(i)
+    ABI_UNUSED_A(res)
   end subroutine mv1vec
 
   ! matrix vector vector  product. matrix should be dim3.

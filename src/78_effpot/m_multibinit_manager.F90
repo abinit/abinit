@@ -117,7 +117,7 @@ contains
        self%params=>params
     else
        self%use_external_params=.False.
-       allocate(self%params)
+       ABI_MALLOC_SCALAR(self%params)
        call self%read_params()
     endif
     self%filenames=filenames
@@ -239,7 +239,7 @@ contains
     ! spin
     call xmpi_bcast(self%params%spin_dynamics, master, comm, ierr)
     if(self%params%spin_dynamics>0) then
-       allocate(spin_pot)
+       ABI_MALLOC_SCALAR(spin_pot)
        call spin_pot%initialize(self%unitcell)
        call spin_pot%load_from_files(self%params, self%filenames)
        call self%prim_pots%append(spin_pot)

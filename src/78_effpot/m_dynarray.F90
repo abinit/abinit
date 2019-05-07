@@ -319,12 +319,12 @@ subroutine int2d_array_type_push(self, val)
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ALLOCATE(self%data(size(val), self%capacity), stat=err)
+      ABI_MALLOC(self%data, (size(val), self%capacity))
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ALLOCATE(temp(size(val), self%capacity), stat=err)
+      ABI_MALLOC(temp, (size(val), self%capacity))
       temp(:,:self%size-1) = self%data
-      call move_alloc(temp, self%data) !temp gets deallocated
+      ABI_MOVE_ALLOC(temp, self%data) !temp gets deallocated
     end if
     self%data(:,self%size)=val
 end subroutine int2d_array_type_push
@@ -397,7 +397,7 @@ subroutine int2d_array_type_finalize(self)
 
   class(int2d_array_type), intent(inout):: self
   if ( allocated(self%data) ) then
-      DEALLOCATE(self%data)
+      ABI_SFREE(self%data)
   end if
   self%size=0
   self%capacity=0
@@ -457,7 +457,6 @@ end subroutine insertion_sort_int_test
 
 subroutine int2d_array_test()
   type(int2d_array_type) :: t
-  integer :: i
   call t%push_unique([1,1,2])
   call t%push_unique([1,2,2])
   call t%push_unique([1,1,2])

@@ -286,6 +286,9 @@
 
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
+/* If variable is not one of base types so the method above does not work, 
+ * require F03. */ 
+#define ABI_UNUSED_A(var) associate( var => var ); end associate 
 
 #ifdef HAVE_PAPI
 #  define XPAPI_CHECK(check,msg) if (check/=PAPI_OK) call xpapi_handle_error(check, msg _FILE_LINE_ARGS_)

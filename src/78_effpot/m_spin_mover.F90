@@ -228,7 +228,7 @@ contains
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
     character(len=fnlen), intent(in) :: fname
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if (iam_master) then
@@ -294,7 +294,7 @@ contains
    type(multibinit_dtset_type) :: params
    character(len=*), intent(in) :: fname
 
-   integer :: master, my_rank, comm, nproc, ierr
+   integer :: master, my_rank, comm, nproc
    logical :: iam_master
    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
@@ -550,7 +550,7 @@ contains
     integer :: counter, i, ii
     character(len=80) :: msg, msg_empty
 
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 

@@ -57,19 +57,16 @@ contains
     write(std_out, *) "Unit test2: Dynamic array"
     call dynamic_array_unittest()
     write(std_out, *) "End Unit test2"
-    print*, "================================="
 
     ! test4
     write(std_out, *) "ndcoo matrix test"
     call test_ndcoo()
     write(std_out, *) "End ndcoo matrix test"
-    print*, "================================="
 
 
     write(std_out, *) "spmat convert test"
     call spmat_convert_unittest()
     write(std_out, *) "End spmat convert test"
-    print*, "================================="
   end subroutine mb_test_main
 
   !-------------------------------------------------

@@ -109,6 +109,8 @@ contains
   subroutine set_kmesh(self, kmesh)
     class(tight_binding_t), intent(inout) :: self
     integer, intent(in) :: kmesh(3)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(kmesh)
   end subroutine set_kmesh
 
 

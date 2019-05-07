@@ -103,11 +103,10 @@ contains
          spinat(3,natoms), gyroratios(nspin), damping_factors(nspin)
     integer :: iatom, ispin
     real(dp) :: ms(nspin), spin_positions(3, nspin)
-
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
+    
 
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
@@ -134,12 +133,7 @@ contains
     integer :: ii
     logical:: use_sia, use_exchange, use_dmi, use_bi
 
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-    if (iam_master) then
+    if (xmpi_comm_rank(xmpi_world)==0) then
        xml_fname=fnames(3)
        write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
             &     'reading spin terms.'
@@ -167,12 +161,10 @@ contains
     real(dp), intent(in) :: val(3,3)
     real(dp) :: v
     integer :: indR, iv, jv
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
 
-    if(iam_master) then
+
+    if (xmpi_comm_rank(xmpi_world)==0) then
        call self%Rlist%push_unique(R, position=indR)
        do jv=1,3
           do iv=1,3
@@ -189,12 +181,7 @@ contains
     real(dp), intent(in) :: vallist(3, 3,n)
     integer :: idx
 
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-    if (iam_master) then
+    if (xmpi_comm_rank(xmpi_world)==0) then
        do idx = 1, n
           call self%set_bilinear_1term(ilist(idx), jlist(idx), Rlist(:,idx), vallist(:,:, idx))
        end do
@@ -208,12 +195,7 @@ contains
     integer :: idx
     real(dp) :: bivallist(3,3, n)
 
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-    if(iam_master) then
+    if (xmpi_comm_rank(xmpi_world)==0) then
        bivallist(:,:,:)=0.0d0
        do idx = 1, n, 1
           bivallist(1,1,idx)=vallist(1, idx)
@@ -232,12 +214,7 @@ contains
     integer :: idx
     real(dp) :: bivallist(3,3, n), D(3)
 
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-    if(iam_master) then
+    if (xmpi_comm_rank(xmpi_world)==0) then
        bivallist(:,:,:)=0.0d0
        do idx=1,n, 1
           D(:)=vallist(:, idx)
@@ -259,12 +236,7 @@ contains
     real(dp), intent(in) :: k1list(:), k1dirlist(:, :)
     integer :: idx, Rlist(3, n)
     real(dp) :: bivallist(3,3, n)
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-    if (iam_master) then
+    if (xmpi_comm_rank(xmpi_world)==0) then
        bivallist(:,:,:)=0.0d0
        Rlist(:, :)=0.0d0
        do idx=1,n, 1
@@ -284,12 +256,7 @@ contains
 
     integer :: i
 
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-    if(iam_master) then
+    if (xmpi_comm_rank(xmpi_world)==0) then
        write(std_out,'(A28)') "Adding SIA terms from input"
        do i =1, self%nspin
           in_sia_ind(i)=i
@@ -331,10 +298,9 @@ contains
 
     real(dp) :: uc(3,3)
 
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
 
     if (iam_master) then
        write(std_out,'(A58)') "Reading parameters from xml file and setting up spin model"
@@ -446,7 +412,7 @@ contains
                Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
                vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
        else
-          if(.not. ubi) print *, " Bilinear term in xml file not used."
+          if(.not. ubi) write(std_out, '(A38)'), " Bilinear term in xml file not used."
        endif
     endif
 
@@ -469,7 +435,6 @@ contains
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
     integer, allocatable :: i_sc(:), j_sc(:), Rj_sc(:, :)
     real(dp) :: val_sc(scmaker%ncells)
-
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -477,7 +442,7 @@ contains
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
     call xmpi_bcast(sc_nspin, master, comm, ierr)
-    allocate(spin_potential_t::scpot)
+    ABI_MALLOC_SCALAR(spin_potential_t::scpot)
     select type(scpot)
     type is (spin_potential_t)
        call scpot%initialize(sc_nspin)

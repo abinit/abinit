@@ -80,6 +80,9 @@ module m_mpi_scheduler
   public :: init_mpi_info
 
 contains
+  ! logical :: iam_master
+  ! iam_master=xmpi_comm_rank(xmpi_world)==0
+
   !integer :: master, my_rank, comm, nproc, ierr
   !logical :: iam_master
   !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 

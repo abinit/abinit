@@ -221,7 +221,9 @@ contains
     integer, intent(in) :: i, nbasis
     integer, allocatable, intent(inout) :: i_sc(:)
     integer :: icell
-    if(.not. allocated(i_sc)) ABI_ALLOCATE(i_sc, (self%ncells))
+    if(.not. allocated(i_sc)) then
+       ABI_ALLOCATE(i_sc, (self%ncells))
+    end if
     do icell =1, self%ncells
        i_sc(icell)=nbasis*(icell-1)+i
     end do
@@ -243,7 +245,9 @@ contains
     integer, intent(in) :: ilist(:), nbasis
     integer, allocatable,  intent(inout) :: ilist_sc(:)
     integer :: i
-    if(.not. allocated(ilist_sc)) ABI_ALLOCATE(ilist_sc, (size(ilist)*self%ncells))
+    if(.not. allocated(ilist_sc)) then
+       ABI_ALLOCATE(ilist_sc, (size(ilist)*self%ncells))
+    end if
     do i =1, size(ilist)
        call trans_i_noalloc(self,nbasis, ilist(i), ilist_sc(self%ncells*(i-1)+1:self%ncells*i ))
     end do
@@ -255,8 +259,12 @@ contains
     integer, intent(in) :: j, Rj(3), nbasis
     integer, allocatable , intent(inout) :: j_sc(:), Rj_sc(:, :)
     integer :: i,jj
-    if(.not. allocated(j_sc)) ABI_ALLOCATE(j_sc, (self%ncells))
-    if(.not. allocated(Rj_sc)) ABI_ALLOCATE(Rj_sc, (3, self%ncells))
+    if(.not. allocated(j_sc)) then
+       ABI_ALLOCATE(j_sc, (self%ncells))
+    endif
+    if(.not. allocated(Rj_sc)) then
+       ABI_ALLOCATE(Rj_sc, (3, self%ncells))
+    endif
     do i =1, self%ncells
        call self%R_to_sc(Rj + self%rvecs(:,i), Rj_sc(:,i), jj)
        j_sc(i)=nbasis*(jj-1)+j
@@ -279,8 +287,12 @@ contains
     integer, intent(in) :: jlist(:), Rj(3), nbasis
     integer, allocatable, intent(inout) :: ind_sc(:), R_sc(:,:)
     integer :: i,jj, counter, indj
-    if (.not. allocated(ind_sc)) ABI_ALLOCATE(ind_sc, (self%ncells*size(jlist)) )
-    if (.not. allocated(R_sc)) ABI_ALLOCATE(R_sc, (3, self%ncells))
+    if (.not. allocated(ind_sc)) then
+       ABI_ALLOCATE(ind_sc, (self%ncells*size(jlist)) )
+    endif
+    if (.not. allocated(R_sc)) then
+       ABI_ALLOCATE(R_sc, (3, self%ncells))
+    endif
     counter=0
     do i =1, self%ncells
        call self%R_to_sc(Rj + self%rvecs(:,i), R_sc(:,i), jj)

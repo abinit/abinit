@@ -90,7 +90,7 @@ subroutine fill_supercell(self, scmaker, scpot)
     class(primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
-    write(*, *) "load_from_files for abstract primitive potential is not implemented."
+    MSG_ERROR("load_from_files for abstract primitive potential is not implemented.")
   end subroutine load_from_files
 
 

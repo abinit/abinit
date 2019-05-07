@@ -174,7 +174,7 @@ contains
     type(multibinit_dtset_type) :: params
     real(dp) :: tmp(3, self%nspin)
     integer :: i
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if(iam_master) then
@@ -211,7 +211,7 @@ contains
     class(spin_potential_t), intent(inout) :: self
     integer, intent(in) :: i, j
     real(dp), intent(in) :: val
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if(iam_master) then
@@ -224,7 +224,7 @@ contains
     integer, intent(in) :: ilist(:), jlist(:)
     real(dp), intent(in) :: vallist(:)
     integer :: i
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
@@ -243,7 +243,7 @@ contains
     real(dp), intent(in) :: val(:,:)
     integer :: ia, ib
 
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
@@ -295,11 +295,23 @@ contains
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     ! if present in input
     ! calculate if required
+
+
     if (present(bfield) .and. present(energy)) then
        call self%get_Heff(spin, bfield, energy)
     !else
     !   call self%get_energy(spin, energy)
     end if
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(force)
+    ABI_UNUSED_A(stress)
+    ABI_UNUSED_A(bfield)
+    ABI_UNUSED_A(lwf_force)
+    ABI_UNUSED_A(energy)
   end subroutine spin_potential_t_calculate
 
 

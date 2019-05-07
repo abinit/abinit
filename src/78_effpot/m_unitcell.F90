@@ -89,6 +89,7 @@ contains
 
   subroutine initialize(self)
     class(unitcell_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
   end subroutine initialize
 
   !TODO: Implement
@@ -117,6 +118,10 @@ contains
     class(unitcell_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(17)
+
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
+    ABI_UNUSED_A(fnames)
   end subroutine read_from_file
 
 
@@ -148,16 +153,21 @@ contains
   !=========================================================================
   subroutine latt_initialize(self)
     class(unitcell_lattice_t) :: self
+    ABI_UNUSED_A(self)
   end subroutine latt_initialize
 
   subroutine latt_finalize(self)
     class(unitcell_lattice_t) :: self
+    ABI_UNUSED_A(self)
   end subroutine latt_finalize
 
   subroutine latt_fill_supercell(self, sc_maker, supercell)
     class(unitcell_lattice_t), intent(inout):: self
     type(supercell_maker_t), intent(inout):: sc_maker
     type(mb_supercell_t), intent(inout):: supercell
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(sc_maker)
+    ABI_UNUSED_A(supercell)
   end subroutine latt_fill_supercell
 
 
@@ -242,19 +252,24 @@ contains
 
 
 
-  !========================= SPIN =================================
+  !========================= LWF =================================
   Subroutine lwf_initialize(self)
-    class(unitcell_lwf_t) :: self
+    class(unitcell_lwf_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
   end subroutine lwf_initialize
 
   subroutine lwf_finalize(self)
-    class(unitcell_lwf_t) :: self
+    class(unitcell_lwf_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
   end subroutine lwf_finalize
 
   subroutine lwf_fill_supercell(self, sc_maker,supercell)
     class(unitcell_lwf_t) :: self
     type(supercell_maker_t):: sc_maker
     type(mb_supercell_t) :: supercell
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(sc_maker)
+    ABI_UNUSED_A(supercell)
   end subroutine lwf_fill_supercell
 
 

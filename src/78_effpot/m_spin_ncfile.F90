@@ -35,6 +35,8 @@
 #include "config.h"
 #endif
 
+#include "abi_common.h"
+
 module m_spin_ncfile
   use defs_basis
   use m_abicore
@@ -245,7 +247,8 @@ end subroutine def_observable_var
 
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_primitive_potential_t) :: prim
-    integer :: ncerr
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(prim)
 
 #if defined HAVE_NETCDF
 !     ncerr=nf90_redef(self%ncid)
@@ -279,7 +282,8 @@ end subroutine def_observable_var
 
     class(spin_ncfile_t), intent(inout) :: self
     type(mb_supercell_t), intent(in) :: supercell
-    integer :: rprimd_id, pos_id, ispin_prim_id, rvec_id, iatoms_id, ncerr
+    integer ::  pos_id, ispin_prim_id, rvec_id, ncerr
+    !integer :: rprimd_id, iatomsid
     ! sc_matric
 
 #if defined HAVE_NETCDF
