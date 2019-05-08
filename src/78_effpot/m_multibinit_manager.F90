@@ -140,7 +140,9 @@ contains
     call self%lattice_mover%finalize()
     if(.not. self%use_external_params) then
        call multibinit_dtset_free(self%params)
-       ! TODO: Intel compilers complains but it should not. Uncomment when knowing why.
+       if associated(self%params) then
+           ABI_DEALLOCATE_SCALAR(self%params)
+       endif
        !deallocate(self%params)
     endif
     nullify(self%params)

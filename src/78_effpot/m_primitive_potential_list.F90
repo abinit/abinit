@@ -142,7 +142,9 @@ contains
     do i=1, self%size
        call self%data(i)%obj%finalize()
        ! intel compiler do not allow this. why?
-       !if(associated(self%data(i)%obj)) deallocate(self%data(i)%obj)
+       if(associated(self%data(i)%obj)) then
+           ABI_DATATYPE_DEALLOCATE_SCALAR(self%data(i)%obj)
+       endif
        nullify(self%data(i)%obj)
     end do
     if(allocated(self%data)) then
