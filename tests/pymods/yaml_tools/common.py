@@ -34,9 +34,12 @@ class BaseDictWrapper(object):
     '''
     is_dict_like = True
 
-    def __init__(self, d={}):
+    def __init__(self, d={}, **kwargs):
         for attr in d:
             self[attr] = d[attr]
+
+        for attr in kwargs:
+            self[attr] = kwargs[attr]
 
     def get(self, key, default=None):
         if isinstance(key, basestring):
@@ -82,7 +85,7 @@ class BaseDictWrapper(object):
         del self.__dict__[nkey]
 
     def __repr__(self):
-        r = self.__class__.__name__ + '('
+        r = type(self).__name__ + '('
         for attr, val in self.__dict__.items():
             r += '{}={}, '.format(attr, val)
         return r[:-2] + ')'

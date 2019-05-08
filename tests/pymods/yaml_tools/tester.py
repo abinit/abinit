@@ -119,7 +119,7 @@ class Tester(object):
                         msg = ('Exception while checking {} ({}/{}):\n'
                                '{}: {}').format(cons.name, short_repr(ref),
                                                 short_repr(tested),
-                                                e.__class__.__name__, str(e))
+                                                type(e).__name__, str(e))
                         self.issues.append(Failure(self.conf, msg))
                     else:  # no exceptions
                         analyze(success, cons)
@@ -138,7 +138,7 @@ class Tester(object):
                     dtest = tested.get_children()
                 except Exception as e:
                     msg = ('Tried to get a dict of item from {} but failed:\n'
-                           '{}: {}').format(name, e.__class__.__name__, str(e))
+                           '{}: {}').format(name, type(e).__name__, str(e))
                     self.issues.append(Failure(self.conf, msg))
                 else:
                     for child in dref:

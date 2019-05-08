@@ -380,11 +380,10 @@ class FileToTest(object):
                 isok, status, msg = make_diff()
             except Exception as e:
                 warnings.warn(('[{}] Something went wrong with this test:\n'
-                               '{}: {}\n').format(self.name,
-                                                  e.__class__.__name__,
+                               '{}: {}\n').format(self.name, type(e).__name__,
                                                   str(e)))
                 isok, status = False, 'failed'
-                msg = 'internal error:\n{}: {}'.format(e.__class__.__name__,
+                msg = 'internal error:\n{}: {}'.format(type(e).__name__,
                                                        str(e))
         msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
@@ -705,7 +704,7 @@ class AbinitTestInfoParser(object):
             except Exception as exc:
                 err_msg = ("In file: %s\nWrong line:\n key = %s, d[key] = %s\n"
                            "%s: %s") % (self.inp_fname, key, d[key],
-                                        exc.__class__.__name__, str(exc))
+                                        type(exc).__name__, str(exc))
                 raise self.Error(err_msg)
 
         # At this point info contains the parsed global values.
@@ -756,7 +755,7 @@ class AbinitTestInfoParser(object):
                     err_msg = ("In file: %s\nWrong line:\n"
                                " key = %s, d[key] = %s\n %s: %s") % (
                                    self.inp_fname, key, d[key],
-                                   exc.__class__.__name__, str(exc)
+                                   type(exc).__name__, str(exc)
                     )
                     raise self.Error(err_msg)
 
@@ -854,7 +853,7 @@ class Compiler(object):
         self.version = version
 
     def __str__(self):
-        return "%s: %s %s" % (self.__class__.__name__, self.name, self.version)
+        return "%s: %s %s" % (type(self).__name__, self.name, self.version)
 
     @classmethod
     def from_defined_cpp_vars(cls, defined_cpp_vars):
@@ -3406,12 +3405,12 @@ class AbinitTestSuite(object):
                             task_remaining -= 1
                             warnings.warn(
                                 'Error append in a worker on test {}:\n{}: {}'
-                                .format(msg['task'], e.__class__.__name__, e)
+                                .format(msg['task'], type(e).__name__, e)
                             )
                         else:
                             warnings.warn(
                                 'Error append in a worker:\n{}: {}'
-                                .format(e.__class__.__name__, e)
+                                .format(type(e).__name__, e)
                             )
 
                     logger.info("{} worker(s) remaining for {} tasks."
