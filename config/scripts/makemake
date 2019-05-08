@@ -276,6 +276,8 @@ if ( opts.run_clean ):
     "find src -name 'abinit.dir' -exec rm {} \;")
   run_script(my_name, "Removing configuration dumper input",
     "rm -f config.dump.in")
+  run_script(my_name, "Removing source split scripts",
+    "rm -rf config/split")
 
   print_header(my_name, "Core-managed documentation")
   run_script(my_name, "Removing certified build examples",
@@ -467,6 +469,8 @@ if ( opts.run_buildsys ):
     "./config/scripts/make-macros-output")
   run_script(my_name, "Generating macros for include flags",
     "./config/scripts/make-macros-incflags")
+  run_script(my_name, "Generating source split symlink maker",
+    "./config/scripts/make-symlink-maker")
 else:
   print_message(my_name, "*** Skipping build system update ***")
 
