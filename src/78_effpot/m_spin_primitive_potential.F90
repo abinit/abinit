@@ -39,7 +39,7 @@ module m_spin_primitive_potential
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_io_xml, only: xml_read_spin, xml_free_spin
-  use m_unitcell, only: unitcell_t
+  use m_multibinit_cell, only: mbcell_t
   use m_primitive_potential, only: primitive_potential_t
   use m_abstract_potential, only: abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
@@ -72,7 +72,7 @@ contains
 
   subroutine initialize(self, primcell)
     class(spin_primitive_potential_t), intent(inout) :: self
-    type(unitcell_t), target, intent(inout) :: primcell
+    type(mbcell_t), target, intent(inout) :: primcell
     !integer, intent(in) :: nspin
     self%primcell=>primcell
     self%label="Spin_primitive_potential"

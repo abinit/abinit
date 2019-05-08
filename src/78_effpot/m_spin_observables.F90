@@ -35,8 +35,7 @@ module m_spin_observables
   use m_errors
   use m_xmpi
   use m_spin_potential, only: spin_potential_t
-  !use m_spin_supercell, only: spin_supercell_t
-  use m_multibinit_supercell, only: mb_supercell_t
+  use m_multibinit_cell, only: mbcell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
 
   implicit none
@@ -87,7 +86,7 @@ contains
   subroutine initialize(self, supercell , params)
 
     class(spin_observable_t) :: self
-    type(mb_supercell_t) :: supercell
+    type(mbcell_t) :: supercell
     type(multibinit_dtset_type) :: params
     integer i
     complex(dp) :: i2pi = (0.0, two_pi)
@@ -96,15 +95,15 @@ contains
     self%calc_traj_obs= (params%spin_calc_traj_obs ==1)
     self%calc_correlation_obs=(params%spin_calc_correlation_obs ==1)
 
-    self%nspin=supercell%nspin
-    self%nsublatt=maxval(supercell%ispin_prim)
+    self%nspin=supercell%spin%nspin
+    self%nsublatt=maxval(supercell%spin%ispin_prim)
 
 
     ABI_ALLOCATE(self%S, (3, self%nspin))
     ABI_ALLOCATE(self%Snorm, (self%nspin))
 
     ABI_ALLOCATE(self%isublatt,(self%nspin) )
-    self%isublatt(:)=supercell%ispin_prim(:)
+    self%isublatt(:)=supercell%spin%ispin_prim(:)
 
     ABI_ALLOCATE(self%nspin_sub, (self%nsublatt))
     self%nspin_sub(:)=0
@@ -119,7 +118,7 @@ contains
     ABI_ALLOCATE(self%Avg_Mst_sub_norm, (self%nsublatt))
 
     do i =1, self%nspin
-       self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_qpoint, supercell%Rvec(:,i))))
+       self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_qpoint, supercell%spin%Rvec(:,i))))
     end do
 
     call reset(self, params)

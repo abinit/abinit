@@ -42,9 +42,8 @@ module m_multibinit_manager
   use m_mathfuncs, only: diag
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
        outvars_multibinit, multibinit_dtset_free
-  use m_unitcell, only : unitcell_t
   use m_supercell_maker, only: supercell_maker_t
-  use m_multibinit_supercell, only: mb_supercell_t
+  use m_multibinit_cell, only: mbcell_t
   use m_primitive_potential_list, only: primitive_potential_list_t
   use m_primitive_potential, only: primitive_potential_t
   use m_spin_primitive_potential, only: spin_primitive_potential_t
@@ -72,8 +71,8 @@ module m_multibinit_manager
      character(len=fnlen) :: filenames(17)
      type(multibinit_dtset_type), pointer :: params
      type(supercell_maker_t) :: sc_maker
-     type(unitcell_t) :: unitcell
-     type(mb_supercell_t) :: supercell
+     type(mbcell_t) :: unitcell
+     type(mbcell_t) :: supercell
      type(primitive_potential_list_t) :: prim_pots
      type(potential_list_t) :: pots
 
@@ -230,8 +229,6 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-
-
     !class(primitive_potential_t), pointer :: t
     call self%unitcell%initialize()
     ! latt : TODO
@@ -240,6 +237,9 @@ contains
     call xmpi_bcast(self%params%spin_dynamics, master, comm, ierr)
     if(self%params%spin_dynamics>0) then
        ABI_MALLOC_SCALAR(spin_pot)
+       ! One may wonder why unitcell does not read data from files
+       ! That is because the spin_pot (which has an pointer to unitcell)
+       ! read the file and set the spin unitcell.
        call spin_pot%initialize(self%unitcell)
        call spin_pot%load_from_files(self%params, self%filenames)
        call self%prim_pots%append(spin_pot)
@@ -256,12 +256,16 @@ contains
   !-------------------------------------------------------------------!
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
-    !class(abstract_potential_t), pointer :: q
-    ! unitcell
-    call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
+    ! build supercell structure
+    !call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
+    call self%supercell%from_unitcell(self%sc_maker, self%unitcell)
+
+    ! supercell potential
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
     call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
+
+    ! why do this twice.
     call self%pots%set_supercell(self%supercell)
   end subroutine fill_supercell
 

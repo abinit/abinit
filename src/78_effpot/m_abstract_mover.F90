@@ -38,7 +38,7 @@ module m_abstract_mover
 
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
-  use m_multibinit_supercell, only: mb_supercell_t
+  use m_multibinit_cell, only: mbcell_t
   implicit none
 !!***
 
@@ -49,7 +49,7 @@ module m_abstract_mover
      ! calculate d(var)/dt and integrate new var. 
      ! call functions to calculate observables.
      ! interact with hist file.
-     type(mb_supercell_t), pointer:: supercell=>null()
+     type(mbcell_t), pointer:: supercell=>null()
      character (len=200) :: label="Abstract Mover"
      ! temperature
      ! ntime
@@ -84,7 +84,7 @@ contains
 
   subroutine set_supercell(self, supercell)
     class(abstract_mover_t), intent(inout) :: self
-    type(mb_supercell_t), target :: supercell
+    type(mbcell_t), target :: supercell
     self%supercell=>supercell
   end subroutine set_supercell
 

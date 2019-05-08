@@ -47,7 +47,8 @@ module m_spin_ncfile
   use m_spin_primitive_potential, only: spin_primitive_potential_t
   use m_spin_potential , only: spin_potential_t
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_supercell, only: mb_supercell_t
+  !use m_multibinit_supercell, only: mb_supercell_t
+  use m_multibinit_cell, only: mbcell_t
   use m_spin_observables, only : spin_observable_t
 #if defined HAVE_NETCDF
   use netcdf
@@ -281,7 +282,7 @@ end subroutine def_observable_var
   subroutine write_supercell(self, supercell)
 
     class(spin_ncfile_t), intent(inout) :: self
-    type(mb_supercell_t), intent(in) :: supercell
+    type(mbcell_t), intent(in) :: supercell
     integer ::  pos_id, ispin_prim_id, rvec_id, ncerr
     !integer :: rprimd_id, iatomsid
     ! sc_matric
@@ -303,9 +304,9 @@ end subroutine def_observable_var
     ncerr=nf90_enddef(self%ncid)
 
     !ncerr=nf90_put_var(self%ncid, rprimd_id, scell%cell)
-    ncerr=nf90_put_var(self%ncid, pos_id, supercell%spin_positions)
-    ncerr=nf90_put_var(self%ncid, ispin_prim_id, supercell%ispin_prim)
-    ncerr=nf90_put_var(self%ncid, rvec_id, supercell%rvec)
+    ncerr=nf90_put_var(self%ncid, pos_id, supercell%spin%spin_positions)
+    ncerr=nf90_put_var(self%ncid, ispin_prim_id, supercell%spin%ispin_prim)
+    ncerr=nf90_put_var(self%ncid, rvec_id, supercell%spin%rvec)
     ! ncerr=nf90_put_var(self%ncid, iatoms_id, scell%iatoms)
 #endif
   end subroutine write_supercell

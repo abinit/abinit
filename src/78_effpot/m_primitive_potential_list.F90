@@ -38,7 +38,7 @@ module m_primitive_potential_list
 
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset , only: multibinit_dtset_type
-  use m_unitcell, only: unitcell_t
+  !use m_multibinit_cell, only: mbcell_t
   use m_supercell_maker, only: supercell_maker_t
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t

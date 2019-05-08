@@ -1,17 +1,17 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_unitcell
+!!****m* ABINIT/m_multibinit_cell
 !! NAME
-!! m_unitcell
+!! m_multibinit_cell
 !!
 !! FUNCTION
 !! This module define the m_unitcell type, which defines an atomic structure, with spin, lwf, electron
 !!
 !! Datatypes:
-!!  unitcell_t
+!!  
 !!
 !! Subroutines:
 !!
-!! !! COPYRIGHT !! Copyright (C) 2001-2019 ABINIT group (hexu) !! This file is distributed under the terms of the
+!! COPYRIGHT !! Copyright (C) 2001-2019 ABINIT group (hexu) !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
@@ -25,7 +25,7 @@
 #include "abi_common.h"
 
 
-module m_unitcell
+module m_multibinit_cell
   use defs_basis
   use m_abicore
   use m_errors
@@ -39,15 +39,16 @@ module m_unitcell
 !!***
   private
   ! TODO: use crystal_t
-  type, public :: unitcell_lattice_t
-  !type, public, extends(crystal_t) :: unitcell_lattice_t
+  type, public :: mbcell_lattice_t
+  !type, public, extends(crystal_t) :: mbcell_lattice_t
    contains
      procedure :: initialize => latt_initialize
      procedure :: finalize => latt_finalize
      procedure :: fill_supercell=>latt_fill_supercell
-  end type unitcell_lattice_t
+     procedure :: from_unitcell => latt_from_unitcell
+  end type mbcell_lattice_t
 
-  type, public :: unitcell_spin_t
+  type, public :: mbcell_spin_t
      integer :: nspin
      real(dp) :: rprimd(3,3)
      real(dp), allocatable :: ms(:)
@@ -60,51 +61,54 @@ module m_unitcell
      procedure :: set => spin_set
      procedure :: finalize => spin_finalize
      procedure :: fill_supercell=>spin_fill_supercell
-  end type unitcell_spin_t
+     procedure :: from_unitcell=>spin_from_unitcell
+  end type mbcell_spin_t
 
-  type, public :: unitcell_lwf_t
+  type, public :: mbcell_lwf_t
      integer :: nlwf
    contains
      procedure :: initialize => lwf_initialize
      procedure :: finalize => lwf_finalize
      procedure :: fill_supercell => lwf_fill_supercell
-  end type unitcell_lwf_t
+     procedure :: from_unitcell => lwf_from_unitcell
+  end type mbcell_lwf_t
 
-  type ,public :: unitcell_t
+  type ,public :: mbcell_t
      logical :: has_lattice=.False.
      logical :: has_spin=.False.
      logical :: has_lwf=.False.
      logical :: has_electron=.False.
      integer :: sc_matrix(3,3)
      integer :: ncell
-     type(unitcell_lattice_t) :: lattice
-     type(unitcell_spin_t) :: spin
-     type(unitcell_lwf_t) :: lwf
+     type(mbcell_lattice_t) :: lattice
+     type(mbcell_spin_t) :: spin
+     type(mbcell_lwf_t) :: lwf
    contains
      procedure:: initialize
      procedure :: finalize
      procedure :: set_lattice
      procedure :: set_spin
      procedure :: fill_supercell
-  end type unitcell_t
+     procedure :: from_unitcell
+  end type mbcell_t
 
 contains
 
   subroutine initialize(self)
-    class(unitcell_t), intent(inout) :: self
+    class(mbcell_t), intent(inout) :: self
     ABI_UNUSED_A(self)
   end subroutine initialize
 
   !TODO: Implement
   subroutine set_lattice(self)
-    class(unitcell_t), intent(inout) :: self
+    class(mbcell_t), intent(inout) :: self
     self%has_lattice=.True.
     call self%lattice%initialize()
   end subroutine set_lattice
 
 
   subroutine set_spin(self,nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim)
-    class(unitcell_t) , intent(inout):: self
+    class(mbcell_t) , intent(inout):: self
     integer, intent(in) :: nspin
     real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
     integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
@@ -114,13 +118,13 @@ contains
   end subroutine set_spin
 
   subroutine set_lwf(self)
-    class(unitcell_t) , intent(inout):: self
+    class(mbcell_t) , intent(inout):: self
     self%has_lwf=.True.
     call self%lwf%initialize()
   end subroutine set_lwf
 
   subroutine read_from_file(self, params, fnames)
-    class(unitcell_t), intent(inout) :: self
+    class(mbcell_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(17)
 
@@ -131,17 +135,19 @@ contains
 
 
   subroutine finalize(self)
-    class(unitcell_t), intent(inout) :: self
+    class(mbcell_t), intent(inout) :: self
     call self%lattice%finalize()
     call self%spin%finalize()
     call self%lwf%finalize()
   end subroutine finalize
 
   subroutine fill_supercell(self, sc_maker, supercell)
-    class(unitcell_t), intent(inout) :: self
+    class(mbcell_t), intent(inout) :: self
     type(supercell_maker_t), intent(inout) :: sc_maker
-    class(unitcell_t), intent(inout) :: supercell
+    class(mbcell_t), intent(inout) :: supercell
     call supercell%initialize()
+    supercell%ncell=sc_maker%ncells
+    supercell%sc_matrix=sc_maker%scmat
     if (self%has_lattice) then
        call self%lattice%fill_supercell(sc_maker, supercell%lattice)
     endif
@@ -155,32 +161,47 @@ contains
     endif
   end subroutine fill_supercell
 
-  !=========================================================================
+
+  subroutine from_unitcell(self, sc_maker, unitcell)
+    class(mbcell_t), intent(inout) :: self
+    type(supercell_maker_t), intent(inout) :: sc_maker
+    class(mbcell_t), intent(inout) :: unitcell
+    call unitcell%fill_supercell(sc_maker, self)
+  end subroutine from_unitcell
+
+!================================Lattice====================================
   subroutine latt_initialize(self)
-    class(unitcell_lattice_t) :: self
+    class(mbcell_lattice_t) :: self
     ABI_UNUSED_A(self)
   end subroutine latt_initialize
 
   subroutine latt_finalize(self)
-    class(unitcell_lattice_t) :: self
+    class(mbcell_lattice_t) :: self
     ABI_UNUSED_A(self)
   end subroutine latt_finalize
 
+
   subroutine latt_fill_supercell(self, sc_maker, supercell)
-    class(unitcell_lattice_t), intent(inout):: self
+    class(mbcell_lattice_t), intent(inout):: self
     type(supercell_maker_t), intent(inout):: sc_maker
-    type(unitcell_lattice_t), intent(inout):: supercell
+    type(mbcell_lattice_t), intent(inout):: supercell
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(sc_maker)
     ABI_UNUSED_A(supercell)
   end subroutine latt_fill_supercell
 
+  subroutine latt_from_unitcell(self, sc_maker, unitcell)
+    class(mbcell_lattice_t), intent(inout):: self
+    type(supercell_maker_t), intent(inout):: sc_maker
+    type(mbcell_lattice_t), intent(inout):: unitcell
+    call unitcell%fill_supercell(sc_maker, self)
+  end subroutine latt_from_unitcell
 
   !========================= SPIN =================================
 
 
   Subroutine spin_initialize(self, nspin)
-    class(unitcell_spin_t) , intent(inout):: self
+    class(mbcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
@@ -197,7 +218,7 @@ contains
 
 
   Subroutine spin_set(self, nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
-    class(unitcell_spin_t) , intent(inout):: self
+    class(mbcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
     real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
     integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
@@ -233,7 +254,7 @@ contains
 
 
   subroutine spin_finalize(self)
-    class(unitcell_spin_t) :: self
+    class(mbcell_spin_t) :: self
     self%nspin=0
     if (allocated(self%ms)) then
        ABI_DEALLOCATE(self%ms)
@@ -256,9 +277,9 @@ contains
   end subroutine spin_finalize
 
   subroutine spin_fill_supercell(self, sc_maker, supercell)
-    class(unitcell_spin_t),intent(inout) :: self
+    class(mbcell_spin_t),intent(inout) :: self
     type(supercell_maker_t), intent(inout):: sc_maker
-    type(unitcell_spin_t), intent(inout) :: supercell
+    type(mbcell_spin_t), intent(inout) :: supercell
     integer :: i, nspin
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
@@ -266,7 +287,6 @@ contains
 
     nspin=sc_maker%ncells*self%nspin
     call supercell%initialize(nspin=nspin)
-    !Subroutine spin_initialize(self, nspin, ms, spin_positions, gyro_ratio, gilbert_damping)
 
     if(iam_master) then
        call sc_maker%repeat(self%ms, supercell%ms)
@@ -287,27 +307,39 @@ contains
     call xmpi_bcast(supercell%rprimd, master, comm, ierr)
   end subroutine spin_fill_supercell
 
-
+  subroutine spin_from_unitcell(self, sc_maker, unitcell)
+    class(mbcell_spin_t),intent(inout) :: self
+    type(supercell_maker_t), intent(inout):: sc_maker
+    type(mbcell_spin_t), intent(inout) :: unitcell
+    call unitcell%fill_supercell(sc_maker, self)
+  end subroutine spin_from_unitcell
 
 
   !========================= LWF =================================
   Subroutine lwf_initialize(self)
-    class(unitcell_lwf_t), intent(inout) :: self
+    class(mbcell_lwf_t), intent(inout) :: self
     ABI_UNUSED_A(self)
   end subroutine lwf_initialize
 
   subroutine lwf_finalize(self)
-    class(unitcell_lwf_t), intent(inout) :: self
+    class(mbcell_lwf_t), intent(inout) :: self
     ABI_UNUSED_A(self)
   end subroutine lwf_finalize
 
   subroutine lwf_fill_supercell(self, sc_maker,supercell)
-    class(unitcell_lwf_t) :: self
+    class(mbcell_lwf_t) :: self
     type(supercell_maker_t):: sc_maker
-    type(unitcell_lwf_t) :: supercell
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(sc_maker)
-    ABI_UNUSED_A(supercell)
+    type(mbcell_lwf_t) :: supercell
+    call supercell%from_unitcell(sc_maker, self)
   end subroutine lwf_fill_supercell
 
-end module m_unitcell
+  subroutine lwf_from_unitcell(self, sc_maker, unitcell)
+    class(mbcell_lwf_t) :: self
+    type(supercell_maker_t):: sc_maker
+    type(mbcell_lwf_t) :: unitcell
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(sc_maker)
+    ABI_UNUSED_A(unitcell)
+  end subroutine lwf_from_unitcell
+
+end module m_multibinit_cell

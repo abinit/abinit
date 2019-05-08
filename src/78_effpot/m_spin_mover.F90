@@ -50,7 +50,7 @@ module m_spin_mover
   use m_spin_ncfile, only: spin_ncfile_t
   use m_spin_observables, only: spin_observable_t
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_supercell, only: mb_supercell_t
+  use m_multibinit_cell, only: mbcell_t
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
@@ -130,7 +130,7 @@ contains
   subroutine initialize(self, params, supercell)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target :: params
-    type(mb_supercell_t), target :: supercell
+    type(mbcell_t), target :: supercell
     !real(dp):: damping(self%supercell%nspin)
     integer :: i, nspin
 
@@ -141,7 +141,7 @@ contains
     self%params=>params
     self%supercell=>supercell
     if (iam_master) then
-       nspin=supercell%nspin
+       nspin=supercell%spin%nspin
        self%nspin=nspin
        self%dt= params%spin_dt
        self%pre_time= params%spin_ntime_pre * self%dt
@@ -191,11 +191,11 @@ contains
        if (params%spin_damping >=0) then
           self%damping(:)= params%spin_damping
        else
-          self%damping(:)=supercell%gilbert_damping(:)
+          self%damping(:)=supercell%spin%gilbert_damping(:)
        end if
 
-       self%gyro_ratio(:)=supercell%gyro_ratio(:)
-       self%ms(:)=supercell%ms(:)
+       self%gyro_ratio(:)=supercell%spin%gyro_ratio(:)
+       self%ms(:)=supercell%spin%ms(:)
     endif
 
     call xmpi_bcast(self%damping, master, comm, ierr)
@@ -279,7 +279,7 @@ contains
        call wrtout(std_out,msg,'COLL')
 
     end if
-    call self%hist%set_vars(S=self%Stmp, Snorm=self%supercell%ms, &
+    call self%hist%set_vars(S=self%Stmp, Snorm=self%supercell%spin%ms, &
          &  time=0.0_dp, ihist_latt=0, inc=.True.)
    endif
    call xmpi_bcast(self%Stmp, 0, comm, ierr)
@@ -515,7 +515,7 @@ contains
     ! do not inc until time is set to hist.
     ! run one step does not know about time. So it will be done in the outer loop.
     if(self%mps%irank==0) then
-       call self%hist%set_vars(S=self%Stmp, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
+       call self%hist%set_vars(S=self%Stmp, Snorm=effpot%supercell%spin%ms, etot=etot, inc=.False.)
     end if
   end subroutine spin_mover_t_run_one_step
 
