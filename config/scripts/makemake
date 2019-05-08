@@ -216,6 +216,32 @@ print_header(my_name, "Source tree consistency")
 run_script(my_name, "Enabling write permission for all dirs & files",
   "chmod -R u+w .")
 
+# Create symlinks for legacy mode
+src_symlinks = []
+for cdir in os.listdir(os.path.join("shared", "common", "src")):
+  try:
+    x = int(cdir[0:2])
+  except ValueError:
+    continue
+  src = os.path.join("..", "shared", "common", "src", cdir)
+  dst = os.path.join("src", cdir)
+  if ( os.path.exists(dst) ):
+    if ( os.path.islink(dst) ):
+      os.remove(dst)
+    else:
+      raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
+  os.symlink(src, dst)
+  src_symlinks.append(dst)
+src = os.path.join("..", "shared", "libpaw", "src")
+dst = os.path.join("src", "42_libpaw")
+if ( os.path.exists(dst) ):
+  if ( os.path.islink(dst) ):
+    os.remove(dst)
+  else:
+    raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
+os.symlink(src, dst)
+src_symlinks.append(dst)
+
 # Special case: clean-up
 if ( opts.run_clean ):
   my_name = "abiclean"
@@ -228,6 +254,8 @@ if ( opts.run_clean ):
     "find . -depth -name 'tmp-*' -exec rm -rf {} \;")
   run_script(my_name, "Removing old files",
     "find src -name '*.old' -exec rm -f {} \;")
+  run_script(my_name, "Removing symbolic links",
+    "find src -type l -exec rm -f {} \;")
 
   print_header(my_name, "Abinit scripts outputs")
   run_script(my_name, "Removing abirules logs",
@@ -324,6 +352,13 @@ if ( opts.run_clean ):
         run_script(my_name, "Sluicing out the %s subsystem (subdir: %s)" % \
           (subsys, subdir),
           "cd %s && ./wipeout.sh" % subdir, indent_output=False)
+
+  run_script(my_name, "Removing byte-compiled ABINIT files",
+    "find . -name 'abinit.srcc' -exec rm {} \;")
+  run_script(my_name, "Removing byte-compiled Python files",
+    "find . -name '*.py[co]' -exec rm {} \;")
+  run_script(my_name, "Removing Python cache dirs",
+    "find . -depth -name '__pycache__' -exec rm -r {} \;")
 
   now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
   print_message(my_name, "--------------------------------------")
