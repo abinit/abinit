@@ -49,7 +49,7 @@ program abitk
  use m_fstrings,       only : sjoin, strcat, basename
  use m_specialmsg,     only : herald
  use m_symtk,          only : matr3inv
- use m_phonons,        only : phdos_unittests
+ use m_unittests,      only : tetra_unittests, kptrank_unittests
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
 
@@ -273,7 +273,10 @@ program abitk
    call destroy_tetra(tetra)
 
  case ("tetra_unit_tests")
-   call phdos_unittests(comm)
+   call tetra_unittests(comm)
+
+ case ("kptrank_unit_tests")
+   call kptrank_unittests(comm)
 
  case default
    MSG_ERROR(sjoin("Unknown command:", command))
