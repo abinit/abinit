@@ -70,6 +70,10 @@ module m_dft_energy
  use m_prep_kgb,         only : prep_getghc, prep_nonlop
  use m_psolver,          only : psolver_rhohxc
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
  implicit none
 
  private

@@ -40,6 +40,10 @@ module m_prep_kgb
  use m_getghc,      only : multithreaded_getghc
  use m_fft,         only : fourwf
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
  implicit none
 
  private
