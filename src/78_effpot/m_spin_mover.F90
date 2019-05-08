@@ -943,6 +943,10 @@ contains
        ABI_DEALLOCATE(self%Stmp)
     end if
 
+    if(allocated(self%Stmp2)) then
+       ABI_DEALLOCATE(self%Stmp2)
+    end if
+
 
     if(allocated(self%Heff_tmp)) then
        ABI_DEALLOCATE(self%Heff_tmp)

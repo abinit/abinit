@@ -69,7 +69,7 @@ module m_multibinit_manager
   !-------------------------------------------------------------------!
   type, public :: mb_manager_t
      character(len=fnlen) :: filenames(17)
-     type(multibinit_dtset_type), pointer :: params
+     type(multibinit_dtset_type), pointer :: params=>null()
      type(supercell_maker_t) :: sc_maker
      type(mbcell_t) :: unitcell
      type(mbcell_t) :: supercell
@@ -140,8 +140,8 @@ contains
     call self%lattice_mover%finalize()
     if(.not. self%use_external_params) then
        call multibinit_dtset_free(self%params)
-       if associated(self%params) then
-           ABI_DEALLOCATE_SCALAR(self%params)
+       if (associated(self%params)) then
+           ABI_FREE_SCALAR(self%params)
        endif
        !deallocate(self%params)
     endif
