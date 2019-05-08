@@ -431,6 +431,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
     & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
     & xccc3d1,dtset%ixcrot)
 
+
    !Accumulate the potential in meaningful arrays
    vhxc1_efield(iq2grad,:)=vtrial1(:,nspden)
 
@@ -529,6 +530,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
        call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
        eqgradhart(re,iatpert,iq2grad,iq1grad)=dotr*half
        eqgradhart(im,iatpert,iq2grad,iq1grad)=doti*half
+
        qdrflg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),q2grad(2,iq2grad),q1grad(2,iq1grad))=1
 
        blkflg(q2grad(2,iq2grad),q2grad(1,iq2grad),pert_atdis(2,iatpert),pert_atdis(1,iatpert),&
