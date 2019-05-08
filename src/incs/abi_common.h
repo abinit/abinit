@@ -286,8 +286,12 @@
 
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
-/* If variable is not one of base types so the method above does not work, 
- * require F03. */ 
+/* 
+ * The method above work for basic types (integer, real, etc...). 
+ * For types, arrays, we can use associate (F03 feature)
+ * Does not work for character(*) with gfortran <=5.x (>7.x is fine. No 6.x data)
+ * character with fixed length is fine.
+ * */ 
 #define ABI_UNUSED_A(var) associate( var => var ); end associate 
 
 #ifdef HAVE_PAPI
