@@ -2,6 +2,20 @@ from __future__ import print_function, division, unicode_literals
 from .common import BaseDictWrapper, string, basestring
 
 
+def short_repr(thing):
+    '''
+    Shorten representation of things when the default one is too long.
+    '''
+    s = str(thing)
+    if len(s) > 30:
+        if hasattr(thing, 'short_str'):
+            return thing.short_str()
+        else:
+            return '<{} instance>'.format(type(thing).__name__)
+    else:
+        return s
+
+
 class Issue(object):
     '''
         Represent the result of a test.
@@ -32,7 +46,7 @@ class Failure(Issue):
     def __repr__(self):
         if self.ref is not None:
             return Issue.__repr__(self) + '\nref: {}\ntested: {}'.format(
-                self.ref, self.tested
+                short_repr(self.ref), short_repr(self.tested)
             )
         else:
             return Issue.__repr__(self)
@@ -76,11 +90,11 @@ class Tester(object):
                 msg = '{} ok'.format(cons.name)
                 self.issues.append(Success(self.conf, msg))
             elif hasattr(success, 'details'):
-                msg = '{} ({}) failed'.format(cons.name, cons.value)
+                msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
                 self.issues.append(DetailedFailure(self.conf, msg,
                                                    success.details))
             else:
-                msg = '{} ({}) failed'.format(cons.name, cons.value)
+                msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
                 self.issues.append(Failure(self.conf, msg,
                                            ref, tested))
 
@@ -103,7 +117,8 @@ class Tester(object):
                         success = cons.check(ref, tested, self.conf)
                     except Exception as e:
                         msg = ('Exception while checking {} ({}/{}):\n'
-                               '{}: {}').format(cons.name, ref, tested,
+                               '{}: {}').format(cons.name, short_repr(ref),
+                                                short_repr(tested),
                                                 e.__class__.__name__, str(e))
                         self.issues.append(Failure(self.conf, msg))
                     else:  # no exceptions
