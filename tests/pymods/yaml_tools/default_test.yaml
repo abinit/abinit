@@ -14,6 +14,4 @@ Etot steps:
     data:
         callback:  # callback take a mapping as its value
             method: last_iter
-            tol: 1.0e-7
-            ceil: 1.0e-7
             tol_iter: 3
