@@ -31,7 +31,7 @@ module m_unitcell
   use m_errors
   use m_xmpi
   use m_mpi_scheduler, only: init_mpi_info
-  use m_multibinit_supercell, only: mb_supercell_t
+  !use m_multibinit_supercell, only: mb_supercell_t
   use m_supercell_maker , only: supercell_maker_t
   use m_multibinit_dataset, only : multibinit_dtset_type
   implicit none
@@ -52,10 +52,12 @@ module m_unitcell
      real(dp) :: rprimd(3,3)
      real(dp), allocatable :: ms(:)
      real(dp), allocatable :: gyro_ratio(:)
-     real(dp), allocatable :: damping_factor(:)
+     real(dp), allocatable :: gilbert_damping(:)
      real(dp), allocatable :: spin_positions(:,:)
+     integer, allocatable ::  ispin_prim(:), rvec(:,:)
    contains
      procedure :: initialize => spin_initialize
+     procedure :: set => spin_set
      procedure :: finalize => spin_finalize
      procedure :: fill_supercell=>spin_fill_supercell
   end type unitcell_spin_t
@@ -73,10 +75,11 @@ module m_unitcell
      logical :: has_spin=.False.
      logical :: has_lwf=.False.
      logical :: has_electron=.False.
+     integer :: sc_matrix(3,3)
+     integer :: ncell
      type(unitcell_lattice_t) :: lattice
      type(unitcell_spin_t) :: spin
      type(unitcell_lwf_t) :: lwf
-     ! shared 
    contains
      procedure:: initialize
      procedure :: finalize
@@ -100,12 +103,14 @@ contains
   end subroutine set_lattice
 
 
-  subroutine set_spin(self,nspin, ms, spin_positions, gyro_ratio, damping_factor)
+  subroutine set_spin(self,nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim)
     class(unitcell_t) , intent(inout):: self
     integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), damping_factor(nspin)
+    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
+    integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
     self%has_spin=.True.
-    call self%spin%initialize(nspin, ms, spin_positions, gyro_ratio, damping_factor)
+    call self%spin%initialize(nspin)
+    call self%spin%set(nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
   end subroutine set_spin
 
   subroutine set_lwf(self)
@@ -135,18 +140,18 @@ contains
   subroutine fill_supercell(self, sc_maker, supercell)
     class(unitcell_t), intent(inout) :: self
     type(supercell_maker_t), intent(inout) :: sc_maker
-    type(mb_supercell_t), intent(inout) :: supercell
+    class(unitcell_t), intent(inout) :: supercell
     call supercell%initialize()
     if (self%has_lattice) then
-       call self%lattice%fill_supercell(sc_maker, supercell)
+       call self%lattice%fill_supercell(sc_maker, supercell%lattice)
     endif
 
     if (self%has_spin) then
-       call self%spin%fill_supercell(sc_maker, supercell)
+       call self%spin%fill_supercell(sc_maker, supercell%spin)
     endif
 
     if (self%has_lwf) then
-       call self%lwf%fill_supercell(sc_maker, supercell)
+       call self%lwf%fill_supercell(sc_maker, supercell%lwf)
     endif
   end subroutine fill_supercell
 
@@ -164,7 +169,7 @@ contains
   subroutine latt_fill_supercell(self, sc_maker, supercell)
     class(unitcell_lattice_t), intent(inout):: self
     type(supercell_maker_t), intent(inout):: sc_maker
-    type(mb_supercell_t), intent(inout):: supercell
+    type(unitcell_lattice_t), intent(inout):: supercell
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(sc_maker)
     ABI_UNUSED_A(supercell)
@@ -174,32 +179,58 @@ contains
   !========================= SPIN =================================
 
 
-  Subroutine spin_initialize(self, nspin, ms, spin_positions, gyro_ratio, damping_factor)
+  Subroutine spin_initialize(self, nspin)
     class(unitcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), damping_factor(nspin)
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
     ABI_ALLOCATE(self%spin_positions, (3, self%nspin))
     ABI_ALLOCATE(self%ms, (self%nspin))
     ABI_ALLOCATE(self%gyro_ratio, (self%nspin))
-    ABI_ALLOCATE(self%damping_factor, (self%nspin))
+    ABI_ALLOCATE(self%gilbert_damping, (self%nspin))
+    ABI_ALLOCATE(self%rvec,(3, self%nspin) )
+    ABI_ALLOCATE(self%ispin_prim,(self%nspin) )
+  end subroutine spin_initialize
+
+
+  Subroutine spin_set(self, nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
+    class(unitcell_spin_t) , intent(inout):: self
+    integer, intent(in) :: nspin
+    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
+    integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
+    integer :: i
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if (iam_master) then
        self%ms(:) = ms(:)
        self%spin_positions(:,:)=spin_positions(:,:)
        self%gyro_ratio(:)=gyro_ratio(:)
-       self%damping_factor(:)=damping_factor(:)
+       self%gilbert_damping(:)=gilbert_damping(:)
+       if (present(rvec)) then
+          self%rvec(:,:)=rvec(:,:)
+       else
+          self%rvec(:,:)=0
+       end if
+       if (present(ispin_prim)) then
+          self%ispin_prim(:)=ispin_prim
+       else
+          do i =1 , nspin
+             self%ispin_prim(i)=i
+          end do
+       end if
     endif
     call xmpi_bcast(self%spin_positions, master, comm, ierr)
     call xmpi_bcast(self%ms, master, comm, ierr)
     call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
-    call xmpi_bcast(self%damping_factor, master, comm, ierr)
-  end subroutine spin_initialize
+    call xmpi_bcast(self%gilbert_damping, master, comm, ierr)
+    call xmpi_bcast(self%rvec, master, comm, ierr)
+    call xmpi_bcast(self%ispin_prim, master, comm, ierr)
+  end Subroutine spin_set
+
 
   subroutine spin_finalize(self)
     class(unitcell_spin_t) :: self
@@ -213,27 +244,34 @@ contains
     if (allocated(self%gyro_ratio)) then
        ABI_DEALLOCATE(self%gyro_ratio)
     end if
-    if (allocated(self%damping_factor)) then
-       ABI_DEALLOCATE(self%damping_factor)
+    if (allocated(self%gilbert_damping)) then
+       ABI_DEALLOCATE(self%gilbert_damping)
+    end if
+    if (allocated(self%rvec)) then
+       ABI_DEALLOCATE(self%rvec)
+    end if
+    if (allocated(self%ispin_prim)) then
+       ABI_DEALLOCATE(self%ispin_prim)
     end if
   end subroutine spin_finalize
 
   subroutine spin_fill_supercell(self, sc_maker, supercell)
     class(unitcell_spin_t),intent(inout) :: self
     type(supercell_maker_t), intent(inout):: sc_maker
-    type(mb_supercell_t), intent(inout) :: supercell
+    type(unitcell_spin_t), intent(inout) :: supercell
     integer :: i, nspin
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-
     nspin=sc_maker%ncells*self%nspin
     call supercell%initialize(nspin=nspin)
+    !Subroutine spin_initialize(self, nspin, ms, spin_positions, gyro_ratio, gilbert_damping)
+
     if(iam_master) then
        call sc_maker%repeat(self%ms, supercell%ms)
        call sc_maker%repeat(self%gyro_ratio, supercell%gyro_ratio)
-       call sc_maker%repeat(self%damping_factor, supercell%gilbert_damping)
+       call sc_maker%repeat(self%gilbert_damping, supercell%gilbert_damping)
        call sc_maker%repeat([(i ,i=1, self%nspin)], supercell%ispin_prim)
        supercell%rprimd(:,:)=sc_maker%sc_cell(self%rprimd)
        call sc_maker%trans_xcart(self%rprimd, self%spin_positions, supercell%spin_positions)
@@ -266,11 +304,10 @@ contains
   subroutine lwf_fill_supercell(self, sc_maker,supercell)
     class(unitcell_lwf_t) :: self
     type(supercell_maker_t):: sc_maker
-    type(mb_supercell_t) :: supercell
+    type(unitcell_lwf_t) :: supercell
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(sc_maker)
     ABI_UNUSED_A(supercell)
   end subroutine lwf_fill_supercell
-
 
 end module m_unitcell
