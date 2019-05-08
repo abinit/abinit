@@ -233,7 +233,7 @@ if has_pandas:
                                                          oserie[o_n]))
                     if 'tol' in opts[key]:
                         tol = opts[key]['tol']
-                        if not chk_ceil(sserie[s_n], oserie[o_n], tol):
+                        if not chk_tol(sserie[s_n], oserie[o_n], tol):
                             msg = ('Last item of {} column does not match the'
                                    ' tolerance {}: difference is {}.')
                             return FailDetail(
