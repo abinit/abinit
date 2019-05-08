@@ -77,10 +77,9 @@ module m_spin_mover
 
   type, public, extends(abstract_mover_t) :: spin_mover_t
      integer :: nspin, method
-     real(dp) :: dt, total_time, temperature, pre_time
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:), Stmp2(:,:)
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:), buffer(:,:)
-     type(rng_t) :: rng
+     !type(rng_t) :: rng
      type(spin_hist_t) :: hist
      logical :: gamma_l_calculated
      type(spin_mc_t) :: spin_mc
@@ -144,7 +143,7 @@ contains
        nspin=supercell%spin%nspin
        self%nspin=nspin
        self%dt= params%spin_dt
-       self%pre_time= params%spin_ntime_pre * self%dt
+       self%thermal_time= params%spin_ntime_pre * self%dt
        self%total_time= params%spin_ntime * self%dt
        self%temperature=params%spin_temperature
        if(params%spin_dynamics>=0) then
@@ -156,7 +155,7 @@ contains
     end if
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%dt, master, comm, ierr)
-    call xmpi_bcast(self%pre_time, master, comm, ierr)
+    call xmpi_bcast(self%thermal_time, master, comm, ierr)
     call xmpi_bcast(self%total_time, master, comm, ierr)
     call xmpi_bcast(self%temperature, master, comm, ierr)
     call xmpi_bcast(self%method, master, comm, ierr)
@@ -313,7 +312,6 @@ contains
   subroutine set_temperature(self, temperature)
     class(spin_mover_t), intent(inout) :: self
     real(dp), optional, intent(in) ::  temperature
-
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
@@ -581,14 +579,14 @@ contains
        call wrtout(ab_out, msg, 'COLL')
     end if
 
-    if (abs(self%pre_time) > 1e-30) then
+    if (abs(self%thermal_time) > 1e-30) then
        if (iam_master) then
           msg="Thermalization run:"
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
        end if
 
-       do while(t<self%pre_time)
+       do while(t<self%thermal_time)
           counter=counter+1
           call self%run_one_step(effpot=calculator, displacement=displacement, strain=strain, lwf=lwf)
           if (iam_master) then

@@ -36,6 +36,7 @@ module m_abstract_mover
   use m_abicore
   use m_errors
 
+  use m_random_xoroshiro128plus, only: rng_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_multibinit_cell, only: mbcell_t
@@ -51,18 +52,15 @@ module m_abstract_mover
      ! interact with hist file.
      type(mbcell_t), pointer:: supercell=>null()
      character (len=200) :: label="Abstract Mover"
-     ! temperature
-     ! ntime
-     ! dt
-     ! nthermalization
-     ! rng
+     real(dp) :: dt, total_time, temperature, thermal_time
+     type(rng_t) :: rng
 
    contains
-     !procedure:: initialize       ! perhaps each effpot type should have own 
+     !procedure:: initialize       ! perhaps each effpot type should have own
      !procedure :: finalize
      procedure :: set_params
      procedure :: set_initial_state ! initial state
-     procedure:: run_one_step 
+     procedure:: run_one_step
      !procedure:: run_time
      !procedure:: run_temperature
      procedure :: reset            ! reset the mover
