@@ -1000,17 +1000,20 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,iq,nprocs, my_rank, ierr, iqlk
+ integer :: iq_ibz,ikpq_ibz,ib,ii,iq,nprocs, my_rank, ierr
  real(dp),parameter :: max_occ1=one
- real(dp) :: volconst_mult
  logical :: use_bzsum_
 !arrays
- real(dp) :: ework(4, 2)
  real(dp),allocatable :: pme_k(:,:)
  complex(dp),allocatable :: cweights_tmp(:,:)
- integer :: ind_ibz(4)
  !complex(dpc) :: SIM0, SIM0I
+#ifndef DEV_NEW_TETRA
+ integer :: itetra, iqlk, jj, iz
+ integer :: ind_ibz(4)
+ real(dp) :: volconst_mult
+ real(dp) :: ework(4, 2)
  complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(4,nz)
+#endif
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
