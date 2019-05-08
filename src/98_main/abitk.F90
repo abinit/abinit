@@ -126,6 +126,7 @@ program abitk
      write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
      write(std_out,"(a)")"tetra_mjv                             Old tetrahedron routine"
      write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
+     write(std_out,"(a)")"kptrank_unit_tests                    Run unit tests for kptrank routines."
      goto 100
    end if
  end do

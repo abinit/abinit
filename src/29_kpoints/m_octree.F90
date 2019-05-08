@@ -23,10 +23,10 @@
 #endif
 
 #include "abi_common.h"
+
 module m_octree
 
   use defs_basis
-
   implicit none
 
   real(dp),protected :: shifts(3,2,8)
@@ -90,7 +90,7 @@ module m_octree
 
     ! check if this is a leaf node
     if (nids<octree%max_npoints) then
-      allocate(new%ids(nids))
+      ABI_MALLOC(new%ids,(nids))
       new%ids = ids(:nids)
       return
     end if
@@ -98,7 +98,7 @@ module m_octree
     !determine the octants of each point
     call get_octants(lo,hi,nids,ids,octree%points,octants)
 
-    allocate(new%childs(8))
+    ABI_MALLOC(new%childs,(8))
     do ioctant=1,8
       ! How many points are in this octant?
       counter = 0
@@ -256,7 +256,7 @@ module m_octree
     integer :: ioctant
     ! if leaf deallocate ids
     if (allocated(octn%ids)) then
-      deallocate(octn%ids,stat=ierr)
+      ABI_FREE(octn%ids)
     else
       do ioctant=1,8
         ierr = octn_free(octn%childs(ioctant))

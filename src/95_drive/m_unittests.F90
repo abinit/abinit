@@ -32,6 +32,8 @@ module m_unittests
  use m_ptgroups
  use m_tetrahedron
  use m_htetrahedron
+ use m_kptrank
+ use m_hkptrank
  use m_numeric_tools
 
  use m_time,            only : cwtime, cwtime_report
@@ -204,7 +206,7 @@ subroutine tetra_unittests(comm)
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: dos_qshift(3,nqshft1)
- real(dp) :: rprimd(3,3),rlatt(3,3),qlatt(3,3)
+ real(dp) :: rlatt(3,3),qlatt(3,3)
  real(dp),allocatable :: tweight(:,:),dweight(:,:)
  real(dp),allocatable :: qbz(:,:),qibz(:,:)
  real(dp),allocatable :: wtq_ibz(:), wdt(:,:)
@@ -223,12 +225,6 @@ subroutine tetra_unittests(comm)
  call wrtout(std_out,'0. Initialize')
 
  ! Create fake crystal
- rprimd(:,1) = [ 0.0, 0.5, 0.5]
- rprimd(:,2) = [ 0.5, 0.0, 0.5]
- rprimd(:,3) = [ 0.5, 0.5, 0.0]
- !rprimd(:,1) = [ 1.0, 0.0, 0.0]
- !rprimd(:,2) = [ 0.0, 1.0, 0.0]
- !rprimd(:,3) = [ 0.0, 0.0, 1.0]
  crystal = crystal_from_ptgroup('m-3m')
 
  ! Create a regular grid
@@ -484,6 +480,43 @@ subroutine kptrank_unittests(comm)
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm
+
+!Variables -------------------------------
+ type(crystal_t) :: crystal
+ type(kptrank_type) :: kptrank
+ type(hkptrank_t) :: hkptrank
+ integer,parameter :: qptopt1=1,nqshft1=1
+ integer :: nqibz,nqbz
+ integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
+ real(dp) :: dos_qshift(3,nqshft1)
+ integer,allocatable :: bz2ibz(:,:)
+ real(dp),allocatable :: wtq_ibz(:)
+ real(dp),allocatable :: qbz(:,:),qibz(:,:)
+
+ ! Create fake crystal
+ crystal = crystal_from_ptgroup('m-3m')
+
+ ! Create a regular grid
+ in_qptrlatt(:,1)=[ 20, 0, 0]
+ in_qptrlatt(:,2)=[ 0, 20, 0]
+ in_qptrlatt(:,3)=[ 0, 0, 20]
+ dos_qshift(:,1) =[0.0,0.0,0.0]
+ call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
+                             nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
+
+ ! Test mkkptrank
+ call mkkptrank(qbz,nqbz,kptrank)
+ call destroy_kptrank(kptrank)
+
+ ! Test hkptrank
+ call hkptrank_init(hkptrank,qbz,nqbz)
+ call hkptrank_free(hkptrank)
+
+ ABI_SFREE(qbz)
+ ABI_SFREE(qibz)
+ ABI_SFREE(bz2ibz)
+ ABI_SFREE(wtq_ibz)
+ call crystal%free()
 
 end subroutine kptrank_unittests
 !!***

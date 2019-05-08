@@ -56,9 +56,9 @@ module m_hashtable
     new%nbuckets = nbuckets
     new%bucketsize = bucketsize
     new%bucketstep = bucketstep
-    allocate(new%buckets(nbuckets))
+    ABI_ALLOCATE(new%buckets,(nbuckets))
     do ibucket=1,nbuckets
-      allocate(new%buckets(ibucket)%items(2,new%bucketsize))
+      ABI_ALLOCATE(new%buckets(ibucket)%items,(2,new%bucketsize))
       new%buckets(ibucket)%nitems = 0
     end do
   end function hashtable_init
@@ -81,10 +81,10 @@ module m_hashtable
     end do
     ! Check if the buckets are full
     if (size(self%buckets(ihash)%items,2)==nitems) then
-      allocate(new_items(2,nitems+self%bucketstep))
+      ABI_MALLOC(new_items,(2,nitems+self%bucketstep))
       new_items(:,:nitems) = self%buckets(ihash)%items(:,:nitems)
       new_items(:,nitems+1:) = 0
-      call move_alloc(new_items,self%buckets(ihash)%items)
+      ABI_MOVE_ALLOC(new_items,self%buckets(ihash)%items)
     end if
     ! Add the element to the bucket
     nitems = nitems + 1
@@ -128,9 +128,9 @@ module m_hashtable
     do ibucket=1,self%nbuckets
       ! get size of buckets and free unecessary memory
       nitems = self%buckets(ibucket)%nitems
-      allocate(new_items(2,nitems))
+      ABI_MALLOC(new_items,(2,nitems))
       new_items = self%buckets(ibucket)%items(:,:nitems)
-      call move_alloc(new_items,self%buckets(ibucket)%items)
+      ABI_MOVE_ALLOC(new_items,self%buckets(ibucket)%items)
     end do
   end subroutine hashtable_cleanup
 
@@ -150,9 +150,9 @@ module m_hashtable
     integer :: ibucket
     if (allocated(self%buckets)) then
       do ibucket=1,self%nbuckets
-        deallocate(self%buckets(ibucket)%items)
+        ABI_FREE(self%buckets(ibucket)%items)
       end do
-      deallocate(self%buckets)
+      ABI_FREE(self%buckets)
     end if
   end subroutine hashtable_free
 
