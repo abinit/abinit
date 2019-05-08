@@ -121,7 +121,11 @@ contains
     integer :: i
     do i=1, self%size
        call self%list(i)%ptr%finalize()
-       !if(associated(self%list(i)%ptr)) deallocate(self%list(i)%ptr)
+       ! Intel compiler complains
+       if(associated(self%list(i)%ptr)) then
+          ABI_DATATYPE_DEALLOCATE_SCALAR(self%list(i)%ptr)
+       endif 
+       
        nullify(self%list(i)%ptr)
     end do
     if (allocated(self%list)) then

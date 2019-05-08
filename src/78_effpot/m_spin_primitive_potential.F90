@@ -443,7 +443,8 @@ contains
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
     call xmpi_bcast(sc_nspin, master, comm, ierr)
-    ABI_MALLOC_SCALAR(spin_potential_t::scpot)
+    !ABI_MALLOC_SCALAR(spin_potential_t::scpot)
+    ABI_DATATYPE_ALLOCATE_SCALAR(spin_potential_t, scpot)
     select type(scpot)
     type is (spin_potential_t)
        call scpot%initialize(sc_nspin)

@@ -84,7 +84,7 @@ contains
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
     type(abstract_potential_t), pointer :: tmp
-    ABI_MALLOC_SCALAR(abstract_potential_t::tmp)
+    ABI_DATATYPE_ALLOCATE_SCALAR(abstract_potential_t, tmp)
     !call tmp%initialize(....)
     ! set tmp
     ABI_UNUSED_A(self)
