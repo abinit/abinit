@@ -223,16 +223,16 @@ if has_pandas:
                 oserie, sserie = other[key], self[key]
                 # index -1 does not work on series
 
-                if key in self.opts:  # for each column look for a constraint
-                    if 'ceil' in self.opts[key]:
-                        ceil = self.opts[key]['ceil']
+                if key in opts:  # for each column look for a constraint
+                    if 'ceil' in opts[key]:
+                        ceil = opts[key]['ceil']
                         if not chk_ceil(oserie[o_n], ceil):
                             msg = ('Last item of {} column does not match the'
                                    ' ceil {}: value is {}.')
                             return FailDetail(msg.format(key, ceil,
                                                          oserie[o_n]))
-                    if 'tol' in self.opts[key]:
-                        tol = self.opts[key]['tol']
+                    if 'tol' in opts[key]:
+                        tol = opts[key]['tol']
                         if not chk_ceil(sserie[s_n], oserie[o_n], tol):
                             msg = ('Last item of {} column does not match the'
                                    ' tolerance {}: difference is {}.')
