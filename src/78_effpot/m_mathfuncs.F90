@@ -13,11 +13,22 @@ module m_mathfuncs
   use m_random_xoroshiro128plus
   implicit none
 
+  interface mat33det
+     procedure  real_mat33det
+     procedure  int_mat33det
+  end interface mat33det
+
+  interface diag
+     procedure diag_mat_int
+     procedure diag_mat_real
+     procedure diag_array_int
+     procedure diag_array_real
+  end interface diag
+
 contains
 
   ! vector cross production
   function cross(a, b) result(c)
-
     real(dp), intent(in) :: a(3), b(3)
     real(dp)  :: c(3)
     c(1) = a(2)*b(3) - a(3)*b(2)
@@ -41,6 +52,106 @@ contains
     return
   end function outer_product
 
+  function array_lessthan(a, b, N) result (y)
+    integer, intent(in)  :: a(:), b(:), N
+    logical :: y
+    integer :: i
+    y=.False.
+    do i =1, N
+       if (a(i).lt.b(i)) then
+          y=.True.
+          exit
+       elseif (a(i).gt.b(i)) then
+          y=.False.
+          exit
+       end if
+    end do
+  end function array_lessthan
+
+  function array_morethan(a, b, N) result (y)
+    integer, intent(in)  :: a(:), b(:), N
+    logical :: y
+    integer :: i
+    y=.False.
+    do i =1, N
+       if (a(i).gt.b(i)) then
+          y=.True.
+          exit
+       elseif (a(i).lt.b(i)) then
+          y=.False.
+          exit
+       end if
+    end do
+  end function array_morethan
+
+  function find_int(a, x) result(ix)
+    integer, intent(in):: a(:), x
+    integer :: ix, i
+    ix=0
+    do i=1, size(a)
+       if( a(i)==x ) then
+          ix=i
+       endif
+    end do
+  end function find_int
+
+  function binsearch_left_integer(a, x) result(ix)
+    integer, intent(in):: a(:), x
+    integer :: n,ix, ub, lb
+    integer , save :: i=1
+    n=size(a)
+    if (i<0 .or. i>n) i=(size(a)/2+1)
+    if (a(i)==x) then
+       ix=i
+    else
+       ub=n
+       lb=1
+       do while (lb<ub)
+          i=floor((lb+ub)/2.0)
+          if (a(i)< x) then
+             lb=i+1
+          else
+             ub=i
+          end if
+       end do
+       if(a(lb)==x) then
+          ix=lb
+          i=ix
+       else
+          ix=0
+       end if
+    endif
+  end function binsearch_left_integer
+
+  function binsearch_left_integerlist(a, x) result(ix)
+    integer, intent(in):: a(:,:), x(:)
+    integer :: n,ix, ub, lb, nx
+    integer , save :: i=1
+    nx=size(x)
+    n=size(a, dim=2)
+    if (i<0 .or. i>n) i=(size(a, dim=2)/2+1)
+    if (all(a(:,i)==x(:))) then
+       ix=i
+    else
+       ub=n
+       lb=1
+       do while (lb<ub)
+          i=floor((lb+ub)/2.0)
+          if (array_lessthan(a(:, i), x, nx)) then
+             lb=i+1
+          else
+             ub=i
+          end if
+       end do
+       if(all(a(:, lb)==x)) then
+          ix=lb
+          i=ix
+       else
+          ix=0
+       end if
+    endif
+  end function binsearch_left_integerlist
+
   subroutine set_random_seed(seed)
 
       integer , intent(in) :: seed(:)
@@ -48,6 +159,48 @@ contains
       &(set_random_seed,which calls RANDOM_SEED) works. Do test it!"
       call RANDOM_SEED(put=seed(:))
   end subroutine set_random_seed
+
+  pure function diag_mat_real(mat) result (ret)
+    real(dp), intent(in) :: mat(:, :)
+    real(dp):: ret(size(mat, dim=1))
+    integer :: n, i
+    n=size(mat, dim=1)
+    do i=1, n
+       ret(i)=mat(i,i)
+    end do
+  end function diag_mat_real
+
+  pure function diag_mat_int(mat) result (ret)
+    integer, intent(in) :: mat(:, :)
+    integer:: ret(size(mat, dim=1))
+    integer :: n, i
+    n=size(mat, dim=1)
+    do i=1, n
+       ret(i)=mat(i,i)
+    end do
+  end function diag_mat_int
+
+  pure function diag_array_int(a) result (ret)
+    integer, intent(in) :: a(:)
+    integer:: ret(size(a), size(a))
+    integer :: i
+    ret(:,:)=0
+    do i=1, size(a)
+       ret(i, i)=a(i)
+    end do
+  end function diag_array_int
+
+  pure function diag_array_real(a) result (ret)
+    real(dp), intent(in) :: a(:)
+    real(dp):: ret(size(a), size(a))
+    integer :: i
+    ret(:,:)=0.0_dp
+    do i=1, size(a)
+       ret(i, i)=a(i)
+    end do
+  end function diag_array_real
+
+
 
   ! Random number generator; Normal (Gaussian) dist.
   ! a is a array.
@@ -65,20 +218,28 @@ contains
     !a(:,1)=0.2
   end subroutine rand_normal_builtin
 
-  ! wrapper of  normal random number generator using ziggurat method.
-  ! rnor implemented in ziggruat.F90
-  ! TODO hexu: implement a random number generator module which contains
-  ! all the related subroutines. & Move this one there.
-  !  subroutine rand_normal_ziggurat(a)
 
+  function real_mat33det(A) result(det)
+    real(dp), intent(in) :: A(3,3)
+    real(dp) :: det
+    DET =   A(1,1)*A(2,2)*A(3,3)  &
+         - A(1,1)*A(2,3)*A(3,2)  &
+         - A(1,2)*A(2,1)*A(3,3)  &
+         + A(1,2)*A(2,3)*A(3,1)  &
+         + A(1,3)*A(2,1)*A(3,2)  &
+         - A(1,3)*A(2,2)*A(3,1)
+  end function real_mat33det
 
-!    real(dp), intent(out)::a(:,:)
-!    integer :: i, j
-!    do i=1, size(a, dim=2)
-!      do j=1, size(a, dim=1)
-!        a(j, i)=rnor()
-!      end do
-!    end do
-!    end subroutine rand_normal_ziggurat
+  function int_mat33det(A) result(det)
+    integer, intent(in) :: A(3,3)
+    integer :: det
+    DET =   A(1,1)*A(2,2)*A(3,3)  &
+         - A(1,1)*A(2,3)*A(3,2)  &
+         - A(1,2)*A(2,1)*A(3,3)  &
+         + A(1,2)*A(2,3)*A(3,1)  &
+         + A(1,3)*A(2,1)*A(3,2)  &
+         - A(1,3)*A(2,2)*A(3,1)
+  end function int_mat33det
+
 
 end module m_mathfuncs
