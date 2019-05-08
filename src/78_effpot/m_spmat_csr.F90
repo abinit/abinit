@@ -114,19 +114,20 @@ contains
 
   end subroutine set
 
-  subroutine sync(self)
+  subroutine sync(self, master, comm, nblock)
     class (csr_mat_t), intent(inout) :: self
+    integer , intent(in) :: master, comm, nblock
     integer :: ierr, iproc
     iproc=xmpi_comm_rank(xmpi_world)
 
     call xmpi_barrier(xmpi_world)
 
-    call xmpi_bcast(self%ncol, 0, xmpi_world, ierr)
-    call xmpi_bcast(self%nrow, 0, xmpi_world, ierr)
-    call xmpi_bcast(self%nnz, 0, xmpi_world, ierr)
+    call xmpi_bcast(self%ncol, master, comm, ierr)
+    call xmpi_bcast(self%nrow, master, comm, ierr)
+    call xmpi_bcast(self%nnz, master, comm, ierr)
 
-    call self%mps%initialize(self%nrow/3, xmpi_world, 3)
-    if (.not. self%mps%irank==0) then
+    call self%mps%initialize(self%nrow/nblock, master, comm, nblock)
+    if (.not. self%mps%irank==master) then
        if(.not. allocated(self%icol)) then
           ABI_ALLOCATE(self%icol, (self%nnz))
        endif
@@ -141,10 +142,9 @@ contains
 
     ! TODO: no need to send all the data to all the
     ! only the corresponding row data.
-    call xmpi_bcast(self%icol, 0, xmpi_world, ierr)
-    call xmpi_bcast(self%row_shift, 0, xmpi_world, ierr)
-    call xmpi_bcast(self%val, 0, xmpi_world, ierr)
-
+    call xmpi_bcast(self%icol, master, comm, ierr)
+    call xmpi_bcast(self%row_shift, master, comm, ierr)
+    call xmpi_bcast(self%val, master, comm, ierr)
   end subroutine sync
 
 

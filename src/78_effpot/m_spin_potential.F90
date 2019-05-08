@@ -101,17 +101,15 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-    call self%mps%initialize(nspin, comm)
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
+    call self%mps%initialize(ntasks=nspin, master=master, comm=comm)
     self%label="SpinPotential"
     self%has_spin=.True.
     self%has_displacement=.False.
     self%has_strain=.False.
     self%is_null=.False.
     self%nspin=nspin
-
     call xmpi_bcast(self%nspin, master, comm, ierr)
-
     ABI_ALLOCATE( self%ms, (self%nspin))
     if(iam_master) then
        call self%coeff_coo%initialize([self%nspin*3, self%nspin*3])
@@ -268,7 +266,7 @@ contains
           call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
           call self%coeff_coo%finalize()
        endif
-       call self%bilinear_csr_mat%sync()
+       call self%bilinear_csr_mat%sync(master=master, comm=comm, nblock=1)
        self%csr_mat_ready=.True.
        call xmpi_bcast(self%csr_mat_ready, master, comm, ierr)
     endif

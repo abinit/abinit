@@ -181,7 +181,7 @@ contains
     ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
 
     self%gamma_l_calculated=.False.
-    call self%mps%initialize(nspin, comm)
+    call self%mps%initialize(ntasks=nspin,master=master, comm=comm)
 
 
     call xmpi_bcast(params%spin_damping, master, comm, ierr)
