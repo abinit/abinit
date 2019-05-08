@@ -5320,7 +5320,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
  ! Get full BZ associated to ebands
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
-   nkibz, kibz, wtk, nkbz, kbz)
+   nkibz, kibz, wtk, nkbz, kbz, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  ABI_FREE(wtk)
@@ -5328,15 +5328,15 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  ABI_CHECK(nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
 
  ! Build BZ --> IBZ mapping using symrec.
- ABI_MALLOC(bz2ibz, (nkbz, 6))
- call listkk(dksqmax, cryst%gmet, bz2ibz, ebands%kptns, kbz, ebands%nkpt, nkbz, cryst%nsym, &
-      1, cryst%symafm, cryst%symrec, sigma%timrev, comm, exit_loop=.True., use_symrec=.True.)
- if (dksqmax > tol12) then
-   write(msg, '(a, es16.6)' ) &
-    "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ", dksqmax
-   MSG_ERROR(msg)
- end if
- call cwtime_report(" qpoints_oracle_listkk1", cpu, wall, gflops)
+ !ABI_MALLOC(bz2ibz, (nkbz, 6))
+ !call listkk(dksqmax, cryst%gmet, bz2ibz, ebands%kptns, kbz, ebands%nkpt, nkbz, cryst%nsym, &
+ !     1, cryst%symafm, cryst%symrec, sigma%timrev, comm, exit_loop=.True., use_symrec=.True.)
+ !if (dksqmax > tol12) then
+ !  write(msg, '(a, es16.6)' ) &
+ !   "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ", dksqmax
+ !  MSG_ERROR(msg)
+ !end if
+ !call cwtime_report(" qpoints_oracle_listkk1", cpu, wall, gflops)
 
  ! Make full k-point rank arrays
  call mkkptrank(kbz, nkbz, kptrank)
@@ -5357,7 +5357,8 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
        if (ikq_bz < 1) then
          MSG_ERROR(sjoin("Cannot find kq: ", ktoa(kq)))
        end if
-       ikq_ibz = bz2ibz(ikq_bz, 1)
+       !ikq_ibz = bz2ibz(ikq_bz,1)
+       ikq_ibz = bz2ibz(1, ikq_bz)
        do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
          band_ks = ib_k + sigma%bstart_ks(ikcalc, spin) - 1
          eig0nk = ebands%eig(band_ks, ik_ibz, spin)
