@@ -1,7 +1,7 @@
 dis_win_max = 50.0
 dis_froz_max = 8.0
 kmesh_tol = 1e-08
-num_bands = 7
+num_bands = 12
 num_wann = 9
 num_iter = 100
 search_shells = 24

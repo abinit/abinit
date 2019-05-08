@@ -1170,10 +1170,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%spin_dynamics=intarr(1)
  if(multibinit_dtset%spin_dynamics< 0 .or.&
-      &   multibinit_dtset%spin_dynamics > 2) then
+      &   multibinit_dtset%spin_dynamics > 3) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'spin_dynamics is',multibinit_dtset%spin_dynamics,', but the only allowed values',ch10,&
-         &   'are 0, 1, and 2.',ch10,&
+         &   'are 0, 1, 2, and 3.',ch10,&
          &   'Action: correct spin_dynamics in your input file.'
     MSG_ERROR(message)
  end if
@@ -1201,7 +1201,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     ABI_ALLOCATE(intarr,(marr))
     ABI_ALLOCATE(dprarr,(marr))
  end if
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_mag_field',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_mag_field',tread,'BFI')
  if(tread==1) multibinit_dtset%spin_mag_field(1:3)= dprarr(1:3)
 
  multibinit_dtset%spin_nctime=100
@@ -1267,7 +1267,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     ABI_ALLOCATE(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_qpoint',tread,'DPR')
- if(tread==1) multibinit_dtset%spin_mag_field(1:3)= dprarr(1:3)
+ if(tread==1) multibinit_dtset%spin_qpoint(1:3)= dprarr(1:3)
 
 
  multibinit_dtset%spin_sia_add=0
@@ -1281,7 +1281,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
  multibinit_dtset%spin_sia_k1amp=0.0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_k1amp',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_k1amp',tread,'ENE')
  if(tread==1) multibinit_dtset%spin_sia_k1amp=dprarr(1)
 
  multibinit_dtset%spin_sia_k1dir(:)= [0.0,0.0,1.0]
@@ -1302,10 +1302,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_temperature=325
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_temperature',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_temperature=dprarr(1)
- if(multibinit_dtset%spin_temperature<=0)then
+ if(multibinit_dtset%spin_temperature<0)then
    write(message, '(a,f10.1,a,a,a,a,a)' )&
 &   'spin_temperature is ',multibinit_dtset%spin_temperature,'. The only allowed values',ch10,&
-&   'are positives values.',ch10,&
+&   'are non-negative values.',ch10,&
 &   'Action: correct spin_temperature in your input file.'
    MSG_ERROR(message)
  end if
@@ -2241,7 +2241,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolavg',multibinit_dtset%spin_tolavg
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolvar',multibinit_dtset%spin_tolvar
     write(nunit,'(13x,a15)')   'spin_mag_field'
-    write(nunit,'(31x,3es12.5)')   (multibinit_dtset%spin_mag_field(ii),ii=1,3)
+    write(nunit,'(31x,3es12.5, a8)')   (multibinit_dtset%spin_mag_field(ii)/Bfield_Tesla,ii=1,3), '   Tesla'
     write(nunit, '(13x, a15, I12.1)') 'spin_sia_add', multibinit_dtset%spin_sia_add
     write(nunit, '(13x, a15, ES15.5)') 'spin_sia_k1amp', multibinit_dtset%spin_sia_k1amp
     write(nunit, '(13x, a15, 3ES15.5)') 'spin_sia_k1dir', (multibinit_dtset%spin_sia_k1dir(ii), ii=1,3)

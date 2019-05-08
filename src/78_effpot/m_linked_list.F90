@@ -71,7 +71,7 @@ module m_linked_list
        tmp=>iter
        iter=>iter%next
        if( associated(tmp)) then
-          deallocate(tmp)
+          ABI_FREE_SCALAR(tmp)
        endif
     enddo
     nullify(self%first)
@@ -85,17 +85,16 @@ module m_linked_list
     integer, intent(in)::i
     real(dp), intent(in)::val
     if(.not. associated(self%last)) then
-       allocate(self%first)
+       ABI_MALLOC_SCALAR(self%first)
        self%last=>self%first
     else
-       allocate(self%last%next)
+       ABI_MALLOC_SCALAR(self%last%next)
        self%last=>self%last%next
     endif
     self%last%i=i
     self%last%val=val
     self%last%next=>null()
     self%length = self%length+1
-    !print *, 'length', self%length
   end subroutine llist_append
 
   subroutine llist_iter_restart(self)
@@ -116,7 +115,7 @@ module m_linked_list
     if(.not.associated(ptr%next)) then
        call llist_append(self,i,val)
     else
-       allocate(tmp)
+       ABI_MALLOC_SCALAR(tmp)
        tmp%i=i
        tmp%val=val
        tmp%next=>ptr%next
@@ -131,7 +130,7 @@ module m_linked_list
     integer, intent(in) :: i
     real(dp), intent(in):: val
     type(lnode), pointer:: tmp=>null()
-    allocate(tmp)
+    ABI_MALLOC_SCALAR(tmp)
     tmp%i=i
     tmp%val=val
     tmp%next=>self%first
@@ -149,22 +148,12 @@ module m_linked_list
     class(llist):: self
     integer, intent(in) :: i, mode
     real(dp), intent(in):: val
-    !print *, "debug insert"
-    !print *, "first i", self%first%i
-    !print *, "last i", self%last%i
-    !print *, i
     call llist_iter_restart(self)
     if(.not.associated(self%last)) then
-       !print *, "append"
-       ! no element in list
        call llist_append(self,i,val)
-       !print *, self%last%i
-       !print *, self%last%val
     else if (i<self%first%i) then
-       !print *, "insert head"
        call llist_insert_head(self, i, val)
     else
-       !print *, "insert middle"
        do while(associated(self%iter))
           ! at the begining i<i0
           ! before the end,
@@ -187,25 +176,22 @@ module m_linked_list
           call llist_append(self,i,val)
           return
        else
-          print*, "cannot find proper place to insert"
+          MSG_BUG("m_linked_list cannot find proper place to insert")
        endif
     endif
 
-    !allocate(self%last%next)
-    !self%last=>self%last%next
 
   end subroutine llist_sorted_insert
 
-  subroutine llist_print_all(self)
-
-    class(llist), intent(inout)::self
-    call llist_iter_restart(self)
-    print*, "linkedlist of length ", self%length
-    do while(associated(self%iter))
-       print*, "I: ", self%iter%i, "  val: ", self%iter%val
-       self%iter=>self%iter%next
-    enddo
-  end subroutine llist_print_all
+!  subroutine llist_print_all(self)
+!
+!    class(llist), intent(inout)::self
+!    call llist_iter_restart(self)
+!    do while(associated(self%iter))
+!       !print*, "I: ", self%iter%i, "  val: ", self%iter%val
+!       self%iter=>self%iter%next
+!    enddo
+!  end subroutine llist_print_all
 
 
   subroutine llist_get_data(self, ilist, vallist)
@@ -214,8 +200,8 @@ module m_linked_list
     integer, allocatable, intent(inout)::ilist(:)
     real(dp),allocatable, intent(inout)::vallist(:)
     integer::ind=1
-    allocate(ilist(self%length))
-    allocate(vallist(self%length))
+    ABI_ALLOCATE(ilist,(self%length))
+    ABI_ALLOCATE(vallist, (self%length))
     call llist_iter_restart(self)
     do while(associated(self%iter))
        ilist(ind)=self%iter%i

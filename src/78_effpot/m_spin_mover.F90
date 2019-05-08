@@ -99,7 +99,7 @@ module m_spin_mover
      procedure :: run_time => spin_mover_t_run_time
      procedure :: run_MvT
      procedure :: set_temperature
-     procedure :: prepare_ncfile
+     procedure, private :: prepare_ncfile
      procedure, private ::get_Langevin_Heff
      procedure :: current_spin
      procedure :: set_ncfile_name
@@ -228,7 +228,7 @@ contains
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
     character(len=fnlen), intent(in) :: fname
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if (iam_master) then
@@ -294,7 +294,7 @@ contains
    type(multibinit_dtset_type) :: params
    character(len=*), intent(in) :: fname
 
-   integer :: master, my_rank, comm, nproc, ierr
+   integer :: master, my_rank, comm, nproc
    logical :: iam_master
    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
@@ -487,7 +487,10 @@ contains
     real(dp), optional, intent(inout) :: displacement(:, :), strain(:,:), lwf(:)
     real(dp), intent(inout) :: S_in(3,self%nspin)
     real(dp), intent(out) ::  etot
-    call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
+    if(present(displacement) .or. present(lwf) .or. present(strain)) then
+       MSG_BUG("Monte carlo only implemented for spin only.")
+       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
+    end if
   end subroutine spin_mover_t_run_one_step_MC
 
   subroutine spin_mover_t_run_one_step(self, effpot, displacement, strain, spin, lwf)
@@ -510,7 +513,7 @@ contains
        call self%run_one_step_MC(effpot, self%Stmp, etot)
     end if
     ! do not inc until time is set to hist.
-    !if (iam_master) then
+    ! run one step does not know about time. So it will be done in the outer loop.
     if(self%mps%irank==0) then
        call self%hist%set_vars(S=self%Stmp, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
     end if
@@ -550,7 +553,7 @@ contains
     integer :: counter, i, ii
     character(len=80) :: msg, msg_empty
 
-    integer :: master, my_rank, comm, nproc, ierr
+    integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
@@ -971,7 +974,6 @@ contains
     call self%spin_ob%finalize()
     !call self%spin_ncfile%close()
     call self%spin_ob%finalize()
-    ABI_UNUSED((/self%nspins/))
   end subroutine finalize
   !!***
 

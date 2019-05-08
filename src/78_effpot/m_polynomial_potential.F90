@@ -31,7 +31,7 @@
 
 #include "abi_common.h"
 
-module m_polynomail_potential
+module m_polynomial_potential
   use defs_basis
   use m_abicore
   use m_errors
@@ -76,6 +76,7 @@ contains
     if (find_int(nature, spin)/=0) self%has_spin=.True.
     if (find_int(nature, lwf)/=0) self%has_lwf=.True.
     !call self%coeff%initialize(mshape=mshape)
+    ABI_UNUSED_A(mshape)
     self%label="PolynomialPotential"
   end subroutine initialize
 
@@ -94,8 +95,18 @@ contains
 
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(force)
+    ABI_UNUSED_A(stress)
+    ABI_UNUSED_A(bfield)
+    ABI_UNUSED_A(lwf_force)
+    ABI_UNUSED_A(energy)
     MSG_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 
 
-end module m_polynomail_potential
+end module m_polynomial_potential

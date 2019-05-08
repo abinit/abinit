@@ -59,7 +59,7 @@ module m_spmat_csr
      procedure :: sync ! sync data to all mpi ranks
      procedure :: mv_mpi => csr_mat_t_mv_mpi ! mpi version of mv
      procedure :: mv_select_row =>csr_mat_t_mv_select_row ! mv of selected rows
-     procedure :: print
+     !procedure :: print
   end type CSR_mat_t
 contains
 
@@ -86,7 +86,7 @@ contains
 
     iproc=xmpi_comm_rank(xmpi_world)
     if (iproc/=0) then
-       print *, "This function should be only used on root node"
+       MSG_ERROR("This function (CSR_MAT%set) should be only used on root node")
     end if
 
     self%nnz=nnz
@@ -175,7 +175,7 @@ contains
     real(dp), intent(out) :: b(self%nrow)
     integer::irow, i1, i2, i
     b(:)=0.0d0
-    !!$OMP PARALLEL DO private(i, i1, i2)
+    !$OMP PARALLEL DO private(i, i1, i2)
     do irow=1, self%nrow
         i1=self%row_shift(irow)
         i2=self%row_shift(irow+1)-1
@@ -183,7 +183,7 @@ contains
             b(irow)=b(irow)+ self%val(i)*x(self%icol(i))
         end do
     enddo
-    !!$OMP END PARALLEL DO
+    !$OMP END PARALLEL DO
   end subroutine CSR_mat_t_mv
 
 
@@ -207,7 +207,7 @@ contains
           b(irow)=b(irow)+ self%val(i)*x(self%icol(i))
        end do
     enddo
-    ! TODO : use gather instead of reduce.
+    ! TODO : use gather instead of reduce?
     !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
     if (syncb) then
        call xmpi_sum_master(b, 0, xmpi_world, ierr )
@@ -231,11 +231,11 @@ contains
     end do
   end subroutine CSR_mat_t_mv_select_row
 
-  subroutine print(self)
-    class(CSR_mat_t), intent(in) :: self
-    print *, "icol:", self%icol
-    print *, "row_shift:", self%row_shift
-    print *, "val:", self%val
-  end subroutine print
+!  subroutine print(self)
+!    class(CSR_mat_t), intent(in) :: self
+!    print *, "icol:", self%icol
+!    print *, "row_shift:", self%row_shift
+!    print *, "val:", self%val
+!  end subroutine print
 
 end module m_spmat_csr

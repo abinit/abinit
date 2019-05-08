@@ -78,7 +78,7 @@ program multibinit
   character(len=24) :: codename,start_datetime
   character(len=fnlen) :: filnam(17),tmpfilename
   character(len=500) :: message, arg
-  type(args_t) :: args
+  !type(args_t) :: args
   integer :: ii, nargs, iarg
   logical :: unittest=.False. , use_f03=.False.
   integer :: master, my_rank, comm, nproc, ierr

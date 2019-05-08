@@ -64,8 +64,8 @@ contains
     integer, intent(in) :: mshape(:)
     if (size(mshape)/=2) MSG_ERROR("LCO_mat should be of dimension 2.")
     call self%base_mat2d_t%initialize(mshape)
-    call ABI_ALLOCATE(self%icol, (self%nrow))
-    call ABI_ALLOCATE(self%val, (self%nrow))
+    ABI_MALLOC(self%icol, (self%nrow))
+    ABI_MALLOC(self%val, (self%nrow))
     self%is_sorted=.False.
     self%is_unique=.False.
 
@@ -137,7 +137,7 @@ contains
 
   subroutine sort_indices(self)
     class(LCO_mat_t), intent(inout) :: self
-    integer :: i, irow
+    integer ::  irow
     integer, allocatable :: order(:)
     do irow=1, self%nrow
        associate(indcol=>self%icol(irow))

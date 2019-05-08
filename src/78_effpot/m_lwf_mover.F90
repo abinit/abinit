@@ -4,7 +4,7 @@
 !! m_lwf_mover
 !!
 !! FUNCTION
-!! This module contains the lwf mover, which controls how the spin 
+!! This module contains the lwf mover, which controls how the lattice wannier function move.
 !!
 !!
 !! Datatypes:
@@ -58,6 +58,14 @@ contains
     class(lwf_mover_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     class(abstract_potential_t), intent(inout) :: effpot
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(effpot)
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+
+
     MSG_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 

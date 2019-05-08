@@ -91,9 +91,6 @@ contains
 
   subroutine initialize(self)
     class (potential_list_t), intent(inout) :: self
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%size=0
     self%capacity=0
     self%label="ListPotential"
@@ -144,16 +141,15 @@ contains
     class (potential_list_t) :: self
     class (abstract_potential_t), target :: effpot
     type(effpot_pointer_t), allocatable :: temp(:)
-    integer :: err
     self%size=self%size + 1
     if(self%size==1) then
        self%capacity=8
-       ABI_ALLOCATE(self%list, (self%capacity))
+       ABI_MALLOC(self%list, (self%capacity))
     else if ( self%size>self%capacity ) then
        self%capacity = self%size + self%size / 4 + 8
-       ALLOCATE(temp(self%capacity), stat=err)
+       ABI_MALLOC(temp, (self%capacity))
        temp(:self%size-1) = self%list(:)
-       call move_alloc(temp, self%list) !temp gets deallocated
+       ABI_MOVE_ALLOC(temp, self%list) !temp gets deallocated
     end if
     self%list(self%size)%ptr=>effpot
     self%is_null= (self%is_null .and. effpot%is_null)

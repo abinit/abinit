@@ -31,14 +31,15 @@ spin_write_traj = 0
 #%% system_xml = t23.xml
 #%% [files]
 #%% files_to_test = 
-#%%   t23.out, tolnlines = 0, tolabs = 0.01, tolrel = 0.02, fld_options = -medium;
+#%%   t23.out, tolnlines = 1, tolabs = 2e3, tolrel = 1, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He 
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   This is to test spin_dynamics=2 (Depondt-Mertens method) in Multibinit.
+#%%   read xml and run spin dynamics.
+#%%   This is to test spin_dynamics=2 (Depondt-Mertens method of spin rotation.)
 #%%   The ncell, spin_ntime_pre, spin_ntime parameters are small.
 #%%
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)

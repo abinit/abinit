@@ -84,9 +84,13 @@ contains
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
     type(abstract_potential_t), pointer :: tmp
-    allocate(abstract_potential_t:: tmp)
+    ABI_MALLOC_SCALAR(abstract_potential_t::tmp)
     !call tmp%initialize(....)
     ! set tmp
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(scmaker)
+    ABI_UNUSED_A(scpot)
+
     nullify(tmp)
   end subroutine fill_supercell
 
@@ -97,6 +101,11 @@ contains
     class(primitive_potential_list_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
+    ABI_UNUSED_A(fnames)
+
+
   end subroutine load_from_files
 
   !-------------------------------------------------------------------!
@@ -104,7 +113,10 @@ contains
   !-------------------------------------------------------------------!
   subroutine save_to_file(self, fname)
     class(primitive_potential_list_t), intent(inout) :: self
-    character(*), intent(in) :: fname
+    character(len=fnlen), intent(in) :: fname
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(fname)
+
   end subroutine save_to_file
 
 
@@ -129,6 +141,7 @@ contains
     call xmpi_bcast(self%size, master, comm, ierr)
     do i=1, self%size
        call self%data(i)%obj%finalize()
+       ! intel compiler do not allow this. why?
        !if(associated(self%data(i)%obj)) deallocate(self%data(i)%obj)
        nullify(self%data(i)%obj)
     end do
@@ -151,7 +164,6 @@ contains
     class(primitive_potential_list_t), intent(inout):: self
     class(primitive_potential_t), target, intent(inout) :: pot
     type(primitive_potential_pointer_t), allocatable :: temp(:)
-    integer :: err
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -162,9 +174,9 @@ contains
        ABI_ALLOCATE(self%data, (self%capacity))
     else if ( self%size>self%capacity ) then
        self%capacity = self%size + self%size / 4 + 8
-       ALLOCATE(temp(self%capacity), stat=err)
+       ABI_MALLOC(temp, (self%capacity))
        temp(1:self%size-1) = self%data(:)
-       call move_alloc(temp, self%data) !temp gets deallocated
+       ABI_MOVE_ALLOC(temp, self%data) !temp gets deallocated
     end if
 
     call xmpi_barrier(comm)
@@ -193,7 +205,7 @@ contains
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     type(potential_list_t), pointer :: tmp
-    allocate(tmp)
+    ABI_MALLOC_SCALAR(tmp)
     call self%fill_supercell_list( sc_maker, tmp)
     ! call tmp%initialize(....)
     ! set tmp

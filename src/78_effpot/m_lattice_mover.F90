@@ -1,3 +1,31 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_lattice_mover
+!! NAME
+!! m_lattice_mover
+!!
+!! FUNCTION
+!! This module contains the lattice mover.
+!!
+!!
+!! Datatypes:
+!!
+!! * lattice_mover_t: defines the lattice movers
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -12,6 +40,7 @@ module m_lattice_mover
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
+!!***
 
   implicit none
   private
@@ -35,26 +64,36 @@ module m_lattice_mover
 contains
 
   subroutine initialize(self, params, fnames)
-
     class(lattice_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
-    character(*), intent(in) :: fnames(:)
+    character(len=fnlen), intent(in) :: fnames(:)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
+    ABI_UNUSED_A(fnames)
+
   end subroutine initialize
 
   subroutine finalize(self)
     class(lattice_mover_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
   end subroutine finalize
 
   subroutine set_params(self, params)
     ! set parameters from input file. (something else, like temperature for MvT calculation?)
     class(lattice_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
+
   end subroutine set_params
 
   subroutine set_initial_state(self, mode)
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(mode)
+
   end subroutine set_initial_state
 
   subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
@@ -66,29 +105,45 @@ contains
     if(present(displacement) .or. present(strain)) then
        MSG_ERROR("displacement and strain should not be input for lattice mover")
     end if
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(effpot)
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+
   end subroutine run_one_step
 
   subroutine reset(self)
     ! reset the state of mover (e.g. counter->0)
     ! so it can be reused.
     class(lattice_mover_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
   end subroutine reset
 
   subroutine calc_observables(self)
     ! call functions to calculate observables.
     class(lattice_mover_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
   end subroutine calc_observables
 
   subroutine write_hist(self)
     ! write to hist file
     class(lattice_mover_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
   end subroutine write_hist
 
-  subroutine get_state(self, position, strain, spin, ihist)
+  subroutine get_state(self, displacement, strain, spin, lwf, ihist)
     ! get the state of the ihist(th) step. ihist can be 0 (current), -1 (last), ... -maxhist..
     class(lattice_mover_t), intent(in):: self
-    real(dp), optional, intent(inout) :: position, strain, spin
+    real(dp), optional, intent(inout) :: displacement, strain, spin, lwf
     integer, optional, intent(in):: ihist
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(ihist)
   end subroutine get_state
 
 end module m_lattice_mover

@@ -74,6 +74,8 @@ contains
     class(base_mat_t), intent(inout) :: self
     integer, intent(in) :: ind(self%ndim)
     real(dp), intent(in) :: val
+    ABI_UNUSED(ind)
+    ABI_UNUSED(val)
   end subroutine add_entry
 
   subroutine base_mat2d_t_initialize(self,mshape)
@@ -88,6 +90,8 @@ contains
     class(base_mat2d_t), intent(in) :: self
     real(dp), intent(in) :: x(self%ncol)
     real(dp), intent(out) :: b(self%nrow)
+    ABI_UNUSED_A(x)
+    ABI_UNUSED_A(b)
   end subroutine base_mat2d_t_mv
 
 end module m_spmat_base

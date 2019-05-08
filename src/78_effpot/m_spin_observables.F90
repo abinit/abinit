@@ -34,7 +34,9 @@ module m_spin_observables
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_spin_terms, only: spin_terms_t
+  use m_spin_potential, only: spin_potential_t
+  !use m_spin_supercell, only: spin_supercell_t
+  use m_multibinit_supercell, only: mb_supercell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
 
   implicit none
@@ -43,9 +45,9 @@ module m_spin_observables
   !!***
   type, public :: spin_observable_t
      logical :: calc_thermo_obs, calc_correlation_obs, calc_traj_obs
-     integer :: nspins, nsublatt, ntime, nscell
+     integer :: nspin, nsublatt, ntime, nscell
      real(dp) :: temperature
-     integer, allocatable :: isublatt(:), nspins_sub(:)
+     integer, allocatable :: isublatt(:), nspin_sub(:)
      real(dp) :: energy
      ! Ms_coeff: coefficient to calcualte staggered Mst
      ! Mst_sub: M staggered for sublattice
@@ -67,24 +69,25 @@ module m_spin_observables
      real(dp) :: avg_m_t   ! average of sum(Mst_norm_total) over t
      real(dp) :: avg_m2_t  ! average of sum(Mst_norm_total**2) over t
      real(dp) :: avg_m4_t  !average of sum(Mst_sub_total_norm**4) over t
+   contains
+     procedure :: initialize
+     procedure :: finalize
+     procedure :: reset
+     procedure :: get_staggered_M
+     procedure :: get_thermo_obs
+     procedure :: get_correlation_obs
+     procedure :: get_traj_obs
+     procedure :: get_observables
 
   end type spin_observable_t
 
-  public :: ob_initialize
-  public :: ob_finalize
-  public :: ob_reset
-  public :: ob_calc_staggered_M
-  public :: ob_calc_thermo_obs
-  public :: ob_calc_correlation_obs
-  public :: ob_calc_traj_obs
-  public :: ob_calc_observables
 contains
 
 
-  subroutine ob_initialize(self, supercell, params)
+  subroutine initialize(self, supercell , params)
 
     class(spin_observable_t) :: self
-    type(spin_terms_t) :: supercell
+    type(mb_supercell_t) :: supercell
     type(multibinit_dtset_type) :: params
     integer i
     complex(dp) :: i2pi = (0.0, two_pi)
@@ -93,36 +96,36 @@ contains
     self%calc_traj_obs= (params%spin_calc_traj_obs ==1)
     self%calc_correlation_obs=(params%spin_calc_correlation_obs ==1)
 
-    self%nspins=supercell%nspins
+    self%nspin=supercell%nspin
     self%nsublatt=maxval(supercell%ispin_prim)
 
 
-    ABI_ALLOCATE(self%S, (3, self%nspins))
-    ABI_ALLOCATE(self%Snorm, (self%nspins))
+    ABI_ALLOCATE(self%S, (3, self%nspin))
+    ABI_ALLOCATE(self%Snorm, (self%nspin))
 
-    ABI_ALLOCATE(self%isublatt,(self%nspins) )
+    ABI_ALLOCATE(self%isublatt,(self%nspin) )
     self%isublatt(:)=supercell%ispin_prim(:)
 
-    ABI_ALLOCATE(self%nspins_sub, (self%nsublatt))
-    self%nspins_sub(:)=0
-    do i =1, self%nspins
-       self%nspins_sub(self%isublatt(i)) = self%nspins_sub(self%isublatt(i)) + 1
+    ABI_ALLOCATE(self%nspin_sub, (self%nsublatt))
+    self%nspin_sub(:)=0
+    do i =1, self%nspin
+       self%nspin_sub(self%isublatt(i)) = self%nspin_sub(self%isublatt(i)) + 1
     end do
 
-    ABI_ALLOCATE(self%Ms_coeff,(self%nspins) )
+    ABI_ALLOCATE(self%Ms_coeff,(self%nspin) )
     ABI_ALLOCATE(self%Mst_sub,(3, self%nsublatt) )
     ABI_ALLOCATE(self%Mst_sub_norm, (self%nsublatt))
 
     ABI_ALLOCATE(self%Avg_Mst_sub_norm, (self%nsublatt))
 
-    do i =1, self%nspins
+    do i =1, self%nspin
        self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_qpoint, supercell%Rvec(:,i))))
     end do
 
-    call ob_reset(self, params)
-  end subroutine ob_initialize
+    call reset(self, params)
+  end subroutine initialize
 
-  subroutine ob_reset(self, params)
+  subroutine reset(self, params)
     ! set values to zeros.
     class(spin_observable_t), intent(inout) :: self
     class(multibinit_dtset_type), optional, intent(in) :: params
@@ -146,16 +149,16 @@ contains
     self%avg_m_t=0.0
     self%avg_m2_t=0.0
     self%avg_m4_t=0.0
-  end subroutine ob_reset
+  end subroutine reset
 
-  subroutine ob_finalize(self)
+  subroutine finalize(self)
     class(spin_observable_t) :: self
     if (allocated(self%isublatt)) then
        ABI_DEALLOCATE(self%isublatt)
     endif
 
-    if (allocated(self%nspins_sub)) then
-       ABI_DEALLOCATE(self%nspins_sub)
+    if (allocated(self%nspin_sub)) then
+       ABI_DEALLOCATE(self%nspin_sub)
     endif
 
     if(allocated(self%S)) then
@@ -180,23 +183,23 @@ contains
        ABI_DEALLOCATE(self%Avg_Mst_sub_norm)
     endif
 
-  end subroutine ob_finalize
+  end subroutine finalize
 
-  subroutine ob_update(self, S, Snorm, energy)
+  subroutine update(self, S, Snorm, energy)
     class(spin_observable_t), intent(inout) :: self
-    real(dp), intent(in):: S(3,self%nspins), Snorm(self%nspins), energy
+    real(dp), intent(in):: S(3,self%nspin), Snorm(self%nspin), energy
     self%S=S
     self%Snorm=Snorm
     self%energy=energy
-  end subroutine ob_update
+  end subroutine update
 
-  subroutine ob_calc_staggered_M(self)
+  subroutine get_staggered_M(self)
 
     class(spin_observable_t), intent(inout) :: self
     integer :: i, isub
     self%Mst_sub(:,:)=0.0
     self%M_total(:)=0.0
-    do i = 1, self%nspins
+    do i = 1, self%nspin
        isub=self%isublatt(i)
        self%Mst_sub(:, isub) = self%Mst_sub(:, isub) +  self%S(:, i)* self%Ms_coeff(i) * self%Snorm(i)
        self%M_total(:) = self%M_total + self%S(:, i)*self%Snorm(i)
@@ -209,23 +212,24 @@ contains
 
     self%avg_Mst_sub_norm(:)=(self%avg_Mst_sub_norm(:)*self%ntime + self%Mst_sub_norm(:))/(self%ntime+1)
     self%avg_Mst_norm_total=(self%avg_Mst_norm_total*self%ntime + self%Mst_norm_total)/(self%ntime+1)
-  end subroutine ob_calc_staggered_M
+  end subroutine get_staggered_M
 
-  subroutine ob_calc_traj_obs(self)
+  subroutine get_traj_obs(self)
     class(spin_observable_t) :: self
-    ABI_UNUSED(self%avg_E_t)
-  end subroutine ob_calc_traj_obs
+    ABI_UNUSED(self%nspin)
+  end subroutine get_traj_obs
 
-  subroutine ob_calc_thermo_obs(self)
+  subroutine get_thermo_obs(self )
     class(spin_observable_t) :: self
     real(dp) :: avgm
+    ABI_UNUSED(self%nspin)
     ! Cv
     self%avg_E_t = (self%avg_E_t*self%ntime + self%energy)/(self%ntime+1)
     self%avg_E2_t = (self%avg_E2_t*self%ntime + self%energy**2)/(self%ntime+1)
     if(self%temperature<1d-12) then
        self%Cv=0.0d0
     else
-       self%Cv = (self%avg_E2_t-self%avg_E_t**2)/self%temperature**2/kb_SI
+       self%Cv = (self%avg_E2_t-self%avg_E_t**2)/self%temperature**2
     end if
 
 
@@ -241,35 +245,34 @@ contains
     if(self%temperature<1d-12) then
        self%chi=(self%avg_m2_t-self%avg_m_t**2)
     else
-       self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature/kb_SI
+       self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature
     endif
+  end subroutine get_thermo_obs
 
-  end subroutine ob_calc_thermo_obs
 
-  subroutine ob_calc_correlation_obs(self)
+  subroutine get_correlation_obs(self)
+    class(spin_observable_t) :: self
+    ABI_UNUSED(self%nspin)
+  end subroutine get_correlation_obs
+
+  subroutine get_observables(self, S, Snorm, energy)
 
     class(spin_observable_t) :: self
-    ABI_UNUSED(self%ntime)
-  end subroutine ob_calc_correlation_obs
-
-  subroutine ob_calc_observables(self, S, Snorm, energy)
-
-    class(spin_observable_t) :: self
-    real(dp), intent(in) :: S(3,self%nspins), Snorm(self%nspins), energy
-    call ob_update(self, S, Snorm, energy)
-    call ob_calc_staggered_M(self)
+    real(dp), intent(in) :: S(3,self%nspin), Snorm(self%nspin), energy
+    call update(self, S, Snorm, energy)
+    call get_staggered_M(self)
     if(self%calc_traj_obs) then
-       call ob_calc_traj_obs(self)
+       call get_traj_obs(self)
     end if
     if(self%calc_thermo_obs) then
-       call ob_calc_thermo_obs(self)
+       call get_thermo_obs(self)
     end if
     if(self%calc_correlation_obs) then
-       call ob_calc_correlation_obs(self)
+       call get_correlation_obs(self)
     endif
     self%ntime=self%ntime+1
 
-  end subroutine ob_calc_observables
+  end subroutine get_observables
 
 
 end module m_spin_observables

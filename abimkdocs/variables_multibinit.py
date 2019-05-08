@@ -827,6 +827,8 @@ Flag to run spin dynamics.
 
 * 2 --> Run spin dynamics with Depondt-Mertens method [[cite:Depondt2009]].
 
+* 3 --> Run Monte Carlo.
+
 The HeunP method does less computation for each step,
 whereas the Depondt-Mertens method allow larger time step.
 For system with very simple interaction terms, HeunP could be faster.
@@ -961,8 +963,8 @@ Variable(
     mnemonics="SPIN Single Ion Anistropy K1 AMPtitude",
     text=r"""
 User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
-The direction is defined with [[multibinit:spin_sia_k1dir]].
-Default value: 0.0.
+The direction is defined with [[multibinit:spin_sia_k1dir]]. The unit is Ha. To use eV or Ry as unit, 
+put eV or Ry at the end.
 """,
 ),
 

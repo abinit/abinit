@@ -55,7 +55,6 @@ module m_abstract_potential
      logical :: has_lwf = .False.
      logical :: is_null=.True.   ! if is_null, this term does not exist.
      type(mb_supercell_t) ,pointer :: supercell => null()
-     !real(dp), allocatable :: ms(:)
      character (len=200) :: label="Abstract Potential"
    contains
      procedure :: set_supercell   ! set_supercell
@@ -70,7 +69,8 @@ contains
   subroutine set_supercell(self, supercell)
     class(abstract_potential_t), intent(inout) :: self
     type(mb_supercell_t), target, intent(inout) :: supercell
-    self%supercell => supercell
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(supercell)
     MSG_ERROR("Every potential should override this set_supercell method to avoid mistake.")
   end subroutine set_supercell
 
@@ -84,8 +84,34 @@ contains
   subroutine set_params(self, params)
     class(abstract_potential_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
     MSG_ERROR("Every potential should override this method set_params to avoid mistakes")
   end subroutine set_params
+
+  ! hexu comment : which one is better, more general variables,
+  !  or one function for each type of var?
+  !subroutine set_variables(self, displacements, strain, spin)
+  !  class(lattice_api_t), intent(inout) :: self
+  !  real(dp), optional, intent(in) :: displacements(:,:), strain(:,:), spin(:,:)
+  !end subroutine set_variables
+
+  !subroutine get_1st_deriv(self, force, stress, bfield)
+  !  class(lattice_api_t), intent(inout) :: self
+  !  real(dp), optional, intent(out) :: force(:,:), stress(:,:), bfield(:,:)
+  !end subroutine get_1st_deriv
+
+  ! subroutine set_distortion(self, displacement, strain)
+  !   class(abstract_potential_t), intent(inout) :: self
+  !   real(dp), optional, intent(in) :: displacement(:,:), strain(:,:)
+  !   MSG_ERROR("set_distortion not implemented.")
+  ! end subroutine set_distortion
+
+  ! subroutine set_spin(self, spin)
+  !   class(abstract_potential_t), intent(inout) :: self
+  !   real(dp), optional, intent(in) :: spin
+  !   MSG_ERROR("set_spin not implemented.")
+  ! end subroutine set_spin
 
   subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
     ! This function calculate the energy and its first derivative
@@ -98,6 +124,17 @@ contains
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     ! if present in input
     ! calculate if required
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(force)
+    ABI_UNUSED_A(stress)
+    ABI_UNUSED_A(bfield)
+    ABI_UNUSED_A(lwf_force)
+    ABI_UNUSED_A(energy)
+
     MSG_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 
@@ -108,7 +145,34 @@ contains
     real(dp), intent(inout) :: S(:,:),  Snew(:)
     integer, intent(in) :: ispin
     real(dp), intent(inout) :: deltaE
-    MSG_ERROR("get_delta_E currenlty only implemented for spin potential.")
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(S)
+    ABI_UNUSED_A(ispin)
+    ABI_UNUSED_A(Snew)
+    ABI_UNUSED_A(deltaE)
+    MSG_ERROR("get_delta_E not implemented for this effpot.")
   end subroutine get_delta_E
+
+!   subroutine get_energy(self, energy)
+!     class(abstract_potential_t), intent(inout) :: self
+!     real(dp) , intent(inout) :: energy
+!   end subroutine get_energy
+
+
+!   subroutine get_force(self, force)
+!     class(abstract_potential_t), intent(inout) :: self
+!     real(dp), intent(out) :: force(:,:)
+!   end subroutine get_force
+
+!   subroutine get_stress(self, stress)
+!     class(abstract_potential_t), intent(inout) :: self
+!     real(dp), intent(out) :: stress(:,:)
+!   end subroutine get_stress
+
+!   subroutine get_effective_Bfield(self, spin,bfield)
+!     class(abstract_potential_t), intent(in) :: self
+!     real(dp), intent(in) :: spin(:,:)
+!     real(dp), intent(inout) :: bfield(:,:)
+!   end subroutine get_effective_Bfield
 
 end module m_abstract_potential

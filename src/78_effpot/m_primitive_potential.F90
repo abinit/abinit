@@ -84,19 +84,28 @@ subroutine fill_supercell(self, scmaker, scpot)
     ! e.g. type(spin_potential_t), pointer :: tmp
     ! call tmp%initialize(....)
     ! set tmp
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(scmaker)
+    ABI_UNUSED_A(scpot)
+    
   end subroutine fill_supercell
 
   subroutine load_from_files(self, params,  fnames)
     class(primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
-    write(*, *) "load_from_files for abstract primitive potential is not implemented."
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(params)
+    ABI_UNUSED_A(fnames)
+    MSG_ERROR("load_from_files for abstract primitive potential is not implemented.")
   end subroutine load_from_files
 
 
   subroutine save_to_file(self, fname)
     class(primitive_potential_t), intent(inout) :: self
-    character(*), intent(in) :: fname
+    character(len=fnlen), intent(in) :: fname
+    ABI_UNUSED_A(self)
+    !ABI_UNUSED_A(fname)
   end subroutine save_to_file
 
 end module m_primitive_potential

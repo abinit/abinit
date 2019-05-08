@@ -164,7 +164,6 @@ end subroutine real_array_type_push
 subroutine real_array_type_finalize(self)
 
   class(real_array_type), intent(inout):: self
-
   ABI_SFREE(self%data)
   self%size=0
   self%capacity=0
@@ -315,17 +314,17 @@ end subroutine int_array_type_finalize
 subroutine int2d_array_type_push(self, val)
 
     class(int2d_array_type), intent(inout):: self
-    integer :: val(:), err
+    integer :: val(:)
     integer, allocatable :: temp(:,:)
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ALLOCATE(self%data(size(val), self%capacity), stat=err)
+      ABI_MALLOC(self%data, (size(val), self%capacity))
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ALLOCATE(temp(size(val), self%capacity), stat=err)
+      ABI_MALLOC(temp, (size(val), self%capacity))
       temp(:,:self%size-1) = self%data
-      call move_alloc(temp, self%data) !temp gets deallocated
+      ABI_MOVE_ALLOC(temp, self%data) !temp gets deallocated
     end if
     self%data(:,self%size)=val
 end subroutine int2d_array_type_push
@@ -398,7 +397,7 @@ subroutine int2d_array_type_finalize(self)
 
   class(int2d_array_type), intent(inout):: self
   if ( allocated(self%data) ) then
-      DEALLOCATE(self%data)
+      ABI_SFREE(self%data)
   end if
   self%size=0
   self%capacity=0
@@ -454,15 +453,10 @@ subroutine insertion_sort_int_test()
   call insertion_sort_int(a, order)
   a2=[3,6,2,4, 3, 5, 0, 9]
   call insertion_sort_int(a2)
-  print *, a2
 end subroutine insertion_sort_int_test
 
 subroutine int2d_array_test()
   type(int2d_array_type) :: t
-  integer :: i
-  print *, array_morethan([2,1,4], [1,1,2], 3)
-  print *, array_morethan([2,1,4], [1,2,2], 3)
-  print *, array_morethan([1,2,2], [2,1,4], 3)
   call t%push_unique([1,1,2])
   call t%push_unique([1,2,2])
   call t%push_unique([1,1,2])
@@ -470,9 +464,6 @@ subroutine int2d_array_test()
   call t%push_unique([-1, 3, 3])
   call t%push_unique([2,1, 4])
   call t%sort()
-  do i=1, t%size
-     print *, t%data(:, i)
-  end do
 end subroutine int2d_array_test
 
 subroutine dynamic_array_unittest()

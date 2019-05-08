@@ -1,16 +1,16 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_multibinit_supercell
+!!****m* ABINIT/m_spin_supercell
 !! NAME
-!! m_multibinit_supercell
+!! m_spin_supercell
 !!
 !! FUNCTION
-!! This module define the supercell_t type, which contains all the information of the supercell.
+!! This module define the spin_supercell_t type, which contains the supercell for spin.
 !!
 !! Datatypes:
-!!  mb_supercell_t
+!!  spin_supercell_t
 !!
 !! Subroutines:
-!!
+!! 
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2019 ABINIT group (hexu)
@@ -27,70 +27,50 @@
 #endif
 #include "abi_common.h"
 
-module m_multibinit_supercell
+module m_spin_supercell
   use defs_basis
   use m_abicore
   use m_errors
   use m_mpi_scheduler, only: init_mpi_info
-  use m_xmpi
   implicit none
   private
 !!***
 
-  type ,public :: mb_supercell_t
-     integer :: sc_matrix(3,3)
-     integer :: ncell
-     logical :: has_lattice=.False.
-     logical :: has_spin=.False.
-     logical :: has_lwf=.False.
-     logical :: has_electron=.False.
-     ! lattice related
-     integer :: natom
-     integer :: ntypat
-     real(dp):: rprimd(3,3)
-     integer, allocatable :: typat(:)
-     real(dp), allocatable :: xred(:, :)
-     ! spin related
+  type, public :: spin_supercell_t
      integer :: nspin
-     real(dp), allocatable :: ms(:), spin_positions(:, :), gyro_ratio(:), gilbert_damping(:)
-     integer, allocatable ::  ispin_prim(:), rvec(:,:)
-
-     ! lwf related
-     integer :: nlwf
-
+     real(dp), allocatable :: ms(:), pos(:, :), gyro_ratio(:), gilbert_damping(:)
+     integer, allocatable :: iatoms(:), ispin_prim(:), rvec(:,:)
    contains
-     procedure:: initialize
+     procedure :: initialize
+     procedure :: set
      procedure :: finalize
-  end type mb_supercell_t
+  end type spin_supercell_t
 contains
-
-
-  subroutine initialize(self, natom, nspin, nlwf)
-    class(mb_supercell_t),intent(inout) :: self
-    integer, intent(in), optional :: nspin, natom, nlwf
+  subroutine initialize(self, nspin)
+    class(spin_supercell_t),intent(inout) :: self
+    integer, intent(in) :: nspin
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-    ! TODO: lattice
-    ABI_UNUSED(natom)
-    ABI_UNUSED(nlwf)
 
-    if (present(nspin)) then
-       if (iam_master) self%nspin=nspin
-       call xmpi_bcast(self%nspin, master, comm, ierr)
-       ABI_ALLOCATE(self%spin_positions, (3,self%nspin) )
-       ABI_ALLOCATE(self%ms, (self%nspin))
-       ABI_ALLOCATE(self%ispin_prim, (self%nspin))
-       ABI_ALLOCATE(self%rvec, (3, self%nspin))
-       ABI_ALLOCATE(self%gyro_ratio, (self%nspin))
-       ABI_ALLOCATE(self%gilbert_damping, (self%nspin) )
-    end if
+
+    if (iam_master) self%nspin=nspin
+    call xmpi_bcast(self%nspin, master, comm, ierr)
+
+    ABI_ALLOCATE(self%iatoms, (self%nspin))
+    ABI_ALLOCATE(self%pos, (3,self%nspin) )
+    ABI_ALLOCATE(self%ms, (self%nspin))
+    ABI_ALLOCATE(self%ispin_prim, (self%nspin))
+    ABI_ALLOCATE(self%rvec, (3, self%nspin))
+    ABI_ALLOCATE(self%gyro_ratio, (self%nspin))
+    ABI_ALLOCATE(self%gilbert_damping, (self%nspin) )
   end subroutine initialize
 
-  subroutine set(self, ispin_prim, rvec,  pos, ms, gyro_ratio, damping)
-    class(mb_supercell_t),intent(inout) :: self
+  subroutine set(self, ispin_prim, rvec, iatoms, pos, ms, gyro_ratio, damping)
+    class(spin_supercell_t),intent(inout) :: self
     integer, intent(in) :: ispin_prim(:), rvec(:,:)
+    integer, intent(in) :: iatoms(:)
     real(dp), intent(in)::pos(:,:), ms(:), gyro_ratio(:), damping(:)
     !Local variables-------------------------------
     integer :: nspin
@@ -100,9 +80,11 @@ contains
 
 
     nspin=self%nspin
+    if (iam_master) self%iatoms(:)=iatoms(:)
+    call xmpi_bcast(self%iatoms, master, comm, ierr)
 
-    if (iam_master) self%spin_positions(:,:)=pos(:,:)
-    call xmpi_bcast(self%spin_positions, master, comm, ierr)
+    if (iam_master) self%pos(:,:)=pos(:,:)
+    call xmpi_bcast(self%pos, master, comm, ierr)
 
     if (iam_master) self%ms(:)=ms(:)
     call xmpi_bcast(self%ms, master, comm, ierr)
@@ -123,16 +105,19 @@ contains
 
 
   subroutine finalize(self)
-    class(mb_supercell_t), intent(inout) :: self
+    class(spin_supercell_t), intent(inout) :: self
     self%nspin=0
     if (allocated(self%ms))  then
        ABI_DEALLOCATE(self%ms)
     endif
 
-    if (allocated(self%spin_positions))  then
-       ABI_DEALLOCATE(self%spin_positions)
+    if (allocated(self%pos))  then
+       ABI_DEALLOCATE(self%pos)
     endif
 
+    if (allocated(self%iatoms)) then
+       ABI_DEALLOCATE(self%iatoms)
+    endif
     if (allocated(self%ispin_prim)) then
        ABI_DEALLOCATE(self%ispin_prim)
     endif
@@ -150,6 +135,4 @@ contains
 
   end subroutine finalize
 
-
-
-end module m_multibinit_supercell
+end module m_spin_supercell

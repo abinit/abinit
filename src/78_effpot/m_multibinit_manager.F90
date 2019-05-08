@@ -117,7 +117,7 @@ contains
        self%params=>params
     else
        self%use_external_params=.False.
-       allocate(self%params)
+       ABI_MALLOC_SCALAR(self%params)
        call self%read_params()
     endif
     self%filenames=filenames
@@ -141,7 +141,7 @@ contains
     call self%lattice_mover%finalize()
     if(.not. self%use_external_params) then
        call multibinit_dtset_free(self%params)
-       ! TODO: Intel compilers complains but it should not. Uncomment when know why.
+       ! TODO: Intel compilers complains but it should not. Uncomment when knowing why.
        !deallocate(self%params)
     endif
     nullify(self%params)
@@ -239,7 +239,7 @@ contains
     ! spin
     call xmpi_bcast(self%params%spin_dynamics, master, comm, ierr)
     if(self%params%spin_dynamics>0) then
-       allocate(spin_pot)
+       ABI_MALLOC_SCALAR(spin_pot)
        call spin_pot%initialize(self%unitcell)
        call spin_pot%load_from_files(self%params, self%filenames)
        call self%prim_pots%append(spin_pot)
@@ -270,6 +270,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine fit_lattice_model(self)
     class(mb_manager_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
     !TODO:
   end subroutine fit_lattice_model
 
