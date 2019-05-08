@@ -30,8 +30,6 @@
 
 subroutine xmpi_alltoall_int(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
@@ -71,8 +69,6 @@ end subroutine xmpi_alltoall_int
 
 subroutine xmpi_alltoall_dp2d(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in)    :: xval(:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:)
@@ -109,9 +105,6 @@ end subroutine xmpi_alltoall_dp2d
 !! SOURCE
 
 subroutine xmpi_alltoall_dp4d(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in)    :: xval(:,:,:,:)

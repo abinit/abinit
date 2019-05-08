@@ -26,14 +26,14 @@ logger = logging.getLogger(__name__)
 # monty installs the subpackage paths and this breaks the import below
 pack_dir, x = os.path.split(os.path.abspath(__file__))
 pack_dir, x = os.path.split(pack_dir)
-sys.path.insert(0,pack_dir)
+sys.path.insert(0, pack_dir)
 pack_dir, x = os.path.split(pack_dir)
-sys.path.insert(0,pack_dir)
+sys.path.insert(0, pack_dir)
 
 try:
     from tests.pymods.memprof import AbimemParser
 except ImportError:
-    print("Cannot find tests.pymods.memprof module in python path")
+    print("Cannot find tests.pymods.memprof module in python path.")
     print("Very likely, you have copied the scripts from ~abinit/test/Scripts to another directory")
     print("In this case, you have to add the abinit directory to the python path by executing:\n")
     print("     export PYTHONPATH=~/abinit_directory\n")
@@ -129,7 +129,8 @@ def get_parsers(options):
 def main():
     def str_examples():
         return """\
-usage example:
+Usage example:
+
     abimem.py leaks [FILES]       => Find possible memory leaks in FILE(s)
     abimem.py small [FILES]       => Find small memory allocations in FILE(s)
     abimem.py intens [FILES]      => Find periods of intense memory allocation in FILE(s)

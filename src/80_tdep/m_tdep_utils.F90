@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -578,9 +579,9 @@ contains
   double precision, intent(out) :: U0,Free_Anh
   double precision, intent(in),optional  :: ftot3(3*InVar%natom,InVar%nstep)
   
-  integer :: ii,jj,kk,istep,iatom,jatom,katom,islice,nslice,istepmin,istepmax
-  integer :: alpha,beta,gama,lambda,nu,delta,iatcell
-  double precision :: force_i,Delta_F2,Delta_U,Delta_U2,norm1
+  integer :: ii,jj,istep,iatom,jatom,islice,nslice,istepmin,istepmax
+  !integer :: nu,delta !alpha,beta,gama,lambda,
+  double precision :: Delta_F2,Delta_U,Delta_U2
   double precision :: tmp0,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7,tmp8,tmp9,sigma,U_1,U_2,U_3,UMD
   double precision, allocatable :: Fmean(:)
   double precision, allocatable :: U_MD(:),U_TDEP(:),PijUi(:),PhijUiUj(:),PsijUiUjUk(:),residualF(:)

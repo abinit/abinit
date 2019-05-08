@@ -18,20 +18,17 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "align.c",
  "calling_levmar.c",
  "cclock.c",
  "etime.c",
  #"filelock.c",
  "fsi_posix.c",
  "gnu_tools.c",
- "intrinsics.c",
  "mallinfo.c",
  "md5.c",
  "m_clib.F90",
- "progress_bar.c",
  "xexit.c",
- "xmalloc.c"
+ "xmalloc.c",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

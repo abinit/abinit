@@ -206,8 +206,6 @@ CONTAINS  !===========================================================
 
 subroutine xpaw_mpi_abort(comm,mpierr,msg,exit_status)
 
- implicit none
-
 !Arguments-------------------------
  integer,optional,intent(in) :: comm,mpierr,exit_status
  character(len=*),optional,intent(in) :: msg
@@ -275,8 +273,6 @@ end subroutine xpaw_mpi_abort
 
 function xpaw_mpi_comm_rank(comm)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(in) :: comm
  integer :: xpaw_mpi_comm_rank
@@ -318,8 +314,6 @@ end function xpaw_mpi_comm_rank
 
 function xpaw_mpi_comm_size(comm)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(in) :: comm
  integer :: xpaw_mpi_comm_size
@@ -360,8 +354,6 @@ end function xpaw_mpi_comm_size
 !! SOURCE
 
 subroutine xpaw_mpi_barrier(comm)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(in) :: comm
@@ -411,8 +403,6 @@ end subroutine xpaw_mpi_barrier
 
 subroutine xpaw_mpi_wait(request,mpierr)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(out) :: mpierr
  integer,intent(inout) :: request
@@ -456,8 +446,6 @@ end subroutine xpaw_mpi_wait
 !! SOURCE
 
 subroutine xpaw_mpi_waitall(array_of_requests,mpierr)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(inout) :: array_of_requests(:)
@@ -505,8 +493,6 @@ end subroutine xpaw_mpi_waitall
 !! SOURCE
 
 subroutine xpaw_mpi_iprobe(source,tag,mpicomm,flag,mpierr)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(in) :: mpicomm,source,tag
@@ -558,8 +544,6 @@ end subroutine xpaw_mpi_iprobe
 
 subroutine xpaw_mpi_allgather_int1d(xval,nelem,recvbuf,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(in) :: xval(:)
  integer, intent(inout) :: recvbuf(:)
@@ -606,8 +590,6 @@ end subroutine xpaw_mpi_allgather_int1d
 !! SOURCE
 
 subroutine xpaw_mpi_allgather_dp1d(xval,nelem,recvbuf,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:)
@@ -656,8 +638,6 @@ end subroutine xpaw_mpi_allgather_dp1d
 
 subroutine xpaw_mpi_allgather_dp2d(xval,nelem,recvbuf,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:,:)
  real(dp), intent(inout) :: recvbuf(:,:)
@@ -704,8 +684,6 @@ end subroutine xpaw_mpi_allgather_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_allgather_dp3d(xval,nelem,recvbuf,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:,:,:)
@@ -757,8 +735,6 @@ end subroutine xpaw_mpi_allgather_dp3d
 !! SOURCE
 
 subroutine xpaw_mpi_allgatherv_int1d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, intent(in) :: xval(:)
@@ -816,8 +792,6 @@ end subroutine xpaw_mpi_allgatherv_int1d
 
 subroutine xpaw_mpi_allgatherv_dp1d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:)
  real(dp), intent(inout) :: recvbuf(:)
@@ -873,8 +847,6 @@ end subroutine xpaw_mpi_allgatherv_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:,:)
@@ -936,8 +908,6 @@ end subroutine xpaw_mpi_allgatherv_dp2d
 
 subroutine xpaw_mpi_scatterv_int1d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(in) :: xval(:)
  integer, intent(inout) :: recvbuf(:)
@@ -994,8 +964,6 @@ end subroutine xpaw_mpi_scatterv_int1d
 
 subroutine xpaw_mpi_scatterv_dp1d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:)
  real(dp), intent(inout)   :: recvbuf(:)
@@ -1051,8 +1019,6 @@ end subroutine xpaw_mpi_scatterv_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:,:)
@@ -1111,8 +1077,6 @@ end subroutine xpaw_mpi_scatterv_dp2d
 
 subroutine xpaw_mpi_alltoall_int1d(xval,sendsize,recvbuf,recvsize,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(in) :: xval(:)
  integer, intent(inout) :: recvbuf(:)
@@ -1165,8 +1129,6 @@ end subroutine xpaw_mpi_alltoall_int1d
 
 subroutine xpaw_mpi_alltoall_dp1d(xval,sendsize,recvbuf,recvsize,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(in)    :: xval(:)
  real(dp), intent(inout) :: recvbuf(:)
@@ -1216,8 +1178,6 @@ end subroutine xpaw_mpi_alltoall_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_alltoall_dp2d(xval,sendsize,recvbuf,recvsize,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(in)    :: xval(:,:)
@@ -1272,8 +1232,6 @@ end subroutine xpaw_mpi_alltoall_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_alltoallv_int1d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, intent(in) :: xval(:)
@@ -1336,8 +1294,6 @@ end subroutine xpaw_mpi_alltoallv_int1d
 
 subroutine xpaw_mpi_alltoallv_dp1d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:)
  real(dp), intent(inout) :: recvbuf(:)
@@ -1396,8 +1352,6 @@ end subroutine xpaw_mpi_alltoallv_dp1d
 
 subroutine xpaw_mpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:,:)
  real(dp), intent(inout) :: recvbuf(:,:)
@@ -1455,8 +1409,6 @@ end subroutine xpaw_mpi_alltoallv_dp2d
 
 subroutine xpaw_mpi_bcast_int(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(inout) :: xval
  integer, intent(in) :: spaceComm,master
@@ -1499,8 +1451,6 @@ end subroutine xpaw_mpi_bcast_int
 !! SOURCE
 
 subroutine xpaw_mpi_bcast_int1d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(inout) :: xval(:)
@@ -1545,8 +1495,6 @@ end subroutine xpaw_mpi_bcast_int1d
 !!
 !! SOURCE
 subroutine xpaw_mpi_bcast_dp1d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:)
@@ -1595,8 +1543,6 @@ end subroutine xpaw_mpi_bcast_dp1d
 
 subroutine xpaw_mpi_bcast_dp2d(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:)
  integer, intent(in) :: spaceComm,master
@@ -1643,8 +1589,6 @@ end subroutine xpaw_mpi_bcast_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_bcast_dp3d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:,:)
@@ -1698,8 +1642,6 @@ end subroutine xpaw_mpi_bcast_dp3d
 
 subroutine xpaw_mpi_gather_int1d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(in) :: sendcount,recvcount
  integer, intent(in) :: xval(:)
@@ -1749,8 +1691,6 @@ end subroutine xpaw_mpi_gather_int1d
 !! SOURCE
 
 subroutine xpaw_mpi_gather_dp1d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, intent(in) :: sendcount,recvcount
@@ -1802,8 +1742,6 @@ end subroutine xpaw_mpi_gather_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_gather_dp2d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, intent(in) :: sendcount,recvcount
@@ -1858,8 +1796,6 @@ end subroutine xpaw_mpi_gather_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_gatherv_int1d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, intent(in) :: xval(:)
@@ -1918,8 +1854,6 @@ end subroutine xpaw_mpi_gatherv_int1d
 
 subroutine xpaw_mpi_gatherv_dp1d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:)
  real(dp), intent(inout) :: recvbuf(:)
@@ -1976,8 +1910,6 @@ end subroutine xpaw_mpi_gatherv_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_gatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(in) :: xval(:,:)
@@ -2039,8 +1971,6 @@ end subroutine xpaw_mpi_gatherv_dp2d
 
 subroutine xpaw_mpi_recv_int1d(xval,source,tag,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(inout) :: xval(:)
  integer, intent(in) :: source,tag,spaceComm
@@ -2092,8 +2022,6 @@ subroutine xpaw_mpi_recv_int1d(xval,source,tag,spaceComm,ier)
 !! SOURCE
 
 subroutine xpaw_mpi_recv_dp1d(xval,source,tag,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:)
@@ -2147,8 +2075,6 @@ end subroutine xpaw_mpi_recv_dp1d
 
 subroutine xpaw_mpi_recv_dp2d(xval,source,tag,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:)
  integer, intent(in) :: source,tag,spaceComm
@@ -2200,8 +2126,6 @@ end subroutine xpaw_mpi_recv_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_recv_dp3d(xval,source,tag,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:,:)
@@ -2257,8 +2181,6 @@ end subroutine xpaw_mpi_recv_dp3d
 
 subroutine xpaw_mpi_irecv_int1d(xval,source,tag,spaceComm,request,ierr)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(inout) :: xval(:)
  integer, intent(in) :: source,tag,spaceComm
@@ -2310,8 +2232,6 @@ subroutine xpaw_mpi_irecv_int1d(xval,source,tag,spaceComm,request,ierr)
 !! SOURCE
 
 subroutine xpaw_mpi_irecv_dp1d(xval,source,tag,spaceComm,request,ierr)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:)
@@ -2366,8 +2286,6 @@ end subroutine xpaw_mpi_irecv_dp1d
 
 subroutine xpaw_mpi_irecv_dp2d(xval,source,tag,spaceComm,request,ierr)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:)
  integer, intent(in) :: source,tag,spaceComm
@@ -2420,8 +2338,6 @@ end subroutine xpaw_mpi_irecv_dp2d
 
 subroutine xpaw_mpi_send_int1d(xval,dest,tag,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(inout) :: xval(:)
  integer, intent(in) :: dest,tag,spaceComm
@@ -2470,8 +2386,6 @@ subroutine xpaw_mpi_send_int1d(xval,dest,tag,spaceComm,ier)
 !! SOURCE
 
 subroutine xpaw_mpi_send_dp1d(xval,dest,tag,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:)
@@ -2522,8 +2436,6 @@ end subroutine xpaw_mpi_send_dp1d
 
 subroutine xpaw_mpi_send_dp2d(xval,dest,tag,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:)
  integer, intent(in) :: dest,tag,spaceComm
@@ -2572,8 +2484,6 @@ end subroutine xpaw_mpi_send_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_send_dp3d(xval,dest,tag,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:,:)
@@ -2626,8 +2536,6 @@ end subroutine xpaw_mpi_send_dp3d
 
 subroutine xpaw_mpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(inout) :: xval(:)
  integer, intent(in) :: dest,tag,spaceComm
@@ -2678,8 +2586,6 @@ subroutine xpaw_mpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 
 subroutine xpaw_mpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:)
  integer, intent(in) :: dest,tag,spaceComm
@@ -2729,8 +2635,6 @@ end subroutine xpaw_mpi_isend_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:)
@@ -2785,8 +2689,6 @@ end subroutine xpaw_mpi_isend_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_exch_int1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
-
- implicit none
 
 !Arguments----------------
  integer, intent(in) :: n1
@@ -2846,8 +2748,6 @@ end subroutine xpaw_mpi_exch_int1d
 
 subroutine xpaw_mpi_exch_dp1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
- implicit none
-
 !Arguments----------------
  integer,intent(in) :: n1
  real(dp), intent(in) :: vsend(:)
@@ -2905,8 +2805,6 @@ end subroutine xpaw_mpi_exch_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
-
- implicit none
 
 !Arguments----------------
  integer,intent(in) :: nt
@@ -2966,8 +2864,6 @@ end subroutine xpaw_mpi_exch_dp2d
 
 subroutine xpaw_mpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
- implicit none
-
 !Arguments----------------
  integer,intent(in) :: nt
  real(dp), intent(in) :: vsend(:,:,:)
@@ -3024,8 +2920,6 @@ end subroutine xpaw_mpi_exch_dp3d
 
 subroutine xpaw_mpi_sum_int(xval,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(inout) :: xval
  integer, intent(in) :: comm
@@ -3081,8 +2975,6 @@ end subroutine xpaw_mpi_sum_int
 !! SOURCE
 
 subroutine xpaw_mpi_sum_int1d(xval,comm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, intent(inout) :: xval(:)
@@ -3141,8 +3033,6 @@ end subroutine xpaw_mpi_sum_int1d
 
 subroutine xpaw_mpi_sum_dp1d(xval,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:)
  integer, intent(in) :: comm
@@ -3199,8 +3089,6 @@ end subroutine xpaw_mpi_sum_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_sum_dp2d(xval,comm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:)
@@ -3259,8 +3147,6 @@ end subroutine xpaw_mpi_sum_dp2d
 
 subroutine xpaw_mpi_sum_dp3d(xval,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), intent(inout) :: xval(:,:,:)
  integer, intent(in) :: comm
@@ -3316,8 +3202,6 @@ end subroutine xpaw_mpi_sum_dp3d
 !! SOURCE
 
 function xpaw_mpi_get_tag_ub(comm)
-
- implicit none
 
 !Arguments-------------------------
  integer, intent(in) :: comm

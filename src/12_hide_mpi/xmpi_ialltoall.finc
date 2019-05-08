@@ -40,8 +40,6 @@
 
 subroutine xmpi_ialltoall_dp4d(xval, sendsize, recvbuf, recvsize, comm, request)
 
- implicit none
-
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(in) :: xval(:,:,:,:)
  real(dp) ABI_ASYNC, intent(inout) :: recvbuf(:,:,:,:)
@@ -57,8 +55,9 @@ subroutine xmpi_ialltoall_dp4d(xval, sendsize, recvbuf, recvsize, comm, request)
  ! Requires MPI3
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_IALLTOALL(&
-&    xval,   sendsize, MPI_DOUBLE_PRECISION,&
-&    recvbuf,recvsize, MPI_DOUBLE_PRECISION, comm, request, ierr) 
+     xval,   sendsize, MPI_DOUBLE_PRECISION,&
+     recvbuf,recvsize, MPI_DOUBLE_PRECISION, comm, request, ierr) 
+   xmpi_count_requests = xmpi_count_requests + 1
    return
  end if
  return

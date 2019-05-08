@@ -66,25 +66,3 @@ xfree (void* ptr)
   if (ptr)
     free (ptr);
 }
-
-#if 0
-typedef void* voidptr_t;
-
-/* Variadic function for freeing several pointers. Use at your own risk */
-void
-vxfree (const int n, ...)
-{
-  int i;
-  void* ptr;
-  va_list vl;
-
-  va_start(vl, n);
-
-  for (i=0; i<n; i++){
-    ptr = va_arg(vl, voidptr_t );
-    xfree(ptr);
-  }
-
-  va_end(vl);
-}
-#endif

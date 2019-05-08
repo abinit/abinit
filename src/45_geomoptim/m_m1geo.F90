@@ -100,8 +100,6 @@ contains  !=============================================================
 
  subroutine m1geo_init(dtfil,dtset,m1geo_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(datafiles_type),target,intent(in) :: dtfil
@@ -110,7 +108,7 @@ contains  !=============================================================
 
 !Local variables
 !integer
- integer :: iatom,ionmov,natom,ncycle,nhisttot,nimage,ntimimage,ntypat
+ integer :: ionmov,natom,ncycle,nhisttot,nimage,ntimimage,ntypat
  real(dp), allocatable :: amu_curr(:)
 
 !************************************************************************
@@ -217,15 +215,9 @@ contains  !=============================================================
 
  subroutine m1geo_destroy(m1geo_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(m1geo_type),intent(inout) :: m1geo_param
-
-!Local variables
-!integer
- integer :: iatom,ionmov,natom,nimage,ntimimage,ntypat
 
 !************************************************************************
 

@@ -105,8 +105,6 @@ contains
 
 subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm,Epren)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -340,8 +338,6 @@ end subroutine build_spectra
 
 subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: what
@@ -514,8 +510,6 @@ end subroutine exc_write_data
 
 subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,opt_cvk,ucvol,broad,nomega,omega,eps_rpa,dos)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbnds,lomo_min,nsppol,nomega,nq
@@ -533,9 +527,9 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 !scalars
  integer :: iw,ib_v,ib_c,ik_bz,ik_ibz,spin,iq
  real(dp) :: fact,arg,ediff
- real(dp) :: lifetime
+ real(dp) :: linewidth
  complex(dpc) :: ctemp
- logical :: do_lifetime
+ logical :: do_linewidth
 
 !************************************************************************
 
@@ -546,8 +540,8 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
  eps_rpa=czero; dos=zero
 
- do_lifetime = .FALSE.
- do_lifetime = allocated(BSt%lifetime)
+ do_linewidth = .FALSE.
+ do_linewidth = allocated(BSt%linewidth)
 
  !write(std_out,*)nsppol,Kmesh%nbz,lomo_min,homo,nbnds
  !
@@ -562,13 +556,13 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
          ediff = BSt%eig(ib_c,ik_ibz,spin) - BSt%eig(ib_v,ik_ibz,spin)
 
          !
-         if(do_lifetime) then
-           lifetime = BSt%lifetime(ib_c,ik_ibz,spin) + BSt%lifetime(ib_v,ik_ibz,spin)
+         if(do_linewidth) then
+           linewidth = BSt%linewidth(1,ib_c,ik_ibz,spin) + BSt%linewidth(1,ib_v,ik_ibz,spin)
            do iq=1,nq
              ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
              do iw=1,nomega
                eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
-&             (one/(ediff-j_dpc*lifetime-omega(iw)) + one/(ediff+j_dpc*lifetime+omega(iw)))
+&             (one/(ediff-j_dpc*linewidth-omega(iw)) + one/(ediff+j_dpc*linewidth+omega(iw)))
              end do
            end do
            !
@@ -579,7 +573,7 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
            do iw=1,nomega
              arg = DBLE(omega(iw)) - ediff
-             dos(iw) = dos(iw) + dirac_delta(arg,lifetime)
+             dos(iw) = dos(iw) + dirac_delta(arg,linewidth)
            end do
          else
            do iq=1,nq
@@ -643,11 +637,8 @@ end subroutine exc_eps_rpa
 !!
 !! SOURCE
 
-
 subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,&
 &    ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -896,10 +887,7 @@ end subroutine exc_eps_resonant
 !!
 !! SOURCE
 
-
 subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,ucvol,nomega,omega,eps_exc,dos_exc)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -970,8 +958,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 
  ABI_MALLOC(fa,(nstates,BSp%nq))
  ABI_MALLOC(fap,(nstates,BSp%nq))
- ABI_STAT_MALLOC(Ami,(exc_size), ierr)
- ABI_CHECK(ierr==0, " out-of-memory Ami")
+ ABI_MALLOC_OR_DIE(Ami,(exc_size), ierr)
 
  do mi=1,nstates ! Loop on excitonic eigenvalues mi
    read(eig_unt, err=10, iomsg=errmsg) Ami(:)
@@ -1089,8 +1076,6 @@ end subroutine exc_eps_coupling
 !! SOURCE
 
 subroutine exc_write_tensor(BSp,BS_files,what,tensor)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1238,8 +1223,6 @@ end subroutine exc_write_tensor
 
 subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1348,8 +1331,6 @@ end subroutine mdfs_ncwrite
 !! SOURCE
 
 subroutine check_kramerskronig(n,o,eps)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1482,8 +1463,6 @@ end subroutine check_kramerskronig
 !! SOURCE
 
 subroutine check_fsumrule(n,o,e2,omegaplasma)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

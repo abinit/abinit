@@ -69,12 +69,12 @@ contains
 !! filnam(5)=character strings giving file names
 !! filstat=character strings giving name of status file
 !! idtset=number of the dataset
-!! image_index= -optional argument- index of image to be used when appending
-!!             "_IMGxxx" string to file names. To be used only when an algorithm
-!!             using images of the cell is activated
 !! jdtset_(0:ndtset)=actual index of the datasets
 !! mpi_enreg=information about MPI parallelization
 !! ndtset=number of datasets
+!! [image_index]= index of image to be used when appending
+!!             "_IMGxxx" string to file names. To be used only when an algorithm
+!!             using images of the cell is activated
 !!
 !! OUTPUT
 !! dtfil=<type datafiles_type>infos about file names, file unit numbers
@@ -129,7 +129,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  character(len=10) :: appen,tag
  character(len=9) :: stringvar
  character(len=15) :: stringfile
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: filsus,filddbsin,fildens1in,fildensin,filpawdensin,filkdensin,filqps,filscr,fil_efmas
  character(len=fnlen) :: fnamewff1,fnamewffddk,fnamewffdelfd,fnamewffdkdk,fnamewffdkde,fnamewffk,fnamewffq
  character(len=fnlen) :: filbseig,filfft,filhaydock,fil_bsreso,fil_bscoup
@@ -201,18 +201,17 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_WFK'
  end if
  stringvar='wfk'
- call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,ndtset,stringfile,stringvar,will_read)
 
  if(dtset%optdriver/=RUNL_RESPFN)ireadwf=will_read
  if(ndtset/=0 .and. dtset%optdriver==RUNL_RESPFN .and. will_read==0)then
-   write(message, '(5a,i3,3a,i3,a,i3,3a)' )&
-&   'At least one of the input variables irdwfk and getwfk ',ch10,&
-&   'must refer to a valid _WFK file, in the response function',ch10,&
-&   'case, while for idtset = ',idtset,',',ch10,&
-&   'they are irdwfk=',dtset%irdwfk,', and getwfk=',dtset%getwfk,'.',ch10,&
-&   'Action: correct irdwfk or getwfk in your input file.'
-   MSG_ERROR(message)
+   write(msg, '(5a,i3,3a,i3,a,i3,3a)' )&
+   'At least one of the input variables irdwfk and getwfk ',ch10,&
+   'must refer to a valid _WFK file, in the response function',ch10,&
+   'case, while for idtset = ',idtset,',',ch10,&
+   'they are irdwfk=',dtset%irdwfk,', and getwfk=',dtset%getwfk,'.',ch10,&
+   'Action: correct irdwfk or getwfk in your input file.'
+   MSG_ERROR(msg)
  end if
 
 !Treatment of the other get wavefunction variable, if response function case or nonlinear case
@@ -222,60 +221,50 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  if (ANY(dtset%optdriver == [RUNL_RESPFN, RUNL_NONLINEAR, RUNL_EPH])) then
 #endif
 
-!  According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
+   ! According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
    stringfile='_WFQ' ; stringvar='wfq'
-   call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
-!  If fnamewffq is not initialized thanks to getwfq or irdwfq, use fnamewffk
+   call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,ndtset,stringfile,stringvar,will_read)
+   ! If fnamewffq is not initialized thanks to getwfq or irdwfq, use fnamewffk
    if(will_read==0)fnamewffq=fnamewffk
 
-!  According to get1wf and ird1wf, build _1WF file name, referred as fnamewff1
+   ! According to get1wf and ird1wf, build _1WF file name, referred as fnamewff1
    stringfile='_1WF' ; stringvar='1wf'
-   call mkfilename(filnam,fnamewff1,dtset%get1wf,idtset,dtset%ird1wf,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewff1,dtset%get1wf,idtset,dtset%ird1wf,jdtset_,ndtset,stringfile,stringvar,will_read)
    ireadwf=will_read
 
-!  According to getddk and irdddk, build _1WF file name, referred as fnamewffddk
+   ! According to getddk and irdddk, build _1WF file name, referred as fnamewffddk
    stringfile='_1WF' ; stringvar='ddk'
-   call mkfilename(filnam,fnamewffddk,dtset%getddk,idtset,dtset%irdddk,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffddk,dtset%getddk,idtset,dtset%irdddk,jdtset_,ndtset,stringfile,stringvar,will_read)
 
-!  According to getdelfd, build _1WF file name, referred as fnamewffdelfd
+   ! According to getdelfd, build _1WF file name, referred as fnamewffdelfd
    stringfile='_1WF' ; stringvar='delfd'
-   call mkfilename(filnam,fnamewffdelfd,dtset%getdelfd,idtset,0,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdelfd,dtset%getdelfd,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
 
-!  According to getdkdk, build _1WF file name, referred as fnamewffdkdk
+   ! According to getdkdk, build _1WF file name, referred as fnamewffdkdk
    stringfile='_1WF' ; stringvar='dkdk'
-   call mkfilename(filnam,fnamewffdkdk,dtset%getdkdk,idtset,0,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdkdk,dtset%getdkdk,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
 
-!  According to getdkde, build _1WF file name, referred as fnamewffdkde
+   ! According to getdkde, build _1WF file name, referred as fnamewffdkde
    stringfile='_1WF' ; stringvar='dkde'
-   call mkfilename(filnam,fnamewffdkde,dtset%getdkde,idtset,0,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdkde,dtset%getdkde,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
  end if
 
 !-------------------------------------------------------------------------------------------
-!Build name of files from dtfil%filnam_ds(3)
+ ! Build name of files from dtfil%filnam_ds(3)
 
-! According to getddb, build _DDB file name, referred as filddbsin
- stringfile='_DDB'
- stringvar='ddb'
- call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ ! According to getddb, build _DDB file name, referred as filddbsin
+ stringfile='_DDB'; stringvar='ddb'
+ call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read)
 
 ! According to getdvdb, build _DVDB file name
 ! A default is available if getden is 0
- stringfile='_DVDB'
- stringvar='dvdb'
- call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ stringfile='_DVDB'; stringvar='dvdb'
+ call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read)
  !if (will_read == 0) dtfile%fildvdbin = trim(filnam_ds(3))//'_DVDB'
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
 
-!According to getden, build _DEN file name, referred as fildensin
-!A default is available if getden is 0
+ ! According to getden, build _DEN file name, referred as fildensin
+ ! A default is available if getden is 0
  if (iimage>0.and.dtfil%getden_from_image/=0) then
    if (dtfil%getden_from_image==-1) then
      call appdig(iimage,'',appen)
@@ -287,17 +276,16 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_DEN'
  end if
  stringvar='den'
- call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
 
  if(will_read==0)fildensin=trim(filnam_ds(3))//'_DEN'
  ireadden=will_read
 
  if ((dtset%optdriver==RUNL_GWLS.or.dtset%optdriver==RUNL_GSTATE) .and.dtset%iscf<0) ireadden=1
-!if (optdriver==RUNL_GSTATE.and.ireadwf/=0) ireadden=0
+ !if (optdriver==RUNL_GSTATE.and.ireadwf/=0) ireadden=0
 
-!According to getpawden, build _PAWDEN file name, referred as filpawdensin
-!A default is available if getden is 0
+ ! According to getpawden, build _PAWDEN file name, referred as filpawdensin
+ ! A default is available if getden is 0
  if (iimage>0.and.dtfil%getpawden_from_image/=0) then
    if (dtfil%getpawden_from_image==-1) then
      call appdig(iimage,'',appen)
@@ -309,12 +297,11 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_PAWDEN'
  end if
  stringvar='pawden'
- call mkfilename(filnam,filpawdensin,dtset%getpawden,idtset,dtset%irdden,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filpawdensin,dtset%getpawden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filpawdensin=trim(filnam_ds(3))//'_PAWDEN'
 
-!According to getden and usekden, build _KDEN file name, referred as filkdensin
-!A default is available if getden is 0
+ ! According to getden and usekden, build _KDEN file name, referred as filkdensin
+ ! A default is available if getden is 0
  if(dtset%usekden==1)then
    if (iimage>0.and.dtfil%getden_from_image/=0) then
      if (dtfil%getden_from_image==-1) then
@@ -327,8 +314,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
      stringfile='_KDEN'
    end if
    stringvar='kden'
-   call mkfilename(filnam,filkdensin,dtset%getden,idtset,dtset%irdden,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,filkdensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
    if(will_read==0)filkdensin=trim(filnam_ds(3))//'_KDEN'
    ireadkden=will_read
    if ((dtset%optdriver==RUNL_GSTATE.or.dtset%optdriver==RUNL_GWLS).and.dtset%iscf<0) ireadkden=1
@@ -336,70 +322,64 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    ireadkden=0
  end if
 
-!According to get1den, build _DEN file name, referred as fildens1in
-!A default is available if get1den is 0
+ ! According to get1den, build _DEN file name, referred as fildens1in
+ ! A default is available if get1den is 0
  stringfile='_DEN' ; stringvar='1den'
- call mkfilename(filnam,fildens1in,dtset%get1den,idtset,dtset%ird1den,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fildens1in,dtset%get1den,idtset,dtset%ird1den,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)fildens1in=trim(filnam_ds(3))//'_DEN'
 
-!According to getefmas and irdefmas, build _EFMAS file name, referred as fil_efmas
-!A default is available if getefmas is 0
+ ! According to getefmas and irdefmas, build _EFMAS file name, referred as fil_efmas
+ ! A default is available if getefmas is 0
  stringfile='_EFMAS.nc' ; stringvar='efmas'
- call mkfilename(filnam,fil_efmas,dtset%getefmas,idtset,dtset%irdefmas,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fil_efmas,dtset%getefmas,idtset,dtset%irdefmas,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)fil_efmas=trim(filnam_ds(3))//'_EFMAS.nc'
 
-!According to getscr and irdscr, build _SCR file name, referred as filscr
-!A default is available if getscr is 0
+ ! According to getscr and irdscr, build _SCR file name, referred as filscr
+ ! A default is available if getscr is 0
  stringfile='_SCR' ; stringvar='scr'
- call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filscr=trim(filnam_ds(3))//'_SCR'
 
-!According to getsuscep and irdsuscep, build _SUS file name, referred as filsus
-!A default is available if getsuscep is 0
+ ! According to getsuscep and irdsuscep, build _SUS file name, referred as filsus
+ ! A default is available if getsuscep is 0
  stringfile='_SUS' ; stringvar='sus'
- call mkfilename(filnam,filsus,dtset%getsuscep,idtset,dtset%irdsuscep,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filsus,dtset%getsuscep,idtset,dtset%irdsuscep,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filsus=TRIM(filnam_ds(3))//'_SUS'
 
-!According to getqps and irdqps, build _QPS file name, referred as filqps
-!A default is available if getqps is 0
+ ! According to getqps and irdqps, build _QPS file name, referred as filqps
+ ! A default is available if getqps is 0
  stringfile='_QPS' ; stringvar='qps'
- call mkfilename(filnam,filqps,dtset%getqps,idtset,dtset%irdqps,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filqps,dtset%getqps,idtset,dtset%irdqps,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filqps=trim(filnam_ds(3))//'_QPS'
 
-!According to getbseig and irdbseig, build _BSEIG file name, referred as filbseig
-!A default is available if getbseig is 0
+ ! According to getbseig and irdbseig, build _BSEIG file name, referred as filbseig
+ ! A default is available if getbseig is 0
  stringfile='_BSEIG' ; stringvar='bseig'
  call mkfilename(filnam,filbseig,dtset%getbseig,idtset,dtset%irdbseig,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filbseig=trim(filnam_ds(3))//'_BSEIG'
 
-!According to gethaydock and irdhaydock, build _HAYD file name, referred as filhaydock.
-!A default is available if gethaydock is 0
+ ! According to gethaydock and irdhaydock, build _HAYD file name, referred as filhaydock.
+ ! A default is available if gethaydock is 0
  stringfile='_HAYDR_SAVE' ; stringvar='haydock'
  call mkfilename(filnam,filhaydock,dtset%gethaydock,idtset,dtset%irdhaydock,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filhaydock=trim(filnam_ds(3))//'_HAYDR_SAVE'
 
-!According to getbsr and irdbsr, build _BSR file name, referred as fil_bsreso
-!A default is available if getbsr is 0
+ ! According to getbsr and irdbsr, build _BSR file name, referred as fil_bsreso
+ ! A default is available if getbsr is 0
  stringfile='_BSR' ; stringvar='bsreso'
  call mkfilename(filnam,fil_bsreso,dtset%getbsreso,idtset,dtset%irdbsreso,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0) fil_bsreso=trim(filnam_ds(3))//'_BSR'
 
-!According to getbsc and irdbsc, build _BSC file name, referred as fil_bscoup
-!A default is available if getbsc is 0
+ ! According to getbsc and irdbsc, build _BSC file name, referred as fil_bscoup
+ ! A default is available if getbsc is 0
  stringfile='_BSC' ; stringvar='bscoup'
  call mkfilename(filnam,fil_bscoup,dtset%getbscoup,idtset,dtset%irdbscoup,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)fil_bscoup=trim(filnam_ds(3))//'_BSC'
 
-!According to getwfkfine and irdwfkfine, build _WFK file name, referred as filwfkfine
-!A default is avaible if getwfkfine is 0
+ ! According to getwfkfine and irdwfkfine, build _WFK file name, referred as filwfkfine
+ ! A default is avaible if getwfkfine is 0
  stringfile='_WFK' ; stringvar='wfkfine'
- call mkfilename(filnam,filwfkfine,dtset%getwfkfine,idtset,dtset%irdwfkfine,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filwfkfine,dtset%getwfkfine,idtset,dtset%irdwfkfine,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filwfkfine=trim(filnam_ds(3))//'_WFK'
 
  dtfil%ireadden      =ireadden
@@ -435,7 +415,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_phvec=trim(dtfil%filnam_ds(3))//'_PHVEC'
 
 !-------------------------------------------------------------------------------------------
-!Build name of files from dtfil%filnam_ds(4)
+ ! Build name of files from dtfil%filnam_ds(4)
 
  dtfil%fnameabo_ddb=trim(dtfil%filnam_ds(4))//'_DDB'
  dtfil%fnameabo_den=trim(dtfil%filnam_ds(4))//'_DEN'
@@ -480,8 +460,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_pspdata=trim(dtfil%filnam_ds(4))//'_pspdata_'
 
 !-------------------------------------------------------------------------------------------
-!Build name of files from dtfil%filnam_ds(5)
-
+ ! Build name of files from dtfil%filnam_ds(5)
  dtfil%fnametmp_eig=trim(dtfil%filnam_ds(5))//'_EIG'
  dtfil%fnametmp_1wf1_eig=trim(dtfil%filnam_ds(5))//'_1WF1_EIG' ! This appendix should be changed !
  dtfil%fnametmp_kgs=trim(dtfil%filnam_ds(5))//'_KGS'
@@ -491,12 +470,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnametmp_cg=trim(dtfil%filnam_ds(5))//'_cg'
  dtfil%fnametmp_cprj=trim(dtfil%filnam_ds(5))//'_cprj'
 
-!'_WF1' -> dtfil%unwft1
-!'_WF2' -> dtfil%unwft2
-!'_KG' ->  dtfil%unkg
-!'_DUM' -> tmp_unit (real dummy name)
-!'_YLM' -> dtfil%unylm
-!'_PAW' -> dtfil%unpaw
+ !'_WF1' -> dtfil%unwft1
+ !'_WF2' -> dtfil%unwft2
+ !'_KG' ->  dtfil%unkg
+ !'_DUM' -> tmp_unit (real dummy name)
+ !'_YLM' -> dtfil%unylm
+ !'_PAW' -> dtfil%unpaw
 
  tmpfil(1)=trim(dtfil%filnam_ds(5))//'_WF1'  ! tmpfil(1)
  tmpfil(2)=trim(dtfil%filnam_ds(5))//'_WF2'  ! tmpfil(2)
@@ -587,9 +566,9 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnametmp_paw1=trim(tmpfil(13))
  dtfil%fnametmp_pawq=trim(tmpfil(14))
 
-!Prepare the name of the _FFT file
+ ! Prepare the name of the _FFT file
  filfft=trim(dtfil%filnam_ds(5))//'_FFT'
-!There is a definite problem in the treatment of // by CPP ...
+ ! There is a definite problem in the treatment of // by CPP ...
  if(xmpi_paral==1 .or. mpi_enreg%paral_kgb==1)then
    call int2char4(mpi_enreg%me,tag)
    ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
@@ -597,7 +576,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
  dtfil%fnametmp_fft=filfft
 
-!These keywords are only used in algorithms using images of the cell
+ ! These keywords are only used in algorithms using images of the cell
  if (iimage==0) then
    dtfil%getwfk_from_image   =0
    dtfil%getden_from_image   =0
@@ -728,8 +707,8 @@ end subroutine dtfil_init_time
 !!        if -1 : append "_SUF0" (called from brdmin)
 !!        if -2, -3, -4, -5: append "_SUFA", ... ,"_SUFD", (called from move)
 !!      SUF can be TIM (default) or IMG
-!! suff= --optional argument--indicates the suffixe to be appended:
-!!       SUF=TIM (default) or SUF=IMG or ...
+!! [suff]= --optional argument--indicates the suffixe to be appended:
+!!         SUF=TIM (default) or SUF=IMG or ...
 !!
 !! OUTPUT
 !! filapp= filename with appended string
@@ -835,7 +814,7 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
  type(datafiles_type),intent(out) :: dtfil
  type(dataset_type),intent(in) :: dtset
 !arrays
- integer :: jdtset(0:ndtset)
+ integer,intent(in) :: jdtset(0:ndtset)
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------
@@ -913,19 +892,18 @@ end subroutine dtfil_init_img
 !! From the root (input or output) file names, produce a real file name.
 !!
 !! INPUTS
-!! character(len=fnlen):: filnam(5)=the root file names
-!!  (only filnam(3) and filnam(4) are really needed)
+!! filnam(5)=the root file names (only filnam(3) and filnam(4) are really needed)
 !! get=input 'get variable', if 1, must get the file from another dataset
 !! idtset=number of the dataset
 !! ird=input 'iread variable', if 1, must get the file from the input root
 !! jdtset_(0:ndtset)=actual index of the dataset
 !! ndtset=number of datasets
-!! stringfil character(len=*)=the string of characters to be appended e.g. '_WFK' or '_DEN'
-!! stringvar tcharacter(len=*)=the string of characters to be appended
+!! stringfil=the string of characters to be appended e.g. '_WFK' or '_DEN'
+!! stringvar=the string of characters to be appended
 !!   that defines the 'get' or 'ird' variables, e.g. 'wfk' or 'ddk'
 !!
 !! OUTPUT
-!! character(len=fnlen):: filnam_out=the new file name
+!! filnam_out=the new file name
 !! will_read=1 if the file must be read ; 0 otherwise (ird and get were zero)
 !!
 !! PARENTS
@@ -953,75 +931,72 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
 !scalars
  integer :: jdtset,jget
  character(len=4) :: appen
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: filnam_appen
 
 ! *************************************************************************
 
-!Here, defaults if no get variable
+ ! Here, defaults if no get variable
  will_read=ird
 
- filnam_appen=trim(filnam(3))
- if(ndtset>0)then
-   jdtset=jdtset_(idtset)
-   call appdig(jdtset,'',appen)
-   filnam_appen=trim(filnam_appen)//'_DS'//appen
+ filnam_appen = trim(filnam(3))
+ if (ndtset > 0) then
+   jdtset = jdtset_(idtset)
+   call appdig(jdtset, '', appen)
+   filnam_appen = trim(filnam_appen)//'_DS'//appen
  end if
- filnam_out=trim(filnam_appen)//trim(stringfil)
+ filnam_out = trim(filnam_appen)//trim(stringfil)
 
-!Treatment of the multi-dataset case  (get is not relevant otherwise)
- if(ndtset/=0)then
+ ! Treatment of the multi-dataset case (get is not relevant otherwise)
+ if (ndtset /= 0) then
 
-   if(ndtset==1.and.get<0.and.(jdtset_(1)+get>0))then
-     write(message, '(7a,i3,a,i3,5a)' )&
-&     'You cannot use a negative value of get',trim(stringvar),' with only 1 dataset!',ch10, &
-&     ' If you want to refer to a previously computed dataset,',ch10, &
-&     ' you should give the absolute index of it (i.e. ', &
-&     jdtset_(idtset)+get,' instead of ',get,').',ch10, &
-&     'Action: correct get',trim(stringvar),' in your input file.'
-     MSG_ERROR(message)
+   if(ndtset==1 .and. get<0 .and. (jdtset_(1)+get>0)) then
+     write(msg, '(7a,i0,a,i0,5a)' )&
+     'You cannot use a negative value of get',trim(stringvar),' with only 1 dataset!',ch10, &
+     'If you want to refer to a previously computed dataset,',ch10, &
+     'you should give the absolute index of it (i.e. ', jdtset_(idtset)+get,' instead of ',get,').',ch10, &
+     'Action: correct get',trim(stringvar),' in your input file.'
+     MSG_ERROR(msg)
    end if
 
-   if(idtset+get<0)then
-     write(message, '(a,a,a,a,a,i3,a,a,a,i3,a,a,a,a)' )&
-&     'The sum of idtset and get',trim(stringvar),' cannot be negative,',ch10,&
-&     'while they are idtset=',idtset,', and get',trim(stringvar),'=',get,ch10,&
-&     'Action: correct get',trim(stringvar),' in your input file.'
-     MSG_ERROR(message)
+   if (idtset + get < 0) then
+     write(msg, '(5a,i0,3a,i0,4a)' )&
+     'The sum of idtset and get',trim(stringvar),' cannot be negative,',ch10,&
+     'while they are idtset = ',idtset,', and get',trim(stringvar),' = ',get,ch10,&
+     'Action: correct get',trim(stringvar),' in your input file.'
+     MSG_ERROR(msg)
    end if
 
    if(get>0 .or. (get<0 .and. idtset+get>0) )then
 
      if(ird/=0 .and. get/=0)then
-       write(message, '(a,a,a,a,a,a,a,a,a,a,a,i3,a,i3,a,a,a,a,a,a,a)' )&
-&       'The input variables ird',trim(stringvar),' and get',trim(stringvar),' cannot be',ch10,&
-&       'simultaneously non-zero, while for idtset=',idtset,',',ch10,&
-&       'they are ',ird,', and ',get,'.',ch10,&
-&       'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
-       MSG_ERROR(message)
+       write(msg, '(7a,i0,3a,i0,a,i0,7a)' )&
+       'The input variables ird',trim(stringvar),' and get',trim(stringvar),' cannot be',ch10,&
+       'simultaneously non-zero, while for idtset = ',idtset,',',ch10,&
+       'they are ',ird,', and ',get,'.',ch10,&
+       'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
+       MSG_ERROR(msg)
      end if
 
      will_read=1
 
-!    Compute the dataset from which to take the file, and the corresponding index
+     ! Compute the dataset from which to take the file, and the corresponding index
      if(get<0 .and. idtset+get>0) jget=jdtset_(idtset+get)
      if(get>0) jget=get
      call appdig(jget,'',appen)
 
-!    Note use of output filename (filnam(4))
+     ! Note use of output filename (filnam(4))
      filnam_out=trim(filnam(4))//'_DS'//trim(appen)//trim(stringfil)
 
      if(jdtset>=100)then
-       write(message, '(a,a,a,a,a,i5,a,a)' )&
-&       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
-&       ' from output of DATASET ',jget,'.',ch10
+       write(msg, '(5a,i5,2a)' )&
+       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),' from output of DATASET ',jget,'.',ch10
      else
-       write(message, '(a,a,a,a,a,i3,a,a)' )&
-&       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
-&       ' from output of DATASET ',jget,'.',ch10
+       write(msg, '(5a,i3,2a)' )&
+       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),' from output of DATASET ',jget,'.',ch10
      end if
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg,'COLL')
    end if ! conditions on get and idtset
 
  end if ! ndtset/=0
@@ -1037,8 +1012,8 @@ end subroutine mkfilename
 !! FUNCTION
 !! Inquire Status of FILE
 !! Checks that for status =
-!! 'old': file already exists
-!! 'new': file does not exist; if file exists,
+!!      'old': file already exists
+!!      'new': file does not exist; if file exists,
 !! filnam is modified to filnam.A or filnam.B,....
 !!
 !! INPUTS
@@ -1069,9 +1044,8 @@ subroutine isfile(filnam, status)
 !scalars
  logical :: ex,found
  integer :: ii,ios, ioserr
- character(len=500) :: message
- character(len=fnlen) :: filnam_tmp
- character(len=fnlen) :: trialnam
+ character(len=500) :: msg
+ character(len=fnlen) :: filnam_tmp, trialnam
 
 ! *************************************************************************
 
@@ -1081,17 +1055,17 @@ subroutine isfile(filnam, status)
    inquire(file=filnam,iostat=ios,exist=ex)
 
    if (ios/=0) then
-     write(message,'(4a,i0,2a)')&
-&     'Checks for existence of file  ',trim(filnam),ch10,&
-&     'but INQUIRE statement returns error code',ios,ch10,&
-&     'Action: identify which problem appears with this file.'
-     MSG_ERROR(message)
+     write(msg,'(4a,i0,2a)')&
+     'Checks for existence of file  ',trim(filnam),ch10,&
+     'but INQUIRE statement returns error code',ios,ch10,&
+     'Action: identify which problem appears with this file.'
+     MSG_ERROR(msg)
    else if (.not.ex) then
-     write(message, '(5a)' )&
-&     'Checks for existence of file  ',trim(filnam),ch10,&
-&     'but INQUIRE finds file does not exist.',&
-&     'Action: check file name and re-run.'
-     MSG_ERROR(message)
+     write(msg, '(5a)' )&
+     'Checks for existence of file  ',trim(filnam),ch10,&
+     'but INQUIRE finds file does not exist.',&
+     'Action: check file name and re-run.'
+     MSG_ERROR(msg)
    end if
 
  else if (status=='new') then
@@ -1101,21 +1075,21 @@ subroutine isfile(filnam, status)
    trialnam = filnam
    ii = 0
    inquire(file=trim(trialnam),iostat=ios,exist=ex)
-   if ( ios /= 0 ) then
-     write(message,'(3a)') 'Something is wrong with permissions for reading/writing on this filesystem.',ch10,&
-&     'Action: Check permissions.'
-     MSG_ERROR(message)
+   if (ios /= 0) then
+     write(msg,'(3a)') 'Something is wrong with permissions for reading/writing on this filesystem.',ch10,&
+     'Action: Check permissions.'
+     MSG_ERROR(msg)
    end if
 
    if ( ex .eqv. .true. ) then
-     write(message,'(3a)')'Output file: ',trim(trialnam),' already exists.'
-     MSG_COMMENT(message)
+     write(msg,'(3a)')'Output file: ',trim(trialnam),' already exists.'
+     MSG_COMMENT(msg)
      found=.false.
 
      ii=1
      do while ( (found .eqv. .false.) .and. (ii < 10000) )
-       call int2char4(ii,message)
-       trialnam=trim(trim(filnam_tmp)//message)
+       call int2char4(ii,msg)
+       trialnam=trim(trim(filnam_tmp)//msg)
        inquire(file=trim(trialnam),iostat=ios,exist=ex)
        if ( (ex .eqv. .false.) .and. (ios == 0)) then
          found  = .true.
@@ -1123,34 +1097,34 @@ subroutine isfile(filnam, status)
        if ( ios /= 0 )  ioserr=ioserr+1
        if ( ioserr > 10 ) then
 !        There is a problem => stop
-         write(message, '(2a,i0,2a)' )&
-&         'Check for permissions of reading/writing files on the filesystem', &
-&         '10 INQUIRE statements returned an error code like ',ios,ch10,&
-&         'Action: Check permissions'
-         MSG_ERROR(message)
+         write(msg, '(2a,i0,2a)' )&
+         'Check for permissions of reading/writing files on the filesystem', &
+         '10 INQUIRE statements returned an error code like ',ios,ch10,&
+         'Action: Check permissions'
+         MSG_ERROR(msg)
        end if
        ii=ii+1
      end do
      if ( found .eqv. .true. ) then
-       write(message,'(4a)') 'Renaming old ',trim(filnam),' to ',trim(trialnam)
-       MSG_COMMENT(message)
-       call clib_rename(filnam,trialnam,ioserr)
+       write(msg,'(4a)') 'Renaming old ',trim(filnam),' to ',trim(trialnam)
+       MSG_COMMENT(msg)
+       ioserr = clib_rename(filnam, trialnam)
        if ( ioserr /= 0 ) then
-         write(message,'(4a)') 'Failed to rename file: ', trim(filnam),' to: ',trim(trialnam)
-         MSG_ERROR(message)
+         write(msg,'(4a)') 'Failed to rename file: ', trim(filnam),' to: ',trim(trialnam)
+         MSG_ERROR(msg)
        end if
      else
-       write(message,'(3a)')&
-&       'Have used all names of the form filenameXXXX, X in [0-9]',ch10,&
-&       'Action: clean up your directory and start over.'
-       MSG_ERROR(message)
+       write(msg,'(3a)')&
+       'Have used all names of the form filenameXXXX, X in [0-9]',ch10,&
+       'Action: clean up your directory and start over.'
+       MSG_ERROR(msg)
      end if
    end if
    ! if ii > 0 we iterated so rename abi_out to abi_outXXXX and just write to abi_out
  else
    ! status not recognized
-   write(message,'(3a)')' Input status= ',status,' not recognized.'
-   MSG_BUG(message)
+   write(msg,'(3a)')' Input status= ',status,' not recognized.'
+   MSG_BUG(msg)
  end if
 
 end subroutine isfile
@@ -1208,7 +1182,7 @@ subroutine iofn1(filnam,filstat,comm)
  logical :: ex
  character(len=fnlen) :: fillog,tmpfil
  character(len=10) :: tag
- character(len=500) :: message,errmsg
+ character(len=500) :: msg,errmsg
 
 !*************************************************************************
 
@@ -1219,15 +1193,14 @@ subroutine iofn1(filnam,filstat,comm)
 
  blank = ' '; tmpfil = ''
 
-!Determine who I am in comm
- me = xmpi_comm_rank(comm)
- nproc = xmpi_comm_size(comm)
+ ! Determine who I am in comm
+ me = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
-!Define values of do_write_log and do_write_status parameters
-!if a _NOLOG file exists no LOG file and no STATUS file are created for each cpu core
-!if a _LOG file exists, a LOG file and a STATUS file are created for each cpu core
-!if the #_of_cpu_core>NPROC_NO_EXTRA_LOG OR presence of ABI_MAIN_LOG_FILE, LOG file is only created for master proc
-!if the #_of_cpu_core>NPROC_NO_EXTRA_STATUS OR presence of ABI_MAIN_LOG_FILE, STATUS file is only created for master proc
+ !Define values of do_write_log and do_write_status parameters
+ !if a _NOLOG file exists no LOG file and no STATUS file are created for each cpu core
+ !if a _LOG file exists, a LOG file and a STATUS file are created for each cpu core
+ !if the #_of_cpu_core>NPROC_NO_EXTRA_LOG OR presence of ABI_MAIN_LOG_FILE, LOG file is only created for master proc
+ !if the #_of_cpu_core>NPROC_NO_EXTRA_STATUS OR presence of ABI_MAIN_LOG_FILE, STATUS file is only created for master proc
  inquire(file=ABI_NO_LOG_FILE,iostat=ios,exist=ex)
  if (ios/=0) ex=.false.
  if (ex) then
@@ -1259,6 +1232,7 @@ subroutine iofn1(filnam,filstat,comm)
      end if
    end if
  end if
+ !do_write_log = .True.
 
  if (me==master) then
    !  Eventually redefine standard input and standard output
@@ -1269,38 +1243,38 @@ subroutine iofn1(filnam,filstat,comm)
      tmpfil(1:3)='log'
      call isfile(tmpfil,'new')
      close(std_out, err=10, iomsg=errmsg)
-     if (open_file(tmpfil,message,unit=std_out,form='formatted',status='new',action="write") /= 0) then
-       MSG_ERROR(message)
+     if (open_file(tmpfil,msg,unit=std_out,form='formatted',status='new',action="write") /= 0) then
+       MSG_ERROR(msg)
      end if
 #endif
    else
      ! Redirect standard output to null
      close(std_out, err=10, iomsg=errmsg)
-     if (open_file(NULL_FILE,message,unit=std_out,action="write") /= 0) then
-       MSG_ERROR(message)
+     if (open_file(NULL_FILE,msg,unit=std_out,action="write") /= 0) then
+       MSG_ERROR(msg)
      end if
    end if
 
 #if defined READ_FROM_FILE
-!  Now take care of the "files" file
+   ! Now take care of the "files" file
    tmpfil(1:fnlen)=blank
    tmpfil(1:9)='ab.files'
-   write(message, '(4a)' )&
-&   'Because of CPP option READ_FROM_FILE,',ch10,&
-&   'read file "ab.files" instead of standard input ' ,ch10
-   MSG_COMMENT(message)
+   write(msg, '(4a)' )&
+   'Because of CPP option READ_FROM_FILE,',ch10,&
+   'read file "ab.files" instead of standard input ' ,ch10
+   MSG_COMMENT(msg)
    call isfile(tmpfil,'old')
    close(std_in, err=10, iomsg=errmsg)
-   if (open_file(tmpfil,message,unit=std_in,form='formatted',status='old',action="read") /= 0) then
-     MSG_ERROR(message)
+   if (open_file(tmpfil,msg,unit=std_in,form='formatted',status='old',action="read") /= 0) then
+     MSG_ERROR(msg)
    end if
 #endif
 
-!  Print greetings for interactive user
+   ! Print greetings for interactive user
    write(std_out,*,err=10,iomsg=errmsg)' ABINIT ',trim(abinit_version)
    write(std_out,*,err=10,iomsg=errmsg)' '
 
-!  Read name of input file (std_in):
+   ! Read name of input file (std_in):
    write(std_out,*,err=10,iomsg=errmsg)' Give name for formatted input file: '
    read(std_in, '(a)',err=10,iomsg=errmsg ) filnam(1)
    write(std_out, '(a)',err=10,iomsg=errmsg ) trim(filnam(1))
@@ -1317,70 +1291,68 @@ subroutine iofn1(filnam,filstat,comm)
    read (std_in, '(a)', err=10, iomsg=errmsg ) filnam(5)
    write (std_out, '(a)', err=10, iomsg=errmsg ) trim(filnam(5))
 
-!  Check that old input file exists
+   ! Check that old input file exists
    call isfile(filnam(1),'old')
-
-!  Check that new output file does NOT exist
+   ! Check that new output file does NOT exist
    call isfile(filnam(2),'new')
 
-!  Check that root name for generic input and output differ
+   ! Check that root name for generic input and output differ
    if ( trim(filnam(3))==trim(filnam(4)) ) then
-     write(message, '(a,a,a)' )&
-&     'Root name for generic input and output files must differ ',ch10,&
-&     'Action: correct your "file" file.'
-     MSG_ERROR(message)
+     write(msg, '(3a)' )&
+     'Root name for generic input and output files must differ ',ch10,&
+     'Action: correct your "file" file.'
+     MSG_ERROR(msg)
    end if
 
-!  Check that root names are at least 20 characters less than fnlen
+   ! Check that root names are at least 20 characters less than fnlen
    if ( len_trim(filnam(3)) >= (fnlen-20) ) then
-     write(message, '(a,a,a,a,a,i4,a,i4,a,a)' )&
-&     'Root name for generic input files is too long. ',ch10,&
-&     'It must be 20 characters less than the maximal allowed ',ch10,&
-&     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(3)),ch10,&
-&     'Action: correct your "file" file.'
-     MSG_ERROR(message)
+     write(msg, '(a,a,a,a,a,i4,a,i4,a,a)' )&
+     'Root name for generic input files is too long. ',ch10,&
+     'It must be 20 characters less than the maximal allowed ',ch10,&
+     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(3)),ch10,&
+     'Action: correct your "file" file.'
+     MSG_ERROR(msg)
    end if
    if ( len_trim(filnam(4)) >= (fnlen-20) ) then
-     write(message, '(a,a,a,a,a,i4,a,i4,a,a)' )&
-&     'Root name for generic output files is too long. ',ch10,&
-&     'It must be 20 characters less than the maximal allowed ',ch10,&
-&     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(4)),ch10,&
-&     'Action: correct your "file" file.'
-     MSG_ERROR(message)
+     write(msg, '(a,a,a,a,a,i4,a,i4,a,a)' )&
+     'Root name for generic output files is too long. ',ch10,&
+     'It must be 20 characters less than the maximal allowed ',ch10,&
+     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(4)),ch10,&
+     'Action: correct your "file" file.'
+     MSG_ERROR(msg)
    end if
    if ( len_trim(filnam(5)) >= (fnlen-20) ) then
-     write(message, '(a,a,a,a,a,i4,a,i4,a,a)' )&
-&     'Root name for generic temporary files is too long. ',ch10,&
-&     'It must be 20 characters less than the maximal allowed ',ch10,&
-&     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(5)),ch10,&
-&     'Action: correct your "file" file.'
-     MSG_ERROR(message)
+     write(msg, '(a,a,a,a,a,i4,a,i4,a,a)' )&
+     'Root name for generic temporary files is too long. ',ch10,&
+     'It must be 20 characters less than the maximal allowed ',ch10,&
+     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(5)),ch10,&
+     'Action: correct your "file" file.'
+     MSG_ERROR(msg)
    end if
 
  end if ! master only
 
-!Communicate filenames to all processors
+ ! Communicate filenames to all processors
  call xmpi_bcast(filnam,master,comm,ierr)
 
-!Check
-!Create a name for the status file, based on filnam(5)
+ ! Create a name for the status file, based on filnam(5)
  filstat=trim(filnam(5))//'_STATUS'
 
-!Redefine the log unit if not the master
- if (me/=master) then
+ ! Redefine the log unit if not the master
+ if (me /= master) then
    call int2char4(me,tag)
    ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
    filstat=trim(filstat)//'_P-'//trim(tag)
    if (do_write_log) then
      fillog=trim(filnam(5))//'_LOG_'//trim(tag)
      close(std_out, err=10, iomsg=errmsg)
-     if (open_file(fillog,message,unit=std_out,status='unknown',action="write") /= 0) then
-       MSG_ERROR(message)
+     if (open_file(fillog,msg,unit=std_out,status='unknown',action="write") /= 0) then
+       MSG_ERROR(msg)
      end if
    else
      close(std_out, err=10, iomsg=errmsg)
-     if (open_file(NULL_FILE,message,unit=std_out,action="write") /= 0) then
-       MSG_ERROR(message)
+     if (open_file(NULL_FILE,msg,unit=std_out,action="write") /= 0) then
+       MSG_ERROR(msg)
      end if
    end if
  end if
@@ -1388,7 +1360,7 @@ subroutine iofn1(filnam,filstat,comm)
  call xmpi_barrier(comm)
  return
 
-! Handle possibe IO errors
+ ! Handle possibe IO errors
  10 continue
  MSG_ERROR(errmsg)
 
