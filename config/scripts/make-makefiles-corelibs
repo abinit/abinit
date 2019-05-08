@@ -105,6 +105,7 @@ for lib in abinit_corelibs:
   # Init
   lib_opt = cnf.get(lib,"optional")
   lib_rul = cnf.get(lib,"abirules")
+  lib_par = cnf.get(lib,"parent")
   try:
     lib_deps = cnf.get(lib,"dependencies").split()
   except NoOptionError:
@@ -120,8 +121,16 @@ for lib in abinit_corelibs:
   sources_specs = dict()
   checkers = None
 
+  # Select parent dir
+  if ( lib_par == "common" ):
+    par_dir = os.path.join("shared", "common", "src", lib)
+  elif ( lib_par == "libpaw" ):
+    par_dir = os.path.join("shared", "libpaw", "src")
+  else:
+    par_dir = os.path.join("src", lib)
+
   # Import source configuration
-  src_cnf = "src/%s/abinit.src" % (lib)
+  src_cnf = os.path.join(par_dir, "abinit.src")
   if ( os.path.exists(src_cnf) ):
     exec(compile(open(src_cnf).read(), src_cnf, 'exec'))
   else:
@@ -130,7 +139,7 @@ for lib in abinit_corelibs:
     sys.exit(3)
 
   # Import inter-directory dependency configuration
-  dir_cnf = "src/%s/abinit.dir" % (lib)
+  dir_cnf = os.path.join(par_dir, "abinit.dir")
   if ( os.path.exists(dir_cnf) ):
     exec(compile(open(dir_cnf).read(), dir_cnf, 'exec'))
   else:
@@ -140,8 +149,8 @@ for lib in abinit_corelibs:
   include_dirs += ["incs"]
 
   # Import interfaces
-  if ( os.path.exists("src/%s/interfaces_%s.F90" % (lib,lib)) ):
-    sources.append("interfaces_%s.F90" % (lib))
+  #if ( os.path.exists("src/%s/interfaces_%s.F90" % (lib,lib)) ):
+  #  sources.append("interfaces_%s.F90" % (lib))
 
   # Initialize internal variables
   dd_srcs = "lib%s_srcs =" % (lib)
@@ -194,8 +203,8 @@ for lib in abinit_corelibs:
       nds_print = True
     else:
       dd_srcs += " \\\n\t%s" % (src)
-      if ( not os.path.exists("src/%s/%s" % (lib,src)) ):
-        sys.stderr.write("Error: No such file or directory: 'src/%s/%s'\n" % (lib,src))
+      if ( not os.path.exists("%s/%s" % (par_dir,src)) ):
+        sys.stderr.write("Error: No such file or directory: '%s/%s'\n" % (par_dir,src))
         sys.exit(4)
 
     # Check whether to clean the preprocessed source file
@@ -260,7 +269,7 @@ for lib in abinit_corelibs:
   makefile += "\nEXTRA_DIST = abinit.src\n"
 
   # Write internal library dependencies
-  dep = "src/%s/abinit.dep" % (lib)
+  dep = os.path.join(par_dir, "abinit.dep")
   if ( os.path.exists(dep) ):
     makefile += "\nEXTRA_DIST += abinit.dep\n"
     makefile += "\n"+ open(dep,"rt").read()
@@ -311,17 +320,17 @@ for lib in abinit_corelibs:
 
   dd_srcs += "\n\n"
   # Write additional hand-made information
-  add = "src/%s/abinit.amf" % (lib)
+  add = os.path.join(par_dir, "abinit.amf")
   if ( os.path.exists(add) ):
     makefile += "\nEXTRA_DIST += abinit.amf\n"
     makefile += "\n" + open(add, "rt").read()
 
   # Include RoboDOC header
-  hdr = "src/%s/_%s_" % (lib,lib)
+  hdr = "%s/_%s_" % (par_dir,lib)
   if ( os.path.exists(hdr) ):
     makefile += "\nEXTRA_DIST += _%s_\n" % (lib)
 
   # Output to Makefile.am
-  mf = open("src/%s/Makefile.am" % (lib), "wt")
+  mf = open(os.path.join(par_dir, "Makefile.am"), "wt")
   mf.write(makefile)
   mf.close()
