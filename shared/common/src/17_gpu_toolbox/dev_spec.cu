@@ -9,8 +9,15 @@
  */
 
 #include <stdio.h>
-#include <string.h>
-#include "gpu_four_header.h"
+
+//Interfaces
+#ifdef __cplusplus
+extern "C" {
+#endif
+void leave_new_(char*);
+#ifdef __cplusplus
+}
+#endif
 
 static __host__ int version_2_cores(int major, int minor);
 

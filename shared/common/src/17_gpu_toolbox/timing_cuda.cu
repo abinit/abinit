@@ -9,9 +9,7 @@
  *
  */
 
-#include "cuda_common.h"
-#include "cuda_header.h"
-#include "cuda_rec_head.h"
+#include "stdio.h"
 
 /*=========================================================================*/
 /*_________________________TIMING IN CUDA ROUTINES_________________________*/
