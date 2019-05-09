@@ -334,9 +334,9 @@ if ( opts.run_clean ):
     run_script(my_name, "Removing Fortran interfaces",
       "find src -name 'interfaces_*.F90' -exec rm {} \;")
     run_script(my_name, "Removing CPP options dumper routine",
-      "rm -f src/10_dumpinfo/m_cppopts_dumper.F90")
+      "rm -f src/14_hidewrite/m_cppopts_dumper.F90")
     run_script(my_name, "Removing optimization flags dumper routine",
-      "rm -f src/10_dumpinfo/m_optim_dumper.F90")
+      "rm -f src/14_hidewrite/m_optim_dumper.F90")
   else:
     print_message(my_name,
       "*** Skipping script-generated source file removal ***")
@@ -345,7 +345,7 @@ if ( opts.run_clean ):
   run_script(my_name, "Removing top config.* files",
     "rm -f config.dump config.mk config.optim config.pc config.py config.sh")
   run_script(my_name, "Removing Fortran modules containing package info",
-    "rm -f src/01manage_mpi/defs_info.F90 src/10_dumpinfo/m_build_info.F90")
+    "rm -f src/01manage_mpi/defs_info.F90 src/14_hidewrite/m_build_info.F90")
 
   print_header(my_name, "Subsystems")
   for subsys in bcnf.sections():

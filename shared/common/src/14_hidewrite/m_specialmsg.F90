@@ -88,6 +88,8 @@ CONTAINS  !===========================================================
 
 subroutine specialmsg_setcount(n_add_comment,n_add_warning,n_add_exit)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,optional,intent(in) :: n_add_comment,n_add_warning,n_add_exit
 
@@ -129,6 +131,8 @@ end subroutine specialmsg_setcount
 
 subroutine specialmsg_getcount(ncomment,nwarning,nexit)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(out) :: ncomment,nexit,nwarning
 
@@ -165,6 +169,8 @@ end subroutine specialmsg_getcount
 !! SOURCE
 
 subroutine specialmsg_mpisum(mpicomm)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mpicomm
@@ -214,6 +220,8 @@ end subroutine specialmsg_mpisum
 !! SOURCE
 
 subroutine herald(code_name,code_version,iout)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: iout

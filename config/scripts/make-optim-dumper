@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Init
-f90_optim_dumper="src/10_dumpinfo/m_optim_dumper.F90"
+f90_optim_dumper="shared/common/src/14_hidewrite/m_optim_dumper.F90"
 
 # Get optimizations
 . ./config.optim
