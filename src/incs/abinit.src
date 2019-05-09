@@ -23,7 +23,6 @@ sources = []
 
 includes = [
   "abi_xc_vdw.h",
-  "cuda_common.h",
   "cuda_header.h",
   "cuda_rec_head.h",
   "dummy_functions.inc",
