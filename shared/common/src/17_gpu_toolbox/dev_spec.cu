@@ -9,15 +9,7 @@
  */
 
 #include <stdio.h>
-
-//Interfaces
-#ifdef __cplusplus
-extern "C" {
-#endif
-void leave_new_(char*);
-#ifdef __cplusplus
-}
-#endif
+#include <abi_gpu_header.h>
 
 static __host__ int version_2_cores(int major, int minor);
 

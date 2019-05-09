@@ -26,5 +26,4 @@ includes = [
   "cuda_header.h",
   "cuda_rec_head.h",
   "dummy_functions.inc",
-  "gpu_four_header.h",
 ]

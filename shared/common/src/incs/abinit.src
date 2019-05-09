@@ -24,6 +24,7 @@ sources = []
 includes = [
   "abi_clib.h",
   "abi_common.h",
+  "abi_gpu_header.h",
   "cuda_common.h",
   "string_f.h",
 ]
