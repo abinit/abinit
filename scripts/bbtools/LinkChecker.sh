@@ -50,8 +50,24 @@ cd ..
 
 echo -e "\n***  Removing false errors...\n"
 
-./scripts/bbtools/LinkChecker_rm_false_errors.py linkchecker_ext.log > linkchecker_ext_wo_false_errors.log
+#./scripts/bbtools/LinkChecker_rm_false_errors.py linkchecker_ext.log > linkchecker_ext_wo_false_errors.log
+LinkChecker_rm_false_errors.py linkchecker_ext.log > linkchecker_ext_wo_false_errors.log; rc=`echo $?`
 
-rc=`echo $?` 
 #echo "exit_status : $rc"
 exit $rc
+
+
+# Temporary until the new abinit production version
+
+#!#CMD="./scripts/bbtools/LinkChecker_rm_false_errors.py"
+#!#if [[ -x "$CMD" ]]
+#!#then
+#!#   # the script is on abinit src
+#!#   echo "${CMD} from ABINIT source ( ./scripts/bbtools/ )"
+#!#   ./scripts/bbtools/LinkChecker_rm_false_errors.py linkchecker_ext.log > linkchecker_ext_wo_false_errors.log
+#!#else
+#!#   # the script is on ~/bin
+#!#   echo "${CMD} from ~/bin"
+#!#   LinkChecker_rm_false_errors.py linkchecker_ext.log > linkchecker_ext_wo_false_errors.log
+#!#fi
+
