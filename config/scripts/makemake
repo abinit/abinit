@@ -35,6 +35,18 @@ def getstatusoutput(command):
 # ---------------------------------------------------------------------------- #
 
 #
+# ABINIT blocks (split of the source tree)
+#
+
+abinit_blocks = {
+  "common": "shared/common/src",
+  "core": "src",
+  "libpaw": "shared/libpaw",
+}
+
+# ---------------------------------------------------------------------------- #
+
+#
 # Internal classes and functions
 #
 
@@ -258,26 +270,27 @@ if ( opts.run_clean ):
     "find src -type l -exec rm -f {} \;")
 
   print_header(my_name, "Abinit scripts outputs")
-  run_script(my_name, "Removing abirules logs",
-    "rm -f src/abirules.log")
-  run_script(my_name, "Removing abirules outputs",
-    "find src -name '*.abirules' -exec rm -f {} \;")
-  run_script(my_name, "Removing abiauty outputs",
-    "find src -name '*.abiauty' -exec rm -f {} \;")
   run_script(my_name, "Removing file lists",
     "rm -f config/dist/*.lst")
   run_script(my_name, "Removing M4 macros",
     "rm -f config/m4/auto-*.m4")
   run_script(my_name, "Removing abilint outputs ",
     "rm -f .abilint abilint.log abilint.out")
-  run_script(my_name, "Removing abinit.dep files",
-    "find src -name 'abinit.dep' -exec rm {} \;")
-  run_script(my_name, "Removing abinit.dir files",
-    "find src -name 'abinit.dir' -exec rm {} \;")
   run_script(my_name, "Removing configuration dumper input",
     "rm -f config.dump.in")
   run_script(my_name, "Removing source split scripts",
     "rm -rf config/split")
+  for block in sorted(abinit_blocks.keys()):
+    run_script(my_name, "Removing abinit.dep files in %s" % block,
+      "find %s -name 'abinit.dep' -exec rm {} \;" % abinit_blocks[block])
+    run_script(my_name, "Removing abinit.dir files in %s" % block,
+      "find %s -name 'abinit.dir' -exec rm {} \;" % abinit_blocks[block])
+    run_script(my_name, "Removing abirules logs in %s" % block,
+      "rm -f %s/tmp-abirules.log" % abinit_blocks[block])
+    run_script(my_name, "Removing abirules outputs in %s" % block,
+      "find %s -name '*.abirules' -exec rm -f {} \;" % abinit_blocks[block])
+    run_script(my_name, "Removing abiauty outputs in %s" % block,
+      "find %s -name '*.abiauty' -exec rm -f {} \;" % abinit_blocks[block])
 
   print_header(my_name, "Core-managed documentation")
   run_script(my_name, "Removing certified build examples",
@@ -321,8 +334,9 @@ if ( opts.run_clean ):
         "find %s -name Makefile -exec rm -f {} \;" % dcln)
       run_script(my_name, "Removing libraries and object files in %s/" % dcln,
         "find %s -name '*.a' -o -name '*.o' -exec rm {} \;" % dcln)
-  run_script(my_name, "Removing binary Fortran modules in src/",
-    "find src -name '*.mod' -exec rm {} \;")
+  for block in sorted(abinit_blocks.keys()):
+    run_script(my_name, "Removing binary Fortran modules in %s" % block,
+      "find %s -name '*.mod' -exec rm {} \;" % abinit_blocks[block])
   abinit_bins = xcnf.sections()
   abinit_bins.sort()
   abinit_bins = "src/98_main/" + " src/98_main/".join(abinit_bins)
@@ -334,9 +348,9 @@ if ( opts.run_clean ):
     run_script(my_name, "Removing Fortran interfaces",
       "find src -name 'interfaces_*.F90' -exec rm {} \;")
     run_script(my_name, "Removing CPP options dumper routine",
-      "rm -f src/14_hidewrite/m_cppopts_dumper.F90")
+      "rm -f shared/common/src/14_hidewrite/m_cppopts_dumper.F90")
     run_script(my_name, "Removing optimization flags dumper routine",
-      "rm -f src/14_hidewrite/m_optim_dumper.F90")
+      "rm -f shared/common/src/14_hidewrite/m_optim_dumper.F90")
   else:
     print_message(my_name,
       "*** Skipping script-generated source file removal ***")
@@ -345,7 +359,7 @@ if ( opts.run_clean ):
   run_script(my_name, "Removing top config.* files",
     "rm -f config.dump config.mk config.optim config.pc config.py config.sh")
   run_script(my_name, "Removing Fortran modules containing package info",
-    "rm -f src/01manage_mpi/defs_info.F90 src/14_hidewrite/m_build_info.F90")
+    "rm -f shared/common/src/14_hidewrite/m_build_info.F90")
 
   print_header(my_name, "Subsystems")
   for subsys in bcnf.sections():
