@@ -143,6 +143,8 @@ end function md5_check
 
 function md5_sum_from_file(fname)
 
+  implicit none
+
 !Arguments ------------------------------------
   character(len=*),intent(in) :: fname
 
@@ -192,6 +194,8 @@ end function md5_sum_from_file
 
 function md5_sum_from_string(text)
 
+  implicit none
+
 !Arguments ------------------------------------
   character(len=*), intent(in) :: text
 
@@ -231,6 +235,8 @@ end function md5_sum_from_string
 !! SOURCE
 
 subroutine hash_final(retval, ctx)
+
+implicit none
 
 !Arguments ------------------------------------
   character(len=32), intent(out) :: retval
@@ -311,6 +317,8 @@ end subroutine hash_init
 !! SOURCE
 
 subroutine hash_update(ctx, buffer, bufsize)
+
+ implicit none
 
 !Arguments ------------------------------------
   type(md5_context_t), intent(inout) :: ctx
