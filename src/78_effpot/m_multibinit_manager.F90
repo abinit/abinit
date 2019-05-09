@@ -225,26 +225,26 @@ contains
   !-------------------------------------------------------------------!
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
-    type(spin_primitive_potential_t), pointer :: spin_pot
-
+    class(primitive_potential_t), pointer :: spin_pot
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-    !class(primitive_potential_t), pointer :: t
     call self%unitcell%initialize()
     ! latt : TODO
 
     ! spin
     call xmpi_bcast(self%params%spin_dynamics, master, comm, ierr)
     if(self%params%spin_dynamics>0) then
-       ABI_MALLOC_SCALAR(spin_pot)
+       ABI_DATATYPE_ALLOCATE_SCALAR(spin_primitive_potential_t, spin_pot)
        ! One may wonder why unitcell does not read data from files
        ! That is because the spin_pot (which has an pointer to unitcell)
        ! read the file and set the spin unitcell.
-       call spin_pot%initialize(self%unitcell)
-       call spin_pot%load_from_files(self%params, self%filenames)
-       call self%prim_pots%append(spin_pot)
+       select type(spin_pot)
+       type is (spin_primitive_potential_t)
+          call spin_pot%initialize(self%unitcell)
+          call spin_pot%load_from_files(self%params, self%filenames)
+          call self%prim_pots%append(spin_pot)
+       end select
     end if
     if(self%params%dynamics>0) then
        !TODO: LATT

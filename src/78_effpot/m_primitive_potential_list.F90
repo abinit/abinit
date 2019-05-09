@@ -141,7 +141,6 @@ contains
     call xmpi_bcast(self%size, master, comm, ierr)
     do i=1, self%size
        call self%data(i)%obj%finalize()
-       ! intel compiler do not allow this. why?
        if(associated(self%data(i)%obj)) then
            ABI_DATATYPE_DEALLOCATE_SCALAR(self%data(i)%obj)
        endif
@@ -209,8 +208,6 @@ contains
     type(potential_list_t), pointer :: tmp
     ABI_MALLOC_SCALAR(tmp)
     call self%fill_supercell_list( sc_maker, tmp)
-    ! call tmp%initialize(....)
-    ! set tmp
     sc_pot=>tmp
     nullify(tmp)
   end subroutine fill_supercell_ptr
@@ -220,8 +217,8 @@ contains
   !-------------------------------------------------------------------!
   subroutine fill_supercell_list(self, sc_maker, sc_pots)
     class(primitive_potential_list_t), intent(inout) :: self
-    class(supercell_maker_t), intent(inout) :: sc_maker
-    class(potential_list_t), intent(inout) :: sc_pots
+    type(supercell_maker_t), intent(inout) :: sc_maker
+    type(potential_list_t), intent(inout) :: sc_pots
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     class(abstract_potential_t), pointer :: tmp
