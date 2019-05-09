@@ -145,8 +145,8 @@ for lib in abinit_corelibs:
   else:
     include_dirs = []
 
-  # FIXME: hard-coded include list
-  include_dirs += ["incs"]
+  # Add special dirs to include list
+  include_dirs += ["common", "core"]
 
   # Import interfaces
   #if ( os.path.exists("src/%s/interfaces_%s.F90" % (lib,lib)) ):
