@@ -231,7 +231,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
-& natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+& ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !In some cases (e.g. getcell/=0), the plane wave vectors have
@@ -411,7 +411,7 @@ ecore=zero
 
  call xcdata_init(xcdata,dtset=dtset)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
 !TODO: This part of the implementation does not work properly to select specific directions 

@@ -1329,7 +1329,6 @@ end subroutine vlocalstr
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
-!!  paral_kgb= activate PARALelization over K-point, G-vectors and Bands
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
 !!  qdir=direction of the q-gradient 
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
@@ -1361,7 +1360,7 @@ end subroutine vlocalstr
 
 subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,paral_kgb,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,xred)
+& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,xred)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1375,7 +1374,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- integer,intent(in) :: paral_kgb,qdir
+ integer,intent(in) :: qdir
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1671,7 +1670,6 @@ end subroutine dfpt_vlocaldq
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
 !!  opthartdqdq= if 1 activates the calculation 2nd q-gradient of the Hartree potential 
-!!  paral_kgb= activate PARALelization over K-point, G-vectors and Bands
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
 !!  qdir=direction of the q-gradient 
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
@@ -1719,7 +1717,7 @@ end subroutine dfpt_vlocaldq
 
 subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,opthartdqdq,paral_kgb,ph1d,qdir,qgrid,qphon,rhog,&
+& ntypat,n1,n2,n3,opthartdqdq,ph1d,qdir,qgrid,qphon,rhog,&
 & ucvol,vlspl,vhart1dqdq,vpsp1dqdq)
 
 
@@ -1734,7 +1732,7 @@ subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- integer,intent(in) :: opthartdqdq,paral_kgb,qdir
+ integer,intent(in) :: opthartdqdq,qdir
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays

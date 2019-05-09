@@ -368,7 +368,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call dfpt_vlocal(atindx,cplex,gs_hamkq%gmet,gsqcut,idir,ipert,mpi_enreg, &
    &  psps%mqgrid_vl,dtset%natom,&
    &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
-   &  dtset%paral_kgb,ph1d,psps%qgrid_vl,&
+   &  ph1d,psps%qgrid_vl,&
    &  dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
    !Set up local potential vlocal1 with proper dimensioning, from vpsp1 + vhxc1_atdis
@@ -766,7 +766,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      call dfpt_vlocaldq(atindx,2,gs_hamkq%gmet,gsqcut,idir,ipert,mpi_enreg, &
      &  psps%mqgrid_vl,dtset%natom,&
      &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
-     &  dtset%paral_kgb,ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
+     &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
      &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
 
      !Set up q-gradient of local potential vlocal1dq with proper dimensioning
@@ -1254,7 +1254,7 @@ subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k
 
    !Get first-order local part of the pseudopotential
    call vlocalstr(gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,istr,dtset%mgfft,mpi_enreg,&
-&  psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,dtset%paral_kgb,ph1d,psps%qgrid_vl,&
+&  psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,ph1d,psps%qgrid_vl,&
 &  ucvol,psps%vlspl,vpsp1,g0term=g0term)
 
    !Set up local potential vlocal1 with proper dimensioning, from vpsp1 + vhxc1_strain
@@ -1674,7 +1674,7 @@ c0_VefielddQ_c1strain_bks=zero
      call dfpt_vlocaldqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,mpi_enreg, &
      &  psps%mqgrid_vl,dtset%natom, &
      &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),opthartdqdq, &
-     &  dtset%paral_kgb,ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
+     &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
      &  dtset%qptn,rhog,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq)
 
      !Merge both local contributions
@@ -2044,7 +2044,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    call dfpt_vlocal(atindx,cplex,gs_hamkq%gmet,gsqcut,idir,ipert,mpi_enreg, &
    &  psps%mqgrid_vl,dtset%natom,&
    &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
-   &  dtset%paral_kgb,ph1d,psps%qgrid_vl,&
+   &  ph1d,psps%qgrid_vl,&
    &  dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
    !Set up local potential vlocal1 with proper dimensioning, from vpsp1 + vhxc1_atdis
@@ -2333,7 +2333,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      call dfpt_vlocaldq(atindx,2,gs_hamkq%gmet,gsqcut,jdir,jpert,mpi_enreg, &
      &  psps%mqgrid_vl,dtset%natom,&
      &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
-     &  dtset%paral_kgb,ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
+     &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
      &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
 
      !Set up q-gradient of local potential vlocal1dq with proper dimensioning
