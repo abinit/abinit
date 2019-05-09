@@ -1008,12 +1008,12 @@ end subroutine dfpt_vlocal
 !! SOURCE
 
 subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
-&  mqgrid,natom,nattyp,nfft,ngfft,ntypat,paral_kgb,ph1d,qgrid,&
+&  mqgrid,natom,nattyp,nfft,ngfft,ntypat,ph1d,qgrid,&
 &  ucvol,vlspl,vpsp1,g0term)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istr,mgfft,mqgrid,natom,nfft,ntypat,paral_kgb
+ integer,intent(in) :: istr,mgfft,mqgrid,natom,nfft,ntypat
  integer,optional,intent(in) :: g0term
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg

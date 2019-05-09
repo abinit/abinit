@@ -207,7 +207,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  integer,parameter :: re=1,im=2
  real(dp) :: boxcut,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
  real(dp) :: vres2, wtk_k
- logical :: t_exist 
+ logical :: non_magnetic_xc,t_exist 
  character(len=500) :: msg                   
  character(len=fnlen) :: fi1o,fiwfatdis,fiwfefield,fiwfddk,fiwfdkdk
  type(ebands_t) :: bs_rbz
@@ -217,6 +217,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  type(gs_hamiltonian_type) :: gs_hamkq
 
 !arrays
+ integer,allocatable :: bz2ibz_smap(:,:)
  integer,allocatable :: indkpt1(:), indkpt1_tmp(:),indsy1(:,:,:),irrzon1(:,:,:)
  integer,allocatable :: istwfk_rbz(:),kg(:,:),kg_k(:,:)
  integer,allocatable :: nband_rbz(:),npwarr(:),npwtot(:)
@@ -283,6 +284,8 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  usexcnhat=0
  n3xccc=0
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
+ non_magnetic_xc=.true.
+ 
 
 !Generate the 1-dimensional phases
  ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
@@ -427,7 +430,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
     & gsqcut,q2grad(2,iq2grad),dtset%natom+2,&
     & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-    & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+    & nspden,n3xccc,non_magnetic_xc,optene,optres,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
     & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
     & xccc3d1,dtset%ixcrot)
 
@@ -470,7 +473,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
     & gsqcut,iatdir,iatpol,&
     & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-    & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+    & nspden,n3xccc,non_magnetic_xc,optene,optres,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
     & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
     & xccc3d1,dtset%ixcrot)
 
@@ -578,18 +581,20 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !and initialize other quantities
  ABI_ALLOCATE(indkpt1_tmp,(nkpt))
  ABI_ALLOCATE(wtk_folded,(nkpt))
+ ABI_ALLOCATE(bz2ibz_smap,(6, nkpt))
  indkpt1_tmp(:)=0 
 
  if (dtset%kptopt==2) then
    call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
-  & nsym1,symrc1,timrev,dtset%wtk,wtk_folded)
+  & nsym1,symrc1,timrev,dtset%wtk,wtk_folded,bz2ibz_smap,xmpi_comm_self)
  else if (dtset%kptopt==3) then
    call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
-  & nsym1,symrc1,0,dtset%wtk,wtk_folded)
+  & nsym1,symrc1,0,dtset%wtk,wtk_folded,bz2ibz_smap,xmpi_comm_self)
  else
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
    MSG_BUG(msg)
  end if
+ ABI_DEALLOCATE(bz2ibz_smap)
 
  ABI_ALLOCATE(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
  ABI_ALLOCATE(indkpt1,(nkpt_rbz))
@@ -1650,7 +1655,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  integer,parameter :: re=1,im=2
  real(dp) :: boxcut,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
  real(dp) :: vres2,wtk_k
- logical :: t_exist 
+ logical :: non_magnetic_xc,t_exist 
  character(len=500) :: msg                   
  character(len=fnlen) :: fi1o,fiwfatdis,fiwfstrain,fiwfefield,fiwfddk,fiwfdkdk
  type(ebands_t) :: bs_rbz
@@ -1661,6 +1666,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
 
 !arrays
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
+ integer,allocatable :: bz2ibz_smap(:,:)
  integer,allocatable :: ddmdq_flg(:,:,:,:,:),elflexoflg(:,:,:,:)
  integer,allocatable :: indkpt1(:), indkpt1_tmp(:)
  integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:)
@@ -1734,6 +1740,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  usexcnhat=0
  n3xccc=0
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
+ non_magnetic_xc=.true.
 
 !Generate the 1-dimensional phases
  ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
@@ -1947,7 +1954,7 @@ end if
      call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
       & gsqcut,iatdir,iatpol,&
       & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-      & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+      & nspden,n3xccc,non_magnetic_xc,optene,optres,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
       & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
       & xccc3d1,dtset%ixcrot)
 
@@ -1988,7 +1995,7 @@ end if
      call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
       & gsqcut,pert_efield(2,iefipert),dtset%natom+2,&
       & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-      & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+      & nspden,n3xccc,non_magnetic_xc,optene,optres,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
       & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
       & xccc3d1,dtset%ixcrot)
 
@@ -2031,7 +2038,7 @@ endif
      call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
       & gsqcut,istrdir,istrtype,&
       & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-      & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+      & nspden,n3xccc,non_magnetic_xc,optene,optres,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
       & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
       & xccc3d1,dtset%ixcrot)
 
@@ -2190,18 +2197,20 @@ end if
 !and initialize other quantities
  ABI_ALLOCATE(indkpt1_tmp,(nkpt))
  ABI_ALLOCATE(wtk_folded,(nkpt))
+ ABI_ALLOCATE(bz2ibz_smap,(6, nkpt))
  indkpt1_tmp(:)=0 
 
  if (dtset%kptopt==2) then
    call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
-  & nsym1,symrc1,timrev,dtset%wtk,wtk_folded)
+  & nsym1,symrc1,timrev,dtset%wtk,wtk_folded,bz2ibz_smap,xmpi_comm_self)
  else if (dtset%kptopt==3) then
    call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
-  & nsym1,symrc1,0,dtset%wtk,wtk_folded)
+  & nsym1,symrc1,0,dtset%wtk,wtk_folded,bz2ibz_smap,xmpi_comm_self)
  else
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
    MSG_BUG(msg)
  end if
+ ABI_DEALLOCATE(bz2ibz_smap)
 
  ABI_ALLOCATE(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
  ABI_ALLOCATE(indkpt1,(nkpt_rbz))
