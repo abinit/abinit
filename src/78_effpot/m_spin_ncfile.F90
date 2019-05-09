@@ -48,7 +48,7 @@ module m_spin_ncfile
   use m_spin_potential , only: spin_potential_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   !use m_multibinit_supercell, only: mb_supercell_t
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_spin_observables, only : spin_observable_t
 #if defined HAVE_NETCDF
   use netcdf
@@ -282,7 +282,7 @@ end subroutine def_observable_var
   subroutine write_supercell(self, supercell)
 
     class(spin_ncfile_t), intent(inout) :: self
-    type(mbcell_t), intent(in) :: supercell
+    type(mbsupercell_t), intent(in) :: supercell
     integer ::  pos_id, ispin_prim_id, rvec_id, ncerr
     !integer :: rprimd_id, iatomsid
     ! sc_matric

@@ -39,7 +39,7 @@ module m_abstract_potential
   use m_xmpi
 
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
 
   implicit none
 !!***
@@ -54,7 +54,7 @@ module m_abstract_potential
      logical :: has_spin=.False.
      logical :: has_lwf = .False.
      logical :: is_null=.True.   ! if is_null, this term does not exist.
-     type(mbcell_t) ,pointer :: supercell => null()
+     type(mbsupercell_t) ,pointer :: supercell => null()
      character (len=200) :: label="Abstract Potential"
    contains
      procedure :: set_supercell   ! set_supercell
@@ -68,7 +68,7 @@ contains
 
   subroutine set_supercell(self, supercell)
     class(abstract_potential_t), intent(inout) :: self
-    type(mbcell_t), target, intent(inout) :: supercell
+    type(mbsupercell_t), target, intent(inout) :: supercell
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(supercell)
     MSG_ERROR("Every potential should override this set_supercell method to avoid mistake.")

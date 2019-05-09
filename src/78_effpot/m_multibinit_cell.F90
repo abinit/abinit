@@ -78,8 +78,6 @@ module m_multibinit_cell
      logical :: has_spin=.False.
      logical :: has_lwf=.False.
      logical :: has_electron=.False.
-     integer :: sc_matrix(3,3)
-     integer :: ncell
      type(mbcell_lattice_t) :: lattice
      type(mbcell_spin_t) :: spin
      type(mbcell_lwf_t) :: lwf
@@ -89,8 +87,17 @@ module m_multibinit_cell
      procedure :: set_lattice
      procedure :: set_spin
      procedure :: fill_supercell
-     procedure :: from_unitcell
+     !procedure :: from_unitcell
   end type mbcell_t
+
+  type, public, extends(mbcell_t):: mbsupercell_t
+     integer :: sc_matrix(3,3)
+     integer :: ncell
+     type(supercell_maker_t), pointer :: supercell_maker
+     type(mbcell_t), pointer :: unitcell
+   contains
+     procedure :: from_unitcell
+  end type mbsupercell_t
 
 contains
 
@@ -142,12 +149,17 @@ contains
   end subroutine finalize
 
   subroutine fill_supercell(self, sc_maker, supercell)
-    class(mbcell_t), intent(inout) :: self
-    type(supercell_maker_t), intent(inout) :: sc_maker
-    class(mbcell_t), intent(inout) :: supercell
+    class(mbcell_t), target, intent(inout) :: self
+    type(supercell_maker_t), target, intent(inout) :: sc_maker
+    class(mbsupercell_t), intent(inout) :: supercell
     call supercell%initialize()
     supercell%ncell=sc_maker%ncells
     supercell%sc_matrix=sc_maker%scmat
+    supercell%has_lattice = self%has_lattice
+    supercell%has_spin = self%has_spin
+    supercell%has_lwf =self%has_lwf
+    supercell%supercell_maker => sc_maker
+    supercell%unitcell => self
     if (self%has_lattice) then
        call self%lattice%fill_supercell(sc_maker, supercell%lattice)
     endif
@@ -159,15 +171,29 @@ contains
     if (self%has_lwf) then
        call self%lwf%fill_supercell(sc_maker, supercell%lwf)
     endif
+
   end subroutine fill_supercell
 
 
+!=================== Supercell =====================================
+  subroutine supercell_initialize(self)
+    class(mbsupercell_t), intent(inout) :: self
+    call self%mbcell_t%initialize()
+  end subroutine supercell_initialize
+
   subroutine from_unitcell(self, sc_maker, unitcell)
-    class(mbcell_t), intent(inout) :: self
-    type(supercell_maker_t), intent(inout) :: sc_maker
+    class(mbsupercell_t), intent(inout) :: self
+    type(supercell_maker_t),  intent(inout) :: sc_maker
     class(mbcell_t), intent(inout) :: unitcell
     call unitcell%fill_supercell(sc_maker, self)
   end subroutine from_unitcell
+
+  subroutine supercell_finalize(self)
+    class(mbsupercell_t), intent(inout) :: self
+    call self%mbcell_t%finalize()
+    nullify(self%supercell_maker)
+    nullify(self%unitcell)
+  end subroutine supercell_finalize
 
 !================================Lattice====================================
   subroutine latt_initialize(self)
@@ -267,12 +293,6 @@ contains
     end if
     if (allocated(self%gilbert_damping)) then
        ABI_DEALLOCATE(self%gilbert_damping)
-    end if
-    if (allocated(self%rvec)) then
-       ABI_DEALLOCATE(self%rvec)
-    end if
-    if (allocated(self%ispin_prim)) then
-       ABI_DEALLOCATE(self%ispin_prim)
     end if
   end subroutine spin_finalize
 

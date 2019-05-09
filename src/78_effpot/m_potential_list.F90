@@ -41,7 +41,7 @@ module m_potential_list
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
 
 
   implicit none
@@ -108,7 +108,7 @@ contains
   
   subroutine set_supercell(self, supercell)
     class (potential_list_t), intent(inout) :: self
-    type (mbcell_t), target, intent(inout) :: supercell
+    type (mbsupercell_t), target, intent(inout) :: supercell
     integer :: i
     self%supercell => supercell
     do i=1, self%size

@@ -35,7 +35,7 @@ module m_spin_observables
   use m_errors
   use m_xmpi
   use m_spin_potential, only: spin_potential_t
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbsupercell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
 
   implicit none
@@ -86,7 +86,7 @@ contains
   subroutine initialize(self, supercell , params)
 
     class(spin_observable_t) :: self
-    type(mbcell_t) :: supercell
+    type(mbsupercell_t) :: supercell
     type(multibinit_dtset_type) :: params
     integer i
     complex(dp) :: i2pi = (0.0, two_pi)

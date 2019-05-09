@@ -43,7 +43,7 @@ module m_multibinit_manager
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
        outvars_multibinit, multibinit_dtset_free
   use m_supercell_maker, only: supercell_maker_t
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_primitive_potential_list, only: primitive_potential_list_t
   use m_primitive_potential, only: primitive_potential_t
   use m_spin_primitive_potential, only: spin_primitive_potential_t
@@ -72,7 +72,7 @@ module m_multibinit_manager
      type(multibinit_dtset_type), pointer :: params=>null()
      type(supercell_maker_t) :: sc_maker
      type(mbcell_t) :: unitcell
-     type(mbcell_t) :: supercell
+     type(mbsupercell_t) :: supercell
      type(primitive_potential_list_t) :: prim_pots
      type(potential_list_t) :: pots
 

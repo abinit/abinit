@@ -50,7 +50,7 @@ module m_spin_mover
   use m_spin_ncfile, only: spin_ncfile_t
   use m_spin_observables, only: spin_observable_t
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
@@ -129,7 +129,7 @@ contains
   subroutine initialize(self, params, supercell)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target :: params
-    type(mbcell_t), target :: supercell
+    type(mbsupercell_t), target :: supercell
     !real(dp):: damping(self%supercell%nspin)
     integer :: i, nspin
 

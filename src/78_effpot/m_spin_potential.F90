@@ -43,7 +43,7 @@ module  m_spin_potential
   use m_xmpi
   use m_mpi_scheduler, only: mb_mpi_info_t, init_mpi_info, mpi_scheduler_t
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_spmat_coo, only: coo_mat_t
   use m_spmat_lil, only: lil_mat_t
   use m_spmat_csr, only : CSR_mat_t
@@ -125,7 +125,7 @@ contains
 
   subroutine set_supercell(self, supercell)
     class(spin_potential_t), intent(inout) :: self
-    type(mbcell_t), target, intent(inout) :: supercell
+    type(mbsupercell_t), target, intent(inout) :: supercell
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
