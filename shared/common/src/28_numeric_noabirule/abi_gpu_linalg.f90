@@ -32,7 +32,7 @@
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
-!!   the correct one is in 15_gpu_toolbox/dev_spec.cu
+!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS
 !!      lobpcgwf
@@ -77,7 +77,7 @@ end subroutine alloc_on_gpu
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
-!!   the correct one is in 15_gpu_toolbox/dev_spec.cu
+!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS
 !!      lobpcgwf,m_abi_gpu_linalg
@@ -121,7 +121,7 @@ end subroutine copy_from_gpu
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
-!!   the correct one is in 15_gpu_toolbox/dev_spec.cu
+!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS
 !!      lobpcgwf,m_abi_gpu_linalg
@@ -162,7 +162,7 @@ end subroutine copy_on_gpu
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
-!!   the correct one is in 15_gpu_toolbox/dev_spec.cu
+!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS
 !!      lobpcgwf
@@ -199,7 +199,7 @@ end subroutine dealloc_on_gpu
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
-!!   the correct one is in 15_gpu_toolbox/gpu_linalg.cu
+!!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! PARENTS
 !!      lobpcgwf
@@ -226,7 +226,7 @@ end subroutine gpu_linalg_init
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
-!!   the correct one is in 15_gpu_toolbox/gpu_linalg.cu
+!!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! PARENTS
 !!      lobpcgwf
@@ -271,7 +271,7 @@ end subroutine gpu_linalg_shutdown
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
-!!   the correct one is in 15_gpu_toolbox/gpu_linalg.cu
+!!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! PARENTS
 !!      lobpcgwf,m_abi_gpu_linalg
@@ -351,7 +351,7 @@ end subroutine gpu_xgemm
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
-!!   the correct one is in 15_gpu_toolbox/gpu_linalg.cu
+!!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! PARENTS
 !!      lobpcgwf,m_abi_gpu_linalg
