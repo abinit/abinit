@@ -1173,7 +1173,7 @@ ABI_FALLBACKS_PARAMS
 # ---------------------------------------------------------------------------- #
 
 # Void CPPFLAGS to allow for C/Fortran mixing
-ABI_CPPFLAGS="${CPPFLAGS} -I$(top_srcdir)/shared/common/src/incs"
+ABI_CPPFLAGS="${CPPFLAGS}"
 CPPFLAGS=""
 
 # ---------------------------------------------------------------------------- #
