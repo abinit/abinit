@@ -237,6 +237,7 @@ pages:
         - psp8: developers/psp8_info.md
     - Code stats: developers/codestats.md
     - Autoconf_examples: developers/autoconf_examples.md
+    - Test Page for linkcheck: developers/testlink.md
     #- External Resources: developers/external_resources.md
 - About:
     - Release Notes: about/release-notes.md
@@ -386,3 +387,4 @@ extra:
         #netcdf: https://www.unidata.ucar.edu/software/netcdf/docs/faq.html#whatisit
         #YAML: https://en.wikipedia.org/wiki/YAML
         #JSON: https://en.wikipedia.org/wiki/JSON
+        aTDEP: '<span style="font-variant:small-caps;">a</span>-TDEP'
