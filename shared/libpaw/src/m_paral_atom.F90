@@ -70,6 +70,8 @@ CONTAINS
 
 subroutine get_my_natom(comm_atom,my_natom,natom)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: comm_atom,natom
@@ -133,6 +135,8 @@ end subroutine get_my_natom
 
 subroutine get_my_atmtab(comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,&
 &                        my_natom_ref) ! optional argument
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -229,6 +233,8 @@ end subroutine get_my_atmtab
 
 subroutine free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  logical,intent(inout) :: my_atmtab_allocated
@@ -279,6 +285,8 @@ end subroutine free_my_atmtab
 !! SOURCE
 
  subroutine get_proc_atmtab(iproc,atmtab,natom_out,natom,comm_atom_size)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars

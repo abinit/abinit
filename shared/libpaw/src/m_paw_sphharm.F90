@@ -92,6 +92,8 @@ CONTAINS
 
 function ylmc(il,im,kcart)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: il,im
@@ -251,6 +253,8 @@ end function ylmc
 
 subroutine ylmcd(il,im,kcart,dth,dphi)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: il,im
@@ -392,6 +396,8 @@ end subroutine ylmcd
 !! SOURCE
 
 subroutine ylm_cmplx(lx,ylm,xx,yy,zz)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -541,6 +547,8 @@ end subroutine ylm_cmplx
 !! SOURCE
 
 subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -748,6 +756,8 @@ end subroutine initylmr
 
 subroutine ys(lp,mp,ll,mm,ys_val)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ll,lp,mm,mp
@@ -823,6 +833,8 @@ end subroutine ys
 
 subroutine lxyz(lp,mp,idir,ll,mm,lidir)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: idir,ll,lp,mm,mp
@@ -884,6 +896,8 @@ end subroutine lxyz
 
 subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: idir,ll,lp,mm,mp
@@ -939,6 +953,8 @@ end subroutine slxyzs
 !! SOURCE
 
 subroutine plm_coeff(blm,mpsang,xx)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1045,6 +1061,8 @@ end subroutine plm_coeff
 
 function ass_leg_pol(l,m,xarg)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) ::  l,m
@@ -1119,6 +1137,8 @@ end function ass_leg_pol
 !! SOURCE
 
 subroutine plm_d2theta(mpsang,plm_d2t,xx)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1202,6 +1222,8 @@ end subroutine plm_d2theta
 !! SOURCE
 
 function plm_dphi(ll,mm,xx)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1288,6 +1310,8 @@ end function plm_dphi
 !! SOURCE
 
 function plm_dtheta(ll,mm,xx)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1377,6 +1401,8 @@ end function plm_dtheta
 
 subroutine pl_deriv(mpsang,pl_d2,xx)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: mpsang
@@ -1448,6 +1474,8 @@ end subroutine pl_deriv
 !! SOURCE
 
 subroutine mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1539,6 +1567,8 @@ end subroutine mkeuler
 
 elemental function dble_factorial(nn)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -1592,6 +1622,8 @@ end function dble_factorial
 !! SOURCE
 
 function dbeta(cosbeta,ll,mp,mm)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1677,6 +1709,8 @@ end function dbeta
 
 pure function phim(costheta,sintheta,mm)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: mm
@@ -1736,6 +1770,8 @@ pure function phim(costheta,sintheta,mm)
 !! SOURCE
 
 subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,wrt_mode)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -2002,6 +2038,8 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
 
 subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitfi,wrt_mode)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ndij,lcor,option,optspin,prtvol,unitfi
@@ -2157,6 +2195,8 @@ end subroutine mat_slm2ylm
 
 subroutine create_slm2ylm(lcor,slmtwoylm)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: lcor
@@ -2215,6 +2255,8 @@ end subroutine create_slm2ylm
 !! SOURCE
 
 subroutine create_mlms2jmj(lcor,mlmstwojmj)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -2335,6 +2377,8 @@ end subroutine create_mlms2jmj
 !! SOURCE
 
 subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -2487,6 +2531,8 @@ end subroutine setsym_ylm
 !! SOURCE
 
  subroutine setnabla_ylm(ang_phipphj,mpsang)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars

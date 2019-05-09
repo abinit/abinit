@@ -229,6 +229,8 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nk3xc1,nspden,cplex,pawxcdev,ty
 &          has_vhartree,has_vxc,has_vxcval,has_kxc,has_k3xc,has_vxc_ex, & ! optional arguments
 &          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nkxc1,nk3xc1,ntypat,cplex,nspden,pawxcdev
@@ -386,6 +388,8 @@ end subroutine paw_an_init
 
 subroutine paw_an_free(Paw_an)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(Paw_an_type),intent(inout) :: Paw_an(:)
@@ -474,6 +478,8 @@ end subroutine paw_an_free
 
 subroutine paw_an_nullify(Paw_an)
 
+ implicit none
+
 !Arguments ------------------------------------
  type(Paw_an_type),intent(inout) :: Paw_an(:)
 
@@ -533,6 +539,8 @@ end subroutine paw_an_nullify
 
 subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
 &                      mpi_atmtab,comm_atom)  ! optional arguments (parallelism)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -730,6 +738,8 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
 subroutine paw_an_print(Paw_an,unit,mode_paral, &
 &                       mpi_atmtab,comm_atom,natom)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: comm_atom,natom,unit
@@ -831,6 +841,8 @@ end subroutine paw_an_print
 !! SOURCE
 
 subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: master,comm_atom
@@ -1392,6 +1404,8 @@ subroutine paw_an_redistribute(paw_an,mpi_comm_in,mpi_comm_out,&
 &                 natom,mpi_atmtab_in,mpi_atmtab_out,paw_an_out,&
 &                 SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpi_comm_in,mpi_comm_out
@@ -1721,6 +1735,8 @@ end subroutine paw_an_redistribute
 
 subroutine paw_an_reset_flags(Paw_an)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(Paw_an_type),intent(inout) :: Paw_an(:)
@@ -1775,6 +1791,8 @@ end subroutine paw_an_reset_flags
 !! SOURCE
 
 subroutine paw_an_isendreceive_getbuffer(paw_an,npaw_an_send,atm_indx_recv,buf_int,buf_dp)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1979,6 +1997,8 @@ end subroutine paw_an_isendreceive_getbuffer
 
 subroutine paw_an_isendreceive_fillbuffer(paw_an, atmtab_send,atm_indx_send,npaw_an_send,&
 &                                         buf_int,buf_int_size,buf_dp,buf_dp_size)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars

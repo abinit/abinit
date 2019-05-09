@@ -115,6 +115,8 @@ CONTAINS
  subroutine gaussfit_main(mparam,nparam_out,nterm_bounds,nr,&
 &           param_out,pawrad,option,outfile,rpaw,y,comm_mpi)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in)::mparam,nr,nterm_bounds(2)
  integer,intent(in)::option
@@ -405,6 +407,8 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_set_weight(f,x)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in)::x
  integer,intent(out)::f
@@ -453,6 +457,8 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_remove_item(iterm,pload)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in)::iterm
  integer,intent(inout)::pload
@@ -491,6 +497,8 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_add_item(iterm,pload)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in)::iterm
  integer,intent(inout)::pload
@@ -528,6 +536,8 @@ end subroutine gaussfit_main
 !! SOURCE
 
  subroutine gaussfit_mpi_calc_deviation(deviation,nproc,proc_load)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)::nproc
@@ -579,6 +589,8 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_swap(iterm,jterm,&
 &           nproc,nterm_bounds,proc_dist,proc_load)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)::iterm,jterm,nproc,nterm_bounds(2)
@@ -642,6 +654,8 @@ end subroutine gaussfit_main
 
  subroutine gaussfit_mpi_assign(iterm,nproc,nterm_bounds,&
 & proc_dist,proc_load)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)::iterm,nproc,nterm_bounds(2)
@@ -708,6 +722,8 @@ end subroutine gaussfit_main
 !! SOURCE
 
  subroutine gaussfit_mpi_main(nproc,nterm_bounds,proc_dist)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)::nproc,nterm_bounds(2)
@@ -825,6 +841,8 @@ subroutine gaussfit_fit(chisq,constrains,&
 & limit,maxiter,nparam,nterm,nx,option,outfile,param,&
 & verbosity,weight,x,y,y_out)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer, intent(in) :: maxiter,nparam
  integer,intent(in)  :: nterm,nx,option,verbosity
@@ -906,6 +924,8 @@ end subroutine gaussfit_fit
 
 subroutine gaussfit_calc_deriv_r(nterm,nparam,nx,opt,param,x,y_out,&
 & deriv) ! optional
+
+ implicit none
 
 !Arguments -------------------------------
  integer,intent(in)::nx     !number of point in the x grid
@@ -1019,6 +1039,8 @@ end subroutine gaussfit_calc_deriv_r
 subroutine gaussfit_calc_deriv_c3(nparam,nterm,nx,opt,param,x,y_out,&
 & deriv) ! optional
 
+ implicit none
+
 !Arguments -------------------------------
  integer,intent(in)::nparam !number of parameters
  integer,intent(in)::nterm !number of gaussian expressions
@@ -1119,6 +1141,8 @@ end subroutine gaussfit_calc_deriv_c3
 
 subroutine gaussfit_calc_deriv_c2(nparam,nterm,nx,opt,param,x,y_out,&
 & deriv) ! optional
+
+ implicit none
 
 !Arguments -------------------------------
  integer,intent(in)::nparam !number of param
@@ -1240,6 +1264,8 @@ end subroutine gaussfit_calc_deriv_c2
 
 subroutine gaussfit_calc_deriv_c(nparam,nterm,nx,opt,param,x,y_out,&
 & deriv) ! optional
+
+ implicit none
 
 !Arguments -------------------------------
  integer,intent(in)::nparam !number of parameters
@@ -1390,6 +1416,8 @@ end subroutine gaussfit_calc_deriv_c
 subroutine gaussfit_calc_deriv_c4(nparam,nterm,nx,opt,param,x,y_out,&
 & deriv) ! optional
 
+ implicit none
+
 !Arguments -------------------------------
  integer,intent(in)::nparam !number of parameters
  integer,intent(in)::nterm !number of gaussian expressions
@@ -1539,6 +1567,8 @@ subroutine gaussfit_rlsf(&
 &chisq,constrains,limit,maxiter,&
 &nterm,nparam,nx,option,parameters,&
 &verbosity,weight,x,y)
+
+ implicit none
 
 !Arguments -------------------------------
  real(dp),parameter::deltachi=tol10
@@ -1712,6 +1742,8 @@ end subroutine gaussfit_rlsf
 subroutine gaussfit_chisq_alpha_beta(alpha,beta,chisq,&
 & nparam,nterm,nx,option,parameters,x,y)
 
+ implicit none
+
 !Arguments -------------------------------
  integer,intent(in)::nparam,nterm,nx
  integer,intent(in)::option
@@ -1792,6 +1824,8 @@ end subroutine gaussfit_chisq_alpha_beta
 
 subroutine gaussfit_set_param1(nterm,nparam,nx,param,sep,x,y)
 
+ implicit none
+
 !Arguments -------------------------------
  integer,intent(in)::nterm,nparam,nx
  real(dp),intent(in)::sep
@@ -1862,6 +1896,8 @@ end subroutine gaussfit_set_param1
 !! SOURCE
 
 subroutine gaussfit_set_param2(nterm,nparam,nx,param,rpaw,x,y)
+
+ implicit none
 
 !Arguments -------------------------------
  integer,intent(in)::nterm,nparam,nx
@@ -1968,6 +2004,8 @@ end subroutine gaussfit_set_param2
 
 subroutine gaussfit_set_param3(nterm,nparam,param,sep)
 
+ implicit none
+
 !Arguments -------------------------------
  integer,intent(in)::nterm,nparam
  real(dp),intent(in)::sep
@@ -2020,6 +2058,8 @@ end subroutine gaussfit_set_param3
 
 subroutine gaussfit_set_param4(nparam,param)
 
+ implicit none
+
 !Arguments -------------------------------
  integer,intent(in)::nparam
  real(dp),intent(out)::param(nparam)
@@ -2056,6 +2096,8 @@ end subroutine gaussfit_set_param4
 !! SOURCE
 
 subroutine gaussfit_set_param5(nterm,nparam,nx,param,rpaw,y)
+
+ implicit none
 
 !Arguments -------------------------------
  integer,intent(in)::nterm,nparam,nx
@@ -2116,6 +2158,8 @@ end subroutine gaussfit_set_param5
 !! SOURCE
 
 subroutine gaussfit_constrains_init(cons1,cons2,limit,nparam,nterm,nx,option,rpaw,y)
+
+ implicit none
 
 !Arguments -------------------------------
  integer,intent(in)::nterm,option,nparam,nx
@@ -2193,6 +2237,8 @@ end subroutine gaussfit_constrains_init
 
 subroutine gaussfit_apply_constrains(const,limit,nparam,ioparams)
 
+ implicit none
+
 !Arguments -------------------------------
  integer,intent(in):: nparam
  integer,intent(in):: const(nparam)
@@ -2252,6 +2298,8 @@ end subroutine gaussfit_apply_constrains
 
 subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbitals,param,pawrad,&
 & rpaw,tproj,comm_mpi)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: basis_size

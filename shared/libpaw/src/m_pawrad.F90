@@ -197,6 +197,8 @@ CONTAINS
 
 subroutine pawrad_init(mesh,mesh_size,mesh_type,rstep,lstep,r_for_intg)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: mesh_size,mesh_type
@@ -325,6 +327,8 @@ end subroutine pawrad_init
 
 subroutine pawrad_free_0D(Rmesh)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(pawrad_type),intent(inout) :: Rmesh
@@ -368,6 +372,8 @@ end subroutine pawrad_free_0D
 !! SOURCE
 
 subroutine pawrad_free_1D(Rmesh)
+
+ implicit none
 
 !Arguments ------------------------------------
  type(pawrad_type),intent(inout) :: Rmesh(:)
@@ -417,6 +423,8 @@ end subroutine pawrad_free_1D
 !! SOURCE
 
 subroutine pawrad_print(Rmesh,header,unit,prtvol,mode_paral)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in),optional :: prtvol,unit
@@ -513,6 +521,8 @@ end subroutine pawrad_print
 
 subroutine pawrad_isame(Rmesh1,Rmesh2,hasameq,whichdenser)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(out) :: whichdenser
  logical,intent(out) :: hasameq
@@ -595,6 +605,8 @@ end subroutine pawrad_isame
 
 subroutine pawrad_copy(mesh1,mesh2)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(pawrad_type),intent(in) :: mesh1
@@ -655,6 +667,8 @@ end subroutine pawrad_copy
 
 subroutine pawrad_deducer0(func,funcsz,radmesh)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: funcsz
@@ -697,6 +711,8 @@ end subroutine pawrad_deducer0
 !! SOURCE
 
 subroutine pawrad_bcast(pawrad,comm_mpi)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -878,6 +894,7 @@ subroutine simp_gen(intg,func,radmesh,r_for_intg)
 #if defined HAVE_AVX_SAFE_MODE
 !DEC$ NOOPTIMIZE
 #endif
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -998,6 +1015,8 @@ end subroutine simp_gen
 
 subroutine nderiv_gen(der,func,radmesh,der2)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(pawrad_type),intent(in) :: radmesh
@@ -1100,6 +1119,8 @@ end subroutine nderiv_gen
 
 subroutine nderiv_lin(hh,yy,zz,ndim,norder)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ndim,norder
@@ -1193,6 +1214,8 @@ end subroutine nderiv_lin
 
  subroutine bound_deriv(func,mesh,nn,yp1,ypn)
 
+ implicit none
+
 !Arguments----------------------
  integer, intent(in) :: nn
  real(dp), intent(in) :: func(nn)
@@ -1248,6 +1271,8 @@ end subroutine bound_deriv
 !! SOURCE
 
 subroutine poisson(den,ll,radmesh,rv,screened_sr_separation,qq)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1495,6 +1520,8 @@ end subroutine poisson
 
 function pawrad_ifromr(radmesh,rr)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer :: pawrad_ifromr
@@ -1555,6 +1582,8 @@ end function pawrad_ifromr
 !! SOURCE
 
 function screened_coul_kernel(order,r1,r2,formula)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1800,6 +1829,8 @@ end function screened_coul_kernel
 !! SOURCE
 
 subroutine calc_slatradl(ll,mesh_size,ff1,ff2,Pawrad,integral)
+
+ implicit none
 
 !scalars
  integer,intent(in) :: mesh_size,ll

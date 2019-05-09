@@ -116,6 +116,8 @@ CONTAINS !===========================================================
 
 subroutine libpaw_wrtout(unit,msg,mode_paral)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in) :: unit
  character(len=*),intent(in) :: msg
@@ -187,6 +189,8 @@ end subroutine libpaw_wrtout
 
 subroutine libpaw_wrtout_myproc(unit,msg)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: unit
@@ -253,6 +257,8 @@ end subroutine libpaw_wrtout_myproc
 !! SOURCE
 
 subroutine libpaw_write_lines(unit,msg)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -350,6 +356,8 @@ end subroutine libpaw_write_lines
 
 subroutine libpaw_msg_hndl(msg,level,mode_paral,file,line)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,optional,intent(in) :: line
  character(len=*),intent(in) :: level,msg,mode_paral
@@ -425,6 +433,8 @@ end subroutine libpaw_msg_hndl
 
 subroutine libpaw_spmsg_getcount(ncomment,nwarning,nexit)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(out) :: ncomment,nexit,nwarning
 
@@ -466,6 +476,8 @@ end subroutine libpaw_spmsg_getcount
 !! SOURCE
 
 subroutine libpaw_spmsg_mpisum(mpicomm)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mpicomm
@@ -511,6 +523,8 @@ end subroutine libpaw_spmsg_mpisum
 
 subroutine libpaw_write_comm_set(new_write_comm)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in) :: new_write_comm
  
@@ -547,6 +561,8 @@ end subroutine libpaw_write_comm_set
 !! SOURCE
 
 subroutine libpaw_log_flag_set(log_flag)
+
+ implicit none
 
 !Arguments ------------------------------------
  logical,intent(in) :: log_flag
@@ -586,6 +602,8 @@ end subroutine libpaw_log_flag_set
 !! SOURCE
 
 subroutine libpaw_netcdf_check(ncerr,msg,file,line)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: ncerr
@@ -660,6 +678,8 @@ end subroutine libpaw_netcdf_check
 
 subroutine libpaw_leave(mode_paral,exit_status)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in),optional :: exit_status
  character(len=4),intent(in) :: mode_paral
@@ -712,6 +732,8 @@ end subroutine libpaw_leave
 !! SOURCE
 
 subroutine libpaw_die(message,file,line)
+
+ implicit none
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: line
@@ -766,6 +788,8 @@ end subroutine libpaw_die
 
 subroutine libpaw_lock_and_write(filename,string)
 
+ implicit none
+
 !Arguments ------------------------------------
  character(len=*),intent(in) :: filename,string
 
@@ -813,6 +837,8 @@ end subroutine libpaw_lock_and_write
 !! SOURCE
 
 integer function libpaw_get_free_unit()
+
+ implicit none
 
 !Local variables-------------------------------
  integer,parameter :: MIN_UNIT_NUMBER=10
@@ -863,6 +889,8 @@ end function libpaw_get_free_unit
 
 subroutine libpaw_flush(unit)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in) :: unit
 
@@ -910,6 +938,8 @@ end subroutine libpaw_flush
 
 pure function libpaw_basename(istr) result(ostr)
 
+ implicit none
+
 !Arguments ------------------------------------
  character(len=*),intent(in) :: istr
  character(len=LEN_TRIM(istr)) :: ostr
@@ -956,6 +986,8 @@ end function libpaw_basename
 
 pure function libpaw_to_upper(istr) result(ostr)
 
+ implicit none
+
 !Arguments ------------------------------------
  character(len=*),intent(in) :: istr
  character(len=LEN_TRIM(istr)) :: ostr
@@ -995,6 +1027,8 @@ end function libpaw_to_upper
 !! SOURCE
 
 pure function libpaw_lstrip(istr) result(ostr)
+
+ implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: istr
@@ -1038,6 +1072,8 @@ end function libpaw_lstrip
 !! SOURCE
 
 pure function libpaw_indent(istr) result(ostr)
+
+ implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: istr

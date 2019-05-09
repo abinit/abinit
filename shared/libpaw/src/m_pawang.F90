@@ -182,6 +182,8 @@ CONTAINS
 
 subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: gnt_option,lmax,nphi,nsym,ntheta
@@ -293,6 +295,8 @@ end subroutine pawang_init
 
 subroutine pawang_free(Pawang)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(Pawang_type),intent(inout) :: Pawang
@@ -369,6 +373,8 @@ end subroutine pawang_free
 !! SOURCE
 
 subroutine pawang_lsylm(pawang)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -561,6 +567,8 @@ subroutine pawang_lsylm(pawang)
 
  subroutine initang(pawang)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(pawang_type),intent(inout) :: pawang
@@ -652,6 +660,8 @@ end subroutine initang
 !! SOURCE
 
 subroutine realgaunt(l_max,ngnt,gntselect,realgnt)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -810,6 +820,8 @@ end subroutine realgaunt
 
 function gaunt(ll,mm,l1,m1,l2,m2)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: l1,l2,ll,m1,m2,mm
@@ -928,6 +940,8 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 
  subroutine gauleg(xmin,xmax,x,weights,n)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -996,6 +1010,8 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 
 elemental function rfactorial(nn)
 
+ implicit none
+
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -1039,6 +1055,8 @@ end function rfactorial
 !! SOURCE
 
 function perms(nn,kk)
+
+ implicit none
 
 !Arguments ---------------------------------------------
 !scalars

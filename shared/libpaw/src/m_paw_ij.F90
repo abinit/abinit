@@ -332,6 +332,8 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
 &                      has_exexch_pot,has_pawu_occ,nucdipmom,& ! Optional
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nspinor,nspden,nsppol,natom,ntypat,pawspnorb
@@ -573,6 +575,8 @@ end subroutine paw_ij_init
 
 subroutine paw_ij_free(Paw_ij)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(Paw_ij_type),intent(inout) :: Paw_ij(:)
@@ -681,6 +685,8 @@ end subroutine paw_ij_free
 
 subroutine paw_ij_nullify(Paw_ij)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(Paw_ij_type),intent(inout) :: Paw_ij(:)
@@ -752,6 +758,8 @@ end subroutine paw_ij_nullify
 
 subroutine paw_ij_copy(paw_ij_in,paw_ij_cpy, &
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -987,6 +995,8 @@ end subroutine paw_ij_copy
 subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert, &
 &                       mpi_atmtab,comm_atom,natom)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: enunit,ipert
@@ -1014,9 +1024,8 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 
 ! *************************************************************************
 
- if (.False.) write(std_out,*)"pawspnorb:",pawspnorb
-
 !@Paw_ij_type
+
  size_paw_ij=SIZE(Paw_ij);if (size_paw_ij==0) return
 
  my_unt   =std_out   ; if (PRESENT(unit      )) my_unt   =unit
@@ -1356,6 +1365,8 @@ end subroutine paw_ij_print
 !! SOURCE
 
 subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2025,6 +2036,8 @@ subroutine paw_ij_redistribute(paw_ij,mpi_comm_in,mpi_comm_out,&
 &                 natom,mpi_atmtab_in,mpi_atmtab_out,paw_ij_out,&
 &                 SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpi_comm_in,mpi_comm_out
@@ -2353,6 +2366,8 @@ end subroutine paw_ij_redistribute
 
 subroutine paw_ij_reset_flags(Paw_ij,all,dijhartree,self_consistent)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  logical,optional,intent(in) :: all,dijhartree,self_consistent
@@ -2447,6 +2462,8 @@ end subroutine paw_ij_reset_flags
 !! SOURCE
 
 subroutine paw_ij_isendreceive_getbuffer(paw_ij,npaw_ij_send,atm_indx_recv,buf_int,buf_dp)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2694,6 +2711,8 @@ end subroutine paw_ij_isendreceive_getbuffer
 
 subroutine paw_ij_isendreceive_fillbuffer(paw_ij,atmtab_send,atm_indx_send,npaw_ij_send,&
 &                                         buf_int,buf_int_size,buf_dp,buf_dp_size)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars

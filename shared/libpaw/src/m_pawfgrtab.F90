@@ -184,6 +184,8 @@ CONTAINS
 subroutine pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,nspden,typat,&
 &                         mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nspden
@@ -274,6 +276,8 @@ end subroutine pawfgrtab_init
 
 subroutine pawfgrtab_free(Pawfgrtab)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(Pawfgrtab_type),intent(inout) :: Pawfgrtab(:)
@@ -345,6 +349,8 @@ end subroutine pawfgrtab_free
 
 subroutine pawfgrtab_nullify(Pawfgrtab)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(Pawfgrtab_type),intent(inout) :: Pawfgrtab(:)
@@ -407,6 +413,8 @@ end subroutine pawfgrtab_nullify
 
 subroutine pawfgrtab_copy(pawfgrtab_in,pawfgrtab_cp, &
 &                         mpi_atmtab,comm_atom) ! optional arguments
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -561,6 +569,8 @@ end subroutine pawfgrtab_copy
 
 subroutine pawfgrtab_print(Pawfgrtab,natom,unit,prtvol,mode_paral,mpi_atmtab,comm_atom)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: comm_atom,natom,prtvol,unit
@@ -668,6 +678,8 @@ end subroutine pawfgrtab_print
 
 subroutine pawfgrtab_gather(pawfgrtab,pawfgrtab_gathered,comm_atom,istat, &
 &                           mpi_atmtab) ! optional argument
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -997,6 +1009,8 @@ end subroutine pawfgrtab_gather
 subroutine pawfgrtab_redistribute(pawfgrtab,mpi_comm_in,mpi_comm_out,&
 &                    natom,mpi_atmtab_in,mpi_atmtab_out,pawfgrtab_out,&
 &                    SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1336,6 +1350,8 @@ end subroutine pawfgrtab_redistribute
 
 subroutine pawfgrtab_isendreceive_getbuffer(pawfgrtab,npawfgrtab_send,atm_indx_recv,buf_int,buf_dp)
 
+implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npawfgrtab_send
@@ -1479,6 +1495,8 @@ end subroutine pawfgrtab_isendreceive_getbuffer
 !!
 subroutine pawfgrtab_isendreceive_fillbuffer(pawfgrtab, atmtab_send,atm_indx_send,npawfgrtab_send,&
 &                                            buf_int,buf_int_size,buf_dp,buf_dp_size)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars
