@@ -1,6 +1,6 @@
-!!****d* ABINIT/41_xc_lowlevel
+!!****d* ABINIT/33_xc_lowlevel
 !! NAME
-!! 41_xc_lowlevel
+!! 33_xc_lowlevel
 !!
 !! DESCRIPTION
 !!  FIXME: Description is missing
@@ -13,7 +13,6 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! interfaces_41_xc_lowlevel.F90
 !! m_drivexc.F90
 !! m_libxc_functionals.F90
 !! m_xc_noncoll.F90
