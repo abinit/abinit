@@ -294,6 +294,15 @@ contains
     if (allocated(self%gilbert_damping)) then
        ABI_DEALLOCATE(self%gilbert_damping)
     end if
+    if (allocated(self%ispin_prim)) then
+       ABI_DEALLOCATE(self%ispin_prim)
+    end if
+    if (allocated(self%rvec)) then
+       ABI_DEALLOCATE(self%rvec)
+    end if
+
+
+
   end subroutine spin_finalize
 
   subroutine spin_fill_supercell(self, sc_maker, supercell)
