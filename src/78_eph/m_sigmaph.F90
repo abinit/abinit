@@ -316,6 +316,9 @@ module m_sigmaph
    ! pert_table(1, npert): rank of the processor treating this atomic perturbation.
    ! pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
 
+  integer,allocatable :: phmodes_skip(:)
+   ! (natoms3) A mask to skip accumulating the contribution of certain phonon modes
+
   integer,allocatable:: indkk_kq(:, :)
    ! (6, %nqibz_k))
    ! Mapping k+q --> initial IBZ. Depends on ikcalc.
@@ -1602,6 +1605,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Ignore acoustic or unstable modes.
            nu = sigma%my_pinfo(3, imyp)
            wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
+           if (sigma%phmodes_skip(nu)==1) cycle
 
            ! For each band in Sigma_{bk}
            do ib_k=1,nbcalc_ks
@@ -2687,6 +2691,22 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end do
  !write(std_out,*)"my_npert", new%my_npert, "nprocs_pert", new%nprocs_pert; write(std_out,*)"my_pinfo", new%my_pinfo
 
+ ! Set a mask to skip accumulating the contribution of certain phonon modes
+ ! By default do not skip, if set skip all but specified
+ ABI_MALLOC(new%phmodes_skip,(natom3))
+ new%phmodes_skip = 0
+ if (all(dtset%eph_phrange/=0)) then
+   if (minval(dtset%eph_phrange)<1.or.&
+       maxval(dtset%eph_phrange)>natom3.or.&
+       dtset%eph_phrange(2)<dtset%eph_phrange(1)) then
+     MSG_ERROR('Invalid range for eph_phrange. Should be between [1,3*natom] and eph_modes(2)>eph_modes(1)')
+   end if
+   call wrtout(std_out, sjoin(" Including phonon modes between [", &
+               itoa(dtset%eph_phrange(1)), ',', itoa(dtset%eph_phrange(2)),"]"))
+   new%phmodes_skip = 0
+   new%phmodes_skip(dtset%eph_phrange(1):dtset%eph_phrange(2)) = 1
+ end if
+
  if (.not. new%imag_only) then
    ! Split bands among the procs inside comm_bsum.
    call xmpi_split_work(new%nbsum, new%comm_bsum, new%my_bsum_start, new%my_bsum_stop)
@@ -3093,6 +3113,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, restart, co
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("eph_ngqpt_fine", "int", "three"), &
+     nctkarr_t("eph_phrange", "int", "two"), &
      nctkarr_t("ddb_ngqpt", "int", "three"), &
      nctkarr_t("ph_ngqpt", "int", "three"), &
      nctkarr_t("sigma_ngkpt", "int", "three"), &
@@ -3201,6 +3222,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, restart, co
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_ngkpt"), dtset%sigma_ngkpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "frohl_params"), dtset%frohl_params))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_phrange"), dtset%eph_phrange))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), self%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), self%nbcalc_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), self%kcalc))
@@ -3648,6 +3670,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%itreat_qibz)
  ABI_SFREE(self%my_pinfo)
  ABI_SFREE(self%pert_table)
+ ABI_SFREE(self%phmodes_skip)
  ABI_SFREE(self%indkk_kq)
  ABI_SFREE(self%indq2dvdb_k)
  ABI_SFREE(self%ind_ibzk2ibz)
