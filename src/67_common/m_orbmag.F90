@@ -4095,7 +4095,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
       & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
  call cpu_time(finish_time)
- write(std_out,'(a,es16.8)')'JWZ debug make_smat time: ',finish_time-start_time
+ write(std_out,'(a,es16.8)')' orbmag progress: make_smat time ',finish_time-start_time
  
  ! call chern number routine if necessary
  if (dtset%orbmag .EQ. 3) then
@@ -4106,7 +4106,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  end if
 
  ! compute the shifted cprj's <p_k+b|u_k>
- call cpu_time(start_time)
+ ! call cpu_time(start_time)
  write(std_out,'(a)')' orbmag progress: making <p_k+b|u_k>, step 2 of 6'
  ABI_DATATYPE_ALLOCATE(cprj_kb_k,(6,0:4,dtset%natom,mcprj))
  ncpgrb = 0 ! no k gradients in <p_k+b|u_k>
@@ -4118,12 +4118,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  call ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
       & istwf_k,kg,mcg,mcprj,mpi_enreg,nattyp,ncpgrb,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
  call cpu_time(finish_time)
- write(std_out,'(a,es16.8)')'JWZ debug ctocprjb time: ',finish_time-start_time
+ write(std_out,'(a,es16.8)')' orbmag progress: ctocprjb time ',finish_time-start_time
 
  ! compute the <u_kg|dS/dk_b|u_k> matrix elements
  ! ABI_ALLOCATE(dsdk_,(2,nband_k,nband_k,dtorbmag%fnkpt,1:3))
  call cpu_time(start_time)
- write(std_out,'(a)')' orbmag progress: making <u_n1k1|dS/dk|u_n2k>, step 5 of 6'
+ write(std_out,'(a)')' orbmag progress: making <u_n1k1|dS/dk|u_n2k>, step 3 of 6'
  ABI_ALLOCATE(dsdk,(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4))
  ! call make_dsdk_cprj(atindx1,cprj,dsdk_,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
  call make_dsdk_FD(atindx1,cprj_kb_k,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
@@ -4131,27 +4131,27 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !     & mcg,mpi_enreg,nband_k,npwarr,paw_ij,pawtab,psps,pwind,pwind_alloc,&
  !     & rmet,rprimd,xred,ylm,ylmgr)
  call cpu_time(finish_time)
- write(std_out,'(a,es16.8)')'JWZ debug make_dsdk time: ',finish_time-start_time
+ write(std_out,'(a,es16.8)')' orbmag progress: make_dsdk time ',finish_time-start_time
 
  
  ! compute the energies at each k pt
  call cpu_time(start_time)
- write(std_out,'(a)')' orbmag progress: making <u_n1k|H_k|u_n2k>, step 3 of 6'
+ write(std_out,'(a)')' orbmag progress: making <u_n1k|H_k|u_n2k>, step 4 of 6'
  ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
  call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
       & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
       & ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
  call cpu_time(finish_time)
- write(std_out,'(a,es16.8)')'JWZ debug make_eeig time: ',finish_time-start_time
+ write(std_out,'(a,es16.8)')' orbmag progress: make_eeig time ',finish_time-start_time
 
  ! compute the <u_kg|H_k|u_kb> matrix elements
  call cpu_time(start_time)
- write(std_out,'(a)')' orbmag progress: making <u_n1k1|H_k2|u_n3k3>, step 4 of 6'
+ write(std_out,'(a)')' orbmag progress: making <u_n1k1|H_k2|u_n3k3>, step 5 of 6'
  ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
  call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,gprimd,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
       & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
  call cpu_time(finish_time)
- write(std_out,'(a,es16.8)')'JWZ debug make_eeig123 time: ',finish_time-start_time
+ write(std_out,'(a,es16.8)')' orbmag progress: make_eeig123 time ',finish_time-start_time
 
 
  call cpu_time(start_time)
@@ -4191,7 +4191,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  end do ! end loop over adir
  call cpu_time(finish_time)
- write(std_out,'(a,es16.8)')'JWZ debug adir loop time: ',finish_time-start_time
+ write(std_out,'(a,es16.8)')' orbmag progress: loop over adir time ',finish_time-start_time
 
  ! convert terms to cartesian coordinates as needed
  ! note that terms like <dv/dk| x |dw/dk> computed in reduced coords,
@@ -4237,14 +4237,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  write(std_out,'(a,3es16.8)')' JWZ debug VVIII ',VVIII(1,1),VVIII(1,2),VVIII(1,3)
 
  ! accumulate in orbmagvec
-
- ! orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
- !                  & - s1trace(1:2,1:3) &
- !                  & + CCI(1:2,1:3) &
- !                  & + VVII(1:2,1:3) &
- !                  & + VVI(1:2,1:3) &
- !                  & + VVIII(1:2,1:3) &
- !                  & - CCIV(1:2,1:3)
 
  orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
                   & - s1trace(1:2,1:3) &
