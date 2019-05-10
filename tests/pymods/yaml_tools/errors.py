@@ -100,6 +100,7 @@ class UnlabeledDocumentError(InputFileError):
                ' identified.')
         InputFileError.__init__(self, line, msg)
 
+
 class DuplicateDocumentError(InputFileError):
     def __init__(self, line, id):
         msg = ('There are two document with the same label and iteration'
