@@ -1572,6 +1572,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  real(dp), allocatable :: selftemp_imag(:)
  integer :: natom,ndim,nsppol,nspinor
  real(dp) :: delta,slope,y0
+ character(len=500) :: message
 ! *********************************************************************
  delta=0.0000000
  ABI_ALLOCATE(selftemp_re,(self%nw))
