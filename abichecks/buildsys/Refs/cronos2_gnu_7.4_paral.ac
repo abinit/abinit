@@ -118,7 +118,7 @@
 
 # C preprocessor additional custom flags
 #
-CPPFLAGS_EXTRA="-DHAVE_TEST_TIME_PARTITIONING"
+#CPPFLAGS_EXTRA="-P"
 
 # Forced C preprocessor flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -315,7 +315,7 @@ CPPFLAGS_EXTRA="-DHAVE_TEST_TIME_PARTITIONING"
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -pedantic -fcheck=all"
+#FCFLAGS_EXTRA="-O2"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -531,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi_gcc53"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -773,11 +773,11 @@ with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-with_fft_incs="-I/usr/include"
+#with_fft_incs="-I/usr/local/include/fftw"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
+with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,7 +852,7 @@ with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="custom"
+with_linalg_flavor="mkl"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
@@ -860,7 +860,7 @@ with_linalg_flavor="custom"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
+with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -900,7 +900,7 @@ with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+libxc+wannier90+bigdft"
+with_dft_flavor="atompaw+libxc+wannier90"
 
                        # ------------------------------ #
 
@@ -920,11 +920,11 @@ with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.1.0.5/lib -latompaw"
 
 # Include flags for the BigDFT library (default is unset)
 #
-with_bigdft_incs="-I${FALLBACKS_PATH}/bigdft/abinit-1.7.1.28/include"
+#with_bigdft_incs="-I/usr/local/include/bigdft"
 
 # Link flags for the BigDFT library (default is unset)
 #
-with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft/abinit-1.7.1.28/lib -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 
@@ -1024,7 +1024,7 @@ with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/2.0.1.1/lib -lwannier90"
 
 # Enable double precision for GW calculations (gmatteo)
 #
-enable_gw_dpc="yes"
+#enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #
