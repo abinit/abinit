@@ -286,6 +286,7 @@ type(ephwg_t) function ephwg_new( &
    ! Compute Frohlich matrix elements
    qpt = new%ibz(:,ik)
    qpt_cart = two_pi*matmul(cryst%gprimd, qpt)
+   if (sum(qpt_cart**2) < tol6) cycle
    inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
    fqdamp = (two / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
 
@@ -302,8 +303,7 @@ type(ephwg_t) function ephwg_new( &
      end do
      gkq2_lr(nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu)
    end do
-   new%frohl_ibz(ik,:) = gkq2_lr !* fqdamp
-   if (sum(qpt**2) < tol14) new%frohl_ibz(ik,:3) = 0
+   new%frohl_ibz(ik,:) = gkq2_lr * fqdamp
  end do
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
