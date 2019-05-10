@@ -87,6 +87,7 @@ tests/TestBot_MPI*/*
 /bindings/autom4te.cache
 /bindings/configure
 /bindings/config.log
+/bindings/config.mk
 /bindings/config.sh
 /bindings/config.status
 /bindings/config/gnu/compile

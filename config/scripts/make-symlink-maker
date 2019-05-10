@@ -116,7 +116,7 @@ for lib in abinit_corelibs:
   else:
     par_dir = ""
   if ( cnf.get(lib, "parent") != "core" ):
-    links += "${LN_S} %s %s\n" % (par_dir, lib)
+    links += "test -e %s || ${LN_S} %s %s\n" % (lib, par_dir, lib)
 
 # Write down script
 with open(my_output, "w") as script_file:
