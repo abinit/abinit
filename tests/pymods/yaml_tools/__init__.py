@@ -82,13 +82,13 @@ class Document(object):
         '''
         if self._id is None:
             state = []
-            if not hasattr(self.obj, 'label'):
+            if 'label' not in self.obj:
                 raise UnlabeledDocumentError(self.start)
 
             for key, val in self.iterators.items():
                 state.append('{}={}'.format(key, val))
 
-            self._id = ','.join(state) + ' ' + self.obj.label
+            self._id = ','.join(state) + ' ' + self.obj['label']
         return self._id
 
     @property

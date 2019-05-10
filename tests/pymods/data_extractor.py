@@ -64,7 +64,7 @@ class DataExtractor:
         # Reset those states to allow several extract with the same instance
         self.iterators_state = {}
         self.corrupted_docs = []
-        lines, docs, ignored = [], [], []
+        lines, docs, ignored = [], {}, []
 
         current_doc = None
         for i, line in enumerate(src_lines):
