@@ -5612,6 +5612,8 @@ subroutine pawdij_print_dij(dij,cplex_dij,qphase,iatom,natom,nspden,nsppol,&
 
 ! *************************************************************************
 
+ if (.False.) write(std_out,*)"nsppol", nsppol
+
 !Optional arguments
  my_unt   =std_out ; if (PRESENT(unit      )) my_unt   =unit
  my_mode  ='COLL'  ; if (PRESENT(mode_paral)) my_mode  =mode_paral

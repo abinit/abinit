@@ -794,6 +794,8 @@ subroutine libxc_functionals_getrefs(xcrefs,xc_functional)
      iref_c=-1
    end if
  end do
+#else
+ if (.False.) write(std_out,*) xc_functional%id
 #endif
 
 end subroutine libxc_functionals_getrefs

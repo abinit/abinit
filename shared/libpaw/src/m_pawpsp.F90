@@ -2921,6 +2921,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
 !************************************************************************
 
+ if (.False.) write(std_out,*) ipsp
+
 !==========================================================
 !Destroy everything in pawtab but optional flags
  call pawtab_free(pawtab)

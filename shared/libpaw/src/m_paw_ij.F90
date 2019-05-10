@@ -1024,8 +1024,9 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 
 ! *************************************************************************
 
-!@Paw_ij_type
+ if (.False.) write(std_out,*)"pawspnorb:",pawspnorb
 
+!@Paw_ij_type
  size_paw_ij=SIZE(Paw_ij);if (size_paw_ij==0) return
 
  my_unt   =std_out   ; if (PRESENT(unit      )) my_unt   =unit
