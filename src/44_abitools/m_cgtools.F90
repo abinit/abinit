@@ -583,7 +583,7 @@ end function cg_dznrm2
 !!
 !! SOURCE
 
-function cg_zdotc(n,x,y) result(res)
+function cg_zdotc(n, x, y) result(res)
 
 !Arguments ------------------------------------
 !scalars
@@ -596,9 +596,10 @@ function cg_zdotc(n,x,y) result(res)
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ZDOTC_BUG
  integer :: ii
-#endif
+#else
  complex(dpc) :: cres
  complex(dpc),external :: zdotc
+#endif
 
 ! *************************************************************************
 
@@ -694,9 +695,10 @@ function cg_zdotu(n, x, y) result(res)
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ZDOTU_BUG
  integer :: ii
-#endif
+#else
  complex(dpc) :: cres
  complex(dpc),external :: zdotu
+#endif
 
 ! *************************************************************************
 
@@ -751,8 +753,6 @@ subroutine cg_zaxpy(n,alpha,x,y)
  real(dp),intent(in) :: x(2*n)
  real(dp),intent(inout) :: y(2*n)
 
-!local variables
-! integer :: ii
 
 ! *************************************************************************
 
@@ -914,7 +914,7 @@ end subroutine cg_zgemv
 !!
 !! SOURCE
 
-subroutine cg_zgemm(transa,transb,npws,ncola,ncolb,cg_a,cg_b,cg_c,alpha,beta)
+subroutine cg_zgemm(transa, transb, npws, ncola, ncolb, cg_a, cg_b, cg_c, alpha, beta)
 
 !Arguments ------------------------------------
 !scalars
@@ -3562,7 +3562,7 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
  if(ek0<1.0d-10)then
    write(message,'(3a)')&
 &   'The mean kinetic energy of a wavefunction vanishes.',ch10,&
-&   'It is reset to 0.1Ha.'
+&   'It is reset to 0.1 Ha.'
    MSG_WARNING(message)
    ek0=0.1_dp
  end if
@@ -4458,19 +4458,19 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
      ABI_ALLOCATE(subovl_tmp,(nband_k*(nband_k+1)/2))
      subovl_tmp=subovl(1:nband_k*(nband_k+1):2)
 !    TO DO: Not sure this one has been fully tested
-     call abi_xhpgv(1,'V','U',nband_k, subham_tmp,subovl_tmp, eig_k,evec_tmp,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpgv(1,'V','U',nband_k,subham_tmp,subovl_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
      ABI_DEALLOCATE(subovl_tmp)
    else
-     call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
    evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
    ABI_DEALLOCATE(evec_tmp)
    ABI_DEALLOCATE(subham_tmp)
  else
    if (use_subovl==1) then
-     call abi_xhpgv(1,'V','U',nband_k,subham,subovl,eig_k,evec,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpgv(1,'V','U',nband_k,subham,subovl,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    else
-     call abi_xhpev('V','U',nband_k,subham,eig_k,evec,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpev('V','U',nband_k,subham,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
  end if
 
@@ -4499,12 +4499,9 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 !=====================================================
  if (istwf_k==2) then
 
-   ABI_STAT_ALLOCATE(blockvectora,(vectsize,nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in blockvectora")
-   ABI_STAT_ALLOCATE(blockvectorb,(nband_k,nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in blockvectorb")
-   ABI_STAT_ALLOCATE(blockvectorc,(vectsize,nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in blockvectorc")
+   ABI_MALLOC_OR_DIE(blockvectora,(vectsize,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorb,(nband_k,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorc,(vectsize,nband_k), ierr)
 
    do iband=1,nband_k
      if (me_g0 == 1) then
@@ -4569,8 +4566,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 
  else
 
-   ABI_STAT_ALLOCATE(work,(2,npw_k*nspinor*nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in work")
+   ABI_MALLOC_OR_DIE(work,(2,npw_k*nspinor*nband_k), ierr)
 
 !  MG: Do not remove this initialization.
 !  telast_06 stops in fxphase on inca_debug and little_buda (very very strange, due to atlas?)

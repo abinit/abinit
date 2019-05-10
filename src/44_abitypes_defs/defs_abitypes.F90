@@ -226,6 +226,7 @@ type dataset_type
  integer :: efmas_n_dirs
  integer :: efmas_ntheta
  integer :: enunit
+ integer :: eph_restart = 0
  integer :: eph_task
  integer :: exchn2n3d
  integer :: extrapwf
@@ -935,18 +936,28 @@ type dataset_type
  integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
+ real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
+
  integer :: eph_ngqpt_fine(3)
+ integer :: eph_np_pqbks(5) = 0
+
+ integer :: eph_stern = 0
  integer :: eph_transport
 
  integer :: ph_intmeth
+ integer :: prteliash = 0
  real(dp) :: ph_wstep
  real(dp) :: ph_smear
  integer :: ddb_ngqpt(3)
  real(dp) :: ddb_shiftq(3)
 
  integer :: mixprec = 0
+ integer :: symv1scf = 0
+ integer :: dvdb_add_lr = 1
 
  integer :: sigma_bsum_range(2) = 0
+
+ real(dp) :: sigma_erange(2) = -one
 
  integer :: sigma_ngkpt(3) = 0
  ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
@@ -965,7 +976,11 @@ type dataset_type
  integer :: nkpath=0
  real(dp) :: einterp(4)=zero
  real(dp),allocatable :: kptbounds(:,:)
- real(dp) :: tmesh(3) ! = [10._dp, 300._dp, 5._dp] This triggers a bug in the bindings
+ real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
+
+ character(len=fnlen) :: getkerange_path = ABI_NOFILE
+ !character(len=fnlen) :: getpot_path = ABI_NOFILE
+ !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
 
  end type dataset_type
 !!***
@@ -978,7 +993,7 @@ type dataset_type
 !!
 !! FUNCTION
 !! The MPI_type structured datatype gather different information
-!! about the MPI parallelisation : number of processors,
+!! about the MPI parallelisation: number of processors,
 !! the index of my processor, the different groups of processors, etc ...
 !!
 !! SOURCE

@@ -5,6 +5,8 @@ import os
 import re
 import sys
 
+from abirules_tools import find_abinit_toplevel_directory
+
 # Init regular expressions
 re_m4file  = re.compile("\.m4$")
 re_hdrfile  = re.compile("\.h$")
@@ -47,15 +49,15 @@ def check_name(cpp_option,cpp_blocks):
   return ret
 
 
-def main(opts):
-  chk_verbose = opts.verbose
-
-  # Init script
-  my_name = os.path.basename(__file__) + ":main"
+def main():
+  top = find_abinit_toplevel_directory()
+  verbose = 0
 
   # Extract CPP options from the libPAW header files
+  libpaw_dir = os.path.join(top, "src", "42_libpaw")
+  assert os.path.isdir(libpaw_dir)
   cpp_libpaw = list()
-  for root,dirs,files in os.walk("src/42_libpaw"):
+  for root,dirs,files in os.walk(libpaw_dir):
     for src in files:
       if ( re_hdrfile.search(src) ):
         with open(os.path.join(root,src), "rt") as fh:
@@ -66,8 +68,10 @@ def main(opts):
                   cpp_libpaw.append(tmp_def)
 
   # Extract CPP options from the libTetra header files
+  libtetra_dir = os.path.join(top, "src", "17_libtetra_ext")
+  assert os.path.isdir(libtetra_dir)
   cpp_libtetra = list()
-  for root,dirs,files in os.walk("src/17_libtetra_ext"):
+  for root,dirs,files in os.walk(libtetra_dir):
     for src in files:
       if ( re_hdrfile.search(src) ):
         with open(os.path.join(root,src), "rt") as fh:
@@ -79,7 +83,9 @@ def main(opts):
 
   # Extract CPP options from the build system
   cpp_buildsys = list()
-  for root,dirs,files in os.walk("config/m4"):
+  m4_path = os.path.join(top, "config", "m4")
+  assert os.path.isdir(m4_path)
+  for root,dirs,files in os.walk(m4_path):
     for src in files:
       if not re_m4file.search(src): continue
       with open(os.path.join(root, src), "rt") as fh:
@@ -89,7 +95,7 @@ def main(opts):
               if not tmp_def in cpp_buildsys:
                 cpp_buildsys.append(tmp_def)
 
-  with open("configure.ac", "rt") as fh:
+  with open(os.path.join(top, "configure.ac"), "rt") as fh:
       for line in fh:
         if ( re_acdef.search(line) ):
           tmp_def = re.sub(".*AC_DEFINE\\([\\[]?([^\\],]*).*","\\1",line).strip()
@@ -109,8 +115,10 @@ def main(opts):
         cpp_blocks[i].append(tmp[i])
 
   # Extract CPP options from the includes
+  incs_dir = os.path.join(top, "src", "incs")
+  assert os.path.isdir(incs_dir)
   cpp_includes = list()
-  for root,dirs,files in os.walk("src/incs"):
+  for root,dirs,files in os.walk(incs_dir):
     for src in files:
       if not re_hdrfile.search(src): continue
       with open(os.path.join(root,src), "rt") as fh:
@@ -128,8 +136,10 @@ def main(opts):
 
   # Explore the source files
   cpp_source = dict()
-  for root,dirs,files in os.walk("src"):
+  src_dir = os.path.join(top, "src")
+  assert os.path.isdir(src_dir)
 
+  for root,dirs,files in os.walk(src_dir):
     files.sort()
     for src in files:
       if re_f90file.search(src):
@@ -187,12 +197,12 @@ def main(opts):
   cpp_misnamed.sort()
 
   # Display forbidden CPP options
-  if ( (chk_verbose and (len(cpp_devel) > 0)) or (len(cpp_undefined) > 0) ):
+  if ( (verbose and (len(cpp_devel) > 0)) or (len(cpp_undefined) > 0) ):
     sys.stderr.write("%s: reporting preprocessing option discrepancies\n\n" % \
       (os.path.basename(sys.argv[0])))
     sys.stderr.write("X: N=Wrong Naming / U=Undefined\n\n")
 
-  if ( chk_verbose and (len(cpp_devel) > 0) ):
+  if ( verbose and (len(cpp_devel) > 0) ):
     sys.stderr.write("%s  %-24s  %-44s\n" % ("X","Developer option","Location"))
     sys.stderr.write("%s  %-24s  %-44s\n" % ("-","-" *24,"-" * 48))
     for opt in cpp_devel:
@@ -223,16 +233,4 @@ def main(opts):
   return retval
 
 if __name__ == "__main__":
-  # Parse command-line arguments
-  from optparse import OptionParser
-
-  my_help = "Usage: %prog [-v|--verbose]"""
-  parser = OptionParser(usage=my_help, version="%prog for Abinit 6")
-  parser.add_option("-v", "--verbose", action="store_true",
-    dest="verbose", default=False,
-    help="Report developer options")
-
-  (opts, args) = parser.parse_args()
-
-  exit_status = main(opts)
-  sys.exit(exit_status)
+  sys.exit(main())

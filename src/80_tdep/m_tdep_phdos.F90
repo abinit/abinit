@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -7,8 +8,6 @@
 module m_tdep_phdos
 
   use defs_basis
-!FB  use m_nctk
-!FB  use m_xmpi
   use m_errors
   use m_abicore
   use m_phonons
@@ -22,9 +21,6 @@ module m_tdep_phdos
   use m_tdep_shell,       only : Shell_Variables_type
   use m_tdep_abitypes,    only : tdep_ifc2phij, tdep_read_ifc, tdep_write_ifc
   use m_xmpi
-!FB#ifdef HAVE_NETCDF
-!FB  use netcdf
-!FB#endif
 
   implicit none
 
@@ -35,15 +31,14 @@ module m_tdep_phdos
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
+subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
 
-  implicit none
-
-  integer :: prtdos,nqpt,ii,jj,iqpt,iatom
-  integer :: msym,natom,natom_unitcell,iomega
+  integer :: prtdos,ii,iqpt,iatom
+  integer :: natom,natom_unitcell,iomega
   integer :: dos_ngqpt(3)
   integer :: count_wminmax(2)
   character (len=25):: phdos_fname
+  character(len=500) :: msg
   double precision :: dossmear,integ,domega
   double precision :: Phij_NN(3*natom,3*natom)
   double precision :: Rlatt4abi(3,natom_unitcell,natom)
@@ -57,7 +52,6 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
   type(Symetries_Variables_type),intent(in) :: Sym
   type(crystal_t),intent(in) :: Crystal
   type(Qpoints_type),intent(in) :: Qpt
-  type(ddb_type),intent(in) :: ddb
   type(Shell_Variables_type),intent(in) :: Shell2at
 
   write(InVar%stdout,*)' '
@@ -115,6 +109,8 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos_free(phdos)
+     write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
+     call wrtout(std_out, msg)
   end do
 
   write(InVar%stdout,'(a)') ' ------- achieved'
@@ -157,8 +153,6 @@ end subroutine tdep_calc_phdos
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
-
-  implicit none
 
   integer :: iomega,itemp,iatom,itypat
   double precision :: k_B,wovert,heatcapa,entropy,internalE,freeE,expm2x,ln2shx,cothx,xx
@@ -274,8 +268,6 @@ end subroutine tdep_calc_thermo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
-
-  implicit none
 
   integer :: iatom,ii,jj,kk,ll,iatcell,itypat
 ! integer :: istep

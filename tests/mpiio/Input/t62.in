@@ -14,7 +14,7 @@
   getwfk1   0            # Cancel default
     nqpt1   0            # Cancel default
   kptopt1   1            # Automatic generation of k points with symmetries
-  tolvrs1   1.0d-15      # SCF stopping criterion (modify default)
+  tolwfr1   1.0d-20      # SCF stopping criterion (modify default)
    prtwf1   1            # Printing of WF
 
 #Set 2 : Response function calculation of d/dk wave function

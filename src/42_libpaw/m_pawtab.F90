@@ -264,9 +264,15 @@ MODULE m_pawtab
    ! useexexch=1 ; use local exact-exchange
 
   integer :: usepawu
-   ! usepawu=0 ; do not use PAW+U formalism
-   ! usepawu=1 ; use PAW+U formalism (Full localized limit)
-   ! usepawu=2 ; use PAW+U formalism (Around Mean Field)
+   ! usepawu= 0 ; do not use PAW+U formalism
+   ! usepawu= 1 ; use PAW+U formalism (Full localized limit)
+   ! usepawu= 2 ; use PAW+U formalism (Around Mean Field)
+   ! usepawu= 3 ; use PAW+U formalism (Around Mean Field) - Alternative
+   ! usepawu= 4 ; use PAW+U formalism (FLL) without polarization in the XC 
+   ! usepawu=-1 ; use PAW+U formalism (FLL) - No use of the occupation matrix - Experimental
+   ! usepawu=-2 ; use PAW+U formalism (AMF) - No use of the occupation matrix - Experimental
+   ! usepawu=10 ; use PAW+U within DMFT
+   ! usepawu=14 ; use PAW+U within DMFT without polarization in the XC
 
   integer :: usepotzero
    ! usepotzero=0 if it is the Kresse-Joubert convention
@@ -604,8 +610,6 @@ CONTAINS !===========================================================
 
 subroutine pawtab_nullify_0D(Pawtab)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  type(Pawtab_type),intent(inout) :: Pawtab
@@ -678,8 +682,6 @@ end subroutine pawtab_nullify_0D
 
 subroutine pawtab_nullify_1D(Pawtab)
 
- implicit none
-
 !Arguments ------------------------------------
  type(pawtab_type),intent(inout) :: Pawtab(:)
 
@@ -721,8 +723,6 @@ end subroutine pawtab_nullify_1D
 !! SOURCE
 
 subroutine pawtab_free_0D(Pawtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -933,8 +933,6 @@ end subroutine pawtab_free_0D
 
 subroutine pawtab_free_1D(Pawtab)
 
- implicit none
-
 !Arguments ------------------------------------
  type(pawtab_type),intent(inout) :: Pawtab(:)
 
@@ -972,8 +970,6 @@ end subroutine pawtab_free_1D
 
 subroutine pawtab_set_flags_0D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
 &                              has_vhtnzc,has_nabla,has_shapefncg,has_wvl)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in),optional :: has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
@@ -1025,8 +1021,6 @@ end subroutine pawtab_set_flags_0D
 
 subroutine pawtab_set_flags_1D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
 &                              has_vhtnzc,has_nabla,has_shapefncg,has_wvl)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in),optional :: has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
@@ -1090,8 +1084,6 @@ end subroutine pawtab_set_flags_1D
 !! SOURCE
 
 subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1294,8 +1286,6 @@ end subroutine pawtab_print
 subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
 &                           mpi_atmtab) ! Optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -1379,8 +1369,6 @@ end subroutine pawtab_get_lsize
 !! SOURCE
 
 subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2764,8 +2752,6 @@ end subroutine pawtab_bcast
 
 subroutine wvlpaw_allocate(wvlpaw)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wvlpaw_type),pointer :: wvlpaw
 
@@ -2804,8 +2790,6 @@ end subroutine wvlpaw_allocate
 !! SOURCE
 
 subroutine wvlpaw_free(wvlpaw)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wvlpaw_type),pointer :: wvlpaw
@@ -2857,8 +2841,6 @@ end subroutine wvlpaw_free
 
 subroutine wvlpaw_nullify(wvlpaw)
 
- implicit none
-
 !Arguments ------------------------------------
  type(wvlpaw_type),pointer :: wvlpaw
 
@@ -2896,8 +2878,6 @@ end subroutine wvlpaw_nullify
 !! SOURCE
 
 subroutine wvlpaw_rholoc_free(wvlpaw_rholoc)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wvlpaw_rholoc_type),intent(inout) :: wvlpaw_rholoc
@@ -2938,8 +2918,6 @@ end subroutine wvlpaw_rholoc_free
 !! SOURCE
 
 subroutine wvlpaw_rholoc_nullify(wvlpaw_rholoc)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wvlpaw_rholoc_type),intent(inout) :: wvlpaw_rholoc

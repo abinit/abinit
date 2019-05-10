@@ -88,8 +88,6 @@ CONTAINS
 
 subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpsang,ntypat
@@ -255,8 +253,6 @@ end subroutine pawnabla_init
 !! SOURCE
 
 subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

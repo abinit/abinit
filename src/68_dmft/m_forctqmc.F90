@@ -1290,7 +1290,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) 
        open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
-       if(paw_dmft%dmft_solv==5) ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+       if(paw_dmft%dmft_solv==5) then
+         ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+       end if
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
        !use  gw_tmp to put freq
        do ifreq=1,paw_dmft%dmft_nwlo

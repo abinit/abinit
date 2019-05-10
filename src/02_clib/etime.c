@@ -5,9 +5,7 @@
 #include <sys/resource.h>
 #endif
 
-double 
-FC_FUNC_(etime,ETIME)
-   (tt)
+double etime(tt)
 float tt[2];
 {
 #if defined HAVE_SYS_TIME_H && defined HAVE_SYS_RESOURCE_H

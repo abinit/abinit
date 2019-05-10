@@ -5,13 +5,16 @@ import re
 import os
 import sys
 
+from abirules_tools import find_abinit_src_directory
+
 # Init
 re_srcfile = re.compile("\.([Ff]|[Ff]90|finc)$")
 len_limit = 132
 
 
-def main(top):
+def main():
     retval = 0
+    top = find_abinit_src_directory()
     for root, dirs, files in os.walk(top):
 
         # Check line lengths in Fortran source files
@@ -34,13 +37,4 @@ def main(top):
 
 
 if __name__ == "__main__":
-
-    if len(sys.argv) == 1:
-        top = "src"
-    else:
-        top = sys.argv[1]
-
-    if not os.path.exists(top):
-        raise ValueError("Path %s does not exist" % top)
-
-    sys.exit(main(top))
+    sys.exit(main())

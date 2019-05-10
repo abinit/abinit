@@ -217,16 +217,14 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  end if
 
  !YG2014
- ABI_STAT_MALLOC(kets,(hexc%hsize,nkets), ierr)
- ABI_CHECK(ierr==0, "out of memory in kets")
+ ABI_MALLOC_OR_DIE(kets,(hexc%hsize,nkets), ierr)
  kets=czero
  !
  ! Prepare the kets for the macroscopic dielectric function.
  lomo_min=Bsp%lomo_min; max_band=Bsp%nbnds
 
  !YG2014
- ABI_STAT_MALLOC(opt_cvk,(lomo_min:max_band,lomo_min:max_band,hexc%nbz,Wfd%nsppol,BSp%nq), ierr)
- ABI_CHECK(ierr==0, "out of memory in opt_cvk")
+ ABI_MALLOC_OR_DIE(opt_cvk,(lomo_min:max_band,lomo_min:max_band,hexc%nbz,Wfd%nsppol,BSp%nq), ierr)
 
  do iq=1,Bsp%nq
  ! Note KS_BSt is used here to calculate the commutator.
@@ -300,7 +298,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      do_ep_lifetime = .TRUE.
    end if
 
-   ! Force elphon lifetime
+   ! Force elphon linewidth
    do_ep_lifetime = .TRUE.
 
    ! Map points from BSE to elphon kpoints
@@ -351,10 +349,10 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
          end if
          ep_renorms(ireh) = (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
 
-         ! Add lifetime
+         ! Add linewith
          if(do_ep_lifetime) then
-           ep_renorms(ireh) = ep_renorms(ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) +&
-&                                                       Epren%lifetimes(1,iv,ik,isppol,itemp))
+           ep_renorms(ireh) = ep_renorms(ireh) - j_dpc*(Epren%linewidth(1,ic,ik,isppol,itemp) +&
+&                                                       Epren%linewidth(1,iv,ik,isppol,itemp))
          end if
 
        end do
@@ -952,8 +950,7 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
  !
  my_nt = my_t2-my_t1+1
 
- ABI_STAT_MALLOC(hphi_n,(hexc%hsize), ierr)
- ABI_CHECK(ierr==0, "out-of-memory hphi_n")
+ ABI_MALLOC_OR_DIE(hphi_n,(hexc%hsize), ierr)
 
  ABI_MALLOC(phi_np1,(my_nt))
 
@@ -1628,8 +1625,7 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
 
  keep_vectors = (keep_vectors.and.xmpi_comm_size(comm)==1)
  if (keep_vectors) then
-   ABI_STAT_MALLOC(save_phi,(my_t2-my_t1+1,niter_tot), ierr)
-   ABI_CHECK(ierr==0, "out of memory in save_phi")
+   ABI_MALLOC_OR_DIE(save_phi,(my_t2-my_t1+1,niter_tot), ierr)
    save_phi=czero
  end if
 
@@ -2220,6 +2216,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 !************************************************************************
 
  ABI_UNUSED(ket0_hbar_norm)
+ ABI_UNUSED(ket0(1))
  ABI_UNUSED(hexc_i%hsize_dense)
 
  my_nt = my_t2-my_t1+1
@@ -2233,16 +2230,13 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  keep_vectors = (keep_vectors.and.xmpi_comm_size(comm)==1)
  if (keep_vectors) then
    ABI_MALLOC(save_phi,(my_t2-my_t1+1,niter_tot))
-   ABI_STAT_MALLOC(save_phit,(my_t2-my_t1+1,niter_tot),ierr)
-   ABI_CHECK(ierr==0,"out of memory in save_phi")
+   ABI_MALLOC_OR_DIE(save_phit,(my_t2-my_t1+1,niter_tot),ierr)
    save_phi=czero
    save_phit=czero
  end if
 
- ABI_STAT_MALLOC(hphi_np1,(hexc%hsize),ierr)
- ABI_CHECK(ierr==0,"out-of-memory hphi_np1")
- ABI_STAT_MALLOC(hphit_np1,(hexc%hsize),ierr)
- ABI_CHECK(ierr==0,"out-of-memory hphit_np1")
+ ABI_MALLOC_OR_DIE(hphi_np1,(hexc%hsize),ierr)
+ ABI_MALLOC_OR_DIE(hphit_np1,(hexc%hsize),ierr)
 
  do inn=niter_done+1,niter_tot
 

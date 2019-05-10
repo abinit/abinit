@@ -12,10 +12,6 @@
 
 subroutine xmpi_land_log0d(xval, comm)
 
-
- implicit none
-
-
 !Arguments ------------------------------------
  logical,intent(inout) :: xval
  integer,intent(in) :: comm
@@ -56,10 +52,6 @@ end subroutine xmpi_land_log0d
 !! SOURCE
 
 subroutine xmpi_lor_log1d(xval,comm)
-
-
- implicit none
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -106,11 +98,8 @@ end subroutine xmpi_lor_log1d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_lor_log2d(xval,comm)
-
-
- implicit none
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -158,10 +147,8 @@ end subroutine xmpi_lor_log2d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_lor_log3d(xval,comm)
-
- implicit none
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm

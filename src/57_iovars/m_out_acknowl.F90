@@ -188,7 +188,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).'
  comment(8)=' Comment : Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.'//ch10//&
 & ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#hamann2005'
- priority(8)=20
+ priority(8)=18
 
  ref(9)=' Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, '//ch10//&
 & ' using density-functional theory.'//ch10//&
@@ -404,6 +404,15 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 & ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#chen2015'
  priority(36)=20
 
+ ref(37)= ' Projector augmented-wave formulation of response to strain and electric-field perturbation '//ch10//&
+& ' within density functional perturbation theory '//ch10//&
+& ' A. Martin, M. Torrent, and R. Caracas. Phys. Rev. B 99, 094112 (2019)'
+ comment(37)=' Comment : in case Elastic constants, Born Effective charges, piezoelectric tensor '//ch10//&
+& ' are computed within the Projector Augmented-Wave (PAW) approach. '//ch10//&
+& ' Strong suggestion to cite this paper in your publications.'//ch10//&
+& ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#martin2019'
+ priority(37)=20
+
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
 
@@ -509,6 +518,10 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !  If bootstrap kernel is used with GW, cite Chen2015
    if (any(dtsets(idtset)%gwgamma == [-3,-4,-5,-6])) cite(36)=1
+
+!  If rfstrs/=0 or rfelfd/=0 and PAW, cite Martin2019
+   if(dtsets(idtset)%rfstrs/=0.and.dtsets(idtset)%usepaw==1) cite(37)=1
+   if(dtsets(idtset)%rfelfd/=0.and.dtsets(idtset)%usepaw==1) cite(37)=1
 
  end do
 

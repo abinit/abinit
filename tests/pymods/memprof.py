@@ -21,47 +21,58 @@ def group_entries_bylocus(entries):
     return d
 
 
-class Entry(namedtuple("Entry", "vname, ptr, action, size, file, func, line, tot_memory, sidx")):
+class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memory")):
+    """
+    vname: Variable name.
+    prt: Address of variable.
+    action: "A" for allocation, "D" for deallocation.
+    size: Size of allocation in bytes.
+    file: Name of Fortran file in which allocation/deallocation is performed.
+    line: Line number in file.
+    tot_memory: Total memory in bytes allocated so far.
+    """
 
     @classmethod
-    def from_line(cls, line, sidx):
-        #args = line.split()
-        #args.append(sidx)
+    def from_line(cls, line):
+        """Build entry from line."""
         vname = line[:59].strip().replace(" ", "")
         args = [vname] + line[59:].split()
-        args.append(sidx)
         return cls(*args)
 
     def __new__(cls, *args):
         """Extends the base class adding type conversion of arguments."""
         # write(logunt,'(a,t60,a,1x,2(i0,1x),2(a,1x),2(i0,1x))')&
-        # trim(vname), trim(act), addr, isize, trim(basename(file)), trim(func), line, memtot_abi%memory
+        # trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), line, memtot_abi%memory
         return super(cls, Entry).__new__(cls,
         	vname=args[0],
         	action=args[1],
         	ptr=int(args[2]),
         	size=int(args[3]),
         	file=args[4],
-        	func=args[5],
-        	line=int(args[6]),
-        	tot_memory=int(args[7]),
-        	sidx=args[8],
+                line=int(args[5]),
+                tot_memory=int(args[6]),
         )
 
     def __repr__(self):
-        return self.as_repr(with_addr=True)
+        return self.to_repr(with_addr=True)
 
-    def as_repr(self, with_addr=True):
+    def to_repr(self, with_addr=True):
         if with_addr:
-            return "<var=%s, %s@%s:%s:%s, addr=%s, size=%d, idx=%d>" % (
-              self.vname, self.action, self.file, self.func, self.line, hex(self.ptr), self.size, self.sidx)
+            return "<var=%s, %s@%s:%s, addr=%s, size_mb=%.3f>" % (
+              self.vname, self.action, self.file, self.line, hex(self.ptr), self.size_mb)
         else:
-            return "<var=%s, %s@%s:%s:%s, size=%d, idx=%d>" %  (
-              self.vname, self.action, self.file, self.func, self.line, self.size, self.sidx)
+            return "<var=%s, %s@%s:%s, size_mb=%.3f>" %  (
+              self.vname, self.action, self.file, self.line, self.size_mb)
 
     @property
-    def basename(self):
-        return self.vname.split("%")[-1]
+    def size_mb(self):
+        """Size in Megabytes."""
+        sign = {"A": +1, "D": -1}[self.action]
+        return sign* self.size / 1024 ** 2
+
+    #@property
+    #def basename(self):
+    #    return self.vname.split("%")[-1]
 
     @property
     def isalloc(self):
@@ -80,8 +91,8 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, func, line, tot
 
     @property
     def locus(self):
-        """This is almost unique"""
-        return self.func + "@" + self.file
+        """Location of the entry. This is unique."""
+        return "%s:%s" % (self.file, self.line)
 
     def frees_onheap(self, other):
         if (not self.isfree) or other.isalloc: return False
@@ -124,18 +135,6 @@ class Stack(dict):
         print("")
 
 
-def catchall(method):
-    @wraps(method)
-    def wrapper(*args, **kwargs):
-        self = args[0]
-        try:
-            return method(*args, **kwargs)
-        except Exception as exc:
-            # Add info on file and re-raise.
-            msg = "Exception while parsing file: %s\n" % self.path
-            raise exc.__class__(msg + str(exc))
-    return wrapper
-
 
 class AbimemParser(object):
     def __init__(self, path):
@@ -146,20 +145,18 @@ class AbimemParser(object):
     #    app = lines.append
     #    return "\n".join(lines)
 
-    @catchall
     def summarize(self):
         with open(self.path, "rt") as fh:
             l = fh.read()
             print(l)
 
-    @catchall
     def find_small_allocs(self, nbytes=160):
         """Zero sized allocations are not counted."""
         smalles = []
         with open(self.path, "rt") as fh:
             for lineno, line in enumerate(fh):
-                if lineno == 0: continue
-                e = Entry.from_line(line, lineno)
+                if line.startswith("#"): continue
+                e = Entry.from_line(line)
                 if not e.isalloc: continue
                 if 0 < e.size <= nbytes: smalles.append(e)
 
@@ -167,13 +164,15 @@ class AbimemParser(object):
 
         return smalles
 
-    @catchall
     def find_intensive(self, threshold=2000):
+        """
+        Find intensive spots i.e. variables that are allocated/freed many times.
+        """
         d = {}
         with open(self.path, "rt") as fh:
             for lineno, line in enumerate(fh):
-                if lineno == 0: continue
-                e = Entry.from_line(line, lineno)
+                if line.startswith("#"): continue
+                e = Entry.from_line(line)
                 loc = e.locus
                 if loc not in d:
                     d[loc] = [e]
@@ -193,8 +192,8 @@ class AbimemParser(object):
 
     #def show_peaks(self):
 
-    @catchall
     def find_zerosized(self):
+        """Find zero-sized allocations."""
         elist = []
         eapp = elist.append
         for e in self.yield_all_entries():
@@ -207,7 +206,6 @@ class AbimemParser(object):
             print("No zero-sized found")
         return elist
 
-    @catchall
     def find_weird_ptrs(self):
         elist = []
         eapp = elist.append
@@ -224,15 +222,18 @@ class AbimemParser(object):
     def yield_all_entries(self):
         with open(self.path, "rt") as fh:
             for lineno, line in enumerate(fh):
-                if lineno == 0: continue # skip header line of abimem files
+                # skip header line of abimem files
+                if line.startswith("#"): continue
                 try:
-                    yield Entry.from_line(line, lineno)
+                    yield Entry.from_line(line)
                 except Exception as exc:
                     print("Error while parsing lineno %d, line:\n%s" % (lineno, line))
                     raise exc
 
-    @catchall
     def find_peaks(self, maxlen=20):
+        """
+        Find peaks in the allocation with the corresponding variable.
+        """
         # the deque is bounded to the specified maximum length. Once a bounded length deque is full,
         # when new items are added, a corresponding number of items are discarded from the opposite end.
         peaks = deque(maxlen=maxlen)
@@ -256,13 +257,18 @@ class AbimemParser(object):
 
         return peaks
 
-    @catchall
     def plot_memory_usage(self, show=True):
-        memory = [e.tot_memory for e in self.yield_all_entries()]
+        """
+        Plot total allocated memory in Mb.
+        """
+        memory = [e.tot_memory / 1024**2 for e in self.yield_all_entries()]
         import matplotlib.pyplot as plt
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
         ax.plot(memory)
+        ax.grid(True)
+        #ax.set_xlabel('Energy (eV)')
+        ax.set_ylabel("Total Memory [Mb]")
         if show: plt.show()
         return fig
 
@@ -271,15 +277,19 @@ class AbimemParser(object):
     #    frame = pd.DataFrame()
     #    return frame
 
-    @catchall
     def find_memleaks(self):
+        """
+        Try to find memory leaks using the address of the arrays and the action
+        performed (allocation/free).
+        """
         heap, stack = Heap(), Stack()
         reallocs = []
 
         with open(self.path, "rt") as fh:
             for lineno, line in enumerate(fh):
-                if lineno == 0: continue
-                newe = Entry.from_line(line, lineno)
+                if line.startswith("#"): continue
+                #print(line)
+                newe = Entry.from_line(line)
 
                 p = newe.ptr
                 if newe.size == 0: continue
