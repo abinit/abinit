@@ -2331,7 +2331,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmft_entropy dmft_nlambda'
  list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_iter dmft_mxsf dmft_nwli dmft_nwlo'
- list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv dmft_t2g'
+ list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv dmft_t2g dmft_x2my2d'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka'
