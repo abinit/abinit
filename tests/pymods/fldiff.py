@@ -484,16 +484,14 @@ class Differ(object):
             doc_differences = [YFailure(
                 self.yaml_conf,
                 'Reference has corrupted YAML documents at line(s) {}.'
-                .format(', '.join(str(d.start + 1)
-                                  for d in corrupted[0]))
+                .format(', '.join(str(d.start + 1) for d in corrupted[0]))
             )]
 
         elif corrupted[1]:
             doc_differences = [YFailure(
                 self.yaml_conf,
                 'Tested file has corrupted YAML documents at line(s) {}.'
-                .format(', '.join(str(d.start + 1)
-                                  for d in corrupted[1]))
+                .format(', '.join(str(d.start + 1) for d in corrupted[1]))
             )]
 
         else:

@@ -5,7 +5,7 @@
 from __future__ import print_function, division, unicode_literals
 
 import warnings
-from .errors import NoYAMLSupportError
+from .errors import NoYAMLSupportError, UnlabeledDocumentError
 
 try:
     import yaml
@@ -61,6 +61,7 @@ class Document(object):
         self.lines = lines
         self._obj = None
         self._corrupted = False
+        self._id = None
 
     def _parse(self):
         if is_available:
@@ -73,6 +74,22 @@ class Document(object):
         else:
             raise NoYAMLSupportError('Try to access YAML document but YAML is'
                                      ' not available in this environment.')
+
+    @property
+    def id(self):
+        '''
+            Produce a string id that should be unique.
+        '''
+        if self._id is None:
+            state = []
+            if not hasattr(self.obj, 'label'):
+                raise UnlabeledDocumentError(self.start)
+
+            for key, val in self.iterators.items():
+                state.append('{}={}'.format(key, val))
+
+            self._id = ','.join(state) + ' ' + self.obj.label
+        return self._id
 
     @property
     def obj(self):

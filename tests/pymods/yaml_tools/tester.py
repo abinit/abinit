@@ -161,29 +161,20 @@ class Tester(object):
         top_cons = self.conf.get_top_level_constraints()
         for cons in top_cons:
             if top_cons[cons].apply_to('this'):
-                # ref = [doc.obj for doc in self.ref]
-                # tested = [doc.obj for doc in self.tested]
-                # success = top_cons[cons].check(ref, tested, self.conf)
-                # if success:
-                #     msg = '{} ok'.format(cons.name)
-                #     self.issues.append(Success(self.conf, msg))
-                # else:
-                #     msg = '{} ({}) failed'.format(cons.name, cons.value)
-                #     self.issues.append(Failure(self.conf, msg))
                 # FIXME How to define and use top level constraints applying on
                 # this like equations ?
                 raise NotImplementedError('Top level constraints are not yet'
                                           ' implemented')
+            # else:  if it does not apply on this it apply on a deeper level
+            # so it is managed later
 
-        if len(self.ref) != len(self.tested):
-            msg = 'there is not the same number of documents in both side'
-            self.issues.append(Failure(self.conf, msg))
-        else:
-            # FIXME Use a non linear matching of documents ?
-            # ref_doc['iterators'] could be of some use here
-            for ref_doc, tested_doc in zip(self.ref, self.tested):
-                with self.conf.use_filter(ref_doc.iterators):
-                    self.check_this(ref_doc.obj['label'], ref_doc.obj,
-                                    tested_doc.obj)
+        for doc_id, ref_doc in self.ref.items():
+            if doc_id not in self.tested:
+                msg = ('Document ({}) is not present in the tested file.'
+                       .format(doc_id))
+                self.issues.append(Failure(self.conf, msg))
+            with self.conf.use_filter(ref_doc.iterators):
+                self.check_this(ref_doc.obj['label'], ref_doc.obj,
+                                self.tested[doc_id].obj)
 
         return self.issues
