@@ -375,6 +375,8 @@ if ( opts.run_clean ):
     "find . -name '*.py[co]' -exec rm {} \;")
   run_script(my_name, "Removing Python cache dirs",
     "find . -depth -name '__pycache__' -exec rm -r {} \;")
+  run_script(my_name, "Removing abisrc.py Pickle files",
+    "find . -depth -name '_project_py[23].pickle' -exec rm {} \;")
 
   now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
   print_message(my_name, "--------------------------------------")
