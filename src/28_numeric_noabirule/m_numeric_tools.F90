@@ -5541,12 +5541,12 @@ subroutine vdiff_print(vd, unit)
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
- write(unt,"(a,es10.3)")"  L1_rerr: ", vd%l1_rerr
- write(unt,"(a,es10.3)")"  Integral |f1-f2| dr: ", vd%int_adiff
- write(unt,"(a,es10.3)")"  min {|f1-f2|}: ", vd%min_adiff
- write(unt,"(a,es10.3)")"  Max {|f1-f2|}: ", vd%max_adiff
- write(unt,"(a,es10.3)")"  mean {|f1-f2|}: ", vd%mean_adiff
- write(unt,"(a,es10.3)")"  stdev {|f1-f2|}: ", vd%stdev_adiff
+ write(unt,"(a,es10.3,a)")"  L1_rerr: ", vd%l1_rerr, ","
+ write(unt,"(a,es10.3,a)")"  'Integral |f1-f2|dr': ", vd%int_adiff, ","
+ write(unt,"(a,es10.3,a)")"  'min {|f1-f2|}': ", vd%min_adiff, ","
+ write(unt,"(a,es10.3,a)")"  'Max {|f1-f2|}': ", vd%max_adiff, ","
+ write(unt,"(a,es10.3,a)")"  'mean {|f1-f2|}': ", vd%mean_adiff, ","
+ write(unt,"(a,es10.3,a)")"  'stdev {|f1-f2|}': ", vd%stdev_adiff, ","
 
 end subroutine vdiff_print
 !!***
