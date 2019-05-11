@@ -1755,7 +1755,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  integer :: ik_ibz,itim_k,ikp_ibz,itim_kp,isym_k,isym_kp
  integer :: iq_bz,iq_ibz,isym_q,itim_q,iqbz0,rank
  integer :: iv,ivp,ic,icp
- integer :: block,ierr
+ integer :: block
  integer(i8b) :: tot_nels,ir,it,itp
  real(dp) :: faq,kx_fact
  complex(spc) :: ctemp

@@ -2221,7 +2221,7 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
 
 !Local variables-------------------------------
 !scalars
- integer :: my_nspins,my_maxb,my_minb,isp,spin,distr_err,nsppol,band,rank_spin,ib
+ integer :: my_nspins,my_maxb,my_minb,isp,spin,nsppol,band,rank_spin,ib
  character(len=500) :: msg
  logical :: store_ur
 !arrays

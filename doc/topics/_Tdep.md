@@ -13,8 +13,7 @@ Theory: [[pdf:TDEP_Paper|TDEP paper]]
 
 The Temperature Dependent Effective Potential (TDEP) method
 has been developped by O. Hellman *et al.* [[cite:Hellman2011]],
-[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the
-<span style="font-variant:small-caps;">a</span>-TDEP implementation
+[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the |aTDEP| implementation
 in ABINIT has been performed and used for the first time in 2015 by
 J. Bouchet and F. Bottin [[cite:Bouchet2015]], [[cite:Bouchet2017]].
 
@@ -22,7 +21,7 @@ The capture of thermal effects in solid state physic is a long standing
 issue and several stand-alone or post-process computational codes are
 available. Using different theoretical frameworks, they propose to provide
 some thermodynamic quantities involving the so called anharmonic effects.
-A <span style="font-variant:small-caps;">a</span>-TDEP calculation can produce almost all the temperature-dependent
+|aTDEP| calculation can produce almost all the temperature-dependent
 thermodynamic quantities you want, from a single *ab initio*
 molecular dynamic (AIMD) trajectory and by means of a Graphical User
 Interface (GUI) very easy to use ([[https://github.com/abinit/abiout|AGATE]]).

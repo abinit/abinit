@@ -549,16 +549,18 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    dvdb = dvdb_new(dvdb_path, comm)
    ! Set dielectric tensor, BECS and has_dielt_zeff flag that
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
-   ! of the DFPT potentials except when dipdip == 0
+   ! of the DFPT potentials except when dvdb_add_lr == 0
    dvdb%add_lr_part = .False.
    if (iblock /= 0) then
      dvdb%dielt = dielt
      dvdb%zeff = zeff
      dvdb%has_dielt_zeff = .True.
-     dvdb%add_lr_part = .True.; if (dtset%dvdb_add_lr == 0)  dvdb%add_lr_part = .False.
-     !if (dtset%dipdip /= 0) then
-     !  call wrtout(std_out, " Setting has_dielt_zeff to True. Long-range term will be substracted in Fourier interpolation.")
-     !end if
+     dvdb%add_lr_part = .True.
+     if (dtset%dvdb_add_lr == 0)  then
+       dvdb%add_lr_part = .False.
+       call wrtout([std_out, ab_out], &
+         " WARNING: Setting add_lr_part to False. Long-range term will be substracted in Fourier interpolation.")
+     end if
    end if
 
    if (my_rank == master) then
