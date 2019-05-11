@@ -19586,6 +19586,20 @@ A q-point is included in the sum if the tetrahedron weights for phonon absorptio
 ),
 
 Variable(
+    abivarname="eph_phrange",
+    varset="eph",
+    topics=['SelfEnergy_expert'],
+    vartype="real",
+    defaultval=[0, 0],
+    dimensions=[2],
+    mnemonics="EPH PHonon mode RANGE.",
+    text=r"""
+This variable is used to select the range of phonon modes included in the computation of the phonon self-energy.
+By default [0,0] all phonon modes are included, otherwise only the modes with index between the first and second entries are included.
+""",
+),
+
+Variable(
     abivarname="eph_restart",
     varset="eph",
     topics=['ElPhonInt_basic'],

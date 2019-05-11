@@ -3614,7 +3614,6 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  integer :: qptrlatt(3,3),g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3),shift(3) !,qpt_ibz(3)
- real(dp) :: start_time, stop_time
  real(dp) :: cpu, wall, gflops
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:)
@@ -3845,7 +3844,6 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
        ! SLOW FT.
        cnt = 0
-       call cpu_time(start_time)
        do ispden=1,db%nspden
 #if 0
          do irpt=1,db%my_nrpt
