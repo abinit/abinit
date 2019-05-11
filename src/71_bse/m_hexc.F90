@@ -267,7 +267,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  integer :: spin, spad, itt ! For diagonal !
  logical :: is_resonant, diago_is_real, use_mpio=.FALSE.
  character(len=fnlen) :: hreso_fname, hcoup_fname
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  complex(dpc),allocatable :: test(:,:)
 

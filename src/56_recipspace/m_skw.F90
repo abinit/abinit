@@ -992,7 +992,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
 !scalars
  integer :: cnt,nstars,i1,i2,i3,msize,ir,nsh,ish,ss,ee,nst,ierr,nprocs,my_rank,ii
  real(dp) :: r2_prev
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: iperm(:),rtmp(:,:),rgen(:,:),r2sh(:),shlim(:),sh_start(:),sh_stop(:)
  integer,allocatable :: recvcounts(:),displs(:),recvbuf(:,:)
