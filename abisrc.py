@@ -22,32 +22,36 @@ Usage example:
 # Documentation
 ################
 
-  ./abisrc.py print 41_geometry/m_crystal.F90   ==> Print info about file.
-  ./abisrc.py print 41_geometry                 ==> Print info about directory.
-  ./abisrc.py print crystal_init                ==> Print info about public procedure.
-  ./abisrc.py print m_crystal                   ==> Print info about module.
-  ./abisrc.py print crystal_t                   ==> Print info about datatype.
-  ./abisrc.py print xmpi_sum                    ==> Print info about interface.
-  ./abisrc.py interfaces xmpi_sum               ==> Print Fortran interfaces.
+  ./abisrc.py print src/41_geometry/m_crystal.F90   ==> Print info about file.
+  ./abisrc.py print src/41_geometry                 ==> Print info about directory.
+  ./abisrc.py print crystal_init                    ==> Print info about public procedure.
+  ./abisrc.py print m_crystal                       ==> Print info about module.
+  ./abisrc.py print crystal_t                       ==> Print info about datatype.
+  ./abisrc.py print xmpi_sum                        ==> Print info about interface.
+  ./abisrc.py interface xmpi_sum                    ==> Print Fortran interfaces.
+  ./abisrc.py interface                             ==> Print ALL Fortran interfaces.
 
-  ./abisrc.py parse 41_geometry/m_crystal.F90   ==> Parse file, print results.
+  ./abisrc.py parse src/41_geometry/m_crystal.F90   ==> Parse file, print results (debugging tool)
 
 #################
 # Graphviz graphs
 #################
 
-  ./abisrc.py graph 41_geometry/m_crystal.F90   ==> Plot dependency graph for module.
-  ./abisrc.py graph 41_geometry                 ==> Plot dependency graph for directory.
-  ./abisrc.py graph fourdp                      ==> Plot dependency graph for public procedure.
+  ./abisrc.py graph src/41_geometry/m_crystal.F90   ==> Plot dependency graph for module.
+  ./abisrc.py graph src/41_geometry                 ==> Plot dependency graph for directory.
+  ./abisrc.py graph fourdp                          ==> Plot dependency graph for public procedure.
+
+Requires graphviz and python graphviz: https://graphviz.readthedocs.io/en/stable/manual.html
 
 #############
 # Developers
 #############
 
   ./abisrc.py makemake           ==> Generate files required by the build system.
+  ./abisrc.py validate           ==> Validate files in project.
   ./abisrc.py touch              ==> Touch all files that have been changed + parents.
-                                   so that make can recompile all the relevant files.
-                                   Useful when changing API/ABI.
+                                     so that make can recompile all the relevant files.
+                                     Useful when changing API/ABI.
   ./abisrc.py pedit fourdp       ==> Call $EDITOR to edit all the parents of the fourdp routine.
   ./abisrc.py stats              ==> Print pandas Dataframe with stats about project/dir/file.
                                      Use -c to copy to system clipboard
@@ -151,8 +155,7 @@ def get_parser():
     p_graph.add_argument("what", nargs="?", default=None, help="File of directory to visualize.")
 
     # Subparser for validate.
-    p_validate = subparsers.add_parser('validate', parents=[copts_parser],
-        help="Validate source tree.")
+    p_validate = subparsers.add_parser('validate', parents=[copts_parser], help="Validate source tree.")
 
     p_abirules = subparsers.add_parser('abirules', parents=[copts_parser], help="Check abirules (still under development).")
     p_abirules.add_argument("what", nargs="?", default=None, help="File, directory or empty for project.")

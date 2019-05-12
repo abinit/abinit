@@ -265,6 +265,8 @@ class Procedure(Node):
                 self.args[aname] = None
         self.path = path
         self.basename = os.path.basename(self.path)
+        # This trick is needed for F90.in files that will be post-processed by the build system
+        if self.basename.endswith(".F90.in"): self.basename = self.basename[:-3]
 
         self.num_f90lines, self.num_doclines, self.num_omp_statements = 0, 0, 0
         self.contains, self.local_uses, self.includes = [], [], []
@@ -335,7 +337,11 @@ class Procedure(Node):
             return -1
         else:
             # 72_response --> 72
-            return int(self.dirname.split("_")[0])
+            try:
+                return int(self.dirname.split("_")[0])
+            except Exception as exc:
+                cprint("Cannot extract dirlevel from dirname: `%s`" % self.dirname)
+                raise exc
 
     @property
     def is_public(self):
