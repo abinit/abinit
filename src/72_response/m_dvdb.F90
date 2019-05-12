@@ -3608,7 +3608,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: nproc,my_rank,ifft,cnt,ierr
  character(len=500) :: msg
- real(dp) :: dksqmax,phre,phim
+ real(dp) :: dksqmax
  logical :: isirr_q, found
 !arrays
  integer :: qptrlatt(3,3),g0q(3)
