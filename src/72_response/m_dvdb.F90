@@ -3607,6 +3607,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  integer :: ii,iq_dvdb,cplex_qibz,ispden,irpt,idir,iat
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: nproc,my_rank,ifft,cnt,ierr
+ character(len=500) :: msg
  real(dp) :: dksqmax,phre,phim
  logical :: isirr_q, found
 !arrays
@@ -3753,6 +3754,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  !v1r_qbz = huge(one)
 
  iqst = 0
+ call cwtime(cpu, wall, gflops, "start")
  do iq_ibz=1,nqibz
 
    ! Get potentials for this IBZ q-point on the real-space FFT mesh.
@@ -3770,18 +3772,18 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
      tsign = 3-2*itimrev
 
      qpt_bz = qbz(:, iq_bz)
-     write(std_out,*)"  treating:",trim(ktoa(qpt_bz))
+     !write(std_out,*)"  treating:",trim(ktoa(qpt_bz))
      isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
      !ABI_CHECK(all(g0q == 0), "g0q /= 0")
 
      ! Compute long-range part of the coupling potential
-     call cwtime(cpu, wall, gflops, "start")
+     !call cwtime(cpu, wall, gflops, "start")
      v1r_lr = zero; cnt = 0
      if (db%has_dielt_zeff .and. db%add_lr_part) then
        idir = mod(ipert-1, 3) + 1; iat = (ipert - idir) / 3 + 1
        call dvdb_v1r_long_range(db, qpt_bz, iat, idir, nfft, ngfft, v1r_lr)
      end if
-     call cwtime_report(" dvdb_v1r_long_range", cpu, wall, gflops)
+     !call cwtime_report(" dvdb_v1r_long_range", cpu, wall, gflops)
 
      if (cplex_qibz == 1) then
        ! Gamma point.
@@ -3794,7 +3796,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
        end do
 
        ! SLOW FT.
-       call cwtime(cpu, wall, gflops, "start")
+       !call cwtime(cpu, wall, gflops, "start")
        cnt = 0
        do ispden=1,db%nspden
          do irpt=1,db%my_nrpt
@@ -3806,7 +3808,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
            end do
          end do
        end do
-       call cwtime_report(" slow fft", cpu, wall, gflops)
+       !call cwtime_report(" slow fft", cpu, wall, gflops)
 
      else
        ! q /= Gamma
@@ -3815,10 +3817,10 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
          !write(std_out,*)sjoin("qpt irred:",ktoa(qpt_bz))
          v1r_qbz = v1r_qibz
        else
-         call cwtime(cpu, wall, gflops, "start")
+         !call cwtime(cpu, wall, gflops, "start")
          call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q,&
            ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
-         call cwtime_report(" rotate", cpu, wall, gflops)
+         !call cwtime_report(" rotate", cpu, wall, gflops)
          !v1r_qbz = zero; v1r_qbz = v1r_qibz
 
          !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
@@ -3839,7 +3841,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
        ! Compute FT phases for this qpt_bz.
        call calc_eiqr(-qpt_bz, db%my_nrpt, db%my_rpt, emiqr)
-       call cwtime_report(" phases", cpu, wall, gflops)
+       !call cwtime_report(" phases", cpu, wall, gflops)
 
        ! SLOW FT.
        cnt = 0
@@ -3873,10 +3875,13 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
          end do
 #endif
        end do
-       call cwtime_report(" slow fft", cpu, wall, gflops)
+       !call cwtime_report(" slow fft", cpu, wall, gflops)
      end if
 
    end do ! iqst
+
+   write(msg,'(2(a,i0),a)') " q-point [",iq_ibz,"/",nqibz,"]"
+   call cwtime_report(msg, cpu, wall, gflops)
 
    ABI_FREE(v1r_qibz)
  end do ! iq_ibz
