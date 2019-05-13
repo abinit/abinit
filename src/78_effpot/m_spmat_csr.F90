@@ -121,13 +121,17 @@ contains
     iproc=xmpi_comm_rank(xmpi_world)
 
     call xmpi_barrier(xmpi_world)
-
+    call xmpi_bcast(self%ndim, master, comm, ierr)
     call xmpi_bcast(self%ncol, master, comm, ierr)
     call xmpi_bcast(self%nrow, master, comm, ierr)
     call xmpi_bcast(self%nnz, master, comm, ierr)
 
     call self%mps%initialize(self%nrow/nblock, master, comm, nblock)
     if (.not. self%mps%irank==master) then
+       if(.not. allocated(self%mshape)) then
+          ABI_ALLOCATE(self%mshape, (self%ndim))
+       endif
+
        if(.not. allocated(self%icol)) then
           ABI_ALLOCATE(self%icol, (self%nnz))
        endif
@@ -142,6 +146,7 @@ contains
 
     ! TODO: no need to send all the data to all the
     ! only the corresponding row data.
+    call xmpi_bcast(self%mshape, master, comm, ierr)
     call xmpi_bcast(self%icol, master, comm, ierr)
     call xmpi_bcast(self%row_shift, master, comm, ierr)
     call xmpi_bcast(self%val, master, comm, ierr)
@@ -164,7 +169,9 @@ contains
     if(allocated(self%val)) then
        ABI_DEALLOCATE(self%val)
     endif
-    if(allocated(self%mshape)) ABI_DEALLOCATE(self%mshape)
+    if(allocated(self%mshape)) then
+       ABI_DEALLOCATE(self%mshape)
+    endif
   end subroutine CSR_mat_t_finalize
 
 
