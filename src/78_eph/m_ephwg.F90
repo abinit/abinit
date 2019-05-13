@@ -288,7 +288,7 @@ type(ephwg_t) function ephwg_new( &
    qpt_cart = two_pi*matmul(cryst%gprimd, qpt)
    if (sum(qpt_cart**2) < tol6) cycle
    inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
-   fqdamp = (two / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
+   fqdamp = (four_pi / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
 
    ! Compute gkq_{LR}. Note that in our approx it does not dependend on ib_k.
    gkq2_lr(:) = zero

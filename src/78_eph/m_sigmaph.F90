@@ -1647,7 +1647,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
-                     if (ibsum_kq == band_ks) then
+                     if (ediff <= TOL_EDIFF) then
                        gkq2_dfrohl = sigma%ephwg%frohl_ibz(iq_ibz_fine,nu) - sigma%ephwg%frohl_ibz(iq_ibz_frohl,nu)
                        gkq2_pf = gkq2_pf + weight_q*gkq2_dfrohl
                      end if
