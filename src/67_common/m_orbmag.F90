@@ -51,7 +51,7 @@ module m_orbmag
   use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,&
        &                         load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
   use m_initylmg,         only : initylmg
-  use m_kg,               only : getph,mkkin,mkkpg,mkpwind_k,mknucdipmom_k,ph1d3d
+  use m_kg,               only : getph,mkkin,mkkpg,mkpwind_k,ph1d3d
   use m_kpts,             only : listkk, smpbz
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle
@@ -2874,12 +2874,11 @@ end subroutine make_dsdk_cprj
 subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
      & nattyp,nband_k,nfftf,npwarr,&
      & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
-     & ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
+     & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: mcg,mcprj,nband_k,nfftf,with_vectornd
- real(dp),intent(in) :: ucvol
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
  type(pawfgr_type),intent(in) :: pawfgr
@@ -2915,7 +2914,6 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  real(dp),allocatable :: kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: ph3d(:,:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
- complex(dpc),allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cwaveprj(:,:)
 
 
@@ -3388,14 +3386,13 @@ end subroutine make_CCIV_dsdk
 !! SOURCE
 
 subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
-     & gmet,gprimd,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
+     & gmet,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
      & paw_ij,pawfgr,pawtab,psps,&
-     & rprimd,symrec,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
+     & rprimd,symrec,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
 
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: mcg,mcprj,nband_k,nfftf,with_vectornd
- real(dp),intent(in) :: ucvol
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
  type(orbmag_type), intent(inout) :: dtorbmag
@@ -3405,7 +3402,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  !arrays
  integer,intent(in) :: atindx1(dtset%natom)
  integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rprimd(3,3)
+ real(dp),intent(in) :: cg(2,mcg),gmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden)
  real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
  real(dp),intent(in) :: xred(3,dtset%natom)
@@ -3438,7 +3435,6 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  real(dp),allocatable :: kgkpg(:,:)
  real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqb(:,:),cgqg(:,:),cgrvtrial(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:),work(:,:,:,:)
- complex(dpc),allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_kb(:,:),cprj_kg(:,:),cwaveprj(:,:)
 
 
@@ -4140,7 +4136,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
  call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
       & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
-      & ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
+      & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' orbmag progress: make_eeig time ',finish_time-start_time
 
@@ -4148,8 +4144,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  call cpu_time(start_time)
  write(std_out,'(a)')' orbmag progress: making <u_n1k1|H_k2|u_n3k3>, step 5 of 6'
  ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
- call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,gprimd,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
-      & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
+ call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,mcg,mcprj,&
+      & mpi_enreg,nband_k,nfftf,npwarr,&
+      & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,vectornd,vhartr,vpsp,vxc,with_vectornd,xred)
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' orbmag progress: make_eeig123 time ',finish_time-start_time
 
