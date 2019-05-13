@@ -11,7 +11,7 @@ from .project import AbinitProject
 class TestTrickyCode(TestCase):
 
     def test_tricky_module(self):
-        """Parsing tricky Fortran module similar to 42_libpaw/m_libpaw_libxc.F90"""
+        """Parsing tricky Fortran module similar to 39_libpaw/m_libpaw_libxc.F90"""
         s = """\
 #include "libpaw.h"
 

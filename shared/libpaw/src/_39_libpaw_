@@ -1,6 +1,6 @@
-!!****d* ABINIT/42_libpaw
+!!****d* ABINIT/39_libpaw
 !! NAME
-!! 42_libpaw
+!! 39_libpaw
 !!
 !! DESCRIPTION
 !!  FIXME: Description is missing
@@ -13,7 +13,6 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! interfaces_42_libpaw.F90
 !! m_libpaw_defs.F90
 !! m_libpaw_libxc.F90
 !! m_libpaw_mpi.F90

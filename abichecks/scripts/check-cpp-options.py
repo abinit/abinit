@@ -54,7 +54,7 @@ def main():
   verbose = 0
 
   # Extract CPP options from the libPAW header files
-  #libpaw_dir = os.path.join(top, "src", "42_libpaw")
+  #libpaw_dir = os.path.join(top, "src", "39_libpaw")
   libpaw_dir = os.path.join(top, "shared", "libpaw")
   assert os.path.isdir(libpaw_dir)
   cpp_libpaw = list()
