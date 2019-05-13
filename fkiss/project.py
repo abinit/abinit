@@ -199,8 +199,6 @@ class FortranFile(object):
     @lazy_property
     def dirlevel(self):
         """Integer given the dir level in the Abinit hierarchy."""
-        # libpaw has different organization without number in dirname --> use previous value.
-        if "shared/libpaw/" in self.path: return 42
         # 72_response --> 72
         return int(os.path.basename(os.path.dirname(self.path)).split("_")[0])
 
@@ -626,9 +624,8 @@ class AbinitProject(object):
 
     @lazy_property
     def all_src_dirs(self):
-        """List with all top level directories containgin subdirectories with F90 file."""
+        """List with all top level directories containing subdirectories with F90 file."""
         return [os.path.join(self.top, "shared", "common", "src"),
-                os.path.join(self.top, "shared", "libpaw"),
                 os.path.join(self.top, "src"),
                ]
 
@@ -642,7 +639,7 @@ class AbinitProject(object):
             #print("src_dir", src_dir)
             #print(os.listdir(src_dir))
             dpaths = [os.path.join(src_dir, d) for d in os.listdir(src_dir)]
-            s = [d for d in dpaths if os.path.isdir(d) and not os.path.islink(d) and
+            s = [d for d in dpaths if os.path.isdir(d) and
                  os.path.isfile(os.path.join(d, "abinit.src"))]
             #print(s)
             l += s
@@ -957,8 +954,6 @@ class AbinitProject(object):
             # Note include_files_in_dirs
             allmods = self.find_allmods(path, include_files_in_dirs=True)
             dirnames = sorted(set(mod.dirname for mod in allmods), reverse=True)
-            # FIXME yet another hack for libpaw
-            dirnames = sorted([d if d != "src" else "42_libpaw" for d in dirnames], reverse=True)
             if verbose:
                 print("For program:", prog_file.name)
                 pprint(dirnames)
@@ -1050,8 +1045,6 @@ class AbinitProject(object):
             outside_dir = []
             for fort_file in fort_files:
                 outside_dir.extend(m.dirname for m in fort_file.all_used_mods)
-            # FIXME yet another hack for libpaw
-            outside_dir = [d if d != "src" else "42_libpaw" for d in outside_dir]
 
 	    # Write abinit.dir
             s = template.format(kind="outside the directory", directory=os.path.basename(dirpath))

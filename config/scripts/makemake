@@ -229,30 +229,29 @@ run_script(my_name, "Enabling write permission for all dirs & files",
   "chmod -R u+w .")
 
 # Create symlinks for legacy mode
-src_symlinks = []
-for cdir in os.listdir(os.path.join("shared", "common", "src")):
-  try:
-    x = int(cdir[0:2])
-  except ValueError:
-    continue
-  src = os.path.join("..", "shared", "common", "src", cdir)
-  dst = os.path.join("src", cdir)
-  if ( os.path.exists(dst) ):
+if ( not opts.split_source ):
+  src_symlinks = []
+  for cdir in os.listdir(os.path.join("shared", "common", "src")):
+    try:
+      x = int(cdir[0:2])
+    except ValueError:
+      continue
+    src = os.path.join("..", "shared", "common", "src", cdir)
+    dst = os.path.join("src", cdir)
     if ( os.path.islink(dst) ):
       os.remove(dst)
-    else:
+    elif ( os.path.exists(dst) ):
       raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
-  os.symlink(src, dst)
-  src_symlinks.append(dst)
-src = os.path.join("..", "shared", "libpaw", "src")
-dst = os.path.join("src", "42_libpaw")
-if ( os.path.exists(dst) ):
+    os.symlink(src, dst)
+    src_symlinks.append(dst)
+  src = os.path.join("..", "shared", "libpaw", "src")
+  dst = os.path.join("src", "39_libpaw")
   if ( os.path.islink(dst) ):
     os.remove(dst)
-  else:
+  elif ( os.path.exists(dst) ):
     raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
-os.symlink(src, dst)
-src_symlinks.append(dst)
+  os.symlink(src, dst)
+  src_symlinks.append(dst)
 
 # Special case: clean-up
 if ( opts.run_clean ):
@@ -266,7 +265,9 @@ if ( opts.run_clean ):
     "find . -depth -name 'tmp-*' -exec rm -rf {} \;")
   run_script(my_name, "Removing old files",
     "find src -name '*.old' -exec rm -f {} \;")
-  run_script(my_name, "Removing symbolic links",
+  run_script(my_name, "Removing symbolic links in common",
+    "find shared/common/src -type l -exec rm -f {} \;")
+  run_script(my_name, "Removing symbolic links in core",
     "find src -type l -exec rm -f {} \;")
 
   print_header(my_name, "Abinit scripts outputs")
@@ -501,18 +502,32 @@ if ( opts.run_source ):
   run_script(my_name, "Generating CPP option dumper",
     "./config/scripts/make-cppopts-dumper")
 
-  # Call abisrc to build dependency graph and create files for buildsystem
-  #abisrc_cmdline = "./abisrc.py validate"
-  abisrc_cmdline = "./abisrc.py makemake"
-  print_message(my_name, "---> running %s" % (abisrc_cmdline))
-  abisrc_exitcode = os.system(abisrc_cmdline)
+  # Create a symlink to the sources of LibPAW, so that the same naming
+  # conventions can be used in the whole shared section of ABINIT
+  lcnf = MyConfigParser()
+  lcnf.read(os.path.join("config", "specs", "corelibs.conf"))
+  libpaw_dir = [item for item in lcnf.sections() \
+    if ( lcnf.get(item, "parent") == "libpaw" )][0]
+  src = os.path.join("..", "..", "libpaw", "src")
+  dst = os.path.join("shared", "common", "src", libpaw_dir)
+  if ( os.path.islink(dst) ):
+    os.remove(dst)
+  elif ( os.path.exists(dst) ):
+    raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
+  os.symlink(src, dst)
 
-  if abisrc_exitcode != 0:
-    sys.stderr.write("""
+  # Call abisrc to build dependency graph and create files for buildsystem
+  if ( opts.split_source ):
+    #abisrc_cmdline = "./abisrc.py validate"
+    abisrc_cmdline = "./abisrc.py makemake"
+    print_message(my_name, "---> running %s" % (abisrc_cmdline))
+    abisrc_exitcode = os.system(abisrc_cmdline)
+
+    if abisrc_exitcode != 0:
+      sys.stderr.write("""
        ****************************************************************
        ***                     FATAL ERROR!                         ***
        ****************************************************************
-       ***                                                          ***
        *** The abisrc.py script returned a non-zero exit status.    ***
        *** This usually means that the script found subroutines or  ***
        *** functions that are not declared inside modules or that   ***
@@ -521,9 +536,15 @@ if ( opts.run_source ):
        *** Please note that procedures outside Fortran modules      ***
        *** are not allowed any longer.                              ***
        ****************************************************************\n""")
-    sys.stderr.write("[%s] Aborting now\n" % (my_name))
-    sys.exit(1)
+      sys.stderr.write("[%s] Aborting now\n" % (my_name))
+      sys.exit(1)
 
+  # Remove LibPAW symlink
+  if ( os.path.exists(dst) ):
+    if ( os.path.islink(dst) ):
+      os.remove(dst)
+    else:
+      raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
 
 else:
   print_message(my_name, "*** Skipping source tree update ***")
