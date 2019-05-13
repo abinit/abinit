@@ -228,31 +228,6 @@ print_header(my_name, "Source tree consistency")
 run_script(my_name, "Enabling write permission for all dirs & files",
   "chmod -R u+w .")
 
-# Create symlinks for legacy mode
-if ( not opts.split_source ):
-  src_symlinks = []
-  for cdir in os.listdir(os.path.join("shared", "common", "src")):
-    try:
-      x = int(cdir[0:2])
-    except ValueError:
-      continue
-    src = os.path.join("..", "shared", "common", "src", cdir)
-    dst = os.path.join("src", cdir)
-    if ( os.path.islink(dst) ):
-      os.remove(dst)
-    elif ( os.path.exists(dst) ):
-      raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
-    os.symlink(src, dst)
-    src_symlinks.append(dst)
-  src = os.path.join("..", "shared", "libpaw", "src")
-  dst = os.path.join("src", "39_libpaw")
-  if ( os.path.islink(dst) ):
-    os.remove(dst)
-  elif ( os.path.exists(dst) ):
-    raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
-  os.symlink(src, dst)
-  src_symlinks.append(dst)
-
 # Special case: clean-up
 if ( opts.run_clean ):
   my_name = "abiclean"
@@ -517,14 +492,13 @@ if ( opts.run_source ):
   os.symlink(src, dst)
 
   # Call abisrc to build dependency graph and create files for buildsystem
-  if ( opts.split_source ):
-    #abisrc_cmdline = "./abisrc.py validate"
-    abisrc_cmdline = "./abisrc.py makemake"
-    print_message(my_name, "---> running %s" % (abisrc_cmdline))
-    abisrc_exitcode = os.system(abisrc_cmdline)
+  #abisrc_cmdline = "./abisrc.py validate"
+  abisrc_cmdline = "./abisrc.py makemake"
+  print_message(my_name, "---> running %s" % (abisrc_cmdline))
+  abisrc_exitcode = os.system(abisrc_cmdline)
 
-    if abisrc_exitcode != 0:
-      sys.stderr.write("""
+  if abisrc_exitcode != 0:
+    sys.stderr.write("""
        ****************************************************************
        ***                     FATAL ERROR!                         ***
        ****************************************************************
@@ -536,8 +510,8 @@ if ( opts.run_source ):
        *** Please note that procedures outside Fortran modules      ***
        *** are not allowed any longer.                              ***
        ****************************************************************\n""")
-      sys.stderr.write("[%s] Aborting now\n" % (my_name))
-      sys.exit(1)
+    sys.stderr.write("[%s] Aborting now\n" % (my_name))
+    sys.exit(1)
 
   # Remove LibPAW symlink
   if ( os.path.exists(dst) ):
