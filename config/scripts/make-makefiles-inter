@@ -147,7 +147,7 @@ for parent in abinit_parents:
     else:
       lib_specs["subdirs"].append(subdir)
   if ( parent == "core" ):
-    lib_specs["abiauty"].append("98_main")
+    #lib_specs["abiauty"].append("98_main")
     lib_specs["abirules"].append("98_main")
     lib_specs["subdirs"].append("98_main")
 
