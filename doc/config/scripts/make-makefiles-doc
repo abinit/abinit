@@ -95,6 +95,27 @@ SUBDIRS =%s
 
 EXTRA_DIST = built-docs.tgz config/gnu config/m4 config/util rules.am
 
+DISTCLEANFILES = \
+  macroave/macroave.pdf \
+  build/connectors.pdf \
+  build/build-howto.html \
+  build/build-system-guide.pdf \
+  versioning/bzr-quickref.pdf \
+  users/aimhelp.pdf \
+  users/conducti_manual.pdf \
+  users/AbinitBandStructureMaker_manual.pdf \
+  users/conductivity_paw_manu.pdf \
+  users/elphon_manual.pdf \
+  users/xtalinput.pdf \
+  users/linear_optics_paw.pdf \
+  theory/geometry.pdf \
+  theory/wavefunction.pdf \
+  theory/set_WFs.pdf \
+  theory/gwa.pdf \
+  theory/vanderbilt-anaddb-notes.pdf \
+  theory/fixd_theory.pdf \
+  theory/noncol.pdf
+
 %s
 """
 
