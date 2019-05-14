@@ -154,6 +154,7 @@ for lib in abinit_corelibs:
   # Initialize internal variables
   dd_srcs = "lib%s_srcs =" % (lib)
   nd_srcs = "lib%s_srcs_built =" % (lib)
+  ed_srcs = ""
   ob_srcs = ""
 
   cleans = ""
@@ -199,6 +200,7 @@ for lib in abinit_corelibs:
     if ( (src_specs & ABI_SRC_BLT) != 0 ):
       distcleans += " \\\n\t%s" % (src)
       nd_srcs += " \\\n\t%s" % (src)
+      ed_srcs += " \\\n\t%s.in" % (src)
       nds_print = True
     else:
       dd_srcs += " \\\n\t%s" % (src)
@@ -317,7 +319,10 @@ for lib in abinit_corelibs:
   #except NameError:
   #  pass
 
-  dd_srcs += "\n\n"
+  # Write source file templates
+  if ( len(ed_srcs) > 0 ):
+    makefile += "\n\nEXTRA_DIST +=" + ed_srcs + "\n"
+
   # Write additional hand-made information
   add = os.path.join(par_dir, "abinit.amf")
   if ( os.path.exists(add) ):
