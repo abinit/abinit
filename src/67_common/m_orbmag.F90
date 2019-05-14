@@ -3329,7 +3329,7 @@ subroutine make_CCIV_dsdk(adir,CCIV,dsdk,dtorbmag,dtset,eeig,mpi_enreg,nband_k)
            do n1 = 1, nband_k
               bme=cmplx(dsdk(1,nn,n1,ikpt,bdir,0),dsdk(2,nn,n1,ikpt,bdir,0),KIND=dpc)
               gme=cmplx(dsdk(1,n1,nn,ikpt,gdir,0),dsdk(2,n1,nn,ikpt,gdir,0),KIND=dpc)
-              CCIV=CCIV+half*j_dpc*epsabg*ENK*bme*gme
+              CCIV=CCIV-half*j_dpc*epsabg*ENK*bme*gme
            end do ! end loop over n1
         end do ! end loop over nn
      end do ! end loop over epsabg
@@ -4504,7 +4504,7 @@ subroutine make_CCIV_dpdk(adir,dtorbmag,eeig,nband_k,smat_all_indx,CCIV_dir)
                    end do ! end n2
                 end do ! end n1
              end do ! end nn
-             CCIV_dir = CCIV_dir + half*j_dpc*epsabg*bsigma*gsigma*CCIV/(2.0*deltab*2.0*deltag)
+             CCIV_dir = CCIV_dir - half*j_dpc*epsabg*bsigma*gsigma*CCIV/(2.0*deltab*2.0*deltag)
           end do ! end loop over ikpt
        end do ! end loop over gfor
     end do ! end loop over bfor
