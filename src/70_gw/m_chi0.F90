@@ -778,10 +778,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
                             do ispinor2=1,wan%nspinor
                               do il2=1,wan%nbl_atom_wan(iat2)
                                 do m2=1,2*(wan%latom_wan(iat2)%lcalc(il2))+1
-                                  fac=fac - real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
-                                            &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
-                                            &wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
-                                            &conjg(wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2))
+                                  fac=fac -  real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1)*&
+&                                           conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+&                                                 wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
+&                                           conjg(wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)))
                                   fac3=fac3+ real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
                                              &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
                                              &wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
@@ -804,9 +804,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &                                   conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor1,m1)))
                          do ispinor2=1,nspinor
                            do m2=1,2*lcor+1
-                             fac=fac - real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
-&                                      conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
-&                                      coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
+                             fac=fac -  real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+&                                      conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))*&
+&                                            coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
 &                                      conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)))
                              fac3=fac3 + real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
 &                                        conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
@@ -1728,10 +1728,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
                              do il2=1,wan%nbl_atom_wan(iat2) 
                                do m1=1,2*wan%latom_wan(iat1)%lcalc(il1)+1
                                  do m2=1,2*wan%latom_wan(iat2)%lcalc(il2)+1
-                                   fac=fac - real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                   fac=fac - real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1)*&
                                              &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
                                              &wan%psichi(ikmq_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
-                                             &conjg(wan%psichi(ikmq_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2))
+                                             &conjg(wan%psichi(ikmq_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)))
                                  enddo !m2
                                enddo !m1
                              enddo !il2
