@@ -134,7 +134,6 @@ subroutine paw_spline(t,y,n,ybcbeg,ybcend,ypp)
 !
 !  Author:
 !    John Burkardt, modified by Xavier Gonze
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -250,8 +249,6 @@ end subroutine paw_spline
 
 subroutine paw_splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfit, nspline
@@ -336,8 +333,6 @@ end subroutine paw_splint
 !! SOURCE
 
 subroutine paw_splint_der(nspline,xspline,yspline,ysplin2,nfit,xfit,dydxfit,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -432,8 +427,6 @@ end subroutine paw_splint_der
 !! SOURCE
 
 subroutine paw_uniform_splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -563,8 +556,6 @@ end subroutine paw_uniform_splfit
 
 subroutine paw_smooth(a,mesh,it)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: it,mesh
@@ -636,8 +627,6 @@ end subroutine paw_smooth
 !! SOURCE
 
 subroutine paw_sort_dp(n,list,iperm,tol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -738,8 +727,6 @@ end subroutine paw_sort_dp
 !! SOURCE
 
 subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -870,8 +857,6 @@ end subroutine paw_jbessel
 
  subroutine paw_solvbes(root,alpha,beta,ll,nq)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: ll,nq
@@ -955,8 +940,6 @@ end subroutine paw_solvbes
 !! SOURCE
 
 subroutine paw_jbessel_4spline(bes,besp,ll,order,xx,tol)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1072,8 +1055,6 @@ end subroutine paw_jbessel_4spline
 !! SOURCE
 
 elemental function paw_derfc(yy) result(derfc_yy)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

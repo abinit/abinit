@@ -138,8 +138,6 @@ subroutine pawxc_xcpositron_wrapper(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_
 &                                   rhoer,rhopr,vxce,vxcegr,vxcp,&
 &                                   dvxce,dvxcp) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixcpositron,ngr,npt
@@ -181,8 +179,6 @@ contains
 
 subroutine pawxc_xcpositron_abinit()
 
- implicit none
-
 ! *************************************************************************
 
  if(present(dvxce) .and. present(dvxcp)) then
@@ -219,8 +215,6 @@ end subroutine pawxc_xcpositron_abinit
 !! SOURCE
 
 subroutine pawxc_xcpositron_local()
-
- implicit none
 
  character(len=*), parameter :: msg='xcpositron only available in ABINIT!'
 
@@ -269,8 +263,6 @@ end subroutine pawxc_xcpositron_wrapper
 
 subroutine pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order)
 
- implicit none
-
 !Arguments----------------------
  integer, intent(in) :: ixc,nspden,order
  integer, intent(out) :: ndvxc,nd2vxc,ngr2,nvxcdgr
@@ -304,8 +296,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_size_dvxc_local()
-
- implicit none
 
 ! *************************************************************************
 
@@ -433,8 +423,6 @@ end subroutine pawxc_size_dvxc_wrapper
 
 subroutine pawxc_xcmult_wrapper(depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,ngrad,nspden,nspgrad
@@ -471,8 +459,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_xcmult_local()
-
- implicit none
 
 !Local variables-------------------------------
 !scalars
@@ -547,8 +533,6 @@ end subroutine pawxc_xcmult_wrapper
 
 subroutine pawxc_mkdenpos_wrapper(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nspden,option
@@ -586,8 +570,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_mkdenpos_local()
-
- implicit none
 
 !Local variables-------------------------------
 !scalars
@@ -1410,8 +1392,6 @@ subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselec
 &                        nhat,nhat_ep,nrad,nspden,option,pawang,pawrad,posdensity0_limit,&
 &                        rhor,rhor_ep,usecore,usexcnhat,vxc,xc_denpos)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: calctype,ixcpositron,lm_size,nrad,nspden,option,usecore,usexcnhat
@@ -1721,8 +1701,6 @@ end subroutine pawxcpositron
 subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,non_magnetic_xc,&
 &                 nrad,nspden,option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc,vxc1,xclevel,&
 &                 d2enxc_im) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2575,8 +2553,6 @@ end subroutine pawxc_dfpt
 
  subroutine pawxcsph(exc,exexch,ixc,kxc,nkxc,nrad,nspden,pawrad,rho_updn,vxc,xclevel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exexch,ixc,nkxc,nrad,nspden,xclevel
@@ -2844,8 +2820,6 @@ end subroutine pawxcsph
 
 
 subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_updn,vxc1,xclevel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3158,8 +3132,6 @@ end subroutine pawxcsph_dfpt
 
  subroutine pawxcsphpositron(calctype,fxc,ixcpositron,nrad,pawrad,posdensity0_limit,rho,rho_ep,vxce,vxcp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: calctype,ixcpositron,nrad
@@ -3281,8 +3253,6 @@ end subroutine pawxcsphpositron
 
  subroutine pawxcsum(cplex1,cplex2,cplexsum,lmselect1,lmselect2,lm_size,nrad,nsums,&
 &                    option,pawang,rho1,rho2,sum1,sum2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3664,8 +3634,6 @@ end subroutine pawxcsphpositron
 
  subroutine pawxcm(corexc,enxc,enxcdc,exexch,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magnetic_xc,&
 &                  nrad,nspden,option,pawang,pawrad,pawxcdev,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4458,8 +4426,6 @@ end subroutine pawxcsphpositron
 &                   nrad,nspden,option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel,&
 &                   d2enxc_im) ! optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex_den,cplex_vxc,ixc,lm_size,nkxc,nrad,nspden,option
@@ -4808,8 +4774,6 @@ end subroutine pawxcsphpositron
 subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselect,lmselect_ep,&
 &                         nhat,nhat_ep,nrad,nspden,option,pawang,pawrad,pawxcdev,posdensity0_limit,&
 &                         rhor,rhor_ep,usecore,usexcnhat,vxc,xc_denpos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5308,8 +5272,6 @@ end subroutine pawxcmpositron
 
  subroutine pawxc_get_nkxc(nkxc,nspden,xclevel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nspden,xclevel
@@ -5373,8 +5335,6 @@ end subroutine pawxcmpositron
 &           order,rho,vxcrho,xclevel, &
 &           dvxc,d2vxc,el_temp,exexch,fxcT,grho2,lrho,tau,vxcgrho,vxclrho,vxctau,xc_tb09_c) ! Optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,xclevel
@@ -5427,8 +5387,6 @@ contains
 
 subroutine pawxc_drivexc_abinit()
 
- implicit none
-
 ! *************************************************************************
 
  if ((.not.present(dvxc)).or.(.not.present(grho2)).or.(.not.present(vxcgrho))) then
@@ -5472,8 +5430,6 @@ end subroutine pawxc_drivexc_abinit
 !! SOURCE
 
 subroutine pawxc_drivexc_libxc()
-
- implicit none
 
 ! *************************************************************************
 
@@ -5566,8 +5522,6 @@ end subroutine pawxc_drivexc_wrapper
 
  subroutine pawxc_rotate_mag(rho_in,rho_out,mag,vectsize,mag_norm_out,rho_out_format)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: vectsize
@@ -5658,8 +5612,6 @@ end subroutine pawxc_rotate_mag
 
  subroutine pawxc_rotate_back_mag(vxc_in,vxc_out,mag,vectsize)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: vectsize
@@ -5732,8 +5684,6 @@ end subroutine pawxc_rotate_back_mag
 !! SOURCE
 
  subroutine pawxc_rotate_back_mag_dfpt(vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

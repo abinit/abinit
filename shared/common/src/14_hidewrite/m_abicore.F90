@@ -68,8 +68,6 @@ contains  !=====================================================
 
 subroutine appdig(integ,string,strinn)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: integ

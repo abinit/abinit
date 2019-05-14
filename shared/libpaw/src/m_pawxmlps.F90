@@ -1138,8 +1138,6 @@ end subroutine pawdata_chunk
 
 subroutine paw_setup_free(paw_setupin)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(paw_setup_t),intent(inout) :: paw_setupin
@@ -1265,8 +1263,6 @@ end subroutine paw_setup_free
 !! SOURCE
 
 subroutine paw_setup_copy(paw_setupin,paw_setupout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1504,8 +1500,6 @@ end subroutine paw_setup_copy
 
  subroutine paw_rdfromline(keyword,line,output,ierr)
 
- implicit none
-
 !Arguments ---------------------------------------------
   character(len=*), intent(in) :: keyword,line
   character(len=*), intent(out) :: output
@@ -1555,8 +1549,6 @@ end subroutine paw_setup_copy
 !! SOURCE
 
  subroutine rdpawpsxml_header(ecut_tmp,filename,paw_setup)
-
- implicit none
 
 !Arguments ---------------------------------------------
  
@@ -1944,8 +1936,6 @@ end subroutine paw_setup_copy
 !! SOURCE
 
  subroutine rdpawpsxml(filename,paw_setup)
-
- implicit none
 
 !Arguments ---------------------------------------------
  character (len=fnlen),intent(in) :: filename
@@ -2687,8 +2677,6 @@ end subroutine paw_setup_copy
 !! SOURCE
 
  subroutine rdpawpsxml_core(energy_cor,filename,lcor,ncor,nphicor,pawrad,phi_cor)
-
- implicit none
 
 !Arguments ---------------------------------------------
  character (len=fnlen),intent(in) :: filename

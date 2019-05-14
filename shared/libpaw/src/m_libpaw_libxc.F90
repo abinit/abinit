@@ -333,8 +333,6 @@ contains
 
  subroutine libpaw_libxc_constants_load()
 
- implicit none
-
 !Local variables-------------------------------
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
  integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8
@@ -386,8 +384,6 @@ contains
 !! SOURCE
 
  function libpaw_libxc_check(stop_if_error)
-
- implicit none
 
 !Arguments ------------------------------------
  logical :: libpaw_libxc_check
@@ -452,8 +448,6 @@ contains
 !! SOURCE
 
  subroutine libpaw_libxc_init(ixc,nspden,xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: nspden
@@ -612,8 +606,6 @@ end subroutine libpaw_libxc_init
 
  subroutine libpaw_libxc_end(xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  type(libpaw_libxc_type),intent(inout),optional,target :: xc_functionals(2)
 !Local variables-------------------------------
@@ -672,8 +664,6 @@ end subroutine libpaw_libxc_init
 !! SOURCE
 
  function libpaw_libxc_fullname(xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=100) :: libpaw_libxc_fullname
@@ -747,8 +737,6 @@ end function libpaw_libxc_fullname
 
 subroutine libpaw_libxc_getrefs(xcrefs,xc_functional)
 
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(out) :: xcrefs(:)
  type(libpaw_libxc_type),intent(in) :: xc_functional
@@ -797,8 +785,6 @@ end subroutine libpaw_libxc_getrefs
 
  function libpaw_libxc_family_from_id(xcid)
 
- implicit none
-
 !Arguments ------------------------------------
  integer :: libpaw_libxc_family_from_id
  integer,intent(in) :: xcid
@@ -836,8 +822,6 @@ end function libpaw_libxc_family_from_id
 !! SOURCE
 
  function libpaw_libxc_getid(xcname)
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: libpaw_libxc_getid
@@ -887,8 +871,6 @@ end function libpaw_libxc_getid
 
  function libpaw_libxc_ixc(xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  integer :: libpaw_libxc_ixc
  type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
@@ -921,8 +903,6 @@ end function libpaw_libxc_ixc
 !! SOURCE
 
  function libpaw_libxc_isgga(xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  logical :: libpaw_libxc_isgga
@@ -962,8 +942,6 @@ end function libpaw_libxc_isgga
 
 function libpaw_libxc_ismgga(xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  logical :: libpaw_libxc_ismgga
  type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
@@ -999,8 +977,6 @@ end function libpaw_libxc_ismgga
 !! SOURCE
 
  function libpaw_libxc_is_hybrid(xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  logical :: libpaw_libxc_is_hybrid
@@ -1040,8 +1016,6 @@ end function libpaw_libxc_is_hybrid
 
 function libpaw_libxc_has_kxc(xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  logical :: libpaw_libxc_has_kxc
  type(libpaw_libxc_type),intent(in),optional,target :: xc_functionals(2)
@@ -1079,8 +1053,6 @@ end function libpaw_libxc_has_kxc
 !! SOURCE
 
 function libpaw_libxc_nspin(xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: libpaw_libxc_nspin
@@ -1143,8 +1115,6 @@ end function libpaw_libxc_nspin
 
  subroutine libpaw_libxc_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho,exc,vxc,&
 &           grho2,vxcgr,lrho,vxclrho,tau,vxctau,dvxc,d2vxc,xc_tb09_c,xc_functionals) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: ndvxc,nd2vxc,npts,nspden,order
@@ -1452,8 +1422,6 @@ end subroutine libpaw_libxc_getvxc
 
 subroutine libpaw_libxc_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  real(dp),intent(out),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
  type(libpaw_libxc_type),intent(in),optional,target :: xc_functionals(2)
@@ -1543,8 +1511,6 @@ end subroutine libpaw_libxc_get_hybridparams
 !! SOURCE
 
 subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
@@ -1651,8 +1617,6 @@ end subroutine libpaw_libxc_set_hybridparams
 !! SOURCE
 
 function libpaw_libxc_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1774,8 +1738,6 @@ end function libpaw_libxc_gga_from_hybrid
 !! SOURCE
 
  subroutine libpaw_libxc_set_tb09(npts,nspden,rho,grho2,xc_tb09_c,xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: npts,nspden
