@@ -375,7 +375,7 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Number of bands in e-ph self-energy sum: 54
- From bmin: 1 to bmax: 54
+ From bsum_start: 1 to bsum_stop: 54
  Symsigma: 0 Timrev: 1
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
@@ -393,10 +393,13 @@ All the independent perturbations are available
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 54
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 54
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -560,7 +563,7 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Number of bands in e-ph self-energy sum: 54
- From bmin: 1 to bmax: 54
+ From bsum_start: 1 to bsum_stop: 54
  Symsigma: 1 Timrev: 1
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
@@ -578,10 +581,13 @@ All the independent perturbations are available
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 54
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 54
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -746,7 +752,7 @@ All the independent perturbations are available
  Interpolation of the electron-phonon coupling potential
 
  From coarse q-mesh: [2,2,2] to: [4,4,4]
- Number of q-points found in input DVDB 3
+ Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 5
 Interpolation of the electron-phonon coupling potential completed
 
@@ -849,7 +855,7 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Number of bands in e-ph self-energy sum: 54
- From bmin: 1 to bmax: 54
+ From bsum_start: 1 to bsum_stop: 54
  Symsigma: 1 Timrev: 1
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
@@ -867,10 +873,13 @@ All the independent perturbations are available
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 54
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 54
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 8 of 8
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:
@@ -1055,7 +1064,7 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Number of bands in e-ph self-energy sum: 54
- From bmin: 1 to bmax: 54
+ From bsum_start: 1 to bsum_stop: 54
  Symsigma: 1 Timrev: 1
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Tetrahedron method
@@ -1074,10 +1083,13 @@ All the independent perturbations are available
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 54
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 54
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over (q-points, bands): 1
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 8 of 8
+P Number of CPUs for parallelism over bands: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
 Final results in eV.
 Notations:

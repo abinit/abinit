@@ -128,7 +128,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c=1,berryopt0=0, useylmgr1=0,master=0
- integer :: my_rank,nproc,iomode,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
+ integer :: my_rank,nproc,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor
  integer :: ib1,ib2,band,ik,ikq,timerev_q
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
@@ -323,8 +323,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dtset%prtvol)
 
  ! Allocate vlocal1 with correct cplex. Note nvloc
- ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
- ABI_CHECK(ierr==0, "oom vlocal1")
+ ABI_MALLOC_OR_DIE(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
 
  ABI_MALLOC(displ_cart, (2,3*cryst%natom,3*cryst%natom))
  ABI_MALLOC(displ_red, (2,3*cryst%natom,3*cryst%natom))
@@ -617,7 +616,7 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: ngfftf(18)
  real(dp) :: phfrq(3*cryst%natom),qpt(3)

@@ -918,7 +918,7 @@ by smoothing the oscillation in the high energy part of the spectrum
   * 1 --> Use the terminator function. The particular expression depends on the type of calculation:
     In the resonant-only case, the $a_i$ and $b_i$ coefficients for $i > \text{niter}$, are replaced
     by their values at $i = \text{niter}$.
-    If the coupling block is included, the terminator function described in [[cite:Rocca2008]].
+    If the coupling block is included, the terminator function is the one described in [[cite:Rocca2008]].
 """,
 ),
 
@@ -7726,8 +7726,8 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 15 --> GGA, RPBE of [[cite:Hammer1999]]
   * 16 --> GGA, HTCH93 of [[cite:Hamprecht1998]]
   * 17 --> GGA, HTCH120 of [[cite:Boese2000]] - The usual HCTH functional.
-  * 18 --> (NOT AVAILABLE: used internally for GGA BLYP pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/blyp) \- use the LibXC instead, with [[ixc]] = -106131.
-  * 19 --> (NOT AVAILABLE: used internally for GGA BP86 pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/bp) \- use the LibXC instead, with [[ixc]] = -106132.
+  * 18 --> (NOT AVAILABLE: used internally for GGA BLYP pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/data/POTENTIAL) \- use the LibXC instead, with [[ixc]] = -106131.
+  * 19 --> (NOT AVAILABLE: used internally for GGA BP86 pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/data/POTENTIAL) \- use the LibXC instead, with [[ixc]] = -106132.
 
   * 20 --> Fermi-Amaldi xc ( -1/N Hartree energy, where N is the number of electrons per cell; G=0 is not taken into account however),
                             for TDDFT tests. No spin-pol. Does not work for RF.
@@ -7737,7 +7737,7 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 24 --> GGA, C09x exchange of [[cite:Cooper2010]].
   * 26 --> GGA, HTCH147 of [[cite:Boese2000]].
   * 27 --> GGA, HTCH407 of [[cite:Boese2001]].
-  * 28 --> (NOT AVAILABLE: used internally for GGA OLYP pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/olyp) \- use the LibXC instead, with [[ixc]] = -110131.
+  * 28 --> (NOT AVAILABLE: used internally for GGA OLYP pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/data/POTENTIAL) \- use the LibXC instead, with [[ixc]] = -110131.
 
   * 40 --> Hartree-Fock
   * 41 --> PBE0, [[cite:Perdew1996]].
@@ -9847,7 +9847,6 @@ acting on the images.
 See [[cite:Henkelman2000]]
 
   * 2 --> **Climbing-Image NEB (CI-NEB)**.
-XG 20180813: This algorithm seems to be BROKEN.
 The CI-NEB method constitutes a small modification to the NEB method.
 Information about the shape of the MEP is retained, but a rigorous convergence
 to a saddle point is also obtained. By default the spring constants are
@@ -9868,11 +9867,11 @@ Variable(
     vartype="real",
     topics=['TransPath_useful'],
     dimensions=[2],
-    defaultval=ValueWithConditions({'[[neb_algo]] == 2': [0.02, 0.15], 'defaultval': [0.05, 0.05]}),
+    defaultval=ValueWithConditions({'[[neb_algo]] == 2': ValueWithUnit(units='Hartree/Bohr^2', value=[0.02, 0.15]), 'defaultval': ValueWithUnit(units='Hartree/Bohr^2', value=[0.05, 0.05])}),
     mnemonics="Nudged Elastic Band: SPRING constant",
     requires="[[imgmov]] == 5",
     text=r"""
-Gives the minimal and maximal values of the spring constant connecting images
+Gives the minimal and maximal values (in Hartree/Bohr^2) of the spring constant connecting images
 for the NEB method.
 In the standard "Nudged Elastic Band" method, the spring constant is constant
 along the path, but, in order to have higher resolution close to the saddle
@@ -15783,7 +15782,7 @@ To be more specific, keeping the default value of [[scalecart]] = 1 to simplify
 the matter, [[rprim]] 1 2 3 4 5 6 7 8 9 corresponds to input of the three
 primitive translations R1=(1,2,3) (to be multiplied by [[acell]](1)),
 R2=(4,5,6) (to be multiplied by [[acell]](2)), and R3=(7,8,9) (to be
-multiplied by [[acell](3)).
+multiplied by [[acell]](3)).
 Note carefully that the first three numbers input are the first column of
 [[rprim]], the next three are the second, and the final three are the third.
 This corresponds with the usual Fortran order for arrays. The matrix whose
@@ -19645,6 +19644,62 @@ Variable(
 This variable defines the path of the external KERANGE.nc file with the list of k-points in the electron/hole pockets.
 The tables stored in the file are used for the calculation of the imaginary part of the e-ph self-energy ([[eph_task]] == -4)
 This file is generated by running a preliminary step with [[wfk_task]] = "wfk_einterp".
+""",
+),
+
+Variable(
+    abivarname="symv1scf",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SYMmetrize V1 DFPT SCF potentials",
+    text=r"""
+If symv1scf is equal to 1, the spatial-symmetry on the first-order DFPT potentials 
+is enforced every time a set of potentials in the BZ is recostructed by symmetry
+starting from the initial values in the IBZ.
+This option is similar to [[symdynmat]] but it acts on the DFPT potentials instead of 
+the dynamical matrix.
+""",
+),
+
+Variable(
+    abivarname="dvdb_add_lr",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="DVDB ADD Long-Range part when interpolating DFPT potentials.",
+    text=r"""
+This flag is used in the Fourier interpolation in q-space of the DFPT potentials.
+In polar materials there is a long range (LR) component in the first-order variation
+of the KS potential that can be modeled in terms of the Born effective charges and 
+the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]].
+If dvdb_add_lr is set to 1, this part is removed when computing the real-space representation
+of the DFPT potentials so that the potential is short-ranged and ameneable to Fourier interpolation.
+The long-range contribution is added back when interpolating the DFPT potentials at arbitrary q-points
+Setting this flag to zero deactivate the treatment of the LR contribution.
+
+By default, the code will always treat the LR term is the DDB file contains Born effective charges 
+and the macroscopic dielectric tensor.
+This option is similar to [[dipdip]] but it acts on the DFPT potentials instead of the dynamical matrix.
+""",
+),
+
+Variable(
+    abivarname="eph_np_pqbks",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions=[5],
+    defaultval=0,
+    mnemonics="EPH Number of Processors for Perturbations, Q-points, Bands, K-points, Spin.",
+    text=r"""
+This variable defined the MPI grid of processors used for EPH calculations.
+By default, the code will generate this grid automatically using the total number of processors 
+and the dimensions of the run computed at runtime.
 """,
 ),
 

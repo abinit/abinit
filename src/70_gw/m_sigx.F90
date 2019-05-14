@@ -423,8 +423,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    if (ALL(proc_distrb(:,:,spin) /= Wfd%my_rank)) CYCLE
 
    ! Load wavefunctions for GW corrections.
-   ABI_STAT_MALLOC(wfr_bdgw, (gwx_nfftot*nspinor,ib1:ib2), ierr)
-   ABI_CHECK(ierr==0, "Out of memory in wfr_bdgw")
+   ABI_MALLOC_OR_DIE(wfr_bdgw, (gwx_nfftot*nspinor,ib1:ib2), ierr)
    call wfd%get_many_ur([(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
 
    if (Wfd%usepaw==1) then

@@ -28,7 +28,6 @@
 module m_common
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_exit
@@ -38,14 +37,32 @@ module m_common
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_nctk
+ use m_crystal
+ use m_wfk
+ use m_ebands
+ use m_hdr
+ use m_xmpi
+ use m_dtset
+ use m_xpapi
 
- use m_fstrings,          only : indent
+ use m_fstrings,          only : indent, endswith, sjoin
  use m_electronpositron,  only : electronpositron_type
  use m_energies,          only : energies_type, energies_eval_eint
-
  use m_pair_list,         only : pair_list
  use m_neat,              only : neat_energies
-
+ use m_geometry,          only : mkrdim, metric
+ use m_kg,                only : getcut
+ use m_parser,            only : parsefile
+ use m_invars1,           only : invars0, invars1m, indefo
+ use m_invars2
+ use m_time,              only : timab, time_set_papiopt
+ use defs_abitypes,       only : dataset_type, ab_dimensions, hdr_type, MPI_type
+ use defs_datatypes,      only : pspheader_type, ebands_t
+ use m_pspheads,          only : inpspheads, pspheads_comm
 
  implicit none
 
@@ -56,7 +73,11 @@ module m_common
  public :: setup1
  public :: prteigrs
  public :: prtene
- public :: get_dtsets_pspheads
+ public :: get_dtsets_pspheads     ! Parse input file, get list of pseudos for files file and build list of datasets
+                                   ! pseudopotential headers, maxval of dimensions needed in outvars
+ public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files 
+ public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file 
+                                   ! with file extension in [".abi", ".in"]
 !!***
 
 contains
@@ -96,7 +117,7 @@ contains
 !!   | prtvol= control print volume
 !!   | usedmatpu=LDA+U: number of SCF steps keeping occ. matrix fixed
 !!   | usefock=1 if Fock operator is present (hence possibility of a double loop)
-!!   | usepawu=0 if no LDA+U; 1 if LDA+U
+!!   | usepawu=0 if no LDA+U; /=0 if LDA+U
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  etotal=total energy (hartree)
@@ -509,7 +530,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if (iexit/=0) quit=1
 
    ! In special cases, do not quit even if convergence is reached
-   noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu>0).and.&
+   noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu/=0).and.&
 &   (dtset%usedmatpu/=0).and.(istep<=abs(dtset%usedmatpu)).and.&
 &   (dtset%usedmatpu<0.or.initGS==0))
 
@@ -986,16 +1007,13 @@ end subroutine scprqt
 !! SOURCE
 
 subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
-&  gprimd,gsqcut_eff,gsqcutc_eff,natom,ngfft,ngfftc,nkpt,nsppol,&
+&  gprimd,gsqcut_eff,gsqcutc_eff,ngfft,ngfftc,nkpt,nsppol,&
 &  response,rmet,rprim,rprimd,ucvol,usepaw)
-
- use m_geometry,   only : mkrdim, metric
- use m_kg,         only : getcut
 
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
- integer,intent(in) :: natom,nkpt,nsppol
+ integer,intent(in) :: nkpt,nsppol
  integer,intent(in) :: response,usepaw
  integer,intent(out) :: bantot
  real(dp),intent(in) :: ecut_eff,ecutc_eff
@@ -1067,9 +1085,9 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  ! Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
  if (boxcut<2.0_dp.and.dtset%intxc==1) then
    write(message, '(a,es12.4,a,a,a,a,a)' )&
-&   'boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
-&   'Need larger ngfft to use intxc=1.',ch10,&
-&   'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
+   'boxcut= ',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
+   'Need larger ngfft to use intxc=1.',ch10,&
+   'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
    MSG_ERROR(message)
  end if
 
@@ -1800,21 +1818,9 @@ end subroutine prtene
 
 subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
 
- use m_xmpi
- use m_dtset
- use m_xpapi
-
- use m_parser,       only : parsefile
- use m_invars1,      only : invars0, invars1m, indefo
- use m_invars2
- use m_time,         only : timab, time_set_papiopt
- use defs_abitypes,  only : dataset_type, ab_dimensions
- use defs_datatypes, only : pspheader_type
- use m_pspheads,     only : inpspheads, pspheads_comm
-
 !Arguments ------------------------------------
 !scalars
- integer, intent(out) :: lenstr, ndtset
+ integer,intent(out) :: lenstr, ndtset
  type(ab_dimensions),intent(out) :: mx
  character(len=strlen), intent(out) :: string
  character(len=*),intent(in) :: path
@@ -1972,6 +1978,134 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  ABI_FREE(mband_upper_)
 
 end subroutine get_dtsets_pspheads
+!!***
+
+
+!!****f* ABINIT/ebands_from_file
+!! NAME
+!! ebands_from_file
+!!
+!! FUNCTION
+!!  Build and ebands_t object from file. Supports Fortran and netcdf files 
+!!  provided they have a Abinit header and obviously GS eigenvalues
+!!
+!! INPUTS
+!!  path: File name.
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+type(ebands_t) function ebands_from_file(path, comm) result(new)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: fform, ncid
+ type(hdr_type) :: hdr
+!arrays
+ real(dp),pointer :: gs_eigen(:,:,:)
+
+! *************************************************************************
+
+ ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK 
+ if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
+   call hdr_read_from_fname(hdr, path, fform, comm)
+   ABI_CHECK(fform /= 0, "fform == 0")
+   call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
+   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   
+ else if (endswith(path, ".nc")) then
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nctk_open_read(ncid, path, comm))
+   call hdr_ncread(hdr, ncid, fform)
+   ABI_MALLOC(gs_eigen, (hdr%mband, hdr%nkpt, hdr%nsppol))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), gs_eigen))
+   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   NCF_CHECK(nf90_close(ncid))
+#endif
+ else
+   MSG_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
+ end if
+
+ ABI_FREE(gs_eigen)
+ call hdr_free(hdr)
+
+end function ebands_from_file
+!!***
+
+
+!!****f* ABINIT/crystal_from_file
+!! NAME
+!! crystal_from_file
+!!
+!! FUNCTION
+!!  Build crystal_t object from netcdf file or Abinit input file with file extension in [".abi", ".in"]
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+type(crystal_t) function crystal_from_file(path, comm) result(new)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: fform, timrev !, lenstr, ndtset, timopt, dmatpuflag
+ !character(len=strlen) :: string
+ type(hdr_type) :: hdr
+ !type(ab_dimensions) :: mx
+!arrays
+ !type(dataset_type),allocatable :: dtsets(:)
+ !type(pspheader_type),allocatable :: pspheads(:)
+
+! *************************************************************************
+
+ if (endswith(path, ".abi") .or. endswith(path, ".in")) then
+   NOT_IMPLEMENTED_ERROR()
+
+   ! TODO
+   ! This routine prompts for the list of pseudos! One should get rid of the files file 
+   ! before activating this part.
+   !call get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
+   !call crystal_init(dtset%amu_orig(:,1), new, dtset%spgroup, dtset%natom, dtset%npsp, &
+   !  psps%ntypat,dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl,1, &
+   !  dtset%nspden==2.and.dtset%nsppol==1, remove_inv, psps%title, &
+   !  symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
+   !ABI_FREE(dtsets)
+   !ABI_FREE(pspheads)
+
+ else
+    ! Assume file header
+    call hdr_read_from_fname(hdr, path, fform, comm)
+    ABI_CHECK(fform /= 0, "fform == 0")
+    timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
+    new = hdr_get_crystal(hdr, timrev)
+    call hdr_free(hdr)
+ end if
+
+end function crystal_from_file
 !!***
 
 end module m_common

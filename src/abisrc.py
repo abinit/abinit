@@ -270,6 +270,9 @@ def main():
             cprint("validate returned retcode: %s. Aborting now" % retcode, "red")
             return retcode
 
+        #all_mods = proj.find_allmods("dummy_tests.F90")
+        #for mod in all_mods: print(mod.basename)
+
         proj.write_binaries_conf(verbose=options.verbose, dryrun=False)
         proj.write_buildsys_files(verbose=options.verbose, dryrun=False)
 

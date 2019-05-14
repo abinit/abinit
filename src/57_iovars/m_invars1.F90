@@ -43,8 +43,9 @@ module m_invars1
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
  use m_symtk,   only : mati3det
+
 #if defined HAVE_GPU_CUDA
- use m_initcuda, only : Get_ndevice
+ use m_gpu_toolbox
 #endif
 
  implicit none
@@ -122,6 +123,8 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  real(dp),allocatable :: dprarr(:)
 
 !******************************************************************
+
+ ABI_UNUSED(comm)
 
  marr=max(9,ndtset_alloc,2)
  ABI_ALLOCATE(dprarr,(marr))
@@ -703,8 +706,8 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
    mx%nsppol = max(dtsets(ii)%nsppol, mx%nsppol)
    mx%ntypat = max(dtsets(ii)%ntypat, mx%ntypat)
    mx%nzchempot = max(dtsets(ii)%nzchempot, mx%nzchempot)
-   if (dtsets(ii)%usepawu>0) then
-     if (dtsets(ii)%usedmatpu/=0) dmatpuflag=1
+   if (dtsets(ii)%usepawu/=0) then
+     if (dtsets(ii)%usepawu>0.and.dtsets(ii)%usedmatpu/=0) dmatpuflag=1
      lpawu=maxval(dtsets(ii)%lpawu(:))
      mx%lpawu=max(lpawu,mx%lpawu)
      !dtsets(ii)%natpawu=count(dtsets(ii)%lpawu(dtsets(ii)%typat((/(i1,i1=1,dtsets(ii)%natom)/)))/=-1)
@@ -1792,18 +1795,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%usepawu=intarr(1)
  if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
 
- if (dtset%usepawu > 0 ) then
-   write(msg, '(7a)' )&
-   'usedmft and usepawu are both activated ',ch10,&
-   'This is not an usual calculation:',ch10,&
-   'usepawu will be put to a value >= 10:',ch10,&
-   'LDA+U potential and energy will be put to zero'
-   MSG_WARNING(msg)
- end if
-
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
- if (dtset%usepawu>0.or.dtset%usedmft>0) then
+ if (dtset%usepawu/=0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
@@ -1818,7 +1812,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  dtset%lexexch(1:dtset%ntypat)=-1
 
- if (dtset%useexexch>0) then
+ if (dtset%useexexch/=0) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lexexch',tread,'INT')
    if(tread==1) dtset%lexexch(1:dtset%ntypat)=intarr(1:dtset%ntypat)
  end if
@@ -2038,6 +2032,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
+   dtsets(idtset)%dmft_x2my2d=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_charge_prec=tol6
@@ -2484,6 +2479,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtvpsp=0
    dtsets(idtset)%prtwant=0
    dtsets(idtset)%prtwf=1; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
+   !if (dtset%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    dtsets(idtset)%prtwf_full=0
    dtsets(idtset)%prtxml = 0
    do ii=1,dtsets(idtset)%natom,1
@@ -2651,12 +2647,12 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%bs_freq_mesh = [zero,zero,0.01_dp/Ha_eV]
 
 !  Interpolation
-   dtsets(idtset)%bs_interp_method=1 ! YG interpolation
-   dtsets(idtset)%bs_interp_mode=0 ! No interpolation
-   dtsets(idtset)%bs_interp_prep=0 ! Do not prepare interp
-   dtsets(idtset)%bs_interp_kmult=(/zero,zero,zero/)
-   dtsets(idtset)%bs_interp_m3_width=one
-   dtsets(idtset)%bs_interp_rl_nb=1
+   dtsets(idtset)%bs_interp_method = 1 ! YG interpolation
+   dtsets(idtset)%bs_interp_mode = 0 ! No interpolation
+   dtsets(idtset)%bs_interp_prep = 0 ! Do not prepare interp
+   dtsets(idtset)%bs_interp_kmult = 0
+   dtsets(idtset)%bs_interp_m3_width = one
+   dtsets(idtset)%bs_interp_rl_nb = 1
 
 !  END VARIABLES FOR @Bethe-Salpeter.
 

@@ -146,7 +146,7 @@
 # Forced C compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-CFLAGS="-O2 -g"
+#CFLAGS="-O2"
 
 # C linker custom debug flags (when enable_debug=yes)
 #
@@ -230,7 +230,7 @@ CFLAGS="-O2 -g"
 # Forced C++ compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-CXXFLAGS="-O2 -g"
+#CXXFLAGS="-O2"
 
 # C++ linker custom debug flags (when enable_debug=yes)
 #
@@ -320,7 +320,7 @@ CXXFLAGS="-O2 -g"
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FCFLAGS="-O2 -g -ffree-line-length-none"
+#FCFLAGS="-O2"
 
 # Fortran flags for fixed-form source files
 #
@@ -348,7 +348,7 @@ FCFLAGS="-O2 -g -ffree-line-length-none"
 
 # Fortran linker custom flags
 #
-#FC_LDFLAGS_EXTRA="-Bstatic"
+FC_LDFLAGS_EXTRA="-Wl,-z,muldefs"
 
 # Forced Fortran linker flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -531,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/opt/local"
+with_mpi_prefix="${MPIHOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -553,7 +553,7 @@ with_mpi_prefix="/opt/local"
 #
 # Note: this is highly experimental - USE AT YOUR OWN RISKS!
 #
-#enable_gpu="yes"
+enable_gpu="yes"
 
 # Flavor of the GPU library to use (default is cuda-single)
 #
@@ -563,7 +563,7 @@ with_mpi_prefix="/opt/local"
 #   * cuda-double : Cuda with double-precision arithmetic
 #   * none        : not implemented (will replace enable_gpu)
 #
-#with_gpu_flavor="cuda-double"
+with_gpu_flavor="cuda-double"
 
 # Include flags for the GPU library (default is unset)
 #
@@ -622,7 +622,7 @@ with_mpi_prefix="/opt/local"
 
 # Forced nVidia C compiler flags (should not be set)
 #
-#NVCC_CFLAGS="-arch=sm_13"
+NVCC_CFLAGS="-O3 -gencode arch=compute_70,code=sm_70 -gencode arch=compute_30,code=sm_30 -Xptxas=-v --use_fast_math --compiler-options -O3,-fPIC"
 
 # Forced nVidia linker flags (should not be set)
 #
@@ -721,11 +721,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/opt/local/include"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/opt/local/lib -lnetcdf -lnetcdff"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -769,7 +769,7 @@ with_netcdf_libs="-L/opt/local/lib -lnetcdf -lnetcdff"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+#with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
@@ -777,7 +777,7 @@ with_fft_flavor="fftw3"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/opt/local/lib -lfftw3 -lfftw3f"
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,15 +852,15 @@ with_fft_libs="-L/opt/local/lib -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="custom+scalapack"
+with_linalg_flavor="mkl+magma"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_incs="-I/opt/local/include"
+with_linalg_incs="-I${MAGMA_ROOT}/include -I${MKLROOT}/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/local/lib -lscalapack -lopenblas"
+with_linalg_libs="-L${MAGMA_ROOT}/lib -Wl,--start-group -lmagma -lcuda -Wl,--end-group -L${MKLROOT}/lib/intel64 -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lgomp -lpthread -lm"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -923,21 +923,21 @@ with_linalg_libs="-L/opt/local/lib -lscalapack -lopenblas"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="libxc+wannier90+atompaw"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="/opt/local/bin"
+#with_atompaw_bins="/usr/local/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I/opt/local/include"
+#with_atompaw_incs="-I/usr/local/include/atompaw"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L/opt/local/lib -latompaw"
+#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
 
                        # ------------------------------ #
 
@@ -953,25 +953,25 @@ with_atompaw_libs="-L/opt/local/lib -latompaw"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/opt/local/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/opt/local/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-with_wannier90_bins="/opt/local/bin"
+#with_wannier90_bins="/usr/local/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-with_wannier90_incs="-I/opt/local/include"
+#with_wannier90_incs="-I/usr/local/include/wannier90"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-with_wannier90_libs="-L/opt/local/lib -lwannier"
+#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
@@ -1047,7 +1047,7 @@ with_wannier90_libs="-L/opt/local/lib -lwannier"
 
 # Enable double precision for GW calculations (gmatteo)
 #
-#enable_gw_dpc="yes"
+enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #

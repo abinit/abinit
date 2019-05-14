@@ -279,8 +279,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
    -kptrlatt(1,3)*kptrlatt(2,2)*kptrlatt(3,1) &
    -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
 
- ABI_STAT_MALLOC(kpt_full,(3,mkpt), ierr)
- ABI_CHECK(ierr==0, 'allocating kpt_full')
+ ABI_MALLOC_OR_DIE(kpt_full,(3,mkpt), ierr)
 
  call smpbz(brav1,std_out,kptrlatt,mkpt,nkpt_full,nshiftk,option0,shiftk,kpt_full)
 
