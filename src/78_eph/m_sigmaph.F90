@@ -598,6 +598,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nlines_done, nline_in, grad_berry_size_mpw1
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
  integer :: nqibz, nqbz, comm_rpt
+ logical :: has_dielt_zeff, add_lr_part
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag, q0rad, out_resid
@@ -620,6 +621,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
  integer,allocatable :: wfd_istwfk(:), ibz2dvdb(:)
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
@@ -993,10 +995,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfft, ngfftf, cryst, &
                                      ifc%ngqpt, ifc%nqshft, ifc%qshft, comm, custom_qpt)
    end if
+   ! Save dielt and zeff to propagate to new dvdb instance
+   dielt = dvdb%dielt
+   zeff = dvdb%zeff
+   has_dielt_zeff = dvdb%has_dielt_zeff
+   add_lr_part = dvdb%add_lr_part
    call dvdb%free()
-   ! MG: WARNING: zeff, dielt, has_dielt_zeff and add_lr_part might be lost here
-   ! One should get them from DDB!
    dvdb = dvdb_new(dtfil%fnameabo_dvdb, comm)
+   ! Add dielt and zeff again
+   dvdb%dielt = dielt
+   dvdb%zeff = zeff
+   dvdb%has_dielt_zeff = has_dielt_zeff
+   dvdb%add_lr_part = add_lr_part
    ! Naive q-point check
    do iq_ibz=1,cnt-1
      found = .false.
