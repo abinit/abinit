@@ -164,7 +164,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp) :: enlout(ndat),lambda_ndat(ndat),tsec(2)
  real(dp),target :: nonlop_dum(1,1)
  real(dp),allocatable :: buff_wf(:,:),cwavef1(:,:),cwavef2(:,:),cwavef_fft(:,:),cwavef_fft_tr(:,:)
- real(dp),allocatable :: ghc1(:,:),ghc2(:,:),ghc3(:,:),ghc4(:,:),ghcnd(:,:),ghc_mGGA(:,:),ghc_vectornd(:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:),ghc3(:,:),ghc4(:,:),ghc_mGGA(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: gvnlc(:,:),vlocal_tmp(:,:,:),work(:,:,:,:)
  real(dp), pointer :: kinpw_k1(:),kinpw_k2(:),kpt_k1(:),kpt_k2(:)
  real(dp), pointer :: gsc_ptr(:,:)
@@ -545,7 +545,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        MSG_BUG('wrong sizes for vectornd in getghc!')
      end if
      ABI_ALLOCATE(ghc_vectornd,(2,npw_k2*my_nspinor*ndat))
-     call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,gs_ham%gprimd,gs_ham%istwf_k,kg_k1,kpt_k1,&
+     call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,gs_ham%istwf_k,kg_k1,kpt_k1,&
 &     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
 &     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%use_gpu_cuda)
      ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_vectornd(1:2,1:npw_k2*my_nspinor*ndat)
@@ -801,7 +801,7 @@ end subroutine getghc
 !!
 !! SOURCE
 
-subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
+subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
 &                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,use_gpu_cuda)
 
 !Arguments ------------------------------------
@@ -810,7 +810,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
- real(dp),intent(in) :: gprimd(3,3),kpt(3)
+ real(dp),intent(in) :: kpt(3)
  real(dp),intent(inout) :: cwavef(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: ghc_vectornd(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc,3)
@@ -820,12 +820,10 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,gprimd,istwf_k,kg_k,kpt,mg
  integer,parameter :: tim_fourwf=1
  integer :: idat,idir,ipw,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: gp2pi1,gp2pi2,gp2pi3,scale_conversion,weight=one
+ real(dp) :: scale_conversion,weight=one
  !arrays
- real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
- real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
- real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:)
- real(dp),allocatable :: lcwavef(:,:),lcwavef1(:,:),lcwavef2(:,:)
+ real(dp),allocatable :: gcwavef(:,:,:)
+ real(dp),allocatable :: ghc1(:,:),kgkpk(:,:)
  real(dp),allocatable :: work(:,:,:,:)
 
 ! *********************************************************************
@@ -924,7 +922,6 @@ end subroutine getghc_nucdip
 !! INPUTS
 !! cwavef(2,npw_k*my_nspinor*ndat)=planewave coefficients of wavefunction.
 !! gbound_k(2*mgfft+4)=sphere boundary info
-!! gprimd(3,3)=dimensional reciprocal space primitive translations (b^-1)
 !! istwf_k=input parameter that describes the storage of wfs
 !! kg_k(3,npw_k)=G vec coordinates wrt recip lattice transl.
 !! kpt(3)=current k point
@@ -1544,102 +1541,102 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 end subroutine multithreaded_getghc
 !!***
 
-!!****f* ABINIT/getghcnd
-!!
-!! NAME
-!! getghcnd
-!!
-!! FUNCTION
-!! Compute <G|H_ND|C> for input vector |C> expressed in reciprocal space
-!! Result is put in array ghcnc. H_ND is the Hamiltonian due to magnetic dipoles
-!! on the nuclear sites.
-!!
-!! INPUTS
-!! cwavef(2,npw*nspinor*ndat)=planewave coefficients of wavefunction.
-!! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
-!! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
-!! ndat=number of FFT to do in //
-!!
-!! OUTPUT
-!! ghcnd(2,npw*my_nspinor*ndat)=matrix elements <G|H_ND|C>
-!!
-!! NOTES
-!!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
-!!  at the atomic nuclei to the input wavefunction. Strategy below is to take advantage of
-!!  Hermiticity to store H_ND in triangular form and then use a BLAS call to zhpmv to apply to
-!!  input vector in one shot.
-!! Application of <k^prime|H|k> or <k|H|k^prime> not implemented!
-!!
-!! PARENTS
-!!      getghc
-!!
-!! CHILDREN
-!!      zhpmv
-!!
-!! SOURCE
+! !!****f* ABINIT/getghcnd
+! !!
+! !! NAME
+! !! getghcnd
+! !!
+! !! FUNCTION
+! !! Compute <G|H_ND|C> for input vector |C> expressed in reciprocal space
+! !! Result is put in array ghcnc. H_ND is the Hamiltonian due to magnetic dipoles
+! !! on the nuclear sites.
+! !!
+! !! INPUTS
+! !! cwavef(2,npw*nspinor*ndat)=planewave coefficients of wavefunction.
+! !! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
+! !! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
+! !! ndat=number of FFT to do in //
+! !!
+! !! OUTPUT
+! !! ghcnd(2,npw*my_nspinor*ndat)=matrix elements <G|H_ND|C>
+! !!
+! !! NOTES
+! !!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
+! !!  at the atomic nuclei to the input wavefunction. Strategy below is to take advantage of
+! !!  Hermiticity to store H_ND in triangular form and then use a BLAS call to zhpmv to apply to
+! !!  input vector in one shot.
+! !! Application of <k^prime|H|k> or <k|H|k^prime> not implemented!
+! !!
+! !! PARENTS
+! !!      getghc
+! !!
+! !! CHILDREN
+! !!      zhpmv
+! !!
+! !! SOURCE
 
-subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
+! subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
 
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: my_nspinor,ndat
- type(gs_hamiltonian_type),intent(in) :: gs_ham
-!arrays
- real(dp),intent(in) :: cwavef(2,gs_ham%npw_k*my_nspinor*ndat)
- real(dp),intent(out) :: ghcnd(2,gs_ham%npw_k*my_nspinor*ndat)
+! !Arguments ------------------------------------
+! !scalars
+!  integer,intent(in) :: my_nspinor,ndat
+!  type(gs_hamiltonian_type),intent(in) :: gs_ham
+! !arrays
+!  real(dp),intent(in) :: cwavef(2,gs_ham%npw_k*my_nspinor*ndat)
+!  real(dp),intent(out) :: ghcnd(2,gs_ham%npw_k*my_nspinor*ndat)
 
-!Local variables-------------------------------
-!scalars
- integer :: cwavedim
- character(len=500) :: message
- !arrays
- complex(dpc),allocatable :: inwave(:),hggc(:)
+! !Local variables-------------------------------
+! !scalars
+!  integer :: cwavedim
+!  character(len=500) :: message
+!  !arrays
+!  complex(dpc),allocatable :: inwave(:),hggc(:)
 
-! *********************************************************************
+! ! *********************************************************************
 
- if (gs_ham%matblk /= gs_ham%natom) then
-   write(message,'(a,i4,a,i4)')' gs_ham%matblk = ',gs_ham%matblk,' but natom = ',gs_ham%natom
-   MSG_ERROR(message)
- end if
- if (ndat /= 1) then
-   write(message,'(a,i4,a)')' ndat = ',ndat,' but getghcnd requires ndat = 1'
-   MSG_ERROR(message)
- end if
- if (my_nspinor /= 1) then
-   write(message,'(a,i4,a)')' nspinor = ',my_nspinor,' but getghcnd requires nspinor = 1'
-   MSG_ERROR(message)
- end if
- if (any(abs(gs_ham%kpt_k(:)-gs_ham%kpt_kp(:))>tol8)) then
-   message=' not allowed for kpt(left)/=kpt(right)!'
-   MSG_BUG(message)
- end if
+!  if (gs_ham%matblk /= gs_ham%natom) then
+!    write(message,'(a,i4,a,i4)')' gs_ham%matblk = ',gs_ham%matblk,' but natom = ',gs_ham%natom
+!    MSG_ERROR(message)
+!  end if
+!  if (ndat /= 1) then
+!    write(message,'(a,i4,a)')' ndat = ',ndat,' but getghcnd requires ndat = 1'
+!    MSG_ERROR(message)
+!  end if
+!  if (my_nspinor /= 1) then
+!    write(message,'(a,i4,a)')' nspinor = ',my_nspinor,' but getghcnd requires nspinor = 1'
+!    MSG_ERROR(message)
+!  end if
+!  if (any(abs(gs_ham%kpt_k(:)-gs_ham%kpt_kp(:))>tol8)) then
+!    message=' not allowed for kpt(left)/=kpt(right)!'
+!    MSG_BUG(message)
+!  end if
 
- if (any(abs(gs_ham%nucdipmom_k)>tol8)) then
-   cwavedim = gs_ham%npw_k*my_nspinor*ndat
-   ABI_ALLOCATE(hggc,(cwavedim))
-   ABI_ALLOCATE(inwave,(cwavedim))
+!  if (any(abs(gs_ham%nucdipmom_k)>tol8)) then
+!    cwavedim = gs_ham%npw_k*my_nspinor*ndat
+!    ABI_ALLOCATE(hggc,(cwavedim))
+!    ABI_ALLOCATE(inwave,(cwavedim))
 
-   inwave(1:gs_ham%npw_k) = cmplx(cwavef(1,1:gs_ham%npw_k),cwavef(2,1:gs_ham%npw_k),kind=dpc)
+!    inwave(1:gs_ham%npw_k) = cmplx(cwavef(1,1:gs_ham%npw_k),cwavef(2,1:gs_ham%npw_k),kind=dpc)
 
-    ! apply hamiltonian hgg to input wavefunction inwave, result in hggc
-    ! ZHPMV is a level-2 BLAS routine, does Matrix x Vector multiplication for double complex
-    ! objects, with the matrix as Hermitian in packed storage
-   call ZHPMV('L',cwavedim,cone,gs_ham%nucdipmom_k,inwave,1,czero,hggc,1)
+!     ! apply hamiltonian hgg to input wavefunction inwave, result in hggc
+!     ! ZHPMV is a level-2 BLAS routine, does Matrix x Vector multiplication for double complex
+!     ! objects, with the matrix as Hermitian in packed storage
+!    call ZHPMV('L',cwavedim,cone,gs_ham%nucdipmom_k,inwave,1,czero,hggc,1)
 
-   ghcnd(1,1:gs_ham%npw_k) = real(hggc)
-   ghcnd(2,1:gs_ham%npw_k) = aimag(hggc)
+!    ghcnd(1,1:gs_ham%npw_k) = real(hggc)
+!    ghcnd(2,1:gs_ham%npw_k) = aimag(hggc)
 
-   ABI_DEALLOCATE(hggc)
-   ABI_DEALLOCATE(inwave)
+!    ABI_DEALLOCATE(hggc)
+!    ABI_DEALLOCATE(inwave)
 
- else
+!  else
 
-   ghcnd(:,:) = zero
+!    ghcnd(:,:) = zero
 
- end if
+!  end if
 
-end subroutine getghcnd
-!!***
+! end subroutine getghcnd
+! !!***
 
 end module m_getghc
 !!***

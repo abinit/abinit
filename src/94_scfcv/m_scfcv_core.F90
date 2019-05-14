@@ -1110,7 +1110,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      ABI_ALLOCATE(vectornd,(with_vectornd*nfftf,3))
      if(with_vectornd .EQ. 1) then
         call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
-             & dtset%paral_kgb,rprimd,vectornd,xred)
+             & rprimd,vectornd,xred)
      endif
 
    end if ! moved_atm_inside==1 .or. istep==1
