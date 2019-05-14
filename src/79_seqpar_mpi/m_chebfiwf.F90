@@ -208,7 +208,13 @@ module m_chebfiwf
   
   !Local variables for chebfi
   !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
+  !print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
+  !stop
+  
   call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft) 
+  
+  !print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
+  !stop
     
   if ( l_istwf == 2 ) then ! Real only
     ! Scale cg
@@ -241,8 +247,8 @@ module m_chebfiwf
   !print *, "l_mpi_enreg%bandpp", l_mpi_enreg%bandpp
   !stop
   
-  print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
-  print *, "l_mpi_enreg%nproc_band", l_mpi_enreg%nproc_band
+  !print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
+  !print *, "l_mpi_enreg%nproc_band", l_mpi_enreg%nproc_band
   !stop
  
   call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, dtset%paral_kgb, l_mpi_enreg%nproc_band, &
@@ -359,10 +365,12 @@ module m_chebfiwf
     print *, "spacedim X", spacedim
     print *, "blockdim X", blockdim
     
-    !call xgBlock_getSize(AX,spacedim,blockdim)
+    call xgBlock_getSize(AX,spacedim,blockdim)
     
     !print *, "spacedim AX", spacedim
     !print *, "blockdim AX", blockdim
+    
+    !stop
     
     !call xgBlock_getSize(BX,spacedim,blockdim)
     
@@ -378,13 +386,23 @@ module m_chebfiwf
     call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)
     call xgBlock_reverseMap(BX,gsc,l_icplx,spacedim*blockdim)
     
+    !call debug_helper(X, blockdim)
+    !stop
+    
+    print *, "spacedim", spacedim
+    print *, "blockdim", blockdim
+    !stop
+    
     ! scale back cg
     if(l_istwf == 2) then
       !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
       call xgBlock_scale(X,inv_sqrt2,1)
+      !suppress scaling to debug MPI
       if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
     end if
       
+    !call debug_helper(X, blockdim)
+    !stop 
 
     if ( size(l_gvnlc) < 2*blockdim*spacedim ) then
       ABI_FREE(l_gvnlc)
@@ -402,6 +420,9 @@ module m_chebfiwf
       call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),eval,blockdim,l_mpi_enreg,&
 &                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.true.)  !already_transposed = true (previous)
     end if
+    
+    !call debug_helper(AX, blockdim)
+    !stop
   
     ! scale cg, ghc, gsc
     if ( l_istwf == 2 ) then
@@ -409,6 +430,7 @@ module m_chebfiwf
       !ghc(:,1:spacedim*blockdim) = ghc(:,1:spacedim*blockdim) * sqrt2
       call xgBlock_scale(X,sqrt2,1)
       call xgBlock_scale(AX,sqrt2,1)
+      !suppress scaling to debug MPI
       if(l_mpi_enreg%me_g0 == 1) then
         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
         ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
@@ -419,6 +441,10 @@ module m_chebfiwf
         if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
       end if
     end if
+    
+    !print *, "BAJA DO JAJA"
+    !call debug_helper(AX, blockdim)
+    !stop
     
     if ( .not. l_paw ) call xgBlock_copy(X,BX)
   
@@ -447,9 +473,11 @@ module m_chebfiwf
     call xgBlock_getSize(X,spacedim,blockdim)
     spacedim = spacedim/l_icplx
     
-    print *, "spacedim", spacedim
-    print *, "BLOCKDIM", blockdim
+    !print *, "spacedim", spacedim
+    !print *, "BLOCKDIM", blockdim
     !stop
+    
+    !print *, "USAO U FUNKCIJU"
     
     call xgBlock_reverseMap(X,ghc_filter,l_icplx,spacedim*blockdim)
     call xgBlock_reverseMap(Bm1X,gsm1hc_filter,l_icplx,spacedim*blockdim)
@@ -468,13 +496,17 @@ module m_chebfiwf
       end if
     end if
     
-    !stop
+    !print *, "PROSAO 1"
     
     !cwaveprj dummy allocate
     if(l_paw) then
-      ABI_DATATYPE_ALLOCATE(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim)) !nband_filter
-      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj) 
+      !print *, "DUMMY ALLOCATE"
       !stop
+      ABI_DATATYPE_ALLOCATE(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim)) !nband_filter
+      print *, "ABI_DATATYPE_ALLOCATE PASS"
+      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj) 
+      print *, "DUMMY ALLOCATE PASS"
+      stop
       call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), & 
 &     spacedim, blockdim, l_mpi_enreg, l_nspinor)   !!ghc_filter size problem if transposed
       !stop
@@ -482,7 +514,7 @@ module m_chebfiwf
       gsm1hc_filter(:,:) = ghc_filter(:,:)
     end if
     
-    
+    !print *, "OVDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
     ! scale cg, ghc, gsc
     if ( l_istwf == 2 ) then
       !cg(:,1:spacedim*blockdim) = cg(:,precond1:spacedim*blockdim) * sqrt2
@@ -502,6 +534,8 @@ module m_chebfiwf
       call pawcprj_free(cwaveprj_next)
       ABI_DATATYPE_DEALLOCATE(cwaveprj_next)
     end if
+    
+    !print *, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     
   end subroutine getBm1X
  
@@ -526,5 +560,39 @@ module m_chebfiwf
     end do
 
   end subroutine precond1
+  
+  subroutine debug_helper(debugBlock, nband)
+      
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(integer) , intent(in) :: nband
+    type(xgBlock_t) :: HELPER
+    
+    integer :: DEBUG_ROWS = 20
+    integer :: DEBUG_COLUMNS = 4
+
+!    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+!    call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+! 
+!    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc
+!      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
+!    end if
+    
+    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+      !print *, "ZASTO NISTA NE ISPISUJE"
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)) 
+      
+      call xgBlock_setBlock(debugBlock, HELPER, nband/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)+1) 
+    else
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)) 
+    end if
+    
+    !print *, "debugBlock%rows", rows(debugBlock)
+    !print *, "debugBlock%cols", cols(debugBlock)
+
+  end subroutine debug_helper
   
 end module m_chebfiwf

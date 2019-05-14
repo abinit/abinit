@@ -39,6 +39,8 @@ module m_prep_kgb
  use m_nonlop,      only : nonlop
  use m_getghc,      only : multithreaded_getghc
  use m_fft,         only : fourwf
+ 
+ use m_xg
 
  implicit none
 
@@ -138,6 +140,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  real(dp),pointer :: ewavef_alltoall_sym(:,:),gvnlxc_alltoall_sym(:,:)
  real(dp),pointer :: gwavef_alltoall_sym(:,:)
  real(dp),pointer :: swavef_alltoall_sym(:,:)
+ 
+ type(xgBlock_t) :: xgx0
 
 ! *************************************************************************
 
@@ -166,8 +170,14 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  mcg=2*gs_hamk%npw_fft_k*my_nspinor*bandpp
  if (do_transpose) mcg=2*gs_hamk%npw_k*my_nspinor*blocksize
  
- !print *, "bandpp", bandpp
- !print *, "mcg", mcg
+ print *, "gs_hamk%npw_fft_k", 2*gs_hamk%npw_fft_k
+ print *, "blocksize", blocksize
+ print *, "bandpp", bandpp
+ !stop
+ 
+ call xgBlock_map(xgx0,cwavef,SPACE_CR,2*gs_hamk%npw_fft_k*my_nspinor,blocksize,mpi_enreg%comm_bandspinorfft) 
+ 
+ !call debug_helper(xgx0, blocksize) 
  !stop
  
  if (size(cwavef)<mcg) then
@@ -688,6 +698,8 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 ! print *, "size(cwavef)", size(cwavef)
 ! print *, "2*npw*my_nspinor*blocksize", 2*npw*my_nspinor*blocksize
  !stop
+ 
+
  
  if (size(cwavef)/=2*npw*my_nspinor*blocksize) then
    msg = 'Incorrect size for cwavef!'
@@ -2091,6 +2103,39 @@ subroutine prep_sort_wavef_spin(nproc_band,nspinor,ndatarecv,recvcounts,rdispls,
 
 end subroutine prep_sort_wavef_spin
 !!***
+
+  subroutine debug_helper(debugBlock, nbands)
+      
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(integer) , intent(in) :: nbands
+    type(xgBlock_t) :: HELPER
+    
+    integer :: DEBUG_ROWS = 20
+    integer :: DEBUG_COLUMNS = 2
+
+!    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+!    call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+! 
+!    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc
+!      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
+!    end if
+    
+    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)) 
+      
+      call xgBlock_setBlock(debugBlock, HELPER, nbands/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)+1) 
+    else
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)) 
+    end if
+    
+    !print *, "debugBlock%rows", rows(debugBlock)
+    !print *, "debugBlock%cols", cols(debugBlock)
+
+  end subroutine debug_helper
 
 end module m_prep_kgb
 !!***

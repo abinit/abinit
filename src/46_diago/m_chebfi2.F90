@@ -330,12 +330,17 @@ module m_chebfi2
     double precision :: center
     double precision :: radius
     
+    double precision :: errmax
+    double precision, pointer :: cg(:,:)
+    double precision, pointer :: cg0(:,:)
+    
     integer :: info
     integer :: ierr
     
     integer :: cols, rows
     
     type(xgBlock_t) :: HELPER
+    type(xg_t) :: xCOPY
    
     double precision :: tsec(2)
                     
@@ -379,13 +384,15 @@ module m_chebfi2
     tolerance = chebfi%tolerance
     lambda_plus = chebfi%ecut
     chebfi%X = X0
+   
     
     ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
 
-    call debug_helper(chebfi%X, chebfi) 
-    stop
+    !call debug_helper(chebfi%X, chebfi) 
+    !stop
     
     print *, "AJDE" 
+    !stop
 
     ! Transpose
     if (chebfi%paral_kgb == 1) then
@@ -393,8 +400,18 @@ module m_chebfi2
       nCpuRows = chebfi%nproc_fft
       nCpuCols = chebfi%nproc_band
   
+      !print *, "spacedim", spacedim
+      !print *, "neigenpairs", neigenpairs
+      
+      call xg_init(xCOPY, chebfi%space, spacedim, neigenpairs)
+      call xgBlock_reverseMap(chebfi%X,cg,spacedim,neigenpairs)
+      call xgBlock_copy(chebfi%X,xCOPY%self, 1, 1)
+      call xgBlock_reverseMap(xCOPY%self,cg0,spacedim,neigenpairs)
+      !kopirati X u poseban array pa to posle porediti nakon trans
+  
       !print *, "nCpuRows", nCpuRows
       !print *, "nCpuCols", nCpuCols
+      !stop
       
       !all stride arrays are hidden inside transposer
       call xgTransposer_init(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,0)
@@ -419,8 +436,20 @@ module m_chebfi2
       
       !print *, "SSSSSSSSSSSSSS"
       call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS) !all_to_all
-      call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !all_to_all
-      call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS) 
+      !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !all_to_all
+      !call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS) 
+      
+      !call debug_helper(chebfi%xXColsRows, chebfi) 
+      !stop
+      
+      !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
+      
+      !errmax = (sum(cg0-cg))/neigenpairs
+      !print *, "loc cg0", loc(cg0)
+      !print *, "loc cg", loc(cg)   
+      !print *, " Difference: ",errmax
+      
+      !stop
       
       !print *, "BBBBBBBBBBBBBB"
                         
@@ -443,20 +472,24 @@ module m_chebfi2
     
     !print *, "AAAAAAAAAAAAAAAAAAAA"
     !stop
-    call debug_helper(chebfi%xXColsRows, chebfi) 
-    stop
+    !call debug_helper(chebfi%xXColsRows, chebfi) 
+    !stop
    
-   
+    !call debug_helper(chebfi%xAXColsRows, chebfi) 
+    
     call timab(tim_getAX_BX,1,tsec)         
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
     call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
     
+    !stop
+    
     !!TODO TODO TODO TODO debug upper arrays, second one is not good
     !!on nproc 2 for some reason
-    call debug_helper(chebfi%xAXColsRows, chebfi) 
-
-    stop
+    !call debug_helper(chebfi%xXColsRows, chebfi) 
+    !call debug_helper(chebfi%xAXColsRows, chebfi) 
+    !call debug_helper(chebfi%xBXColsRows, chebfi) 
+    !stop
       
     call xmpi_barrier(chebfi%spacecom)
     !print *, "PROSAO NIJE SE UBIO"
@@ -476,9 +509,9 @@ module m_chebfi2
       mineig_global = mineig
     end if
     
-    print *, "maxeig_global", maxeig_global  
-    print *, "mineig_global", mineig_global    
-    !stop
+!    print *, "maxeig_global", maxeig_global  
+!    print *, "mineig_global", mineig_global    
+!    stop
                 
     lambda_minus = maxeig_global
     
@@ -487,7 +520,7 @@ module m_chebfi2
         
     nline_max = cheb_oracle1(mineig, lambda_minus, lambda_plus, 1D-16, 40)
     
-    print *, "nline_max", nline_max
+    !print *, "nline_max", nline_max
     !stop
    
     if (chebfi%paral_kgb == 0) then
@@ -510,8 +543,8 @@ module m_chebfi2
     center = (lambda_plus + lambda_minus)*0.5  
     radius = (lambda_plus - lambda_minus)*0.5
     
-    print *, "center", center
-    print *, "radius", radius
+    !print *, "center", center
+    !print *, "radius", radius
     !stop
                
     one_over_r = 1/radius
@@ -703,10 +736,13 @@ module m_chebfi2
     !B-1 * A * ψ    
     !stop
     if (chebfi%paw) then
-      !stop
       call timab(tim_invovl, 1, tsec)
       !call getBm1X(chebfi%AX%self, chebfi%X_next)
+      !print *, "SSSSSSSSS"
       call getBm1X(chebfi%xAXColsRows, chebfi%X_next) 
+      print *, "PPPPP"
+      call debug_helper(chebfi%X_next, chebfi) 
+      stop
       !call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, chebfi%spacedim, chebfi%neigenpairs) !AX_swap = X_next;
       call timab(tim_invovl, 2, tsec)
     else
@@ -1155,16 +1191,29 @@ module m_chebfi2
     type(chebfi_t) , intent(inout) :: chebfi
     type(xgBlock_t) :: HELPER
 
-    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-    call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
- 
-    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc
+!    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+!    call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+! 
+!    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc
+!      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
+!    end if
+    
+    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+      !print *, "USAOOSOOSOSOSO"
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
+      
       call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)+1) 
+    else
+      !print *, "2222222222222222222"
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
     end if
     
-    print *, "debugBlock%rows", rows(debugBlock)
-    print *, "debugBlock%cols", cols(debugBlock)
+    !print *, "debugBlock%rows", rows(debugBlock)
+    !print *, "debugBlock%cols", cols(debugBlock)
 
   end subroutine debug_helper
   

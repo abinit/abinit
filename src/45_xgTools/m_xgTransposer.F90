@@ -375,9 +375,9 @@ module m_xgTransposer
       if ( xgTransposer%mpiData(MPI_COLS)%size == 1 ) then
         xgTransposer%xgBlock_colsrows = xgTransposer%xgBlock_linalg
       else
-        print *, "HEREEEEEEE"
-        print *, "xgTransposer%ncolsColsRows", xgTransposer%ncolsColsRows
-        print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
+        !print *, "HEREEEEEEE"
+        !print *, "xgTransposer%ncolsColsRows", xgTransposer%ncolsColsRows
+        !print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
  
         !stop
         ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
@@ -864,7 +864,7 @@ module m_xgTransposer
 !        print *, "bufferMess", bufferMess(1,:)
 !      end if
     case (STATE_COLSROWS)
-      print *, "STATE COLROWS"
+      !print *, "STATE COLROWS"
       ! We are going to STATE_LINALG so we are before all2all
       !$omp parallel do private(shiftCpu,toe,tos,frome,froms), collapse(2)
       do col = 1, ncolsColsRows

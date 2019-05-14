@@ -88,11 +88,17 @@ program testTransposer
   
   !print *, "npw", npw
   !stop
-  nband = 4 !2000 big !4 small
+  npw = 3888/2
+  nband = 192 !2000 big !4 small
+  !npw = 
   ncycle = 20
   if ( xmpi_comm_size(xmpi_world) > 1 ) then
     nCpuRows = 2
     nCpuCols = xmpi_comm_size(xmpi_world)/nCpuRows
+    
+    !override
+    nCpuRows = 1
+    nCpuCols = 2
   else
     nCpuRows = 1
     nCpuCols = 1
@@ -111,7 +117,7 @@ program testTransposer
   ABI_MALLOC(cg0, (2,npw*nband))
 
   call random_number(cg)
-  cg0(:,:) = cg(:,:)
+  cg0(:,:) = cg(:,:) !this is actually copy, not just pointer assignment
 
   call xgBlock_map(xcgLinalg,cg,SPACE_C,npw,nband,xmpi_world)
   !print *, "NPW", npw
@@ -127,18 +133,23 @@ program testTransposer
   !print *, "NCLOS 1", ncols
   
   write(std_out,*) " Complex all2all"
-  if (xmpi_comm_rank(xmpi_world) == debug_rank) then
-    print *, "xcgColsRows PRVI PUT:"
-    call xgBlock_print(xcgColsRows,6)
-  end if  
+!  if (xmpi_comm_rank(xmpi_world) == debug_rank) then
+!    print *, "xcgColsRows PRVI PUT:"
+!    call xgBlock_print(xcgColsRows,6)
+!  end if
+
+
+  print *, "nCpuRows", nCpuRows
+  print *, "nCpuCols", nCpuCols
+ 
   call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,debug_rank)
-  call tester()
+  call tester(xcgColsRows)
   call xgTransposer_free(xgTransposer)
   call printTimes()
 
   write(std_out,*) " Complex gatherv"
   call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,2,debug_rank)
-  call tester()
+  call tester(xcgColsRows)
   call xgTransposer_free(xgTransposer)
   call printTimes()
 
@@ -146,13 +157,13 @@ program testTransposer
 
   write(std_out,*) " Real all2all"
   call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,debug_rank)
-  call tester()
+  call tester(xcgColsRows)
   call xgTransposer_free(xgTransposer)
   call printTimes()
 
   write(std_out,*) " Real gatherv"
   call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,2,debug_rank)
-  call tester()
+  call tester(xcgColsRows)
   call xgTransposer_free(xgTransposer)
   call printTimes()
 
@@ -198,8 +209,11 @@ program testTransposer
 !!
 !! SOURCE
 
-    subroutine tester()
+    subroutine tester(xcgColsRows)
 
+
+      type(xgBlock_t) , intent(inout) :: xcgColsRows
+      
       maxt = 0
       cputime = 0
       do i=1,ncycle
@@ -208,16 +222,19 @@ program testTransposer
         !  call xgBlock_print(xcgLinalg,6)
         !end if
         !stop     
-        if (xmpi_comm_rank(xmpi_world) == debug_rank) then
-          print *, "RANK (before transpose): ", debug_rank
-          call xgBlock_print(xcgLinalg,6)
-        end if
+!        if (xmpi_comm_rank(xmpi_world) == debug_rank) then
+!          print *, "RANK (before transpose): ", debug_rank
+!          call xgBlock_print(xcgLinalg,6)
+!        end if
         call xgTransposer_transpose(xgTransposer,STATE_COLSROWS)
         !if (xmpi_comm_rank(xmpi_world) == debug_rank) then
           !print *, "RANK (after transpose): ", debug_rank
           !call xgBlock_print(xcgLinalg,6)
         !end if
         !stop
+        call debug_helper(xcgColsRows) 
+        stop
+        
         if ( ncpucols > 1 ) then ! for 1 both states are aliased !!
           call random_number(cg)
         end if
@@ -285,6 +302,33 @@ program testTransposer
       call timab(1,0,times)
 
     end subroutine printTimes
+    
+    subroutine debug_helper(debugBlock)
+        
+      type(xgBlock_t) , intent(inout) :: debugBlock
+      type(xgBlock_t) :: HELPER
+      
+      integer :: DEBUG_ROWS = 20
+      integer :: DEBUG_COLUMNS = 2
+
+      !call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      !call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)) 
+   
+      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+        call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+        call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)) 
+      
+        call xgBlock_setBlock(debugBlock, HELPER, 192/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+        call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)+1) 
+      else
+        call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+        call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)) 
+      end if
+      
+      !print *, "debugBlock%rows", rows(debugBlock)
+      !print *, "debugBlock%cols", cols(debugBlock)
+
+    end subroutine debug_helper
 
 
   end program testTransposer

@@ -1,2 +1,51 @@
-1.98user 0.06system 0:02.04elapsed 99%CPU (0avgtext+0avgdata 125072maxresident)k
-0inputs+8outputs (0major+25146minor)pagefaults 0swaps
+Abort(13) on node 1 (rank 1 in comm 0): application called MPI_Abort(MPI_COMM_WORLD, 13) - process 1
+[cli_1]: readline failed
+forrtl: error (78): process killed (SIGTERM)
+Image              PC                Routine            Line        Source             
+libifcoremt.so.5   00007F59E0AE7555  for__signal_handl     Unknown  Unknown
+libpthread-2.27.s  00007F59E5749890  Unknown               Unknown  Unknown
+libpthread-2.27.s  00007F59E57482B7  write                 Unknown  Unknown
+libifcoremt.so.5   00007F59E0AFB2BC  for__write_output     Unknown  Unknown
+libifcoremt.so.5   00007F59E0AFC1E6  for__put_sf           Unknown  Unknown
+libifcoremt.so.5   00007F59E0B4394D  for_write_seq_lis     Unknown  Unknown
+abinit             0000000002171464  m_pawcprj_mp_pawc         173  m_pawcprj.F90
+abinit             00000000006A897A  m_chebfiwf_mp_get         507  m_chebfiwf.F90
+abinit             0000000001B5A9B3  m_chebfi2_mp_cheb         559  m_chebfi2.F90
+abinit             00000000006A623E  m_chebfiwf_mp_che         263  m_chebfiwf.F90
+abinit             00000000006994A6  m_vtowfk_mp_vtowf         404  m_vtowfk.F90
+abinit             000000000066F498  m_vtorho_mp_vtorh         933  m_vtorho.F90
+abinit             0000000000601935  m_scfcv_core_mp_s        1532  m_scfcv_core.F90
+abinit             00000000005F6189  m_scfcv_mp_scfcv_         703  m_scfcv.F90
+abinit             00000000005CA405  m_gstate_mp_gstat        1308  m_gstate.F90
+abinit             000000000042BFFC  m_gstateimg_mp_gs         561  m_gstateimg.F90
+abinit             000000000041A4F7  m_driver_mp_drive         695  m_driver.F90
+abinit             00000000004098AD  MAIN__                    394  abinit.F90
+abinit             0000000000408432  Unknown               Unknown  Unknown
+libc-2.27.so       00007F59DE50AB97  __libc_start_main     Unknown  Unknown
+abinit             000000000040831A  Unknown               Unknown  Unknown
+forrtl: error (78): process killed (SIGTERM)
+Image              PC                Routine            Line        Source             
+libifcoremt.so.5   00007F5E6C622555  for__signal_handl     Unknown  Unknown
+libpthread-2.27.s  00007F5E71284890  Unknown               Unknown  Unknown
+libifcoremt.so.5   00007F5E6C63DECD  for__resource_acq     Unknown  Unknown
+libifcoremt.so.5   00007F5E6C631503  for__rm_from_lf_t     Unknown  Unknown
+libifcoremt.so.5   00007F5E6C5FCC11  for__close_proc       Unknown  Unknown
+libifcoremt.so.5   00007F5E6C615E05  for__exit_handler     Unknown  Unknown
+libifcoremt.so.5   00007F5E6C615BE7  for_exit              Unknown  Unknown
+abinit             00000000025ABB0D  m_xmpi_mp_xmpi_ab         832  m_xmpi.F90
+abinit             0000000002508657  m_errors_mp_msg_h         829  m_errors.F90
+abinit             0000000001B68742  m_xg_mp_xgblock_r         524  m_xg.F90
+abinit             00000000006A871C  m_chebfiwf_mp_get         483  m_chebfiwf.F90
+abinit             0000000001B5A9B3  m_chebfi2_mp_cheb         559  m_chebfi2.F90
+abinit             00000000006A623E  m_chebfiwf_mp_che         263  m_chebfiwf.F90
+abinit             00000000006994A6  m_vtowfk_mp_vtowf         404  m_vtowfk.F90
+abinit             000000000066F498  m_vtorho_mp_vtorh         933  m_vtorho.F90
+abinit             0000000000601935  m_scfcv_core_mp_s        1532  m_scfcv_core.F90
+abinit             00000000005F6189  m_scfcv_mp_scfcv_         703  m_scfcv.F90
+abinit             00000000005CA405  m_gstate_mp_gstat        1308  m_gstate.F90
+abinit             000000000042BFFC  m_gstateimg_mp_gs         561  m_gstateimg.F90
+abinit             000000000041A4F7  m_driver_mp_drive         695  m_driver.F90
+abinit             00000000004098AD  MAIN__                    394  abinit.F90
+abinit             0000000000408432  Unknown               Unknown  Unknown
+libc-2.27.so       00007F5E6A045B97  __libc_start_main     Unknown  Unknown
+abinit             000000000040831A  Unknown               Unknown  Unknown
