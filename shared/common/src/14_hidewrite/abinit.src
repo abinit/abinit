@@ -30,4 +30,5 @@ sources = [
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
 sources_specs = {
  "m_build_info.F90":ABI_SRC_BLT,
- "m_optim_dumper.F90":ABI_SRC_BLT}
+ "m_optim_dumper.F90":ABI_SRC_BLT,
+}

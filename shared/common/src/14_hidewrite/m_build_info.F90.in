@@ -104,16 +104,6 @@ module m_build_info
   character(len=*),parameter :: enable_gw_dpc = &
 &   "@enable_gw_dpc@"
  
-#if defined HAVE_BZR_BRANCH
-! Info on Bazaar branch (if applies)
-  character(len=*),parameter :: bzr_branch = &
-&   "@bzr_branch@"
-  character(len=*),parameter :: bzr_revno  = &
-&   "@bzr_revno@"
-  character(len=*),parameter :: bzr_clean  = &
-&   "@bzr_clean@"
-#endif
-
 contains  !===========================================================
 !!***
 
@@ -194,13 +184,6 @@ subroutine dump_config(my_unit)
   write(my_unit,'(2a)')'  Exports             : ',trim(enable_exports)
   write(my_unit,'(2a)')'  GW double-precision : ',trim(enable_gw_dpc)
   write(my_unit,*)
-#if defined HAVE_BZR_BRANCH
-  write(my_unit,'(a)' )' === Bazaar branch information === '
-  write(my_unit,'(2a)')'  Branch ID : ',trim(bzr_branch)
-  write(my_unit,'(2a)')'  Revision  : ',trim(bzr_revno)
-  write(my_unit,'(2a)')'  Committed : ',trim(bzr_clean)
-  write(my_unit,*)
-#endif
   write(my_unit,'(1x,a)') repeat('+',78)
   write(my_unit,*)
 
