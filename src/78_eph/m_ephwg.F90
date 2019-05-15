@@ -231,6 +231,7 @@ type(ephwg_t) function ephwg_new( &
 !Local variables-------------------------------
 !scalars
  integer :: nprocs, my_rank, ik, ierr, out_nkibz
+ real(dp) :: cpu, wall, gflops
 !arrays
  real(dp) :: rlatt(3,3)
  integer :: out_kptrlatt(3,3)
@@ -251,9 +252,12 @@ type(ephwg_t) function ephwg_new( &
  new%cryst => cryst
  call alloc_copy(kibz, new%ibz)
 
+ call cwtime(cpu, wall, gflops, "start")
+
  ! Get full BZ (new%nbz, new%bz) and new kptrlatt for tetra.
  call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, out_nkibz, out_kibz, out_wtk, new%nbz, new%bz, &
    new_kptrlatt=out_kptrlatt)
+ call cwtime_report(" ephwg_new: kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  rlatt = out_kptrlatt; call matr3inv(rlatt, new%klatt)
 
@@ -274,6 +278,7 @@ type(ephwg_t) function ephwg_new( &
    call ifc_fourq(ifc, cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
  end do
+ call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
 
@@ -868,14 +873,13 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
      deltaw_pm(:,iq_ibz,2) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
    else
      call tetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, self%nq_k, pme_k(:,1), weights, tol6)
-     deltaw_pm(:,iq_ibz,1) = weights(:,1) * self%lgk%weights(iq_ibz)
+     deltaw_pm(:,iq_ibz,1) = weights(:,1)
      call tetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, self%nq_k, pme_k(:,2), weights, tol6)
-     deltaw_pm(:,iq_ibz,2) = weights(:,1) * self%lgk%weights(iq_ibz)
+     deltaw_pm(:,iq_ibz,2) = weights(:,1)
    end if
  end do
-#endif
-
  call xmpi_sum(deltaw_pm, comm, ierr)
+#endif
 
 end subroutine ephwg_get_deltas_wvals
 !!***
