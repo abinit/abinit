@@ -1888,7 +1888,7 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
          sd2 = elph_ds%k_phon%wtk(ib2,ikpt_phonq,isppol)
          ibeff=ib2+(ib1-1)*elph_ds%nFSband
 
-         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,isppol,ik_this_proc),(/2,elph_ds%nbranch,elph_ds%nbranch/))
+         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,ik_this_proc,isppol),(/2,elph_ds%nbranch,elph_ds%nbranch/))
 
          call gam_mult_displ(elph_ds%nbranch, displ_red, zgemm_tmp_mat, tmp_mat2)
 
