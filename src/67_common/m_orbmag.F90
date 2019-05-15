@@ -4614,7 +4614,7 @@ subroutine make_VVII(adir,dtorbmag,eeig,nband_k,smat_all_indx,VVII_dir)
                    end do ! end n2
                 end do ! end n1
              end do ! end nn
-             VVII_dir = VVII_dir - half*j_dpc*epsabg*bsigma*gsigma*(-VVII)/(2.0*deltab*2.0*deltag)
+             VVII_dir = VVII_dir + half*j_dpc*epsabg*bsigma*gsigma*VVII/(2.0*deltab*2.0*deltag)
           end do ! end loop over ikpt
        end do ! end loop over gfor
     end do ! end loop over bfor
@@ -4831,7 +4831,7 @@ subroutine make_VVIII(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nban
 
                    end do ! end n1
                 end do ! end nn
-                VVIII_dir = VVIII_dir - half*j_dpc*epsabg*bsigma*gsigma*(-VVIII)/(2.0*deltab*2.0*deltag)
+                VVIII_dir = VVIII_dir + half*j_dpc*epsabg*bsigma*gsigma*VVIII/(2.0*deltab*2.0*deltag)
              end if ! end check that ikpt > 0
              
           end do ! end loop over ikpt_loc
@@ -5067,7 +5067,7 @@ subroutine make_VVI(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_
                       
                    end do ! end n1
                 end do ! end nn
-                VVI_dir = VVI_dir - half*j_dpc*epsabg*bsigma*gsigma*(-VVI)/(2.0*deltab*2.0*deltag)
+                VVI_dir = VVI_dir + half*j_dpc*epsabg*bsigma*gsigma*VVI/(2.0*deltab*2.0*deltag)
              end if ! end check on ikpt > 0
              
           end do ! end loop over ikpt_loc
