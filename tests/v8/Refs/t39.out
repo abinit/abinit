@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 10 May 2019.
-- ( at 10h21 )
+.Starting date : Wed 15 May 2019.
+- ( at 10h19 )
   
 - input  file    -> t39.in
 - output file    -> t39.out
@@ -335,9 +335,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
  
- Orb Mag(   1) : real, imag   3.09354226E-12 -1.08821271E-13
- Orb Mag(   2) : real, imag   3.00412937E-12  1.05235033E-13
- Orb Mag(   3) : real, imag   1.16976156E-12  1.85480268E-14
+ Orb Mag(   1) : real, imag   4.16012573E-12 -1.08088197E-13
+ Orb Mag(   2) : real, imag   4.08283959E-12  1.04626752E-13
+ Orb Mag(   3) : real, imag   3.79568539E-12  1.78469674E-14
  
 ====================================================
  
@@ -572,9 +572,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
  
- Orb Mag(   1) : real, imag  -1.48813564E-09  2.45081694E-13
- Orb Mag(   2) : real, imag   1.66542904E-10 -1.10567994E-13
- Orb Mag(   3) : real, imag  -1.26238059E-04 -1.56993002E-13
+ Orb Mag(   1) : real, imag  -2.13316588E-09  2.45664821E-13
+ Orb Mag(   2) : real, imag  -2.36691233E-10 -1.09636951E-13
+ Orb Mag(   3) : real, imag  -1.44416328E-04 -1.58012903E-13
  
 ====================================================
  
@@ -834,9 +834,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
  
- Orb Mag(   1) : real, imag   1.48778686E-09  2.45006977E-13
- Orb Mag(   2) : real, imag  -1.66422116E-10 -1.08781080E-13
- Orb Mag(   3) : real, imag   1.26238059E-04 -1.58239078E-13
+ Orb Mag(   1) : real, imag   2.13286544E-09  2.45446691E-13
+ Orb Mag(   2) : real, imag   2.36850790E-10 -1.08868957E-13
+ Orb Mag(   3) : real, imag   1.44416328E-04 -1.58324995E-13
  
 ====================================================
  
@@ -1257,10 +1257,10 @@ P           mkmem         256
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         39.5  wall=         39.6
+- Proc.   0 individual time (sec): cpu=         34.6  wall=         34.6
  
 ================================================================================
  
  Calculation completed.
 .Delivered   7 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         39.5  wall=         39.6
++Overall time at end (sec) : cpu=         34.6  wall=         34.6
