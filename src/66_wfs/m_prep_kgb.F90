@@ -170,9 +170,9 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  mcg=2*gs_hamk%npw_fft_k*my_nspinor*bandpp
  if (do_transpose) mcg=2*gs_hamk%npw_k*my_nspinor*blocksize
  
- print *, "gs_hamk%npw_fft_k", 2*gs_hamk%npw_fft_k
- print *, "blocksize", blocksize
- print *, "bandpp", bandpp
+ !print *, "gs_hamk%npw_fft_k", 2*gs_hamk%npw_fft_k
+ !print *, "blocksize", blocksize
+ !print *, "bandpp", bandpp
  !stop
  
  call xgBlock_map(xgx0,cwavef,SPACE_CR,2*gs_hamk%npw_fft_k*my_nspinor,blocksize,mpi_enreg%comm_bandspinorfft) 

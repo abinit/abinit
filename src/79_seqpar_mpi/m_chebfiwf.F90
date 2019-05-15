@@ -208,7 +208,11 @@ module m_chebfiwf
   
   !Local variables for chebfi
   !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
-  !print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
+  print *, "l_icplx", l_icplx
+  print *, "l_npw", l_npw
+  print *, "l_nspinor", l_nspinor
+  print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
+  print *, "nband", nband
   !stop
   
   call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft) 
@@ -365,7 +369,7 @@ module m_chebfiwf
     print *, "spacedim X", spacedim
     print *, "blockdim X", blockdim
     
-    call xgBlock_getSize(AX,spacedim,blockdim)
+    !call xgBlock_getSize(AX,spacedim,blockdim)
     
     !print *, "spacedim AX", spacedim
     !print *, "blockdim AX", blockdim
@@ -477,9 +481,12 @@ module m_chebfiwf
     !print *, "BLOCKDIM", blockdim
     !stop
     
-    !print *, "USAO U FUNKCIJU"
+    !print *, "spacedim*blockdim 2", spacedim*blockdim
+    !stop
     
+    !stop
     call xgBlock_reverseMap(X,ghc_filter,l_icplx,spacedim*blockdim)
+    !stop
     call xgBlock_reverseMap(Bm1X,gsm1hc_filter,l_icplx,spacedim*blockdim)
     
     !stop
@@ -497,18 +504,21 @@ module m_chebfiwf
     end if
     
     !print *, "PROSAO 1"
-    
+    !stop
     !cwaveprj dummy allocate
     if(l_paw) then
-      !print *, "DUMMY ALLOCATE"
+      !print *, "blockdim", blockdim
       !stop
       ABI_DATATYPE_ALLOCATE(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim)) !nband_filter
-      print *, "ABI_DATATYPE_ALLOCATE PASS"
+      !print *, "ABI_DATATYPE_ALLOCATE PASS"
+      !stop
+      !print *, "l_gs_hamk%dimcprj", l_gs_hamk%dimcprj
       call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj) 
-      print *, "DUMMY ALLOCATE PASS"
-      stop
+      !print *, "DUMMY ALLOCATE PASS"
+      !stop
       call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), & 
 &     spacedim, blockdim, l_mpi_enreg, l_nspinor)   !!ghc_filter size problem if transposed
+      !print *, "APPLY INVOVL PASS"
       !stop
     else
       gsm1hc_filter(:,:) = ghc_filter(:,:)

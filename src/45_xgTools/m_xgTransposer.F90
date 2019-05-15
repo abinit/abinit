@@ -225,7 +225,7 @@ module m_xgTransposer
       call xgTransposer_makeComm(xgTransposer,ncpuRows,ncpuCols)
       !print *, "PROSAO"
       call xgTransposer_computeDistribution(xgTransposer)
-      !print *, "PROSAO 1"
+      !print *, "xgTransposer_makeXgBlock"
       call xgTransposer_makeXgBlock(xgTransposer) !ovo valjda pravi send-receive buffer
 
     case (STATE_COLSROWS)
@@ -338,7 +338,10 @@ module m_xgTransposer
     !print *, "icpu", icpu
     !stop
     
+    !print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
     xgTransposer%nrowsColsRows = sum(xgTransposer%nrowsLinalg(icpu+1:icpu+ncpuCols))
+    !print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
+    !stop
     
 !    if (xmpi_comm_rank(xmpi_world) == xgTransposer%debug_rank) then 
 !      print *, "icpu, ncpuCols", icpu, ncpuCols
@@ -374,10 +377,16 @@ module m_xgTransposer
       end if
       if ( xgTransposer%mpiData(MPI_COLS)%size == 1 ) then
         xgTransposer%xgBlock_colsrows = xgTransposer%xgBlock_linalg
+        
+        print *, "xgTransposer%ncolsColsRows", xgTransposer%ncolsColsRows
+        print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
+        !stop
+        
       else
         !print *, "HEREEEEEEE"
-        !print *, "xgTransposer%ncolsColsRows", xgTransposer%ncolsColsRows
-        !print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
+        print *, "xgTransposer%ncolsColsRows", xgTransposer%ncolsColsRows
+        print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
+        !stop
  
         !stop
         ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))

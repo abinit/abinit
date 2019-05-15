@@ -418,6 +418,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  ABI_DEALLOCATE(projs)
 
+ !print *, "Invovl built"
  write(message,*) 'Invovl built'
  call wrtout(std_out,message,'COLL')
 
@@ -474,8 +475,8 @@ end subroutine make_invovl
 
 ! *************************************************************************
 
- print *, "BEFORE ikpt_this_proc"
- stop
+ !print *, "BEFORE ikpt_this_proc"
+ !stop
 
  ikpt_this_proc=bandfft_kpt_get_ikpt()
  invovl => invovl_kpt(ikpt_this_proc)
@@ -492,8 +493,8 @@ end subroutine make_invovl
    blas_transpose = 't'
  end if
  
- print *, "BEFORE ALLOCATE"
- stop
+ !print *, "BEFORE ALLOCATE"
+ !stop
 
  ABI_ALLOCATE(proj, (cplx,invovl%nprojs,nspinor*ndat))
  ABI_ALLOCATE(sm1proj, (cplx,invovl%nprojs,nspinor*ndat))
@@ -511,8 +512,8 @@ end subroutine make_invovl
  cpopt = 0 ! compute and save cprj
  paw_opt = 3 ! S nonlocal operator
  !stop
- print *, "BEFORE PREP"
- stop
+ !print *, "BEFORE PREP"
+ !stop
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
 &                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.) !already_transposed = true (previous)

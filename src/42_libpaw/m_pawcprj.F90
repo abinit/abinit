@@ -155,22 +155,23 @@ CONTAINS
 
 ! *************************************************************************
 
+
  n1dim=size(cprj,dim=1);n2dim=size(cprj,dim=2);nn=size(nlmn,dim=1)
  if (nn/=n1dim) then
    write(msg,*) 'wrong sizes (pawcprj_alloc)! :',nn,n1dim
    MSG_ERROR(msg)
  end if
  
- !print *, "pawcprj_alloc prosao"
- !stop
- !print *, "n2dim", n2dim
- !print *, "n1dim", n1dim
- !stop
-
+! print *, "ncpgr", ncpgr
+! print *, "n1dim", n1dim
+! print *, "n2dim", n2dim
+! print *, "nn", nn
+! print *, "nlmn", nlmn
+! print *, "pawcprj_alloc start"
  do jj=1,n2dim
-   print *, "JJ", jj
+   !print *, "JJ", jj
    do ii=1,n1dim
-     print *, "II", ii
+     !print *, "II", ii
      if (allocated(cprj(ii,jj)%cp)) then
        LIBPAW_DEALLOCATE(cprj(ii,jj)%cp)
      end if
@@ -179,8 +180,8 @@ CONTAINS
      end if
      nn=nlmn(ii)
      cprj(ii,jj)%nlmn=nn
-     print *, "II", ii !!TODO TODO TODO OVDE JE PROBLEM NE ZNAM ZASTO?!?!?!?!?!?!?!?
-     print *, "nn", nn
+     !print *, "II ", "JJ", ii, jj !!TODO TODO TODO OVDE JE PROBLEM NE ZNAM ZASTO?!?!?!?!?!?!?!?
+     !print *, "nn", nn
      LIBPAW_ALLOCATE(cprj(ii,jj)%cp,(2,nn))
      cprj(ii,jj)%cp=zero
      cprj(ii,jj)%ncpgr=ncpgr
@@ -200,7 +201,7 @@ CONTAINS
    !stop
  end do
 ! print *, "OUTER LOOP pass"
-
+ !print *, "pawcprj_alloc end"
 end subroutine pawcprj_alloc
 !!***
 

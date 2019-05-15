@@ -894,7 +894,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Build inverse of overlap matrix for chebfi
        if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
+         print *, "MAKE INVOVL START"
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
+         print *, "MAKE INVOVL END"
        end if
 
        ! Setup gemm_nonlop
@@ -930,6 +932,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Compute the eigenvalues, wavefunction, residuals,
 !      contributions to kinetic energy, nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
+       print *, "VTOFK CALL"
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
 &       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
