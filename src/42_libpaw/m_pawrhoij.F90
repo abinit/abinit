@@ -1874,7 +1874,7 @@ end subroutine pawrhoij_gather
      pawrhoij_out(irhoij)%rhoijselect=0
      pawrhoij_out(irhoij)%rhoijselect(1:nselect)=buf_int(indx_int:indx_int+nselect-1)
      indx_int=indx_int+nselect
-     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(cplex*nselect,nspden))
+     LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(qphase*cplex*nselect,nspden))
      do isp=1,nspden
        do ii=1,qphase
          jj=(ii-1)*cplex*lmn2_size
@@ -2607,6 +2607,8 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
    case ("E","e") ! Echoing the Rhoij tab
 
      my_natinc=1; if(natom>1) my_natinc=natom-1
+     my_qphase=pawrhoij(1)%qphase
+     nselect=maxval(pawrhoij(:)%nrhoijsel)
      if (PRESENT(natinc)) my_natinc = natinc ! user-defined increment.
      LIBPAW_ALLOCATE(ibuffer,(0))
      if (my_qphase==2) then
@@ -2637,15 +2639,15 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
   &                             +pawrhoij(iatom)%rhoijp(jj+2*ii-1,ispden)
              end do
            end if
-           my_cplex=2
+!           my_cplex=2 ! WARNING this forces complex values for ispden == 2 but breaks the bounds of rhoijp
          end if
          write(unitfi, '(a,i4,a,i1,a)' ) ' rhoij(',iatom_tot,',',ispden,')=  (max 12 non-zero components will be written)'
          call pawio_print_ij(unitfi,rhoij_tmp,nselect,my_cplex,&
 &         pawrhoij(iatom)%lmn_size,-1,ibuffer,1,0,&
 &         pawrhoij(iatom)%rhoijselect,-1.d0,1,&
 &         opt_sym=2,mode_paral='PERS')
-       end do
-     end do
+       end do ! end nspden do
+     end do ! end iatom do
      LIBPAW_DEALLOCATE(ibuffer)
      if (my_qphase==2) then
        LIBPAW_DATATYPE_DEALLOCATE(rhoij_tmp)
