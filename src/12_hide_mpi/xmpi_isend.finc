@@ -43,8 +43,6 @@
 
 subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 
- implicit none
-
 !Arguments-------------------------
  integer ABI_ASYNC, intent(inout) :: xval(:)
  integer, intent(in) :: dest,tag,spaceComm
@@ -64,6 +62,7 @@ subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
    n1=size(xval,dim=1)
    my_tag = MOD(tag,xmpi_tag_ub)
    call MPI_ISEND(xval,n1,MPI_INTEGER,dest,my_tag,spaceComm,request,ier)
+   xmpi_count_requests = xmpi_count_requests + 1
    ierr=ier
  end if
 #endif
@@ -91,10 +90,8 @@ subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(inout) :: xval(:)
@@ -115,6 +112,7 @@ subroutine xmpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
    n1=size(xval)
    my_tag = MOD(tag,xmpi_tag_ub)
    call MPI_ISEND(xval,n1,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,request,ier)
+   xmpi_count_requests = xmpi_count_requests + 1
    ierr=ier
  end if
 #endif
@@ -142,10 +140,8 @@ end subroutine xmpi_isend_dp1d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(inout) :: xval(:,:)
@@ -167,6 +163,7 @@ subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
    n2=size(xval,dim=2)
    my_tag = MOD(tag,xmpi_tag_ub)
    call MPI_ISEND(xval,n1*n2,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,request,ier)
+   xmpi_count_requests = xmpi_count_requests + 1
    ierr=ier
  end if
 #endif

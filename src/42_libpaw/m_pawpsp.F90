@@ -140,8 +140,6 @@ CONTAINS
 
 subroutine pawpsp_nl(ffspl,indlmn,lmnmax,lnmax,mqgrid,qgrid,radmesh,wfll)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lmnmax,lnmax,mqgrid
@@ -306,8 +304,6 @@ end subroutine pawpsp_nl
 !! SOURCE
 
 subroutine pawpsp_lo(epsatm,mqgrid,qgrid,q2vq,radmesh,vloc,yp1,ypn,zion)
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -476,8 +472,6 @@ end subroutine pawpsp_lo
 !! SOURCE
 
 subroutine pawpsp_cg(dnqdq0,d2nqdq0,mqgrid,qgrid,nq,radmesh,nr,yp1,ypn)
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -752,8 +746,6 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
 & ncore,nmesh,pawrad,pawtab,pspversion,radmesh,save_core_msz,&
 & tncore,tnvale,tproj,tproj_mesh,usexcnhat_in,usexcnhat_out,vale_mesh,&
 & vlocopt,vlocr,vloc_mesh,znucl)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in):: funit,lmax,usexcnhat_in
@@ -1364,8 +1356,6 @@ end subroutine pawpsp_read
 subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,radmesh,phi_cor,&
 &                             filename) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: lmncmax,nphicor
  character(len=*),optional :: filename
@@ -1487,6 +1477,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
      read(unt,*) i1
      read(unt,*) ncor(iln),lcor(iln)
      read(unt,*) energy_cor(iln)
+     energy_cor(iln)=energy_cor(iln)*half ! For consistency reasons (in the legacy coreWF format, energies are in Ry)
      LIBPAW_ALLOCATE(phitmp,(meshsz(i1)))
      read(unt,*) phitmp
      if ((radmesh%mesh_type/=meshtp(i1)) &
@@ -1532,6 +1523,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    do iln=1,nphicor
      read(unt,'(a4,i4,a3,i4,a6,f15.7,a8,f15.7)') &
 &     dum1,ncor(iln),dum2,lcor(iln),dum3,noccor,dum4,energy_cor(iln)
+     energy_cor(iln)=energy_cor(iln)*half ! For consistency reasons (in the legacy coreWF format, energies are in Ry)
 
      do jln=1,npts
        read(unt,*) rad(jln),phi_cor(jln,iln)
@@ -1592,8 +1584,6 @@ end subroutine pawpsp_read_corewf
 !! SOURCE
 
 subroutine pawpsp_rw_atompaw(basis_size,filpsp,wvl)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in):: basis_size
@@ -1719,8 +1709,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &          qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &          vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: imainmesh,ixc,lnmax,mqgrid_ff,mqgrid_vl
@@ -1765,9 +1753,6 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 
 !==========================================================
 !Perfom tests on meshes
-
-! initialise logical
- non_magnetic_xc=.false.
 
 !Are radial meshes for Phi and Vloc compatibles ?
 ! if (vloc_mesh%rmax<pawrad%rmax) then
@@ -1898,6 +1883,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 
 !Allocate/initialize some dummy variables
  tmp_lmselect(1)=.true.
+ non_magnetic_xc=.false.
  if (pawxcdev==0) then
    pawang_tmp%l_size_max=1;pawang_tmp%angl_size=1;pawang_tmp%ylm_size=1
    pawang_tmp%use_ls_ylm=0;pawang_tmp%gnt_option=0;pawang_tmp%ngnt=0;pawang_tmp%nsym=0
@@ -2576,8 +2562,6 @@ end subroutine pawpsp_calc
 
 subroutine pawpsp_calc_d5(mesh,mesh_size,tcoredens)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: mesh_size
  type(pawrad_type),intent(in) :: mesh
@@ -2659,8 +2643,6 @@ end subroutine pawpsp_calc_d5
 
 subroutine pawpsp_vhar2rho(radmesh,rho,vv)
 
- implicit none
-
 !Arguments ------------------------------------
  type(pawrad_type),intent(in) :: radmesh
  real(dp), intent(in) :: vv(:)
@@ -2723,8 +2705,6 @@ end subroutine pawpsp_vhar2rho
 !! SOURCE
 
 subroutine pawpsp_wvl_calc(pawtab,tnvale,usewvl,vale_mesh,vloc_mesh,vlocr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2885,8 +2865,6 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 & pawxcdev, qgrid_ff,qgrid_vl,usewvl,usexcnhat_in,vlspl,xcccrc,&
 & xclevel,xc_denpos,zion,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ipsp,ixc,lmax,lnmax,mqgrid_ff,mqgrid_vl,pawxcdev,usexcnhat_in
@@ -2920,6 +2898,8 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  type(pawrad_type),allocatable :: radmesh(:)
 
 !************************************************************************
+
+ if (.False.) write(std_out,*) ipsp
 
 !==========================================================
 !Destroy everything in pawtab but optional flags
@@ -3726,8 +3706,6 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,ixc,&
 & pawrad,pawtab,pawxcdev,qgrid_ff,qgrid_vl,&
 & usewvl,usexcnhat_in,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in):: icoulomb,ixc
@@ -3846,8 +3824,6 @@ end subroutine pawpsp_7in
  subroutine pawpsp_wvl_sin2gauss(basis_size,mparam,nparam,&
 & param,wvl)
 
-  implicit none
-  !
 !Arguments ------------------------------------
   integer,intent(in) :: mparam,basis_size
   integer,intent(in) :: nparam(basis_size)
@@ -3999,7 +3975,6 @@ end subroutine pawpsp_7in
 
 subroutine pawpsp_read_header(funit,lloc,lmax,mmax,pspcod,pspxc,r2well,zion,znucl)
 
-implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in):: funit
@@ -4069,8 +4044,6 @@ end subroutine pawpsp_read_header
 
 subroutine pawpsp_read_header_2(funit,pspversion,basis_size,lmn_size)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in):: funit
@@ -4132,8 +4105,6 @@ end subroutine pawpsp_read_header_2
 
 
 subroutine pawpsp_wvl(filpsp,pawrad, pawtab,usewvl, wvl_ngauss, comm_mpi)
-
-implicit none
 
 !Arguments------------------------------------
 !scalars
@@ -4252,7 +4223,6 @@ end subroutine pawpsp_wvl
 subroutine pawpsp_read_header_xml(lloc,lmax,pspcod,pspxc,&
 & psxml,r2well,zion,znucl)
 
-implicit none
 !Arguments ------------------------------------
 !scalars
  type(paw_setup_t),intent(in) :: psxml
@@ -4436,7 +4406,6 @@ end subroutine pawpsp_read_header_xml
 subroutine pawpsp_read_pawheader(basis_size,lmax,lmn_size,&
 & l_size,mesh_size,pspversion,psxml,rpaw,rshp,shape_type)
 
-implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in):: lmax
@@ -4528,8 +4497,6 @@ end subroutine pawpsp_read_pawheader
 !! SOURCE
 
 subroutine pawpsp_bcast(comm_mpi,epsatm,ffspl,pawrad,pawtab,vlspl,xcccrc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm_mpi
@@ -4656,8 +4623,6 @@ subroutine pawpsp_main( &
 & filpsp,usewvl,icoulomb,ixc,xclevel,pawxcdev,usexcnhat,&
 & qgrid_ff,qgrid_vl,ffspl,vlspl,epsatm,xcccrc,zionpsp,znuclpsp,&
 & wvl_ngauss,psxml,comm_mpi,xc_denpos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4824,8 +4789,6 @@ contains
 
 subroutine pawpsp_check_xml_upf(filpsp)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in):: filpsp   ! name of the psp file
@@ -4893,10 +4856,6 @@ end subroutine pawpsp_check_xml_upf
 
 
 subroutine pawpsp_consistency()
-
-implicit none
-
-!Local variables-------------------------------
 
 ! *************************************************************************
 

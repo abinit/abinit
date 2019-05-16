@@ -246,8 +246,6 @@ subroutine pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden,nspinor,nsppol,typat,&
 &  lmnsize,ngrhoij,nlmnmix,pawtab,qphase,use_rhoij_,use_rhoijp,& ! Optional
 &  use_rhoijres,comm_atom,mpi_atmtab) ! Optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex_rhoij,nspden,nspinor,nsppol
@@ -406,8 +404,6 @@ end subroutine pawrhoij_alloc
 
 subroutine pawrhoij_free(pawrhoij)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  type(pawrhoij_type),intent(inout) :: pawrhoij(:)
@@ -475,8 +471,6 @@ end subroutine pawrhoij_free
 !! SOURCE
 
 subroutine pawrhoij_nullify(pawrhoij)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -556,8 +550,6 @@ end subroutine pawrhoij_nullify
 subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
 &          keep_cplex,keep_qphase,keep_itypat,keep_nspden,& ! optional arguments
 &          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1254,8 +1246,6 @@ end subroutine pawrhoij_copy
  subroutine pawrhoij_gather(pawrhoij_in,pawrhoij_gathered,master,comm_atom, &
 &    with_grhoij,with_lmnmix,with_rhoijp,with_rhoijres,with_rhoij_) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: master,comm_atom
@@ -1591,8 +1581,6 @@ end subroutine pawrhoij_gather
 !! SOURCE
 
  subroutine pawrhoij_bcast(pawrhoij_in,pawrhoij_out,master,mpicomm,comm_atom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1985,8 +1973,6 @@ end subroutine pawrhoij_bcast
 &           natom,mpi_atmtab_in,mpi_atmtab_out,pawrhoij_out,&
 &           SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpi_comm_in,mpi_comm_out
@@ -2345,8 +2331,6 @@ end subroutine pawrhoij_redistribute
 
 subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,typat,&
 &                   headform,rdwr_mode,form,natinc,mpi_atmtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2766,8 +2750,6 @@ end subroutine pawrhoij_io
 
 subroutine pawrhoij_unpack(rhoij)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -2839,8 +2821,6 @@ end subroutine pawrhoij_unpack
 
 subroutine pawrhoij_init_unpacked(rhoij)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -2894,8 +2874,6 @@ end subroutine pawrhoij_init_unpacked
 
 subroutine pawrhoij_free_unpacked(rhoij)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -2948,8 +2926,6 @@ end subroutine pawrhoij_free_unpacked
 !! SOURCE
 
 subroutine pawrhoij_mpisum_unpacked_1D(pawrhoij,comm1,comm2)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -3041,8 +3017,6 @@ end subroutine pawrhoij_mpisum_unpacked_1D
 
 subroutine pawrhoij_mpisum_unpacked_2D(pawrhoij,comm1,comm2)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: comm1
@@ -3133,7 +3107,7 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 !!  rhoijselect(lmn2_size)=contains the indices of the selected (i,j) pairs
 !!                         rhoijselect(nselect+1:lmn2_size)=0
 !!
-!! SIDE EFFECTS   
+!! SIDE EFFECTS
 !!  rhoij(cplex*qphase*lmn2_size,nspden)=
 !!     * Input: the array is filled with all rhoij values (only if rhoij_input is not present)
 !!     * Output: the nselect first elements contain the non-zero rhoij values,
@@ -3148,8 +3122,6 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 
 subroutine pawrhoij_filter(rhoij,rhoijselect,nselect,cplex,qphase,lmn2_size,nspden, &
 &                          rhoij_input) ! optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3212,7 +3184,7 @@ subroutine pawrhoij_filter(rhoij,rhoijselect,nselect,cplex,qphase,lmn2_size,nspd
    end if
 
  else ! cplex=2
- 
+
    if (qphase==1) then
      do klmn=1,lmn2_size
        klmn1=2*klmn
@@ -3279,8 +3251,6 @@ end subroutine pawrhoij_filter
 
 subroutine pawrhoij_inquire_dim(cplex,cpxocc,nspden,qpt,spnorb, &
 &                               cplex_rhoij,qphase_rhoij,nspden_rhoij)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -3364,8 +3334,6 @@ end subroutine pawrhoij_inquire_dim
 subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
 &          rhoijselect,test_value,title_msg,unit,opt_prtvol,&
 &          l_only,indlmn,mode_paral) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3576,8 +3544,6 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 &                            ntypat,optrhoij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat, &
 &                            mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: choice,ipert,natom,nsym,ntypat,optrhoij,pawprtvol
@@ -3598,10 +3564,10 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  integer :: at_indx,cplex_eff,cplex_rhoij,iafm,iatm,iatom,il,il0,ilmn,iln,iln0,ilpm,indexi
  integer :: indexii,indexj,indexjj,indexjj0,indexk,indexkc,indexkc_q,iplex,iq,iq0
  integer :: irhoij,irot,ishift2,ishift3,ishift4,ispden,itypat
- integer :: j0lmn,jj,jl,jl0,jlmn,jln,jln0,jlpm,jrhoij,jspden,klmn,klmn1,klmn1q,kspden
+ integer :: j0lmn,jl,jl0,jlmn,jln,jln0,jlpm,jrhoij,jspden,klmn,klmn1,klmn1q,kspden
  integer :: lmn_size,lmn2_size,mi,mj,my_comm_atom,mu,mua,mub,mushift
  integer :: natinc,ngrhoij,nrhoij,nrhoij1,nrhoij_unsym
- integer :: nselect,nselect1,nu,nushift,qphase,sz1,sz2
+ integer :: nselect,nu,nushift,qphase,sz1,sz2
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
  real(dp) :: arg,factafm,ro,syma,zarot2
  logical :: antiferro,has_qphase,my_atmtab_allocated,noncoll
@@ -3613,7 +3579,6 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  integer :: nsym_used(2)
  integer, pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
- integer :: idum(0)
  real(dp) :: fact(2),factsym(2),phase(2),rhoijc(2),rotmag(2,3,2),rotrho(2,2,2)
  real(dp) :: summag(2,3,2),sumrho(2,2,2),sum1(2),work1(2,3,3),xsym(3)
  real(dp),allocatable :: rotgr(:,:,:,:),rotmaggr(:,:,:,:),sumgr(:,:,:),summaggr(:,:,:,:)
@@ -3962,7 +3927,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                        summaggr(1:cplex_eff,nu,mu,1)=summaggr(1:cplex_eff,nu,mu,1) &
 &                         +fact(1:cplex_eff)*zarot2*grad(nu,indexkc+1:indexkc+cplex_eff,1+mu)
                      end do
-                   end do 
+                   end do
                    if (qphase==2) then
                      do mu=1,3
                        do nu=1,ngrhoij
@@ -4011,7 +3976,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                  if (noncoll) then
                    do iplex=1,cplex_rhoij
                      do mu=1,3
-                       do nu=1,ngrhoij             
+                       do nu=1,ngrhoij
                          rhoijc(1)=summaggr(iplex,nu,mu,1)
                          rhoijc(2)=summaggr(iplex,nu,mu,2)
                          summaggr(iplex,nu,mu,1)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
@@ -4028,7 +3993,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                do iq=1,qphase
                  rotrho(1:cplex_eff,iafm,iq)=rotrho(1:cplex_eff,iafm,iq) &
 &                                           +sumrho(1:cplex_eff,iafm,iq)
-               end do  
+               end do
              end if
 
 
@@ -4274,7 +4239,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
      msg=' In the antiferromagnetic case, nsym cannot be 1'
      MSG_BUG(msg)
    end if
-   
+
    if (optrhoij==1) then
 
      do iatm=1,nrhoij
@@ -4371,7 +4336,6 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  contains
    function symrhoij_symcart(aprim,bprim,symred)
 
-   implicit none
    real(dp) :: symrhoij_symcart(3,3)
    integer,intent(in) :: symred(3,3)
    real(dp),intent(in) :: aprim(3,3),bprim(3,3)
@@ -4427,8 +4391,6 @@ end subroutine pawrhoij_symrhoij
 !! SOURCE
 
 subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,buf_int,buf_dp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4574,8 +4536,6 @@ end subroutine pawrhoij_isendreceive_getbuffer
 !!
 subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,nrhoij_send,&
 &                                           buf_int,buf_int_size,buf_dp,buf_dp_size)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars

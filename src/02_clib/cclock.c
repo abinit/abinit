@@ -13,8 +13,7 @@
 
 #include <time.h>
 
-void FC_FUNC(cclock,CCLOCK)
-  (double* cpu)
+void cclock (double* cpu)
 
 {
     *cpu = ((double) clock()) / CLOCKS_PER_SEC;

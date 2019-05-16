@@ -160,12 +160,10 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  me = xmpi_comm_rank(comm)
  master = 0
 
- ABI_STAT_ALLOCATE(h1_mat_el,(2, nFSband**2, nbranch, elph_ds%k_phon%my_nkpt, nsppol), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array h1_mat_el')
+ ABI_MALLOC_OR_DIE(h1_mat_el,(2, nFSband**2, nbranch, elph_ds%k_phon%my_nkpt, nsppol), ierr)
  h1_mat_el= zero
 
- ABI_STAT_ALLOCATE(h1_mat_el_sq,(2, nFSband**2, nbranch**2,elph_ds%k_phon%my_nkpt, nsppol), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array h1_mat_el_sq')
+ ABI_MALLOC_OR_DIE(h1_mat_el_sq,(2, nFSband**2, nbranch**2,elph_ds%k_phon%my_nkpt, nsppol), ierr)
  h1_mat_el_sq = zero
 
  ABI_ALLOCATE(elph_ds%qirredtofull,(elph_ds%nqptirred))
@@ -183,8 +181,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
    elph_ds%gkk_qpt = zero
 
  else if (elph_ds%gkqwrite == 1) then
-   ABI_STAT_ALLOCATE(gkk_qpt_tmp,(2,elph_ds%ngkkband**2,nbranch**2,nsppol), ierr)
-   ABI_CHECK(ierr==0, 'trying to allocate array gkk_qpt_tmp')
+   ABI_MALLOC_OR_DIE(gkk_qpt_tmp,(2,elph_ds%ngkkband**2,nbranch**2,nsppol), ierr)
    gkk_qpt_tmp = zero
    do iqptirred=1,elph_ds%nqptirred*elph_ds%k_phon%nkpt
      write (elph_ds%unitgkq,REC=iqptirred) gkk_qpt_tmp
@@ -1891,7 +1888,7 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
          sd2 = elph_ds%k_phon%wtk(ib2,ikpt_phonq,isppol)
          ibeff=ib2+(ib1-1)*elph_ds%nFSband
 
-         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,isppol,ik_this_proc),(/2,elph_ds%nbranch,elph_ds%nbranch/))
+         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,ik_this_proc,isppol),(/2,elph_ds%nbranch,elph_ds%nbranch/))
 
          call gam_mult_displ(elph_ds%nbranch, displ_red, zgemm_tmp_mat, tmp_mat2)
 

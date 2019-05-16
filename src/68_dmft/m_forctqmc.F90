@@ -1385,7 +1385,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
          open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
-       if(paw_dmft%dmft_solv==5) ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+       if(paw_dmft%dmft_solv==5) then
+         ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+       end if
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
 !     use  gw_tmp to put freq
        do ifreq=1,paw_dmft%dmft_nwlo
@@ -1842,7 +1844,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
              end do ! isppol
              call rotate_matlu(matlu1,eigvectmatlu,natom,3,0)
              call slm2ylm_matlu(matlu1,natom,2,0)
-             call sym_matlu(cryst_struc,matlu1,pawang)
+             call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
              call slm2ylm_matlu(matlu1,natom,1,0)
              call rotate_matlu(matlu1,eigvectmatlu,natom,3,1)
              do isppol=1,nsppol
@@ -2189,7 +2191,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call print_matlu(weiss%oper(1)%matlu,natom,1)  ! debug
 
    do ifreq=1,paw_dmft%dmft_nwlo
-     call sym_matlu(cryst_struc,weiss%oper(ifreq)%matlu,pawang)
+     call sym_matlu(cryst_struc,weiss%oper(ifreq)%matlu,pawang,paw_dmft)
    end do
    write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
 &  " == Print symetrized weiss function for small freq in the original basis"  ! debug
@@ -2201,7 +2203,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ABI_DATATYPE_ALLOCATE(matlu1,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
  call copy_matlu(green%occup_tau%matlu,matlu1,natom)
- call sym_matlu(cryst_struc,matlu1,pawang)
+ call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
 
  write(message,'(a,2x,a,f13.5)') ch10," == Occupation from G(tau) in the original basis"
  call wrtout(std_out,message,'COLL')
@@ -2223,10 +2225,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 & " == Symetrise green function after QMC "
  call wrtout(std_out,message,'COLL')
  do itau=1,paw_dmft%dmftqmc_l
-   call sym_matlu(cryst_struc,green%oper_tau(itau)%matlu,pawang)
+   call sym_matlu(cryst_struc,green%oper_tau(itau)%matlu,pawang,paw_dmft)
  end do
  do ifreq=1,paw_dmft%dmft_nwlo
-   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang)
+   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang,paw_dmft)
  end do
  if(pawprtvol>=3) then
    write(message,'(a,2x,a,f13.5)') ch10,&  ! debug

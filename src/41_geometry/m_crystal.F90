@@ -216,6 +216,9 @@ MODULE m_crystal
    procedure :: adata_type
    ! Return atomic data from the itypat index.
 
+   !procedure :: compare => crystal_compare
+   ! Compare two structures, write warning messages if they differ
+
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
@@ -300,7 +303,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 !scalars
  integer :: iat,indx,itypat,pinv,isym,nsym_noI
  real(dp) :: tolsym8,ucvol
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: symrec(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
@@ -367,7 +370,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 
  if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then
    if (.not.remove_inv) then
-     ! * Just a copy
+     ! Just a copy
      Cryst%nsym= nsym
      ABI_MALLOC(Cryst%symrel,(3,3,nsym))
      ABI_MALLOC(Cryst%symrec,(3,3,nsym))
@@ -559,7 +562,7 @@ end subroutine crystal_free
 !!
 !! SOURCE
 
-subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
+subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -586,8 +589,8 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,msg,my_mode)
  do nu=1,3
    write(msg,'(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)')&
-    'R(',nu,')=',Cryst%rprimd(:,nu)+tol10,&
-    'G(',nu,')=',Cryst%gprimd(:,nu)+tol10 !tol10 is used to be consistent with metric.F90
+    'R(',nu,')=',Cryst%rprimd(:,nu)+tol10, &
+    'G(',nu,')=',Cryst%gprimd(:,nu)+tol10  ! tol10 is used to be consistent with metric.F90
    call wrtout(my_unt,msg,my_mode)
  end do
 
@@ -607,9 +610,10 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,msg,my_mode)
  if (my_prtvol == -1) return
 
- call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
-
- if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
+ if (my_prtvol > 0) then
+   call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
+   if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
+ end if
 
  call wrtout(my_unt,"Reduced atomic positions [iatom, xred, symbol]:",my_mode)
  do iatom=1,cryst%natom
@@ -753,7 +757,7 @@ pure function isymmorphic(Cryst) result(ans)
 
 ! *************************************************************************
 
- ans = ALL (ABS(Cryst%tnons)<tol6)
+ ans = ALL(ABS(Cryst%tnons) < tol6)
 
 end function isymmorphic
 !!***

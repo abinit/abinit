@@ -543,7 +543,7 @@ end function IRadFnH
 !!
 !! FUNCTION
 !!  Approximate Dirac delta with normal distribution.
-!!    delta(x,sigma) = 1/(sigma sqrt(pi)) e^{-x**2/(sigma**2)}
+!!    delta(x,sigma) = 1/(sigma sqrt(two pi)) e^{-x**2/(2 * sigma**2)}
 !!
 !! INPUTS
 !!   arg=Argument of the approximated Delta.
@@ -568,8 +568,12 @@ elemental function dirac_delta(arg,sigma)
 
 ! *********************************************************************
 
- xx=arg/sigma
+ xx = arg / sigma
  dirac_delta = exp(-xx*xx) / (sigma*sqrt(pi))
+
+ ! FIXME: This is the correct expression --> must update reference files.
+ !xx = arg / (sqrt2 * sigma)
+ !dirac_delta = exp(-xx * xx) / (sigma * sqrt(two_pi))
 
 end function dirac_delta
 !!***
@@ -930,8 +934,6 @@ end function abi_derfc
 !! SOURCE
 
 subroutine GAMMA_FUNCTION(X,GA)
-
-  implicit none
 
 #ifdef HAVE_GSL
 ! in case we have gsl, no need to use explicit function, just wrap the

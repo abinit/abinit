@@ -1528,6 +1528,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 
 !Local variables-------------------------------
 !scalars
+ integer :: npt = 10000
  integer :: ii,ip,npt1,npt2,eps_unt,abs_unt
  real(dp),parameter :: del=0.001_dp,ohmtosec=9.d11
  real(dp) :: dx,dx1,dx2,eps1,eps2,idel,komega,pole,refl,sigma2,xsum
@@ -1541,7 +1542,8 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 !BEGIN EXECUTABLE SECTION
 
  if (npti > 12000) then
-   msg = "Sorry - the interpolator INTRPL is hard coded for maximum 12000 points. Reduce the conducti input npti, or implement a better interpolator!"
+   msg = "Sorry - the interpolator INTRPL is hard coded for maximum 12000 points." // &
+&        ch10 // " Reduce the conducti input npti, or implement a better interpolator!"
    MSG_ERROR(msg)
  end if
 
@@ -1562,28 +1564,28 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
  end if
  write(abs_unt,'(a)')'#energy(eV),nomega,komega,refl.,abso.(cm-1)'
 
- ABI_ALLOCATE(fct,(npti))
- ABI_ALLOCATE(fct2,(npti))
- ABI_ALLOCATE(fct3,(npti))
- ABI_ALLOCATE(fct4,(npti))
- ABI_ALLOCATE(fct5,(npti))
- ABI_ALLOCATE(fp,(npti))
- ABI_ALLOCATE(fpp,(npti))
- ABI_ALLOCATE(fppp,(npti))
- ABI_ALLOCATE(x1,(npti))
- ABI_ALLOCATE(x2,(npti))
- ABI_ALLOCATE(fct1,(npti))
- ABI_ALLOCATE(ppsig,(npti))
- ABI_ALLOCATE(fctii,(npti))
- ABI_ALLOCATE(abso,(npti))
- ABI_ALLOCATE(nomega,(npti))
+ ABI_ALLOCATE(fct,(npt))
+ ABI_ALLOCATE(fct2,(npt))
+ ABI_ALLOCATE(fct3,(npt))
+ ABI_ALLOCATE(fct4,(npt))
+ ABI_ALLOCATE(fct5,(npt))
+ ABI_ALLOCATE(fp,(npt))
+ ABI_ALLOCATE(fpp,(npt))
+ ABI_ALLOCATE(fppp,(npt))
+ ABI_ALLOCATE(x1,(npt))
+ ABI_ALLOCATE(x2,(npt))
+ ABI_ALLOCATE(fct1,(npt))
+ ABI_ALLOCATE(ppsig,(npt))
+ ABI_ALLOCATE(fctii,(npt))
+ ABI_ALLOCATE(abso,(npt))
+ ABI_ALLOCATE(nomega,(npt))
 
 !loop on the initial energy grid
  do ip=1,npti
 
 !  adjust the interval before and after the pole to reflect range/npt interval
    xsum=zero
-   dx=(xi(npti)-xi(1))/dble(npti-1)
+   dx=(xi(npti)-xi(1))/dble(npt-1)
    pole=xi(ip)
    npt1=int((pole-del)/dx)
    dx1=zero

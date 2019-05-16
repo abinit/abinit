@@ -250,7 +250,7 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
        ons_cart(2,2)=ons_cart(2,2) - re_p*nabla_ij(2,ilmn,jlmn)
        ons_cart(2,3)=ons_cart(2,3) - re_p*nabla_ij(3,ilmn,jlmn)
        !
-       if (Pawtab(itypat)%usepawu==1) then ! Add i[V_u, r] 
+       if (Pawtab(itypat)%usepawu/=0) then ! Add i[V_u, r] 
          isel=Hur(iatom)%ij_select(ilmn,jlmn,isppol)
          if (isel>0) then
            hurc_ij(:)=Hur(iatom)%commutator(:,isel,isppol)
@@ -258,7 +258,7 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
            ons_cart(1,1)=ons_cart(1,1) - im_p*hurc_ij(1)
            ons_cart(1,2)=ons_cart(1,2) - im_p*hurc_ij(2)
            ons_cart(1,3)=ons_cart(1,3) - im_p*hurc_ij(3)
-                                                                
+
            ons_cart(2,1)=ons_cart(2,1) + re_p*hurc_ij(1)
            ons_cart(2,2)=ons_cart(2,2) + re_p*hurc_ij(2)
            ons_cart(2,3)=ons_cart(2,3) + re_p*hurc_ij(3)
