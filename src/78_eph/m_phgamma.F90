@@ -71,6 +71,7 @@ module m_phgamma
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
+ use m_io_tools,       only : get_unit
 
  implicit none
 
@@ -838,7 +839,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
  end do
 
 #ifdef DEV_MJV
- if (present (gamma_ph_ee) .and. gams%my_iq(iq_ibz) /= -1) then
+ if (present (gamma_ph_ee) .and. gams%my_iqibz(iq_ibz) /= -1) then
    do iene = 1, gams%nene
      do jene = 1, gams%nene
        tmp_gam2 = reshape(gams%vals_ee(:,jene,iene,:,:,iq_ibz,spin), [2,natom3,natom3])
@@ -2333,7 +2334,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    ABI_ALLOCATE (a2feew_w_int, (nomega))
    ount = get_unit()
    open (unit=ount, name="EPC_strength_aafo_T.dat")
-   write (ount, "# temp_el, G_0(T_e) in W/m^3/K, spin")
+   write (ount, "(a)") "# temp_el, G_0(T_e) in W/m^3/K, spin"
    do spin=1,nsppol
      do itemp = 1, ntemp
        temp_el = min_temp + (itemp-1)*delta_temp
@@ -2358,7 +2359,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
        call simpson_int(nomega,wstep,a2feew_w,a2feew_w_int)
        G0 = a2feew_w_int(nomega) * two_pi * a2f%n0(spin) / cryst%ucvol
        ! conversion factor for G0 to SI units =  Ha_J / Time_Sec / (Bohr_meter)**3 ~ 1.2163049915755545e+30
-       write (ount, "2(e20.10,2x)") temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
+       write (ount, "(2(e20.10, 2x))") temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
      end do
    end do
    close (ount)
