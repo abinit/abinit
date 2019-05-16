@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_x.out to t03_x.out0407
+    Renaming old t03_x.out to t03_x.out0056
 ...
  
 
@@ -42,8 +42,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 May 2019.
-- ( at 17h53 )
+.Starting date : Thu 16 May 2019.
+- ( at 15h18 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -51,21 +51,21 @@ message: |
  === Build Information === 
   Version       : 8.11.7
   Build target  : x86_64_linux_intel19.0
-  Build date    : 20190506
+  Build date    : 20190516
  
  === Compiler Suite === 
-  C compiler       : gnu7.4
-  C++ compiler     : gnu7.4
+  C compiler       : gnu7.3
+  C++ compiler     : gnu7.3
   Fortran compiler : intel19.0
   CFLAGS           :  -g -O2 -mtune=native -march=native
   CXXFLAGS         :  -g -O2 -mtune=native -march=native
-  FCFLAGS          : -O2 -heap-arrays 1000000 -traceback
+  FCFLAGS          : -O2 -heap-arrays 1000000
   FC_LDFLAGS       :    -static-intel -static-libgcc
  
  === Optimizations === 
   Debug level        : basic
   Optimization level : standard
-  Architecture       : intel_xeon
+  Architecture       : intel_core_i3
  
  === Multicore === 
   Parallel build : yes
@@ -222,7 +222,7 @@ _ WF disk file :      5.697 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    1
+-  max_nthreads =    2
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
@@ -430,9 +430,9 @@ P           mkmem           1
  CHARACTER: Data type name: CHARACTER             Kind value: 1
 
   ==== OpenMP parallelism is ON ====
-- Max_threads:       1
+- Max_threads:       2
 - Num_threads:       1
-- Num_procs:         6
+- Num_procs:         2
 - Dynamic:           F
 - Nested:            F
  
@@ -541,18 +541,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
-   0.33615   0.05206   0.00347   0.00000   0.00347  -0.00021  -0.00000  -0.00021  -0.00060  -0.00000   0.00035   0.00000 ...
-   0.05206   0.00679   0.00068   0.00000   0.00068   0.00029   0.00000   0.00029  -0.00015  -0.00000   0.00009   0.00000 ...
-   0.00347   0.00068  -0.20099  -0.00000  -0.00084  -0.00031  -0.00000  -0.00042   0.00085   0.00000  -0.00049   0.00000 ...
-   0.00000   0.00000  -0.00000  -0.20015   0.00000  -0.00000   0.00011   0.00000   0.00000   0.00068   0.00000   0.00068 ...
+   0.33615   0.05206   0.00347   0.00000   0.00347  -0.00021  -0.00000  -0.00021  -0.00060   0.00000   0.00035   0.00000 ...
+   0.05206   0.00679   0.00068   0.00000   0.00068   0.00029   0.00000   0.00029  -0.00015   0.00000   0.00009   0.00000 ...
+   0.00347   0.00068  -0.20099   0.00000  -0.00084  -0.00031   0.00000  -0.00042   0.00085   0.00000  -0.00049   0.00000 ...
+   0.00000   0.00000   0.00000  -0.20015   0.00000   0.00000   0.00011   0.00000   0.00000   0.00068   0.00000   0.00068 ...
    0.00347   0.00068  -0.00084   0.00000  -0.20099  -0.00042   0.00000  -0.00031   0.00085   0.00000  -0.00049   0.00000 ...
-  -0.00021   0.00029  -0.00031  -0.00000  -0.00042  -1.17007  -0.00000  -0.00111   0.00049   0.00000  -0.00029   0.00000 ...
-  -0.00000   0.00000  -0.00000   0.00011   0.00000  -0.00000  -1.16896   0.00000   0.00000   0.00032   0.00000   0.00032 ...
+  -0.00021   0.00029  -0.00031   0.00000  -0.00042  -1.17007   0.00000  -0.00111   0.00049   0.00000  -0.00029   0.00000 ...
+  -0.00000   0.00000   0.00000   0.00011   0.00000   0.00000  -1.16896   0.00000   0.00000   0.00032   0.00000   0.00032 ...
   -0.00021   0.00029  -0.00042   0.00000  -0.00031  -0.00111   0.00000  -1.17007   0.00049   0.00000  -0.00029   0.00000 ...
-  -0.00060  -0.00015   0.00085   0.00000   0.00085   0.00049   0.00000   0.00049  -0.03395   0.00000   0.00015  -0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.03381   0.00000  -0.00011 ...
-   0.00035   0.00009  -0.00049   0.00000  -0.00049  -0.00029   0.00000  -0.00029   0.00015   0.00000  -0.03383  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000  -0.00000  -0.00011  -0.00000  -0.03381 ...
+  -0.00060  -0.00015   0.00085   0.00000   0.00085   0.00049   0.00000   0.00049  -0.03395   0.00000   0.00015   0.00000 ...
+   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.03381  -0.00000  -0.00011 ...
+   0.00035   0.00009  -0.00049   0.00000  -0.00049  -0.00029   0.00000  -0.00029   0.00015  -0.00000  -0.03383   0.00000 ...
+   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.00011   0.00000  -0.03381 ...
    ...  only 12  components have been written...
  
  
@@ -560,32 +560,32 @@ _setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  MAKE INVOVL START
  MAKE INVOVL START
+ MAKE INVOVL END
+ VTOFK CALL
  Invovl built
  MAKE INVOVL END
  VTOFK CALL
- MAKE INVOVL END
- VTOFK CALL
+ CHEBFI2 CALL
  CHEBFI2 CALL
  l_icplx           1
  l_npw        1944
  l_nspinor           1
  l_icplx*l_npw*l_nspinor        1944
  nband         192
- nband         192
- CHEBFI2 CALL
  l_icplx           1
  l_npw        1943
  l_nspinor           1
  l_icplx*l_npw*l_nspinor        1943
  nband         192
  nband         192
+ nband         192
  AJDE
  AJDE
+ xgTransposer%ncolsColsRows          96
+ xgTransposer%nrowsColsRows        3887
  xgTransposer%ncolsColsRows          96
  xgTransposer%nrowsColsRows        3887
  PROSAO INIT
- xgTransposer%ncolsColsRows          96
- xgTransposer%nrowsColsRows        3887
  PROSAO INIT
  xgTransposer%ncolsColsRows          96
  xgTransposer%nrowsColsRows        3887
@@ -620,24 +620,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
  spacedim        3887
  blockdim          96
  USAO OVDE
- spacedim X        3887
- blockdim X          96
- spacedim        3887
- blockdim          96
- USAO OVDE
- CHEAT
- flag_inv_sym 2
- CHEAT
- flag_inv_sym 2
- already_transposed T
- already_transposed T
- already_transposed T
- already_transposed T
- spacedim X        3887
- blockdim X          96
- spacedim        3887
- blockdim          96
- USAO OVDE
  CHEAT
  flag_inv_sym 2
  spacedim X        3887
@@ -656,32 +638,54 @@ _setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
  spacedim        3887
  blockdim          96
  USAO OVDE
- spacedim X        3887
- blockdim X          96
- spacedim        3887
- blockdim          96
- CHEAT
- USAO OVDE
- flag_inv_sym 2
  CHEAT
  flag_inv_sym 2
- already_transposed T
- already_transposed T
- already_transposed T
- already_transposed T
- spacedim X        3887
- blockdim X          96
- spacedim        3887
- blockdim          96
  spacedim X        3887
  blockdim X          96
  spacedim        3887
  blockdim          96
  USAO OVDE
+ CHEAT
+ flag_inv_sym 2
+ already_transposed T
+ already_transposed T
+ already_transposed T
+ already_transposed T
+ spacedim X        3887
+ blockdim X          96
+ spacedim        3887
+ blockdim          96
  USAO OVDE
  CHEAT
  flag_inv_sym 2
+ spacedim X        3887
+ blockdim X          96
+ spacedim        3887
+ blockdim          96
+ USAO OVDE
  CHEAT
  flag_inv_sym 2
- LOOP FINISHED
- LOOP FINISHED
+ already_transposed T
+ already_transposed T
+ already_transposed T
+ already_transposed T
+ spacedim X        3887
+ blockdim X          96
+ spacedim        3887
+ blockdim          96
+ USAO OVDE
+ CHEAT
+ flag_inv_sym 2
+ spacedim X        3887
+ blockdim X          96
+ spacedim        3887
+ blockdim          96
+ USAO OVDE
+ CHEAT
+ flag_inv_sym 2
+ TRANS ALLTOALLV
+ TRANS ALLTOALLV
+ TRANS ALLTOALLV
+ TRANS ALLTOALLV
+ TRANS ALLTOALLV
+ TRANS ALLTOALLV

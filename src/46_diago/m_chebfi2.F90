@@ -455,8 +455,8 @@ module m_chebfi2
       
       !print *, "SSSSSSSSSSSSSS"
       call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS) !all_to_all
-      !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !all_to_all
-      !call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS) 
+      call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !all_to_all
+      call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS) 
       
       !call debug_helper(chebfi%xXColsRows, chebfi) 
       !stop
@@ -612,19 +612,33 @@ module m_chebfi2
       
     end do
     
-    print *, "LOOP FINISHED"
+    !print *, "LOOP FINISHED"
     !call debug_helper(chebfi%xXColsRows, chebfi) 
     !call debug_helper(chebfi%xAXColsRows, chebfi) 
     !call debug_helper(chebfi%xBXColsRows, chebfi) 
-    stop
+    !stop
     
     !print *, "LOOP FINISHED"
     !stop
 
     call timab(tim_amp_f,1,tsec)
+    call xmpi_barrier(chebfi%spacecom)
+    !print *, "EIG", eig
+!    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+!      call xgBlock_print(DivResults%self, 200)
+!    else
+!      call xgBlock_print(DivResults%self, 100+xmpi_comm_rank(chebfi%spacecom))
+!    end if
+!    call xmpi_barrier(chebfi%spacecom)
+!    stop
+    !eig should be OK here DivResults are split in the right way over MPI processes
     call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)    !ampfactor
     call timab(tim_amp_f,2,tsec)
    
+   
+    !call debug_helper(chebfi%xXColsRows, chebfi) 
+    !call debug_helper(chebfi%xAXColsRows, chebfi) 
+    !call debug_helper(chebfi%xBXColsRows, chebfi) 
     !print *, "AMPFACTOR FINISHED" 
     !stop
     
@@ -634,21 +648,23 @@ module m_chebfi2
       call xmpi_barrier(chebfi%spacecom)
       
       call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
-      call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !all_to_all !no need to transpose (only X)
-      call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS) !all_to_all
-      
-      call xgTransposer_free(chebfi%xgTransposerX)
-      call xgTransposer_free(chebfi%xgTransposerAX)
-      call xgTransposer_free(chebfi%xgTransposerBX)
-
+      call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG) !all_to_all !no need to transpose (only X)
+      call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG) !all_to_all
+     
     end if
     
     !print *, "PROSAO TRANSPOSE"
-    !stop
-    
-    !call debug_helper(chebfi%X, chebfi) 
 
-    !stop
+    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc  
+        !call debug_helper(chebfi%xXColsRows, chebfi) 
+        call debug_helper(chebfi%xAXColsRows, chebfi) 
+    else
+        !call debug_helper(chebfi%X, chebfi) 
+        call debug_helper(chebfi%AX%self, chebfi) 
+    end if
+
+    !call debug_helper(chebfi%AX%self, chebfi) 
+    stop
 
     call timab(tim_RR, 1, tsec)
     call chebfi_rayleightRitz(chebfi, nline)
@@ -661,6 +677,12 @@ module m_chebfi2
     deallocate(nline_bands)
     
     call xg_free(DivResults)
+    
+    if (chebfi%paral_kgb == 1) then
+      call xgTransposer_free(chebfi%xgTransposerX)
+      call xgTransposer_free(chebfi%xgTransposerAX)
+      call xgTransposer_free(chebfi%xgTransposerBX)
+    end if
     
     call timab(tim_run,2,tsec)
      
@@ -1130,7 +1152,9 @@ module m_chebfi2
       end if
       !cheb_poly1(x, n, a, b)
       ampfactor = cheb_poly1(eig_per_band, nline_bands(iband), lambda_minus, lambda_plus) !OK
-
+      !print *, "AMPFACTOR", ampfactor
+      !ovi ampfactori bi trebali da budu OK s obzirom da su izvedeni iz DivResults (eig) koji je ok podeljen
+      
       if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
       !shift = chebfi%spacedim*(iband-1)
       

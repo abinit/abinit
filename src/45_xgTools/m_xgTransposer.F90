@@ -444,6 +444,7 @@ module m_xgTransposer
       if ( xgTransposer%mpiData(MPI_COLS)%size > 1 ) then
         call xgTransposer_toLinalg(xgTransposer)
       else
+        print *, "SAMO PROMENIO STANJE"
         xgTransposer%state = STATE_LINALG
       end if
     case (STATE_COLSROWS)
@@ -528,7 +529,7 @@ module m_xgTransposer
    case (TRANS_ALL2ALL)
      !ABI_MALLOC(request,(1))
      !myrequest = 1
-
+     print *, "TRANS ALLTOALLV"  !!TODO OVDE SE BAFERI NESTO IZDEBILISU SKONTATI ZASTO :(((
      call timab(tim_all2allv,1,tsec)
      call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
                          recvbuf, recvcounts, rdispls, &
