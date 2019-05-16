@@ -60,7 +60,7 @@ integer, parameter :: TETRA_STEP = 12
 !! SOURCE
 type :: htetra_bucket
 
-  integer,pointer :: indexes(:,:)
+  integer,allocatable :: indexes(:,:)
 
 end type htetra_bucket
 !!***
@@ -173,7 +173,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  integer,optional,intent(in) :: opt
  integer,intent(out) :: ierr
  character(len=80),intent(out) :: errorstring
- type(t_htetrahedron),intent(out) :: tetra
+ type(t_htetrahedron),intent(out),target :: tetra
 !arrays
  integer,intent(in) :: bz2ibz(nkpt_fullbz)
  real(dp),intent(in) :: gprimd(3,3),klatt(3,3),kpt_fullbz(3,nkpt_fullbz),kpt_ibz(3,nkpt_ibz)
@@ -187,7 +187,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  integer :: max_ntetra, ntetra
  real(dp) :: rcvol,length,min_length
 !arrays
- integer,pointer :: indexes(:,:), tetra_hash_count(:)
+ integer,allocatable,target :: indexes(:,:), tetra_hash_count(:)
  integer :: tetra_ibz(4)
  integer :: tetra_shifts(3,4,24,4)  ! 3 dimensions, 4 summits, 24 tetrahedra, 4 main diagonals
  integer :: tetra_shifts_6(3,4,6,1) ! 3 dimensions, 4 summits, 6 tetrahedra, 4 main diagonals
@@ -715,8 +715,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
          ABI_MALLOC(indexes,(0:4,max_ntetra+TETRA_STEP))
          indexes(0:4,:max_ntetra) = tetra%unique_tetra(ihash)%indexes
          indexes(:,max_ntetra+1:) = 0
-         ABI_FREE(tetra%unique_tetra(ihash)%indexes)
-         tetra%unique_tetra(ihash)%indexes => indexes
+         ABI_MOVE_ALLOC(indexes,tetra%unique_tetra(ihash)%indexes)
        end if
        tetra%unique_tetra(ihash)%indexes(1:,tetra_hash_count(ihash)) = tetra_ibz(:)
        tetra%unique_tetra(ihash)%indexes(0, tetra_hash_count(ihash)) = 1
@@ -775,8 +774,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
          ABI_MALLOC(indexes,(0:4,max_ntetra+TETRA_STEP))
          indexes(0:4,:max_ntetra) = tetra%unique_tetra(ihash)%indexes
          indexes(:,max_ntetra+1:) = 0
-         ABI_FREE(tetra%unique_tetra(ihash)%indexes)
-         tetra%unique_tetra(ihash)%indexes => indexes
+         ABI_MOVE_ALLOC(indexes,tetra%unique_tetra(ihash)%indexes)
        end if
        tetra%unique_tetra(ihash)%indexes(1:,tetra_hash_count(ihash)) = tetra_ibz(:)
        tetra%unique_tetra(ihash)%indexes(0, tetra_hash_count(ihash)) = 1
@@ -803,8 +801,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    ! Allocate array with right size
    ABI_MALLOC(indexes,(0:4,ntetra))
    indexes = tetra%unique_tetra(ihash)%indexes(:,:ntetra)
-   ABI_FREE(tetra%unique_tetra(ihash)%indexes)
-   tetra%unique_tetra(ihash)%indexes => indexes
+   ABI_MOVE_ALLOC(indexes,tetra%unique_tetra(ihash)%indexes)
  end do
 
  ! Sum the multiplicity
@@ -1001,14 +998,14 @@ subroutine htetra_free(tetra)
 
  if (allocated(tetra%unique_tetra)) then
    do ihash=1,tetra%nbuckets
-     ABI_SFREE_PTR(tetra%unique_tetra(ihash)%indexes)
+     ABI_SFREE(tetra%unique_tetra(ihash)%indexes)
    end do
    ABI_FREE(tetra%unique_tetra)
  end if
 
  if (allocated(tetra%ibz)) then
    do ikibz=1,tetra%nkibz
-     ABI_SFREE_PTR(tetra%ibz(ikibz)%indexes)
+     ABI_SFREE(tetra%ibz(ikibz)%indexes)
    end do
    ABI_FREE(tetra%ibz)
  end if
