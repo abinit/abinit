@@ -808,13 +808,9 @@ subroutine flush_unit(unit)
 
 !FLUSH on unconnected unit is illegal: F95 std., 9.3.5.
 #if defined HAVE_FC_FLUSH
- if (isopen) then
-   call flush(unit)
- endif
+ if (isopen) call flush(unit)
 #elif defined HAVE_FC_FLUSH_
- if (isopen) then
-   call flush_(unit)
-  end if
+ if (isopen) call flush_(unit)
 #endif
 
 end subroutine flush_unit
@@ -1199,6 +1195,7 @@ end function close_unit
 !! INPUTS
 !!  unit=unit number for writing
 !!  message=(character(len=*)) message to be written
+!!  [toflush]=flag to activate immediate flush of the I/O buffer (default=FALSE)
 !!
 !! OUTPUT
 !!  Only writing.
@@ -1210,20 +1207,23 @@ end function close_unit
 !!
 !! SOURCE
 
-subroutine write_lines(unit,message)
+subroutine write_lines(unit,message,toflush)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: unit
+ logical,intent(in),optional :: toflush
  character(len=*),intent(in) :: message
 
 !Local variables-------------------------------
 !scalars
  integer :: msg_size,ii,jj,rtnpos
+ logical :: toflush_
 
 !******************************************************************
 
  msg_size = len_trim(message)
+ toflush_=.false.;if (present(toflush)) toflush_=toflush
 
  if (msg_size == 0) then
    write(unit,*)
@@ -1236,6 +1236,7 @@ subroutine write_lines(unit,message)
 
  if (rtnpos == 0) then
    write(unit,"(a)")message(1:msg_size)
+   if (toflush_) call flush_unit(unit)
    return
  end if
 
@@ -1243,8 +1244,10 @@ subroutine write_lines(unit,message)
  do
    if (ii == jj) then
      write(unit,*)
+     if (toflush_) call flush_unit(unit)
    else
      write(unit, '(a)' ) message(ii:jj-1)
+     if (toflush_) call flush_unit(unit)
    end if
    ii = jj + 1
    if (ii > msg_size) exit
@@ -1305,7 +1308,7 @@ subroutine lock_and_write(filename, string, ierr)
 
  file_unit = get_unit()
  open(unit=file_unit, file=trim(filename), form="formatted")
- call write_lines(file_unit, string)
+ call write_lines(file_unit, string, toflush=.true.)
  close(lock_unit, status="delete")
  close(file_unit)
  return

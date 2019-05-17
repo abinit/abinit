@@ -25,11 +25,13 @@
 
 #include "abi_common.h"
 
-MODULE m_specialmsg
+module m_specialmsg
 
  use defs_basis
  use m_build_info
  use m_xmpi
+
+ use m_io_tools,   only : flush_unit, write_lines
 
  implicit none
 
@@ -40,9 +42,9 @@ MODULE m_specialmsg
                          ! code, version of code, platform, and starting date.
 
 !Number of WARNINGS/COMMENTS printed in log file
- integer,save :: COMMENT_COUNT=0
- integer,save :: WARNING_COUNT=0
- integer,save :: EXIT_FLAG=0
+ integer,save :: COMMENT_COUNT = 0
+ integer,save :: WARNING_COUNT = 0
+ integer,save :: EXIT_FLAG = 0
 
 !Public procedures
  public :: specialmsg_setcount ! Update number of special messages (WARNING/COMMENT) present in log file
@@ -50,6 +52,11 @@ MODULE m_specialmsg
  public :: specialmsg_mpisum   ! Reduce number of special messages (WARNING/COMMENT) over MPI comm
 
  public :: wrtout
+
+ interface wrtout
+   module procedure wrtout_unit
+   module procedure wrtout_units
+ end interface wrtout
 
 CONTAINS  !===========================================================
 !!***
@@ -81,18 +88,14 @@ CONTAINS  !===========================================================
 
 subroutine specialmsg_setcount(n_add_comment,n_add_warning,n_add_exit)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,optional,intent(in) :: n_add_comment,n_add_warning,n_add_exit
-
-!Local variables-------------------------------
 
 ! *********************************************************************
 
  if (PRESENT(n_add_comment)) COMMENT_COUNT=COMMENT_COUNT+n_add_comment
  if (PRESENT(n_add_warning)) WARNING_COUNT=WARNING_COUNT+n_add_warning
- if (PRESENT(n_add_exit   )) then
+ if (PRESENT(n_add_exit)) then
    EXIT_FLAG=EXIT_FLAG+n_add_exit
    if (EXIT_FLAG>1) EXIT_FLAG=1
  end if
@@ -114,7 +117,7 @@ end subroutine specialmsg_setcount
 !! OUTPUT
 !!  ncomment= number of COMMENTs in log file
 !!  nwarning= number of WARNINGs in log file
-!!  nexit=    1 if exit requested
+!!  nexit= 1 if exit requested
 !!
 !! PARENTS
 !!      abinit
@@ -126,12 +129,8 @@ end subroutine specialmsg_setcount
 
 subroutine specialmsg_getcount(ncomment,nwarning,nexit)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: ncomment,nexit,nwarning
-
-!Local variables-------------------------------
 
 ! *********************************************************************
 
@@ -167,8 +166,6 @@ end subroutine specialmsg_getcount
 
 subroutine specialmsg_mpisum(mpicomm)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: mpicomm
 
@@ -190,7 +187,6 @@ end subroutine specialmsg_mpisum
 !!***
 
 !----------------------------------------------------------------------
-
 
 !!****f* m_specialmsg/herald
 !! NAME
@@ -219,8 +215,6 @@ end subroutine specialmsg_mpisum
 
 subroutine herald(code_name,code_version,iout)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: iout
  character(len=*),intent(in) :: code_name
@@ -232,16 +226,16 @@ subroutine herald(code_name,code_version,iout)
  character(len=5) :: strzone
  character(len=8) :: strdat
  character(len=10) :: strtime
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=3),parameter :: day_names(7)=(/'Mon','Tue','Wed','Thu','Fri','Sat','Sun'/)
  character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
-&                                                'Jul','Aug','Sep','Oct','Nov','Dec'/)
+                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
 
 ! *************************************************************************
 
 !RELEASE TIME FROM ABIRULES
  year_rel=2019
- mm_rel=01
+ mm_rel=04
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -255,29 +249,29 @@ subroutine herald(code_name,code_version,iout)
 
 !GNU GPL license
  write(iout, '(a,/,a,a,a,/,a,/,a,/,a,/)' ) &
-& '.Copyright (C) 1998-2019 ABINIT group . ',&
-& ' ',trim(code_name),' comes with ABSOLUTELY NO WARRANTY.',&
-& ' It is free software, and you are welcome to redistribute it',&
-& ' under certain conditions (GNU General Public License,',&
-& ' see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).'
+ '.Copyright (C) 1998-2019 ABINIT group . ',&
+ ' ',trim(code_name),' comes with ABSOLUTELY NO WARRANTY.',&
+ ' It is free software, and you are welcome to redistribute it',&
+ ' under certain conditions (GNU General Public License,',&
+ ' see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).'
 
  if(trim(code_name)=='OPTIC')then
    write(iout, '(a,a,a,/,a,/,a,/,a,/,a,/,a,/,a,/)' ) &
-&   ' ',trim(code_name),' has originally been developed by',&
-&   ' Sangeeta Sharma and incorporated in ABINIT with the help of M. Verstraete.',&
-&   ' Please refer to : ',&
-&   ' S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B 67, 165332 (2003), and',&
-&   ' S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 (2004).',&
-&   '- URLs and DOI at https://docs.abinit.org/theory/bibliography/#sharma2003',&
-&   '- and https://docs.abinit.org/theory/bibliography/#sharma2004'
+   ' ',trim(code_name),' has originally been developed by',&
+   ' Sangeeta Sharma and incorporated in ABINIT with the help of M. Verstraete.',&
+   ' Please refer to : ',&
+   ' S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B 67, 165332 (2003), and',&
+   ' S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 (2004).',&
+   '- URLs and DOI at https://docs.abinit.org/theory/bibliography/#sharma2003',&
+   '- and https://docs.abinit.org/theory/bibliography/#sharma2004'
  end if
 
  write(iout, '(a,/,a,/,a,/,a,/,a)' ) &
-& ' ABINIT is a project of the Universite Catholique de Louvain,',&
-& ' Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .',&
-& ' Please read https://docs.abinit.org/theory/acknowledgments for suggested',&
-& ' acknowledgments of the ABINIT effort.',&
-& ' For more information, see https://www.abinit.org .'
+ ' ABINIT is a project of the Universite Catholique de Louvain,',&
+ ' Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .',&
+ ' Please read https://docs.abinit.org/theory/acknowledgments for suggested',&
+ ' acknowledgments of the ABINIT effort.',&
+ ' For more information, see https://www.abinit.org .'
 
 !Get year, month and day
  call date_and_time(strdat,strtime,strzone,values)
@@ -300,48 +294,38 @@ subroutine herald(code_name,code_version,iout)
 
 !Print date in nice format (* new format *)
  write(iout, '(/,a,a,1x,i2,1x,a,1x,i4,a,/,a,i2.2,a,i2.2,a)' ) &
-& '.Starting date : ',day_names(day),dd,month_names(mm),year,'.','- ( at ',values(5),'h',values(6),' )'
+ '.Starting date : ',day_names(day),dd,month_names(mm),year,'.','- ( at ',values(5),'h',values(6),' )'
  write(iout,*)' '
 
 !Impose a maximal life cycle of 3 years
  if(year>year_rel+3 .or. (year==year_rel+3 .and. mm>mm_rel) ) then
-   write(message, '(5a,i4,5a)' )&
-&   '- The starting date is more than 3 years after the initial release',ch10,&
-&   '- of this version of ABINIT, namely ',month_names(mm_rel),' ',year_rel,'.',ch10,&
-&   '- This version of ABINIT is not supported anymore.',ch10,&
-&   '- Action: please, switch to a more recent version of ABINIT.'
-   call wrtout(iout,message,'COLL')
+   write(msg, '(5a,i4,5a)' )&
+   '- The starting date is more than 3 years after the initial release',ch10,&
+   '- of this version of ABINIT, namely ',month_names(mm_rel),' ',year_rel,'.',ch10,&
+   '- This version of ABINIT is not supported anymore.',ch10,&
+   '- Action: please, switch to a more recent version of ABINIT.'
+   call wrtout(iout,msg,'COLL')
 
 !  Gives a warning beyond 2 years
  else if(year>year_rel+2 .or. (year==year_rel+2 .and. mm>mm_rel) ) then
-   write(message, '(5a,i4,6a)' )&
-&   '- The starting date is more than 2 years after the initial release',ch10,&
-&   '- of this version of ABINIT, namely ',month_names(mm_rel),' ',year_rel,'.',ch10,&
-&   '- Note that the use beyond 3 years after the release will not be supported.',ch10,&
-&   '- Action: please, switch to a more recent version of ABINIT.',ch10
-   call wrtout(iout,message,'COLL')
+   write(msg, '(5a,i4,6a)' )&
+   '- The starting date is more than 2 years after the initial release',ch10,&
+   '- of this version of ABINIT, namely ',month_names(mm_rel),' ',year_rel,'.',ch10,&
+   '- Note that the use beyond 3 years after the release will not be supported.',ch10,&
+   '- Action: please, switch to a more recent version of ABINIT.',ch10
+   call wrtout(iout,msg,'COLL')
  end if
 
 end subroutine herald
 !!***
 
-
-!{\src2tex{textfont=tt}}
-!!****f* ABINIT/wrtout
+!!****f* m_specialmsg/wrtout_unit
 !! NAME
-!!  wrtout
+!!  wrtout_unit
 !!
 !! FUNCTION
 !!  Organizes the sequential or parallel version of the write intrinsic
 !!  Also allows to treat correctly the write operations for Unix (+DOS) and MacOS.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!  For the initials of contributors, see
-!!  ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  msg=(character(len=*)) message to be written
@@ -440,11 +424,7 @@ end subroutine herald
 !!
 !! SOURCE
 
-subroutine wrtout(unit,msg,mode_paral,do_flush)
-
- use m_xmpi,      only : xmpi_world, xmpi_comm_rank, xmpi_comm_size
- use m_io_tools,  only : flush_unit, write_lines
- implicit none
+subroutine wrtout_unit(unit, msg, mode_paral, do_flush)
 
 !Arguments ------------------------------------
  integer,intent(in) :: unit
@@ -461,53 +441,109 @@ subroutine wrtout(unit,msg,mode_paral,do_flush)
 
 !******************************************************************
 
- if ((unit == std_out).and.(.not.do_write_log)) RETURN
- if (unit == dev_null) RETURN
+ if (unit == std_out .and. .not. do_write_log) return
+ if (unit == dev_null) return
 
- my_mode_paral = "COLL"; if (PRESENT(mode_paral)) my_mode_paral = mode_paral
- my_flush = .false.; if (PRESENT(do_flush)) my_flush = do_flush
+ my_mode_paral = "COLL"; if (present(mode_paral)) my_mode_paral = mode_paral
+ my_flush = .false.; if (present(do_flush)) my_flush = do_flush
 
-!Communicator is xmpi_world by default, except for the parallelization over images
- if (abinit_comm_output/=-1) then
-   comm=abinit_comm_output
+ ! Communicator is xmpi_world by default, except for the parallelization over images
+ if (abinit_comm_output /= -1) then
+   comm = abinit_comm_output
  else
-   comm=xmpi_world
+   comm = xmpi_world
  end if
 
-!Determine who I am in COMM_WORLD
- nproc = xmpi_comm_size(comm)
- me    = xmpi_comm_rank(comm)
+ ! Determine who I am in COMM_WORLD
+ me = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- if( (my_mode_paral=='COLL') .or. (nproc==1) ) then
-   if (me==master) then
-     call wrtout_myproc(unit, msg, do_flush=my_flush)
-   end if
+ if (my_mode_paral == 'COLL' .or. nproc == 1) then
+   if (me == master) call wrtout_myproc(unit, msg, do_flush=my_flush)
 
- else if (my_mode_paral=='PERS') then
+ else if (my_mode_paral == 'PERS') then
    call write_lines(unit,msg)
-
    ! Flush unit
-   if (my_flush) then
-     call flush_unit(unit)
-   end if
+   if (my_flush) call flush_unit(unit)
 
- else if (my_mode_paral=='INIT') then
-   master=unit
+ else if (my_mode_paral == 'INIT') then
+   master = unit
 
  else
    write(string,'(7a)')ch10,&
-&   'wrtout: ERROR -',ch10,&
-&   '  Unknown write mode: ',my_mode_paral,ch10,&
-&   '  Continuing anyway ...'
+   'wrtout_unit: ERROR -',ch10,&
+   '  Unknown write mode: ',trim(my_mode_paral),ch10,&
+   '  Continuing anyway ...'
    write(unit, '(A)' ) trim(string)
  end if
 
-end subroutine wrtout
+end subroutine wrtout_unit
+!!***
+
+!!****f* m_specialmsg/wrtout_units
+!! NAME
+!!  wrtout_units
+!!
+!! FUNCTION
+!!  Write string to multiple units. Wraps wrtout_unit
+!!
+!! INPUTS
+!!  msg=(character(len=*)) message to be written
+!!  unit=unit number for writing. The named constant dev_null defined in defs_basis can be used to avoid any printing.
+!!  [mode_paral]= --optional argument--
+!!   'COLL' if all procs are calling the routine with the same message to be written once only. Default.
+!!   'PERS' if the procs are calling the routine with different messages each to be written,
+!!          or if one proc is calling the routine
+!!   "INIT" to change the rank of the master node that prints the message if "COLL" is used.
+!!  [do_flush]=True to flush the unit. Defaults to .False.
+!!
+!! OUTPUT
+!!  (only writing)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine wrtout_units(units, msg, mode_paral, do_flush)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: units(:)
+ character(len=*),intent(in) :: msg
+ character(len=*),optional,intent(in) :: mode_paral
+ logical,optional,intent(in) :: do_flush
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii, cnt
+ logical :: my_flush
+ character(len=500) :: my_mode_paral
+!arrays
+ integer :: my_units(size(units))
+
+!******************************************************************
+
+ my_mode_paral = "COLL"; if (present(mode_paral)) my_mode_paral = mode_paral
+ my_flush = .false.; if (present(do_flush)) my_flush = do_flush
+
+ ! Remove duplicated units (if any)
+ my_units(1) = units(1); cnt = 1
+ do ii=2,size(units)
+   if (any(units(ii) == my_units(1:cnt))) cycle
+   cnt = cnt + 1
+   my_units(cnt) = units(ii)
+ end do
+
+ do ii=1,cnt
+   call wrtout_unit(my_units(ii), msg, mode_paral=my_mode_paral, do_flush=my_flush)
+ end do
+
+end subroutine wrtout_units
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/wrtout_myproc
+!!****f* m_specialmsg/wrtout_myproc
 !! NAME
 !!  wrtout_myproc
 !!
@@ -515,37 +551,28 @@ end subroutine wrtout
 !!  Do the output for one proc. For parallel or sequential output use wrtout()
 !!  instead. Also allows to treat correctly the write operations for Unix (+DOS) and MacOS.
 !!
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR)
 !! INPUTS
 !!  unit=unit number for writing
-!!  message=(character(len=*)) message to be written
+!!  msg=(character(len=*)) message to be written
 !!  [do_flush]=True to flush the unit. Defaults to .False.
 !!
 !! OUTPUT
 !!  (only writing)
 !!
 !! PARENTS
-!!      wrtout
+!!      wrtout_unit
 !!
 !! CHILDREN
 !!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
-subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
-
- use defs_basis
- !use m_abicore
-
- use m_xmpi,       only : xmpi_sum
- !use m_specialmsg, only : specialmsg_setcount
- use m_io_tools,   only : flush_unit, write_lines
- implicit none
+subroutine wrtout_myproc(unit, msg, do_flush) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: unit
- character(len=*),intent(in) :: message
+ character(len=*),intent(in) :: msg
  logical,optional,intent(in) :: do_flush
 
 !Local variables-------------------------------
@@ -556,14 +583,14 @@ subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
 !******************************************************************
 
  print_std_err = (unit == std_out .and. std_out /= std_err .and. &
-& (index(trim(message),'BUG')/=0.or.index(trim(message),'ERROR')/=0))
+   (index(trim(msg),'BUG')/=0.or.index(trim(msg),'ERROR')/=0))
 
-!Print message
- call write_lines(unit,message)
- if (print_std_err) call write_lines(std_err,message)
+ ! Print message
+ call write_lines(unit, msg)
+ if (print_std_err) call write_lines(std_err, msg)
 
-!Append "Contact Abinit group" to BUG messages
- if( index(trim(message),'BUG') /= 0 )then
+ ! Append "Contact Abinit group" to BUG messages
+ if (index(trim(msg), 'BUG') /= 0 )then
    write(unit, '(a)' ) '  Action: contact ABINIT group (please attach the output of `abinit -b`)'
    write(unit,*)
    if (print_std_err) then
@@ -572,19 +599,13 @@ subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
    end if
  end if
 
-!Count the number of warnings and comments. Only take into
-!account unit std_out, in order not to duplicate these numbers.
- if( index(trim(message),'WARNING') /= 0 .and. unit==std_out )then
-   call specialmsg_setcount(n_add_warning=i_one)
- end if
- if( index(trim(message),'COMMENT') /= 0 .and. unit==std_out )then
-   call specialmsg_setcount(n_add_comment=i_one)
- end if
- if( index(trim(message),'Exit') /= 0 )then
-   call specialmsg_setcount(n_add_exit=i_one)
- end if
+ ! Count the number of warnings and comments. Only take into
+ ! account unit std_out, in order not to duplicate these numbers.
+ if (index(trim(msg), 'WARNING') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_warning=i_one)
+ if (index(trim(msg), 'COMMENT') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_comment=i_one)
+ if (index(trim(msg), 'Exit') /= 0 ) call specialmsg_setcount(n_add_exit=i_one)
 
-!Flush unit
+ ! Flush unit
  if (present(do_flush)) then
    if (do_flush) call flush_unit(unit)
  end if
@@ -596,5 +617,5 @@ subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
 end subroutine wrtout_myproc
 !!***
 
-END MODULE m_specialmsg
+end module m_specialmsg
 !!***

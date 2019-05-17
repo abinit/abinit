@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -511,7 +512,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
   INTEGER                        :: iflavorbis
   INTEGER                        :: iC_m,iC_m_add
   INTEGER                        :: iCdag_m,iCdag_m_add
-  INTEGER                        :: stail,ii
+  INTEGER                        :: stail !,ii
 !  DOUBLE PRECISION               :: pi_invBeta
   DOUBLE PRECISION               :: mbeta_two
   DOUBLE PRECISION               :: beta 
@@ -906,7 +907,7 @@ SUBROUTINE GreenHyboffdiag_setN(op,N)
   TYPE(GreenHyboffdiag)    , INTENT(INOUT)    :: op
   DOUBLE PRECISION  , INTENT(IN   )    :: N(op%nflavors)
   INTEGER :: iflavor,iflavor2
-  COMPLEX(KIND=8) :: tmpoper
+  !COMPLEX(KIND=8) :: tmpoper
 
   IF ( op%set .EQV. .FALSE. ) &
     CALL ERROR("GreenHyboffdiag_setN: green op%operator not set                ")
@@ -986,6 +987,8 @@ SUBROUTINE GreenHyboffdiag_setMuD1(op,iflavor,iflavor2,mu,d1)
 !Local variables ------------------------------------
   DOUBLE PRECISION                :: mu2
 !*********************************************************************
+
+  ABI_UNUSED((/d1/))
   
   mu2=0
   if(iflavor==iflavor2) mu2=mu
@@ -1125,12 +1128,12 @@ include 'mpif.h'
   INTEGER :: delta
   INTEGER :: residu
   INTEGER :: iflavor1
-  INTEGER :: iflavor2,unitnb,unitnb1
+  INTEGER :: iflavor2,unitnb !,unitnb1
   INTEGER, ALLOCATABLE, DIMENSION(:) :: counts
   INTEGER, ALLOCATABLE, DIMENSION(:) :: displs
   DOUBLE PRECISION :: A,AA ! Correction factor
   COMPLEX(KIND=8) :: B,BB ! Correction factor
-  COMPLEX(KIND=8) :: C,CC ! Correction factor
+  COMPLEX(KIND=8) :: C !,CC ! Correction factor
   DOUBLE PRECISION :: inv_beta
   DOUBLE PRECISION :: pi_invBeta
   DOUBLE PRECISION :: two_invBeta
@@ -1907,9 +1910,12 @@ END SUBROUTINE GreenHyboffdiag_destroy
        integer    :: i,j,k,p
        real*8     :: rincopy(L+1),a(L),b(L),c(L),d(L),u(L+1), q(L+1),XM(L+1)
        complex*16 :: cdummy,explus,ex,j_dpc
-       real*8     :: one,two,zero,three,six,wn,tau,xpi,delta,om
+       real*8     :: one,two,zero,three,six,tau,xpi,delta,om !wn,
        complex*16     :: czero
 !***********************************************
+
+       ABI_UNUSED((/aa, c3/))
+       ABI_UNUSED((/lflag/))
        czero=cmplx(0.d0,0.d0)
        zero=0.d0
        one=1.d0

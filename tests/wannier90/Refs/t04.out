@@ -698,8 +698,8 @@ are mandatory secondary input
    mlwfovlp:  you should give k-point in the full brillouin zone 
    with explicit k-points (or kptopt=3) and istwfk 1
 
-   mlwfovlp:  you should give k-point in the full brillouin zone 
-   with explicit k-points (or kptopt=3) and istwfk 1
+   mlwfovlp:  Calculating matrices for both spin polarization 
+ 
 
    mlwfovlp :  mlwfovlp_setup done -
 -  see t04o_w90_up.wout for details.

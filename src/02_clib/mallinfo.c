@@ -19,8 +19,7 @@
 
 #include "abi_clib.h"
 
-void 
-FC_FUNC_(clib_mallinfo,CLIB_MALLINFO)
+void clib_mallinfo
   (long int *arena, long int *hblkhd, long int *usmblks, long int *fsmblks, long int *uordblks, long int *fordblks)
 {
 #ifdef HAVE_MALLINFO

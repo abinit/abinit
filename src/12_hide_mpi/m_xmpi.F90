@@ -131,6 +131,10 @@ MODULE m_xmpi
  integer,public,parameter :: xmpio_single    =1  ! Individual IO.
  integer,public,parameter :: xmpio_collective=2  ! Collective IO.
 
+ integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
+ ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
+ ! This counter should be zero at the end of the run if all requests have been released)
+
 !----------------------------------------------------------------------
 !!***
 
@@ -169,6 +173,11 @@ MODULE m_xmpi
    module procedure xmpi_comm_free_3D
  end interface xmpi_comm_free
 
+ interface xmpi_waitall
+   module procedure xmpi_waitall_1d
+   module procedure xmpi_waitall_2d
+ end interface xmpi_waitall
+
  interface xmpi_split_work
    module procedure xmpi_split_work_i4b
  end interface xmpi_split_work
@@ -196,6 +205,7 @@ MODULE m_xmpi
  public :: xmpi_alltoallv
  public :: xmpi_ialltoallv
  public :: xmpi_bcast
+ public :: xmpi_ibcast
  public :: xmpi_exch
  public :: xmpi_gather
  public :: xmpi_gatherv
@@ -354,6 +364,15 @@ interface xmpi_bcast
   module procedure xmpi_bcast_coeffi2_1d
   module procedure xmpi_bcast_coeff2_1d
 end interface xmpi_bcast
+
+!----------------------------------------------------------------------
+
+interface xmpi_ibcast
+  module procedure xmpi_ibcast_int1d
+  module procedure xmpi_ibcast_dp1d
+  module procedure xmpi_ibcast_dp2d
+  module procedure xmpi_ibcast_dp3d
+end interface xmpi_ibcast
 
 !----------------------------------------------------------------------
 
@@ -521,6 +540,12 @@ interface xmpi_sum
   module procedure xmpi_sum_dpvt
   module procedure xmpi_sum_dpv
   module procedure xmpi_sum_dpn    !?
+  module procedure xmpi_sum_sp2d
+  module procedure xmpi_sum_sp3d
+  module procedure xmpi_sum_sp4d
+  module procedure xmpi_sum_sp5d
+  module procedure xmpi_sum_sp6d
+  module procedure xmpi_sum_sp7d
   module procedure xmpi_sum_dp2d
   module procedure xmpi_sum_dp3d
   module procedure xmpi_sum_dp4d
@@ -1260,9 +1285,7 @@ subroutine xmpi_group_free(spaceGroup)
 
    if (mpierr/=MPI_SUCCESS) then
      call MPI_ERROR_CLASS(mpierr,mpierr_class,ierr)
-     if (mpierr_class/=MPI_ERR_GROUP) then
-       write(std_out,*)" WARNING: MPI_GROUP_FREE returned ierr= ",mpierr
-     end if
+     if (mpierr_class/=MPI_ERR_GROUP) write(std_out,*)" WARNING: MPI_GROUP_FREE returned ierr= ",mpierr
    end if
 
  end if
@@ -1491,7 +1514,7 @@ end subroutine xmpi_comm_group
 !!  input_comm=Input MPI communicator (to be splitted)
 !!  color=Control of subset assignment (nonnegative integer).
 !!        Processes with the same color are in the same new communicator
-!!  key=Ccontrol of rank assigment (integer)
+!!  key=Control of rank assigment (integer)
 !!
 !! OUTPUT
 !!  mpierr=error code returned
@@ -1567,8 +1590,7 @@ subroutine xmpi_group_translate_ranks(spaceGroup1,nrank,ranks1,&
  mpierr=0; ranks2(:)=xmpi_undefined
 #ifdef HAVE_MPI
  if (spaceGroup1/=xmpi_group_null.and.spaceGroup2/=xmpi_group_null) then
-   call MPI_GROUP_TRANSLATE_RANKS(spaceGroup1,nrank,ranks1,&
-&                                 spaceGroup2,ranks2,mpierr)
+   call MPI_GROUP_TRANSLATE_RANKS(spaceGroup1,nrank,ranks1, spaceGroup2,ranks2,mpierr)
  end if
 #else
  ranks2(1)=0
@@ -1676,9 +1698,7 @@ subroutine xmpi_barrier(comm)
 #ifdef HAVE_MPI
  if (comm/=xmpi_comm_null) then
    call MPI_COMM_SIZE(comm,nprocs,ier)
-   if(nprocs>1)then
-     call MPI_BARRIER(comm,ier)
-   end if
+   if(nprocs>1) call MPI_BARRIER(comm,ier)
  end if
 #endif
 
@@ -1823,8 +1843,9 @@ subroutine xmpi_wait(request,mpierr)
 
  mpierr = 0
 #ifdef HAVE_MPI
-  call MPI_WAIT(request,status,ier)
-  mpierr=ier
+ if (request /= xmpi_request_null) xmpi_count_requests = xmpi_count_requests - 1
+ call MPI_WAIT(request,status,ier)
+ mpierr=ier
 #endif
 
 end subroutine xmpi_wait
@@ -1832,9 +1853,9 @@ end subroutine xmpi_wait
 
 !----------------------------------------------------------------------
 
-!!****f* m_xmpi/xmpi_waitall
+!!****f* m_xmpi/xmpi_waitall_1d
 !! NAME
-!!  xmpi_waitall
+!!  xmpi_waitall_1d
 !!
 !! FUNCTION
 !!  Hides MPI_WAITALL from MPI library.
@@ -1854,7 +1875,7 @@ end subroutine xmpi_wait
 !!
 !! SOURCE
 
-subroutine xmpi_waitall(array_of_requests,mpierr)
+subroutine xmpi_waitall_1d(array_of_requests, mpierr)
 
 !Arguments-------------------------
  integer,intent(inout) :: array_of_requests(:)
@@ -1869,11 +1890,54 @@ subroutine xmpi_waitall(array_of_requests,mpierr)
 
  mpierr = 0
 #ifdef HAVE_MPI
-  call MPI_WAITALL(size(array_of_requests),array_of_requests,status,ier)
-  mpierr=ier
+ xmpi_count_requests = xmpi_count_requests - count(array_of_requests /= xmpi_request_null)
+ call MPI_WAITALL(size(array_of_requests), array_of_requests, status, ier)
+ mpierr=ier
 #endif
 
-end subroutine xmpi_waitall
+end subroutine xmpi_waitall_1d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_waitall_2d
+!! NAME
+!!  xmpi_waitall_2d
+!!
+!! FUNCTION
+!!  Hides MPI_WAITALL from MPI library.
+!!  Waits for all given MPI Requests to complete.
+!!
+!! INPUTS
+!!  array_of_requests= array of request handles
+!!
+!! OUTPUT
+!!  mpierr= status error
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine xmpi_waitall_2d(array_of_requests, mpierr)
+
+!Arguments-------------------------
+ integer,intent(inout) :: array_of_requests(:,:)
+ integer,intent(out) :: mpierr
+
+!Local variables-------------------
+ integer :: flat_requests(product(shape(array_of_requests)))
+
+! *************************************************************************
+
+ ! MPI_WAITALL is a Fortran interface so cannot pass count and base address a la C
+ ! so flat 2d array and copy in-out. See https://github.com/open-mpi/ompi/issues/587
+ flat_requests = pack(array_of_requests, mask=.True.)
+ call xmpi_waitall_1d(flat_requests, mpierr)
+ array_of_requests = reshape(flat_requests, shape(array_of_requests))
+
+end subroutine xmpi_waitall_2d
 !!***
 
 !----------------------------------------------------------------------
@@ -1887,7 +1951,7 @@ end subroutine xmpi_waitall
 !!  Frees an array of communication request objects.
 !!
 !! INPUTS
-!!  requests(:)= communication request  array (array of handles)
+!!  requests(:)= communication request array (array of handles)
 !!
 !! OUTPUT
 !!  mpierr= status error
@@ -1915,6 +1979,7 @@ subroutine xmpi_request_free(requests,mpierr)
  mpierr = 0
 #ifdef HAVE_MPI
  do ii=1,size(requests)
+   if (requests(ii) /= xmpi_request_null) xmpi_count_requests = xmpi_count_requests - 1
    call MPI_REQUEST_FREE(requests(ii),ier)
  end do
  mpierr=ier
@@ -2047,7 +2112,8 @@ end subroutine xmpi_comm_set_errhandler
 !!    +2 if ntasks>nprocs.
 !!
 !! NOTES
-!!  If nprocs>ntasks then :
+!!  If nprocs>ntasks then:
+!!
 !!    my_start=ntasks+1
 !!    my_stop=ntask
 !!
@@ -2085,15 +2151,15 @@ subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop,warn_msg,ierr)
  warn_msg = ""; ierr=0
  if (res/=0) then
    write(warn_msg,'(4a,i0,a,i0)')ch10,&
-&   'xmpi_split_work: ',ch10,&
-&   'The number of tasks= ',ntasks,' is not divisible by nprocs= ',nprocs
+    'xmpi_split_work: ',ch10,&
+    'The number of tasks= ',ntasks,' is not divisible by nprocs= ',nprocs
    ierr=1
  end if
  if (block==0) then
    write(warn_msg,'(4a,i0,a,i0,2a)')ch10,&
-&   'xmpi_split_work: ',ch10,&
-&   'The number of processors= ',nprocs,' is larger than number of tasks= ',ntasks,ch10,&
-&   'This is a waste '
+    'xmpi_split_work: ',ch10,&
+    'The number of processors= ',nprocs,' is larger than number of tasks= ',ntasks,ch10,&
+    'This is a waste'
     ierr=2
  end if
 
@@ -2173,15 +2239,15 @@ subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop,warn_msg,ierr)
  warn_msg = ""; ierr=0
  if (res/=0) then
    write(warn_msg,'(a,i0,a,i0,2a)')&
-&   'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
-&   'parallelism is not efficient '
+    'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
+    'parallelism is not efficient '
    ierr=+1
  end if
 
  if (block_tmp==0) then
    write(warn_msg,'(a,i0,a,i0,2a)')&
-&   'The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
-&   'This is a waste '
+    'The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
+    'This is a waste '
    ierr=+2
  end if
 
@@ -2247,15 +2313,15 @@ subroutine xmpi_split_work2_i8b(ntasks,nprocs,istart,istop,warn_msg,ierr)
  warn_msg = ""; ierr=0
  if (res/=0) then
    write(warn_msg,'(a,i0,a,i0,2a)')&
-&   'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
-&   'parallelism is not efficient '
+    'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
+    'parallelism is not efficient '
    ierr=+1
  end if
  !
  if (block_tmp==0) then
    write(warn_msg,'(a,i0,a,i0,2a)')&
-&   ' The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
-&   ' This is a waste '
+    ' The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
+    ' This is a waste '
    ierr=+2
  end if
 
@@ -2341,9 +2407,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
 
  task_distrib = RESHAPE(list, [n1,n2,n3,n4])
 
- if (ANY(task_distrib==-999)) then
-   call xmpi_abort(msg="task_distrib == -999")
- end if
+ if (ANY(task_distrib==-999)) call xmpi_abort(msg="task_distrib == -999")
 
  ABI_DEALLOCATE(list)
 
@@ -2424,6 +2488,7 @@ end function xmpi_distrib_with_replicas
 #include "xmpi_ialltoallv.finc"
 
 #include "xmpi_bcast.finc"
+#include "xmpi_ibcast.finc"
 
 #include "xmpi_exch.finc"
 

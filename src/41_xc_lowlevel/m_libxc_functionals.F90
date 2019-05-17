@@ -333,8 +333,6 @@ contains
 
  subroutine libxc_functionals_constants_load()
 
- implicit none
-
 !Local variables-------------------------------
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8
@@ -390,8 +388,6 @@ contains
 !! SOURCE
 
  function libxc_functionals_check(stop_if_error)
-
- implicit none
 
 !Arguments ------------------------------------
  logical :: libxc_functionals_check
@@ -462,8 +458,6 @@ contains
 !! SOURCE
 
  subroutine libxc_functionals_init(ixc,nspden,xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: nspden
@@ -627,8 +621,6 @@ end subroutine libxc_functionals_init
 
  subroutine libxc_functionals_end(xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  type(libxc_functional_type),intent(inout),optional,target :: xc_functionals(2)
 !Local variables-------------------------------
@@ -693,8 +685,6 @@ end subroutine libxc_functionals_init
 !! SOURCE
 
  function libxc_functionals_fullname(xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=100) :: libxc_functionals_fullname
@@ -768,8 +758,6 @@ end subroutine libxc_functionals_init
 
 subroutine libxc_functionals_getrefs(xcrefs,xc_functional)
 
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(out) :: xcrefs(:)
  type(libxc_functional_type),intent(in) :: xc_functional
@@ -794,6 +782,8 @@ subroutine libxc_functionals_getrefs(xcrefs,xc_functional)
      iref_c=-1
    end if
  end do
+#else
+ if (.False.) write(std_out,*) xc_functional%id
 #endif
 
 end subroutine libxc_functionals_getrefs
@@ -818,8 +808,6 @@ end subroutine libxc_functionals_getrefs
 !! SOURCE
 
  function libxc_functionals_family_from_id(xcid)
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: libxc_functionals_family_from_id
@@ -862,8 +850,6 @@ end function libxc_functionals_family_from_id
 !! SOURCE
 
  function libxc_functionals_getid(xcname)
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: libxc_functionals_getid
@@ -917,8 +903,6 @@ end function libxc_functionals_getid
 
  function libxc_functionals_ixc(xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  integer :: libxc_functionals_ixc
  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
@@ -955,8 +939,6 @@ end function libxc_functionals_ixc
 !! SOURCE
 
  function libxc_functionals_isgga(xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  logical :: libxc_functionals_isgga
@@ -999,8 +981,6 @@ end function libxc_functionals_isgga
 !! SOURCE
 
 function libxc_functionals_ismgga(xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  logical :: libxc_functionals_ismgga
@@ -1048,8 +1028,6 @@ end function libxc_functionals_ismgga
 
  function libxc_functionals_is_hybrid(xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  logical :: libxc_functionals_is_hybrid
  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
@@ -1092,8 +1070,6 @@ end function libxc_functionals_is_hybrid
 
 function libxc_functionals_has_kxc(xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  logical :: libxc_functionals_has_kxc
  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
@@ -1135,8 +1111,6 @@ end function libxc_functionals_has_kxc
 !! SOURCE
 
 function libxc_functionals_nspin(xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: libxc_functionals_nspin
@@ -1200,8 +1174,6 @@ end function libxc_functionals_nspin
 
  subroutine libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho,exc,vxc,&
 &           grho2,vxcgr,lrho,vxclrho,tau,vxctau,dvxc,d2vxc,xc_tb09_c,xc_functionals) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: ndvxc,nd2vxc,npts,nspden,order
@@ -1511,8 +1483,6 @@ end subroutine libxc_functionals_getvxc
 
 subroutine libxc_functionals_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
 
- implicit none
-
 !Arguments ------------------------------------
  real(dp),intent(out),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
@@ -1603,8 +1573,6 @@ end subroutine libxc_functionals_get_hybridparams
 !! SOURCE
 
 subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
@@ -1719,8 +1687,6 @@ end subroutine libxc_functionals_set_hybridparams
 !! SOURCE
 
 function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1852,8 +1818,6 @@ end function libxc_functionals_gga_from_hybrid
 !! SOURCE
 
  subroutine libxc_functionals_set_tb09(npts,nspden,rho,grho2,xc_tb09_c,xc_functionals)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: npts,nspden
