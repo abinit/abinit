@@ -2316,7 +2316,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 !Local variables ---------------------------------------
 !scalars
  integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,klmn,kln,mesh_size
- real(dp) :: intgr3,RecipAlpha2
+ real(dp) :: intgr3
  complex(dpc) :: lms
  logical :: ndmom
 !arrays
@@ -2332,7 +2332,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
  LIBPAW_ALLOCATE(ff,(mesh_size))
 
  
- RecipAlpha2 = 1.d0/(InvFineStruct*InvFineStruct)
+ ! RecipAlpha2 = 1.d0/(InvFineStruct*InvFineStruct)
  ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
 
 !Check data consistency
@@ -2376,8 +2376,10 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 ! matrix element <S il im|L_idir|S jl jm>
          call slxyzs(il,im,idir,jl,jm,lms)
 
-         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + intgr3*dreal(lms)*nucdipmom(idir)*RecipAlpha2
-         dijnd(2*klmn,1) = dijnd(2*klmn,1) + intgr3*dimag(lms)*nucdipmom(idir)*RecipAlpha2
+         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
+              & intgr3*dreal(lms)*nucdipmom(idir)*FineStructureConstant2
+         dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
+              & intgr3*dimag(lms)*nucdipmom(idir)*FineStructureConstant2
 
        end do
 

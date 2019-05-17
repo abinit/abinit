@@ -220,6 +220,8 @@ module defs_basis
  real(dp), parameter :: eps0=one/(four_pi*0.0000001_dp*299792458.0_dp**2)
  real(dp), parameter :: AmuBohr2_Cm2=e_Cb*1.0d20/(Bohr_Ang*Bohr_Ang)
  real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
+ real(dp), parameter :: FineStructureConstant=0.0072973525664_dp ! 2014 CODATA value
+ real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
  real(dp), parameter :: Sp_Lt_SI=2.99792458d8 ! speed of light in SI
  real(dp), parameter :: Sp_Lt=Sp_lt_SI/2.1876912633d6 ! speed of light in atomic units
  real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time, in seconds
