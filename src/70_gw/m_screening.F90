@@ -1770,6 +1770,8 @@ CASE(6)
    ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
    ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in chi0_save")
+   ABI_STAT_MALLOC(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
+   ABI_CHECK(ierr==0, "out-of-memory in chi0_tmp")
 
    if (iqibz==1) then
      vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
@@ -1789,25 +1791,25 @@ CASE(6)
 &    chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
    epsm_lf(1,:) = tmp_lf
 
-   ! chi(RPA) = chi0 * (1 - chi0 * v)^-1
-   chi0 = ch0_save
-   do ig2=1,npwe
-     do ig1=1,npwe
-       chi0(ig1,ig2)=-vc_sqrt(ig1)*chi0(ig1,ig2)*vc_sqrt(ig2)
+   ! chi(RPA) = chi0 * (1 - chi0 * v_c)^-1
+   chi0 = chi0_save
+   do ig2=2,npwe
+     do ig1=2,npwe
+       chi0(ig1,ig2,io)=-vc_sqrt(ig1)*chi0(ig1,ig2,io)*vc_sqrt(ig2)
      end do
-     chi0(ig2,ig2)=one+chi0(ig2,ig2)
+     chi0(ig2,ig2,io)=one+chi0(ig2,ig2,io)
    end do
-   chi0_tmp = chi0
+   chi0(1,:,io) = czero; chi0(:,1,io) = czero; chi0(1,1,io) = one
+   chi0_tmp = chi0(:,:,io)
    call xginv(chi0_tmp,npwe,comm=comm) 
    chi0 = chi0_save
-   chi0 = MATMUL(chi0, chi0_tmp) ! chi(RPA)
+   chi0_tmp = MATMUL(chi0(:,:,io), chi0_tmp(:,:)) ! chi(RPA)
    do ig1=1,npwe
-     vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*chi0(ig1,:)
+     chi0_tmp(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*chi0_tmp(ig1,:)
    end do 
-   call xginv(chi0,npwe,comm=comm) ! chi(RPA)^-1
+   call xginv(chi0_tmp,npwe,comm=comm) ! chi(RPA)^-1
    !
-   !vfxc_boot(1,1) = 1.0/(chi00_head * epsm_lf(1,1))
-   vfxc_boot = chi0(:,:,1)/epsm_lf(1,1)
+   vfxc_boot = chi0_tmp/epsm_lf(1,1)
    fxc_head = vfxc_boot(1,1)
    do ig1=1,npwe
      vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
@@ -1830,6 +1832,7 @@ CASE(6)
 
    ABI_FREE(chi0_save)
    ABI_FREE(vfxc_boot)
+   ABI_FREE(chi0_tmp)
 
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
