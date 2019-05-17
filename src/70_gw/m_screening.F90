@@ -1780,17 +1780,34 @@ CASE(6)
    chi0_save = chi0 ! a copy of chi0
    fxc_head = czero; vfxc_boot = czero;
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
-   chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
+   !chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ',chi00_head
    call wrtout(std_out,msg,'COLL')
 
-   ! static
-   io = 1
+   io = 1 ! static
    call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
 &    chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
    epsm_lf(1,:) = tmp_lf
 
-   vfxc_boot(1,1) = 1.0/(chi00_head * epsm_lf(1,1))
+   ! chi(RPA) = chi0 * (1 - chi0 * v)^-1
+   chi0 = ch0_save
+   do ig2=1,npwe
+     do ig1=1,npwe
+       chi0(ig1,ig2)=-vc_sqrt(ig1)*chi0(ig1,ig2)*vc_sqrt(ig2)
+     end do
+     chi0(ig2,ig2)=one+chi0(ig2,ig2)
+   end do
+   chi0_tmp = chi0
+   call xginv(chi0_tmp,npwe,comm=comm) 
+   chi0 = chi0_save
+   chi0 = MATMUL(chi0, chi0_tmp) ! chi(RPA)
+   do ig1=1,npwe
+     vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*chi0(ig1,:)
+   end do 
+   call xginv(chi0,npwe,comm=comm) ! chi(RPA)^-1
+   !
+   !vfxc_boot(1,1) = 1.0/(chi00_head * epsm_lf(1,1))
+   vfxc_boot = chi0(:,:,1)/epsm_lf(1,1)
    fxc_head = vfxc_boot(1,1)
    do ig1=1,npwe
      vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
