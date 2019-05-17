@@ -199,6 +199,7 @@ module m_xg
   public :: xgBlock_print
   public :: xg_finalize
 
+  public :: xg_getPointer
 
   contains
 !!***
@@ -2612,6 +2613,26 @@ module m_xg
     lcwork = 0
   end subroutine xg_finalize
 !!***
+
+
+
+  subroutine xg_getPointer(xgBlock) 
+    use iso_c_binding
+    type(xgBlock_t), intent(in) :: xgBlock
+    integer :: cptr
+    !integer :: i
+    
+    select case (xgBlock%space)
+      case ( SPACE_R,SPACE_CR )
+        !cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
+        cptr = loc(xgBlock%vecR(:,:))
+      case ( SPACE_C )
+        !cptr = getClocC(xgBlock%Ldim,xgBlock%cols,xgBlock%vecC(:,:))
+        cptr = loc(xgBlock%vecC(:,:))
+    end select
+   ! i = cptr
+    print *, cptr
+  end subroutine xg_getPointer
 
 end module m_xg
 !!***

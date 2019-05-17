@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_x.out to t03_x.out0056
+    Renaming old t03_x.out to t03_x.out0250
 ...
  
 
@@ -42,8 +42,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 16 May 2019.
-- ( at 15h18 )
+.Starting date : Fri 17 May 2019.
+- ( at 20h08 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -560,41 +560,29 @@ _setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  MAKE INVOVL START
  MAKE INVOVL START
- MAKE INVOVL END
- VTOFK CALL
  Invovl built
  MAKE INVOVL END
  VTOFK CALL
- CHEBFI2 CALL
+ MAKE INVOVL END
+ VTOFK CALL
  CHEBFI2 CALL
  l_icplx           1
  l_npw        1944
  l_nspinor           1
  l_icplx*l_npw*l_nspinor        1944
  nband         192
+ nband         192
+ CHEBFI2 CALL
  l_icplx           1
  l_npw        1943
  l_nspinor           1
  l_icplx*l_npw*l_nspinor        1943
  nband         192
  nband         192
- nband         192
  AJDE
  AJDE
- xgTransposer%ncolsColsRows          96
- xgTransposer%nrowsColsRows        3887
- xgTransposer%ncolsColsRows          96
- xgTransposer%nrowsColsRows        3887
  PROSAO INIT
  PROSAO INIT
- xgTransposer%ncolsColsRows          96
- xgTransposer%nrowsColsRows        3887
- xgTransposer%ncolsColsRows          96
- xgTransposer%nrowsColsRows        3887
- xgTransposer%ncolsColsRows          96
- xgTransposer%nrowsColsRows        3887
- xgTransposer%ncolsColsRows          96
- xgTransposer%nrowsColsRows        3887
  spacedim X        3887
  blockdim X          96
  spacedim        3887
@@ -632,6 +620,42 @@ _setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
  already_transposed T
  already_transposed T
  already_transposed T
+ spacedim X        3887
+ blockdim X          96
+ spacedim        3887
+ blockdim          96
+ USAO OVDE
+ CHEAT
+ flag_inv_sym 2
+ already_transposed T
+ spacedim X        3887
+ blockdim X          96
+ spacedim        3887
+ blockdim          96
+ USAO OVDE
+ CHEAT
+ flag_inv_sym 2
+ already_transposed T
+ already_transposed T
+ already_transposed T
+ spacedim X        3887
+ blockdim X          96
+ spacedim        3887
+ blockdim          96
+ USAO OVDE
+ CHEAT
+ flag_inv_sym 2
+ already_transposed T
+ spacedim X        3887
+ blockdim X          96
+ spacedim        3887
+ blockdim          96
+ USAO OVDE
+ CHEAT
+ flag_inv_sym 2
+ already_transposed T
+ already_transposed T
+ already_transposed T
  already_transposed T
  spacedim X        3887
  blockdim X          96
@@ -647,45 +671,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
  USAO OVDE
  CHEAT
  flag_inv_sym 2
- already_transposed T
- already_transposed T
- already_transposed T
- already_transposed T
- spacedim X        3887
- blockdim X          96
- spacedim        3887
- blockdim          96
- USAO OVDE
- CHEAT
- flag_inv_sym 2
- spacedim X        3887
- blockdim X          96
- spacedim        3887
- blockdim          96
- USAO OVDE
- CHEAT
- flag_inv_sym 2
- already_transposed T
- already_transposed T
- already_transposed T
- already_transposed T
- spacedim X        3887
- blockdim X          96
- spacedim        3887
- blockdim          96
- USAO OVDE
- CHEAT
- flag_inv_sym 2
- spacedim X        3887
- blockdim X          96
- spacedim        3887
- blockdim          96
- USAO OVDE
- CHEAT
- flag_inv_sym 2
- TRANS ALLTOALLV
- TRANS ALLTOALLV
- TRANS ALLTOALLV
- TRANS ALLTOALLV
- TRANS ALLTOALLV
- TRANS ALLTOALLV
+ PROSAO TRANSPOSE
+ PROSAO TRANSPOSE
+ PROSAO INIT
+ PROSAO INIT
