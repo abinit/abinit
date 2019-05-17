@@ -1795,7 +1795,8 @@ CASE(6)
    end do 
    call xginv(chi0_tmp,npwe,comm=comm) ! chi(RPA)^-1
    !
-   vfxc_boot = chi0_tmp/epsm_lf(1,1)
+   !vfxc_boot = chi0_tmp/epsm_lf(1,1)
+   vfxc_boot(1,1) = chi0_tmp(1,1)/epsm_lf(1,1)
    fxc_head = vfxc_boot(1,1)
    do ig1=1,npwe
      vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
