@@ -891,7 +891,7 @@ B.1 Implementation of the Limited-memory Broyden-Fletcher-Goldfarb-Shanno (LBFGS
     perhaps because of better treatment of numerical details. 
     This algorithm might become the default in ABINIT, if the better behaviour is confirmed.
     Test case : v8#02 .
-    The working routines were based on the original implementation of J. Nocera 
+    The working routines were based on the original implementation of J. Nocedal 
     available on netlib.org.  They have been reshaped and translated into modern fortran, 
     then interfaced to ABINIT by F. Bruneval (sources in 45_geomoptim/m_lbfgs.F90).
 
