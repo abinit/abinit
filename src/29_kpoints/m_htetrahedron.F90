@@ -48,7 +48,7 @@ private
 !!***
 
 integer, parameter :: TETRA_SIZE = 24
-integer, parameter :: TETRA_STEP = 12
+integer, parameter :: TETRA_STEP = 6
 
 !!****t* m_htetrahedron/t_htetra_bucket
 !! NAME
@@ -667,8 +667,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  !
  ABI_MALLOC(tetra%unique_tetra,(tetra%nbuckets))
  do ihash=1,tetra%nbuckets
-   ABI_MALLOC(tetra%unique_tetra(ihash)%indexes,(0:4,24))
-   tetra%unique_tetra(ihash)%indexes = 0
+   ABI_CALLOC(tetra%unique_tetra(ihash)%indexes,(0:4,TETRA_SIZE))
  end do
  tetra%opt = 2; if (present(opt)) tetra%opt = opt
  select case(tetra%opt)
