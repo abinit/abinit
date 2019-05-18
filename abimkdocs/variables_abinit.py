@@ -6828,7 +6828,6 @@ step. To perform this extrapolation, the potential computed in a) is used
 c) SFC at t=[[lotf_nitex]]. Computation of the potential parameters.
 d) LOTF interpolation, linear interpolation of the potential parameters and
 computation of the atomic forces and positions between t=0 and t=lotf_nitex.
-
 **Purpose:** Molecular Dynamics
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** [[dtion]], [[lotf_classic]], [[lotf_nitex]],
