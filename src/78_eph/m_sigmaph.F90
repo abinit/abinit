@@ -583,13 +583,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,sppoldbl1=1,timrev1=1
  integer,parameter :: igscq0=0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
- integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl, my_npert, nqeff
+ integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl, my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
  integer :: mcgq, mgscq, nband_kq
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
- integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine
+ integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it,imyq,band, ignore_kq, ignore_ibsum_kq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu, iang
@@ -1753,7 +1753,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
-                     if (ediff <= TOL_EDIFF) then
+                     if (ediff <= TOL_EDIFF .and. sigma%frohl_model == 3) then
                        gkq2_dfrohl = sigma%ephwg%frohl_ibz(iq_ibz_fine,nu) - sigma%ephwg%frohl_ibz(iq_ibz_frohl,nu)
                        gkq2_pf = gkq2_pf + weight_q*gkq2_dfrohl
                      end if
@@ -2850,7 +2850,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  if (new%qint_method > 0) then
    if (new%use_doublegrid) then
      ! Double-grid technique from ab-initio energies or star-function interpolation.
-     new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
+     new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, new%frohl_model, comm)
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
    else
      downsample = any(ebands%kptrlatt /= qptrlatt) .or. ebands%nshiftk /= my_nshiftq
@@ -2858,16 +2858,16 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      if (downsample) then
        MSG_COMMENT("K-mesh != Q-mesh for self-energy. Will downsample electron energies.")
        tmp_ebands = ebands_downsample(ebands, cryst, qptrlatt, my_nshiftq, my_shiftq)
-       new%ephwg = ephwg_from_ebands(cryst, ifc, tmp_ebands, bstart, new%nbsum, comm)
+       new%ephwg = ephwg_from_ebands(cryst, ifc, tmp_ebands, bstart, new%nbsum, new%frohl_model, comm)
        call ebands_free(tmp_ebands)
      else
-       new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
+       new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, new%frohl_model, comm)
      end if
    end if
  else
    if (new%use_doublegrid) then
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
-     new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
+     new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, new%frohl_model, comm)
    endif
  end if
 
@@ -3832,6 +3832,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    else
      call self%ephwg%setup_kpoint(kk, prtvol, comm)
    end if
+   call self%ephwg%report_stats()
  endif
 
  call cwtime(cpu, wall, gflops, "start")

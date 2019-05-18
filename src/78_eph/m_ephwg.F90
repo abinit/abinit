@@ -107,8 +107,15 @@ type, public :: ephwg_t
   ! Number of q-points in IBZ and full BZ.
 
   integer :: nq_k
-  ! Nunber of points in IBZ(k) i.e. the irreducible wedge
+  ! Number of points in IBZ(k) i.e. the irreducible wedge
   ! defined by the operations of the little group of k.
+
+  integer :: frohl_model
+  ! Integer controling whether to compute and store the electron-phonon matrix elements
+  ! computed from generalized Frohlich model
+  ! C. Verdi and F. Giustino, Phys. Rev. Lett. 115, 176401 (2015).
+  ! 1,2: Unused (for compatibility with sigma_t)
+  ! 3: Compute Frohlich electron-phonon matrix elements in the IBZ for later integration
 
   integer, allocatable :: kq2ibz(:)
   ! kq2ibz(nq_k)
@@ -135,7 +142,7 @@ type, public :: ephwg_t
   ! (nibz, natom3)
   ! Phonon frequencies in the IBZ
 
-  complex(dp),allocatable :: frohl_ibz(:,:)
+  real(dp),allocatable :: frohl_ibz(:,:)
   ! (nibz, natom3)
   ! Frohlich matrix elements in the IBZ
 
@@ -165,6 +172,9 @@ type, public :: ephwg_t
 
      procedure :: double_grid_setup_kpoint => ephwg_double_grid_setup_kpoint
      ! Prepare tetrahedron method for given external k-point using double grid routines.
+
+     procedure :: report_stats => ephwg_report_stats
+     ! Report how much memory is being used by this object
 
      procedure :: get_deltas => ephwg_get_deltas
      ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
@@ -220,13 +230,15 @@ contains
 !! SOURCE
 
 type(ephwg_t) function ephwg_new( &
-&  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, comm) result(new)
+&  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, frohl_model, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt, nshiftk, nkibz, bstart, nbcount, nsppol, comm
  type(crystal_t),target,intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: frohl_model
+
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
  real(dp),intent(in) :: shiftk(3, nshiftk), kibz(3, nkibz)
@@ -258,6 +270,7 @@ type(ephwg_t) function ephwg_new( &
  new%timrev = kpts_timrev_from_kptopt(new%kptopt)
  new%nibz = nkibz
  new%cryst => cryst
+ new%frohl_model = frohl_model
  call alloc_copy(kibz, new%ibz)
 
  call cwtime(cpu, wall, gflops, "start")
@@ -281,12 +294,16 @@ type(ephwg_t) function ephwg_new( &
 
  ! Fourier interpolate phonon frequencies on the same mesh.
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
- ABI_CALLOC(new%frohl_ibz, (new%nibz, new%natom3))
+ if (frohl_model==3) then
+   ABI_CALLOC(new%frohl_ibz, (new%nibz, new%natom3))
+ end if
+
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
    call ifc_fourq(ifc, cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
 
+   if (frohl_model/=3) cycle
    ! Compute Frohlich matrix elements
    qpt = new%ibz(:,ik)
    qpt_cart = two_pi*matmul(cryst%gprimd, qpt)
@@ -312,7 +329,7 @@ type(ephwg_t) function ephwg_new( &
  call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
- call xmpi_sum(new%frohl_ibz, comm, ierr)
+ if (frohl_model==3) call xmpi_sum(new%frohl_ibz, comm, ierr)
 
 end function ephwg_new
 !!***
@@ -326,7 +343,7 @@ end function ephwg_new
 !! FUNCTION
 !!  Convenience constructor to initialize the object from an ebands_t object
 
-type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, comm) result(new)
+type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, frohl_model, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -334,6 +351,7 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, co
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  type(ebands_t),intent(in) :: ebands
+ integer,intent(in) :: frohl_model
 
 !Local variables-------------------------------
  real(dp),allocatable :: eig_ibz(:, :, :)
@@ -342,7 +360,7 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, co
 
  if (bstart == 1 .and. nbcount == ebands%mband) then
    new = ephwg_new(cryst, ifc, bstart, nbcount, ebands%kptopt, ebands%kptrlatt, ebands%nshiftk, ebands%shiftk, ebands%nkpt, &
-      ebands%kptns, ebands%nsppol, ebands%eig, comm)
+      ebands%kptns, ebands%nsppol, ebands%eig, frohl_model, comm)
  else
    ABI_CHECK(inrange(bstart, [1, ebands%mband]), "Wrong bstart")
    ABI_CHECK(inrange(bstart + nbcount - 1, [1, ebands%mband]), "Wrong nbcount")
@@ -350,7 +368,7 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, co
    ABI_MALLOC(eig_ibz, (nbcount, ebands%nkpt, ebands%nsppol))
    eig_ibz = ebands%eig(bstart:bstart+nbcount-1, : , :)
    new = ephwg_new(cryst, ifc, bstart, nbcount, ebands%kptopt, ebands%kptrlatt, ebands%nshiftk, ebands%shiftk, ebands%nkpt, &
-      ebands%kptns, ebands%nsppol, eig_ibz, comm)
+      ebands%kptns, ebands%nsppol, eig_ibz, frohl_model, comm)
    ABI_FREE(eig_ibz)
  end if
 
@@ -715,6 +733,52 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  ABI_FREE(bz2lgkibz)
 
 end subroutine ephwg_double_grid_setup_kpoint
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ephwg/ephwg_report_stats
+!! NAME
+!! ephwg_report_stats
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ephwg_report_stats(self)
+
+!Arguments ------------------------------------
+!scalars
+ class(ephwg_t),intent(in) :: self
+
+!Variables
+ real(dp) :: mem_tot
+!----------------------------------------------------------------------
+
+ ! IBZ qpoints
+ mem_tot = 3 * self%nibz * dp
+ ! BZ qpoints
+ mem_tot = mem_tot + 3 * self%nbz * dp
+ ! lgk2ibz and kq2ibz
+ mem_tot = mem_tot + self%nq_k * 2 * 4
+ ! phonon frequencies
+ mem_tot = mem_tot + self%nibz * self%natom3 * dp
+ ! Frolich matrix elements
+ if (self%frohl_model == 3) mem_tot = mem_tot + self%nibz * self%natom3 * dp
+ ! eigenvalues
+ mem_tot = mem_tot + self%nibz * self%nbcount * self%nsppol * dp
+
+ write(std_out,"(a,f8.1,a)") " Memory allocated for ephwg:", mem_tot * b2Mb, " [Mb] <<< MEM"
+
+end subroutine ephwg_report_stats
 !!***
 
 !----------------------------------------------------------------------
