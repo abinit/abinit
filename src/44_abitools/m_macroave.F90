@@ -74,7 +74,6 @@ subroutine iorho( task, fname, cell, mesh, nsm, maxp, nspin, f, found )
 ! those required to copy the array f from the file, then the required
 ! values of maxp and nspin are returned on output, but f is not read.
 ! *********************************************************************
-      implicit          none
 
 ! Arguments
       character*(*)     fname, task
@@ -150,7 +149,6 @@ SUBROUTINE FOUR1(DATA,NN,ISIGN)
 ! Output:
 !   real*8  DATA(2*NN) : Fourier transformed function
 !**********************************************************************
-      IMPLICIT NONE
       INTEGER          :: NN, ISIGN
       real(kind=kind(0.0d0)) :: DATA(2*NN)
 
@@ -222,7 +220,6 @@ SUBROUTINE POLINT(XA,YA,N,X,Y,DY)
 !   real*8  Y     : interpolated value of y(x) at X
 !   real*8  DY    : accuracy estimate
 !*****************************************************************
-      IMPLICIT NONE
       INTEGER          :: N
       real(kind=kind(0.0d0)) :: XA(N),YA(N), X, Y, DY
 
@@ -281,7 +278,6 @@ SUBROUTINE MACROAV_SPLINE(DX,Y,N,YP1,YPN,Y2)
 ! - If YP1 or YPN are larger than 1E30, the natural spline
 !   condition (d2y/dx2=0) at the corresponding edge point.
 !************************************************************
-      IMPLICIT NONE
       INTEGER          :: N
       real(kind=kind(0.0d0)) :: DX, Y(N), YP1, YPN, Y2(N)
 
@@ -332,7 +328,6 @@ SUBROUTINE MACROAV_SPLINT(DX,YA,Y2A,N,X,Y,DYDX)
 !   real*8  Y     : interpolated value of y(x) at point X
 !   real*8  DYDX  : interpolated value of dy/dx at point X
 !***************************************************************
-      IMPLICIT NONE
       INTEGER          :: N
       real(kind=kind(0.0d0)) :: DX, YA(N), Y2A(N), X, Y, DYDX
 
@@ -362,7 +357,6 @@ END SUBROUTINE MACROAV_SPLINT
 real(kind=kind(0.0d0)) FUNCTION SURPLA( C )
 
 !  CALCULATES THE SRFACE OF THE UNIT CELL NORMAL TO THE INTERFACE
-      IMPLICIT NONE
 
       real(kind=kind(0.0d0)) C(3,3)
       SURPLA = ( C(2,1)*C(3,2) - C(3,1)*C(2,2) ) **2 +&
@@ -389,8 +383,6 @@ subroutine thetaft(n,L,lav,ft)
 !       |__________|_____________________|_________|___
 !       0         lav/2               L-lav/2     L
 !
-        implicit none
-
         integer n,j
         real*8 L,lav
         real*8 ft(2*n)
@@ -435,8 +427,6 @@ DOUBLE PRECISION FUNCTION VOLCEL( C )
 ! or http://www.gnu.org/copyleft/gpl.txt .
 
 !  CALCULATES THE VOLUME OF THE UNIT CELL
-      IMPLICIT NONE
-
       DOUBLE PRECISION C(3,3)
       VOLCEL = ( C(2,1)*C(3,2) - C(3,1)*C(2,2) ) * C(1,3) +&
      &         ( C(3,1)*C(1,2) - C(1,1)*C(3,2) ) * C(2,3) +&

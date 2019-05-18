@@ -804,8 +804,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
    MSG_ERROR(" different nreh are not supported")
  end if
 
- ABI_STAT_MALLOC(cbuff_dpc,(exc_size), ierr)
- ABI_CHECK(ierr==0, "out of memory in cbuff_dpc")
+ ABI_MALLOC_OR_DIE(cbuff_dpc,(exc_size), ierr)
  !
  ! The two cases nsppol==1,2 can be merged but we keep them
  ! separated to keep to code readable.
@@ -1350,8 +1349,7 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
  hsize = SUM(Bsp%nreh); if (Bsp%use_coupling>0) hsize=2*hsize
 
  ABI_MALLOC(ene_list,(nvec))
- ABI_STAT_MALLOC(vec_list,(hsize,nvec), ierr)
- ABI_CHECK(ierr==0, "out of memory in vec_list")
+ ABI_MALLOC_OR_DIE(vec_list,(hsize,nvec), ierr)
 
  call exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp=Bsp)
 
@@ -1451,7 +1449,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 
 !Local variables ------------------------------
 !scalars
- integer :: ncid,ncerr,cmplx_id,nband_id,nkbz_id,nsppol_id,nq_id,xyz_id
+ integer :: ncid,cmplx_id,nband_id,nkbz_id,nsppol_id,nq_id,xyz_id
  integer :: minb_id,maxb_id,ome_id,iq,is,ik,ib,jb
  integer :: dimOME(6),dimKPT(2),dimQPT(2),dimSCA(0),start6(6),count6(6)
  real(dp) :: complex2(2)
@@ -1461,9 +1459,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  ierr = 1
 
 !1. Create netCDF file
- ncerr = nctk_open_create(ncid, filname, xmpi_comm_self)
- !MT aug 2013: keep the following on THREE lines in order to help abilint script
- NCF_CHECK_MSG(ncerr," create netcdf OME file")
+ NCF_CHECK_MSG(nctk_open_create(ncid, filname, xmpi_comm_self), " create netcdf OME file")
 
 !2. Define dimensions
  NCF_CHECK(nf90_def_dim(ncid,"xyz",3,xyz_id))
@@ -1483,13 +1479,13 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 !3. Define variables
 
  call ab_define_var(ncid, dimOME, ome_id, NF90_DOUBLE,&
-& "OME", "Values of optical matrix elements","Tobedone")
+ "OME", "Values of optical matrix elements","Tobedone")
 
  call ab_define_var(ncid, dimSCA, minb_id, NF90_INT,"minb",&
-& "Minimum band index for the optical matrix elements", "Dimensionless")
+ "Minimum band index for the optical matrix elements", "Dimensionless")
 
  call ab_define_var(ncid, dimSCA, maxb_id, NF90_INT,"maxb",&
-& "Maximum band index for the optical matrix elements", "Dimensionless")
+ "Maximum band index for the optical matrix elements", "Dimensionless")
 
 !4. End define mode
  NCF_CHECK(nf90_enddef(ncid))
@@ -1509,8 +1505,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
            start6 = (/ 1, ib-minb+1, jb-minb+1, ik, is, iq /)
            count6 = (/ 2, 1, 1, 1, 1, 1 /)
            complex2 = (/ REAL(opt_cvk(ib,jb,ik,is,iq)),AIMAG(opt_cvk(ib,jb,ik,is,iq)) /)
-           ncerr = nf90_put_var(ncid, ome_id, complex2, start = start6, count = count6)
-           NCF_CHECK_MSG(ncerr," write variable OME")
+           NCF_CHECK(nf90_put_var(ncid, ome_id, complex2, start = start6, count = count6))
        end do
        end do
      end do

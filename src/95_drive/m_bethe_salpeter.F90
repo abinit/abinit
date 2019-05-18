@@ -221,7 +221,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp
  real(dp) :: compch_fft,compch_sph,gsq_osc
  real(dp) :: vxcavg
- logical :: iscompatibleFFT,paw_add_onsite,call_pawinit
+ logical :: iscompatibleFFT,is_dfpt=.false.,paw_add_onsite,call_pawinit
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,w_fname
  type(Pawfgr_type) :: Pawfgr
@@ -405,12 +405,13 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
    ! Initialize and compute data for LDA+U
-   if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
-     Paw_dmft%use_dmft=Dtset%usedmft
-     call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-&     Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+   Paw_dmft%use_dmft=Dtset%usedmft
+   call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
+&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu)
-     MSG_ERROR("BS equation with LDA+U not completely coded")
+   if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
+     msg='BS equation with LDA+U not completely coded!'
+     MSG_ERROR(msg)
    end if
    if (my_rank == master) call pawtab_print(Pawtab)
 
@@ -605,9 +606,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call paw_ij_nullify(KS_paw_ij)
 
    has_dijso=Dtset%pawspnorb
-   has_dijU=Dtset%usepawu
-   has_dijso=Dtset%pawspnorb
-   has_dijU=Dtset%usepawu
+   has_dijU=merge(0,1,Dtset%usepawu==0)
 
    call paw_ij_init(KS_paw_ij,cplex1,Dtset%nspinor,Dtset%nsppol,&
 &   Dtset%nspden,Dtset%pawspnorb,Cryst%natom,Cryst%ntypat,Cryst%typat,Pawtab,&
@@ -796,14 +795,14 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
        end do
      end do
    end do
-!
-!  * Now read m_lda_to_qp and update the energies in QP_BSt.
-!  TODO switch on the renormalization of n in sigma.
+   !
+   ! Now read m_lda_to_qp and update the energies in QP_BSt.
+   ! TODO switch on the renormalization of n in sigma.
    ABI_MALLOC(prev_rhor,(nfftf,Wfd%nspden))
    ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Wfd%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Wfd%usepaw,Wfd%nspden,1,nscf,&
-&   nfftf,ngfftf,Cryst%ucvol,Wfd%paral_kgb,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,prev_rhor,prev_Pawrhoij)
+    nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,prev_rhor,prev_Pawrhoij)
 
    ABI_FREE(prev_rhor)
    if (Psps%usepaw==1.and.nscf>0) then
@@ -1636,13 +1635,9 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  if (Dtset%usepaw==1) call pawrhoij_free(Pawrhoij)
  ABI_DT_FREE(Pawrhoij)
 
- ! === Find optimal value for G-sphere enlargment due to oscillator matrix elements ===
-
+ ! Find optimal value for G-sphere enlargment due to oscillator matrix elements
  ! We will split k-points over processors
- call xmpi_split_work(Kmesh%nbz,comm,my_k1,my_k2,msg,ierr)
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work(Kmesh%nbz, comm, my_k1, my_k2)
 
  ! If there is no work to do, just skip the computation
  if (my_k2-my_k1+1 <= 0) then

@@ -44,14 +44,12 @@ module m_phonons
  use m_supercell
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
- use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_symtk,           only : matr3inv
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type
- use m_geometry,        only : mkrdim, symredcart
+ use m_geometry,        only : mkrdim, symredcart, normv
  use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph
- use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
  use m_ifc,             only : ifc_type, ifc_fourq, ifc_calcnwrite_nana_terms
  use m_anaddb_dataset,  only : anaddb_dataset_type
@@ -162,7 +160,6 @@ module m_phonons
  end type phonon_dos_type
 
  public :: mkphdos
- public :: phdos_unittests
  public :: phdos_print
  public :: phdos_print_debye
  public :: phdos_print_msqd
@@ -737,8 +734,8 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  real(dp) :: msqd_atom_tmp(3,3),temp_33(3,3)
  real(dp) :: symcart(3,3,crystal%nsym)
  real(dp) :: syme2_xyza(3, crystal%natom)
- real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:),new_shiftq(:,:)
- real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),tmp_phfrq(:),tweight(:,:)
+ real(dp),allocatable :: full_eigvec(:,:,:,:,:),full_phfrq(:,:),new_shiftq(:,:)
+ real(dp),allocatable :: qbz(:,:),qibz(:,:),tmp_phfrq(:)
  real(dp),allocatable :: wtq_ibz(:),xvals(:), gvals_wtq(:), wdt(:,:)
  real(dp),allocatable :: energies(:)
 
@@ -819,8 +816,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
    ! this may change in the future if Matteo refactorizes the tetra weights as sums over k instead of sums over bands
    ABI_CALLOC(full_phfrq, (3*natom, phdos%nqibz))
-   ABI_STAT_MALLOC(full_eigvec, (2, 3, natom, 3*natom, phdos%nqibz), ierr)
-   ABI_CHECK(ierr == 0, 'out-of-memory in full_eigvec')
+   ABI_MALLOC_OR_DIE(full_eigvec, (2, 3, natom, 3*natom, phdos%nqibz), ierr)
    full_eigvec = zero
  end if ! tetra
  ABI_SFREE(bz2ibz)
@@ -980,6 +976,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
      energies = linspace(phdos%omega_min,phdos%omega_max,phdos%nomega)
 
      do iq_ibz=1,phdos%nqibz
+       if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
 
        ! Compute the weights for this q-point using tetrahedron
        do imode=1,3*natom
@@ -1161,252 +1158,6 @@ end subroutine mkphdos
 
 !----------------------------------------------------------------------
 
-!!****f* m_phonons/phdos_unittests
-!! NAME
-!!
-!! FUNCTION
-!!  Unit tests for the tetrahedron routines
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine phdos_unittests(comm)
-
-!Arguments -------------------------------
-!scalars
- integer,intent(in) :: comm
-
-!Local variables -------------------------
-!scalars
- type(crystal_t) :: crystal
- integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
- integer,parameter :: timrev1=1,npsp1=1,nsym=4
- logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
- real(dp),parameter :: max_occ1=1.d0
- integer :: nqibz,iqbz,iqibz,nqbz,ierr,natom,nomega,nprocs, my_rank, ncid
- integer :: iw,nw,ntypat
- real(dp) :: cpu, wall, gflops
- real(dp) :: dosdeltae, emin, emax
- character(len=500) :: msg
- character(len=80) :: errstr
- type(t_tetrahedron) :: tetraq
- type(t_htetrahedron) :: htetraq
-!arrays
- integer :: in_qptrlatt(3,3),new_qptrlatt(3,3),typat(1)
- integer :: symrel(3,3,nsym),symafm(nsym)
- integer,allocatable :: bz2ibz(:,:)
- real(dp) :: dos_qshift(3,nqshft1)
- real(dp) :: amu(1),qpt(3),xred(3,1),znucl(1),zion(1)
- real(dp) :: rprimd(3,3),rlatt(3,3),qlatt(3,3),tnons(3,nsym)
- real(dp),allocatable :: tweight(:,:),dtweightde(:,:)
- real(dp),allocatable :: qbz(:,:),qibz(:,:)
- real(dp),allocatable :: wtq_ibz(:), wdt(:,:)
- real(dp),allocatable :: energies(:),eigen(:)
- real(dp),allocatable :: dos(:),idos(:)
-
-! *********************************************************************
-
- call wrtout(std_out,' Unit Tests')
- call cwtime(cpu, wall, gflops, "start")
-
- ! Create a regular grid
- in_qptrlatt(:,1)=[50, 0, 0]
- in_qptrlatt(:,2)=[ 0,50, 0]
- in_qptrlatt(:,3)=[ 0, 0,50]
- dos_qshift(:,1) =[0.0,0.0,0.5]
-
- amu = 1
- natom = 1
- ntypat = 1
- typat = 1
- znucl=1
- zion=1
- xred(:,1) = [0,0,0]
- rprimd(:,1) = [ 1.0,          0.0,0.0]
- rprimd(:,2) = [-0.5,sqrt(3.0)/2.0,0.0]
- rprimd(:,3) = [ 0.0,          0.0,1.0]
-
- symafm=1
- tnons=0
- !identity
- symrel(:,1,1) = [ 1,0,0]
- symrel(:,2,1) = [ 0,1,0]
- symrel(:,3,1) = [ 0,0,1]
-
- !reflection x axis
- symrel(:,1,2) = [-1,0,0]
- symrel(:,2,2) = [ 0,1,0]
- symrel(:,3,2) = [ 0,0,1]
-
- !reflection y axis
- symrel(:,1,3) = [1, 0,0]
- symrel(:,2,3) = [0,-1,0]
- symrel(:,3,3) = [0, 0,1]
-
- !reflection z axis
- symrel(:,1,4) = [1,0, 0]
- symrel(:,2,4) = [0,1, 0]
- symrel(:,3,4) = [0,0,-1]
-
- call crystal_init(amu,crystal,space_group0,natom,npsp1,ntypat,nsym,rprimd,typat,xred,&
-                   zion,znucl,timrev1,use_antiferro_true,remove_inv_false,"test",&
-                   symrel=symrel,symafm=symafm,tnons=tnons)
- call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
-                             nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
- call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
-
- ! Initialize old tetrahedra
- rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
- call init_tetra(bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
- call cwtime_report(" init_tetra", cpu, wall, gflops)
-
- ! Initialize new tetrahedra
- call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, &
-                  nqibz, ierr, errstr, comm)
- call cwtime_report(" init_htetra", cpu, wall, gflops)
-
- ! Prepare DOS calculation
- emin = 0.d0
- emax = 5.d0
- nw = 500
- dosdeltae = (emax-emin)/(nw-1)
- ABI_MALLOC(energies,(nw))
- ABI_MALLOC(dos,(nw))
- ABI_MALLOC(idos,(nw))
- ABI_MALLOC(wdt,(nw,2))
- energies = arth(emin,dosdeltae,nw)
-
- !
- ! 1. Compute energies of a parabolic band
- !
- ABI_MALLOC(eigen,(nqibz))
- do iqibz=1,nqibz
-   qpt = qibz(1,iqibz)
-   eigen(iqibz) = 10d0*(qpt(1)*qpt(1) + qpt(2)*qpt(2) + qpt(3)*qpt(3))+0.5
- end do
-
- ! Compute DOS using old tetrahedron implementation
- ABI_MALLOC(tweight,(nw,nqibz))
- ABI_MALLOC(dtweightde,(nw,nqibz))
- call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dtweightde,comm)
- dos(:)  = sum(dtweightde,2)
- idos(:) = sum(tweight,2)
- call cwtime_report(" tetra_blochl", cpu, wall, gflops)
- call write_file('parabola_tetra.dat', nw, energies, idos, dos)
-
- ! Compute DOS using new tetrahedron implementation
- call htetra_blochl_weights(htetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dtweightde,comm)
- dos(:)  = sum(dtweightde,2)
- idos(:) = sum(tweight,2)
- call cwtime_report(" htetra_blochl", cpu, wall, gflops)
- call write_file('parabola_htetra.dat', nw, energies, idos, dos)
-
- dos = zero; idos = zero
- do iqibz=1,nqibz
-   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
-   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
-   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
- end do
- call cwtime_report(" htetra_get_onewk_wvals", cpu, wall, gflops)
- call write_file('parabola_htetra_onewk_wvals.dat', nw, energies, idos, dos)
-
- dos = zero; idos = zero
- do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
-   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
-   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
- end do
- call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
- call write_file('parabola_htetra_onewk.dat', nw, energies, idos, dos)
-
- !
- ! 2. Compute energies for a flat band
- !
- eigen = 0.5
-
- ! Compute DOS using old tetrahedron implementation
- call tetra_blochl_weights(tetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dtweightde,comm)
- dos(:)  = sum(dtweightde,2)
- idos(:) = sum(tweight,2)
- call cwtime_report(" tetra_blochl", cpu, wall, gflops)
- call write_file('flat_tetra.dat', nw, energies, idos, dos)
-
- ! Compute DOS using new tetrahedron implementation
- call htetra_blochl_weights(htetraq,eigen,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dtweightde,comm)
- dos(:)  = sum(dtweightde,2)
- idos(:) = sum(tweight,2)
- call cwtime_report(" htetra_blochl", cpu, wall, gflops)
- call write_file('flat_htetra.dat', nw, energies, idos, dos)
-
- dos = zero; idos = zero
- do iqibz=1,nqibz
-   call htetra_get_onewk_wvals(htetraq,iqibz,bcorr0,nw,energies,max_occ1,nqibz,eigen,wdt)
-   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
-   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
- end do
- call cwtime_report(" htetra_get_onewk_wvals", cpu, wall, gflops)
- call write_file('flat_htetra_onewk_wvals.dat', nw, energies, idos, dos)
-
- dos = zero; idos = zero
- do iqibz=1,nqibz
-   call htetra_get_onewk(htetraq,iqibz,bcorr0,nw,nqibz,eigen,emin,emax,max_occ1,wdt)
-   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
-   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
- end do
- call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
- call write_file('flat_htetra_onewk.dat', nw, energies, idos, dos)
-
-
- ! Free memory
- ABI_SFREE(energies)
- ABI_SFREE(eigen)
- ABI_SFREE(wdt)
- ABI_SFREE(tweight)
- ABI_SFREE(dtweightde)
- ABI_SFREE(wtq_ibz)
- ABI_SFREE(dos)
- ABI_SFREE(idos)
- ABI_SFREE(qbz)
- ABI_SFREE(qibz)
- ABI_SFREE(bz2ibz)
- call crystal%free()
- call htetra_free(htetraq)
- call destroy_tetra(tetraq)
-
- contains
- subroutine write_file(fname,nw,energies,dos,idos)
-
- integer,intent(in) :: nw
- character(len=*), intent(in) :: fname
- real(dp),intent(in) :: energies(nw),dos(nw),idos(nw)
- integer :: iw
-
- open(unit=20,file=fname)
- do iw=1,nw-2
-   write(20,*) energies(iw), idos(iw), dos(iw)
- end do
- close(unit=20)
-
- end subroutine write_file
-
-end subroutine phdos_unittests
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_phonons/zacharias_supercell_make
 !! NAME
 !! zacharias_supercell_make
@@ -1483,17 +1234,12 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
  ABI_FREE(qshft)
 
  ! allocate arrays with all of the q, omega, and displacement vectors
- ABI_STAT_MALLOC(phfrq_allq, (3*Crystal%natom*nqibz), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
- ABI_STAT_MALLOC(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_MALLOC_OR_DIE(phfrq_allq, (3*Crystal%natom*nqibz), ierr)
+ ABI_MALLOC_OR_DIE(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
 
- ABI_STAT_MALLOC(phfrq, (3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
- ABI_STAT_MALLOC(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
- ABI_STAT_MALLOC(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_MALLOC_OR_DIE(phfrq, (3*Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
 
  ! loop over q to get all frequencies and displacement vectors
  ABI_ALLOCATE(modeindex, (nqibz*3*Crystal%natom))
@@ -1523,7 +1269,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
 
  ! precalculate phase factors???
 
- ABI_STAT_MALLOC(phdispl1, (2, 3, Crystal%natom), ierr)
+ ABI_MALLOC(phdispl1, (2, 3, Crystal%natom))
  ! for all modes at all q in whole list, sorted
  modesign=one
  do imode = 1, 3*Crystal%natom*nqibz
@@ -1665,17 +1411,12 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
  ABI_FREE(qshft)
 
  ! allocate arrays wzith all of the q, omega, and displacement vectors
- ABI_STAT_MALLOC(phfrq_allq, (3*Crystal%natom, nqibz), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
- ABI_STAT_MALLOC(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_MALLOC_OR_DIE(phfrq_allq, (3*Crystal%natom, nqibz), ierr)
+ ABI_MALLOC_OR_DIE(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
 
- ABI_STAT_MALLOC(phfrq, (3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
- ABI_STAT_MALLOC(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
- ABI_STAT_MALLOC(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
- ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_MALLOC_OR_DIE(phfrq, (3*Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
 
  ! loop over q to get all frequencies and displacement vectors
  imode = 0
@@ -1696,7 +1437,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
 
  ! precalculate phase factors???
 
- ABI_STAT_MALLOC(phdispl1, (2, 3, Crystal%natom), ierr)
+ ABI_MALLOC_OR_DIE(phdispl1, (2, 3, Crystal%natom), ierr)
 
  ! for all modes at all q in whole list, sorted
  do iq = 1, nqibz
@@ -3528,7 +3269,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  if (dtset%prtphbands == 0) return
 
  if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) then
-   MSG_WARNING("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. returning")
+   MSG_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
    return
  end if
 

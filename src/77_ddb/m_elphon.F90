@@ -2818,7 +2818,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 
 !Local variables-------------------------------
 !scalars
- integer :: ikpt,jkpt,kkpt,new, ik
+ integer :: irank,ikpt,jkpt,kkpt,new, ik
  real(dp) :: res
  type(kptrank_type) :: kptrank_t
 !arrays
@@ -2831,11 +2831,12 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 
  ik=1
  do ikpt=1,nkpt
+   call get_rank_1kpt(kptns(:,ikpt),irank,kptrank_t)
 !  add kpt to FS kpts, in order, increasing z, then y, then x !
    new = 1
 !  look for position to insert kpt ikpt among irredkpts already found
    do jkpt=1,ik-1
-     if (kptirrank(jkpt) > kptrank_t%rank(ikpt)) then
+     if (kptirrank(jkpt) > irank) then
 !      shift all the others up
        do kkpt=ik-1,jkpt,-1
          kptirr(:,kkpt+1) = kptirr(:,kkpt)
@@ -2847,7 +2848,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
        call wrap2_pmhalf(kptns(2,ikpt),kptirr(2,jkpt),res)
        call wrap2_pmhalf(kptns(3,ikpt),kptirr(3,jkpt),res)
 
-       kptirrank(jkpt) = kptrank_t%rank(ikpt)
+       kptirrank(jkpt) = irank
        FSirredtoGS(jkpt) = ikpt
        new=0
        exit
@@ -2858,7 +2859,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
      call wrap2_pmhalf(kptns(1,ikpt),kptirr(1,ikpt),res)
      call wrap2_pmhalf(kptns(2,ikpt),kptirr(2,ikpt),res)
      call wrap2_pmhalf(kptns(3,ikpt),kptirr(3,ikpt),res)
-     kptirrank(ik) = kptrank_t%rank(ikpt)
+     kptirrank(ik) = irank
      FSirredtoGS(ik) = ikpt
    end if
    ik=ik+1
@@ -3998,8 +3999,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
    else
      sz6=elph_ds%nqptirred
    end if
-   ABI_STAT_ALLOCATE(elph_ds%gkk_qpt,(2,sz2,sz3,sz4,sz5,sz6), ierr)
-   ABI_CHECK(ierr==0, 'Trying to allocate array elph_ds%gkk_qpt')
+   ABI_MALLOC_OR_DIE(elph_ds%gkk_qpt,(2,sz2,sz3,sz4,sz5,sz6), ierr)
 
    elph_ds%gkk_qpt = zero
 
@@ -4034,8 +4034,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
 
  sz2=elph_ds%nbranch;sz3=elph_ds%k_phon%my_nkpt
  sz4=elph_ds%nsppol;sz5=elph_ds%nqpt_full
- ABI_STAT_ALLOCATE(gkk_flag,(sz2,sz2,sz3,sz4,sz5), ierr)
- ABI_CHECK(ierr==0, "allocating gkk_flag")
+ ABI_MALLOC_OR_DIE(gkk_flag,(sz2,sz2,sz3,sz4,sz5), ierr)
 
  call read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_prt_yambo,unitgkk)
 
@@ -4796,11 +4795,9 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  elph_tr_ds%tmp_velocwtk = zero
  elph_tr_ds%tmp_vvelocwtk = zero
 
- ABI_STAT_ALLOCATE(elph_ds%k_phon%velocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol), ierr)
- ABI_CHECK(ierr==0, 'allocating elph_ds%k_phon%velocwtk')
+ ABI_MALLOC_OR_DIE(elph_ds%k_phon%velocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol), ierr)
 
- ABI_STAT_ALLOCATE(elph_ds%k_phon%vvelocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol), ierr)
- ABI_CHECK(ierr==0, 'allocating elph_ds%k_phon%vvelocwtk')
+ ABI_MALLOC_OR_DIE(elph_ds%k_phon%vvelocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol), ierr)
 
  elph_ds%k_phon%velocwtk = zero
  elph_ds%k_phon%vvelocwtk = zero
@@ -5447,8 +5444,7 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
  end if
 
 !allocate temp variables
- ABI_STAT_ALLOCATE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array tmp_gkkout')
+ ABI_MALLOC_OR_DIE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
 
  do iqpt=1,elph_ds%nqptirred
    iqpt_fullbz = elph_ds%qirredtofull(iqpt)
@@ -5595,12 +5591,10 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
  comm = xmpi_world
 
  ib1=elph_ds%nbranch*elph_ds%nbranch ; ib2=elph_ds%nqpt_full
- ABI_STAT_ALLOCATE(elph_tr_ds%gamma_qpt_trin,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array elph_tr_ds%gamma_qpt_trin')
+ ABI_MALLOC_OR_DIE(elph_tr_ds%gamma_qpt_trin,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
  elph_tr_ds%gamma_qpt_trin = zero
 
- ABI_STAT_ALLOCATE(elph_tr_ds%gamma_qpt_trout,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array elph_tr_ds%gamma_qpt_trout')
+ ABI_MALLOC_OR_DIE(elph_tr_ds%gamma_qpt_trout,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
  elph_tr_ds%gamma_qpt_trout = zero
 
 !information
@@ -5617,8 +5611,7 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
  end if
 
 !allocate temp variables
- ABI_STAT_ALLOCATE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array tmp_gkkout')
+ ABI_MALLOC_OR_DIE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
 
  do iqpt=1,elph_ds%nqptirred
    iqpt_fullbz = elph_ds%qirredtofull(iqpt)

@@ -213,7 +213,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  nband_kq=mband_kq; bks_mask_kq=.False.; keep_ur_kq=.False.
 
  ! Distribute the k-points over the processors
- call xmpi_split_work(nkpt,comm,my_kstart,my_kstop,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_kstart,my_kstop)
  do ik=1,nkpt
  if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
 
@@ -350,8 +350,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  end if
 
  ! Allocate vlocal1 with correct cplex. Note nvloc
- ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
- ABI_CHECK(ierr==0, "oom vlocal1")
+ ABI_MALLOC_OR_DIE(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
 
  ! Allocate el-ph coupling matrix elements
  ABI_MALLOC(gkk, (2, mband_kq, mband, natom, 3))

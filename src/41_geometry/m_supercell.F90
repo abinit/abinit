@@ -270,7 +270,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
 
  ABI_CHECK(iatom_supercell == scell%natom, "iatom_supercell /= scell%natom")
  if(iatom_supercell /= scell%natom) then
-    print *, "iatom_supercell /= scell%natom"
+    write(std_out,*)"iatom_supercell /= scell%natom"
  endif
 
 

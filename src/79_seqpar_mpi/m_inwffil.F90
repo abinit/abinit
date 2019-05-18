@@ -1926,11 +1926,11 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
  end if
 
 !Check the number of bands on disk file against desired number. These are not required to agree)
- if (nband_disk/=nband_k) then
+ if (nband_disk /= nband_k) then
    write(msg,'(2(a,i0),3a,i0,3a)')&
-&   'For kpt number ',ikpt,' disk file has ',nband_disk,' bands',ch10,&
-&   'but input file gave nband= ',nband_k,'.',ch10,&
-&   'This is not fatal. Bands are skipped or filled with random numbers.'
+   'For kpt number ',ikpt,' disk file has ',nband_disk,' bands',ch10,&
+   'but input file gave nband= ',nband_k,'.',ch10,&
+   'This is not fatal. Bands are skipped or filled with random numbers.'
    MSG_COMMENT(msg)
  end if
 

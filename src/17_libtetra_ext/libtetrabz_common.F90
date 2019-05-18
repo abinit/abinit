@@ -28,6 +28,8 @@
 !
 MODULE libtetrabz_common
   !
+  use m_errors
+
   IMPLICIT NONE
 #if defined HAVE_MPI1
  include 'mpif.h'
@@ -178,8 +180,7 @@ SUBROUTINE libtetrabz_initialize(ltetra,nge,ngw,bvec,linterpol,wlsm,nk_local,nt_
      !
   ELSE
      !
-     WRITE(*,*) "[libtetrabz] STOP! ltetrta is invalid."
-     STOP
+     MSG_ERROR("[libtetrabz] STOP! ltetrta is invalid.")
      !
   END IF
   !
@@ -213,7 +214,8 @@ SUBROUTINE libtetrabz_kgrid(linterpol,ivvec,ng,nkBZ,nk_local,nt_local,ik_global,
      nt_front = 0
      nt_local = 6 * nkBZ
   END IF
-  ALLOCATE(ik_global(20, nt_local), ik_local(20, nt_local))
+  ABI_MALLOC(ik_global, (20, nt_local))
+  ABI_MALLOC(ik_local, (20, nt_local))
   !
   ! k-index for energy (Global index)
   !
@@ -271,7 +273,7 @@ SUBROUTINE libtetrabz_kgrid(linterpol,ivvec,ng,nkBZ,nk_local,nt_local,ik_global,
   !
   ! k-vector in the fractional coordinate
   !
-  ALLOCATE(kvec(3,nk_local))
+  ABI_MALLOC(kvec, (3,nk_local))
   DO ik = 1, nk_local
      ! loc2glob(ik) - 1 = i1 + ng(1) * i2 + ng(1) * ng(2) * i3
      i1 = MOD(loc2glob(ik) - 1, ng(1))

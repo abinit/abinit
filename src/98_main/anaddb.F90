@@ -524,11 +524,6 @@ program anaddb
    call zacharias_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
  end if
 
- ! Phonon density of states unit tests
- if (inp%prtdos==3) then
-   call phdos_unittests(comm)
- end if
-
  ! Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
    write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
@@ -970,7 +965,7 @@ program anaddb
 
  if (iam_master) close(ab_out)
 
- 100 call xmpi_end()
+ call xmpi_end()
 
  end program anaddb
 !!***

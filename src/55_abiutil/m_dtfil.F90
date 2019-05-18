@@ -69,12 +69,12 @@ contains
 !! filnam(5)=character strings giving file names
 !! filstat=character strings giving name of status file
 !! idtset=number of the dataset
-!! image_index= -optional argument- index of image to be used when appending
-!!             "_IMGxxx" string to file names. To be used only when an algorithm
-!!             using images of the cell is activated
 !! jdtset_(0:ndtset)=actual index of the datasets
 !! mpi_enreg=information about MPI parallelization
 !! ndtset=number of datasets
+!! [image_index]= index of image to be used when appending
+!!             "_IMGxxx" string to file names. To be used only when an algorithm
+!!             using images of the cell is activated
 !!
 !! OUTPUT
 !! dtfil=<type datafiles_type>infos about file names, file unit numbers
@@ -703,8 +703,8 @@ end subroutine dtfil_init_time
 !!        if -1 : append "_SUF0" (called from brdmin)
 !!        if -2, -3, -4, -5: append "_SUFA", ... ,"_SUFD", (called from move)
 !!      SUF can be TIM (default) or IMG
-!! suff= --optional argument--indicates the suffixe to be appended:
-!!       SUF=TIM (default) or SUF=IMG or ...
+!! [suff]= --optional argument--indicates the suffixe to be appended:
+!!         SUF=TIM (default) or SUF=IMG or ...
 !!
 !! OUTPUT
 !! filapp= filename with appended string
@@ -810,7 +810,7 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
  type(datafiles_type),intent(out) :: dtfil
  type(dataset_type),intent(in) :: dtset
 !arrays
- integer :: jdtset(0:ndtset)
+ integer,intent(in) :: jdtset(0:ndtset)
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------
@@ -888,15 +888,14 @@ end subroutine dtfil_init_img
 !! From the root (input or output) file names, produce a real file name.
 !!
 !! INPUTS
-!! character(len=fnlen):: filnam(5)=the root file names
-!!  (only filnam(3) and filnam(4) are really needed)
+!! filnam(5)=the root file names (only filnam(3) and filnam(4) are really needed)
 !! get=input 'get variable', if 1, must get the file from another dataset
 !! idtset=number of the dataset
 !! ird=input 'iread variable', if 1, must get the file from the input root
 !! jdtset_(0:ndtset)=actual index of the dataset
 !! ndtset=number of datasets
-!! stringfil character(len=*)=the string of characters to be appended e.g. '_WFK' or '_DEN'
-!! stringvar tcharacter(len=*)=the string of characters to be appended
+!! stringfil=the string of characters to be appended e.g. '_WFK' or '_DEN'
+!! stringvar=the string of characters to be appended
 !!   that defines the 'get' or 'ird' variables, e.g. 'wfk' or 'ddk'
 !!
 !! OUTPUT
@@ -936,30 +935,30 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  ! Here, defaults if no get variable
  will_read=ird
 
- filnam_appen=trim(filnam(3))
- if(ndtset>0)then
-   jdtset=jdtset_(idtset)
-   call appdig(jdtset,'',appen)
-   filnam_appen=trim(filnam_appen)//'_DS'//appen
+ filnam_appen = trim(filnam(3))
+ if (ndtset > 0) then
+   jdtset = jdtset_(idtset)
+   call appdig(jdtset, '', appen)
+   filnam_appen = trim(filnam_appen)//'_DS'//appen
  end if
- filnam_out=trim(filnam_appen)//trim(stringfil)
+ filnam_out = trim(filnam_appen)//trim(stringfil)
 
- ! Treatment of the multi-dataset case  (get is not relevant otherwise)
- if(ndtset/=0)then
+ ! Treatment of the multi-dataset case (get is not relevant otherwise)
+ if (ndtset /= 0) then
 
-   if(ndtset==1.and.get<0.and.(jdtset_(1)+get>0))then
+   if(ndtset==1 .and. get<0 .and. (jdtset_(1)+get>0)) then
      write(msg, '(7a,i0,a,i0,5a)' )&
      'You cannot use a negative value of get',trim(stringvar),' with only 1 dataset!',ch10, &
-     ' If you want to refer to a previously computed dataset,',ch10, &
-     ' you should give the absolute index of it (i.e. ', jdtset_(idtset)+get,' instead of ',get,').',ch10, &
+     'If you want to refer to a previously computed dataset,',ch10, &
+     'you should give the absolute index of it (i.e. ', jdtset_(idtset)+get,' instead of ',get,').',ch10, &
      'Action: correct get',trim(stringvar),' in your input file.'
      MSG_ERROR(msg)
    end if
 
-   if(idtset+get<0)then
+   if (idtset + get < 0) then
      write(msg, '(5a,i0,3a,i0,4a)' )&
      'The sum of idtset and get',trim(stringvar),' cannot be negative,',ch10,&
-     'while they are idtset=',idtset,', and get',trim(stringvar),'=',get,ch10,&
+     'while they are idtset = ',idtset,', and get',trim(stringvar),' = ',get,ch10,&
      'Action: correct get',trim(stringvar),' in your input file.'
      MSG_ERROR(msg)
    end if
@@ -969,7 +968,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      if(ird/=0 .and. get/=0)then
        write(msg, '(7a,i0,3a,i0,a,i0,7a)' )&
        'The input variables ird',trim(stringvar),' and get',trim(stringvar),' cannot be',ch10,&
-       'simultaneously non-zero, while for idtset=',idtset,',',ch10,&
+       'simultaneously non-zero, while for idtset = ',idtset,',',ch10,&
        'they are ',ird,', and ',get,'.',ch10,&
        'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
        MSG_ERROR(msg)
@@ -986,13 +985,11 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      filnam_out=trim(filnam(4))//'_DS'//trim(appen)//trim(stringfil)
 
      if(jdtset>=100)then
-       write(msg, '(a,a,a,a,a,i5,a,a)' )&
-       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
-       ' from output of DATASET ',jget,'.',ch10
+       write(msg, '(5a,i5,2a)' )&
+       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),' from output of DATASET ',jget,'.',ch10
      else
-       write(msg, '(a,a,a,a,a,i3,a,a)' )&
-       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),&
-       ' from output of DATASET ',jget,'.',ch10
+       write(msg, '(5a,i3,2a)' )&
+       ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),' from output of DATASET ',jget,'.',ch10
      end if
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,msg,'COLL')
@@ -1011,8 +1008,8 @@ end subroutine mkfilename
 !! FUNCTION
 !! Inquire Status of FILE
 !! Checks that for status =
-!! 'old': file already exists
-!! 'new': file does not exist; if file exists,
+!!      'old': file already exists
+!!      'new': file does not exist; if file exists,
 !! filnam is modified to filnam.A or filnam.B,....
 !!
 !! INPUTS
@@ -1044,8 +1041,7 @@ subroutine isfile(filnam, status)
  logical :: ex,found
  integer :: ii,ios, ioserr
  character(len=500) :: msg
- character(len=fnlen) :: filnam_tmp
- character(len=fnlen) :: trialnam
+ character(len=fnlen) :: filnam_tmp, trialnam
 
 ! *************************************************************************
 
@@ -1108,7 +1104,7 @@ subroutine isfile(filnam, status)
      if ( found .eqv. .true. ) then
        write(msg,'(4a)') 'Renaming old ',trim(filnam),' to ',trim(trialnam)
        MSG_COMMENT(msg)
-       call clib_rename(filnam,trialnam,ioserr)
+       ioserr = clib_rename(filnam, trialnam)
        if ( ioserr /= 0 ) then
          write(msg,'(4a)') 'Failed to rename file: ', trim(filnam),' to: ',trim(trialnam)
          MSG_ERROR(msg)
@@ -1232,6 +1228,7 @@ subroutine iofn1(filnam,filstat,comm)
      end if
    end if
  end if
+ !do_write_log = .True.
 
  if (me==master) then
    !  Eventually redefine standard input and standard output

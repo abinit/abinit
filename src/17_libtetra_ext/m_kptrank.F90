@@ -51,8 +51,6 @@ module m_kptrank
    integer :: npoints
    logical :: time_reversal
    integer,allocatable :: invrank(:)
-   integer,allocatable :: rank(:)
-   integer,allocatable :: multipl(:)
  end type kptrank_type
 
  public :: mkkptrank       ! Sets up the kpt ranks for comparing kpts
@@ -126,8 +124,6 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
  krank%max_rank = 2*krank%max_linear_density**3
  krank%npoints = nkpt
 
- TETRA_ALLOCATE(krank%rank, (nkpt))
-
  TETRA_ALLOCATE(krank%invrank, (krank%max_rank))
  krank%invrank(:) = -1
 
@@ -142,13 +138,13 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 !ie ngkpt < 100.
 ! the following fills invrank for the k-points in the list provided (may be only the irred kpts)
  do ikpt=1,nkpt
-   call get_rank_1kpt (kpt(:,ikpt), krank%rank(ikpt), krank)
+   call get_rank_1kpt (kpt(:,ikpt), irank, krank)
 
-   if (krank%rank(ikpt) > krank%max_rank .or. krank%rank(ikpt) < 1) then
-     write(msg,'(a,2i0)')" max rank exceeded or < 1, ikpt, rank ", ikpt, krank%rank(ikpt)
+   if (irank > krank%max_rank .or. irank < 1) then
+     write(msg,'(a,2i0)')" max rank exceeded or < 1, ikpt, rank ", ikpt, irank
      TETRA_ERROR(msg)
    end if
-   krank%invrank(krank%rank(ikpt)) = ikpt
+   krank%invrank(irank) = ikpt
  end do
 
 ! if symrec is provided, fill invrank with appropriate irred kpt indices
@@ -170,17 +166,6 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
      end do
    end do
  end if
-
- TETRA_ALLOCATE(krank%multipl, (nkpt))
-
- krank%multipl = 0
-! find multiplicity of ikpt
- do irank = 1, krank%max_rank
-   ikpt = krank%invrank(irank)
-   if (ikpt > 0) krank%multipl(ikpt) = krank%multipl(ikpt) + 1
- end do
-
-! could add a check that all k in full grid are in the invrank...
 
 end subroutine mkkptrank
 !!***
@@ -342,14 +327,8 @@ subroutine copy_kptrank (krank_in, krank_out)
  krank_out%max_rank = krank_in%max_rank
  krank_out%npoints = krank_in%npoints
 
- TETRA_ALLOCATE(krank_out%rank, (krank_out%npoints))
- krank_out%rank = krank_in%rank
-
  TETRA_ALLOCATE(krank_out%invrank, (krank_out%max_rank))
  krank_out%invrank = krank_in%invrank
-
- TETRA_ALLOCATE(krank_out%multipl, (krank_out%npoints))
- krank_out%multipl = krank_in%multipl
 
 end subroutine copy_kptrank
 !!***
@@ -384,14 +363,8 @@ subroutine destroy_kptrank (krank)
 
 ! *********************************************************************
 
- if (allocated(krank%rank))  then
-   TETRA_DEALLOCATE(krank%rank)
- end if
  if (allocated(krank%invrank))  then
    TETRA_DEALLOCATE(krank%invrank)
- end if
- if (allocated(krank%multipl))  then
-   TETRA_DEALLOCATE(krank%multipl)
  end if
 
 end subroutine destroy_kptrank
@@ -435,10 +408,6 @@ subroutine dump_kptrank (krank, unout)
   write(unout, *)
   write(unout, '(a)') ' invrank array = '
   write(unout, '(I4)') krank%invrank(:)
-  write(unout, '(a)') ' rank array = '
-  write(unout, '(I4)') krank%rank(:)
-  write(unout, '(a)') ' multiplicity array = '
-  write(unout, '(I4)') krank%multipl(:)
   write(unout, *)
 
 end subroutine dump_kptrank

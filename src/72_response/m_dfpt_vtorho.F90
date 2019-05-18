@@ -225,8 +225,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,&
 & usecprj,useylmgr1,ddk_f,vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,mband,mk1mem,mkmem
@@ -824,10 +822,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !
    if (psps%usepaw==0) then
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&     nspden,nsppol,nsym1,dtset%paral_kgb,phnons1,rhog1  ,rhor1  ,rprimd,symaf1,symrl1)
+&     nspden,nsppol,nsym1,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1)
    else
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&     nspden,nsppol,nsym1,dtset%paral_kgb,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1)
+&     nspden,nsppol,nsym1,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1)
    end if
 !  We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !  we also have the spin-up density, symmetrized, in rhor1(:,2).
