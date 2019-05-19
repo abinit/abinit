@@ -1759,7 +1759,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      end if
 
                      if (sigma%imag_only) then
-                       ! Note pi factor from Sokhotski–Plemelj theorem.
+                       ! Note pi factor from Sokhotski-Plemelj theorem.
                        simag = gkq2_pf * pi * ( &
                          (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
                          (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, jj) ) * weight
@@ -2847,6 +2847,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! bstart and new%bsum select the band range.
  ! Here we compute the weights only for the states included in the sum
  bstart = new%bsum_start
+ new%frohl_model = nint(dtset%frohl_params(1))
  if (new%qint_method > 0) then
    if (new%use_doublegrid) then
      ! Double-grid technique from ab-initio energies or star-function interpolation.
@@ -2920,7 +2921,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call ebands_free(ebands_dense)
 
  ! Prepare computation of Frohlich self-energy
- new%frohl_model = nint(dtset%frohl_params(1))
  if (new%frohl_model /= 0) then
    ! Init parameters for numerical integration inside sphere.
    ! Set sphere radius to a fraction of the smallest reciprocal lattice vector.
