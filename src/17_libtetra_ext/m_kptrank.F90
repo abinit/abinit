@@ -251,7 +251,7 @@ subroutine get_rank_1kpt(kpt,rank,krank)
 &           real(krank%max_linear_density)*(redkpt(3)+half+tol8))))
 
  if (rank > krank%max_rank) then
-   write(msg,'(a,i0,ai0)') ' rank should be inferior to ', krank%max_rank, ' got ', rank
+   write(msg,'(a,i0,a,i0)') ' rank should be inferior to ', krank%max_rank, ' got ', rank
    TETRA_ERROR(msg)
  end if
 
