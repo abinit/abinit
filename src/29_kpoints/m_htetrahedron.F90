@@ -875,7 +875,7 @@ end subroutine htetra_init
 !! SOURCE
 
 subroutine htetra_init_mapping_ibz(tetra)
- type(t_htetrahedron) :: tetra
+ type(t_htetrahedron),intent(inout) :: tetra
  integer :: ikibz, itetra, isummit, ihash, ntetra
  integer :: tetra_count(tetra%nkibz),tetra_mibz(0:4)
 
@@ -1526,7 +1526,7 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
 !scalars
  integer,intent(in) :: ik_ibz,nw,nkibz,opt
  real(dp) ,intent(in) :: max_occ
- type(t_htetrahedron), intent(in) :: tetra
+ type(t_htetrahedron), intent(inout) :: tetra
 !arrays
  real(dp),intent(in) :: wvals(nw)
  real(dp),intent(in) :: eig_ibz(nkibz)
@@ -1613,7 +1613,7 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nw,nkibz,eig_ibz,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,nw,nkibz,bcorr
- type(t_htetrahedron), intent(in) :: tetra
+ type(t_htetrahedron), intent(inout) :: tetra
  real(dp) ,intent(in) :: enemin,enemax,max_occ
 !arrays
  real(dp),intent(in) :: eig_ibz(nkibz)
@@ -1671,7 +1671,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
 !scalars
  integer,intent(in) :: ik_ibz,nz,nkibz,opt
  real(dp) ,intent(in) :: max_occ
- type(t_htetrahedron), intent(in) :: tetra
+ type(t_htetrahedron), intent(inout) :: tetra
 !arrays
  complex(dp),intent(in) :: zvals(nz)
  real(dp),intent(in) :: eig_ibz(nkibz)
