@@ -493,6 +493,8 @@ subroutine kptrank_unittests(comm)
  real(dp),allocatable :: wtq_ibz(:)
  real(dp),allocatable :: qbz(:,:),qibz(:,:)
 
+ ABI_UNUSED(comm)
+
  ! Create fake crystal
  crystal = crystal_from_ptgroup('m-3m')
 

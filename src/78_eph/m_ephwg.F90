@@ -923,7 +923,7 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
 !Local variables-------------------------------
 !scalars
  integer :: iq,iq_ibz,ikpq_ibz,ib
- integer :: nprocs, my_rank, ierr
+ integer :: nprocs, my_rank
  real(dp),parameter :: max_occ1 = one
  real(dp) :: wme0(neig)
 !arrays
