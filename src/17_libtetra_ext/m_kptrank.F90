@@ -7,7 +7,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (MVer)
+!! Copyright (C) 2010-2019 ABINIT group (MVer,HM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,7 +103,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 
 !Local variables -------------------------
 !scalars
- integer :: ikpt, isym, symkptrank, irank
+ integer :: ikpt, isym, symkptrank, irank, min_rank, max_rank
  integer :: timrev, itim
  double precision :: smallestlen
  character(len=500) :: msg
@@ -120,11 +120,19 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
    if (abs(kpt(3,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(3,ikpt)))
  end do
 
- krank%max_linear_density = int(one/smallestlen)+1
- krank%max_rank = 2*krank%max_linear_density**3
+ krank%max_linear_density = nint(one/smallestlen)
  krank%npoints = nkpt
+ min_rank = nint(real(krank%max_linear_density)*(half+tol8 +&
+&                real(krank%max_linear_density)*(half+tol8 +&
+&                real(krank%max_linear_density)*(half+tol8))))
 
- TETRA_ALLOCATE(krank%invrank, (krank%max_rank))
+ max_rank = nint(real(krank%max_linear_density)*(1+half+tol8 +&
+&                real(krank%max_linear_density)*(1+half+tol8 +&
+&                real(krank%max_linear_density)*(1+half+tol8))))
+ ! krank%max_rank = 2*krank%max_linear_density**3
+ krank%max_rank = max_rank
+
+ TETRA_ALLOCATE(krank%invrank, (min_rank:max_rank))
  krank%invrank(:) = -1
 
  timrev = 2
@@ -140,8 +148,8 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
  do ikpt=1,nkpt
    call get_rank_1kpt (kpt(:,ikpt), irank, krank)
 
-   if (irank > krank%max_rank .or. irank < 1) then
-     write(msg,'(a,2i0)')" max rank exceeded or < 1, ikpt, rank ", ikpt, irank
+   if (irank > krank%max_rank .or. irank < min_rank) then
+     write(msg,'(a,2i0)')" rank above max_rank or bellow min_rank, ikpt, rank ", ikpt, irank
      TETRA_ERROR(msg)
    end if
    krank%invrank(irank) = ikpt
@@ -238,12 +246,12 @@ subroutine get_rank_1kpt(kpt,rank,krank)
 ! rank = int(real(krank%max_linear_density)*(redkpt(3)+half+tol8 +&
 !&           real(krank%max_linear_density)*(redkpt(2)+half+tol8 +&
 !&           real(krank%max_linear_density)*(redkpt(1)+half+tol8))))
- rank = int(real(krank%max_linear_density)*(redkpt(1)+half+tol8 +&
+ rank = nint(real(krank%max_linear_density)*(redkpt(1)+half+tol8 +&
 &           real(krank%max_linear_density)*(redkpt(2)+half+tol8 +&
 &           real(krank%max_linear_density)*(redkpt(3)+half+tol8))))
 
  if (rank > krank%max_rank) then
-   write(msg,'(a,i0)') ' rank should be inferior to ', krank%max_rank
+   write(msg,'(a,i0,ai0)') ' rank should be inferior to ', krank%max_rank, ' got ', rank
    TETRA_ERROR(msg)
  end if
 
