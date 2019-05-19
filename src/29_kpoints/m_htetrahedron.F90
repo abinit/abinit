@@ -1341,22 +1341,34 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
         cw(4)=d - (3*d**2*EZ3)*half - 3*d**3*EZ2*EZ3 + 3*d**4*EZ2**2*EZ3*Log(EZ3/EZ2)
     !       e3=e4
     elseif ( E34 .lt. tol14 ) then
-        cw(1)=-(a*b**2*EZ1**2*(-1 + (a*EZ2 + 2*b*EZ3)*Log(EZ1))) + a**2*d**2*EZ2**3*Log(EZ2) - b**2*d*EZ3**2*(1 + (2*b*EZ1 + d*EZ2)*Log(EZ3))
-        cw(2)=a**2*b**2*EZ1**3*Log(EZ1) - a*d**2*EZ2**2*(1 + (a*EZ1 - 2*d*EZ3)*Log(EZ2)) - b*d**2*EZ3**2*(1 + (b*EZ1 + 2*d*EZ2)*Log(EZ3))
-        cw(3)=a*b**3*EZ1**3*Log(EZ1) - a*d**3*EZ2**3*Log(EZ2) + b*d*EZ3*(half + b*EZ1 + d*EZ2 + (b**2*EZ1**2 + b*d*EZ1*EZ2 + d**2*EZ2**2)*Log(EZ3))
-        cw(4)=a*b**3*EZ1**3*Log(EZ1) - a*d**3*EZ2**3*Log(EZ2) + b*d*EZ3*(half + b*EZ1 + d*EZ2 + (b**2*EZ1**2 + b*d*EZ1*EZ2 + d**2*EZ2**2)*Log(EZ3))
+        cw(1)=-(a*b**2*EZ1**2*(-1 + (a*EZ2 + 2*b*EZ3)*Log(EZ1))) + a**2*d**2*EZ2**3*Log(EZ2) - &
+                b**2*d*EZ3**2*(1 + (2*b*EZ1 + d*EZ2)*Log(EZ3))
+        cw(2)=a**2*b**2*EZ1**3*Log(EZ1) - a*d**2*EZ2**2*(1 + (a*EZ1 - 2*d*EZ3)*Log(EZ2)) - &
+              b*d**2*EZ3**2*(1 + (b*EZ1 + 2*d*EZ2)*Log(EZ3))
+        cw(3)=a*b**3*EZ1**3*Log(EZ1) - a*d**3*EZ2**3*Log(EZ2) + b*d*EZ3*(half + b*EZ1 + d*EZ2 + &
+             (b**2*EZ1**2 + b*d*EZ1*EZ2 + d**2*EZ2**2)*Log(EZ3))
+        cw(4)=a*b**3*EZ1**3*Log(EZ1) - a*d**3*EZ2**3*Log(EZ2) + b*d*EZ3*(half + b*EZ1 + d*EZ2 + &
+             (b**2*EZ1**2 + b*d*EZ1*EZ2 + d**2*EZ2**2)*Log(EZ3))
     !    e2=e3
     elseif ( E23 .lt. tol14 ) then
-        cw(1)=-(a**2*c*EZ1**2*(-1 + (2*a*EZ2 + c*EZ4)*Log(EZ1))) + a**2*e*EZ2**2*(1 + (2*a*EZ1 - e*EZ4)*Log(EZ2)) + c**2*e**2*EZ4**3*Log(EZ4)
-        cw(2)=a**3*c*EZ1**3*Log(EZ1) - a*e*EZ2*(half + a*EZ1 - e*EZ4 + (a**2*EZ1**2 - a*e*EZ1*EZ4 + e**2*EZ4**2)*Log(EZ2)) + c*e**3*EZ4**3*Log(EZ4)
-        cw(3)=a**3*c*EZ1**3*Log(EZ1) - a*e*EZ2*(half + a*EZ1 - e*EZ4 + (a**2*EZ1**2 - a*e*EZ1*EZ4 + e**2*EZ4**2)*Log(EZ2)) + c*e**3*EZ4**3*Log(EZ4)
-        cw(4)=a**2*c**2*EZ1**3*Log(EZ1) - a*e**2*EZ2**2*(1 + (a*EZ1 - 2*e*EZ4)*Log(EZ2)) - c*e**2*EZ4**2*(1 + (c*EZ1 + 2*e*EZ2)*Log(EZ4))
+        cw(1)=-(a**2*c*EZ1**2*(-1 + (2*a*EZ2 + c*EZ4)*Log(EZ1))) + &
+                a**2*e*EZ2**2*(1 + (2*a*EZ1 - e*EZ4)*Log(EZ2)) + c**2*e**2*EZ4**3*Log(EZ4)
+        cw(2)=a**3*c*EZ1**3*Log(EZ1) - &
+              a*e*EZ2*(half + a*EZ1 - e*EZ4 + (a**2*EZ1**2 - a*e*EZ1*EZ4 + e**2*EZ4**2)*Log(EZ2)) + c*e**3*EZ4**3*Log(EZ4)
+        cw(3)=a**3*c*EZ1**3*Log(EZ1) - &
+              a*e*EZ2*(half + a*EZ1 - e*EZ4 + (a**2*EZ1**2 - a*e*EZ1*EZ4 + e**2*EZ4**2)*Log(EZ2)) + c*e**3*EZ4**3*Log(EZ4)
+        cw(4)=a**2*c**2*EZ1**3*Log(EZ1) - &
+              a*e**2*EZ2**2*(1 + (a*EZ1 - 2*e*EZ4)*Log(EZ2)) - c*e**2*EZ4**2*(1 + (c*EZ1 + 2*e*EZ2)*Log(EZ4))
     ! e1=e2
     elseif ( E12 .lt. tol14 ) then
-        cw(1)=b*c*EZ1*(half - b*EZ3 - c*EZ4 + (b**2*EZ3**2 + b*c*EZ3*EZ4 + c**2*EZ4**2)*Log(EZ1)) - b**3*EZ3**3*f*Log(EZ3) + c**3*EZ4**3*f*Log(EZ4)
-        cw(2)=b*c*EZ1*(half - b*EZ3 - c*EZ4 + (b**2*EZ3**2 + b*c*EZ3*EZ4 + c**2*EZ4**2)*Log(EZ1)) - b**3*EZ3**3*f*Log(EZ3) + c**3*EZ4**3*f*Log(EZ4)
-        cw(3)=-(b**2*c*EZ1**2*(-1 + (2*b*EZ3 + c*EZ4)*Log(EZ1))) + b**2*EZ3**2*f*(1 + (2*b*EZ1 - EZ4*f)*Log(EZ3)) + c**2*EZ4**3*f**2*Log(EZ4)
-        cw(4)=-(b*c**2*EZ1**2*(-1 + (b*EZ3 + 2*c*EZ4)*Log(EZ1))) + b**2*EZ3**3*f**2*Log(EZ3) - c**2*EZ4**2*f*(1 + (2*c*EZ1 + EZ3*f)*Log(EZ4))
+        cw(1)=b*c*EZ1*(half - b*EZ3 - c*EZ4 + (b**2*EZ3**2 + b*c*EZ3*EZ4 + c**2*EZ4**2)*Log(EZ1)) - &
+              b**3*EZ3**3*f*Log(EZ3) + c**3*EZ4**3*f*Log(EZ4)
+        cw(2)=b*c*EZ1*(half - b*EZ3 - c*EZ4 + (b**2*EZ3**2 + b*c*EZ3*EZ4 + c**2*EZ4**2)*Log(EZ1)) - &
+              b**3*EZ3**3*f*Log(EZ3) + c**3*EZ4**3*f*Log(EZ4)
+        cw(3)=-(b**2*c*EZ1**2*(-1 + (2*b*EZ3 + c*EZ4)*Log(EZ1))) + &
+                b**2*EZ3**2*f*(1 + (2*b*EZ1 - EZ4*f)*Log(EZ3)) + c**2*EZ4**3*f**2*Log(EZ4)
+        cw(4)=-(b*c**2*EZ1**2*(-1 + (b*EZ3 + 2*c*EZ4)*Log(EZ1))) + &
+                b**2*EZ3**3*f**2*Log(EZ3) - c**2*EZ4**2*f*(1 + (2*c*EZ1 + EZ3*f)*Log(EZ4))
     ! e1<e2<e3<e4
     else
         cw(1)=a**2*d*e*EZ2**3*Log(EZ2/EZ1) - b**2*d*EZ3**3*f*Log(EZ3/EZ1) + c*(a*b*EZ1**2 + c*e*EZ4**3*f*Log(EZ4/EZ1))
