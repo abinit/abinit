@@ -47,6 +47,7 @@ module m_kptrank
 
  type,public :: kptrank_type
    integer :: max_linear_density
+   integer :: min_rank
    integer :: max_rank
    integer :: npoints
    logical :: time_reversal
@@ -103,7 +104,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 
 !Local variables -------------------------
 !scalars
- integer :: ikpt, isym, symkptrank, irank, min_rank, max_rank
+ integer :: ikpt, isym, symkptrank, irank
  integer :: timrev, itim
  double precision :: smallestlen
  character(len=500) :: msg
@@ -122,17 +123,15 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 
  krank%max_linear_density = nint(one/smallestlen)
  krank%npoints = nkpt
- min_rank = nint(real(krank%max_linear_density)*(half+tol8 +&
-&                real(krank%max_linear_density)*(half+tol8 +&
-&                real(krank%max_linear_density)*(half+tol8))))
+ krank%min_rank = nint(real(krank%max_linear_density)*(half+tol8 +&
+&                      real(krank%max_linear_density)*(half+tol8 +&
+&                      real(krank%max_linear_density)*(half+tol8))))
 
- max_rank = nint(real(krank%max_linear_density)*(1+half+tol8 +&
-&                real(krank%max_linear_density)*(1+half+tol8 +&
-&                real(krank%max_linear_density)*(1+half+tol8))))
- ! krank%max_rank = 2*krank%max_linear_density**3
- krank%max_rank = max_rank
+ krank%max_rank = nint(real(krank%max_linear_density)*(1+half+tol8 +&
+&                      real(krank%max_linear_density)*(1+half+tol8 +&
+&                      real(krank%max_linear_density)*(1+half+tol8))))
 
- TETRA_ALLOCATE(krank%invrank, (min_rank:max_rank))
+ TETRA_ALLOCATE(krank%invrank, (krank%min_rank:krank%max_rank))
  krank%invrank(:) = -1
 
  timrev = 2
@@ -148,7 +147,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
  do ikpt=1,nkpt
    call get_rank_1kpt (kpt(:,ikpt), irank, krank)
 
-   if (irank > krank%max_rank .or. irank < min_rank) then
+   if (irank > krank%max_rank .or. irank < krank%min_rank) then
      write(msg,'(a,2i0)')" rank above max_rank or bellow min_rank, ikpt, rank ", ikpt, irank
      TETRA_ERROR(msg)
    end if
@@ -332,10 +331,11 @@ subroutine copy_kptrank (krank_in, krank_out)
 
 ! *********************************************************************
  krank_out%max_linear_density = krank_in%max_linear_density
+ krank_out%min_rank = krank_in%min_rank
  krank_out%max_rank = krank_in%max_rank
  krank_out%npoints = krank_in%npoints
 
- TETRA_ALLOCATE(krank_out%invrank, (krank_out%max_rank))
+ TETRA_ALLOCATE(krank_out%invrank, (krank_out%min_rank:krank_out%max_rank))
  krank_out%invrank = krank_in%invrank
 
 end subroutine copy_kptrank
