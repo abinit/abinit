@@ -45,6 +45,8 @@ module m_hashtable
   public :: hashtable_init
   public :: hashtable_add
   public :: hashtable_get
+  public :: hashtable_cleanup
+  public :: hashtable_items
   public :: hashtable_free
 
   contains
@@ -63,6 +65,13 @@ module m_hashtable
     end do
   end function hashtable_init
 
+  pure function compute_hash(self,key) result(ihash)
+    type(hashtable_t),intent(in) :: self
+    integer,intent(in) :: key
+    integer :: ihash
+    ihash = mod(key-1,self%nbuckets)+1
+  end function compute_hash
+
   subroutine hashtable_add(self, key, val)
     ! Add a key to the hashtable structure
     type(hashtable_t) :: self
@@ -70,7 +79,7 @@ module m_hashtable
     integer :: ihash, item, nitems
     integer,allocatable :: new_items(:,:)
     ! Compute bucket for this element
-    ihash = mod(key,self%nbuckets)+1
+    ihash = compute_hash(self,key)
     nitems = self%buckets(ihash)%nitems
     ! Check if the element already exists in the bucket
     do item=1,nitems
@@ -92,13 +101,14 @@ module m_hashtable
     self%buckets(ihash)%nitems = nitems
   end subroutine hashtable_add
 
-  subroutine hashtable_print(self)
+  subroutine hashtable_print(self,iunit)
     ! Print the hashtable data
-    type(hashtable_t) :: self
+    type(hashtable_t),intent(in) :: self
+    integer,intent(in) :: iunit
     integer :: ibucket,item
     do ibucket=1,self%nbuckets
       do item=1,self%buckets(ibucket)%nitems
-        write(*,*) ibucket, self%buckets(ibucket)%items(:,item)
+        write(iunit,*) ibucket, self%buckets(ibucket)%items(:,item)
       end do
     end do
   end subroutine hashtable_print
@@ -110,7 +120,7 @@ module m_hashtable
     integer,intent(out) :: val,ierr
     integer :: item, ihash
     ierr = 0
-    ihash = mod(key,self%nbuckets)+1
+    ihash = compute_hash(self,key)
     do item=1,self%buckets(ihash)%nitems
       if (self%buckets(ihash)%items(1,item) /= key) cycle
       val = self%buckets(ihash)%items(2,item)
@@ -118,6 +128,21 @@ module m_hashtable
     end do
     ierr = 1
   end subroutine hashtable_get
+
+  subroutine hashtable_items(self,items)
+    ! Get an array with all the keys in hashtable
+    type(hashtable_t) ::  self
+    integer :: item,ibucket,idx
+    integer,allocatable :: items(:,:)
+    ABI_MALLOC(items,(2,sum(self%buckets(:)%nitems)))
+    idx = 0
+    do ibucket=1,self%nbuckets
+      do item=1,self%buckets(ibucket)%nitems
+        idx = idx + 1
+        items(:,idx) = self%buckets(ibucket)%items(:,item)
+      end do
+    end do
+  end subroutine hashtable_items
 
   subroutine hashtable_cleanup(self)
     ! Free up memory in all the buckets
