@@ -2333,7 +2333,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    ABI_ALLOCATE (a2feew_w, (nomega))
    ABI_ALLOCATE (a2feew_w_int, (nomega))
    ount = get_unit()
-   open (unit=ount, name="EPC_strength_aafo_T.dat")
+   open (unit=ount, file="EPC_strength_aafo_T.dat")
    write (ount, "(a)") "# temp_el, G_0(T_e) in W/m^3/K, spin"
    do spin=1,nsppol
      do itemp = 1, ntemp
