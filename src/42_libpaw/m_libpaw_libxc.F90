@@ -394,10 +394,6 @@ contains
 ! *************************************************************************
 
 #if defined LIBPAW_HAVE_LIBXC
-#if defined FC_G95
- libpaw_libxc_check=.false.
- msg='LibXC cannot be used with G95 Fortran compiler!'
-#endif
 #if defined LIBPAW_ISO_C_BINDING
  if (.not.libpaw_xc_constants_initialized) call libpaw_libxc_constants_load()
  if (LIBPAW_XC_SINGLE_PRECISION==1) then

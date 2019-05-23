@@ -1030,9 +1030,6 @@ subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
 !  fortunately, on the SGI - R10000 the normal computation is fast enough.
 
    testmipspro=.false.
-#ifdef FC_MIPSPRO
-   testmipspro=.true.
-#endif
    nstep=40
    if(iq-(iq/nstep)*nstep == 0 .or. testmipspro)then
 

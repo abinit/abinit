@@ -51,7 +51,7 @@
 #endif
 
 /** this does not work with gfort, pgi, **/
-#if defined (FC_GNU) || defined(FC_G95) || defined (FC_PGI)
+#if defined (FC_GNU) || defined (FC_PGI)
 #define QUOTE(x)     'x'
 #else
 #define QUOTE(x)     #x
