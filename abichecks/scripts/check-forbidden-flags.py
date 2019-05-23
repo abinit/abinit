@@ -57,7 +57,7 @@ def main():
   # Extract information from build example config file
   bex_ok = True
   cnf_bex = MyConfigParser()
-  cnf_bex.read( os.path.join(home_dir,"config/specs/build-examples.conf") )
+  cnf_bex.read( os.path.join(home_dir,"config/specs/testfarm.conf") )
   env_forbidden = dict()
   for bot in cnf_bex.sections():
     env_forbidden[bot] = list()
