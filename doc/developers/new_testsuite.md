@@ -237,13 +237,41 @@ python side. More about that can be found below.
 
 An example will help clarify.  Let's assume we want to implement the output of
 the `!ETOT` dictionary with the different components of the total free energy.
-In Fortran, we will have to write something like:
+The workflow is splitted in two parts. The idea is to separate the computation
+from the composition of the document, and separate the composition of the
+document from the actual rendering.
+
+In Fortran, we will have to write in the file of the computation:
 
 ```fortran
-use m_neat
+!! Header of the module
+use m_neat, only: neat_etot
+use m_pair_list, only pair_list
+...
 
-call foo()
-call bar()
+!! header of the routine
+real(kind=dp) :: etot
+type(pair_list) :: e_components
+...
+
+!! body of the routine
+call e_components%set("comment", s="Total energie and its components")
+call e_components%set("Total Energie", r=etot)
+...
+
+!! footer of the routine, once all data have been stored
+call neat_etot(e_components)
+```
+
+In *47_neat/m\_neat.F90* we will implement *neat\_etot*:
+```fortran
+subroutine neat_etot(components, abiout)
+type(pair_list), intent(in) :: components
+integer, intent(in) :: abiout
+    call yaml_single_dict("Etot", "", components, 35, 500, tag="ETOT", width=20, file=abiout, real_fmt='(ES20.13)')
+    !! 35 -> max size of the label, needed to extract from the pairlist, 500 -> max size of the strings, needed to extract the comment
+    !! width -> width of the field name side, permit a nice alignment of the values
+end subroutine
 ```
 
 ## Test specification draft
