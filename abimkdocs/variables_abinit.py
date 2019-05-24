@@ -7740,7 +7740,7 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 28 --> (NOT AVAILABLE: used internally for GGA OLYP pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/data/POTENTIAL) \- use the LibXC instead, with [[ixc]] = -110131.
 
   * 40 --> Hartree-Fock
-  * 41 --> PBE0, [[cite:Perdew1996]].
+  * 41 --> PBE0, [[cite:Adamo1999]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
 
 **ETSF Lib XC functionals**
