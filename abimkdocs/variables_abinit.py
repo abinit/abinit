@@ -6507,6 +6507,9 @@ corresponding influential variables are [[vcutgeo]] and [[rcut]].
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
   * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
   * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
+  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
+  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
+  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
