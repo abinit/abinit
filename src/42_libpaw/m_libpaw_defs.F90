@@ -78,6 +78,7 @@ module m_libpaw_defs
  real(dp), parameter :: Bohr_Ang=0.52917720859_dp       ! 1 Bohr, in Angstrom
  real(dp), parameter :: Ha_eV=27.21138386_dp            ! 1 Hartree, in eV
  real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
+ real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure
 
 !A collection of small datatypes for ragged arrays
 !-----------------------------------------------
