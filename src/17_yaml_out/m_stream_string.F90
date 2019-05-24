@@ -373,3 +373,5 @@ module m_stream_string
     end do 
   end subroutine stream_debug 
 !!*** m_stream_string/stream_debug
+
+end module m_stream_string
