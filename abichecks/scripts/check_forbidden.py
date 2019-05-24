@@ -33,7 +33,7 @@ import os
 import re
 import sys
 
-from abirules_tools import find_abinit_src_directory
+from abirules_tools import find_src_dirs
 
 #Activate/Deactivate tests individually
 ACTIVATE_TEST1=True   # Forbidden write(6
@@ -143,7 +143,7 @@ NO_ERROR_LIST = [  # Note: use only lowercases
 ]
 
 def main():
-  top = find_abinit_src_directory()
+
   print()
   print('---------------------------------------------------------------------')
   print(' Looking for forbidden statements in ABINIT src files:               ')
@@ -172,98 +172,99 @@ def main():
   stat_forbidden_call_count=0
   file_forbidden_call_count=0
 
-  #Loop over files in src folder
-  for root, dirs, files in os.walk(top):
-    for src in files:
-      if re_srcfile.search(src):
-        file_total_count += 1
-        filename = os.path.join(root,src)
-        with open(filename, "rt") as fh:
-          src_data = fh.readlines()
+  # Loop over files in src folder
+  for top in find_src_dirs():
+      for root, dirs, files in os.walk(top):
+        for src in files:
+          if re_srcfile.search(src):
+            file_total_count += 1
+            filename = os.path.join(root,src)
+            with open(filename, "rt") as fh:
+              src_data = fh.readlines()
 
-        #Loop over lines in the file
-        lineno=0
-        icount_forbidden_write=0
-        icount_notrecommended_write=0
-        icount_forbidden_commworld=0
-        icount_forbidden_allocate=0
-        icount_forbidden_call=0
-        for line_orig in src_data:
-          lineno += 1
+            #Loop over lines in the file
+            lineno=0
+            icount_forbidden_write=0
+            icount_notrecommended_write=0
+            icount_forbidden_commworld=0
+            icount_forbidden_allocate=0
+            icount_forbidden_call=0
+            for line_orig in src_data:
+              lineno += 1
 
-          #Transform line to lower case + eliminate whitespaces
-          line_lower=line_orig.lower()
-          line = re.sub(" ","",line_lower)
+              #Transform line to lower case + eliminate whitespaces
+              line_lower=line_orig.lower()
+              line = re.sub(" ","",line_lower)
 
-          #Skip lines beginning with an authorized character
-          ignored=0
-          for strg in NO_ERROR_LIST:
-            if line.find(strg) == 0: ignored=1
+              #Skip lines beginning with an authorized character
+              ignored=0
+              for strg in NO_ERROR_LIST:
+                if line.find(strg) == 0: ignored=1
 
-          if ignored == 0:
-            #Look for forbidden write statements
-            if ACTIVATE_TEST1 and (not src in IGNORED_WRITE_FILES):
-              for strg in WRITE_FORBIDDEN_LIST:
-                if line.find(strg) != -1:
-                  print('  Error: %s, line %d: found \"%s\" !' % (filename,lineno,strg))
-                  icount_forbidden_write +=1
+              if ignored == 0:
+                #Look for forbidden write statements
+                if ACTIVATE_TEST1 and (not src in IGNORED_WRITE_FILES):
+                  for strg in WRITE_FORBIDDEN_LIST:
+                    if line.find(strg) != -1:
+                      print('  Error: %s, line %d: found \"%s\" !' % (filename,lineno,strg))
+                      icount_forbidden_write +=1
 
-            #Look for not recommended write statements
-            if ACTIVATE_TEST2 and (not src in IGNORED_WRITE_FILES):
-              for strg in WRITE_NOTRECOMMENDED_LIST:
-                if line.find(strg) != -1 and src not in ["m_specialmsg.F90"]:
-                  print('- Warning: %s, line %d: found \"%s\" !' % (filename,lineno,strg))
-                  icount_notrecommended_write +=1
+                #Look for not recommended write statements
+                if ACTIVATE_TEST2 and (not src in IGNORED_WRITE_FILES):
+                  for strg in WRITE_NOTRECOMMENDED_LIST:
+                    if line.find(strg) != -1 and src not in ["m_specialmsg.F90"]:
+                      print('- Warning: %s, line %d: found \"%s\" !' % (filename,lineno,strg))
+                      icount_notrecommended_write +=1
 
-            #Look for forbidden MPI_COMM_WORLD statements
-            if ACTIVATE_TEST3 and (not src in IGNORED_COMMWORLD_FILES):
-              for strg in COMMWORLD_FORBIDDEN_LIST:
-                if line.find(strg) != -1:
-                  print('  Error: %s, line %d: found \"%s\" !' % (filename,lineno,strg))
-                  icount_forbidden_commworld +=1
+                #Look for forbidden MPI_COMM_WORLD statements
+                if ACTIVATE_TEST3 and (not src in IGNORED_COMMWORLD_FILES):
+                  for strg in COMMWORLD_FORBIDDEN_LIST:
+                    if line.find(strg) != -1:
+                      print('  Error: %s, line %d: found \"%s\" !' % (filename,lineno,strg))
+                      icount_forbidden_commworld +=1
 
-            #Look for forbidden allocate/deallocate statements
-            if ACTIVATE_TEST4 and (not src in IGNORED_ALLOCATE_FILES):
-              ifound=0
-              for strg in ALLOCATE_FORBIDDEN_LIST:
-                ialloc=line.find(strg)
-                if ifound==0 and ialloc != -1:
-                  ifound=1
-                  if not '_'+strg in line:
-                    if ialloc+len(strg)<len(line):
-                      if line[ialloc-4:ialloc] != "abi_" and line[ialloc+len(strg)] == "(":
-                        print('  Error: %s, line %d: found \"%s\" !' % (filename,lineno,strg))
-                        icount_forbidden_allocate +=1
+                #Look for forbidden allocate/deallocate statements
+                if ACTIVATE_TEST4 and (not src in IGNORED_ALLOCATE_FILES):
+                  ifound=0
+                  for strg in ALLOCATE_FORBIDDEN_LIST:
+                    ialloc=line.find(strg)
+                    if ifound==0 and ialloc != -1:
+                      ifound=1
+                      if not '_'+strg in line:
+                        if ialloc+len(strg)<len(line):
+                          if line[ialloc-4:ialloc] != "abi_" and line[ialloc+len(strg)] == "(":
+                            print('  Error: %s, line %d: found \"%s\" !' % (filename,lineno,strg))
+                            icount_forbidden_allocate +=1
 
-            #Look for forbidden call statements (not placed at the start of the line)
-            if ACTIVATE_TEST5 and (not src in IGNORED_CALL_FILES):
-              for strg in CALL_STATEMENT_LIST:
-                icall=line_lower.find(" "+strg+" ")
-                if icall > 0:
-                  line_before=re.sub(" ","",line_lower[:icall])
-                  line_after=re.sub(" ","",line_lower[icall+3:len(line_lower)-1])
-                  nothing_before=(len(line_before) == 0)
-                  comment_before=(line_before.find("!") != -1)
-                  label_before=(not (re.match('[0-9]+',line_before)==None))
-                  quote_before=((line_before.find("'") != -1) or (line_before.find('"') != -1)) 
-                  problem_before=((not nothing_before) and (not label_before) and (not quote_before))
-                  problem_after=(re.match('[^\;\:\>\<\=\+\-\*\/\!\,]*(\(.*[\)\&]+|)',line_after)==None)
-                  if (not comment_before) and (problem_before or problem_after):
-                    print('  Error: %s, line %d: found \"%s\" not placed at the start of the line !' \
-                          % (filename,lineno,strg))
-                    icount_forbidden_call +=1
+                #Look for forbidden call statements (not placed at the start of the line)
+                if ACTIVATE_TEST5 and (not src in IGNORED_CALL_FILES):
+                  for strg in CALL_STATEMENT_LIST:
+                    icall=line_lower.find(" "+strg+" ")
+                    if icall > 0:
+                      line_before=re.sub(" ","",line_lower[:icall])
+                      line_after=re.sub(" ","",line_lower[icall+3:len(line_lower)-1])
+                      nothing_before=(len(line_before) == 0)
+                      comment_before=(line_before.find("!") != -1)
+                      label_before=(not (re.match('[0-9]+',line_before)==None))
+                      quote_before=((line_before.find("'") != -1) or (line_before.find('"') != -1)) 
+                      problem_before=((not nothing_before) and (not label_before) and (not quote_before))
+                      problem_after=(re.match('[^\;\:\>\<\=\+\-\*\/\!\,]*(\(.*[\)\&]+|)',line_after)==None)
+                      if (not comment_before) and (problem_before or problem_after):
+                        print('  Error: %s, line %d: found \"%s\" not placed at the start of the line !' \
+                              % (filename,lineno,strg))
+                        icount_forbidden_call +=1
 
-        #Update counters
-        stat_forbidden_write_count +=icount_forbidden_write
-        stat_notrecommended_write_count +=icount_notrecommended_write
-        stat_forbidden_commworld_count +=icount_forbidden_commworld
-        stat_forbidden_allocate_count +=icount_forbidden_allocate
-        stat_forbidden_call_count +=icount_forbidden_call
-        if icount_forbidden_write>0: file_forbidden_write_count +=1
-        if icount_notrecommended_write>0: file_notrecommended_write_count +=1
-        if icount_forbidden_commworld>0: file_forbidden_commworld_count +=1
-        if icount_forbidden_allocate>0: file_forbidden_allocate_count +=1
-        if icount_forbidden_call>0: file_forbidden_call_count +=1
+            #Update counters
+            stat_forbidden_write_count +=icount_forbidden_write
+            stat_notrecommended_write_count +=icount_notrecommended_write
+            stat_forbidden_commworld_count +=icount_forbidden_commworld
+            stat_forbidden_allocate_count +=icount_forbidden_allocate
+            stat_forbidden_call_count +=icount_forbidden_call
+            if icount_forbidden_write>0: file_forbidden_write_count +=1
+            if icount_notrecommended_write>0: file_notrecommended_write_count +=1
+            if icount_forbidden_commworld>0: file_forbidden_commworld_count +=1
+            if icount_forbidden_allocate>0: file_forbidden_allocate_count +=1
+            if icount_forbidden_call>0: file_forbidden_call_count +=1
 
   # Print final message
   print( '----------->')
@@ -330,6 +331,7 @@ def main():
       print( '              ABI_DEALLOCATE(arr1)')
       print( '              ABI_DEALLOCATE(arr2)\n')
       print( '  Finally, use ABI_MALLOC_SCALAR and ABI_FREE_SCALAR to allocate/free scalar entities.')
+      print( '  and ABI_MOVE_ALLOC instead of Fortran move_alloc.')
 
     if stat_forbidden_call_count > 0:
       # MG: Why? Besides there are several macros doing this...
