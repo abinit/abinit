@@ -1,8 +1,12 @@
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+! This module provide an implementation of a pair list
+! Possible improvement:
+! - Simplify the usage of get by removing the limit in key and string size
+! - Simplify the usage of get by removing the need for variable for all possible
+!   content when you know what is stored
 module m_pair_list
 
   use iso_c_binding
