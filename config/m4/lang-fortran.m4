@@ -26,7 +26,7 @@ AC_DEFUN([_ABI_CHECK_FC_ABSOFT],[
 
   dnl AC_MSG_CHECKING([if we are using the ABSoft Fortran compiler])
   fc_info_string=`$1 -V 2>/dev/null | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^Pro Fortran'`
+  abi_result=`echo "${fc_info_string}" | grep 'Pro Fortran'`
   if test "${abi_result}" = ""; then
     abi_result="no"
     fc_info_string=""
@@ -36,7 +36,7 @@ AC_DEFUN([_ABI_CHECK_FC_ABSOFT],[
     AC_DEFINE([FC_ABSOFT],1,
       [Define to 1 if you are using the ABSOFT Fortran compiler.])
     abi_fc_vendor="absoft"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/Pro Fortran //'`
+    abi_fc_version=`echo "${abi_result}" | sed -e 's/.*Pro Fortran //'`
     if test "${abi_fc_version}" = "${abi_result}"; then
       abi_fc_version="unknown"
     fi
@@ -1093,6 +1093,39 @@ AC_DEFUN([_ABI_CHECK_FC_GETPID],[
 ]) # _ABI_CHECK_FC_GETPID
 
 
+# _ABI_CHECK_FC_ON_THE_FLY_SHAPE()
+# --------------------------------
+#
+# Checks whether process IDs are available from Fortran. (F2003)
+#
+AC_DEFUN([_ABI_CHECK_FC_ON_THE_FLY_SHAPE],[
+  dnl Init
+  fc_has_getpid="no"
+
+  dnl Look for getpid() support
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      integer :: x(3,4)
+      call test_on_the_fly_shape(x)
+      contains
+      subroutine test_on_the_fly_shape(x)
+        integer, intent(inout) :: x(:,:)
+        integer :: y(product(shape(x)))
+      end subroutine test_on_the_fly_shape
+    ]])], [fc_has_on_the_fly_shape="yes"], [fc_has_on_the_fly_shape="no"])
+  AC_LANG_POP([Fortran])
+
+  dnl Determine whether to use getpid()
+  AC_MSG_CHECKING([whether the Fortran compiler can shape arrays on-the-fly])
+  AC_MSG_RESULT([${fc_has_on_the_fly_shape}])
+  if test "${fc_has_on_the_fly_shape}" = "yes"; then
+    AC_DEFINE([HAVE_FC_ON_THE_FLY_SHAPE],1,
+      [Define to 1 if your Fortran compiler can shape arrays on-the-fly.])
+  fi
+]) # _ABI_CHECK_FC_ON_THE_FLY_SHAPE
+
+
 
  #############################################################################
 
@@ -1157,6 +1190,7 @@ AC_DEFUN([ABI_FC_FEATURES],[
   _ABI_CHECK_FC_STREAM_IO
   _ABI_CHECK_FC_CPUTIME
   _ABI_CHECK_FC_TIMING
+  _ABI_CHECK_FC_ON_THE_FLY_SHAPE
 ]) # ABI_FC_FEATURES
 
 
