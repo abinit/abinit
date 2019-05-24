@@ -685,7 +685,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          if(optrw==2) then
            do im=1,ndim
              do im1=1,ndim
-               write(message,*) real(eigvectmatlu(iatom,isppol)%value(im,im1)),imag(eigvectmatlu(iatom,isppol)%value(im,im1))
+               write(message,*) real(eigvectmatlu(iatom,isppol)%value(im,im1)),aimag(eigvectmatlu(iatom,isppol)%value(im,im1))
                call wrtout(3000,message,'COLL')
              enddo
            enddo
@@ -759,10 +759,12 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                 call int2char4(iflavor,tag_iflavor)
                 unitselfrot(iatom,isppol,ispinor,im)=3000+iflavor
                 ABI_CHECK(unitselfrot(iatom,isppol,ispinor,im) > 0, "Cannot find free IO unit for unitselfrot!")
-                tmpfilrot = trim(paw_dmft%filapp)//'Selfrotformaxent'//trim(tag_at)//'_isppol'//tag_is//'_iflavor'//trim(tag_iflavor)
+                tmpfilrot = trim(paw_dmft%filapp)//'Selfrotformaxent'//&
+                & trim(tag_at)//'_isppol'//tag_is//'_iflavor'//trim(tag_iflavor)
                 write(std_out,*) "Create file  ",trim(tmpfilrot)," unit ",unitselfrot(iatom,isppol,ispinor,im)," for flavor",iflavor
 #ifdef FC_NAG
-                open (unit=unitselfrot(iatom,isppol,ispinor,im),file=trim(tmpfilrot),status='unknown',form='formatted',recl=ABI_RECL)
+                open (unit=unitselfrot(iatom,isppol,ispinor,im),file=trim(tmpfilrot),&
+                & status='unknown',form='formatted',recl=ABI_RECL)
 #else
                 open (unit=unitselfrot(iatom,isppol,ispinor,im),file=trim(tmpfilrot),status='unknown',form='formatted')
 #endif
@@ -917,14 +919,14 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                      write(message,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
 &                      real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
 &                      aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
-                     write(6,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
-&                      real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
-&                      aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
+!                     write(6,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
+!&                      real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
+!&                      aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
                     ! if(iflavor==1) then
                     ! write(1024,*) iatom,isppol,ispinor,im,unitselfrot(iatom,isppol,ispinor,im)
                     ! write(1024,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
-&                   !   real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
-&                   !   aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
+                    ! &  real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
+                    ! &  aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
                     ! endif
                      call wrtout(unitselfrot(iatom,isppol,ispinor,im),message,'COLL')
                    enddo
@@ -1087,6 +1089,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      end if
    end do
    ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
+   ABI_DEALLOCATE(unitselfrot) ! 7 is the max ndim possible
  endif 
 !   - For the Tentative rotation of the self-energy file (end destroy)
 
@@ -1571,7 +1574,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  real(dp), allocatable :: selftemp_re(:)
  real(dp), allocatable :: selftemp_imag(:)
  integer :: natom,ndim,nsppol,nspinor
- real(dp) :: delta,slope,y0
+ real(dp) :: delta
  character(len=500) :: message
 ! *********************************************************************
  delta=0.0000000
@@ -1752,7 +1755,7 @@ subroutine selfreal2imag_self(selfr,self)
  &                 * (selfr%omega(jfreq+1)-selfr%omega(jfreq))
                  enddo 
                  selftempmatsub(ifreq)=selftempmatsub(ifreq)/pi
-                 write(672,*)  self%omega(ifreq),real(selftempmatsub(ifreq)),imag(selftempmatsub(ifreq))
+                 write(672,*)  self%omega(ifreq),real(selftempmatsub(ifreq)),aimag(selftempmatsub(ifreq))
                enddo
                  write(672,*)  
              enddo

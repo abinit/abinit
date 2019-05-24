@@ -136,14 +136,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 !Local variables ------------------------------
  character(len=500) :: message
- character(len=2) :: gtau_iter,iatomnb
- integer :: iatom,ierr,if1,if2,iflavor,iflavor1,iflavor2,iflavor3,ifreq,im,im1,ispinor,ispinor1,isppol,itau,itypat,im2,ispinor2
+ integer :: iatom,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,ispinor,ispinor1,isppol,itau,itypat,im2,ispinor2
  integer :: lpawu,master,mbandc,natom,nflavor,nkpt,nspinor,nsppol,nsppol_imp,tndim,ispa,ispb,ima,imb
  integer :: nproc,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
  integer :: ier,rot_type_vee
  complex(dpc) :: omega_current,integral(2,2)
  real(dp) :: doccsum,noise,omega
- real(dp) :: facd,facnd
  logical :: nondiaglevels
 ! arrays
  real(dp), allocatable :: docc(:,:)
@@ -152,7 +150,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  complex(dpc), allocatable :: hybri_limit(:,:)
  real(dp), allocatable, target :: gtmp_nd(:,:,:)
  real(dp) :: umod(2,2)
- character(len=30) :: tmpfil
  complex(dpc), allocatable :: fw1(:,:),gw_tmp(:,:)
  complex(dpc), allocatable, target :: gw_tmp_nd(:,:,:) !modif
  complex(dpc), allocatable, target :: fw1_nd(:,:,:) !modif
@@ -1770,7 +1767,6 @@ subroutine testcode_ctqmc_b(energy_level,hybri_coeff,weiss_for_rot,dmftqmc_l,fw1
  type(green_type)  :: weiss_for_rot
 
 !Local variables ------------------------------
- character(len=500) :: message
  integer :: ifreq,iatom,ima,imb,ispa,ispb
  real(dp) :: omega
  real(dp) :: facnd, facd
@@ -2567,7 +2563,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  type(c_ptr) :: levels_ptr, fw1_nd_ptr, u_mat_ij_ptr, u_mat_ijkl_ptr, g_iw_ptr, gtau_ptr, gl_ptr
  real(dp), allocatable :: jbes(:)
  character(len=500) :: message
- integer :: ifreq, itau,iflavor1
+ integer :: ifreq, iflavor1
  integer :: iflavor2,iflavor,nflavor,iflavor3,itypat
  integer :: nfreq,ntau,nleg,ileg
  integer :: verbosity_solver ! min 0 -> max 3
