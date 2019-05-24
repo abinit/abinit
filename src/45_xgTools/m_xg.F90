@@ -151,6 +151,7 @@ module m_xg
   public :: xg_free
 
   public :: xgBlock_setBlock
+  public :: xgBlock_setBlock1
   public :: xgBlock_set
   public :: xgBlock_map
   public :: xgBlock_reverseMap
@@ -2401,6 +2402,10 @@ module m_xg
     type(xgBlock_t), intent(inout) :: xgBlock
     integer :: i
 
+
+    !print *, "JEDINICE"
+    !print *, "xgBlock%rows", xgBlock%rows
+    !print *, "xgBlock%cols", xgBlock%cols
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       !$omp parallel do
@@ -2408,9 +2413,11 @@ module m_xg
         xgBlock%vecR(i,i) = 1.d0
       end do
     case (SPACE_C)
-      !$omp parallel do
+      !!$omp parallel do
       do i = 1, min(xgBlock%rows,xgBlock%cols)
+        !print *, "POSTAVLJAM"
         xgBlock%vecC(i,i) = dcmplx(1.d0)
+        !print *, xgBlock%vecC(i,i)
       end do
     end select
 
@@ -2633,6 +2640,53 @@ module m_xg
    ! i = cptr
     print *, cptr
   end subroutine xg_getPointer
+
+
+  subroutine xgBlock_setBlock1(xgBlockA,xgBlockB, frow, fcol, rows, cols)
+    use iso_c_binding
+    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(inout) :: xgBlockB
+    integer, intent(in) :: frow
+    integer, intent(in) :: fcol
+    integer, intent(in) :: rows
+    integer, intent(in) :: cols
+    type(c_ptr) :: cptr
+
+    if ( (fcol+cols-1 ) > xgblockA%cols ) then
+      print *, "xgblockA%cols", xgblockA%cols
+      MSG_ERROR("Too many columns")
+    endif
+    if ( (frow+rows-1) > xgblockA%rows ) then
+      print *, "frow", frow
+      print *, "rows", rows
+      print *, "xgblockA%rows", xgblockA%rows
+      print *, "frow+rows-1", frow+rows-1
+      MSG_ERROR("Too many rows")
+    end if
+
+    xgBlockB%space = xgBlockA%space
+    xgBlockB%rows = rows
+    xgBlockB%LDim = xgBlockA%LDim
+    xgBlockB%cols = cols
+    xgBlockB%trans = xgBlockA%trans
+    xgBlockB%normal = xgBlockA%normal
+    xgBlockB%spacedim_comm= xgBlockA%spacedim_comm
+    
+    !print *, "frow", frow
+    !print *, "frow+rows-1", frow+rows-1
+    !stop
+
+    select case(xgBlockA%space)
+    case (SPACE_R,SPACE_CR)
+      cptr = getClocR(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecR(frow:frow+rows-1,fcol:fcol+cols-1))
+      call c_f_pointer(cptr,xgBlockB%vecR,(/ rows,cols /))
+    case(SPACE_C)
+      cptr = getClocC(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecC(frow:frow+rows-1,fcol:fcol+cols-1))
+      call c_f_pointer(cptr,xgBlockB%vecC,(/ rows,cols /))
+    end select
+
+  end subroutine xgBlock_setBlock1
+
 
 end module m_xg
 !!***

@@ -170,12 +170,14 @@ module m_chebfiwf
     ! get the array data into the xgBlock
     space = SPACE_CR
     l_icplx = 2
-
+    
   else ! complex
     space = SPACE_C
     l_icplx = 1
   end if
     
+  print *, "SPACEEEEEEEEEEEEEEE", l_icplx
+  !stop
  
   ! Memory info
   if ( prtvol >= 3 ) then
@@ -254,7 +256,9 @@ module m_chebfiwf
   !print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
   !print *, "l_mpi_enreg%nproc_band", l_mpi_enreg%nproc_band
   !stop
- 
+  !print *, "INIT SPACE", space
+  !stop
+  
   call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, dtset%paral_kgb, l_mpi_enreg%nproc_band, &
                    l_mpi_enreg%bandpp, l_mpi_enreg%nproc_fft, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft, l_mpi_enreg%me_g0, l_paw) 
                    !blockdim
