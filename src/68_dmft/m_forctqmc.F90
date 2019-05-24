@@ -1402,6 +1402,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ! If the CTQMC code in ABINIT was used, then destroy it and deallocate arrays
      ! ----------------------------------------------------------------------------
      if(paw_dmft%dmft_solv<6.and.paw_dmft%dmft_solv>7) then
+     !Nothing just hybrid var problem
+     else
        write(message,'(a,2x,a)') ch10,&
 &       " == Destroy CTQMC"
        call wrtout(std_out,message,'COLL')
@@ -2444,8 +2446,8 @@ subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_
           end do ! isppol
         end do  !itau
         call destroy_matlu(matlu1,paw_dmft%natom)
+        ABI_DATATYPE_DEALLOCATE(matlu1)
       endif ! if natom=1
-      ABI_DATATYPE_DEALLOCATE(matlu1)
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
 &      message, newunit=unt) /= 0) then
         MSG_ERROR(message)
