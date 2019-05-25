@@ -643,7 +643,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    if (dtset%eph_task == -4) then
      call wrtout(std_out, "Calling transport routine after sigmaph run...", do_flush=.True.)
-     !call transport(dtfil, dtset, ebands, cryst, comm)
+     call transport(dtfil, dtset, ebands, cryst, comm)
    end if
 
  case (5, -5)
