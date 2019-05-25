@@ -1,110 +1,49 @@
-#!/bin/sh
+#!/usr/bin/env python
 
-# Init
-f90_optim_dumper="src/10_dumpinfo/m_optim_dumper.F90"
+import os
+import re
+
+from collections import OrderedDict
 
 # Get optimizations
-. ./config.optim
+opt_data = OrderedDict()
+with open("config.optim", "r") as opt_file:
+    opt_specs = [line for line in opt_file.read().split("\n") \
+        if ( len(line) > 0)]
+    for line in opt_specs:
+        line_specs = line.split("=")
+        key = line_specs[0]
+        val = "=".join(line_specs[1:])[1:-1]
+        if ( key == "optim_dumper_template" ):
+            optim_dumper_template = val
+        elif ( key == "optim_dumper_output" ):
+            optim_dumper_output = val
+        else:
+            opt_data[key] = val
 
 # Fix empty default flags
 # (writing an empty string crashes the program when compiling with ifort
 # or xlf)
-test "${fcflags_opt_default}" = "" && fcflags_opt_default="--- None ---"
+if ( opt_data["fcflags_opt_default"] == "" ):
+    opt_data["fcflags_opt_default"] = "--- None ---"
 
-cat >${f90_optim_dumper} <<EOF
-!{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_optim_dumper
-!! NAME
-!!  m_optim_dumper
-!!
-!! FUNCTION
-!!  This module contains information about the optimizations set at
-!!  configure-time when building ABINIT (useful for debugging).
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (Yann Pouillon)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! SOURCE
+# Build source code
+config_optim = ""
+for srcdir in opt_data["fcflags_opt_dirlist"].split():
+    key = "fcflags_opt_{}".format(srcdir)
+    if ( key in opt_data ):
+        config_optim += """
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
+  write(my_unit,"(1x,a,a,3x,a,a,a)") "Optimizations for {srcdir}:",ch10, &
+&   "{optim}",ch10,ch10""".format(srcdir=srcdir, optim=opt_data[key])
 
-module m_optim_dumper
+# Get template and substitute text
+with open(optim_dumper_template, "r") as template_file:
+    dump_source = template_file.read()
+    dump_source = re.sub("@fcflags_opt_default@",
+        opt_data["fcflags_opt_default"], dump_source)
+    dump_source = re.sub("@config.optim@", config_optim, dump_source)
 
-  implicit none
-
-  public :: dump_optim
-
-contains  !===========================================================
-!!***
-
-!!****f* ABINIT/m_optim_dumper/dump_optim
-!! NAME
-!!  dump_optim
-!!
-!! FUNCTION
-!!  Reports a printout of the optimizations set at configure-time,
-!!  useful for error messages and debugging.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (Yann Pouillon)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!  my_unit= Fortran unit number (optional, default is std_out)
-!!
-!! OUTPUT
-!!  Only printing
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
-!! SOURCE
-
-subroutine dump_optim(my_unit)
-    
-  use defs_basis
-
-  implicit none
-
-!Arguments ------------------------------------
-  integer,intent(in) :: my_unit
-
-!Local variables-------------------------------
- 
-! *************************************************************************
- 
-  write(my_unit,"(a,1x,a)") ch10,repeat("+",78)
-  write(my_unit,"(1x,a,a,3x,a,a,a)") "Default optimizations:",ch10, &
-&   "${fcflags_opt_default}",ch10,ch10
-EOF
-
-for srcdir in ${fcflags_opt_dirlist}; do
-  tmp_optim=`eval echo \\$fcflags_opt_${srcdir}`
-  if test -n "${tmp_optim}"; then
-    cat >>${f90_optim_dumper} <<EOF
-
-  write(my_unit,"(1x,a,a,3x,a,a,a)") "Optimizations for ${srcdir}:",ch10, &
-&   "${tmp_optim}",ch10,ch10
-EOF
-  fi
-done
-
-cat >>${f90_optim_dumper} <<EOF
-
-  write(my_unit,"(1x,a,a)") repeat("+",78),ch10
-
-end subroutine dump_optim
-
-end module m_optim_dumper
-!!***
-EOF
+# Write down source file
+with open(optim_dumper_output, "w") as dump_file:
+    dump_file.write(dump_source)
