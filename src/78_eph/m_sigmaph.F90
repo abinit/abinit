@@ -687,8 +687,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call sigmaph_comp(sigma, sigma_restart)
        sigma%qp_done = sigma_restart%qp_done
        restart = 1
-       call wrtout(std_out, "- Restarting from previous SIGEPH.nc file")
-       call wrtout(ab_out, "- Restarting from previous SIGEPH.nc file")
+       call wrtout([std_out, ab_out], "- Restarting from previous SIGEPH.nc file")
      else
        restart = 0; sigma%qp_done = 0
        MSG_COMMENT("Found SIGEPH.nc file with all QP entries already computed. Will overwrite file.")
