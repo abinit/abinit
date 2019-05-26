@@ -21,6 +21,10 @@ import sys
 
 py2 = sys.version_info[0] <= 2
 
+if sys.version[0:3] < "2.7":
+    sys.stderr.write("makemake requires Python version 2.7 or above. Exiting.")
+    sys.exit(1)
+
 from subprocess import Popen, PIPE
 import shlex
 
