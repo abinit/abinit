@@ -6431,6 +6431,9 @@ corresponding influential variables are [[vcutgeo]] and [[rcut]].
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
   * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
   * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
+  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
+  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
+  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
@@ -7652,7 +7655,7 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 28 --> (NOT AVAILABLE: used internally for GGA OLYP pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/potentials/Goedecker/abinit/olyp) \- use the LibXC instead, with [[ixc]] = -110131.
 
   * 40 --> Hartree-Fock
-  * 41 --> PBE0, [[cite:Perdew1996]].
+  * 41 --> PBE0, [[cite:Adamo1999]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
 
 **ETSF Lib XC functionals**
