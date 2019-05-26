@@ -54,7 +54,7 @@ MODULE m_ebands
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one, &
                               isdiagmat
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
  use m_pptools,        only : printbxsf
@@ -2998,7 +2998,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
        wtk = ebands%wtk(ikpt)
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
           wme0 = edos%mesh - ebands%eig(band, ikpt, spin)
-          edos%dos(:, spin) = edos%dos(:, spin) + wtk * dirac_delta(wme0, edos%broad)
+          edos%dos(:, spin) = edos%dos(:, spin) + wtk * gaussian(wme0, edos%broad)
        end do
      end do
    end do
@@ -4300,7 +4300,7 @@ select case (intmeth)
        wtk = ebands%wtk(ikpt)
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
          wme0 = out_mesh - ebands%eig(band, ikpt, spin)
-         wme0 = dirac_delta(wme0,broad) * wtk
+         wme0 = gaussian(wme0, broad) * wtk
          edos%dos(:,spin) = edos%dos(:,spin) + wme0(:)
 
          !scalar
@@ -4616,7 +4616,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
          do ibc=nbv+1,nband_k
            cvmw = ebands%eig(ibc,ik_ibz,spin) - ebands%eig(ibv,ik_ibz,spin) - jdos%mesh
-           jdos%values(:, spin) = jdos%values(:, spin) + wtk * dirac_delta(cvmw, wbroad)
+           jdos%values(:, spin) = jdos%values(:, spin) + wtk * gaussian(cvmw, wbroad)
          end do
        end do
 

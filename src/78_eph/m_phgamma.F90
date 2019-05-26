@@ -52,7 +52,7 @@ module m_phgamma
  use m_io_tools,       only : open_file, iomode_from_fname
  use m_symtk,          only : littlegroup_q
  use m_geometry,       only : normv
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_fft_mesh,       only : rotate_fft_mesh
  use m_cgtools,        only : dotprod_g
@@ -2146,7 +2146,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
          tmp_a2f = zero
          do iw=1,nomega
            xx = a2f%omega(iw) - phfrq(mu)
-           tmp_gaussian(iw,mu) = dirac_delta(xx, smear)
+           tmp_gaussian(iw,mu) = gaussian(xx, smear)
            tmp_a2f(iw) = tmp_a2f(iw) + tmp_gaussian(iw,mu) * lambda_ph(mu) * abs(phfrq(mu))
          end do
          a2f%vals(:,mu,spin) = a2f%vals(:,mu,spin) + tmp_a2f * wtq(iq_ibz)
@@ -3360,8 +3360,8 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
          tmp_a2f_out = zero
          do iw=1,nomega
            xx = a2f_tr%omega(iw) - phfrq(mu)
-           tmp_a2f_in(iw,:,:)  = tmp_a2f_in(iw,:,:)  + dirac_delta(xx, smear) * lambda_in_ph(:,:,mu)  * abs(phfrq(mu))
-           tmp_a2f_out(iw,:,:) = tmp_a2f_out(iw,:,:) + dirac_delta(xx, smear) * lambda_out_ph(:,:,mu) * abs(phfrq(mu))
+           tmp_a2f_in(iw,:,:)  = tmp_a2f_in(iw,:,:)  + gaussian(xx, smear) * lambda_in_ph(:,:,mu)  * abs(phfrq(mu))
+           tmp_a2f_out(iw,:,:) = tmp_a2f_out(iw,:,:) + gaussian(xx, smear) * lambda_out_ph(:,:,mu) * abs(phfrq(mu))
          end do
          a2f_tr%vals_in(:,:,:,mu,spin)  = a2f_tr%vals_in(:,:,:,mu,spin)  + tmp_a2f_in(:,:,:) * wtq(iq_ibz)
          a2f_tr%vals_out(:,:,:,mu,spin) = a2f_tr%vals_out(:,:,:,mu,spin) + tmp_a2f_out(:,:,:) * wtq(iq_ibz)
