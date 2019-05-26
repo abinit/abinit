@@ -2824,6 +2824,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
 
  ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%natom3))
  !v1r_qbz = huge(one)
+ !ABI_CALLOC(average_v1r_qbz(2, ndb%nspden, db%natom3, nqbz))
+ !ABI_SFREE(average_v1r_qbz)
 
  iqst = 0
  do iq_ibz=1,nqibz
@@ -2868,6 +2870,15 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
          end do
        end if
 
+       !if (db%me_pert == 0) then
+       !do imyp=1,db%my_npert
+       !  ipc = db%my_pinfo(3, imyp)
+       !  do ispden=1,db%nspden
+       !    average_v1r_qbz(:, ispden, ipc, iq_bz) = sum(v1r_qbz(:, :, ispden, ipc), dim=2) / nfft
+       !  end do
+       !end do
+       !end if
+
        ! Slow FT.
        do imyp=1,db%my_npert
          ipc = db%my_pinfo(3, imyp)
@@ -2898,12 +2909,14 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
          !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
        end if
 
+       !if (db%me_pert == 0) then
        !do imyp=1,db%my_npert
        !  ipc = db%my_pinfo(3, imyp)
        !  do ispden=1,db%nspden
-       !    average_v1r_qbz(ispden, ipc) = sum(sumv1r_qbz(:, ispden, ipc) / nfft
+       !    average_v1r_qbz(:, ispden, ipc, iq_bz) = sum(v1r_qbz(:, :, ispden, ipc), dim=2) / nfft
        !  end do
        !end do
+       !endif
 
        ! Multiply by e^{iqpt_bz.r}
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
@@ -2970,6 +2983,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      end do
    end do
    call xmpi_sum_master(maxw, master, db%comm, ierr)
+   !call xmpi_sum_master(average_v1r_qbz, master, db%comm, ierr)
 
    if (xmpi_comm_rank(db%comm) == master) then
      sc_rprimd(:, 1) = nq1 * db%cryst%rprimd(:, 1)
