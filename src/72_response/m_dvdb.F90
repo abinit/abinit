@@ -2898,6 +2898,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
          !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
        end if
 
+       !do imyp=1,db%my_npert
+       !  ipc = db%my_pinfo(3, imyp)
+       !  do ispden=1,db%nspden
+       !    average_v1r_qbz(ispden, ipc) = sum(sumv1r_qbz(:, ispden, ipc) / nfft
+       !  end do
+       !end do
+
        ! Multiply by e^{iqpt_bz.r}
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
 
