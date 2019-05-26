@@ -231,7 +231,7 @@ class Explorer(cmd.Cmd):
         '''
             Autocompletion for file path arguments.
         '''
-        return glob.glob(os.path.expanduser(text)+'*')
+        return glob.glob(os.path.expanduser(text) + '*')
 
     def complete_load(self, text, line, begi, endi):
         return self.complete_file_path(text)
