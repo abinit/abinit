@@ -965,13 +965,14 @@ end subroutine polynomial_coeff_writeXML
 !! SOURCE
 !!
 subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart,natom_sc,natom_uc,ncoeff,sc_size,&
-&                                    strain,strten,ncell,index_cells,comm)
+&                                    strain,strten,ncell,index_cells,comm,filename)
 
 !Arguments ------------------------------------
 ! scalar
   real(dp),intent(out):: energy
   integer, intent(in) :: ncell,ncoeff,natom_sc,natom_uc
   integer, intent(in) :: comm
+  character(len=fnlen),optional,intent(in) :: filename 
 ! array
   real(dp),intent(out):: strten(6)
   real(dp),intent(in) :: strain(6)
@@ -992,6 +993,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   integer :: cell_atoma1(3),cell_atoma2(3)
   integer :: cell_atomb1(3),cell_atomb2(3)
   character(len=500) :: msg
+  character(len=fnlen) :: name_file
 ! *************************************************************************
 
 ! Check
@@ -999,6 +1001,8 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
     write(msg,'(a,a)')' No supercell found for getEnergy'
     MSG_ERROR(msg)
   end if
+
+  if(present(filename)) name_file = filename
 
 ! Initialisation of variables
   energy     = zero
@@ -1194,13 +1198,11 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   call xmpi_sum(fcart , comm, ierr)
   call xmpi_sum(strten , comm, ierr)
 
-
 !Write to anharmonic_energy_terms.out ORIGINAL  
-  INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
+  INQUIRE(FILE=name_file,OPENED=file_opened,number=unit_out)
   if(file_opened .eqv. .TRUE.)then
     do icoeff=1,ncoeff
       call xmpi_sum(energy_coeff(icoeff), comm, ierr)
-     !write(*,*) 'term ',icoeff,' :', energy_coeff(icoeff)
      ! Marcus write energy contributions of anharmonic terms to file 
       if(icoeff <ncoeff)then      
         write(unit_out,'(A,1ES24.16)',advance='no')  '    ',energy_coeff(icoeff)
@@ -1298,7 +1300,6 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  real(dp) :: tratom(3)
  character(len=500) :: message
 
-! *************************************************************************
 
 
 !Initialisation of variables
@@ -1340,7 +1341,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  symrel = crystal%symrel
  tnons  = crystal%tnons
 
- tolsym8=tol20
+ tolsym8=tol14
  call symatm(indsym,natom,nsym,symrec,tnons,&
 &            tolsym8,crystal%typat,crystal%xred)
  ABI_ALLOCATE(blkval,(3,natom,3,natom,nrpt))
@@ -2001,6 +2002,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    end do
  end do
 
+
  if(need_verbose)then
    write(message,'(1a)')' Generation of the list of all the possible coefficients'
    call wrtout(std_out,message,'COLL')
@@ -2058,8 +2060,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !TEST_AM
          end if
        end if
-     end do
-   end do
+     end do !end  icoeff 
+   end do !icoeff2
 
 
 !  Compute all the combination of coefficient up to the given order  (get the number)

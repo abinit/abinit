@@ -122,7 +122,7 @@ module m_fit_data
 !    datatype with the informations of the training set
    
  end type fit_data_type
- 
+
 !routine for fit_data
  public :: fit_data_compute
  public :: fit_data_init
@@ -312,7 +312,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !Local variables-------------------------------
 !scalar
  integer :: ii,itime,natom,ntime
- real(dp):: energy
+ real(dp):: energy,e_d_ht,e_d_short,e_d_ewald
  logical :: need_verbose
 !arrays
  character(len=500) :: message
@@ -386,7 +386,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 &                                   compute_displacement=.TRUE.,compute_duDelta=.TRUE.)
 
 !  Get forces and stresses from harmonic part (fixed part)     
-   call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
+   call effective_potential_evaluate(eff_pot,energy,e_d_ht,e_d_short,e_d_ewald,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
 &                                    strten_fixed(:,itime),natom,hist%rprimd(:,:,itime),&
 &                                    displacement=displacement(:,:,itime),&
 &                                    du_delta=du_delta(:,:,:,itime),strain=strain(:,itime),&
@@ -402,7 +402,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
    strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
- end do
+ end do ! End Loop itime 
    
 !Set the training set
  call training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega,ucvol)
@@ -425,6 +425,9 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 
 end subroutine fit_data_compute
 !!***
+
+
+
 
 !!****f* m_fit_data/training_set_init
 !!

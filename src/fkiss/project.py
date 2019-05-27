@@ -59,6 +59,8 @@ EXTERNAL_MODS = {
     "m_build_info",
     "m_optim_dumper",
     "libxc_functionals",
+    #Scale-UP for effective models 
+    "scup_global"
 }
 
 

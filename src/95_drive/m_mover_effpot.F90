@@ -105,6 +105,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
  use m_geometry, only : xcart2xred, xred2xcart
  use m_multibinit_dataset, only : multibinit_dtset_type
+ use m_scup_dataset,       only : scup_dtset_type 
  use m_effective_potential,only : effective_potential_type
  use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML
  use m_fit_polynomial_coeff, only : fit_polynomial_coeff_fit,genereList
@@ -149,8 +150,10 @@ implicit none
 ! real(dp):: time_q,time_b
  logical :: iam_master
  integer, parameter:: master=0
- logical :: verbose,writeHIST
-!real(dp) :: cpui
+ logical :: verbose,writeHIST,file_opened
+ !type 
+ type(scup_dtset_type) :: scup_inp
+ !real(dp) :: cpui
 !character(len=6) :: codvsn
 
 !TEST_AM
@@ -186,7 +189,7 @@ implicit none
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
- character(len=50) :: name_file 
+ character(len=fnlen) :: name_file 
  character(len=200):: term_name
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
@@ -266,7 +269,7 @@ implicit none
    dtset%dmft_entropy = 0
    dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = one  ! DILATation : MaXimal value
+   dtset%dilatmx = 1.5  ! DILATation : MaXimal value
    dtset%chkdilatmx = 0 ! No check on dilatmx is needed in multibilint
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001d0 ! internal FRICTION coefficient
@@ -517,6 +520,11 @@ implicit none
      MSG_BUG(message)
    end if
 
+  !Get SCALE-UP INPUT
+
+  scup_inp = inp%scup_dtset
+
+
 !***************************************************************
 !2  initialization of the structure for the dynamics
 !***************************************************************
@@ -556,39 +564,20 @@ implicit none
      ! and print anharmonic contribution to file anharmonic_energy_terms.out
      ! Open File and write header 
      ncoeff = effective_potential%anharmonics_terms%ncoeff
-     name_file='anharmonic_energy_terms.out' 
-     unit_out = get_unit()
-     if(inp%analyze_anh_pot == 1)then 
-       open(unit=unit_out,file=name_file,status='replace',form='formatted')
-       write(unit_out,*) '#---------------------------------------------#'
-       write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
-       write(unit_out,*) '#---------------------------------------------#'
-       write(unit_out,*) ''
-       write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
-       write(unit_out,*) '' 
-       write(unit_out,'(A)') 'Terms     Names' 
-       do icoeff=1,ncoeff
-         term_name = effective_potential%anharmonics_terms%coefficients(icoeff)%name
-         write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
-       enddo  
-       write(unit_out,*) ''  
-       write(unit_out,'(A)',advance='no')  'Cycle/Terms'
-       do icoeff=1,ncoeff
-         if(icoeff<ncoeff)then
-         write(unit_out,'(I5)',advance='no') icoeff
-         else 
-         write(unit_out,'(I5)',advance='yes') icoeff
-         endif
-       enddo  
-     end if 
+     name_file='MD' 
+     if(inp%analyze_anh_pot == 1)then
+       call effective_potential_writeAnhHead(ncoeff,name_file,&
+&                        effective_potential%anharmonics_terms)      
+     end if
 
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST)
-     close(unit_out)
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp)     
+     INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
+     if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
      !*************************************************************
      !   Try to bound the model
