@@ -298,6 +298,7 @@ module m_pair_list
     elseif(present(s)) then 
         call pair_list_sets(pl%plc, trim(key), s, len_trim(key), len_trim(s)) 
     end if 
+  end subroutine pair_list_set
 !!*** m_pair_list/pair_list_set
 
 !!****f* m_pair_list/pair_list_restart
@@ -326,9 +327,9 @@ module m_pair_list
   end subroutine pair_list_restart 
 !!*** m_pair_list/pair_list_restart
 
-!!****f* m_pair_list/pair_list_next
+!!****f* m_pair_list/pair_list_iter
 !! NAME
-!! pair_list_next
+!! pair_list_iter
 !!
 !! FUNCTION
 !!  equivalent to pair_list_look followed by pair_list_next 
@@ -361,7 +362,7 @@ module m_pair_list
     if(type_code >= 0) then 
       call pair_list_next_c(pl%plc); 
     end if 
-  end subroutine pair_list
-!!*** m_pair_list/pair_list
+  end subroutine pair_list_iter
+!!*** m_pair_list/pair_list_iter
 
 end module m_pair_list
