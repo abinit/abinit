@@ -786,6 +786,7 @@ module m_chebfi2
     !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !proba ali ne radi bas kako treba :(
     
     !!TODO TODO TODO ODAVDE NA DALJE< OVI NIZOVI IZNAD SADA SU OK VALJDA
+    !!TODO RR TEST
     call timab(tim_RR, 1, tsec)
     call chebfi_rayleightRitz(chebfi, nline)
     call timab(tim_RR, 2, tsec) 
