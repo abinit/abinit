@@ -2824,7 +2824,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
 
  ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%natom3))
  !v1r_qbz = huge(one)
- !ABI_CALLOC(average_v1r_qbz(2, ndb%nspden, db%natom3, nqbz))
+ !ABI_CALLOC(average_v1r_qbz, (2, ndb%nspden, db%natom3, nqbz))
  !ABI_SFREE(average_v1r_qbz)
 
  iqst = 0
