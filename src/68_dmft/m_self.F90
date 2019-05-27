@@ -902,8 +902,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                    write(message,'(a,2x,a,i4)') ch10,&
 &                    " == Print non Rotated Self Energy for freq=",ifreq
                    call wrtout(std_out,message,'COLL')
+                   call print_matlu(selfrotmatlu,natom,1,compl=1)
                  endif
-                 call print_matlu(selfrotmatlu,natom,1,compl=1)
                  call rotate_matlu(selfrotmatlu,eigvectmatlu,natom,3,1)
                  if(ifreq<5) then
                    write(message,'(a,2x,a,i4)') ch10,&
@@ -916,9 +916,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                    call wrtout(std_out,message,'COLL')
                  endif
                  !write(message,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
-&                !  ((real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
-&                !  aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
-&                !  im=1,ndim),ispinor=1,nspinor)
+                !  ((real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
+                !  aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
+                !  im=1,ndim),ispinor=1,nspinor)
                  iflavor=0
                  do ispinor=1,nspinor
                    do im=1,ndim
