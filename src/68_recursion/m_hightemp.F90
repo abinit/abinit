@@ -33,6 +33,7 @@ module m_hightemp
   use m_geometry
   use m_special_funcs
   use m_specialmsg
+  use m_energies,       only : energies_type
   use m_mpinfo,         only : ptabs_fourdp, proc_distrb_cycle
   use m_numeric_tools,  only : simpson, simpson_int
 
@@ -405,14 +406,15 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine prt_eigocc(eigen,etotal,fermie,fnameabo_eig,iout,kptns,&
-    & mband,nband,nkpt,nsppol,occ,rprimd,strten,tsmear,vxcavg,wtk)
+  subroutine prt_eigocc(eigen,etotal,energies,fnameabo_eig,iout,kptns,&
+    & mband,nband,nkpt,nsppol,occ,rprimd,strten,tsmear,usepaw,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: iout,mband,nkpt,nsppol
-    real(dp),intent(in) :: etotal,fermie,tsmear,vxcavg
+    integer,intent(in) :: iout,mband,nkpt,nsppol,usepaw
+    real(dp),intent(in) :: etotal,tsmear
     character(len=*),intent(in) :: fnameabo_eig
+    type(energies_type),intent(in) :: energies
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol),kptns(3,nkpt)
@@ -453,8 +455,28 @@ contains
     ! call wrtout(temp_unit,msg,'COLL')
 
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-      & ' Chemical potential = ',fermie,' Ha         Average Vxc        = ',vxcavg,&
-      & ' Ha         Total energy       = ',etotal, ' Ha'
+      & ' Chemical potential = ',energies%e_fermie,' Ha         XC energy          = ',energies%e_xc,&
+      & ' Ha         Total free energy  = ',etotal, ' Ha'
+    call wrtout(temp_unit,msg,'COLL')
+    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
+      & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Hartree energy     = ',energies%e_hartree,&
+      & ' Ha         Ewald energy       = ',energies%e_ewald, ' Ha'
+    call wrtout(temp_unit,msg,'COLL')
+
+    if (usepaw==0) then
+      write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
+        & ' PsPCore energy     = ',energies%e_corepsp,' Ha         Loc. Psp. energy   = ',energies%e_localpsp,&
+        & ' Ha         NL PsP energy      = ',energies%e_nlpsp_vfock, ' Ha'
+    else if (usepaw==1) then
+      write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
+        & ' PsPCore energy     = ',energies%e_corepsp,' Ha         Loc. Psp. energy   = ',energies%e_localpsp,&
+        & ' Ha         PAW PsP energy     = ',energies%e_paw, ' Ha'
+    end if
+    call wrtout(temp_unit,msg,'COLL')
+
+    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
+      & ' Entropy energy     = ',energies%e_entropy,' Ha         Band energy        = ',energies%e_eigenvalues,&
+      & ' Ha         Internal energy    = ',etotal-energies%e_entropy, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
       & ' Unit cell vol      = ',ucvol,' Bohr^3     Elec. temperature  = ',tsmear,&

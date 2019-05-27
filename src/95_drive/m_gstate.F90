@@ -1455,9 +1455,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
 & resid,rhor,rprimd,results_gs%vxcavg,xred)
 
- call prt_eigocc(eigen,results_gs%etotal,results_gs%energies%e_fermie,dtfil%fnameabo_eig,std_out,&
+ call prt_eigocc(eigen,results_gs%etotal,results_gs%energies,dtfil%fnameabo_eig,std_out,&
 & dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,occ,rprimd,results_gs%strten,&
-& dtset%tsmear,results_gs%vxcavg,dtset%wtk)
+& dtset%tsmear,psps%usepaw,dtset%wtk)
 
  if ( (dtset%iscf>=0 .or. dtset%iscf==-3) .and. dtset%prtstm==0) then
    call prtene(dtset,results_gs%energies,ab_out,psps%usepaw)
