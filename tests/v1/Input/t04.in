@@ -60,7 +60,7 @@
 #%% keywords = NC 
 #%% authors = Unknown
 #%% description = 
-#%% Bulk Aluminium, FCC, with 2 special points, occopt=7 and tsmear=0.05.
-#%% Designed to test the treatment of metals, with the Gaussian smearing
+#%%   Bulk Aluminium, FCC, with 2 special points, occopt=7 and tsmear=0.05.
+#%%   Designed to test the treatment of metals, with the Gaussian smearing
 #%% topics = BandOcc
 #%%<END TEST_INFO>

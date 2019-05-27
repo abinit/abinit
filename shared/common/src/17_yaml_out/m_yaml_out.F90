@@ -6,12 +6,10 @@
 #include "abi_common.h"
 #define SET_DEFAULT(v, optv, defv) v = defv; if(present(optv)) v = optv
 #define ERROR_NO_OUT MSG_ERROR("No output medium have been provided.")
-#define YASSERT(cond, msg) if(.not. cond) then; MSG_ERROR(msg); end if
 
 #define MAGIC_NAN 9.9999999999D+99
 
 module m_yaml_out
-
 
   use ieee_arithmetic
 
@@ -31,9 +29,6 @@ module m_yaml_out
   character(len=13),parameter :: default_sfmt="(A)"
   integer,parameter :: default_keysize=30
   integer,parameter :: default_stringsize=500
-
-  integer :: doclock
-
 
   public :: yaml_open_doc, yaml_close_doc, yaml_single_dict, yaml_iterstart
   public :: yaml_add_realfield, yaml_add_intfield, yaml_add_stringfield
@@ -344,11 +339,6 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
   
-    if (doclock == 1) then
-     call interm%write('...')
-    end if
-    doclock = 1
-    
     if(present(tag)) then
       call interm%write('---'//' !'//trim(tag)//eol//'label')
     else
@@ -404,8 +394,6 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    YASSERT(doclock == 1, "No document is opened yet.")
-
     rfmt = '                              '
     SET_DEFAULT(rfmt, real_fmt, default_rfmt)
     if(present(tag)) then
@@ -450,8 +438,6 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    YASSERT(doclock == 1, "No document is opened yet.")
-
     ifmt = '                              '
     SET_DEFAULT(ifmt, int_fmt, default_ifmt)
     if(present(tag)) then
@@ -492,8 +478,6 @@ module m_yaml_out
 
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
-
-    YASSERT(doclock == 1, "No document is opened yet.")
 
     if(present(tag)) then
       call yaml_start_field(interm, label, width=w, tag=tag)
@@ -536,8 +520,6 @@ module m_yaml_out
 
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
-
-    YASSERT(doclock == 1, "No document is opened yet.")
 
     rfmt = '                              '
     SET_DEFAULT(rfmt, real_fmt, default_rfmt)
@@ -583,8 +565,6 @@ module m_yaml_out
 
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
-
-    YASSERT(doclock == 1, "No document is opened yet.")
 
     ifmt = '                              '
     SET_DEFAULT(ifmt, int_fmt, default_ifmt)
@@ -632,8 +612,6 @@ module m_yaml_out
     SET_DEFAULT(w, width, 0)
     SET_DEFAULT(ks, key_size, default_keysize)
     SET_DEFAULT(ss, string_size, default_stringsize)
-
-    YASSERT(doclock == 1, "No document is opened yet.")
 
     kfmt = '                              '
     rfmt = '                              '
@@ -687,8 +665,6 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    YASSERT(doclock == 1, "No document is opened yet.")
-    
     rfmt = '                              '
     SET_DEFAULT(rfmt, real_fmt, default_rfmt)
     SET_DEFAULT(vmax, multiline_trig, 5)
@@ -740,8 +716,6 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    YASSERT(doclock == 1, "No document is opened yet.")
-    
     ifmt = '                              '
     SET_DEFAULT(ifmt, int_fmt, default_ifmt)
     SET_DEFAULT(vmax, multiline_trig, 5)
@@ -791,8 +765,6 @@ module m_yaml_out
     integer :: vmax, ks, i, ss
     logical :: nl
 
-    YASSERT(doclock == 1, "No document is opened yet.")
-    
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
@@ -850,8 +822,6 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(n, indent, 4)
   
-    YASSERT(doclock == 1, "No document is opened yet.")
-    
     if(n > 4) then
       call interm%write(repeat(' ', n-4))
     end if
@@ -889,8 +859,6 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(n, indent, 4)
   
-    YASSERT(doclock == 1, "No document is opened yet.")
-
     call interm%write(repeat(' ', n)//trim(line))
 
     if(nl) then
@@ -981,11 +949,6 @@ module m_yaml_out
     SET_DEFAULT(sfmt, string_fmt, default_sfmt)
     SET_DEFAULT(w, width, 0)
 
-    if (doclock == 1) then
-     call interm%write('...'//eol)
-    end if
-    doclock = 1
-    
     call interm%write('---')
     if(present(tag)) then
       call interm%write(' !'//tag)
@@ -1047,26 +1010,23 @@ module m_yaml_out
 
     SET_DEFAULT(nl, newline, .true.)
 
-    if (doclock == 1) then
-      if(present(stream)) then
-        call stream%write('...')
-        if(nl) call stream%write(eol)
-      else if(present(string)) then
-        if(nl) then
-          write(string, '(A)') '...'//eol
-        else
-          write(string, '(A)') '...'
-        end if
-      else if(present(file_d)) then
-        if(nl) then
-          write(file_d, '(A)') '...'
-        else
-          write(file_d, '(A)', advance='no') '...'
-        end if
+    if(present(stream)) then
+      call stream%write('...')
+      if(nl) call stream%write(eol)
+    else if(present(string)) then
+      if(nl) then
+        write(string, '(A)') '...'//eol
       else
-        ERROR_NO_OUT
+        write(string, '(A)') '...'
       end if
+    else if(present(file_d)) then
+      if(nl) then
+        write(file_d, '(A)') '...'
+      else
+        write(file_d, '(A)', advance='no') '...'
+      end if
+    else
+      ERROR_NO_OUT
     end if
-    doclock = 0
   end subroutine yaml_close_doc
 end module m_yaml_out

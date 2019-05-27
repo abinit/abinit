@@ -59,6 +59,8 @@ module m_stream_string
       cursor => cursor%next
       ABI_FREE_SCALAR(prev)
     end do
+    stream%head => NULL()
+    stream%length = 0
   end subroutine stream_free
 
 ! copy src content to dest without altering src

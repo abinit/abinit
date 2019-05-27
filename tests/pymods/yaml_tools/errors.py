@@ -67,6 +67,12 @@ class IllegalFilterNameError(ConfigError):
         super(IllegalFilterNameError, self).__init__(msg.format(name))
 
 
+class MissingCallbackError(ConfigError):
+    def __init__(self, obj, method):
+        msg = '{} does not expose a {} method.'.format(obj, method)
+        super(MissingCallbackError, self).__init__(msg)
+
+
 ###############################################################################
 class InputFileError(YAMLTestError):
     def __init__(self, line, msg):
@@ -78,7 +84,7 @@ class NoIteratorDefinedError(InputFileError):
     def __init__(self, doc):
         msg = ('No iterator have been found before the first document {}.'
                .format(doc.obj))
-        super(NoIteratorDefinedError, self).__init__(doc.start+1, msg)
+        super(NoIteratorDefinedError, self).__init__(doc.start + 1, msg)
 
 
 class NotAvailableTagError(InputFileError):
@@ -86,3 +92,18 @@ class NotAvailableTagError(InputFileError):
         msg = ('Tag {} is not available in this installation : {}'
                .format(tag, msg))
         YAMLTestError.__init__(self, msg)
+
+
+class UnlabeledDocumentError(InputFileError):
+    def __init__(self, line):
+        msg = ('This document does not have a label field. It cannot be'
+               ' identified.')
+        InputFileError.__init__(self, line, msg)
+
+
+class DuplicateDocumentError(InputFileError):
+    def __init__(self, line, id):
+        msg = ('There are two document with the same label and iteration'
+               ' state ({}). Please change the label of one of them to make it'
+               ' unique.').format(id)
+        InputFileError.__init__(self, line, msg)
