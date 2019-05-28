@@ -2967,7 +2967,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  db%v1scf_rpt = db%v1scf_rpt / nqbz
 
  ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
+ ! TODO
  write_maxw = len_trim(outwr_path) > 0
+ write_maxw = .False.
  if (write_maxw) then
    ABI_CALLOC(maxw, (nrtot, db%natom3))
    do imyp=1,db%my_npert
@@ -3445,31 +3447,32 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  do iq_ibz=1,nqibz
    ! Ignore points reported by the oracle. We can still recompute them on the fly if needed.
    if (qselect_ibz(iq_ibz) == 0) cycle
-   !if (itreatq(iq_ibz) == 0) cycle
+   if (itreatq(iq_ibz) == 0) cycle
 
    call cwtime(cpu, wall, gflops, "start")
 
    ! TODO: DEBUGGING SECTION
-   db_iqpt = db%findq(qibz(:, iq_ibz))
-if (db_iqpt /= -1) then
-      call wrtout(std_out, " DBG: Reading V(q) from DVDB...")
-      call dvdb_readsym_allv1(db, db_iqpt, my_cplex, nfft, ngfft, all_v1scf, comm)
-      do imyp=1,db%my_npert
-        if (my_cplex == 2) then
-          v1scf(:,:,:,imyp) = all_v1scf(:,:,:,db%my_pinfo(3, imyp))
-        else
-          v1scf(1,:,:,imyp) = all_v1scf(1,:,:,db%my_pinfo(3, imyp))
-          v1scf(2,:,:,imyp) = zero
-        end if
-      end do
-      ABI_FREE(all_v1scf)
-     write(msg,'(2(a,i0),a)') " Reading q-point [", iq_ibz, "/", nqibz, "]"
-     call cwtime_report(msg, cpu, wall, gflops)
-else
+   ! Read q-points from file! Incompatible with itreatq cycle and comm_rpt
+   !db_iqpt = db%findq(qibz(:, iq_ibz))
+   !if (db_iqpt /= -1) then
+   !      call wrtout(std_out, " DBG: Reading V(q) from DVDB...")
+   !      call dvdb_readsym_allv1(db, db_iqpt, my_cplex, nfft, ngfft, all_v1scf, comm)
+   !      do imyp=1,db%my_npert
+   !        if (my_cplex == 2) then
+   !          v1scf(:,:,:,imyp) = all_v1scf(:,:,:,db%my_pinfo(3, imyp))
+   !        else
+   !          v1scf(1,:,:,imyp) = all_v1scf(1,:,:,db%my_pinfo(3, imyp))
+   !          v1scf(2,:,:,imyp) = zero
+   !        end if
+   !      end do
+   !      ABI_FREE(all_v1scf)
+   !     write(msg,'(2(a,i0),a)') " Reading q-point [", iq_ibz, "/", nqibz, "]"
+   !     call cwtime_report(msg, cpu, wall, gflops)
+   !else
 
    ! Interpolate my_npert potentials inside comm_rpt
    call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
-end if
+   !end if
 
    ! Points in the IBZ may be distributed to reduce memory.
    if (db%ft_qcache%itreatq(iq_ibz) /= 0) then
@@ -3478,7 +3481,7 @@ end if
    end if
 
    ! Print progress.
-   if (iq_ibz <= 50 .or. mod(iq_ibz, 50) == 0) then
+   if (iq_ibz <= 50 .or. mod(iq_ibz, 100) == 0) then
      write(msg,'(2(a,i0),a)') " Interpolating q-point [", iq_ibz, "/", nqibz, "]"
      call cwtime_report(msg, cpu, wall, gflops)
    end if
@@ -3493,6 +3496,9 @@ end if
  call wrtout(std_out, sjoin(" Max memory inside MPI comm: ", ftoa(max_mbsize, fmt="f8.1"), " [Mb] <<< MEM"))
  call cwtime_report(" Qcache from W(r,R) + symmetrization", cpu_all, wall_all, gflops_all, end_str=ch10)
  call timab(1808, 2, tsec)
+
+ ! This barrier seems to be needed on lemaitre3. DO NOT REMOVE!
+ call xmpi_barrier(comm)
 
 end subroutine dvdb_ftqcache_build
 !!***
