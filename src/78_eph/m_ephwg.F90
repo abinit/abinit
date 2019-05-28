@@ -58,7 +58,7 @@ module m_ephwg
  use m_time,            only : cwtime, cwtime_report, sec2str
  use m_symtk,           only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
- use m_special_funcs,   only : dirac_delta
+ use m_special_funcs,   only : gaussian
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
  use m_simtet,          only : sim0onei, SIM0TWOI
  use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt
@@ -850,7 +850,7 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
    do iq=1,self%nq_k
      do ie=1,2
        wme0 = thetaw(:, 1) - pme_k(iq, ie)
-       deltaw_pm(:, iq, ie) = dirac_delta(wme0, broad)
+       deltaw_pm(:, iq, ie) = gaussian(wme0, broad)
      end do
    end do
 
@@ -950,9 +950,9 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
    do iq_ibz=1,self%nq_k
      if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
      wme0 = eig - pme_k(iq_ibz, 1)
-     deltaw_pm(:,iq_ibz,1) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
+     deltaw_pm(:,iq_ibz,1) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
      wme0 = eig - pme_k(iq_ibz, 2)
-     deltaw_pm(:,iq_ibz,2) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
+     deltaw_pm(:,iq_ibz,2) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
    end do
  else
    call htetra_wvals_weights_delta(self%tetra_k,pme_k(:,1),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,1),comm)
@@ -964,9 +964,9 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
    if (present(broad)) then
      wme0 = eig - pme_k(iq_ibz, 1)
-     deltaw_pm(:,iq_ibz,1) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
+     deltaw_pm(:,iq_ibz,1) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
      wme0 = eig - pme_k(iq_ibz, 2)
-     deltaw_pm(:,iq_ibz,2) = dirac_delta(wme0, broad) * self%lgk%weights(iq_ibz)
+     deltaw_pm(:,iq_ibz,2) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
    else
      call tetra_get_onewk_wvals(self%tetra_k, iq_ibz, bcorr, neig, eig, self%nq_k, pme_k(:,1), weights, tol6)
      deltaw_pm(:,iq_ibz,1) = weights(:,1)

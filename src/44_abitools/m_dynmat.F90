@@ -2823,7 +2823,7 @@ end subroutine make_bigbox
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (nrpt,3) Give the index of the the cell and irpt
+!! cell= (3,nrpt) Give the index of the the cell and irpt
 !! nprt= Number of R points in the Big Box
 !! rpt(3,mrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)

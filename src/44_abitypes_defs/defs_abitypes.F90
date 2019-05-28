@@ -590,6 +590,7 @@ type dataset_type
  integer :: usexcnhat_orig
  integer :: useylm
  integer :: use_slk
+ integer :: use_yaml
  integer :: vacnum
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts

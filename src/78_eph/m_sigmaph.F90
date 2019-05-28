@@ -687,8 +687,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call sigmaph_comp(sigma, sigma_restart)
        sigma%qp_done = sigma_restart%qp_done
        restart = 1
-       call wrtout(std_out, "- Restarting from previous SIGEPH.nc file")
-       call wrtout(ab_out, "- Restarting from previous SIGEPH.nc file")
+       call wrtout([std_out, ab_out], "- Restarting from previous SIGEPH.nc file")
      else
        restart = 0; sigma%qp_done = 0
        MSG_COMMENT("Found SIGEPH.nc file with all QP entries already computed. Will overwrite file.")
@@ -1036,7 +1035,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! to the integral and the potentials must be cached.
      comm_rpt = sigma%comm_qpt
      if (.not. sigma%imag_only) comm_rpt = sigma%comm_bsum
-     !comm_rpt = xmpi_comm_self
+     if (dtset%useric == 666) comm_rpt = xmpi_comm_self
      path = strcat(dtfil%filnam_ds(4), "_WRMAX")
      call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, path, comm_rpt)
 

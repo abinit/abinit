@@ -161,7 +161,7 @@ type(args_t) function args_parser() result(args)
       call get_command_argument(ii + 1, arg)
       args%abimem_level = atoi(arg)
 
-    else if (arg == "--abimem-limit_mv") then
+    else if (arg == "--abimem-limit-mb") then
       call get_command_argument(ii + 1, arg)
       args%abimem_limit_mb = atof(arg)
 
@@ -237,6 +237,7 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"-d, --dry-run              Validate input file and exit."
         write(std_out,*)"-j, --omp-num-threads      Set the number of OpenMp threads."
         write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING"
+        write(std_out,*)"--abimem-limit-mb NUM      Log malloc/free only if size > limit in Megabytes. Requires abimem-level 3"
         write(std_out,*)"--ieee-halt                Halt the code if one of the *usual* IEEE exceptions is raised."
         write(std_out,*)"--ieee-signal              Signal the occurrence of the *usual* IEEE exceptions."
         write(std_out,*)"--fft-ialltoall[=bool]     Use non-blocking ialltoall in MPI-FFT (used only if ndat>1 and MPI3)."

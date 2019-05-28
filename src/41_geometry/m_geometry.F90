@@ -1499,7 +1499,6 @@ end subroutine chkdilatmx
 
 subroutine mkrdim(acell,rprim,rprimd)
 
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: acell(3),rprim(3,3)

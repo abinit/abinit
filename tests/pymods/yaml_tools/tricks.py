@@ -5,15 +5,6 @@
 '''
 
 from __future__ import print_function, division, unicode_literals
-import sys
-
-
-PY3 = sys.version_info[0] == 3
-
-if PY3:
-    string = str
-else:
-    string = basestring
 
 
 def cstm_isinstance(obj, cls):

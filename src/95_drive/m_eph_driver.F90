@@ -547,6 +547,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_path, comm)
+   !dvdb%symv1 = dtset%symv1scf > 0
+   !if (dtset%prtvol > 10) dvdb%debug = .True.
    ! Set dielectric tensor, BECS and has_dielt_zeff flag that
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0
@@ -590,7 +592,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (dtset%eph_frohlichm /= 0) then
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, dtfil%fnameabi_efmas, xmpi_comm_self))
-   call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)
+   call efmas_ncread(efmasdeg, efmasval, kpt_efmas, ncid)
    NCF_CHECK(nf90_close(ncid))
 #else
    MSG_ERROR("netcdf support not enabled")
@@ -658,6 +660,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (7)
    ! Compute phonon limited transport from SIGEPH file
    call transport(dtfil, dtset, ebands, cryst, comm)
+
+ !case (15)
+   !call dvdb%ftinterp_setup(ngqpt, nqshift, qshift, nfft, ngfft, outwr_path, comm_rpt)
+   !call dvdb%write_real_space(dtset, cryst, comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
