@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 17 May 2019.
-- ( at 18h12 )
+.Starting date : Tue 28 May 2019.
+- ( at 15h26 )
   
 - input  file    -> t03.in
 - output file    -> t03_x.out
@@ -50,7 +50,7 @@ _ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    4
+-  max_nthreads =   12
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1

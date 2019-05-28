@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 17 May 2019.
-- ( at 19h49 )
+.Starting date : Tue 28 May 2019.
+- ( at 16h30 )
   
 - input  file    -> t03.in
 - output file    -> t03_x.out
@@ -33,13 +33,14 @@
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       3   xclevel =       1
 -    mband =         192        mffmem =           1         mkmem =           1
-       mpw =        3887          nfft =       64000          nkpt =           1
+       mpw =        1944          nfft =       64000          nkpt =           1
+Pmy_natom=        16
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        45    nfftf =     91125
 ================================================================================
-P This job should need less than                      83.897 Mbytes of memory.
+P This job should need less than                      55.887 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
+_ WF disk file :      5.697 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
  
 --------------------------------------------------------------------------------
@@ -50,13 +51,13 @@ _ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    4
+-  max_nthreads =    6
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
             acell      1.5340000000E+01  1.5340000000E+01  1.5340000000E+01 Bohr
               amu      1.37327000E+02
-           bandpp         192
+           bandpp          96
       chksymbreak           0
      densfor_pred           6
              ecut      8.00000000E+00 Hartree
@@ -70,6 +71,7 @@ P           mkmem           1
             ngfft          40      40      40
           ngfftdg          45      45      45
              nkpt           1
+-          npband           2
             nstep          40
              nsym          48
            ntypat           1
@@ -244,7 +246,7 @@ P           mkmem           1
  
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   nproc =    2
  
 --- !IterStart
 dtset:     1
@@ -296,7 +298,7 @@ dtset:     1
    5.70955898E+05                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
  
-_setup2: Arith. and geom. avg. npw (full set) are    3887.000    3887.000
+_setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
  
 ================================================================================
  

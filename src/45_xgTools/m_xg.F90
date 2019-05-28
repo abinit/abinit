@@ -693,6 +693,9 @@ module m_xg
 
     if ( (fcol+cols-1 ) > xgblockA%cols ) then
       print *, "xgblockA%cols", xgblockA%cols
+      print *, "fcol", fcol
+      print *, "cols", cols  
+      print *, "fcol+cols-1", fcol+cols-1  
       MSG_ERROR("Too many columns")
     endif
     if ( rows > xgblockA%rows ) then
@@ -2349,6 +2352,12 @@ module m_xg
     type(c_ptr) :: cptr
 
     if ( xgBLock%rows*xgBlock%cols /= newShape(1)*newShape(2) ) then
+      print *, "xgBLock%rows", xgBLock%rows
+      print *, "xgBlock%cols", xgBlock%cols
+      print *, "newShape(1)", newShape(1)
+      print *, "newShape(2)", newShape(2)
+      print *, "xgBLock%rows*xgBlock%cols", xgBLock%rows*xgBlock%cols
+      print *, "newShape(1)*newShape(2)", newShape(1)*newShape(2)
       MSG_ERROR("Bad shape")
     end if
 
@@ -2654,6 +2663,9 @@ module m_xg
 
     if ( (fcol+cols-1 ) > xgblockA%cols ) then
       print *, "xgblockA%cols", xgblockA%cols
+      print *, "fcol", fcol
+      print *, "cols", cols  
+      print *, "fcol+cols-1", fcol+cols-1  
       MSG_ERROR("Too many columns")
     endif
     if ( (frow+rows-1) > xgblockA%rows ) then

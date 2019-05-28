@@ -334,10 +334,11 @@ module m_xgTransposer
     
     icpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpuCols  
     
-    !print *, "xgTransposer%mpiData(MPI_ROWS)%rank", xgTransposer%mpiData(MPI_ROWS)%rank
-    !print *, "ncpuCols", ncpuCols
-    !print *, "icpu", icpu
-    !stop
+    print *, "xgTransposer%mpiData(MPI_ROWS)%rank", xgTransposer%mpiData(MPI_ROWS)%rank
+    print *, "xgTransposer%mpiData(MPI_COLS)%rank", xgTransposer%mpiData(MPI_COLS)%rank
+    print *, "ncpuCols", ncpuCols
+    print *, "icpu", icpu
+   
     
     !print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
     xgTransposer%nrowsColsRows = sum(xgTransposer%nrowsLinalg(icpu+1:icpu+ncpuCols))
