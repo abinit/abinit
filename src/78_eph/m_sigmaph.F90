@@ -1045,7 +1045,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (.not. sigma%imag_only) comm_rpt = sigma%comm_bsum
      !FIXME: comm_qpt is buggy.
      if (sigma%imag_only) comm_rpt = xmpi_comm_self
-     !comm_rpt = xmpi_comm_self
+     comm_rpt = xmpi_comm_self
      if (dtset%useric == 666) comm_rpt = xmpi_comm_self
      wr_path = strcat(dtfil%filnam_ds(4), "_WRMAX")
      call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, wr_path, comm_rpt)

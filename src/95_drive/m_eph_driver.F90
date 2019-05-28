@@ -549,7 +549,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    dvdb = dvdb_new(dvdb_path, comm)
    if (dtset%prtvol > 10) dvdb%debug = .True.
    ! This to symmetrize the DFPT potentials.
-   !dvdb%symv1 = dtset%symv1scf > 0
+   dvdb%symv1 = dtset%symv1scf > 0
 
    ! Set dielectric tensor, BECS and has_dielt_zeff flag that
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
