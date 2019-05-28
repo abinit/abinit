@@ -216,7 +216,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
- character(len=fnlen) :: path
+ character(len=fnlen) :: path, sigeph_path
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -226,9 +226,9 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, 'Transport computation driver')
 
- !path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
- sigmaph = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
- if (ierr/=0) MSG_ERROR(msg)
+ sigeph_path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ sigmaph = sigmaph_read(sigeph_path, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
+ ABI_CHECK(ierr == 0, msg)
 
  ! Intialize transport
  transport_rta = transport_rta_new(dtset,sigmaph,cryst,ebands,extrael_fermie,comm)
@@ -250,8 +250,6 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
    path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    call transport_rta_ncwrite(transport_rta, cryst, ncid)
-
-   ! Close the netcdf file
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif

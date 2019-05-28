@@ -547,8 +547,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_path, comm)
+   if (dtset%prtvol > 10) dvdb%debug = .True.
+   ! This to symmetrize the DFPT potentials.
    !dvdb%symv1 = dtset%symv1scf > 0
-   !if (dtset%prtvol > 10) dvdb%debug = .True.
+
    ! Set dielectric tensor, BECS and has_dielt_zeff flag that
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0

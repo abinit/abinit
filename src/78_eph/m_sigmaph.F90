@@ -613,7 +613,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(rf2_t) :: rf2
  type(hdr_type) :: pot_hdr
  character(len=500) :: msg
- character(len=fnlen) :: path
+ character(len=fnlen) :: sigeph_path, wr_path
 !arrays
  integer :: g0_k(3),g0_kq(3)
  integer :: qptrlatt(3,3)
@@ -671,12 +671,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Construct object to store final results.
  ecut = dtset%ecut ! dtset%dilatmx
+ ! Check if a previous netcdf file is present and restart the calculation
  ! Here we try to read an existing SIGEPH file if eph_restart
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
  restart = 0; ierr = 1
+ sigeph_path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  if (my_rank == master .and. dtset%eph_restart == 1) then
-   !path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
-   sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr)
+   sigma_restart = sigmaph_read(sigeph_path, dtset, xmpi_comm_self, msg, ierr)
  end if
 
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
@@ -698,7 +699,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call xmpi_bcast(restart, master, comm, ierr)
  call xmpi_bcast(sigma%qp_done, master, comm, ierr)
- call sigmaph_write(sigma, dtset, cryst, ebands, wfk_hdr, dtfil, restart, comm)
+
+ if (restart == 0) then
+   call sigmaph_write(sigma, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
+ else
+   if (my_rank == master) then
+     NCF_CHECK(nctk_open_modify(sigma%ncid, sigeph_path, xmpi_comm_self))
+   end if
+ end if
+
  if (my_rank == master) then
    call sigmaph_print(sigma, dtset, ab_out)
    call sigmaph_print(sigma, dtset, std_out)
@@ -947,7 +956,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
 
- if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
  dvdb%symv1 = dtset%symv1scf > 0
  if (sigma%nprocs_pert > 1) then
@@ -1035,9 +1043,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! to the integral and the potentials must be cached.
      comm_rpt = sigma%comm_qpt
      if (.not. sigma%imag_only) comm_rpt = sigma%comm_bsum
+     !FIXME: comm_qpt is buggy.
+     if (sigma%imag_only) comm_rpt = xmpi_comm_self
+     !comm_rpt = xmpi_comm_self
      if (dtset%useric == 666) comm_rpt = xmpi_comm_self
-     path = strcat(dtfil%filnam_ds(4), "_WRMAX")
-     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, path, comm_rpt)
+     wr_path = strcat(dtfil%filnam_ds(4), "_WRMAX")
+     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, wr_path, comm_rpt)
 
      ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
      ABI_CALLOC(qselect, (sigma%nqibz))
@@ -3008,8 +3019,7 @@ end function sigmaph_new
 !!  sigmaph_write
 !!
 !! FUNCTION
-!!  Start a sigmaph instance from a netcdf file.
-!!  This routine serves only to read some basic dimensions of sigmaph_t to verify if a restart is possible
+!!  Define dimensions and netcdf arrays in SIGEPH file.
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
@@ -3018,7 +3028,6 @@ end function sigmaph_new
 !!  wfk_hdr=Header of the WFK file.
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !!  dtfil<datafiles_type>=variables related to files.
-!!  restart=1 if we are in restart mode, 0 if new SIGEPH.nc file should be created.
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -3027,10 +3036,10 @@ end function sigmaph_new
 !!
 !! SOURCE
 
-subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, restart, comm)
+subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
 
 !Arguments ------------------------------------
- integer,intent(in) :: comm, restart
+ integer,intent(in) :: comm
  type(sigmaph_t),intent(inout) :: self
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
@@ -3081,17 +3090,11 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, restart, co
  if (my_rank == master) then
    path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
 
-   ! Check if a previous netcdf file is present and restart the calculation
-   if (restart == 1) then
-     NCF_CHECK(nctk_open_modify(self%ncid, path, xmpi_comm_self))
-   else
-    ! Master creates the netcdf file used to store the results of the calculation.
-    NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
-   endif
-
+   ! Master creates the netcdf file used to store the results of the calculation.
+   NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
    ncid = self%ncid
 
-   NCF_CHECK(hdr_ncwrite(wfk_hdr, ncid, fform_from_ext("SIGPEH.nc"), nc_define=.True.))
+   NCF_CHECK(hdr_ncwrite(wfk_hdr, ncid, fform_from_ext("SIGEPH.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    if (dtset%prtdos /= 0) then
@@ -3280,12 +3283,12 @@ end subroutine sigmaph_write
 !!  This routine serves only to read some basic dimensions of sigmaph_t to verify if a restart is possible
 !!
 !! INPUTS
+!!  path= SIGEPH Filename.
 !!  dtset<dataset_type>=All input variables for this dataset.
 !!  ecut=Cutoff energy for wavefunctions.
 !!  cryst<crystal_t>=Crystalline structure
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
-!!  dtfil<datafiles_type>=variables related to files.
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -3294,13 +3297,12 @@ end subroutine sigmaph_write
 !!
 !! SOURCE
 
-type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, extrael_fermie) result(new)
+type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, extrael_fermie) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  integer,intent(out) :: ierr
  type(dataset_type),intent(in) :: dtset
- type(datafiles_type),intent(in) :: dtfil
  character(len=500),intent(out) :: msg
  real(dp), optional, intent(inout) :: extrael_fermie(2)
  logical,optional,intent(in) :: keep_open
@@ -3325,7 +3327,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, 
 #ifdef HAVE_NETCDF
  ierr = 0
 
- path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ !path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  if (.not. file_exists(path)) then
    ierr = 1; return
  end if
