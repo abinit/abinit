@@ -4,65 +4,13 @@
     children have to hinerit from BaseDataStructure
 '''
 from __future__ import print_function, division, unicode_literals
+import numpy as np
 from . import has_pandas
-from .abinit_iterators import ITERATOR_RANKS
+from .common import FailDetail, BaseArray
 from .register_tag import (
     yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar,
     yaml_not_available_tag
 )
-import re
-import numpy as np
-
-
-@yaml_implicit_scalar
-class Undef(float):
-    '''
-        Represent the magic number undef.
-    '''
-    _is_undef = True
-    yaml_pattern = re.compile('undef')
-
-    @staticmethod
-    def __new__(cls):
-        return super(Undef, cls).__new__(cls, 'nan')
-
-    def __eq__(self, other):
-        return getattr(other, '_is_undef', False)
-
-    def __repr__(self):
-        return 'undef'
-
-    @classmethod
-    def from_scalar(cls, scal):
-        return cls()
-
-    def to_scalar(self):
-        return 'undef'
-
-
-@yaml_map
-class IterStart(object):
-    '''
-        Mark the begining of a iteration of a given iterator.
-    '''
-    # Don't do this at home, trick to workaround the custom sys.path
-    _is_iter_start = True
-
-    def __init__(self, iterator, iteration):
-        self.iterator = iterator
-        self.iteration = iteration
-
-    @classmethod
-    def from_map(cls, d):
-        iterator = max(d.keys(), key=lambda x: ITERATOR_RANKS[x])
-        iteration = d[iterator]
-        return cls(iterator, iteration)
-
-    def to_map(self):
-        return {self.iterator: self.iteration}
-
-    def __repr__(self):
-        return 'IterStart({}={})'.format(self.iterator, self.iteration)
 
 
 @yaml_auto_map
@@ -89,36 +37,11 @@ class Etot(object):
         return new
 
 
-@yaml_seq
-class AutoNumpy(np.ndarray):
-    '''
-        Define a base class for YAML tags converted to numpy compatible
-        objects.  Can be used for converting any YAML array of number of any
-        dimension into a numpy compatible array.
-    '''
-    __yaml_tag = 'Array'
-
-    # by default we want to treat this as a coherent object and do not check
-    # values individualy
-    _has_no_child = True
-
-    @classmethod
-    def from_seq(cls, s):
-        return np.array(s).view(cls)
-
-    def to_seq(self):
-        # conversion have to be explicit because numpy float are not
-        # recognised as float by yaml
-        def to_list(arr):
-            if len(arr.shape) > 1:
-                return [to_list(line) for line in arr]
-            else:
-                return [float(f) for f in arr]
-        return to_list(self)
+yaml_seq(BaseArray)
 
 
 @yaml_seq
-class Atoms3D(AutoNumpy):
+class Atoms3D(BaseArray):
     pass
 
 
@@ -128,15 +51,14 @@ class CartForces(Atoms3D):
 
 
 @yaml_seq
-class Matrix33(AutoNumpy):
+class Matrix33(BaseArray):
     '''
         Define a matrix of shape (3, 3) compatible with numpy arrays and
         with YAML tags.
     '''
     def __init__(self, shape=(3, 3), *args, **kwargs):
-        # numpy ndarray does not have __init__
-        # everything is done in __new__
         assert shape == (3, 3)
+        super(Matrix33, self).__init__(shape, *args, **kwargs)
 
     @classmethod
     def from_seq(cls, s):
@@ -251,13 +173,19 @@ class AbinitComment(AbinitMessage):
     __yaml_tag = 'COMMENT'
 
 
+@yaml_auto_map
+class GwSigma(object):
+    pass
+
+
 if has_pandas:
     from pandas import read_csv, DataFrame
     from pandas.compat import StringIO
 
     @yaml_scalar
     class Table(DataFrame):
-        _is_dict_like = True
+        # imply that the class implement a complete dict-like interface
+        is_dict_like = True
         table_sep = r'\s+'
 
         @classmethod
@@ -271,10 +199,52 @@ if has_pandas:
     class GwSigmaData(Table):
         pass
 
-    @yaml_auto_map
-    class GwSigma(object):
-        pass
+    @yaml_scalar
+    class EtotIters(Table):
+        is_dict_like = False  # prevent tester from browsing columns
+
+        residues = {
+            'deltaE(h)',
+            'residm',
+            'vres2'
+        }
+
+        def last_iter(self, other, **opts):
+            tol_iter = opts.get('tol_iter', 5)
+
+            def chk_tol(a, b, tol):
+                return abs(a - b) / (abs(a) + abs(b)) < tol
+
+            def chk_ceil(b, ceil):
+                return abs(b) < ceil
+
+            o_n, s_n = other.shape[0] - 1, self.shape[0] - 1
+            for key in self:
+                oserie, sserie = other[key], self[key]
+                # index -1 does not work on series
+
+                if key in opts:  # for each column look for a constraint
+                    if 'ceil' in opts[key]:
+                        ceil = opts[key]['ceil']
+                        if not chk_ceil(oserie[o_n], ceil):
+                            msg = ('Last item of {} column does not match the'
+                                   ' ceil {}: value is {}.')
+                            return FailDetail(msg.format(key, ceil,
+                                                         oserie[o_n]))
+                    if 'tol' in opts[key]:
+                        tol = opts[key]['tol']
+                        if not chk_tol(sserie[s_n], oserie[o_n], tol):
+                            msg = ('Last item of {} column does not match the'
+                                   ' tolerance {}: difference is {}.')
+                            return FailDetail(
+                                msg.format(key, tol, sserie[s_n] - oserie[o_n])
+                            )
+            if abs(s_n - o_n) > tol_iter:
+                return FailDetail('Difference between number of iteration'
+                                  ' is above tol_iter')
+            return True
+
 else:
     yaml_not_available_tag('Table', 'Pandas module is not available')
-    yaml_not_available_tag('GwSigma', 'Pandas module is not available')
     yaml_not_available_tag('GwSigmaData', 'Pandas module is not available')
+    yaml_not_available_tag('EtotIters', 'Pandas module is not available')
