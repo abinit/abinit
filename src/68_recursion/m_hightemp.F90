@@ -49,7 +49,7 @@ module m_hightemp
     final :: finalize
   end type hightemp_type
 
-  public :: freedos,hightemp_addtorho,prt_eigocc
+  public :: freedos,hightemp_addtoenergy,hightemp_addtorho,prt_eigocc
 contains
 
   !!****f* ABINIT/m_hightemp/init
@@ -493,9 +493,9 @@ contains
       ! Loop over k-points
       do ikpt=1,nkpt
         nband_k=nband(ikpt+(isppol-1)*nkpt)
-        write(msg, '(a,i6,a,i6,a,f9.5,a,3f8.4,a)') &
+        write(msg, '(a,i6,a,i6,a,ES12.5,a,3f8.4,a)') &
           & ' ------- ikpt = ',ikpt,'      nband = ',nband_k,'     ikpt weight = ',wtk(ikpt)+tol10,&
-          & '      Reduced coordinates : ',kptns(1:3,ikpt)+tol10,' -------'
+          & '   Reduced coordinates : ',kptns(1:3,ikpt)+tol10,' -------'
         call wrtout(temp_unit,msg,'COLL')
 
         ! Loop over bands

@@ -114,6 +114,7 @@ program abinit
  use m_libpaw_tools,only : libpaw_spmsg_getcount
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
+ use m_neat,        only : enable_yaml
  use m_chkinp,      only : chkinp
  use m_dtset,       only : chkvars, dtset_free
  use m_dtfil,       only : iofn1
@@ -124,9 +125,11 @@ program abinit
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
  use m_driver,       only : driver
+
 #ifdef HAVE_GPU_CUDA
- use m_initcuda,     only: setdevice_cuda, unsetdevice_cuda
+ use m_gpu_toolbox
 #endif
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
 #endif
@@ -352,6 +355,9 @@ program abinit
 !At this stage, all the information from the "files" file and "input" file have been read and checked.
 
 !------------------------------------------------------------------------------
+
+ ! Enable or disable yaml output
+ call enable_yaml(dtsets(1)%use_yaml == 1)
 
 !14) Print more information, and activate GPU
 

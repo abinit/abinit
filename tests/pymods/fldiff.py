@@ -42,6 +42,7 @@ the '%',and '.' first-column special signs.
 from __future__ import print_function, division, unicode_literals
 import re
 from math import floor
+from threading import Thread
 
 from .data_extractor import DataExtractor
 from .yaml_tools import is_available as has_yaml
@@ -49,12 +50,6 @@ from .yaml_tools import is_available as has_yaml
 if has_yaml:
     from .yaml_tools.driver_test_conf import DriverTestConf as YDriverConf
     from .yaml_tools.tester import Tester as YTester, Failure as YFailure
-else:
-    class YDriverConf(object):
-        def extra_info(self):
-            return ('# YAML support is not available, YAML based tests will'
-                    ' be ignored',)
-
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
@@ -95,6 +90,19 @@ def relative_truncate(f, n):
             p -= 1
         fact = ten_n / ten_p
         return floor(f * fact) / fact
+
+
+class NotDriverConf(object):
+    def __init__(self, has_yaml):
+        self.has_yaml = has_yaml
+
+    def extra_info(self):
+        if self.has_yaml:
+            return ('# YAML support is available, but is disabled for this'
+                    ' test.',)
+        else:
+            return ('# YAML support is not available, YAML based tests will'
+                    ' be ignored.',)
 
 
 class LineDifference(object):
@@ -274,7 +282,7 @@ class Result(object):
 
             else:  # any other Difference
                 assert isinstance(diff, LineDifference), \
-                        'Unknown type of Difference.'
+                    'Unknown type of Difference.'
                 if diff.lines[0] not in error_lines:
                     self.ndiff_lines += 1
                 self.success = False
@@ -401,8 +409,9 @@ class Differ(object):
             'tolerance_rel': 1.01e-10,
             'label': None,
             'use_fl': True,
-            'use_yaml': True,
-            'verbose': False
+            'use_yaml': False,
+            'verbose': False,
+            'debug': False
         }
 
         self.options.update(options)
@@ -412,17 +421,18 @@ class Differ(object):
             self.options['tolerance_rel'] = options['tolerance']
 
         self.use_fl = self.options['use_fl']
-        self.yaml_conf = YDriverConf()
-        self.use_yaml = False
-        if has_yaml:
-            self.use_yaml = self.options['use_yaml']
-            if self.use_yaml:
-                if yaml_test and 'file' in yaml_test and yaml_test['file']:
-                    self.yaml_conf = YDriverConf.from_file(yaml_test['file'])
-                elif yaml_test and 'yaml' in yaml_test and yaml_test['yaml']:
-                    self.yaml_conf = YDriverConf(yaml_test['yaml'])
-                else:
-                    self.yaml_conf = YDriverConf()
+        self.use_yaml = has_yaml and self.options['use_yaml']
+
+        if self.use_yaml:
+            if yaml_test and 'file' in yaml_test and yaml_test['file']:
+                self.yaml_conf = YDriverConf.from_file(yaml_test['file'])
+            elif yaml_test and 'yaml' in yaml_test and yaml_test['yaml']:
+                self.yaml_conf = YDriverConf(yaml_test['yaml'])
+            else:
+                self.yaml_conf = YDriverConf()
+            self.yaml_conf.debug = self.options['debug']
+        else:
+            self.yaml_conf = NotDriverConf(has_yaml)
 
     def diff(self, file1, file2):
         '''
@@ -432,52 +442,60 @@ class Differ(object):
         if file1.endswith('.xml'):
             self.xml_mode = True
 
-        with open(file1, 'rt') as f:
-            lines1 = f.readlines()
+        with open(file1, 'rt') as f1, open(file2, 'rt') as f2:
+            line_diff, doc_diff = self._diff_lines(f1, f2)
 
-        with open(file2, 'rt') as f:
-            lines2 = f.readlines()
-
-        return Result(*self._diff_lines(lines1, lines2),
+        return Result(line_diff, doc_diff,
                       extra_info=self.yaml_conf.extra_info(),
                       label=self.options['label'],
                       verbose=self.options['verbose'])
 
-    def _diff_lines(self, lines1, lines2):
-        dext = DataExtractor(self.use_yaml, xml_mode=self.xml_mode,
-                             ignore=self.options['ignore'],
-                             ignoreP=self.options['ignoreP'])
+    def _diff_lines(self, src1, src2):
 
-        lines1, documents1, _ = dext.extract(lines1)
-        doc1_corrupted_documents = dext.corrupted_docs
+        lines = [None, None]
+        documents = [None, None]
+        corrupted = [None, None]
 
-        lines2, documents2, _ = dext.extract(lines2)
-        doc2_corrupted_documents = dext.corrupted_docs
+        def extractor(src, i):
+            dext = DataExtractor(self.use_yaml, xml_mode=self.xml_mode,
+                                 ignore=self.options['ignore'],
+                                 ignoreP=self.options['ignoreP'])
+
+            lines[i], documents[i], _ = dext.extract(src)
+            corrupted[i] = dext.corrupted_docs
+
+        t1 = Thread(target=extractor, args=(src1, 0))
+        t2 = Thread(target=extractor, args=(src2, 1))
+
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
 
         if self.use_fl:
-            lines_differences = self._fldiff(lines1, lines2)
+            lines_differences = self._fldiff(*lines)
         else:
             lines_differences = []
 
         if not self.use_yaml:
             doc_differences = []
 
-        elif doc1_corrupted_documents:
+        elif corrupted[0]:
             doc_differences = [YFailure(
                 self.yaml_conf,
-                'Reference has corrupted YAML documents at lines ({}).'
-                .format(', '.join(doc1_corrupted_documents))
+                'Reference has corrupted YAML documents at line(s) {}.'
+                .format(', '.join(str(d.start + 1) for d in corrupted[0]))
             )]
 
-        elif doc2_corrupted_documents:
+        elif corrupted[1]:
             doc_differences = [YFailure(
                 self.yaml_conf,
-                'Tested file has corrupted YAML documents at lines ({})'
-                .format(', '.join(doc2_corrupted_documents))
+                'Tested file has corrupted YAML documents at line(s) {}.'
+                .format(', '.join(str(d.start + 1) for d in corrupted[1]))
             )]
 
         else:
-            doc_differences = self._test_doc(documents1, documents2)
+            doc_differences = self._test_doc(*documents)
 
         return lines_differences, doc_differences
 
@@ -544,8 +562,8 @@ class Differ(object):
                                 i = 0
                                 n = len(seq1)
                                 while i + 1 < n:
-                                    yield (seq1[i], seq1[i+1],
-                                           seq2[i], seq2[i+1])
+                                    yield (seq1[i], seq1[i + 1],
+                                           seq2[i], seq2[i + 1])
                                     i += 2
 
                                 if i < n:

@@ -106,7 +106,7 @@ module m_gstate
  use m_hightemp,         only : prt_eigocc
 
 #if defined HAVE_GPU_CUDA
- use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
+ use m_manage_cuda
 #endif
 
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
@@ -117,6 +117,7 @@ module m_gstate
 #else
  use defs_wvltypes,      only : coulomb_operator
 #endif
+
 #if defined HAVE_LOTF
  use defs_param_lotf,    only : lotfparam_init
 #endif

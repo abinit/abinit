@@ -152,7 +152,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_gwls_sternheimer, only : gwls_sternheimer
  use m_nonlinear,        only : nonlinear
  use m_drivexc,          only : echo_xc_name
- use m_neat,             only : neat_start_dataset
+ use m_neat,             only : neat_start_iter
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -180,7 +180,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer,parameter :: level=2,mdtset=9999
  integer,save :: paw_size_old=-1
  integer :: idtset,ierr,iexit,iget_cell,iget_occ,iget_vel,iget_xcart,iget_xred
- integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk
+ integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk,linalg_max_size
  integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol
  real(dp) :: etotal
  character(len=500) :: message
@@ -291,7 +291,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
-   call neat_start_dataset(jdtset, ab_out);
+   call neat_start_iter(jdtset, 'dtset', ab_out);
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)
@@ -675,8 +675,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ! Set precision for FFT libs.
    ii = fftcore_set_mixprec(dtset%mixprec)
 
-!  linalg initialisation:
-   call abi_linalg_init(mpi_enregs(idtset)%comm_bandspinorfft,dtset%np_slk,3*maxval(dtset%nband(:)), mpi_enregs(idtset)%me)
+!  linalg initialisation
+   linalg_max_size=maxval(dtset%nband(:))
+   call abi_linalg_init(linalg_max_size,dtset%optdriver,dtset%wfoptalg,dtset%paral_kgb,&
+&       dtset%use_gpu_cuda,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
 
    call timab(642,2,tsec)
 

@@ -46,8 +46,8 @@
 #%% test_chain = t16.in, t17.in
 #%% [files]
 #%% files_to_test = 
-#%%  t16.out,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%%  extra_inputs = t16.ddb.in.gz
+#%%  t16.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% extra_inputs = t16.ddb.in.gz
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
