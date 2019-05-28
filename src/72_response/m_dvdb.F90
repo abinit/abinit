@@ -2770,7 +2770,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  ! Reconstruct the IBZ according to what is present in the DVDB.
  ABI_MALLOC(nqsts, (nqibz))
  ABI_MALLOC(iqs_dvdb, (nqibz))
- ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
+ ABI_CALLOC(v1r_lr, (2, nfft, db%my_npert))
 
  iqst = 0
  do iq_ibz=1,nqibz
@@ -3011,12 +3011,15 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
 #ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_create(ncid, strcat(outwr_path, ".nc"), xmpi_comm_self))
      NCF_CHECK(db%cryst%ncwrite(ncid))
-     ncerr = nctk_def_dims(ncid, [nctkdim_t("nrpt", nrtot), nctkdim_t("natom3", db%natom3)], defmode=.True.)
+     ncerr = nctk_def_dims(ncid, [ &
+         nctkdim_t("nrpt", nrtot), nctkdim_t("nfft", nfft), &
+         nctkdim_t("natom3", db%natom3), nctkdim_t("nspden", db%nspden)], defmode=.True.)
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "has_dielt_zeff", "add_lr_part", "symv1"]))
      ncerr = nctk_def_arrays(ncid, [ &
         nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
-        nctkarr_t("maxw", "dp", "nrpt, natom3") &
+        nctkarr_t("maxw", "dp", "nrpt, natom3"), &
+        nctkarr_t("v1scf_rpt", "dp", "two, nrpt, nfft, nspden, natom3") &
      ])
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
@@ -3028,6 +3031,10 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
+     ! FIXME: This wont work if parallelism over R or perturbations.
+     if (db%my_npert == db%natom3 .and. db%my_nrpt == nrtot) then
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1scf_rpt"), db%v1scf_rpt))
+     end if
      NCF_CHECK(nf90_close(ncid))
 #endif
      ABI_FREE(all_rmod)
@@ -5815,7 +5822,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
  call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
 
- if (dtset%prtvol > 10) dvdb%debug = .True.
+ !if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
  !if (dtset%symdynmat == 1) dvdb%symv1 = .True.
 
@@ -5969,10 +5976,12 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    NCF_CHECK(nctk_open_create(ncid, tmp_fname, xmpi_comm_self))
    ncerr = nctk_def_dims(ncid, [&
      nctkdim_t("dimv1", dimv1), nctkdim_t("nspden", nspden), &
-     nctkdim_t("natom", natom), nctkdim_t("nqpt_intp", nqpt_interpolate) &
+     nctkdim_t("natom", natom), nctkdim_t("nqpt_intp", nqpt_interpolate), &
+     nctkdim_t("nrpt", dvdb%my_nrpt), nctkdim_t("nfft", nfftf), nctkdim_t("natom3", natom * 3) &
    ])
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("v1", "dp", "dimv1, nspden, three, natom, nqpt_intp")))
+   !NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("v1scf_rpt", "dp", "two, nrpt, nfft, nspden, natom3")))
    NCF_CHECK(nctk_set_datamode(ncid))
  end if
 #endif
@@ -5992,6 +6001,8 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
      call dvdb_get_v1scf_rpt(dvdb, cryst, ngqpt_coarse, nqshift_coarse, &
                              qshift_coarse, nfftf, ngfftf, &
                              dvdb%my_nrpt, dvdb%nspden, ipert, v1scf_rpt, comm)
+
+     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1scf_rpt"), v1scf_rpt, start=[1,1,1,1,ipert]))
 
      call cwtime_report(" v1scf_rpt built", cpu, wall, gflops)
 
