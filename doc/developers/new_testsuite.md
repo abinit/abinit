@@ -833,50 +833,6 @@ Atomic speeds:
         d_min: 1.0e-2
 ```
 
-### Code structure
-
-As long as possible, it is better to include any extensions to the existing code
-in these three entry points to keep the system consistent. However, this system
-will eventually prove to be limited in some way. Hence, here is the general
-structure of the system. (MG: Please clarify this point)
-
-The whole system consists of three main parts:
-
-Fldiff algorithm
-
-: *~abinit/tests/pymods/fldiff.py* implements the legacy algorithm and the
-  creation of the final report. This module represents the interface between the
-  yaml specific tools and the legacy test suite tools. 
-
-
-Interface with Pyyaml library
-
-:  *~abinit/tests/pymods/data_extractor.py*,
-   *~abinit/tests/pymods/yaml_tools/\_\_init\_\_.py* and
-   *~abinit/tests/pymods/yaml_tools/structures/* constitute the Abinit output
-   parser. *data_extractor.py* identify and extract the YAML documents from the
-   source, *__init__.py* provide generic tools base on pyyaml to parse the
-   documents and *structures* provide the classes that are used by YAML to
-   handle tags. *~abinit/tests/pymods/yaml_tools/register_tag.py* define the
-   abstraction layer used to simplify the code in *structures*. It directly
-   deals with PyYaml black magic.
-
-
-Yaml parsers and tools
-
-: the other files in *~abinit/tests/pymods/yaml_tools* are dedicated to the
-  testing procedure. *meta_conf_parser.py* provide the tools to read and
-  interpret the YAML configuration file, namely __ConfParser__ the main parsing
-  class, __ConfTree__ the tree configuration "low-level" interface (only handle
-  a single tree, no access to the inherited properties, etc...) and __Constraint__
-  the representation of a specific test in the tree.  *conf_parser.py* use
-  __ConfParser__ to register actuals constraints and parameters. It is the place
-  to define actual tests. *driver_test_conf.py* define the high level access to
-  the configuration, handling several trees, applying filters etc. Finally,
-  *tester.py* is the main test driver. It browses the data tree and use the
-  configuration to run tests on Abinit output. It produces an __Issue__ list that
-  will be used by *fldiff.py* to produce the report.
-
 ### Add a new parameter
 To have the parser recognise a new token as a parameter one should edit the
 *~abinit/tests/pymods/conf_parser.py*.
