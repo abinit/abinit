@@ -590,8 +590,8 @@ contains
       do il4=1,wanbz%nbl_atom_wan(iatom4)
       if(il1/=il3 .or. il2/=il4)cycle
       if (wanbz%nsppol/=1)then
-        ABI_ALLOCATE(uspin,(wanbz%nsppol**2,nomega))
-        ABI_ALLOCATE(jspin,(wanbz%nsppol**2,nomega))
+        ABI_ALLOCATE(uspin,(4,nomega))
+        ABI_ALLOCATE(jspin,(4,nomega))
       endif
       if (iatom1==iatom2 .and. pos1==pos2 .and. il1 == il2)then
         one_orbital=1
@@ -963,14 +963,14 @@ contains
             ispin=1
           else if(spin1==1 .and. spin2==2) then
             ispin=2
-          else if (spin1==2 .and. spin1==1)then
+          else if (spin1==2 .and. spin2==1)then
             ispin=3
           else
             ispin=4
           endif
           if (wanbz%nsppol/=1)then
-            uspin(iomega,ispin)=uomega(iomega)
-            jspin(iomega,ispin)=jomega(iomega)
+            uspin(ispin,iomega)=uomega(iomega)
+            jspin(ispin,iomega)=jomega(iomega)
           endif
           !write(message,*)ch10,"SCREENED INTERACTION"
           !call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
@@ -978,29 +978,32 @@ contains
         enddo
 
 !   Summarize the calculation if nsppol==1
-        if (wanbz%nsppol==1)then 
-          call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,0)
-          write(message,*)ch10,"  -------------------------------------------------------------"
-          call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-          write(message,*)"           Average U and J as a function of frequency   "
-          call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-          write(message,*)"  -------------------------------------------------------------"
-          call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-          write(message,*)"        omega           U(omega)            J(omega)"
-          call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-          do iomega=1,nomega
-            if(nomega==1) then
-              omega(iomega)=omegamin
-            else
-              omega(iomega)=(omegamax-omegamin)/(nomega-1)*(iomega-1)+omegamin
-            endif
-            if(nomega==1)  omega(iomega)=omegamin
-            write(message,'(2x,f11.3,2x,2f10.4,2x,2f10.4)')  omega(iomega)*Ha_eV, uomega(iomega),jomega(iomega)
-            call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-          enddo
-          write(message,*)"  -------------------------------------------------------------"
-          call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        if (wanbz%nsppol /=1 .and. spin1==2 .and. spin2==2)then
+          uomega(:)=sum(uspin,dim=1)/4
+          jomega(:)=sum(jspin,dim=1)/4
         endif
+        call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,0)
+        write(message,*)ch10,"  -------------------------------------------------------------"
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        write(message,*)"           Average U and J as a function of frequency   "
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        write(message,*)"  -------------------------------------------------------------"
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        write(message,*)"        omega           U(omega)            J(omega)"
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        do iomega=1,nomega
+          if(nomega==1) then
+            omega(iomega)=omegamin
+          else
+            omega(iomega)=(omegamax-omegamin)/(nomega-1)*(iomega-1)+omegamin
+          endif
+          if(nomega==1)  omega(iomega)=omegamin
+          write(message,'(2x,f11.3,2x,2f10.4,2x,2f10.4)')  omega(iomega)*Ha_eV, uomega(iomega),jomega(iomega)
+          call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        enddo
+        write(message,*)"  -------------------------------------------------------------"
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        
 !  END OF LOOP ON ATOMS !!
         
         ABI_DEALLOCATE(uomega)
@@ -1393,9 +1396,12 @@ endif
      write(message,*)ch10,"==Definition of the orbitals=="
    else if (opt==0) then 
      write(message,*)ch10,"==Reminder of the orbitals=="
-   else 
+   else if (opt==2) then
      write(message,*)ch10,"==Reminder of the orbitals=="
      write(print_spin,*)" summary"
+   else if (opt==3) then
+     write(message,*)ch10,"==Reminder of the orbitals=="
+     write(print_spin,*)" average"
    endif
    call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
    if (iatom1==iatom2.and. iatom3==iatom4 .and. iatom3==iatom2)then
@@ -1477,11 +1483,12 @@ endif
  subroutine print_uj_spin(nomega,uspin,jspin,nsppol,omega,omegamin,omegamax,one_orbital)
    implicit none
    integer,intent(in) :: nomega,nsppol,one_orbital
-   complex(dpc),intent(in) :: uspin(nsppol**2,nomega)
-   complex(dpc),intent(in) :: jspin(nsppol**2,nomega)
+   complex(dpc),intent(in) :: uspin(4,nomega)
+   complex(dpc),intent(in) :: jspin(4,nomega)
    real(dp),intent(in) :: omega(nomega)
    real(dp), intent(in) :: omegamin,omegamax
    integer :: iomega,ispin
+   real(dp) :: uomega(nomega),jomega(nomega)
    character(len=500)::message
    
    write(message,*)ch10," --------------------------------------------------------------------" 
@@ -1498,7 +1505,7 @@ endif
    write(message,'(6a)')" -omega (eV)- "," Up-Up "," Up-Down "," Down-Up "," Down-Down "," Average "
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    do iomega=1,nomega
-     write(message,'(a,f7.2,5f9.3)')"    ",omega(iomega)*Ha_eV,(real(uspin(ispin,iomega)),ispin=1,nsppol**2),sum(real(uspin(:,iomega)))/nsppol**2
+     write(message,'(a,f7.2,5f9.3)')"    ",omega(iomega)*Ha_eV,(real(uspin(ispin,iomega)),ispin=1,4),sum(real(uspin(:,iomega)))/4
      call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    end do
    
@@ -1509,10 +1516,27 @@ endif
      write(message,'(6a)')" -omega (eV)- "," Up-Up "," Up-Down "," Down-Up "," Down-Down "," Average "
      call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
      do iomega=1,nomega
-       write(message,'(a,f7.2,5f9.3)')"    ",omega(iomega)*Ha_eV,(real(jspin(ispin,iomega)),ispin=1,nsppol**2),sum(real(jspin(:,iomega)))/nsppol**2
+       write(message,'(a,f7.2,5f9.3)')"    ",omega(iomega)*Ha_eV,(real(jspin(ispin,iomega)),ispin=1,4),sum(real(jspin(:,iomega)))/4
        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
      end do
    endif
+   uomega(:)=sum(uspin,dim=1)/4
+   jomega(:)=sum(jspin,dim=1)/4
+   call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,3)
+   write(message,*)ch10,"  -------------------------------------------------------------"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)"           Average U and J as a function of frequency   "
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)"  -------------------------------------------------------------"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)"        omega           U(omega)            J(omega)"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   do iomega=1,nomega
+     write(message,'(2x,f11.3,2x,2f10.4,2x,2f10.4)')  omega(iomega)*Ha_eV, uomega(iomega),jomega(iomega)
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   enddo
+   write(message,*)"  -------------------------------------------------------------"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
  end subroutine print_uj_spin
            
  end subroutine calc_ucrpa
