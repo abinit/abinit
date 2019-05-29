@@ -38,21 +38,13 @@ if has_pandas:
     class EtotIters(Table):
         is_dict_like = False  # prevent tester from browsing columns
 
-        residues = {
-            'deltaE(h)',
-            'residm',
-            'vres2'
-        }
-
         def last_iter(self, other, **opts):
-            tol = opts.get('tol', 1.0e-10)
-            ceil = opts.get('ceil', 1.0e-10)
             tol_iter = opts.get('tol_iter', 5)
 
-            def chk_tol(a, b):
+            def chk_tol(a, b, tol):
                 return abs(a - b) / (abs(a) + abs(b)) < tol
 
-            def chk_ceil(b):
+            def chk_ceil(b, ceil):
                 return abs(b) < ceil
 
             o_n, s_n = other.shape[0] - 1, self.shape[0] - 1
@@ -60,19 +52,27 @@ if has_pandas:
                 oserie, sserie = other[key], self[key]
                 # index -1 does not work on series
 
-                if key in self.residues:
-                    if not chk_ceil(oserie[o_n]):
-                        msg = ('Last item of {} column does not match the'
-                               ' ceil {}.')
-                        return FailDetail(msg.format(key, ceil))
-                else:
-                    if not chk_tol(sserie[s_n], oserie[o_n]):
-                        msg = ('Last item of {} column does not match the'
-                               ' tolerance {}.')
-                        return FailDetail(msg.format(key, tol))
+                if key in opts:  # for each column look for a constraint
+                    if 'ceil' in opts[key]:
+                        ceil = opts[key]['ceil']
+                        if not chk_ceil(oserie[o_n], ceil):
+                            msg = ('Last item of {} column does not match the'
+                                   ' ceil {}: value is {}.')
+                            return FailDetail(
+                                msg.format(key, ceil, oserie[o_n])
+                            )
+                    if 'tol' in opts[key]:
+                        tol = opts[key]['tol']
+                        if not chk_tol(sserie[s_n], oserie[o_n], tol):
+                            msg = ('Last item of {} column does not match the'
+                                   ' tolerance {}: difference is {}.')
+                            return FailDetail(
+                                msg.format(key, tol, sserie[s_n] - oserie[o_n])
+                            )
             if abs(s_n - o_n) > tol_iter:
                 return FailDetail('Difference between number of iteration'
                                   ' is above tol_iter')
             return True
+
 else:
     yaml_not_available_tag('EtotIters', 'Pandas module is not available')

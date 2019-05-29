@@ -7,7 +7,7 @@ from __future__ import print_function, division, unicode_literals
 import re
 from .yaml_tools import Document
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
-from .yaml_tools.errors import NoIteratorDefinedError
+from .yaml_tools.errors import NoIteratorDefinedError, DuplicateDocumentError
 
 # Tag is only recognised if it is a valid a word ([A-Za-z0-9_]+)
 # It won't recognise serialized tags for example
@@ -64,7 +64,7 @@ class DataExtractor:
         # Reset those states to allow several extract with the same instance
         self.iterators_state = {}
         self.corrupted_docs = []
-        lines, docs, ignored = [], [], []
+        lines, docs, ignored = [], {}, []
 
         current_doc = None
         for i, line in enumerate(src_lines):
@@ -105,7 +105,11 @@ class DataExtractor:
                             if not current_doc.iterators:
                                 # This is not normal !
                                 raise NoIteratorDefinedError(current_doc)
-                            docs.append(current_doc)
+
+                            if current_doc.id in docs:
+                                raise DuplicateDocumentError(current_doc.id)
+
+                            docs[current_doc.id] = current_doc
                     current_doc = None  # go back to normal mode
 
             elif self._get_metachar(line) == '-':

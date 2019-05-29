@@ -841,7 +841,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
      end if
 
+     ! If enabled, output a YAML document with the ETOT iterations
+     call neat_finish_etot(etot_yaml_doc, ab_out)
+
    end if ! nstep == 0 : no output
+
 
  case default
    write(message, '(a,i0,a)' )' choice = ',choice,' is not an allowed value.'
@@ -1780,8 +1784,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  write(msg,'(a,80a)')('-',mu=1,80)
  call wrtout(iout,msg,'COLL')
-
- call neat_finish_etot(etot_yaml_doc, iout)
 
  call wrtout(iout, ch10, 'COLL')
 

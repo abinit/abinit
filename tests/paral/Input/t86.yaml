@@ -1,14 +1,6 @@
 tol_eq: 1.0e-6
 tol_vec: 1.0e-5
 
-Etot steps:
-    data:
-        callback:  # callback take a mapping as its value
-            method: last_iter
-            tol: 1.0e-7
-            ceil: 5.0e-7
-            tol_iter: 3
-
 lda:
     # tolvrs 1.0e-7
     tol_abs: 5.0e-7
@@ -18,6 +10,20 @@ lda:
             ceil: 1.0e-6
         stress tensor:
             tensor_is_symetric: true
+
+    Etot steps:
+        data:
+            callback:
+                method: last_iter
+                tol_iter: 3
+                Etot(hartree):
+                    tol: 1.0e-7
+                deltaE(h):
+                    ceil: 2.0e-8
+                residm:
+                    ceil: 5.0e-7
+                nres2:
+                    ceil: 2.0e-8
 
 dmft:
     tol_abs: 2.0e-8
@@ -43,6 +49,20 @@ dmft:
         Total DC energy eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-8
+
+    Etot steps:
+        data:
+            callback:
+                method: last_iter
+                tol_iter: 3
+                Etot(hartree):
+                    tol: 1.0e-7
+                deltaE(h):
+                    ceil: 2.0e-4
+                residm:
+                    ceil: 1.0e-12
+                nres2:
+                    ceil: 2.0e-1
 
 
 filters:

@@ -53,7 +53,7 @@ class DriverTestConf:
             except YAMLError as e:
                 conf = {}
                 self.warning('An error occured while parsing source:\n'
-                             '{}: {}'.format(e.__class__.__name__, str(e)))
+                             '{}: {}'.format(type(e).__name__, str(e)))
             self.trees, self.filters = conf_parser.make_trees(conf, metadata)
             self.tree.update(self.trees['__default'])
         else:

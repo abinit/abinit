@@ -28,6 +28,7 @@ module m_gpu_detect
 
  use defs_basis
  use m_xmpi
+
 #if defined HAVE_GPU_CUDA
  use m_initcuda, only     : Get_ndevice
 #endif

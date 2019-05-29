@@ -22,12 +22,12 @@ py2 = sys.version_info[0] <= 2
 if py2:
     import cPickle as pickle
     from StringIO import StringIO
-    from ConfigParser import SafeConfigParser, NoOptionError
+    from ConfigParser import SafeConfigParser, NoOptionError, ParsingError as CPError
     from Queue import Empty as EmptyQueueError
 else:
     import pickle
     from io import StringIO
-    from configparser import ConfigParser
+    from configparser import ConfigParser, ParsingError as CPError
     from queue import Empty as EmptyQueueError
 
 from .jobrunner import TimeBomb
@@ -380,11 +380,10 @@ class FileToTest(object):
                 isok, status, msg = make_diff()
             except Exception as e:
                 warnings.warn(('[{}] Something went wrong with this test:\n'
-                               '{}: {}\n').format(self.name,
-                                                  e.__class__.__name__,
+                               '{}: {}\n').format(self.name, type(e).__name__,
                                                   str(e)))
                 isok, status = False, 'failed'
-                msg = 'internal error:\n{}: {}'.format(e.__class__.__name__,
+                msg = 'internal error:\n{}: {}'.format(type(e).__name__,
                                                        str(e))
         msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
@@ -655,10 +654,13 @@ class AbinitTestInfoParser(object):
 
         try:
             self.parser.read_string("".join(lines), source=inp_fname)
-        except Exception as exc:
+        except CPError as exc:
             cprint("Exception while parsing: %s\n%s" % (inp_fname, exc), "red")
             for l in lines:
                 print(l, end="")
+            cprint("A common problem is inappropriate indentation. The rules is"
+                   ": do not indent options more than section title, indent "
+                   "lines that belong to the option above.", "red")
             raise exc
 
         # Consistency check
@@ -702,7 +704,7 @@ class AbinitTestInfoParser(object):
             except Exception as exc:
                 err_msg = ("In file: %s\nWrong line:\n key = %s, d[key] = %s\n"
                            "%s: %s") % (self.inp_fname, key, d[key],
-                                        exc.__class__.__name__, str(exc))
+                                        type(exc).__name__, str(exc))
                 raise self.Error(err_msg)
 
         # At this point info contains the parsed global values.
@@ -753,7 +755,7 @@ class AbinitTestInfoParser(object):
                     err_msg = ("In file: %s\nWrong line:\n"
                                " key = %s, d[key] = %s\n %s: %s") % (
                                    self.inp_fname, key, d[key],
-                                   exc.__class__.__name__, str(exc)
+                                   type(exc).__name__, str(exc)
                     )
                     raise self.Error(err_msg)
 
@@ -851,7 +853,7 @@ class Compiler(object):
         self.version = version
 
     def __str__(self):
-        return "%s: %s %s" % (self.__class__.__name__, self.name, self.version)
+        return "%s: %s %s" % (type(self).__name__, self.name, self.version)
 
     @classmethod
     def from_defined_cpp_vars(cls, defined_cpp_vars):
@@ -3403,12 +3405,12 @@ class AbinitTestSuite(object):
                             task_remaining -= 1
                             warnings.warn(
                                 'Error append in a worker on test {}:\n{}: {}'
-                                .format(msg['task'], e.__class__.__name__, e)
+                                .format(msg['task'], type(e).__name__, e)
                             )
                         else:
                             warnings.warn(
                                 'Error append in a worker:\n{}: {}'
-                                .format(e.__class__.__name__, e)
+                                .format(type(e).__name__, e)
                             )
 
                     logger.info("{} worker(s) remaining for {} tasks."
