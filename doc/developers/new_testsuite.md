@@ -775,9 +775,12 @@ contains declarations of the available constraints and parameters. A basic
 python understanding is required in order to modify this file. Comments and doc strings
 should help users to grasp the meaning of this file.
 
-The third is the file *~abinit/tests/pymods/yaml_tests/structures.py*. It
+The third is the file *~abinit/tests/pymods/yaml_tests/structures/*. It
 defines the structures used by the YAML parser when encountering a tag (starting
 with !), or in some cases when reaching a given pattern (__undef__ for example).
+The *structures* directory is a package organised by features (ex: there is a
+file *structures/ground_state.py*). Each file define structures for a given
+feature. All files are imported by the main script *structures/__init__.py*.
 Even if the abstraction layer on top of the _yaml_ module should help, it is
 better to have a good understanding of more "advanced" python concepts like
 _inheritance_, _decorators_, _classmethod_ etc.
@@ -850,12 +853,12 @@ Interface with Pyyaml library
 
 :  *~abinit/tests/pymods/data_extractor.py*,
    *~abinit/tests/pymods/yaml_tools/\_\_init\_\_.py* and
-   *~abinit/tests/pymods/yaml_tools/structures.py* constitute the Abinit output
+   *~abinit/tests/pymods/yaml_tools/structures/* constitute the Abinit output
    parser. *data_extractor.py* identify and extract the YAML documents from the
    source, *__init__.py* provide generic tools base on pyyaml to parse the
-   documents and *structures.py* provide the classes that are used by YAML to
+   documents and *structures* provide the classes that are used by YAML to
    handle tags. *~abinit/tests/pymods/yaml_tools/register_tag.py* define the
-   abstraction layer used to simplify the code in *structures.py*. It directly
+   abstraction layer used to simplify the code in *structures*. It directly
    deals with PyYaml black magic.
 
 
@@ -936,7 +939,7 @@ from the data. In this case the simpler way to register a new tag is to use
 `yaml_auto_map`. For example to register a tag ETOT that simply register all
 fields from the data tree and let the tester check them with `tol_abs` or
 `tol_rel` we would put the following in
-*~abinit/tests/pymods/yaml_tools/structures.py*:
+*~abinit/tests/pymods/yaml_tools/structures/ground_state.py*:
 
 ```python
 @yaml_auto_map
@@ -997,7 +1000,7 @@ for the tester to browse the components to check them. If we want to only make
 our custom check it is fine. For example we can define a method
 `check_components` and use the `callback` constraint like this:
 
-In `~abinit/tests/pymods/yaml_tools/structure.py`
+In `~abinit/tests/pymods/yaml_tools/structure/ground_state.py`
 ```python
 @yaml_map
 class Etot(object):
@@ -1077,7 +1080,7 @@ To associate a tag to anything else than a YAML mapping or sequence one can use
 that takes the raw source as a string in argument and return an instance of the
 class. It can be used to create custom parsers of new number representation.
 For example to create a 3D vector with unit tag:
-```
+```python
 @yaml_scalar
 class Vec3Unit(object):
     def __init__(self, x, y, z, unit):
