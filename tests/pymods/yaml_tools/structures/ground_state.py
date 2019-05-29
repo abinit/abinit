@@ -39,6 +39,13 @@ if has_pandas:
         is_dict_like = False  # prevent tester from browsing columns
 
         def last_iter(self, other, **opts):
+            '''
+                Expects opts to be a dictionary with keys being column names and
+                values being 'ceil': ceiling_tol_value or 'tol': tolerance_value.
+                The checks are only performed on the last values of each columns.
+                An additional optional key of opts is 'tol_iter' giving a tolerance
+                for the variation of number of iterations. The default value is 5.
+            '''
             tol_iter = opts.get('tol_iter', 5)
 
             def chk_tol(a, b, tol):
