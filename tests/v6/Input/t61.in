@@ -90,6 +90,6 @@ diemac 2.0        # Although this is not mandatory, it is worth to
 #%% authors = P. Boulanger
 #%% keywords = NC, DFPT
 #%% description = 
-#%% H2 Molecule in a small box
-#%% Second-order eigenvalue calculation using a small number of bands, testing bdeigrf.
+#%%   H2 Molecule in a small box
+#%%   Second-order eigenvalue calculation using a small number of bands, testing bdeigrf.
 #%%<END TEST_INFO>

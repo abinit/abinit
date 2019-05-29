@@ -2173,6 +2173,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ionmov=dtset%ionmov ; densfor_pred=dtset%densfor_pred ; iscf=dtset%iscf ; nqpt=dtset%nqpt
  kptopt=dtset%kptopt; nberry=dtset%nberry ; berryopt=dtset%berryopt
 
+
 !Dielectric real(dp) input variables
 !Reading of diemix/diemixmag must be inserted after iprcel
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diecut',tread,'ENE')

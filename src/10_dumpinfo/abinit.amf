@@ -1,1 +1,0 @@
-CLEANFILES += m_build_info.$(MODEXT)

@@ -49,6 +49,7 @@ module m_gstateimg
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
  use m_specialmsg,   only : specialmsg_mpisum
+ use m_neat,         only : neat_start_iter
  use m_libpaw_tools, only : libpaw_spmsg_mpisum
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
@@ -501,6 +502,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      call wrtout(ab_out ,msg,'COLL')
      call wrtout(std_out,msg,'PERS')
    end if
+   call neat_start_iter(itimimage, 'timimage', ab_out)
 
    call timab(704,2,tsec)
 
@@ -543,6 +545,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
            call wrtout(std_out,msg,'PERS')
          end if
        end if
+       call neat_start_iter(iimage, 'image', ab_out)
 
        acell(:)     =res_img(iimage)%acell(:)
        rprim(:,:)   =res_img(iimage)%rprim(:,:)

@@ -125,6 +125,6 @@ vel
 #%% description = 
 #%%   Test of molecular dynamics of B atoms, in the isokinetic
 #%%   ensemble, based on the Thomas-Fermi functional (very fast, even with 32 atoms).
-#%%   Fox the position of one atom along one direction.
+#%%   Fix the position of one atom along one direction.
 #%% topics = Recursion
 #%%<END TEST_INFO>
