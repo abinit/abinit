@@ -1,32 +1,8 @@
 '''
-    Define basic structures without particular requirements.
+    Define basic structures.
 '''
 from __future__ import print_function, division, unicode_literals
 from ..register_tag import yaml_auto_map, yaml_implicit_scalar
-
-
-@yaml_auto_map
-class Etot(object):
-    __yaml_tag = 'ETOT'
-
-    def __init__(self, label='nothing', comment='no comment'):
-        self.label = label
-        self.comment = comment
-
-    @classmethod
-    def from_map(cls, map):
-        new = super(Etot, cls).from_map(map)
-        new.components = {
-            name: value for name, value in new.__dict__.items()
-            if name not in [
-                'Etotal',
-                'label',
-                'comment',
-                'Band energy',
-                'Total energy(eV)'
-            ]
-        }
-        return new
 
 
 @yaml_implicit_scalar
@@ -83,8 +59,3 @@ class AbinitInfo(object):
 @yaml_auto_map
 class AbinitComment(AbinitMessage):
     __yaml_tag = 'COMMENT'
-
-
-@yaml_auto_map
-class GwSigma(object):
-    pass
