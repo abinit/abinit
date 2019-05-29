@@ -52,7 +52,7 @@ module m_mpi_scheduler
   end type mb_mpi_info_t
 
   type, public :: mpi_scheduler_t
-     integer :: nproc, ntasks, irank, comm, istart, iend, ntask, nblock
+     integer :: nproc, ntasks, irank,master, comm, istart, iend, ntask, nblock
      ! ntasks:  total number of tasks
      ! istart: first task id in this proc
      ! iend: last task id in this proc
@@ -87,8 +87,8 @@ contains
   !logical :: iam_master
   !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
   subroutine init_mpi_info(master, iam_master, my_rank, comm, nproc)
-   integer, intent(inout) :: master 
-   logical, intent(inout) :: iam_master 
+   integer, intent(inout) :: master
+   logical, intent(inout) :: iam_master
    integer, intent(inout) :: my_rank, comm, nproc
    master=0
    comm = xmpi_world
@@ -100,7 +100,7 @@ contains
 
   subroutine mb_mpi_info_t_initialize(self)
     class (mb_mpi_info_t):: self
-    self%master = 0     
+    self%master = 0
     self%comm = xmpi_world
     self%nproc = xmpi_comm_size(self%comm)
     self%my_rank = xmpi_comm_rank(self%comm)
@@ -108,13 +108,13 @@ contains
   end subroutine mb_mpi_info_t_initialize
 
 
-  subroutine mpi_scheduler_t_initialize(self, ntasks, comm, nblock)
+  subroutine mpi_scheduler_t_initialize(self, ntasks, master, comm, nblock)
     ! assign ntasks to ranks in mpi comm.
     ! ntask: number of tasks
     ! nblock: number of subtask per task. TODO: should improve the naming.
     class(mpi_scheduler_t), intent(inout) :: self
     integer, intent(in) :: ntasks
-    integer, intent(in) :: comm
+    integer, intent(in) :: master, comm
     integer, optional, intent(in):: nblock
     integer :: i,nmore, n, ierr
 
@@ -123,15 +123,16 @@ contains
     else
        self%nblock=1
     end if
-    call xmpi_bcast(self%nblock, 0, comm, ierr)
+    call xmpi_bcast(self%nblock, master, comm, ierr)
 
+    self%master=master
     !call MPI_COMM_SIZE(comm, self%nproc, ierr)
     self%nproc = xmpi_comm_size(comm)
     !call MPI_COMM_RANK(comm, self%iproc, ierr)
     self%irank=xmpi_comm_rank(comm)
     self%comm=comm
     self%ntasks = ntasks
-    call xmpi_bcast(self%ntasks, 0, comm, ierr )
+    call xmpi_bcast(self%ntasks, self%master, comm, ierr )
     if (.not. allocated(self%istart_list)) then
        ABI_ALLOCATE(self%istart_list, (self%nproc))
     end if
@@ -238,7 +239,7 @@ contains
          & buffer,&
          & self%ntask_list, &
          & self%istart_list-1, &
-         & 0, self%comm, ierr )
+         & self%master, self%comm, ierr )
   data(:)=buffer(:)
   end subroutine gatherv_dp1d
 
@@ -252,7 +253,7 @@ contains
          & buffer, &
          & self%ntask_list*nrow, &
          & (self%istart_list-1)*nrow, &
-         & 0, self%comm, ierr)
+         & self%master, self%comm, ierr)
     data(:,:)=buffer(:,:)
   end subroutine gatherv_dp2d
 

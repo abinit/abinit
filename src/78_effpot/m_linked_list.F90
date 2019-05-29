@@ -35,6 +35,7 @@ module m_linked_list
   use defs_basis
   use m_errors
   use m_xmpi
+  use m_profiling_abi
   implicit none
 !!***
 

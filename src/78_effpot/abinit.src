@@ -38,11 +38,12 @@ sources = [
     "m_lwf_mover.F90",
     "m_mathfuncs.F90",
     "m_mpi_scheduler.F90",
+    "m_multibinit_cell.F90",
     "m_multibinit_dataset.F90",
     "m_multibinit_io_xml.F90",
     "m_multibinit_main.F90",
     "m_multibinit_manager.F90",
-    "m_multibinit_supercell.F90",
+    #"m_multibinit_supercell.F90",
     "m_multibinit_unittest.F90",
     "m_polynomial_coeff.F90",
     "m_polynomial_conf.F90",
@@ -60,7 +61,7 @@ sources = [
     "m_spin_observables.F90",
     "m_spin_potential.F90",
     "m_spin_reciprocal.F90",
-    "m_spin_supercell.F90",
+    #"m_spin_supercell.F90",
     "m_spmat_base.F90",
     "m_spmat_convert.F90",
     "m_spmat_coo.F90",
@@ -71,7 +72,7 @@ sources = [
     "m_spmat_NDCOO.F90",
     "m_supercell_maker.F90",
     "m_tightbinding.F90",
-    "m_unitcell.F90"
+    #"m_unitcell.F90"
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
