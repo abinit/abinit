@@ -69,6 +69,7 @@ module m_dynmat
  public :: dfpt_sydy            ! Symmetrize dynamical matrix (eventually diagonal wrt to the atoms)
  public :: wings3               ! Suppress the wings of the cartesian 2DTE for which the diagonal element is not known
  public :: asrif9               ! Imposes the Acoustic Sum Rule to Interatomic Forces
+ public :: get_bigbox_and_weights ! Compute
  public :: make_bigbox          ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
  public :: bigbx9               ! Helper functions that faciliates the generation  of a Big Box containing
  public :: canat9               ! From reduced to canonical coordinates
@@ -2725,6 +2726,132 @@ end subroutine asrif9
 
 !----------------------------------------------------------------------
 
+!!****f* m_dynmat/get_bigbox_and_weights
+!! NAME
+!! get_bigbox_and_weights
+!!
+!! FUNCTION
+!! Compute Big Box containing all the R points in the cartesian real space needed to Fourier Transform
+!! the dynamical matrix into its corresponding interatomic force.
+!!
+!! INPUTS
+!! brav= Bravais Lattice (1 or -1=S.C.;2=F.C.C.;3=BCC;4=Hex.)
+!! natom= Number of atoms
+!! nqbz= Number of q-points in BZ.
+!! ngqpt(3)= Numbers used to generate the q points to sample the Brillouin zone using an homogeneous grid
+!! nqshft= number of shifts in q-mesh
+!! qshft(3, nqshft) = Q-mesh shifts
+!! rprim(3,3)= Normalized coordinates in real space.
+!! rprimd, gprimd
+!! rcan(3,natom)  = Atomic position in canonical coordinates
+!! comm= MPI communicator
+!!
+!! OUTPUT
+!! nrpt= Total Number of R points in the Big Box
+!! cell(3,nrpt) Give the index of the the cell and irpt
+!! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell. These coordinates are normalized (=> * acell(3)!!)
+!! r_inscribed_sphere
+!! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
+!!
+!! PARENTS
+!!      m_ifc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshft, qshft, rprim, rprimd, gprim, rcan, &
+                                  nrpt, rpt, cell, wghatm, r_inscribed_sphere, comm)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: brav, natom, nqbz, nqshft, comm
+ integer,intent(out) :: nrpt
+ real(dp),intent(out) :: r_inscribed_sphere
+
+!arrays
+ integer,intent(in) :: ngqpt(3)
+ real(dp),intent(in) :: gprim(3,3),rprim(3,3),rprimd(3,3), rcan(3, natom)
+ real(dp),intent(in) :: qshft(3, nqshft)
+ integer,allocatable,intent(out) :: cell(:,:)
+ real(dp),allocatable,intent(out) :: rpt(:,:), wghatm(:,:,:)
+
+!Local variables -------------------------
+!scalars
+ integer :: my_ierr, ierr, ii, irpt, all_nrpt !nprocs,my_rank,
+ real(dp) :: toldist
+ integer :: ngqpt9(9)
+ character(len=500) :: msg
+!arrays
+ integer,allocatable :: all_cell(:,:)
+ real(dp),allocatable :: all_rpt(:,:), all_wghatm(:,:,:)
+
+! *********************************************************************
+
+ ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
+ call make_bigbox(brav, all_cell, ngqpt, nqshft, rprim, all_nrpt, all_rpt)
+
+ ! Weights associated to these R points and to atomic pairs
+ ABI_MALLOC(all_wghatm, (natom, natom, all_nrpt))
+
+ ! HM: this tolerance is highly dependent on the compilation/architecture
+ !     numeric errors in the DDB text file. Try a few tolerances and
+ !     check if all the weights are found.
+ ngqpt9 = 0; ngqpt9(1:3) = ngqpt(1:3)
+ toldist = tol8
+ do while (toldist <= tol6)
+   ! Note ngqpt(9) with intent(inout)!
+   call wght9(brav, gprim, natom, ngqpt9, nqbz, nqshft, all_nrpt, qshft, rcan, &
+              all_rpt, rprimd, toldist, r_inscribed_sphere, all_wghatm, my_ierr)
+   call xmpi_max(my_ierr, ierr, comm, ii)
+   if (ierr > 0) toldist = toldist * 10
+   if (ierr == 0) exit
+ end do
+
+ if (ierr > 0) then
+   write(msg, '(3a,es14.4,2a,i0, 14a)' ) &
+    'The sum of the weight is not equal to nqpt.',ch10,&
+    'The sum of the weights is: ',sum(all_wghatm),ch10,&
+    'The number of q points is: ',nqbz, ch10, &
+    'This might have several sources.',ch10,&
+    'If toldist is larger than 1.0e-8, the atom positions might be loose.',ch10,&
+    'and the q point weights not computed properly.',ch10,&
+    'Action: make input atomic positions more symmetric.',ch10,&
+    'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine and recompile.',ch10,&
+    'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
+    'if abs(brav) /= 1, in which case you should change brav to 1.'
+   MSG_ERROR(msg)
+ end if
+
+ ! Only conserve the necessary points in rpt
+ nrpt = 0
+ do irpt=1,all_nrpt
+   if (sum(all_wghatm(:,:,irpt)) /= 0) nrpt = nrpt + 1
+ end do
+
+ ABI_MALLOC(rpt, (3, nrpt))
+ ABI_MALLOC(cell, (3, nrpt))
+ ABI_MALLOC(wghatm, (natom, natom, nrpt))
+
+ ii = 0
+ do irpt=1,all_nrpt
+   if (sum(all_wghatm(:,:,irpt)) /= 0) then
+     ii = ii + 1
+     rpt(:, ii) = all_rpt(:,irpt)
+     wghatm(:,:,ii) = all_wghatm(:,:,irpt)
+     cell(:,ii) = all_cell(:,irpt)
+   end if
+ end do
+
+ ABI_FREE(all_rpt)
+ ABI_FREE(all_wghatm)
+ ABI_FREE(all_cell)
+
+end subroutine get_bigbox_and_weights
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_dynmat/make_bigbox
 !! NAME
 !! make_bigbox
@@ -2759,7 +2886,7 @@ end subroutine asrif9
 !!
 !! SOURCE
 
-subroutine make_bigbox(brav,cell,ngqpt,nqshft,rprim,nrpt,rpt)
+subroutine make_bigbox(brav, cell, ngqpt, nqshft, rprim, nrpt, rpt)
 
 !Arguments -------------------------------
 !scalars

@@ -2669,6 +2669,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  integer :: qptrlatt(3,3),g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3),shift(3), sc_rprimd(3,3), sc_rmet(3, 3) !,qpt_ibz(3)
+ !real(dp):: rcan(3, db%cryst%natom), trans(3, db%cryst%natom)
+ !real(dp) :: acell(3),rprim(3,3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:), all_rpt(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:,:)
  real(dp),allocatable :: maxw(:,:), all_rmod(:)
@@ -2738,6 +2740,19 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
      end do
    end do
  end do
+
+ ! rprim, and gprim
+ !call mkradim(acell, rprim, cryst%rprimd)
+ !call canat9(brav1, cryst%natom, rcan, rprim, trans, cryst%xred)
+ !call matr3inv(rprim, gprim)
+ !call get_bigbox_and_weights(brav1, cryst%natom, nqbz, ngqpt, nqshft, qshft, rprim, cryst%rprimd, gprim, rcan, &
+ !                            nrtot, all_rpt, all_cell, all_wghatm, r_inscribed_sphere, db%comm)
+ !do ii=nrtot
+ !all_rpt(:, ii) = all_rpt(:, ii) * acell(:)
+ !end do
+ !ABI_FREE(all_cell)
+ !ABI_FRE(all_wghatm)
+ !ABI_FREE(all_rpt)
 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
  call xmpi_split_work(nrtot, db%comm_rpt, my_start, my_stop)

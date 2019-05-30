@@ -1356,7 +1356,7 @@ end subroutine dtset_free
 !!
 !! FUNCTION
 !!  Free arrays that depend on input nkpt (used in EPH code, because EPH has its own
-!!  treatmend of BZ sampling and we don't want to waste memory with large and useless arrays
+!!  treatment of BZ sampling and we don't want to waste memory with large and useless arrays
 !!  especially if very dense k-meshes are used.
 !!
 !! PARENTS

@@ -502,7 +502,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ABI_FREE(dyew)
  end if
 
-! OmegaSRLR: Store the short-range dynmat and compute long-range as difference
+ ! OmegaSRLR: Store the short-range dynmat and compute long-range as difference
  ABI_MALLOC(dynmat_sr,(2,3,natom,3,natom,nqbz))
  ABI_MALLOC(dynmat_lr,(2,3,natom,3,natom,nqbz))
  dynmat_sr=Ifc%dynmat
@@ -522,7 +522,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! Weights associated to these R points and to atomic pairs
  ABI_MALLOC(ifc_tmp%wghatm, (natom, natom, ifc_tmp%nrpt))
 
- ! HM: this tolerance is highly dependent of the compilation/arquitecture
+ ! HM: this tolerance is highly dependent on the compilation/architecture
  !     numeric errors in the DDB text file. Try a few tolerances and
  !     check if all the weights are found.
  toldist = tol8
