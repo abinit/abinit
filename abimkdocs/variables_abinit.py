@@ -6842,6 +6842,9 @@ computation of the atomic forces and positions between t=0 and t=lotf_nitex.
 **Related variables:** time step [[dtion]]
 
   * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to ionmov=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
+Within the HMC algorithm [[Duane1987]], the trial states are generated via short $NVE$ trajectories (ten {\bf ionmov}=24 steps in current implementation).
+ The initial momenta for each trial are randomly sampled from Boltzmann distribution, and the final trajectory state is either accepted or rejected based on the Metropolis criterion.
+ Such strategy allows to simultaneously update all reduced coordinates, achieve higher acceptance ratio than classical Metropolis Monte Carlo and better sampling efficiency for shallow energy landscapes [[Prokhorenko2018]].
 **Purpose:** Monte Carlo sampling
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
