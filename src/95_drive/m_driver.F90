@@ -745,7 +745,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case (RUNL_EPH)
-     !call dtset_free_nkpt_arrays(dtsets(idtset))
+     call dtset_free_nkpt_arrays(dtsets(0))
+     call dtset_free_nkpt_arrays(dtsets(idtset))
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case default

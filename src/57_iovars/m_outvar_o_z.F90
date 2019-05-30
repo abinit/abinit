@@ -1336,27 +1336,26 @@ contains
 & multivals%natom+multivals%nconeq)
 
 !wtk
- tnkpt=0
- dprarr(:,0)=1
- narr=dtsets(1)%nkpt            ! default size for all datasets
- if(prtvol_glob==0 .and. narr>nkpt_max)then
-   narr=nkpt_max
-   tnkpt=1
- end if
- do idtset=1,ndtset_alloc       ! specific size for each dataset
-   narrm(idtset)=dtsets(idtset)%nkpt
-   if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%wtk(1:narrm(idtset))+tol12
-   end if
-
-   if(prtvol_glob==0 .and. narrm(idtset)>nkpt_max)then
-     narrm(idtset)=nkpt_max
+ if (allocated(dtsets(0)%wtk)) then
+   tnkpt=0
+   dprarr(:,0)=1
+   narr=dtsets(1)%nkpt ! default size for all datasets
+   if(prtvol_glob==0 .and. narr>nkpt_max)then
+     narr=nkpt_max
      tnkpt=1
    end if
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,4,marr,narr,narrm,ncid,ndtset_alloc,'wtk','DPR',multivals%nkpt)
+   do idtset=1,ndtset_alloc       ! specific size for each dataset
+     narrm(idtset)=dtsets(idtset)%nkpt
+     if (narrm(idtset)>0) dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%wtk(1:narrm(idtset))+tol12
 
- if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) 'outvars : Printing only first ',nkpt_max,' k-points.'
+     if(prtvol_glob==0 .and. narrm(idtset)>nkpt_max)then
+       narrm(idtset)=nkpt_max
+       tnkpt=1
+     end if
+   end do
+   call prttagm(dprarr,intarr,iout,jdtset_,4,marr,narr,narrm,ncid,ndtset_alloc,'wtk','DPR',multivals%nkpt)
+   if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) 'outvars : Printing only first ',nkpt_max,' k-points.'
+ end if
 
 !WVL - wavelets variables
  if (any(dtsets(:)%usewvl==1)) then
