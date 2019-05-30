@@ -893,12 +893,9 @@ contains
  do idtset=1,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=3*dtsets(idtset)%natom
    if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom),(/ narrm(idtset) /) )
+     dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom), (/narrm(idtset)/))
    end if
-   if(sum(abs( dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom))) < tol12 )then
-     narrm(idtset)=0
-   end if
+   if(sum(abs( dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat','DPR',multivals%natom)
 
@@ -947,8 +944,7 @@ contains
 !  This is a trick to force printing of strten even if zero, still not destroying the value of nimagem(0).
    tmpimg0=nimagem(0)
    nimagem(0)=0
-   call prttagm_images(dprarr_images,iout,jdtset_,2,&
-&   marr,narrm,ncid,ndtset_alloc,'strten','DPR',&
+   call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'strten','DPR',&
 &   mxvals%nimage,nimagem,ndtset,prtimg,strimg)
    nimagem(0)=tmpimg0
  end if
@@ -1085,8 +1081,7 @@ contains
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%typat(1:narrm(idtset))
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,4,marr,narr,&
-& narrm,ncid,ndtset_alloc,'typat','INT',multivals%natom,forceprint=2)
+ call prttagm(dprarr,intarr,iout,jdtset_,4,marr,narr,narrm,ncid,ndtset_alloc,'typat','INT',multivals%natom,forceprint=2)
 
 !###########################################################
 !### 03. Print all the input variables (U)
@@ -1264,7 +1259,6 @@ contains
  call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'vel','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
-
 !vel_cell
 !At present, vel_cell does not depend on image... but this might change in the future.
  prtimg(:,:)=1
@@ -1319,21 +1313,17 @@ contains
      narrm(idtset)=3*dtsets(idtset)%natom*dtsets(idtset)%nconeq
      if (narrm(idtset)>0)&
 &     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%wtatcon(1:3,1:dtsets(idtset)%natom,&
-&     1:dtsets(idtset)%nconeq),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%wtatcon(1:3,1:dtsets(idtset)%natom,1:dtsets(idtset)%nconeq),(/ narrm(idtset) /) )
    else
      narrm(idtset)=3*mxvals%natom*mxvals%nconeq
      if (narrm(idtset)>0)&
 &     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%wtatcon(1:3,1:mxvals%natom,&
-&     1:mxvals%nconeq),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%wtatcon(1:3,1:mxvals%natom,1:mxvals%nconeq),(/ narrm(idtset) /) )
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'wtatcon','DPR',&
-& multivals%natom+multivals%nconeq)
+
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'wtatcon','DPR',&
+   multivals%natom+multivals%nconeq)
 
 !wtk
  if (allocated(dtsets(0)%wtk)) then
@@ -1394,11 +1384,11 @@ contains
    narrm(idtset)=3*size1
    do iimage=1,nimagem(idtset)
      if (narrm(idtset)>0) then
-       dprarr_images(1:narrm(idtset),iimage,idtset)=&
-&       reshape(xangst_(1:3,1:size1,iimage,idtset), (/ narrm(idtset) /) )
+       dprarr_images(1:narrm(idtset),iimage,idtset)=reshape(xangst_(1:3,1:size1,iimage,idtset), (/narrm(idtset)/))
      end if
    end do
  end do
+
  call prttagm_images(dprarr_images,iout,jdtset_,-2,marr,narrm,ncid,ndtset_alloc,'xangst','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
@@ -1417,6 +1407,7 @@ contains
      end if
    end do
  end do
+
  call prttagm_images(dprarr_images,iout,jdtset_,-2,marr,narrm,ncid,ndtset_alloc,'xcart','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
@@ -1478,8 +1469,7 @@ contains
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'zeemanfield','BFI',0)
 
 !ziontypat   ! After all, should always echo this value
- if(sum(dtsets(:)%ntypalch)>0)then   ! After all, should always echo this value ...
-
+ if(sum(dtsets(:)%ntypalch)>0)then
    narr=ntypat                    ! default size for all datasets
    do idtset=0,ndtset_alloc       ! specific size for each dataset
      narrm(idtset)=dtsets(idtset)%ntypat
@@ -1490,7 +1480,6 @@ contains
    end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
 &   narrm,ncid,ndtset_alloc,'ziontypat','DPR',multivals%ntypat,forceprint=2)
-
  end if
 
  do idtset=0,ndtset_alloc

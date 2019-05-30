@@ -704,7 +704,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call sigmaph_write(sigma, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
  else
    if (my_rank == master) then
+#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_modify(sigma%ncid, sigeph_path, xmpi_comm_self))
+#endif
    end if
  end if
 
