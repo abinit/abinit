@@ -3046,21 +3046,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
    ABI_FREE(maxw)
  end if
 
- !do imyp=1,db%my_npert
- !  ipc = db%my_pinfo(3, imyp)
- !  if (open_file(strcat("v1scf_pertcase", itoa(ipc)), msg, newunit=unt, form="formatted", &
- !                action="write", status="unknown") /= 0) then
- !    MSG_ERROR(msg)
- !  end if
- !  !write(unt, *)"# From rank", db%me_pert
- !  do ispden=1,db%nspden
- !    do ifft=1,nfft
- !      write(unt, *)db%v1scf_rpt(:, :, ifft, ispden, imyp)
- !    end do
- !  end do
- !  close(unt)
- !end do
-
  ABI_FREE(emiqr)
  ABI_FREE(qibz)
  ABI_FREE(wtq)
@@ -3923,29 +3908,6 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
  v1scf_rpt = v1scf_rpt / nqbz
  call xmpi_sum(v1scf_rpt, comm, ierr)
-
- ! Build mpi_type for executing fourdp in sequential.
- !call ngfft_seq(ngfft_qspace, [nq1, nq2, nq3])
- !call initmpi_seq(mpi_enreg_seq)
- !call init_distribfft_seq(mpi_enreg_seq%distribfft,'c',ngfft_qspace(2),ngfft_qspace(3),'all')
- !call init_distribfft_seq(mpi_enreg_seq%distribfft,'f',ngfft_qspace(2),ngfft_qspace(3),'all')
-
- !!ABI_MALLOC_OR_DIE(all_v1qr, (nqbz, 2, nfft, db%nspden, db%natom3), ierr)
- !!all_v1qr = zero
-
- !cnt = 0
- !do mu=1,db%natom3
- !  do ispden=1,db%nspden
- !    do ifft=1,nfft
- !      !cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
- !      !call fourdp(1,all_v1qr(:,:,ifft,ispden,mu),db%v1scf_rpt(:,ifft,ispden,mu),+1,&
- !      ! mpi_enreg_seq,nqbz,1,ngfft_qspace,tim_fourdp0)
- !    end do
- !  end do
- !end do
-
- !!ABI_FREE(all_v1qr)
- !call destroy_mpi_enreg(mpi_enreg_seq)
 
  ABI_FREE(emiqr)
  ABI_FREE(qibz)

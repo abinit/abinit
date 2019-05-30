@@ -557,7 +557,7 @@ class AbinitTestInfo(object):
         #     raise TestInfoParserError(err_msg)
 
         # Add the executable name to the list of keywords.
-        self.add_keywords(self.executable)
+        self.add_keywords([self.executable])
 
     @lazy__str__
     def __str__(self): pass

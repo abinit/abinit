@@ -1576,8 +1576,7 @@ subroutine xcart2xred(natom,rprimd,xcart,xred)
  call matr3inv(rprimd,gprimd)
  do iatom=1,natom
    do mu=1,3
-     xred(mu,iatom)= gprimd(1,mu)*xcart(1,iatom)+gprimd(2,mu)*xcart(2,iatom)+&
-&     gprimd(3,mu)*xcart(3,iatom)
+     xred(mu,iatom)= gprimd(1,mu)*xcart(1,iatom)+gprimd(2,mu)*xcart(2,iatom)+gprimd(3,mu)*xcart(3,iatom)
    end do
  end do
 
