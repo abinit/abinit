@@ -57,7 +57,6 @@ contains
   subroutine initialize(self, mshape)
     class(base_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
-    integer :: ierr
     self%ndim=size(mshape)
     ABI_ALLOCATE(self%mshape, (self%ndim))
     self%mshape=mshape
