@@ -224,7 +224,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  ABI_UNUSED((/comm, cryst%natom/))
 
  my_rank = xmpi_comm_rank(comm)
- call wrtout(std_out, 'Transport computation driver')
+ call wrtout(std_out, ' Transport computation driver')
 
  sigeph_path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  sigmaph = sigmaph_read(sigeph_path, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)

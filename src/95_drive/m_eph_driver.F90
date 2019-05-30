@@ -617,9 +617,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! EPH routines should not access them after this point.
  ! TODO: In principle I should deallocate also dtset(idtset) in driver but I have to
  ! disable the output of these arrays in outvars...
- if (dtset%eph_task /= 6) then
-   call dtset_free_nkpt_arrays(dtset)
- end if
+ if (dtset%eph_task /= 6) call dtset_free_nkpt_arrays(dtset)
 
  select case (dtset%eph_task)
  case (0)
@@ -646,7 +644,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
    if (dtset%eph_task == -4) then
-     call wrtout(std_out, "Calling transport routine after sigmaph run...", do_flush=.True.)
+     call wrtout(std_out, " Calling transport routine after sigmaph run...", do_flush=.True.)
      call transport(dtfil, dtset, ebands, cryst, comm)
    end if
 
