@@ -522,7 +522,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 
  ! Here begins the serious business
 
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
  ! If there is some possibility for a change (otherwise, wtk_folded is correctly initialized to give no change)
  if(nkbz/=1 .and. (nsym/=1 .or. timrev==1) )then
 
@@ -564,7 +564,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
    end do ikpt_loop! ikpt
 
  end if ! End check on possibility of change
- call cwtime_report(" ibz", cpu, wall, gflops)
+ !call cwtime_report(" ibz", cpu, wall, gflops)
 
  nkibz = 0
  do ikpt=1,nkbz
@@ -605,7 +605,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
      end do
    end do
  end do
- call cwtime_report(" map", cpu, wall, gflops)
+ !call cwtime_report(" map", cpu, wall, gflops)
 
  !do ikpt=1,nkbz
  !  write(*,*) ikpt, ibz2bz(ikpt), bz2ibz_smap(1,ikpt)

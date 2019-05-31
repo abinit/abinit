@@ -512,9 +512,9 @@ subroutine kptrank_unittests(comm)
  crystal = crystal_from_ptgroup('m-3m')
 
  ! Create a regular grid
- in_qptrlatt(:,1)=[ 50, 0, 0]
- in_qptrlatt(:,2)=[ 0, 50, 0]
- in_qptrlatt(:,3)=[ 0, 0, 50]
+ in_qptrlatt(:,1)=[ 100, 0, 0]
+ in_qptrlatt(:,2)=[ 0, 100, 0]
+ in_qptrlatt(:,3)=[ 0, 0, 100]
  dos_qshift(:,1) =[0.0,0.0,0.0]
  call cwtime(cpu, wall, gflops, "start")
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
@@ -589,14 +589,14 @@ subroutine kptrank_unittests(comm)
    if (bz2ibz_listkk(iqbz,2) /= bz2ibz_symkpt_new(2,iqbz)) then
      write(std_out,*) "Inconsistent isym", iqbz, bz2ibz_listkk(iqbz,2), bz2ibz_symkpt_new(2,iqbz)
    end if
-   if (bz2ibz_listkk(iqbz,3) /= bz2ibz_symkpt_new(3,iqbz)) then
-     write(std_out,*) "Inconsistent itim", iqbz, bz2ibz_listkk(iqbz,3), bz2ibz_symkpt_new(3,iqbz)
+   if (bz2ibz_listkk(iqbz,6) /= bz2ibz_symkpt_new(3,iqbz)) then
+     write(std_out,*) "Inconsistent itim", iqbz, bz2ibz_listkk(iqbz,6), bz2ibz_symkpt_new(3,iqbz)
    end if
-   !if (.not.all(bz2ibz_listkk(iqbz,4:) == bz2ibz_symkpt_new(4:,iqbz))) then
-   !  write(std_out,*) "Inconsistent shift", iqbz
-   !  write(std_out,*) bz2ibz_listkk(iqbz,4:)
-   !  write(std_out,*) bz2ibz_symkpt_new(4:,iqbz)
-   !end if
+   if (.not.all(bz2ibz_listkk(iqbz,3:5) == bz2ibz_symkpt_new(4:,iqbz))) then
+     write(std_out,*) "Inconsistent shift", iqbz
+     write(std_out,*) bz2ibz_listkk(iqbz,3:5)
+     write(std_out,*) bz2ibz_symkpt_new(4:,iqbz)
+   end if
  end do
 
  ABI_SFREE(bz2ibz_symkpt)
