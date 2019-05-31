@@ -2739,8 +2739,8 @@ end subroutine asrif9
 !! natom= Number of atoms
 !! nqbz= Number of q-points in BZ.
 !! ngqpt(3)= Numbers used to generate the q points to sample the Brillouin zone using an homogeneous grid
-!! nqshft= number of shifts in q-mesh
-!! qshft(3, nqshft) = Q-mesh shifts
+!! nqshift= number of shifts in q-mesh
+!! qshift(3, nqshift) = Q-mesh shifts
 !! rprim(3,3)= Normalized coordinates in real space.
 !! rprimd, gprimd
 !! rcan(3,natom)  = Atomic position in canonical coordinates
@@ -2761,19 +2761,19 @@ end subroutine asrif9
 !!
 !! SOURCE
 
-subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshft, qshft, rprim, rprimd, gprim, rcan, &
+subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rprim, rprimd, gprim, rcan, &
                                   cutmode, nrpt, rpt, cell, wghatm, r_inscribed_sphere, comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: brav, natom, nqbz, nqshft, cutmode, comm
+ integer,intent(in) :: brav, natom, nqbz, nqshift, cutmode, comm
  integer,intent(out) :: nrpt
  real(dp),intent(out) :: r_inscribed_sphere
 
 !arrays
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: gprim(3,3),rprim(3,3),rprimd(3,3), rcan(3, natom)
- real(dp),intent(in) :: qshft(3, nqshft)
+ real(dp),intent(in) :: qshift(3, nqshift)
  integer,allocatable,intent(out) :: cell(:,:)
  real(dp),allocatable,intent(out) :: rpt(:,:), wghatm(:,:,:)
 
@@ -2792,7 +2792,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshft, qshft, rprim
  ABI_CHECK(any(cutmode == [0, 1, 2]), "cutmode should be 0, 1, 2")
 
  ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
- call make_bigbox(brav, all_cell, ngqpt, nqshft, rprim, all_nrpt, all_rpt)
+ call make_bigbox(brav, all_cell, ngqpt, nqshift, rprim, all_nrpt, all_rpt)
 
  ! Weights associated to these R points and to atomic pairs
  ABI_MALLOC(all_wghatm, (natom, natom, all_nrpt))
@@ -2804,7 +2804,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshft, qshft, rprim
  toldist = tol8
  do while (toldist <= tol6)
    ! Note ngqpt(9) with intent(inout)!
-   call wght9(brav, gprim, natom, ngqpt9, nqbz, nqshft, all_nrpt, qshft, rcan, &
+   call wght9(brav, gprim, natom, ngqpt9, nqbz, nqshift, all_nrpt, qshift, rcan, &
               all_rpt, rprimd, toldist, r_inscribed_sphere, all_wghatm, my_ierr)
    call xmpi_max(my_ierr, ierr, comm, ii)
    if (ierr > 0) toldist = toldist * 10

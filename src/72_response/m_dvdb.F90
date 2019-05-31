@@ -298,7 +298,8 @@ module m_dvdb
    ! File name of the DVDB file.
 
   real(dp) :: dielt(3,3) = zero
-   ! Dielectric tensor
+   ! Dielectric tensor in Cartesian coordinates.
+   ! Used to deal with the long-range componenent in the Fourier interpolation.
 
   integer,allocatable :: pos_dpq(:,:,:)
    ! pos_dpq(3, mpert, nqpt)
@@ -345,16 +346,17 @@ module m_dvdb
 
   real(dp),allocatable :: my_wratm(:,:)
   ! my_wratm(my_nrpt, minatom:maxatom)
-  ! Weight for the FT associated to the atom and the R vector
+  ! Weight for the FT associated to the atom and the R vector.
 
   real(dp),allocatable :: rhog1_g0(:,:)
   ! rhog1_g0(2, numv1)
   ! G=0 component of rhog1. Used to treat the long range component in (polar) semiconductors.
-  ! NB: For the time being, this quantity is not use. Long range term is treated with Verdi's model.
+  ! NB: For the time being, this quantity is not used. Long range term is treated with Verdi's model.
 
   real(dp),allocatable :: zeff(:,:,:)
   ! zeff(3,3,natom)
-  ! Effective charges on each atom, versus electric field and atomic displacement.
+  ! Effective charges on each atom, versus electric field and atomic displacement in Cartesian coordinates.
+  ! Used to deal with the long-range componenent in the Fourier interpolation.
 
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDB file.
@@ -2658,23 +2660,23 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1, timrev1=1, tim_fourdp0=0, master=0, brav1=1
+ integer,parameter :: sppoldbl1=1, timrev1=1, tim_fourdp0=0, master=0, brav1=1, cutmode2=2
  integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,jj,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
- integer :: ifft, ierr, nrtot, my_rstart, my_rstop
+ integer :: ifft, ierr, nrtot, my_rstart, my_rstop, iatom
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
 #endif
- real(dp) :: dksqmax,phre,phim !,r_inscribed_sphere
+ real(dp) :: dksqmax,phre,phim,r_inscribed_sphere
  real(dp) :: cpu_all,wall_all,gflops_all
- logical :: isirr_q, found, write_maxw
+ logical :: isirr_q, found, write_maxw, use_weights
  character(len=500) :: msg, sfmt
  type(crystal_t),pointer :: cryst
 !arrays
  integer :: qptrlatt(3,3),g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:),all_cell(:,:)
- real(dp) :: qpt_bz(3),shift(3), sc_rprimd(3,3), sc_rmet(3, 3) !,qpt_ibz(3)
+ real(dp) :: qpt_bz(3),shift(3), sc_rprimd(3,3), sc_rmet(3, 3)
  real(dp):: rcan(3, db%cryst%natom), trans(3, db%cryst%natom)
  real(dp) :: acell(3),rprim(3,3), gprim(3,3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:), all_rpt(:,:),all_wghatm(:,:,:)
@@ -2713,49 +2715,53 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  ABI_CHECK(all(qshift(:, 1) == zero), "qshift != 0 not supported")
  ABI_CHECK(nqbz == product(ngqpt) * nqshift, "nqbz /= product(ngqpt) * nqshift")
 
- ! We want a gamma centered q-mesh for the FFT.
- ! TODO: This is not needed anymore because we are gonna use slow FFT to handle a possible distribution of rpts
- ABI_FREE(qbz)
- ABI_MALLOC(qbz, (3, nqbz))
- ii = 0
- do iz=0,nq3-1
-   do iy=0,nq2-1
-     do ix=0,nq1-1
-       ii = ii + 1
-       qbz(:, ii) = [ix / dble(nq1), iy / dble(nq2), iz / dble(nq3)]
-       call wrap2_pmhalf([ix / dble(nq1), iy / dble(nq2), iz / dble(nq3)], qbz(:,ii), shift)
+ use_weights = .False.
+ if (.not. use_weights) then
+   ! We want a gamma centered q-mesh for the FFT.
+   ! TODO: This is not needed anymore because we are gonna use slow FFT to handle a possible distribution of rpts
+   ABI_FREE(qbz)
+   ABI_MALLOC(qbz, (3, nqbz))
+   ii = 0
+   do iz=0,nq3-1
+     do iy=0,nq2-1
+       do ix=0,nq1-1
+         ii = ii + 1
+         qbz(:, ii) = [ix / dble(nq1), iy / dble(nq2), iz / dble(nq3)]
+         call wrap2_pmhalf([ix / dble(nq1), iy / dble(nq2), iz / dble(nq3)], qbz(:,ii), shift)
+       end do
      end do
    end do
- end do
 
- ! Compute real-space points.
- ! Use the following indexing (N means ngfft of the adequate direction)
- ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gc
- ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
- nrtot = nqbz
- ABI_CALLOC(all_rpt, (3, nrtot))
- ii = 0
- do iz=1,nq3
-   r3 = ig2gfft(iz, nq3)
-   do iy=1,nq2
-     r2 = ig2gfft(iy, nq2)
-     do ix=1,nq1
-       r1 = ig2gfft(ix, nq1)
-       ii = ii + 1
-       all_rpt(:, ii) = [r1, r2, r3]
+   ! Compute real-space points.
+   ! Use the following indexing (N means ngfft of the adequate direction)
+   ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gc
+   ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
+   nrtot = nqbz
+   ABI_CALLOC(all_rpt, (3, nrtot))
+   ii = 0
+   do iz=1,nq3
+     r3 = ig2gfft(iz, nq3)
+     do iy=1,nq2
+       r2 = ig2gfft(iy, nq2)
+       do ix=1,nq1
+         r1 = ig2gfft(ix, nq1)
+         ii = ii + 1
+         all_rpt(:, ii) = [r1, r2, r3]
+       end do
      end do
    end do
- end do
 
- ! Compute rprim, and gprim
- call mkradim(acell, rprim, cryst%rprimd)
- call canat9(brav1, cryst%natom, rcan, rprim, trans, cryst%xred)
- call matr3inv(rprim, gprim)
- !call get_bigbox_and_weights(brav1, cryst%natom, nqbz, ngqpt, nqshft, qshft, rprim, cryst%rprimd, gprim, rcan, &
- !                            cutmode2, nrtot, all_rpt, all_cell, all_wghatm, r_inscribed_sphere, db%comm)
- !do ii=1,nrtot
- !  all_rpt(:,ii) = all_rpt(:,ii) * acell(:)
- !end do
+ else
+   ! Compute rprim, and gprim
+   call mkradim(acell, rprim, cryst%rprimd)
+   call canat9(brav1, cryst%natom, rcan, rprim, trans, cryst%xred)
+   call matr3inv(rprim, gprim)
+   call get_bigbox_and_weights(brav1, cryst%natom, nqbz, ngqpt, nqshift, qshift, rprim, cryst%rprimd, gprim, rcan, &
+                               cutmode2, nrtot, all_rpt, all_cell, all_wghatm, r_inscribed_sphere, db%comm)
+   do ii=1,nrtot
+     all_rpt(:,ii) = all_rpt(:,ii) * acell(:)
+   end do
+ end if
 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
  call xmpi_split_work(nrtot, db%comm_rpt, my_rstart, my_rstop)
@@ -2769,15 +2775,16 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
    ! Copy weights for the atoms treated by this proc.
    ABI_MALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
    db%my_wratm = one
-   !do iatom=1,natom
-   !  if (iatom >= ii .and. iatom <= jj) db%my_wratm(:, iatom) = all_wghatm(iatom, iatom, my_rstart:my_rstop)
-   !end if
+   if (use_weights) then
+     do iatom=1,cryst%natom
+       if (iatom >= ii .and. iatom <= jj) db%my_wratm(:, iatom) = all_wghatm(iatom, iatom, my_rstart:my_rstop)
+     end do
+   end if
  end if
  MSG_WARNING_IF(db%my_nrpt == 0, "my_nrpt == 0!")
 
  ABI_SFREE(all_cell)
  ABI_SFREE(all_wghatm)
- !ABI_SFREE(all_rpt)
 
  ! Find correspondence BZ --> IBZ. Note:
  ! q --> -q symmetry is always used for phonons.
@@ -3091,7 +3098,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, outwr_pa
  ABI_FREE(v1r_lr)
  ABI_FREE(all_rpt)
 
- call cwtime_report(" Construction of V(r,R)", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" Construction of W(r, R)", cpu_all, wall_all, gflops_all)
 
 end subroutine dvdb_ftinterp_setup
 !!***
@@ -3458,7 +3465,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
  call timab(1808, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, " Precomputing Vscf(q) from W(r,R) and building qcache...", do_flush=.True.)
+ call wrtout(std_out, " Precomputing Vscf(q) from W(r, R) and building qcache...", do_flush=.True.)
 
  db%ft_qcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%ft_qcache%itreatq(:) = itreatq
@@ -3471,7 +3478,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  do iq_ibz=1,nqibz
    ! Ignore points reported by the oracle. We can still recompute them on the fly if needed.
    if (qselect_ibz(iq_ibz) == 0) cycle
-   if (itreatq(iq_ibz) == 0) cycle
+   if (.not. read_from_dvdb .and. itreatq(iq_ibz) == 0) cycle
 
    call cwtime(cpu, wall, gflops, "start")
 
@@ -3675,7 +3682,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 !arrays
  integer :: qptrlatt(3,3),g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
- real(dp) :: qpt_bz(3),shift(3) !,qpt_ibz(3)
+ real(dp) :: qpt_bz(3),shift(3)
  real(dp) :: cpu, wall, gflops
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:)
