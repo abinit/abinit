@@ -963,9 +963,9 @@ module m_xg
       MSG_ERROR("Not same space")
     end if
 
-    print *, "USAO U GEMM"
-    print *, "xgBlockW%rows", xgBlockW%rows
-    print *, "xgBlockW%cols", xgBlockW%cols
+    !print *, "USAO U GEMM"
+    !print *, "xgBlockW%rows", xgBlockW%rows
+    !print *, "xgBlockW%cols", xgBlockW%cols
     !stop
     !stop
 
@@ -2099,8 +2099,9 @@ module m_xg
       end do
       !$omp end parallel do
     end select
+    !print *, "BEFORE SUM"
     call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
-
+    !print *, "AFTER SUM"
     if ( present(max_val) ) then
       max_val = maxval(dot%vecR(1:xgBlock%cols,1))
     end if

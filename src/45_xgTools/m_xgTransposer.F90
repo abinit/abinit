@@ -334,10 +334,10 @@ module m_xgTransposer
     
     icpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpuCols  
     
-    print *, "xgTransposer%mpiData(MPI_ROWS)%rank", xgTransposer%mpiData(MPI_ROWS)%rank
-    print *, "xgTransposer%mpiData(MPI_COLS)%rank", xgTransposer%mpiData(MPI_COLS)%rank
-    print *, "ncpuCols", ncpuCols
-    print *, "icpu", icpu
+!    print *, "xgTransposer%mpiData(MPI_ROWS)%rank", xgTransposer%mpiData(MPI_ROWS)%rank
+!    print *, "xgTransposer%mpiData(MPI_COLS)%rank", xgTransposer%mpiData(MPI_COLS)%rank
+!    print *, "ncpuCols", ncpuCols
+!    print *, "icpu", icpu
    
     
     !print *, "xgTransposer%nrowsColsRows", xgTransposer%nrowsColsRows
@@ -446,7 +446,7 @@ module m_xgTransposer
       if ( xgTransposer%mpiData(MPI_COLS)%size > 1 ) then
         call xgTransposer_toLinalg(xgTransposer)
       else
-        print *, "SAMO PROMENIO STANJE"
+        !print *, "SAMO PROMENIO STANJE"
         xgTransposer%state = STATE_LINALG
       end if
     case (STATE_COLSROWS)

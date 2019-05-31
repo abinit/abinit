@@ -176,7 +176,7 @@ module m_chebfiwf
     l_icplx = 1
   end if
     
-  print *, "SPACEEEEEEEEEEEEEEE", l_icplx
+  !print *, "SPACEEEEEEEEEEEEEEE", l_icplx
   !stop
  
   ! Memory info
@@ -210,11 +210,11 @@ module m_chebfiwf
   
   !Local variables for chebfi
   !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
-  print *, "l_icplx", l_icplx
-  print *, "l_npw", l_npw
-  print *, "l_nspinor", l_nspinor
-  print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
-  print *, "nband", nband
+!  print *, "l_icplx", l_icplx
+!  print *, "l_npw", l_npw
+!  print *, "l_nspinor", l_nspinor
+!  print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
+!  print *, "nband", nband
   !stop
   
   call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft) 
@@ -237,7 +237,7 @@ module m_chebfiwf
   cptr = c_loc(eig)			
   call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
   call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1)
-  print *, "nband", nband
+  !print *, "nband", nband
   !stop
  
   !call xg_init(xgresidu,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
@@ -370,8 +370,8 @@ module m_chebfiwf
     
     call xgBlock_getSize(X,spacedim,blockdim)
 
-    print *, "spacedim X", spacedim
-    print *, "blockdim X", blockdim
+    !print *, "spacedim X", spacedim
+    !print *, "blockdim X", blockdim
     
     !call xgBlock_getSize(AX,spacedim,blockdim)
     
@@ -397,8 +397,8 @@ module m_chebfiwf
     !call debug_helper(X, blockdim)
     !stop
     
-    print *, "spacedim", spacedim
-    print *, "blockdim", blockdim
+    !print *, "spacedim", spacedim
+    !print *, "blockdim", blockdim
     !stop
     
     ! scale back cg

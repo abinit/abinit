@@ -249,7 +249,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
    gvnlxc_alltoall1(:,:)=zero
    cwavef_alltoall1(:,:)=zero
    gwavef_alltoall1(:,:)=zero
-   print *, "USAO OVDE"
+   !print *, "USAO OVDE"
    !stop
  end if
  ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
@@ -279,7 +279,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
    end if
    call timab(545,2,tsec)
  else
-   print *, "CHEAT"
+   !print *, "CHEAT"
    !stop
    ! Here, we cheat, and use DCOPY to bypass some compiler's overzealous bound-checking
    ! (ndatarecv*my_nspinor*bandpp might be greater than the declared size of cwavef)
@@ -297,7 +297,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 
 !====================================================================
  if ((.not.(flag_inv_sym)) .and. (bandpp==1)) then
-   print *, "flag_inv_sym 1"
+   !print *, "flag_inv_sym 1"
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.my_nspinor==2)then
      call timab(632,3,tsec)
 !    Sort to have all ispinor=1 first, then all ispinor=2
@@ -326,7 +326,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------------
 !  Computation of the index to class the waves functions below bandpp
 !  -------------------------------------------------------------
-   print *, "flag_inv_sym 2"
+   !print *, "flag_inv_sym 2"
    !stop
    if(do_transpose) then
      call timab(632,3,tsec)
@@ -675,7 +675,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    if(already_transposed) do_transpose = .false.
  end if
  
- print *, "already_transposed", already_transposed
+ !print *, "already_transposed", already_transposed
 
  nproc_band = mpi_enreg%nproc_band
  bandpp     = mpi_enreg%bandpp

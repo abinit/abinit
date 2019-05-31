@@ -231,11 +231,11 @@ module m_chebfi2
       !ovde ako nije deljivo sa 2 zauzeti za X_NP jedan red vise pa onda posle prepakovati
       chebfi%total_spacedim = total_spacedim
       !ovako nesto mora da bi se dobio tacan broj redova
-      if (MOD(total_spacedim,xmpi_comm_size(xmpi_world)) /=0) then
-        remainder = MOD(total_spacedim,xmpi_comm_size(xmpi_world))
-      end if
+!      if (MOD(total_spacedim,xmpi_comm_size(xmpi_world)) /=0) then
+!        remainder = MOD(total_spacedim,xmpi_comm_size(xmpi_world))
+!      end if
       !ne moze se dodati jos jedan dummy red jer posle ldim propadne za x_next i x_prev
-      call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp) !transposed arrays
+      call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom) !transposed arrays
       call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,total_spacedim,chebfi%bandpp)  
       call xg_setBlock(chebfi%X_NP,chebfi%X_prev,chebfi%bandpp+1,total_spacedim,chebfi%bandpp)  
       !print *, "prosao"
@@ -249,7 +249,7 @@ module m_chebfi2
     call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom)
     !stop
     
-    print *, "AX spacedim", spacedim
+    !print *, "AX spacedim", spacedim
     !stop
     !neigenpairs * spacedim * spacedim * neigenpairs
   end subroutine chebfi_allocateAll
@@ -419,7 +419,7 @@ module m_chebfi2
     !call debug_helper(chebfi%X, chebfi) 
     !stop
     
-    print *, "AJDE" 
+    !print *, "AJDE" 
    
     !call xgBlock_getSize(chebfi%X,rows,cols) 
     !print *, "rows", rows
@@ -466,7 +466,7 @@ module m_chebfi2
       
       !all stride arrays are hidden inside transposer
       call xgTransposer_init(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,1,0)
-      print *, "PROSAO INIT"
+      !print *, "PROSAO INIT"
       !call xgTransposer_init(chebfi%xgTransposerX,X0,chebfi%X,nCpuRows,nCpuCols,STATE_LINALG,1,0)
       
  !     call xgBlock_getSize(chebfi%X,rows,cols)
@@ -1236,7 +1236,7 @@ module m_chebfi2
        end if 
     end if
     
-    print *, "PROSLO SKALIRANJE"
+    !print *, "PROSLO SKALIRANJE"
     !stop
         
     !*********************************** EIGENVALUE A Ψ X = B Ψ XΛ **********************************************!
@@ -1252,8 +1252,8 @@ module m_chebfi2
     end select
     
     !call xgBlock_print(chebfi%eigenvalues, 6)
-    print *, "info", info
-    print *, "PROSAO HEGV"
+    !print *, "info", info
+    !print *, "PROSAO HEGV"
     !stop
     
     !call debug_helper_linalg(chebfi%X, chebfi, 1, 1) 
@@ -1286,13 +1286,13 @@ module m_chebfi2
     remainder = mod(nline, 3) !3 buffer swap, keep the info which one contains X_data at the end of loop
         
     !print *, "remainder", remainder
-    print *, "spacedim", spacedim
-    print *, "neigenpairs", neigenpairs
+    !print *, "spacedim", spacedim
+    !print *, "neigenpairs", neigenpairs
     !stop   
     
     
 
-    print *, "chebfi%paral_kgb", chebfi%paral_kgb
+    !print *, "chebfi%paral_kgb", chebfi%paral_kgb
     !stop
         
     if (chebfi%paral_kgb == 1) then 
@@ -1325,7 +1325,7 @@ module m_chebfi2
 !      call debug_helper_linalg(chebfi%X, chebfi, 1, 1) 
 !      stop    
       
-      call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs) !transposed arrays
+      call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom) !transposed arrays
       call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs) 
       call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)   
       !print *, "PROSAO AASASASASASA"
@@ -1340,8 +1340,9 @@ module m_chebfi2
     
     !call debug_helper_linalg(chebfi%X, chebfi, 1, 1) 
     !stop
-          
+    !print *, "REMAINDER", remainder      
     if (remainder == 1) then  !save original cg address into temp
+      !print *, "USAO REMEINDER 1"      
       call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X, chebfi%BX_swap, 1, spacedim, neigenpairs) 
       call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) 
@@ -1445,11 +1446,14 @@ module m_chebfi2
     !call debug_helper_linalg(chebfi%AX_swap, chebfi, 1, 1) 
     !print *, "pcond AX_SWAP print"
     !stop 
-  
+    !print *, "BEFORE NORM"
     call xgBlock_colwiseNorm2(chebfi%AX_swap, residu, max_val=maxResidu, max_elt=eigResiduMax,&
                                                       min_val=minResidu, min_elt=eigResiduMin) 
-
+    !print *, "AFTER NORM"
     chebfi_computeResidue = maxResidu
+    
+    !print *, maxResidu
+    !stop
 
   end function chebfi_computeResidue  
   
