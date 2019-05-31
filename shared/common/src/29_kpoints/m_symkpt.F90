@@ -468,7 +468,6 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  integer :: identi,ii,ikpt,ikpt2,ikibz,ind_ikpt,ikpt_found,ierr
  integer :: isym,itim,jj,nkpout,tident
  integer :: istart, istop
- integer :: wtk_folded(nkbz)
  real(dp) :: dist,difk,reduce
  real(dp) :: length1, length_sym
  real(dp) :: cpu, gflops, wall
@@ -506,15 +505,13 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
    ABI_CHECK(tident == 1, 'Did not find the identity operation')
  end if
 
- ! Initialise the wtk_folded array
- wtk_folded = 1
-
  ! Initialize
  ibz2bz = 0
  bz2ibz_smap = 0
  do ikpt=1,nkbz
    bz2ibz_smap(1, ikpt) = ikpt
    bz2ibz_smap(2, ikpt) = 1
+   bz2ibz_smap(4, ikpt) = 1 ! We will use this as wtk_folded
  end do
 
  ! Start kptrank
@@ -523,7 +520,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  ! Here begins the serious business
 
  !call cwtime(cpu, wall, gflops, "start")
- ! If there is some possibility for a change (otherwise, wtk_folded is correctly initialized to give no change)
+ ! If there is some possibility for a change
  if(nkbz/=1 .and. (nsym/=1 .or. timrev==1) )then
 
    ! More efficient algorithm
@@ -534,7 +531,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 
    ikpt_loop: do ikpt=1,nkbz
 
-     if (wtk_folded(ikpt)==0) cycle
+     if (bz2ibz_smap(4, ikpt)==0) cycle
      kpt1 = kbz(:,ikpt)
 
      ! MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
@@ -557,8 +554,8 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
          if (ikpt_found < 0) cycle
          if (ikpt_found >= ikpt) cycle
          bz2ibz_smap(:3, ikpt)  = [ikpt_found,isym,itim]
-         wtk_folded(ikpt) = wtk_folded(ikpt) + wtk_folded(ikpt_found)
-         wtk_folded(ikpt_found) = 0
+         bz2ibz_smap(4,ikpt) = bz2ibz_smap(4,ikpt) + bz2ibz_smap(4,ikpt_found)
+         bz2ibz_smap(4,ikpt_found) = 0
        end do ! itim
      end do ! isym
    end do ikpt_loop! ikpt
@@ -619,22 +616,6 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
      if(iout/=std_out) call wrtout(std_out,message,'COLL')
 
      nkpout=nkibz
-     !if (nkibz>80) then
-     !  call wrtout(std_out,' greater than 80, so only write 20 of them ')
-     !  nkpout=20
-     !end if
-     !do ii=1,nkpout
-     !  write(message, '(1x,i2,a2,3es16.8)' ) ii,') ',kbz(1:3,ibz2bz(ii))
-     !  call wrtout(std_out,message,'COLL')
-     !end do
-
-     !DEBUG
-     !call wrtout(std_out,'   Here are the new weights :','COLL')
-     !do ikpt=1,nkbz,6
-     !  write(message, '(6f12.6)' ) wtk_folded(ikpt:min(nkbz,ikpt+5))
-     !  call wrtout(std_out,message,'COLL')
-     !end do
-     !ENDDEBUG
    else
      write(message, '(a)' )' symkpt : not enough symmetry to change the number of k points.'
      call wrtout(iout,message,'COLL')
