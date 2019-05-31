@@ -311,7 +311,7 @@ type(ephwg_t) function ephwg_new( &
    inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
    fqdamp = (four_pi / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
 
-   ! Compute gkq_{LR}. Note that in our approx it does not dependend on ib_k.
+   ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
    gkq2_lr(:) = zero
    do nu=1,new%natom3
      wqnu = phfrq(nu); if (wqnu < tol8) cycle

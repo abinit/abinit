@@ -2744,6 +2744,7 @@ end subroutine asrif9
 !! rprim(3,3)= Normalized coordinates in real space.
 !! rprimd, gprimd
 !! rcan(3,natom)  = Atomic position in canonical coordinates
+!! cutmode
 !! comm= MPI communicator
 !!
 !! OUTPUT
@@ -2761,11 +2762,11 @@ end subroutine asrif9
 !! SOURCE
 
 subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshft, qshft, rprim, rprimd, gprim, rcan, &
-                                  nrpt, rpt, cell, wghatm, r_inscribed_sphere, comm)
+                                  cutmode, nrpt, rpt, cell, wghatm, r_inscribed_sphere, comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: brav, natom, nqbz, nqshft, comm
+ integer,intent(in) :: brav, natom, nqbz, nqshft, cutmode, comm
  integer,intent(out) :: nrpt
  real(dp),intent(out) :: r_inscribed_sphere
 
@@ -2778,7 +2779,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshft, qshft, rprim
 
 !Local variables -------------------------
 !scalars
- integer :: my_ierr, ierr, ii, irpt, all_nrpt !nprocs,my_rank,
+ integer :: my_ierr, ierr, ii, irpt, all_nrpt
  real(dp) :: toldist
  integer :: ngqpt9(9)
  character(len=500) :: msg
@@ -2787,6 +2788,8 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshft, qshft, rprim
  real(dp),allocatable :: all_rpt(:,:), all_wghatm(:,:,:)
 
 ! *********************************************************************
+
+ ABI_CHECK(any(cutmode == [0, 1, 2]), "cutmode should be 0, 1, 2")
 
  ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
  call make_bigbox(brav, all_cell, ngqpt, nqshft, rprim, all_nrpt, all_rpt)
@@ -2823,10 +2826,11 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshft, qshft, rprim
    MSG_ERROR(msg)
  end if
 
- ! Only conserve the necessary points in rpt
+ ! Only conserve the necessary points in rpt.
  nrpt = 0
  do irpt=1,all_nrpt
-   if (sum(all_wghatm(:,:,irpt)) /= 0) nrpt = nrpt + 1
+   if (filterw(all_wghatm(:,:,irpt))) cycle
+   nrpt = nrpt + 1
  end do
 
  ABI_MALLOC(rpt, (3, nrpt))
@@ -2835,17 +2839,39 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshft, qshft, rprim
 
  ii = 0
  do irpt=1,all_nrpt
-   if (sum(all_wghatm(:,:,irpt)) /= 0) then
-     ii = ii + 1
-     rpt(:, ii) = all_rpt(:,irpt)
-     wghatm(:,:,ii) = all_wghatm(:,:,irpt)
-     cell(:,ii) = all_cell(:,irpt)
-   end if
+   if (filterw(all_wghatm(:,:,irpt))) cycle
+   ii = ii + 1
+   rpt(:, ii) = all_rpt(:,irpt)
+   wghatm(:,:,ii) = all_wghatm(:,:,irpt)
+   cell(:,ii) = all_cell(:,irpt)
  end do
 
  ABI_FREE(all_rpt)
  ABI_FREE(all_wghatm)
  ABI_FREE(all_cell)
+
+contains
+
+logical pure function filterw(wg)
+
+ real(dp),intent(in) :: wg(natom,natom)
+ integer :: iat
+ real(dp) :: trace
+
+ select case (cutmode)
+ case (1)
+   filterw = sum(abs(wg)) < tol16
+ case (2)
+   trace = zero
+   do iat=1,natom
+     trace = trace + abs(wg(iat,iat))
+   end do
+   filterw =  trace < tol16
+ case default
+   filterw = .False.
+ end select
+
+end function filterw
 
 end subroutine get_bigbox_and_weights
 !!***
@@ -4342,7 +4368,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
      do irpt=1,nrpt
        ! Check if the sum of the weights is equal to the number of q points
        sumwght=sumwght+wghatm(ia,ib,irpt)
-       !write(std_out,'(a,3i5)' )' atom1, atom2, irpt ; rpt ; wghatm ',ia,ib,irpt
+       !write(std_out,'(a,3(i0,1x))' )' atom1, atom2, irpt ; rpt ; wghatm ',ia,ib,irpt
        !write(std_out,'(3es16.6,es18.6)' )rpt(1,irpt),rpt(2,irpt),rpt(3,irpt),wghatm(ia,ib,irpt)
      end do
      if (abs(sumwght-nqpt)>tol10) ierr = 1

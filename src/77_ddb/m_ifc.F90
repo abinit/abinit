@@ -599,6 +599,11 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    end if
  end do
 
+ !write(std_out,*)"nrpt before filter:", ifc_tmp%nrpt, ", after: ", ifc%nrpt
+ !do irpt=1,ifc%nrpt
+ !  write(std_out,*)ifc%rpt(:,irpt), (ifc%wghatm(ii,ii,irpt), ii=1,natom)
+ !end do
+
  ! Copy other useful arrays.
  Ifc%dielt = dielt
  Ifc%nqbz = nqbz
