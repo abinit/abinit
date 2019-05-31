@@ -660,7 +660,7 @@ integer function get_arg_list_int(argname, argval, lenr, msg, default, default_l
      end if
    else
      ierr = ierr + 1
-     msg = sjoin("Cannot find", argname, "in CLI and want_len:", itoa(want_len), ch10, msg)
+     msg = sjoin("Cannot find --", argname, "option in CLI and want_len:", itoa(want_len), ch10, msg)
    end if
  end if
 
@@ -760,7 +760,7 @@ integer function get_arg_list_dp(argname, argval, lenr, msg, default, default_li
      end if
    else
      ierr = ierr + 1
-     msg = sjoin("Cannot find ", argname, "in CLI and want_len:", itoa(want_len), ch10, msg)
+     msg = sjoin("Cannot find --", argname, " option in CLI and want_len:", itoa(want_len), ch10, msg)
    end if
  end if
 

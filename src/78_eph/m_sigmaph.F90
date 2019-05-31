@@ -597,7 +597,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nlines_done, nline_in, grad_berry_size_mpw1
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
- integer :: nqibz, nqbz, comm_rpt
+ integer :: nqibz, nqbz, comm_rpt, method
  logical :: has_dielt_zeff, add_lr_part
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
@@ -1050,7 +1050,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      comm_rpt = xmpi_comm_self
      if (dtset%useric == 666) comm_rpt = xmpi_comm_self
      wr_path = strcat(dtfil%filnam_ds(4), "_WRMAX")
-     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, wr_path, comm_rpt)
+     method = dtset%userid
+     !method = 1
+     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, wr_path, comm_rpt)
 
      ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
      ABI_CALLOC(qselect, (sigma%nqibz))
