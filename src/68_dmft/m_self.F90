@@ -553,7 +553,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  complex(dpc), allocatable :: buffer(:)
  integer :: iall,iatom,iatu,ier,iexist2,ifreq,im,im1,ioerr,ispinor,ispinor1,isppol,istepiter,istep,istep_imp
  integer :: icount,iexit,iter,iter_imp,master,mbandc,myproc,natom,ncount,ndim,nkpt,nproc,nrecl,nspinor,nsppol,spacecomm
- integer :: natom_read,nsppol_read,nspinor_read,ndim_read,nw_read,optrw,readimagonly,tndim,iflavor
+ integer :: natom_read,nsppol_read,nspinor_read,ndim_read,nw_read,optrw,readimagonly,tndim,iflavor,unitrot
  logical :: nondiaglevels
  character(len=30000) :: message ! Big buffer to avoid buffer overflow.
  integer,allocatable :: unitselffunc_arr(:)
@@ -666,19 +666,22 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    !  Create file for rotation
  endif
  if(present(pawang)) then
-   if(optrw==2) then
-     tmpmatrot = trim(paw_dmft%filapp)//'.UnitaryMatrix_for_DiagLevel'
-   else if (optrw==1) then
-     tmpmatrot = trim(paw_dmft%filnamei)//'.UnitaryMatrix_for_DiagLevel'
-   endif
-#ifdef FC_NAG
-   open (unit=3000,file=trim(tmpmatrot),status='unknown',form='formatted',recl=ABI_RECL)
-#else
-   open (unit=3000,file=trim(tmpmatrot),status='unknown',form='formatted')
-#endif
-   write(std_out,*) "     Open file  ",trim(tmpmatrot)
-   rewind(3000)
    do iatom=1,natom
+     call int2char4(iatom,tag_at)
+     ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+     if(optrw==2) then
+       tmpmatrot = trim(paw_dmft%filapp)//'.UnitaryMatrix_for_DiagLevel_iatom'//trim(tag_at)
+     else if (optrw==1) then
+       tmpmatrot = trim(paw_dmft%filnamei)//'.UnitaryMatrix_for_DiagLevel_iatom'//trim(tag_at)
+     endif
+     unitrot=3189+iatom
+#ifdef FC_NAG
+     open (unit=unitrot,file=trim(tmpmatrot),status='unknown',form='formatted',recl=ABI_RECL)
+#else
+     open (unit=unitrot,file=trim(tmpmatrot),status='unknown',form='formatted')
+#endif
+     write(std_out,*) "     Open file  ",trim(tmpmatrot)
+     rewind(unitrot)
      if(self%oper(1)%matlu(iatom)%lpawu.ne.-1) then
        ndim=2*self%oper(1)%matlu(iatom)%lpawu+1
        do isppol=1,nsppol
@@ -686,21 +689,21 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            do im=1,ndim
              do im1=1,ndim
                write(message,*) real(eigvectmatlu(iatom,isppol)%value(im,im1)),aimag(eigvectmatlu(iatom,isppol)%value(im,im1))
-               call wrtout(3000,message,'COLL')
+               call wrtout(unitrot,message,'COLL')
              enddo
            enddo
          else if (optrw==1) then
            do im=1,ndim
              do im1=1,ndim
-               read(3000,*) x_r,x_i
+               read(unitrot,*) x_r,x_i
                eigvectmatlu(iatom,isppol)%value(im,im1)=cmplx(x_r,x_i)
              enddo
            enddo
          endif
        enddo
      endif
+    close(unitrot)
    enddo
-   close(3000)
    if(optrw==1) then
      write(message,'(a,2x,a,i4)') ch10,&
 &      " == Print non rotated Self Limit read from Matsubara space=",ifreq
@@ -910,7 +913,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 &                    " == Print Rotated Self Energy for freq=",ifreq
                    call wrtout(std_out,message,'COLL')
                    call print_matlu(selfrotmatlu,natom,1,compl=1)
-                 else
+                 else if(ifreq==5) then
                    write(message,'(a,2x,a,i4)') ch10,&
 &                    "  (Other frequencies not printed)"
                    call wrtout(std_out,message,'COLL')
@@ -923,7 +926,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  do ispinor=1,nspinor
                    do im=1,ndim
                      iflavor=iflavor+1
-                     write(std_out,*) "Write in file unit",unitselfrot(iatom,isppol,ispinor,im),"for flavor",iflavor
+                     if(ifreq<5) then
+                       write(std_out,*) "Write in file unit",unitselfrot(iatom,isppol,ispinor,im),"for flavor",iflavor
+                     endif
                      write(message,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
 &                      real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
 &                      aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
