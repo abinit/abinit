@@ -94,8 +94,6 @@ CONTAINS !===========================================================
 
 subroutine ga_init(dtset,ga_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),target,intent(in) :: dtset
@@ -142,8 +140,6 @@ end subroutine ga_init
 
 subroutine ga_destroy(ga_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ga_type),intent(inout) :: ga_param
@@ -183,8 +179,6 @@ end subroutine ga_destroy
 !! SOURCE
 
 subroutine ga_nullify(ga_param)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -409,12 +409,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%dosdeltae=one/Ha_cmm1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dosdeltae',tread,'DPR')
  if(tread==1) anaddb_dtset%dosdeltae=dprarr(1)
- if(anaddb_dtset%dosdeltae<=zero)then
-   write(message, '(a,es14.4,a,a,a)' )&
-&   'dosdeltae is ',anaddb_dtset%dosdeltae,', which is lower than 0 .',ch10,&
-&   'Action: correct dosdeltae in your input file.'
-   MSG_ERROR(message)
- end if
 
 !FIXME : should probably be smaller
  anaddb_dtset%dossmear=5.0/Ha_cmm1

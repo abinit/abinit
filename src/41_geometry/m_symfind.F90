@@ -42,8 +42,8 @@ module m_symfind
 
  public :: symfind     ! From the symmetries of the Bravais lattice,
                        ! select those that leave invariant the system, and generate tnons
- public :: symanal     ! Find the space group from the list of symmetris and lattice parameters
- public :: symbrav     ! Determine the Bravais information From the list of symmetry operations, and the lattice vectors.
+ public :: symanal     ! Find the space group from the list of symmetries and lattice parameters
+ public :: symbrav     ! Determine the Bravais information from the list of symmetry operations, and the lattice vectors.
  public :: symlatt     ! Find the Bravais lattice and its symmetry operations (ptsymrel).
                        ! From the unit cell vectors (rprimd) and the corresponding metric tensor.
 
