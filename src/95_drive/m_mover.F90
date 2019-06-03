@@ -240,7 +240,7 @@ character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename,fname_ddb, name_file
 character(len=500) :: MY_NAME = "mover"
-real(dp) :: favg,e_d_ht,e_d_sr,e_d_lr
+real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: change,useprtxfase
@@ -639,8 +639,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 #endif
 
            call effective_potential_evaluate( &
-&           effective_potential,scfcv_args%results_gs%etotal,e_d_ht,e_d_sr,e_d_lr,&
-&           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+&           effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,& 
 &           filename=name_file,elec_eval=need_elec_eval)
 

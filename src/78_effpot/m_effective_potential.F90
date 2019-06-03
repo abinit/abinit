@@ -2274,8 +2274,7 @@ end subroutine effective_potential_writeAbiInput
 !!
 !! SOURCE
 
-subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_harm_short,energy_harm_ewald,& 
-&                                       fcart,fred,strten,natom,rprimd,&
+subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                       displacement,du_delta,strain,xred,&
 &                                       compute_anharmonic,verbose,filename,elec_eval)
 
@@ -2287,7 +2286,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   character(len=fnlen),optional,intent(in) :: filename 
 !array
   type(effective_potential_type),intent(in) :: eff_pot
-  real(dp),intent(out) :: energy,energy_harm_tot,energy_harm_short,energy_harm_ewald
+  real(dp),intent(out) :: energy
   real(dp),intent(out) :: fcart(3,natom)
   real(dp),intent(out) :: fred(3,natom)
   real(dp),intent(out) :: strten(6)
@@ -2486,11 +2485,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   energy_part    = zero
   fcart_part(:,:)= zero
 
-  call harmonics_terms_evaluateIFC(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,:),&
-&                                  eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:),&
-&                                  eff_pot%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:),disp_tmp,&
-&                                  energy_harm_tot,energy_harm_short,energy_harm_ewald,fcart_part,&
-&                                  eff_pot%supercell%natom,&
+  call harmonics_terms_evaluateIFC(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,:),disp_tmp,&
+&                                  energy_part,fcart_part,eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%mpi_ifc%my_ncell,&
 &                                  eff_pot%mpi_ifc%my_nrpt,eff_pot%mpi_ifc%my_atmrpt_index,&
 &                                  eff_pot%mpi_ifc%my_index_cells,sc_size,eff_pot%mpi_ifc%my_rpt,&
@@ -2498,11 +2494,11 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
 
   if(need_verbose)then
     write(msg, '(a,1ES24.16,a)' ) ' Energy of the ifc part                    :',&
-&                                     energy_harm_tot,' Hartree'
+&                                     energy_part,' Hartree'
     call wrtout(ab_out,msg,'COLL')
     call wrtout(std_out,msg,'COLL')
 
-    if(abs(energy_harm_tot) < tol16 .and. eff_pot%anharmonics_terms%ncoeff == 0)then
+    if(abs(energy_part) < tol16 .and. eff_pot%anharmonics_terms%ncoeff == 0)then
       write(msg, '(8a)' )ch10,&
 &        ' --- !WARNING!',ch10,&
 &        '        The harmonic part is negative, the simulation will diverge',ch10,&
@@ -2512,10 +2508,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
     end if
   end if
  
-  energy_harm_short = energy_harm_short + eff_pot%energy * ncell
-  energy_harm_ewald = energy_harm_ewald + eff_pot%energy * ncell
-  energy = energy + energy_harm_tot
-  energy_harm_tot = energy_harm_tot + eff_pot%energy * ncell
+  energy = energy + energy_part
   fcart(:,:)= fcart(:,:) + fcart_part(:,:)
 
 
@@ -3412,7 +3405,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !scalar
  character(len=500) :: msg
  integer :: ia,ib,ii,mu,nu,npt
- real(dp):: delt,energy,e_d_ht,e_d_short,e_d_ewald
+ real(dp):: delt,energy
 !array
  real(dp):: strten(6)
  real(dp),allocatable :: disp(:,:),diff(:)
@@ -3468,7 +3461,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
        delt = (-(npt/2+1)+ii) * delta
        disp = zero
        disp(mu,ia) = delt * eff_pot%supercell%rprimd(mu,mu)
-       call effective_potential_evaluate(eff_pot,energy,e_d_ht,e_d_short,e_d_ewald,fcart,fred,&
+       call effective_potential_evaluate(eff_pot,energy,fcart,fred,&
 &                                        strten,natom,eff_pot%supercell%rprimd,&
 &                                        displacement=disp,&
 &                                        compute_anharmonic=.FALSE.,verbose=.false.)
@@ -3554,7 +3547,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !scalar
  integer :: ii,jj,ia,mu,npt,istep
 ! integer :: ifirst
- real(dp):: energy,e_d_ht,e_d_short,e_d_ewald,delt,delta,ucvol
+ real(dp):: energy,delt,delta,ucvol
  !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),mat_def(3,3),identity(3,3)
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3)
@@ -3616,7 +3609,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
          disp_red(mu,ia) = disp_red(mu,ia) + delt
          call xred2xcart(natom, rprimd, disp, disp_red)
 
-         call effective_potential_evaluate(eff_pot,energy,e_d_ht,e_d_short,e_d_ewald,fcart,fred,strten,natom,rprimd,&
+         call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                          xred=xred,du_delta=du_delta,&
 &                                          displacement=disp,compute_anharmonic=.true.,verbose=.false.)
          diff(ii) = energy
@@ -3629,7 +3622,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 &                                   xcart_ref=eff_pot%supercell%xcart,&
 &                                   compute_displacement = .true.,compute_duDelta = .true.)
 
-   call effective_potential_evaluate(eff_pot,energy,e_d_ht,e_d_short,e_d_ewald,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,du_delta=du_delta,&
 &                                    displacement=disp,compute_anharmonic=.true.,verbose=.false.)
 
@@ -3676,7 +3669,7 @@ forall(ii=1:3)identity(ii,ii)=1
 ! &                                      compute_anharmonic=.true.,verbose=.false.)
 
 !   Option 2 => compute the disps within evaluate
-    call effective_potential_evaluate(eff_pot,energy,e_d_ht,e_d_short,e_d_ewald,fcart,fred,strten,natom,rprimd_def,&
+    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd_def,&
 &                                     xred=xred,compute_anharmonic=.true.,verbose=.false.)
 
 
@@ -3698,7 +3691,7 @@ forall(ii=1:3)identity(ii,ii)=1
 ! &                                    compute_anharmonic=.true.,verbose=.false.)
 
 !  Option 2 => compute the disps within evaluate
-   call effective_potential_evaluate(eff_pot,energy,e_d_ht,e_d_short,e_d_ewald,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.true.,verbose=.false.)
    
  write(std_out,*) "Analyti:",strten(jj)
