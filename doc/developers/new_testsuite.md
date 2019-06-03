@@ -145,8 +145,6 @@ implementation, indeed, supports only a subset of the YAML specifications:
 * mapping containing scalars
 * tables in CSV format (which is more like an extension of the standard)
 
-A more detailed discussion about the Fortran API is given in the XXX section.
-
 !!! important
 
     YAML is not designed to handle large amount of data therefore it should
@@ -192,6 +190,8 @@ On the Fortran side, we provide:
 - a higher level module called *m_neat* provides Fortran procedures to create specific
   documents associated to important physical properties. Currently routines
   for total energy components and ground state general results are implemented.
+
+A more detailed example is provided [below](#creating-a-new-document-in-fortran).
 
 <!--
 For the Fortran side routines may be available to output given structures of
@@ -904,6 +904,53 @@ class YAMLComplex(complex):
         # few adjustment to match the python restrictions on complex number
         # writing
         return cls(scal.replace('i', 'j').replace(' ', ''))
+```
+
+### Creating a new document in Fortran
+
+Developers are expected to browse the sources of `m_neat` and `m_yaml_out` to
+have a comprehensive overview of available tools. Indeed the routines are
+documented and commented and creating a hand-written reference is likely to go
+out of sync quicker than on-site documentation. Here we show a little example to
+give the feeling of the process.
+
+The simplest way to create a YAML document have been introduced above with the
+use of `yaml_single_dict`. However this method is limited to scalars only. It is
+possible to put 1D and 2D arrays, dictionaries and even column based data.
+
+The best way to create a new document is to have a routine
+`neat_my_new_document` that will take all required data in argument and will do
+all the formating work at once.
+
+This routine will declare a `stream_string` object to build the YAML document
+inside, open the document with `yaml_open_doc`, fill it, close it with
+`yaml_close_doc` and finally print it to the output file with `wrtout_stream`.
+
+Here come a basic skeleton of `neat` routine:
+
+```fortran
+subroutine neat_energies(data_1, data_2,... , iout)
+  !! declare your pieces of data... (arrays, numbers, pair_list...)
+  ...
+  integer,intent(in) :: iout  !! this is the output file descriptor
+!Local variables-------------------------------
+  type(stream_string) :: stream
+
+  !! open the document
+  call yaml_open_doc('my label', 'some comments on the document', stream=stream)
+  
+  !! fill the document
+  ...
+  
+  !! close and output the document
+  call yaml_close_doc(stream=stream)
+  call wrtout_stream(stream, iout)
+end subroutine neat_energies
+```
+
+Suppose we want a 2D matrix of real number with the tag `!NiceMatrix` in our document for the field name 'that matrix'we will add the following to the middle section:
+```fortran
+call yaml_add_real2d('that matrix', dimension_1, dimension_2, mat_data, tag='NiceMatrix, stream=stream)
 ```
 
 
