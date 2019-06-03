@@ -929,7 +929,7 @@ inside, open the document with `yaml_open_doc`, fill it, close it with
 Here come a basic skeleton of `neat` routine:
 
 ```fortran
-subroutine neat_energies(data_1, data_2,... , iout)
+subroutine neat_my_new_document(data_1, data_2,... , iout)
   !! declare your pieces of data... (arrays, numbers, pair_list...)
   ...
   integer,intent(in) :: iout  !! this is the output file descriptor
@@ -945,13 +945,17 @@ subroutine neat_energies(data_1, data_2,... , iout)
   !! close and output the document
   call yaml_close_doc(stream=stream)
   call wrtout_stream(stream, iout)
-end subroutine neat_energies
+end subroutine neat_my_new_document
 ```
 
 Suppose we want a 2D matrix of real number with the tag `!NiceMatrix` in our document for the field name 'that matrix'we will add the following to the middle section:
 ```fortran
 call yaml_add_real2d('that matrix', dimension_1, dimension_2, mat_data, tag='NiceMatrix, stream=stream)
 ```
+
+Other `m_yaml_out` routines provide similar interface: first the label, then the
+data and its structural metadata, then a bunch of optional arguments for
+formating, adding tags, tweaking spacing etc...
 
 
 ## Coding rules
