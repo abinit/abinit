@@ -35,6 +35,7 @@ module m_chebfi2
   integer, parameter :: EIGENVD = 2
   integer, parameter :: DEBUG_ROWS = 20
   integer, parameter :: DEBUG_COLUMNS = 20
+  integer, parameter :: test_OMP = 1
   
 #ifdef HAVE_OPENMP 
   integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
@@ -206,6 +207,13 @@ module m_chebfi2
 !    print *, "chebfi%bandpp", chebfi%bandpp
 !    stop
     
+    if (test_OMP == 1) then
+      call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs) !regular arrays
+      call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)  
+      call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  
+    end if
+    
+    if (test_OMP == 0) then
     if (chebfi%paral_kgb == 0) then
       call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs) !regular arrays
       call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)  
@@ -240,6 +248,7 @@ module m_chebfi2
       call xg_setBlock(chebfi%X_NP,chebfi%X_prev,chebfi%bandpp+1,total_spacedim,chebfi%bandpp)  
       !print *, "prosao"
       !stop
+    end if
     end if
     !print *, "spacedim", spacedim
     !stop
@@ -341,7 +350,9 @@ module m_chebfi2
     
     integer :: nCpuCols, nCpuRows
     
-    integer, allocatable :: index_wavef_band(:)
+    !integer, allocatable :: index_wavef_band(:)
+        
+
         
     !Pointers similar to old Chebfi    
     integer, allocatable :: nline_bands(:)      !Oracle variable
@@ -401,6 +412,8 @@ module m_chebfi2
     nline = chebfi%nline
     chebfi%eigenvalues = eigen
     
+    !test_OMP = 1
+    
     if (chebfi%paral_kgb == 0) then
       allocate(nline_bands(neigenpairs))
       call xg_init(DivResults, chebfi%space, neigenpairs, 1)
@@ -440,6 +453,7 @@ module m_chebfi2
     !end if
 
     ! Transpose
+    if (test_OMP == 0) then
     if (chebfi%paral_kgb == 1) then
       
       nCpuRows = chebfi%nproc_fft
@@ -535,7 +549,16 @@ module m_chebfi2
       call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
       call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
     end if
+    end if
     
+    
+    !!TEST TEST TEST (delete later)
+    if (test_OMP == 1) then
+      call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, 1, spacedim, neigenpairs)   !use xXColsRows instead of X notion
+      call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
+      call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
+    end if
+    !!TEST TEST TEST 
     
     !print *, "AAAAAAAAAAAAAAAAAAAA"
     !stop
@@ -561,8 +584,10 @@ module m_chebfi2
     !call debug_helper(chebfi%xBXColsRows, chebfi) 
     !stop
       
+    if (test_OMP == 0) then
     if (chebfi%paral_kgb == 1) then   
       call xmpi_barrier(chebfi%spacecom)
+    end if
     end if
     !stop
                
@@ -586,9 +611,9 @@ module m_chebfi2
       mineig_global = mineig
     end if
     
-    print *, "maxeig_global", maxeig_global  
-    print *, "mineig_global", mineig_global    
-    stop
+    !print *, "maxeig_global", maxeig_global  
+    !print *, "mineig_global", mineig_global    
+    !stop
                 
     lambda_minus = maxeig_global
     
@@ -654,6 +679,10 @@ module m_chebfi2
       !call xg_getPointer(chebfi%X)
       !call xg_getPointer(chebfi%xXColsRows)
       
+      !print *, "chebfi%bandpp SIB", chebfi%bandpp
+      !print *, "chebfi%total_spacedim", chebfi%total_spacedim
+      !stop
+      
       call timab(tim_swap,1,tsec)  
       if (chebfi%paral_kgb == 0) then             
         call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
@@ -718,8 +747,11 @@ module m_chebfi2
     !print *, "LOOP FINISHED"
     !stop
 
-
+    if (test_OMP == 0) then
+    if (chebfi%paral_kgb == 1) then  
     call xmpi_barrier(chebfi%spacecom)
+    end if 
+    end if
     !print *, "EIG", eig
 !    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
 !      call xgBlock_print(DivResults%self, 200)
@@ -767,6 +799,7 @@ module m_chebfi2
     !stop
     
     !Filtering done transpose back 
+    if (test_OMP == 0) then
     if (chebfi%paral_kgb == 1) then
     
       call xmpi_barrier(chebfi%spacecom)
@@ -782,11 +815,21 @@ module m_chebfi2
       call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG) !all_to_all
      
     end if
+    end if
+    
+    !!TEST TEST TEST (delete later)
+    if (test_OMP == 1) then
+      call xgBlock_copy(chebfi%xXColsRows, chebfi%X, 1, 1)  
+      call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
+      call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, neigenpairs)
+    end if
+    !!TEST TEST TEST 
    
     !call debug_helper_linalg(chebfi%X, chebfi, 1) 
     !stop
     
     !print *, "PROSAO TRANSPOSE"
+    !stop
 
     !call debug_helper_linalg(chebfi%X, chebfi, 1) 
     !call debug_helper_linalg(chebfi%AX%self, chebfi, 1) 
@@ -799,7 +842,8 @@ module m_chebfi2
     call chebfi_rayleightRitz(chebfi, nline)
     call timab(tim_RR, 2, tsec) 
 
-    !print *, "PRE RESIDUE"
+    print *, "PRE RESIDUE"
+    stop
 
     call timab(tim_residu, 1, tsec)
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
@@ -1303,7 +1347,8 @@ module m_chebfi2
 
     !print *, "chebfi%paral_kgb", chebfi%paral_kgb
     !stop
-        
+       
+    if (test_OMP == 0) then 
     if (chebfi%paral_kgb == 1) then 
 !      multiply = chebfi%total_spacedim * (chebfi%bandpp * 2 + 1)
 !      size_remainder = multiply - (spacedim * 2 * neigenpairs)
@@ -1346,6 +1391,7 @@ module m_chebfi2
       !call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  
       !!TODO UOPSTE NE ZNAM DA LI OVO MOZE DA SE ODRADI SA POSTOJECIM FUNKCIJAMA
     end if 
+    end if
     
     !call debug_helper_linalg(chebfi%X, chebfi, 1, 1) 
     !stop

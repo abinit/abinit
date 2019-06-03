@@ -1,2 +1,13 @@
-5.51user 0.10system 0:05.64elapsed 99%CPU (0avgtext+0avgdata 181392maxresident)k
-0inputs+40outputs (0major+65350minor)pagefaults 0swaps
+ 
+--- !ERROR
+src_file: m_xg.F90
+src_line: 476
+mpi_rank: 0
+message: |
+    Bad size for real array
+...
+ 
+Abort(13) on node 0 (rank 0 in comm 0): application called MPI_Abort(MPI_COMM_WORLD, 13) - process 0
+Command exited with non-zero status 13
+6.71user 0.17system 0:06.91elapsed 99%CPU (0avgtext+0avgdata 277676maxresident)k
+0inputs+40outputs (0major+112218minor)pagefaults 0swaps

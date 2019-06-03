@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_x.out to t03_x.out0075
+    Renaming old t03_x.out to t03_x.out0086
 ...
  
 
@@ -43,7 +43,7 @@ message: |
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon  3 Jun 2019.
-- ( at 11h53 )
+- ( at 16h00 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -51,7 +51,7 @@ message: |
  === Build Information === 
   Version       : 8.11.7
   Build target  : x86_64_linux_intel19.0
-  Build date    : 20190527
+  Build date    : 20190603
  
  === Compiler Suite === 
   C compiler       : gnu7.4
@@ -79,7 +79,6 @@ message: |
   DFT flavor    : none
   FFT flavor    : fftw3
   LINALG flavor : mkl
-  MATH flavor   : none
   TIMER flavor  : abinit
   TRIO flavor   : none
  
@@ -204,14 +203,14 @@ memory: analysis of memory needs
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        45    nfftf =     91125
 ================================================================================
-P This job should need less than                      80.870 Mbytes of memory.
+P This job should need less than                      83.897 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
  
  Biggest array : pawfgrtab%gylm(gr), with     21.0009 MBytes.
  memana : allocated an array of     21.001 Mbytes, for testing purposes.
- memana: allocated      80.870Mbytes, for testing purposes. 
+ memana: allocated      83.897Mbytes, for testing purposes. 
  The job will continue.
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
@@ -224,10 +223,12 @@ _ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -  max_nthreads =   12
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           1
             acell      1.5340000000E+01  1.5340000000E+01  1.5340000000E+01 Bohr
               amu      1.37327000E+02
            bandpp         192
       chksymbreak           0
+     densfor_pred           6
              ecut      8.00000000E+00 Hartree
 -          fftalg         312
            istwfk        1
@@ -275,6 +276,7 @@ P           mkmem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
            occopt           3
+        paral_kgb           1
         pawecutdg      1.00000000E+01 Hartree
            prtden           0
            prteig           0
@@ -569,5 +571,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    3887.000    3887.000
  ITER STEP NUMBER     1
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  Invovl built
- maxeig_global  0.710003659831692     
- mineig_global -4.863724647570208E-002
+ 
+--- !ERROR
+src_file: m_xg.F90
+src_line: 476
+mpi_rank: 0
+message: |
+    Bad size for real array
+...
+ 
+ 
+ abi_abort: decision taken to exit ...
