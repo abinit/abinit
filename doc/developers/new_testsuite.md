@@ -284,8 +284,8 @@ More specifically:
 - the *files_to_test* section now accepts the optional argument *use_yaml*. 
   Possible values are:
   
-  * "yes" --> activate YAML based test (default)
-  * "no" -->  do not use YAML test
+  * "yes" --> activate YAML based test
+  * "no" -->  do not use YAML test (default)
   * "only" --> use YAML based test but not legacy fldiff algorithm
 
 - a new (optional) section `[yaml_test]` is added with two possible fields: 
@@ -296,6 +296,11 @@ More specifically:
   specification. The path is relative to the Abinit input file. A natural choice
   would be to use the path "./t21.yaml" associated to the input file "t21.in"
   unless we decide to create a dedicated directory.
+
+!!! important
+    Until the basic document list is considered stable enough the printing of
+    YAML documents is disabled by default. To enable it, add `use_yaml 1` to your
+    input file (in the normal Abinit input variables part).
 
 ### Test specification syntax
 
