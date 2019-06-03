@@ -218,10 +218,6 @@ As concerns the python implementation:
 - A command line tool `testtools.py` to allow doing different manual actions
   (see Test CLI)
 
-==TODO== Add Pseudo code with examples showing how to write ETOT in Fortran, how
-to define and register a python YAML object associated to the ETOT tag.
-==END TODO==
-
 The new infrastructure has been designed with extensibility and ease-of-use in
 mind. From the perspective of an Abinit developer, adding support for the
 YAML-based approach requires two steps:
@@ -522,7 +518,8 @@ filters:
 Here we simply said that we associate the label `lda` to a filter matching all
 documents created in the first dataset and we associate the label `dmft` to a
 filter matching all document created in the second dataset. This is the simplest
-filter declaration possible. More on filters declarations in section XXX. (TODO)
+filter declaration possible. More on filters declarations in
+[here](yaml_tools_api#filters-api).
 
 Now we have to use our filters. First of all we will associate the configuration
 we already wrote to the `lda` filter so we can have a different configuration
@@ -601,132 +598,6 @@ filters:
         dtset: 2
 ```
 
-==TODO==
-Details on the definition of a filter
-Explanation of composition of different configurations (precedence of filters,
-default config, hard reset)
-==END TODO==
-
-A filter can specify all currently known iterators: dtset, timimage, image, and time. 
-For each iterator a set of integers can be defined with three methods:
-
-- a single integer value (`dtset: 1`)
-- a YAML list of values (`dtset: [1, 2, 5]`)
-- a mapping with the optional members "from" and "to" specifying the boundaries (both
-  included) of the integer interval (`dtset: {from: 1, to: 5}`). If "from" is omitted, the default is 1. If
-  "to" is omitted the default is no upper boundary. 
-
-Several filters can be used for the same document if they overlap. However, it
-is fundamental that an order of specificity can be determined which means that
-overlapping filters must absolutely be included in each other. Though the first
-example below is fine because _f2_ is included in _f1_ but the second example
-will raise an error because _f4_ is not included in _f3_.
-
-```yaml
-# this is fine
-filters:
-    f1:
-        dtset:
-            from: 2
-            to: 7
-        image:
-            from: 4
-
-    f2:
-        dtset: 7
-        image:
-        - 4
-        - 5
-        - 6
-```
-
-```yaml
-# this will raise an error
-filters:
-    f3:
-        dtset:
-            from: 2
-            to: 7
-        image:
-            from: 4
-
-    f4:
-        dtset: 7
-        image:
-            from: 1
-            to: 5
-```
-
-When a test is defined, the default tree is overridden by the user defined
-tree. When a filtered tree is used it overrides the less specific tree. As you
-can see, the overriding process is used everywhere. Though, it is important to
-know how it works. By default, only what is explicitly specified is overridden
-which means that if a constraint is defined at a deeper level on the default
-tree than what is done on the new tree, the original constraints will be kept.
-For example let `f1`  and `f2` two filters such that `f2` is included in `f1`.
-
-```yaml
-f1:
-    results_gs:
-        tol_abs: 1.0e-6
-        convergence:
-            ceil: 1.0e-6
-            diffor:
-                1.0e-4
-
-f2:
-    results_gs:
-        tol_rel: 1.0e-7
-        convergence:
-            ceil: 1.0e-7
-
-filters:
-    f1:
-        dtset: 1
-    f2:
-        dtset: 1
-        image: 5
-```
-
-When the tester will reach the fifth image of the first dataset, the config tree
-used will be the following:
-
-```yaml
-results_gs:
-    tol_abs: 1.0e-6
-    tol_rel: 1.0e-7  # this has been appended without modifying anything else
-    convergence:
-        ceil: 1.0e-7  # this one have been overridden
-        diffor:
-            1.0e-4  # this one have been kept
-```
-
-If this is not the behavior you need, you can use the "hard reset marker".
-Append `!` to the name of the specialization you want to override to completely
-replace it. Let the `f2` tree be:
-
-```yaml
-f2:
-    results_gs:
-        convergence!:
-            ceil: 1.0e-7
-```
-
-and now the resulting tree for the fifth image of the first dataset is:
-
-```yaml
-results_gs:
-    tol_abs: 1.0e-6
-    convergence:  # the whole convergence node have been overriden
-        ceil: 1.0e-7
-```
-
-!!! tip
-
-    Here again the `explore` shell could be of great help to know what is inherited
-    from the other trees and what is overridden.
-
-
 ## Command line interface
 
 The `~abinit/tests/testtools.py` script provides a command line interface to facilitate the creation of new tests. 
@@ -773,7 +644,8 @@ to learn its usage from the available examples.
 The second one is the *~abinit/tests/pymods/yaml_tests/conf_parser.py* file. It
 contains declarations of the available constraints and parameters. A basic
 python understanding is required in order to modify this file. Comments and doc strings
-should help users to grasp the meaning of this file.
+should help users to grasp the meaning of this file. More details on 
+[here](./yaml_tools_api#constraints-and-parameters-registration)
 
 The third is the file *~abinit/tests/pymods/yaml_tests/structures/*. It
 defines the structures used by the YAML parser when encountering a tag (starting
@@ -832,51 +704,6 @@ Atomic speeds:
         method: not_going_anywhere
         d_min: 1.0e-2
 ```
-
-### Add a new parameter
-To have the parser recognise a new token as a parameter one should edit the
-*~abinit/tests/pymods/conf_parser.py*.
-
-The `conf_parser` variable in this file have a method `parameter` to register a
-new parameter. Arguments are the following:
-
-- `token`: mandatory, the name used in configuration for this parameter
-- `default`: optional (`None`), the default value used when the parameter is
-  not available in the configuration.
-- `value_type`: optional (`float`), the expected type of the value found in
-  the configuration.
-- `inherited`: optional (`True`), whether or not an explicit value in the
-  configuration should be propagated to deeper levels.
-
-### Adding a constraint
-To have the parser recognise a new token as a constraint one should also edit the
-*~abinit/tests/pymods/conf_parser.py*.
-
-`conf_parser` have a method `constraint` to register a new constraint It is
-supposed to be used as a decorator that takes arguments. The arguments are all
-optional and are the following:
-
-- `value_type`: (`float`) the expected type of the value found in the
-  configuration.
-- `inherited`: (`True`), whether or not the constraint should be propagated to
-  deeper levels.
-- `apply_to`: (`'number'`), the type of data this constraint can be applied to.
-  This can be a type or one of the special strings (`'number'`, `'real'`,
-  `'integer'`, `'complex'`, `'Array'` (refer to numpy arrays), `'this'`) `'this'`
-  is used when the constraint should be applied to the structure where it is
-  defined and not be inherited.
-- `use_params`: (`[]`) a list of names of parameters to be passed as argument to
-  the test function.
-- `exclude`: (`set()`) a set of names of constraints that should not be applied
-  when this one is.
-
-The decorated function contains the actual test code. It should return `True` if
-the test succeed and either `False` or an instance of `FailDetail` if the test
-failed. If the test is simple enough one should use `False`.  However if the
-test is compound of several non-trivial checks `FailDetail` come in handy to
-tell the user which part failed. When you want to signal a failed test and
-explaining what happened return `FailDetail('some explanations')`. The message
-passed to `FailDetail` will be transmitted to the final report for the user.
 
 ### Add a new tag
 
