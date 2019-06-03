@@ -785,8 +785,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%eph_stern
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_stern','INT',0)
 
- intarr(1,:)=dtsets(:)%eph_force_ftinterp
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_force_ftinterp','INT',0)
+ intarr(1,:)=dtsets(:)%eph_use_ftinterp
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_use_ftinterp','INT',0)
 
  intarr(1,:)=dtsets(:)%eph_transport
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_transport','INT',0)

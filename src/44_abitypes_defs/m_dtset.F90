@@ -493,7 +493,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
- dtout%eph_force_ftinterp = = dtin%eph_force_ftinterp
+ dtout%eph_use_ftinterp = dtin%eph_use_ftinterp
  dtout%eph_transport      = dtin%eph_transport
 
  dtout%ph_wstep          = dtin%ph_wstep
@@ -2190,7 +2190,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm eph_phrange'
  list_vars=trim(list_vars)//' eph_tols_idelta eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
  list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_np_pqbks eph_restart '
- list_vars=trim(list_vars)//' eph_stern eph_task eph_transport eph_force_ftinterp'
+ list_vars=trim(list_vars)//' eph_stern eph_task eph_transport eph_use_ftinterp'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'

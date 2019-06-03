@@ -945,7 +945,7 @@ type dataset_type
 
  integer :: eph_stern = 0
  integer :: eph_transport = 0
- integer :: eph_force_ftinterp = 0
+ integer :: eph_use_ftinterp = 0
 
  integer :: ph_intmeth
  integer :: prteliash = 0

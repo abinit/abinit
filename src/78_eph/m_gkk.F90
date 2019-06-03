@@ -307,7 +307,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  call cwtime(cpu, wall, gflops, "start")
 
- if (dtset%eph_force_ftinterp /= 0) then
+ if (dtset%eph_use_ftinterp /= 0) then
    MSG_WARNING(sjoin("Enforcing FT interpolation as could not find q-point:", ktoa(qpt), "in DVDB"))
    comm_rpt = xmpi_comm_self
    !wr_path = strcat(dtfil%filnam_ds(4), "_WRMAX")

@@ -1154,13 +1154,13 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 
  num_acoustic = 0
  do nu = 1, 3*crystal%natom
-!  Check if this mode is acoustic like: scalar product of all displacement vectors are collinear
+   ! Check if this mode is acoustic like: scalar product of all displacement vectors are collinear
    isacoustic = 1
-!  Find reference atom with non-zero displacement
+   ! Find reference atom with non-zero displacement
    do iatom=1,crystal%natom
      if(sum(displ_cart(:,(iatom-1)*3+1:(iatom-1)*3+3,nu)**2) >tol16)iatref=iatom
-   enddo
-!  Now compute scalar product, and check they are all positive
+   end do
+   ! Now compute scalar product, and check they are all positive
    do iatom = 1, crystal%natom
      if (sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3, nu)*eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, nu)) < tol16 ) isacoustic = 0
    end do
