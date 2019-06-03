@@ -48,7 +48,7 @@
 #%% keywords = FAILS_IFMPI
 #%% authors = D.J. Adams
 #%% description = Compute U in cells containing 2, 16 and 128 atoms.
-#%% Cannot be executed in parallel, random errors
-#%%   At line 111 of file ujdet.F90 (unit = 7, file = ...)
-#%%   Fortran runtime error: File 'ujdet.out' already exists
+#%%   Cannot be executed in parallel, random errors
+#%%     At line 111 of file ujdet.F90 (unit = 7, file = ...)
+#%%     Fortran runtime error: File 'ujdet.out' already exists
 #%%<END TEST_INFO>

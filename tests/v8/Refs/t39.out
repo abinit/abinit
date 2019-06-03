@@ -1,5 +1,5 @@
 
-.Version 8.11.6 of ABINIT 
+.Version 8.11.7 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Apr 2019.
-- ( at 11h54 )
+.Starting date : Wed 15 May 2019.
+- ( at 10h19 )
   
 - input  file    -> t39.in
 - output file    -> t39.out
@@ -323,9 +323,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
  
- C(   1) : real, imag   1.25691875E-12 -1.22017265E-15
- C(   2) : real, imag   2.12624335E-13 -8.49982208E-16
- C(   3) : real, imag  -9.54967879E-12  6.73205874E-16
+ C(   1) : real, imag   1.25691853E-12  2.95320464E-17
+ C(   2) : real, imag   2.12622480E-13 -6.19757030E-17
+ C(   3) : real, imag  -9.54967943E-12 -4.61698190E-17
  
 ====================================================
  
@@ -335,9 +335,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
  
- Orb Mag(   1) : real, imag   3.09354226E-12 -1.08821271E-13
- Orb Mag(   2) : real, imag   3.00412937E-12  1.05235033E-13
- Orb Mag(   3) : real, imag   1.16976156E-12  1.85480268E-14
+ Orb Mag(   1) : real, imag   4.16012573E-12 -1.08088197E-13
+ Orb Mag(   2) : real, imag   4.08283959E-12  1.04626752E-13
+ Orb Mag(   3) : real, imag   3.79568539E-12  1.78469674E-14
  
 ====================================================
  
@@ -553,16 +553,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
 ================================================================================
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.5657694653724    -8.566E+00 7.783E-11 6.632E-11
+ ETOT  1  -8.5657694653723    -8.566E+00 7.783E-11 6.632E-11
  
 ====================================================
  
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
  
- C(   1) : real, imag   1.31295316E-09 -6.47417327E-16
- C(   2) : real, imag   1.74314747E-09  3.88284018E-16
- C(   3) : real, imag  -2.39362872E-05  4.19479842E-16
+ C(   1) : real, imag   1.31262429E-09 -1.12304965E-17
+ C(   2) : real, imag   1.74298390E-09  2.12131601E-17
+ C(   3) : real, imag  -2.39362864E-05  7.81975313E-17
  
 ====================================================
  
@@ -572,9 +572,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
  
- Orb Mag(   1) : real, imag  -1.48485582E-09 -1.25681988E-12
- Orb Mag(   2) : real, imag   1.72085645E-10  2.14440482E-12
- Orb Mag(   3) : real, imag  -5.20803220E-05 -8.53126190E-15
+ Orb Mag(   1) : real, imag  -2.13316588E-09  2.45664821E-13
+ Orb Mag(   2) : real, imag  -2.36691233E-10 -1.09636951E-13
+ Orb Mag(   3) : real, imag  -1.44416328E-04 -1.58012903E-13
  
 ====================================================
  
@@ -593,7 +593,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     -0.432399036587450
- Compensation charge over fine fft grid    =     -0.432394214283902
+ Compensation charge over fine fft grid    =     -0.432394214283892
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -686,12 +686,12 @@ natom     :        2
 nsppol    :        1
 cut       : {"ecut":   5.00000000000000000E+00, "pawecutdg":   6.00000000000000000E+00, }
 convergence: {
-    "deltae":  -8.56576946537236950E+00, "res2":   6.63244193507960744E-11, 
-    "residm":   7.78311285900403348E-11, "diffor":   0.00000000000000000E+00, 
+    "deltae":  -8.56576946537227180E+00, "res2":   6.63244147438839372E-11, 
+    "residm":   7.78311291150040741E-11, "diffor":   0.00000000000000000E+00, 
 }
-etotal    :  -8.56576946537236950E+00
+etotal    :  -8.56576946537227180E+00
 entropy   :   0.00000000000000000E+00
-fermie    :   5.34286079410098702E-02
+fermie    :   5.34286079407535128E-02
 stress tensor: !Tensor
 - [undef, undef, undef, ]
 - [undef, undef, undef, ]
@@ -729,50 +729,50 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
  
-    Kinetic energy  =  3.12510276894012E+00
+    Kinetic energy  =  3.12510276894003E+00
     Hartree energy  =  7.98046600780114E-01
     XC energy       = -7.30630455129475E+00
     Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283372960337E+00
     Spherical terms =  4.27798752587250E+00
-    >>>>>>>>> Etotal= -8.56575966887788E+00
+    >>>>>>>>> Etotal= -8.56575966887798E+00
  
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.09018242662814E-01
+    Band energy     = -9.09018242662716E-01
     Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Dble-C XC-energy= -4.31595268799009E+00
     Spherical terms =  4.09695974885304E+00
-    >>>> Etotal (DC)= -8.56576946537237E+00
+    >>>> Etotal (DC)= -8.56576946537227E+00
  
-  >Total energy in eV           = -2.33086174402342E+02
-  >Total DC energy in eV        = -2.33086440978515E+02
+  >Total energy in eV           = -2.33086174402345E+02
+  >Total DC energy in eV        = -2.33086440978512E+02
 --------------------------------------------------------------------------------
 --- !ETOT
 label               : Etot
 comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  3.125102768940124953E+00
+Kinetic energy      :  3.125102768940025921E+00
 Hartree energy      :  7.980466007801138018E-01
 XC energy           : -7.306304551294751093E+00
 Ewald energy        : -8.471703049892726156E+00
 PsPCore             :  1.033944766320227249E+00
 Loc. psp. energy    : -2.022833729603370934E+00
 Spherical terms     :  4.277987525872504193E+00
-Etotal              : -8.565759668877877431E+00
-Total energy(eV)    : -2.330861744023424365E+02
+Etotal              : -8.565759668877976907E+00
+Total energy(eV)    : -2.330861744023451365E+02
 ...
  
 --- !ETOT
 label               : Etot DC
 comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -9.090182426628135026E-01
+Band energy         : -9.090182426627163581E-01
 Ewald energy        : -8.471703049892726156E+00
 PspCore energy      :  1.033944766320227249E+00
 'Dble-C XC-energy'  : -4.315952687990094461E+00
 Spherical terms     :  4.096959748853038263E+00
-Etotal (DC)         : -8.565769465372369496E+00
-Total DC energy(eV) : -2.330861744023424365E+02
+Etotal (DC)         : -8.565769465372271796E+00
+Total DC energy(eV) : -2.330861744023451365E+02
 ...
  
  
@@ -815,16 +815,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
 ================================================================================
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.5657694653724    -8.566E+00 7.783E-11 6.632E-11
+ ETOT  1  -8.5657694653723    -8.566E+00 7.783E-11 6.632E-11
  
 ====================================================
  
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
  
- C(   1) : real, imag  -1.31316681E-09  1.06502542E-15
- C(   2) : real, imag  -1.74298874E-09 -3.88907935E-17
- C(   3) : real, imag   2.39362869E-05  5.09531786E-17
+ C(   1) : real, imag  -1.31283175E-09  4.47140139E-17
+ C(   2) : real, imag  -1.74283004E-09  7.09185058E-17
+ C(   3) : real, imag   2.39362860E-05 -2.05684464E-16
  
 ====================================================
  
@@ -834,9 +834,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
  
- Orb Mag(   1) : real, imag   1.48449475E-09 -1.25670703E-12
- Orb Mag(   2) : real, imag  -1.71962276E-10  2.14323294E-12
- Orb Mag(   3) : real, imag   5.20803221E-05 -8.74391424E-15
+ Orb Mag(   1) : real, imag   2.13286544E-09  2.45446691E-13
+ Orb Mag(   2) : real, imag   2.36850790E-10 -1.08868957E-13
+ Orb Mag(   3) : real, imag   1.44416328E-04 -1.58324995E-13
  
 ====================================================
  
@@ -855,7 +855,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     -0.432399036587450
- Compensation charge over fine fft grid    =     -0.432394214283907
+ Compensation charge over fine fft grid    =     -0.432394214283897
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -948,12 +948,12 @@ natom     :        2
 nsppol    :        1
 cut       : {"ecut":   5.00000000000000000E+00, "pawecutdg":   6.00000000000000000E+00, }
 convergence: {
-    "deltae":  -8.56576946537236950E+00, "res2":   6.63244198504396212E-11, 
-    "residm":   7.78311144822828880E-11, "diffor":   0.00000000000000000E+00, 
+    "deltae":  -8.56576946537227357E+00, "res2":   6.63244152223516863E-11, 
+    "residm":   7.78311057008787432E-11, "diffor":   0.00000000000000000E+00, 
 }
-etotal    :  -8.56576946537236950E+00
+etotal    :  -8.56576946537227357E+00
 entropy   :   0.00000000000000000E+00
-fermie    :   5.34286079410088849E-02
+fermie    :   5.34286079407525205E-02
 stress tensor: !Tensor
 - [undef, undef, undef, ]
 - [undef, undef, undef, ]
@@ -991,50 +991,50 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
  
-    Kinetic energy  =  3.12510276894012E+00
+    Kinetic energy  =  3.12510276894002E+00
     Hartree energy  =  7.98046600780114E-01
     XC energy       = -7.30630455129475E+00
     Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283372960337E+00
     Spherical terms =  4.27798752587250E+00
-    >>>>>>>>> Etotal= -8.56575966887789E+00
+    >>>>>>>>> Etotal= -8.56575966887799E+00
  
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.09018242662814E-01
+    Band energy     = -9.09018242662718E-01
     Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Dble-C XC-energy= -4.31595268799009E+00
     Spherical terms =  4.09695974885304E+00
-    >>>> Etotal (DC)= -8.56576946537237E+00
+    >>>> Etotal (DC)= -8.56576946537227E+00
  
-  >Total energy in eV           = -2.33086174402343E+02
-  >Total DC energy in eV        = -2.33086440978515E+02
+  >Total energy in eV           = -2.33086174402345E+02
+  >Total DC energy in eV        = -2.33086440978512E+02
 --------------------------------------------------------------------------------
 --- !ETOT
 label               : Etot
 comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  3.125102768940115627E+00
+Kinetic energy      :  3.125102768940017040E+00
 Hartree energy      :  7.980466007801138018E-01
 XC energy           : -7.306304551294751093E+00
 Ewald energy        : -8.471703049892726156E+00
 PsPCore             :  1.033944766320227249E+00
 Loc. psp. energy    : -2.022833729603370934E+00
 Spherical terms     :  4.277987525872504193E+00
-Etotal              : -8.565759668877888089E+00
-Total energy(eV)    : -2.330861744023427207E+02
+Etotal              : -8.565759668877985789E+00
+Total energy(eV)    : -2.330861744023453923E+02
 ...
  
 --- !ETOT
 label               : Etot DC
 comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -9.090182426628137247E-01
+Band energy         : -9.090182426627176904E-01
 Ewald energy        : -8.471703049892726156E+00
 PspCore energy      :  1.033944766320227249E+00
 'Dble-C XC-energy'  : -4.315952687990094461E+00
 Spherical terms     :  4.096959748853038263E+00
-Etotal (DC)         : -8.565769465372369496E+00
-Total DC energy(eV) : -2.330861744023427207E+02
+Etotal (DC)         : -8.565769465372273572E+00
+Total DC energy(eV) : -2.330861744023453923E+02
 ...
  
  
@@ -1257,10 +1257,10 @@ P           mkmem         256
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         25.2  wall=         25.2
+- Proc.   0 individual time (sec): cpu=         34.6  wall=         34.6
  
 ================================================================================
  
  Calculation completed.
-.Delivered   7 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.2  wall=         25.2
+.Delivered   7 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=         34.6  wall=         34.6
