@@ -22,6 +22,8 @@
 module m_simtet
 
  use defs_basis
+ use m_errors
+
 
  implicit none
 
