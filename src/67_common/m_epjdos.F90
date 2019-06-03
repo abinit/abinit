@@ -1938,7 +1938,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
 !Local variables-------------------------------
 !scalars
- logical,parameter :: write_procar = .False.
  integer,parameter :: prtsphere0=0 ! do not output all the band by band details for projections.
  integer :: shift_b,shift_sk,iat,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
  integer :: ipw,isppol,ixint,mbess,mcg_disk,me_kpt,shift_cg
@@ -2000,7 +1999,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
  call cwtime(cpu, wall, gflops, "start")
 
- if (write_procar) then
+ if (dtset%prtprocar /= 0) then
    ! open file for each proc, and print header for master node
    call int2char4(me_kpt, ikproc_str)
    filename = 'PROCAR_'//ikproc_str
@@ -2106,7 +2105,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
        npw_k = npwarr(ikpt)
        kpoint(:) = dtset%kpt(:,ikpt)
 
-       if (write_procar) then
+       if (dtset%prtprocar /= 0) then
          write (unit_procar,'(a,I7,a,3F12.6,a,F12.6,a)') &
            ' k-point ', ikpt, ' : ', kpoint(:), ' weight = ', dtset%wtk(ikpt), ch10
        end if
@@ -2166,7 +2165,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
          !write(std_out,*)"in band:",iband
          ! TODO: eventually import eig and occ down to here - a pain, but printing outside would imply saving a huge array in memory
-         if (write_procar) then
+         if (dtset%prtprocar /= 0) then
            write (unit_procar,'(a,I7,a,F12.6,a,F12.6,a)') 'band ', iband, ' # energy ', &
              eigen(abs_shift_b), ' # occ. ', occ(abs_shift_b), ch10
          end if
@@ -2204,7 +2203,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          shift_b = shift_b + my_nspinor*npw_k
 
          ! now we have both spinor components.
-         if (write_procar) then
+         if (dtset%prtprocar /= 0) then
            write (unit_procar,'(a)') 'ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot'
            do ipauli= 1,dtset%nspinor**2
              ! Contract with Pauli matrices to get projections for this k and band, all atoms and ilang
@@ -2334,7 +2333,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    MSG_WARNING('only partial_dos==1 or 2 is coded')
  end if
 
- if (write_procar) close(unit_procar)
+ if (dtset%prtprocar /= 0) close(unit_procar)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" partial_dos_fractions: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
