@@ -4531,19 +4531,19 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
      ABI_ALLOCATE(subovl_tmp,(nband_k*(nband_k+1)/2))
      subovl_tmp=subovl(1:nband_k*(nband_k+1):2)
 !    TO DO: Not sure this one has been fully tested
-     call abi_xhpgv(1,'V','U',nband_k, subham_tmp,subovl_tmp, eig_k,evec_tmp,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpgv(1,'V','U',nband_k,subham_tmp,subovl_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
      ABI_DEALLOCATE(subovl_tmp)
    else
-     call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
    evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
    ABI_DEALLOCATE(evec_tmp)
    ABI_DEALLOCATE(subham_tmp)
  else
    if (use_subovl==1) then
-     call abi_xhpgv(1,'V','U',nband_k,subham,subovl,eig_k,evec,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpgv(1,'V','U',nband_k,subham,subovl,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    else
-     call abi_xhpev('V','U',nband_k,subham,eig_k,evec,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpev('V','U',nband_k,subham,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
  end if
 

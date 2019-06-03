@@ -590,6 +590,7 @@ type dataset_type
  integer :: usexcnhat_orig
  integer :: useylm
  integer :: use_slk
+ integer :: use_yaml
  integer :: vacnum
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts
@@ -937,6 +938,7 @@ type dataset_type
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
+ integer :: eph_phrange(2) = 0
 
  integer :: eph_ngqpt_fine(3)
  integer :: eph_np_pqbks(5) = 0

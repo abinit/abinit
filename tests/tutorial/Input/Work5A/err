@@ -1,9 +1,2 @@
-forrtl: severe (24): end-of-file during read, unit 5, file /proc/29660/fd/0
-Image              PC                Routine            Line        Source             
-libifcoremt.so.5   00007F00866B67B6  for__io_return        Unknown  Unknown
-libifcoremt.so.5   00007F00866F4C00  for_read_seq_fmt      Unknown  Unknown
-abinit             0000000001A2CC59  Unknown               Unknown  Unknown
-abinit             00000000004089DC  Unknown               Unknown  Unknown
-abinit             0000000000408442  Unknown               Unknown  Unknown
-libc-2.27.so       00007F00840EEB97  __libc_start_main     Unknown  Unknown
-abinit             000000000040832A  Unknown               Unknown  Unknown
+5.51user 0.10system 0:05.64elapsed 99%CPU (0avgtext+0avgdata 181392maxresident)k
+0inputs+40outputs (0major+65350minor)pagefaults 0swaps

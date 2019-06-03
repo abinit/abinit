@@ -163,15 +163,14 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  what = "(GKK files)"; if (dtset%eph_task == -2) what = "GKQ file"
  write(msg, '(3a)') " Computation of electron-phonon coupling matrix elements ", trim(what), ch10
- call wrtout(std_out, msg, do_flush=.True.); call wrtout(ab_out, msg, do_flush=.True.)
+ call wrtout([std_out, ab_out], msg, do_flush=.True.)
 
  if (psps%usepaw == 1) then
    MSG_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
- my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
- i_am_master = (my_rank == master)
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm); i_am_master = my_rank == master
 
  ! Copy important dimensions
  natom = cryst%natom
@@ -210,7 +209,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  nband_kq=mband_kq; bks_mask_kq=.False.; keep_ur_kq=.False.
 
  ! Distribute the k-points over the processors
- call xmpi_split_work(nkpt,comm,my_kstart,my_kstop,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_kstart,my_kstop)
  do ik=1,nkpt
    if (.not. (ik >= my_kstart .and. ik <= my_kstop)) cycle
    kk = ebands_k%kptns(:,ik)
@@ -296,9 +295,9 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
  call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,natom,&
-&  dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
-&  usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda,&
-&  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
+   dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
+   usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda,&
+   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
 
  ! Allocate vlocal. Note nvloc
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
@@ -377,7 +376,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    ipert = (ipc - idir) / 3 + 1
    write(msg, '(a,2i4)') " Treating ipert, idir = ", ipert, idir
    call wrtout(std_out, msg, do_flush=.True.)
-   if (dtset%eph_task ==  2) gkk = zero
+   if (dtset%eph_task == 2) gkk = zero
 
    do spin=1,nsppol
      if (dtset%eph_task == -2) gkq_atm = zero
@@ -447,8 +446,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
          eshift = eig0nk - dtset%dfpt_sciss
 
          call getgh1c(berryopt0,kets(:,:,ib2),cwaveprj0,h1_kets(:,:,ib2),&
-&                     grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
-&                     optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+                      grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
+                      optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
 
        ABI_FREE(kinpw1)
@@ -460,9 +459,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        ABI_FREE(ph3d)
        ABI_FREE(gs1c)
 
-       if (allocated(ph3d1)) then
-         ABI_FREE(ph3d1)
-       end if
+       ABI_SFREE(ph3d1)
 
        ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
        ! The array eig1_k contains:
@@ -486,6 +483,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        end do
 
      end do ! ikpt
+
      ABI_FREE(bras)
      ABI_FREE(kets)
      ABI_FREE(h1_kets)
@@ -543,7 +541,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ! ===========
  ABI_SFREE(gkk)
  ABI_SFREE(gkq_atm)
-
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
  ABI_FREE(v1scf)

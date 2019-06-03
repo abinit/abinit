@@ -250,25 +250,6 @@ if test "${PYTHON}" = ""; then
   AC_CHECK_PROGS(PYTHON,[python python2.7 python2.6 python2.5 python2.4])
 fi
 
-# Get Python preprocessing options
-AC_MSG_CHECKING([for Python CPPFLAGS])
-if test "${PYTHON}" != "" -a "${PYTHON_CPPFLAGS}" = ""; then
-  PYTHON_CPPFLAGS=`${PYTHON} -c "\
-try:
-    import distutils.sysconfig
-    print '-I' + distutils.sysconfig.get_python_inc(),
-except:
-    pass
-try:
-    import numpy
-    print '-I' + numpy.get_include(),
-except:
-    pass"`
-fi
-AC_MSG_RESULT([${PYTHON_CPPFLAGS}])
-
-ABIBND_CHECK_PYTHON
-
 # ---------------------------------------------------------------------------- #
 
 #

@@ -59,9 +59,9 @@
 #%% keywords = PAW
 #%% authors = M. Torrent
 #%% description =
-#%% Test the extrapolation of then wave functions from
-#%% one structural relaxation (time) step to the other:
-#%% extrapwf=1
-#%% WARNING: this feature is stil experimental and probably buggy.
-#%% Si, Bulk, 2 atoms
+#%%   Test the extrapolation of then wave functions from
+#%%   one structural relaxation (time) step to the other:
+#%%   extrapwf=1
+#%%   WARNING: this feature is stil experimental and probably buggy.
+#%%   Si, Bulk, 2 atoms
 #%%<END TEST_INFO>

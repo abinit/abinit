@@ -42,6 +42,10 @@ module m_prep_kgb
  
  use m_xg
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
  implicit none
 
  private

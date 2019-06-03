@@ -99,9 +99,9 @@
 #%% authors = JF. Danel, M. Torrent
 #%% keywords =
 #%% description =
-#%% Boron, 32 atoms - Thomas-Fermi method (without orbitals)
-#%% Test the temperature-dependent XC functional (ixc=50)
-#%% (Ichimaru et al Phys. Rep. 149, 91-205 (1987)
-#%% Test the von Weizsacker gradient correction (tfkinfunc=11 or 12)
+#%%   Boron, 32 atoms - Thomas-Fermi method (without orbitals)
+#%%   Test the temperature-dependent XC functional (ixc=50)
+#%%   (Ichimaru et al Phys. Rep. 149, 91-205 (1987)
+#%%   Test the von Weizsacker gradient correction (tfkinfunc=11 or 12)
 #%% topics = Recursion
 #%%<END TEST_INFO>

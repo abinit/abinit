@@ -550,6 +550,7 @@ module m_chebfi2
     call timab(tim_getAX_BX,2,tsec)
     
     !print *, "PROSAO getAX_BX"
+    !stop
     !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
     !call debug_helper_linalg(chebfi%X, chebfi, 1) 
     !stop
@@ -560,8 +561,9 @@ module m_chebfi2
     !call debug_helper(chebfi%xBXColsRows, chebfi) 
     !stop
       
-    call xmpi_barrier(chebfi%spacecom)
-    !print *, "PROSAO NIJE SE UBIO"
+    if (chebfi%paral_kgb == 1) then   
+      call xmpi_barrier(chebfi%spacecom)
+    end if
     !stop
                
     !********************* Compute Rayleigh quotients for every band, and set λ − equal to the largest one *****!
@@ -569,6 +571,8 @@ module m_chebfi2
     call chebfi_rayleighRitzQuotiens(chebfi, maxeig, mineig, DivResults%self) !OK
     call timab(tim_RR_q, 2, tsec)
     
+    !print *, "PROSAO RRQ"
+    !stop
     !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
     !call debug_helper_linalg(chebfi%X, chebfi, 1) 
     !stop
@@ -582,9 +586,9 @@ module m_chebfi2
       mineig_global = mineig
     end if
     
-!    print *, "maxeig_global", maxeig_global  
-!    print *, "mineig_global", mineig_global    
-!    stop
+    print *, "maxeig_global", maxeig_global  
+    print *, "mineig_global", mineig_global    
+    stop
                 
     lambda_minus = maxeig_global
     
@@ -795,9 +799,14 @@ module m_chebfi2
     call chebfi_rayleightRitz(chebfi, nline)
     call timab(tim_RR, 2, tsec) 
 
+    !print *, "PRE RESIDUE"
+
     call timab(tim_residu, 1, tsec)
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
     call timab(tim_residu, 2, tsec)
+    
+    !print *, "PROSAO RESIDUE"
+    !stop
                         
     deallocate(nline_bands)
     
