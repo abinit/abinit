@@ -3596,33 +3596,34 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 
  if (db%ft_qcache%maxnq == 0) return
  qcnt = count(ineed_qpt /= 0)
- if (qcnt == 0) return
 
- !call timab(1807, 1, tsec)
- call wrtout(std_out, sjoin(" Need to update Vscf(q) cache with: ", itoa(qcnt), "q-points from FT..."), do_flush=.True.)
- call cwtime(cpu_all, wall_all, gflops_all, "start")
+ if (qcnt /= 0) then
+   !call timab(1807, 1, tsec)
+   call wrtout(std_out, sjoin(" Need to update Vscf(q) cache with: ", itoa(qcnt), "q-points from FT..."), do_flush=.True.)
+   call cwtime(cpu_all, wall_all, gflops_all, "start")
 
- if (db%ft_qcache%make_room(ineed_qpt, msg) /= 0) then
-   MSG_WARNING(msg)
- end if
-
- cplex = 2
- ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
-
- do iq_ibz=1,nqibz
-   if (ineed_qpt(iq_ibz) == 0) cycle
-
-   ! Interpolate my_npert potentials inside comm_rpt.
-   call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
-
-   ! Transfer to cache.
-   if (ineed_qpt(iq_ibz) /= 0) then
-     ABI_MALLOC(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
-     db%ft_qcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
+   if (db%ft_qcache%make_room(ineed_qpt, msg) /= 0) then
+     MSG_WARNING(msg)
    end if
- end do
 
- ABI_FREE(v1scf)
+   cplex = 2
+   ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+
+   do iq_ibz=1,nqibz
+     if (ineed_qpt(iq_ibz) == 0) cycle
+
+     ! Interpolate my_npert potentials inside comm_rpt.
+     call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
+
+     ! Transfer to cache.
+     if (ineed_qpt(iq_ibz) /= 0) then
+       ABI_MALLOC(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
+       db%ft_qcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
+     end if
+   end do
+
+   ABI_FREE(v1scf)
+ end if
 
  mbsize = db%ft_qcache%get_mbsize()
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(mbsize, fmt="f8.1"), " [Mb] <<< MEM"))

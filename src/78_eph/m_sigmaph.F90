@@ -2724,12 +2724,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! Set a mask to skip accumulating the contribution of certain phonon modes
  ! By default do not skip, if set skip all but specified
- ABI_MALLOC(new%phmodes_skip,(natom3))
+ ABI_MALLOC(new%phmodes_skip, (natom3))
  new%phmodes_skip = 0
- if (all(dtset%eph_phrange/=0)) then
-   if (minval(dtset%eph_phrange)<1.or.&
-       maxval(dtset%eph_phrange)>natom3.or.&
-       dtset%eph_phrange(2)<dtset%eph_phrange(1)) then
+ if (all(dtset%eph_phrange /= 0)) then
+   if (minval(dtset%eph_phrange) < 1 .or. &
+       maxval(dtset%eph_phrange) > natom3 .or. &
+       dtset%eph_phrange(2) < dtset%eph_phrange(1)) then
      MSG_ERROR('Invalid range for eph_phrange. Should be between [1,3*natom] and eph_modes(2)>eph_modes(1)')
    end if
    call wrtout(std_out, sjoin(" Including phonon modes between [", &
