@@ -819,7 +819,10 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   double complex, allocatable :: tab_vec(:,:),temp(:,:),alphaij(:,:,:),constraints(:,:)
   logical, allocatable :: unchanged(:)
 
-  if (iatcell==1.and.order==1) return
+  if (iatcell==1.and.order==1) then
+    ncoeff=0
+    return
+  end if    
   if (jatom==iatcell.and.order==2) return
   if (katom==iatcell.and.jatom==iatcell.and.order==3) return
 
