@@ -234,6 +234,15 @@ def links(ctx):
         else:
             cprint("Cannot find `%s` in dir `%s" % (source, main98), "yellow")
 
+
+@task
+def ctags(ctx):
+    """
+    Update ctags file.
+    """
+    with cd(ABINIT_ROOTDIR):
+        ctx.run('ctags -R --exclude="_*"', pty=True)
+
 #def pulltrunk(ctx):
 #    ctx.run("git stash")
 #    ctx.run("git pull trunk develop")

@@ -317,7 +317,6 @@ program anaddb
 
  if (my_rank == master) then
 #ifdef HAVE_NETCDF
-   ! TODO: Cartesian or reduced?
    ncerr = nctk_def_arrays(ana_ncid, [&
    nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'),&
    nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")],&
