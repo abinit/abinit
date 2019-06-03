@@ -3532,7 +3532,7 @@ class AbinitTestSuite(object):
                 # remove this to let python garbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security
                 # reasons)
-                del self._processes
+                self._processes = []
                 task_q.close()
                 res_q.close()
 
@@ -3715,7 +3715,7 @@ class AbinitTestSuite(object):
         for p in self._processes:
             p.terminate()
         self._kill_me = True
-        del self._processes
+        self._processes = []
 
     @staticmethod
     def _pyhtml_table_section(status):
