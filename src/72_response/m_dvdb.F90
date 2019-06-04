@@ -3597,10 +3597,11 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  if (db%ft_qcache%maxnq == 0) return
  qcnt = count(ineed_qpt /= 0)
 
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
+
  if (qcnt /= 0) then
    !call timab(1807, 1, tsec)
    call wrtout(std_out, sjoin(" Need to update Vscf(q) cache with: ", itoa(qcnt), "q-points from FT..."), do_flush=.True.)
-   call cwtime(cpu_all, wall_all, gflops_all, "start")
 
    if (db%ft_qcache%make_room(ineed_qpt, msg) /= 0) then
      MSG_WARNING(msg)

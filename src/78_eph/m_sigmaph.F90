@@ -2610,7 +2610,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      MSG_ERROR("nprocs_bsum should be 1 when computing Imag(Sigma)")
    end if
  else
-   !
    ! Automatic grid generation.
    !
    ! Handle parallelism over perturbations first.
@@ -2626,10 +2625,13 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      MSG_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
    end if
 
-   ! This to deactivate parallelism over perturbations for debugging.
-   !if (dtset%userib == 789 .and. new%my_npert /= natom3) then
-   !  new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
-   !  MSG_WARNING("Deactivating parallelism over perturbations.")
+   !do cnt=natom,2,-1
+   !  if (mod(nprocs, cnt) == 0 .and. mod(natom, cnt) == 0) then
+   !    new%nprocs_pert = cnt; new%my_npert = natom / cnt; exit
+   !  end if
+   !end do
+   !if (new%my_npert == natom .and. nprocs > 1) then
+   !  MSG_WARNING("The number of MPI procs should be divisible by natom to reduce memory requirements!")
    !end if
 
    ! Define number of procs for q-points and bands. nprocs is divisible by nprocs_pert.
@@ -2722,7 +2724,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end do
  !write(std_out,*)"my_npert", new%my_npert, "nprocs_pert", new%nprocs_pert; write(std_out,*)"my_pinfo", new%my_pinfo
 
- ! Set a mask to skip accumulating the contribution of certain phonon modes
+ ! Setup a mask to skip accumulating the contribution of certain phonon modes.
  ! By default do not skip, if set skip all but specified
  ABI_MALLOC(new%phmodes_skip, (natom3))
  new%phmodes_skip = 0
@@ -2742,7 +2744,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ! Split bands among the procs inside comm_bsum.
    call xmpi_split_work(new%nbsum, new%comm_bsum, new%my_bsum_start, new%my_bsum_stop)
    if (new%my_bsum_start == new%nbsum + 1) then
-     MSG_ERROR("sigmaph code does not support idle processes! Decrease ncpus or increase nband.")
+     MSG_ERROR("sigmaph code does not support idle processes! Decrease ncpus or increase nband or use eph_np_pqbks input var.")
    end if
    new%my_bsum_start = new%bsum_start + new%my_bsum_start - 1
    new%my_bsum_stop = new%bsum_start + new%my_bsum_stop - 1
@@ -2783,7 +2785,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end if
 
  ! Prepare calculation of generalized Eliashberg functions by setting gfw_nomega
- ! prteliash == 0 deactivates computation.
+ ! prteliash == 0 deactivates computation (default).
  new%gfw_nomega = 0
  if (dtset%prteliash /= 0) then
    new%gfw_nomega = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / dtset%ph_wstep) + 1
