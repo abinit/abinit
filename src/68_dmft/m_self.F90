@@ -667,22 +667,22 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  endif
  if(present(pawang)) then
    do iatom=1,natom
-     call int2char4(iatom,tag_at)
-     ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-     if(optrw==2) then
-       tmpmatrot = trim(paw_dmft%filapp)//'.UnitaryMatrix_for_DiagLevel_iatom'//trim(tag_at)
-     else if (optrw==1) then
-       tmpmatrot = trim(paw_dmft%filnamei)//'.UnitaryMatrix_for_DiagLevel_iatom'//trim(tag_at)
-     endif
-     unitrot=3189+iatom
-#ifdef FC_NAG
-     open (unit=unitrot,file=trim(tmpmatrot),status='unknown',form='formatted',recl=ABI_RECL)
-#else
-     open (unit=unitrot,file=trim(tmpmatrot),status='unknown',form='formatted')
-#endif
-     write(std_out,*) "     Open file  ",trim(tmpmatrot)
-     rewind(unitrot)
      if(self%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+       call int2char4(iatom,tag_at)
+       ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+       if(optrw==2) then
+         tmpmatrot = trim(paw_dmft%filapp)//'.UnitaryMatrix_for_DiagLevel_iatom'//trim(tag_at)
+       else if (optrw==1) then
+         tmpmatrot = trim(paw_dmft%filnamei)//'.UnitaryMatrix_for_DiagLevel_iatom'//trim(tag_at)
+       endif
+       unitrot=3189+iatom
+#ifdef FC_NAG
+       open (unit=unitrot,file=trim(tmpmatrot),status='unknown',form='formatted',recl=ABI_RECL)
+#else
+       open (unit=unitrot,file=trim(tmpmatrot),status='unknown',form='formatted')
+#endif
+       write(std_out,*) "     Open file  ",trim(tmpmatrot)
+       rewind(unitrot)
        ndim=2*self%oper(1)%matlu(iatom)%lpawu+1
        do isppol=1,nsppol
          if(optrw==2) then
@@ -701,8 +701,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            enddo
          endif
        enddo
+       close(unitrot)
      endif
-    close(unitrot)
    enddo
    if(optrw==1) then
      write(message,'(a,2x,a,i4)') ch10,&
@@ -901,19 +901,19 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                !----------------------------------------------------------------
                if(optrw==2.and.present(pawang)) then
                  call copy_matlu(self%oper(ifreq)%matlu,selfrotmatlu,natom)
-                 if(ifreq<5) then
+                 if(ifreq<3) then
                    write(message,'(a,2x,a,i4)') ch10,&
 &                    " == Print non Rotated Self Energy for freq=",ifreq
                    call wrtout(std_out,message,'COLL')
                    call print_matlu(selfrotmatlu,natom,1,compl=1)
                  endif
                  call rotate_matlu(selfrotmatlu,eigvectmatlu,natom,3,1)
-                 if(ifreq<5) then
+                 if(ifreq<3) then
                    write(message,'(a,2x,a,i4)') ch10,&
 &                    " == Print Rotated Self Energy for freq=",ifreq
                    call wrtout(std_out,message,'COLL')
                    call print_matlu(selfrotmatlu,natom,1,compl=1)
-                 else if(ifreq==5) then
+                 else if(ifreq==3) then
                    write(message,'(a,2x,a,i4)') ch10,&
 &                    "  (Other frequencies not printed)"
                    call wrtout(std_out,message,'COLL')
@@ -926,9 +926,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  do ispinor=1,nspinor
                    do im=1,ndim
                      iflavor=iflavor+1
-                     if(ifreq<5) then
-                       write(std_out,*) "Write in file unit",unitselfrot(iatom,isppol,ispinor,im),"for flavor",iflavor
-                     endif
+                    ! if(ifreq<5) then
+                    !   write(std_out,*) "Write in file unit",unitselfrot(iatom,isppol,ispinor,im),"for flavor",iflavor
+                    ! endif
                      write(message,'(2x,393(e18.10,2x))')  self%omega(ifreq),&
 &                      real(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor)),&
 &                      aimag(selfrotmatlu(iatom)%mat(im,im,isppol,ispinor,ispinor))
