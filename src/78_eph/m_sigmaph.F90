@@ -3992,6 +3992,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
      self%indq2dvdb_k(1,ikpt) = self%ibz2dvdb(self%ind_ibzk2ibz(1,ikpt))
    end do
 #endif
+   call cwtime_report(" IBZ_k --> DVDB", cpu, wall, gflops)
  end if
 
  ! Find k+q in the extended zone and extract symmetry info.
