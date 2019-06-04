@@ -2233,7 +2233,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1,istwfk1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,qprange_,bstop
- integer :: jj,bstart,natom3
+ integer :: jj,bstart,natom,natom3
  integer :: isym_k, trev_k, mband, i1,i2,i3
  integer :: idir, iatom, pertcase, nrest
  integer :: ip, npoints !,skw_cplex !, edos_intmeth
@@ -2268,7 +2268,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call cwtime(cpu, wall, gflops, "start")
 
  ! Copy important dimensions.
- new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor; mband = dtset%mband; natom3 = cryst%natom * 3
+ new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor; mband = dtset%mband
+ natom = cryst%natom; natom3 = cryst%natom * 3
 
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
@@ -3264,15 +3265,9 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    !NCF_CHECK(nf90_sync(ncid))
    !NCF_CHECK(nf90_close(ncid))
  end if ! master
-
- ! Now reopen the file (note xmpi_comm_self)
- !call xmpi_barrier(comm)
- !NCF_CHECK(nctk_open_modify(self%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
- !NCF_CHECK(nctk_set_datamode(self%ncid))
 #endif
 
  call edos%free()
-
  call cwtime_report(" sigmaph_new: netcdf", cpu_all, wall_all, gflops_all)
 
 end subroutine sigmaph_write
@@ -3333,7 +3328,6 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
 #ifdef HAVE_NETCDF
  ierr = 0
 
- !path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  if (.not. file_exists(path)) then
    ierr = 1; return
  end if
@@ -3388,7 +3382,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("eta"), eta))
  new%ieta = j_dpc * eta
 
- ! try to read the done array
+ ! Try to read the done array used to implement restart capabilities.
  ABI_ICALLOC(new%qp_done, (new%nkcalc, new%nsppol))
  ncerr = nf90_inq_varid(ncid, "qp_done", varid)
  if (ncerr == nf90_noerr) then

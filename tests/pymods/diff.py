@@ -73,7 +73,7 @@ def main():
 
     # writelines because diff is a generator
     if options.file:
-        with open(options.file, "w") as fh
+        with open(options.file, "w") as fh:
             fh.writelines(diff)
     else:
         sys.stdout.writelines(diff)

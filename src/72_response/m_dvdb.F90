@@ -2863,7 +2863,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  call wrtout(std_out, sjoin(" Memory required for W(r,R): ", &
     ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * dp * b2Mb, fmt="f6.1"), "[Mb] <<< MEM"))
  ABI_MALLOC(emiqr, (2, db%my_nrpt))
- ABI_MALLOC_OR_DIE(db%v1scf_rpt,(2, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
+ ABI_MALLOC_OR_DIE(db%v1scf_rpt, (2, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
  db%v1scf_rpt = zero
 
  ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%natom3))
@@ -3602,7 +3602,6 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  if (qcnt /= 0) then
    !call timab(1807, 1, tsec)
    call wrtout(std_out, sjoin(" Need to update Vscf(q) cache with: ", itoa(qcnt), "q-points from FT..."), do_flush=.True.)
-
    if (db%ft_qcache%make_room(ineed_qpt, msg) /= 0) then
      MSG_WARNING(msg)
    end if
@@ -3748,11 +3747,11 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
  ii = 0
  do iz=1,nq3
-   r3 = ig2gfft(iz,nq3) !* nq3
+   r3 = ig2gfft(iz,nq3)
    do iy=1,nq2
-     r2 = ig2gfft(iy,nq2) !* nq2
+     r2 = ig2gfft(iy,nq2)
      do ix=1,nq1
-       r1 = ig2gfft(ix,nq1) !* nq1
+       r1 = ig2gfft(ix,nq1)
        ii = ii + 1
        db%my_rpt(:,ii) = [r1, r2, r3]
      end do
@@ -3780,7 +3779,6 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  ! Reconstruct the IBZ according to what is present in the DVDB.
  ABI_MALLOC(nqsts, (nqibz))
  ABI_MALLOC(iqs_dvdb, (nqibz))
-
  ABI_MALLOC(v1r_lr, (2,nfft))
 
  iqst = 0
