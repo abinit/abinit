@@ -823,8 +823,14 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
     ncoeff=0
     return
   end if    
-  if (jatom==iatcell.and.order==2) return
-  if (katom==iatcell.and.jatom==iatcell.and.order==3) return
+  if (jatom==iatcell.and.order==2) then
+    ncoeff=0
+    return
+  end if    
+  if (katom==iatcell.and.jatom==iatcell.and.order==3) then
+    ncoeff=0
+    return
+  end if    
 
   if (order==1) then
     facorder=1
