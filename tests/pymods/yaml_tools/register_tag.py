@@ -89,7 +89,7 @@ def yaml_scalar(Cls):
         if ismethod(Cls.from_scalar):
             return Cls.from_scalar(scalar)
         else:
-            return Cls().from_seq(scalar)
+            return Cls().from_scalar(scalar)
 
     def representer(dumper, data):
         return dumper.represent_scalar(tag, data.to_scalar())
@@ -184,5 +184,5 @@ def yaml_not_available_tag(tag, reason, fatal=False):
             raise NotAvailableTagError(msg)
         else:
             warnings.warn(msg)
-            return {}
+            return {'_not_available': True}
     yaml.add_constructor('!' + tag, constructor, Loader=Loader)

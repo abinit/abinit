@@ -630,7 +630,7 @@ label     : results_gs
 comment   : Summary of ground states results.
 natom     :        2
 nsppol    :        1
-cut       : {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
+cutoff energies: {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
 convergence: {
     "deltae":  -8.20676859802915715E-13, "res2":   3.94248819542692761E-13, 
     "residm":   6.97915219202327066E-15, "diffor":   0.00000000000000000E+00, 
@@ -887,7 +887,7 @@ label     : results_gs
 comment   : Summary of ground states results.
 natom     :        2
 nsppol    :        1
-cut       : {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
+cutoff energies: {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
 convergence: {
     "deltae":  -8.86402062860724982E-13, "res2":   3.94836720121338466E-13, 
     "residm":   6.94497881212451100E-15, "diffor":   0.00000000000000000E+00, 
@@ -1122,7 +1122,7 @@ label     : results_gs
 comment   : Summary of ground states results.
 natom     :        2
 nsppol    :        1
-cut       : {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
+cutoff energies: {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
 convergence: {
     "deltae":   9.25481913327530492E-13, "res2":   6.49806009940183930E-14, 
     "residm":   4.64764647596229310E-15, "diffor":   0.00000000000000000E+00, 
@@ -1379,7 +1379,7 @@ label     : results_gs
 comment   : Summary of ground states results.
 natom     :        2
 nsppol    :        1
-cut       : {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
+cutoff energies: {"ecut":   5.00000000000000000E+00, "pawecutdg":   1.00000000000000000E+01, }
 convergence: {
     "deltae":  -1.34470212742598960E-12, "res2":   9.66870498259227870E-14, 
     "residm":   1.23776477969062408E-15, "diffor":   0.00000000000000000E+00, 
