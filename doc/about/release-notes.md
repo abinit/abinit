@@ -926,7 +926,7 @@ C.2 New versions of Fortran compilers have been integrated in the test farm:
     - gnu 6.1 and 6.2
     - IBM xlf compiler 14.1
     - NAG 5.3
-    Corresponding examples are available in doc/config/build-examples.
+    Corresponding examples are available in doc/build/config-examples.
     On the contrary, g95 is not tested anymore.
     Work by J.-M. Beuken
 
