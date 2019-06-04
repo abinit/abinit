@@ -42,9 +42,8 @@ module m_multibinit_manager
   use m_mathfuncs, only: diag
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
        outvars_multibinit, multibinit_dtset_free
-  use m_unitcell, only : unitcell_t
   use m_supercell_maker, only: supercell_maker_t
-  use m_multibinit_supercell, only: mb_supercell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_primitive_potential_list, only: primitive_potential_list_t
   use m_primitive_potential, only: primitive_potential_t
   use m_spin_primitive_potential, only: spin_primitive_potential_t
@@ -70,10 +69,10 @@ module m_multibinit_manager
   !-------------------------------------------------------------------!
   type, public :: mb_manager_t
      character(len=fnlen) :: filenames(17)
-     type(multibinit_dtset_type), pointer :: params
+     type(multibinit_dtset_type), pointer :: params=>null()
      type(supercell_maker_t) :: sc_maker
-     type(unitcell_t) :: unitcell
-     type(mb_supercell_t) :: supercell
+     type(mbcell_t) :: unitcell
+     type(mbsupercell_t) :: supercell
      type(primitive_potential_list_t) :: prim_pots
      type(potential_list_t) :: pots
 
@@ -141,7 +140,9 @@ contains
     call self%lattice_mover%finalize()
     if(.not. self%use_external_params) then
        call multibinit_dtset_free(self%params)
-       ! TODO: Intel compilers complains but it should not. Uncomment when knowing why.
+       if (associated(self%params)) then
+           ABI_FREE_SCALAR(self%params)
+       endif
        !deallocate(self%params)
     endif
     nullify(self%params)
@@ -224,25 +225,26 @@ contains
   !-------------------------------------------------------------------!
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
-    type(spin_primitive_potential_t), pointer :: spin_pot
-
+    class(primitive_potential_t), pointer :: spin_pot
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
-
-
-    !class(primitive_potential_t), pointer :: t
     call self%unitcell%initialize()
     ! latt : TODO
 
     ! spin
     call xmpi_bcast(self%params%spin_dynamics, master, comm, ierr)
     if(self%params%spin_dynamics>0) then
-       ABI_MALLOC_SCALAR(spin_pot)
-       call spin_pot%initialize(self%unitcell)
-       call spin_pot%load_from_files(self%params, self%filenames)
-       call self%prim_pots%append(spin_pot)
+       ABI_DATATYPE_ALLOCATE_SCALAR(spin_primitive_potential_t, spin_pot)
+       ! One may wonder why unitcell does not read data from files
+       ! That is because the spin_pot (which has an pointer to unitcell)
+       ! read the file and set the spin unitcell.
+       select type(spin_pot)
+       type is (spin_primitive_potential_t)
+          call spin_pot%initialize(self%unitcell)
+          call spin_pot%load_from_files(self%params, self%filenames)
+          call self%prim_pots%append(spin_pot)
+       end select
     end if
     if(self%params%dynamics>0) then
        !TODO: LATT
@@ -256,12 +258,16 @@ contains
   !-------------------------------------------------------------------!
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
-    !class(abstract_potential_t), pointer :: q
-    ! unitcell
-    call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
+    ! build supercell structure
+    !call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
+    call self%supercell%from_unitcell(self%sc_maker, self%unitcell)
+
+    ! supercell potential
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
     call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
+
+    ! why do this twice.
     call self%pots%set_supercell(self%supercell)
   end subroutine fill_supercell
 

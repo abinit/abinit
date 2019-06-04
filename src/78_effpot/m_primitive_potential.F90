@@ -36,7 +36,7 @@ module m_primitive_potential
   use m_errors
   use m_supercell
   use m_multibinit_dataset , only: multibinit_dtset_type
-  use m_unitcell, only: unitcell_t
+  use m_multibinit_cell, only: mbcell_t
   use m_supercell_maker, only: supercell_maker_t
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
@@ -49,7 +49,7 @@ module m_primitive_potential
   type ,public :: primitive_potential_t
      ! This is the abstract class of primitive potential
      ! It do the following things:
-     type(unitcell_t), pointer :: primcell=>null()
+     type(mbcell_t), pointer :: primcell=>null()
      character(len=200) :: label="Abstract primitive potential"
      logical::has_displacement=.False.
      logical::has_strain=.False.
@@ -105,7 +105,7 @@ subroutine fill_supercell(self, scmaker, scpot)
     class(primitive_potential_t), intent(inout) :: self
     character(len=fnlen), intent(in) :: fname
     ABI_UNUSED_A(self)
-    !ABI_UNUSED_A(fname)
+    ABI_UNUSED_A(fname)
   end subroutine save_to_file
 
 end module m_primitive_potential

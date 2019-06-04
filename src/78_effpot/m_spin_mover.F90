@@ -50,7 +50,7 @@ module m_spin_mover
   use m_spin_ncfile, only: spin_ncfile_t
   use m_spin_observables, only: spin_observable_t
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_supercell, only: mb_supercell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
@@ -77,10 +77,9 @@ module m_spin_mover
 
   type, public, extends(abstract_mover_t) :: spin_mover_t
      integer :: nspin, method
-     real(dp) :: dt, total_time, temperature, pre_time
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:), Stmp2(:,:)
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:), buffer(:,:)
-     type(rng_t) :: rng
+     !type(rng_t) :: rng
      type(spin_hist_t) :: hist
      logical :: gamma_l_calculated
      type(spin_mc_t) :: spin_mc
@@ -130,7 +129,7 @@ contains
   subroutine initialize(self, params, supercell)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target :: params
-    type(mb_supercell_t), target :: supercell
+    type(mbsupercell_t), target :: supercell
     !real(dp):: damping(self%supercell%nspin)
     integer :: i, nspin
 
@@ -141,10 +140,10 @@ contains
     self%params=>params
     self%supercell=>supercell
     if (iam_master) then
-       nspin=supercell%nspin
+       nspin=supercell%spin%nspin
        self%nspin=nspin
        self%dt= params%spin_dt
-       self%pre_time= params%spin_ntime_pre * self%dt
+       self%thermal_time= params%spin_ntime_pre * self%dt
        self%total_time= params%spin_ntime * self%dt
        self%temperature=params%spin_temperature
        if(params%spin_dynamics>=0) then
@@ -156,7 +155,7 @@ contains
     end if
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%dt, master, comm, ierr)
-    call xmpi_bcast(self%pre_time, master, comm, ierr)
+    call xmpi_bcast(self%thermal_time, master, comm, ierr)
     call xmpi_bcast(self%total_time, master, comm, ierr)
     call xmpi_bcast(self%temperature, master, comm, ierr)
     call xmpi_bcast(self%method, master, comm, ierr)
@@ -182,7 +181,7 @@ contains
     ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
 
     self%gamma_l_calculated=.False.
-    call self%mps%initialize(nspin, comm)
+    call self%mps%initialize(ntasks=nspin,master=master, comm=comm)
 
 
     call xmpi_bcast(params%spin_damping, master, comm, ierr)
@@ -191,11 +190,11 @@ contains
        if (params%spin_damping >=0) then
           self%damping(:)= params%spin_damping
        else
-          self%damping(:)=supercell%gilbert_damping(:)
+          self%damping(:)=supercell%spin%gilbert_damping(:)
        end if
 
-       self%gyro_ratio(:)=supercell%gyro_ratio(:)
-       self%ms(:)=supercell%ms(:)
+       self%gyro_ratio(:)=supercell%spin%gyro_ratio(:)
+       self%ms(:)=supercell%spin%ms(:)
     endif
 
     call xmpi_bcast(self%damping, master, comm, ierr)
@@ -279,7 +278,7 @@ contains
        call wrtout(std_out,msg,'COLL')
 
     end if
-    call self%hist%set_vars(S=self%Stmp, Snorm=self%supercell%ms, &
+    call self%hist%set_vars(S=self%Stmp, Snorm=self%supercell%spin%ms, &
          &  time=0.0_dp, ihist_latt=0, inc=.True.)
    endif
    call xmpi_bcast(self%Stmp, 0, comm, ierr)
@@ -313,7 +312,6 @@ contains
   subroutine set_temperature(self, temperature)
     class(spin_mover_t), intent(inout) :: self
     real(dp), optional, intent(in) ::  temperature
-
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
@@ -515,7 +513,7 @@ contains
     ! do not inc until time is set to hist.
     ! run one step does not know about time. So it will be done in the outer loop.
     if(self%mps%irank==0) then
-       call self%hist%set_vars(S=self%Stmp, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
+       call self%hist%set_vars(S=self%Stmp, Snorm=effpot%supercell%spin%ms, etot=etot, inc=.False.)
     end if
   end subroutine spin_mover_t_run_one_step
 
@@ -581,14 +579,14 @@ contains
        call wrtout(ab_out, msg, 'COLL')
     end if
 
-    if (abs(self%pre_time) > 1e-30) then
+    if (abs(self%thermal_time) > 1e-30) then
        if (iam_master) then
           msg="Thermalization run:"
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
        end if
 
-       do while(t<self%pre_time)
+       do while(t<self%thermal_time)
           counter=counter+1
           call self%run_one_step(effpot=calculator, displacement=displacement, strain=strain, lwf=lwf)
           if (iam_master) then
@@ -943,6 +941,10 @@ contains
 
     if(allocated(self%Stmp)) then
        ABI_DEALLOCATE(self%Stmp)
+    end if
+
+    if(allocated(self%Stmp2)) then
+       ABI_DEALLOCATE(self%Stmp2)
     end if
 
 

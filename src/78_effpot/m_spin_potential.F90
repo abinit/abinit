@@ -43,7 +43,7 @@ module  m_spin_potential
   use m_xmpi
   use m_mpi_scheduler, only: mb_mpi_info_t, init_mpi_info, mpi_scheduler_t
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_supercell, only: mb_supercell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_spmat_coo, only: coo_mat_t
   use m_spmat_lil, only: lil_mat_t
   use m_spmat_csr, only : CSR_mat_t
@@ -101,17 +101,15 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-    call self%mps%initialize(nspin, comm)
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
+    call self%mps%initialize(ntasks=nspin, master=master, comm=comm)
     self%label="SpinPotential"
     self%has_spin=.True.
     self%has_displacement=.False.
     self%has_strain=.False.
     self%is_null=.False.
     self%nspin=nspin
-
     call xmpi_bcast(self%nspin, master, comm, ierr)
-
     ABI_ALLOCATE( self%ms, (self%nspin))
     if(iam_master) then
        call self%coeff_coo%initialize([self%nspin*3, self%nspin*3])
@@ -127,13 +125,13 @@ contains
 
   subroutine set_supercell(self, supercell)
     class(spin_potential_t), intent(inout) :: self
-    type(mb_supercell_t), target, intent(inout) :: supercell
+    type(mbsupercell_t), target, intent(inout) :: supercell
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
  
     self%supercell=>supercell
-    self%ms(:)=supercell%ms(:)
+    self%ms(:)=supercell%spin%ms(:)
     call xmpi_bcast(self%ms, master, comm, ierr)
   end subroutine set_supercell
 
@@ -268,7 +266,7 @@ contains
           call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
           call self%coeff_coo%finalize()
        endif
-       call self%bilinear_csr_mat%sync()
+       call self%bilinear_csr_mat%sync(master=master, comm=comm, nblock=1)
        self%csr_mat_ready=.True.
        call xmpi_bcast(self%csr_mat_ready, master, comm, ierr)
     endif

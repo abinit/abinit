@@ -902,6 +902,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%usewvl             = dtin%usewvl
  dtout%usexcnhat_orig     = dtin%usexcnhat_orig
  dtout%useylm             = dtin%useylm
+ dtout%use_yaml           = dtin%use_yaml
  dtout%vacnum             = dtin%vacnum
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
@@ -2399,6 +2400,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk'
+ list_vars=trim(list_vars)//' use_yaml'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'

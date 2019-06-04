@@ -16,7 +16,7 @@ from time import gmtime,strftime
 
 # Initial setup
 my_name     = "make-cppopts-dumper"
-my_output   = "src/10_dumpinfo/m_cppopts_dumper.F90"
+my_output   = "shared/common/src/14_hidewrite/m_cppopts_dumper.F90"
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or

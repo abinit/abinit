@@ -38,7 +38,7 @@ module m_primitive_potential_list
 
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset , only: multibinit_dtset_type
-  use m_unitcell, only: unitcell_t
+  !use m_multibinit_cell, only: mbcell_t
   use m_supercell_maker, only: supercell_maker_t
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
@@ -84,7 +84,7 @@ contains
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
     type(abstract_potential_t), pointer :: tmp
-    ABI_MALLOC_SCALAR(abstract_potential_t::tmp)
+    ABI_DATATYPE_ALLOCATE_SCALAR(abstract_potential_t, tmp)
     !call tmp%initialize(....)
     ! set tmp
     ABI_UNUSED_A(self)
@@ -141,8 +141,9 @@ contains
     call xmpi_bcast(self%size, master, comm, ierr)
     do i=1, self%size
        call self%data(i)%obj%finalize()
-       ! intel compiler do not allow this. why?
-       !if(associated(self%data(i)%obj)) deallocate(self%data(i)%obj)
+       if(associated(self%data(i)%obj)) then
+           ABI_DATATYPE_DEALLOCATE_SCALAR(self%data(i)%obj)
+       endif
        nullify(self%data(i)%obj)
     end do
     if(allocated(self%data)) then
@@ -207,8 +208,6 @@ contains
     type(potential_list_t), pointer :: tmp
     ABI_MALLOC_SCALAR(tmp)
     call self%fill_supercell_list( sc_maker, tmp)
-    ! call tmp%initialize(....)
-    ! set tmp
     sc_pot=>tmp
     nullify(tmp)
   end subroutine fill_supercell_ptr
@@ -218,8 +217,8 @@ contains
   !-------------------------------------------------------------------!
   subroutine fill_supercell_list(self, sc_maker, sc_pots)
     class(primitive_potential_list_t), intent(inout) :: self
-    class(supercell_maker_t), intent(inout) :: sc_maker
-    class(potential_list_t), intent(inout) :: sc_pots
+    type(supercell_maker_t), intent(inout) :: sc_maker
+    type(potential_list_t), intent(inout) :: sc_pots
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     class(abstract_potential_t), pointer :: tmp
