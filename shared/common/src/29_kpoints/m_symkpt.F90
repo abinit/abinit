@@ -545,8 +545,8 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
          ! Get the symmetric of the vector
          do ii=1,3
            ksym(ii)=(1-2*itim)*( kpt1(1)*symrec(ii,1,isym)+&
-                                +kpt1(2)*symrec(ii,2,isym)&
-                                +kpt1(3)*symrec(ii,3,isym) )
+                                 kpt1(2)*symrec(ii,2,isym)+&
+                                 kpt1(3)*symrec(ii,3,isym) )
          end do
 
          !find this point
