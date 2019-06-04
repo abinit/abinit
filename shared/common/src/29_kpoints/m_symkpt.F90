@@ -604,6 +604,8 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  end do
  !call cwtime_report(" map", cpu, wall, gflops)
 
+ call destroy_kptrank(kptrank)
+
  !do ikpt=1,nkbz
  !  write(*,*) ikpt, ibz2bz(ikpt), bz2ibz_smap(1,ikpt)
  !end do
