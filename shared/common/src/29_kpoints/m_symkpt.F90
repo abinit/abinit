@@ -143,6 +143,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
  ! Find the identity symmetry operation
  identi = 1
+ tident = -1
  if (nsym/=1) then
    do isym=1,nsym
      tident=1
@@ -465,19 +466,17 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 !Local variables -------------------------
 !scalars
  type(kptrank_type) :: kptrank
- integer :: identi,ii,ikpt,ikpt2,ikibz,ind_ikpt,ikpt_found,ierr
+ integer :: identi,ii,ikpt,ikibz,ikpt_found
  integer :: isym,itim,jj,nkpout,tident
- integer :: istart, istop
- real(dp) :: dist,difk,reduce
- real(dp) :: length1, length_sym
- real(dp) :: cpu, gflops, wall
+ !real(dp) :: cpu, gflops, wall
  character(len=500) :: message
 !arrays
- real(dp) :: kptmin(3),kptmax(3),ksym(3),kpt1(3),kpt2(3),shift(3)
- real(dp),allocatable :: length2(:)
+ real(dp) :: ksym(3),kpt1(3)
 
 ! *********************************************************************
  ABI_UNUSED(comm)
+ ABI_UNUSED(chksymbreak)
+ ABI_UNUSED(gmet)
 
  if (timrev/=1 .and. timrev/=0) then
    write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
@@ -486,6 +485,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 
  ! Find the identity symmetry operation
  identi = 1
+ tident = -1
  if (nsym/=1) then
    do isym=1,nsym
      tident=1

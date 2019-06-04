@@ -3816,6 +3816,8 @@ end subroutine sigmaph_free
 
 subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol, comm)
 
+ use m_abicore
+
 !Arguments ------------------------------------
  integer,intent(in) :: ikcalc, prtvol, comm
  type(dataset_type),intent(in) :: dtset
@@ -3827,7 +3829,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 !Local variables-------------------------------
  integer,parameter :: sppoldbl1 = 1, timrev1 = 1, master = 0
  integer :: spin, my_rank, iq_ibz, nprocs !, nbcalc_ks !, bstart_ks
- integer :: ikpt, iqpt, ibz, ibz_k, isym_lgk, isym_k, itim_k
+ integer :: ikpt, ibz_k, isym_lgk, isym_k, itim_k
  real(dp) :: dksqmax, cpu, wall, gflops
  character(len=500) :: msg
  logical :: compute_lgk
@@ -3839,6 +3841,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  real(dp),allocatable :: kq_list(:,:)
 
 ! *************************************************************************
+
+ ABI_UNUSED(dvdb%nqpt)
 
  ABI_SFREE(self%qibz_k)
  ABI_SFREE(self%wtq_k)
@@ -3920,7 +3924,6 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    end if
    ABI_REMALLOC(self%ind_ibzk2ibz, (6, self%nqibz_k))
    do iq_ibz=1,self%nqibz_k
-     write(*,*) iq_ibz, iqk2dvdb(iq_ibz, :2),iqk2dvdb(iq_ibz, 6),iqk2dvdb(iq_ibz, 3:5)
      self%ind_ibzk2ibz(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
    end do
    ABI_FREE(iqk2dvdb)

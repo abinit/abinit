@@ -488,15 +488,12 @@ subroutine kptrank_unittests(comm)
  type(crystal_t) :: crystal
  type(kptrank_type) :: kptrank
  type(hkptrank_t) :: hkptrank
- type(hashtable_t) :: hashtable
  integer,parameter :: qptopt1=1,nqshft1=1,iout0=0,chksymbreak0=0,sppoldbl1=1
  integer :: nqibz,iqbz,iqibz,iqbz_rank,nqbz,nqibz_symkpt,nqibz_symkpt_new
- integer :: ierr, val
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
  real(dp) :: cpu, gflops, wall
  real(dp) :: dksqmax
  real(dp) :: dos_qshift(3,nqshft1)
- integer,allocatable :: ibz_idx(:,:)
  integer,allocatable :: bz2ibz(:,:)
  integer,allocatable :: bz2ibz_symkpt(:,:), bz2ibz_symkpt_new(:,:)
  integer,allocatable :: bz2ibz_listkk(:,:)
