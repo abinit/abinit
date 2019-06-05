@@ -179,7 +179,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  !print *, "bandpp", bandpp
  !stop
  
- call xgBlock_map(xgx0,cwavef,SPACE_CR,2*gs_hamk%npw_fft_k*my_nspinor,blocksize,mpi_enreg%comm_bandspinorfft) 
+ !TODO OVDE SAM NESTO USRAO
+ !call xgBlock_map(xgx0,cwavef,SPACE_CR,2*gs_hamk%npw_fft_k*my_nspinor,blocksize,mpi_enreg%comm_bandspinorfft) 
  
  !call debug_helper(xgx0, blocksize) 
  !stop

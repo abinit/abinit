@@ -417,6 +417,8 @@ module m_chebfiwf
       ABI_MALLOC(l_gvnlc,(2,blockdim*spacedim))
     end if
       
+    !print *, "before getghc"  
+      
     if (l_mpi_enreg%paral_kgb==0) then
       !l_cpopt = -1
       call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,& 
@@ -424,10 +426,13 @@ module m_chebfiwf
     else
       !print *, "blockdim", blockdim
       !print *, "spacedim", spacedim
-      !stop
+      !print *, "before prep_getghc"
       call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),eval,blockdim,l_mpi_enreg,&
 &                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.true.)  !already_transposed = true (previous)
+      !print *, "after prep_getghc"
     end if
+    
+    !print *, "after getghc"  
     
     !call debug_helper(AX, blockdim)
     !stop

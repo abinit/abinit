@@ -328,7 +328,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
 
    ! This initialisation is needed for the MPI-parallelisation (gathering using sum)
-   if(wfopta10 /= 1 .and. .not. newlobpcg) then
+   if(wfopta10 /= 1 .and. .not. newlobpcg .and. .not. newchebfi) then
      subham(:)=zero
      if (gs_hamk%usepaw==0) then
        if (wfopta10==4) then
@@ -499,6 +499,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end if
 
+   !print *, "residk", residk
+   !print *, "dtset%tolwfr", dtset%tolwfr
+   !print *, "dtset%toldfe", dtset%toldfe
    if (iscf < 0) then
      if (residk > dtset%tolwfr .and. residk < tol7) then
        if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")

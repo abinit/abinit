@@ -2100,6 +2100,7 @@ module m_xg
       !$omp end parallel do
     end select
     !print *, "BEFORE SUM"
+    !stop
     call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
     !print *, "AFTER SUM"
     if ( present(max_val) ) then

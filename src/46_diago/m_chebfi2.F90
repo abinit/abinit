@@ -208,10 +208,12 @@ module m_chebfi2
 !    stop
     
     if (test_OMP == 1) then
-      call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs) !regular arrays
+      call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom) !regular arrays
       call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)  
-      call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  
+      call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs) 
+      chebfi%total_spacedim = spacedim 
     end if
+
     
     if (test_OMP == 0) then
     if (chebfi%paral_kgb == 0) then
@@ -257,7 +259,7 @@ module m_chebfi2
     call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom)
     call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom)
     !stop
-    
+
     !print *, "AX spacedim", spacedim
     !stop
     !neigenpairs * spacedim * spacedim * neigenpairs
@@ -412,7 +414,6 @@ module m_chebfi2
     nline = chebfi%nline
     chebfi%eigenvalues = eigen
     
-    !test_OMP = 1
     
     if (chebfi%paral_kgb == 0) then
       allocate(nline_bands(neigenpairs))
@@ -551,7 +552,7 @@ module m_chebfi2
     end if
     end if
     
-    
+  
     !!TEST TEST TEST (delete later)
     if (test_OMP == 1) then
       call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, 1, spacedim, neigenpairs)   !use xXColsRows instead of X notion
@@ -656,7 +657,7 @@ module m_chebfi2
     !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
     !call debug_helper_linalg(chebfi%X, chebfi, 1) 
     !stop
-        
+       
     !print *, "AAAAAAAAAAAAAAAAAAAA"
     do iline = 0, nline - 1 
     
@@ -687,9 +688,13 @@ module m_chebfi2
       if (chebfi%paral_kgb == 0) then             
         call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
       else 
+        !print *, "chebfi%bandpp SIB", chebfi%bandpp
+        !print *, "chebfi%total_spacedim", chebfi%total_spacedim
+        !stop
         call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
       end if
       call timab(tim_swap,2,tsec) 
+       
       
       !call xg_getPointer(chebfi%X)
       !call xg_getPointer(chebfi%xXColsRows)
@@ -704,13 +709,18 @@ module m_chebfi2
       call timab(tim_getAX_BX,1,tsec)             
       !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
       !stop
+      !print *, "getAX_BX before"
       call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
-      !print *, "NIJE SE RASPAO"
+      !print *, "getAX_BX after"
+      !stop
       !call debug_helper(chebfi%xXColsRows, chebfi) 
       !call debug_helper(chebfi%xAXColsRows, chebfi) 
       !call debug_helper(chebfi%xBXColsRows, chebfi) 
       !stop
       call timab(tim_getAX_BX,2,tsec) 
+      
+      !print *, "test_OMP start"
+      !stop  
       
       !if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
         !call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, 1, spacedim, neigenpairs)  
@@ -724,6 +734,8 @@ module m_chebfi2
       !stop
       
     end do
+    
+    
     
 !    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
 !      call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, 1, spacedim, neigenpairs)  
@@ -818,6 +830,7 @@ module m_chebfi2
     end if
     
     !!TEST TEST TEST (delete later)
+    !print *, "BEFORE RESET"
     if (test_OMP == 1) then
       call xgBlock_copy(chebfi%xXColsRows, chebfi%X, 1, 1)  
       call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
@@ -842,8 +855,8 @@ module m_chebfi2
     call chebfi_rayleightRitz(chebfi, nline)
     call timab(tim_RR, 2, tsec) 
 
-    print *, "PRE RESIDUE"
-    stop
+    !print *, "PRE RESIDUE"
+    !stop
 
     call timab(tim_residu, 1, tsec)
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
@@ -856,10 +869,12 @@ module m_chebfi2
     
     call xg_free(DivResults)
     
+    if (test_OMP == 0) then
     if (chebfi%paral_kgb == 1) then
       call xgTransposer_free(chebfi%xgTransposerX)
       call xgTransposer_free(chebfi%xgTransposerAX)
       call xgTransposer_free(chebfi%xgTransposerBX)
+    end if
     end if
     
     call timab(tim_run,2,tsec)
@@ -911,6 +926,8 @@ module m_chebfi2
     !stop
 
     if (chebfi%paral_kgb == 0) then
+      !print *, "chebfi%neigenpairs", chebfi%neigenpairs
+      !stop
       call xg_init(Results1, chebfi%space, chebfi%neigenpairs, 1)
       call xg_init(Results2, chebfi%space, chebfi%neigenpairs, 1)
     else
@@ -1343,8 +1360,6 @@ module m_chebfi2
     !print *, "neigenpairs", neigenpairs
     !stop   
     
-    
-
     !print *, "chebfi%paral_kgb", chebfi%paral_kgb
     !stop
        
@@ -1390,6 +1405,7 @@ module m_chebfi2
       !call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)  
       !call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)  
       !!TODO UOPSTE NE ZNAM DA LI OVO MOZE DA SE ODRADI SA POSTOJECIM FUNKCIJAMA
+      !print *, "USAAAAAAAAAAAAAAAAAAAAAAAAA"
     end if 
     end if
     
@@ -1483,11 +1499,15 @@ module m_chebfi2
     !stop       
     
     !PAW
+    !print *, "PRE COLWISE"
+    !stop
     if (chebfi%paw) then
       call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%BX_swap,chebfi%AX_swap)
     else
       call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%X_swap,chebfi%AX_swap)
     end if
+    !print *, "POSLE COLWISE"
+    !stop
     
     !call debug_helper_linalg(chebfi%AX_swap, chebfi, 1, 1) 
     !print *, "chebfi_computeResidue AX_SWAP print"
@@ -1502,9 +1522,11 @@ module m_chebfi2
     !print *, "pcond AX_SWAP print"
     !stop 
     !print *, "BEFORE NORM"
+    !stop
     call xgBlock_colwiseNorm2(chebfi%AX_swap, residu, max_val=maxResidu, max_elt=eigResiduMax,&
                                                       min_val=minResidu, min_elt=eigResiduMin) 
     !print *, "AFTER NORM"
+    !stop
     chebfi_computeResidue = maxResidu
     
     !print *, maxResidu

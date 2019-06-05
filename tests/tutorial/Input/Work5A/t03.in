@@ -7,8 +7,8 @@
 # npkpt 1 npband 8 npfft 8   # 64 MPI processes -1
 # npkpt 1 npband 16 npfft 4  # 64 MPI processes -2
 # npkpt 1 npband 16 npfft 8  # 128 MPI processes
-paral_kgb 1
-npband 4
+paral_kgb 0
+npband 1
 npfft 1
 #bandpp 2
 
@@ -18,7 +18,7 @@ pawecutdg 10.
 
 #Self-consistent cycle parameters
 toldfe 1.d-5
-nstep 80
+nstep 400
 nline 4
 
 #K-points and symetries
