@@ -381,6 +381,10 @@ class Result(object):
         isok = status in ('succeeded', 'passed')
         return isok, status, msg
 
+    def has_line_count_error(self):
+        return any(isinstance(diff, LineCountDifference)
+                   for diff in self.fl_diff)
+
 
 class Differ(object):
     def __init__(self, yaml_test=None, **options):
