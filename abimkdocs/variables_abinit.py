@@ -19766,7 +19766,7 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 ),
 
 Variable(
-    abivarname="eph_force_ftinterp",
+    abivarname="eph_use_ftinterp",
     varset="eph",
     vartype="integer",
     topics=['ElPhonInt_expert'],
@@ -19775,9 +19775,9 @@ Variable(
     mnemonics="EPH FORCE Fourier Transform Interpolation of DFPT potentials.",
     text=r"""
 This is an advanced option used for testing/debugging the interpolation of the DFPT potentials when [[eph_task]] in (2, -2)
-By default, the code seeks for the q-point in the input DVDB file when *eph_force_ftinterp* is set to zero (default)
+By default, the code seeks for the q-point in the input DVDB file when *eph_use_ftinterp* is set to zero (default)
 and stops is the q-point in not found in the file.
-When *eph_force_ftinterp* is set to 1, the input DVDB file (assumed to be on the [[ddb_ngqpt]] q-mesh)
+When *eph_use_ftinterp* is set to 1, the input DVDB file (assumed to be on the [[ddb_ngqpt]] q-mesh)
 will be used to generate the real-space representation of the DFPT potentials and interpolated the potential
 at the input [[qpt]].
 """,

@@ -2668,7 +2668,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
 #endif
- real(dp) :: dksqmax,phre,phim,r_inscribed_sphere
+ real(dp) :: dksqmax,r_inscribed_sphere, phre !,phim,
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  logical :: isirr_q, found, write_maxw
  character(len=500) :: msg, sfmt
@@ -2769,8 +2769,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  end if
 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
- write(std_out, "(a, i0)")" Using method: ",method
- write(std_out, "(a, i0)")" Number of R-points in big box:", nrtot
+ write(std_out, "(a, i0)")" Using method for integration weights: ",method
+ write(std_out, "(a, i0)")" Number of R-points in real-space big box:", nrtot
  call xmpi_split_work(nrtot, db%comm_rpt, my_rstart, my_rstop)
  db%my_nrpt = 0
  ii = minval(db%my_pinfo(2,:))
@@ -2928,8 +2928,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        do imyp=1,db%my_npert
          ipc = db%my_pinfo(3, imyp)
          do ispden=1,db%nspden
-           do irpt=1,db%my_nrpt
-             do ifft=1,nfft
+           do ifft=1,nfft
+             do irpt=1,db%my_nrpt
                db%v1scf_rpt(1, irpt, ifft, ispden, imyp) = db%v1scf_rpt(1, irpt, ifft, ispden, imyp) + &
                                                                v1r_qibz(1, ifft, ispden, ipc)
              end do
@@ -2945,13 +2945,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        else
          call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q, &
            ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
-         !v1r_qbz = zero; v1r_qbz = v1r_qibz
-
-         !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
-         !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
-         !if (itimrev == 2) v1r_qbz(2,:,:,:) = -v1r_qbz(2,:,:,:)
-         !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
-         !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
        end if
 
        !if (db%me_pert == 0) then
@@ -2984,16 +2977,14 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        do imyp=1,db%my_npert
          ipc = db%my_pinfo(3, imyp)
          do ispden=1,db%nspden
+           do ifft=1,nfft
+             db%v1scf_rpt(1, :, ifft, ispden, imyp) = db%v1scf_rpt(1, :, ifft, ispden, imyp) &
+                + emiqr(1, :) * v1r_qbz(1, ifft, ispden, ipc) &
+                - emiqr(2, :) * v1r_qbz(2, ifft, ispden, ipc)
 
-           do irpt=1,db%my_nrpt
-             phre = emiqr(1, irpt); phim = emiqr(2, irpt)
-             do ifft=1,nfft
-               db%v1scf_rpt(1, irpt, ifft, ispden, imyp) = db%v1scf_rpt(1, irpt, ifft, ispden, imyp) + &
-                  phre * v1r_qbz(1, ifft, ispden, ipc) - phim * v1r_qbz(2, ifft, ispden, ipc)
-
-               db%v1scf_rpt(2, irpt, ifft, ispden, imyp) = db%v1scf_rpt(2, irpt, ifft, ispden, imyp) + &
-                  phre * v1r_qbz(2, ifft, ispden, ipc) + phim * v1r_qbz(1, ifft, ispden, ipc)
-             end do
+             db%v1scf_rpt(2, :, ifft, ispden, imyp) = db%v1scf_rpt(2, :, ifft, ispden, imyp) &
+                + emiqr(1, :) * v1r_qbz(2, ifft, ispden, ipc) &
+                + emiqr(2, :) * v1r_qbz(1, ifft, ispden, ipc)
            end do
            !call zgerc(db%my_nrpt, nfft, cone, emiqr, 1, v1r_qbz(:,:,ispden,ipc), 1, &
            !           db%v1scf_rpt(:,:,:,ispden,imyp), db%my_nrpt)
@@ -3080,7 +3071,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
-     ! FIXME: This wont work if parallelism over R or perturbations.
+     ! FIXME: This wont work if parallelism over R and/or perturbations.
      if (db%my_npert == db%natom3 .and. db%my_nrpt == nrtot) then
        ii = minval(db%my_pinfo(3, :))
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_rpt"), db%v1scf_rpt, &
@@ -3188,6 +3179,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
    weiqr(1,:) = db%my_wratm(:, ipert) * eiqr(1,:)
    weiqr(2,:) = db%my_wratm(:, ipert) * eiqr(2,:)
+
    do ispden=1,db%nspden
 
      ! Slow FT.
@@ -3608,13 +3600,10 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
-
    do iq_ibz=1,nqibz
      if (ineed_qpt(iq_ibz) == 0) cycle
-
      ! Interpolate my_npert potentials inside comm_rpt.
      call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
-
      ! Transfer to cache.
      if (ineed_qpt(iq_ibz) /= 0) then
        ABI_MALLOC(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
@@ -3925,22 +3914,6 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
        ! SLOW FT.
        cnt = 0
        do ispden=1,db%nspden
-#if 0
-         do irpt=1,db%my_nrpt
-           cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
-           phre = emiqr(1,irpt); phim = emiqr(2,irpt)
-
-           do ifft=1,nfft
-             v1scf_rpt(1,irpt,ifft,ispden) = v1scf_rpt(1,irpt,ifft,ispden) &
-                                   + phre * v1r_qbz(1, ifft, ispden, ipert) &
-                                   - phim * v1r_qbz(2, ifft, ispden, ipert)
-
-             v1scf_rpt(2,irpt,ifft,ispden) = v1scf_rpt(2,irpt,ifft,ispden) &
-                                   + phre * v1r_qbz(2, ifft, ispden, ipert) &
-                                   + phim * v1r_qbz(1, ifft, ispden, ipert)
-           end do
-         end do
-#else
          do ifft=1,nfft
            cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
 
@@ -3952,7 +3925,6 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
                                    + emiqr(1,:) * v1r_qbz(2, ifft, ispden, ipert) &
                                    + emiqr(2,:) * v1r_qbz(1, ifft, ispden, ipert)
          end do
-#endif
        end do
        !call cwtime_report(" slow fft", cpu, wall, gflops)
      end if

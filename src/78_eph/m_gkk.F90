@@ -135,7 +135,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer :: mpw,mpw_k,mpw_kq,ierr,my_kstart,my_kstop,ncid
  integer :: n1,n2,n3,n4,n5,n6,nspden,ncerr
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1, interpolated
  real(dp) :: cpu,wall,gflops,ecut,eshift,eig0nk,dotr,doti
  logical :: i_am_master, gen_eigenpb
  type(wfd_t) :: wfd_k, wfd_kq
@@ -307,10 +307,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  call cwtime(cpu, wall, gflops, "start")
 
+ interpolated = 0
  if (dtset%eph_use_ftinterp /= 0) then
    MSG_WARNING(sjoin("Enforcing FT interpolation as could not find q-point:", ktoa(qpt), "in DVDB"))
    comm_rpt = xmpi_comm_self
-   !wr_path = strcat(dtfil%filnam_ds(4), "_WRMAX")
    wr_path = ""
    method = dtset%userid
    !method = 0
@@ -318,6 +318,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfftf, nspden, dvdb%my_npert))
    call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
+   interpolated = 1
  else
    ! Find the index of the q-point in the DVDB.
    db_iqpt = dvdb%findq(qpt)
@@ -359,7 +360,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ncerr = nctk_def_dims(ncid, [nctkdim_t('number_of_phonon_modes', natom3)], defmode=.True.)
      NCF_CHECK(ncerr)
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-       "symdynmat", "symv1scf", "dvdb_add_lr"])
+       "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"])
      NCF_CHECK(ncerr)
      !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
      !  "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"])
@@ -381,8 +382,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ! Write data.
      NCF_CHECK(nctk_set_datamode(ncid))
      ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-       "symdynmat", "symv1scf", "dvdb_add_lr"], &
-       [dtset%symdynmat, dtset%symv1scf, dtset%dvdb_add_lr])
+       "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"], &
+       [dtset%symdynmat, dtset%symv1scf, dtset%dvdb_add_lr, interpolated])
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpoint"), qpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart"), dvdb%dielt))
@@ -423,8 +424,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ! GKA: This little block used to be right after the perturbation loop
      ! Prepare application of the NL part.
      call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
-               ! paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,&
-               !&mpi_atmtab=mpi_enreg%my_atmtab,my_spintab=mpi_enreg%my_isppoltab)
      call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
      do ik=1,nkpt
@@ -783,8 +782,7 @@ subroutine find_mpw(mpw, kpts, nsppol, nkpt, gmet, ecut, comm)
  integer,allocatable :: gtmp(:,:)
  real(dp) :: kpt(3)
 
- my_rank = xmpi_comm_rank(comm)
- nproc = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
  mpw = 0; cnt=0
  do ispin=1,nsppol
