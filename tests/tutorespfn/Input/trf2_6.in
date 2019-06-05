@@ -27,7 +27,9 @@ blue 0 0
 #%% [setup]
 #%% executable = band2eps
 #%% test_chain = trf2_1.in, trf2_3.in, trf2_4.in, trf2_5.in, trf2_6.in, trf2_7.in
+#%% no_check = yes
 #%% [files]
+### the tests have been disabled
 ##%% files_to_test = 
 ##%%   trf2_6.out.eps, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]

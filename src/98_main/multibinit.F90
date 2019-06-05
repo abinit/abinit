@@ -114,11 +114,11 @@ program multibinit
 ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
 
-!Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
-!set the argument of abimem_init to "2" instead of "0"
-!note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if activated at configure time.
+ ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
+ ! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
 !Initialisation of the timing
@@ -204,6 +204,11 @@ program multibinit
 !  Echo the inputs to console and main output file
    call outvars_multibinit(inp,std_out)
    call outvars_multibinit(inp,ab_out)
+ end if
+
+ if (args%dry_run /= 0) then
+   call wrtout([std_out, ab_out], "Multibinit in dry_run mode. Exiting after input parser")
+   goto 100
  end if
 
 ! Read and treat the reference structure
@@ -459,7 +464,9 @@ program multibinit
    call effective_potential_free(reference_effective_potential)
    call multibinit_dtset_free(inp)
    call abihist_free(hist)
-   call spin_model_t_finalize(spin_model)
+   if(inp%spin_dynamics>0) then
+      call spin_model_t_finalize(spin_model)
+   endif
 !****************************************************************************************
 
    write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10

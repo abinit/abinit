@@ -29,7 +29,7 @@ module m_epjdos
  use m_abicore
  use m_xmpi
  use m_errors
- use m_tetrahedron
+ use m_htetrahedron
  use m_splines
  use m_cgtools
  use m_atomdata
@@ -242,21 +242,17 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
  end if
 
  ! Check allocations status as these arrays are not distributed and the wavefunctions are still in memory.
- ABI_STAT_MALLOC(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
- ABI_CHECK(ierr==0, "out of memory in new%fractions")
+ ABI_MALLOC_OR_DIE(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
  new%fractions = zero
 
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
-   ABI_STAT_MALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fractions_m")
+   ABI_MALLOC_OR_DIE(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
    new%fractions_m = zero
  end if
 
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
-   ABI_STAT_MALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fraction_paw1")
-   ABI_STAT_MALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fraction_pawt1")
+   ABI_MALLOC_OR_DIE(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
+   ABI_MALLOC_OR_DIE(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
    new%fractions_paw1 = zero; new%fractions_pawt1 = zero
  end if
 
@@ -371,7 +367,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  logical :: bigDOS,iam_master
  character(len=10) :: tag
  character(len=500) :: frmt,frmt_extra,msg
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  integer,allocatable :: unt_atsph(:)
  real(dp) :: list_dp(3)
@@ -411,9 +407,9 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  call cwtime(cpu, wall, gflops, "start")
 
  tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-   dtset%shiftk, dtset%nkpt, dtset%kpt, msg, ierr)
+   dtset%shiftk, dtset%nkpt, dtset%kpt, comm, msg, ierr)
  if (ierr /= 0) then
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
    MSG_WARNING(msg)
    return
  end if
@@ -540,7 +536,8 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
         ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
         tmp_eigen(:) = ebands%eig(iband, :, isppol)
-        call tetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        call htetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        wdt = wdt*ebands%wtk(ikpt)
         eig_dos = eig_dos + wdt
 
         ! Accumulate L-DOS.
@@ -721,7 +718,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
    ABI_FREE(dos_pawt1)
  end if
 
- call destroy_tetra(tetra)
+ call htetra_free(tetra)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
@@ -940,8 +937,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
 
  ! Workspace array (used to reduce the number of MPI communications)
  ! One could reduce a bit the memory requirement by using non-blocking operations ...
- ABI_STAT_MALLOC(values, (nradintmax, nspinor, mlang**2, natsph), ierr)
- ABI_CHECK(ierr==0, "oom in values")
+ ABI_MALLOC_OR_DIE(values, (nradintmax, nspinor, mlang**2, natsph), ierr)
  values = czero
 
  my_nspinor = max(1,nspinor/mpi_enreg%nproc_spinor)
@@ -1238,11 +1234,11 @@ end subroutine recip_ylm
 !! SOURCE
 
 subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
-&                       paral_kgb,ph1d,rmax,ucvol)
+&                       ph1d,rmax,ucvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istwfk,natom,npw_k,paral_kgb
+ integer,intent(in) :: istwfk,natom,npw_k
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays

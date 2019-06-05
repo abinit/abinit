@@ -26,13 +26,16 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 #include "abi_common.h"
 
 module m_spin_mpi
+
   use defs_basis
   use m_abicore
   use m_errors
   use m_xmpi
+
   implicit none
   private
 
@@ -55,9 +58,9 @@ contains
 
     self%nspins = nspins
     self%nproc = xmpi_comm_size(comm)
-    call ABI_ALLOCATE(self%istart, (self%nproc))
-    call ABI_ALLOCATE(self%iend, (self%nproc))
-    call ABI_ALLOCATE(self%nspin_proc, (self%nproc))
+    ABI_ALLOCATE(self%istart, (self%nproc))
+    ABI_ALLOCATE(self%iend, (self%nproc))
+    ABI_ALLOCATE(self%nspin_proc, (self%nproc))
 
 
     n=(self%nspins-nlast)/nspins
@@ -81,20 +84,16 @@ contains
   subroutine sync_S(self, Slocal, S)
     class(spin_mpi_t), intent(in) :: self
     real(dp), intent(inout) :: Slocal(:,:), S(:,:)
+    ABI_UNUSED((/self%nproc/))
+    ABI_UNUSED((/Slocal(1,1), S(1,1)/))
     ! TODO 
   end subroutine sync_S
 
   subroutine spin_mpi_t_finalize(self)
     class(spin_mpi_t), intent(inout) :: self
-    if (allocated(self%istart)) then
-       ABI_DEALLOCATE(self%istart)
-    endif
-    if (allocated(self%iend)) then
-       ABI_DEALLOCATE(self%iend)
-    endif
-    if (allocated(self%istart)) then
-       ABI_DEALLOCATE(self%iend)
-    endif
+    ABI_SFREE(self%istart)
+    ABI_SFREE(self%iend)
+    ABI_SFREE(self%nspin_proc)
   end subroutine spin_mpi_t_finalize
 
 end module m_spin_mpi

@@ -1499,7 +1499,6 @@ end subroutine chkdilatmx
 
 subroutine mkrdim(acell,rprim,rprimd)
 
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: acell(3),rprim(3,3)
@@ -1577,8 +1576,7 @@ subroutine xcart2xred(natom,rprimd,xcart,xred)
  call matr3inv(rprimd,gprimd)
  do iatom=1,natom
    do mu=1,3
-     xred(mu,iatom)= gprimd(1,mu)*xcart(1,iatom)+gprimd(2,mu)*xcart(2,iatom)+&
-&     gprimd(3,mu)*xcart(3,iatom)
+     xred(mu,iatom)= gprimd(1,mu)*xcart(1,iatom)+gprimd(2,mu)*xcart(2,iatom)+gprimd(3,mu)*xcart(3,iatom)
    end do
  end do
 
@@ -2919,11 +2917,14 @@ subroutine symredcart(aprim,bprim,symcart,symred)
    end do
  end do
 
+ ! work = bprim * symred^T
+
  symcart=zero
  do kk=1,3
    do jj=1,3
      symtmp=work(jj,kk)
      do ii=1,3
+       ! symcart = aprim * work^T = aprim * symred * bprim^T
        symcart(ii,jj)=symcart(ii,jj)+aprim(ii,kk)*symtmp
      end do
    end do

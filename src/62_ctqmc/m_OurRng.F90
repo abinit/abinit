@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -78,7 +79,6 @@ SUBROUTINE OurRng(xn,rng)
   ! returns a value between 0. and 1. with a period of 2**31
   ! implements the Marsaglia serie:
   !   xn+1 = (69069 * xn) mod 2^31
-  implicit none
 !Arguments ------------------------------------
   DOUBLE PRECISION, INTENT(  OUT) :: rng
   INTEGER(8), INTENT(INOUT) :: xn

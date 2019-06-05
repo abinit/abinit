@@ -608,8 +608,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
          NCF_CHECK_MSG(ncerr, "getting cg_k")
        else
          write(std_out,*)"ETSF Reading distributed cg"
-         ABI_STAT_MALLOC(cg_all, (2, npw1*nspinor, nband1), ierr)
-         ABI_CHECK(ierr==0, "oom cg_all")
+         ABI_MALLOC_OR_DIE(cg_all, (2, npw1*nspinor, nband1), ierr)
          ncerr = nf90_get_var(wff%unwff, cg_varid, cg_all, start=[1,1,1,1,ikpt,isppol], &
          count=[2,npw1,nspinor,nband1,1,1])
          NCF_CHECK_MSG(ncerr, "getting cg_k")

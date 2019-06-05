@@ -1,0 +1,415 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/xmpi_allgather
+!! NAME
+!!  xmpi_allgather
+!!
+!! FUNCTION
+!!  This module contains functions that calls MPI routine,
+!!  if we compile the code using the  MPI CPP flags.
+!!  xmpi_allgather is the generic function.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2001-2019 ABINIT group (AR,XG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~ABINIT/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! SOURCE
+
+!!***
+
+!!****f* ABINIT/xmpi_allgather_int
+!! NAME
+!!  xmpi_allgather_int
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and distributes it to all.
+!!  Target: one-dimensional integer arrays.
+!!
+!! INPUTS
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!  recvbuf= received elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allgather
+!!
+!! SOURCE
+
+subroutine xmpi_allgather_int(xval,recvbuf,spaceComm,ier)
+
+!Arguments-------------------------
+ integer,intent(inout) :: xval
+ integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
+ integer, intent(in) :: spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in spaceComm
+   call MPI_ALLGATHER(xval,1,MPI_INTEGER,recvbuf,1,MPI_INTEGER,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+   recvbuf(1)=xval
+ end if
+#else
+ recvbuf(1)=xval
+#endif
+end subroutine xmpi_allgather_int
+!!***
+
+
+!!****f* ABINIT/xmpi_allgather_char
+!! NAME
+!!  xmpi_allgather_char
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and distributes it to all.
+!!  Target: one-dimensional character(20) arrays.
+!!
+!! INPUTS
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  charval= buffer array
+!!  recvbuf= received elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allgather
+!!
+!! SOURCE
+
+subroutine xmpi_allgather_char(charval,recvbuf,spaceComm,ier)
+
+!Arguments-------------------------
+ integer,intent(in)  :: spaceComm
+ integer,intent(out) :: ier
+ character(len=20),intent(inout) :: charval
+ character(len=20), DEV_CONTARRD intent(inout) :: recvbuf(:)
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in spaceComm
+   call MPI_ALLGATHER(charval,20,MPI_CHARACTER,recvbuf,20,MPI_CHARACTER,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+   recvbuf=charval
+ end if
+#else
+ recvbuf=charval
+#endif
+
+end subroutine xmpi_allgather_char
+!!***
+
+
+!!****f* ABINIT/xmpi_allgather_int1d
+!! NAME
+!!  xmpi_allgather_int1d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and distributes it to all.
+!!  Target: one-dimensional integer arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  nelem= number of elements
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allgather
+!!
+!! SOURCE
+
+subroutine xmpi_allgather_int1d(xval,nelem,recvbuf,spaceComm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(in) :: xval(:)
+ integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
+ integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(out) :: ier
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in spaceComm
+   call MPI_ALLGATHER(xval,nelem,MPI_INTEGER,recvbuf,nelem,MPI_INTEGER,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+   recvbuf(1:nelem)=xval(1:nelem)
+ end if
+#else
+ recvbuf(1:nelem)=xval(1:nelem)
+#endif
+end subroutine xmpi_allgather_int1d
+!!***
+
+!!****f* ABINIT/xmpi_allgather_int2d
+!! NAME
+!!  xmpi_allgather_int2d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and distributes it to all.
+!!  Target: two-dimensional integer arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  nelem= number of elements
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allgather
+!!
+!! SOURCE
+
+subroutine xmpi_allgather_int2d(xval,nelem,recvbuf,spaceComm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(in) :: xval(:,:)
+ integer, DEV_CONTARRD intent(inout) :: recvbuf(:,:)
+ integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(out) :: ier
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in spaceComm
+   call MPI_ALLGATHER(xval,nelem,MPI_INTEGER,recvbuf,nelem,MPI_INTEGER,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+   recvbuf(:,:)=xval(:,:)
+ end if
+#else
+ recvbuf(:,:)=xval(:,:)
+#endif
+end subroutine xmpi_allgather_int2d
+!!***
+
+
+!!****f* ABINIT/xmpi_allgather_dp1d
+!! NAME
+!!  xmpi_allgather_dp1d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and distributes it to all.
+!!  Target: double precision one-dimensional arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  nelem= number of elements
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allgather
+!!
+!! SOURCE
+
+subroutine xmpi_allgather_dp1d(xval,nelem,recvbuf,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:)
+ real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
+ integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(out) :: ier
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in spaceComm
+   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+   recvbuf(1:nelem)=xval(1:nelem)
+ end if
+#else
+ recvbuf(1:nelem)=xval(1:nelem)
+#endif
+end subroutine xmpi_allgather_dp1d
+!!***
+
+!!****f* ABINIT/xmpi_allgather_dp2d
+!! NAME
+!!  xmpi_allgather_dp2d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and distributes it to all.
+!!  Target: double precision two-dimensional arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  nelem= number of elements
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allgather
+!!
+!! SOURCE
+
+subroutine xmpi_allgather_dp2d(xval,nelem,recvbuf,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
+ real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:)
+ integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(out)   :: ier
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in spaceComm
+   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+   recvbuf(:,:)=xval(:,:)
+ end if
+#else
+ recvbuf(:,:)=xval(:,:)
+#endif
+end subroutine xmpi_allgather_dp2d
+!!***
+
+!!****f* ABINIT/xmpi_allgather_dp3d
+!! NAME
+!!  xmpi_allgather_dp3d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and distributes it to all.
+!!  Target: double precision three-dimensional arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  nelem= number of elements
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allgather
+!!
+!! SOURCE
+
+subroutine xmpi_allgather_dp3d(xval,nelem,recvbuf,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
+ real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:)
+ integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(out)   :: ier
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in spaceComm
+   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+   recvbuf(:,:,:)=xval(:,:,:)
+ end if
+#else
+ recvbuf(:,:,:)=xval(:,:,:)
+#endif
+end subroutine xmpi_allgather_dp3d
+!!***
+
+!!****f* ABINIT/xmpi_allgather_dp4d
+!! NAME
+!!  xmpi_allgather_dp4d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and distributes it to all.
+!!  Target: double precision four-dimensional arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  nelem= number of elements
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allgather
+!!
+!! SOURCE
+
+subroutine xmpi_allgather_dp4d(xval,nelem,recvbuf,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:)
+ real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:,:)
+ integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(out)   :: ier
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in spaceComm
+   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+   recvbuf(:,:,:,:)=xval(:,:,:,:)
+ end if
+#else
+ recvbuf(:,:,:,:)=xval(:,:,:,:)
+#endif
+end subroutine xmpi_allgather_dp4d
+!!***

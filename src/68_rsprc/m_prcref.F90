@@ -58,7 +58,6 @@ module m_prcref
  use m_mklocl,     only : mklocl
  use m_mkcore,     only : mkcore
 
-
  implicit none
 
  private
@@ -200,8 +199,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred)
 
- implicit none
-
 !Arguments-------------------------------
 !scalars
  integer,intent(in) :: dielstrt,istep,my_natom,mgfft,moved_atm_inside,n1xccc
@@ -237,8 +234,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
- logical :: computediel
- logical :: non_magnetic_xc
+ logical :: computediel,non_magnetic_xc
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -259,9 +255,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 
@@ -343,7 +336,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      cplex=optreal
      qphon(:)=zero
 !    Simple scalar multiplication, or model dielectric function
-     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,dtset%paral_kgb,qphon,rprimd,vresid,vrespc)
+     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
    else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
@@ -364,7 +357,7 @@ subroutine prcref(atindx,dielar,dielinv,&
          option=1
          if(modulo(dtset%iprcel,100)>=61)option=2
          call dieltcel(dielinv,gmet,kg_diel,kxc,&
-&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%paral_kgb,dtset%prtvol,susmat)
+&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%prtvol,susmat)
        end if
      end if
 
@@ -640,13 +633,13 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(vhartr_wk,(nfft))
      option=1
 
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
 
 !    Prepare the call to rhotoxc
      call xcdata_init(xcdata,dtset=dtset)
-     nk3xc=1
+     nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
      call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_DEALLOCATE(xccc3d)
 
@@ -849,8 +842,6 @@ end subroutine prcref
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,xred,&
 &  etotal,pawtab,wvl)
 
- implicit none
-
 !Arguments-------------------------------
 !variables used for tfvw
 !scalars
@@ -888,8 +879,7 @@ end subroutine prcref
  real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
- logical :: computediel
- logical :: non_magnetic_xc
+ logical :: computediel,non_magnetic_xc
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -915,9 +905,6 @@ end subroutine prcref
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 
@@ -999,7 +986,7 @@ end subroutine prcref
      cplex=optreal
      qphon(:)=zero
 !    Simple scalar multiplication, or model dielectric function
-     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,dtset%paral_kgb,qphon,rprimd,vresid,vrespc)
+     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
    else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
@@ -1020,7 +1007,7 @@ end subroutine prcref
          option=1
          if(modulo(dtset%iprcel,100)>=61)option=2
          call dieltcel(dielinv,gmet,kg_diel,kxc,&
-&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%paral_kgb,dtset%prtvol,susmat)
+&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%prtvol,susmat)
        end if
      end if
 
@@ -1276,14 +1263,14 @@ end subroutine prcref
    ABI_ALLOCATE(vhartr_wk,(nfft))
    option=1
 
-   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
+   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
 
 !  Prepare the call to rhotoxc
    call xcdata_init(xcdata,dtset=dtset)
-   nk3xc=1
+   nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
    ABI_ALLOCATE(work,(0))
    call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(xccc3d)
@@ -1368,13 +1355,11 @@ end subroutine prcref_PMA
 !!
 !! SOURCE
 
-subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral_kgb,qphon,rprimd,vresid,vrespc)
-
- implicit none
+subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !Arguments-------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nspden,optreal,optres,paral_kgb
+ integer,intent(in) :: cplex,nfft,nspden,optreal,optres
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -1437,9 +1422,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
  magn_precon=(diemixmag>=zero) ! Set to true if magnetization has to be preconditionned
  diemixmag=abs(diemixmag)
 
-!DEBUG
 !write(std_out,*)' moddiel : diemac, diemix, diemixmag =',diemac,diemix,diemixmag
-!ENDDEBUG
 
  if(abs(diemac-1.0_dp)<1.0d-6)then
 
@@ -1609,8 +1592,6 @@ end subroutine moddiel
 !! SOURCE
 
 subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1972,14 +1953,11 @@ end subroutine dielmt
 !!
 !! SOURCE
 
-subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
-&  nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb,prtvol,susmat)
-
- implicit none
+subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,prtvol,susmat)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb
+ integer,intent(in) :: nfft,nkxc,npwdiel,nspden,occopt,option
  integer,intent(in) :: prtvol
 !arrays
  integer,intent(in) :: kg_diel(3,npwdiel),ngfft(18)
@@ -2295,8 +2273,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
    call wrtout(ab_out,message,'COLL')
  end if
 
- write(message, '(a,a)' )ch10,&
-& ' dieltcel : 15 largest eigenvalues of the symmetrized dielectric matrix'
+ write(message,'(2a)')ch10,' dieltcel : 15 largest eigenvalues of the symmetrized dielectric matrix'
  call wrtout(std_out,message,'COLL')
  write(message, '(a,5es12.5)' )'  1-5  :',eig_sym(npwdiel:npwdiel-4:-1)
  call wrtout(std_out,message,'COLL')
@@ -2304,8 +2281,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
  call wrtout(std_out,message,'COLL')
  write(message, '(a,5es12.5)' )'  11-15:',eig_sym(npwdiel-10:npwdiel-14:-1)
  call wrtout(std_out,message,'COLL')
- write(message, '(a,a)' )ch10,&
-& ' dieltcel : 5 smallest eigenvalues of the symmetrized dielectric matrix'
+ write(message, '(2a)' )ch10,' dieltcel : 5 smallest eigenvalues of the symmetrized dielectric matrix'
  call wrtout(std_out,message,'COLL')
  write(message, '(a,5es12.5)' )'  1-5  :',eig_sym(1:5)
  call wrtout(std_out,message,'COLL')
@@ -2450,8 +2426,6 @@ end subroutine dieltcel
 
 subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,vresid,vrespc,base)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nspden
@@ -2530,7 +2504,9 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
 !compute deltaW                                                 **
 !******************************************************************
  vrespc=vresid !starting point
- call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,dtset%paral_kgb,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart) ! put the laplacian of the residuals into deltaW
+ ! put the laplacian of the residuals into deltaW
+ call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart) 
+
 !call laplacian(vrespc,buffer,ngfft,gprimd) ! put the laplacian of the residuals into deltaW
 !do ifft=1,nfft
 !if (buffer(ifft,1)/=deltaW(ifft,1)) then
@@ -2667,8 +2643,6 @@ end subroutine prcrskerker1
 !! SOURCE
 
 subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vrespc,natom,xred,mpi_enreg,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2859,7 +2833,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 !compute V1
 !******************************************************************
  V1=vresid
- call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,dtset%paral_kgb,rdfuncr=V1,laplacerdfuncr=deltaW)
+ call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=V1,laplacerdfuncr=deltaW)
  deltaW(:,1)= (((one/rdiemac(:))*V1(:,1))-(((rdielng(:))**2)*deltaW(:,1)))
 !deltaW(:,1)= -diemix*(((rdielng(:))**2)*deltaW(:,ispden))
  if (nspden>1) then
@@ -2977,8 +2951,6 @@ end subroutine prcrskerker2
 
 subroutine cgpr(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,dtol,itmax,v,fmin,delta)
 
- implicit none
-
 !Arguments ------------------------------------
 include "dummy_functions.inc"
 !scalars
@@ -3069,8 +3041,6 @@ end subroutine cgpr
 
 subroutine linmin(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,v,grad,fmin)
 
- implicit none
-
 !Arguments ------------------------------------
 include "dummy_functions.inc"
 !scalars
@@ -3127,8 +3097,6 @@ end subroutine linmin
 !! SOURCE
 
 subroutine bracketing (nv1,nv2,dp_dum_v2dp,v,grad,a,x,b,fa,fx,fb)
-
- implicit none
 
 !Arguments ------------------------------------
 include "dummy_functions.inc"
@@ -3238,8 +3206,6 @@ end subroutine bracketing
 !! SOURCE
 
 function brent(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,itmax,v,grad,ax,xx,bx,tol,xmin)
-
- implicit none
 
 !Arguments ------------------------------------
 include "dummy_functions.inc"

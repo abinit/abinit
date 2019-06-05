@@ -13,10 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -32,7 +28,7 @@ MODULE m_gruneisen
  use m_abicore
  use m_xmpi
  use m_crystal
- use m_tetrahedron
+ use m_htetrahedron
  use m_ddb
  use m_ddb_hdr
  use m_ifc
@@ -43,7 +39,7 @@ MODULE m_gruneisen
 #endif
 
  use m_io_tools,            only : get_unit, open_file
- use m_time,                only : cwtime
+ use m_time,                only : cwtime, cwtime_report
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
@@ -160,8 +156,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
  ddbun = get_unit()
  do ivol=1,new%nvols
    call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_paths(ivol)))
-   call ddb_hdr_open_read(ddb_hdr,ddb_paths(ivol),ddbun,DDB_VERSION,&
-&                         dimonly=1)
+   call ddb_hdr_open_read(ddb_hdr,ddb_paths(ivol),ddbun,DDB_VERSION, dimonly=1)
    natom = ddb_hdr%natom
 
    call ddb_hdr_free(ddb_hdr)
@@ -250,8 +245,6 @@ end function gruns_new
 !!      m_gruneisen
 !!
 !! CHILDREN
-!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
-!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -343,8 +336,6 @@ end subroutine gruns_fourq
 !!      m_gruneisen
 !!
 !! CHILDREN
-!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
-!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -474,8 +465,6 @@ end subroutine gruns_qpath
 !!      m_gruneisen
 !!
 !! CHILDREN
-!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
-!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -496,7 +485,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  integer,parameter :: master=0,qptopt1=1,bcorr0=0
  integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu,ncerr,nomega,cnt,unt,io
  real(dp) :: gavg,omega_min,omega_max,v2
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
@@ -526,7 +515,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    nqibz, qibz, wtq, nqbz, qbz)
 
  ! Build tetrahedra
- tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nshiftq, shiftq, nqibz, qibz, msg, ierr)
+ tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nshiftq, shiftq, nqibz, qibz, comm, msg, ierr)
  if (ierr /= 0) MSG_ERROR(msg)
 
  ABI_CALLOC(wvols_qibz, (gruns%natom3, gruns%nvols, nqibz))
@@ -572,7 +561,8 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    do nu=1,gruns%natom3
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
      wibz = wvols_qibz(nu, gruns%iv0, :)
-     call tetra_get_onewk(tetra,iqibz,bcorr0,nomega,nqibz,wibz,omega_min,omega_max,one,wdt)
+     call htetra_get_onewk(tetra,iqibz,bcorr0,nomega,nqibz,wibz,omega_min,omega_max,one,wdt)
+     wdt = wdt*wtq(iqibz)
      wdos = wdos + wdt
      grdos = grdos + wdt * gvals_qibz(nu,iqibz)
      gr2dos = gr2dos + wdt * gvals_qibz(nu,iqibz) ** 2
@@ -677,7 +667,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  ABI_FREE(v2dos)
  ABI_FREE(vdos)
 
- call destroy_tetra(tetra)
+ call htetra_free(tetra)
 
 end subroutine gruns_qmesh
 !!***
@@ -695,8 +685,6 @@ end subroutine gruns_qmesh
 !!      m_gruneisen
 !!
 !! CHILDREN
-!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
-!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -757,8 +745,6 @@ end subroutine gruns_free
 !!      anaddb
 !!
 !! CHILDREN
-!!      cwtime,gruns_free,gruns_qmesh,gruns_qpath,ifc_calcnwrite_nana_terms
-!!      ifc_speedofsound,kpath_free,wrtout
 !!
 !! SOURCE
 
@@ -779,8 +765,6 @@ subroutine gruns_anaddb(inp, prefix, comm)
  real(dp) :: cpu,wall,gflops
  type(gruns_t),target :: gruns
  type(kpath_t) :: qpath
- character(len=500) :: msg
-!arrays
 
 ! ************************************************************************
 
@@ -863,10 +847,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
 #endif
 
  call gruns_free(gruns)
-
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')" gruns_anaddb completed. cpu:",cpu,", wall:",wall
- call wrtout(std_out, msg, do_flush=.True.)
+ call cwtime_report("gruns_anaddb", cpu, wall, gflops)
 
 end subroutine gruns_anaddb
 !!***

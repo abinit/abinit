@@ -214,7 +214,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp5=5,master=0,cplex1=1
- integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij,band
+ integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij !,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount
  integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus
@@ -229,14 +229,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha,opt_ecut
+ real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  complex(dpc) :: max_degw,cdummy
- logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit
+ logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname
  type(kmesh_t) :: Kmesh,Qmesh
@@ -290,7 +290,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:)
  type(esymm_t),target,allocatable :: KS_sym(:,:)
  type(esymm_t),pointer :: QP_sym(:,:)
- type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
+ type(pawcprj_type),allocatable :: Cp1(:,:) !,Cp2(:,:)
  type(littlegroup_t),allocatable :: Ltg_k(:)
  type(Paw_an_type),allocatable :: KS_paw_an(:),QP_paw_an(:)
  type(Paw_ij_type),allocatable :: KS_paw_ij(:),QP_paw_ij(:)
@@ -489,19 +489,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Initialize optional flags in Pawtab to zero
    ! (Cannot be done in Pawinit since the routine is called only if some pars. are changed)
    Pawtab(:)%has_nabla = 0
-   Pawtab(:)%usepawu   = 0
-   Pawtab(:)%useexexch = 0
-   Pawtab(:)%exchmix   =zero
 
    call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
    ! Initialize and compute data for LDA+U
    Paw_dmft%use_dmft=Dtset%usedmft
-   if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
-     call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-&     Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+   call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
+&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
-   end if
 
    if (my_rank == master) call pawtab_print(Pawtab)
 
@@ -715,17 +710,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  end do
 
  ABI_FREE(my_spins)
- opt_ecut=Dtset%ecutwfn
-!opt_ecut=zero
 
- call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,Dtset%paral_kgb,Sigp%npwwfn,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
-& Dtset%nspden,Dtset%nspinor,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-& Gsph_Max%gvec,Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,opt_ecut=opt_ecut)
+ call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
+   Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
+   Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
  if (Dtset%pawcross==1) then
-   call wfd_init(Wfdf,Cryst,Pawtab,Psps,keep_ur,Dtset%paral_kgb,Sigp%npwwfn,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
-&   Dtset%nspden,Dtset%nspinor,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-&   Gsph_Max%gvec,Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,opt_ecut=opt_ecut)
+   call wfd_init(Wfdf,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
+     Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
+     Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
  end if
 
  ABI_FREE(bks_mask)
@@ -854,7 +847,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  * Initialize also lmselect (index of non-zero LM-moments of densities).
    ABI_DT_MALLOC(KS_paw_ij,(Cryst%natom))
 !  cplex=1;cplex_dij=Dtset%nspinor
-   has_dijso=Dtset%pawspnorb; has_dijU=Dtset%usepawu
+   has_dijso=Dtset%pawspnorb; has_dijU=merge(0,1,Dtset%usepawu==0)
    call paw_ij_nullify(KS_paw_ij)
    call paw_ij_init(KS_paw_ij,cplex,Dtset%nspinor,Dtset%nsppol,&
 &   Dtset%nspden,Dtset%pawspnorb,Cryst%natom,Cryst%ntypat,Cryst%typat,Pawtab,&
@@ -991,8 +984,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  KS_mflags%has_vhartree=1
  KS_mflags%has_vxc     =1
  KS_mflags%has_vxcval  =1
- if (Dtset%usepawu>0     )  KS_mflags%has_vu     =1
- if (Dtset%useexexch>0   )  KS_mflags%has_lexexch=1
+ if (Dtset%usepawu/=0    )  KS_mflags%has_vu     =1
+ if (Dtset%useexexch/=0  )  KS_mflags%has_lexexch=1
  if (Sigp%use_sigxcore==1)  KS_mflags%has_sxcore =1
  if (gwcalctyp<10           )  KS_mflags%only_diago =1 ! off-diagonal elements only for SC on wavefunctions.
 
@@ -1125,7 +1118,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Psps%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,1,nscf,&
-&   nfftf,ngfftf,Cryst%ucvol,Dtset%paral_kgb,Cryst,Pawtab,MPI_enreg_seq,nbsc,Sr%m_lda_to_qp,prev_rhor,prev_Pawrhoij)
+              nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,Sr%m_lda_to_qp,prev_rhor,prev_Pawrhoij)
 
 !  Find the irreps associated to the QP amplitudes starting from the analogous table for the KS states.
 !  bmin=Sigp%minbdgw; bmax=Sigp%maxbdgw
@@ -1455,8 +1448,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  * Core contribution estimated using Fock exchange.
    if (Dtset%usepaw==1) then
      if (Sigp%use_sigxcore==1) Sr%hhartree=hlda - (KS_me%vxc - KS_me%sxcore)
-     if (Dtset%usepawu>0) Sr%hhartree=Sr%hhartree-KS_me%vu
-     if (Dtset%useexexch>0) then
+     if (Dtset%usepawu/=0) Sr%hhartree=Sr%hhartree-KS_me%vu
+     if (Dtset%useexexch/=0) then
        MSG_ERROR("useexexch > 0 not implemented")
        Sr%hhartree = Sr%hhartree - KS_me%vlexx
      end if
@@ -1512,8 +1505,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      QP_mflags%has_vxcval_hybrid=1
    end if
 !  if (Sigp%use_sigxcore==1) QP_mflags%has_sxcore =1
-!  if (Dtset%usepawu>0)    QP_mflags%has_vu     =1
-!  if (Dtset%useexexch>0)  QP_mflags%has_lexexch=1
+!  if (Dtset%usepawu/=0)    QP_mflags%has_vu     =1
+!  if (Dtset%useexexch/=0)  QP_mflags%has_lexexch=1
 
    ABI_MALLOC(tmp_kstab,(2,Wfd%nkibz,Wfd%nsppol))
    tmp_kstab=0
@@ -1643,7 +1636,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! Matrix elements of V_U are zero unless we are using LDA+U as starting point
  do ib=b1gw,b2gw
    Sr%vxcme(ib,:,:)=KS_me%vxcval(ib,ib,:,:)
-   if (Dtset%usepawu>0) Sr%vUme (ib,:,:)=KS_me%vu(ib,ib,:,:)
+   if (Dtset%usepawu/=0) Sr%vUme (ib,:,:)=KS_me%vu(ib,ib,:,:)
  end do
 
  ! Initial guess for the GW energies
@@ -3872,7 +3865,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 
  ! Allocate quantities related to the PAW spheres for the QP Hamiltonian.
  ! TODO call paw_ij_init in scfcv and respfn, fix small issues
- has_dijso=Dtset%pawspnorb; has_dijU=Dtset%usepawu
+ has_dijso=Dtset%pawspnorb; has_dijU=merge(0,1,Dtset%usepawu==0)
 
  call paw_ij_nullify(QP_paw_ij)
  call paw_ij_init(QP_paw_ij,cplex,Dtset%nspinor,Dtset%nsppol,&

@@ -154,8 +154,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 & opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,berryopt
@@ -236,7 +234,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !Tell us what is going on:
  if (prtvol>=10) then
    write(msg,'(a,i6,2x,a,i3,a)')' --- dfpt_cgwf is called for band',band,'for',nline,' lines'
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
  end if
 
  me_g0 = mpi_enreg%me_g0
@@ -278,7 +276,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  if (prtvol==-level.or.prtvol==-19.or.prtvol==-20) then
    write(msg,'(a)') " ** cgwf3 : debugging mode, tests will be done"
    ! Search CGWF3_WARNING in the log file to find errors (if any)
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
    ABI_ALLOCATE(work,(2,npw1*nspinor))
    ABI_ALLOCATE(work1,(2,npw1*nspinor))
 !  ===== Check <Psi_k+q^(0)|S(0)|Psi_k+q^(0)>=delta
@@ -296,7 +294,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      if(abs(doti)>tol12) test_is_ok=0
      if(test_is_ok/=1) then
        write(msg,'(a,i3,a,2es22.15)') "CGWF3_WARNING : <Psi_k+q,i^(0)|S(0)|Psi_k+q,j^(0)> for band j=",iband," is ",dotr,doti
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
    end do
 !  ===== Check Pc.Psi_k+q^(0)=0
@@ -307,7 +305,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
      if(sqrt(dotr)>tol12) then
        write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.Psi_k+q_j^(0) for band j=",iband," is ",sqrt(dotr)
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
    end do
 !  ===== Check Pc.Psi_k^(0)=0
@@ -317,7 +315,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
    if(sqrt(dotr)>tol12) then
      write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.Psi_k^(0) for band ",band," is ",sqrt(dotr)
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out,msg)
    end if
 !  ===== Check Pc.dcwavef=0 (for 2nd order only)
    if(ipert==natom+10.or.ipert==natom+11) then
@@ -327,7 +325,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
      if(sqrt(dotr)>tol10) then
        write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.dcwavef for band ",band," is ",sqrt(dotr)
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
    end if
 !  ===== Check Pc^*.S(0).Psi_k+q^(0)=0
@@ -339,7 +337,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
        if(sqrt(dotr)>tol12) then
          write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc^*.S(0).Psi_k+q_j^(0) for band j=",iband," is ",sqrt(dotr)
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
      end do
    end if
@@ -426,7 +424,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    ABI_DEALLOCATE(cwwork)
    if(sqrt(dotr)>tol12) then
      write(msg,'(a,i3,a,es22.15)') 'CGWF3_WARNING : |Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1)| (band ',band,')=',sqrt(dotr)
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out,msg)
    end if
  end if
 
@@ -623,7 +621,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
 !    DEBUG Keep this debugging feature !
 !     write(msg,'(a,f14.6,a,f14.6)') 'prod1 = ',prod1,' prod2 = ',prod2
-!     call wrtout(std_out,msg,'PERS')
+!     call wrtout(std_out,msg)
 !    ENDDEBUG
 
 !    Compute <u_m(1)|H(0)-e_m(0)|u_m(1)>
@@ -642,7 +640,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      if(u1h0me0u1<-tol_restart)then
        if (prtvol==-level.or.prtvol==-19) then
          write(msg,'(a,es22.13e3)') '  cgwf3: u1h0me0u1 = ',u1h0me0u1
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
        cwavef =zero
        ghc    =zero
@@ -653,7 +651,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end if
 !      A negative residual will be the signal of this problem ...
        resid=-one
-       call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -1','PERS')
+       if (prtvol > 0) call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -1')
 !      Number of one-way 3D ffts skipped
        nskip=nskip+(nline-iline+1)
 !      Exit from the loop on iline
@@ -666,14 +664,14 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        write(msg,'(a,a,i3,f14.6,a,a,4es12.4)') ch10,&
 &       ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
 &       '         resid,prod1,prod2,d2te=',resid,prod1,prod2,d2te
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
 
 !    If residual sufficiently small stop line minimizations
      if (resid<tolwfr) then
        if(prtvol>=10)then
          write(msg,'(a,i4,a,i2,a,es12.4)')' dfpt_cgwf: band',band,' converged after ',iline,' line minimizations: resid = ',resid
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
        nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
        exit                         ! Exit from the loop on iline
@@ -682,7 +680,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    If user require exiting the job, stop line minimisations
      if (quit==1) then
        write(msg,'(a,i0)')' dfpt_cgwf: user require exiting => skip update of band ',band
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
        nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
        exit                         ! Exit from the loop on iline
      end if
@@ -765,15 +763,13 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        dotgp=dotgg
        if (prtvol==-level.or.prtvol==-19)then
          write(msg,'(a,2es16.6)') 'dfpt_cgwf: dotgg,gamma = ',dotgg,gamma
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
 !$OMP PARALLEL DO
        do ipw=1,npw1*nspinor
          conjgr(1:2,ipw)=direc(1:2,ipw)+gamma*conjgr(1:2,ipw)
        end do
-       if (prtvol==-level.or.prtvol==-19)then
-         call wrtout(std_out,'dfpt_cgwf: conjugate direction has been found','PERS')
-       end if
+       if (prtvol==-level.or.prtvol==-19) call wrtout(std_out,'dfpt_cgwf: conjugate direction has been found')
      end if
 
 !    ======================================================================
@@ -786,10 +782,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    between E(2) and the 2DTE
      call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
      dedt=-two*two*dedt
-     if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) then
-       write(msg,'(a)') '  CGWF3_WARNING : dedt>0'
-       call wrtout(std_out,msg,'PERS')
-     end if
+     if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
      ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
      ABI_ALLOCATE(gh_direc,(2,npw1*nspinor))
      if (gen_eigenpb)  then
@@ -822,7 +815,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      d2edt2=two*two*d2edt2
      if(prtvol==-level.or.prtvol==-19)then
        write(msg,'(a,2es14.6)') 'dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
 
 !    ======================================================================
@@ -848,7 +841,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end if
 !      A negative residual will be the signal of this problem ...
        resid=-two
-       call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2',"PERS")
+       if (prtvol > 0) call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2')
      else
 !      Here, the value of theta that gives the minimum
        theta=-dedt/d2edt2
@@ -859,8 +852,10 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
 !    Check that result is above machine precision
      if (one+theta==one) then
-       write(msg, '(a,es16.4)' ) ' dfpt_cgwf: converged with theta=',theta
-       call wrtout(std_out,msg,'PERS')
+       if (prtvol > 0) then
+         write(msg, '(a,es16.4)' ) ' dfpt_cgwf: converged with theta=',theta
+         call wrtout(std_out,msg)
+       end if
        nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
        exit                        ! Exit from the loop on iline
      end if
@@ -898,8 +893,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        else if (abs(deltae)<tolrde*two*abs(deold) .and. iline/=nline) then
          if(prtvol>=10.or.prtvol==-level.or.prtvol==-19)then
            write(msg, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
-&           ' dfpt_cgwf: line',iline,' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
-           call wrtout(std_out,msg,'PERS')
+            ' dfpt_cgwf: line',iline,' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
+           call wrtout(std_out,msg)
          end if
          nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
          exit                        ! Exit from the loop on iline
@@ -955,7 +950,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !         else
          write(msg,'(a,i3,a,es22.15)') 'CGWF3_WARNING : |<Psi^(0)_i,k+q|Psi^(1)_j,k,q>+amn(i,j)/2|, for j= ',iband,' is ',dotr
 !         end if
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
      end do
      ABI_DEALLOCATE(work)
@@ -992,7 +987,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !       else
        write(msg,'(a,es22.15)') 'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q| = ',sqrt(dotr)
 !       end if
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out,msg)
      end if
    end if
 
@@ -1042,7 +1037,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      write(msg,'(a,i3,a,es22.15,2a,i4)') &
 &     '*** CGWF3 Sternheimer equation test for band ',band,'=',sqrt(dotr),ch10,&
 &     'It should go to zero for large nline : nlines_done = ',nlines_done
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out,msg)
    end if
 
 !  Check that < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is in agreement with eig^(1)
@@ -1076,11 +1071,11 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
          write(msg,'(2(a,i3),a,es22.15)') &
 &         'CGWF3_WARNING < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > for i=',iband,' j=',band,&
          ' : ',sqrt(dotr**2+doti**2)
-         call wrtout(std_out,msg,'PERS')
+         call wrtout(std_out,msg)
        end if
      end do
 !     write(msg,'(a)') '< Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is done.'
-!     call wrtout(std_out,msg,'PERS')
+!     call wrtout(std_out,msg)
      ABI_DEALLOCATE(work)
      ABI_DEALLOCATE(cwwork)
    end if
@@ -1105,7 +1100,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
  if (xmpi_paral==1 .and. band==nband .and. prtvol>=10) then
    write(msg,'(a,i0)')' dfpt_cgwf: number of one-way 3D ffts skipped in cgwf3 until now =',nskip
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
  end if
 
  ABI_DEALLOCATE(gh1c)

@@ -42,8 +42,8 @@ module m_symfind
 
  public :: symfind     ! From the symmetries of the Bravais lattice,
                        ! select those that leave invariant the system, and generate tnons
- public :: symanal     ! Find the space group from the list of symmetris and lattice parameters
- public :: symbrav     ! Determine the Bravais information From the list of symmetry operations, and the lattice vectors.
+ public :: symanal     ! Find the space group from the list of symmetries and lattice parameters
+ public :: symbrav     ! Determine the Bravais information from the list of symmetry operations, and the lattice vectors.
  public :: symlatt     ! Find the Bravais lattice and its symmetry operations (ptsymrel).
                        ! From the unit cell vectors (rprimd) and the corresponding metric tensor.
 
@@ -79,7 +79,7 @@ contains
 !! spinat(3,natom)=initial spin of each atom, in unit of hbar/2.
 !! tolsym=tolerance for the symmetries
 !! typat(natom)=integer identifying type of atom.
-!! use_inversion=1 if inversion can be included in set of symmetries
+!! use_inversion=1 if inversion and improper rotations can be included in set of symmetries
 !! xred(3,natom)=reduced coordinates of atoms in terms of real space
 !!   primitive translations
 !!
@@ -103,8 +103,6 @@ contains
  subroutine symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
 &  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
 &  nucdipmom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -131,7 +129,7 @@ contains
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
  real(dp) :: diff(3),efieldrot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),sxred0(3)
- real(dp) :: symnucdipmom2(3)
+ !real(dp) :: symnucdipmom2(3)
  real(dp) :: symnucdipmom2cart(3,3),symnucdipmom2red(3,3),symspinat2(3),symxred2(3),trialnons(3)
  real(dp),allocatable :: local_nucdipmom(:,:,:),nucdipmomcl(:,:),nucdipmomred(:,:,:)
  real(dp),allocatable :: spinatcl(:,:),spinatred(:,:)
@@ -200,7 +198,7 @@ contains
 
  ! need rprimd later to transform back to cart coords
  call matr3inv(gprimd,rprimd)
- 
+
 !Initialise with the first atom
  nclass=1
  natomcl(1)=1
@@ -562,8 +560,6 @@ end subroutine symfind
 
 subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: chkprim,msym,nsym
@@ -727,8 +723,6 @@ end subroutine symanal
 !! SOURCE
 
 subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1046,7 +1040,6 @@ end subroutine symbrav
 subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 
  use m_numeric_tools, only : OPERATOR(.x.)
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1472,8 +1465,6 @@ end subroutine symspgr
 !! SOURCE
 
 subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

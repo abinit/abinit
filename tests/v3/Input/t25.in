@@ -10,21 +10,16 @@ angdeg1 70 80 85    ! triclinic
 angdeg2 70 80 85    ! triclinic
 angdeg  90 80 90    ! the others are monoclinic
 
-natom1 1
-natom2 2
-natom3 2
-natom4 2
-natom5 2
-natom6 2
-natom7 2
-natom8 2
-natom9 2
-natom10 4
-natom11 4
-natom12 4
-natom13 4
-natom14 4
-natom15 4
+
+# wyckoff multiplicity 1
+natom1  3
+
+# wyckoff multiplicity 2
+natom2  6  natom3  6 natom4  6 natom5  6 
+natom6  6  natom7  6 natom8  6 natom9  6
+
+# wyckoff multiplicity 4
+natom10 12 natom11 12 natom12 12 natom13 12 natom14 12 natom15 12
 
 # Common data
 prtvol -1          # stop in abinit (main program), before call driver.
@@ -33,9 +28,13 @@ brvltt -1          # important to reduce the conventional cell to primitive,
 acell 7 8 9
 ntypat 1
 znucl 1
-natrd 1
-xred 0.17 0.15 0.11
-typat 1
+xred
+0.17  0.15  0.11
+0.734 0.467 0.66
+0.44  0.824 0.31415
+natrd 3
+
+typat *1
 ecut 1
   kptopt 0
 nkpt 1
