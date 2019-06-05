@@ -371,15 +371,15 @@ class FileToTest(object):
             result = differ.diff(ref_fname, out_fname)
             result.dump_details(outf)
 
-            return (*result.passed_within_tols(
+            return (result.passed_within_tols(
                 self.tolnlines, self.tolabs, self.tolrel
             ), result.has_line_count_error())
 
         if fldebug:  # fail on first error and output the traceback
-            isok, status, msg, has_line_count_error = make_diff()
+            (isok, status, msg), has_line_count_error = make_diff()
         else:
             try:
-                isok, status, msg, has_line_count_error = make_diff()
+                (isok, status, msg), has_line_count_error = make_diff()
             except Exception as e:
                 warnings.warn(('[{}] Something went wrong with this test:\n'
                                '{}: {}\n').format(self.name, type(e).__name__,
