@@ -325,6 +325,8 @@ integer function fform_from_ext(abiext) result(fform)
    end if
  end if
 
+ MSG_ERROR(sjoin("Cannot find fform associated to extension:", abiext))
+
 end function fform_from_ext
 !!***
 

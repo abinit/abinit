@@ -246,6 +246,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
+ ! IF eph_task is needed and ird/get variables are not provided we assume WFQ == WFK
+ if (any(dtset%eph_task == [2, -2, 3]) .and. .not. use_wfq) then
+   wfq_path = wfk0_path
+   use_wfq = .True.
+   write(msg, "(4a)")&
+       "eph_task requires WFQ but neither irdwfq nor getwfq are specified in the input.", ch10, &
+       "Will read WFQ wavefunctions from WFK file:", trim(wfk0_path)
+   MSG_COMMENT(msg)
+ end if
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. dtset%eph_task /= 7)
 
  ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
@@ -343,7 +352,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    MSG_ERROR_NODUMP("aborting now")
  end if
 
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Construct crystal and ebands from the GS WFK file.
  if (use_wfk) then
@@ -421,7 +430,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! =======================================
  ! Output useful info on electronic bands
  ! =======================================
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime(cpu, wall, gflops, "start")
  if (my_rank == master) then
    ! Fermi Surface
    if (dtset%prtfsurf /= 0) then
@@ -547,8 +556,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_path, comm)
-   !dvdb%symv1 = dtset%symv1scf > 0
-   !if (dtset%prtvol > 10) dvdb%debug = .True.
+   if (dtset%prtvol > 10) dvdb%debug = .True.
+   ! This to symmetrize the DFPT potentials.
+   dvdb%symv1 = dtset%symv1scf > 0
+
    ! Set dielectric tensor, BECS and has_dielt_zeff flag that
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0
@@ -613,11 +624,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Relase nkpt-based arrays in dtset to decreased memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
- ! TODO: In principle I should deallocate also dtset(idtset) in driver but I have to
- ! disable the output of these arrays in outvars...
- if (dtset%eph_task /= 6) then
-   call dtset_free_nkpt_arrays(dtset)
- end if
+ if (dtset%eph_task /= 6) call dtset_free_nkpt_arrays(dtset)
 
  select case (dtset%eph_task)
  case (0)
@@ -626,27 +633,24 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (1)
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (2, -2)
    ! Compute electron-phonon matrix elements
    call eph_gkk(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (3)
    ! Compute phonon self-energy
    call eph_phpi(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (4, -4)
    ! Compute electron self-energy (phonon contribution)
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   if (dtset%eph_task == -4) then
-     call wrtout(std_out, "Calling transport routine after sigmaph run...", do_flush=.True.)
-     call transport(dtfil, dtset, ebands, cryst, comm)
-   end if
+   if (dtset%eph_task == -4) call transport(dtfil, dtset, ebands, cryst, comm)
 
  case (5, -5)
    ! Interpolate the phonon potential

@@ -6917,7 +6917,10 @@ computation of the atomic forces and positions between t=0 and t=lotf_nitex.
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]]
 
-  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to ionmov=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
+  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to [[ionmov]]=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
+Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via short $NVE$ trajectories (ten [[ionmov]]=24 steps in current implementation). 
+ The initial momenta for each trial are randomly sampled from Boltzmann distribution, and the final trajectory state is either accepted or rejected based on the Metropolis criterion.
+ Such strategy allows to simultaneously update all reduced coordinates, achieve higher acceptance ratio than classical Metropolis Monte Carlo and better sampling efficiency for shallow energy landscapes [[cite:Prokhorenko2018]].
 **Purpose:** Monte Carlo sampling
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
@@ -19759,6 +19762,24 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 !!! important
 
     The total number of MPI processes must be equal to the product of the different entries.
+""",
+),
+
+Variable(
+    abivarname="eph_use_ftinterp",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EPH FORCE Fourier Transform Interpolation of DFPT potentials.",
+    text=r"""
+This is an advanced option used for testing/debugging the interpolation of the DFPT potentials when [[eph_task]] in (2, -2)
+By default, the code seeks for the q-point in the input DVDB file when *eph_use_ftinterp* is set to zero (default)
+and stops is the q-point in not found in the file.
+When *eph_use_ftinterp* is set to 1, the input DVDB file (assumed to be on the [[ddb_ngqpt]] q-mesh)
+will be used to generate the real-space representation of the DFPT potentials and interpolated the potential
+at the input [[qpt]].
 """,
 ),
 

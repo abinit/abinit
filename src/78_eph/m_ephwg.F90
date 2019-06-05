@@ -55,7 +55,7 @@ module m_ephwg
 
  use defs_datatypes,    only : ebands_t
  use defs_abitypes,     only : dataset_type
- use m_time,            only : cwtime, cwtime_report, sec2str
+ use m_time,            only : cwtime, cwtime_report
  use m_symtk,           only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
  use m_special_funcs,   only : gaussian
@@ -238,7 +238,6 @@ type(ephwg_t) function ephwg_new( &
  type(crystal_t),target,intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  integer,intent(in) :: frohl_model
-
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
  real(dp),intent(in) :: shiftk(3, nshiftk), kibz(3, nkibz)
@@ -303,7 +302,7 @@ type(ephwg_t) function ephwg_new( &
    call ifc_fourq(ifc, cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
 
-   if (frohl_model/=3) cycle
+   if (frohl_model /= 3) cycle
    ! Compute Frohlich matrix elements
    qpt = new%ibz(:,ik)
    qpt_cart = two_pi*matmul(cryst%gprimd, qpt)
@@ -311,7 +310,7 @@ type(ephwg_t) function ephwg_new( &
    inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
    fqdamp = (four_pi / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
 
-   ! Compute gkq_{LR}. Note that in our approx it does not dependend on ib_k.
+   ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
    gkq2_lr(:) = zero
    do nu=1,new%natom3
      wqnu = phfrq(nu); if (wqnu < tol8) cycle
@@ -326,10 +325,10 @@ type(ephwg_t) function ephwg_new( &
    end do
    new%frohl_ibz(ik,:) = gkq2_lr * fqdamp
  end do
- call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
- if (frohl_model==3) call xmpi_sum(new%frohl_ibz, comm, ierr)
+ if (frohl_model == 3) call xmpi_sum(new%frohl_ibz, comm, ierr)
+ call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
 end function ephwg_new
 !!***

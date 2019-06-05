@@ -50,8 +50,8 @@ def main():
     # we're passing these as arguments to the diff function
     fromdate = time.ctime(os.stat(fromfile).st_mtime)
     todate = time.ctime(os.stat(tofile).st_mtime)
-    fromlines = open(fromfile, 'U').readlines()
-    tolines = open(tofile, 'U').readlines()
+    fromlines = open(fromfile, 'rt').readlines()
+    tolines = open(tofile, 'rt').readlines()
 
     if options.u:
         diff = difflib.unified_diff(fromlines, tolines, fromfile, tofile,
@@ -73,9 +73,8 @@ def main():
 
     # writelines because diff is a generator
     if options.file:
-        fh = open(options.file, "w")
-        fh.writelines(diff)
-        fh.close()
+        with open(options.file, "w") as fh:
+            fh.writelines(diff)
     else:
         sys.stdout.writelines(diff)
 
