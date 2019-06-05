@@ -15693,7 +15693,7 @@ To be more specific, keeping the default value of [[scalecart]] = 1 to simplify
 the matter, [[rprim]] 1 2 3 4 5 6 7 8 9 corresponds to input of the three
 primitive translations R1=(1,2,3) (to be multiplied by [[acell]](1)),
 R2=(4,5,6) (to be multiplied by [[acell]](2)), and R3=(7,8,9) (to be
-multiplied by [[acell](3)).
+multiplied by [[acell]](3)).
 Note carefully that the first three numbers input are the first column of
 [[rprim]], the next three are the second, and the final three are the third.
 This corresponds with the usual Fortran order for arrays. The matrix whose
