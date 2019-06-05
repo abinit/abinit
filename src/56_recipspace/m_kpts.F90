@@ -42,7 +42,7 @@ module m_kpts
  use m_geometry,       only : metric
  use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
  use m_htetrahedron,   only : t_htetrahedron, htetra_init
- use m_symkpt,         only : symkpt
+ use m_symkpt,         only : symkpt, symkpt_new
 
  implicit none
 
@@ -1041,6 +1041,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  integer, parameter :: max_number_of_prime=47
  integer :: brav,decreased,found,ii,ikpt,iprime,ishiftk,isym,jshiftk,kshiftk,mkpt,mult
  integer :: nkpthf_computed,nkpt_fullbz,nkptlatt,nshiftk2,nsym_used,option
+ integer :: ik_bz,ik_ibz
  integer :: test_prime,timrev
  integer :: nkpt_use
  real(dp) :: length2,ucvol,ucvol_super
@@ -1376,20 +1377,23 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
    ABI_ALLOCATE(indkpt,(nkpt_fullbz))
    ABI_ALLOCATE(kpt_fullbz,(3,nkpt_fullbz))
-   ABI_ALLOCATE(wtk_fullbz,(nkpt_fullbz))
-   ABI_ALLOCATE(wtk_folded,(nkpt_fullbz))
    ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
+   ABI_ALLOCATE(wtk_folded,(nkpt_fullbz))
 
    kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
-   wtk_fullbz(1:nkpt_fullbz)=1.0_dp/dble(nkpt_fullbz)
 
    timrev=1;if (kptopt==4) timrev=0
 
-   call symkpt(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
-&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded, bz2ibz_smap, xmpi_comm_self)
+   call symkpt_new(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
+&   nkpt_computed,nsym_used,symrec,timrev,bz2ibz_smap, xmpi_comm_self)
 
    ABI_DEALLOCATE(symrec)
-   ABI_DEALLOCATE(wtk_fullbz)
+   wtk_folded = 0
+   do ik_bz=1,nkpt_fullbz
+    ik_ibz = indkpt(bz2ibz_smap(1,ik_bz))
+    wtk_folded(ik_ibz) = wtk_folded(ik_ibz) + one
+   end do
+   wtk_folded = wtk_folded / nkpt_fullbz
 
  else if(kptopt==3)then
    nkpt_computed=nkpt_fullbz
