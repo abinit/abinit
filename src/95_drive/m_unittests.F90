@@ -494,6 +494,7 @@ subroutine kptrank_unittests(comm)
  real(dp) :: cpu, gflops, wall
  real(dp) :: dksqmax
  real(dp) :: dos_qshift(3,nqshft1)
+ character(len=500) :: msg
  integer,allocatable :: bz2ibz(:,:)
  integer,allocatable :: bz2ibz_symkpt(:,:), bz2ibz_symkpt_new(:,:)
  integer,allocatable :: bz2ibz_listkk(:,:)
@@ -560,15 +561,14 @@ subroutine kptrank_unittests(comm)
  ! check if ibz is the same
  do iqibz=1,nqibz
    if (ibz2bz(iqibz) == ibz2bz_new(iqibz)) cycle
-   write(std_out,*) "The IBZ is different"
-   call exit(1)
+   MSG_ERROR("The IBZ is different")
  end do
 
  ! check if mapping is the same
  do iqbz=1,nqbz
    if (bz2ibz_symkpt(1,iqbz) == bz2ibz_symkpt_new(1,iqbz)) cycle
-   write(std_out,*) "Inconsistent mapping", iqbz, bz2ibz_symkpt(1,iqbz), bz2ibz_symkpt_new(1,iqbz)
-   call exit(1)
+   write(msg,*) "Inconsistent mapping", iqbz, bz2ibz_symkpt(1,iqbz), bz2ibz_symkpt_new(1,iqbz)
+   MSG_ERROR(msg)
  end do
 
  ! call listkk
