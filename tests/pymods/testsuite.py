@@ -311,6 +311,8 @@ class FileToTest(object):
             if not opt.startswith("-"):
                 raise ValueError("Wrong fldiff option: %s" % opt)
 
+        self.do_html_diff = False
+
     @lazy__str__
     def __str__(self): pass
 
@@ -369,15 +371,15 @@ class FileToTest(object):
             result = differ.diff(ref_fname, out_fname)
             result.dump_details(outf)
 
-            return result.passed_within_tols(
+            return (*result.passed_within_tols(
                 self.tolnlines, self.tolabs, self.tolrel
-            )
+            ), result.has_line_count_error())
 
         if fldebug:  # fail on first error and output the traceback
-            isok, status, msg = make_diff()
+            isok, status, msg, has_line_count_error = make_diff()
         else:
             try:
-                isok, status, msg = make_diff()
+                isok, status, msg, has_line_count_error = make_diff()
             except Exception as e:
                 warnings.warn(('[{}] Something went wrong with this test:\n'
                                '{}: {}\n').format(self.name, type(e).__name__,
@@ -391,6 +393,9 @@ class FileToTest(object):
         self.fld_isok = isok
         self.fld_status = status
         self.fld_msg = msg
+
+        if has_line_count_error and not self.exec_error:
+            self.do_html_diff = True
 
         return isok, status, msg
 
@@ -1387,6 +1392,7 @@ class BaseTest(object):
         self._isok = None
         self.stdout_fname = None
         self._print_lock = NotALock()
+        self.exec_error = False
 
         self.had_timeout = False
         self.force_skip = False
@@ -1964,6 +1970,7 @@ class BaseTest(object):
 
             # Save exceptions (if any).
             if runner.exceptions:
+                self.exec_error = True
                 self.exceptions.extend(runner.exceptions)
                 if not self.expected_failure:
                     for exc in runner.exceptions:
@@ -2139,6 +2146,7 @@ class BaseTest(object):
         self.run_etime = d['run_etime']
         self._executed = d['executed']
         self._isok = d['isok']
+        self.exec_error = d['exec_error']
         self.workdir = d['workdir']
 
     def results_dump(self, skipped_info=False):
@@ -2153,6 +2161,7 @@ class BaseTest(object):
             'tot_etime': self.tot_etime,
             'run_etime': self.run_etime,
             'executed': self._executed,
+            'exec_error': self.exec_error,
             'isok': self.isok,
             'workdir': self.workdir,
         }
@@ -2216,7 +2225,7 @@ class BaseTest(object):
         diffpy = self.abenv.apath_of("tests", "pymods", "diff.py")
 
         for f in self.files_to_test:
-            if f.fld_isok and self.make_html_diff == 1:
+            if not f.do_html_diff and self.make_html_diff == 1:
                 continue
 
             ref_fname = os.path.abspath(os.path.join(self.ref_dir, f.name))
