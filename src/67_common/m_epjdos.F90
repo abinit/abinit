@@ -876,6 +876,7 @@ end subroutine dos_calcnwrite
 !! OUTPUT
 !!  sum_1ll_1atom(mlang,natsph)= projected scalars for each atom and ang. mom.
 !!  sum_1lm_1atom(mlang*mlang,natsph)= projected scalars for each atom and LM component.
+!!  cplx_1lm_1atom(2,dtset%nspinor**2,dos%mbesslang**2,natsph_tot) = complex projection of wave function on atomic like orbital
 !!
 !! NOTES
 !!  * ph3d atoms are ordered with natsph and must be provided by the caller in the correct order!
@@ -894,7 +895,7 @@ end subroutine dos_calcnwrite
 
 subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax, mlang,&
 &  mpw, natsph, typat_extra, mlang_type, npw_k, nspinor, ph3d, prtsphere, rint, rmax,&
-&  rc_ylm, sum_1ll_1atom, sum_1lm_1atom, ucvol, ylm_k, znucl_sph)
+&  rc_ylm, sum_1ll_1atom, sum_1lm_1atom, cplx_1lm_1atom, ucvol, ylm_k, znucl_sph)
 
 !Arguments ------------------------------------
 !scalars
@@ -911,6 +912,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  type(MPI_type),intent(in) :: mpi_enreg
  real(dp),intent(out) :: sum_1ll_1atom(nspinor**2, mlang, natsph)
  real(dp),intent(out) :: sum_1lm_1atom(nspinor**2, mlang*mlang,natsph)
+ real(dp),intent(out) :: cplx_1lm_1atom(2,nspinor, mlang*mlang,natsph)
 
 !Local variables-------------------------------
 !scalars
@@ -927,6 +929,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  real(dp) :: c1(2),c2(2)
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
  real(dp) :: func(nradintmax)
+ real(dp) :: func_cplx(nradintmax,2)
  complex(dpc) :: vect(npw_k)
  complex(dpc),allocatable :: tmppsia(:,:),tmppsim(:,:),dotc(:)
  integer, allocatable :: ispinors(:)
@@ -952,6 +955,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  end if
 
  sum_1lm_1atom = zero
+ cplx_1lm_1atom = zero
 
  do ll=0,mlang-1
    do mm=-ll,ll
@@ -1106,12 +1110,13 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
    itypat = typat_extra(iat)
    lm_size = mlang_type(itypat) ** 2
    do ilm=1,lm_size
+
      do ipauli=0,nspinor**2-1
        do ixint=1,nradint(iat)
          func(ixint) = zero
          do is=1,nspinor
            do isp=1,nspinor
-             func(ixint) =  func(ixint) + real(conjg(values(ixint, is, ilm, iat))*pauli_mat(is,isp,ipauli)*&
+             func(ixint) =  func(ixint) + real(conjg(values(ixint, is, ilm, iat)) * pauli_mat(is,isp,ipauli)*&
 &                                                    values(ixint, isp, ilm, iat))
            end do
          end do
@@ -1119,14 +1124,28 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
        end do
        ! Here I should treat the case in which the last point /= rcut
        ! NB: indexing is from 1 not 0 for spin matrix components
-       sum_1lm_1atom(ipauli+1, ilm, iat) = simpson(dr, func(1:nradint(iat)))
+       sum_1lm_1atom   (ipauli+1, ilm, iat) = simpson(dr, func(1:nradint(iat)))
+     end do ! ipauli
+
+     do is = 1, nspinor
+       func_cplx(:,1) = real(values(:, is, ilm, iat))
+       func_cplx(:,2) = aimag(values(:, is, ilm, iat))
+       do ixint=1,nradint(iat)
+         func_cplx(ixint,:) = rint(ixint)**2 * func_cplx(ixint,:)
+       end do
+       cplx_1lm_1atom(1, is, ilm, iat) = simpson(dr, func_cplx(1:nradint(iat),1))
+       cplx_1lm_1atom(2, is, ilm, iat) = simpson(dr, func_cplx(1:nradint(iat),2))
      end do
-   end do
- end do
+
+   end do ! ilm
+ end do ! iat
 
  ! Normalize with unit cell volume and include 4pi term coming from Rayleigh expansion.
  fact = four_pi**2 / ucvol
  sum_1lm_1atom = fact * sum_1lm_1atom
+ cplx_1lm_1atom = fact * cplx_1lm_1atom
+
+ ! sum up the m-independent fractions
  sum_1ll_1atom = zero
  do iat=1,natsph
    itypat = typat_extra(iat)
@@ -1963,6 +1982,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  real(dp),allocatable :: cg_1band(:,:),cg_1kpt(:,:),kpgnorm(:),ph1d(:,:)
  real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1atom_1ll(:,:,:)
  real(dp),allocatable :: sum_1atom_1lm(:,:,:)
+ real(dp),allocatable :: cplx_1atom_1lm(:,:,:,:)
  real(dp),allocatable :: xred_sph(:,:),znucl_sph(:),phkxred(:,:)
  complex(dpc) :: cgcmat(2,2)
 
@@ -2007,7 +2027,10 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
       MSG_ERROR(msg)
    end if
    if(mpi_enreg%me==0) then
-     write (unit_procar,'(a)') 'PROCAR lm decomposed - need to concatenate files in parallel case'
+     write (unit_procar,'(a)') 'PROCAR lm decomposed - need to merge files yourself in parallel case!!! Or use pyprocar package'
+     if (dtset%prtprocar == 2) then
+       write (unit_procar,'(a)') ' Requested complex output of PROCAR file (prtprocar 2)' 
+     end if
      write (unit_procar,'(a,I10,a,I10,a,I10,a)') '# of k-points: ', dtset%nkpt, &
        ' # of bands:', dtset%mband, ' # of ions:', dtset%natom, ch10
    end if
@@ -2054,6 +2077,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    ! init bessel function integral for recip_ylm max ang mom + 1
    ABI_ALLOCATE(sum_1atom_1ll,(dtset%nspinor**2,dos%mbesslang,natsph_tot))
    ABI_ALLOCATE(sum_1atom_1lm,(dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
+   ABI_ALLOCATE(cplx_1atom_1lm,(2,dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
 
    ! Note ecuteff instead of ecut.
    kpgmax = sqrt(dtset%ecut * dtset%dilatmx**2)
@@ -2175,7 +2199,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
          call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+my_nspinor*npw_k), dtset%istwfk(ikpt),&
 &          mpi_enreg, nradint, nradintmax, dos%mbesslang , dtset%mpw, natsph_tot, typat_extra, dos%mlang_type,&
-&          npw_k, dtset%nspinor, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
+&          npw_k, dtset%nspinor, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm, cplx_1atom_1lm,&
 &          crystal%ucvol, ylm_k, znucl_sph)
          ! on exit the sum_1atom_* have both spinors counted
 
@@ -2202,21 +2226,51 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          !shift_b = shift_b + npw_k
          shift_b = shift_b + my_nspinor*npw_k
 
-         ! now we have both spinor components.
+         ! now we have both spinor components. The first option is for real values projections, eventually decomposed by Pauli spinor components
          if (dtset%prtprocar /= 0) then
-           write (unit_procar,'(a)') 'ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot'
+           write (unit_procar,'(a)') 'ion       s      py     pz     px    dxy    dyz    dz2    dxz    dx2    tot'
            do ipauli= 1,dtset%nspinor**2
              ! Contract with Pauli matrices to get projections for this k and band, all atoms and ilang
              do iatom = 1, natsph_tot
-               write (unit_procar, '(I3)', advance='no') iatom
+               write (unit_procar, '(1x,I5)', advance='no') iatom
                do ilang=1,min(dos%mbesslang**2,9)
                  write (unit_procar, '(F7.3)',advance='no') sum_1atom_1lm(ipauli,ilang,iatom)
                end do
                write (unit_procar, '(F7.3)',advance='yes') sum(sum_1atom_1lm(ipauli,:,iatom))
              end do
+             ! final line with sum over atoms
+             write (unit_procar, '(a)', advance='no') 'tot   '
+             do ilang=1,min(dos%mbesslang**2,9)
+               write (unit_procar, '(F7.3)',advance='no') sum(sum_1atom_1lm(ipauli,ilang,:))
+             end do
+             write (unit_procar, '(F7.3)',advance='yes') sum(sum_1atom_1lm(ipauli,:,:))
            end do
-           write (unit_procar,*)
-        end if
+
+           ! second option is to also print the complex projection on the atomic like orbital: <psi_nk | Y_lm> in a sphere
+           !  Two blocks are printed, first real then imaginary part
+           if (dtset%prtprocar == 2) then
+             write (unit_procar,'(2a)') 'ion            s              py              pz              px',&
+&              '             dxy             dyz             dz2             dxz             dx2             tot'
+             do is1= 1,dtset%nspinor
+               ! Contracted with Pauli matrices to get projections for this k and band, all atoms and ilang
+               do iatom = 1, natsph_tot
+                 write (unit_procar, '(1x,I5)', advance='no') iatom
+                 do ilang=1,min(dos%mbesslang**2,9)
+                   write (unit_procar, '(2(F7.3,1x))',advance='no') cplx_1atom_1lm(:,is1,ilang,iatom)
+                 end do
+                 write (unit_procar, '(2(F7.3,1x))',advance='yes') sum(cplx_1atom_1lm(1,is1,:,iatom)), &
+&                   sum(cplx_1atom_1lm(2,is1,:,iatom))
+               end do
+               ! final line with sum over atoms
+               write (unit_procar, '(a)', advance='no') 'charge'
+               do ilang=1,min(dos%mbesslang**2,9)
+                 write (unit_procar, '(F7.3,9x)',advance='no') sum(cplx_1atom_1lm(:,is1,ilang,:)**2)
+               end do
+               write (unit_procar, '(F7.3,9x)',advance='yes') sum(cplx_1atom_1lm(:,is1,:,:)**2)
+             end do
+             write (unit_procar,*)
+           end if
+         end if
 
        end do ! band
 
@@ -2254,6 +2308,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    ABI_DEALLOCATE(rint)
    ABI_DEALLOCATE(sum_1atom_1ll)
    ABI_DEALLOCATE(sum_1atom_1lm)
+   ABI_DEALLOCATE(cplx_1atom_1lm)
    ABI_DEALLOCATE(xred_sph)
    ABI_DEALLOCATE(znucl_sph)
 
