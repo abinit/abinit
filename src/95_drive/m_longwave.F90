@@ -492,7 +492,7 @@ ecore=zero
  end if
 
 !MR:tmp!!!!!!!!! 
-!dyewdq(:,:,:,:,:,:)=zero
+dyewdq(:,:,:,:,:,:)=zero
 
 !Calculate the quadrupole tensor
  if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
