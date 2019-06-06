@@ -2154,6 +2154,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        ABI_DEALLOCATE(sum_1atom_1ll)
        ABI_DEALLOCATE(sum_1atom_1lm)
+       ABI_DEALLOCATE(cplx_1atom_1lm)
        ABI_DEALLOCATE(ph3d)
        ABI_DEALLOCATE(iindex)
        ABI_DEALLOCATE(yfit)
