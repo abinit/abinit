@@ -311,6 +311,7 @@ class FileToTest(object):
             if not opt.startswith("-"):
                 raise ValueError("Wrong fldiff option: %s" % opt)
 
+        self.has_line_count_error = False
         self.do_html_diff = False
 
     @lazy__str__
@@ -393,9 +394,7 @@ class FileToTest(object):
         self.fld_isok = isok
         self.fld_status = status
         self.fld_msg = msg
-
-        if has_line_count_error and not self.exec_error:
-            self.do_html_diff = True
+        self.has_line_count_error = has_line_count_error
 
         return isok, status, msg
 
@@ -1997,9 +1996,11 @@ class BaseTest(object):
 
                     isok, status, msg = f.compare(self.abenv.fldiff_path, self.ref_dir, self.workdir,
                                                   yaml_test=self.yaml_test, timebomb=self.timebomb, outf=fh)
-
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
+
+                if not self.exec_error and f.has_line_count_error:
+                    f.do_html_diff = True
 
                 msg = ": ".join([self.full_id, msg])
                 self.cprint(msg, status2txtcolor[status])
@@ -2247,10 +2248,10 @@ class BaseTest(object):
             safe_hdiff = ext in {".out", ".stdout"}  # Create HTML diff file only for these files
 
             if ref_exists and out_exists and safe_hdiff:
-                out_opt = "-u"
+                out_opt = "-m"
                 # out_opt = "-t"   # For simple HTML table. (can get stuck)
                 # args = ["python", diffpy, out_opt, "-f " + hdiff_fname, out_fname, ref_fname ]
-                args = [diffpy, out_opt, "-f " + hdiff_fname, out_fname, ref_fname]
+                args = [diffpy, out_opt, "-j",  "-f " + hdiff_fname, out_fname, ref_fname]
                 cmd = " ".join(args)
                 # print("Diff", cmd)
 
@@ -2303,7 +2304,7 @@ class BaseTest(object):
                 # out_opt = "-n"
                 # out_opt = "-c"
                 out_opt = "-u"
-                args = [diffpy, out_opt, "-f " + diff_fname, out_fname,
+                args = [diffpy, out_opt, "-j", "-f " + diff_fname, out_fname,
                         ref_fname]
                 cmd = " ".join(args)
 
