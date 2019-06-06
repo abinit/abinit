@@ -17,7 +17,14 @@ import argparse
 
 def abinit_junk(line):
     return (
-        not line.startswith(' ')
+        line.startswith('-')
+        or line.startswith('+')
+        or line.startswith(',')
+        or line.startswith('P')
+        or line.startswith('%')
+        or line.startswith(';')
+        or line.startswith('.')
+        or line.startswith('_')
         or line.isspace()
     )
 
