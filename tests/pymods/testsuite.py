@@ -388,6 +388,7 @@ class FileToTest(object):
                 isok, status = False, 'failed'
                 msg = 'internal error:\n{}: {}'.format(type(e).__name__,
                                                        str(e))
+                has_line_count_error = False
         msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
         # Save comparison results.
