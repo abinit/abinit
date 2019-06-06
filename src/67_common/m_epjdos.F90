@@ -2077,7 +2077,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    ! init bessel function integral for recip_ylm max ang mom + 1
    ABI_ALLOCATE(sum_1atom_1ll,(dtset%nspinor**2,dos%mbesslang,natsph_tot))
    ABI_ALLOCATE(sum_1atom_1lm,(dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
-   ABI_ALLOCATE(cplx_1atom_1lm,(2,dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
+   ABI_ALLOCATE(cplx_1atom_1lm,(2,dtset%nspinor,dos%mbesslang**2,natsph_tot))
 
    ! Note ecuteff instead of ecut.
    kpgmax = sqrt(dtset%ecut * dtset%dilatmx**2)
