@@ -105,7 +105,13 @@ for bin in main_bins:
     # Set directory for library
     lib_opt = "yes"
     if ( lib in abinit_corelibs ):
-      lib_dir = "src/%s" % (lib)
+      parent = lib_cnf.get(lib, "parent")
+      if ( parent == "common" ):
+        lib_dir = "shared/common/src/%s" % (lib)
+      elif ( parent == "libpaw" ):
+        lib_dir = "shared/libpaw/src"
+      else:
+        lib_dir = "src/%s" % (lib)
       lib_tgt = "lib%s.a" % (lib)
       lib_opt = lib_cnf.get(lib,"optional")
     else:

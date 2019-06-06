@@ -292,15 +292,13 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  ! * Initialize QP amplitudes with KS, QP_bst% presently contains KS energies.
  ! * If file not found return, everything has been already initialized with KS values
  !   Here qp_rhor is not needed thus dimrho=0
- ! TODO paral_kgb not implemented but this is the last problem to be solved
-
  ABI_MALLOC(m_lda_to_qp,(mband,mband,dtset%nkptgw,nsppol))
  m_lda_to_qp=czero
  do iband=1,mband
    m_lda_to_qp(iband,iband,:,:)=cone
  end do
 
- ! * Fake MPI_type for rdqps
+ ! Fake MPI_type for rdqps
  call initmpi_seq(MPI_enreg_seq)
 
  my_ngfft=Dtset%ngfft; if (Dtset%usepaw==1.and.ALL(Dtset%ngfftdg(1:3)/=0)) my_ngfft=Dtset%ngfftdg
@@ -321,14 +319,14 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
    ABI_MALLOC(qp_rhor,(nfftot,nspden*dimrho))
 
    call rdqps(QP_bst,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,dimrho,nscf,&
-&   nfftot,my_ngfft,ucvol,Dtset%paral_kgb,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,qp_rhor,prev_Pawrhoij)
+    nfftot,my_ngfft,ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,qp_rhor,prev_Pawrhoij)
 
    ABI_FREE(qp_rhor)
    ABI_DT_FREE(prev_Pawrhoij)
 
- else  ! Read GW file (m_lda_to_qp has been already set to 1, no extrapolation is performed)
-   write(msg,*) ' READING GW CORRECTIONS FROM FILE g0w0 !'
-   MSG_WARNING(msg)
+ else
+   ! Read GW file (m_lda_to_qp has been already set to 1, no extrapolation is performed)
+   MSG_WARNING(' READING GW CORRECTIONS FROM FILE g0w0 !')
    input = from_GW_FILE
    ABI_MALLOC(igwene,(QP_bst%mband,QP_bst%nkpt,QP_bst%nsppol))
    call rdgw(QP_bst,gw_fname,igwene,extrapolate=.FALSE.)
@@ -352,14 +350,14 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
     if (nband_k/=mband) then
       write(msg,'(a,i0,7a)')&
-&       'Number of bands for k point ',ikpt,' is inconsistent with number',ch10,&
-&       'specified for wannier90 calculation',ch10,&
-&       'Action: correct input so all band numbers are equal for GW',ch10,&
-&       'and wannier90 datasets.'
+       'Number of bands for k point ',ikpt,' is inconsistent with number',ch10,&
+       'specified for wannier90 calculation',ch10,&
+       'Action: correct input so all band numbers are equal for GW',ch10,&
+       'and wannier90 datasets.'
       MSG_ERROR(msg)
     end if
 
-    ! === Load KS states for this kbz and spin ===
+    ! Load KS states for this kbz and spin
     do iband=1,nband_k
       icg_shift=npw_k*my_nspinor*(iband-1)+icg
       do ipw=1,npw_k
@@ -417,8 +415,8 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
     if (input==from_QPS_FILE .and. .not.qpenek_is_ordered) then
       write(msg,'(3a)')&
-&      " QP energies read from QPS file are not ordered, likely nband_k>nbdgw. ",ch10,&
-&      " Change nband in the input file so that it equals the number of GW states calculated"
+      " QP energies read from QPS file are not ordered, likely nband_k>nbdgw. ",ch10,&
+      " Change nband in the input file so that it equals the number of GW states calculated"
       MSG_WARNING(msg)
     end if
 
@@ -508,9 +506,9 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  end if !PAW
 
  write(msg,'(6a)')ch10,&
-&  ' mlwfovlp_qp: Input KS wavefuctions have been converted',ch10,&
-&  '  to GW quasiparticle wavefunctions for maximally localized wannier',ch10,&
-&  '  function construction by wannier90.'
+  ' mlwfovlp_qp: Input KS wavefuctions have been converted',ch10,&
+  '  to GW quasiparticle wavefunctions for maximally localized wannier',ch10,&
+  '  function construction by wannier90.'
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 

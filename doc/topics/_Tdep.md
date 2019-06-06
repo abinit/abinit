@@ -39,7 +39,6 @@ order IFCs, we could extract the Gruneisen parameter, the thermal
 expansion, the sound velocities... and in particular, how to take into account
 the anisotropy of the system within.
 
-
 ## Related Input Variables
 
 {{ related_variables }}

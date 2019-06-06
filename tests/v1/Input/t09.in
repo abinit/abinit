@@ -38,6 +38,6 @@
 #%% keywords = NC
 #%% authors = Unknown
 #%% description = 
-#%% O2 molecule, treated as a spin-polarized molecule, with fixed occupation
-#%% numbers (occopt=2), with nsppol=2 . Gives total energy of -32.09792 Hartree
+#%%  O2 molecule, treated as a spin-polarized molecule, with fixed occupation
+#%%  numbers (occopt=2), with nsppol=2 . Gives total energy of -32.09792 Hartree
 #%%<END TEST_INFO>

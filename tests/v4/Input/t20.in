@@ -67,7 +67,7 @@ nloc_alg  2
 #%%   norm-conserving pseudopotentials.  A full description and discussion
 #%%   is given on the ABINIT wiki 
 #%%   https://wiki.abinit.org/doku.php?id=developers:pseudos:psp8_format
-#%%.  This test case, CaO, is an
+#%%   This test case, CaO, is an
 #%%   example of self-interaction-corrected pseudopotentials in the
 #%%   style of D. Vogel, P. Krueger, and J. Pollmann, Phys. Rev. B 52,
 #%%   14 316 (1995).  The bandgap (direct) in the test example, 11.2eV,

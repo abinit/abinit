@@ -50,6 +50,7 @@
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
+#%% no_check = yes
 #%% executable = abinit
 #%% [files]
 #%% psp_files= 70yb.pspnc
