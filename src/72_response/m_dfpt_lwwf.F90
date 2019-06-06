@@ -1671,7 +1671,7 @@ c0_VefielddQ_c1strain_bks=zero
 
      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
      !contribution from ground state density
-     call dfpt_vlocaldqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,mpi_enreg, &
+     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,mpi_enreg, &
      &  psps%mqgrid_vl,dtset%natom, &
      &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),opthartdqdq, &
      &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&

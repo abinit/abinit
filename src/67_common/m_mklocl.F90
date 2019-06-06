@@ -61,7 +61,7 @@ module m_mklocl
  public :: vlocalstr             ! Compute strain derivatives of local ionic potential
 #ifdef MR_DEV
  public :: dfpt_vlocaldq         ! Compute the first q-gradient of the 1st-order potential due to atomic displacement. 
- public :: dfpt_vlocaldqdq       ! Compute the second q-gradient of the 1st-order potential due to a metric perturbation.
+ public :: dfpt_vmetdqdq       ! Compute the second q-gradient of the 1st-order potential due to a metric perturbation.
 #endif
 !!***
 
@@ -1633,9 +1633,9 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 end subroutine dfpt_vlocaldq
 !!***
 
-!!****f* ABINIT/dfpt_vlocaldqdq	
+!!****f* ABINIT/dfpt_vmetdqdq	
 !! NAME
-!! dfpt_vlocaldqdq
+!! dfpt_vmetdqdq
 !!
 !! FUNCTION
 !! Compute second q-gradient (at q=0) of the local part of 1st-order 
@@ -1715,7 +1715,7 @@ end subroutine dfpt_vlocaldq
 !!
 !! SOURCE
 
-subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
+subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
 & ntypat,n1,n2,n3,opthartdqdq,ph1d,qdir,qgrid,qphon,rhog,&
 & ucvol,vlspl,vhart1dqdq,vpsp1dqdq)
@@ -1724,7 +1724,7 @@ subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfpt_vlocaldqdq'
+#define ABI_FUNC 'dfpt_vmetdqdq'
 !End of the abilint section
 
  implicit none
@@ -2078,7 +2078,7 @@ subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 &   dble(2*i2*i3)*gmet(2,3)+dble(2*i3*i1)*gmet(3,1)
  end function gsq_vl
 
-end subroutine dfpt_vlocaldqdq
+end subroutine dfpt_vmetdqdq
 #endif
 
 end module m_mklocl
