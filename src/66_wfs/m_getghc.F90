@@ -224,6 +224,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    MSG_BUG(msg)
  end if
  if (size(ghc)<2*npw_k2*my_nspinor*ndat) then
+   !print *, "size(ghc)", size(ghc)
+   !print *, "2*npw_k2*my_nspinor*ndat", 2*npw_k2*my_nspinor*ndat
    msg='wrong size for ghc!'
    MSG_BUG(msg)
  end if

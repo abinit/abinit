@@ -216,6 +216,7 @@ module m_chebfiwf
 !  print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
 !  print *, "nband", nband
   !stop
+  !call random_number(cg) !to test validity of algo
   
   call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft) 
   
@@ -258,10 +259,12 @@ module m_chebfiwf
   !stop
   !print *, "INIT SPACE", space
   !stop
-  
+
+
   call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, dtset%paral_kgb, l_mpi_enreg%nproc_band, &
-                   l_mpi_enreg%bandpp, l_mpi_enreg%nproc_fft, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft, l_mpi_enreg%me_g0, l_paw) 
-                   !blockdim
+                   l_mpi_enreg%bandpp, l_mpi_enreg%nproc_fft, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft, l_mpi_enreg%me_g0, l_paw)
+  !chebfi_init(chebfi, neigenpairs, spacedim, tolerance, ecut, nline, space, eigenProblem, istwf_k, spacecom, me_g0, paw)                
+  !call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft, l_mpi_enreg%me_g0, l_paw) 
  
   !###########################################################################
   !################    RUUUUUUUN    ##########################################
@@ -270,6 +273,7 @@ module m_chebfiwf
   ! Run chebfi
   call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu) 
 
+  !stop
   ! Free preconditionning since not needed anymore
   ABI_FREE(l_pcon)
     

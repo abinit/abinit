@@ -1,21 +1,25 @@
 forrtl: error (69): process interrupted (SIGINT)
 Image              PC                Routine            Line        Source             
-libifcoremt.so.5   00007F977A71D555  for__signal_handl     Unknown  Unknown
-libpthread-2.27.s  00007F977F37F890  Unknown               Unknown  Unknown
-abinit             000000000143A1BF  m_opernla_ylm_mp_         275  m_opernla_ylm.F90
-abinit             00000000013EE1D6  m_nonlop_ylm_mp_n         778  m_nonlop_ylm.F90
-abinit             00000000013C1C38  m_nonlop_mp_nonlo         730  m_nonlop.F90
-abinit             000000000069B10C  m_vtowfk_mp_vtowf         812  m_vtowfk.F90
-abinit             000000000066F567  m_vtorho_mp_vtorh         964  m_vtorho.F90
-abinit             0000000000601123  m_scfcv_core_mp_s        1548  m_scfcv_core.F90
-abinit             00000000005F58E9  m_scfcv_mp_scfcv_         703  m_scfcv.F90
-abinit             00000000005CA22A  m_gstate_mp_gstat        1309  m_gstate.F90
-abinit             000000000042C9A5  m_gstateimg_mp_gs         564  m_gstateimg.F90
-abinit             000000000041AE8F  m_driver_mp_drive         697  m_driver.F90
-abinit             000000000040997B  MAIN__                    399  abinit.F90
-abinit             0000000000408492  Unknown               Unknown  Unknown
-libc-2.27.so       00007F9778140B97  __libc_start_main     Unknown  Unknown
-abinit             000000000040837A  Unknown               Unknown  Unknown
+libifcoremt.so.5   00007F8D439B9555  for__signal_handl     Unknown  Unknown
+libpthread-2.27.s  00007F8D4861B890  Unknown               Unknown  Unknown
+abinit             000000000148C164  Unknown               Unknown  Unknown
+abinit             00000000014323D9  Unknown               Unknown  Unknown
+abinit             0000000001401642  Unknown               Unknown  Unknown
+abinit             00000000012DCE73  Unknown               Unknown  Unknown
+abinit             00000000006B2FB4  Unknown               Unknown  Unknown
+abinit             0000000001BCDBB8  Unknown               Unknown  Unknown
+abinit             00000000006B0230  Unknown               Unknown  Unknown
+abinit             00000000006A34C5  Unknown               Unknown  Unknown
+abinit             0000000000678FC7  Unknown               Unknown  Unknown
+abinit             0000000000607D73  Unknown               Unknown  Unknown
+abinit             00000000005FC4C3  Unknown               Unknown  Unknown
+abinit             00000000005D0513  Unknown               Unknown  Unknown
+abinit             000000000042D702  Unknown               Unknown  Unknown
+abinit             000000000041B710  Unknown               Unknown  Unknown
+abinit             000000000040998B  Unknown               Unknown  Unknown
+abinit             00000000004084A2  Unknown               Unknown  Unknown
+libc-2.27.so       00007F8D413DCB97  __libc_start_main     Unknown  Unknown
+abinit             000000000040838A  Unknown               Unknown  Unknown
 Command exited with non-zero status 1
-3234.85user 3.86system 54:01.40elapsed 99%CPU (0avgtext+0avgdata 249824maxresident)k
-136inputs+832outputs (2major+4578876minor)pagefaults 0swaps
+113.04user 0.54system 1:56.11elapsed 97%CPU (0avgtext+0avgdata 253080maxresident)k
+73240inputs+56outputs (248major+118973minor)pagefaults 0swaps
