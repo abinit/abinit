@@ -1704,7 +1704,7 @@ end subroutine dfpt_vlocaldq
 
 subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qdir1,qdir2,qgrid,qphon,ucvol,vlspl,vpsp1dqd1,xred)
+& ntypat,n1,n2,n3,ph1d,qdir1,qdir2,qgrid,qphon,ucvol,vlspl,vpsp1dqdq,xred)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1734,7 +1734,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
  integer :: itypat,jj,re=1
  real(dp),parameter :: tolfix=1.000000001_dp
- real(dp) :: aa,bb,cc,cutoff,dd,delad,delag,deldg,diff,gfact,gfact1,gfact2,,gmag,gq1
+ real(dp) :: aa,bb,cc,cutoff,dd,delad,delag,deldg,diff,gfact,gfact1,gfact2,gmag,gq1
  real(dp) :: gq2,gq3,gsquar
  real(dp) :: sfi,sfr,term1,term2,xnorm
  logical :: qeq0
@@ -1834,7 +1834,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
              gfact2=dot_product(gmet(delta,:),gvec(:))
              gfact=gvec(alpha)*gfact1*gfact2/gsquar
 
-             term1=delag*gfact2+delad*gfact1+deldg*gvec(alpha)*gmet(gamma,beta)
+             term1=delag*gfact2+delad*gfact1+deldg*gvec(alpha)*gmet(gamma,delta)
              term1=term1-gfact
              term1=term1*vion1dq(1)/gmag
 
