@@ -91,8 +91,8 @@ def make(ctx, jobs="auto", touch=False, clean=False):
     """
     Touch all modified files and recompile the code with -jNUM.
     """
-    with cd(ABINIT_SRCDIR):
-        if touch:
+    if touch:
+        with cd(ABINIT_ROOTDIR):
             cmd = "./abisrc.py touch"
             cprint("Executing: %s" % cmd, "yellow")
             result = ctx.run(cmd, pty=True)
@@ -104,12 +104,23 @@ def make(ctx, jobs="auto", touch=False, clean=False):
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
 
     with cd(top):
-        if clean: ctx.run("make clean", pty=True)
+        if clean: 
+            ctx.run("cd src && make clean && cd ..", pty=True)
+            ctx.run("cd shared && make clean && cd ..", pty=True)
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
         cprint("Executing: %s" % cmd, "yellow")
         retcode = ctx.run(cmd, pty=True)
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
+
+
+@task
+def clean(ctx):
+    """Remove object files in src and shared."""
+    top = find_top_build_tree(".", with_abinit=False)
+    with cd(top):
+        ctx.run("cd src && make clean && cd ..", pty=True)
+        ctx.run("cd shared && make clean && cd ..", pty=True)
 
 
 @task

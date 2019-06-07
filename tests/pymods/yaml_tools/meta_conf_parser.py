@@ -1,13 +1,12 @@
 from __future__ import print_function, division, unicode_literals
 from inspect import isclass
 from copy import deepcopy
-from numpy import ndarray
 from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
                      IllegalFilterNameError)
 from .abinit_iterators import IterStateFilter
-from .register_tag import normalize_attr
 from .tricks import cstm_isinstance
-from .structures import Undef
+from .common import Undef, normalize_attr, string, BaseArray, FailDetail
+from warnings import warn
 
 
 def make_apply_to(type_):
@@ -20,21 +19,21 @@ def make_apply_to(type_):
         def apply_to(self, obj):
             return isinstance(obj, (int, float, complex))
 
-    elif type_ == 'real' or (isclass(type_) and issubclass(type_, float)):
+    elif type_ == 'real':
         def apply_to(self, obj):
             return isinstance(obj, float)
 
-    elif type_ == 'integer' or (isclass(type_) and issubclass(type_, int)):
+    elif type_ == 'integer':
         def apply_to(self, obj):
             return isinstance(obj, int)
 
-    elif type_ == 'complex' or (isclass(type_) and issubclass(type_, complex)):
+    elif type_ == 'complex':
         def apply_to(self, obj):
-            return isinstance(obj, complex)
+            return isinstance(obj, (float, complex))
 
-    elif type_ == 'Array' or (isclass(type_) and issubclass(type_, ndarray)):
+    elif type_ == 'Array':
         def apply_to(self, obj):
-            return isinstance(obj, ndarray)
+            return getattr(obj, '_is_base_array', False)
 
     elif type_ == 'this':
         def apply_to(self, obj):
@@ -67,6 +66,7 @@ class Constraint(object):
         self.metadata = metadata
         self.handle_undef = handle_undef
 
+        self._apply_to_type = apply_to
         self._apply_to = make_apply_to(apply_to)
 
     def __repr__(self):
@@ -86,14 +86,25 @@ class Constraint(object):
             Return True if the constraint is verified.
         '''
         # apply to floats at least
-        if self._apply_to(self, 1.0) and self.handle_undef:
-            if conf.get_param('allow_undef'):
-                if ref == Undef():
-                    print('left undef')
-                    return True
-            elif ref == Undef() or tested == Undef():
-                print('left or right undef')
-                return False
+        if getattr(ref, '_not_available', False):
+            return FailDetail(
+                'This constraint was to be applied to a document that is not'
+                ' available (check warnings).'
+            )
+        if self.handle_undef:
+            if isinstance(ref, (float, complex)) and self._apply_to(self, 1.0):
+                if conf.get_param('allow_undef'):
+                    if Undef.is_undef(ref):
+                        return True
+                elif Undef.is_undef(ref) or Undef.is_undef(tested):
+                    return FailDetail('undef value have been found.')
+            elif (getattr(ref, '_is_base_array', False)
+                  and self._apply_to(self, BaseArray((0,)))):
+                if conf.get_param('allow_undef'):
+                    if ref._has_undef:
+                        return True
+                elif ref._has_undef or tested._has_undef:
+                    return FailDetail('undef value have been found.')
 
         params = [conf.get_param(p) for p in self.use_params]
         return self.test(self.value, ref, tested, *params)
@@ -149,7 +160,9 @@ class SpecKey(object):
     @classmethod
     def parse(cls, name):
         hardr = False
-        if name.endswith('!'):
+        if isinstance(name, int):
+            name = string(name)
+        elif name.endswith('!'):
             hardr = True
             name = name[:-1]
 
@@ -303,9 +316,9 @@ class ConfParser(object):
     def __init__(self):
         self.parameters = {
             'allow_undef': {
-                 'type': bool,
-                 'inherited': True,
-                 'default': True
+                'type': bool,
+                'inherited': True,
+                'default': True
             }
         }
         self.constraints = {}
@@ -380,13 +393,15 @@ class ConfParser(object):
                     raise IllegalFilterNameError(name)
                 filters[name] = IterStateFilter(filt)
 
-                # Parse each filtered tree then remove it from the source tree
+                # Parse each filtered tree and remove it from the source tree
                 if name in parsed_src:
                     self.metadata['tree'] = name
-                    trees[name] = ConfTree.make_tree(parsed_src[name], self)
-                    del parsed_src[name]
+                    trees[name] = ConfTree.make_tree(parsed_src.pop(name),
+                                                     self)
                 else:
-                    pass  # Should we raise an error ?
+                    # Should we raise an error ?
+                    warn('In YAML config {} filter is defined but not used.'
+                         .format(name))
 
             # Remove the filters field from the dict
             del parsed_src['filters']

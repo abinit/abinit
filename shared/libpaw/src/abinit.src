@@ -1,0 +1,49 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2019 ABINIT Group (MT, TRangel)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 39_libpaw library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "libpaw_libxc.c",
+ "m_libpaw_mpi.F90",
+ "m_libpaw_tools.F90",
+ "m_libpaw_libxc.F90",
+ "m_paral_atom.F90",
+ "m_paw_numeric.F90",
+ "m_paw_sphharm.F90",
+ "m_paw_io.F90",
+ "m_pawang.F90",
+ "m_pawrad.F90",
+ "m_pawtab.F90",
+ "m_paw_an.F90",
+ "m_paw_ij.F90",
+ "m_pawfgrtab.F90",
+ "m_paw_finegrid.F90",
+ "m_paw_onsite.F90",
+ "m_pawcprj.F90",
+ "m_pawrhoij.F90",
+ "m_pawdij.F90",
+ "m_pawxc.F90",
+ "m_paw_atom.F90",
+ "m_paw_gaussfit.F90",
+ "m_pawxmlps.F90",
+ "m_pawpsp.F90"
+ ]
+# IMPORTANT : please DO NOT use the alphabetic order in the previous list.
+# They are placed in compilation order.
+# If module A depends on module B, put first module B and then module A.
+# This is important to compile libpaw in standalone mode.
