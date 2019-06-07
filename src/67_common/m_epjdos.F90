@@ -1980,9 +1980,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  real(dp),allocatable :: ylm_k(:,:)
  real(dp),allocatable :: bess_fit(:,:,:)
  real(dp),allocatable :: cg_1band(:,:),cg_1kpt(:,:),kpgnorm(:),ph1d(:,:)
- real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1atom_1ll(:,:,:)
- real(dp),allocatable :: sum_1atom_1lm(:,:,:)
- real(dp),allocatable :: cplx_1atom_1lm(:,:,:,:)
+ real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1ll_1atom(:,:,:)
+ real(dp),allocatable :: sum_1lm_1atom(:,:,:)
+ real(dp),allocatable :: cplx_1lm_1atom(:,:,:,:)
  real(dp),allocatable :: xred_sph(:,:),znucl_sph(:),phkxred(:,:)
  complex(dpc) :: cgcmat(2,2)
 
@@ -2075,9 +2075,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    end do
 
    ! init bessel function integral for recip_ylm max ang mom + 1
-   ABI_ALLOCATE(sum_1atom_1ll,(dtset%nspinor**2,dos%mbesslang,natsph_tot))
-   ABI_ALLOCATE(sum_1atom_1lm,(dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
-   ABI_ALLOCATE(cplx_1atom_1lm,(2,dtset%nspinor,dos%mbesslang**2,natsph_tot))
+   ABI_ALLOCATE(sum_1ll_1atom,(dtset%nspinor**2,dos%mbesslang,natsph_tot))
+   ABI_ALLOCATE(sum_1lm_1atom,(dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
+   ABI_ALLOCATE(cplx_1lm_1atom,(2,dtset%nspinor,dos%mbesslang**2,natsph_tot))
 
    ! Note ecuteff instead of ecut.
    kpgmax = sqrt(dtset%ecut * dtset%dilatmx**2)
@@ -2199,7 +2199,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
          call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+my_nspinor*npw_k), dtset%istwfk(ikpt),&
 &          mpi_enreg, nradint, nradintmax, dos%mbesslang , dtset%mpw, natsph_tot, typat_extra, dos%mlang_type,&
-&          npw_k, dtset%nspinor, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm, cplx_1atom_1lm,&
+&          npw_k, dtset%nspinor, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1ll_1atom, sum_1lm_1atom, cplx_1lm_1atom,&
 &          crystal%ucvol, ylm_k, znucl_sph)
          ! on exit the sum_1atom_* have both spinors counted
 
@@ -2208,7 +2208,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
            do ilang=1,dos%mbesslang
              dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
 &             = dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
-&             + sum_1atom_1ll(1,ilang,iatom)
+&             + sum_1ll_1atom(1,ilang,iatom)
            end do
          end do
 
@@ -2217,7 +2217,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
              do ilang=1,dos%mbesslang**2
                dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
 &               = dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
-&               + sum_1atom_1lm(1,ilang,iatom)
+&               + sum_1lm_1atom(1,ilang,iatom)
              end do
            end do
          end if
@@ -2234,16 +2234,16 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
              do iatom = 1, natsph_tot
                write (unit_procar, '(1x,I5)', advance='no') iatom
                do ilang=1,min(dos%mbesslang**2,9)
-                 write (unit_procar, '(F7.3)',advance='no') sum_1atom_1lm(ipauli,ilang,iatom)
+                 write (unit_procar, '(F7.3)',advance='no') sum_1lm_1atom(ipauli,ilang,iatom)
                end do
-               write (unit_procar, '(F7.3)',advance='yes') sum(sum_1atom_1lm(ipauli,:,iatom))
+               write (unit_procar, '(F7.3)',advance='yes') sum(sum_1lm_1atom(ipauli,:,iatom))
              end do
              ! final line with sum over atoms
              write (unit_procar, '(a)', advance='no') 'tot   '
              do ilang=1,min(dos%mbesslang**2,9)
-               write (unit_procar, '(F7.3)',advance='no') sum(sum_1atom_1lm(ipauli,ilang,:))
+               write (unit_procar, '(F7.3)',advance='no') sum(sum_1lm_1atom(ipauli,ilang,:))
              end do
-             write (unit_procar, '(F7.3)',advance='yes') sum(sum_1atom_1lm(ipauli,:,:))
+             write (unit_procar, '(F7.3)',advance='yes') sum(sum_1lm_1atom(ipauli,:,:))
            end do
 
            ! second option is to also print the complex projection on the atomic like orbital: <psi_nk | Y_lm> in a sphere
@@ -2256,17 +2256,17 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
                do iatom = 1, natsph_tot
                  write (unit_procar, '(1x,I5)', advance='no') iatom
                  do ilang=1,min(dos%mbesslang**2,9)
-                   write (unit_procar, '(2(F7.3,1x))',advance='no') cplx_1atom_1lm(:,is1,ilang,iatom)
+                   write (unit_procar, '(2(F7.3,1x))',advance='no') cplx_1lm_1atom(:,is1,ilang,iatom)
                  end do
-                 write (unit_procar, '(2(F7.3,1x))',advance='yes') sum(cplx_1atom_1lm(1,is1,:,iatom)), &
-&                   sum(cplx_1atom_1lm(2,is1,:,iatom))
+                 write (unit_procar, '(2(F7.3,1x))',advance='yes') sum(cplx_1lm_1atom(1,is1,:,iatom)), &
+&                   sum(cplx_1lm_1atom(2,is1,:,iatom))
                end do
                ! final line with sum over atoms
                write (unit_procar, '(a)', advance='no') 'charge'
                do ilang=1,min(dos%mbesslang**2,9)
-                 write (unit_procar, '(F7.3,9x)',advance='no') sum(cplx_1atom_1lm(:,is1,ilang,:)**2)
+                 write (unit_procar, '(F7.3,9x)',advance='no') sum(cplx_1lm_1atom(:,is1,ilang,:)**2)
                end do
-               write (unit_procar, '(F7.3,9x)',advance='yes') sum(cplx_1atom_1lm(:,is1,:,:)**2)
+               write (unit_procar, '(F7.3,9x)',advance='yes') sum(cplx_1lm_1atom(:,is1,:,:)**2)
              end do
              write (unit_procar,*)
            end if
@@ -2306,9 +2306,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    ABI_DEALLOCATE(phkxred)
    ABI_DEALLOCATE(ratsph)
    ABI_DEALLOCATE(rint)
-   ABI_DEALLOCATE(sum_1atom_1ll)
-   ABI_DEALLOCATE(sum_1atom_1lm)
-   ABI_DEALLOCATE(cplx_1atom_1lm)
+   ABI_DEALLOCATE(sum_1ll_1atom)
+   ABI_DEALLOCATE(sum_1lm_1atom)
+   ABI_DEALLOCATE(cplx_1lm_1atom)
    ABI_DEALLOCATE(xred_sph)
    ABI_DEALLOCATE(znucl_sph)
 
