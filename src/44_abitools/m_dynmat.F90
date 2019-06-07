@@ -2866,7 +2866,7 @@ logical pure function filterw(wg)
    do iat=1,natom
      trace = trace + abs(wg(iat,iat))
    end do
-   filterw =  trace < tol16
+   filterw = trace < tol16
  case default
    filterw = .False.
  end select

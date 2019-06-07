@@ -1561,7 +1561,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
 
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
  ddbun = get_unit()
- call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION, comm=comm, dimonly=1)
+ call ddb_hdr_open_read(ddb_hdr, filename, ddbun, DDB_VERSION, comm=comm, dimonly=1)
 
  nblok = ddb_hdr%nblok
  mtyp = ddb_hdr%mblktyp
@@ -1582,14 +1582,13 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
    MSG_ERROR(sjoin("input natom:",itoa(natom),"does not agree with DDB value:",itoa(natom)))
  end if
 
- mpert=natom+6
+ mpert = natom+6
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
 
  ! Allocate arrays depending on msym (which is actually fixed to nsym inside inprep8)
  ABI_MALLOC(symrel,(3,3,msym))
  ABI_MALLOC(symafm,(msym))
  ABI_MALLOC(tnons,(3,msym))
-
  ABI_MALLOC(typat,(natom))
  ABI_MALLOC(xred,(3,natom))
  ABI_MALLOC(zion,(ntypat))
@@ -1608,11 +1607,11 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
    call ddb_malloc(ddb,msize,nblok,natom,ntypat)
 
    call rdddb9(acell,atifc,amu,ddb,&
-&   ddbun,filename,gmet,gprim,indsym,ab_out,&
-&   mband,mpert,msize,msym,&
-&   natifc,ddb_natom,nkpt,nsym,ntypat,&
-&   rmet,rprim,symrec,symrel,symafm,&
-&   tnons,typat,ucvol,xcart,xred,zion,znucl)
+    ddbun,filename,gmet,gprim,indsym,ab_out,&
+    mband,mpert,msize,msym,&
+    natifc,ddb_natom,nkpt,nsym,ntypat,&
+    rmet,rprim,symrec,symrel,symafm,&
+    tnons,typat,ucvol,xcart,xred,zion,znucl)
 
    close(ddbun)
 
@@ -1625,10 +1624,10 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
    if (abs(brav)/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
      if(abs(rprim(1,2))<tol6)then
        write(message, '(a,i0,7a)' )&
-&       'The input DDB value of brav is ',brav,',',ch10,&
-&       'and the one of rprim(1,2) is zero.',ch10,&
-&       'These are incompatible',ch10,&
-&       'Action: check the value of brav and rprim(1,2) in your DDB.'
+        'The input DDB value of brav is ',brav,',',ch10,&
+        'and the one of rprim(1,2) is zero.',ch10,&
+        'These are incompatible',ch10,&
+        'Action: check the value of brav and rprim(1,2) in your DDB.'
        MSG_ERROR(message)
      end if
      factor=abs(rprim(1,2))*two
@@ -1674,7 +1673,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
    call xmpi_bcast(znucl, master, comm, ierr)
  end if
 
-!Initialize crystal_t object.
+ ! Initialize crystal_t object.
  call mkrdim(acell,rprim,rprimd)
 
 !FIXME: These variables are hardcoded
@@ -1686,10 +1685,10 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
    write(title(ii),'(a,i0)')"No title for typat ",ii
  end do
 
-!Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
+ ! Warning znucl is dimensioned with ntypat = nspsp hence alchemy is not supported here
  call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
-&  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
-&  symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
+   zion,znucl,timrev,use_antiferro,.FALSE.,title,&
+   symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
 
  ABI_FREE(title)
  ABI_FREE(symrel)
@@ -2332,18 +2331,16 @@ integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
  ! In case it was not found, iblok = 0
  zeff=zero; dielt=zero; dielt(1,1)=one; dielt(2,2)=one; dielt(3,3)=one
 
- if (iblok/=0) then
+ if (iblok /= 0) then
    write(message, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
-&   ' Dielectric Tensor and Effective Charges ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   ' Dielectric Tensor and Effective Charges ',ch10
+   call wrtout([std_out, ab_out],message)
 
    ! Make the imaginary part of the Gamma block vanish
    write(message, '(a,a,a,a,a)'  ) ch10,&
-&   ' anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,',ch10,&
-&   '   and impose the ASR on the effective charges ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   ' anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,',ch10,&
+   '   and impose the ASR on the effective charges ',ch10
+   call wrtout([std_out, ab_out],message)
 
    ! Impose the charge neutrality on the effective charges and eventually select some parts of the effective charges
    call chneu9(chneut,ddb%val(:,:,iblok),ddb%mpert,ddb%natom,ddb%ntypat,selectz,Crystal%typat,Crystal%zion)
@@ -2384,7 +2381,7 @@ end function ddb_get_dielt_zeff
 !!
 !! SOURCE
 
-integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
+integer function ddb_get_dielt(ddb, rftyp, dielt) result(iblok)
 
 !Arguments -------------------------------
 !scalars

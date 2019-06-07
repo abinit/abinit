@@ -267,17 +267,21 @@ module m_dvdb
   integer :: mpert
    ! Maximum number of perturbations
 
-  integer :: my_nrpt=0
+  integer :: my_nrpt = 0
   ! Number of real space points used for Fourier interpolation treated by this MPI rank.
 
-  integer :: prtvol=0
+  integer :: prtvol = 0
    ! Verbosity level
+
+  real(dp) :: qdamp = -one
+   ! Exponential damping used in the Fourier transform of the long-range potentials
+   ! Use negative value to deactivate damping.
 
   logical :: debug = .False.
    ! Debug flag
 
   logical :: has_dielt_zeff = .False.
-   ! Does the dvdb have the dielectric tensor and Born effective charges
+  ! True if the dielectric tensor and the Born effective charges are available.
 
   logical :: add_lr_part = .True.
    ! Logical flag to not add the long range part after the interpolation.
@@ -297,7 +301,7 @@ module m_dvdb
   character(len=fnlen) :: path = ABI_NOFILE
    ! File name of the DVDB file.
 
-  real(dp) :: dielt(3,3) = zero
+  real(dp) :: dielt(3, 3) = zero
    ! Dielectric tensor in Cartesian coordinates.
    ! Used to deal with the long-range componenent in the Fourier interpolation.
 
@@ -354,15 +358,19 @@ module m_dvdb
   ! NB: For the time being, this quantity is not used. Long range term is treated with Verdi's model.
 
   real(dp),allocatable :: zeff(:,:,:)
-  ! zeff(3,3,natom)
+  ! zeff(3, 3, natom)
   ! Effective charges on each atom, versus electric field and atomic displacement in Cartesian coordinates.
   ! Used to deal with the long-range componenent in the Fourier interpolation.
+
+  real(dp),allocatable :: qstar(:,:,:,:)
+  ! qstar(3, 3, 3, natom)
+  ! dynamical quadrupole
 
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDB file.
 
   type(hdr_type) :: hdr_ref
-  ! Header associated to the first potential. Used to backspace.
+  ! Header associated to the first potential in the DVDB. Used to backspace.
   ! Gives the number of Fortran records required to backspace the header
   ! Assume headers with same headform and same basic dimensions e.g. npsp
 
@@ -422,10 +430,10 @@ module m_dvdb
    ! Use cache to reduce number of slow FTs.
 
    procedure :: ftqcache_build => dvdb_ftqcache_build
-   ! This function initializes the internal q-cache from W(r,R)
+   ! This function initializes the internal q-cache from W(r, R)
 
    procedure :: ftqcache_update_from_ft => dvdb_ftqcache_update_from_ft
-   ! This function initializes the internal q-cache from W(r,R)
+   ! This function initializes the internal q-cache from W(r, R)
 
    procedure :: v1r_long_range => dvdb_v1r_long_range
    ! Long-range part of the phonon potential
@@ -663,6 +671,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 
  ! Init Born effective charges
  ABI_CALLOC(new%zeff, (3, 3, new%natom))
+ ABI_CALLOC(new%qstar, (3, 3, 3, new%natom))
 
  ! Internal MPI_type needed for calling fourdp!
  call initmpi_seq(new%mpi_enreg)
@@ -839,6 +848,7 @@ subroutine dvdb_free(db)
  ABI_SFREE(db%my_wratm)
  ABI_SFREE(db%rhog1_g0)
  ABI_SFREE(db%zeff)
+ ABI_SFREE(db%qstar)
 
  ! types
  call hdr_free(db%hdr_ref)
@@ -919,7 +929,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  if (db%nqpt > 10) write(std_out,"(a)")"..."
 
  write(std_out,"(a)")sjoin(" Have dielectric tensor and Born effective charges:", yesno(db%has_dielt_zeff))
- write(std_out,"(a)")sjoin(" Add LR term in polar materials:", yesno(db%add_lr_part))
+ write(std_out,"(a)")sjoin(" Use special treatment of long-range part in polar materials:", yesno(db%add_lr_part))
  if (db%has_dielt_zeff) then
    write(std_out, '(a,3(/,3es16.6))') ' Dielectric Tensor:', &
      db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
@@ -927,12 +937,22 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
      db%dielt(3,1), db%dielt(3,2), db%dielt(3,3)
    write(std_out, '(a)') ' Effectives Charges: '
    do iatom=1,db%natom
-     write(std_out,'(a,i0,3(/,3es16.6))')' iatom: ',iatom, &
+     write(std_out,'(a,i0,3(/,3es16.6))')' iatom: ', iatom, &
        db%zeff(1,1,iatom), db%zeff(1,2,iatom), db%zeff(1,3,iatom), &
        db%zeff(2,1,iatom), db%zeff(2,2,iatom), db%zeff(2,3,iatom), &
        db%zeff(3,1,iatom), db%zeff(3,2,iatom), db%zeff(3,3,iatom)
    end do
  end if
+
+ !if (db%has_quadrupoles) then
+ !  write(std_out, '(a)') ' Dynamical Quadrupoles: '
+ !  do iatom=1,db%natom
+ !    write(std_out,'(a,i0,3(/,3es16.6))')' iatom: ', iatom, &
+ !      db%qstar(1,1,iatom), db%qstar(1,2,iatom), db%qstar(1,3,iatom), &
+ !      db%qstar(2,1,iatom), db%qstar(2,2,iatom), db%qstar(2,3,iatom), &
+ !      db%qstar(3,1,iatom), db%qstar(3,2,iatom), db%qstar(3,3,iatom)
+ !  end do
+ !end if
 
  if (my_prtvol > 0) then
    call crystal_print(db%cryst, header="Crystal structure in DVDB file")
@@ -2893,7 +2913,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
 
      ! Compute long-range part of the coupling potential.
-     if (db%has_dielt_zeff .and. db%add_lr_part) then
+     if (db%add_lr_part) then
        do imyp=1,db%my_npert
          idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
          call dvdb_v1r_long_range(db, qpt_bz, ipert, idir, nfft, ngfft, v1r_lr(:,:,imyp))
@@ -2906,7 +2926,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        ABI_CHECK(all(g0q == 0), "gamma point with g0q /= 0")
 
        ! Substract the long-range part of the potential.
-       if (db%has_dielt_zeff .and. db%add_lr_part) then
+       if (db%add_lr_part) then
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
@@ -2960,7 +2980,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
 
        ! Substract the long-range part of the potential.
-       if (db%has_dielt_zeff .and. db%add_lr_part) then
+       if (db%add_lr_part) then
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
@@ -3165,7 +3185,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
  call calc_eiqr(qpt, db%my_nrpt, db%my_rpt, eiqr)
 
  ! Compute long-range part of the coupling potential
- if (db%has_dielt_zeff .and. db%add_lr_part) then
+ if (db%add_lr_part) then
    ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3191,14 +3211,14 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
          ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) + wi * weiqr(1, ir)
        end do
        ! Add the long-range part of the potential
-       if (db%has_dielt_zeff .and. db%add_lr_part) then
+       if (db%add_lr_part) then
          ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + v1r_lr(1, ifft, imyp)
          ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + v1r_lr(2, ifft, imyp)
        end if
      end do ! ifft
 
      !beta = czero
-     !if (db%has_dielt_zeff .and. db%add_lr_part) then
+     !if (db%add_lr_part) then
      !  beta = cone
      !  ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
      !end if
@@ -3847,7 +3867,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
      ! Compute long-range part of the coupling potential
      !call cwtime(cpu, wall, gflops, "start")
      v1r_lr = zero; cnt = 0
-     if (db%has_dielt_zeff .and. db%add_lr_part) then
+     if (db%add_lr_part) then
        idir = mod(ipert-1, 3) + 1; iat = (ipert - idir) / 3 + 1
        call dvdb_v1r_long_range(db, qpt_bz, iat, idir, nfft, ngfft, v1r_lr)
      end if
@@ -4030,7 +4050,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
  ! Compute long-range part of the coupling potential
  v1r_lr = zero; cnt = 0
- if (db%has_dielt_zeff .and. db%add_lr_part) then
+ if (db%add_lr_part) then
    call dvdb_v1r_long_range(db, qpt, iat, idir, nfft, ngfft, v1r_lr)
  end if
 
@@ -5314,7 +5334,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: brav1 = 1, master = 0, natifc0 = 0, rfmeth1 = 1, selectz0 = 0
- integer :: nfft, iq, cplex, mu, ispden, comm_rpt, chneut, iblock, my_rank,  ierr
+ integer :: nfft, iq, cplex, mu, ispden, comm_rpt, chneut, iblock_dielt, iblock_dielt_zeff, my_rank,  ierr
  logical :: autotest
  type(dvdb_t) :: dvdb, coarse_dvdb
  type(vdiff_t) :: vd_max
@@ -5345,27 +5365,31 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 
  !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
- iblock = 0
+ iblock_dielt = 0; iblock_dielt_zeff = 0
  if (len_trim(ddb_path) > 0) then
    ABI_CALLOC(dummy_atifc, (dvdb%natom))
    call ddb_from_file(ddb, ddb_path, brav1, dvdb%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=prtvol)
    ABI_FREE(dummy_atifc)
    call cryst_ddb%free()
 
+   ! Get Dielectric Tensor
+   iblock_dielt = ddb_get_dielt(ddb, rfmeth1, dielt)
+   dvdb%dielt = dielt
+
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    ABI_MALLOC(zeff, (3, 3, dvdb%natom))
    chneut = 2
-   iblock = ddb_get_dielt_zeff(ddb, dvdb%cryst, rfmeth1, chneut, selectz0, dielt, zeff)
+   iblock_dielt_zeff = ddb_get_dielt_zeff(ddb, dvdb%cryst, rfmeth1, chneut, selectz0, dielt, zeff)
    if (my_rank == master) then
-     if (iblock == 0) then
+     if (iblock_dielt_zeff == 0) then
        call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
        call wrtout(ab_out, "Values initialized with zeros")
      else
        call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
      end if
    end if
-   if (iblock /= 0) then
+   if (iblock_dielt_zeff /= 0) then
      dvdb%dielt = dielt
      dvdb%zeff = zeff
      dvdb%has_dielt_zeff = .True.
@@ -5638,7 +5662,6 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
    v1G_lr(2,ig) = phim * re + phre * im
  end do
 
- ! Free memory
  ABI_FREE(gfft)
 
  ! FFT to get the long-range potential in r space
@@ -5650,7 +5673,6 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
 
  ! Free memory
  ABI_FREE(v1G_lr)
-
  call destroy_mpi_enreg(MPI_enreg_seq)
 
 end subroutine dvdb_v1r_long_range

@@ -636,22 +636,22 @@ subroutine psps_copy(pspsin, pspsout)
 
  ! integer allocatable
  if (allocated(pspsin%algalch)) then
-   call alloc_copy( pspsin%algalch, pspsout%algalch)
+   call alloc_copy(pspsin%algalch, pspsout%algalch)
  end if
  if (allocated(pspsin%indlmn)) then
-   call alloc_copy( pspsin%indlmn, pspsout%indlmn)
+   call alloc_copy(pspsin%indlmn, pspsout%indlmn)
  end if
  if (allocated(pspsin%pspdat)) then
-   call alloc_copy( pspsin%pspdat, pspsout%pspdat)
+   call alloc_copy(pspsin%pspdat, pspsout%pspdat)
  end if
  if (allocated(pspsin%pspcod)) then
-   call alloc_copy( pspsin%pspcod, pspsout%pspcod)
+   call alloc_copy(pspsin%pspcod, pspsout%pspcod)
  end if
  if (allocated(pspsin%pspso)) then
-   call alloc_copy( pspsin%pspso, pspsout%pspso)
+   call alloc_copy(pspsin%pspso, pspsout%pspso)
  end if
  if (allocated(pspsin%pspxc)) then
-   call alloc_copy( pspsin%pspxc, pspsout%pspxc)
+   call alloc_copy(pspsin%pspxc, pspsout%pspxc)
  end if
 
  ! real allocatable
@@ -662,37 +662,37 @@ subroutine psps_copy(pspsin, pspsout)
    call alloc_copy( pspsin%ffspl, pspsout%ffspl)
  end if
  if (allocated(pspsin%mixalch)) then
-   call alloc_copy( pspsin%mixalch, pspsout%mixalch)
+   call alloc_copy(pspsin%mixalch, pspsout%mixalch)
  end if
  if (allocated(pspsin%qgrid_ff)) then
-   call alloc_copy( pspsin%qgrid_ff, pspsout%qgrid_ff)
+   call alloc_copy(pspsin%qgrid_ff, pspsout%qgrid_ff)
  end if
  if (allocated(pspsin%qgrid_vl)) then
-   call alloc_copy( pspsin%qgrid_vl, pspsout%qgrid_vl)
+   call alloc_copy(pspsin%qgrid_vl, pspsout%qgrid_vl)
  end if
  if (allocated(pspsin%vlspl)) then
-   call alloc_copy( pspsin%vlspl, pspsout%vlspl)
+   call alloc_copy(pspsin%vlspl, pspsout%vlspl)
  end if
  if (allocated(pspsin%dvlspl)) then
-   call alloc_copy( pspsin%dvlspl, pspsout%dvlspl)
+   call alloc_copy(pspsin%dvlspl, pspsout%dvlspl)
  end if
  if (allocated(pspsin%xcccrc)) then
-   call alloc_copy( pspsin%xcccrc, pspsout%xcccrc)
+   call alloc_copy(pspsin%xcccrc, pspsout%xcccrc)
  end if
  if (allocated(pspsin%xccc1d)) then
-   call alloc_copy( pspsin%xccc1d, pspsout%xccc1d)
+   call alloc_copy(pspsin%xccc1d, pspsout%xccc1d)
  end if
  if (allocated(pspsin%zionpsp)) then
-   call alloc_copy( pspsin%zionpsp, pspsout%zionpsp)
+   call alloc_copy(pspsin%zionpsp, pspsout%zionpsp)
  end if
  if (allocated(pspsin%ziontypat)) then
-   call alloc_copy( pspsin%ziontypat, pspsout%ziontypat)
+   call alloc_copy(pspsin%ziontypat, pspsout%ziontypat)
  end if
  if (allocated(pspsin%znuclpsp)) then
-   call alloc_copy( pspsin%znuclpsp, pspsout%znuclpsp)
+   call alloc_copy(pspsin%znuclpsp, pspsout%znuclpsp)
  end if
  if (allocated(pspsin%znucltypat)) then
-   call alloc_copy( pspsin%znucltypat, pspsout%znucltypat)
+   call alloc_copy(pspsin%znucltypat, pspsout%znucltypat)
  end if
 
  ! allocate and copy character strings
@@ -798,8 +798,8 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
  !END SELECT
 
  write(msg,'(a,i4,2a,i4)')&
-&  '  Number of pseudopotentials .. ',psps%npsp,ch10,&
-&  '  Number of types of atoms   .. ',psps%ntypat
+  '  Number of pseudopotentials .. ',psps%npsp,ch10,&
+  '  Number of types of atoms   .. ',psps%ntypat
  call wrtout(unt,msg,mode)
 
  if (psps%usepaw==0) then
@@ -808,13 +808,13 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
      call wrtout(unt,'  Scalar calculation (no spin-orbit term) ',mode)
    CASE (2)
      write(msg,'(3a,i3)')&
-&      '  Calculation with spin-orbit coupling ',ch10,&
-&      '  Max number of channels (spin-orbit included) ',psps%mpssoang
+      '  Calculation with spin-orbit coupling ',ch10,&
+      '  Max number of channels (spin-orbit included) ',psps%mpssoang
      call wrtout(unt,msg,mode)
      do itypat=1,psps%ntypat
        if (psps%pspso(itypat) /= 1) then
          write(msg,'(a,i4,a,i2,a)')&
-&          '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
+          '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
          call wrtout(unt,msg,mode)
        end if
      end do
@@ -846,19 +846,19 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
  call wrtout(unt,msg,mode)
 
  write(msg,'(a,i3,2a,i3,2a,i3)')&
-& '  Highest angular momentum +1 ....... ',psps%mpsang,ch10,&
-& '  Max number of (l,n)   components .. ',psps%lnmax, ch10,&
-& '  Max number of (l,m,n) components .. ',psps%lmnmax
+ '  Highest angular momentum +1 ....... ',psps%mpsang,ch10,&
+ '  Max number of (l,n)   components .. ',psps%lnmax, ch10,&
+ '  Max number of (l,m,n) components .. ',psps%lmnmax
  call wrtout(unt,msg,mode)
 
  !FIXME for paw n1xccc==1
  ! Non-linear Core correction
  if (psps%n1xccc/=0) then
    write(msg,'(3a,2(a,i4,a),2a)')ch10,&
-&    ' Pseudo-Core Charge Info: ',ch10,&
-&    '   Number of radial points for pseudo-core charge .. ',psps%n1xccc,ch10,&
-&    '   XC core-correction treatment (optnlxccc) ........ ',psps%optnlxccc,ch10,&
-&    '   Radius for pseudo-core charge for each type ..... ',ch10
+    ' Pseudo-Core Charge Info: ',ch10,&
+    '   Number of radial points for pseudo-core charge .. ',psps%n1xccc,ch10,&
+    '   XC core-correction treatment (optnlxccc) ........ ',psps%optnlxccc,ch10,&
+    '   Radius for pseudo-core charge for each type ..... ',ch10
    call wrtout(unt,msg,mode)
    do itypat=1,psps%ntypat
      write(msg,'(a,i4,a,f7.4)')'  - Atom type ',itypat,' has pseudo-core radius .. ',psps%xcccrc(itypat)
@@ -869,10 +869,10 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
  ! Alchemical mixing
  if (psps%mtypalch/=0) then
    write(msg,'(3a,3(a,i4,a))')ch10,&
-&    ' Calculation with alchemical mixing:',ch10,&
-&    '   Number of pure pseudoatoms .... ',psps%ntyppure,ch10,&
-&    '   Number of pseudos for mixing .. ',psps%npspalch,ch10,&
-&    '   Alchemical pseudoatoms ........ ',psps%ntypalch,ch10
+    ' Calculation with alchemical mixing:',ch10,&
+    '   Number of pure pseudoatoms .... ',psps%ntyppure,ch10,&
+    '   Number of pseudos for mixing .. ',psps%npspalch,ch10,&
+    '   Alchemical pseudoatoms ........ ',psps%ntypalch,ch10
    call wrtout(unt,msg,mode)
    do ipsp_alch=1,psps%npspalch
      do ityp_alch=1,psps%ntypalch
@@ -887,9 +887,9 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
 
  ! Info in Q-grid for spline of form factors
  write(msg,'(3a,a,i6,a,a,i6)')ch10,&
-&  ' Info on the Q-grid used for form factors in spline form: ',ch10,&
-&  '   Number of q-points for radial functions ffspl .. ',psps%mqgrid_ff,ch10,&
-&  '   Number of q-points for vlspl ................... ',psps%mqgrid_vl
+  ' Info on the Q-grid used for form factors in spline form: ',ch10,&
+  '   Number of q-points for radial functions ffspl .. ',psps%mqgrid_ff,ch10,&
+  '   Number of q-points for vlspl ................... ',psps%mqgrid_vl
  call wrtout(unt,msg,mode)
 
  if (psps%vlspl_recipSpace) then
@@ -1208,28 +1208,17 @@ subroutine psp2params_free(gth_params)
 
 ! *********************************************************************
 
-!Check arrays.
- if (allocated(gth_params%set))  then
-   ABI_DEALLOCATE(gth_params%set)
- end if
- if (allocated(gth_params%hasGeometry))  then
-   ABI_DEALLOCATE(gth_params%hasGeometry)
- end if
+ ABI_SFREE(gth_params%set)
+ ABI_SFREE(gth_params%hasGeometry)
 
 !Coefficients for local part and projectors
- if (allocated(gth_params%psppar))  then
-   ABI_DEALLOCATE(gth_params%psppar)
- end if
+ ABI_SFREE(gth_params%psppar)
 
 !Coefficients for spin orbit part
- if (allocated(gth_params%psp_k_par))  then
-   ABI_DEALLOCATE(gth_params%psp_k_par)
- end if
+ ABI_SFREE(gth_params%psp_k_par)
 
 !Different radii
- if (allocated(gth_params%radii_cf))  then
-   ABI_DEALLOCATE(gth_params%radii_cf)
- end if
+ ABI_SFREE(gth_params%radii_cf)
 
 end subroutine psp2params_free
 !!***
@@ -1307,16 +1296,10 @@ subroutine nctab_free(nctab)
 ! *************************************************************************
 
  nctab%mqgrid_vl = 0
-
  nctab%has_tvale = .False.
- if (allocated(nctab%tvalespl)) then
-   ABI_FREE(nctab%tvalespl)
- end if
-
+ ABI_SFREE(nctab%tvalespl)
  nctab%has_tcore = .False.
- if (allocated(nctab%tcorespl)) then
-   ABI_FREE(nctab%tcorespl)
- end if
+ ABI_SFREE(nctab%tcorespl)
 
 end subroutine nctab_free
 !!***
@@ -1352,10 +1335,10 @@ subroutine nctab_copy(nctabin, nctabout)
  nctabout%dnvdq0     = nctabin%dnvdq0
 
  if (allocated(nctabin%tvalespl)) then
-   call alloc_copy( nctabin%tvalespl, nctabout%tvalespl)
+   call alloc_copy(nctabin%tvalespl, nctabout%tvalespl)
  end if
  if (allocated(nctabin%tcorespl)) then
-   call alloc_copy( nctabin%tcorespl, nctabout%tcorespl)
+   call alloc_copy(nctabin%tcorespl, nctabout%tcorespl)
  end if
 
 end subroutine nctab_copy
@@ -1497,7 +1480,7 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
  ! Compute 4\pi\int[(\frac{\sin(2\pi q r)}{2\pi q r})(r^2 n(r))dr].
  !write(std_out,*)"xccc1d: amesh, min, max, minloc ",amesh,maxval(xccc1d(:,1)),minval(xccc1d(:,1)),minloc(xccc1d(:,1))
  call pawpsp_cg(nctab%dncdq0, nctab%d2ncdq0, mqgrid_vl, qgrid_vl, nctab%tcorespl(:,1), &
-&               core_mesh, xccc1d(:,1), yp1, ypn)
+                core_mesh, xccc1d(:,1), yp1, ypn)
 
  ! Compute second derivative of tcorespl(q)
  call paw_spline(qgrid_vl, nctab%tcorespl(:,1), mqgrid_vl, yp1, ypn, nctab%tcorespl(:,2))

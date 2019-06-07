@@ -1108,19 +1108,22 @@ pure subroutine get_gftt(ngfft,kpt,gmet,gsq_max,gfft)
 !************************************************************************
 
  ifft=0; gsq_max=smallest_real
- do i3=1,ngfft(3)    ; g3 = ig2gfft(i3,ngfft(3))
-   do i2=1,ngfft(2)  ; g2 = ig2gfft(i2,ngfft(2))
-     do i1=1,ngfft(1); g1 = ig2gfft(i1,ngfft(1))
-       ifft=ifft+1
+ do i3=1,ngfft(3)
+   g3 = ig2gfft(i3,ngfft(3))
+   do i2=1,ngfft(2)
+     g2 = ig2gfft(i2,ngfft(2))
+     do i1=1,ngfft(1)
+       g1 = ig2gfft(i1,ngfft(1))
+       ifft = ifft+1
        gfft(1,ifft) = g1
        gfft(2,ifft) = g2
        gfft(3,ifft) = g3
-       dsq=gmet(1,1)*(kpt(1)+dble(i1))**2&
-&        +gmet(2,2)*(kpt(2)+dble(i2))**2&
-&        +gmet(3,3)*(kpt(3)+dble(i3))**2&
-&        +2._dp*(gmet(1,2)*(kpt(1)+dble(i1))*(kpt(2)+dble(i2))&
-&        +gmet(2,3)*(kpt(2)+dble(i2))*(kpt(3)+dble(i3))&
-&        +gmet(3,1)*(kpt(3)+dble(i3))*(kpt(1)+dble(i1)))
+       dsq=gmet(1,1)*(kpt(1)+dble(i1))**2 &
+        +gmet(2,2)*(kpt(2)+dble(i2))**2 &
+        +gmet(3,3)*(kpt(3)+dble(i3))**2 &
+        +2._dp*(gmet(1,2)*(kpt(1)+dble(i1))*(kpt(2)+dble(i2)) &
+        +gmet(2,3)*(kpt(2)+dble(i2))*(kpt(3)+dble(i3)) &
+        +gmet(3,1)*(kpt(3)+dble(i3))*(kpt(1)+dble(i1)))
        gsq_max = MAX(dsq,gsq_max)
      end do
    end do

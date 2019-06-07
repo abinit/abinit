@@ -161,7 +161,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0,sppoldbl1=1,timrev1=1
  integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
- integer :: iblock,ddb_nqshift,ierr,brav1
+ integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
@@ -481,11 +481,20 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Set the q-shift for the DDB
  ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
 
+ ! Get Dielectric Tensor
+ iblock_dielt = ddb_get_dielt(ddb, dtset%rfmeth, dielt)
+ dvdb%dielt = dielt
+
+ !dvdb%diel = 13.103 * dvdb%dielt
+ !do iat=1,dvdb%natom
+ ! dvdb%qstar(:,:,:,iatom) = (-1**(iat + 1)) * levi_civita_3() * 13.368_dp
+ !end do
+
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
- iblock = ddb_get_dielt_zeff(ddb, cryst, dtset%rfmeth, dtset%chneut, selectz0, dielt, zeff)
+ iblock_dielt_zeff = ddb_get_dielt_zeff(ddb, cryst, dtset%rfmeth, dtset%chneut, selectz0, dielt, zeff)
  if (my_rank == master) then
-   if (iblock == 0) then
+   if (iblock_dielt_zeff == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
      call wrtout(ab_out, "Values initialized with zeros")
    else
@@ -512,7 +521,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos_free(phdos)
-     write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHODOS with wmin, wmax: ",wminmax
+     write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)
    end do
 
@@ -564,7 +573,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0
    dvdb%add_lr_part = .False.
-   if (iblock /= 0) then
+   if (iblock_dielt_zeff /= 0) then
      dvdb%dielt = dielt
      dvdb%zeff = zeff
      dvdb%has_dielt_zeff = .True.
@@ -572,7 +581,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      if (dtset%dvdb_add_lr == 0)  then
        dvdb%add_lr_part = .False.
        call wrtout([std_out, ab_out], &
-         " WARNING: Setting add_lr_part to False. Long-range term will be substracted in Fourier interpolation.")
+         " WARNING: Setting add_lr_part to False. Long-range term won't be substracted in Fourier interpolation.")
      end if
    end if
 

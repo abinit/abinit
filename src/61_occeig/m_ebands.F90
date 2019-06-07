@@ -1606,7 +1606,7 @@ subroutine apply_scissor(ebands, scissor_energy)
 
  ! Recalculate the fermi level and occ. factors.
  ! For Semiconductors only the Fermi level is changed (in the middle of the new gap)
- spinmagntarget_=-99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
+ spinmagntarget_ = -99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
  call ebands_update_occ(ebands, spinmagntarget_)
 
 end subroutine apply_scissor
@@ -2341,9 +2341,7 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 
  call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=my_prtvol)
 
- if (my_prtvol > 10) then
-   call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
- end if
+ if (my_prtvol > 10) call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
 
 end subroutine ebands_set_scheme
 !!***
