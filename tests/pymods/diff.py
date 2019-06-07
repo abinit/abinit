@@ -15,18 +15,16 @@ import difflib
 import argparse
 
 
-def abinit_junk(line):
+def abinit_line_junk(line):
     return (
         line.startswith('-')
         or line.startswith('+')
-        or line.startswith(',')
-        or line.startswith('P')
-        or line.startswith('%')
-        or line.startswith(';')
-        or line.startswith('.')
-        or line.startswith('_')
         or line.isspace()
     )
+
+
+def abinit_char_junk(c):
+    return c.isspace() or c.isdigit()
 
 
 def main():
@@ -54,7 +52,7 @@ def main():
                         help='Write diff to file FILE. stdout is used if not specified', metavar='FILE')
 
     parser.add_argument('-j', '--abinit-junk', action='store_true', default=False,
-                        help='Use builtin Abinit output specific heuristic instead of builtin one.')
+                        help='Use Abinit output specific heuristic instead of builtin heuristic to syncronise lines.')
 
     parser.add_argument('fromfile', help='Reference file')
     parser.add_argument('tofile', help='Compared file')
@@ -71,23 +69,26 @@ def main():
     tolines = open(tofile, 'U').readlines()
 
     if options.abinit_junk:
-        junk = abinit_junk
+        line_junk = abinit_line_junk
+        char_junk = abinit_char_junk
     else:
-        junk = None
+        line_junk = None
+        char_junk = None
 
     if options.u:
         diff = difflib.unified_diff(fromlines, tolines, fromfile, tofile,
                                     fromdate, todate, n=n)
     elif options.n:
-        diff = difflib.ndiff(fromlines, tolines, linejunk=junk)
+        diff = difflib.ndiff(fromlines, tolines, linejunk=line_junk,
+                             charjunk=char_junk)
 
     elif options.m:
-        diff = difflib.HtmlDiff(linejunk=junk).make_file(
+        diff = difflib.HtmlDiff(linejunk=line_junk, charjunk=char_junk).make_file(
             fromlines, tolines, fromfile, tofile, context=options.c,
             numlines=n
         )
     elif options.t:
-        diff = difflib.HtmlDiff(linejunk=junk).make_table(
+        diff = difflib.HtmlDiff(linejunk=line_junk, charjunk=char_junk).make_table(
             fromlines, tolines, fromfile, tofile, context=options.c,
             numlines=n
         )
