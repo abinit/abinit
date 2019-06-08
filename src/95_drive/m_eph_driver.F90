@@ -54,6 +54,7 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
+ !use m_special_funcs,   only : levi_civita_3
  use m_transport,       only : transport
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -483,12 +484,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Get Dielectric Tensor
  iblock_dielt = ddb_get_dielt(ddb, dtset%rfmeth, dielt)
- dvdb%dielt = dielt
 
- !dvdb%diel = 13.103 * dvdb%dielt
- !do iat=1,dvdb%natom
- ! dvdb%qstar(:,:,:,iatom) = (-1**(iat + 1)) * levi_civita_3() * 13.368_dp
- !end do
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
@@ -569,14 +565,25 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! This to symmetrize the DFPT potentials.
    dvdb%symv1 = dtset%symv1scf > 0
 
-   ! Set dielectric tensor, BECS and has_dielt_zeff flag that
-   ! activates automatically the treatment of the long-range term in the Fourier interpolation
+   !dvdb%diel = 13.103 * dvdb%dielt
+   !do ii=1,dvdb%natom
+   !  dvdb%qstar(:,:,:,ii) = (-1 ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
+   !end do
+   !dvdb%has_quadrupoles = .True.
+
+   ! Set dielectric tensor, BECS and associated flags.
+   ! This activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0
    dvdb%add_lr_part = .False.
-   if (iblock_dielt_zeff /= 0) then
+   if (iblock_dielt /= 0) then
+     dvdb%has_dielt = .True.
      dvdb%dielt = dielt
+   end if
+   if (iblock_dielt_zeff /= 0) then
+     dvdb%has_zeff = .True.
      dvdb%zeff = zeff
-     dvdb%has_dielt_zeff = .True.
+   end if
+   if (dvdb%has_dielt .and. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
      dvdb%add_lr_part = .True.
      if (dtset%dvdb_add_lr == 0)  then
        dvdb%add_lr_part = .False.

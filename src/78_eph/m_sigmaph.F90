@@ -598,7 +598,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nlines_done, nline_in, grad_berry_size_mpw1
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
  integer :: nqibz, nqbz, comm_rpt, method
- logical :: has_dielt_zeff, add_lr_part
+ logical :: has_dielt, has_zeff, has_quadrupoles, add_lr_part
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag, q0rad, out_resid
@@ -1007,14 +1007,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! Save dielt and zeff to propagate to new dvdb instance
    dielt = dvdb%dielt
    zeff = dvdb%zeff
-   has_dielt_zeff = dvdb%has_dielt_zeff
+   has_dielt = dvdb%has_dielt
+   has_zeff = dvdb%has_zeff
+   has_quadrupoles = dvdb%has_quadrupoles
    add_lr_part = dvdb%add_lr_part
    call dvdb%free()
    dvdb = dvdb_new(dtfil%fnameabo_dvdb, comm)
    ! Add dielt and zeff again
    dvdb%dielt = dielt
    dvdb%zeff = zeff
-   dvdb%has_dielt_zeff = has_dielt_zeff
+   dvdb%has_dielt = has_dielt
+   dvdb%has_zeff = has_zeff
+   dvdb%has_quadrupoles = has_quadrupoles
+   !dvdb%qstar = qstar
    dvdb%add_lr_part = add_lr_part
    ! Naive q-point check
    do iq_ibz=1,cnt-1

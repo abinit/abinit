@@ -280,8 +280,14 @@ module m_dvdb
   logical :: debug = .False.
    ! Debug flag
 
-  logical :: has_dielt_zeff = .False.
-  ! True if the dielectric tensor and the Born effective charges are available.
+  logical :: has_dielt = .False.
+  ! True if the dielectric tensor is available.
+
+  logical :: has_zeff = .False.
+  ! True if Born effective charges are available.
+
+  logical :: has_quadrupoles = .False.
+  ! True if dynamical quadrupoles are available.
 
   logical :: add_lr_part = .True.
    ! Logical flag to not add the long range part after the interpolation.
@@ -673,6 +679,8 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  ABI_CALLOC(new%zeff, (3, 3, new%natom))
  ABI_CALLOC(new%qstar, (3, 3, 3, new%natom))
 
+ !new%qdamp = 5 * two_pi ** 2 * sum(new%cryst%gprimd(:,1) ** 2)
+
  ! Internal MPI_type needed for calling fourdp!
  call initmpi_seq(new%mpi_enreg)
 
@@ -928,13 +936,17 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  end do
  if (db%nqpt > 10) write(std_out,"(a)")"..."
 
- write(std_out,"(a)")sjoin(" Have dielectric tensor and Born effective charges:", yesno(db%has_dielt_zeff))
+ write(std_out,"(a)")sjoin(" Have dielectric tensor:", yesno(db%has_dielt))
+ write(std_out,"(a)")sjoin(" Have Born effective charges:", yesno(db%has_zeff))
+ !write(std_out,"(a)")sjoin(" Have Dynamical quadrupoles:", yesno(db%has_quadrupoles))
  write(std_out,"(a)")sjoin(" Use special treatment of long-range part in polar materials:", yesno(db%add_lr_part))
- if (db%has_dielt_zeff) then
+ if (db%has_dielt) then
    write(std_out, '(a,3(/,3es16.6))') ' Dielectric Tensor:', &
      db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
      db%dielt(2,1), db%dielt(2,2), db%dielt(2,3), &
      db%dielt(3,1), db%dielt(3,2), db%dielt(3,3)
+ end if
+ if (db%has_zeff) then
    write(std_out, '(a)') ' Effectives Charges: '
    do iatom=1,db%natom
      write(std_out,'(a,i0,3(/,3es16.6))')' iatom: ', iatom, &
@@ -943,7 +955,6 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
        db%zeff(3,1,iatom), db%zeff(3,2,iatom), db%zeff(3,3,iatom)
    end do
  end if
-
  !if (db%has_quadrupoles) then
  !  write(std_out, '(a)') ' Dynamical Quadrupoles: '
  !  do iatom=1,db%natom
@@ -2789,9 +2800,10 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  end if
 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
- write(std_out, "(a, i0)")" Using method for integration weights: ",method
+ write(std_out, "(a, i0)")" Using method for integration weights: ", method
  write(std_out, "(a, i0)")" Number of R-points in real-space big box:", nrtot
  call xmpi_split_work(nrtot, db%comm_rpt, my_rstart, my_rstop)
+
  db%my_nrpt = 0
  ii = minval(db%my_pinfo(2,:))
  jj = maxval(db%my_pinfo(2,:))
@@ -3075,7 +3087,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
          nctkdim_t("nrpt", nrtot), nctkdim_t("nfft", nfft), &
          nctkdim_t("natom3", db%natom3), nctkdim_t("nspden", db%nspden)], defmode=.True.)
      NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "has_dielt_zeff", "add_lr_part", "symv1"]))
+     ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+       "has_dielt", "has_zeff", "has_quadrupoles", "add_lr_part", "symv1"])
+     NCF_CHECK(ncerr)
      ncerr = nctk_def_arrays(ncid, [ &
         nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
         nctkarr_t("maxw", "dp", "nrpt, natom3"), &
@@ -3084,8 +3098,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
      ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-       "has_dielt_zeff", "add_lr_part", "symv1" ], &
-       l2int([db%has_dielt_zeff, db%add_lr_part, db%symv1]))
+       "has_dielt", "has_zeff", "has_quadrupoles", "add_lr_part", "symv1" ], &
+       l2int([db%has_dielt, db%has_zeff, db%has_quadrupoles, db%add_lr_part, db%symv1]))
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
@@ -5389,10 +5403,15 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
        call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
      end if
    end if
-   if (iblock_dielt_zeff /= 0) then
+   if (iblock_dielt /= 0) then
+     dvdb%has_dielt = .True.
      dvdb%dielt = dielt
+   end if
+   if (iblock_dielt_zeff /= 0) then
+     dvdb%has_zeff = .True.
      dvdb%zeff = zeff
-     dvdb%has_dielt_zeff = .True.
+   end if
+   if (dvdb%has_dielt .and. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
      dvdb%add_lr_part = .True.
      if (dvdb_add_lr == 0)  then
        dvdb%add_lr_part = .False.
@@ -5479,11 +5498,12 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
    coarse_dvdb%debug = dvdb%debug
    coarse_dvdb%symv1 = dvdb%symv1
    coarse_dvdb%add_lr_part = dvdb%add_lr_part
-   coarse_dvdb%has_dielt_zeff = dvdb%has_dielt_zeff
-   if (dvdb%has_dielt_zeff) then
-     coarse_dvdb%dielt = dvdb%dielt
-     coarse_dvdb%zeff = dvdb%zeff
-   end if
+   coarse_dvdb%has_dielt = dvdb%has_dielt
+   coarse_dvdb%has_zeff = dvdb%has_zeff
+   coarse_dvdb%has_quadrupoles = dvdb%has_quadrupoles
+   coarse_dvdb%dielt = dvdb%dielt
+   coarse_dvdb%zeff = dvdb%zeff
+   coarse_dvdb%qstar = dvdb%qstar
    !call coarse_dvdb%print()
 
    ! Prepare FT interpolation using coarse q-mesh.
@@ -5579,8 +5599,7 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
 !Arguments ------------------------------------
 !scalars
  class(dvdb_t),intent(in) :: db
- integer,intent(in) :: iatom, idir
- integer,intent(in) :: nfft
+ integer,intent(in) :: iatom, idir, nfft
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
@@ -5588,16 +5607,15 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
 
 !Local variables-------------------------------
 !scalars
- integer :: n1, n2, n3, nfftot, ig
+ integer :: n1, n2, n3, nfftot, ig !, ii, jj, kk
  real(dp) :: fac, qGZ, denom, denom_inv, qtau
- real(dp) :: re, im, phre, phim
- real(dp) :: dummy
+ real(dp) :: re, im, phre, phim, qg_mod, gsq_max
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer, allocatable :: gfft(:,:)
  real(dp) :: gprimd(3,3), rprimd(3,3)
- real(dp) :: dielt(3,3), zeff(3,3), dielt_red(3,3)
- real(dp) :: qG(3), Zstar(3), tau(3)
+ real(dp) :: dielt_red(3,3) !, quad_cart(3,3)
+ real(dp) :: qG_red(3), qG_cart(3), Zstar(3), tau_red(3)
  real(dp), allocatable :: v1G_lr(:,:)
 
 ! *************************************************************************
@@ -5615,44 +5633,47 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
  ABI_MALLOC(v1G_lr, (2,nfft))
 
  ! Reciprocal and real space primitive vectors
- gprimd = db%cryst%gprimd
- rprimd = db%cryst%rprimd
+ gprimd = db%cryst%gprimd; rprimd = db%cryst%rprimd
 
  ! Prefactor
  fac = four_pi / db%cryst%ucvol
 
  ! Transform the Born effective charge tensor from Cartesian to reduced coordinates
  ! and select the relevant direction.
- zeff = db%zeff(:,:,iatom)
- Zstar = matmul(transpose(gprimd), matmul(zeff, rprimd(:,idir))) * two_pi
+ Zstar = matmul(transpose(gprimd), matmul(db%zeff(:,:,iatom), rprimd(:,idir))) * two_pi
 
  ! Transform the dielectric tensor from Cartesian to reduced coordinates.
- dielt = db%dielt
- dielt_red = matmul(transpose(gprimd), matmul(dielt, gprimd)) * two_pi ** 2
+ dielt_red = matmul(transpose(gprimd), matmul(db%dielt, gprimd)) * two_pi ** 2
 
  ! Atom position
- tau = db%cryst%xred(:,iatom)
+ tau_red = db%cryst%xred(:,iatom)
 
  ! Get the set of G vectors
- call get_gftt(ngfft,qpt,db%cryst%gmet,dummy,gfft)
+ call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
  ! Compute the long-range potential in G-space
  v1G_lr = zero
+ !write(std_out, *)"qdamp", db%qdamp
  do ig=1,nfft
    ! (q + G)
-   qG(:) = qpt(:) + gfft(:,ig)
+   qG_red = qpt + gfft(:,ig)
+
+   qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
+   qG_mod = sqrt(sum(qG_cart ** 2))
 
    ! (q + G) . Zeff(:,idir,iatom)
-   qGZ = dot_product(qG, Zstar)
+   qGZ = dot_product(qG_red, Zstar)
 
    ! (q + G) . dielt . (q + G)
-   denom = dot_product(qG, matmul(dielt_red, qG))
+   denom = dot_product(qG_red, matmul(dielt_red, qG_red))
 
    ! Avoid (q+G) = 0
-   denom_inv = denom / (denom ** 2 + tol10 ** 2)
+   if (qG_mod < tol8) cycle
+   denom_inv = one / denom
+   if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
 
    ! Phase factor exp(-i (q+G) . tau)
-   qtau = - two_pi * dot_product(qG, tau)
+   qtau = - two_pi * dot_product(qG_red, tau_red)
    phre = cos(qtau); phim = sin(qtau)
 
    re = zero
@@ -5665,11 +5686,11 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
  ABI_FREE(gfft)
 
  ! FFT to get the long-range potential in r space
- v1r_lr = zero
- call fourdp(2,v1G_lr,v1r_lr,1,MPI_enreg_seq,nfft,1,ngfft,0)
+ !v1r_lr = zero
+ call fourdp(2, v1G_lr, v1r_lr, 1, MPI_enreg_seq, nfft, 1, ngfft,0)
 
  ! Multiply by exp(i q . r)
- call times_eikr(qpt,ngfft,nfft,1,v1r_lr)
+ call times_eikr(qpt, ngfft, nfft, 1, v1r_lr)
 
  ! Free memory
  ABI_FREE(v1G_lr)
