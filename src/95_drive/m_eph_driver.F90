@@ -392,10 +392,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
    end if
 
-   ! default value of eph_fermie is zero hence no tolerance is used!
+   ! Default value of eph_fermie is zero hence no tolerance is used!
    if (dtset%eph_fermie /= zero) then
      ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
-     call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
+     call wrtout(ab_out, sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie)))
      call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
      call wrtout(ab_out, msg)
      if (use_wfq) then
@@ -409,7 +409,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call wrtout(ab_out, msg)
      if (use_wfq) then
        call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-       call ebands_set_nelect(ebands_kq, ebands%nelect+dtset%eph_extrael, dtset%spinmagntarget, msg)
+       call ebands_set_nelect(ebands_kq, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
        call wrtout(ab_out, msg)
      end if
    end if
@@ -484,7 +484,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Get Dielectric Tensor
  iblock_dielt = ddb_get_dielt(ddb, dtset%rfmeth, dielt)
-
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
@@ -574,21 +573,18 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! Set dielectric tensor, BECS and associated flags.
    ! This activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0
-   dvdb%add_lr_part = .False.
+   dvdb%add_lr = dtset%dvdb_add_lr
    if (iblock_dielt /= 0) then
-     dvdb%has_dielt = .True.
-     dvdb%dielt = dielt
+     dvdb%has_dielt = .True.; dvdb%dielt = dielt
    end if
    if (iblock_dielt_zeff /= 0) then
-     dvdb%has_zeff = .True.
-     dvdb%zeff = zeff
+     dvdb%has_zeff = .True.; dvdb%zeff = zeff
    end if
-   if (dvdb%has_dielt .and. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
-     dvdb%add_lr_part = .True.
-     if (dtset%dvdb_add_lr == 0)  then
-       dvdb%add_lr_part = .False.
-       call wrtout([std_out, ab_out], &
-         " WARNING: Setting add_lr_part to False. Long-range term won't be substracted in Fourier interpolation.")
+   if (.not. dvdb%has_dielt .or. .not. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
+     if (dvdb%add_lr /= 0) then
+       dvdb%add_lr = 0
+       !call wrtout([std_out, ab_out], &
+       !  " WARNING: Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
      end if
    end if
 

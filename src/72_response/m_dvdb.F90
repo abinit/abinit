@@ -289,9 +289,12 @@ module m_dvdb
   logical :: has_quadrupoles = .False.
   ! True if dynamical quadrupoles are available.
 
-  logical :: add_lr_part = .True.
-   ! Logical flag to not add the long range part after the interpolation.
-   ! This is mainly used for debugging purposes.
+  integer :: add_lr = 1
+   ! Flag defining the treatment of the long range component in the interpolation of the DFPT potentials.
+   ! 0 --> No treatment
+   ! 1 --> Remove LR model when building W(r,R). Add it back after W(r,R) --> v(q) Fourier interpolation
+   !       This is the standard approach for polar materials.
+   ! -1 --> Remove LR model when building W(r,R). DO NOT reintroduce it after Fourier interpolation.
 
   logical :: symv1 = .False.
    ! Activate symmetrization of v1 potentials.
@@ -679,7 +682,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  ABI_CALLOC(new%zeff, (3, 3, new%natom))
  ABI_CALLOC(new%qstar, (3, 3, 3, new%natom))
 
- !new%qdamp = 5 * two_pi ** 2 * sum(new%cryst%gprimd(:,1) ** 2)
+ !new%qdamp = 5 * two_pi ** 2 * minval([(sum(new%cryst%gprimd(:,ii) ** 2), ii=1,3)])
 
  ! Internal MPI_type needed for calling fourdp!
  call initmpi_seq(new%mpi_enreg)
@@ -939,7 +942,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin(" Have dielectric tensor:", yesno(db%has_dielt))
  write(std_out,"(a)")sjoin(" Have Born effective charges:", yesno(db%has_zeff))
  !write(std_out,"(a)")sjoin(" Have Dynamical quadrupoles:", yesno(db%has_quadrupoles))
- write(std_out,"(a)")sjoin(" Use special treatment of long-range part in polar materials:", yesno(db%add_lr_part))
+ write(std_out,"(a)")sjoin(" Treatment of long-range part in V1scf:", itoa(db%add_lr))
  if (db%has_dielt) then
    write(std_out, '(a,3(/,3es16.6))') ' Dielectric Tensor:', &
      db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
@@ -2747,6 +2750,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  ABI_CHECK(nqbz == product(ngqpt) * nqshift, "nqbz /= product(ngqpt) * nqshift")
 
  if (method == 0) then
+#if 1
    ! We want a gamma centered q-mesh for the FFT.
    ! TODO: This is not needed anymore because we are gonna use slow FFT to handle a possible distribution of rpts
    ABI_FREE(qbz)
@@ -2761,6 +2765,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        end do
      end do
    end do
+#endif
 
    ! Compute real-space points.
    ! Use the following indexing (N means ngfft of the adequate direction)
@@ -2801,7 +2806,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
  write(std_out, "(a, i0)")" Using method for integration weights: ", method
- write(std_out, "(a, i0)")" Number of R-points in real-space big box:", nrtot
+ write(std_out, "(a, i0)")" Number of R-points in real-space big box: ", nrtot
  call xmpi_split_work(nrtot, db%comm_rpt, my_rstart, my_rstop)
 
  db%my_nrpt = 0
@@ -2925,7 +2930,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
 
      ! Compute long-range part of the coupling potential.
-     if (db%add_lr_part) then
+     if (db%add_lr /= 0) then
        do imyp=1,db%my_npert
          idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
          call dvdb_v1r_long_range(db, qpt_bz, ipert, idir, nfft, ngfft, v1r_lr(:,:,imyp))
@@ -2938,7 +2943,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        ABI_CHECK(all(g0q == 0), "gamma point with g0q /= 0")
 
        ! Substract the long-range part of the potential.
-       if (db%add_lr_part) then
+       if (db%add_lr /= 0) then
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
@@ -2951,7 +2956,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        !do imyp=1,db%my_npert
        !  ipc = db%my_pinfo(3, imyp)
        !  do ispden=1,db%nspden
-       !    average_v1r_qbz(:, ispden, ipc, iq_bz) = sum(v1r_qbz(:, :, ispden, ipc), dim=2) / nfft
+       !      write(std_out,*)"Average v1scf", sum(v1r_qibz(:, :, ispden, ipc), dim=2) / nfft, "qbz", trim(ktoa(qbz(:, iq_bz)))
+       !  !average_v1r_qbz(:, ispden, ipc, iq_bz) = sum(v1r_qibz(:, :, ispden, ipc), dim=2) / nfft
        !  end do
        !end do
        !end if
@@ -2979,11 +2985,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
            ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
        end if
 
+
        !if (db%me_pert == 0) then
        !do imyp=1,db%my_npert
        !  ipc = db%my_pinfo(3, imyp)
        !  do ispden=1,db%nspden
-       !    average_v1r_qbz(:, ispden, ipc, iq_bz) = sum(v1r_qbz(:, :, ispden, ipc), dim=2) / nfft
+       !    write(std_out,*)"Average v1scf", sum(v1r_qbz(:, :, ispden, ipc), dim=2) / nfft, "qbz", trim(ktoa(qbz(:, iq_bz)))
+       !    !average_v1r_qbz(:, ispden, ipc, iq_bz) = sum(v1r_qbz(:, :, ispden, ipc), dim=2) / nfft
        !  end do
        !end do
        !endif
@@ -2992,7 +3000,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
 
        ! Substract the long-range part of the potential.
-       if (db%add_lr_part) then
+       if (db%add_lr /= 0) then
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
@@ -3088,7 +3096,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
          nctkdim_t("natom3", db%natom3), nctkdim_t("nspden", db%nspden)], defmode=.True.)
      NCF_CHECK(ncerr)
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-       "has_dielt", "has_zeff", "has_quadrupoles", "add_lr_part", "symv1"])
+       "has_dielt", "has_zeff", "has_quadrupoles", "dvdb_add_lr", "symv1"])
      NCF_CHECK(ncerr)
      ncerr = nctk_def_arrays(ncid, [ &
         nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
@@ -3098,8 +3106,10 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
      ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-       "has_dielt", "has_zeff", "has_quadrupoles", "add_lr_part", "symv1" ], &
-       l2int([db%has_dielt, db%has_zeff, db%has_quadrupoles, db%add_lr_part, db%symv1]))
+       "has_dielt", "has_zeff", "has_quadrupoles", "symv1" ], &
+       l2int([db%has_dielt, db%has_zeff, db%has_quadrupoles, db%symv1]))
+     NCF_CHECK(ncerr)
+     ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "dvdb_add_lr"], [db%add_lr])
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
@@ -3199,7 +3209,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
  call calc_eiqr(qpt, db%my_nrpt, db%my_rpt, eiqr)
 
  ! Compute long-range part of the coupling potential
- if (db%add_lr_part) then
+ if (db%add_lr > 0) then
    ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3225,14 +3235,14 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
          ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) + wi * weiqr(1, ir)
        end do
        ! Add the long-range part of the potential
-       if (db%add_lr_part) then
+       if (db%add_lr > 0) then
          ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + v1r_lr(1, ifft, imyp)
          ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + v1r_lr(2, ifft, imyp)
        end if
      end do ! ifft
 
      !beta = czero
-     !if (db%add_lr_part) then
+     !if (db%add_lr > 0) then
      !  beta = cone
      !  ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
      !end if
@@ -3881,7 +3891,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
      ! Compute long-range part of the coupling potential
      !call cwtime(cpu, wall, gflops, "start")
      v1r_lr = zero; cnt = 0
-     if (db%add_lr_part) then
+     if (db%add_lr /= 0) then
        idir = mod(ipert-1, 3) + 1; iat = (ipert - idir) / 3 + 1
        call dvdb_v1r_long_range(db, qpt_bz, iat, idir, nfft, ngfft, v1r_lr)
      end if
@@ -3893,9 +3903,11 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
        ABI_CHECK(all(g0q == 0), "gamma point with g0q /= 0")
 
        ! Substract the long-range part of the potential
-       do ispden=1,db%nspden
-         v1r_qibz(1,:,ispden,ipert) = v1r_qibz(1,:,ispden,ipert) - v1r_lr(1,:)
-       end do
+       if (db%add_lr /= 0) then
+         do ispden=1,db%nspden
+           v1r_qibz(1,:,ispden,ipert) = v1r_qibz(1,:,ispden,ipert) - v1r_lr(1,:)
+         end do
+       end if
 
        ! SLOW FT.
        !call cwtime(cpu, wall, gflops, "start")
@@ -3936,10 +3948,12 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
 
        ! Substract the long-range part of the potential
-       do ispden=1,db%nspden
-         v1r_qbz(1,:,ispden,ipert) = v1r_qbz(1,:,ispden,ipert) - v1r_lr(1,:)
-         v1r_qbz(2,:,ispden,ipert) = v1r_qbz(2,:,ispden,ipert) - v1r_lr(2,:)
-       end do
+       if (db%add_lr /= 0) then
+         do ispden=1,db%nspden
+           v1r_qbz(1,:,ispden,ipert) = v1r_qbz(1,:,ispden,ipert) - v1r_lr(1,:)
+           v1r_qbz(2,:,ispden,ipert) = v1r_qbz(2,:,ispden,ipert) - v1r_lr(2,:)
+         end do
+       end if
 
        ! Compute FT phases for this qpt_bz.
        call calc_eiqr(-qpt_bz, db%my_nrpt, db%my_rpt, emiqr)
@@ -4064,7 +4078,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
  ! Compute long-range part of the coupling potential
  v1r_lr = zero; cnt = 0
- if (db%add_lr_part) then
+ if (db%add_lr > 0) then
    call dvdb_v1r_long_range(db, qpt, iat, idir, nfft, ngfft, v1r_lr)
  end if
 
@@ -4084,11 +4098,11 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
      end do
 
      ! Add the long-range part of the potential
-     if (db%add_lr_part) then
+     if (db%add_lr > 0) then
        v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
        v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
      end if
-     end do ! ifft
+   end do ! ifft
 
    call xmpi_sum(v1scf_qpt(:,:,ispden), comm, ierr)
 
@@ -4533,7 +4547,7 @@ integer function my_hdr_skip(unit, idir, ipert, qpt, msg) result(ierr)
    if (idir /= mod(tmp_hdr%pertcase-1, 3) + 1 .or. &
        ipert /= (tmp_hdr%pertcase - idir) / 3 + 1 .or. &
        any(abs(qpt - tmp_hdr%qptn) > tol14)) then
-         msg = "Perturbation index on file does not match the one expected by caller"
+         msg = "Perturbation index on file does not match the one expected by the caller"
          ierr = -1
    end if
  end if
@@ -5375,7 +5389,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
  dvdb%debug = .False.
  ABI_CHECK(any(symv1 == [0, 1]), sjoin("invalid value of symv1:", itoa(symv1)))
  dvdb%symv1 = symv1 == 1
- dvdb%add_lr_part = .False.
+ dvdb%add_lr = dvdb_add_lr
 
  !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
@@ -5412,11 +5426,9 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
      dvdb%zeff = zeff
    end if
    if (dvdb%has_dielt .and. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
-     dvdb%add_lr_part = .True.
-     if (dvdb_add_lr == 0)  then
-       dvdb%add_lr_part = .False.
+     if (dvdb%add_lr == 0)  then
        call wrtout([std_out, ab_out], &
-         " WARNING: Setting add_lr_part to False. Long-range term will be substracted in Fourier interpolation.")
+         " WARNING: dvdb_add_lr set to 0. Long-range term won't be substracted in Fourier interpolation.")
      end if
    end if
    ABI_FREE(zeff)
@@ -5497,7 +5509,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 
    coarse_dvdb%debug = dvdb%debug
    coarse_dvdb%symv1 = dvdb%symv1
-   coarse_dvdb%add_lr_part = dvdb%add_lr_part
+   coarse_dvdb%add_lr = dvdb%add_lr
    coarse_dvdb%has_dielt = dvdb%has_dielt
    coarse_dvdb%has_zeff = dvdb%has_zeff
    coarse_dvdb%has_quadrupoles = dvdb%has_quadrupoles

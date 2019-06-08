@@ -297,12 +297,12 @@ subroutine ddb_copy(iddb, oddb)
  oddb%acell = iddb%acell
 
  ! Allocate and copy the allocatable arrays.
- call alloc_copy(iddb%flg,oddb%flg)
- call alloc_copy(iddb%typ,oddb%typ)
- call alloc_copy(iddb%amu,oddb%amu)
- call alloc_copy(iddb%nrm,oddb%nrm)
- call alloc_copy(iddb%qpt,oddb%qpt)
- call alloc_copy(iddb%val,oddb%val)
+ call alloc_copy(iddb%flg, oddb%flg)
+ call alloc_copy(iddb%typ, oddb%typ)
+ call alloc_copy(iddb%amu, oddb%amu)
+ call alloc_copy(iddb%nrm, oddb%nrm)
+ call alloc_copy(iddb%qpt, oddb%qpt)
+ call alloc_copy(iddb%val, oddb%val)
 
 end subroutine ddb_copy
 !!***
