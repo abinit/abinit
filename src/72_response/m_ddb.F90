@@ -1943,11 +1943,12 @@ end subroutine carteig2d
 !! nblok= number of blocks in the DDB
 !! blkval(2,3*mpert*3*mpert,nblok)=  dynamical matrices
 !!  In our case, the nblok is restricted to iblok
+!! [unit]=Output unit number
 !!
 !! OUTPUT
 !! zeff(3,3,natom)=effective charge on each atom, versus electric
 !!  field and atomic displacement. Note the following convention:
-!!  zeff(electric field direction, atomic direction, atom number)
+!!  zeff(electric field direction, atomic direction, atom index)
 !! dielt(3,3)=dielectric tensor
 !!
 !! PARENTS
@@ -1958,56 +1959,56 @@ end subroutine carteig2d
 !!
 !! SOURCE
 
-subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
+subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff,unit)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,natom,nblok
+ integer,intent(in),optional :: unit
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
  real(dp),intent(out) :: dielt(3,3),zeff(3,3,natom)
 
 !Local variables -------------------------
 !scalars
- integer :: depl,elec,elec1,elec2,iatom
- character(len=1000) :: message
+ integer :: depl,elec,elec1,elec2,iatom, unt
+ character(len=1000) :: msg
 
 ! *********************************************************************
 
-!Extration of effectives charges
+ unt = std_out; if (present(unit)) unt = unit
+
+ ! Extraction of effectives charges
  do iatom=1,natom
    do elec=1,3
      do depl=1,3
        zeff(elec,depl,iatom)=0.5*&
-&       (blkval(1,depl,iatom,elec,natom+2,iblok)+&
-&       blkval(1,elec,natom+2,depl,iatom,iblok))
+        (blkval(1,depl,iatom,elec,natom+2,iblok)+&
+         blkval(1,elec,natom+2,depl,iatom,iblok))
      end do
    end do
  end do
 
-!Extration of dielectric tensor
+ ! Extraction of dielectric tensor
  do elec1=1,3
    do elec2=1,3
      dielt(elec1,elec2)=blkval(1,elec1,natom+2,elec2,natom+2,iblok)
    end do
  end do
 
- write(message,'(a,3es16.6,3es16.6,3es16.6)' )&
-& ' Dielectric Tensor ',&
-& dielt(1,1),dielt(1,2),dielt(1,3),&
-& dielt(2,1),dielt(2,2),dielt(2,3),&
-& dielt(3,1),dielt(3,2),dielt(3,3)
+ write(msg,'(a,3es16.6,3es16.6,3es16.6)' )' Dielectric Tensor ',&
+   dielt(1,1),dielt(1,2),dielt(1,3),&
+   dielt(2,1),dielt(2,2),dielt(2,3),&
+   dielt(3,1),dielt(3,2),dielt(3,3)
+ call wrtout(unt, msg)
 
- call wrtout(std_out,message,'COLL')
-
- write(message,'(a)' ) ' Effectives Charges '
- call wrtout(std_out,message,'COLL')
+ call wrtout(unt, ' Effectives Charges ')
  do iatom=1,natom
-   write(message,'(a,i4,3es16.6,3es16.6,3es16.6)' )' atom ',iatom,&
-&   zeff(1,1,iatom),zeff(1,2,iatom),zeff(1,3,iatom),&
-&   zeff(2,1,iatom),zeff(2,2,iatom),zeff(2,3,iatom),&
-&   zeff(3,1,iatom),zeff(3,2,iatom),zeff(3,3,iatom)
-    call wrtout(std_out,message,'COLL')
+   write(msg,'(a,i4,3es16.6,3es16.6,3es16.6)' )' atom ',iatom,&
+     zeff(1,1,iatom),zeff(1,2,iatom),zeff(1,3,iatom),&
+     zeff(2,1,iatom),zeff(2,2,iatom),zeff(2,3,iatom),&
+     zeff(3,1,iatom),zeff(3,2,iatom),zeff(3,3,iatom)
+    call wrtout(std_out, msg)
  end do
 
 end subroutine dtech9
@@ -2016,7 +2017,6 @@ end subroutine dtech9
 !----------------------------------------------------------------------
 
 !!****f* m_ddb/dtchi
-!!
 !! NAME
 !! dtchi
 !!
@@ -2283,9 +2283,10 @@ end function ddb_get_etotal
 !!    The block with the effective charges is modified if charge neutrality is imposed.
 !!
 !! OUTPUT
+!!  iblok=Index of the block containing the data. 0 if block is not found.
 !!  dielt(3,3) = Macroscopic dielectric tensor
 !!  zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
-!!  iblok=Index of the block containing the data. 0 if block is not found.
+!!  [zeff_raw(3,3,natom)]=effective charge on each atom before enforcing charge-neutrality.
 !!
 !! NOTES
 !!  dielt and zeff are initialized to one_3D and zero if the derivatives are not available in the DDB file.
@@ -2296,7 +2297,7 @@ end function ddb_get_etotal
 !!
 !! SOURCE
 
-integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff) result(iblok)
+integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt, zeff, zeff_raw) result(iblok)
 
 !Arguments -------------------------------
 !scalars
@@ -2305,14 +2306,15 @@ integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(out) :: dielt(3,3),zeff(3,3,crystal%natom)
+ real(dp),optional,intent(out) :: zeff_raw(3,3,crystal%natom)
 
 !Local variables -------------------------
 !scalars
  integer :: ii
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
- real(dp) :: qphnrm(3),qphon(3,3)
+ real(dp) :: qphnrm(3),qphon(3,3), my_zeff_raw(3,3,crystal%natom)
 
 ! *********************************************************************
 
@@ -2323,31 +2325,35 @@ integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
  rfelfd(1:2)=2
  rfstrs(1:2)=0
 
- !write(std_out,*)"ddb%mpert",ddb%mpert
-
- call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call gtblk9(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
 
  ! Compute effective charges and dielectric tensor only if the Gamma-blok was found in the DDB
  ! In case it was not found, iblok = 0
  zeff=zero; dielt=zero; dielt(1,1)=one; dielt(2,2)=one; dielt(3,3)=one
+ my_zeff_raw = zero
 
  if (iblok /= 0) then
-   write(message, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+   write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
    ' Dielectric Tensor and Effective Charges ',ch10
-   call wrtout([std_out, ab_out],message)
+   call wrtout([std_out, ab_out], msg)
 
    ! Make the imaginary part of the Gamma block vanish
-   write(message, '(a,a,a,a,a)'  ) ch10,&
+   write(msg, '(5a)'  ) ch10,&
    ' anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,',ch10,&
    '   and impose the ASR on the effective charges ',ch10
-   call wrtout([std_out, ab_out],message)
+   call wrtout([std_out, ab_out], msg)
+
+   ! Extrac Zeff before enforcing sum rule.
+   call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
 
    ! Impose the charge neutrality on the effective charges and eventually select some parts of the effective charges
    call chneu9(chneut,ddb%val(:,:,iblok),ddb%mpert,ddb%natom,ddb%ntypat,selectz,Crystal%typat,Crystal%zion)
 
    ! Extraction of the dielectric tensor and the effective charges
-   call dtech9(ddb%val,dielt,iblok,ddb%mpert,ddb%natom,ddb%nblok,zeff)
+   call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
  end if ! iblok not found
+
+ if (present(zeff_raw)) zeff_raw = my_zeff_raw
 
 end function ddb_get_dielt_zeff
 !!***
