@@ -21,6 +21,8 @@
 !!
 !! SOURCE
 
+#define DEV_KPTRANK
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -29,7 +31,6 @@
 
 module m_symkpt
 
- use m_kptrank
  implicit none
 
  private
@@ -452,6 +453,8 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  use m_sort
  use m_numeric_tools
  use m_time
+ use m_kptrank
+ use m_octree
 
 !Arguments -------------------------------
 !scalars
@@ -466,11 +469,14 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 !Local variables -------------------------
 !scalars
  type(kptrank_type) :: kptrank
+ type(octree_t) :: octree
  integer :: identi,ii,ikpt,ikibz,ikpt_found
- integer :: isym,itim,jj,nkpout,tident
+ integer :: isym,itim,jj,nkpout,tident,ierr
  !real(dp) :: cpu, gflops, wall
  character(len=500) :: message
+ real(dp) :: dist
 !arrays
+ integer,allocatable :: iperm(:)
  real(dp) :: ksym(3),kpt1(3)
 
 ! *********************************************************************
@@ -515,7 +521,11 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  end do
 
  ! Start kptrank
+#ifdef DEV_KPTRANK
  call mkkptrank(kbz,nkbz,kptrank)
+#else
+ octree = octree_init(kbz,2**4,[-one,-one,-one],[two,two,two])
+#endif
 
  ! Here begins the serious business
  !call cwtime(cpu, wall, gflops, "start")
@@ -542,12 +552,18 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
            end do
 
            !find this point
+#ifdef DEV_KPTRANK
            ikpt_found = kptrank_index(kptrank,ksym)
+#else
+           ikpt_found = octree_find(octree,ksym,dist)
+           ikpt_found = octree_find_nearest(octree,ksym,dist)
+           if (dist>tol6) cycle
+#endif
            !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
            !  MSG_ERROR('Wrong k-point mapping found by kptrank')
            !end if
            !if k-point not found
-           if (ikpt_found < 0) then
+           if (ikpt_found < 1) then
              write(message,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
              'Chksymbreak=1. It has been observed that the k point grid is not symmetric:',ch10,&
              'for the symmetry number: ',isym,ch10,&
@@ -566,7 +582,6 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
    ! Here I generate the IBZ
    ikpt_loop: do ikpt=1,nkbz
 
-     if (bz2ibz_smap(4, ikpt)==0) cycle
      kpt1 = kbz(:,ikpt)
 
      ! MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
@@ -585,14 +600,20 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
          end do
 
          !find this point
+#ifdef DEV_KPTRANK
          ikpt_found = kptrank_index(kptrank,ksym)
+#else
+         ikpt_found = octree_find(octree,ksym,dist)
+         ikpt_found = octree_find_nearest(octree,ksym,dist)
+         if (dist>tol6) cycle
+#endif
          !if k-point not found just cycle
-         if (ikpt_found < 0) cycle
+         if (ikpt_found < 1 .or. ikpt_found >= ikpt) cycle
+         if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) cycle
          !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
          !  MSG_ERROR('Wrong k-point mapping found by kptrank')
          !end if
-         if (ikpt_found >= ikpt) cycle
-         bz2ibz_smap(:3, ikpt)  = [ikpt_found,isym,itim]
+         bz2ibz_smap(:3,ikpt)  = [ikpt_found,isym,itim]
          bz2ibz_smap(4,ikpt) = bz2ibz_smap(4,ikpt) + bz2ibz_smap(4,ikpt_found)
          bz2ibz_smap(4,ikpt_found) = 0
        end do ! itim
@@ -603,19 +624,32 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  !call cwtime_report(" ibz", cpu, wall, gflops)
 
  nkibz = 0
+#if 1
  do ikpt=1,nkbz
    ikibz = bz2ibz_smap(1,ikpt)
    if (ikibz /= ikpt) cycle
    nkibz = nkibz + 1
    ibz2bz(nkibz) = ikpt
  end do
+#else
+ do ikpt=1,nkbz
+   if (bz2ibz_smap(4,ikpt) == 0) cycle
+   nkibz = nkibz + 1
+   ibz2bz(nkibz) = ikpt
+ end do
+#endif
 
  !do ikpt=1,nkbz
- !  write(*,*) ikpt, ibz2bz(ikpt), bz2ibz_smap(1,ikpt)
+ !  write(*,*) ikpt, ibz2bz(ikpt), bz2ibz_smap(1,ikpt), ibz2bz(bz2ibz_smap(1,ikpt))
  !end do
 
  ! Initialize again
- bz2ibz_smap = 0
+ do ikpt=1,nkbz
+   bz2ibz_smap(1, ikpt) = ikpt
+   bz2ibz_smap(2, ikpt) = 1
+   bz2ibz_smap(3, ikpt) = 0 ! We will use this as wtk_folded
+   bz2ibz_smap(4:6, ikpt) = 0
+ end do
 
  ! Now I loop again over the points in the IBZ to find the mapping to the BZ
  do ikpt=1,nkibz
@@ -633,9 +667,15 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
        end do
 
        !find this point
+#ifdef DEV_KPTRANK
        ikpt_found = kptrank_index(kptrank,ksym)
+#else
+       ikpt_found = octree_find(octree,ksym,dist)
+       ikpt_found = octree_find_nearest(octree,ksym,dist)
+       if (dist>tol6) cycle
+#endif
        if (ikpt_found < 0) cycle
-       if (bz2ibz_smap(1, ikpt_found) /= 0) cycle
+       if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol10) cycle
        bz2ibz_smap(:3, ikpt_found) = [ikpt,isym,itim]
        bz2ibz_smap(4:, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
      end do
@@ -643,16 +683,15 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  end do
  !call cwtime_report(" map", cpu, wall, gflops)
 
- call destroy_kptrank(kptrank)
-
- !Here I make a check if the mapping was sucessfull
- if (any(bz2ibz_smap(1, :) == 0)) then
-   MSG_ERROR('Could not find mapping BZ to IBZ')
- end if
-
  !do ikpt=1,nkbz
- !  write(*,*) ikpt, ibz2bz(ikpt), bz2ibz_smap(1,ikpt)
+ !  write(*,*) ikpt, ibz2bz(ikpt), bz2ibz_smap(1,ikpt), ibz2bz(bz2ibz_smap(1,ikpt))
  !end do
+
+#ifdef DEV_KPTRANK
+ call destroy_kptrank(kptrank)
+#else
+ ierr = octree_free(octree)
+#endif
 
  if(iout/=0)then
    if(nkbz/=nkibz)then
