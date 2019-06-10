@@ -1392,12 +1392,6 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
    ABI_DEALLOCATE(symrec)
    ABI_DEALLOCATE(wtk_fullbz)
-   wtk_folded = 0
-   do ik_bz=1,nkpt_fullbz
-    ik_ibz = indkpt(bz2ibz_smap(1,ik_bz))
-    wtk_folded(ik_ibz) = wtk_folded(ik_ibz) + one
-   end do
-   wtk_folded = wtk_folded / nkpt_fullbz
 #else
    ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
    ABI_ALLOCATE(wtk_fullbz,(nkpt_fullbz))
