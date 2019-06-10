@@ -1377,7 +1377,30 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
    ABI_ALLOCATE(indkpt,(nkpt_fullbz))
    ABI_ALLOCATE(kpt_fullbz,(3,nkpt_fullbz))
+#if 1
+   ABI_ALLOCATE(wtk_fullbz,(nkpt_fullbz))
+   ABI_ALLOCATE(wtk_folded,(nkpt_fullbz))
    ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
+
+   kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
+   wtk_fullbz(1:nkpt_fullbz)=1.0_dp/dble(nkpt_fullbz)
+
+   timrev=1;if (kptopt==4) timrev=0
+
+   call symkpt(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
+&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded, bz2ibz_smap, xmpi_comm_self)
+
+   ABI_DEALLOCATE(symrec)
+   ABI_DEALLOCATE(wtk_fullbz)
+   wtk_folded = 0
+   do ik_bz=1,nkpt_fullbz
+    ik_ibz = indkpt(bz2ibz_smap(1,ik_bz))
+    wtk_folded(ik_ibz) = wtk_folded(ik_ibz) + one
+   end do
+   wtk_folded = wtk_folded / nkpt_fullbz
+#else
+   ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
+   ABI_ALLOCATE(wtk_fullbz,(nkpt_fullbz))
    ABI_ALLOCATE(wtk_folded,(nkpt_fullbz))
 
    kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
@@ -1394,6 +1417,8 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
     wtk_folded(ik_ibz) = wtk_folded(ik_ibz) + one
    end do
    wtk_folded = wtk_folded / nkpt_fullbz
+
+#endif
 
  else if(kptopt==3)then
    nkpt_computed=nkpt_fullbz
