@@ -644,12 +644,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  !end do
 
  ! Initialize again
- do ikpt=1,nkbz
-   bz2ibz_smap(1, ikpt) = ikpt
-   bz2ibz_smap(2, ikpt) = 1
-   bz2ibz_smap(3, ikpt) = 0 ! We will use this as wtk_folded
-   bz2ibz_smap(4:6, ikpt) = 0
- end do
+ bz2ibz_smap = 0
 
  ! Now I loop again over the points in the IBZ to find the mapping to the BZ
  do ikpt=1,nkibz
@@ -675,7 +670,8 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
        if (dist>tol6) cycle
 #endif
        if (ikpt_found < 0) cycle
-       if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol10) cycle
+       if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) cycle
+       if (bz2ibz_smap(1, ikpt_found) /= 0) cycle
        bz2ibz_smap(:3, ikpt_found) = [ikpt,isym,itim]
        bz2ibz_smap(4:, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
      end do
