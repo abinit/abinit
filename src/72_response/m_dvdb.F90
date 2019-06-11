@@ -295,6 +295,8 @@ module m_dvdb
    ! 1 --> Remove LR model when building W(r,R). Add it back after W(r,R) --> v(q) Fourier interpolation
    !       This is the standard approach for polar materials.
    ! -1 --> Remove LR model when building W(r,R). DO NOT reintroduce it after Fourier interpolation.
+   !       This procedure should be used for homopolar materials with (spurious) non-zero BECS
+   !       in order to remove the long range component from the DFPT potentials.
 
   logical :: symv1 = .False.
    ! Activate symmetrization of v1 potentials.
@@ -923,12 +925,12 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 ! *************************************************************************
 
- my_unt = std_out; if (PRESENT(unit)) my_unt = unit
- my_prtvol = 0   ; if (PRESENT(prtvol)) my_prtvol = prtvol
- my_mode = 'COLL'; if (PRESENT(mode_paral)) my_mode = mode_paral
+ my_unt = std_out; if (present(unit)) my_unt = unit
+ my_prtvol = 0   ; if (present(prtvol)) my_prtvol = prtvol
+ my_mode = 'COLL'; if (present(mode_paral)) my_mode = mode_paral
 
  msg=' ==== Info on the dvdb% object ==== '
- if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
+ if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)
 
  write(std_out,"(a)")sjoin(" DVDB version:", itoa(db%version))
@@ -957,14 +959,14 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  if (db%has_zeff) then
    write(std_out, '(a)') ' Effectives Charges: '
    do iatom=1,db%natom
-     write(std_out,'(a,i0,3(/,3es16.6))')' iatom: ', iatom, &
+     write(std_out,'(a,i0,2a,3(/,3es16.6))')' iatom: ', iatom, db%cryst%symbol_iatom(iatom), ch10, &
        db%zeff(1,1,iatom), db%zeff(1,2,iatom), db%zeff(1,3,iatom), &
        db%zeff(2,1,iatom), db%zeff(2,2,iatom), db%zeff(2,3,iatom), &
        db%zeff(3,1,iatom), db%zeff(3,2,iatom), db%zeff(3,3,iatom)
    end do
    !write(std_out, '(a)') ' Effectives Charges before chneut: '
    !do iatom=1,db%natom
-   !  write(std_out,'(a,i0,3(/,3es16.6))')' iatom: ', iatom, &
+   !  write(std_out,'(a,i0,2a,3(/,3es16.6))')' iatom: ', iatom, db%crystal%symbol_iatom(iatom), ch10, &
    !    db%zeff_raw(1,1,iatom), db%zeff_raw(1,2,iatom), db%zeff_raw(1,3,iatom), &
    !    db%zeff_raw(2,1,iatom), db%zeff_raw(2,2,iatom), db%zeff_raw(2,3,iatom), &
    !    db%zeff_raw(3,1,iatom), db%zeff_raw(3,2,iatom), db%zeff_raw(3,3,iatom)
@@ -2680,6 +2682,12 @@ end subroutine rotate_fqg
 !!  required for the Fourier interpolation
 !!  This is a collective routine that should be called by all procs inside db%comm.
 !!
+!! \begin{equation}
+!! 	\label{eq:dfpt_pot_realspace}
+!!     W_{\kappa\alpha}(\rr,\RR) = \dfrac{1}{N_\qq} \sum_\qq e^{-i\qq\cdot(\RR - \rr)}\,
+!!     \partial_{\kappa\alpha\qq}{v^{\text{scf}}}(\rr),
+!! \end{equation}
+!!
 !! INPUTS
 !!  ngqpt(3)=Divisions of the ab-initio q-mesh.
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
@@ -3172,6 +3180,10 @@ end subroutine dvdb_ftinterp_setup
 !!  Fourier interpolation of potentials for a given q-point
 !!  Internal tables must be prepared in advance by calling `dvdb_ftinterp_setup`.
 !!
+!!  \begin{equation}
+!!  \partial v^{scf}_{\tilde\qq\kappa\alpha}(\rr) \approx \sum_\RR e^{+i\tilde{\qq}\cdot(\RR - \rr)} W_{\kappa\alpha}(\rr,\RR).
+!!  \end{equation
+!!
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates (arbitrary point in the BZ).
 !!  nfft=Number of FFT-points treated by this processors.
@@ -3217,7 +3229,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
  ! Examine the symmetries of the q-wavevector
  call littlegroup_q(db%cryst%nsym, qpt, symq, db%cryst%symrec, db%cryst%symafm, timerev_q, prtvol=db%prtvol)
 
- ! Compute FT phases for this q-point.
+ ! Compute e^{iqR} FT phases for this q-point.
  ABI_MALLOC(weiqr, (2, db%my_nrpt))
  ABI_MALLOC(eiqr, (2, db%my_nrpt))
  call calc_eiqr(qpt, db%my_nrpt, db%my_rpt, eiqr)
@@ -3263,7 +3275,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
      !call ZGEMV("T", db%my_nrpt, nfft, cone, db%v1scf_rpt(1,1,1,ispden,imyp), db%mynrpt, weiqr, 1, &
      !           beta, ov1r(1,1,ispden,imyp), 1)
 
-     ! Remove the phase.
+     ! Remove the phase to get the lattice-periodic part.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
 
      ! Need to collect results if R-points are distributed (TODO Non-blocking API?)
@@ -5749,7 +5761,7 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
 !Local variables-------------------------------
 !scalars
  integer :: n1, n2, n3, nfftot, ig !, ii, jj, kk
- real(dp) :: fac, qGZ, denom, denom_inv, qtau
+ real(dp) :: fac, qGZ, denom, denom_inv, qtau, ll
  real(dp) :: re, im, phre, phim, qg_mod, gsq_max
  type(MPI_type) :: MPI_enreg_seq
 !arrays
@@ -5781,8 +5793,10 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
 
  ! Transform the Born effective charge tensor from Cartesian to reduced coordinates
  ! and select the relevant direction.
- Zstar = matmul(transpose(gprimd), matmul(db%zeff(:,:,iatom), rprimd(:,idir))) * two_pi
- !Zstar = matmul(transpose(gprimd), matmul(db%zeff_raw(:,:,iatom), rprimd(:,idir))) * two_pi
+ ll = sqrt(sum(rprimd(:, idir) ** 2))
+ ll = one
+ Zstar = matmul(transpose(gprimd), matmul(db%zeff(:,:,iatom), rprimd(:,idir) / ll)) * two_pi
+ !Zstar = matmul(transpose(gprimd), matmul(db%zeff_raw(:,:,iatom), rprimd(:,idir) / ll)) * two_pi
 
  ! Transform the dielectric tensor from Cartesian to reduced coordinates.
  dielt_red = matmul(transpose(gprimd), matmul(db%dielt, gprimd)) * two_pi ** 2
@@ -5810,7 +5824,7 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
    denom_inv = one / denom
    if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
    !if (db%has_quadrupoles) then
-   !   db%qstar(:,:,:,iatom)
+   !  db%qstar(:,:,:,iatom)
    !end if
 
    ! Phase factor exp(-i (q+G) . tau)
