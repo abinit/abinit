@@ -229,6 +229,8 @@ CONTAINS
 
 subroutine init_results_gs(natom,nsppol,results_gs,only_part)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsppol
@@ -316,6 +318,8 @@ end subroutine init_results_gs
 !! SOURCE
 
 subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -413,6 +417,8 @@ end subroutine init_results_gs_array
 
 subroutine destroy_results_gs(results_gs)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(results_gs_type),intent(inout) :: results_gs
@@ -481,6 +487,8 @@ end subroutine destroy_results_gs
 !! SOURCE
 
 subroutine destroy_results_gs_array(results_gs)
+
+ implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -561,6 +569,8 @@ end subroutine destroy_results_gs_array
 !! SOURCE
 
 subroutine copy_results_gs(results_gs_in,results_gs_out)
+
+ implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -701,6 +711,8 @@ end subroutine copy_results_gs
 !! SOURCE
 
 integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars

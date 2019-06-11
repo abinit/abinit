@@ -5,7 +5,7 @@ import re
 import os
 import sys
 
-from abirules_tools import find_src_dirs
+from abirules_tools import find_abinit_src_directory
 
 IGNORED_DIRS = ["libpaw"]
 
@@ -16,30 +16,30 @@ re_config  = re.compile(\
 
 
 def main():
-  for top in find_src_dirs():
-      assert os.path.exists(top)
-      retval = 0
-      for root,dirs,files in os.walk(top):
-        # Sort dirs
-        dirs.sort()
-        for item in files:
-          # Skip some dirs
-          ignored = 0
-          for dd in IGNORED_DIRS:
-            if root.find(dd) != -1: ignored=1
+  top = find_abinit_src_directory()
+  assert os.path.exists(top)
+  retval = 0
+  for root,dirs,files in os.walk(top):
+    # Sort dirs
+    dirs.sort()
+    for item in files:
+      # Skip some dirs
+      ignored = 0
+      for dd in IGNORED_DIRS:
+        if root.find(dd) != -1: ignored=1
 
-            if ignored == 0:
-              if re_srcfile.search(item):
-                path = os.path.join(root, item)
-                with open(path, "rt") as fh:
-                  src_data = fh.read()
-                src_count = len(re.findall(re_config,src_data))
+        if ignored == 0:
+          if re_srcfile.search(item):
+            path = os.path.join(root, item)
+            with open(path, "rt") as fh:
+              src_data = fh.read()
+            src_count = len(re.findall(re_config,src_data))
 
-                if src_count == 0:
-                  sys.stderr.write("%s/%s: missing include of config.h\n" % (root,item))
-                  retval = 1
-                elif src_count > 1:
-                  sys.stdout.write("%s/%s: %d includes of config.h\n" % (root,item,src_count))
+            if src_count == 0:
+              sys.stderr.write("%s/%s: missing include of config.h\n" % (root,item))
+              retval = 1
+            elif src_count > 1:
+              sys.stdout.write("%s/%s: %d includes of config.h\n" % (root,item,src_count))
 
   return retval
 

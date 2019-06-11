@@ -84,9 +84,6 @@ class ArgParser(object):
                             action='store_true')
         parser.add_argument('--no-fl', help='Disable legacy fldiff comparison',
                             action='store_true')
-        parser.add_argument('--debug', '-d', action='store_true',
-                            help='Enable debugging mode, no longer catch'
-                            ' errors so you can read the tracebacks')
 
     def fldiff(self, args):
         '''
@@ -94,11 +91,10 @@ class ArgParser(object):
         '''
         opts = {
             'tolerance': args.tolerance,
-            'ignore': not args.include,
-            'ignoreP': not args.includeP,
-            'use_yaml': not args.no_yaml,
-            'use_fl': not args.no_fl,
-            'debug': args.debug,
+            'ignore': False if args.include else True,
+            'ignoreP': False if args.includeP else True,
+            'use_yaml': False if args.no_yaml else True,
+            'use_fl': False if args.no_fl else True,
         }
 
         yaml_test = {

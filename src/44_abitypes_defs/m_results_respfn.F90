@@ -99,6 +99,8 @@ CONTAINS
 
 subroutine init_results_respfn(dtsets,ndtset_alloc,results_respfn)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndtset_alloc
@@ -166,9 +168,13 @@ end subroutine init_results_respfn
 
 subroutine destroy_results_respfn(results_respfn)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(results_respfn_type),intent(inout) :: results_respfn
+!Local variables-------------------------------
+!scalars
 
 !************************************************************************
 

@@ -32,8 +32,6 @@ module m_lbfgs
  use defs_basis
  use m_abicore
 
- implicit none
-
 type,public :: lbfgs_internal
  integer              :: lbfgs_status
  integer              :: ndim
@@ -92,6 +90,8 @@ contains
 
 subroutine lbfgs_init(ndim,history_record,diag_guess)
 
+implicit none
+
 integer,intent(in)   :: ndim
 integer,intent(in)   :: history_record
 real(dp),intent(in)  :: diag_guess(ndim)
@@ -140,6 +140,8 @@ end subroutine lbfgs_init
 
 subroutine lbfgs_destroy()
 
+implicit none
+
  if(allocated (lbfgs_plan%work)) then
    ABI_DEALLOCATE(lbfgs_plan%work)
  end if
@@ -176,6 +178,7 @@ end subroutine lbfgs_destroy
 
 function lbfgs_execute(x,f,gradf)
 
+implicit none
 real(dp),intent(inout) :: x(lbfgs_plan%ndim)
 real(dp),intent(in)    :: f
 real(dp),intent(in)    :: gradf(lbfgs_plan%ndim)
@@ -228,6 +231,8 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
                  LINE_STY,LINE_FY,LINE_DGY,   &
                  LINE_STMIN,LINE_STMAX,       &
                  LINE_BRACKT,LINE_STAGE1,LINE_INFOC)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -394,6 +399,8 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
                   GTOL,STPMIN,STPMAX,DGINIT,FINIT, &
                   STX,FX,DGX,STY,FY,DGY,STMIN,STMAX, &
                   BRACKT,STAGE1,INFOC)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -610,6 +617,8 @@ end subroutine mcsrch
 !! SOURCE
 
 subroutine mcstep(STX,FX,DX,STY,FY,DY,STP,FP,DG,BRACKT,STPMIN,STPMAX,INFO)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -880,6 +880,8 @@ end subroutine abimover_destroy
 
 subroutine abimover_print(ab_mover,iout)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in) :: iout
  type(abimover),intent(inout) :: ab_mover
@@ -954,6 +956,8 @@ end subroutine abimover_print
 
 subroutine mttk_ini(mttk_vars,nnos)
 
+ implicit none
+
  integer,intent(in)  :: nnos
  type(mttk_type), intent(out) :: mttk_vars
 
@@ -988,6 +992,8 @@ end subroutine mttk_ini
 !! SOURCE
 
 subroutine mttk_fin(mttk_vars)
+
+ implicit none
 
  type(mttk_type), intent(inout) :: mttk_vars
 
@@ -1137,6 +1143,8 @@ end subroutine abiforstr_fin
 !! SOURCE
 
 subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1304,6 +1312,8 @@ end subroutine make_prim_internals
 
 subroutine make_angles(deloc,natom)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -1404,6 +1414,8 @@ end subroutine make_angles
 !! SOURCE
 
 subroutine make_dihedrals(badangles,deloc)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1552,6 +1564,8 @@ end subroutine make_dihedrals
 
 subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -1686,6 +1700,8 @@ end subroutine make_bonds
 
 subroutine calc_prim_int(deloc,natom,rprimd,xcart,prim_int)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -1811,6 +1827,8 @@ end subroutine calc_prim_int
 
 pure function bond_length(r1,r2)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  real(dp) :: bond_length
@@ -1841,6 +1859,8 @@ end function bond_length
 !! SOURCE
 
 pure function angle_ang(r1,r2,r3)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1887,6 +1907,8 @@ end function angle_ang
 !! SOURCE
 
  function angle_dihedral(r1,r2,r3,r4)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1987,6 +2009,8 @@ end function angle_dihedral
 !! SOURCE
 
 subroutine make_bonds_new(bonds,natom,ntypat,rprimd,typat,xcart,znucl)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2225,6 +2249,8 @@ end subroutine make_bonds_new
 
 subroutine bonds_free(bonds)
 
+ implicit none
+
 !Arguments ------------------------------------
  type(go_bonds),intent(inout) :: bonds
 
@@ -2284,6 +2310,8 @@ end subroutine bonds_free
 !! SOURCE
 
 subroutine print_bonds(amu,bonds,natom,ntypat,symbol,typat,znucl)
+
+ implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -2357,6 +2385,8 @@ end subroutine print_bonds
 !! SOURCE
 
 subroutine delocint_ini(deloc)
+
+ implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -2484,6 +2514,8 @@ end subroutine delocint_fin
 #if 0
 
 subroutine make_angles_new(angles,bonds,natom,ntypat,rprimd,typat,xcart,znucl)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars

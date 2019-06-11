@@ -41,6 +41,7 @@ MODULE m_results_img
 
  use m_geometry,   only : mkrdim, xred2xcart
 
+
  implicit none
 
  private
@@ -165,6 +166,8 @@ CONTAINS
 
 subroutine init_results_img(natom,npspalch,nsppol,ntypalch,ntypat,results_img)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,npspalch,nsppol,ntypalch,ntypat
@@ -240,6 +243,8 @@ end subroutine init_results_img
 !! SOURCE
 
 subroutine destroy_results_img(results_img)
+
+ implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -321,6 +326,8 @@ end subroutine destroy_results_img
 
 subroutine nullify_results_img(results_img)
 
+ implicit none
+
 !Arguments ------------------------------------
 !arrays
  type(results_img_type),intent(inout) :: results_img(:)
@@ -373,6 +380,8 @@ end subroutine nullify_results_img
 !! SOURCE
 
 subroutine copy_results_img(results_img_in,results_img_out)
+
+ implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -483,6 +492,8 @@ end subroutine copy_results_img
 
 subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 &                 master,allgather,only_one_per_img) ! optional arguments
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -766,6 +777,8 @@ end subroutine gather_results_img
 subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
 &                              master,allgather,only_one_per_img) ! optional arguments
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: master
@@ -922,6 +935,8 @@ end subroutine gather_array_img_1D
 
 subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
 &                              master,allgather,only_one_per_img) ! optional arguments
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1081,6 +1096,8 @@ end subroutine gather_array_img_2D
 subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
 &                            master,only_one_per_img) ! optional arguments
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: master
@@ -1231,6 +1248,8 @@ end subroutine scatter_array_img
 !! SOURCE
 
 subroutine get_geometry_img(etotal,natom,nimage,results_img,fcart,rprimd,xcart,xred)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars

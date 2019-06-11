@@ -251,6 +251,8 @@ contains
 
 subroutine destroy_efield(dtefield)
 
+ implicit none
+
 !Arguments ------------------------------------
 !array
  type(efield_type),intent(inout) :: dtefield !vz_i

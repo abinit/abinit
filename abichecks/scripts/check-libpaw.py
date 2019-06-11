@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding=utf8
+# encoding=utf8  
 from __future__ import unicode_literals, division, print_function, absolute_import
 
 import tempfile
@@ -8,7 +8,7 @@ import string
 import glob,os
 import re
 import sys
-#reload(sys
+#reload(sys)  
 try:
     sys.setdefaultencoding('utf8')
 except AttributeError:
@@ -44,7 +44,7 @@ def main(home_dir=""):
   ou.close()
   er.close()
   sys.stdout.write(" done...\n")
-
+	
   # test tarball
   sys.stdout.write("\nTesting tarball...\n")
 
@@ -82,13 +82,13 @@ def main(home_dir=""):
   except:
     sys.stderr.write("cleaning error")
     retval = 1
-
+  
   return retval
 
 if __name__ == "__main__":
-  if len(sys.argv) == 1:
+  if len(sys.argv) == 1: 
     home_dir = "."
   else:
-    home_dir = sys.argv[1]
+    home_dir = sys.argv[1] 
 
   sys.exit(main(home_dir))

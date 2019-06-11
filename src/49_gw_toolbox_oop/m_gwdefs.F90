@@ -417,6 +417,8 @@ CONTAINS  !=====================================================================
 
 subroutine em1params_free(Ep)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(em1params_t),intent(inout) :: Ep
@@ -426,12 +428,23 @@ subroutine em1params_free(Ep)
  !@em1params_t
 
 !real
- ABI_SFREE(Ep%qcalc)
- ABI_SFREE(Ep%qibz)
- ABI_SFREE(Ep%qlwl)
- ABI_SFREE(Ep%omegasf)
+ if (allocated(Ep%qcalc)) then
+   ABI_FREE(Ep%qcalc)
+ end if
+ if (allocated(Ep%qibz)) then
+   ABI_FREE(Ep%qibz)
+ end if
+ if (allocated(Ep%qlwl)) then
+   ABI_FREE(Ep%qlwl)
+ end if
+ if (allocated(Ep%omegasf)) then
+   ABI_FREE(Ep%omegasf)
+ end if
+
 !complex
- ABI_SFREE(Ep%omega)
+ if (allocated(Ep%omega)) then
+   ABI_FREE(Ep%omega)
+ end if
 
 end subroutine em1params_free
 !!***
@@ -458,6 +471,8 @@ end subroutine em1params_free
 !! SOURCE
 
 subroutine sigijtab_free(Sigijtab)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -507,6 +522,8 @@ end subroutine sigijtab_free
 
 subroutine sigparams_free(Sigp)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(sigparams_t),intent(inout) :: Sigp
@@ -516,24 +533,40 @@ subroutine sigparams_free(Sigp)
  !@sigparams_t
 
 !integer
- ABI_SFREE(Sigp%kptgw2bz)
- ABI_SFREE(Sigp%minbnd)
- ABI_SFREE(Sigp%maxbnd)
+ if (allocated(Sigp%kptgw2bz)) then
+   ABI_FREE(Sigp%kptgw2bz)
+ end if
+ if (allocated(Sigp%minbnd)) then
+   ABI_FREE(Sigp%minbnd)
+ end if
+ if (allocated(Sigp%maxbnd)) then
+   ABI_FREE(Sigp%maxbnd)
+ end if
+
 !real
- ABI_FREE(Sigp%kptgw)
+ if (allocated(Sigp%kptgw)) then
+   ABI_FREE(Sigp%kptgw)
+ end if
+
 !complex
- ABI_SFREE(Sigp%omegasi)
- ABI_SFREE(Sigp%omega_r)
+ if (allocated(Sigp%omegasi)) then
+   ABI_FREE(Sigp%omegasi)
+ end if
+ if (allocated(Sigp%omega_r)) then
+   ABI_FREE(Sigp%omega_r)
+ end if
+
+!logical
 
 !types
  if (allocated(Sigp%Sigcij_tab)) then
    call sigijtab_free(Sigp%Sigcij_tab)
-   ABI_FREE(Sigp%Sigcij_tab)
+   ABI_DT_FREE(Sigp%Sigcij_tab)
  end if
 
  if (allocated(Sigp%Sigxij_tab)) then
    call sigijtab_free(Sigp%Sigxij_tab)
-   ABI_FREE(Sigp%Sigxij_tab)
+   ABI_DT_FREE(Sigp%Sigxij_tab)
  end if
 
 end subroutine sigparams_free
@@ -561,6 +594,8 @@ end subroutine sigparams_free
 !! SOURCE
 
 function sigma_type_from_key(key) result(sigma_type)
+
+ implicit none
 
  integer,intent(in) :: key
  character(len=STR_LEN) :: sigma_type
@@ -609,6 +644,8 @@ end function sigma_type_from_key
 
 pure logical function sigma_is_herm(Sigp)
 
+ implicit none
+
 !Arguments ------------------------------
 !scalars
  type(sigparams_t),intent(in) :: Sigp
@@ -645,6 +682,8 @@ end function sigma_is_herm
 
 pure logical function sigma_needs_w(Sigp)
 
+ implicit none
+
 !Arguments ------------------------------
 !scalars
  type(sigparams_t),intent(in) :: Sigp
@@ -680,6 +719,8 @@ end function sigma_needs_w
 
 pure logical function sigma_needs_ppm(Sigp)
 
+ implicit none
+
 !Arguments ------------------------------
 !scalars
  type(sigparams_t),intent(in) :: Sigp
@@ -713,6 +754,8 @@ end function sigma_needs_ppm
 !! SOURCE
 
 function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars

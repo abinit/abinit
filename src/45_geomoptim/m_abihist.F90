@@ -195,6 +195,8 @@ contains  !=============================================================
 
 subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in) :: natom,mxhist
  logical,intent(in) :: isVUsed,isARused
@@ -268,6 +270,8 @@ end subroutine abihist_init_0D
 
 subroutine abihist_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
 
+ implicit none
+
 !Arguments ------------------------------------
  integer,intent(in) :: natom,mxhist
  logical,intent(in) :: isVUsed,isARUsed
@@ -311,6 +315,8 @@ end subroutine abihist_init_1D
 !! SOURCE
 
 subroutine abihist_free_0D(hist)
+
+ implicit none
 
 !Arguments ------------------------------------
  type(abihist),intent(inout) :: hist
@@ -391,6 +397,8 @@ end subroutine abihist_free_0D
 
 subroutine abihist_free_1D(hist)
 
+ implicit none
+
 !Arguments ------------------------------------
  type(abihist),intent(inout) :: hist(:)
 
@@ -434,6 +442,8 @@ end subroutine abihist_free_1D
 !! SOURCE
 
 subroutine abihist_bcast_0D(hist,master,comm)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -635,6 +645,8 @@ end subroutine abihist_bcast_0D
 
 subroutine abihist_bcast_1D(hist,master,comm)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: master,comm
@@ -688,6 +700,8 @@ end subroutine abihist_bcast_1D
 !! SOURCE
 
 subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -751,6 +765,8 @@ end subroutine var2hist
 !! SOURCE
 
 function abihist_findIndex(hist,step) result(index)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -823,6 +839,8 @@ end function abihist_findIndex
 
 subroutine hist2var(acell,hist,natom,rprimd,xred,zDEBUG)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
 integer,intent(in) :: natom
@@ -892,6 +910,8 @@ end subroutine hist2var
 
 subroutine vel2hist(amass,hist,vel,vel_cell)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
 type(abihist),intent(inout) :: hist
@@ -960,6 +980,8 @@ end subroutine vel2hist
 
 subroutine abihist_copy(hist_in,hist_out)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
 type(abihist),intent(in) :: hist_in
@@ -1027,6 +1049,8 @@ end subroutine abihist_copy
 !! SOURCE
 
 subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,store_all)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1158,6 +1182,8 @@ end subroutine abihist_compare_and_copy
 
 subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 &                        typat,amu,znucl,dtion,mdtemp)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1294,6 +1320,8 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
 &                            typat,amu,znucl,dtion,&
 &                            nimage,imgmov,mdtemp,comm_img,imgtab) ! optional arguments
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ifirst,itime,natom,ntypat
@@ -1429,6 +1457,8 @@ end subroutine write_md_hist_img
 
 subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
 
+implicit none
+
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: isVUsed,isARUsed,readOnlyLast
@@ -1527,6 +1557,8 @@ end subroutine read_md_hist
 !! SOURCE
 
 subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1640,6 +1672,8 @@ end subroutine read_md_hist_img
 !! SOURCE
 
 subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1845,6 +1879,8 @@ end subroutine def_file_hist
 subroutine get_dims_hist(ncid,natom,ntypat,nimage,time,&
 &          natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
+implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1926,6 +1962,8 @@ end subroutine get_dims_hist
 
 subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
 &          rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2012,6 +2050,8 @@ end subroutine get_varid_hist
 
 subroutine read_csts_hist(ncid,dtion,typat,znucl,amu)
 
+implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -2083,6 +2123,8 @@ end subroutine read_csts_hist
 !! SOURCE
 
 subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2170,6 +2212,8 @@ end subroutine write_csts_hist
 subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
 &          xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,rprimd_id,&
 &          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2334,6 +2378,8 @@ end subroutine write_vars_hist
 subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,start_time,&
 &          xred_id,fcart_id,vel_id,vel_cell_id,rprimd_id,acell_id,&
 &          strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
+implicit none
 
 !Arguments ------------------------------------
 !scalars

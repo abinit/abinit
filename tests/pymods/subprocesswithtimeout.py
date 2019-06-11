@@ -33,8 +33,11 @@ class SubProcessWithTimeout(object):
                                      bufsize, executable, stdin, stdout, stderr, preexec_fn,
                                      close_fds, shell, cwd, env, universal_newlines, startupinfo, creationflags)
 
-        return_code = self._wait_testcomplete()
-        return self.proc, return_code
+        try:
+            return_code = self._wait_testcomplete()
+            return self.proc, return_code
+        except TimeoutError:
+            raise
 
     def _wait_testcomplete(self):
         start = time.time()
@@ -49,20 +52,16 @@ class SubProcessWithTimeout(object):
             os.kill(-self.proc.pid, signal.SIGTERM)
         except OSError as e:
             # If it's not because the process no longer exists, something weird is wrong.
-            if e.errno != errno.ESRCH:
-                raise e
+            if e.errno != errno.ESRCH: raise
         time.sleep(1)
 
-        if self.proc.poll() is None:  # Still hasn't exited.
+        if self.proc.poll() is None: # Still hasn't exited.
             try:
                 os.kill(-self.proc.pid, signal.SIGKILL)
             except OSError as e:
-                if e.errno != errno.ESRCH:
-                    raise e
-            return 137  # timeout return code for SIGKILL
-        else:
-            return 124  # timeout return code for SIGTERM
+                if e.errno != errno.ESRCH: raise
 
+        raise TimeoutError("timed out waiting for test to complete")
 
 #############################################################################################################
 # Unit tests
@@ -72,8 +71,8 @@ import unittest
 class TestSubProcessWithTimeout(unittest.TestCase):
     def test_with_sleep(self):
         """"Testing if sleep 5 raises TimeoutError"""
-        proc, retcode = SubProcessWithTimeout(1).run(["sleep", "5"])
-        self.assertEqual(retcode, 124)
+        func = SubProcessWithTimeout(1).run
+        self.assertRaises(TimeoutError, func, ["sleep", "5"])
 
 
 if __name__ == "__main__":

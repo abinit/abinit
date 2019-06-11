@@ -1199,7 +1199,10 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
 
  ! === Fourier transform back to real space just to check cutoff implementation ===
  ntasks=nqbz*ng
- call xmpi_split_work(ntasks,comm,my_start,my_stop)
+ call xmpi_split_work(ntasks,comm,my_start,my_stop,msg,ierr)
+ if (ierr/=0) then
+   MSG_WARNING(msg)
+ end if
 
  l1=SQRT(SUM(Vcp%rprimd(:,1)**2))
  l2=SQRT(SUM(Vcp%rprimd(:,2)**2))
@@ -1631,7 +1634,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
  end do
 
  ntasks=nq*ng
- call xmpi_split_work(ntasks,comm,my_start,my_stop)
+ call xmpi_split_work(ntasks,comm,my_start,my_stop,msg,ierr)
  !
  ! ================================================
  ! === Different approaches according to method ===

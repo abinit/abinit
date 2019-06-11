@@ -5,7 +5,7 @@ import os
 import re
 import sys
 
-from abirules_tools import find_abinit_toplevel_directory, find_src_dirs
+from abirules_tools import find_abinit_toplevel_directory
 
 # Init regular expressions
 re_m4file  = re.compile("\.m4$")
@@ -54,8 +54,7 @@ def main():
   verbose = 0
 
   # Extract CPP options from the libPAW header files
-  #libpaw_dir = os.path.join(top, "src", "39_libpaw")
-  libpaw_dir = os.path.join(top, "shared", "libpaw")
+  libpaw_dir = os.path.join(top, "src", "42_libpaw")
   assert os.path.isdir(libpaw_dir)
   cpp_libpaw = list()
   for root,dirs,files in os.walk(libpaw_dir):
@@ -137,50 +136,50 @@ def main():
 
   # Explore the source files
   cpp_source = dict()
-  #src_dir = os.path.join(top, "src")
-  #assert os.path.isdir(src_dir)
-  for src_dir in find_src_dirs():
-      for root,dirs,files in os.walk(src_dir):
-        files.sort()
-        for src in files:
-          if re_f90file.search(src):
-            with open(os.path.join(root, src), "rt") as fh:
-              f90_buffer = fh.readlines()
-            cpp_load = False
-            for i in range(len(f90_buffer)):
-              line = f90_buffer[i]
+  src_dir = os.path.join(top, "src")
+  assert os.path.isdir(src_dir)
 
-              # Record CPP lines
-              if ( re_cppline.search(line) ):
-                if ( cpp_load ):
-                  sys.stderr.write("%s: %s:%d: Error: unterminated CPP directive\n" % \
-                    (my_name,src,i+1))
-                  sys.exit(1)
-                cpp_load = True
-                cpp_buffer = ""
+  for root,dirs,files in os.walk(src_dir):
+    files.sort()
+    for src in files:
+      if re_f90file.search(src):
+        with open(os.path.join(root, src), "rt") as fh:
+          f90_buffer = fh.readlines()
+        cpp_load = False
+        for i in range(len(f90_buffer)):
+          line = f90_buffer[i]
 
-              # Process CPP lines
-              if ( cpp_load ):
-                cpp_buffer += line
-                if ( not re_cppcont.search(line) ):
-                  if ( not re_cppskip.search(line) ):
+          # Record CPP lines
+          if ( re_cppline.search(line) ):
+            if ( cpp_load ):
+              sys.stderr.write("%s: %s:%d: Error: unterminated CPP directive\n" % \
+                (my_name,src,i+1))
+              sys.exit(1)
+            cpp_load = True
+            cpp_buffer = ""
 
-                    # Extract CPP options
-                    for kwd in cpp_keywords:
-                      cpp_buffer = re.sub(kwd,"",cpp_buffer)
-                    cpp_buffer = re.sub("[\n\t ]+"," ",cpp_buffer)
-                    cpp_buffer = cpp_buffer.strip()
-                    cpp_buffer = cpp_buffer.split()
+          # Process CPP lines
+          if ( cpp_load ):
+            cpp_buffer += line
+            if ( not re_cppcont.search(line) ):
+              if ( not re_cppskip.search(line) ):
 
-                    # Register CPP options
-                    for opt in cpp_buffer:
-                      if ( not opt in cpp_ignored ):
-                        if ( not opt in cpp_source ):
-                          cpp_source[opt] = list()
-                        cpp_source[opt].append("%s/%s:%d" % (root,src,i+1))
+                # Extract CPP options
+                for kwd in cpp_keywords:
+                  cpp_buffer = re.sub(kwd,"",cpp_buffer)
+                cpp_buffer = re.sub("[\n\t ]+"," ",cpp_buffer)
+                cpp_buffer = cpp_buffer.strip()
+                cpp_buffer = cpp_buffer.split()
 
-                  # Reset
-                  cpp_load = False
+                # Register CPP options
+                for opt in cpp_buffer:
+                  if ( not opt in cpp_ignored ):
+                    if ( not opt in cpp_source ):
+                      cpp_source[opt] = list()
+                    cpp_source[opt].append("%s/%s:%d" % (root,src,i+1))
+
+              # Reset 
+              cpp_load = False
 
   # Process CPP option information
   cpp_keys = list(cpp_source.keys())

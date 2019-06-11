@@ -237,7 +237,7 @@ a list of strings:
 - "two strings"
 - "..."
 ...'''
-        lines = [line + '\n' for line in lines.split('\n')]
+        lines = [line+'\n' for line in lines.split('\n')]
         with pytest.raises(NoIteratorDefinedError):
             _, documents, _ = dext.extract(lines)
 
@@ -260,7 +260,7 @@ a list of strings:
 - "..."
 ...'''
 
-        lines = [line + '\n' for line in lines.split('\n')]
+        lines = [line+'\n' for line in lines.split('\n')]
         _, documents, _ = dext.extract(lines)
         print(documents)
 

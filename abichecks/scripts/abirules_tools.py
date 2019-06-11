@@ -3,23 +3,10 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import os
 
+
 def find_abinit_src_directory(start_path=None, ntrials=10):
-    top = find_abinit_toplevel_directory(start_path=start_path, ntrials=ntrials)
+    top = find_abinit_toplevel_directory()
     return os.path.join(top, "src")
-
-
-def find_src_dirs(start_path=None, ntrials=10):
-    """
-    Return list of directories containing source files
-    taking into account the new division in shared and ~abinit/src.
-    """
-    top = find_abinit_toplevel_directory(start_path=start_path, ntrials=ntrials)
-    dlist= [os.path.join(top, "shared", "common", "src"),
-            os.path.join(top, "shared", "libpaw", "src"),
-            os.path.join(top, "src")]
-    if not all(os.path.isdir(d) for d in dlist):
-        raise RuntimeError("Non-existent directory in list:" % str(dlist))
-    return dlist
 
 
 def find_abinit_toplevel_directory(start_path=None, ntrials=10):

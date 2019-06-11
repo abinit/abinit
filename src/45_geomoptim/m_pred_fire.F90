@@ -34,7 +34,6 @@ module m_pred_fire
  use m_abihist
  use m_xfpack
  use m_geometry,    only : mkrdim, fcart2fred, metric, xred2xcart
- use m_errors, only: unused_var
 
  implicit none
 

@@ -122,7 +122,7 @@ def main():
     tpl_data = fh.read()
 
   opt_values = dict()
-  for opt in opt_config:
+  for opt in cnf_opt.sections():
     try:
       tmp_values = cnf_opt.get(opt,"values").split()
       if "no" in tmp_values:

@@ -2282,7 +2282,7 @@ Variable(
     text=r"""
 [[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
 on-the-flight variations the plane wave basis set, due to cell optimization by ABINIT.
-Useful only when [[ionmov]] == 2 or 22 and [[optcell]]/=0, that is, cell optimization.
+Useful only when [[ionmov]] == 2 and [[optcell]]/=0, that is, cell optimization.
 
 In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
 ABINIT will rescale uniformly the
@@ -4241,7 +4241,7 @@ Variable(
     text=r"""
 The forces multiplied by [[fxcartfactor]] will be treated like difference in
 cartesian coordinates in the process of optimization. This is a simple preconditioner.
-TO BE UPDATED See ([[ionmov]] = 2 or 22, non-zero [[optcell]]). For example, the
+TO BE UPDATED See ([[ionmov]] = 2, non-zero [[optcell]]). For example, the
 stopping criterion defined by [[tolmxf]] relates to these scaled stresses.
 """,
 ),
@@ -6507,9 +6507,6 @@ corresponding influential variables are [[vcutgeo]] and [[rcut]].
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
   * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
   * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
-  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
-  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
-  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
@@ -6793,7 +6790,7 @@ Choice of algorithm to control the displacements of ions, and eventually (see
 **Related variables:** Viscous parameter [[vis]], time step [[dtion]], index
 of atoms fixed [[iatfix]]
 
-  * 2 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS). This is much more efficient for structural optimization than viscous damping, when there are less than about 10 degrees of freedom to optimize. Another version of the BFGS is available with [[ionmov]]==22, and is apparently more robust and efficient than [[ionmov]]==2.
+  * 2 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS). This is much more efficient for structural optimization than viscous damping, when there are less than about 10 degrees of freedom to optimize.
 **Purpose:** Structural optimization
 **Cell optimization:** Yes (if [[optcell]]/=0)
 **Related variables:**
@@ -6849,13 +6846,13 @@ friction coefficient ([[friction]]).
 
   * 12 --> Isokinetic ensemble molecular dynamics.
 The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]],
-as worked out in [[cite:Minary2003]].
+as worked out in [cite:Minary2003]].
 The conservation of the kinetic energy is obtained within machine precision, at each step.
 As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
 microscopic kinetic energy is hosted is 3*natom-4. Indeed, the total kinetic energy is constrained, which accounts for
-minus one degree of freedom (also mentioned in [[cite:Minary2003]]), but also there are three degrees of freedom
+minus one degree of freedom (also mentioned in [cite:Minary2003]]), but also there are three degrees of freedom
 related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
-total momentum is also preserved (but this is not mentioned in [[cite:Minary2003]]). When some atom is fixed in one or more direction,
+total momentum is also preserved (but this is not mentioned in [cite:Minary2003]]). When some atom is fixed in one or more direction,
 e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly,
 albeit taking into account that the total momentum is not preserved
 anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
@@ -6879,7 +6876,7 @@ thermostats ([[qmass]]).
 
   * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by
 Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]].
-According to the authors, the efficiency of this method is nearly the same as L-bfgs ([[ionmov]]=22).
+The efficiency of this method is nearly the same as L-bfgs ([[ionmov]]=22).
 It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps.
 The initial time step is set with [[dtion]]. Note that the physical meaning and unit of [[dtion]] are different from the default ones.
 The purpose of this algorithm is relaxation, not molecular dynamics. [[dtion]] governs the ion position changes, but the cell parameter changes as well.
@@ -6893,7 +6890,7 @@ The positions are in reduced coordinates instead of in cartesian coordinates. Th
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** DIIS memory [[diismemory]]
 
-  * 22 --> Conduct structural optimization using the Limited-memory Broyden-Fletcher-Goldfarb-Shanno minimization (L-BFGS) [[cite:Nocedal1980]]. The working routines were based on the original implementation of J. Nocedal available on netlib.org. This algorithm can be much better than the native implementation of BFGS in ABINIT ([[ionmov]] = 2) when one approaches convergence, perhaps because of better treatment of numerical details.
+  * 22 --> Conduct structural optimization using the Limited-memory Broyden-Fletcher-Goldfarb-Shanno minimization (L-BFGS). The working routines were based on the original implementation of J. Nocera available on netlib.org. This algorithm can be much better than the native implementation of BFGS in ABINIT ([[ionmov]] = 2) when one approaches convergence, perhaps because of better treatment of numerical details.
 **Purpose:** Structural optimization
 **Cell optimization:** Yes (if [[optcell]]/=0)
 **Related variables:**
@@ -6907,6 +6904,7 @@ step. To perform this extrapolation, the potential computed in a) is used
 c) SFC at t=[[lotf_nitex]]. Computation of the potential parameters.
 d) LOTF interpolation, linear interpolation of the potential parameters and
 computation of the atomic forces and positions between t=0 and t=lotf_nitex.
+
 **Purpose:** Molecular Dynamics
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** [[dtion]], [[lotf_classic]], [[lotf_nitex]],
@@ -6917,10 +6915,7 @@ computation of the atomic forces and positions between t=0 and t=lotf_nitex.
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]]
 
-  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to [[ionmov]]=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
-Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via short $NVE$ trajectories (ten [[ionmov]]=24 steps in current implementation). 
- The initial momenta for each trial are randomly sampled from Boltzmann distribution, and the final trajectory state is either accepted or rejected based on the Metropolis criterion.
- Such strategy allows to simultaneously update all reduced coordinates, achieve higher acceptance ratio than classical Metropolis Monte Carlo and better sampling efficiency for shallow energy landscapes [[cite:Prokhorenko2018]].
+  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to ionmov=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
 **Purpose:** Monte Carlo sampling
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
@@ -7745,7 +7740,7 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 28 --> (NOT AVAILABLE: used internally for GGA OLYP pseudopotentials from [[cite:Krack2005]], available from the [ CP2K repository ](https://github.com/cp2k/cp2k/tree/master/data/POTENTIAL) \- use the LibXC instead, with [[ixc]] = -110131.
 
   * 40 --> Hartree-Fock
-  * 41 --> PBE0, [[cite:Adamo1999]].
+  * 41 --> PBE0, [[cite:Perdew1996]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
 
 **ETSF Lib XC functionals**
@@ -11807,7 +11802,7 @@ Variable(
     defaultval=0,
     mnemonics="OPTimize the CELL shape and dimensions",
     text=r"""
-Allows one to optimize the unit cell shape and dimensions, when [[ionmov]] >= 2 or
+Allows to optimize the unit cell shape and dimensions, when [[ionmov]] >= 2 or
 3. The configuration for which the stress almost vanishes is iteratively
 determined, by using the same algorithms as for the nuclei positions. Will
 eventually modify [[acell]] and/or [[rprim]]. The ionic positions are ALWAYS
@@ -13645,7 +13640,7 @@ If set to 1 or a larger value, provide output of electron density in real
 space rho(r), in units of electrons/Bohr^3.
 If [[ionmov]] == 0, the name of the density file will be the root output name,
 followed by _DEN.
-If [[ionmov]] /= 0, density files will be output at each time step, with
+If [[ionmov]] == 1 or 2, density files will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -13801,7 +13796,7 @@ consistent case as well as in the non-self-consistent case, using [[iscf]] = -3.
 This allows one to refine the DOS at fixed starting density.
 In that case, if [[ionmov]] == 0, the name of the potential file will be the
 root output name, followed by _DOS (like in the [[prtdos]] = 1 case).
-However, if [[ionmov]] /= 0, potential files will be output at each time
+However, if [[ionmov]] == 1 or 2, potential files will be output at each time
 step, with the name being made of
 
   * the root output name,
@@ -14050,7 +14045,7 @@ It will deduce a maximum number of "nearest" and "next-nearest" neighbors
 accordingly, and compute corresponding bond lengths.
 It will compute bond angles for the "nearest" neighbours only.
 If [[ionmov]] == 0, the name of the file will be the root output name, followed by _GEO.
-If [[ionmov]] /= 0, one file will be output at each time step, with the
+If [[ionmov]] == 1 or 2, one file will be output at each time step, with the
 name being made of
 
   * the root output name,
@@ -14287,7 +14282,7 @@ pseudo-potential, Hartree potential, and xc potential).
 
 If [[ionmov]] == 0, the name of the potential file will be the root output name,
 followed by _POT.
-If [[ionmov]] /= 0, potential file will be output at each time step, with
+If [[ionmov]] == 1 or 2, potential file will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -14436,7 +14431,7 @@ If set >=1, provide output of the Hartree potential.
 
 If [[ionmov]] == 0, the name of the potential file will be the root output name,
 followed by _VHA.
-If [[ionmov]] /= 0, potential files will be output at each time step, with
+If [[ionmov]] == 1 or 2, potential files will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -14461,7 +14456,7 @@ If set >=1, provide output of the sum of the Hartree potential and xc potential.
 
 If [[ionmov]] == 0, the name of the potential file will be the root output name,
 followed by _VHXC.
-If [[ionmov]] /= 0, potential files will be output at each time step, with
+If [[ionmov]] == 1 or 2, potential files will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -14548,7 +14543,7 @@ Variable(
 If set >=1, provide output of the local pseudo potential.
 
 If [[ionmov]] == 0, the name of the potential file will be the root output name, followed by _VPSP.
-If [[ionmov]] /= 0, potential files will be output at each time step, with the name being made of
+If [[ionmov]] == 1 or 2, potential files will be output at each time step, with the name being made of
 
   * the root output name,
   * followed by _TIMx, where x is related to the timestep (see later)
@@ -14572,7 +14567,7 @@ If set >=1, provide output of the exchange-correlation potential.
 
 If [[ionmov]] == 0, the name of the potential file will be the root output name,
 followed by _VXC.
-If [[ionmov]] /= 0, potential files will be output at each time step, with
+If [[ionmov]] == 1 or 2, potential files will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -15392,7 +15387,7 @@ continue the work done by the job that produced this wf file. If
 into account. The code will take into consideration the whole history (if
 [[restartxf]] = 1), or discard the few first (x,f) pairs, and begin only at the
 pair whose number corresponds to [[restartxf]].
-Works only for [[ionmov]] = 2 or 22 (Broyden) and when an input wavefunction file is
+Works only for [[ionmov]] = 2 (Broyden) and when an input wavefunction file is
 specified, thanks to the appropriate values of [[irdwfk]] or [[getwfk]].
 
 NOTES:
@@ -15759,7 +15754,7 @@ Variable(
     text=r"""
 Give, in columnwise entry, the three dimensionless primitive translations in
 real space, to be rescaled by [[acell]] and [[scalecart]].
-It is [[EVOLVING]] only if [[ionmov]] == 2 or 22 and [[optcell]]/=0, otherwise it is
+It is [[EVOLVING]] only if [[ionmov]] == 2 and [[optcell]]/=0, otherwise it is
 fixed.
 If the Default is used, that is, [[rprim]] is the unity matrix, the three
 dimensionless primitive vectors are three unit vectors in cartesian
@@ -15877,7 +15872,7 @@ computed from [[acell]], [[scalecart]], and [[rprim]].
   * R2p(i)=[[rprimd]](i,2)=[[scalecart]](i)*[[rprim]](i,2)*[[acell]](2) for i=1,2,3
   * R3p(i)=[[rprimd]](i,3)=[[scalecart]](i)*[[rprim]](i,3)*[[acell]](3) for i=1,2,3
 
-It is [[EVOLVING]] only if [[ionmov]] == 2 or 22 and [[optcell]]/=0, otherwise it is fixed.
+It is [[EVOLVING]] only if [[ionmov]] == 2 and [[optcell]]/=0, otherwise it is fixed.
 """,
 ),
 
@@ -16525,7 +16520,7 @@ Variable(
     mnemonics="STRess FACTor",
     text=r"""
 The stresses multiplied by [[strfact]] will be treated like forces in the
-process of optimization ([[ionmov]] = 2 or 22, non-zero [[optcell]]).
+process of optimization ([[ionmov]] = 2, non-zero [[optcell]]).
 For example, the stopping criterion defined by [[tolmxf]] relates to these
 scaled stresses.
 """,
@@ -17014,7 +17009,7 @@ If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
 to any particular cartesian component of any atom, INCLUDING fixed ones. This
 is to be used when trying to equilibrate a structure to its lowest energy
-configuration (select [[ionmov]]), or in case of molecular dynamics ([[ionmov]] = 1)
+configuration ([[ionmov]] = 2), or in case of molecular dynamics ([[ionmov]] = 1)
 A value ten times smaller than [[tolmxf]] is suggested (for example 5.0d-6
 hartree/Bohr).
 This stopping criterion is not allowed for RF calculations.
@@ -17082,7 +17077,7 @@ conversion factor [[strfact]]. This tolerance applies to any particular
 cartesian component of any atom, excluding fixed ones. See the parameter
 [[ionmov]].
 This is to be used when trying to equilibrate a structure to its lowest energy
-configuration.
+configuration ( [[ionmov]] =2).
 A value of about 5.0d-5 hartree/Bohr or smaller is suggested (this corresponds
 to about 2.5d-3 eV/Angstrom).
 No meaning for RF calculations.
@@ -17128,7 +17123,7 @@ If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
 to any particular cartesian component of any atom, INCLUDING fixed ones. This
 is to be used when trying to equilibrate a structure to its lowest energy
-configuration (select [[ionmov]]), or in case of molecular dynamics ([[ionmov]] = 1)
+configuration ([[ionmov]] = 2), or in case of molecular dynamics ([[ionmov]] = 1)
 A value of 0.02 is suggested.
 This stopping criterion is not allowed for RF calculations.
 Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed
@@ -19591,20 +19586,6 @@ A q-point is included in the sum if the tetrahedron weights for phonon absorptio
 ),
 
 Variable(
-    abivarname="eph_phrange",
-    varset="eph",
-    topics=['SelfEnergy_expert'],
-    vartype="real",
-    defaultval=[0, 0],
-    dimensions=[2],
-    mnemonics="EPH PHonon mode RANGE.",
-    text=r"""
-This variable is used to select the range of phonon modes included in the computation of the phonon self-energy.
-By default [0,0] all phonon modes are included, otherwise only the modes with index between the first and second entries are included.
-""",
-),
-
-Variable(
     abivarname="eph_restart",
     varset="eph",
     topics=['ElPhonInt_basic'],
@@ -19716,52 +19697,9 @@ Variable(
     defaultval=0,
     mnemonics="EPH Number of Processors for Perturbations, Q-points, Bands, K-points, Spin.",
     text=r"""
-This variable defines the Cartesian grid of MPI processors used for EPH calculations.
-If not specified in the input, the code will generate this grid automatically using the total number of processors 
-and the basic dimensions of the job computed at runtime.
-At present (|today|), this variable is supported only in the calculation of the e-ph self-energy.
-
-Preliminary considerations:
-
-EPH calculations require very dense samplings of the BZ to converge and the memory requirements
-increase quickly with the number of k-points, q-points and [[natom]]. 
-The EPH code can MPI-distribute the most important datastructures but non all the MPI-levels 
-present the same scalability and the same parallel efficiency. 
-Besides the maximum number of MPI processes that can be used for the different MPI-levels is related 
-to the basic dimensions of the calculation.
-
-In what follows, we explain briefly the pros/cons of the different MPI-levels, then we specialize 
-the discussion to the different calculations activated by [[eph_task]].
-
-The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
-needed for the DFPT potentials.
-The maximum valus for **np** is 3 * [[natom]] and the workload is equally distributed provided **np** 
-divides 3 * [[natom]] equally. 
-Using **np** == [[natom]] usually gives good parallel efficiency.
-
-The parallelization over bands (**nb**) has limited scalability but it allows one to reduce the memory
-allocated for the wavefunctions, especially when we have to sum over empty states.
-
-[[eph_task]] = +4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
-    Parallelization over bands allows one to reduce the memory needed for the wavefunctions but
-    this level is less efficient than the parallelization over q-points and perturbations.
-    To avoid load and memory imbalance, **nb** should divide [[nband]].
-    We suggest to increase the number of procs for bands until the memory allocated for the wavefunctions
-    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order.
-
-[[eph_task]] = -4
-:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
-    The number of bands in the self-energy sum is usually small so it does not make sense to
-    parallelize along this dimension. The parallelization over q-points seem to be more efficient than
-    the one over perturbations although it introduces some load imbalance because, due to memory reasons, 
-    the code distributes the q-points in the IBZ (nqibz) instead of the q-points in the full BZ (nqbz).
-    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$ 
-
-
-!!! important
-
-    The total number of MPI processes must be equal to the product of the different entries.
+This variable defined the MPI grid of processors used for EPH calculations.
+By default, the code will generate this grid automatically using the total number of processors 
+and the dimensions of the run computed at runtime.
 """,
 ),
 

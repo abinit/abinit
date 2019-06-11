@@ -28,7 +28,7 @@ MODULE m_gruneisen
  use m_abicore
  use m_xmpi
  use m_crystal
- use m_htetrahedron
+ use m_tetrahedron
  use m_ddb
  use m_ddb_hdr
  use m_ifc
@@ -485,7 +485,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  integer,parameter :: master=0,qptopt1=1,bcorr0=0
  integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu,ncerr,nomega,cnt,unt,io
  real(dp) :: gavg,omega_min,omega_max,v2
- type(t_htetrahedron) :: tetra
+ type(t_tetrahedron) :: tetra
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
@@ -561,8 +561,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    do nu=1,gruns%natom3
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
      wibz = wvols_qibz(nu, gruns%iv0, :)
-     call htetra_get_onewk(tetra,iqibz,bcorr0,nomega,nqibz,wibz,omega_min,omega_max,one,wdt)
-     wdt = wdt*wtq(iqibz)
+     call tetra_get_onewk(tetra,iqibz,bcorr0,nomega,nqibz,wibz,omega_min,omega_max,one,wdt)
      wdos = wdos + wdt
      grdos = grdos + wdt * gvals_qibz(nu,iqibz)
      gr2dos = gr2dos + wdt * gvals_qibz(nu,iqibz) ** 2
@@ -667,7 +666,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
  ABI_FREE(v2dos)
  ABI_FREE(vdos)
 
- call htetra_free(tetra)
+ call destroy_tetra(tetra)
 
 end subroutine gruns_qmesh
 !!***

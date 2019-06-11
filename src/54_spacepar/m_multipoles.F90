@@ -81,7 +81,9 @@ contains
 !! SOURCE
 
 subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
-                           distribfft,mpi_comm_grid)
+&                          distribfft,mpi_comm_grid)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -233,7 +235,9 @@ end subroutine multipoles_fftr
 !! SOURCE
 
 subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
-                          ntypat,rprimd,typat,ucvol,unit_out,xred,ziontypat)
+&                         ntypat,rprimd,typat,ucvol,unit_out,xred,ziontypat)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -360,7 +364,9 @@ end subroutine multipoles_out
 !! SOURCE
 
 subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
-                  rhor,rprimd,typat,ucvol,vtrial,xred,znucl)
+&  rhor,rprimd,typat,ucvol,vtrial,xred,znucl)
+
+ implicit none
 
 !Arguments ------------------------------------
 !scalars

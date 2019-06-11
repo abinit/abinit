@@ -1,9 +1,8 @@
 from __future__ import print_function, division, unicode_literals
 import pytest
 from .errors import (EmptySetError, NotOrderedOverlappingSetError)
-from .common import Undef, BaseArray
 from .abinit_iterators import IterStateFilter
-from .meta_conf_parser import ConfTree, ConfParser, SpecKey, Constraint
+from .meta_conf_parser import ConfTree, ConfParser, SpecKey
 from .driver_test_conf import DriverTestConf
 from .structures import Tensor
 
@@ -436,76 +435,6 @@ class TestMetaConfParser(object):
         assert test == ref
 
 
-def true(v, r, t):
-    return True
-
-
-class TestConstraint(object):
-    def test_apply_to_number(self):
-        cons = Constraint('c1', true, int, True, [], set(), 'number', True)
-
-        assert cons.apply_to(1.0)
-        assert cons.apply_to(1)
-        assert cons.apply_to(1.0 + 1.0j)
-        assert cons.apply_to(Undef())
-
-    def test_apply_to_real(self):
-        cons = Constraint('c1', true, int, True, [], set(), 'real', True)
-
-        assert cons.apply_to(1.0) is True
-        assert cons.apply_to(1) is False
-        assert cons.apply_to(1.0 + 1.0j) is False
-        assert cons.apply_to(Undef()) is True
-
-    def test_apply_to_integer(self):
-        cons = Constraint('c1', true, int, True, [], set(), 'integer', True)
-
-        assert cons.apply_to(1.0) is False
-        assert cons.apply_to(1) is True
-        assert cons.apply_to(1.0 + 1.0j) is False
-        assert cons.apply_to(Undef()) is False
-
-    def test_apply_to_complex(self):
-        cons = Constraint('c1', true, int, True, [], set(), 'complex', True)
-
-        assert cons.apply_to(1.0) is True
-        assert cons.apply_to(1) is False
-        assert cons.apply_to(1.0 + 1.0j) is True
-        assert cons.apply_to(Undef()) is True
-
-    def test_apply_to_Array(self):
-        cons = Constraint('c1', true, int, True, [], set(), 'Array', True)
-
-        assert cons.apply_to(BaseArray((0,))) is True
-        assert cons.apply_to(1.0) is False
-        assert cons.apply_to([1, 1.0, 45]) is False
-
-        class MyArray(BaseArray):
-            pass
-        assert cons.apply_to(MyArray.from_seq([1, 2, 3])) is True
-
-    def test_apply_to_class(self):
-        class BaseClass(object):
-            pass
-
-        class OtherClass(object):
-            pass
-
-        class ChildClass(BaseClass):
-            pass
-
-        class MultiChildClass(ChildClass, OtherClass):
-            pass
-
-        cons = Constraint('c1', true, int, True, [], set(), BaseClass, True)
-
-        assert cons.apply_to(BaseClass()) is True
-        assert cons.apply_to(1.0) is False
-        assert cons.apply_to(OtherClass()) is False
-        assert cons.apply_to(ChildClass()) is True
-        assert cons.apply_to(MultiChildClass()) is True
-
-
 class TestDriverTestConf(object):
     src1 = '''\
 tol_abs: 1.2e-7
@@ -626,12 +555,6 @@ sp1:
         tensor_is_symetric: true
 '''
 
-    src4 = '''\
-sp1:
-    stress tensor:
-        tol_vec: 1.0e-8
-'''
-
     def test_get_constraints_other_types(self):
         DriverTestConf.default_conf = '/dev/null'
         driver = DriverTestConf(src=self.src3)
@@ -645,12 +568,6 @@ sp1:
                 assert constraints[0].name == 'tensor_is_symetric'
                 assert constraints[0].value is True
 
-        driver = DriverTestConf(src=self.src4)
-        from .common import BaseArray
 
-        with driver.use_filter({'dtset': 1}):
-            with driver.go_down('sp1').go_down('stress tensor'):
-                constraints = driver.get_constraints_for(BaseArray((0,)))
-                assert len(constraints) == 1
-                assert constraints[0].name == 'tol_vec'
-                assert constraints[0].value == 1.0e-8
+class TestTester(object):
+    pass
