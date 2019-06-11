@@ -59,10 +59,10 @@ prtwf 0
 #%% authors = P.M. Anglade
 #%% keywords = 
 #%% description = 
-#%% Simple test for TFvW2 preconditionner (not already effective)
-#%% simple scf calculation
-#%% following part of the code are tested:
-#%% 04rsprc/prctfw2.F90
-#%% 01cg/*
-#%% THIS TEST DOES NOT WORK AT PRESENT
+#%%   Simple test for TFvW2 preconditionner (not already effective)
+#%%   simple scf calculation
+#%%   following part of the code are tested:
+#%%   04rsprc/prctfw2.F90
+#%%   01cg/*
+#%%   THIS TEST DOES NOT WORK AT PRESENT
 #%%<END TEST_INFO>

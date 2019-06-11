@@ -1,6 +1,19 @@
 from __future__ import print_function, division, unicode_literals
-from .tricks import string
-from .register_tag import BaseDictWrapper
+from .common import BaseDictWrapper, string, basestring
+
+
+def short_repr(thing):
+    '''
+    Shorten representation of things when the default one is too long.
+    '''
+    s = str(thing)
+    if len(s) > 30:
+        if hasattr(thing, 'short_str'):
+            return thing.short_str()
+        else:
+            return '<{} instance>'.format(type(thing).__name__)
+    else:
+        return s
 
 
 class Issue(object):
@@ -31,15 +44,24 @@ class Failure(Issue):
         Issue.__init__(self, conf, msg)
 
     def __repr__(self):
-        if self.ref:
+        if self.ref is not None:
             return Issue.__repr__(self) + '\nref: {}\ntested: {}'.format(
-                self.ref, self.tested
+                short_repr(self.ref), short_repr(self.tested)
             )
         else:
             return Issue.__repr__(self)
 
     def is_fail(self):
         return True
+
+
+class DetailedFailure(Failure):
+    def __init__(self, conf, msg, details):
+        self.details = details
+        Issue.__init__(self, conf, msg)
+
+    def __repr__(self):
+        return Issue.__repr__(self) + '\n{}'.format(self.details)
 
 
 class Success(Issue):
@@ -62,6 +84,20 @@ class Tester(object):
             Check constraints applying to the 'tested' node (of name 'name')
             against 'ref'
         '''
+
+        def analyze(success, cons):
+            if success:
+                msg = '{} ok'.format(cons.name)
+                self.issues.append(Success(self.conf, msg))
+            elif hasattr(success, 'details'):
+                msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
+                self.issues.append(DetailedFailure(self.conf, msg,
+                                                   success.details))
+            else:
+                msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
+                self.issues.append(Failure(self.conf, msg,
+                                           ref, tested))
+
         # we want to detect only dictionaries, not classes that inherit from it
         if type(ref) is dict:
             ref = BaseDictWrapper(ref)
@@ -71,24 +107,24 @@ class Tester(object):
         with self.conf.go_down(name):
             constraints = self.conf.get_constraints_for(ref)
 
-            for cons in constraints:
-                try:
+            if self.conf.debug:
+                for cons in constraints:
                     success = cons.check(ref, tested, self.conf)
-                except Exception as e:
-                    msg = ('Exception while checking {} ({}/{}):\n'
-                           '{}: {}').format(cons.name, ref, tested,
-                                            e.__class__.__name__, str(e))
-                    self.issues.append(Failure(self.conf, msg))
-                else:
-                    if success:
-                        msg = '{} ok'.format(cons.name)
-                        self.issues.append(Success(self.conf, msg))
-                    else:
-                        msg = '{} ({}) failed'.format(cons.name, cons.value)
-                        self.issues.append(Failure(self.conf, msg,
-                                                   ref, tested))
+                    analyze(success, cons)
+            else:
+                for cons in constraints:
+                    try:
+                        success = cons.check(ref, tested, self.conf)
+                    except Exception as e:
+                        msg = ('Exception while checking {} ({}/{}):\n'
+                               '{}: {}').format(cons.name, short_repr(ref),
+                                                short_repr(tested),
+                                                type(e).__name__, str(e))
+                        self.issues.append(Failure(self.conf, msg))
+                    else:  # no exceptions
+                        analyze(success, cons)
 
-            if getattr(ref, '_is_dict_like', False):  # have children
+            if getattr(ref, 'is_dict_like', False):  # have children
                 for child in ref:
                     if child not in tested:
                         msg = '{} was not present'.format(child)
@@ -96,11 +132,27 @@ class Tester(object):
                     else:
                         self.check_this(child, ref[child], tested[child])
 
-            elif hasattr(ref, '__iter__') \
-                    and not getattr(ref, '_has_no_child', False) \
-                    and not isinstance(ref, string):
+            elif hasattr(ref, 'get_children'):  # user made browsable
+                try:
+                    dref = ref.get_children()
+                    dtest = tested.get_children()
+                except Exception as e:
+                    msg = ('Tried to get a dict of item from {} but failed:\n'
+                           '{}: {}').format(name, type(e).__name__, str(e))
+                    self.issues.append(Failure(self.conf, msg))
+                else:
+                    for child in dref:
+                        if child not in dtest:
+                            msg = '{} was not present'.format(child)
+                            self.issues.append(Failure(self.conf, msg))
+                        else:
+                            self.check_this(child, dref[child], dtest[child])
+
+            elif (hasattr(ref, '__iter__')
+                  and not getattr(ref, 'has_no_child', False)
+                  and not isinstance(ref, basestring)):
                 for index, (vref, vtest) in enumerate(zip(ref, tested)):
-                    self.check_this(index, vref, vtest)
+                    self.check_this(string(index), vref, vtest)
 
     def run(self):
         '''
@@ -109,29 +161,20 @@ class Tester(object):
         top_cons = self.conf.get_top_level_constraints()
         for cons in top_cons:
             if top_cons[cons].apply_to('this'):
-                # ref = [doc.obj for doc in self.ref]
-                # tested = [doc.obj for doc in self.tested]
-                # success = top_cons[cons].check(ref, tested, self.conf)
-                # if success:
-                #     msg = '{} ok'.format(cons.name)
-                #     self.issues.append(Success(self.conf, msg))
-                # else:
-                #     msg = '{} ({}) failed'.format(cons.name, cons.value)
-                #     self.issues.append(Failure(self.conf, msg))
                 # FIXME How to define and use top level constraints applying on
                 # this like equations ?
                 raise NotImplementedError('Top level constraints are not yet'
                                           ' implemented')
+            # else:  if it does not apply on this it apply on a deeper level
+            # so it is managed later
 
-        if len(self.ref) != len(self.tested):
-            msg = 'there is not the same number of documents in both side'
-            self.issues.append(Failure(self.conf, msg))
-        else:
-            # FIXME Use a non linear matching of documents ?
-            # ref_doc['iterators'] could be of some use here
-            for ref_doc, tested_doc in zip(self.ref, self.tested):
-                with self.conf.use_filter(ref_doc.iterators):
-                    self.check_this(ref_doc.obj['label'], ref_doc.obj,
-                                    tested_doc.obj)
+        for doc_id, ref_doc in self.ref.items():
+            if doc_id not in self.tested:
+                msg = ('Document ({}) is not present in the tested file.'
+                       .format(doc_id))
+                self.issues.append(Failure(self.conf, msg))
+            with self.conf.use_filter(ref_doc.iterators):
+                self.check_this(ref_doc.obj['label'], ref_doc.obj,
+                                self.tested[doc_id].obj)
 
         return self.issues

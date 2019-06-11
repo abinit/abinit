@@ -59,8 +59,6 @@ module m_xredistribute
 CONTAINS  !===========================================================
 !!***
 
-
-
 !!****f* ABINIT/xredistribute_mpi_dp
 !! NAME
 !!  xredistribute_mpi_dp
@@ -90,9 +88,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
-  &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
-
- implicit none
+                                rec_counts,rec_displs,me,nproc,spaceComm,ier)
 
 !Arguments-------------------------
  integer ,intent(in) :: me,nproc
@@ -165,10 +161,7 @@ end subroutine xredistribute_mpi_dp
 !!
 !! SOURCE
 subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
-  &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
-
- implicit none
-
+                                   rec_counts,rec_displs,me,nproc,spaceComm,ier)
 
 !Arguments-------------------------
  integer ,intent(in) :: me,nproc
