@@ -1,5 +1,5 @@
 
-.Version 8.11.7 of ABINIT 
+.Version 8.11.8 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 31 May 2019.
-- ( at 12h03 )
+.Starting date : Mon 10 Jun 2019.
+- ( at 14h01 )
   
 - input  file    -> t03.in
 - output file    -> t03_x.out
@@ -33,14 +33,13 @@
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       3   xclevel =       1
 -    mband =         192        mffmem =           1         mkmem =           1
-       mpw =        1944          nfft =       64000          nkpt =           1
-Pmy_natom=        16
+       mpw =        3887          nfft =       64000          nkpt =           1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        45    nfftf =     91125
 ================================================================================
-P This job should need less than                      55.887 Mbytes of memory.
+P This job should need less than                      80.870 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      5.697 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
+_ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
  
 --------------------------------------------------------------------------------
@@ -51,15 +50,13 @@ _ WF disk file :      5.697 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    2
+-  max_nthreads =    4
 -
  -outvars: echo values of preprocessed input variables --------
--          iomode           1
             acell      1.5340000000E+01  1.5340000000E+01  1.5340000000E+01 Bohr
               amu      1.37327000E+02
-           bandpp          96
+           bandpp         192
       chksymbreak           0
-     densfor_pred           6
              ecut      8.00000000E+00 Hartree
 -          fftalg         312
            istwfk        1
@@ -71,8 +68,7 @@ P           mkmem           1
             ngfft          40      40      40
           ngfftdg          45      45      45
              nkpt           1
--          npband           2
-            nstep          40
+            nstep         400
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
@@ -108,7 +104,6 @@ P           mkmem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
            occopt           3
-        paral_kgb           1
         pawecutdg      1.00000000E+01 Hartree
            prtden           0
            prteig           0
@@ -246,11 +241,7 @@ P           mkmem           1
  
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    2
- 
---- !IterStart
-dtset:     1
-...
+-   nproc =    1
  
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -298,8 +289,10 @@ dtset:     1
    5.70955898E+05                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
  
-_setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
+_setup2: Arith. and geom. avg. npw (full set) are    3887.000    3887.000
  
 ================================================================================
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2
+ ETOT  1  -798.94035765362    -7.989E+02 2.033E+00 1.384E+01
+ ETOT  2  -800.09506246439    -1.155E+00 5.785E-01 6.513E-01

@@ -113,6 +113,8 @@ module m_chebfiwf
   type(xgBlock_t) :: xgeigen
   type(xgBlock_t) :: xgresidu
   type(chebfi_t) :: chebfi
+  
+  type(xgBlock_t) :: HELPER
  
   integer :: space, nline !blockdim
   integer :: ipw
@@ -269,10 +271,13 @@ module m_chebfiwf
   !###########################################################################
   !################    RUUUUUUUN    ##########################################
   !###########################################################################
-     
+  call xg_getPointer(xgx0)   
   ! Run chebfi
   call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu) 
 
+  call xgBlock_setBlock(xgx0, HELPER, 1, 2, 5) 
+  call xgBlock_print(HELPER, 201) 
+  !stop
   !stop
   ! Free preconditionning since not needed anymore
   ABI_FREE(l_pcon)

@@ -1,5 +1,5 @@
 
-.Version 8.11.7 of ABINIT 
+.Version 8.11.8 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 31 May 2019.
-- ( at 12h35 )
+.Starting date : Mon 10 Jun 2019.
+- ( at 14h23 )
   
 - input  file    -> t03.in
 - output file    -> t03_x.out
@@ -70,7 +70,7 @@ P           mkmem           1
             ngfft          40      40      40
           ngfftdg          45      45      45
              nkpt           1
-            nstep          40
+            nstep         400
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
@@ -246,10 +246,6 @@ P           mkmem           1
 == DATASET  1 ==================================================================
 -   nproc =    1
  
---- !IterStart
-dtset:     1
-...
- 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -301,3 +297,19 @@ _setup2: Arith. and geom. avg. npw (full set) are    3887.000    3887.000
 ================================================================================
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2
+ ETOT  1  -789.20440148277    -7.892E+02 5.387E+00 2.440E+02
+ ETOT  2  -801.01050432159    -1.181E+01 5.424E+00 3.626E+01
+ ETOT  3  -809.04719697782    -8.037E+00 3.264E+00 1.179E+00
+ ETOT  4  -807.19809023025     1.849E+00 5.823E+00 2.644E-01
+ ETOT  5  -807.39175470616    -1.937E-01 3.946E+00 4.684E-02
+ ETOT  6  -806.66247354602     7.293E-01 5.604E+00 7.900E-02
+ ETOT  7  -807.10728852013    -4.448E-01 4.202E+00 9.806E-03
+ ETOT  8  -806.49991784846     6.074E-01 5.336E+00 4.032E-02
+ ETOT  9  -806.81964934613    -3.197E-01 4.322E+00 1.091E-02
+ ETOT 10  -806.30093139725     5.187E-01 5.152E+00 4.554E-02
+ ETOT 11  -806.56779209834    -2.669E-01 4.413E+00 4.442E-02
+ ETOT 12  -805.93284450523     6.349E-01 5.047E+00 2.376E-02
+ ETOT 13  -806.10265585735    -1.698E-01 4.508E+00 2.115E-02
+ ETOT 14  -805.78755081468     3.151E-01 4.949E+00 8.131E-02
+ ETOT 15  -805.79298286638    -5.432E-03 4.606E+00 4.884E-02
+ ETOT 16  -805.48597550772     3.070E-01 4.903E+00 6.751E-02

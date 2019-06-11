@@ -1,5 +1,5 @@
 
-.Version 8.11.7 of ABINIT 
+.Version 8.11.8 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  3 Jun 2019.
-- ( at 10h23 )
+.Starting date : Mon 10 Jun 2019.
+- ( at 17h04 )
   
 - input  file    -> t03.in
 - output file    -> t03_x.out
@@ -50,7 +50,7 @@ _ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =   12
+-  max_nthreads =    4
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
@@ -70,7 +70,7 @@ P           mkmem           1
             ngfft          40      40      40
           ngfftdg          45      45      45
              nkpt           1
-            nstep          40
+            nstep         400
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
@@ -245,10 +245,6 @@ P           mkmem           1
 ================================================================================
 == DATASET  1 ==================================================================
 -   nproc =    1
- 
---- !IterStart
-dtset:     1
-...
  
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7

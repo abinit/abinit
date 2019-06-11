@@ -988,7 +988,7 @@ module m_xg
       !stop
       if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
         !print *, "LUDILO"
-        !call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K) !!TODO BUGGGGGGGGGGGGGGGGGGg
+        call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K) !!TODO BUGGGGGGGGGGGGGGGGGGg
         !print *, "LUDILO GOTOVO"
         !stop
       end if
@@ -999,7 +999,7 @@ module m_xg
         calpha,xgBlockA%vecC, xgBlockA%LDim, &
         xgBlockB%vecC, xgBlockB%LDim, cbeta,xgBlockW%vecC,xgBlockW%LDim)
       if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockW%trans .and. abs(beta) < 1d-10 ) then
-        !call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+        call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
       end if
     end select
 
@@ -1044,7 +1044,7 @@ module m_xg
       alpha,xgBlockA%vecC, xgBlockA%LDim, &
       xgBlockB%vecC, xgBlockB%LDim, beta,xgBlockW%vecC,xgBlockW%LDim)
     if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockA%trans .and. abs(beta) < 1.d-10 ) then
-      !call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+      call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
     end if
 
     call timab(tim_gemm,2,tsec)
@@ -2101,7 +2101,7 @@ module m_xg
     end select
     !print *, "BEFORE SUM"
     !stop
-    !call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
+    call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
     !print *, "AFTER SUM"
     if ( present(max_val) ) then
       max_val = maxval(dot%vecR(1:xgBlock%cols,1))
