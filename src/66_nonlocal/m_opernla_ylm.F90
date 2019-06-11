@@ -445,7 +445,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
-           scale2=scale
            if (cplex==2) then
              buffer_r1 = zero ; buffer_i1 = zero
              do ipw=1,npw
@@ -455,11 +454,11 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                buffer_i1 = buffer_i1 + aux_i*kpg(ipw,ialpha)
              end do
              if (parity) then
-               dgxdt(1,mu0,ilmn,ia,ispinor) = scale2*buffer_r1
-               dgxdt(2,mu0,ilmn,ia,ispinor) = scale2*buffer_i1
+               dgxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
+               dgxdt(2,mu0,ilmn,ia,ispinor) = scale*buffer_i1
              else
-               dgxdt(1,mu0,ilmn,ia,ispinor) =-scale2*buffer_i1
-               dgxdt(2,mu0,ilmn,ia,ispinor) = scale2*buffer_r1
+               dgxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
+               dgxdt(2,mu0,ilmn,ia,ispinor) = scale*buffer_r1
              end if
            else
              if (parity) then
@@ -467,13 +466,13 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                do ipw=1,npw
                  buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,1,ilmn)*kpg(ipw,ialpha)
                end do
-               dgxdt(1,mu0,ilmn,ia,ispinor) = scale2*buffer_r1
+               dgxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
              else
                buffer_i1 = zero
                do ipw=1,npw
                  buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,1,ilmn)*kpg(ipw,ialpha)
                end do
-               dgxdt(1,mu0,ilmn,ia,ispinor) =-scale2*buffer_i1
+               dgxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
              end if
            end if
          end do
@@ -1762,7 +1761,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
-           scale2=scale
            if (cplex==2) then
 !$OMP SINGLE
              buffer_r1 = zero ; buffer_i1 = zero
@@ -1779,11 +1777,11 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !$OMP END DO
 !$OMP SINGLE
              if (parity) then
-               dgxdt(1,mu0,ilmn,ia,ispinor) = scale2*buffer_r1
-               dgxdt(2,mu0,ilmn,ia,ispinor) = scale2*buffer_i1
+               dgxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
+               dgxdt(2,mu0,ilmn,ia,ispinor) = scale*buffer_i1
              else
-               dgxdt(1,mu0,ilmn,ia,ispinor) =-scale2*buffer_i1
-               dgxdt(2,mu0,ilmn,ia,ispinor) = scale2*buffer_r1
+               dgxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
+               dgxdt(2,mu0,ilmn,ia,ispinor) = scale*buffer_r1
              end if
 !$OMP END SINGLE
            else
@@ -1798,7 +1796,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                end do
 !$OMP END DO
 !$OMP SINGLE
-               dgxdt(1,mu0,ilmn,ia,ispinor) = scale2*buffer_r1
+               dgxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
 !$OMP END SINGLE
              else
 !$OMP SINGLE
@@ -1811,7 +1809,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                end do
 !$OMP END DO
 !$OMP SINGLE
-               dgxdt(1,mu0,ilmn,ia,ispinor) =-scale2*buffer_i1
+               dgxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
 !$OMP END SINGLE
              end if
            end if

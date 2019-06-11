@@ -448,7 +448,7 @@ contains
    check=(idir>=1.and.idir<=6)
    ABI_CHECK(check,'BUG: choice=3 and signs=2 requires 1<=idir<=6')
 !1<=idir<=9 is required when choice= 25 or 33 and signs=2
- else if (choice==25.or.choice==33.and.signs==2) then
+ else if ((choice==25.or.choice==33).and.signs==2) then
    check=(idir>=1.and.idir<=9)
    ABI_CHECK(check,'BUG: choice= 25 or 33 and signs=2 requires 1<=idir<=9')
 !1<=idir<=9 is required when choice==8/81 and signs=2
