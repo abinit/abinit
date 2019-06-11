@@ -65,8 +65,8 @@ def main():
     # we're passing these as arguments to the diff function
     fromdate = time.ctime(os.stat(fromfile).st_mtime)
     todate = time.ctime(os.stat(tofile).st_mtime)
-    fromlines = open(fromfile, 'U').readlines()
-    tolines = open(tofile, 'U').readlines()
+    fromlines = open(fromfile).readlines()
+    tolines = open(tofile).readlines()
 
     if options.abinit_junk:
         line_junk = abinit_line_junk
