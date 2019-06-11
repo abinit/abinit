@@ -58,7 +58,7 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
- integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, method, symv1
+ integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, method, symv1scf
  character(len=24) :: codename
  character(len=500) :: command,arg, msg
  character(len=fnlen) :: dvdb_path, dump_file, ddb_path
@@ -118,13 +118,16 @@ program mrgdv
        write(std_out,*)"info out_DVDB              Print information on DVDB file"
        write(std_out,*)"-h, --help                 Show this help and exit."
        write(std_out,*)" "
-       write(std_out,*)"Options for developers:"
-       write(std_out,*)"test_v1complete [file]     Test symmetrization of DFPT potentials."
-       write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (prep_gkk)."
-       write(std_out,*)"test_v1rsym                Test symmetries of DFPT potentials in real space."
-       write(std_out,*)"test_ftinterp in_DVDB --ngqpt 4 4 4  [--ddb-path] [--dvdb-add-lr 0] [--coarse-ngqpt 2 2 2]"
+       write(std_out,*)"=== Options for developers ==="
+       write(std_out,*)" "
+       write(std_out,*)"test_v1complete FILE [--symv1scf]"
+       write(std_out,*)"                           Test symmetrization of DFPT potentials with symv1scf option"
+       write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (use prep_gkk)."
+       write(std_out,*)"test_v1rsym [--symv1scf]   Test symmetries of DFPT potentials in real space."
+       write(std_out,*)"test_ftinterp in_DVDB --ngqpt 4 4 4 [--ddb-path] [--dvdb-add-lr 0]"
+       write(std_out,*)"                                    [--symv1scf] [--coarse-ngqpt 2 2 2]"
        write(std_out,*)"                           Test Fourier interpolation of DFPT potentials."
-       write(std_out,*)"downsample in_DVDB out_DVDB [n1,n2,n3] Produce new DVDB with q-subsmesh"
+       write(std_out,*)"downsample in_DVDB out_DVDB [n1, n2, n3] Produce new DVDB with q-subsmesh"
        !write(std_out,*)"convert in_old_DVDB out_DVDB.nc  Convert old DVDB format to new DVDB in netcdf format"
        !write(std_out,*)"add_gspot in_POT in_DVDB.nc  Add GS potential to DVDB file (required for Sternheimer."
        goto 100
@@ -166,22 +169,24 @@ program mrgdv
      call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB, pass extra argument to dump v1(r)) to file")
      call get_command_argument(2, dvdb_path)
      dump_file = ""; if (nargs > 2) call get_command_argument(3, dump_file)
-     call dvdb_test_v1complete(dvdb_path, dump_file, comm)
+     ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
+     call dvdb_test_v1complete(dvdb_path, symv1scf, dump_file, comm)
 
    case ("test_v1rsym")
      call wrtout(std_out," Testing symmetries of V1(r) in real space.")
      call get_command_argument(2, dvdb_path)
-     call dvdb_test_v1rsym(dvdb_path, comm)
+     ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
+     call dvdb_test_v1rsym(dvdb_path, symv1scf, comm)
 
    case ("test_ftinterp")
      call get_command_argument(2, dvdb_path)
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default=2, want_len=3) == 0, msg)
      ABI_CHECK(get_arg("ddb-path", ddb_path, msg, default="") == 0, msg)
      ABI_CHECK(get_arg("method", method, msg, default=0) == 0, msg)
-     ABI_CHECK(get_arg("symv1", symv1, msg, default=0) == 0, msg)
+     ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
      ABI_CHECK(get_arg_list("coarse-ngqpt", coarse_ngqpt, lenr, msg, default=0, want_len=3) == 0, msg)
-     call dvdb_test_ftinterp(dvdb_path, method, symv1, ngqpt, dvdb_add_lr, ddb_path, prtvol, coarse_ngqpt, comm)
+     call dvdb_test_ftinterp(dvdb_path, method, symv1scf, ngqpt, dvdb_add_lr, ddb_path, prtvol, coarse_ngqpt, comm)
 
    case ("downsample")
      call get_command_argument(2, dvdb_path)

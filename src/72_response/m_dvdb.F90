@@ -5061,6 +5061,7 @@ end function dvdb_check_fform
 !!
 !! INPUTS
 !!  db_path=Filename
+!!  symv1scf=1 to activate symmetrization of DFPT potentials. 0 ti disable it.
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
@@ -5073,11 +5074,11 @@ end function dvdb_check_fform
 !!
 !! SOURCE
 
-subroutine dvdb_test_v1rsym(db_path, comm)
+subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: db_path
- integer,intent(in) :: comm
+ integer,intent(in) :: symv1scf, comm
 
 !Local variables-------------------------------
 !scalars
@@ -5099,9 +5100,9 @@ subroutine dvdb_test_v1rsym(db_path, comm)
 
  db = dvdb_new(db_path, comm)
  db%debug = .True.
- !db%symv1 = .True.
- db%symv1 = .False.
+ db%symv1 = symv1scf > 0
  call dvdb_print(db)
+ !call dvdb%list_perts([-1,-1,-1])
 
  call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
  nfft = product(ngfft(1:3))
@@ -5192,10 +5193,11 @@ end subroutine dvdb_test_v1rsym
 !! FUNCTION
 !!  Debugging tool used to test the symmetrization of the DFPT potentials.
 !!  Assumes DVDB file containing all 3*natom perturbations (generated with nsym == 1 or
-!!  other specialized variables.)
+!!  other specialized variables e.g. prepgkk)
 !!
 !! INPUTS
 !!  db_path=Filename of the DVDB file.
+!!  symv1scf=1 to activate symmetrization of DFPT potentials. 0 ti disable it.
 !!  dump_path=File used to dump potentials (empty string to disable output)
 !!  comm=MPI communicator.
 !!
@@ -5209,11 +5211,11 @@ end subroutine dvdb_test_v1rsym
 !!
 !! SOURCE
 
-subroutine dvdb_test_v1complete(dvdb_path, dump_path, comm)
+subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: dvdb_path,dump_path
- integer,intent(in) :: comm
+ integer,intent(in) :: symv1scf, comm
 
 !Local variables-------------------------------
 !scalars
@@ -5235,7 +5237,7 @@ subroutine dvdb_test_v1complete(dvdb_path, dump_path, comm)
 
  dvdb = dvdb_new(dvdb_path, comm)
  dvdb%debug = .True.
- dvdb%symv1 = .False. !; db%symv1 = .True.
+ dvdb%symv1 = symv1scf > 0
  call dvdb%print()
  call dvdb%list_perts([-1,-1,-1])
 
