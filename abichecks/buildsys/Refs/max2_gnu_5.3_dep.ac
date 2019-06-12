@@ -320,7 +320,7 @@
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FCFLAGS="-O1 -g -ffree-line-length-none -ffree-form"
+FCFLAGS="-O0 -g -ffree-line-length-none -ffree-form"
 
 # Fortran flags for fixed-form source files
 #
@@ -883,29 +883,6 @@ with_linalg_libs="-L/opt/acml6.1.0/lib -lacml"
 # Link flags for the algorithmic libraries (default is unset)
 #
 #with_algo_libs="-L/usr/local/lib -llevmar"
-
-# ---------------------------------------------------------------------------- #
-# Mathematical library connector                                               #
-# ---------------------------------------------------------------------------- #
-
-# Flavor of the math library to use (default is none)
-#
-# Supported libraries:
-#
-#   * custom (bypass build-system checks)
-#   * gsl
-#   * mlib
-#   * none   (disable external math support)
-#
-#with_math_flavor="gsl"
-
-# Include flags for the math library (default is unset)
-#
-#with_math_incs="-I/usr/local/include/gsl"
-
-# Link flags for the math library (default is unset)
-#
-#with_math_libs="-L/usr/local/lib/gsl -lgsl"
 
 # ---------------------------------------------------------------------------- #
 # DFT library connector                                                        #

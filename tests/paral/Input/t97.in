@@ -12,6 +12,7 @@ optcell = 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
+#%% exclude_builders = graphene_gnu_8.3_macports
 #%% test_chain = t95,t96,t97,t98.in
 #%% [files]
 #%% [paral_info]

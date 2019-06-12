@@ -55,7 +55,6 @@ contains
 !! using the Thomas-Fermi functional
 !!
 !! INPUTS
-!!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
@@ -89,10 +88,8 @@ contains
 !!
 !! SOURCE
 
-subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
+subroutine vtorhotf(dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 &  irrzon,mpi_enreg,natom,nfft,nspden,nsppol,nsym,phnons,rhog,rhor,rprimd,ucvol,vtrial)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -100,7 +97,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: ek,enlx,entropy,fermie
  type(MPI_type),intent(in) :: mpi_enreg
- type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: irrzon((dtset%ngfft(1)*dtset%ngfft(1)*dtset%ngfft(1))**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))
@@ -113,7 +109,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: jdichomax=20,level=111
- integer :: i1,i2,i3,ierr,iexit,ifft,ii,ir,iscf,jdicho
+ integer :: i1,i2,i3,ierr,ifft,ii,ir,iscf,jdicho
  integer :: me_fft,n1,n2,n3,nfftot,nproc_fft,prtvol
  real(dp),save :: cktf,fermie_tol,nelect_mid
  real(dp) :: dnelect_mid_dx,dxrtnewt,eektemp,eektf,feektemp,feektf
@@ -124,7 +120,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: betamumoinsV(:),rhor_mid(:),rhor_middx(:)
-!no_abirules
 
 ! *************************************************************************
 
@@ -196,8 +191,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !! SOURCE
   subroutine tf()
 
-  implicit none
-
 ! *************************************************************************
 
    ABI_ALLOCATE(rhor_mid,(nfft))
@@ -251,7 +244,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
    call timab(70,1,tsec)
 
    nfftot=dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3)
-   call symrhg(1,gprimd,irrzon,mpi_enreg,nfft,nfftot,dtset%ngfft,nspden,nsppol,nsym,dtset%paral_kgb,phnons,&
+   call symrhg(1,gprimd,irrzon,mpi_enreg,nfft,nfftot,dtset%ngfft,nspden,nsppol,nsym,phnons,&
 &   rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
 
 !  We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
@@ -282,8 +275,6 @@ end subroutine tf
 !! SOURCE
 
   subroutine tfek()
-
-  implicit none
 
 ! *************************************************************************
 
@@ -355,8 +346,6 @@ end subroutine tf
 !! SOURCE
 
  function zfermim12(xx)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -441,7 +430,6 @@ end function zfermim12
 !..reference: antia apjs 84,101 1993
 !..
 !..declare
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -527,7 +515,6 @@ end function zfermi12
 !..reference: antia  priv comm. 11sep94
 !..
 !..declare
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -604,8 +591,6 @@ end function zfermi1
 !! SOURCE
 
  function zfermi32(xx)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -689,8 +674,6 @@ end function zfermi32
 
  function zfermi2(xx)
 
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
  real(dp) :: zfermi2
@@ -766,8 +749,6 @@ end function zfermi2
 !! SOURCE
 
  function zfermi52(xx)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -850,8 +831,6 @@ end function zfermi52
 
  function zfermi3(xx)
 
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
  real(dp):: zfermi3
@@ -929,8 +908,6 @@ end function zfermi3
 
  function ifermim12(ff)
 
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
  real(dp) :: ifermim12
@@ -1006,8 +983,6 @@ end function ifermim12
 
  function ifermi12(ff)
 
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
  real(dp) :: ifermi12
@@ -1079,8 +1054,6 @@ end function ifermi12
 !! SOURCE
 
  function ifermi32(ff)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
@@ -1154,8 +1127,6 @@ end function ifermi32
 
  function ifermi52(ff)
 
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
  real(dp) :: ifermi52
@@ -1226,8 +1197,6 @@ end function ifermi52
 
  function fp12a1 (x)
 
- implicit none
-
 ! Arguments -------------------------------
  real(dp),intent(in) :: x
  real(dp) :: fp12a1
@@ -1276,8 +1245,6 @@ end function ifermi52
 !! SOURCE
 
  function fp32a1 (x)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp),intent(in) :: x
@@ -1328,8 +1295,6 @@ end function ifermi52
 !! SOURCE
 
  function xp12a1 (y)
-
- implicit none
 
 !Arguments -------------------------------
  real(dp) :: xp12a1
@@ -1382,8 +1347,6 @@ end function ifermi52
 
  function fm12a1 (x)
 
- implicit none
-
 !Arguments -------------------------------
  real(dp),intent(in) :: x
  real(dp) :: fm12a1
@@ -1433,8 +1396,6 @@ end function ifermi52
 !! SOURCE
 
  subroutine fm12a1t (cktf,rtnewt,tphysel,vtrial,rhor_middx,rhor_mid,nfft)
-
- implicit none
 
  integer,intent(in) :: nfft
  real(dp),intent(in) :: tphysel,rtnewt,cktf

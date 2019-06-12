@@ -935,10 +935,9 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
    if (Er%mqmem>0) then
      ! In-core solution.
-     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb]'
-     call wrtout(std_out,msg,'PERS')
-     ABI_STAT_MALLOC(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
-     ABI_CHECK(ierr==0, "Out-of-memory in Er%epsm1 (in-core)")
+     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
+     call wrtout(std_out,msg)
+     ABI_MALLOC_OR_DIE(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
 
      if (iomode == IO_MODE_MPI) then
        !call wrtout(std_out, "read_screening with MPI_IO")
@@ -993,8 +992,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call hscr_io(hscr_cp,fform,rdwr,unt_dump,comm_self,master,iomode)
        call hscr_free(Hscr_cp)
 
-       ABI_STAT_MALLOC(epsm1,(npwe,npwe,Er%nomega), ierr)
-       ABI_CHECK(ierr==0, "out of memory in epsm1")
+       ABI_MALLOC_OR_DIE(epsm1,(npwe,npwe,Er%nomega), ierr)
 
        do iqibz=1,Er%nqibz
          is_qeq0=0
@@ -1068,8 +1066,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ! ========================
      ! === In-core solution ===
      ! ========================
-     ABI_STAT_MALLOC(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
-     ABI_CHECK(ierr==0, 'Out-of-memory in Er%epsm1 (in-core)')
+     ABI_MALLOC_OR_DIE(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
 
      ! FIXME there's a problem with SUSC files and MPI-IO
      !if (iomode == IO_MODE_MPI) then
@@ -1187,8 +1184,7 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
    if (allocated(Er%epsm1))  then
      ABI_FREE(Er%epsm1)
    end if
-   ABI_STAT_MALLOC(Er%epsm1,(Er%npwe,Er%npwe,Er%nomega,1), ierr)
-   ABI_CHECK(ierr==0, 'Out-of-memory in Er%epsm1 (out-of-core)')
+   ABI_MALLOC_OR_DIE(Er%epsm1,(Er%npwe,Er%npwe,Er%nomega,1), ierr)
 
    ! FIXME there's a problem with SUSC files and MPI-IO
    !if (iomode == IO_MODE_MPI) then
@@ -1298,8 +1294,7 @@ subroutine decompose_epsm1(Er,iqibz,eigs)
      ABI_MALLOC(work,(lwork))
      ABI_MALLOC(rwork,(3*npwe-2))
      ABI_MALLOC(eigvec,(npwe,npwe))
-     ABI_STAT_MALLOC(Adpp,(npwe*(npwe+1)/2), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in Adpp')
+     ABI_MALLOC_OR_DIE(Adpp,(npwe*(npwe+1)/2), ierr)
 
      idx=0 ! Pack the matrix
      do ig2=1,npwe
@@ -1475,7 +1470,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ! * Initialize distribution table for frequencies.
    ABI_MALLOC(istart,(nprocs))
    ABI_MALLOC(istop,(nprocs))
-   call xmpi_split_work2_i4b(nomega,nprocs,istart,istop,msg,ierr)
+   call xmpi_split_work2_i4b(nomega,nprocs,istart,istop)
    omega_distrb(:)=xmpi_undefined_rank
    do irank=0,nprocs-1
      i1 = istart(irank+1)
@@ -1542,8 +1537,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
 
    ! Make kxcg_mat(G1,G2) = kxcg(G1-G2) from kxcg defined on the FFT mesh.
-   ABI_STAT_MALLOC(kxcg_mat,(npwe,npwe), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory kxcg_mat")
+   ABI_MALLOC_OR_DIE(kxcg_mat,(npwe,npwe), ierr)
 
    ierr=0
    do ig2=1,npwe
@@ -1615,12 +1609,9 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
  CASE (4)
    !@WC bootstrap vertex correction, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]]
-   ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
-   ABI_STAT_MALLOC(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in chi0_tmp")
-   ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in chi0_save")
+   ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
 
    if (iqibz==1) then
      vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
@@ -1717,10 +1708,8 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
  CASE(5)
    !@WC: one-shot scalar bootstrap approximation
-   ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
-   ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in chi0_save")
+   ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
 
    if (iqibz==1) then
      vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
@@ -1766,10 +1755,8 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 CASE(6)
    !@WC: RPA bootstrap by Rigamonti et al. (PRL 114, 146402) [[cite:Rigamonti2015]]
    !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]]
-   ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
-   ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in chi0_save")
+   ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
 
    if (iqibz==1) then
      vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
@@ -2132,8 +2119,7 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
  end if
 
  write(msg,'(a,f8.2,a)')" chitmp requires: ",npwe**2*gwpc*b2Mb," Mb"
- ABI_STAT_MALLOC(chitmp,(npwe,npwe), ierr)
- ABI_CHECK(ierr==0, msg)
+ ABI_MALLOC_OR_DIE(chitmp,(npwe,npwe), ierr)
  !
  ! * Calculate chi0*fxc.
  chitmp = MATMUL(chi0,kxcg_mat)
@@ -2729,7 +2715,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  real(dp) :: qpg2_nrm
  complex(dpc) :: ph_mqbzt
  logical :: is_qeq0,isirred
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: umklp(3)
@@ -2749,7 +2735,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
 
  nprocs = xmpi_comm_size(comm)
- call xmpi_split_work(npw,comm,my_gstart,my_gstop,msg,ierr)
+ call xmpi_split_work(npw,comm,my_gstart,my_gstop)
 
  call get_bz_item(Qmesh,iq_bz,qpt_bz,iq_ibz,isym_q,itim_q,ph_mqbzt,umklp,isirred)
 
@@ -2822,8 +2808,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  !
  ! W = 1/2 * (A + A^H)
  ! The MPI sum is done inside the loop to avoid problems with the size of the packet.
- ABI_STAT_MALLOC(ctmp,(npw,npw), ierr)
- ABI_CHECK(ierr==0, "out of memory in ctmp")
+ ABI_MALLOC_OR_DIE(ctmp,(npw,npw), ierr)
 
  do iw=1,nomega
    !ctmp = TRANSPOSE(CONJG(w_qbz(:,:,iw)))

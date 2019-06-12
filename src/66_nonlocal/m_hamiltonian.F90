@@ -49,6 +49,10 @@ module m_hamiltonian
  use m_kg,                only : ph1d3d, getph
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
 #if defined HAVE_FC_ISO_C_BINDING
  use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif
@@ -72,12 +76,12 @@ module m_hamiltonian
 !!
 !! FUNCTION
 !! This datastructure contains the information about one Hamiltonian,
-!! needed in the "getghc" routine, that apply the Hamiltonian
-!! on a wavefunction.
+!! needed in the "getghc" routine, that apply the Hamiltonian on a wavefunction.
 !! The Hamiltonian is expressed in reciprocal space:
+!!
 !!       H_k^prime,k = exp(-i.k^prime.r^prime) H exp(i.k.r)
-!! In most cases k=k^prime and the k^prime objects are simply pointers
-!! to k objects.
+!!
+!! In most cases k = k^prime and the k^prime objects are simply pointers to k objects.
 !!
 !! SOURCE
 
@@ -361,6 +365,11 @@ module m_hamiltonian
    ! ph3d_kp(2,npw_fft_kp,matblk)
    ! 3-dim structure factors, for each atom and plane wave at k^prime
 
+  real(dp), pointer :: vectornd(:,:,:,:,:) => null()
+   ! vectornd(n4,n5,n6,nvloc,3)
+   ! vector potential of nuclear magnetic dipoles
+   ! in real space, on the augmented fft grid
+
   real(dp), pointer :: vlocal(:,:,:,:) => null()
    ! vlocal(n4,n5,n6,nvloc)
    ! local potential in real space, on the augmented fft grid
@@ -578,6 +587,7 @@ subroutine destroy_hamiltonian(Ham)
    ABI_DEALLOCATE(Ham%phkxred)
  end if
  if (associated(Ham%ekb)) nullify(Ham%ekb)
+ if (associated(Ham%vectornd)) nullify(Ham%vectornd)
  if (associated(Ham%vlocal)) nullify(Ham%vlocal)
  if (associated(Ham%vxctaulocal)) nullify(Ham%vxctaulocal)
  if (associated(Ham%xred)) nullify(Ham%xred)
@@ -686,8 +696,6 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                           ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
 &                           electronpositron,fock,nucdipmom,use_gpu_cuda)           ! optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
@@ -707,7 +715,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !Local variables-------------------------------
 !scalars
- integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex,cplex_dij,jsp
+ integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex_dij,jsp
  real(dp) :: ucvol
 !arrays
  integer :: my_spintab(2)
@@ -948,8 +956,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 &                             kg_k,kpg_k,kpt_k,nucdipmom_k,npw_k,npw_fft_k,ph3d_k,&
 &                             compute_gbound,compute_ph3d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_k,npw_fft_k,istwf_k
@@ -1134,8 +1140,6 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
 &                                  kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
 &                                  ph3d_kp,compute_gbound,compute_ph3d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_kp,npw_fft_kp,istwf_kp
@@ -1268,8 +1272,6 @@ end subroutine load_kprime_hamiltonian
 
 subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
 
-implicit none
-
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(in),target :: gs_hamk_in
  type(gs_hamiltonian_type),intent(out),target :: gs_hamk_out
@@ -1365,6 +1367,7 @@ implicit none
  end if
 
  call addr_copy(gs_hamk_in%xred,gs_hamk_out%xred)
+ call addr_copy(gs_hamk_in%vectornd,gs_hamk_out%vectornd)
  call addr_copy(gs_hamk_in%vlocal,gs_hamk_out%vlocal)
  call addr_copy(gs_hamk_in%vxctaulocal,gs_hamk_out%vxctaulocal)
  call addr_copy(gs_hamk_in%kinpw_k,gs_hamk_out%kinpw_k)
@@ -1424,6 +1427,7 @@ end subroutine copy_hamiltonian
 !!
 !! INPUTS
 !!  isppol=index of current spin
+!!  [vectornd(n4,n5,n6,nvloc,3)]=optional, vector potential of nuclear magnetic dipoles in real space
 !!  [vlocal(n4,n5,n6,nvloc)]=optional, local potential in real space
 !!  [vxctaulocal(n4,n5,n6,nvloc,4)]=optional, derivative of XC energy density with respect
 !!                                  to kinetic energy density in real space
@@ -1446,9 +1450,7 @@ end subroutine copy_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
-
- implicit none
+subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
@@ -1456,6 +1458,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
  logical,optional,intent(in) :: with_nonlocal
  type(gs_hamiltonian_type),intent(inout),target :: Ham
 !arrays
+ real(dp),optional,intent(in),target :: vectornd(:,:,:,:,:)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
@@ -1475,6 +1478,10 @@ subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
  if (present(vxctaulocal)) then
    ABI_CHECK(size(vxctaulocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*4,"Wrong vxctaulocal")
    Ham%vxctaulocal => vxctaulocal
+ end if
+ if (present(vectornd)) then
+   ABI_CHECK(size(vectornd)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*3,"Wrong vectornd")
+   Ham%vectornd => vectornd
  end if
 
 !Retrieve non-local factors for this spin component
@@ -1593,8 +1600,6 @@ end subroutine destroy_rf_hamiltonian
 
 subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 &          comm_atom,mpi_atmtab,mpi_spintab,paw_ij1,has_e1kbsc) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1745,8 +1750,6 @@ end subroutine init_rf_hamiltonian
 
 subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isppol
@@ -1817,8 +1820,6 @@ end subroutine load_spin_rf_hamiltonian
 
 subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: npw_k
@@ -1878,8 +1879,6 @@ end subroutine load_k_rf_hamiltonian
 !! SOURCE
 
 subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1964,8 +1963,6 @@ end subroutine pawdij2ekb
 !! SOURCE
 
 subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

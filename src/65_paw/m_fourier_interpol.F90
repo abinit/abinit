@@ -102,8 +102,6 @@ CONTAINS  !=====================================================================
 
 subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfgr,rhog,rhogf,rhor,rhorf)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,nspden,optgrid,optin,optout,paral_kgb
@@ -393,9 +391,9 @@ end subroutine transgrid
 !! fourier_interpol
 !!
 !! FUNCTION
-!!  Perform a Fourier interpolation. Just a wrapper for transgrid, the table giving the correspondence 
-!!  between the coarse and the mesh FFT grids are constructed inside the routine. This allows to specify an 
-!!  arbitrary FFT mesh to be used for the interpolation. Besides the routine works also in 
+!!  Perform a Fourier interpolation. Just a wrapper for transgrid, the table giving the correspondence
+!!  between the coarse and the mesh FFT grids are constructed inside the routine. This allows to specify an
+!!  arbitrary FFT mesh to be used for the interpolation. Besides the routine works also in
 !!  case of NC calculations since it does not require Pawfgr.
 !!
 !! INPUTS
@@ -413,8 +411,7 @@ end subroutine transgrid
 !!         1: output density/potential is given in r space in rhor_out(:,nspden)
 !!                                          and in g space in rhog_out(:)
 !! ngfft_asked(18)=All info on the required FFT mesh.
-!! paral_kgb=Flag related to the kpoint-band-fft parallelism (TODO not implemented)
-!!  
+!!
 !! OUTPUT
 !!  rhor_out(cplex*nfft_out,nspden)=output density/potential in r space on the required FFT mesh.
 !!  if optout=1:
@@ -429,14 +426,12 @@ end subroutine transgrid
 !! SOURCE
 
 subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,ngfft_out,&
-& paral_kgb,MPI_enreg,rhor_in,rhor_out,rhog_in,rhog_out)
-
- implicit none
+                           MPI_enreg,rhor_in,rhor_out,rhog_in,rhog_out)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nspden,optin,optout
- integer,intent(in) :: nfft_in,nfft_out,paral_kgb
+ integer,intent(in) :: nfft_in,nfft_out
  type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft_in(18),ngfft_out(18)
@@ -455,39 +450,36 @@ subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,
 
 ! *************************************************************************
 
-!=== FFT parallelism not implemented ===
- ABI_CHECK(paral_kgb==0,'paral_kgb/=0 not implemented')
-
- ltest= ALL( ngfft_in(7:) == ngfft_out(7:) )
+ ltest= ALL(ngfft_in(7:) == ngfft_out(7:) )
  ABI_CHECK(ltest,'ngfftf_in(7:18)/=ngfftf_out(7:18)')
 
-!================================
-!=== Which one is the coarse? ===
-!================================
- if (nfft_out>=nfft_in) then 
+ !================================
+ !=== Which one is the coarse? ===
+ !================================
+ if (nfft_out>=nfft_in) then
    ! From coarse to fine grid. If meshes are equivalent, call transgrid anyway because of optout, optin.
-   nfftf    =nfft_out 
+   nfftf    =nfft_out
    ngfftf(:)=ngfft_out(:)
    nfftf_tot =PRODUCT(ngfft_out(1:3))
 
-   nfftc    =nfft_in 
+   nfftc    =nfft_in
    ngfftc(:)=ngfft_in(:)
    nfftc_tot =PRODUCT(ngfft_in (1:3))
 
-   Pawfgr%usefinegrid=1 
-   if (ALL(ngfft_in(1:3)==ngfft_out(1:3))) Pawfgr%usefinegrid=0 
+   Pawfgr%usefinegrid=1
+   if (ALL(ngfft_in(1:3)==ngfft_out(1:3))) Pawfgr%usefinegrid=0
    optgrid=1
 
- else 
+ else
    ! From fine towards coarse.
-   nfftf    =nfft_in 
+   nfftf    =nfft_in
    ngfftf(:)=ngfft_in(:)
    nfftf_tot =PRODUCT(ngfft_in(1:3))
 
-   nfftc    =nfft_out 
+   nfftc    =nfft_out
    ngfftc(:)=ngfft_out(:)
    nfftc_tot =PRODUCT(ngfft_out (1:3))
-   Pawfgr%usefinegrid=1 
+   Pawfgr%usefinegrid=1
    optgrid=-1
  end if
 
@@ -504,14 +496,14 @@ subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,
  Pawfgr%nfftc  =PRODUCT(ngfftc(1:3)) ! no FFT parallelism!
  Pawfgr%ngfftc =ngfftc
 
- if (optgrid==1) then 
-   call transgrid(cplex,MPI_enreg,nspden,optgrid,optin,optout,paral_kgb,Pawfgr,rhog_in ,rhog_out,rhor_in ,rhor_out)
+ if (optgrid==1) then
+   call transgrid(cplex,MPI_enreg,nspden,optgrid,optin,optout,MPI_enreg%paral_kgb,Pawfgr,rhog_in ,rhog_out,rhor_in ,rhor_out)
  else
-   call transgrid(cplex,MPI_enreg,nspden,optgrid,optin,optout,paral_kgb,Pawfgr,rhog_out,rhog_in ,rhor_out,rhor_in)
+   call transgrid(cplex,MPI_enreg,nspden,optgrid,optin,optout,MPI_enreg%paral_kgb,Pawfgr,rhog_out,rhog_in ,rhor_out,rhor_in)
  end if
 
  call pawfgr_destroy(Pawfgr)
- 
+
 end subroutine fourier_interpol
 !!***
 

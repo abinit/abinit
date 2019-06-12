@@ -74,7 +74,7 @@ contains
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  nkxc=second dimension of the kxc array. If /=0,
 !!   the exchange-correlation kernel must be computed.
-!!  non_magnetic_xc= true if usepawu==4
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  n3xccc=dimension of the xccc3d array (0 or nfft or cplx*nfft).
 !!  option=0 or 1 for xc only (exc, vxc, strsxc),
 !!         2 for xc and kxc (no paramagnetic part if xcdata%nspden=1)
@@ -84,7 +84,6 @@ contains
 !!              by the related auxiliary GGA functional for the computation of the xc kernel (not for other quantities)
 !!         3 for xc, kxc and k3xc
 !!        -2 for xc and kxc (with paramagnetic part if xcdata%nspden=1)
-!!  paral_kgb=Flag related to the kpoint-band-fft parallelism
 !!  rhor(nfft,xcdata%nspden)=electron density in real space in electrons/bohr**3
 !!   (total in first half and spin-up in second half if xcdata%nspden=2)
 !!   (total in first comp. and magnetization in comp. 2 to 4 if xcdata%nspden=4)
@@ -257,15 +256,13 @@ contains
 !! SOURCE
 
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,paral_kgb, &
+& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 & add_tfw,exc_vdw_out,electronpositron,k3xc,taug,taur,vhartr,vxctau,xc_funcs) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,option,paral_kgb
+ integer,intent(in) :: nk3xc,n3xccc,nfft,nhatdim,nhatgrdim,nkxc,option
  integer,intent(in) :: usexcnhat
  logical,intent(in) :: non_magnetic_xc
  logical,intent(in),optional :: add_tfw
@@ -296,7 +293,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
- logical :: allow3,test_nhat,with_vxctau
+ logical :: allow3,test_nhat,need_nhat,need_nhatgr,with_vxctau
  character(len=500) :: message
  real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range
 !arrays
@@ -462,7 +459,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !  Thomas-Fermi-Weiszacker is a gradient correction
    if(add_tfw_) ngrad=2
 !  Test: has a compensation density to be added/substracted (PAW) ?
-   test_nhat=((nhatdim==1).and.(usexcnhat==0.or.(ngrad==2.and.nhatgrdim==1)))
+   need_nhat=(nhatdim==1.and.usexcnhat==0)
+   need_nhatgr=(nhatdim==1.and.nhatgrdim==1.and.ngrad==2)
+   test_nhat=(need_nhat.or.need_nhatgr)
 !  nspden_updn: 1 for non-polarized, 2 for polarized
    nspden_updn=min(nspden,2)
 !  nspden_eff: effective value of nspden used to compute gradients of density:
@@ -498,28 +497,28 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !  PAW: select the valence density (and magnetization) to use:
 !  link the correct density, according to usexcnhat option
-   if ((usexcnhat==1).or.(nhatdim==0)) then
+   if ((.not.need_nhat).and.(.not.non_magnetic_xc)) then
      rhor_ => rhor
    else
      ABI_ALLOCATE(rhor_,(nfft,nspden))
-     !rhor_(:,:)=rhor(:,:)-nhat(:,:)
-     do ispden=1,nspden
-       do ifft=1,nfft
-         rhor_(ifft,ispden)=rhor(ifft,ispden)-nhat(ifft,ispden)
+     if (need_nhat) then
+       do ispden=1,nspden
+         do ifft=1,nfft
+           rhor_(ifft,ispden)=rhor(ifft,ispden)-nhat(ifft,ispden)
+         end do
        end do
-     end do
+     else
+       do ispden=1,nspden
+         do ifft=1,nfft
+           rhor_(ifft,ispden)=rhor(ifft,ispden)
+         end do
+       end do
+     end if
+     if(non_magnetic_xc) then
+       if(nspden==2) rhor_(:,2)=rhor_(:,1)*half
+       if(nspden==4) rhor_(:,2:4)=zero
+     endif
    end if
-
-  if(non_magnetic_xc) then
-    if(nspden==2) then
-      rhor_(:,2)=rhor_(:,1)/two
-    endif
-    if(nspden==4) then
-      rhor_(:,2)=zero
-      rhor_(:,3)=zero
-      rhor_(:,4)=zero
-    endif
-  endif
 
 !  Some initializations for the electron-positron correlation
    if (ipositron==2) then
@@ -608,23 +607,23 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if ((n3xccc==0).and.(.not.test_nhat).and.(nspden_eff==nspden)) then
        if (mgga==1) then
          call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         paral_kgb,qphon,rhor_,rhonow,lrhonow=lrhonow)
+&         qphon,rhor_,rhonow,lrhonow=lrhonow)
        else
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,paral_kgb,qphon,rhor_,rhonow)
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,qphon,rhor_,rhonow)
        end if
      else if ((ishift>0).and.(test_nhat)) then
        if (mgga==1) then
          call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         paral_kgb,qphon,rhocorval,rhonow,lrhonow=lrhonow)
+&         qphon,rhocorval,rhonow,lrhonow=lrhonow)
        else
-         call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,paral_kgb,qphon,rhocorval,rhonow)
+         call xcden(cplex,gprimd,0,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,qphon,rhocorval,rhonow)
        end if
      else
        if (mgga==1) then
          call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,&
-&         paral_kgb,qphon,rhocorval,rhonow,lrhonow=lrhonow)
+&         qphon,rhocorval,rhonow,lrhonow=lrhonow)
        else
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,paral_kgb,qphon,rhocorval,rhonow)
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,qphon,rhocorval,rhonow)
        end if
      end if
 
@@ -644,7 +643,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            rhocorval(:,1)=rhocorval(:,1)+nhat(:,1)
            rhocorval(:,2)=rhocorval(:,2)+nhat_up(:)
          end if
-         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,nspden_eff,paral_kgb,qphon,rhocorval,rhonow)
+         call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,1,nspden_eff,qphon,rhocorval,rhonow)
        end if
        if (ngrad==2.and.nhatgrdim==1.and.nspden==nspden_eff) then
          do ii=1,3
@@ -1114,10 +1113,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if (nspden/=4) then
        if(with_vxctau)then
          call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&         paral_kgb,qphon,rhonow_ptr,vxc,vxctau=vxctau)
+&         qphon,rhonow_ptr,vxc,vxctau=vxctau)
        else
          call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&         paral_kgb,qphon,rhonow_ptr,vxc)
+&         qphon,rhonow_ptr,vxc)
        end if
 
      else
@@ -1126,7 +1125,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxcrho_b_updn,(nfft,4))
        vxcrho_b_updn=zero
        call xcpot(cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
-&       paral_kgb,qphon,rhonow_ptr,vxcrho_b_updn)
+&       qphon,rhonow_ptr,vxcrho_b_updn)
        do ifft=1,nfft
          dvdn=half*(vxcrho_b_updn(ifft,1)+vxcrho_b_updn(ifft,2))
          if(m_norm(ifft)>m_norm_min) then
@@ -1158,7 +1157,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        ABI_ALLOCATE(vxc_apn,(nfft,nspden_apn))
        vxc_apn=zero
        call xcpot(cplex,depsxc_apn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad_apn,&
-&       nspden_apn,ngrad_apn,paral_kgb,qphon,rhonow_apn,vxc_apn)
+&       nspden_apn,ngrad_apn,qphon,rhonow_apn,vxc_apn)
        vxc(:,1)=vxc(:,1)+vxc_apn(:,1)
        if (nspden_updn==2) vxc(:,2)=vxc(:,2)+vxc_apn(:,1)
        s1=zero
@@ -1224,7 +1223,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    if (nspden==4)  then
      ABI_DEALLOCATE(m_norm)
    end if
-   if ((usexcnhat==0).and.(nhatdim/=0)) then
+   if (need_nhat.or.non_magnetic_xc) then
      ABI_DEALLOCATE(rhor_)
    end if
 

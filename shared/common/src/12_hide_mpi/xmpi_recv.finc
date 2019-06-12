@@ -1,0 +1,497 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/xmpi_recv
+!! NAME
+!!  xmpi_recv
+!!
+!! FUNCTION
+!!  This module contains functions that call MPI routine MPI_RECV,
+!!  to receive data on one processor sent by another,
+!!  if we compile the code using the MPI CPP flags.
+!!  xmpi_recv is the generic function.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2001-2019 ABINIT group
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~ABINIT/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! TODO
+!!
+!! SOURCE
+!!***
+
+!!****f* ABINIT/xmpi_recv_char
+!! NAME
+!!  xmpi_recv_char
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: character.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! SOURCE
+
+subroutine xmpi_recv_char(xval,source,tag,spaceComm,ier)
+
+!Arguments-------------------------
+ character(len=*), intent(inout) :: xval
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   my_tag = MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,len(xval),MPI_CHARACTER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_char
+!!***
+
+!!****f* ABINIT/xmpi_recv_intv
+!! NAME
+!!  xmpi_recv_intv
+!!
+!! FUNCTION
+!!  Receives data from one processor sent by another.
+!!  Target: single integer.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! SOURCE
+
+subroutine xmpi_recv_intv(xval,source,tag,spaceComm,ier)
+
+!Arguments-------------------------
+ integer,intent(inout) :: xval
+ integer,intent(in) :: source,tag,spaceComm
+ integer,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+  integer :: my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   my_tag=MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,1,MPI_INTEGER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+ end subroutine xmpi_recv_intv
+!!***
+
+!!****f* ABINIT/xmpi_recv_int1d
+!! NAME
+!!  xmpi_recv_int1d
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: integer one-dimensional arrays.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! SOURCE
+
+subroutine xmpi_recv_int1d(xval,source,tag,spaceComm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(inout) :: xval(:)
+ integer,intent(in) :: source,tag,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_tag, n1
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   n1=size(xval,dim=1)
+   my_tag = MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,n1,MPI_INTEGER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+ end subroutine xmpi_recv_int1d
+!!***
+
+!!****f* ABINIT/xmpi_recv_int2d
+!! NAME
+!!  xmpi_recv_int2d
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: integer two-dimensional arrays.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_recv
+!!
+!! SOURCE
+subroutine xmpi_recv_int2d(xval,source,tag,spaceComm,ier)
+
+!Arguments-------------------------
+ integer,intent(inout) :: xval(:,:)
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   n1=size(xval,dim=1)
+   n2=size(xval,dim=2)
+   my_tag=MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,n1*n2,MPI_INTEGER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_int2d
+!!***
+
+!!****f* ABINIT/xmpi_recv_int3d
+!! NAME
+!!  xmpi_recv_int3d
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: integer three-dimensional arrays.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_recv
+!!
+!! SOURCE
+subroutine xmpi_recv_int3d(xval,source,tag,spaceComm,ier)
+
+!Arguments-------------------------
+ integer,intent(inout) :: xval(:,:,:)
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,n3,my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   n1=size(xval,dim=1)
+   n2=size(xval,dim=2)
+   n3=size(xval,dim=3)
+   my_tag=MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,n1*n2*n3,MPI_INTEGER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_int3d
+!!***
+
+!!****f* ABINIT/xmpi_recv_dp
+!! NAME
+!!  xmpi_recv_dp
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: double precision value.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! SOURCE
+
+subroutine xmpi_recv_dp(xval,source,tag,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   my_tag = MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,1,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_dp
+!!***
+
+!!****f* ABINIT/xmpi_recv_dp1d
+!! NAME
+!!  xmpi_recv_dp1d
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: double precision one-dimensional arrays.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! SOURCE
+
+subroutine xmpi_recv_dp1d(xval,source,tag,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:)
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   n1=size(xval,dim=1)
+   my_tag = MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,n1,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_dp1d
+!!***
+
+!!****f* ABINIT/xmpi_recv_dp2d
+!! NAME
+!!  xmpi_recv_dp2d
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: double precision two-dimensional arrays.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! SOURCE
+
+subroutine xmpi_recv_dp2d(xval,source,tag,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   n1=size(xval,dim=1)
+   n2=size(xval,dim=2)
+   my_tag=MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,n1*n2,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_dp2d
+!!***
+
+!!****f* ABINIT/xmpi_recv_dp3d
+!! NAME
+!!  xmpi_recv_dp3d
+!!
+!! FUNCTION
+!!  Receives data from one proc sent by another.
+!!  Target: double precision three-dimensional arrays.
+!!
+!! INPUTS
+!!  source :: rank of source process
+!!  tag :: integer message tag
+!!  spaceComm :: MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! NOTES
+!!  status of MPI_RECV is explicitly ignored
+!!
+!! SOURCE
+
+subroutine xmpi_recv_dp3d(xval,source,tag,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
+ integer ,intent(in) :: source,tag,spaceComm
+ integer ,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: n1,n2,n3,my_tag
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   n1=size(xval,dim=1)
+   n2=size(xval,dim=2)
+   n3=size(xval,dim=3)
+   my_tag=MOD(tag,xmpi_tag_ub)
+   call MPI_RECV(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
+ end if
+#endif
+
+end subroutine xmpi_recv_dp3d
+!!***

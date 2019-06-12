@@ -1,0 +1,23 @@
+EXTRA_DIST += \
+	xmpi_allgather.finc \
+        xmpi_allgatherv.finc \
+        xmpi_gather.finc \
+        xmpi_gatherv.finc \
+        xmpi_bcast.finc \
+        xmpi_min.finc \
+        xmpi_sum_master.finc \
+        xmpi_exch.finc \
+        xmpi_recv.finc \
+        xmpi_irecv.finc \
+        xmpi_sum.finc \
+        xmpi_ibcast.finc \
+        xmpi_isum.finc \
+        xmpi_alltoall.finc \
+        xmpi_ialltoall.finc \
+        xmpi_alltoallv.finc \
+        xmpi_ialltoallv.finc \
+        xmpi_max.finc \
+        xmpi_send.finc \
+        xmpi_isend.finc \
+        xmpi_scatterv.finc \
+        xmpi_land_lor.finc

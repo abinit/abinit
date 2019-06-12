@@ -75,8 +75,6 @@ contains
 
 subroutine symlist_prim(additional_info,nsym,n_axes,spgroup)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: additional_info,nsym
@@ -514,8 +512,6 @@ end subroutine symlist_prim
 
 subroutine symlist_bcc(additional_info,nsym,n_axes,spgroup)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: additional_info,nsym
@@ -701,8 +697,6 @@ end subroutine symlist_bcc
 
 subroutine symlist_fcc(nsym,n_axes,spgroup)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -815,8 +809,6 @@ end subroutine symlist_fcc
 !! SOURCE
 
 subroutine symlist_others(brvltt,nsym,n_axes,spgroup)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
