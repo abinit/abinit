@@ -18,6 +18,10 @@
 #include <string>
 #include <fstream>
 
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+
 #if defined HAVE_MPI
 #include <mpi.h>
 #endif
