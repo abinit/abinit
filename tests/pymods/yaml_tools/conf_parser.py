@@ -10,24 +10,22 @@
     should explain when the test fail and when it succeed.
 '''
 from __future__ import print_function, division, unicode_literals
-from numpy import ndarray, isnan
+from numpy import ndarray
 from numpy.linalg import norm
 from .meta_conf_parser import ConfParser
-from .structures import Tensor, Undef
+from .structures import Tensor
+from .errors import MissingCallbackError
+from .common import FailDetail
 
 conf_parser = ConfParser()
 
 # Parameters
+# arguments are token, default=None, value_type=float, inherited=True
 conf_parser.parameter('tol_eq', default=1e-8, inherited=True)
 
 
-tol_group = {
-    'tol_rel', 'tol_abs', 'tol'
-}
-
-
 # Constraints
-# default parameters for constraints are:
+# default arguments for constraints are:
 # value_type=float, inherited=True, apply_to='number' use_params=[], exclude={}
 # handle_undef = True
 @conf_parser.constraint(exclude={'tol', 'ceil', 'ignore'})
@@ -50,6 +48,15 @@ def tol_abs(tol, ref, tested):
     return abs(ref - tested) < tol
 
 
+@conf_parser.constraint(apply_to='Array', inherited=True)
+def tol_vec(tol, ref, tested):
+    '''
+        Valid if the cartesian norm of the vector (ref - tested) is below
+        the given tolerance.
+    '''
+    return norm(ref - tested) < tol
+
+
 @conf_parser.constraint(exclude={'ceil', 'tol_abs', 'tol_rel', 'ignore'})
 def tol(tolv, ref, tested):
     '''
@@ -58,8 +65,12 @@ def tol(tolv, ref, tested):
     '''
     if abs(ref) + abs(tested) == 0.0:
         return True
-    return (abs(ref - tested) / (abs(ref) + abs(tested)) < tolv and
-            abs(ref - tested) < tolv)
+    elif abs(ref - tested) / (abs(ref) + abs(tested)) >= tolv:
+        return FailDetail('Relative error above tolerance.')
+    elif abs(ref - tested) >= tolv:
+        return FailDetail('Absolute error above tolerance.')
+    else:
+        return True
 
 
 @conf_parser.constraint(exclude={'tol', 'tol_abs', 'tol_rel', 'ignore'})
@@ -123,3 +134,12 @@ def tensor_is_symetric(sym, ref, tested):
         return tested.is_symetric()
     else:
         return tested.is_anti_symetric()
+
+
+@conf_parser.constraint(value_type=dict, apply_to='this')
+def callback(locs, ref, tested):
+    method = locs.pop('method')
+    if hasattr(ref, method):
+        return getattr(ref, method)(tested, **locs)
+    else:
+        raise MissingCallbackError(ref, method)

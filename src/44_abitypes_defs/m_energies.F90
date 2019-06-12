@@ -208,8 +208,6 @@ CONTAINS !===========================================================
 
 subroutine energies_init(energies)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(energies_type),intent(out) :: energies
@@ -279,8 +277,6 @@ end subroutine energies_init
 !! SOURCE
 
  subroutine energies_copy(energies_in,energies_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -357,8 +353,6 @@ end subroutine energies_copy
 !! SOURCE
 
  subroutine energies_to_array(energies,energies_array,option)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -483,8 +477,6 @@ end subroutine energies_to_array
 
  subroutine energies_eval_eint(energies,dtset,usepaw,optdc,eint,eintdc)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(energies_type),intent(in) :: energies
@@ -580,8 +572,6 @@ end subroutine energies_eval_eint
 !! SOURCE
 
 subroutine energies_ncwrite(enes,ncid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

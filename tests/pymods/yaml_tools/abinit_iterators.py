@@ -43,7 +43,7 @@ class IntSet(object):
                                 return False
                         return True
                     elif v._type == 'bounded':
-                        return set(range(v.min, v.max+1)).issubset(self.values)
+                        return set(range(v.min, v.max + 1)).issubset(self.values)
                     else:
                         return False
                 else:

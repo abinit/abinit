@@ -35,7 +35,7 @@ Examples of configuration files for clusters are available at https://github.com
 ])
 
 # Initialize Autoconf
-AC_INIT([ABINIT],[8.11.7],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[8.11.8],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -1016,11 +1016,8 @@ ABI_CONNECT_FFT
 
 # Note: the order is critical!
 #       level 1 ---> LINALG, IO, TIMER (require MPI and GPU)
-#       level 2 ---> FFT, MATH (require MPI, GPU, and LINALG)
-#       level 3 ---> DFT (may require MPI, GPU, LINALG, IO, FFT and MATH)
-#
-# Further note: MATH libraries may even depend on LINALG and FFT
-#               (wait and see...)
+#       level 2 ---> FFT (require MPI, GPU, and LINALG)
+#       level 3 ---> DFT (may require MPI, GPU, LINALG, IO and FFT)
 
 ABI_MSG_SECTION([Connectors / Fallbacks])
 
@@ -1048,11 +1045,6 @@ fi
 # External algorithmic library support
 if test "${enable_connectors}" = "yes"; then
   ABI_CONNECT_ALGO
-fi
-
-# External math library support
-if test "${enable_connectors}" = "yes"; then
-  ABI_CONNECT_MATH
 fi
 
 # External DFT support
@@ -1102,8 +1094,6 @@ for pkg in atompaw bigdft etsf_io libxc linalg netcdf wannier90; do
   AC_MSG_RESULT([${tmp_pkg_enabled}])
 done
 
-# Inform Automake
-AM_CONDITIONAL([DO_BUILD_01_GSL_EXT],[test "${lib_math_flavor}" = "gsl"])
 ##############################################
 if test "${enable_connectors}" = "yes"; then
   ABI_CONNECT_TRIQS

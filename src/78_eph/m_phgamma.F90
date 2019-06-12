@@ -29,7 +29,7 @@ module m_phgamma
  use m_xmpi
  use m_errors
  use m_kptrank
- use m_tetrahedron
+ use m_htetrahedron
  use m_ifc
  use m_ebands
  use m_fstab
@@ -52,7 +52,7 @@ module m_phgamma
  use m_io_tools,       only : open_file, iomode_from_fname
  use m_symtk,          only : littlegroup_q
  use m_geometry,       only : normv
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_fft_mesh,       only : rotate_fft_mesh
  use m_cgtools,        only : dotprod_g
@@ -859,7 +859,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
 
  ! Compute lambda
  ! TODO : check this - looks like a factor of 2 wrt the inline documentation!
- ! NB: one factor of 2 comes from the phonon propagator and BE factor, 
+ ! NB: one factor of 2 comes from the phonon propagator and BE factor,
  ! then you have to be careful with the convention for the Fermi level DOS
  !
  !spinfact should be 1 for a normal non sppol calculation without spinorbit
@@ -1985,7 +1985,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 #endif
  logical :: do_qintp
  character(len=500) :: msg
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  integer :: qptrlatt(3,3),new_qptrlatt(3,3)
  real(dp),allocatable :: my_qshift(:,:)
@@ -2146,7 +2146,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
          tmp_a2f = zero
          do iw=1,nomega
            xx = a2f%omega(iw) - phfrq(mu)
-           tmp_gaussian(iw,mu) = dirac_delta(xx, smear)
+           tmp_gaussian(iw,mu) = gaussian(xx, smear)
            tmp_a2f(iw) = tmp_a2f(iw) + tmp_gaussian(iw,mu) * lambda_ph(mu) * abs(phfrq(mu))
          end do
          a2f%vals(:,mu,spin) = a2f%vals(:,mu,spin) + tmp_a2f * wtq(iq_ibz)
@@ -2211,8 +2211,9 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 ! NB: if we are interpolating the gamma, nqibz > gams%nqibz
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
 
-         call tetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu), &
+         call htetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu), &
            omega_min, omega_max, one, wdt)
+         wdt = wdt*wtq(iq_ibz)
 
          ! Accumulate (Integral of a2F is computed afterwards)
          a2f%vals(:,mu,spin) = a2f%vals(:,mu,spin) + wdt(:,1) * lambda_tetra(iq_ibz,mu,spin)
@@ -2225,7 +2226,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    ABI_FREE(wdt)
    ABI_FREE(lambda_tetra)
    ABI_FREE(phfreq_tetra)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
  end if
 
  ! Collect final results on each node
@@ -3229,7 +3230,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
  real(dp) :: omega,xx,omega_min,omega_max,ww
  logical :: do_qintp
  character(len=500) :: msg
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  integer :: qptrlatt(3,3),new_qptrlatt(3,3)
  real(dp),allocatable :: my_qshift(:,:)
@@ -3359,8 +3360,8 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
          tmp_a2f_out = zero
          do iw=1,nomega
            xx = a2f_tr%omega(iw) - phfrq(mu)
-           tmp_a2f_in(iw,:,:)  = tmp_a2f_in(iw,:,:)  + dirac_delta(xx, smear) * lambda_in_ph(:,:,mu)  * abs(phfrq(mu))
-           tmp_a2f_out(iw,:,:) = tmp_a2f_out(iw,:,:) + dirac_delta(xx, smear) * lambda_out_ph(:,:,mu) * abs(phfrq(mu))
+           tmp_a2f_in(iw,:,:)  = tmp_a2f_in(iw,:,:)  + gaussian(xx, smear) * lambda_in_ph(:,:,mu)  * abs(phfrq(mu))
+           tmp_a2f_out(iw,:,:) = tmp_a2f_out(iw,:,:) + gaussian(xx, smear) * lambda_out_ph(:,:,mu) * abs(phfrq(mu))
          end do
          a2f_tr%vals_in(:,:,:,mu,spin)  = a2f_tr%vals_in(:,:,:,mu,spin)  + tmp_a2f_in(:,:,:) * wtq(iq_ibz)
          a2f_tr%vals_out(:,:,:,mu,spin) = a2f_tr%vals_out(:,:,:,mu,spin) + tmp_a2f_out(:,:,:) * wtq(iq_ibz)
@@ -3396,8 +3397,9 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
        do iq_ibz=1,nqibz
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi-parallelism
 
-         call tetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu,spin), &
+         call htetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu,spin), &
            omega_min, omega_max, one, wdt)
+         wdt = wdt*wtq(iq_ibz)
 
          ! Accumulate (Integral of a2F_tr is computed afterwards)
          do idir=1,3
@@ -3418,7 +3420,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
    ABI_FREE(lambda_in_tetra)
    ABI_FREE(lambda_out_tetra)
    ABI_FREE(phfreq_tetra)
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
  end if
 
  ! Collect final results on each node and divide by g(eF, spin)
@@ -4240,7 +4242,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      ! =========================
      ! Integration over FS(spin)
      ! =========================
-     call xmpi_split_work(fs%nkfs,comm,my_kstart,my_kstop,msg,ierr)
+     call xmpi_split_work(fs%nkfs,comm,my_kstart,my_kstop)
 
      do ik_bz=my_kstart,my_kstop
        ! The k-point and the symmetries relating the BZ points to the IBZ.

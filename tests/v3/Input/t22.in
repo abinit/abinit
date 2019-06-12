@@ -84,6 +84,6 @@ occopt 7 tsmear 5.0d-3
 #%% authors = Unknown
 #%% keywords = PAW
 #%% description = 
-#%% Test different ways to obtain the NiO antiferromagnetic structure
+#%%   Test different ways to obtain the NiO antiferromagnetic structure
 #%% topics = spinpolarisation
 #%%<END TEST_INFO>
