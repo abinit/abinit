@@ -969,7 +969,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call dvdb%open_read(ngfftf, xmpi_comm_self)
 
  ! This to symmetrize the DFPT potentials.
- dvdb%symv1 = dtset%symv1scf > 0
+ dvdb%symv1 = dtset%symv1scf
  if (sigma%nprocs_pert > 1) then
    call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%comm_pert)
  end if

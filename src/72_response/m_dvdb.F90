@@ -298,8 +298,11 @@ module m_dvdb
    !       This procedure should be used for homopolar materials with (spurious) non-zero BECS
    !       in order to remove the long range component from the DFPT potentials.
 
-  logical :: symv1 = .False.
-   ! Activate symmetrization of v1 potentials.
+  integer :: symv1 = 0
+   ! Flag for the symmetrization of v1 potentials.
+   ! 0 --> No symmetrization
+   ! 1 --> Symmetrization in real space
+   ! 2 --> Call v1phq_complete after interpolation of the potentials in ftinterp_qpt
 
   type(qcache_t) :: qcache
     ! Cache used to store potentials if Fourier interpolation is not used
@@ -939,7 +942,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin(" Number of q-points in DVDB: ", itoa(db%nqpt))
  write(std_out,"(a)")sjoin("-P Number of CPUs for parallelism over perturbations:", itoa(db%nprocs_pert))
  write(std_out,"(a)")sjoin("-P Number of perturbations treated by this CPU:", itoa(db%my_npert))
- write(std_out,"(a)")sjoin(" Activate symmetrization of v1scf(r):", yesno(db%symv1))
+ write(std_out,"(a)")sjoin(" Option for symmetrization of v1scf(r):", itoa(db%symv1))
  write(std_out,"(a)")" List of q-points: min(10, nqpt)"
  do iq=1,min(db%nqpt, 10)
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
@@ -1285,7 +1288,7 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 
  ! Return if all perts are available.
  if (npc == 3*db%natom) then
-   if (db%symv1) then
+   if (db%symv1==1) then
      if (db%debug) write(std_out,*)"Potentials are available but will call v1phq_symmetrize because of symv1"
      do mu=1,db%natom3
        !if (mod(mu, nproc) /= my_rank) cycle ! MPI parallelism.
@@ -2002,7 +2005,7 @@ end function qcache_make_room
 !!  nspden=number of spin-density components
 !!  nsppol=Number of independent spin polarizations
 !!  mpi_enreg=information about MPI parallelization
-!!  symv1=If True, the new potentials are symmetrized using the set of symmetries that leaves the
+!!  symv1=If 1, the new potentials are symmetrized using the set of symmetries that leaves the
 !!    perturbation invariant.
 !!
 !! SIDE EFFECTS
@@ -2025,7 +2028,7 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,nsppol
- logical,intent(in) :: symv1
+ integer,intent(in) :: symv1
  type(crystal_t),intent(in) :: cryst
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -2191,7 +2194,7 @@ pcase_loop: &
      end if
    end do
 
-   if (symv1) then
+   if (symv1==1) then
      if (debug) write(std_out,*)"Calling v1phq_symmetrize"
      call v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1scf(:,:,pcase))
    end if
@@ -3128,8 +3131,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
      ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-       "has_dielt", "has_zeff", "has_quadrupoles", "symv1" ], &
-       l2int([db%has_dielt, db%has_zeff, db%has_quadrupoles, db%symv1]))
+       "has_dielt", "has_zeff", "has_quadrupoles"], &
+       l2int([db%has_dielt, db%has_zeff, db%has_quadrupoles]))
      NCF_CHECK(ncerr)
      ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "dvdb_add_lr"], [db%add_lr])
      NCF_CHECK(ncerr)
@@ -3286,41 +3289,41 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
    end do ! ispden
 
    ! Be careful with gamma and cplex!
-   if (db%symv1) then !(.and. reveiver == -1 .or. receiver == db%comm_rpt%my_rank)
+   if (db%symv1==1) then !(.and. reveiver == -1 .or. receiver == db%comm_rpt%my_rank)
      call v1phq_symmetrize(db%cryst, idir, ipert, symq, ngfft, cplex2, nfft, db%nspden, db%nsppol, &
          db%mpi_enreg, ov1r(:,:,:,imyp))
    end if
  end do ! imyp
 
-#if 1
- ! Initialize the list of perturbations rfpert and rdfir
- ! WARNING: Only phonon perturbations are considered for the time being.
- ABI_MALLOC(rfpert,(db%mpert))
- rfpert = 0; rfpert(1:db%cryst%natom) = 1; rfdir = 1
- ABI_MALLOC(pertsy, (3,db%mpert))
- ABI_MALLOC(pflag, (3, db%natom))
+ if (db%symv1==2) then
+   ! Initialize the list of perturbations rfpert and rdfir
+   ! WARNING: Only phonon perturbations are considered for the time being.
+   ABI_MALLOC(rfpert,(db%mpert))
+   rfpert = 0; rfpert(1:db%cryst%natom) = 1; rfdir = 1
+   ABI_MALLOC(pertsy, (3,db%mpert))
+   ABI_MALLOC(pflag, (3, db%natom))
 
- ! Determine the symmetrical perturbations. Meaning of pertsy:
- !    0 for non-target perturbations
- !    1 for basis perturbations
- !   -1 for perturbations that can be found from basis perturbations
- call irreducible_set_pert(db%cryst%indsym,db%mpert,db%cryst%natom,db%cryst%nsym,&
-     pertsy,rfdir,rfpert,symq,db%cryst%symrec,db%cryst%symrel)
+   ! Determine the symmetrical perturbations. Meaning of pertsy:
+   !    0 for non-target perturbations
+   !    1 for basis perturbations
+   !   -1 for perturbations that can be found from basis perturbations
+   call irreducible_set_pert(db%cryst%indsym,db%mpert,db%cryst%natom,db%cryst%nsym,&
+       pertsy,rfdir,rfpert,symq,db%cryst%symrec,db%cryst%symrel)
 
- pflag = 0
- do imyp=1,3*db%cryst%natom
-   idir = mod(imyp-1, 3) + 1; ipert = (imyp - idir) / 3 + 1
-   if (pertsy(idir, ipert) == 1) then
-     pflag(idir,ipert) = 1
-   end if
- end do
+   pflag = 0
+   do imyp=1,3*db%cryst%natom
+     idir = mod(imyp-1, 3) + 1; ipert = (imyp - idir) / 3 + 1
+     if (pertsy(idir, ipert) == 1) then
+       pflag(idir,ipert) = 1
+     end if
+   end do
 
- ! Complete potentials
- call v1phq_complete(db%cryst,qpt,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,db%symv1,pflag,ov1r)
+   ! Complete potentials
+   call v1phq_complete(db%cryst,qpt,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,db%symv1,pflag,ov1r)
 
- ABI_SFREE(pertsy)
- ABI_SFREE(rfpert)
-#endif
+   ABI_SFREE(pertsy)
+   ABI_SFREE(rfpert)
+ endif
 
  ! Set imaginary part to zero if gamma point.
  if (sum(qpt**2) < tol14) ov1r(2, :, :, :) = zero
@@ -4170,7 +4173,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
  end do
 
  ! Be careful with gamma and cplex!
- if (db%symv1) then
+ if (db%symv1==1) then
    call v1phq_symmetrize(db%cryst, idir, iat, symq, ngfft, cplex2, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1scf_qpt)
  end if
 
@@ -5094,7 +5097,7 @@ end function dvdb_check_fform
 !!
 !! INPUTS
 !!  db_path=Filename
-!!  symv1scf=1 to activate symmetrization of DFPT potentials. 0 ti disable it.
+!!  symv1scf=1 to activate symmetrization of DFPT potentials. 0 to disable it.
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
@@ -5133,7 +5136,7 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
 
  db = dvdb_new(db_path, comm)
  db%debug = .True.
- db%symv1 = symv1scf > 0
+ db%symv1 = symv1scf
  call dvdb_print(db)
  !call dvdb%list_perts([-1,-1,-1])
 
@@ -5270,7 +5273,7 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
 
  dvdb = dvdb_new(dvdb_path, comm)
  dvdb%debug = .True.
- dvdb%symv1 = symv1scf > 0
+ dvdb%symv1 = symv1scf
  call dvdb%print()
  call dvdb%list_perts([-1,-1,-1])
 
@@ -5453,8 +5456,8 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 
  dvdb = dvdb_new(dvdb_path, comm)
  dvdb%debug = .False.
- ABI_CHECK(any(symv1 == [0, 1]), sjoin("invalid value of symv1:", itoa(symv1)))
- dvdb%symv1 = symv1 == 1
+ ABI_CHECK(any(symv1 == [0, 1, 2]), sjoin("invalid value of symv1:", itoa(symv1)))
+ dvdb%symv1 = symv1
  dvdb%add_lr = dvdb_add_lr
 
  !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
