@@ -403,7 +403,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  ===== Compute "on-site" densities (n1, ntild1, nhat1) =====
 !  ==========================================================
 
-   call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
+   call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,0,&
 &   nhat1,nspden,nzlmopt,opt_compch,1-usenhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
 &   pawrhoij(iatom),pawtab(itypat),rho1,trho1,one_over_rad2=one_over_rad2)
 
@@ -417,7 +417,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      if (nzlmopt==1) lmselect_cur_ep(:)=electronpositron%lmselect_ep(1:lm_size,iatom)
 
      call pawdensities(rdum,cplex,iatom_tot,lmselect_cur_ep,lmselect_ep,&
-&     lm_size,nhat1_ep,nspden,nzlmopt,0,1-usenhat,-1,0,pawang,0,pawrad(itypat),&
+&     lm_size,0,nhat1_ep,nspden,nzlmopt,0,1-usenhat,-1,0,pawang,0,pawrad(itypat),&
 &     electronpositron%pawrhoij_ep(iatom),pawtab(itypat),&
 &     rho1_ep,trho1_ep,one_over_rad2=one_over_rad2)
 
@@ -667,7 +667,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      ABI_ALLOCATE(rho1xx,(mesh_size,lm_size,nspden))
      ABI_ALLOCATE(lmselect_tmp,(lm_size))
      lmselect_tmp(:)=lmselect_cur(:)
-     call pawdensities(rdum,cplex,iatom_tot,lmselect_cur,lmselect_tmp,lm_size,rdum3,nspden,&
+     call pawdensities(rdum,cplex,iatom_tot,lmselect_cur,lmselect_tmp,lm_size,0,rdum3,nspden,&
 &     1,0,2,pawtab(itypat)%lexexch,0,pawang,pawprtvol,pawrad(itypat),&
 &     pawrhoij(iatom),pawtab(itypat),rho1xx,rdum3a,one_over_rad2=one_over_rad2)
      ABI_DEALLOCATE(lmselect_tmp)
@@ -1045,6 +1045,7 @@ end subroutine pawdenpot
 !!  lm_size=number of (l,m) moments
 !!  lmselectin(lm_size)=flags selecting the non-zero LM-moments of on-site densities
 !!                      (value of these flags at input; must be .TRUE. for nzlmopt/=1)
+!!  mgga= 1 if Meta GGA is activated, 0 otherwise
 !!  nspden=number of spin-density components
 !!  nzlmopt=if -1, compute all LM-moments of densities (lmselectin=.true. forced)
 !!                 initialize "lmselectout" (index of non-zero LM-moments of densities)
@@ -1071,6 +1072,10 @@ end subroutine pawdenpot
 !!
 !! OUTPUT
 !!  nhat1(cplex*mesh_size,lm_size,nspden)= compensation charge on-site density for current atom
+!!  tau1(cplex*mesh_size*mgga,lm_size,nspden)= on site kinetic energy density, non zero size if 
+!!  mgga activated
+!!  ttau1(cplex*mesh_size*mgga,lm_size,nspden)= pseudo on site kinetic energy density, non zero size if 
+!!  mgga activated
 !!  rho1(cplex*mesh_size,lm_size,nspden)= all electron on-site density for current atom
 !!  trho1(cplex*mesh_size,lm_size,nspden)= pseudo on-site density for current atom
 !!  ==== if nzlmopt/=1
@@ -1090,15 +1095,16 @@ end subroutine pawdenpot
 !!
 !! SOURCE
 
-subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nhat1,nspden,nzlmopt,&
+subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,mgga,nhat1,nspden,nzlmopt,&
 &          opt_compch,opt_dens,opt_l,opt_print,pawang,pawprtvol,pawrad,pawrhoij,pawtab,rho1,trho1,&
-&          one_over_rad2) ! optional
+&          one_over_rad2,tau1,ttau1) ! optional
 
  implicit none
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,iatom,lm_size,nspden,nzlmopt,opt_compch,opt_dens,opt_l,opt_print,pawprtvol
+ integer,intent(in) :: mgga
 ! jmb  real(dp),intent(out) :: compch_sph
  real(dp),intent(inout) :: compch_sph
  type(pawang_type),intent(in) :: pawang
@@ -1112,15 +1118,16 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
  real(dp),intent(out) :: nhat1(cplex*pawtab%mesh_size,lm_size,nspden*(1-((opt_dens+1)/2)))
  real(dp),intent(out) ::  rho1(cplex*pawtab%mesh_size,lm_size,nspden)
  real(dp),intent(out) :: trho1(cplex*pawtab%mesh_size,lm_size,nspden*(1-(opt_dens/2)))
-
+ real(dp),intent(out),optional :: tau1(cplex*pawtab%mesh_size*mgga,lm_size,nspden*(1-(opt_dens/2)))
+ real(dp),intent(out),optional :: ttau1(cplex*pawtab%mesh_size*mgga,lm_size,nspden*(1-(opt_dens/2)))
 !Local variables ---------------------------------------
 !scalars
- integer :: dplex,ii,ilm,iplex,iq0,ir,irhoij,isel,ispden,jrhoij
- integer :: klm,klmn,kln,ll,lmax,lmin,mesh_size
- real(dp) :: m1,mt1,rdum
+ integer :: dplex,ii,ilm,iplex,iq0,ir,irhoij,isel,isel2,ispden,jrhoij
+ integer :: klm,klm1,klm2,klmn,kln,ll,lmax,lmin,mesh_size
+ real(dp) :: m1,mt1,phiphj,phibarphjbar,rdum,tphitphj,tphibartphjbar
  character(len=500) :: msg
 !arrays
- real(dp) :: compchspha(cplex),compchsphb(cplex),ro(cplex),ro_ql(cplex),ro_rg(cplex)
+ real(dp) :: compchspha(cplex),compchsphb(cplex),ro(cplex),ro_ql(cplex),ro_rg(cplex),ro_rg2(cplex*mgga)
  real(dp),allocatable :: aa(:),bb(:)
  real(dp),pointer :: one_over_rad2_(:)
 
@@ -1158,7 +1165,8 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
 
 !Various inits
  rho1=zero
- if (opt_dens <2) trho1=zero
+ tau1=zero
+ if (opt_dens <2) trho1=zero ; ttau1=zero
  if (opt_dens==0) nhat1=zero
  mesh_size=pawtab%mesh_size;dplex=cplex-1
  iq0=pawrhoij%cplex_rhoij*pawrhoij%lmn2_size
@@ -1184,7 +1192,10 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
      kln =pawtab%indklmn(2,klmn)
      lmin=pawtab%indklmn(3,klmn)
      lmax=pawtab%indklmn(4,klmn)
-
+     if (mgga==1) then
+       klm1=pawtab%indklmn(5,klmn)
+       klm2=pawtab%indklmn(6,klmn)
+     end if
 !    Retrieve rhoij
      if (pawrhoij%nspden/=2) then
        ro(1)=pawrhoij%rhoijp(jrhoij,ispden)
@@ -1272,8 +1283,51 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
 
 !    -- End loop over ij channels
      jrhoij=jrhoij+pawrhoij%cplex_rhoij
+!##################################### MettaGGa ################################
+     if (mgga==1) then
+       if (opt_dens==1) then
+         do ilm=1,(1+lmax)**2
+           isel=pawang%gntselect(ilm,klm)
+           isel2=pawang%nablagntselect(ilm,klm1,klm2)
+         if ((isel>0).or.(isel2>0)) then
+           ro_rg(1:cplex)=ro(1:cplex)*pawang%realgnt(isel) 
+           ro_rg2(1:cplex)=ro(1:cplex)*pawang%nablarealgnt(isel2)
+           do ir=2,mesh_size
+             tphibartphjbar=pawtab%tnablaphi(ir,klm1)*pawtab%tnablaphi(ir,klm2)
+             tphitphj=pawtab%tphi(ir,klm1)*pawtab%tphi(ir,klm2)
+             phibarphjbar=pawtab%nablaphi(ir,klm1)*pawtab%nablaphi(ir,klm2)
+             phiphj=pawtab%phi(ir,klm1)*pawtab%phi(ir,klm2)
+
+             ttau1(cplex*ir-dplex:ir*cplex,ilm,ispden) =ttau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
+&                   +ro_rg(1:cplex)*tphibartphjbar*one_over_rad2_(ir)&
+&                   +ro_rg2(1:cplex)*tphitphj*one_over_rad2_(ir)
+             tau1(cplex*ir-dplex:ir*cplex,ilm,ispden) =tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
+&                   +ro_rg(1:cplex)*phibarphjbar*one_over_rad2_(ir)&
+&                   +ro_rg2(1:cplex)*phiphj*one_over_rad2_(ir)
+           end do
+         end if
    end do
 
+     else if (opt_dens==2) then
+       do ilm=1,(1+lmax)**2
+         isel=pawang%gntselect(ilm,klm)
+         isel2=pawang%nablagntselect(ilm,klm1,klm2)
+         if ((isel>0).or.(isel2>0)) then
+           ro_rg(1:cplex)=ro(1:cplex)*pawang%realgnt(isel)
+           ro_rg2(1:cplex)=ro(1:cplex)*pawang%nablarealgnt(isel2)
+           do ir=2,mesh_size
+             phibarphjbar=pawtab%nablaphi(ir,klm1)*pawtab%nablaphi(ir,klm2)
+             phiphj=pawtab%phi(ir,klm1)*pawtab%phi(ir,klm2)
+             tau1(cplex*ir-dplex:ir*cplex,ilm,ispden) =tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
+&                   +ro_rg(1:cplex)*phibarphjbar*one_over_rad2_(ir)&
+&                   +ro_rg2(1:cplex)*phiphj*one_over_rad2_(ir)
+           end do
+         end if
+       end do
+     end if 
+   end if
+ end do    
+!##################################### MettaGGa ################################
 !  Scale densities with 1/r**2 and compute rho1(r=0) and trho1(r=0)
    if (cplex==2)  then
      ABI_ALLOCATE(aa,(5))

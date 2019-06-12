@@ -167,13 +167,13 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
-&                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usepotzero)
+&                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usekden,usepotzero)
 
  implicit none
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: gnt_option,lcutdens,lmix,mpsang,nphi,nsym,ntheta
+ integer,intent(in) :: gnt_option,lcutdens,lmix,mpsang,nphi,nsym,ntheta,usekden
  integer,intent(in) :: pawspnorb,pawxcdev,xclevel,usepotzero
  real(dp),intent(in) :: gsqcut_eff,hyb_range_fock
  type(pawang_type),intent(inout) :: pawang
@@ -187,14 +187,14 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
  integer :: basis_size,i0lm,i0ln,ij_size,il,ilm,ilmn,iln,iloop,iq,isel,isel1
  integer :: itypat,j0lm,j0lmn,j0ln,jl,jlm,jlmn,jln,klm,klm1
  integer :: klmn,klmn1,kln,kln1,l_size,ll,lm0,lmax,lmax1,lmin,lmin1,lmn2_size
- integer :: lmn_size,lmnmix,mesh_size,meshsz,mm,ntypat,usexcnhat,use_ls_ylm,use_ylm
+ integer :: lmn_size,lmnmix,mesh_size,meshsz,mm,nabgnt_option,ntypat,pw_mesh_size,usexcnhat,use_ls_ylm,use_ylm
  real(dp) :: dq,gnrm,intg,ql,ql1,rg,rg1,vh1,yp1,ypn
  character(len=500) :: message
 !arrays
  integer,allocatable :: indl(:,:),klm_diag(:),kmix_tmp(:)
  integer, ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: ff(:),gg(:),hh(:),indklmn_(:,:),intvhatl(:)
+ real(dp),allocatable :: der(:),ff(:),gg(:),hh(:),indklmn_(:,:),intvhatl(:)
  real(dp),allocatable :: rad(:),rgl(:,:),vhatijl(:,:),vhatl(:),work(:)
  real(dp),pointer :: eijkl(:,:)
 
@@ -222,8 +222,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
  use_ylm=0;if (pawxcdev==0) use_ylm=1
  use_ls_ylm=0;if (pawspnorb>0) use_ls_ylm=1
  call pawang_free(pawang)
- call pawang_init(pawang,gnt_option,mpsang-1,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
-
+ call pawang_init(pawang,gnt_option,usekden,mpsang-1,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
 
 !*******************
@@ -610,6 +609,33 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
      ABI_DEALLOCATE(work)
    end if
 
+ !############ MetaGGA ############################
+   
+  if (usekden==1)  then
+    pawtab(itypat)%has_nablaphi=1
+    pw_mesh_size=pawtab(itypat)%partialwave_mesh_size
+    if (allocated(pawtab(itypat)%nablaphi)) then
+      ABI_DEALLOCATE(pawtab(itypat)%nablaphi)
+    end if
+    ABI_ALLOCATE(pawtab(itypat)%nablaphi,(pw_mesh_size,basis_size))
+    if (allocated(pawtab(itypat)%tnablaphi)) then
+      ABI_DEALLOCATE(pawtab(itypat)%tnablaphi)
+    end if
+    ABI_ALLOCATE(pawtab(itypat)%tnablaphi,(pw_mesh_size,basis_size))
+    ABI_ALLOCATE(der,(pw_mesh_size))
+    do iln=1,basis_size
+      call nderiv_gen(der,pawtab(itypat)%phi(1:pw_mesh_size,iln),&
+&                     pawrad(itypat))
+      pawtab(itypat)%nablaphi(:,iln)=der(:) &
+&          -pawtab(itypat)%phi(1:pw_mesh_size,iln)/pawrad(itypat)%rad(1:pw_mesh_size)
+      call nderiv_gen(der,pawtab(itypat)%tphi(1:pw_mesh_size,iln),&
+&                     pawrad(itypat))
+      pawtab(itypat)%tnablaphi(:,iln)=der(:) &
+&          -pawtab(itypat)%tphi(1:pw_mesh_size,iln)/pawrad(itypat)%rad(1:pw_mesh_size)
+    end do
+    ABI_DEALLOCATE(der)
+ end if
+!############ MetaGGA ############################
 !  ***********************
 !  End Loop on atom types
 !  ***********************
@@ -684,7 +710,7 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
 
 !Local variables-------------------------------
 !scalars
- integer,save :: gencond(9)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1/)
+ integer,save :: gencond(10)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
 
 ! *********************************************************************
 
@@ -696,7 +722,7 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
 &   gencond(3)/=Dtset%pawnphi  .or.gencond(4)/=Dtset%pawntheta.or.&
 &   gencond(5)/=Dtset%pawspnorb.or.gencond(6)/=Dtset%pawxcdev.or.&
 &   gencond(7)/=Dtset%nsym     .or.gencond(8)/=gnt_option.or.&
-&   gencond(9)/=Dtset%usepotzero) call_pawinit = .True.
+&   gencond(9)/=Dtset%usepotzero.or.gencond(10)/=Dtset%usekden) call_pawinit = .True.
 
  case ("save")
     ! Update internal values
@@ -705,6 +731,7 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
    gencond(5)=Dtset%pawspnorb; gencond(6)=Dtset%pawxcdev
    gencond(7)=Dtset%nsym     ; gencond(8)=gnt_option
    gencond(9)=Dtset%usepotzero
+   gencond(10)=Dtset%usekden
 
  case ("reset")
    gencond = -1

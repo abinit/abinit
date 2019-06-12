@@ -154,6 +154,9 @@ MODULE m_pawtab
    ! if 1, onsite matrix elements of the nabla operator are allocated.
    ! if 2, onsite matrix elements of the nabla operator are computed and stored.
 
+  integer :: has_nablaphi
+   ! if 1, nablaphi are computed for MetaGGA and stored. 0 otherwise
+
   integer :: has_tproj
    ! Flag controling use of projectors in real space (0 if tnval is unknown)
    ! if 1, tproj() is allocated.
@@ -439,6 +442,10 @@ MODULE m_pawtab
    ! nabla_ij(3,lmn_size,lmn_size)
    ! Onsite matrix elements <phi|\nabla|phj>-<tphi|\nabla|tphj>
 
+  real(dp), allocatable :: nablaphi(:,:)
+   ! nablaphi(partialwave_mesh_size, basis_size)
+   ! store the results of dphi/dr-(1/r)phi
+
   real(dp), allocatable :: phi(:,:)
    ! phi(partialwave_mesh_size, basis_size)
    ! Gives the paw electron wavefunctions on the radial grid
@@ -507,6 +514,10 @@ MODULE m_pawtab
   real(dp), allocatable :: tcorespl(:,:)
    ! tcorespl(mqgrid,2)
    ! Gives the pseudo core density in reciprocal space on a regular grid
+
+  real(dp), allocatable :: tnablaphi(:,:)
+   ! tphi(partialwave_mesh_size,basis_size)
+   ! Gives, on the radial grid, the paw atomic pseudowavefunctions
 
   real(dp), allocatable :: tphi(:,:)
    ! tphi(partialwave_mesh_size,basis_size)
@@ -628,6 +639,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%has_vhnzc=0
  Pawtab%has_vminushalf=0
  Pawtab%has_nabla=0
+ Pawtab%has_nablaphi=0
  Pawtab%has_shapefncg=0
  Pawtab%has_wvl=0
 
@@ -791,6 +803,9 @@ subroutine pawtab_free_0D(Pawtab)
  if (allocated(Pawtab%nabla_ij))  then
    LIBPAW_DEALLOCATE(Pawtab%nabla_ij)
  end if
+ if (allocated(Pawtab%nablaphi))  then
+   LIBPAW_DEALLOCATE(Pawtab%nablaphi)
+ end if
  if (allocated(Pawtab%orbitals)) then
    LIBPAW_DEALLOCATE(Pawtab%orbitals)
  end if
@@ -839,6 +854,9 @@ subroutine pawtab_free_0D(Pawtab)
  if (allocated(Pawtab%tcorespl))  then
    LIBPAW_DEALLOCATE(Pawtab%tcorespl)
  end if
+ if (allocated(Pawtab%tnablaphi))  then
+   LIBPAW_DEALLOCATE(Pawtab%tphi)
+ end if
  if (allocated(Pawtab%tphi))  then
    LIBPAW_DEALLOCATE(Pawtab%tphi)
  end if
@@ -883,6 +901,7 @@ subroutine pawtab_free_0D(Pawtab)
 !Pawtab%has_vhnzc=0
 !Pawtab%has_vminushalf=0
 !Pawtab%has_nabla=0
+!Pawtab%has_nablaphi=0
 !Pawtab%has_shapefncg=0
 !Pawtab%has_wvl=0
 
@@ -971,13 +990,13 @@ end subroutine pawtab_free_1D
 !! SOURCE
 
 subroutine pawtab_set_flags_0D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
-&                              has_vhtnzc,has_nabla,has_shapefncg,has_wvl)
+&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_wvl)
 
  implicit none
 
 !Arguments ------------------------------------
  integer,intent(in),optional :: has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
- integer,intent(in),optional :: has_nabla,has_shapefncg,has_wvl
+ integer,intent(in),optional :: has_nabla,has_nablaphi,has_shapefncg,has_wvl
  type(pawtab_type),intent(inout) :: Pawtab
 
 !Local variables-------------------------------
@@ -993,6 +1012,7 @@ subroutine pawtab_set_flags_0D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_v
  Pawtab%has_vhnzc    =0
  Pawtab%has_vhtnzc   =0
  Pawtab%has_nabla    =0
+ Pawtab%has_nablaphi =0
  Pawtab%has_shapefncg=0
  Pawtab%has_wvl      =0
  if (present(has_fock))     Pawtab%has_fock=has_fock
@@ -1002,6 +1022,7 @@ subroutine pawtab_set_flags_0D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_v
  if (present(has_vhnzc))    Pawtab%has_vhnzc=has_vhnzc
  if (present(has_vhtnzc))   Pawtab%has_vhtnzc=has_vhtnzc
  if (present(has_nabla))    Pawtab%has_nabla=has_nabla
+ if (present(has_nablaphi)) Pawtab%has_nablaphi=has_nablaphi
  if (present(has_shapefncg))Pawtab%has_shapefncg=has_shapefncg
  if (present(has_wvl))      Pawtab%has_wvl=has_wvl
 
@@ -1024,13 +1045,13 @@ end subroutine pawtab_set_flags_0D
 !! SOURCE
 
 subroutine pawtab_set_flags_1D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
-&                              has_vhtnzc,has_nabla,has_shapefncg,has_wvl)
+&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_wvl)
 
  implicit none
 
 !Arguments ------------------------------------
  integer,intent(in),optional :: has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
- integer,intent(in),optional :: has_nabla,has_shapefncg,has_wvl
+ integer,intent(in),optional :: has_nabla,has_nablaphi,has_shapefncg,has_wvl
  type(pawtab_type),intent(inout) :: Pawtab(:)
 
 !Local variables-------------------------------
@@ -1051,6 +1072,7 @@ subroutine pawtab_set_flags_1D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_v
    Pawtab(ii)%has_vhnzc    =0
    Pawtab(ii)%has_vhtnzc   =0
    Pawtab(ii)%has_nabla    =0
+   Pawtab(ii)%has_nablaphi =0
    Pawtab(ii)%has_shapefncg=0
    Pawtab(ii)%has_wvl          =0
    if (present(has_fock))     Pawtab(ii)%has_fock=has_fock
@@ -1060,6 +1082,7 @@ subroutine pawtab_set_flags_1D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_v
    if (present(has_vhnzc))    Pawtab(ii)%has_vhnzc=has_vhnzc
    if (present(has_vhtnzc))   Pawtab(ii)%has_vhtnzc=has_vhtnzc
    if (present(has_nabla))    Pawtab(ii)%has_nabla=has_nabla
+   if (present(has_nablaphi))    Pawtab(ii)%has_nablaphi=has_nablaphi
    if (present(has_shapefncg))Pawtab(ii)%has_shapefncg=has_shapefncg
    if (present(has_wvl))      Pawtab(ii)%has_wvl=has_wvl
  end do
@@ -1208,6 +1231,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   write(msg,'(a,i4)')'  Has vminushalf ................................. ',Pawtab(ityp)%has_vminushalf
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has nabla ...................................... ',Pawtab(ityp)%has_nabla
+  call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,i4)')'  Has nablaphi ...................................... ',Pawtab(ityp)%has_nablaphi
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has shapefuncg ................................. ',Pawtab(ityp)%has_shapefncg
   call wrtout(my_unt,msg,my_mode)
@@ -1393,10 +1418,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
  integer :: ierr,ii,me,nn_dpr,nn_dpr_arr,nn_int,nn_int_arr
  integer :: siz_indklmn,siz_indlmn,siz_klmntomn,siz_kmix,siz_lnproju,siz_orbitals
  integer :: siz_coredens,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr,siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij
- integer :: siz_gnorm,siz_fock,siz_kij,siz_nabla_ij,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint
+ integer :: siz_gnorm,siz_fock,siz_kij,siz_nabla_ij,siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint
  integer :: siz_qgrid_shp,siz_qijl,siz_rad_for_spline,siz_rhoij0,siz_shape_alpha
  integer :: siz_shape_q,siz_shapefunc,siz_shapefncg,siz_sij,siz_tcoredens,siz_tcorespl
- integer :: siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex,siz_vhtnzc
+ integer :: siz_tnablaphi,siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex,siz_vhtnzc
  integer :: siz_vhnzc,siz_vminushalf,siz_zioneff
  integer :: siz_wvlpaw,siz_wvl_pngau,siz_wvl_parg,siz_wvl_pfac
  integer :: siz_wvl_rholoc_rad,siz_wvl_rholoc_d,sz1,sz2
@@ -1423,7 +1448,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (read from psp file)
 !-------------------------------------------------------------------------
-!  basis_size,has_fock,has_kij,has_shapefncg,has_nabla,has_tproj,has_tvale,has_vhtnzc,has_vhnzc,has_vminushalf
+!  basis_size,has_fock,has_kij,has_shapefncg,has_nabla,has_nablaphi,has_tproj,has_tvale,has_vhtnzc,has_vhnzc,has_vminushalf
 !  has_wvl,ij_size,l_size,lmn_size,lmn2_size,mesh_size,partialwave_mesh_size,core_mesh_size, vminus_mesh_size
 !  tnvale_mesh_size,mqgrid,shape_lambda,shape_type,usetcore,usexcnhat
    nn_int=nn_int+25
@@ -1487,10 +1512,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals arrays (read from psp file)
 !-------------------------------------------------------------------------
-   siz_coredens=0 ; siz_dij0=0     ; siz_kij=0  ; siz_fock=0
-   siz_phi=0      ; siz_rhoij0=0   ; siz_shape_alpha=0
+   siz_coredens=0 ; siz_dij0=0     ; siz_kij=0      ; siz_fock=0
+   siz_nablaphi=0   ; siz_phi=0      ; siz_rhoij0=0   ; siz_shape_alpha=0
    siz_shape_q=0  ; siz_shapefunc=0; siz_tcoredens=0
-   siz_tcorespl=0 ; siz_tphi=0     ; siz_tproj=0
+   siz_tcorespl=0 ; siz_tphi=0     ; siz_tnablaphi=0  ; siz_tproj=0
    siz_tvalespl=0 ; siz_vhtnzc=0   ; siz_vhnzc=0
    siz_vminushalf=0
    nn_int=nn_int+17
@@ -1515,6 +1540,11 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      siz_kij=size(pawtab%kij)                       !(lmn2_size)
      if (siz_kij/=pawtab%lmn2_size) msg=trim(msg)//' kij'
      nn_dpr=nn_dpr+siz_kij
+   end if
+   if (allocated(pawtab%nablaphi)) then
+     siz_phi=size(pawtab%nablaphi)                       !(partialwave_mesh_size, basis_size)
+     if (siz_nablaphi/=pawtab%partialwave_mesh_size*pawtab%basis_size) msg=trim(msg)//' nablaphi'
+     nn_dpr=nn_dpr+siz_nablaphi
    end if
    if (allocated(pawtab%phi)) then
      siz_phi=size(pawtab%phi)                       !(partialwave_mesh_size, basis_size)
@@ -1551,6 +1581,11 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      siz_tcorespl=size(pawtab%tcorespl)             !(mqgrid,2)
      if (siz_tcorespl/=pawtab%mqgrid*2) msg=trim(msg)//' tcorespl'
      nn_dpr=nn_dpr+siz_tcorespl
+   end if
+   if (allocated(pawtab%tnablaphi)) then
+     siz_tnablaphi=size(pawtab%tnablaphi)                     !(partialwave_mesh_size, basis_size)
+     if (siz_tnablaphi/=pawtab%partialwave_mesh_size*pawtab%basis_size) msg=trim(msg)//' tnablaphi'
+     nn_dpr=nn_dpr+siz_tnablaphi
    end if
    if (allocated(pawtab%tphi)) then
      siz_tphi=size(pawtab%tphi)                     !(partialwave_mesh_size, basis_size)
@@ -1795,6 +1830,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=siz_dij0  ;ii=ii+1
    list_int(ii)=siz_fock  ;ii=ii+1
    list_int(ii)=siz_kij  ;ii=ii+1
+   list_int(ii)=siz_nablaphi; ii=ii+1
    list_int(ii)=siz_phi  ;ii=ii+1
    list_int(ii)=siz_rhoij0  ;ii=ii+1
    list_int(ii)=siz_shape_alpha  ;ii=ii+1
@@ -1802,6 +1838,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=siz_shapefunc  ;ii=ii+1
    list_int(ii)=siz_tcoredens  ;ii=ii+1
    list_int(ii)=siz_tcorespl  ;ii=ii+1
+   list_int(ii)=siz_tnablaphi  ;ii=ii+1
    list_int(ii)=siz_tphi  ;ii=ii+1
    list_int(ii)=siz_tproj  ;ii=ii+1
    list_int(ii)=siz_tvalespl  ;ii=ii+1
@@ -1815,6 +1852,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_int(ii)=pawtab%has_kij  ;ii=ii+1
    list_int(ii)=pawtab%has_shapefncg  ;ii=ii+1
    list_int(ii)=pawtab%has_nabla  ;ii=ii+1
+   list_int(ii)=pawtab%has_nablaphi ; ii=ii+1
    list_int(ii)=pawtab%has_tproj  ;ii=ii+1
    list_int(ii)=pawtab%has_tvale  ;ii=ii+1
    list_int(ii)=pawtab%has_vhtnzc  ;ii=ii+1
@@ -1950,6 +1988,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_dij0=list_int(ii)  ;ii=ii+1
    siz_fock=list_int(ii)  ;ii=ii+1
    siz_kij=list_int(ii)  ;ii=ii+1
+   siz_nablaphi=list_int(ii)  ;ii=ii+1
    siz_phi=list_int(ii)  ;ii=ii+1
    siz_rhoij0=list_int(ii)  ;ii=ii+1
    siz_shape_alpha=list_int(ii)  ;ii=ii+1
@@ -1957,6 +1996,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    siz_shapefunc=list_int(ii)  ;ii=ii+1
    siz_tcoredens=list_int(ii)  ;ii=ii+1
    siz_tcorespl=list_int(ii)  ;ii=ii+1
+   siz_tnablaphi=list_int(ii)  ;ii=ii+1
    siz_tphi=list_int(ii)  ;ii=ii+1
    siz_tproj=list_int(ii)  ;ii=ii+1
    siz_tvalespl=list_int(ii)  ;ii=ii+1
@@ -1970,6 +2010,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%has_kij=list_int(ii)  ;ii=ii+1
    pawtab%has_shapefncg=list_int(ii)  ;ii=ii+1
    pawtab%has_nabla=list_int(ii)  ;ii=ii+1
+   pawtab%has_nablaphi=list_int(ii) ; ii=ii+1
    pawtab%has_tproj=list_int(ii)  ;ii=ii+1
    pawtab%has_tvale=list_int(ii)  ;ii=ii+1
    pawtab%has_vhtnzc=list_int(ii)  ;ii=ii+1
@@ -2156,6 +2197,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_dpr(ii:ii+siz_kij-1)=pawtab%kij(1:siz_kij)
      ii=ii+siz_kij
    end if
+   if (siz_nablaphi>0) then
+     list_dpr(ii:ii+siz_nablaphi-1)=reshape(pawtab%nablaphi,(/siz_nablaphi/))
+     ii=ii+siz_nablaphi
+   end if
    if (siz_phi>0) then
      list_dpr(ii:ii+siz_phi-1)=reshape(pawtab%phi,(/siz_phi/))
      ii=ii+siz_phi
@@ -2183,6 +2228,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    if (siz_tcorespl>0) then
      list_dpr(ii:ii+siz_tcorespl-1)=reshape(pawtab%tcorespl,(/siz_tcorespl/))
      ii=ii+siz_tcorespl
+   end if
+   if (siz_tnablaphi>0) then
+     list_dpr(ii:ii+siz_tnablaphi-1)=reshape(pawtab%tnablaphi,(/siz_tnablaphi/))
+     ii=ii+siz_tnablaphi
    end if
    if (siz_tphi>0) then
      list_dpr(ii:ii+siz_tphi-1)=reshape(pawtab%tphi,(/siz_tphi/))
@@ -2394,6 +2443,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%kij=list_dpr(ii:ii+pawtab%lmn2_size-1)
      ii=ii+siz_kij
    end if
+   if (allocated(pawtab%nablaphi)) then
+     LIBPAW_DEALLOCATE(pawtab%nablaphi)
+   end if
+   if (siz_nablaphi>0) then
+     LIBPAW_ALLOCATE(pawtab%nablaphi,(pawtab%partialwave_mesh_size,pawtab%basis_size))
+     pawtab%nablaphi=reshape(list_dpr(ii:ii+siz_nablaphi-1),(/pawtab%partialwave_mesh_size,pawtab%basis_size/))
+     ii=ii+siz_nablaphi
+   end if
    if (allocated(pawtab%phi)) then
      LIBPAW_DEALLOCATE(pawtab%phi)
    end if
@@ -2451,8 +2508,16 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%tcorespl=reshape(list_dpr(ii:ii+siz_tcorespl-1),(/pawtab%mqgrid,2/))
      ii=ii+siz_tcorespl
    end if
-   if (allocated(pawtab%tphi)) then
-     LIBPAW_DEALLOCATE(pawtab%tphi)
+  if (allocated(pawtab%tnablaphi)) then
+     LIBPAW_DEALLOCATE(pawtab%tnablaphi)
+   end if
+   if (siz_tnablaphi>0) then
+     LIBPAW_ALLOCATE(pawtab%tnablaphi,(pawtab%partialwave_mesh_size,pawtab%basis_size))
+     pawtab%tphi=reshape(list_dpr(ii:ii+siz_tnablaphi-1),(/pawtab%partialwave_mesh_size,pawtab%basis_size/))
+     ii=ii+siz_tnablaphi
+   end if
+   if (allocated(pawtab%tnablaphi)) then
+     LIBPAW_DEALLOCATE(pawtab%tnablaphi)
    end if
    if (siz_tphi>0) then
      LIBPAW_ALLOCATE(pawtab%tphi,(pawtab%partialwave_mesh_size,pawtab%basis_size))

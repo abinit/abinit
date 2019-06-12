@@ -291,7 +291,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      if (nzlmopt_a==1) lmselect_tmp(:)=lmselect_a(:)
 !    Compute on-site 1st-order densities
      call pawdensities(compch,cplex_a,iatom_tot,lmselect_tmp,lmselect_a,&
-&     lm_size_a,nhat1,nspden,nzlmopt_a,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
+&     lm_size_a,0,nhat1,nspden,nzlmopt_a,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &     pawrad(itypat),pawrhoij_a(iatom),pawtab(itypat),rho1,trho1)
      ABI_DEALLOCATE(lmselect_tmp)
 !    Compute on-site 1st-order xc potentials
@@ -336,7 +336,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    if (nzlmopt_b==1) lmselect_tmp(:)=lmselect_b(:)
 !  Compute on-site 1st-order densities
    call pawdensities(compch,cplex_b,iatom_tot,lmselect_tmp,lmselect_b,&
-&   lm_size_b,nhat1,nspden,nzlmopt_b,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
+&   lm_size_b,0,nhat1,nspden,nzlmopt_b,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_b(iatom),pawtab(itypat),rho1,trho1)
    ABI_DEALLOCATE(lmselect_tmp)
 !  Compute contributions to 1st-order (or 2nd-order) energy

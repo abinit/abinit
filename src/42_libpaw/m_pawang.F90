@@ -30,7 +30,7 @@ MODULE m_pawang
  USE_MPI_WRAPPERS
  USE_MEMORY_PROFILING
 
- use m_paw_sphharm, only : initylmr, mat_mlms2jmj, mat_slm2ylm
+ use m_paw_sphharm, only : initylmr, mat_mlms2jmj, mat_slm2ylm, nablarealgaunt
 
  implicit none
 
@@ -82,11 +82,19 @@ MODULE m_pawang
   integer :: ngnt=0
    ! Number of non zero Gaunt coefficients
 
+  integer :: nnablagnt=0
+   ! Number of non zero Gaunt coefficient derivatives
+
   integer :: ntheta, nphi
    ! Dimensions of paw angular mesh
 
   integer :: nsym
    ! Number of symmetry elements in space group
+
+  integer :: nabgnt_option=-1
+   ! Option for nablarealgaunt coefficients:
+   ! nabgnt_option==0, nablarealgaunt coeffs are not computed (and not allocated)
+   ! nabgnt_option==1, nablarealgaunt coeffs are computed up to l_max 
 
   integer :: gnt_option=-1
    ! Option for Gaunt coefficients:
@@ -107,6 +115,11 @@ MODULE m_pawang
    ! Selection rules for Gaunt coefficients stored as (LM,ij) where ij is in packed form.
    ! (if gntselect>0, Gaunt coeff. is non-zero)
 
+  integer, allocatable :: nablagntselect(:,:,:)
+  ! nablagntselect((l_max+1)**2,(l_max+1)**2,(l_max+1)**2)
+  ! Selection rules for nablaGaunt coefficients
+  ! (if nablagntselect>0, nablGaunt coeff. is non-zero)
+
 !Real (real(dp)) arrays
 
   real(dp), allocatable :: anginit(:,:)
@@ -124,6 +137,10 @@ MODULE m_pawang
    ! ls_ylm(2,l_max**2*(l_max**2+1)/2,2)
    ! LS operator in the real spherical harmonics basis
    ! ls_ylm(ilm1m2,ispin)= <sigma, y_lm1| LS |y_lm2, sigma_prime>
+
+  real(dp), allocatable :: nablarealgnt(:)
+   ! realgnt(2,nnablagnt)
+   ! Non zero real nablaGaunt coefficients
 
   real(dp), allocatable :: realgnt(:)
    ! realgnt(ngnt)
@@ -160,6 +177,7 @@ CONTAINS
 !!  Initialize a pawang datastructure
 !!
 !! INPUTS
+!!  nabgnt_option=flag activated if pawang%nablagntselect and pawang%nablarealgnt have to be allocated
 !!  gnt_option=flag activated if pawang%gntselect and pawang%realgnt have to be allocated
 !!             also determine the size of these pointers
 !!  lmax=maximum value of angular momentum l
@@ -180,13 +198,13 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
+subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: gnt_option,lmax,nphi,nsym,ntheta
+ integer,intent(in) :: gnt_option,nabgnt_option,lmax,nphi,nsym,ntheta
  integer,intent(in) :: pawxcdev,use_ls_ylm,use_ylm,xclevel
  type(Pawang_type),intent(inout) :: Pawang
 
@@ -195,7 +213,7 @@ subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_y
  integer :: ll,sz1,sz2,sz3
 !arrays
  real(dp),allocatable :: rgnt_tmp(:)
-
+ real(dp),allocatable :: nablargnt_tmp(:)
 ! *************************************************************************
 
  !@Pawang_type
@@ -260,7 +278,22 @@ subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_y
    Pawang%realgnt(1:Pawang%ngnt)=rgnt_tmp(1:Pawang%ngnt)
    LIBPAW_DEALLOCATE(rgnt_tmp)
  end if
-
+ Pawang%nabgnt_option=nabgnt_option
+!###################### MetaGGA ##################################################
+ if (Pawang%nabgnt_option==1) then 
+   sz1=(Pawang%l_max)**6
+   sz2=(Pawang%l_max)**2
+   LIBPAW_ALLOCATE(nablargnt_tmp,(sz1))
+   LIBPAW_ALLOCATE(pawang%nablagntselect,(sz2,sz2,sz2))
+   call nablarealgaunt(pawang%l_max,pawang%nnablagnt,pawang%nablagntselect,nablargnt_tmp)
+   if (allocated(pawang%nablarealgnt)) then
+     LIBPAW_DEALLOCATE(pawang%nablarealgnt)
+   end if
+   LIBPAW_ALLOCATE(pawang%nablarealgnt,(pawang%nnablagnt))
+   Pawang%nablarealgnt(1:Pawang%nnablagnt)=nablargnt_tmp(1:Pawang%nnablagnt)
+   LIBPAW_DEALLOCATE(nablargnt_tmp)
+ end if
+!###################### MetaGGA ##################################################
  Pawang%use_ls_ylm=use_ls_ylm
  if (use_ls_ylm>0) then
    LIBPAW_ALLOCATE(pawang%ls_ylm,(2,Pawang%l_max**2*(Pawang%l_max**2+1)/2,2))
@@ -335,6 +368,7 @@ subroutine pawang_free(Pawang)
  pawang%l_max=-1
  pawang%l_size_max=-1
  pawang%gnt_option=-1
+ pawang%nabgnt_option=-1
  pawang%ngnt=0
 
 end subroutine pawang_free

@@ -190,7 +190,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_ALLOCATE(trho1_1,(cplex_1*mesh_size,lm_size_all,nspden))
    ABI_ALLOCATE(nhat1_1,(cplex_1*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_1,iatom_tot,lmselect_tmp,lmselect_1,&
-&   lm_size_all,nhat1_1,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
+&   lm_size_all,0,nhat1_1,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_1(iatom),pawtab(itypat),rho1_1,trho1_1)
 !  Compute on-site 1st-order densities (pert2)
    ABI_ALLOCATE(lmselect_2,(lm_size_all))
@@ -199,7 +199,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_ALLOCATE(trho1_2,(cplex_2*mesh_size,lm_size_all,nspden))
    ABI_ALLOCATE(nhat1_2,(cplex_2*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_2,iatom_tot,lmselect_tmp,lmselect_2,&
-&   lm_size_all,nhat1_2,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
+&   lm_size_all,0,nhat1_2,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_2(iatom),pawtab(itypat),rho1_2,trho1_2)
 !  Compute on-site 1st-order densities (pert3)
    ABI_ALLOCATE(lmselect_3,(lm_size_all))
@@ -208,7 +208,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_ALLOCATE(trho1_3,(cplex_3*mesh_size,lm_size_all,nspden))
    ABI_ALLOCATE(nhat1_3,(cplex_3*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_3,iatom_tot,lmselect_tmp,lmselect_3,&
-&   lm_size_all,nhat1_3,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
+&   lm_size_all,0,nhat1_3,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_3(iatom),pawtab(itypat),rho1_3,trho1_3)
    ABI_DEALLOCATE(lmselect_tmp)
 
