@@ -5208,8 +5208,8 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
          end do
        end do
        if (nsym1>1) then
-         write(std_out,"(3(a,i0),a,es16.8,i6)")"For iqpt= ",iqpt,&
-         ", idir= ",idir,", ipert= ",ipert,", max_err= ",max_err,nsym1
+         write(std_out,"(3(a,i2),a,i2,a,es16.8)")"For iqpt= ",iqpt,&
+         ", idir= ",idir,", ipert= ",ipert,", nsym= ",nsym1,", max_err= ",max_err
        end if
 
        ABI_FREE(irottb)
