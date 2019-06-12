@@ -3150,7 +3150,10 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
  !complex(dpc) :: beta
 !arrays
  integer :: symq(4,2,db%cryst%nsym)
+ integer :: rfdir(3)
  real(dp),allocatable :: eiqr(:,:), weiqr(:,:), v1r_lr(:,:,:)
+ integer,allocatable :: pertsy(:,:),rfpert(:)
+ integer,allocatable :: pflag(:,:)
 
 ! *************************************************************************
 
@@ -3218,6 +3221,36 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
          db%mpi_enreg, ov1r(:,:,:,imyp))
    end if
  end do ! imyp
+
+#if 1
+ ! Initialize the list of perturbations rfpert and rdfir
+ ! WARNING: Only phonon perturbations are considered for the time being.
+ ABI_MALLOC(rfpert,(db%mpert))
+ rfpert = 0; rfpert(1:db%cryst%natom) = 1; rfdir = 1
+ ABI_MALLOC(pertsy, (3,db%mpert))
+ ABI_MALLOC(pflag, (3, db%natom))
+
+ ! Determine the symmetrical perturbations. Meaning of pertsy:
+ !    0 for non-target perturbations
+ !    1 for basis perturbations
+ !   -1 for perturbations that can be found from basis perturbations
+ call irreducible_set_pert(db%cryst%indsym,db%mpert,db%cryst%natom,db%cryst%nsym,&
+     pertsy,rfdir,rfpert,symq,db%cryst%symrec,db%cryst%symrel)
+
+ pflag = 0
+ do imyp=1,3*db%cryst%natom
+   idir = mod(imyp-1, 3) + 1; ipert = (imyp - idir) / 3 + 1
+   if (pertsy(idir, ipert) == 1) then
+     pflag(idir,ipert) = 1
+   end if
+ end do
+
+ ! Complete potentials
+ call v1phq_complete(db%cryst,qpt,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,db%symv1,pflag,ov1r)
+
+ ABI_SFREE(pertsy)
+ ABI_SFREE(rfpert)
+#endif
 
  ! Set imaginary part to zero if gamma point.
  if (sum(qpt**2) < tol14) ov1r(2, :, :, :) = zero
@@ -5144,7 +5177,7 @@ subroutine dvdb_test_v1complete(dvdb_path, dump_path, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank
+ integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank,cnt
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
  type(dvdb_t),target :: dvdb
@@ -5190,6 +5223,7 @@ subroutine dvdb_test_v1complete(dvdb_path, dump_path, comm)
    write(std_out,"(a)")sjoin("Will write potentials to:", dump_path)
  end if
 
+ cnt = 0
  do iqpt=1,dvdb%nqpt
    qpt = dvdb%qpts(:,iqpt)
 
@@ -5233,6 +5267,7 @@ subroutine dvdb_test_v1complete(dvdb_path, dump_path, comm)
 
        ! Debug: Write potentials to file.
        if (unt /= -1) then
+         write(unt,*)"# count:", cnt
          write(unt,*)"# q-point:", trim(ktoa(qpt))
          write(unt,*)"# idir: ",idir,", ipert: ",ipert,", ispden:", ispden
          write(unt,*)"# file_v1scf, symmetrized_v1scf, diff"
@@ -5251,6 +5286,9 @@ subroutine dvdb_test_v1complete(dvdb_path, dump_path, comm)
                file_v1scf(2,ifft,ispden,pcase) - symm_v1scf(2,ifft,ispden,pcase)
            end do
          end if
+         write(unt,*)
+         write(unt,*)
+         cnt = cnt+1
        end if
 
      end do
@@ -5860,6 +5898,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
    ! Find the index of the q-point in the DVDB.
    db_iqpt = dvdb_findq(dvdb, qpt)
+   !if (db_iqpt /= 1) db_iqpt = -1
 
    if (db_iqpt /= -1) then
      if (dvdb%prtvol > 0) call wrtout(std_out, sjoin("Q-point: ",ktoa(qpt)," found in DVDB with index ",itoa(db_iqpt)))
@@ -5886,6 +5925,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
      call irreducible_set_pert(cryst%indsym,dvdb%mpert,cryst%natom,cryst%nsym,&
          this_pertsy,rfdir,rfpert,symq,cryst%symrec,cryst%symrel)
          pertsy(nqpt_interpolate,:,:) = this_pertsy
+     !pertsy = 1
 
      do iat=1,natom
        do idir=1,3
