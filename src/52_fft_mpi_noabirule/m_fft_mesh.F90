@@ -957,9 +957,9 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
  end do !ig
 
  if (ierr/=0) then
-   write(msg,'(a,i4,3a)')&
-&    'Found ',ierr,' G-G0 vectors falling outside the FFT box. ',ch10,&
-&    'igfft will be set to zero for these particular G-G0 '
+   write(msg,'(a,i0,3a)')&
+    'Found ',ierr,' G-G0 vectors falling outside the FFT box. ',ch10,&
+    'igfft will be set to zero for these particular G-G0 '
    MSG_WARNING(msg)
  end if
 
@@ -986,12 +986,11 @@ end subroutine cigfft
 !!
 !! SOURCE
 
-elemental function ig2gfft(ig,ng) result (gc)
+elemental integer function ig2gfft(ig,ng) result (gc)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ig,ng
- integer :: gc
 
 !************************************************************************
 

@@ -2,8 +2,7 @@
 
 The Temperature Dependent Effective Potential (TDEP) method
 has been developped by O. Hellman *et al.* [[cite:Hellman2011]],
-[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the
-<span style="font-variant:small-caps;">a</span>-TDEP implementation
+[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the |aTDEP| implementation
 in ABINIT has been performed and used for the first time in 2015 by
 J. Bouchet and F. Bottin [[cite:Bouchet2015]], [[cite:Bouchet2017]].
 
@@ -14,12 +13,10 @@ This manual can be found as a pdf file: [[pdf:TDEP_Guide| TDEP guide]]
 The approach used in this code is detailed in a publication dedicated to the development
 of all formula (see [[pdf:TDEP_Paper|TDEP paper]]). We strongly encourage all the users to carefully read
 this paper before beginning. All the vibrational, elastic and thermodynamic
-quantities computed by <span style="font-variant:small-caps;">a</span>-TDEP are
-presented with the same writing conventions as the ones used in the output files of 
-<span style="font-variant:small-caps;">a</span>-TDEP. In the same manner, a
-comprehensive understanding of some ABINIT basic variables is also required
-in order to fill the input file and read the output file of
-<span style="font-variant:small-caps;">a</span>-TDEP.
+quantities computed by |aTDEP| are
+presented with the same writing conventions as the ones used in the output files of |aTDEP|.
+In the same manner, a comprehensive understanding of some ABINIT basic variables is also required
+in order to fill the input file and read the output file of |aTDEP|.
 
 In addition, this paper is also useful to understand
 the limitations and convergences which are inherent to the present method.
@@ -28,7 +25,7 @@ article, with some references and illustrating examples.
 
 ## The ABINIT computation
 
-To run <span style="font-variant:small-caps;">a</span>-TDEP, a preliminary
+To run |aTDEP|, a preliminary
 ABINIT simulation is needed. This one could be a molecular dynamic trajectory
 or a set of "ground state" calculations on specific configurations (representative of a given thermodynamic state).
 After that, all the configurations have to be merged:
@@ -37,12 +34,14 @@ After that, all the configurations have to be merged:
 as they are written in the output file of ABINIT. In the later case, the 3 files can be built easily
 by concatenating in each one all the time steps or configurations (using `agrep` shell instruction, for example).
 
-## The <span style="font-variant:small-caps;">a</span>-TDEP computation
+## The |aTDEP| computation
 
-In a same manner as performed for ABINIT, the use of <span style="font-variant:small-caps;">a</span>-TDEP
-is quite simple. One has just to execute `tdep` as follows :
+In a same manner as performed for ABINIT, the use of |aTDEP| is quite simple. 
+One has just to execute `tdep` as follows:
 
+```sh
     tdep < input.files > log
+```
 
 with the `input.files` file containing 3 lines. The first one defines the input
 file, the second one is the *NetCDF* file (if present, see above) and the third one
@@ -57,11 +56,10 @@ one is absent, the code will automatically search the 3 `ASCII.dat` files.
 
 ## The input files
 
-An example of a <span style="font-variant:small-caps;">a</span>-TDEP
-calculation (in the special case where the *NetCDF* file `HIST.nc` is employed)
-can be found in [[tests/v8/Input/t37.in|v8#t37.in]]. The 2 input files are
+An example of a |aTDEP|  calculation (in the special case where the *NetCDF* file `HIST.nc` is employed)
+can be found in [[test:v8_37]]. The 2 input files are
 given in the `tests/v8/Input` directory.  
-Let us describe briefly this [[tests/v8/Input/t37.in|v8#t37.in]] file:
+Let us describe briefly this [[test:v8_37]] file:
 
 {% dialog tests/v8/Input/t37.in %}
 
@@ -98,8 +96,7 @@ from the `HIST.nc` file. In particular, the features of the supercell.
 
 ## The output files
 
-A large number of output files are obtained after an execution of
-<span style="font-variant:small-caps;">a</span>-TDEP.
+A large number of output files are obtained after an execution of |aTDEP|.
 
 {% dialog tests/v8/Refs/t37.out %}
 {% dialog tests/v8/Refs/t37omega.dat %}
@@ -111,7 +108,7 @@ A large number of output files are obtained after an execution of
    the energy of the model...
 2. `*omega.dat` contains the dispersion of phonon frequencies (in meV) along a path in the Brillouin Zone.
 3. `*thermo.dat` lists all the thermodynamic quantities obtained by considering
-   the system as a quantum harmonic crystal : specific heat, vibrational
+   the system as a quantum harmonic crystal: specific heat, vibrational
    energy, entropy and free energy. It also gives all these contributions as a
    function of temperature in the harmonic approximation.
 4. `sym.dat` details all the symmetry operations of the bravais lattice,
@@ -119,7 +116,7 @@ A large number of output files are obtained after an execution of
    contained in the `omega.dat` file.
 6. `xredaverage.xyz` includes the ideal and average positions in the supercell.
 7. `Indym*.dat` contain all the symmetry relations between one or two atoms
-   in the unitcell or the supercell.
+   in the unit cell or the supercell.
 8. `vdos.dat` displays the vibrational density of states (in meV).
 9. `dij.dat` lists the dynamical matrices for a particular set of q-points.
 10. `etotMDvsTDEP2.dat` compares the MD trajectory with the one computed

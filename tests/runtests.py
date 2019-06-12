@@ -53,8 +53,8 @@ def str_examples():
     return """
 Usage example (assuming the script is executed within a build tree):
 
-    runtests.py                      ==> Run the entire test suite with one python thread.
-    runtests.py -j2                  ==> Run the entire test suite with two python threads.
+    runtests.py                      ==> Run the entire test suite with one python process.
+    runtests.py -j2                  ==> Run the entire test suite with two python processes.
     runtests.py v1 v2 -k abinit      ==> Run only the tests in v1,v2 containing abinit as keyword.
     runtests.py v3[:4] v4[45:] v5[3] ==> Run the tests in v3 from t1.in to t3.in, all the
                                          tests in v4 starting from t45.in, and test t3 in v5
@@ -205,8 +205,8 @@ def main():
                             "(irrespectively of its value)."
                       ))
 
-    parser.add_option("-j", "--jobs", dest="py_nthreads", type="int", default=1,
-                      help="Number of python threads.")
+    parser.add_option("-j", "--jobs", dest="py_nprocs", type="int", default=1,
+                      help="Number of python processes.")
 
     parser.add_option("-r", "--regenerate", dest="regenerate", default=False, action="store_true",
                       help=("Regenerate the test suite database"
@@ -360,7 +360,7 @@ def main():
 
     mpi_nprocs = options.mpi_nprocs
     omp_nthreads = options.omp_nthreads
-    py_nthreads = options.py_nthreads
+    py_nprocs = options.py_nprocs
 
     cprint("Running on %s -- system %s -- ncpus %s -- Python %s -- %s" % (
           gethostname(), system, ncpus_detected, platform.python_version(), _my_name),
@@ -524,19 +524,19 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
 
     # Run the tested selected by the user.
     if omp_nthreads == 0:
-        ncpus_used = mpi_nprocs * py_nthreads
-        msg = ("Running %s test(s) with MPI_procs=%s, py_threads=%s..."
-               % (test_suite.full_length, mpi_nprocs, py_nthreads))
+        ncpus_used = mpi_nprocs * py_nprocs
+        msg = ("Running %s test(s) with MPI_procs=%s, py_nprocs=%s..."
+               % (test_suite.full_length, mpi_nprocs, py_nprocs))
     else:
-        ncpus_used = mpi_nprocs * omp_nthreads * py_nthreads
-        msg = ("Running %s test(s) with MPI_nprocs=%s, OMP_nthreads=%s, py_nthreads=%s..."
-               % (test_suite.full_length, mpi_nprocs, omp_nthreads, py_nthreads))
+        ncpus_used = mpi_nprocs * omp_nthreads * py_nprocs
+        msg = ("Running %s test(s) with MPI_nprocs=%s, OMP_nthreads=%s, py_nprocs=%s..."
+               % (test_suite.full_length, mpi_nprocs, omp_nthreads, py_nprocs))
     cprint(msg, "yellow")
 
     if ncpus_used < 0.3 * ncpus_detected:
         msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs\n"
-              "You may want to use python threads to speed up the execution\n"
-              "Use `runtests -jNUM` to run with NUM threads" % (ncpus_used, ncpus_detected))
+              "You may want to use python processes to speed up the execution\n"
+              "Use `runtests -jNUM` to run with NUM processes" % (ncpus_used, ncpus_detected))
         cprint(msg, "blue")
 
     elif ncpus_used > 1.5 * ncpus_detected:
@@ -564,7 +564,7 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
 
     results = test_suite.run_tests(build_env, workdir, runner,
                                    nprocs=mpi_nprocs,
-                                   nthreads=py_nthreads,
+                                   py_nprocs=py_nprocs,
                                    runmode=runmode,
                                    erase_files=options.erase_files,
                                    make_html_diff=options.make_html_diff,
@@ -605,7 +605,7 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
                     test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
                     results = test_suite.run_tests(build_env, workdir, runner,
                                                    nprocs=mpi_nprocs,
-                                                   nthreads=py_nthreads,
+                                                   py_nprocs=py_nprocs,
                                                    runmode=runmode,
                                                    erase_files=options.erase_files,
                                                    make_html_diff=options.make_html_diff,
