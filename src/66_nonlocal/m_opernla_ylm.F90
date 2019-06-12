@@ -390,10 +390,10 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 2, 22  --  SIGNS= 2
+!      CHOICE= 2, --  SIGNS= 2
 !      Accumulate dGxdt --- derivative wrt atm pos. --- for direction IDIR
 !      --------------------------------------------------------------------
-       if ((signs==2).and.(choice_==2.or.choice_==22)) then
+       if ((signs==2).and.(choice_==2)) then
          mu0=1
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -434,13 +434,14 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 
 #ifdef MR_DEV
 !      --------------------------------------------------------------------
-!      CHOICE= 25  --  SIGNS= 2
-!      Accumulate dGxdt --- derivative wrt atm pos. and two q-vectors--- 
+!      CHOICE= 22 and 25  --  SIGNS= 2
+!      Accumulate dGxdt --- derivative wrt atm pos. and one or two q-vectors--- 
 !      for directions fixed by IDIR and qdir
 !      --------------------------------------------------------------------
-       if (signs==2.and.choice_==25) then
+       if (signs==2.and.(choice_==22.or.choice_==25)) then
          !Use same notation as the notes for clarity
-         ialpha=nalpha(idir)
+         if(choice_==22) ialpha=idir
+         if(choice_==25) ialpha=nalpha(idir)
          mu0=1
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -1684,10 +1685,10 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 2, 22  --  SIGNS= 2
+!      CHOICE= 2  --  SIGNS= 2
 !      Accumulate dGxdt --- derivative wrt atm pos. --- for direction IDIR
 !      --------------------------------------------------------------------
-       if ((signs==2).and.(choice_==2.or.choice_==22)) then
+       if ((signs==2).and.(choice_==2)) then
          mu0=1
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -1750,13 +1751,14 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 
 #ifdef MR_DEV
 !      --------------------------------------------------------------------
-!      CHOICE= 25  --  SIGNS= 2
-!      Accumulate dGxdt --- derivative wrt atm pos. and two q-vectors--- 
+!      CHOICE= 22 and 25  --  SIGNS= 2
+!      Accumulate dGxdt --- derivative wrt atm pos. and one or two q-vectors--- 
 !      for directions fixed by IDIR and qdir
 !      --------------------------------------------------------------------
-       if (signs==2.and.choice_==25) then
+       if (signs==2.and.(choice_==22.or.choice_==25)) then
          !Use same notation as the notes for clarity
-         ialpha=nalpha(idir)
+         if(choice_==22) ialpha=idir
+         if(choice_==25) ialpha=nalpha(idir)
          mu0=1
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)

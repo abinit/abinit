@@ -337,9 +337,9 @@ contains
 !!    indices.(Also applies for choice=25)
 !!
 !!  **A -i factor has been factorized out in all the contributions of the second
-!!    q-gradient of the metric Hamiltonian. This is lately included in the contribution
-!!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
-!!    (Also applies for choice=25)
+!!    q-gradient of the metric Hamiltonian and in the first and second q-gradients
+!!    of the atomic displacement Hamiltonian. This is lately included in the 
+!!    matrix element calculation. 
 !!
 !! TODO
 !! * Complete implementation of spin-orbit

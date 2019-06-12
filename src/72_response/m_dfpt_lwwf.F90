@@ -808,8 +808,11 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_efield,gh1dqc, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c0_Hatdisdq_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)= dotr
-         c0_Hatdisdq_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)= -doti
+         !Apply the -i factor that has been factorized in the
+         !H^{\tau_{\kappa\beta}}_{\gamma} terms. (And consider the complex
+         !conjugate too)
+         c0_Hatdisdq_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)= doti
+         c0_Hatdisdq_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)= dotr
 
        end do !iq2grad
 
@@ -2374,8 +2377,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_iatdis,gh1dqc, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)= dotr
-         c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad)= doti
+         c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)= doti
+         c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad)= -dotr
 
        end do !iatpert
 

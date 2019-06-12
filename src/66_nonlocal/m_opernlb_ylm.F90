@@ -464,13 +464,14 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+qdir
            if (idir==qdir) then
              do ilmn=1,nlmn
-               ztab(:)=ztab(:)+two_pi*ffnl(:,1,ilmn)*cmplx(gxfac_(2,ilmn),-gxfac_(1,ilmn),kind=dp)
+               ztab(:)=ztab(:)+ffnl(:,1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
              end do
            end if
            do ilmn=1,nlmn
-             ztab(:)=ztab(:)+two_pi*kpg(:,idir)*ffnl(:,ffnl_dir1,ilmn)*cmplx(gxfac_(2,ilmn),-gxfac_(1,ilmn),kind=dp)
-             ztab(:)=ztab(:)+ffnl(:,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+             ztab(:)=ztab(:)+kpg(:,idir)*ffnl(:,ffnl_dir1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+             ztab(:)=ztab(:)-ffnl(:,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
            end do
+           ztab(:)=ztab(:)*two_pi
          end if
 #endif
 
@@ -991,25 +992,26 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 #ifdef MR_DEV
 !        ------
          else if (choice==22) then ! mixed derivative w.r.t. atm. pos and q vector (at q=0)
-           ffnl_dir1=2
+           ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+qdir
 !$OMP DO
            do ipw=1,npw
              if (idir==qdir) then
                do ilmn=1,nlmn
-                 ztab(ipw)=ztab(ipw)+two_pi*ffnl(ipw,1,ilmn)*cmplx(gxfac_(2,ilmn),-gxfac_(1,ilmn),kind=dp)
+                 ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
                end do
              end if
              do ilmn=1,nlmn
-               ztab(ipw)=ztab(ipw)+two_pi*kpg(ipw,idir)*ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfac_(2,ilmn),-gxfac_(1,ilmn),kind=dp)
-               ztab(ipw)=ztab(ipw)+ffnl(ipw,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+               ztab(ipw)=ztab(ipw)+kpg(ipw,idir)*ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               ztab(ipw)=ztab(ipw)-ffnl(ipw,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
              end do
+             ztab(ipw)=ztab(ipw)*two_pi
            end do
 !$OMP END DO
 #endif
 
 #ifdef MR_DEV
 !        ------
-         if (choice==25) then ! mixed derivative w.r.t. atm. pos and thwo q vectors (at q=0)
+         else if (choice==25) then ! mixed derivative w.r.t. atm. pos and thwo q vectors (at q=0)
            !Use same notation as the notes for clarity
            ialpha=nalpha(idir)
            idelta=nbeta(idir)
@@ -1017,24 +1019,23 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            idelgam=gamma(idelta,igamma)
 !$OMP DO
            do ipw=1,npw
-           if (ialpha==igamma) then
+             if (ialpha==igamma) then
+               do ilmn=1,nlmn
+                 ztab(ipw)=ztab(ipw)+ffnl(ipw,1+idelta,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               end do
+             end if
+             if (ialpha==idelta) then
+               do ilmn=1,nlmn
+                 ztab(ipw)=ztab(ipw)+ffnl(ipw,1+igamma,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               end do
+             end if
              do ilmn=1,nlmn
-               ztab(ipw)=ztab(ipw)+ffnl(ipw,1+idelta,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               ztab(ipw)=ztab(ipw)+kpg(ipw,ialpha)*ffnl(ipw,4+idelgam,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               ztab(ipw)=ztab(ipw)-ffnl(ipw,4+idelgam,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
              end do
-           end if
-           if (ialpha==idelta) then
-             do ilmn=1,nlmn
-               ztab(ipw)=ztab(ipw)+ffnl(ipw,1+igamma,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
-             end do
-           end if
-           do ilmn=1,nlmn
-             ztab(ipw)=ztab(ipw)+kpg(ipw,ialpha)*ffnl(ipw,4+idelgam,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
-             ztab(ipw)=ztab(ipw)-ffnl(ipw,4+idelgam,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
-           end do
-           ztab(ipw)=ztab(ipw)*two_pi
+             ztab(ipw)=ztab(ipw)*two_pi
            end do
 !$OMP END DO
-         end if
 #endif
 !        ------
          else if (choice==3) then ! derivative w.r.t. strain
@@ -1064,7 +1065,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 #ifdef MR_DEV
 !        ------
-         if (choice==33) then ! mixed derivative w.r.t. strain and q vector (at q=0)
+         else if (choice==33) then ! mixed derivative w.r.t. strain and q vector (at q=0)
            !Use same notation as the notes for clarity
            ibeta=nalpha(idir)
            idelta=nbeta(idir)
@@ -1093,7 +1094,6 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              ztab(ipw)=ztab(ipw)*two_piinv
            end do
 !$OMP END DO
-         end if
 #endif
 
 !        ------

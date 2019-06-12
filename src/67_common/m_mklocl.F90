@@ -1350,6 +1350,10 @@ end subroutine vlocalstr
 !!             here: e^{i q (R_l + \tau_{\kappa})}
 !!   rest of ABINIT: e^{i q R_l}  
 !!
+!!  **A -i factor has been factorized out in all the contributions of the first
+!!    q-gradient of the atomic displacement Hamiltonian. This is lately included 
+!!    in the matrix element calculation.
+!!
 !! PARENTS
 !!      dfpt_qdrpwf
 !!
@@ -1477,13 +1481,13 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
              gvec=(/ig1,ig2,ig3/)
              gfact=dot_product(gmet(qdir,:),gvec(:))/gmag
 
-!            Phase   G*xred  (complex conjugate) * -i *2*pi*(g_idir)*vion1dq*gfact
-             sfr=-phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
-             sfi=-phre_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
-!            Phase   G*xred  (complex conjugate) * -i *2*pi*(\delta_{idir,qdir})*vion1
+!            Phase   G*xred  (complex conjugate) *2*pi*(g_idir)*vion1dq*gfact
+             sfr=phre_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
+             sfi=-phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*gq(idir)*vion1dq(1)*gfact
+!            Phase   G*xred  (complex conjugate) *2*pi*(\delta_{idir,qdir})*vion1
              if (idir==qdir) then
-               sfr=sfr - phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
-               sfi=sfi - phre_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
+               sfr=sfr + phre_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
+               sfi=sfi - phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
              end if         
 
              work1(re,ii)=sfr
