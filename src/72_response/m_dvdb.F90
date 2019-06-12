@@ -2110,6 +2110,11 @@ pcase_loop: &
      pcase_eq = idir_eq + (ipert_eq-1)*3
      if (debug) write(std_out,*)"idir_eq, ipert_eq, tsign",idir_eq, ipert_eq, tsign
 
+     if (pflag(idir_eq, ipert_eq) == 0) then
+       write(msg, *)"pflag for idir_eq, ipert_eq", idir_eq, ipert_eq, "cannot be zero"
+       MSG_ERROR(msg)
+     end if
+
      do ispden=1,nspden
        ! Get symmetric perturbation in G-space in workg_eq array.
        call fourdp(cplex,workg_eq,v1scf(:,ispden,pcase_eq),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
@@ -5202,7 +5207,10 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
            end do
          end do
        end do
-       write(std_out,"(3(a,i0),a,es16.8)")"For iqpt= ",iqpt,", idir= ",idir,", ipert= ",ipert,", max_err= ",max_err
+       if (nsym1>1) then
+         write(std_out,"(3(a,i0),a,es16.8,i6)")"For iqpt= ",iqpt,&
+         ", idir= ",idir,", ipert= ",ipert,", max_err= ",max_err,nsym1
+       end if
 
        ABI_FREE(irottb)
        ABI_FREE(v1scf)
@@ -5347,7 +5355,7 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
        ! Debug: Write potentials to file.
        if (unt /= -1) then
          write(unt,*)"# count:", cnt
-         write(unt,*)"# q-point:", trim(ktoa(qpt))
+         write(unt,*)"# q-point:", trim(ktoa(qpt)), ", iqpt: ", trim(itoa(iqpt))
          write(unt,*)"# idir: ",idir,", ipert: ",ipert,", ispden:", ispden
          write(unt,*)"# file_v1scf, symmetrized_v1scf, diff"
          if (cplex == 1) then
