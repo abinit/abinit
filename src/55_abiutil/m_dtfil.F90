@@ -205,11 +205,11 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 
  if(dtset%optdriver/=RUNL_RESPFN)ireadwf=will_read
  if(ndtset/=0 .and. dtset%optdriver==RUNL_RESPFN .and. will_read==0)then
-   write(msg, '(5a,i3,3a,i3,a,i3,3a)' )&
+   write(msg, '(5a,i0,3a,i0,a,i0,3a)' )&
    'At least one of the input variables irdwfk and getwfk ',ch10,&
    'must refer to a valid _WFK file, in the response function',ch10,&
    'case, while for idtset = ',idtset,',',ch10,&
-   'they are irdwfk=',dtset%irdwfk,', and getwfk=',dtset%getwfk,'.',ch10,&
+   'they are irdwfk= ',dtset%irdwfk,', and getwfk= ',dtset%getwfk,'.',ch10,&
    'Action: correct irdwfk or getwfk in your input file.'
    MSG_ERROR(msg)
  end if
@@ -943,6 +943,13 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  end if
  filnam_out = trim(filnam_appen)//trim(stringfil)
 
+ !if (present(get_path)) then
+ !  filnam_out = rmquotes(get_path)
+ !  write(msg, '(4a)' )' mkfilename: get',trim(stringvar) ,"file from: ",trim(get_path)
+ !  call wrtout([std_out, ab_out], msg)
+ !  will_read = 1; return
+ !end if
+
  ! Treatment of the multi-dataset case (get is not relevant otherwise)
  if (ndtset /= 0) then
 
@@ -991,15 +998,12 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
        write(msg, '(5a,i3,2a)' )&
        ' mkfilename : get',trim(stringvar) ,'/=0, take file ',trim(stringfil),' from output of DATASET ',jget,'.',ch10
      end if
-     call wrtout(ab_out,msg,'COLL')
-     call wrtout(std_out,msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
    end if ! conditions on get and idtset
-
  end if ! ndtset/=0
 
 end subroutine mkfilename
 !!***
-
 
 !!****f* m_dtfil/isfile
 !! NAME

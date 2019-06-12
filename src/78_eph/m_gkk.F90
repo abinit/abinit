@@ -551,7 +551,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  end do ! ipc (loop over 3*natom atomic perturbations)
 
  call cwtime(cpu, wall, gflops, "stop")
- write(msg, '(4a)') " Computation of electron-phonon coupling matrix elements ", trim(what), " completed", ch10
+ write(msg, '(2a)') " Computation of gkq matrix elements with ", trim(what)
  call wrtout([std_out, ab_out], msg, do_flush=.True.)
  call wrtout(std_out, sjoin("cpu-time:", sec2str(cpu), ",wall-time:", sec2str(wall)), do_flush=.True.)
 

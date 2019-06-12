@@ -465,7 +465,7 @@ module defs_datatypes
 
   real(dp), allocatable :: ziontypat(:)
    ! ziontypat(ntypat)
-   !  For each type of atom (might be alchemy wrt psps), the ionic pseudo-charge
+   ! For each type of atom (might be alchemy wrt psps), the ionic pseudo-charge
    ! (giving raise to a long-range coulomb potential)
 
   real(dp), allocatable :: znuclpsp(:)

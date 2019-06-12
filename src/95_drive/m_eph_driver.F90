@@ -54,6 +54,7 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
+ !use m_special_funcs,   only : levi_civita_3
  use m_transport,       only : transport
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -161,7 +162,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0,sppoldbl1=1,timrev1=1
  integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
- integer :: iblock,ddb_nqshift,ierr,brav1
+ integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
@@ -190,7 +191,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: count_wminmax(2)
  real(dp) :: wminmax(2)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  real(dp),allocatable :: kpt_efmas(:,:)
@@ -391,10 +392,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
    end if
 
-   ! default value of eph_fermie is zero hence no tolerance is used!
+   ! Default value of eph_fermie is zero hence no tolerance is used!
    if (dtset%eph_fermie /= zero) then
      ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
-     call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
+     call wrtout(ab_out, sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie)))
      call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
      call wrtout(ab_out, msg)
      if (use_wfq) then
@@ -408,7 +409,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call wrtout(ab_out, msg)
      if (use_wfq) then
        call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-       call ebands_set_nelect(ebands_kq, ebands%nelect+dtset%eph_extrael, dtset%spinmagntarget, msg)
+       call ebands_set_nelect(ebands_kq, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
        call wrtout(ab_out, msg)
      end if
    end if
@@ -481,11 +482,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Set the q-shift for the DDB
  ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
 
+ ! Get Dielectric Tensor
+ iblock_dielt = ddb_get_dielt(ddb, dtset%rfmeth, dielt)
+
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
- iblock = ddb_get_dielt_zeff(ddb, cryst, dtset%rfmeth, dtset%chneut, selectz0, dielt, zeff)
+ iblock_dielt_zeff = ddb_get_dielt_zeff(ddb, cryst, dtset%rfmeth, dtset%chneut, selectz0, dielt, zeff, zeff_raw=zeff_raw)
  if (my_rank == master) then
-   if (iblock == 0) then
+   if (iblock_dielt_zeff == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
      call wrtout(ab_out, "Values initialized with zeros")
    else
@@ -512,7 +516,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos_free(phdos)
-     write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHODOS with wmin, wmax: ",wminmax
+     write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)
    end do
 
@@ -560,19 +564,27 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! This to symmetrize the DFPT potentials.
    dvdb%symv1 = dtset%symv1scf > 0
 
-   ! Set dielectric tensor, BECS and has_dielt_zeff flag that
-   ! activates automatically the treatment of the long-range term in the Fourier interpolation
+   !dvdb%diel = 13.103 * dvdb%dielt
+   !do ii=1,dvdb%natom
+   !  dvdb%qstar(:,:,:,ii) = (-1 ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
+   !end do
+   !dvdb%has_quadrupoles = .True.
+
+   ! Set dielectric tensor, BECS and associated flags.
+   ! This activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0
-   dvdb%add_lr_part = .False.
-   if (iblock /= 0) then
-     dvdb%dielt = dielt
-     dvdb%zeff = zeff
-     dvdb%has_dielt_zeff = .True.
-     dvdb%add_lr_part = .True.
-     if (dtset%dvdb_add_lr == 0)  then
-       dvdb%add_lr_part = .False.
-       call wrtout([std_out, ab_out], &
-         " WARNING: Setting add_lr_part to False. Long-range term will be substracted in Fourier interpolation.")
+   dvdb%add_lr = dtset%dvdb_add_lr
+   if (iblock_dielt /= 0) then
+     dvdb%has_dielt = .True.; dvdb%dielt = dielt
+   end if
+   if (iblock_dielt_zeff /= 0) then
+     dvdb%has_zeff = .True.; dvdb%zeff = zeff; dvdb%zeff_raw = zeff_raw
+   end if
+   if (.not. dvdb%has_dielt .or. .not. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
+     if (dvdb%add_lr /= 0) then
+       dvdb%add_lr = 0
+       !call wrtout([std_out, ab_out], &
+       !  " WARNING: Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
      end if
    end if
 

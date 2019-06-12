@@ -19600,7 +19600,8 @@ Variable(
     mnemonics="EPH PHonon mode RANGE.",
     text=r"""
 This variable is used to select the range of phonon modes included in the computation of the phonon self-energy.
-By default [0,0] all phonon modes are included, otherwise only the modes with index between the first and second entries are included.
+By default [0, 0] all phonon modes are included, otherwise only the modes with index between the first 
+and second entries are included.
 """,
 ),
 
@@ -19675,7 +19676,7 @@ Variable(
     defaultval=0,
     mnemonics="SYMmetrize V1 DFPT SCF potentials",
     text=r"""
-If symv1scf is equal to 1, the spatial-symmetry on the first-order DFPT potentials 
+If *symv1scf* is equal to 1, the spatial-symmetry on the first-order DFPT potentials 
 is enforced every time a set of potentials in the BZ is recostructed by symmetry
 starting from the initial values in the IBZ.
 This option is similar to [[symdynmat]] but it acts on the DFPT potentials instead of 
@@ -19696,10 +19697,10 @@ This flag is used in the Fourier interpolation in q-space of the DFPT potentials
 In polar materials there is a long range (LR) component in the first-order variation
 of the KS potential that can be modeled in terms of the Born effective charges and 
 the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]].
-If dvdb_add_lr is set to 1, this part is removed when computing the real-space representation
+If *dvdb_add_lr* is set to 1, this part is removed when computing the real-space representation
 of the DFPT potentials so that the potential is short-ranged and ameneable to Fourier interpolation.
 The long-range contribution is added back when interpolating the DFPT potentials at arbitrary q-points
-Setting this flag to zero deactivate the treatment of the LR contribution.
+Setting this flag to zero deactivates the treatment of the LR contribution.
 
 By default, the code will always treat the LR term is the DDB file contains Born effective charges 
 and the macroscopic dielectric tensor.
@@ -19730,7 +19731,7 @@ present the same scalability and the same parallel efficiency.
 Besides the maximum number of MPI processes that can be used for the different MPI-levels is related 
 to the basic dimensions of the calculation.
 
-In what follows, we explain briefly the pros/cons of the different MPI-levels, then we specialize 
+In what follows, we explain briefly the pros and cons of the different MPI-levels, then we specialize 
 the discussion to the different calculations activated by [[eph_task]].
 
 The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
@@ -19774,7 +19775,7 @@ Variable(
     defaultval=0,
     mnemonics="EPH FORCE Fourier Transform Interpolation of DFPT potentials.",
     text=r"""
-This is an advanced option used for testing/debugging the interpolation of the DFPT potentials when [[eph_task]] in (2, -2)
+This is an *advanced option* used for testing/debugging the interpolation of the DFPT potentials when [[eph_task]] in (2, -2)
 By default, the code seeks for the q-point in the input DVDB file when *eph_use_ftinterp* is set to zero (default)
 and stops is the q-point in not found in the file.
 When *eph_use_ftinterp* is set to 1, the input DVDB file (assumed to be on the [[ddb_ngqpt]] q-mesh)

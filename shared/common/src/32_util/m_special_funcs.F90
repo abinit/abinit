@@ -51,6 +51,7 @@ module m_special_funcs
  public :: sbf8              ! Computes set of spherical bessel functions using accurate algorithm
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
+ public :: levi_civita_3     ! Return Levi-Civita tensor of rank 3
 !!***
 
 !!****t* m_special_funcs/jlspline_t
@@ -1497,6 +1498,38 @@ elemental function k_thfermi(rhor)
  k_thfermi = SQRT(four*k_fermi(rhor)*piinv)
 
 end function k_thfermi
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/levi_civita_3
+!! NAME
+!!  levi_civita_3
+!!
+!! FUNCTION
+ !! Return Levi-Civita tensor of rank 3
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+pure function levi_civita_3() result(ee)
+
+!Arguments ------------------------------------
+ integer :: ee(3,3,3)
+
+! *************************************************************************
+
+ ee = 0
+ ee(1,2,3) = 1
+ ee(2,3,1) = 1
+ ee(3,1,2) = 1
+ !
+ ee(3,2,1) = -1
+ ee(1,3,2) = -1
+ ee(2,1,3) = -1
+
+end function levi_civita_3
 !!***
 
 !!****f* m_special_funcs/jlspline_new

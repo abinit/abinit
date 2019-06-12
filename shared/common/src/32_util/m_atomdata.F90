@@ -379,228 +379,218 @@ subroutine atomdata_from_symbol(atom,symbol)
 ! *************************************************************************
 
  select case (symbol)
-   case('no')
-     amu=     one         ; rcov=one/Bohr_Ang    ; znucl=0
-   case(' H', 'H ')
-     amu=     1.00794d0   ; rcov=0.32d0/Bohr_Ang ; znucl=1
-   case('He')
-     amu=     4.002602d0  ; rcov=0.93d0/Bohr_Ang ; znucl=2
-   case('Li')
-     amu=     6.941d0     ; rcov=1.23d0/Bohr_Ang ; znucl=3
-   case('Be')
-     amu=     9.012182d0  ; rcov=0.90d0/Bohr_Ang ; znucl=4
-   case(' B', 'B ')
-     amu=     10.811d0    ; rcov=0.80d0/Bohr_Ang ; znucl=5
-   case(' C', 'C ')
-     amu=     12.011d0    ; rcov=0.77d0/Bohr_Ang ; znucl=6
-   case(' N', 'N ')
-     amu=     14.00674d0  ; rcov=0.74d0/Bohr_Ang ; znucl=7
-   case(' O', 'O ')
-     amu=     15.9994d0   ; rcov=0.73d0/Bohr_Ang ; znucl=8
-   case(' F', 'F ')
-     amu=     18.9984032d0; rcov=0.72d0/Bohr_Ang ; znucl=9
-
-   case('Ne')
-     amu=     20.1797d0   ; rcov=0.71d0/Bohr_Ang ; znucl=10
-   case('Na')
-     amu=    22.989768d0 ; rcov=1.54d0/Bohr_Ang ; znucl= 11
-   case('Mg')
-     amu=     24.3050d0   ; rcov=1.36d0/Bohr_Ang ; znucl=12
-   case('Al')
-     amu=     26.981539d0 ; rcov=1.18d0/Bohr_Ang ; znucl=13
-   case('Si')
-     amu=     28.0855d0   ; rcov=1.11d0/Bohr_Ang ; znucl=14
-   case(' P', 'P ')
-     amu=     30.973762d0 ; rcov=1.06d0/Bohr_Ang ; znucl=15
-   case(' S', 'S ')
-     amu=     32.066d0    ; rcov=1.02d0/Bohr_Ang ; znucl=16
-   case('Cl')
-     amu=     35.4527d0   ; rcov=0.99d0/Bohr_Ang ; znucl=17
-   case('Ar')
-     amu=     39.948d0    ; rcov=0.98d0/Bohr_Ang ; znucl=18
-   case(' K', 'K ')
-     amu=     39.0983d0   ; rcov=2.03d0/Bohr_Ang ; znucl=19
-
-   case('Ca')
-     amu=     40.078d0    ; rcov=1.74d0/Bohr_Ang ; znucl=20
-   case('Sc')
-     amu=     44.955910d0 ; rcov=1.44d0/Bohr_Ang ; znucl=21
-   case('Ti')
-     amu=     47.88d0     ; rcov=1.32d0/Bohr_Ang ; znucl=22
-   case(' V', 'V ')
-     amu=     50.9415d0   ; rcov=1.22d0/Bohr_Ang ; znucl=23
-   case('Cr')
-     amu=     51.9961d0   ; rcov=1.18d0/Bohr_Ang ; znucl=24
-   case('Mn')
-     amu=     54.93805d0  ; rcov=1.17d0/Bohr_Ang ; znucl=25
-   case('Fe')
-     amu=     55.847d0    ; rcov=1.17d0/Bohr_Ang ; znucl=26
-   case('Co')
-     amu=     58.93320d0  ; rcov=1.16d0/Bohr_Ang ; znucl=27
-   case('Ni')
-     amu=     58.69d0     ; rcov=1.15d0/Bohr_Ang ; znucl=28
-   case('Cu')
-     amu=     63.546d0    ; rcov=1.17d0/Bohr_Ang ; znucl=29
-
-   case('Zn')
-     amu=     65.39d0     ; rcov=1.25d0/Bohr_Ang ; znucl=30
-   case('Ga')
-     amu=     69.723d0    ; rcov=1.26d0/Bohr_Ang ; znucl=31
-   case('Ge')
-     amu=     72.61d0     ; rcov=1.22d0/Bohr_Ang ; znucl=32
-   case('As')
-     amu=     74.92159d0  ; rcov=1.20d0/Bohr_Ang ; znucl=33
-   case('Se')
-     amu=     78.96d0     ; rcov=1.16d0/Bohr_Ang ; znucl=34
-   case('Br')
-     amu=     79.904d0    ; rcov=1.14d0/Bohr_Ang ; znucl=35
-   case('Kr')
-     amu=     83.80d0     ; rcov=1.12d0/Bohr_Ang ; znucl=36
-   case('Rb')
-     amu=     85.4678d0   ; rcov=2.16d0/Bohr_Ang ; znucl=37
-   case('Sr')
-     amu=     87.62d0     ; rcov=1.91d0/Bohr_Ang ; znucl=38
-   case(' Y', 'Y ')
-     amu=     88.90585d0  ; rcov=1.62d0/Bohr_Ang ; znucl=39
-
-   case('Zr')
-     amu=     91.224d0    ; rcov=1.45d0/Bohr_Ang ; znucl=40
-   case('Nb')
-     amu=     92.90638d0  ; rcov=1.34d0/Bohr_Ang ; znucl=41
-   case('Mo')
-     amu=     95.94d0     ; rcov=1.30d0/Bohr_Ang ; znucl=42
-   case('Tc')
-     amu=     98.9062d0   ; rcov=1.27d0/Bohr_Ang ; znucl=43
-   case('Ru')
-     amu=     101.07d0    ; rcov=1.25d0/Bohr_Ang ; znucl=44
-   case('Rh')
-     amu=     102.9055d0  ; rcov=1.25d0/Bohr_Ang ; znucl=45
-   case('Pd')
-     amu=     106.42d0    ; rcov=1.28d0/Bohr_Ang ; znucl=46
-   case('Ag')
-     amu=     107.8682d0  ; rcov=1.34d0/Bohr_Ang ; znucl=47
-   case('Cd')
-     amu=     112.411d0   ; rcov=1.48d0/Bohr_Ang ; znucl=48
-   case('In')
-     amu=     114.82d0    ; rcov=1.44d0/Bohr_Ang ; znucl=49
-
-   case('Sn')
-     amu=     118.710d0   ; rcov=1.41d0/Bohr_Ang ; znucl=50
-   case('Sb')
-     amu=     121.753d0   ; rcov=1.40d0/Bohr_Ang ; znucl=51
-   case('Te')
-     amu=     127.60d0    ; rcov=1.36d0/Bohr_Ang ; znucl=52
-   case(' I', 'I ')
-     amu=     126.90447d0 ; rcov=1.33d0/Bohr_Ang ; znucl=53
-   case('Xe')
-     amu=     131.29d0    ; rcov=1.31d0/Bohr_Ang ; znucl=54
-   case('Cs')
-     amu=     132.90543d0 ; rcov=2.35d0/Bohr_Ang ; znucl=55
-   case('Ba')
-     amu=     137.327d0   ; rcov=1.98d0/Bohr_Ang ; znucl=56
-   case('La')
-     amu=     138.9055d0  ; rcov=1.69d0/Bohr_Ang ; znucl=57
-   case('Ce')
-     amu=     140.115d0   ; rcov=1.65d0/Bohr_Ang ; znucl=58
-   case('Pr')
-     amu=     140.90765d0 ; rcov=1.65d0/Bohr_Ang ; znucl=59
-
-   case('Nd')
-     amu=     144.24d0    ; rcov=1.64d0/Bohr_Ang ; znucl=60
-   case('Pm')
-     amu=     147.91d0    ; rcov=1.64d0/Bohr_Ang ; znucl=61
-   case('Sm')
-     amu=     150.36d0    ; rcov=1.62d0/Bohr_Ang ; znucl=62
-   case('Eu')
-     amu=     151.965d0   ; rcov=1.85d0/Bohr_Ang ; znucl=63
-   case('Gd')
-     amu=     157.25d0    ; rcov=1.61d0/Bohr_Ang ; znucl=64
-   case('Tb')
-     amu=     158.92534d0 ; rcov=1.59d0/Bohr_Ang ; znucl=65
-   case('Dy')
-     amu=     162.50d0    ; rcov=1.59d0/Bohr_Ang ; znucl=66
-   case('Ho')
-     amu=     164.93032d0 ; rcov=1.57d0/Bohr_Ang ; znucl=67
-   case('Er')
-     amu=     167.26d0    ; rcov=1.57d0/Bohr_Ang ; znucl=68
-   case('Tm')
-     amu=     168.93421d0 ; rcov=1.56d0/Bohr_Ang ; znucl=69
-
-   case('Yb')
-     amu=     173.04d0    ; rcov=1.70d0/Bohr_Ang ; znucl=70
-   case('Lu')
-     amu=     174.967d0   ; rcov=1.56d0/Bohr_Ang ; znucl=71
-   case('Hf')
-     amu=     178.49d0    ; rcov=1.44d0/Bohr_Ang ; znucl=72
-   case('Ta')
-     amu=     180.9479d0  ; rcov=1.34d0/Bohr_Ang ; znucl=73
-   case(' W', 'W ')
-     amu=     183.85d0    ; rcov=1.30d0/Bohr_Ang ; znucl=74
-   case('Re')
-     amu=     186.207d0   ; rcov=1.28d0/Bohr_Ang ; znucl=75
-   case('Os')
-     amu=     190.2d0     ; rcov=1.26d0/Bohr_Ang ; znucl=76
-   case('Ir')
-     amu=     192.22d0    ; rcov=1.27d0/Bohr_Ang ; znucl=77
-   case('Pt')
-     amu=     195.08d0    ; rcov=1.30d0/Bohr_Ang ; znucl=78
-   case('Au')
-     amu=     196.96654d0 ; rcov=1.34d0/Bohr_Ang ; znucl=79
-
-   case('Hg')
-     amu=     200.59d0    ; rcov=1.49d0/Bohr_Ang ; znucl=80
-   case('Tl')
-     amu=     204.3833d0  ; rcov=1.48d0/Bohr_Ang ; znucl=81
-   case('Pb')
-     amu=     207.2d0     ; rcov=1.47d0/Bohr_Ang ; znucl=82
-   case('Bi')
-     amu=     208.98037d0 ; rcov=1.46d0/Bohr_Ang ; znucl=83
-   case('Po')
-     amu=     209.0d0     ; rcov=1.46d0/Bohr_Ang ; znucl=84
-   case('At')
-     amu=     210.0d0     ; rcov=1.45d0/Bohr_Ang ; znucl=85
-   case('Rn')
-     amu=     222.0d0     ; rcov=1.45d0/Bohr_Ang ; znucl=86
-   case('Fr')
-     amu=     223.0d0     ; rcov=2.50d0/Bohr_Ang ; znucl=87
-   case('Ra')
-     amu=     226.0254d0  ; rcov=2.10d0/Bohr_Ang ; znucl=88
-   case('Ac')
-     amu=     230.0d0     ; rcov=1.85d0/Bohr_Ang ; znucl=89
-
-   case('Th')
-     amu=     232.0381d0  ; rcov=1.65d0/Bohr_Ang ; znucl=90
-   case('Pa')
-     amu=     231.0359d0  ; rcov=1.50d0/Bohr_Ang ; znucl=91
-   case(' U', 'U ')
-     amu=     238.0289d0  ; rcov=1.42d0/Bohr_Ang ; znucl=92
-   case('Np')
-     amu=     237.0482d0  ; rcov=1.42d0/Bohr_Ang ; znucl=93
-   case('Pu')
-     amu=     242.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=94
-   case('Am')
-     amu=     243.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=95
-   case('Cm')
-     amu=     247.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=96
-   case('Bk')
-     amu=     247.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=97
-   case('Cf')
-     amu=     249.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=98
-   case('Es')
-     amu=     254.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=89
-
-   case('Fm')
-     amu=     253.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=100
-   case('Md')
-     amu=     256.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=101
-   case('No')
-     amu=     254.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=102
-   case('Lr')
-     amu=     257.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=103
-   case('Xx')
-     amu=     260.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=104
-   case default
-     MSG_ERROR("Unknown symbol name: "//TRIM(symbol))
+ case('no')
+   amu=     one         ; rcov=one/Bohr_Ang    ; znucl=0
+ case(' H', 'H ')
+   amu=     1.00794d0   ; rcov=0.32d0/Bohr_Ang ; znucl=1
+ case('He')
+   amu=     4.002602d0  ; rcov=0.93d0/Bohr_Ang ; znucl=2
+ case('Li')
+   amu=     6.941d0     ; rcov=1.23d0/Bohr_Ang ; znucl=3
+ case('Be')
+   amu=     9.012182d0  ; rcov=0.90d0/Bohr_Ang ; znucl=4
+ case(' B', 'B ')
+   amu=     10.811d0    ; rcov=0.80d0/Bohr_Ang ; znucl=5
+ case(' C', 'C ')
+   amu=     12.011d0    ; rcov=0.77d0/Bohr_Ang ; znucl=6
+ case(' N', 'N ')
+   amu=     14.00674d0  ; rcov=0.74d0/Bohr_Ang ; znucl=7
+ case(' O', 'O ')
+   amu=     15.9994d0   ; rcov=0.73d0/Bohr_Ang ; znucl=8
+ case(' F', 'F ')
+   amu=     18.9984032d0; rcov=0.72d0/Bohr_Ang ; znucl=9
+ case('Ne')
+   amu=     20.1797d0   ; rcov=0.71d0/Bohr_Ang ; znucl=10
+ case('Na')
+   amu=    22.989768d0 ; rcov=1.54d0/Bohr_Ang ; znucl= 11
+ case('Mg')
+   amu=     24.3050d0   ; rcov=1.36d0/Bohr_Ang ; znucl=12
+ case('Al')
+   amu=     26.981539d0 ; rcov=1.18d0/Bohr_Ang ; znucl=13
+ case('Si')
+   amu=     28.0855d0   ; rcov=1.11d0/Bohr_Ang ; znucl=14
+ case(' P', 'P ')
+   amu=     30.973762d0 ; rcov=1.06d0/Bohr_Ang ; znucl=15
+ case(' S', 'S ')
+   amu=     32.066d0    ; rcov=1.02d0/Bohr_Ang ; znucl=16
+ case('Cl')
+   amu=     35.4527d0   ; rcov=0.99d0/Bohr_Ang ; znucl=17
+ case('Ar')
+   amu=     39.948d0    ; rcov=0.98d0/Bohr_Ang ; znucl=18
+ case(' K', 'K ')
+   amu=     39.0983d0   ; rcov=2.03d0/Bohr_Ang ; znucl=19
+ case('Ca')
+   amu=     40.078d0    ; rcov=1.74d0/Bohr_Ang ; znucl=20
+ case('Sc')
+   amu=     44.955910d0 ; rcov=1.44d0/Bohr_Ang ; znucl=21
+ case('Ti')
+   amu=     47.88d0     ; rcov=1.32d0/Bohr_Ang ; znucl=22
+ case(' V', 'V ')
+   amu=     50.9415d0   ; rcov=1.22d0/Bohr_Ang ; znucl=23
+ case('Cr')
+   amu=     51.9961d0   ; rcov=1.18d0/Bohr_Ang ; znucl=24
+ case('Mn')
+   amu=     54.93805d0  ; rcov=1.17d0/Bohr_Ang ; znucl=25
+ case('Fe')
+   amu=     55.847d0    ; rcov=1.17d0/Bohr_Ang ; znucl=26
+ case('Co')
+   amu=     58.93320d0  ; rcov=1.16d0/Bohr_Ang ; znucl=27
+ case('Ni')
+   amu=     58.69d0     ; rcov=1.15d0/Bohr_Ang ; znucl=28
+ case('Cu')
+   amu=     63.546d0    ; rcov=1.17d0/Bohr_Ang ; znucl=29
+ case('Zn')
+   amu=     65.39d0     ; rcov=1.25d0/Bohr_Ang ; znucl=30
+ case('Ga')
+   amu=     69.723d0    ; rcov=1.26d0/Bohr_Ang ; znucl=31
+ case('Ge')
+   amu=     72.61d0     ; rcov=1.22d0/Bohr_Ang ; znucl=32
+ case('As')
+   amu=     74.92159d0  ; rcov=1.20d0/Bohr_Ang ; znucl=33
+ case('Se')
+   amu=     78.96d0     ; rcov=1.16d0/Bohr_Ang ; znucl=34
+ case('Br')
+   amu=     79.904d0    ; rcov=1.14d0/Bohr_Ang ; znucl=35
+ case('Kr')
+   amu=     83.80d0     ; rcov=1.12d0/Bohr_Ang ; znucl=36
+ case('Rb')
+   amu=     85.4678d0   ; rcov=2.16d0/Bohr_Ang ; znucl=37
+ case('Sr')
+   amu=     87.62d0     ; rcov=1.91d0/Bohr_Ang ; znucl=38
+ case(' Y', 'Y ')
+   amu=     88.90585d0  ; rcov=1.62d0/Bohr_Ang ; znucl=39
+ case('Zr')
+   amu=     91.224d0    ; rcov=1.45d0/Bohr_Ang ; znucl=40
+ case('Nb')
+   amu=     92.90638d0  ; rcov=1.34d0/Bohr_Ang ; znucl=41
+ case('Mo')
+   amu=     95.94d0     ; rcov=1.30d0/Bohr_Ang ; znucl=42
+ case('Tc')
+   amu=     98.9062d0   ; rcov=1.27d0/Bohr_Ang ; znucl=43
+ case('Ru')
+   amu=     101.07d0    ; rcov=1.25d0/Bohr_Ang ; znucl=44
+ case('Rh')
+   amu=     102.9055d0  ; rcov=1.25d0/Bohr_Ang ; znucl=45
+ case('Pd')
+   amu=     106.42d0    ; rcov=1.28d0/Bohr_Ang ; znucl=46
+ case('Ag')
+   amu=     107.8682d0  ; rcov=1.34d0/Bohr_Ang ; znucl=47
+ case('Cd')
+   amu=     112.411d0   ; rcov=1.48d0/Bohr_Ang ; znucl=48
+ case('In')
+   amu=     114.82d0    ; rcov=1.44d0/Bohr_Ang ; znucl=49
+ case('Sn')
+   amu=     118.710d0   ; rcov=1.41d0/Bohr_Ang ; znucl=50
+ case('Sb')
+   amu=     121.753d0   ; rcov=1.40d0/Bohr_Ang ; znucl=51
+ case('Te')
+   amu=     127.60d0    ; rcov=1.36d0/Bohr_Ang ; znucl=52
+ case(' I', 'I ')
+   amu=     126.90447d0 ; rcov=1.33d0/Bohr_Ang ; znucl=53
+ case('Xe')
+   amu=     131.29d0    ; rcov=1.31d0/Bohr_Ang ; znucl=54
+ case('Cs')
+   amu=     132.90543d0 ; rcov=2.35d0/Bohr_Ang ; znucl=55
+ case('Ba')
+   amu=     137.327d0   ; rcov=1.98d0/Bohr_Ang ; znucl=56
+ case('La')
+   amu=     138.9055d0  ; rcov=1.69d0/Bohr_Ang ; znucl=57
+ case('Ce')
+   amu=     140.115d0   ; rcov=1.65d0/Bohr_Ang ; znucl=58
+ case('Pr')
+   amu=     140.90765d0 ; rcov=1.65d0/Bohr_Ang ; znucl=59
+ case('Nd')
+   amu=     144.24d0    ; rcov=1.64d0/Bohr_Ang ; znucl=60
+ case('Pm')
+   amu=     147.91d0    ; rcov=1.64d0/Bohr_Ang ; znucl=61
+ case('Sm')
+   amu=     150.36d0    ; rcov=1.62d0/Bohr_Ang ; znucl=62
+ case('Eu')
+   amu=     151.965d0   ; rcov=1.85d0/Bohr_Ang ; znucl=63
+ case('Gd')
+   amu=     157.25d0    ; rcov=1.61d0/Bohr_Ang ; znucl=64
+ case('Tb')
+   amu=     158.92534d0 ; rcov=1.59d0/Bohr_Ang ; znucl=65
+ case('Dy')
+   amu=     162.50d0    ; rcov=1.59d0/Bohr_Ang ; znucl=66
+ case('Ho')
+   amu=     164.93032d0 ; rcov=1.57d0/Bohr_Ang ; znucl=67
+ case('Er')
+   amu=     167.26d0    ; rcov=1.57d0/Bohr_Ang ; znucl=68
+ case('Tm')
+   amu=     168.93421d0 ; rcov=1.56d0/Bohr_Ang ; znucl=69
+ case('Yb')
+   amu=     173.04d0    ; rcov=1.70d0/Bohr_Ang ; znucl=70
+ case('Lu')
+   amu=     174.967d0   ; rcov=1.56d0/Bohr_Ang ; znucl=71
+ case('Hf')
+   amu=     178.49d0    ; rcov=1.44d0/Bohr_Ang ; znucl=72
+ case('Ta')
+   amu=     180.9479d0  ; rcov=1.34d0/Bohr_Ang ; znucl=73
+ case(' W', 'W ')
+   amu=     183.85d0    ; rcov=1.30d0/Bohr_Ang ; znucl=74
+ case('Re')
+   amu=     186.207d0   ; rcov=1.28d0/Bohr_Ang ; znucl=75
+ case('Os')
+   amu=     190.2d0     ; rcov=1.26d0/Bohr_Ang ; znucl=76
+ case('Ir')
+   amu=     192.22d0    ; rcov=1.27d0/Bohr_Ang ; znucl=77
+ case('Pt')
+   amu=     195.08d0    ; rcov=1.30d0/Bohr_Ang ; znucl=78
+ case('Au')
+   amu=     196.96654d0 ; rcov=1.34d0/Bohr_Ang ; znucl=79
+ case('Hg')
+   amu=     200.59d0    ; rcov=1.49d0/Bohr_Ang ; znucl=80
+ case('Tl')
+   amu=     204.3833d0  ; rcov=1.48d0/Bohr_Ang ; znucl=81
+ case('Pb')
+   amu=     207.2d0     ; rcov=1.47d0/Bohr_Ang ; znucl=82
+ case('Bi')
+   amu=     208.98037d0 ; rcov=1.46d0/Bohr_Ang ; znucl=83
+ case('Po')
+   amu=     209.0d0     ; rcov=1.46d0/Bohr_Ang ; znucl=84
+ case('At')
+   amu=     210.0d0     ; rcov=1.45d0/Bohr_Ang ; znucl=85
+ case('Rn')
+   amu=     222.0d0     ; rcov=1.45d0/Bohr_Ang ; znucl=86
+ case('Fr')
+   amu=     223.0d0     ; rcov=2.50d0/Bohr_Ang ; znucl=87
+ case('Ra')
+   amu=     226.0254d0  ; rcov=2.10d0/Bohr_Ang ; znucl=88
+ case('Ac')
+   amu=     230.0d0     ; rcov=1.85d0/Bohr_Ang ; znucl=89
+ case('Th')
+   amu=     232.0381d0  ; rcov=1.65d0/Bohr_Ang ; znucl=90
+ case('Pa')
+   amu=     231.0359d0  ; rcov=1.50d0/Bohr_Ang ; znucl=91
+ case(' U', 'U ')
+   amu=     238.0289d0  ; rcov=1.42d0/Bohr_Ang ; znucl=92
+ case('Np')
+   amu=     237.0482d0  ; rcov=1.42d0/Bohr_Ang ; znucl=93
+ case('Pu')
+   amu=     242.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=94
+ case('Am')
+   amu=     243.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=95
+ case('Cm')
+   amu=     247.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=96
+ case('Bk')
+   amu=     247.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=97
+ case('Cf')
+   amu=     249.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=98
+ case('Es')
+   amu=     254.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=89
+ case('Fm')
+   amu=     253.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=100
+ case('Md')
+   amu=     256.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=101
+ case('No')
+   amu=     254.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=102
+ case('Lr')
+   amu=     257.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=103
+ case('Xx')
+   amu=     260.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=104
+ case default
+   MSG_ERROR("Unknown symbol name: "//TRIM(symbol))
  end select
 
  atom%znucl = znucl

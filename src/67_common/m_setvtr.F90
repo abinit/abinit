@@ -112,7 +112,7 @@ contains
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  nkxc=second dimension of the array kxc
 !!  ntypat=number of types of atoms in unit cell.
-!!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
+!!  n1xccc=dimension of xccc1d; 0 if no XC core correction is used
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  optene=>0 if some additional energies have to be computed
 !!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
@@ -179,8 +179,8 @@ contains
 !!    All computations are done on the fine FFT grid.
 !!    All variables (nfft,ngfft,mgfft) refer to this fine FFT grid.
 !!    All arrays (densities/potentials...) are computed on this fine FFT grid.
-!!  ! Developpers have to be careful when introducing others arrays:
-!!      they have to be stored on the fine FFT grid.
+!!  Developers have to be careful when introducing others arrays: they have to be stored on the fine FFT grid.
+
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
 !! PARENTS
