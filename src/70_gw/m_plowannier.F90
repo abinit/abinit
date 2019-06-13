@@ -1806,7 +1806,7 @@ endif
  ! Warning:  In the case of the diagonalisation of the whole hamltonien
  ! the band structure is separated in as many files as atoms.
  !------------------------------------------------------------------------
- if (band_struct .eq. 1) then
+ if (band_struct .eq. 1 ) then
 
    write(message,'(3a)') ch10,&
 &   ' == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis'
@@ -2331,7 +2331,7 @@ end subroutine compute_coeff_plowannier
  integer :: unt,iatom,spin,ikpt,iband,ibandc,il,ispinor,im
 
  !Creation of the data.plowann file
- if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
+ if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='replace') /= 0) then
   MSG_ERROR(msg)
  end if
  rewind(unt)
@@ -2345,7 +2345,7 @@ end subroutine compute_coeff_plowannier
  write(unt,'(a7,2i4)')"Bands =",wan%bandi_wan,wan%bandf_wan
  write(unt,'(a26,i2)')"Total number of orbitals =",sum(wan%nbl_atom_wan(:))
  do iatom=1,wan%natom_wan
-   write(unt,*)"Orbitals for atom",wan%iatom_wan(iatom)," = ",wan%latom_wan(iatom)%lcalc(:)
+   write(unt,'(a17,i2,a3,4i2)')"Orbitals for atom",wan%iatom_wan(iatom)," = ",wan%latom_wan(iatom)%lcalc(:)
  enddo
  write(unt,'(a16,i2)')"Number of spin =",wan%nsppol
  write(unt,'(a19,i4)')"Number of k-points=",wan%nkpt
@@ -2410,7 +2410,7 @@ end subroutine compute_coeff_plowannier
  real(dp) ::xx,yy
 
  !Opening of the data.plowann file
- if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
+ if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='old') /= 0) then
   MSG_ERROR(msg)
  end if
  rewind(unt)
