@@ -188,6 +188,7 @@ type dataset_type
  integer :: dmft_dc
  integer :: dmft_entropy
  integer :: dmft_iter
+ integer :: dmft_kspectralfunc
  integer :: dmft_nlambda
  integer :: dmft_nwli
  integer :: dmft_nwlo

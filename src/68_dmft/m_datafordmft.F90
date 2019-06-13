@@ -101,7 +101,7 @@ contains
 !!
 !! SOURCE
 
-subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
+subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 & lda_occup,mband,mband_cprj,mkmem,mpi_enreg,nkpt,my_nspinor,nsppol,occ,&
 & paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,unpaw,nbandkss)
 
@@ -127,7 +127,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iscf,mband,mband_cprj,mkmem
+ integer,intent(in) :: mband,mband_cprj,mkmem
  integer,intent(in) :: nkpt,my_nspinor,nsppol
  integer,intent(in) :: unpaw,usecprj
  integer, optional, intent(in) :: nbandkss
@@ -168,7 +168,6 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
  logical :: lprojchi,t2g,x2my2d
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 !************************************************************************
 
 !DBG_ENTER("COLL")
@@ -594,11 +593,11 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
    call psichi_print(dtset,cryst_struc%nattyp,cryst_struc%ntypat,nkpt,my_nspinor,&
 &   nsppol,paw_dmft,pawtab,psps,t2g,x2my2d)
  end if ! proc=me
-!==========================================================================
+
 !********************* Check normalization  and occupations ***************
-! Only if the complete BZ is sampled (ie iscf>0)
+! Only if the complete BZ is sampled (ie paw_dmft%kspectralfunc=0)
 !==========================================================================
- if(iscf>0) then
+ if(paw_dmft%dmft_kspectralfunc==0) then
    ABI_DATATYPE_ALLOCATE(xocc_check,(natom))
    ABI_DATATYPE_ALLOCATE(xnorm_check,(natom))
    call init_matlu(natom,my_nspinor,nsppol,paw_dmft%lpawu,xocc_check)
@@ -734,11 +733,11 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,iscf,&
  endif
 
  if(present(nbandkss)) then
-   if((me.eq.0.and.nbandkss/=0).or.(iscf<0)) then
+   if((me.eq.0.and.nbandkss/=0).or.(paw_dmft%dmft_kspectralfunc==1)) then
 !     opt_renorm=1 ! if ucrpa==1, no need for individual orthonormalization
      opt_renorm=3
-     if(dtset%ucrpa>=1.or.iscf<0) opt_renorm=2
-     call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm,iscf=iscf)
+     if(dtset%ucrpa>=1.or.paw_dmft%dmft_kspectralfunc==1) opt_renorm=2
+     call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)
      call psichi_print(dtset,cryst_struc%nattyp,cryst_struc%ntypat,nkpt,my_nspinor,&
 &     nsppol,paw_dmft,pawtab,psps,t2g,x2my2d)
    end if ! proc=me
@@ -1197,7 +1196,7 @@ end subroutine datafordmft
 !!
 !! SOURCE
 
-subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
+subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 
  use defs_basis
  use m_errors
@@ -1215,12 +1214,11 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type), intent(in) :: pawang
  integer, optional, intent(in) :: opt
- integer, optional, intent(in) :: iscf
 
 !Local variables ------------------------------
 !scalars
  integer :: iatom,ib,ikpt,im,ispinor,isppol,jkpt
- integer :: natom,mbandc,ndim,nkpt,nspinor,nsppol,option,iscfloc
+ integer :: natom,mbandc,ndim,nkpt,nspinor,nsppol,option
  real(dp), pointer ::  temp_wtk(:) => null()
  real(dp) ::  pawprtvol
  type(oper_type) :: norm
@@ -1229,14 +1227,6 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
 !arrays
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
 !************************************************************************
-
- if(present(iscf)) then
-   iscfloc=iscf
- else
-   iscfloc=1
- endif
-
-
 
  DBG_ENTER("COLL")
 
@@ -1325,7 +1315,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
  call identity_oper(norm,1)
 
 !== Deduce norm%matlu from norm%ks with new psichi
- if (iscfloc<0) then
+ if (paw_dmft%dmft_kspectralfunc==1) then
    call init_oper(paw_dmft,oper_temp)
    do jkpt=1,nkpt  ! jkpt
      call loc_oper(norm,paw_dmft,1,jkpt=jkpt)
@@ -1339,7 +1329,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
 &     norm%matlu,oper_temp%matlu,norm%natom,1,tol6,zero_or_one=1)
    enddo
    call destroy_oper(oper_temp)
- else ! iscfloc
+ else !dmft_kspectralfunc
    call loc_oper(norm,paw_dmft,1)
 
 
@@ -1371,7 +1361,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt,iscf)
    call destroy_oper(oper_temp)
 
    call destroy_oper(norm)
- endif ! iscfloc
+ endif ! dmft_kspectralfunc
 
  paw_dmft%lpsichiortho=1
 

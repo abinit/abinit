@@ -739,7 +739,11 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !           == Create name for file
 !          ===========================
            if(self%w_type=="real") then
-             tmpfil = trim(paw_dmft%filapp)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
+             if (optrw==1) then
+               tmpfil = trim(paw_dmft%filnamei)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
+             else 
+               tmpfil = trim(paw_dmft%filapp)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
+             endif
            else
              tmpfil = trim(paw_dmft%filapp)//'Self-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
              if(present(opt_char)) then
@@ -1015,7 +1019,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                write(message,'(4x,2a)') " Read only diagonal self energy from Maxent"
                call wrtout(std_out,message,'COLL')
                !write(6,*) "opt_hdc",opt_hdc(1)%mat(1,1,1,1,1)
-               call kramerskronig_self(self,opt_selflimit,opt_hdc)
+               call kramerskronig_self(self,opt_selflimit,opt_hdc,paw_dmft%filapp)
 
                ! Rotate back rotate_matlu
                !-----------------------------
@@ -1570,7 +1574,7 @@ end subroutine make_qmcshift_self
 !!
 !! SOURCE
 
-subroutine kramerskronig_self(self,selflimit,selfhdc)
+subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
@@ -1581,6 +1585,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  type(self_type),intent(inout) :: self
  type(matlu_type),intent(in) :: selflimit(self%hdc%natom)
  type(matlu_type),intent(in) :: selfhdc(self%hdc%natom)
+ character(len=fnlen), intent(in) :: filapp
 
 !Local variables-------------------------------
  integer :: ifreq,jfreq,isppol,ispinor,ispinor1,im,im1,iatom
@@ -1606,6 +1611,8 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
  call wrtout(std_out,  message,'COLL')
 
  call print_matlu(selfhdc,natom,3)
+ open(unit=67,file=trim(filapp)//"_DFTDMFT_Self_realaxis_from_maxent_and_kramerskronig.dat", status='unknown',form='formatted')
+ rewind(67)
 !  Compute limit of Real Part and put in double counting energy.
 ! call copy_matlu(selfhdc,self%hdc%matlu,natom)
      !!write(6,*) "selfhdc   kramerskronig",selfhdc(1)%mat(1,1,1,1,1)
@@ -1656,7 +1663,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
 !                 TEST*************************
               ! write(6,*) "TWO FACTOR IS PUT BECAUSE OF MAXENT CODE ??"
                do ifreq=1,self%nw
-                 write(68,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
+!                 write(68,*)  self%omega(ifreq),selftemp_re(ifreq),selftemp_imag(ifreq)
                  selftemp_re(ifreq)=selftemp_re(ifreq)+ &
  &                 real(selflimit(iatom)%mat(im,im1,isppol,ispinor,ispinor1)- &
  &                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
@@ -1672,7 +1679,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
                  ,aimag(self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                enddo
                write(67,*) 
-               write(68,*) 
+               !write(68,*) 
                !!!!!!!!!! Z renormalization
 !               i0=389
 !               slope=(selftemp_re(i0+1)-selftemp_re(i0))/&
@@ -1693,6 +1700,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc)
      enddo ! isppol
    endif ! lpawu=/-1
  enddo ! iatom
+ close(67)
      !write(6,*) "self1",aimag(self%oper(489)%matlu(1)%mat(1,1,1,1,1))
                
  ABI_DEALLOCATE(selftemp_re)
@@ -1722,7 +1730,7 @@ end subroutine kramerskronig_self
 !!
 !! SOURCE
 
-subroutine selfreal2imag_self(selfr,self)
+subroutine selfreal2imag_self(selfr,self,filapp)
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
@@ -1732,6 +1740,7 @@ subroutine selfreal2imag_self(selfr,self)
 !type
  type(self_type),intent(inout) :: selfr
  type(self_type),intent(inout) :: self
+ character(len=fnlen), intent(in) :: filapp
 
 !Local variables-------------------------------
  integer :: ifreq,jfreq,isppol,ispinor,ispinor1,im,im1,iatom
@@ -1747,6 +1756,8 @@ subroutine selfreal2imag_self(selfr,self)
 !  Compute limit of Real Part and put in double counting energy.
 ! call copy_matlu(selfhdc,self%hdc%matlu,natom)
      !write(6,*) "self3",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
+
+ open(unit=672,file=trim(filapp)//"_DFTDMFT_Self_forcheck_imagaxis_from_realaxis.dat", status='unknown',form='formatted')
  do iatom=1,natom
    if(self%oper(1)%matlu(iatom)%lpawu.ne.-1) then
      ndim=2*self%oper(1)%matlu(iatom)%lpawu+1
@@ -1778,6 +1789,7 @@ subroutine selfreal2imag_self(selfr,self)
      enddo ! isppol
    endif ! lpawu=/-1
  enddo ! iatom
+ close(672)
                
  ABI_DEALLOCATE(selftempmatsub)
 
