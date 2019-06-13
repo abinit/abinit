@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 # -*- coding: utf-8 -*- 
 """
 This script analyzes the Abinit source tree and generates the dependency graph
