@@ -8,7 +8,7 @@ t72o_DS7_WFK   # GS wavefunction file
 #%% executable = mrggkk
 #%% test_chain = t72.in, t73.in, t74.in, t75.in, t76.in
 #%% [files]
-#%%  files_to_test =
+#%% files_to_test =
 #%%    t75.stdout,  tolnlines=  0, tolabs=  0.0,   tolrel=  0.0
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -16,5 +16,5 @@ t72o_DS7_WFK   # GS wavefunction file
 #%% authors = M. Verstraete
 #%% keywords = 
 #%% description = 
-#%% 75. mrggkk of test 72 to make auxiliary file finegrid_GKK
+#%%   75. mrggkk of test 72 to make auxiliary file finegrid_GKK
 #%%<END TEST_INFO>

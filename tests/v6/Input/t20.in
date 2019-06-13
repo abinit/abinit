@@ -77,9 +77,9 @@ jdtset 11
 #%%   lattice, and using multiple step berry phase calculation.
 #%%   (Tests 21-30 are related to geometry optimization, molecular dynamics, etc)
 #%%
-#%% Cannot be executed in parallel:
-#%% chkint_prt: ERROR -
-#%% Context : the value of the variable nproc is 2.
-#%% The value of the input variable berrystep is 5, while it must be
-#%% equal to 1
+#%%   Cannot be executed in parallel:
+#%%   chkint_prt: ERROR -
+#%%   Context : the value of the variable nproc is 2.
+#%%   The value of the input variable berrystep is 5, while it must be
+#%%   equal to 1
 #%%<END TEST_INFO>

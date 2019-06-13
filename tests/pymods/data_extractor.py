@@ -7,10 +7,12 @@ from __future__ import print_function, division, unicode_literals
 import re
 from .yaml_tools import Document
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
-from .yaml_tools.errors import NoIteratorDefinedError
+from .yaml_tools.errors import NoIteratorDefinedError, DuplicateDocumentError
 
-doc_start_re = re.compile(r'---( !.*)?\n?$')
-doc_end_re = re.compile(r'\.\.\.')
+# Tag is only recognised if it is a valid a word ([A-Za-z0-9_]+)
+# It won't recognise serialized tags for example
+doc_start_re = re.compile(r'---( !!?\w+)?\n?$')
+doc_end_re = re.compile(r'\.\.\.\n?$')
 
 
 class DataExtractor:
@@ -62,14 +64,15 @@ class DataExtractor:
         # Reset those states to allow several extract with the same instance
         self.iterators_state = {}
         self.corrupted_docs = []
-        lines, docs, ignored = [], [], []
+        lines, docs, ignored = [], {}, []
 
         current_doc = None
         for i, line in enumerate(src_lines):
             if current_doc is not None:
                 # accumulate source lines
                 current_doc.lines.append(line)
-                if doc_end_re.match(line):  # reached the end of the doc
+                if line.startswith('...') and doc_end_re.match(line):
+                    # reached the end of the doc
                     if self.use_yaml:
                         current_doc.end = i
 
@@ -79,7 +82,9 @@ class DataExtractor:
                             curr_it = current_doc.obj.iterator
 
                             # Update current iterators state
-                            for iterator in self.iterators_state:
+                            # list freeze the key list to allow deleting in the
+                            # loop
+                            for iterator in list(self.iterators_state):
                                 if ITERATOR_RANKS[curr_it] \
                                    < ITERATOR_RANKS[iterator]:
                                     del self.iterators_state[iterator]
@@ -88,7 +93,7 @@ class DataExtractor:
 
                         elif current_doc.corrupted:
                             # Signal corruption but ignore the document
-                            self.corrupted_docs.append(current_doc.start+1)
+                            self.corrupted_docs.append(current_doc)
 
                         elif getattr(current_doc.obj, '_is_abinit_message',
                                      False):
@@ -100,11 +105,16 @@ class DataExtractor:
                             if not current_doc.iterators:
                                 # This is not normal !
                                 raise NoIteratorDefinedError(current_doc)
-                            docs.append(current_doc)
+
+                            if current_doc.id in docs:
+                                raise DuplicateDocumentError(current_doc.id)
+
+                            docs[current_doc.id] = current_doc
                     current_doc = None  # go back to normal mode
 
             elif self._get_metachar(line) == '-':
-                if doc_start_re.match(line):  # starting a yaml doc
+                # starting a yaml doc
+                if line.startswith('---') and doc_start_re.match(line):
                     current_doc = Document(self.iterators_state.copy(),
                                            i, [line])
                 else:

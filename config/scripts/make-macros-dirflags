@@ -69,10 +69,15 @@ AC_DEFUN([ABI_OPTFLAGS_DIRS],[
     AC_MSG_RESULT([yes])
   fi
 
+  dnl Init config.optim
+  echo "optim_dumper_template='${abinit_srcdir}/shared/common/src/14_hidewrite/m_optim_dumper.F90.in'" > config.optim
+  echo "optim_dumper_output='${abinit_builddir}/shared/common/src/14_hidewrite/m_optim_dumper.F90'" >> config.optim
+
   dnl Set default
   fcflags_opt_default="$1"
-  echo "fcflags_opt_default='${fcflags_opt_default}'" >config.optim
+  echo "fcflags_opt_default='${fcflags_opt_default}'" >>config.optim
   fcflags_opt_dirlist=""
+  AC_SUBST(fcflags_opt_default)
 @OPTFLAGS@
   echo "fcflags_opt_dirlist='${fcflags_opt_dirlist}'" >>config.optim
 ]) # ABI_OPTFLAGS_DIRS\n"
@@ -147,7 +152,6 @@ for main_bin in bin_cnf.sections():
 ext_libs = sorted(list(set(ext_libs)))
 ext_libs.remove("fft")
 ext_libs.remove("gpu")
-ext_libs.remove("math")
 ext_libs.remove("mpi")
 ext_libs.remove("timer")
 ext_libs = ["atompaw"] + ext_libs
