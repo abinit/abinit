@@ -445,7 +445,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  elph_ds%nFSband = elph_ds%maxFSband - elph_ds%minFSband + 1
 
- if (ep_prt_yambo==1) then
+ if (anaddb_dtset%ep_prt_yambo==1) then
    elph_ds%nFSband = nband
    elph_ds%minFSband = 1
    elph_ds%maxFSband = nband
