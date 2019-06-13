@@ -1,0 +1,17 @@
+/02_clib
+/10_defs
+/11_memory_mpi
+/12_hide_mpi
+/14_hidewrite
+/16_hideleave
+/17_gpu_toolbox
+/17_libtetra_ext
+/17_yaml_out
+/18_timing
+/21_hashfuncs
+/27_toolbox_oop
+/28_numeric_noabirule
+/29_kpoints
+/32_util
+/33_xc_lowlevel
+/39_libpaw

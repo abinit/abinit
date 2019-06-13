@@ -38,7 +38,7 @@ module m_fstab
  use m_symtk,          only : matr3inv
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_kpts,           only : kpts_timrev_from_kptopt, listkk, smpbz
 
  implicit none
@@ -595,7 +595,7 @@ subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
      band = ib + bstart_k - 1
      arg = ebands%eig(band,ik_ibz,spin) - chempot
      do isig=1,fs%nsig
-       wtk(isig,ib) = dirac_delta(arg, sigmas(isig))
+       wtk(isig,ib) = gaussian(arg, sigmas(isig))
      end do
    end do
 

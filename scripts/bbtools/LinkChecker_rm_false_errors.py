@@ -130,7 +130,18 @@ def Checking_on_false_error_list(url, valid, parent, cnx):
 
   return False # may be a error
 
-# ---------------------------------------------------------------------------- #
+
+def Checking_on_warning_error_list(valid) :
+  global warning_list
+
+  for warning_error in warning_list:
+    
+    v_rc = None
+    v_rc = warning_error['valid'].search(valid) 
+    if v_rc != None :
+       return True
+
+  return False
 
 # ---------------------------------------------------------------------------- #
 
@@ -142,6 +153,11 @@ def Checking_on_false_error_list(url, valid, parent, cnx):
 #    Error: 502 Bad Gateway
 #    Error: ReadTimeout:
 #    ConnectionError: ('Connection aborted.
+
+warning_list = [
+    { 'valid': re.compile('^ReadTimeout')
+    },
+]
 
 no_error_list = [
     { 'url'  : re.compile('(doi|aps|stacks.iop).org'),
@@ -227,7 +243,10 @@ def main(filename,home_dir=""):
   
   rc=0 # true error counter 
   frc=0 # false error counter
+  wrc=0 # warning error counter
+
   urls=set()
+
   for child in tree.xpath("/linkchecker/urldata"):
   
     url    = child.find('url')
@@ -295,6 +314,10 @@ def main(filename,home_dir=""):
         frc += 1
         continue
 
+    # check if it's a warning
+    if Checking_on_warning_error_list(valid=valid) :
+        wrc += 1
+
     # found a true error... : reporting on bb
     rc += 1
     name=child.find('name')
@@ -319,7 +342,15 @@ def main(filename,home_dir=""):
     print('---------------------------')
 
   print('false errors found : ',frc,' ( must be : 7 )')
-  return rc
+
+  if rc != 0:
+     if rc - wrc != 0:
+        return 2 # FAILED
+     else:
+        print('warning errors found : ',wrc, ' [probably, these errors are transient...]')
+        return 1 # WARNING
+
+  return 0 # SUCCESS
 
 # ---------------------------------------------------------------------------- #
 
@@ -338,6 +369,7 @@ if __name__ == "__main__":
 
   filename = args.filename
   home_dir = args.home_dir
+  #print(filename, home_dir)
 
   exit_status = main(filename,home_dir)
   sys.exit(exit_status)

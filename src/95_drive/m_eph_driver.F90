@@ -547,18 +547,24 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_path, comm)
+   if (dtset%prtvol > 10) dvdb%debug = .True.
+   ! This to symmetrize the DFPT potentials.
+   dvdb%symv1 = dtset%symv1scf > 0
+
    ! Set dielectric tensor, BECS and has_dielt_zeff flag that
    ! activates automatically the treatment of the long-range term in the Fourier interpolation
-   ! of the DFPT potentials except when dipdip == 0
+   ! of the DFPT potentials except when dvdb_add_lr == 0
    dvdb%add_lr_part = .False.
    if (iblock /= 0) then
      dvdb%dielt = dielt
      dvdb%zeff = zeff
      dvdb%has_dielt_zeff = .True.
-     dvdb%add_lr_part = .True.; if (dtset%dvdb_add_lr == 0)  dvdb%add_lr_part = .False.
-     !if (dtset%dipdip /= 0) then
-     !  call wrtout(std_out, " Setting has_dielt_zeff to True. Long-range term will be substracted in Fourier interpolation.")
-     !end if
+     dvdb%add_lr_part = .True.
+     if (dtset%dvdb_add_lr == 0)  then
+       dvdb%add_lr_part = .False.
+       call wrtout([std_out, ab_out], &
+         " WARNING: Setting add_lr_part to False. Long-range term will be substracted in Fourier interpolation.")
+     end if
    end if
 
    if (my_rank == master) then
@@ -588,7 +594,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (dtset%eph_frohlichm /= 0) then
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, dtfil%fnameabi_efmas, xmpi_comm_self))
-   call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)
+   call efmas_ncread(efmasdeg, efmasval, kpt_efmas, ncid)
    NCF_CHECK(nf90_close(ncid))
 #else
    MSG_ERROR("netcdf support not enabled")
@@ -611,9 +617,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! EPH routines should not access them after this point.
  ! TODO: In principle I should deallocate also dtset(idtset) in driver but I have to
  ! disable the output of these arrays in outvars...
- if (dtset%eph_task /= 6) then
-   call dtset_free_nkpt_arrays(dtset)
- end if
+ if (dtset%eph_task /= 6) call dtset_free_nkpt_arrays(dtset)
 
  select case (dtset%eph_task)
  case (0)
@@ -622,17 +626,17 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (1)
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (2, -2)
    ! Compute electron-phonon matrix elements
    call eph_gkk(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (3)
    ! Compute phonon self-energy
    call eph_phpi(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (4, -4)
    ! Compute electron self-energy (phonon contribution)
@@ -640,8 +644,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
    if (dtset%eph_task == -4) then
-     call wrtout(std_out, "Calling transport routine after sigmaph run...", do_flush=.True.)
-     !call transport(dtfil, dtset, ebands, cryst, comm)
+     call wrtout(std_out, " Calling transport routine after sigmaph run...", do_flush=.True.)
+     call transport(dtfil, dtset, ebands, cryst, comm)
    end if
 
  case (5, -5)
@@ -656,6 +660,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (7)
    ! Compute phonon limited transport from SIGEPH file
    call transport(dtfil, dtset, ebands, cryst, comm)
+
+ !case (15)
+   !call dvdb%ftinterp_setup(ngqpt, nqshift, qshift, nfft, ngfft, outwr_path, comm_rpt)
+   !call dvdb%write_real_space(dtset, cryst, comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

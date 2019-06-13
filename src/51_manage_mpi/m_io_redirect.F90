@@ -70,8 +70,6 @@ contains
 !!
  subroutine localfilnam(commspace,commspace1,commworld,filnam,nam,nfil)
 
- implicit none
- 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: commspace,commspace1,commworld,nfil
@@ -138,8 +136,6 @@ contains
 !! SOURCE
 !!
  subroutine localwrfile(commspace,ii,nfil,paral,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: commspace,ii,nfil,paral,prtvol
@@ -213,8 +209,6 @@ contains
 !!
  subroutine localrdfile(commspace,commworld,compute_all,nfil,paral,prtvol,dyn)
 
- implicit none
- 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: commspace,commworld,nfil,paral,prtvol
@@ -319,8 +313,6 @@ contains
 !!
  subroutine localredirect(commspace,commworld,nfil,paral,prtvol)
 
- implicit none
- 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: commspace,commworld,nfil,paral,prtvol

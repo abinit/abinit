@@ -935,8 +935,8 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
    if (Er%mqmem>0) then
      ! In-core solution.
-     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb]'
-     call wrtout(std_out,msg,'PERS')
+     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
+     call wrtout(std_out,msg)
      ABI_MALLOC_OR_DIE(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
 
      if (iomode == IO_MODE_MPI) then
@@ -1470,7 +1470,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ! * Initialize distribution table for frequencies.
    ABI_MALLOC(istart,(nprocs))
    ABI_MALLOC(istop,(nprocs))
-   call xmpi_split_work2_i4b(nomega,nprocs,istart,istop,msg,ierr)
+   call xmpi_split_work2_i4b(nomega,nprocs,istart,istop)
    omega_distrb(:)=xmpi_undefined_rank
    do irank=0,nprocs-1
      i1 = istart(irank+1)
@@ -2715,7 +2715,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  real(dp) :: qpg2_nrm
  complex(dpc) :: ph_mqbzt
  logical :: is_qeq0,isirred
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: umklp(3)
@@ -2735,7 +2735,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
 
  nprocs = xmpi_comm_size(comm)
- call xmpi_split_work(npw,comm,my_gstart,my_gstop,msg,ierr)
+ call xmpi_split_work(npw,comm,my_gstart,my_gstop)
 
  call get_bz_item(Qmesh,iq_bz,qpt_bz,iq_ibz,isym_q,itim_q,ph_mqbzt,umklp,isirred)
 
