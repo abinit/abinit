@@ -162,7 +162,8 @@ module m_chebfiwf
  
   !Variables
   nline=dtset%nline
- 
+  
+   
   !Depends on istwfk
   if ( l_istwf == 2 ) then ! Real only
     ! SPACE_CR mean that we have complex numbers but no re*im terms only re*re
@@ -234,15 +235,46 @@ module m_chebfiwf
     if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2 
        
   end if
-     
+  
+  !if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 1) then   
+    !print *, "EIG", eig
+    !print *, "nband", nband
+    !print *, "npw", npw
+  !end if
+  
+  !call xmpi_barrier(l_mpi_enreg%comm_bandspinorfft)
+  
+  !stop
   !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
   ! Trick with C is to change rank of arrays (:) to (:,:)
+    
   cptr = c_loc(eig)			
   call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
   call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1)
+  !if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 1) then  
+    !print *, "EIG FROM OUT", l_nband_filter
+    !print *, eig
+    !print *, "XGEIGEN print"
+    !call xgBlock_print(xgeigen, 200+xmpi_comm_rank(xmpi_world))
+  !end if
   !print *, "nband", nband
   !stop
  
+!  if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 0) then  
+!      !print *, "BEGIN" 
+!      stop
+!      print *, "eig", eig
+!      !print *, "eig_ptr", eig_ptr
+!      !call xgBlock_print(xgeigen, 6)
+!      print *, "rank", xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
+!      print *, "nband", nband
+!      call xgBlock_print(xgeigen, 6)
+!  end if
+  
+  !call xmpi_barrier(l_mpi_enreg%comm_bandspinorfft)
+  
+  !stop
+  
   !call xg_init(xgresidu,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
   ! Trick the with C to change rank of arrays (:) to (:,:)
   cptr = c_loc(resid)		
@@ -271,12 +303,23 @@ module m_chebfiwf
   !###########################################################################
   !################    RUUUUUUUN    ##########################################
   !###########################################################################
+  print *, "BEFORE"
   call xg_getPointer(xgx0)   
+  !stop
   ! Run chebfi
   call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu) 
 
-  call xgBlock_setBlock(xgx0, HELPER, 1, 2, 5) 
-  call xgBlock_print(HELPER, 201) 
+  if (xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft) == 0) then
+    print *, "xgx0 AFTER"
+    call xg_getPointer(xgx0) 
+  end if  
+  !stop
+  
+  !call debug_helper_linalg(xgx0, l_mpi_enreg%comm_bandspinorfft, l_icplx*l_npw*l_nspinor, nband, 1, 1) !MPI 1,2 OK
+  !stop
+  
+  !call xgBlock_setBlock(xgx0, HELPER, 1, 2, 5) 
+  !call xgBlock_print(HELPER, 201) 
   !stop
   !stop
   ! Free preconditionning since not needed anymore
@@ -599,11 +642,11 @@ module m_chebfiwf
     integer :: DEBUG_COLUMNS = 4
 
 !    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-!    call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+!    call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)) 
 ! 
-!    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc
+!    if (xmpi_comm_size(comm) == 1) then !only one MPI proc
 !      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
+!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)+1) 
 !    end if
     
     if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
@@ -622,5 +665,95 @@ module m_chebfiwf
     !print *, "debugBlock%cols", cols(debugBlock)
 
   end subroutine debug_helper
+  
+  subroutine debug_helper_linalg(debugBlock, comm, spacedim, neigenpairs, set_option, first_row)
+      
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(integer) , intent(in) :: comm
+    type(integer), intent(in) :: spacedim
+    type(integer), intent(in) :: neigenpairs
+    type(integer) , intent(in) :: set_option
+    type(integer), intent(in) :: first_row
+    type(xgBlock_t) :: HELPER
+    
+    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 20
+    
+    call xmpi_barrier(comm) 
+    
+    !print *, "chebfi%bandpp", chebfi%bandpp
+    !print *, "spacedim", spacedim
+    !stop
+    !stop
+    
+    if (set_option == 0) then
+      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+        ! *, "PISE 1"
+        call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 200+xmpi_comm_rank(comm)) 
+      
+        call xgBlock_setBlock(debugBlock, HELPER, neigenpairs/2+1, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 200+xmpi_comm_rank(comm)+1) 
+      else
+        !print *, "2222222222222222222"
+        !print *, "xmpi_comm_rank(comm)", xmpi_comm_rank(comm)
+        if (xmpi_comm_rank(comm) == 0) then
+          call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
+          call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm))
+        
+          call xgBlock_setBlock(debugBlock, HELPER, neigenpairs/2+1, DROWS, DCOLS) 
+          call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)+1)  
+        end if
+      end if
+    else
+      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+        print *, "STAMPAM MPI1"
+        print *, "spacedim/2", spacedim/2
+        call xgBlock_setBlock1(debugBlock, HELPER, spacedim/2, FCOL, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 100) 
+      
+        call xgBlock_setBlock1(debugBlock, HELPER, spacedim/2+1, FCOL, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 101)
+        !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
+        
+        call xgBlock_setBlock1(debugBlock, HELPER, spacedim/2+2, FCOL, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 110) 
+      
+        call xgBlock_setBlock1(debugBlock, HELPER, spacedim/2+3, FCOL, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 111)
+         
+      else
+        !!TODO STOP DEBUGGING PARTS OF AX AND TRY TO PRINT THE SUM
+        !print *, "STAMPAM MPI2"
+        !print *, "rank, spacedim", xmpi_comm_rank(comm), spacedim
+        if (xmpi_comm_rank(comm) == 0) then
+          !print *, "spacedim-1", spacedim-1
+          !stop
+          
+          call xgBlock_setBlock1(debugBlock, HELPER, spacedim-1, FCOL, DROWS, DCOLS) 
+          call xgBlock_print(HELPER, 200)
+          
+          !print *, "spacedim", spacedim
+          !print *, "FCOL", FCOL
+          !print *, "00000000000000000000000000000000000000000000000000"
+          
+          
+          call xgBlock_setBlock1(debugBlock, HELPER, spacedim, FCOL, DROWS, DCOLS) 
+          call xgBlock_print(HELPER, 201)  
+        else !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
+          !print *, "FROW, FCOL, DROWS, DCOLS", FROW, FCOL, DROWS, DCOLS
+          call xgBlock_setBlock1(debugBlock, HELPER, FROW, FCOL, DROWS, DCOLS) 
+          call xgBlock_print(HELPER, 210)
+        
+          call xgBlock_setBlock1(debugBlock, HELPER, FROW+1, FCOL, DROWS, DCOLS) 
+          call xgBlock_print(HELPER, 211)
+        end if
+      end if
+    end if
+    
+    !print *, "debugBlock%rows", rows(debugBlock)
+    !print *, "debugBlock%cols", cols(debugBlock)
+    call xmpi_barrier(comm)
+
+  end subroutine debug_helper_linalg
   
 end module m_chebfiwf

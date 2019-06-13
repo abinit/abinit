@@ -8,7 +8,7 @@
 # npkpt 1 npband 16 npfft 4  # 64 MPI processes -2
 # npkpt 1 npband 16 npfft 8  # 128 MPI processes
 paral_kgb 1
-npband 1
+npband 4
 npfft 1
 #bandpp 2
 

@@ -402,6 +402,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
          else
            !print *, "CHEBFI2 CALL"
+           !print *, "nband_k", nband_k
+           !print *, eig_k
+           !stop
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k) 
          end if            

@@ -470,13 +470,17 @@ module m_xg
     type(c_ptr) :: cptr
 
     fullsize = size(array)
+    !print *, "MAPSIZE", fullsize
     select case (space)
     case ( SPACE_R,SPACE_CR )
       if ( fullsize < cols*rows .or. mod(fullsize,rows) /= 0) then
         MSG_ERROR("Bad size for real array")
       end if
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
+      !print *, "array", array
       call c_f_pointer(cptr,xgBlock%vecR,(/ rows, cols /))
+      !print *, "XGVEC"
+      !print *, xgBlock%vecR
     xgBlock%trans = 't'
     case ( SPACE_C )
       if ( fullsize/2 < cols*rows .or. mod(fullsize/2,rows) /= 0) then
@@ -493,7 +497,7 @@ module m_xg
     xgBlock%cols = cols
     xgBlock%normal = 'n'
     if ( present(comm) ) xgBlock%spacedim_comm = comm
-
+    print *, "MAPIRANO"
   end subroutine xgBlock_map
 !!***
 
@@ -2597,8 +2601,13 @@ module m_xg
     case (SPACE_R,SPACE_CR)
       write(ccols,'(i4)') xgBlock%cols
       fstring = '(1x,'//trim(adjustl(ccols))//'ES22.14)'
+      !print *, "xgBlock%rows", xgBlock%rows
+      !print *, "xgBlock%cols",  xgBlock%cols
+      !write(outunit,*) xgBLock%vecR
+      !print *, xgBLock%vecR
       do i = 1, xgBlock%rows
-          write(outunit,fstring) (/ (xgBlock%vecR(i,j), j = 1, xgBlock%cols) /)
+          !print *, xgBlock%vecR(i,1)
+          write(outunit,*) (/ (xgBlock%vecR(i,j), j = 1, xgBlock%cols) /)
       end do
     case (SPACE_C)
       write(ccols,'(i4)') xgBlock%cols

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Jun 2019.
-- ( at 17h17 )
+.Starting date : Thu 13 Jun 2019.
+- ( at 18h04 )
   
 - input  file    -> t03.in
 - output file    -> t03_x.out
@@ -33,14 +33,13 @@
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       3   xclevel =       1
 -    mband =         192        mffmem =           1         mkmem =           1
-       mpw =        1944          nfft =       64000          nkpt =           1
-Pmy_natom=        16
+       mpw =        3887          nfft =       64000          nkpt =           1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        45    nfftf =     91125
 ================================================================================
-P This job should need less than                      55.887 Mbytes of memory.
+P This job should need less than                      83.897 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      5.697 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
+_ WF disk file :     11.390 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
  
 --------------------------------------------------------------------------------
@@ -57,7 +56,7 @@ _ WF disk file :      5.697 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -          iomode           1
             acell      1.5340000000E+01  1.5340000000E+01  1.5340000000E+01 Bohr
               amu      1.37327000E+02
-           bandpp          96
+           bandpp         192
       chksymbreak           0
      densfor_pred           6
              ecut      8.00000000E+00 Hartree
@@ -71,7 +70,6 @@ P           mkmem           1
             ngfft          40      40      40
           ngfftdg          45      45      45
              nkpt           1
--          npband           2
             nstep         400
              nsym          48
            ntypat           1
@@ -246,7 +244,7 @@ P           mkmem           1
  
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    2
+-   nproc =    1
  
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -294,8 +292,13 @@ P           mkmem           1
    5.70955898E+05                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
  
-_setup2: Arith. and geom. avg. npw (full set) are    1944.000    1944.000
+_setup2: Arith. and geom. avg. npw (full set) are    3887.000    3887.000
  
 ================================================================================
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2
+ ETOT  1  -790.61559369086    -7.906E+02 5.941E+00 1.131E+01
+ ETOT  2  -798.88011571306    -8.265E+00 8.859E+00 1.582E+00
+ ETOT  3  -800.01224795319    -1.132E+00 5.804E-01 3.816E-01
+ ETOT  4  -800.04634455182    -3.410E-02 1.100E+01 2.911E-02
+ ETOT  5  -800.35537922208    -3.090E-01 1.747E-01 1.050E-01

@@ -1,2 +1,8 @@
-12.05user 0.16system 0:12.35elapsed 98%CPU (0avgtext+0avgdata 230116maxresident)k
-5408inputs+0outputs (10major+64774minor)pagefaults 0swaps
+forrtl: error (69): process interrupted (SIGINT)
+Image              PC                Routine            Line        Source             
+libifcoremt.so.5   00007F3367E8E555  for__signal_handl     Unknown  Unknown
+libpthread-2.27.s  00007F336CAF0890  Unknown               Unknown  Unknown
+libmkl_avx.so      00007F335EA6933B  mkl_blas_avx_zgem     Unknown  Unknown
+Command exited with non-zero status 1
+157.87user 0.83system 2:38.07elapsed 100%CPU (0avgtext+0avgdata 347748maxresident)k
+0inputs+64outputs (0major+286517minor)pagefaults 0swaps
