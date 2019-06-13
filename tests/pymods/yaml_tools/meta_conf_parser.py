@@ -86,6 +86,11 @@ class Constraint(object):
             Return True if the constraint is verified.
         '''
         # apply to floats at least
+        if getattr(ref, '_not_available', False):
+            return FailDetail(
+                'This constraint was to be applied to a document that is not'
+                ' available (check warnings).'
+            )
         if self.handle_undef:
             if isinstance(ref, (float, complex)) and self._apply_to(self, 1.0):
                 if conf.get_param('allow_undef'):

@@ -6917,7 +6917,10 @@ computation of the atomic forces and positions between t=0 and t=lotf_nitex.
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]]
 
-  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to ionmov=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
+  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to [[ionmov]]=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
+Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via short $NVE$ trajectories (ten [[ionmov]]=24 steps in current implementation). 
+ The initial momenta for each trial are randomly sampled from Boltzmann distribution, and the final trajectory state is either accepted or rejected based on the Metropolis criterion.
+ Such strategy allows to simultaneously update all reduced coordinates, achieve higher acceptance ratio than classical Metropolis Monte Carlo and better sampling efficiency for shallow energy landscapes [[cite:Prokhorenko2018]].
 **Purpose:** Monte Carlo sampling
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
@@ -19588,6 +19591,20 @@ A q-point is included in the sum if the tetrahedron weights for phonon absorptio
 ),
 
 Variable(
+    abivarname="eph_phrange",
+    varset="eph",
+    topics=['SelfEnergy_expert'],
+    vartype="real",
+    defaultval=[0, 0],
+    dimensions=[2],
+    mnemonics="EPH PHonon mode RANGE.",
+    text=r"""
+This variable is used to select the range of phonon modes included in the computation of the phonon self-energy.
+By default [0,0] all phonon modes are included, otherwise only the modes with index between the first and second entries are included.
+""",
+),
+
+Variable(
     abivarname="eph_restart",
     varset="eph",
     topics=['ElPhonInt_basic'],
@@ -19699,9 +19716,52 @@ Variable(
     defaultval=0,
     mnemonics="EPH Number of Processors for Perturbations, Q-points, Bands, K-points, Spin.",
     text=r"""
-This variable defined the MPI grid of processors used for EPH calculations.
-By default, the code will generate this grid automatically using the total number of processors 
-and the dimensions of the run computed at runtime.
+This variable defines the Cartesian grid of MPI processors used for EPH calculations.
+If not specified in the input, the code will generate this grid automatically using the total number of processors 
+and the basic dimensions of the job computed at runtime.
+At present (|today|), this variable is supported only in the calculation of the e-ph self-energy.
+
+Preliminary considerations:
+
+EPH calculations require very dense samplings of the BZ to converge and the memory requirements
+increase quickly with the number of k-points, q-points and [[natom]]. 
+The EPH code can MPI-distribute the most important datastructures but non all the MPI-levels 
+present the same scalability and the same parallel efficiency. 
+Besides the maximum number of MPI processes that can be used for the different MPI-levels is related 
+to the basic dimensions of the calculation.
+
+In what follows, we explain briefly the pros/cons of the different MPI-levels, then we specialize 
+the discussion to the different calculations activated by [[eph_task]].
+
+The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
+needed for the DFPT potentials.
+The maximum valus for **np** is 3 * [[natom]] and the workload is equally distributed provided **np** 
+divides 3 * [[natom]] equally. 
+Using **np** == [[natom]] usually gives good parallel efficiency.
+
+The parallelization over bands (**nb**) has limited scalability but it allows one to reduce the memory
+allocated for the wavefunctions, especially when we have to sum over empty states.
+
+[[eph_task]] = +4
+:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
+    Parallelization over bands allows one to reduce the memory needed for the wavefunctions but
+    this level is less efficient than the parallelization over q-points and perturbations.
+    To avoid load and memory imbalance, **nb** should divide [[nband]].
+    We suggest to increase the number of procs for bands until the memory allocated for the wavefunctions
+    decreases to a reasonable level and then use the remaining procs for **nq** and **np** in this order.
+
+[[eph_task]] = -4
+:   Parallelization over k-points and spin is not yet implemented hence use 1 for these entries.
+    The number of bands in the self-energy sum is usually small so it does not make sense to
+    parallelize along this dimension. The parallelization over q-points seem to be more efficient than
+    the one over perturbations although it introduces some load imbalance because, due to memory reasons, 
+    the code distributes the q-points in the IBZ (nqibz) instead of the q-points in the full BZ (nqbz).
+    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$ 
+
+
+!!! important
+
+    The total number of MPI processes must be equal to the product of the different entries.
 """,
 ),
 

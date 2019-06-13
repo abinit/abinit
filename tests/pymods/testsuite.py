@@ -35,7 +35,7 @@ from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher,
                     Editor)
 from .xyaptu import xcopier
 from .devtools import NoErrorFileLock, makeunique
-from .memprof import AbimemParser
+from .memprof import AbimemFile
 from .termcolor import cprint
 
 from .fldiff import Differ as FlDiffer
@@ -557,7 +557,7 @@ class AbinitTestInfo(object):
         #     raise TestInfoParserError(err_msg)
 
         # Add the executable name to the list of keywords.
-        self.add_keywords(self.executable)
+        self.add_keywords([self.executable])
 
     @lazy__str__
     def __str__(self): pass
@@ -2072,10 +2072,10 @@ class BaseTest(object):
                 self.cprint("Found %s abimem files" % len(paths))
                 # abimem_retcode = 0
                 for path in paths:
-                    parser = AbimemParser(path)
-                    parser.find_memleaks()
-                    # if rc: parser.show_errors()
-                    # abimem_retcode += rc
+                    memfile = AbimemFile(path)
+                    memfile.find_memleaks()
+                    #if rc: parser.show_errors()
+                    #abimem_retcode += rc
 
             # if False and kwargs.get("etsf_check", False):
             if kwargs.get("etsf_check", False):
@@ -3532,7 +3532,7 @@ class AbinitTestSuite(object):
                 # remove this to let python garbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security
                 # reasons)
-                del self._processes
+                self._processes = []
                 task_q.close()
                 res_q.close()
 
@@ -3715,7 +3715,7 @@ class AbinitTestSuite(object):
         for p in self._processes:
             p.terminate()
         self._kill_me = True
-        del self._processes
+        self._processes = []
 
     @staticmethod
     def _pyhtml_table_section(status):

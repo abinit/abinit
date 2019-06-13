@@ -2818,7 +2818,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 
 !Local variables-------------------------------
 !scalars
- integer :: ikpt,jkpt,kkpt,new, ik
+ integer :: irank,ikpt,jkpt,kkpt,new, ik
  real(dp) :: res
  type(kptrank_type) :: kptrank_t
 !arrays
@@ -2831,11 +2831,12 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 
  ik=1
  do ikpt=1,nkpt
+   call get_rank_1kpt(kptns(:,ikpt),irank,kptrank_t)
 !  add kpt to FS kpts, in order, increasing z, then y, then x !
    new = 1
 !  look for position to insert kpt ikpt among irredkpts already found
    do jkpt=1,ik-1
-     if (kptirrank(jkpt) > kptrank_t%rank(ikpt)) then
+     if (kptirrank(jkpt) > irank) then
 !      shift all the others up
        do kkpt=ik-1,jkpt,-1
          kptirr(:,kkpt+1) = kptirr(:,kkpt)
@@ -2847,7 +2848,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
        call wrap2_pmhalf(kptns(2,ikpt),kptirr(2,jkpt),res)
        call wrap2_pmhalf(kptns(3,ikpt),kptirr(3,jkpt),res)
 
-       kptirrank(jkpt) = kptrank_t%rank(ikpt)
+       kptirrank(jkpt) = irank
        FSirredtoGS(jkpt) = ikpt
        new=0
        exit
@@ -2858,7 +2859,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
      call wrap2_pmhalf(kptns(1,ikpt),kptirr(1,ikpt),res)
      call wrap2_pmhalf(kptns(2,ikpt),kptirr(2,ikpt),res)
      call wrap2_pmhalf(kptns(3,ikpt),kptirr(3,ikpt),res)
-     kptirrank(ik) = kptrank_t%rank(ikpt)
+     kptirrank(ik) = irank
      FSirredtoGS(ik) = ikpt
    end if
    ik=ik+1

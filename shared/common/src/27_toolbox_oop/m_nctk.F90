@@ -679,6 +679,10 @@ integer function nctk_open_read(ncid, path, comm) result(ncerr)
  else
    ncerr = nf90_open(path, mode=nf90_nowrite, ncid=ncid)
    NCF_CHECK_MSG(ncerr, sjoin("opening file:", path))
+   !if (ncerr /= NC_EHDFERR) then
+   !  ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4), nf90_nowrite),&
+   !                    comm=comm, info=xmpio_info, ncid=ncid)
+   !end if
    if (nprocs > 1) then
      ncerr = nf90_einval
      MSG_WARNING("netcdf without MPI-IO support with nprocs > 1! Will abort in the caller")
