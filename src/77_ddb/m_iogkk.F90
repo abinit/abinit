@@ -147,13 +147,8 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  use_sym   = 1
  nsppol    = elph_ds%nsppol
  nbranch   = elph_ds%nbranch
- if (ep_prt_yambo==1) then
-   nFSband = nband
-   minFSband = 1
- else
-   nFSband   = elph_ds%nFSband
-   minFSband = elph_ds%minFSband
- end if
+ nFSband   = elph_ds%nFSband
+ minFSband = elph_ds%minFSband
 
 !init values for parallelization
  comm = xmpi_world
