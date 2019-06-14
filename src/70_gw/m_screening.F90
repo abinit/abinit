@@ -1768,46 +1768,22 @@ CASE(6)
    chi0_save = chi0 ! a copy of chi0
    fxc_head = czero; vfxc_boot = czero;
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
-   !chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
+   chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ',chi00_head
    call wrtout(std_out,msg,'COLL')
-
    io = 1 ! static
-   call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
+   call rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),my_nqlwl,dim_wing,&
 &    chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
    epsm_lf(1,:) = tmp_lf
-
-   ! chi(RPA) = chi0 * (1 - chi0 * v_c)^-1
-   chi0 = chi0_save
-   do ig2=2,npwe
-     do ig1=2,npwe
-       chi0(ig1,ig2,io)=-vc_sqrt(ig1)*chi0(ig1,ig2,io)*vc_sqrt(ig2)
-     end do
-     chi0(ig2,ig2,io)=one+chi0(ig2,ig2,io)
-   end do
-   chi0(1,:,io) = czero; chi0(:,1,io) = czero; chi0(1,1,io) = one
-   chi0_tmp = chi0(:,:,io)
-   call xginv(chi0_tmp,npwe,comm=comm) 
-   chi0 = chi0_save
-   chi0_tmp = MATMUL(chi0(:,:,io), chi0_tmp(:,:)) ! chi(RPA)
-   do ig1=1,npwe
-     chi0_tmp(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*chi0_tmp(ig1,:)
-   end do 
-   !call xginv(chi0_tmp,npwe,comm=comm) ! chi(RPA)^-1
-   !vfxc_boot = chi0_tmp/epsm_lf(1,1)
-   !
-   !vfxc_boot(1,1) = chi0_tmp(1,1)/epsm_lf(1,1)
-   vfxc_boot(1,1) = one/chi0_tmp(1,1)/epsm_lf(1,1)
-   !@WC: alternatively:
-   !chi00_head = chi0(1,1,io)*vc_sqrt(1)**2
-   !vfxc_boot(1,1) = one/chi00_head/epsm_lf(1,1)
+   write(msg,'(a,2f10.6)') ' -> eps(mac)_rpa:   ',epsm_lf(1,1)
+   call wrtout(std_out,msg,'COLL')
+   vfxc_boot(1,1) = one/chi00_head/epsm_lf(1,1)
    fxc_head = vfxc_boot(1,1)
+   write(msg,'(a,2f10.6)') ' -> v^-1*fxc(head): ',fxc_head
+   call wrtout(std_out,msg,'COLL')
    do ig1=1,npwe
      vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
    end do
-   write(msg,'(a,2f10.6)') ' -> v^-1*fxc(head): ',fxc_head
-   call wrtout(std_out,msg,'COLL')
-
    chi0 = chi0_save
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
