@@ -409,14 +409,31 @@ module m_chebfi2
     
     !stop
     
-    if (xmpi_comm_rank(chebfi%spacecom) == 1) then
-      call xgBlock_print(chebfi%eigenvalues, 6)
-    end if
+    !if (xmpi_comm_rank(chebfi%spacecom) == 1) then
+      !call xgBlock_print(chebfi%eigenvalues, 6)
+    !end if
     
-    call xmpi_barrier(chebfi%spacecom)
+    !call xmpi_barrier(chebfi%spacecom)
     
     !stop
-    
+!  call omp_set_num_threads(4)
+
+!  print *, "Native", omp_get_num_threads()
+!  write(*,*) "Num threads", OMP_GET_MAX_THREADS()
+!  WRITE(*,*) "Num procs", omp_get_num_procs()
+!  
+!  write ( *, * ) 'A sequential hello to you!'
+!  !$omp parallel
+!  print *, "Native", omp_get_num_threads()
+!  write ( *, * ) ' Parallel hello''s to you!'
+!  !$omp end parallel
+!  
+!  stop
+!    print *, "Native", omp_get_num_threads()
+!    print *, "Current", xomp_get_num_threads(open_parallel=.true.)
+!    write(*,*) "Num threads", OMP_GET_MAX_THREADS()
+!    WRITE(*,*) "Num procs", omp_get_num_procs()
+!    stop
     
     if (chebfi%paral_kgb == 0) then
       allocate(nline_bands(neigenpairs))
