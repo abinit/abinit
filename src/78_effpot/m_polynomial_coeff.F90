@@ -3224,14 +3224,14 @@ end subroutine polynomial_coeff_getOrder1
 !! polynomial_coeff_getNorder 
 !!
 !! SOURCE
-subroutine polynomial_coeff_getEvenAnhaStrain(strain_terms,crystal,ncoeff_out,power_strain,comm)
+subroutine polynomial_coeff_getEvenAnhaStrain(strain_terms,crystal,irred_ncoeff,power_strain,comm)
 
  implicit none
 
 !Arguments ------------------------------------
 type(polynomial_coeff_type),allocatable,intent(inout) :: strain_terms(:)
 type(crystal_t), intent(inout) :: crystal
-integer,intent(out) :: ncoeff_out 
+integer,intent(out) :: irred_ncoeff 
 integer,intent(in) :: power_strain(2)
 integer,intent(in) :: comm
 !scalars
@@ -3242,7 +3242,7 @@ integer :: ncoeff
 integer :: power_strph
 integer :: option 
 integer :: icoeff1,icoeff2,start
-integer :: irred_ncoeff
+integer :: ncoeff_out 
 character(len=fnlen) :: fname
 logical,allocatable :: same(:)
 type(polynomial_coeff_type),allocatable :: strain_terms_tmp(:)
@@ -3260,7 +3260,7 @@ sc_size = (/1,1,1/)
 
 call polynomial_coeff_getNorder(strain_terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_strain,& 
 &                               power_strph,option,sc_size,comm,anharmstr=.true.,spcoupling=.false.,&
-&                               only_odd_power=.false.,only_even_power=.true.,verbose=.true.) 
+&                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.) 
 
 
 !TODO Probably put in one routine
