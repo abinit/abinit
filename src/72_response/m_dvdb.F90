@@ -2073,7 +2073,11 @@ pcase_loop: &
    if (pflag(idir, ipert) /= 0) cycle ! This pcase is available
 
    ! Find symmetry which links to the perturbation requested (pcase)
-   call find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt)
+   call find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt, allow_g0=.false.)
+   if (isym_eq == -1) then
+     call find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt, allow_g0=.true.)
+   end if
+
    if (isym_eq == -1) then
      if (debug) write(std_out,*)"Cannot find isym eq for idir, ipert:", idir,ipert
      cycle pcase_loop
@@ -2101,13 +2105,13 @@ pcase_loop: &
    workg = zero
 
    ! Reconstruct DFPT potential. Final results stored in v1g.
-   !write(std_out,*)"Reconstructing idir, ipert",idir,ipert
+   write(std_out,*)"Reconstructing idir:", idir, ", ipert:", ipert
    v1g = zero; cnt = 0
    do idir_eq=1,3
      if (symrec_eq(idir, idir_eq) == 0) cycle
      cnt = cnt + 1
      pcase_eq = idir_eq + (ipert_eq-1)*3
-     if (debug) write(std_out,*)"idir_eq, ipert_eq, tsign",idir_eq, ipert_eq, tsign
+     if (debug) write(std_out,*) "idir_eq: ", idir_eq, ", ipert_eq: ", ipert_eq, ", tsign: ", tsign
 
      if (pflag(idir_eq, ipert_eq) == 0) then
        write(msg, *)"pflag for idir_eq, ipert_eq", idir_eq, ipert_eq, "cannot be zero"
@@ -2117,6 +2121,7 @@ pcase_loop: &
      do ispden=1,nspden
        ! Get symmetric perturbation in G-space in workg_eq array.
        call fourdp(cplex,workg_eq,v1scf(:,ispden,pcase_eq),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
+       !call zerosym(workg_eq,cplex,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
 
        !call rotate_fqg(itirev_eq,symrec_eq,qpt,tnon,ngfft,nfft,nspden,workg_eq,workg)
        ind1=0
@@ -2183,7 +2188,7 @@ pcase_loop: &
        v1g(:,:,ispden) = v1g(:,:,ispden) + workg * symrec_eq(idir, idir_eq)
      end do ! ispden
    end do ! idir_eq
-   if (debug) write(std_out,*)"Used ",cnt," equivalent perturbations"
+   !if (debug) write(std_out,*)"Used ",cnt," equivalent perturbations"
 
    ! Get potential in real space (results in v1scf)
    do ispden=1,nspden
@@ -2194,7 +2199,7 @@ pcase_loop: &
      ! we want q so we have to multiply by exp(iG0r) in real space.
      if (any(g0_qpt /= 0)) then
        ABI_CHECK(cplex==2, "cplex == 1")
-       if (debug) write(std_out,*)"Found not zero g0_qpt for idir, ipert:",idir,ipert
+       if (debug) write(std_out,*)"Found not zero g0_qpt", g0_qpt ! for idir: ", idir, ", ipert: ", ipert
        call times_eigr(g0_qpt, ngfft, nfft, 1, v1scf(:,ispden,pcase))
      end if
    end do
@@ -2258,24 +2263,27 @@ end subroutine v1phq_complete
 !!
 !! SOURCE
 
-subroutine find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt)
+subroutine find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt, allow_g0)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: idir,ipert
  integer,intent(out) :: ipert_eq,isym_eq,itirev_eq
  type(crystal_t),intent(in) :: cryst
+ logical,optional :: allow_g0
 !arrays
  integer,intent(in) :: symq(4,2,cryst%nsym),pflag(3,cryst%natom)
  integer,intent(out) :: g0_qpt(3)
 
 !Local variables-------------------------------
 !scalars
+ logical :: do_allow_g0
  integer :: isym,idir_eq,ip,itirev
 
 ! *************************************************************************
 
  isym_eq = -1; ipert_eq = -1
+ do_allow_g0 = .true.; if (present(allow_g0)) do_allow_g0 = allow_g0
 
 symloop: &
  do itirev=1,2
@@ -2285,6 +2293,7 @@ symloop: &
      ! Check that isym preserves the q-point
      !if (symq(4,itirev,isym) /= 1 .or. any(symq(1:3,itirev,isym) /= 0)) cycle
      if (symq(4,itirev,isym) /= 1) cycle ! .or. any(symq(1:3,itirev,isym) /= 0)) cycle
+     if (any(symq(1:3,itirev,isym) /= 0) .and. .not.do_allow_g0) cycle
      g0_qpt = symq(1:3,itirev,isym)
 
      do ip=1,cryst%natom
