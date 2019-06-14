@@ -368,6 +368,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  integer :: iorder, iorder1, iorder2, order,order_start,order_stop, ncombi
  integer :: power_tot,icombi,icombi_start,icombi_stop,jdisp,sec
  integer :: nterm_start,nterm_tot_tmp,nterm2,norder,jdisp1,jdisp2 
+ !1406
+ integer :: ncombi_strain 
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.0001
  real(dp) :: to_divide,divided,divider1,divider2
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
@@ -379,7 +381,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  type(polynomial_coeff_type) :: term
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
- type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:)
+ !1406 strain_temrs_tmp
+ type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:),strain_terms_tmp(:)
 !Logicals
  logical :: need_print_anh=.FALSE.,file_opened,equal_term_done ! MARCUS FOR THE MOMENT PRINT NO FILES
  logical :: had_strain
@@ -501,7 +504,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      terms(iterm) = iterm
      
      ! Let's check if we really want all this mess 
-     ! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all terms of term
+     ! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all equivalent terms of term
      if(term%coefficient > 0 .and. .not. any(mod(term%terms(1)%power_disp(:),2) /= 0))then 
               ! Message to Output 
               write(message,'(3a)' )ch10,&
@@ -510,7 +513,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
               call wrtout(std_out,message,'COLL')
              cycle 
      end if
-     !if term has-strain cycle...strain-phonon-terms have to be implemented 
+     ! Check if term has strain component. 
+     ! If yes filter strain and fit high order atomic displacement terms
      had_strain = .FALSE.
      if(term%terms(1)%nstrain /= 0)then
               ! Message to Output 
@@ -543,6 +547,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      ! get total amount of combinations and combinations per order for the term
      call opt_getCombisforterm(order_start,order_stop,ndisp,ncombi,ncombi_order,comm)
      
+     !1406 TODO get count of high order even anharmonic strain terms and the strain terms itself  
+     call polynomial_coeff_getEvenAnhaStrain(strain_terms_tmp,eff_pot%crystal,ncombi_strain,order_ran,comm)
+
+     !1406 Get new number of combis 
+     ! ncombi = ncombi + ncombi_strain
+
      ! Allocate my_coeffs with ncombi free space to work with 
      nterm_start = eff_pot%anharmonics_terms%ncoeff
      nterm_tot_tmp = eff_pot%anharmonics_terms%ncoeff + ncombi 
@@ -550,12 +560,16 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      
      !Copy original terms to my_coeffs 
      my_coeffs(1:nterm_start) =  eff_pot%anharmonics_terms%coefficients(:)
-     
+     !Copy anharmonic strain terms to begin of new terms
+
      ! Copy current term to the ncombination elemenst a the end in array my_coeffs 
      ! change the value of their coefficient to a start value
      ! The start is estimed to not be larger then half the initial term's value
      ! This is because higher order terms should have smaller coefficients 
      do icombi=1,ncombi
+         !1406 if ncombi < ncombi_strain put anharmonic strain
+         
+         !1406 if ncombi > ncombi_strain put atomic terms
          my_coeffs(nterm_start+icombi) = term
          coeff_ini = abs(my_coeffs(iterm)%coefficient / 2)
          my_coeffs(nterm_start+icombi)%coefficient = coeff_ini
@@ -601,11 +615,10 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
               call wrtout(std_out,message,'COLL')
              ! Check if generated term is not already contained in effpot
              ! If yes cycle 
-             !do jterm=1,nterm
-             !   !write(*,*) 'what is jterm here', jterm 
-             !   exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2))
-             !enddo !jterm
-             !write(*,*) 'exists?', exists 
+             do jterm=1,nterm
+                !write(*,*) 'what is jterm here', jterm 
+                exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2))
+             enddo !jterm
              if(any(exists))then 
                 write(message,'(3a)' )ch10,&
 &               '   ==> Term exists already. We cycle',ch10

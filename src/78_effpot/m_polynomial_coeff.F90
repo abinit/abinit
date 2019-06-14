@@ -57,6 +57,7 @@ module m_polynomial_coeff
  public :: polynomial_coeff_setName
  public :: polynomial_coeff_setCoefficient
  public :: polynomial_coeff_writeXML
+ public :: polynomial_coeff_getEvenAnhaStrain
  private :: computeNorder
  private :: computeCombinationFromList
  private :: getCoeffFromList
@@ -3199,6 +3200,106 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
  ABI_DEALLOCATE(coeffs_tmp)
 
 end subroutine polynomial_coeff_getOrder1
+!!***
+
+!!****f* m_polynomial_coeff/polynomial_coeff_getEvenAnhaStrain
+!!
+!! NAME
+!! polynomial_coeff_getEvenAnhaStrain
+!!
+!! FUNCTION
+!! Get even anharmonic strain terms in defined range of order
+!!
+!! INPUTS
+!!
+!!
+!! OUTPUT
+!! polynomial_coeff<(type(polynomial_coeff_type)>(ncoeff_out) = array of datatype with
+!!                                                              the polynomial_coeff
+!! ncoeff_out = number of coefficients
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!! polynomial_coeff_getNorder 
+!!
+!! SOURCE
+subroutine polynomial_coeff_getEvenAnhaStrain(strain_terms,crystal,ncoeff_out,power_strain,comm)
+
+ implicit none
+
+!Arguments ------------------------------------
+type(polynomial_coeff_type),allocatable,intent(inout) :: strain_terms(:)
+type(crystal_t), intent(inout) :: crystal
+integer,intent(out) :: ncoeff_out 
+integer,intent(in) :: power_strain(2)
+integer,intent(in) :: comm
+!scalars
+!arrays
+!Local variables-------------------------------
+real(dp) :: cutoff 
+integer :: ncoeff
+integer :: power_strph
+integer :: option 
+integer :: icoeff1,icoeff2,start
+integer :: irred_ncoeff
+character(len=fnlen) :: fname
+logical,allocatable :: same(:)
+type(polynomial_coeff_type),allocatable :: strain_terms_tmp(:)
+!scalar
+!arrays
+integer :: sc_size(3) 
+! *************************************************************************
+
+!Initialize Variables for call to polynomial_coeff_getNorder 
+cutoff = zero
+power_strph = zero
+option = 0 
+sc_size = (/1,1,1/)
+
+
+call polynomial_coeff_getNorder(strain_terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_strain,& 
+&                               power_strph,option,sc_size,comm,anharmstr=.true.,spcoupling=.false.,&
+&                               only_odd_power=.false.,only_even_power=.true.,verbose=.true.) 
+
+
+!TODO Probably put in one routine
+!Get irreducible strain
+ABI_ALLOCATE(same,(ncoeff_out))
+same = .false.
+do icoeff1 =1,ncoeff_out
+        start = icoeff1 + 1
+        !write(*,*) "name coeff_",icoeff1,": ", strain_terms_tmp(icoeff1)%name
+        do icoeff2=start,ncoeff_out
+                if(.not.same(icoeff2)) same(icoeff2) = coeffs_compare(strain_terms_tmp(icoeff1),strain_terms_tmp(icoeff2))
+        enddo 
+        !write(*,*) "same(",icoeff1,"): ", same(icoeff1)
+enddo 
+
+irred_ncoeff = ncoeff_out - count(same)
+ABI_DATATYPE_ALLOCATE(strain_terms,(irred_ncoeff))
+
+!Transfer irreducible strain to output array
+icoeff2=0
+icoeff1=0
+do icoeff1=1,ncoeff_out
+        if(.not.same(icoeff1))then 
+                icoeff2=icoeff2 + 1
+                strain_terms(icoeff2) = strain_terms_tmp(icoeff1)
+        endif 
+enddo
+
+!TEST MS write coefficients to xml to check 
+!fname="EvenAnhaStrain.xml"
+!call polynomial_coeff_writeXML(strain_terms,irred_ncoeff,filename=fname,newfile=.true.)
+!write(*,*) "Strain terms to xml done"
+
+
+!Deallocateion
+ABI_DATATYPE_DEALLOCATE(strain_terms_tmp)
+ABI_DEALLOCATE(same)
+
+end subroutine polynomial_coeff_getEvenAnhaStrain 
 !!***
 
 !!****f* m_polynomial_coeff/coeffs_compare
