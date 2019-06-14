@@ -173,7 +173,9 @@ contains
     call this%compute_int_rhocontrib(fermie,1024,tsmear)
     call this%compute_int_energycontrib(fermie,1024,tsmear)
 
-    write(0,*) this%u0, this%int_rhocontrib
+    write(0,*) "U_0 = ", this%u0
+    write(0,*) "Density contribution = ", this%int_rhocontrib
+    write(0,*) "Energy contribution = ", this%int_energycontrib
   end subroutine compute_obj
 
   !!****f* ABINIT/m_hightemp/compute_u0
@@ -338,7 +340,6 @@ contains
     end do
     this%int_energycontrib=simpson(step,values)
 
-    write(0,*) this%int_energycontrib
   end subroutine compute_int_energycontrib
 
   ! *********************************************************************
