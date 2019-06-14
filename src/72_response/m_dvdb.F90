@@ -53,7 +53,7 @@ module m_dvdb
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
- use m_fft,           only : fourdp
+ use m_fft,           only : fourdp,zerosym
  use m_crystal,       only : crystal_t, crystal_print
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
  use m_spacepar,      only : symrhg, setsym
@@ -2088,7 +2088,6 @@ pcase_loop: &
 
    ! Phase due to L0 + R^{-1}tau
    l0 = cryst%indsym(1:3,isym_eq,ipert)
-   call mati3inv(symrel_eq, symm); symm = transpose(symm)
 
    tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_eq))
    has_phase = any(abs(tnon) > tol12)
@@ -2188,6 +2187,7 @@ pcase_loop: &
 
    ! Get potential in real space (results in v1scf)
    do ispden=1,nspden
+     !call zerosym(v1g(:,:,ispden),cplex,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      call fourdp(cplex,v1g(:,:,ispden),v1scf(:,ispden,pcase),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
 
      ! IS(q) = q + G0
@@ -5280,7 +5280,7 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
  my_rank = xmpi_comm_rank(comm)
 
  dvdb = dvdb_new(dvdb_path, comm)
- dvdb%debug = .True.
+ dvdb%debug = .false.
  dvdb%symv1 = symv1scf
  call dvdb%print()
  call dvdb%list_perts([-1,-1,-1])
@@ -5346,11 +5346,13 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
      idir = mod(pcase-1, 3) + 1; ipert = (pcase - idir) / 3 + 1
      if (pflag(idir,ipert) == 1) cycle
 
-     write(std_out,"(2(a,i0),2a)")"For idir: ",idir, ", ipert: ", ipert, ", qpt: ",trim(ktoa(qpt))
      do ispden=1,dvdb%nspden
+       write(std_out,"(4(a,i0),3a,es12.4)")"For iqpt: ", iqpt, ", idir: ", idir, &
+               ", ipert: ", ipert, ", ispden: ", ispden, ", qpt: ", trim(ktoa(qpt)) ,", max_err: ", &
+               maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
        !write(std_out,"(a,es10.3)")"  max(abs(f1-f2))", &
        ! maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
-       call vdiff_print(vdiff_eval(cplex,nfft,file_v1scf(:,:,ispden,pcase),symm_v1scf(:,:,ispden,pcase),cryst%ucvol))
+       !call vdiff_print(vdiff_eval(cplex,nfft,file_v1scf(:,:,ispden,pcase),symm_v1scf(:,:,ispden,pcase),cryst%ucvol))
 
        ! Debug: Write potentials to file.
        if (unt /= -1) then
@@ -5379,7 +5381,7 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
        end if
 
      end do
-     write(std_out,*)""
+     !write(std_out,*)""
    end do
 
    ABI_FREE(symm_v1scf)
@@ -5427,13 +5429,13 @@ end subroutine dvdb_test_v1complete
 !!
 !! SOURCE
 
-subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr, ddb_path, prtvol, coarse_ngqpt, comm)
+subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr, qdamp, ddb_path, prtvol, coarse_ngqpt, comm)
 
  use m_ddb
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: dvdb_path, ddb_path
- integer,intent(in) :: comm, prtvol, dvdb_add_lr, method, symv1
+ integer,intent(in) :: comm, prtvol, dvdb_add_lr, qdamp, method, symv1
  integer,intent(in) :: dvdb_ngqpt(3), coarse_ngqpt(3)
 
 !Local variables-------------------------------
@@ -5595,6 +5597,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
    coarse_dvdb%zeff = dvdb%zeff
    coarse_dvdb%zeff_raw = dvdb%zeff_raw
    coarse_dvdb%qstar = dvdb%qstar
+   coarse_dvdb%qdamp = qdamp
    !call coarse_dvdb%print()
 
    ! Prepare FT interpolation using coarse q-mesh.
@@ -5871,7 +5874,7 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
    ! (q + G) . dielt . (q + G)
    denom = dot_product(qG_red, matmul(dielt_red, qG_red))
    ! Avoid (q+G) = 0
-   if (qG_mod < tol8) cycle
+   if (qG_mod < tol8 .or. denom < tol8) cycle
    denom_inv = one / denom
    if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
    !if (db%has_quadrupoles) then
