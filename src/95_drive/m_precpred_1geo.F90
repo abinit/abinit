@@ -244,9 +244,9 @@ real(dp), allocatable :: xred(:,:)
          hist%ihist = abihist_findIndex(hist,-1)
          call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
          call crystal_init(amu_curr,crystal,0,ab_mover%natom,&
-&         npsp,ab_mover%ntypat,ab_mover%nsym,rprimd,ab_mover%typat,xred,&
-&         [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
-&         symrel=ab_mover%symrel,tnons=ab_mover%tnons,symafm=ab_mover%symafm)
+           npsp,ab_mover%ntypat,ab_mover%nsym,rprimd,ab_mover%typat,xred,&
+           [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
+           symrel=ab_mover%symrel,tnons=ab_mover%tnons,symafm=ab_mover%symafm)
 
 #ifdef HAVE_NETCDF
          ! Write netcdf file

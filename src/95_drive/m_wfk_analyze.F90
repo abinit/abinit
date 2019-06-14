@@ -166,7 +166,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: cryst
  type(ebands_t) :: ebands
- type(t_tetrahedron) :: tetra
  !type(edos_t) :: edos
  type(pawfgr_type) :: pawfgr
  !type(paw_dmft_type) :: paw_dmft
@@ -398,15 +397,15 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
 
      ! Write tetrahedron tables.
-     tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-     dtset%shiftk, dtset%nkpt, dtset%kptns, xmpi_comm_self, msg, ierr)
-     if (ierr == 0) then
-       call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-     else
-       MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, msg))
-     end if
+     !tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
+     !dtset%shiftk, dtset%nkpt, dtset%kptns, xmpi_comm_self, msg, ierr)
+     !if (ierr == 0) then
+     !  call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
+     !else
+     !  MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, msg))
+     !end if
 
-     call destroy_tetra(tetra)
+     !call destroy_tetra(tetra)
    end if
    call xmpi_barrier(comm)
 

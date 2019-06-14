@@ -53,7 +53,7 @@ module m_common
  use m_electronpositron,  only : electronpositron_type
  use m_energies,          only : energies_type, energies_eval_eint
  use m_pair_list,         only : pair_list
- use m_neat,              only : neat_energies
+ use m_neat,              only : neat_energies, neat_open_etot, neat_finish_etot, neat_etot_add_line, stream_string
  use m_geometry,          only : mkrdim, metric
  use m_kg,                only : getcut
  use m_parser,            only : parsefile
@@ -78,6 +78,7 @@ module m_common
  public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files 
  public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file 
                                    ! with file extension in [".abi", ".in"]
+ type(stream_string) :: etot_yaml_doc
 !!***
 
 contains
@@ -347,6 +348,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          end if
        end if
      end if
+     call neat_open_etot(etot_yaml_doc, '', message)
      call wrtout(ab_out,message,'COLL')
    end if
 
@@ -452,6 +454,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          write(message, '(2a,'//format_istep//',1p,g22.14,1x,3es10.3)' ) &
 &         firstchar,'ETOT',istep,etotal,deltae,residm,res2
        end if
+     end if
+     if (etot_yaml_doc%length /= 0) then
+       call neat_etot_add_line(etot_yaml_doc, message)
      end if
      call wrtout(ab_out,message,'COLL')
 
@@ -836,7 +841,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
      end if
 
+     ! If enabled, output a YAML document with the ETOT iterations
+     call neat_finish_etot(etot_yaml_doc, ab_out)
+
    end if ! nstep == 0 : no output
+
 
  case default
    write(message, '(a,i0,a)' )' choice = ',choice,' is not an allowed value.'
@@ -1531,7 +1540,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
 &       '    Hartree energy  = ',energies%e_hartree,ch10,&
 &       '    XC energy       = ',exc_semilocal,ch10,&
-&       '    '//eneName//'  =',enevalue,ch10,&
+&       '    '//eneName//'  = ',enevalue,ch10,&
 &       '    PspCore energy  = ',energies%e_corepsp
        call wrtout(iout,msg,'COLL')
        call e_components%set('Hartree energy', r=energies%e_hartree)
@@ -1776,13 +1785,17 @@ subroutine prtene(dtset,energies,iout,usepaw)
  write(msg,'(a,80a)')('-',mu=1,80)
  call wrtout(iout,msg,'COLL')
 
+ call wrtout(iout, ch10, 'COLL')
+
  call neat_energies(e_components, iout)
  call e_components%free()
 
  if(e_components_dc%length() > 1) then
+   call wrtout(iout, ch10, 'COLL')
    call neat_energies(e_components_dc, iout, label='Etot DC')
    call e_components_dc%free()
  end if
+
 
 end subroutine prtene
 !!***

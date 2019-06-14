@@ -922,6 +922,7 @@ subroutine indefo1(dtset)
  dtset%usepawu=0
  dtset%usepotzero=0
  dtset%use_slk=0
+ dtset%use_yaml=0
 !V
  dtset%vel_orig(:,:,:)=zero
  dtset%vel_cell_orig(:,:,:)=zero
@@ -1103,6 +1104,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
    if(tread==1) dtset%wvl_bigdft_comp=intarr(1)
  end if
+
+!---------------------------------------------------------------------------
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_yaml',tread,'INT')
+ if(tread==1) dtset%use_yaml=intarr(1)
 
 !---------------------------------------------------------------------------
 

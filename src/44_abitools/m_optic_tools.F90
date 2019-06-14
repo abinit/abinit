@@ -568,7 +568,7 @@ complex(dpc), allocatable :: eps(:)
  end do
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 !start calculating linear optical response
  chi(:)=0._dp
@@ -979,7 +979,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  !ENDDBYG
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 !initialise
  inter2w(:)=0._dp
@@ -1779,7 +1779,7 @@ integer :: start4(4),count4(4)
  my_emax=-HUGE(0._dp)
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 ! loop over kpts
  do ik=my_k1,my_k2
@@ -2354,7 +2354,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  my_emax=-HUGE(0._dp)
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 ! loop over kpts
  do ik=my_k1,my_k2

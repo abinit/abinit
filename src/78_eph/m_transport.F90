@@ -42,7 +42,7 @@ module m_transport
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
- use m_numeric_tools,  only : bisect, arth, simpson_int, polyn_interp
+ use m_numeric_tools,  only : bisect, arth, simpson_int, polyn_interp, safe_div
  use m_fstrings,       only : strcat
  use m_occ,            only : occ_fd, occ_dfd
  use m_pawang,         only : pawang_type
@@ -216,7 +216,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
- character(len=fnlen) :: path
+ character(len=fnlen) :: path, sigeph_path
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -224,11 +224,11 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  ABI_UNUSED((/comm, cryst%natom/))
 
  my_rank = xmpi_comm_rank(comm)
- call wrtout(std_out, 'Transport computation driver')
+ call wrtout(std_out, ' Transport computation driver')
 
- !path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
- sigmaph = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
- if (ierr/=0) MSG_ERROR(msg)
+ sigeph_path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ sigmaph = sigmaph_read(sigeph_path, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
+ ABI_CHECK(ierr == 0, msg)
 
  ! Intialize transport
  transport_rta = transport_rta_new(dtset,sigmaph,cryst,ebands,extrael_fermie,comm)
@@ -250,8 +250,6 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
    path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    call transport_rta_ncwrite(transport_rta, cryst, ncid)
-
-   ! Close the netcdf file
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
@@ -417,7 +415,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  integer :: ntens, nvecs, nvals, edos_intmeth, ifermi, iel
  real(dp) :: vr(3)
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT
- real(dp) :: linewidth
+ real(dp) :: linewidth, fact0
  real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
@@ -445,9 +443,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
        ! Multiply by the lifetime
        do itemp=1,self%ntemp
          linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
-         vv_tens(:, :, 1+itemp, ib, ik, ispin) = 0
-         if (linewidth < tol12) cycle
-         vv_tens(:, :, 1+itemp, ib, ik, ispin) = vv_tens(:, :, 1, ib, ik, ispin) / linewidth
+         call safe_div( vv_tens(:, :, 1, ib, ik, ispin), linewidth, zero, vv_tens(:, :, 1+itemp, ib, ik, ispin))
        end do
      end do
    end do
@@ -503,23 +499,19 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  call onsager(2,self%l2)
 
  ! Compute transport quantities
-#define siemens (e_Cb**2/Ha_J/Time_Sec)
-#define meter   (Bohr_Ang * 1d-10)
-#define second  (Time_Sec)
-#define volt    (Ha_J/e_Cb)
-#define fact0   (siemens / (meter*second) / cryst%ucvol)
-#define fact1   (volt * fact0)
-#define fact2   (volt**2 * fact0)
+ fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
  self%sigma = fact0 * self%l0
- self%pi(:,:,:,:,itemp) = (fact1 * self%l1(:,:,:,:,itemp)) / (fact0 * max(self%l0(:,:,:,:,itemp),tol12))
+ call safe_div(volt_SI * self%l1, self%l0, zero, self%pi)
  do itemp=1,self%ntemp
-   if (kT < tol8) cycle
    kT = self%kTmesh(itemp) / kb_HaK
-   self%seebeck(:,:,:,:,itemp) = 1/kT * (fact1 * self%l1(:,:,:,:,itemp))/ &
-                                        (fact0 * max(self%l0(:,:,:,:,itemp),tol12))
-   self%kappa(:,:,:,:,itemp) = 1/kT * (-(fact1 * self%l1(:,:,:,:,itemp))**2 / &
-                                        (fact0 * max(self%l0(:,:,:,:,itemp),tol12)) + &
-                                        (fact2 * self%l2(:,:,:,:,itemp)))
+   call safe_div(volt_SI * self%l1(:,:,:,:,itemp), &
+                 kT * self%l0(:,:,:,:,itemp), zero, self%seebeck(:,:,:,:,itemp))
+
+   ! HM: to write it as a single division I do:
+   ! kappa = L1^2/L0 + L2 = (L1^2 + L2*L0)/L0
+   ! Check why do we need minus sign here to get consistent results with Boltztrap!
+   call safe_div( - volt_SI**2 * fact0 * (self%l1(:,:,:,:,itemp)**2 - self%l2(:,:,:,:,itemp)*self%l0(:,:,:,:,itemp)), &
+                 kT * self%l0(:,:,:,:,itemp), zero, self%kappa(:,:,:,:,itemp))
  end do
 
  ! Compute the index of the fermi level
@@ -542,14 +534,14 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
      do iw=1,self%nw !doping
        self%n(iw,itemp,1) = carriers(self%vvdos_mesh,self%edos%dos(:,ispin)*max_occ,ifermi,self%nw, &
                                      kT,self%vvdos_mesh(iw)) / &
-                                     cryst%ucvol / (Bohr_Ang * 1.0d-10)**3
+                                     cryst%ucvol / Bohr_meter**3
      end do
 
      ! Compute carrier density of holes
      do iw=1,self%nw !doping
        self%n(iw,itemp,2) = carriers(self%vvdos_mesh,self%edos%dos(:,ispin)*max_occ,1,ifermi, &
                                      kT,self%vvdos_mesh(iw)) / &
-                                     cryst%ucvol / (Bohr_Ang * 1.0d-10)**3
+                                     cryst%ucvol / Bohr_meter**3
      end do
 
      self%n(:,itemp,2) = self%n(self%nw,itemp,2) - self%n(:,itemp,2)
@@ -559,9 +551,9 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
      do ii=1,3
        do jj=1,3
          do iw=1,self%nw
-           if (abs(self%n(iw,itemp,iel)) < tol12) cycle
-           self%mobility(iw,ispin,ii,jj,itemp,iel) = self%sigma(iw,ispin,ii,jj,itemp) / &
-                                                 ( e_Cb * self%n(iw,itemp,iel) ) * 100**2
+           call safe_div( self%sigma(iw,ispin,ii,jj,itemp) * 100**2, &
+                          e_Cb * self%n(iw,itemp,iel), &
+                          zero, self%mobility(iw,ispin,ii,jj,itemp,iel) )
          end do
        end do
      end do
@@ -605,7 +597,8 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 
  ! Get spin degeneracy
  max_occ = two/(self%nspinor*self%nsppol)
- fact = max_occ / ( 2*Ha_s )
+ ! 2 comes from linewidth-lifetime relation
+ fact = max_occ / two
 
  do itemp=1,self%ntemp
    kT = self%kTmesh(itemp)
@@ -661,8 +654,8 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  integer :: nsppol, nkpt, mband, ib, ik, ispin, ii, jj, itemp
  integer :: ielhol, nvalence
  integer :: bmin(2), bmax(2)
- real(dp) :: vr(3), vv_tens(3,3)
- real(dp) :: eig_nk, mu_e, linewidth, fact
+ real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
+ real(dp) :: eig_nk, mu_e, linewidth, fact, fact0
  real(dp) :: max_occ, kT, wtk
 
  ABI_UNUSED((/dtset%natom, comm/))
@@ -676,6 +669,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
 
  ! Compute index of valence band
  max_occ = two/(self%nspinor*self%nsppol)
+ ! TODO: should add nelect0 to ebands to keep track of intrinsic
  nvalence = nint(self%ebands%nelect - self%eph_extrael)/max_occ
 
  ABI_CALLOC(self%ne,(self%ntemp))
@@ -704,8 +698,9 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
    end do
  end do
 
- ! Get spin degeneracy
- fact = max_occ * fact0 / e_Cb / ( 2*Ha_s ) * 100**2
+ ! Get units conversion factor and spin degeneracy
+ fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
+ fact = max_occ * fact0 / e_Cb / two * 100**2
 
  ! Compute mobility
  self%mobility_mu = 0
@@ -732,10 +727,8 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
          mu_e = self%transport_mu_e(itemp)
          kT = self%kTmesh(itemp)
          linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
-         if (linewidth < tol12) cycle
-         self%mobility_mu(ielhol, ispin, :, :, itemp) = &
-                                      self%mobility_mu(ielhol, ispin, :, :, itemp) + &
-                                      wtk * vv_tens(:, :) * occ_dfd(eig_nk,kT,mu_e) / linewidth
+         call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk,kT,mu_e), linewidth, zero, vv_tenslw(:, :))
+         self%mobility_mu(ielhol, ispin, :, :, itemp) = self%mobility_mu(ielhol, ispin, :, :, itemp) + vv_tenslw(:, :)
        end do
      end do
    end do !kpt
@@ -743,20 +736,14 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
 
  ! Scale by the carrier concentration
  do itemp=1,self%ntemp
-   ! Electron mobility
-   if (self%ne(itemp)>tol12) then
-     self%mobility_mu(1,:,:,:,itemp) = fact * self%mobility_mu(1,:,:,:,itemp) / &
-                                       ( self%ne(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-10)**3 )
-   else
-     self%mobility_mu(1,:,:,:,itemp) = 0
-   end if
-   ! Hole mobility
-   if (self%nh(itemp)>tol12) then
-     self%mobility_mu(2,:,:,:,itemp) = fact * self%mobility_mu(2,:,:,:,itemp) / &
-                                       ( self%nh(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-10)**3 )
-   else
-     self%mobility_mu(2,:,:,:,itemp) = 0
-   end if
+   ! for electrons
+   call safe_div( fact * self%mobility_mu(1,:,:,:,itemp), &
+                  self%ne(itemp) / cryst%ucvol / Bohr_meter**3, &
+                  zero, self%mobility_mu(1,:,:,:,itemp) )
+   ! for holes
+   call safe_div( fact * self%mobility_mu(2,:,:,:,itemp), &
+                  self%nh(itemp) / cryst%ucvol / Bohr_meter**3, &
+                  zero, self%mobility_mu(2,:,:,:,itemp) )
  end do
 
  contains
@@ -880,14 +867,21 @@ subroutine transport_rta_write(self,cryst)
 
 !Local variables --------------------------------
  integer :: itemp, ispin
+ character(len=500) :: msg
 
- write(std_out,"(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+
+ call wrtout(ab_out,'Transport calculation results')
+ write(msg,"(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+ call wrtout(std_out,msg)
+ call wrtout(ab_out,msg)
  do ispin=1,self%nsppol
    do itemp=1,self%ntemp
-     write(std_out,"(f16.2,2e16.2,2f16.2)") self%kTmesh(itemp) / kb_HaK, &
-                            self%ne(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-8)**3, &
-                            self%nh(itemp) / cryst%ucvol / (Bohr_Ang * 1.0d-8)**3, &
+     write(msg,"(f16.2,2e16.2,2f16.2)") self%kTmesh(itemp) / kb_HaK, &
+                            self%ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
+                            self%nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
                             self%mobility_mu(1,ispin,1,1,itemp), self%mobility_mu(2,ispin,1,1,itemp)
+     call wrtout(std_out,msg)
+     call wrtout(ab_out,msg)
    end do !temp
  end do !spin
 
