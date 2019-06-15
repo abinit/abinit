@@ -45,7 +45,7 @@ def key_is_ok(key):
 
 # Initial setup
 my_name     = "make-build-examples"
-my_configs  = ["config/specs/testfarm.conf","config/specs/examples.conf"]
+my_configs  = ["config/specs/testfarm.conf"]
 my_template = "doc/build/config-template.ac"
 my_outdir   = "doc/build/config-examples"
 
@@ -75,6 +75,8 @@ else:
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 
 # Process config files and write examples
+if ( not os.path.exists(my_outdir) ):
+  os.makedirs(my_outdir)
 for my_config in my_configs:
   cnf = MyConfigParser()
   cnf.read(my_config)

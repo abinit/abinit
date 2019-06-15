@@ -130,8 +130,7 @@ mkdocs_plugins/dist
 /doc/config.status
 /doc/build/build-howto.html
 /doc/build/build-system-guide.pdf
-/doc/build/config-examples/*.ac
-/doc/build/config-examples/uncertified/*.ac
+/doc/build/config-examples
 /doc/build/connectors.pdf
 /doc/config/gnu/config.guess
 /doc/config/gnu/config.sub

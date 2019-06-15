@@ -38,7 +38,7 @@ re_garbage = re.compile("#")
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 
 # Process all existing build examples
-for (root,dirs,files) in os.walk("./config/build-examples"):
+for (root,dirs,files) in os.walk("./doc/build/config-examples"):
 
   for src in files:
     if ( re_cf.search(src) ):

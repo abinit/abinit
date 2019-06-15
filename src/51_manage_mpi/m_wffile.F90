@@ -912,7 +912,6 @@ subroutine clsopn(wff)
 
 !    od is a logical variable which is set to true if the specified
 !    unit is connected to a file; otherwise it is set to false.
-#if !defined FC_HITACHI
    else if (.not.od) then
      write(message, '(/,a,/,a,i8,/,a,/,a,/,a,/,a)' ) &
 &     ' clsopn : ERROR -',&
@@ -922,7 +921,6 @@ subroutine clsopn(wff)
 &     '  Action: check whether there might be some external problem,',&
 &     '  then resubmit.'
      MSG_ERROR(message)
-#endif
 
 !    nmd is a logical variable assigned the value true if the file
 !    has a name; otherwise false.  A scratch file is not named.
@@ -934,17 +932,6 @@ subroutine clsopn(wff)
 
 !    May now close the file and then reopen it
 !    (file is already opened according to above checks)
-
-#if defined FC_HITACHI
-     if (.not.od) then
-       write(message, '(a,i0,/,a,/,a,/,a)' ) &
-&       '  Tried to inquire about unit',unit,&
-&       '  and found it not connected to a file.',&
-&       '  May be due to temporary problem with file, disks or network.',&
-&       '  Action: disregard this error and continue the process anyway.'
-       MSG_WARNING(message)
-     end if
-#endif
      close (unit=unit)
      open (unit=unit,file=filnam,form=fm,status='old') !VALGRIND complains filnam is just a few thousand bytes inside a block of 8300
 
