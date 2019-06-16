@@ -40,6 +40,9 @@ module m_lattice_mover
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
+  use m_random_xoroshiro128plus, only:  rng_t
+
 !!***
 
   implicit none
@@ -50,6 +53,11 @@ module m_lattice_mover
      ! calculate d(var)/dt and integrate new var. 
      ! call functions to calculate observables.
      ! interact with hist file.
+     type(multibinit_dtset_type) :: params
+     real(dp) :: masses
+     integer :: natom
+     real(dp), allocatable :: current_xcart, current_vcart
+     type(lattice_hist_t) :: hist
    contains
      procedure:: initialize       ! perhaps each effpot type should have own 
      procedure :: finalize
@@ -63,13 +71,14 @@ module m_lattice_mover
 
 contains
 
-  subroutine initialize(self, params, fnames)
+  subroutine initialize(self, params, supercell)
     class(lattice_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
-    character(len=fnlen), intent(in) :: fnames(:)
-    ABI_UNUSED_A(self)
+    self%params=>params
+    self%supercell=>supercell
+    self%label="Lattice Mover"
+    self%natom = supercell%natom
     ABI_UNUSED_A(params)
-    ABI_UNUSED_A(fnames)
 
   end subroutine initialize
 
@@ -91,8 +100,15 @@ contains
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(mode)
+    !ABI_UNUSED_A(self)
+    !ABI_UNUSED_A(mode)
+
+    if(mode==1) then ! using a distribution. 
+       ! TODO to be implemented
+
+    elseif(mode==2) then ! random position and velocity.
+       self%current_positons=self.
+    end if
 
   end subroutine set_initial_state
 
@@ -147,3 +163,4 @@ contains
   end subroutine get_state
 
 end module m_lattice_mover
+
