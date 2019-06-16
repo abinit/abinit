@@ -1118,7 +1118,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Psps%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,1,nscf,&
-&   nfftf,ngfftf,Cryst%ucvol,Dtset%paral_kgb,Cryst,Pawtab,MPI_enreg_seq,nbsc,Sr%m_lda_to_qp,prev_rhor,prev_Pawrhoij)
+              nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,Sr%m_lda_to_qp,prev_rhor,prev_Pawrhoij)
 
 !  Find the irreps associated to the QP amplitudes starting from the analogous table for the KS states.
 !  bmin=Sigp%minbdgw; bmax=Sigp%maxbdgw

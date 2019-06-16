@@ -145,8 +145,6 @@ implementation, indeed, supports only a subset of the YAML specifications:
 * mapping containing scalars
 * tables in CSV format (which is more like an extension of the standard)
 
-A more detailed discussion about the Fortran API is given in the XXX section.
-
 !!! important
 
     YAML is not designed to handle large amount of data therefore it should
@@ -193,6 +191,8 @@ On the Fortran side, we provide:
   documents associated to important physical properties. Currently routines
   for total energy components and ground state general results are implemented.
 
+A more detailed example is provided [below](#creating-a-new-document-in-fortran).
+
 <!--
 For the Fortran side routines may be available to output given structures of
 data (matrices, scalars, arrays...) along with meaningful metadata helping post
@@ -218,10 +218,6 @@ As concerns the python implementation:
 - A command line tool `testtools.py` to allow doing different manual actions
   (see Test CLI)
 
-==TODO== Add Pseudo code with examples showing how to write ETOT in Fortran, how
-to define and register a python YAML object associated to the ETOT tag.
-==END TODO==
-
 The new infrastructure has been designed with extensibility and ease-of-use in
 mind. From the perspective of an Abinit developer, adding support for the
 YAML-based approach requires two steps:
@@ -237,13 +233,41 @@ python side. More about that can be found below.
 
 An example will help clarify.  Let's assume we want to implement the output of
 the `!ETOT` dictionary with the different components of the total free energy.
-In Fortran, we will have to write something like:
+The workflow is splitted in two parts. The idea is to separate the computation
+from the composition of the document, and separate the composition of the
+document from the actual rendering.
+
+In Fortran, we will have to write in the file of the computation:
 
 ```fortran
-use m_neat
+!! Header of the module
+use m_neat, only: neat_etot
+use m_pair_list, only pair_list
+...
 
-call foo()
-call bar()
+!! header of the routine
+real(kind=dp) :: etot
+type(pair_list) :: e_components
+...
+
+!! body of the routine
+call e_components%set("comment", s="Total energie and its components")
+call e_components%set("Total Energie", r=etot)
+...
+
+!! footer of the routine, once all data have been stored
+call neat_etot(e_components)
+```
+
+In *47_neat/m\_neat.F90* we will implement *neat\_etot*:
+```fortran
+subroutine neat_etot(components, abiout)
+type(pair_list), intent(in) :: components
+integer, intent(in) :: abiout
+    call yaml_single_dict("Etot", "", components, 35, 500, tag="ETOT", width=20, file=abiout, real_fmt='(ES20.13)')
+    !! 35 -> max size of the label, needed to extract from the pairlist, 500 -> max size of the strings, needed to extract the comment
+    !! width -> width of the field name side, permit a nice alignment of the values
+end subroutine
 ```
 
 ## Test specification draft
@@ -260,8 +284,8 @@ More specifically:
 - the *files_to_test* section now accepts the optional argument *use_yaml*. 
   Possible values are:
   
-  * "yes" --> activate YAML based test (default)
-  * "no" -->  do not use YAML test
+  * "yes" --> activate YAML based test
+  * "no" -->  do not use YAML test (default)
   * "only" --> use YAML based test but not legacy fldiff algorithm
 
 - a new (optional) section `[yaml_test]` is added with two possible fields: 
@@ -272,6 +296,11 @@ More specifically:
   specification. The path is relative to the Abinit input file. A natural choice
   would be to use the path "./t21.yaml" associated to the input file "t21.in"
   unless we decide to create a dedicated directory.
+
+!!! important
+    Until the basic document list is considered stable enough the printing of
+    YAML documents is disabled by default. To enable it, add `use_yaml 1` to your
+    input file (in the normal Abinit input variables part).
 
 ### Test specification syntax
 
@@ -494,7 +523,8 @@ filters:
 Here we simply said that we associate the label `lda` to a filter matching all
 documents created in the first dataset and we associate the label `dmft` to a
 filter matching all document created in the second dataset. This is the simplest
-filter declaration possible. More on filters declarations in section XXX. (TODO)
+filter declaration possible. More on filters declarations in
+[here](yaml_tools_api#filters-api).
 
 Now we have to use our filters. First of all we will associate the configuration
 we already wrote to the `lda` filter so we can have a different configuration
@@ -573,132 +603,6 @@ filters:
         dtset: 2
 ```
 
-==TODO==
-Details on the definition of a filter
-Explanation of composition of different configurations (precedence of filters,
-default config, hard reset)
-==END TODO==
-
-A filter can specify all currently known iterators: dtset, timimage, image, and time. 
-For each iterator a set of integers can be defined with three methods:
-
-- a single integer value (`dtset: 1`)
-- a YAML list of values (`dtset: [1, 2, 5]`)
-- a mapping with the optional members "from" and "to" specifying the boundaries (both
-  included) of the integer interval (`dtset: {from: 1, to: 5}`). If "from" is omitted, the default is 1. If
-  "to" is omitted the default is no upper boundary. 
-
-Several filters can be used for the same document if they overlap. However, it
-is fundamental that an order of specificity can be determined which means that
-overlapping filters must absolutely be included in each other. Though the first
-example below is fine because _f2_ is included in _f1_ but the second example
-will raise an error because _f4_ is not included in _f3_.
-
-```yaml
-# this is fine
-filters:
-    f1:
-        dtset:
-            from: 2
-            to: 7
-        image:
-            from: 4
-
-    f2:
-        dtset: 7
-        image:
-        - 4
-        - 5
-        - 6
-```
-
-```yaml
-# this will raise an error
-filters:
-    f3:
-        dtset:
-            from: 2
-            to: 7
-        image:
-            from: 4
-
-    f4:
-        dtset: 7
-        image:
-            from: 1
-            to: 5
-```
-
-When a test is defined, the default tree is overridden by the user defined
-tree. When a filtered tree is used it overrides the less specific tree. As you
-can see, the overriding process is used everywhere. Though, it is important to
-know how it works. By default, only what is explicitly specified is overridden
-which means that if a constraint is defined at a deeper level on the default
-tree than what is done on the new tree, the original constraints will be kept.
-For example let `f1`  and `f2` two filters such that `f2` is included in `f1`.
-
-```yaml
-f1:
-    results_gs:
-        tol_abs: 1.0e-6
-        convergence:
-            ceil: 1.0e-6
-            diffor:
-                1.0e-4
-
-f2:
-    results_gs:
-        tol_rel: 1.0e-7
-        convergence:
-            ceil: 1.0e-7
-
-filters:
-    f1:
-        dtset: 1
-    f2:
-        dtset: 1
-        image: 5
-```
-
-When the tester will reach the fifth image of the first dataset, the config tree
-used will be the following:
-
-```yaml
-results_gs:
-    tol_abs: 1.0e-6
-    tol_rel: 1.0e-7  # this has been appended without modifying anything else
-    convergence:
-        ceil: 1.0e-7  # this one have been overridden
-        diffor:
-            1.0e-4  # this one have been kept
-```
-
-If this is not the behavior you need, you can use the "hard reset marker".
-Append `!` to the name of the specialization you want to override to completely
-replace it. Let the `f2` tree be:
-
-```yaml
-f2:
-    results_gs:
-        convergence!:
-            ceil: 1.0e-7
-```
-
-and now the resulting tree for the fifth image of the first dataset is:
-
-```yaml
-results_gs:
-    tol_abs: 1.0e-6
-    convergence:  # the whole convergence node have been overriden
-        ceil: 1.0e-7
-```
-
-!!! tip
-
-    Here again the `explore` shell could be of great help to know what is inherited
-    from the other trees and what is overridden.
-
-
 ## Command line interface
 
 The `~abinit/tests/testtools.py` script provides a command line interface to facilitate the creation of new tests. 
@@ -745,11 +649,15 @@ to learn its usage from the available examples.
 The second one is the *~abinit/tests/pymods/yaml_tests/conf_parser.py* file. It
 contains declarations of the available constraints and parameters. A basic
 python understanding is required in order to modify this file. Comments and doc strings
-should help users to grasp the meaning of this file.
+should help users to grasp the meaning of this file. More details on 
+[here](./yaml_tools_api#constraints-and-parameters-registration)
 
-The third is the file *~abinit/tests/pymods/yaml_tests/structures.py*. It
+The third is the file *~abinit/tests/pymods/yaml_tests/structures/*. It
 defines the structures used by the YAML parser when encountering a tag (starting
 with !), or in some cases when reaching a given pattern (__undef__ for example).
+The *structures* directory is a package organised by features (ex: there is a
+file *structures/ground_state.py*). Each file define structures for a given
+feature. All files are imported by the main script *structures/__init__.py*.
 Even if the abstraction layer on top of the _yaml_ module should help, it is
 better to have a good understanding of more "advanced" python concepts like
 _inheritance_, _decorators_, _classmethod_ etc.
@@ -802,95 +710,6 @@ Atomic speeds:
         d_min: 1.0e-2
 ```
 
-### Code structure
-
-As long as possible, it is better to include any extensions to the existing code
-in these three entry points to keep the system consistent. However, this system
-will eventually prove to be limited in some way. Hence, here is the general
-structure of the system. (MG: Please clarify this point)
-
-The whole system consists of three main parts:
-
-Fldiff algorithm
-
-: *~abinit/tests/pymods/fldiff.py* implements the legacy algorithm and the
-  creation of the final report. This module represents the interface between the
-  yaml specific tools and the legacy test suite tools. 
-
-
-Interface with Pyyaml library
-
-:  *~abinit/tests/pymods/data_extractor.py*,
-   *~abinit/tests/pymods/yaml_tools/\_\_init\_\_.py* and
-   *~abinit/tests/pymods/yaml_tools/structures.py* constitute the Abinit output
-   parser. *data_extractor.py* identify and extract the YAML documents from the
-   source, *__init__.py* provide generic tools base on pyyaml to parse the
-   documents and *structures.py* provide the classes that are used by YAML to
-   handle tags. *~abinit/tests/pymods/yaml_tools/register_tag.py* define the
-   abstraction layer used to simplify the code in *structures.py*. It directly
-   deals with PyYaml black magic.
-
-
-Yaml parsers and tools
-
-: the other files in *~abinit/tests/pymods/yaml_tools* are dedicated to the
-  testing procedure. *meta_conf_parser.py* provide the tools to read and
-  interpret the YAML configuration file, namely __ConfParser__ the main parsing
-  class, __ConfTree__ the tree configuration "low-level" interface (only handle
-  a single tree, no access to the inherited properties, etc...) and __Constraint__
-  the representation of a specific test in the tree.  *conf_parser.py* use
-  __ConfParser__ to register actuals constraints and parameters. It is the place
-  to define actual tests. *driver_test_conf.py* define the high level access to
-  the configuration, handling several trees, applying filters etc. Finally,
-  *tester.py* is the main test driver. It browses the data tree and use the
-  configuration to run tests on Abinit output. It produces an __Issue__ list that
-  will be used by *fldiff.py* to produce the report.
-
-### Add a new parameter
-To have the parser recognise a new token as a parameter one should edit the
-*~abinit/tests/pymods/conf_parser.py*.
-
-The `conf_parser` variable in this file have a method `parameter` to register a
-new parameter. Arguments are the following:
-
-- `token`: mandatory, the name used in configuration for this parameter
-- `default`: optional (`None`), the default value used when the parameter is
-  not available in the configuration.
-- `value_type`: optional (`float`), the expected type of the value found in
-  the configuration.
-- `inherited`: optional (`True`), whether or not an explicit value in the
-  configuration should be propagated to deeper levels.
-
-### Adding a constraint
-To have the parser recognise a new token as a constraint one should also edit the
-*~abinit/tests/pymods/conf_parser.py*.
-
-`conf_parser` have a method `constraint` to register a new constraint It is
-supposed to be used as a decorator that takes arguments. The arguments are all
-optional and are the following:
-
-- `value_type`: (`float`) the expected type of the value found in the
-  configuration.
-- `inherited`: (`True`), whether or not the constraint should be propagated to
-  deeper levels.
-- `apply_to`: (`'number'`), the type of data this constraint can be applied to.
-  This can be a type or one of the special strings (`'number'`, `'real'`,
-  `'integer'`, `'complex'`, `'Array'` (refer to numpy arrays), `'this'`) `'this'`
-  is used when the constraint should be applied to the structure where it is
-  defined and not be inherited.
-- `use_params`: (`[]`) a list of names of parameters to be passed as argument to
-  the test function.
-- `exclude`: (`set()`) a set of names of constraints that should not be applied
-  when this one is.
-
-The decorated function contains the actual test code. It should return `True` if
-the test succeed and either `False` or an instance of `FailDetail` if the test
-failed. If the test is simple enough one should use `False`.  However if the
-test is compound of several non-trivial checks `FailDetail` come in handy to
-tell the user which part failed. When you want to signal a failed test and
-explaining what happened return `FailDetail('some explanations')`. The message
-passed to `FailDetail` will be transmitted to the final report for the user.
-
 ### Add a new tag
 
 Pyyaml offer the possibility to directly convert some YAML structures to a
@@ -908,7 +727,7 @@ from the data. In this case the simpler way to register a new tag is to use
 `yaml_auto_map`. For example to register a tag ETOT that simply register all
 fields from the data tree and let the tester check them with `tol_abs` or
 `tol_rel` we would put the following in
-*~abinit/tests/pymods/yaml_tools/structures.py*:
+*~abinit/tests/pymods/yaml_tools/structures/ground_state.py*:
 
 ```python
 @yaml_auto_map
@@ -969,7 +788,7 @@ for the tester to browse the components to check them. If we want to only make
 our custom check it is fine. For example we can define a method
 `check_components` and use the `callback` constraint like this:
 
-In `~abinit/tests/pymods/yaml_tools/structure.py`
+In `~abinit/tests/pymods/yaml_tools/structure/ground_state.py`
 ```python
 @yaml_map
 class Etot(object):
@@ -1049,7 +868,7 @@ To associate a tag to anything else than a YAML mapping or sequence one can use
 that takes the raw source as a string in argument and return an instance of the
 class. It can be used to create custom parsers of new number representation.
 For example to create a 3D vector with unit tag:
-```
+```python
 @yaml_scalar
 class Vec3Unit(object):
     def __init__(self, x, y, z, unit):
@@ -1091,6 +910,57 @@ class YAMLComplex(complex):
         # writing
         return cls(scal.replace('i', 'j').replace(' ', ''))
 ```
+
+### Creating a new document in Fortran
+
+Developers are expected to browse the sources of `m_neat` and `m_yaml_out` to
+have a comprehensive overview of available tools. Indeed the routines are
+documented and commented and creating a hand-written reference is likely to go
+out of sync quicker than on-site documentation. Here we show a little example to
+give the feeling of the process.
+
+The simplest way to create a YAML document have been introduced above with the
+use of `yaml_single_dict`. However this method is limited to scalars only. It is
+possible to put 1D and 2D arrays, dictionaries and even column based data.
+
+The best way to create a new document is to have a routine
+`neat_my_new_document` that will take all required data in argument and will do
+all the formating work at once.
+
+This routine will declare a `stream_string` object to build the YAML document
+inside, open the document with `yaml_open_doc`, fill it, close it with
+`yaml_close_doc` and finally print it to the output file with `wrtout_stream`.
+
+Here come a basic skeleton of `neat` routine:
+
+```fortran
+subroutine neat_my_new_document(data_1, data_2,... , iout)
+  !! declare your pieces of data... (arrays, numbers, pair_list...)
+  ...
+  integer,intent(in) :: iout  !! this is the output file descriptor
+!Local variables-------------------------------
+  type(stream_string) :: stream
+
+  !! open the document
+  call yaml_open_doc('my label', 'some comments on the document', stream=stream)
+  
+  !! fill the document
+  ...
+  
+  !! close and output the document
+  call yaml_close_doc(stream=stream)
+  call wrtout_stream(stream, iout)
+end subroutine neat_my_new_document
+```
+
+Suppose we want a 2D matrix of real number with the tag `!NiceMatrix` in our document for the field name 'that matrix'we will add the following to the middle section:
+```fortran
+call yaml_add_real2d('that matrix', dimension_1, dimension_2, mat_data, tag='NiceMatrix, stream=stream)
+```
+
+Other `m_yaml_out` routines provide similar interface: first the label, then the
+data and its structural metadata, then a bunch of optional arguments for
+formating, adding tags, tweaking spacing etc...
 
 
 ## Coding rules

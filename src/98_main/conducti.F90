@@ -53,6 +53,7 @@ program conducti
  use m_fstrings,  only : sjoin, itoa
  use m_mpinfo,    only : destroy_mpi_enreg
  use m_paw_optics,only : linear_optics_paw
+
  implicit none
 
 !Arguments -----------------------------------

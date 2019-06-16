@@ -230,6 +230,7 @@ class TestDataExtractor:
         dext.iterators_state = {'dtset': 1}
         lines = '''\
 ---
+label: a doc
 a field: 58
 another: 78
 a list of strings:
@@ -252,6 +253,7 @@ dtset: 1
  Garbage here
 
 ---
+label: a doc
 a field: 58
 another: 78
 a list of strings:
@@ -262,15 +264,15 @@ a list of strings:
 
         lines = [line + '\n' for line in lines.split('\n')]
         _, documents, _ = dext.extract(lines)
-        print(documents)
 
         # IterStart documents should not be in the document list
         assert len(documents) == 1
-        assert documents[0].iterators == {'dtset': 1}
-        assert documents[0].start == 6
-        assert documents[0].end == 13
-        assert documents[0].lines == lines[6:]
-        assert documents[0].obj == {
+        assert documents['dtset=1 a doc'].iterators == {'dtset': 1}
+        assert documents['dtset=1 a doc'].start == 6
+        assert documents['dtset=1 a doc'].end == 14
+        assert documents['dtset=1 a doc'].lines == lines[6:]
+        assert documents['dtset=1 a doc'].obj == {
+            'label': 'a doc',
             'a field': 58,
             'another': 78,
             'a list of strings': ['a string', 'two strings', '...']

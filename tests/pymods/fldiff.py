@@ -13,16 +13,15 @@ different, BOTH the absolute difference and the relative difference (difference
 divided by the sum of absolute values) must be bigger than the tolerance.
 
 Some special characters at the beginning of lines require a different handling:
--	mark lines as same regardless to their content (i. e. ignore lines)
-(can be be present in the 2 files or not, but must begin with -) _ mark lines
-as same regardless to their content (must be present in the 2 files, but can
-begin with _ in only one of them) +	mark lines as different regardless to
-their content ,	handle as + if ignore option is False and as - else P	handle
-as + if ignoreP option is False and as - else %	floating point comparisons are
-done with a tolerance of 1.01e-2 ;	floating point comparisons are done
-irrespective of signs :	ignore floating point numbers and do a characters
-comparison .	do a characters comparison, but do not count this line in the
-Summary
+-	mark lines as same regardless to their content (i. e. ignore lines) (can be be present in the 2 files or not, but must begin with -) 
+_       mark lines as same regardless to their content (must be present in the 2 files, but can begin with _ in only one of them) 
++	mark lines as different regardless to their content 
+,	handle as + if ignore option is False and as - else 
+P	handle as + if ignoreP option is False and as - else 
+%	floating point comparisons are done with a tolerance of 1.01e-2 
+;	floating point comparisons are done irrespective of signs 
+:	ignore floating point numbers and do a characters comparison 
+.	do a characters comparison, but do not count this line in the Summary
 
 Both files should have the same number of non - starting lines.
 
@@ -34,7 +33,7 @@ first column (see above)
 
 The label option, if specified, is appended at the end of the summary
 
-the tolerance option set the tolerance for comparision of floats, the default
+the tolerance option set the tolerance for comparison of floats, the default
 is 1.01e-10.  This modifications do not apply to the tolerance determined by
 the '%',and '.' first-column special signs.
 '''
@@ -251,7 +250,7 @@ class Result(object):
                 details.append(repr(diff) + '\n\n')
 
         if self.fl_diff:
-            details.append('# Start legacy fldiff comparision report\n')
+            details.append('# Start legacy fldiff comparison report\n')
 
         for diff in self.fl_diff:
             if isinstance(diff, LineCountDifference) \
@@ -382,6 +381,10 @@ class Result(object):
         isok = status in ('succeeded', 'passed')
         return isok, status, msg
 
+    def has_line_count_error(self):
+        return any(isinstance(diff, LineCountDifference)
+                   for diff in self.fl_diff)
+
 
 class Differ(object):
     def __init__(self, yaml_test=None, **options):
@@ -507,7 +510,7 @@ class Differ(object):
 
     def _fldiff(self, lines1, lines2):
         '''
-            Compute the effective comparision between two set of lines.
+            Compute the effective comparison between two set of lines.
             LineCountDifference and MetaCharDifference are both fatal so
             they are returned alone if encountered.
         '''
