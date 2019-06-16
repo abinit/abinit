@@ -209,7 +209,7 @@ see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]
 ## 10 Other physical properties (e.g. positron)
   
   1. [[topic:positron|Positron calculations]]
-  2. [[topic:LDAminushalf|The LDA-1/2 approach]] (not in production)
+  2. [[topic:LDAminushalf|The LDA-1/2 approach]] 
 
 ## 11 Analysis/postprocessing tools
   
