@@ -71,7 +71,7 @@ timopt -2
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%%     files_to_test = tdfpt_04_MPI24.out, tolnlines=500, tolabs=0.0, tolrel=0.0, fld_options= -medium
+#%% files_to_test = tdfpt_04_MPI24.out, tolnlines=500, tolabs=0.0, tolrel=0.0, fld_options= -medium
 #%% [extra_info]
 #%% keywords = NC
 #%% description = BaTiO3 linear response calculation

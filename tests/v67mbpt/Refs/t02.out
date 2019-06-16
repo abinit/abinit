@@ -1,6 +1,6 @@
 
-.Version 8.11.5 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.7 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 Mar 2019.
-- ( at 16h19 )
+.Starting date : Wed  8 May 2019.
+- ( at 10h50 )
   
 - input  file    -> t02.in
 - output file    -> t02.out
@@ -351,6 +351,7 @@ P           mkmem          16
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr      1.00000000E-10
             typat      1  1
+         use_yaml           1
               wtk        0.00463    0.03704    0.03704    0.01852    0.02778    0.11111
                          0.11111    0.11111    0.05556    0.02778    0.11111    0.05556
                          0.01389    0.11111    0.11111    0.05556
@@ -387,6 +388,14 @@ dtset:     1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
+--- !IterStart
+timimage:     1
+...
+
+--- !IterStart
+image:     1
+...
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
  R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
@@ -398,8 +407,8 @@ dtset:     1
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/cavignac_neat_pandas/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/cavignac_neat_pandas/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/cavignac_develop/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/cavignac_develop/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -437,6 +446,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.181     288.126
   sigma(1 1)=  2.76864062E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.76864062E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.76864062E-05  sigma(2 1)=  0.00000000E+00
+
+---
+label: Etot steps
+data: !EtotIters |
+    
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+        1  -8.8665583109188    -8.867E+00 4.904E-03 5.902E+00
+        2  -8.8716164865705    -5.058E-03 7.865E-06 1.499E-01
+        3  -8.8716870540284    -7.057E-05 9.162E-06 3.282E-03
+        4  -8.8716880857424    -1.032E-06 3.499E-07 1.367E-05
+        5  -8.8716880912518    -5.509E-09 1.992E-09 6.991E-09
+        6  -8.8716880912528    -9.539E-13 8.968E-11 2.131E-11
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -510,7 +532,7 @@ cartesian forces: !CartForces
     Kinetic energy  =  3.02923675082961E+00
     Hartree energy  =  5.39965567979231E-01
     XC energy       = -3.53945919029367E+00
-    Ewald energy    =-8.43581958561899E+00
+    Ewald energy    = -8.43581958561899E+00
     PspCore energy  =  8.60437873155177E-02
     Loc. psp. energy= -2.43330466453661E+00
     NL   psp  energy=  1.88164924307216E+00
@@ -519,6 +541,8 @@ cartesian forces: !CartForces
  Other information on the energy :
     Total energy(eV)= -2.41410910137269E+02 ; Band energy (Ha)=   2.3374776183E-01
 --------------------------------------------------------------------------------
+
+
 --- !ETOT
 label               : Etot
 comment             : Components of total free energy (in Hartree)
@@ -574,8 +598,8 @@ dtset:     2
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/cavignac_neat_pandas/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/cavignac_neat_pandas/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/cavignac_develop/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_serial/cavignac_develop/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1769,6 +1793,7 @@ P           mkmem          16
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr      1.00000000E-10
             typat      1  1
+         use_yaml           1
               wtk        0.00463    0.03704    0.03704    0.01852    0.02778    0.11111
                          0.11111    0.11111    0.05556    0.02778    0.11111    0.05556
                          0.01389    0.11111    0.11111    0.05556
@@ -1782,10 +1807,47 @@ P           mkmem          16
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         69.1        1.15      0.019
+- Total wall clock time (s,m,h):         74.0        1.23      0.021
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           69.1, wall_time =           74.0
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 59.011  85.4     59.515  80.4              3      -1.00        0.99       0.99
+- fourwf%(pot)                   2.257   3.3      2.244   3.0          15388      -1.00        1.01       1.01
+- projbd                         1.195   1.7      1.260   1.7          23096      -1.00        0.95       0.95
+- pspini                         0.844   1.2      0.846   1.1              5      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.447   0.6      0.454   0.6             -1      -1.00        0.98       0.98
+- ewald                          0.420   0.6      0.424   0.6              5      -1.00        0.99       0.99
+- nonlop(apply)                  0.370   0.5      0.387   0.5          15388      -1.00        0.96       0.96
+- others (127)                   0.929   1.3      0.943   1.3             -1      -1.00        0.98       0.98
+-<END_TIMER>
+-
+- subtotal                      65.472  94.7     66.073  89.3                                  0.99       0.99
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          69.1, wall_time =          74.0
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 59.011  85.4     59.515  80.4              3      -1.00        0.99       0.99
+- fourwf%(pot)                   2.257   3.3      2.244   3.0          15388      -1.00        1.01       1.01
+- projbd                         1.195   1.7      1.260   1.7          23096      -1.00        0.95       0.95
+- pspini                         0.844   1.2      0.846   1.1              5      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.447   0.6      0.454   0.6             -1      -1.00        0.98       0.98
+- ewald                          0.420   0.6      0.424   0.6              5      -1.00        0.99       0.99
+- nonlop(apply)                  0.370   0.5      0.387   0.5          15388      -1.00        0.96       0.96
+- others (127)                   0.929   1.3      0.943   1.3             -1      -1.00        0.98       0.98
+-<END_TIMER>
 
+- subtotal                      65.472  94.7     66.073  89.3                                  0.99       0.99
 
 ================================================================================
 
@@ -1855,10 +1917,10 @@ P           mkmem          16
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         57.2  wall=         57.3
+- Proc.   0 individual time (sec): cpu=         69.1  wall=         74.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         57.2  wall=         57.3
+.Delivered  13 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         69.1  wall=         74.0

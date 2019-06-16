@@ -145,6 +145,7 @@ znucl 22
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t90.in, t91.in, t92.in, t93.in, t94.in
+#%% no_check = yes
 #%% [files]
 #%% files_to_test = 
 ####  The comparison of the output file has been disabled: this test
