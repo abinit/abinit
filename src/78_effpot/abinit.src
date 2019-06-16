@@ -35,6 +35,7 @@ sources = [
     "m_lattice_effpot.F90",
     "m_lattice_harmonic_potential.F90", 
     "m_lattice_io_netcdf.F90",
+    "m_lattice_berendsen_mover.F90",
     "m_lattice_langevin_mover.F90",
     "m_lattice_mover.F90",
     "m_lattice_verlet_mover.F90",

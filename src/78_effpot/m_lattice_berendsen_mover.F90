@@ -1,16 +1,17 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_lattice_langevin_mover
+!!****m* ABINIT/m_lattice_berendsen_mover
+!! TODO: This is not yet implemented.
 !! NAME
-!! m_lattice_langevin_mover
+!! m_lattice_berendsen_mover
 !!
 !! FUNCTION
-!! This module contains the langevin  (NVT) lattice mover.
+!! This module contains the berendsen  (NPT) lattice mover.
 !! 
 !!
 !!
 !! Datatypes:
 !!
-!! * lattice_langevin_mover_t: defines the lattice movers
+!! * lattice_berendsen_mover_t: defines the lattice movers
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.
@@ -33,7 +34,7 @@
 
 #include "abi_common.h"
 
-module m_lattice_langevin_mover
+module m_lattice_berendsen_mover
   use defs_basis
   use m_abicore
   use m_errors
@@ -50,9 +51,7 @@ module m_lattice_langevin_mover
 
   private
 
-  type, public, extends(lattice_mover_t) :: lattice_langevin_mover_t
-     real(dp) :: c1, c2
-     real(dp), allocatable :: c3(:), c4(:), c5(:)
+  type, public, extends(lattice_mover_t) :: lattice_berendsen_mover_t
      real(dp) :: fr   ! friction
      real(dp), allocatable :: xi(:), eta(:)
    contains
@@ -60,28 +59,22 @@ module m_lattice_langevin_mover
      procedure :: finalize
      procedure :: run_one_step
      procedure :: update_vars
-  end type lattice_langevin_mover_t
+  end type lattice_berendsen_mover_t
 
 contains
 
 
   subroutine initialize(self,params, supercell)
-    class(lattice_langevin_mover_t), intent(inout) :: self
+    class(lattice_berendsen_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target, intent(in):: params
     type(mbsupercell_t), target, intent(in) :: supercell
     call self%lattice_mover_t%initialize(params, supercell)
-    ABI_ALLOCATE(self%c3, (self%natom))
-    ABI_ALLOCATE(self%c4, (self%natom))
-    ABI_ALLOCATE(self%c5, (self%natom))
-    ABI_ALLOCATE(self%xi, (3,self%natom))
-    ABI_ALLOCATE(self%eta, (3,self%natom))
-
-    call self%update_vars()
+    MSG_ERROR("Berendsen NPT mover is not yet implemented")    
   end subroutine initialize
 
 
   subroutine finalize(self)
-    class(lattice_langevin_mover_t), intent(inout) :: self
+    class(lattice_berendsen_mover_t), intent(inout) :: self
     ABI_DEALLOCATE(self%c3)
     ABI_DEALLOCATE(self%c4)
     ABI_DEALLOCATE(self%c5)
@@ -92,7 +85,7 @@ contains
  
 
   subroutine update_vars(self):
-    class(lattice_langevin_mover_t), intent(inout) :: self
+    class(lattice_berendsen_mover_t), intent(inout) :: self
     real(dp) :: dt, T, fr, sigma(self%natom)
 
     dt=self%dt
@@ -108,7 +101,7 @@ contains
 
 
   subroutine run_one_step(self, effpot,displacement, strain, spin, lwf )
-    class(lattice_langevin_mover_t), intent(inout) :: self
+    class(lattice_berendsen_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     integer :: i
@@ -141,5 +134,5 @@ contains
 
   end subroutine run_one_step
 
-end module m_lattice_langevin_mover
+end module m_lattice_berendsen_mover
 

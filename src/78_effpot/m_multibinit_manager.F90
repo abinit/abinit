@@ -287,11 +287,11 @@ contains
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
     if (self%params%spin_dynamics>0) then
-       call self%spin_mover%initialize(self%params, supercell=self%supercell)
+       call self%spin_mover%initialize(params=self%params, supercell=self%supercell)
     end if
 
     if (self%params%dynamics>0) then
-       call self%lattice_mover%initialize(self%params, self%filenames)
+       call self%lattice_mover%initialize(params=self%params, supercell=self%supercell)
     end if
 
     ! TODO: LWF MOVER

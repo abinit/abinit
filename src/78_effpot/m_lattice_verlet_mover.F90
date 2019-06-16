@@ -1,16 +1,16 @@
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lattice_verlet_mover
 !! NAME
-!! m_lattice_Verlet_mover
+!! m_lattice_verlet_mover
 !!
 !! FUNCTION
-!! This module contains the Verlet(NVE) lattice mover.
+!! This module contains the verlet  (NVE) lattice mover.
 !! 
 !!
 !!
 !! Datatypes:
 !!
-!! * lattice_verlet_mover_t: defines the lattice mover using verlet method
+!! * lattice_verlet_mover_t: defines the lattice movers
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.
@@ -33,7 +33,7 @@
 
 #include "abi_common.h"
 
-module m_lattice_Verlet_mover
+module m_lattice_verlet_mover
   use defs_basis
   use m_abicore
   use m_errors
@@ -41,7 +41,7 @@ module m_lattice_Verlet_mover
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
-  use m_lattice_mover, only: lattice_movert_t
+  use m_lattice_mover, only: lattice_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
 
 !!***
@@ -50,32 +50,62 @@ module m_lattice_Verlet_mover
 
   private
 
-  type, public, extends(lattice_mover_t) :: lattice_Verlet_mover_t
+  type, public, extends(lattice_mover_t) :: lattice_verlet_mover_t
    contains
      procedure :: initialize
      procedure :: finalize
      procedure :: run_one_step
-  end type lattice_Verlet_mover_t
+  end type lattice_verlet_mover_t
 
 contains
 
 
-  subroutine initialize(self)
-    class(lattice_Verlet_mover_t), intent(inout) :: self
-    
+  subroutine initialize(self,params, supercell)
+    class(lattice_verlet_mover_t), intent(inout) :: self
+    type(multibinit_dtset_type), target, intent(in):: params
+    type(mbsupercell_t), target, intent(in) :: supercell
+    call self%lattice_mover_t%initialize(params, supercell)
   end subroutine initialize
 
   subroutine finalize(self)
-    class(lattice_Verlet_mover_t), intent(inout) :: self
+    class(lattice_verlet_mover_t), intent(inout) :: self
     call self%lattice_mover_t%finalize()
   end subroutine finalize
 
-  
-  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf )
-    class(lattice_Verlet_mover_t), intent(inout) :: self
+
+  !===================== run_one_step===============================!
+  ! run one md step
+  ! effpot: effective potential
+  ! displacement: Should NOT be given, because it is stored in the mover already.
+  ! strain: Should Not be given. Because 1) it is stored in the mover,
+  !          and 2) this is a constant volume mover.
+  ! spin: spin of atoms. Useful with spin-lattice coupling.
+  ! lwf: lattice wannier function. Useful with lattice-lwf coupling (perhaps useless.)
+  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf)
+    class(lattice_verlet_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    integer :: i
+
+    ! first half of velocity update. And full displacement update.
+    call effpot%calculate( displacement=self%displacement, strain=self%strain, &
+         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
+    do i=1, self%natom
+       self%current_vcart(:,i) = self%current_vcart(:,i) + &
+            & 0.5_dp * self%dt * self%forces(:,i)/self%masses(i)
+       self%displacement(:,i) = self%displacement(:,i)+self%current_vcart(:,i) * self%dt
+       self%current_xcart(:,i) = self%supercell%lattice%xcart(:,i) + self%displacement(:,i)
+    end do
+
+    ! second half of velocity update.
+    call effpot%calculate( displacement=self%displacement, strain=self%strain, &
+         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
+    do i=1, self%natom
+       self%current_vcart(:,i) = self%current_vcart(:,i) + 0.5_dp * self%dt * self%forces(:,i)/self%masses(i)
+    end do
+
   end subroutine run_one_step
+
 
 end module m_lattice_verlet_mover
 

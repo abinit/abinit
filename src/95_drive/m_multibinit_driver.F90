@@ -91,7 +91,7 @@ contains
   !!
   !!
   !! SOURCE
-  subroutine multibinit_main(filnam, dryrun)
+  subroutine multibinit_main(filnam, dry_run)
     character(len=fnlen), intent(inout) :: filnam(17)
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
