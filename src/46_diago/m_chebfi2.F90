@@ -837,7 +837,7 @@ module m_chebfi2
       
       if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
         call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, 1, spacedim, neigenpairs)  
-        call xgBlock_copy(chebfi%xXColsRows, chebfi%X, 1, 1)  
+        !call xgBlock_copy(chebfi%xXColsRows, chebfi%X, 1, 1)  
         !call xgBlock_copy(chebfi%xAXColsRows, chebfi%AX%self, 1, 1)  
         !call xgBlock_copy(chebfi%xBXColsRows, chebfi%BX%self, 1, 1)  
       end if
@@ -846,7 +846,7 @@ module m_chebfi2
       !if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)  !OVO JE OK ONO IZNAD NIJE
         !call xg_getPointer(chebfi%xXColsRows)
         call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, 1, spacedim, neigenpairs)  
-        call xgBlock_copy(chebfi%xXColsRows, chebfi%X, 1, 1)  
+        !call xgBlock_copy(chebfi%xXColsRows, chebfi%X, 1, 1)  
       !end if
     end if
     

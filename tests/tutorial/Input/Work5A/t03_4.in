@@ -1,4 +1,4 @@
-#ABINIT - INPUT FILE
+#ABINIT - INPUT F
 #GOLD 31 ATOMS
 
 #Process distribution (parallelism) - TO BE ADAPTED
@@ -18,7 +18,7 @@ pawecutdg 10.
 
 #Self-consistent cycle parameters
 toldfe 1.d-5
-nstep 400
+nstep 120
 nline 4
 
 #K-points and symetries
