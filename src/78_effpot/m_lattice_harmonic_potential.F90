@@ -35,7 +35,7 @@ module m_lattice_harmonic_potential
   use m_abicore
   use m_abstract_potential, only: abstract_potential_t
   use m_spmat_coo, only: COO_mat_t
-  use m_spmat_csr, only: CSR_mat_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   implicit none
 
   private
@@ -43,7 +43,61 @@ module m_lattice_harmonic_potential
   type, public, extends(abstract_potential_t) :: lattice_harmonic_potential_t
      integer :: natom
      real(dp), allocatable :: ref_xcart(:,:)
-
+     type(COO_mat_t) :: coeff
+   contains
+     procedure :: initialize
+     procedure :: finalize
+     procedure :: set_supercell
+     procedure :: calculate
   end type lattice_harmonic_potential_t
+
+contains
+
+  subroutine initialize(self, natom)
+    class(lattice_harmonic_potential_t), intent(inout) :: self
+    integer, intent(in) :: natom
+    self%has_displacement = .True.
+    self%label="Lattice_harmonic_potential"
+    self%natom=natom
+    call self%coeff%initialize(mshape= [3*self%natom, 3*self%natom])
+  end subroutine initialize
+
+  subroutine finalize(self)
+    class(lattice_harmonic_potential_t), intent(inout) :: self
+    self%has_displacement=.False.
+    call self%coeff%finalize()
+    call self%abstract_potential_t%finalize()
+  end subroutine finalize
+
+  subroutine set_supercell(self, supercell)
+    class(lattice_harmonic_potential_t), intent(inout) :: self
+    type(mbsupercell_t), target, intent(inout) :: supercell
+    self%supercell => supercell
+  end subroutine set_supercell
+
+
+  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
+    ! This function calculate the energy and its first derivative
+    ! the inputs and outputs are optional so that each effpot can adapt to its
+    ! own.
+    ! In principle, the 1st derivatives are only calculated if asked to (present). However, they can be computed if it is simply convinient to do.
+    class(lattice_harmonic_potential_t), intent(inout) :: self  ! the effpot may save the states.
+
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
+    real(dp) :: f(3,self%natom)
+    ! if present in input
+    ! calculate if required
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(stress)
+    ABI_UNUSED_A(bfield)
+    ABI_UNUSED_A(lwf_force)
+
+    call self%coeff%mv(displacement, f)
+    force(:,:) = force(:,:) - f
+    energy =energy + 0.5_dp * sum(f*displacement)
+  end subroutine calculate
 
 end module m_lattice_harmonic_potential

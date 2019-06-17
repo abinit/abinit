@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_sspin_primitive_potential
+!!****m* ABINIT/m_spin_primitive_potential
 !! NAME
 !! m_spin_primitive_potential
 !!
