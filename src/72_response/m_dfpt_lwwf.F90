@@ -52,6 +52,7 @@ module m_dfpt_lwwf
  public :: dfpt_qdrpwf
  public :: dfpt_flexowf
  public :: dfpt_ddmdqwf
+ public :: dfpt_isdqfr
 
 ! *************************************************************************
 
@@ -2568,7 +2569,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !! CHILDREN
 !!
 !! SOURCE
-
+           
 subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
@@ -2577,7 +2578,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfpt_ddmdqwf'
+#define ABI_FUNC 'dfpt_isdqfr'
 !End of the abilint section
 
  implicit none
