@@ -61,6 +61,7 @@ module m_mklocl
  public :: vlocalstr             ! Compute strain derivatives of local ionic potential
 #ifdef MR_DEV
  public :: dfpt_vlocaldq         ! Compute the first q-gradient of the 1st-order potential due to atomic displacement. 
+ public :: dfpt_vlocaldqdq       ! Compute the second q-gradient of the 1st-order potential due to atomic displacement. 
  public :: dfpt_vmetdqdq       ! Compute the second q-gradient of the 1st-order potential due to a metric perturbation.
 #endif
 !!***

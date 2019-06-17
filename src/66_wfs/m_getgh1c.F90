@@ -1462,7 +1462,7 @@ ABI_ALLOCATE(gvnl1dqc_,(2,npw1*my_nspinor))
 !Phonon perturbation
 !-------------------------------------------
  !1st q-gradient
- if (ipert<=natom.and.optnl>0) then
+ if (ipert<=natom.and..not.present(qdir2).and.optnl>0) then
    cpopt=-1 ; choice=22 ; signs=2 ; paw_opt=0
    call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &  paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1dqc_,iatom_only=ipert,qdir=qdir1)
@@ -1675,7 +1675,7 @@ end if
 !derivative and every time it calculates all the form factors derivatives. This could be
 !done just once.
  !-- 1st q-grad of atomic displacement perturbation
- if (ipert<=natom) then
+ if (ipert<=natom.and..not.present(qdir2)) then
    ider=1;idir0=qdir1
  !-- 2nd q-grad of atomic displacement perturbation
  else if (ipert<=natom.and.present(qdir2)) then
