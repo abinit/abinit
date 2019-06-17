@@ -1692,6 +1692,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  real(dp),allocatable :: elflexowf_t4(:,:,:,:,:),elflexowf_t4_k(:,:,:,:,:)
  real(dp),allocatable :: elflexowf_t5(:,:,:,:,:),elflexowf_t5_k(:,:,:,:,:)
  real(dp),allocatable :: elqgradhart(:,:,:,:,:)
+ real(dp),allocatable :: frwfdq(:,:,:,:),frwfdq_k(:,:,:,:)
  real(dp),allocatable :: kpt_rbz(:,:)
  real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
  real(dp),allocatable :: occ_k(:),occ_rbz(:)
@@ -2517,6 +2518,13 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ddmdqwf_t3=zero
  end if
 
+!Allocate arrays for wf contributions to the first q-gradient of the internal strain tensor 
+ if (lw_flexo==1.or.lw_flexo==4) then 
+   ABI_ALLOCATE(frwfdq,(2,natpert,nq1grad,nstrpert))
+   ABI_ALLOCATE(frwfdq_k,(2,natpert,nq1grad,nstrpert))
+   frwfdq=zero
+ end if
+
 !LOOP OVER SPINS
  bdtot_index=0
  icg=0
@@ -2585,21 +2593,28 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !    Compute the wf contributions to the first q-gradient of the dynamical matrix
      if (lw_flexo==1.or.lw_flexo==3) then
-       call dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k, &
-       &  ddmdqwf_t3_k,dtset, &
-       &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
-       &  kg_k,kpoint,mkmem_rbz, &
-       &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
-       &  npw_k,nq1grad,nspden,nsppol,nylmgr,occ_k, &
-       &  pert_atdis,ph1d,psps,q1grad,rmet,ucvol,useylmgr, &
-       &  vhxc1_atdis,wfk_t_atdis,wfk_t_ddk, &
-       &  wtk_k,xred,ylm_k,ylmgr_k)
+       call dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,ddmdqwf_t3_k,&
+       &  dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k,kg_k,kpoint,mkmem_rbz,    &
+       &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz,npw_k,nq1grad,nspden,  &
+       &  nsppol,nylmgr,occ_k,pert_atdis,ph1d,psps,q1grad,rmet,ucvol,useylmgr, &
+       &  vhxc1_atdis,wfk_t_atdis,wfk_t_ddk,wtk_k,xred,ylm_k,ylmgr_k)
 
 !      Add the contribution from each k-point
        ddmdqwf=ddmdqwf + ddmdqwf_k
        ddmdqwf_t1=ddmdqwf_t1 + ddmdqwf_t1_k
        ddmdqwf_t2=ddmdqwf_t2 + ddmdqwf_t2_k
        ddmdqwf_t3=ddmdqwf_t3 + ddmdqwf_t3_k
+     end if
+
+!    Compute the wf contributions to the first q-gradient of the internal strain tensor
+     if (lw_flexo==1.or.lw_flexo==4) then
+
+!      First calculate the frozen wf contribution
+       call dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
+       &  isppol,istwf_k,kg_k,kpoint,mkmem_rbz,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,&
+       &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
+       &  pert_strain,ph1d,psps,q1grad,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
+
      end if
 
 !    Keep track of total number of bands
@@ -2737,6 +2752,10 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ABI_DEALLOCATE(pert_strain)
    ABI_DEALLOCATE(vhxc1_strain)
    ABI_DEALLOCATE(wfk_t_strain)
+ end if
+ if (lw_flexo==1.or.lw_flexo==4) then 
+   ABI_DEALLOCATE(frwfdq)
+   ABI_DEALLOCATE(frwfdq_k)
  end if
  ABI_DEALLOCATE(q1grad)
  ABI_DEALLOCATE(ph1d)

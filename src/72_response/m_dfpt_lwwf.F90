@@ -2494,5 +2494,129 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  end subroutine dfpt_ddmdqwf
 !!***
 
+!!****f* ABINIT/dfpt_isdqfr
+!! NAME
+!!  dfpt_isdqfr
+!!
+!! FUNCTION
+!!  This routine computes the frozen wf contribution to the q-gradient of the
+!!  internal strain tensor
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
+!!  cplex: if 1, several magnitudes are REAL, if 2, COMPLEX
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  gsqcut=large sphere cut-off
+!!  icg=shift to be applied on the location of data in the array cg
+!!  ikpt=number of the k-point
+!!  indkpt1(nkpt_rbz)=non-symmetrized indices of the k-points
+!!  isppol=1 for unpolarized, 2 for spin-polarized
+!!  istwf_k=parameter that describes the storage of wfs
+!!  kg_k(3,npw_k)=reduced planewave coordinates.
+!!  kpt(3)=reduced coordinates of k point
+!!  mkmem =number of k points treated by this node
+!!  mpi_enreg=information about MPI parallelization
+!!  mpw=maximum dimensioned size of npw or wfs at k
+!!  natpert=number of atomic displacement perturbations
+!!  nattyp(ntypat)= # atoms of each type.
+!!  nband_k=number of bands at this k point for that spin polarization
+!!  nfft=(effective) number of FFT grid points (for this proc)
+!!  ngfft(1:18)=integer array with FFT box dimensions and other
+!!  nkpt_rbz= number of k-points in the RBZ
+!!  npw_k=number of plane waves at this k point
+!!  nq1grad=number of q1 (q_{\gamma}) gradients
+!!  nspden=number of spin-density components
+!!  nsppol=1 for unpolarized, 2 for spin-polarized
+!!  nstrpert=number of strain perturbations
+!!  nylmgr=second dimension of ylmgr_k
+!!  occ_k(nband_k)=occupation number for each band (usually 2) for each k.
+!!  pert_atdis(3,natpert)=array with the info for the atomic displacement perturbations
+!!  pert_strain(6,nstrpert)=array with the info for the strain perturbations
+!!  ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)=1-dimensional phases
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
+!!  rmet(3,3)=real space metric (bohr**2)
+!!  ucvol=unit cell volume in bohr**3.
+!!  useylmgr= if 1 use the derivative of spherical harmonics
+!!  wtk_k=weight assigned to the k point.
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!  ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics for the k point
+!!  ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical
+!!                                                                      harmonics for the k point
+!!
+!! OUTPUT
+!!
+!!  frwfdq_k(2,natpert,nq1grad,nstrpert)=frozen wave function dependent part of the 1st q-gradient of
+!!                            internal strain tensor
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!!   dfpt_lw
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
+       &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,&
+       &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
+       &  pert_strain,ph1d,psps,q1grad,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_ddmdqwf'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
+ integer,intent(in) :: mkmem,mpw,natpert,nband_k,nfft
+ integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr
+ integer,intent(in) :: useylmgr
+ real(dp),intent(in) :: gsqcut,ucvol,wtk_k
+ type(dataset_type),intent(in) :: dtset
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(pseudopotential_type),intent(in) :: psps
+
+!arrays
+ integer,intent(in) :: atindx(dtset%natom)
+ integer,intent(in) :: indkpt1(nkpt_rbz),kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
+ integer,intent(in) :: pert_atdis(3,natpert),pert_strain(6,nstrpert)
+ integer,intent(in) :: q1grad(3,nq1grad)
+ real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
+ real(dp),intent(out) :: frwfdq_k(2,natpert,nq1grad,nstrpert)
+ real(dp),intent(in) :: kpt(3),occ_k(nband_k)
+ real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
+ real(dp),intent(in) :: rmet(3,3) 
+ real(dp),intent(in) :: xred(3,dtset%natom)
+ real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),intent(in) :: ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
+
+
+ DBG_ENTER("COLL")
+
+ write(*,*) "DINS"
+
+ DBG_EXIT("COLL")
+
+ end subroutine dfpt_isdqfr
+!!***
+
 end module m_dfpt_lwwf
 !!***

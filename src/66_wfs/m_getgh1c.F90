@@ -1380,7 +1380,7 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 
 !Local variables-------------------------------
 !scalars
- integer :: choice,cpopt,ipw,ipws,ispinor,my_nspinor,natom,nnlout
+ integer :: choice,cpopt,iidir,ipw,ipws,ispinor,my_nspinor,natom,nnlout
  integer :: npw,npw1,paw_opt,signs,tim_fourwf,tim_nonlop
  logical :: has_kin
  character(len=500) :: msg
@@ -1475,9 +1475,9 @@ ABI_ALLOCATE(gvnl1dqc_,(2,npw1*my_nspinor))
 
  !2nd q-gradient
  else if (ipert<=natom.and.present(qdir2).and.optnl>0) then
-   idir=ngamma(idir,qdir2)
+   iidir=ngamma(idir,qdir2)
    cpopt=-1 ; choice=25 ; signs=2 ; paw_opt=0
-   call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
+   call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,iidir,(/lambda/),mpi_enreg,1,nnlout,&
 &  paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1dqc_,iatom_only=ipert,qdir=qdir1)
 
 !$OMP PARALLEL DO 
