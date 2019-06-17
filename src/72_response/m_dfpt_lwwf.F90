@@ -2609,10 +2609,122 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
 
+!Local variables-------------------------------
+!scalars
+ integer :: iatpert,iband,idir,ipert,iq1grad,iq2grad,nkpg,optlocal,optnl,tim_getgh1c,useylmgr1
+ real(dp) :: doti,dotr
+ type(pawfgr_type) :: pawfgr
+ type(rf_hamiltonian_type) :: rf_hamkq
+
+!arrays
+ real(dp),allocatable :: c0_hatdisdq_c0_bks(:,:,:,:)
+ real(dp),allocatable :: cwave0i(:,:)
+ real(dp),allocatable :: dkinpw(:)
+ real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable :: gh1dqc(:,:),gvloc1dqc(:,:),gvnl1dqc(:,:)
+ real(dp),allocatable :: hatdisdqdq_c0m(:,:,:,:,:,:)
+ real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
+ real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1dq(:,:,:,:), dum_vpsp(:)
+ real(dp),allocatable :: vpsp1(:),vpsp1dq(:), dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
+ type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
+
 
  DBG_ENTER("COLL")
 
- write(*,*) "DINS"
+!Additional definitions
+ tim_getgh1c=0
+
+!Additional allocations
+ ABI_ALLOCATE(cwave0i,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(dum_vpsp,(nfft))
+ ABI_ALLOCATE(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_ALLOCATE(vpsp1,(cplex*nfft))
+ ABI_DATATYPE_ALLOCATE(dum_cwaveprj,(0,0))
+
+!-----------------------------------------------------------------------------------------------
+!  q1-gradient of atomic displacement 1st order hamiltonian: 
+!  < u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}_{\gamma} | u_{i,k}^{(0)} >
+!-----------------------------------------------------------------------------------------------
+
+!Specific allocations
+ ABI_ALLOCATE(vpsp1dq,(2*nfft))
+ ABI_ALLOCATE(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_ALLOCATE(gh1dqc,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(gvloc1dqc,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(gvnl1dqc,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(c0_hatdisdq_c0_bks,(2,nband_k,nq1grad,natpert))
+
+!Specific definitions
+ useylmgr1=1;optlocal=1;optnl=1
+
+!LOOP OVER HAMILTONIAN ATOMIC DISPLACEMENT PERTURBATIONS
+ do iatpert=1,natpert
+   ipert=pert_atdis(1,iatpert)
+   idir=pert_atdis(2,iatpert)
+
+   !LOOP OVER Q1-GRADIENT
+   do iq1grad=1,3
+
+     !Get q-gradient of first-order local part of the pseudopotential
+     call dfpt_vlocaldq(atindx,2,gs_hamkq%gmet,gsqcut,idir,ipert,mpi_enreg, &
+     &  psps%mqgrid_vl,dtset%natom,&
+     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
+     &  ph1d,iq1grad,psps%qgrid_vl,&
+     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
+
+     !Set up q-gradient of local potential vlocal1dq with proper dimensioning
+     call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
+     &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
+
+     !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
+     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
+     & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
+     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
+
+     !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+     call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,iq1grad, &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
+   & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
+
+     !LOOP OVER BANDS
+     do iband=1,nband_k
+
+       if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+       !Read ket ground-state wavefunctions
+       cwave0i(:,:)=cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
+
+       !Compute < g |H^{\tau_{\kappa\alpha}}_{\gamma} | u_{i,k}^{(0)} >
+       call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
+       & idir,ipert,mpi_enreg,optlocal,optnl,iq1grad,rf_hamkq)
+
+       !Calculate:
+       !(<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma} | u_{i,k}^{(0)} >)*
+       call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqc, &
+     & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+ 
+       c0_hatdisdq_c0_bks(1,iband,iq1grad,iatpert)=dotr
+       c0_hatdisdq_c0_bks(2,iband,iq1grad,iatpert)=doti
+
+       write(100,*) dotr, doti
+
+     end do
+
+     !Clean the rf_hamiltonian
+     call destroy_rf_hamiltonian(rf_hamkq)
+
+   end do
+ end do
+
+!Deallocations
+ ABI_DEALLOCATE(dum_cwaveprj)
+! ABI_DEALLOCATE(gh1dqc)
+! ABI_DEALLOCATE(gvloc1dqc)
+! ABI_DEALLOCATE(gvnl1dqc)
+ ABI_DEALLOCATE(vpsp1dq)
+ ABI_DEALLOCATE(vlocal1dq)
+ ABI_DEALLOCATE(dum_vpsp)
+ ABI_DEALLOCATE(dum_vlocal)
 
  DBG_EXIT("COLL")
 
