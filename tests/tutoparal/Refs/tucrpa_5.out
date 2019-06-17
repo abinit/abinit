@@ -1,6 +1,6 @@
 
-.Version 8.1.7 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu6.1 computer) 
+.Version 8.11.8 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,17 +14,17 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 16 Dec 2016.
-- ( at 14h54 )
+.Starting date : Mon 17 Jun 2019.
+- ( at 10h35 )
   
 - input  file    -> tucrpa_5.in
 - output file    -> tucrpa_5.out
 - root for input  files -> tucrpa_I
 - root for output files -> tucrpa_O
 
-- inpspheads : Reading pseudopotential header in XML form from ../../Psps_for_tests/V.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from ../../Psps_for_tests/O.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/O.LDA_PW-JTH.xml
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -40,7 +40,7 @@ Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      16.256 Mbytes of memory.
+P This job should need less than                      16.174 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -59,7 +59,7 @@ _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      14.388 Mbytes of memory.
+P This job should need less than                      14.307 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -78,7 +78,7 @@ _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      16.752 Mbytes of memory.
+P This job should need less than                      16.671 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -97,7 +97,7 @@ _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      15.598 Mbytes of memory.
+P This job should need less than                      15.517 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -107,10 +107,10 @@ _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    0
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
@@ -144,7 +144,7 @@ _ WF disk file :      4.653 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     1.19824785E+01 Hartree
           ecutwfn4     1.19824785E+01 Hartree
--          fftalg         112
+-          fftalg         312
         freqremax1     0.00000000E+00 Hartree
         freqremax2     0.00000000E+00 Hartree
         freqremax3     1.10247976E+00 Hartree
@@ -369,7 +369,10 @@ P           mkmem           1
           usedmft2          1
           usedmft3          0
           usedmft4          0
-          usepawu           1
+          usepawu1          1
+          usepawu2         10
+          usepawu3          1
+          usepawu4          1
            useylm           1
               wtk        0.12500    0.37500    0.37500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -401,7 +404,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =   16   -> not optimal: autoparal keyword recommended in input file
+-   nproc =   32   -> not optimal: autoparal keyword recommended in input file
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -426,9 +429,9 @@ P           mkmem           1
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/V.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -446,9 +449,9 @@ P           mkmem           1
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -466,9 +469,9 @@ P           mkmem           1
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/O.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -523,18 +526,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -151.88047514227    -1.519E+02 2.061E+00 1.918E+01
- ETOT  2  -152.36095595316    -4.805E-01 8.289E-03 1.488E+02
- ETOT  3  -151.97028699349     3.907E-01 7.168E-04 4.174E+00
- ETOT  4  -151.94072711352     2.956E-02 6.350E-04 1.288E+00
- ETOT  5  -151.92946288304     1.126E-02 1.020E-03 1.653E-01
- ETOT  6  -151.92845249069     1.010E-03 3.219E-04 3.301E-03
- ETOT  7  -151.92842649066     2.600E-05 9.337E-05 1.824E-03
- ETOT  8  -151.92841167999     1.481E-05 2.120E-05 3.273E-04
- ETOT  9  -151.92840920202     2.478E-06 1.324E-05 1.311E-05
- ETOT 10  -151.92840909961     1.024E-07 1.286E-05 2.424E-07
- ETOT 11  -151.92840909774     1.868E-09 1.239E-05 1.517E-11
- ETOT 12  -151.92840909774     1.421E-13 1.174E-05 6.740E-11
- ETOT 13  -151.92840909774    -4.832E-13 1.093E-05 6.306E-14
+ ETOT  2  -152.36095595308    -4.805E-01 8.289E-03 1.488E+02
+ ETOT  3  -151.97028699850     3.907E-01 7.168E-04 4.174E+00
+ ETOT  4  -151.94072711307     2.956E-02 6.349E-04 1.288E+00
+ ETOT  5  -151.92946288949     1.126E-02 1.019E-03 1.653E-01
+ ETOT  6  -151.92845249123     1.010E-03 3.219E-04 3.301E-03
+ ETOT  7  -151.92842649038     2.600E-05 9.338E-05 1.824E-03
+ ETOT  8  -151.92841167986     1.481E-05 2.123E-05 3.273E-04
+ ETOT  9  -151.92840920209     2.478E-06 1.324E-05 1.312E-05
+ ETOT 10  -151.92840909961     1.025E-07 1.286E-05 2.424E-07
+ ETOT 11  -151.92840909774     1.868E-09 1.239E-05 1.508E-11
+ ETOT 12  -151.92840909774     5.684E-14 1.174E-05 6.726E-11
+ ETOT 13  -151.92840909774     1.137E-13 1.093E-05 6.307E-14
 
  At SCF step   13       nres2   =  6.31E-14 < tolvrs=  1.00E-13 =>converged.
 
@@ -555,8 +558,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      5.992978814762293
- Compensation charge over fine fft grid    =      5.993710068172701
+ Compensation charge over spherical meshes =      5.992978814760171
+ Compensation charge over fine fft grid    =      5.993710068180687
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -644,7 +647,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.7604E-08; max=  1.0925E-05
+ Mean square residual over all n,k,spin=   47.603E-09; max=  10.925E-06
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -719,32 +722,36 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.22101101715150E+01
-    Hartree energy  =  3.42934572955441E+01
-    XC energy       = -1.94923345890713E+01
+    Kinetic energy  =  4.22101101715811E+01
+    Hartree energy  =  3.42934572955244E+01
+    XC energy       = -1.94923345890687E+01
     Ewald energy    = -1.14220316979058E+02
     PspCore energy  =  6.33972391350157E+00
-    Loc. psp. energy= -1.09494290828756E+02
-    Spherical terms =  8.43864085028115E+00
-    >>>>> Internal E= -1.51925010166043E+02
+    Loc. psp. energy= -1.09494290828721E+02
+    Spherical terms =  8.43864085029452E+00
+    >>>>> Internal E= -1.51925010165945E+02
 
-    -kT*entropy     = -3.39894393162277E-03
-    >>>>>>>>> Etotal= -1.51928409109975E+02
+    -kT*entropy     = -3.39894393162385E-03
+    >>>>>>>>> Etotal= -1.51928409109877E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -1.47235864740968E+01
-    Ewald energy    = -1.14220316979058E+02
+    Band energy     = -1.47235864740861E+01
+    Ewald energy    =-1.14220316979058E+02
     PspCore energy  =  6.33972391350157E+00
-    Dble-C XC-energy= -3.05329761494707E+01
-    Spherical terms =  1.21214553531726E+00
+    Dble-C XC-energy= -3.05329761494506E+01
+    Spherical terms =  1.21214553528701E+00
     >>>>> Internal E= -1.51925010153806E+02
 
-    -kT*entropy     = -3.39894393162277E-03
-    >>>> Etotal (DC)= -1.51928409097738E+02
+    -kT*entropy     = -3.39894393162385E-03
+    >>>> Etotal (DC)= -1.51928409097737E+02
 
-  >Total energy in eV           = -4.13418225953065E+03
-  >Total DC energy in eV        = -4.13418225919766E+03
+  >Total energy in eV           = -4.13418225952799E+03
+  >Total DC energy in eV        = -4.13418225919764E+03
 --------------------------------------------------------------------------------
+
+
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.09030256E-03  sigma(3 2)=  0.00000000E+00
@@ -758,7 +765,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =   16   -> not optimal: autoparal keyword recommended in input file
+-   nproc =   32   -> not optimal: autoparal keyword recommended in input file
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -786,7 +793,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 --------------------------------------------------------------------------------
 
 
--       ( number of procs used in dmft ) = 16
+-       ( number of procs used in dmft ) = 32
 
 
  ******************************************
@@ -821,18 +828,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 ================================================================================
  prteigrs : about to open file tucrpa_O_DS2_EIG
  Non-SCF case, kpt    1 (  0.12500  0.12500  0.12500), residuals and eigenvalues=
-  1.63E-19  9.34E-19  3.93E-19  9.08E-19  8.75E-20  3.18E-20  1.89E-19  6.98E-19
+  1.63E-19  9.34E-19  3.93E-19  9.07E-19  8.75E-20  3.18E-20  1.90E-19  7.00E-19
   9.93E-19  1.02E-19  1.41E-19  2.27E-19  4.35E-19  6.58E-19  1.24E-19  3.29E-19
-  7.52E-19  4.78E-19  5.20E-19  2.57E-19  2.61E-19  6.77E-19  1.44E-19  2.14E-19
-  1.11E-19  3.60E-19  9.31E-19  1.92E-19  6.49E-19  7.39E-19  4.04E-19  8.83E-19
-  1.03E-19  5.80E-19  1.26E-19  2.75E-19  2.31E-19  7.05E-20  3.14E-19  7.32E-20
+  7.52E-19  4.78E-19  5.20E-19  2.57E-19  2.61E-19  6.76E-19  1.44E-19  2.14E-19
+  1.11E-19  3.60E-19  9.30E-19  1.92E-19  6.49E-19  7.39E-19  4.04E-19  8.83E-19
+  1.03E-19  5.80E-19  1.26E-19  2.75E-19  2.31E-19  7.05E-20  3.13E-19  7.31E-20
   1.42E-19  2.15E-19  8.05E-20  1.06E-19  8.30E-20  8.73E-19  5.37E-20  4.62E-19
-  3.71E-19  1.92E-19  2.40E-19  2.22E-19  2.58E-19  3.56E-19  1.17E-19  3.06E-19
+  3.71E-19  1.92E-19  2.37E-19  2.25E-19  2.58E-19  3.56E-19  1.17E-19  3.06E-19
   2.71E-19  2.15E-19  2.84E-19  6.24E-19  2.01E-19  3.60E-19  7.60E-19  8.02E-19
   6.72E-19  1.47E-19  4.56E-19  1.91E-19  6.32E-19  2.06E-19  1.56E-19  5.69E-19
-  6.97E-19  7.84E-19  3.19E-19  7.54E-19  4.01E-19  5.28E-19  4.65E-19  3.70E-19
-  6.64E-19  3.63E-19  1.20E-19  2.28E-19  4.01E-19  3.40E-19  2.15E-19  8.28E-19
-  9.44E-19  4.36E-19  3.20E-19  3.84E-19  4.52E-19  5.78E-19  6.96E-19  7.03E-19
+  6.97E-19  7.85E-19  3.19E-19  7.54E-19  4.01E-19  5.28E-19  4.65E-19  3.70E-19
+  6.62E-19  3.63E-19  1.20E-19  2.28E-19  4.01E-19  3.40E-19  2.15E-19  8.28E-19
+  9.44E-19  4.36E-19  3.19E-19  3.84E-19  4.52E-19  5.78E-19  6.95E-19  7.03E-19
   4.73E-17  4.58E-17  5.51E-08  1.25E-07
  -2.1011E+00 -1.1520E+00 -1.1520E+00 -1.1520E+00 -9.6527E-01 -4.2839E-01
  -3.8629E-01 -3.8629E-01 -3.0392E-01 -3.0392E-01 -2.9801E-01  8.3122E-02
@@ -869,7 +876,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =      5.992978791001829
+ Compensation charge over spherical meshes =      5.992978791009687
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -941,6 +948,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
+  (This is PAW atomic orbital occupations)
+  (For Wannier orbital occupations, refer to DFT+DMFT occupations above)
 
  == Occupation matrix for correlated orbitals:
 
@@ -957,72 +966,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file
  Using conjugate gradient wavefunctions and energies (kssform=3)
- number of Gamma centered plane waves    973
- number of Gamma centered shells     43
- number of bands    100
- maximum angular momentum components      3
- Conjugate gradient eigenvalues
-   k    eigenvalues [Hartree]
-   1     -2.1011 -1.1520 -1.1520 -1.1520 -0.9653 -0.4284 -0.3863 -0.3863 -0.3039
-         -0.3039 -0.2980  0.0831  0.0977  0.0977  0.1433  0.1433  0.1682  0.1808
-          0.1924  0.1924  0.2789  0.2826  0.2826  0.3703  0.3703  0.4481  0.4481
-          0.4888  0.5466  0.5466  0.5485  0.7748  0.8372  0.8372  0.8709  0.8967
-          0.9545  0.9545  0.9940  0.9940  1.0471  1.0532  1.0532  1.0770  1.1302
-          1.2304  1.2304  1.3242  1.3397  1.3397  1.3548  1.3548  1.3881  1.4633
-          1.5082  1.5082  1.5525  1.5525  1.5859  1.6153  1.6153  1.6744  1.6912
-          1.6912  1.7258  1.7391  1.7960  1.7960  1.8251  1.8467  1.8865  1.8865
-          1.8911  1.9175  1.9175  1.9361  1.9644  1.9676  1.9676  2.0421  2.0421
-          2.0995  2.0995  2.1463  2.1463  2.1768  2.1988  2.2003  2.2003  2.2223
-          2.2944  2.2944  2.3441  2.4020  2.4020  2.4120  2.4475  2.4475  2.5417
-          2.5417
-   2     -2.1011 -1.1530 -1.1520 -1.1520 -0.9644 -0.4287 -0.3853 -0.3833 -0.3054
-         -0.2991 -0.2884  0.0534  0.0860  0.0987  0.1018  0.1104  0.1541  0.1703
-          0.1729  0.1816  0.2840  0.3218  0.3225  0.3699  0.4310  0.4944  0.5012
-          0.5381  0.5499  0.5669  0.6010  0.7228  0.7810  0.8129  0.8431  0.8438
-          0.9295  0.9367  0.9555  0.9880  0.9885  1.0581  1.0857  1.1107  1.1548
-          1.1835  1.1874  1.2522  1.3111  1.3680  1.3919  1.4087  1.4447  1.4699
-          1.4777  1.4953  1.5467  1.5639  1.5806  1.6182  1.6246  1.6501  1.6851
-          1.7010  1.7223  1.7458  1.7526  1.7597  1.8082  1.8480  1.8669  1.8942
-          1.9019  1.9307  1.9392  1.9525  1.9739  2.0033  2.0270  2.0505  2.0570
-          2.1036  2.1123  2.1533  2.1711  2.2035  2.2205  2.2531  2.2680  2.3112
-          2.3242  2.3553  2.3574  2.3860  2.4270  2.4540  2.4695  2.5289  2.5337
-          2.5467
-   3     -2.1011 -1.1530 -1.1530 -1.1519 -0.9638 -0.4123 -0.3923 -0.3838 -0.3050
-         -0.2966 -0.2922  0.0446  0.0573  0.0642  0.0964  0.1037  0.1290  0.1694
-          0.1746  0.2105  0.3228  0.3249  0.3348  0.3965  0.4763  0.5170  0.5319
-          0.5484  0.5580  0.5815  0.6353  0.7209  0.7309  0.7862  0.8028  0.8082
-          0.8354  0.8885  0.9972  1.0124  1.0215  1.0843  1.1098  1.1403  1.1432
-          1.1756  1.2017  1.2605  1.2867  1.3285  1.3647  1.3705  1.3745  1.4430
-          1.4695  1.5008  1.5381  1.5432  1.5766  1.5858  1.5983  1.6245  1.6692
-          1.7121  1.7381  1.7466  1.7548  1.7911  1.8244  1.8280  1.8966  1.9069
-          1.9234  1.9734  1.9871  1.9872  2.0123  2.0612  2.0827  2.1078  2.1176
-          2.1432  2.1559  2.1968  2.2026  2.2117  2.2138  2.2303  2.2595  2.3310
-          2.3315  2.3717  2.3825  2.4168  2.4233  2.4585  2.4821  2.4826  2.5270
-          2.5303
-   4     -2.1011 -1.1529 -1.1529 -1.1529 -0.9632 -0.3956 -0.3817 -0.3817 -0.3124
-         -0.3124 -0.3026  0.0410  0.0647  0.0647  0.0709  0.0819  0.0819  0.2057
-          0.2057  0.2148  0.3400  0.3413  0.3413  0.4736  0.4736  0.5036  0.5097
-          0.5097  0.5749  0.5749  0.6282  0.7334  0.7694  0.7694  0.8108  0.8576
-          0.8713  0.8713  0.9367  0.9367  0.9765  1.0813  1.1218  1.1218  1.1835
-          1.1835  1.2287  1.2752  1.3192  1.3192  1.3460  1.3470  1.3470  1.4286
-          1.4366  1.4366  1.5339  1.5461  1.5461  1.5581  1.5794  1.5794  1.6554
-          1.6554  1.6916  1.7583  1.7777  1.7777  1.8969  1.8969  1.9278  1.9619
-          1.9704  1.9782  1.9782  2.0430  2.0430  2.1147  2.1147  2.1277  2.1387
-          2.1781  2.1781  2.1804  2.1987  2.1987  2.2655  2.2655  2.2858  2.3532
-          2.3532  2.3646  2.4226  2.4454  2.4454  2.4646  2.4779  2.4779  2.5252
-          2.5713
- Test on the normalization of the wavefunctions
-  min sum_G |a(n,k,G)| =  1.000000
-  max sum_G |a(n,k,G)| =  1.000000
- Test on the orthogonalization of the wavefunctions
-  min sum_G a(n,k,G)a(n',k,G) =  0.000000
-  max sum_G a(n,k,G)a(n',k,G) =  0.000000
-
+ outkss: Not allowed options found !
+ Program does not stop but _KSS file will not be created...
+ outkss: see the log file for more information.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   6.3930E-08; max=  7.9281E-06
+ Mean square residual over all n,k,spin=   63.930E-09; max=  79.281E-07
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1059,7 +1010,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =   16   -> not optimal: autoparal keyword recommended in input file
+-   nproc =   32
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1085,9 +1036,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/V.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -1105,9 +1056,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -1125,9 +1076,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/O.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -1225,9 +1176,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................  592
+  Size of radial mesh ............................  910
   Size of radial mesh for partial waves...........  910
-  Size of radial mesh for [pseudo] core density...  592
+  Size of radial mesh for [pseudo] core density...  910
   Size of radial mesh for pseudo valence density..  910
   No of Q-points for tcorespl and tvalespl ....... 3001
   No of Q-points for the radial shape functions ..    0
@@ -1241,12 +1192,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Number of (i,j) elements for PAW+U or EXX .....    3
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has Fock   .....................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
-  Has vhtnzc .....................................    0
-  Has vhnzc ......................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
   Has nabla ......................................    2
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -1271,9 +1224,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................ 1084
+  Size of radial mesh ............................ 1500
   Size of radial mesh for partial waves........... 1500
-  Size of radial mesh for [pseudo] core density... 1084
+  Size of radial mesh for [pseudo] core density... 1500
   Size of radial mesh for pseudo valence density.. 1500
   No of Q-points for tcorespl and tvalespl ....... 3001
   No of Q-points for the radial shape functions ..    0
@@ -1284,12 +1237,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has Fock   .....................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
-  Has vhtnzc .....................................    0
-  Has vhnzc ......................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
   Has nabla ......................................    2
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -1313,9 +1268,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    3
   lmn2_size ......................................   36
   lmnmix_sz ......................................   36
-  Size of radial mesh ............................ 1311
+  Size of radial mesh ............................ 2001
   Size of radial mesh for partial waves........... 2001
-  Size of radial mesh for [pseudo] core density... 1311
+  Size of radial mesh for [pseudo] core density... 2001
   Size of radial mesh for pseudo valence density.. 2001
   No of Q-points for tcorespl and tvalespl ....... 3001
   No of Q-points for the radial shape functions ..    0
@@ -1326,12 +1281,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has Fock   .....................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
-  Has vhtnzc .....................................    0
-  Has vhnzc ......................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
   Has nabla ......................................    2
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -1348,14 +1305,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 - screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 23
 - Remaining bands to be divided among processors   nbcw = 77
-- Number of bands treated by each node ~4
+- Number of bands treated by each node ~2
 
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      5.992978791001829
- Compensation charge over fine fft grid    =      5.993710068172701
+ Compensation charge over spherical meshes =      5.992978791009687
+ Compensation charge over fine fft grid    =      5.993710068180687
 
 
  Total number of electrons per unit cell =   41.0000 (Spherical mesh),   41.0007 (FFT mesh)
@@ -1506,10 +1463,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
-        0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
 
     2  -0.000 -29.822  -4.528  -0.332  -0.332  -0.334  -0.334  -8.128  -7.830
-       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+       -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.6122   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1573,7 +1530,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2  -0.000 -31.686  -3.601  -4.249  -4.249  -4.253  -4.253  -9.795  -9.514
-        0.000  -6.554  -4.809  -1.124  -1.124  -1.128  -1.128  -5.537  -5.157
+        0.000  -6.555  -4.809  -1.124  -1.124  -1.128  -1.128  -5.537  -5.157
 
   chi0(G,G') at the   10 th omega   5.5102   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1588,8 +1545,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
     1  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
-    2  -0.000 -20.664   6.424   1.362   1.362   1.357   1.357   2.713   2.518
-        0.000 -32.559 -28.930  -8.419  -8.419  -8.423  -8.423 -27.466 -26.919
+    2  -0.000 -20.664   6.423   1.362   1.362   1.357   1.357   2.713   2.518
+        0.000 -32.560 -28.930  -8.419  -8.419  -8.423  -8.423 -27.466 -26.919
 
   chi0(G,G') at the   12 th omega   6.7347   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1605,7 +1562,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2  -0.000 -20.365   5.861   2.328   2.328   2.327   2.327   2.622   2.349
-        0.000 -24.969 -20.635  -7.486  -7.486  -7.488  -7.488 -18.808 -18.244
+        0.000 -24.969 -20.635  -7.486  -7.486  -7.488  -7.488 -18.808 -18.245
 
   chi0(G,G') at the   14 th omega   7.9592   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1859,7 +1816,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    Upper and lower wings at the   26 th omega  15.3061   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.339  -0.014   0.014  -0.028   0.028  -0.042   0.042  -0.014   0.014
-     -0.644  -0.043   0.043  -0.085   0.085  -0.128   0.128   0.030  -0.030
+     -0.644  -0.043   0.042  -0.085   0.085  -0.128   0.128   0.030  -0.030
        1       2       3       4       5       6       7       8       9
       0.339  -0.014   0.014  -0.028   0.028  -0.042   0.042  -0.014   0.014
      -0.644  -0.042   0.042  -0.085   0.085  -0.128   0.128   0.030  -0.030
@@ -2089,7 +2046,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.531  -4.713  -4.093  -4.714  -4.098  -4.713  -4.093  -1.090  -1.341
-        0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
 
     2  -4.713 -30.986  -8.295  -1.037  -1.202  -1.039  -1.204  -9.777  -6.816
         0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
@@ -2148,14 +2105,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -18.309  -8.587  -4.590  -8.586  -4.592  -8.586  -4.591  -3.279   0.420
 
     2  -0.335 -23.652  -2.875  -5.999  -5.745  -6.008  -5.742  -9.686  -8.324
-       -8.587 -18.866 -14.331   0.088   1.443   0.088   1.441  -9.761  -5.629
+       -8.587 -18.867 -14.331   0.088   1.443   0.088   1.441  -9.761  -5.629
 
   chi0(G,G') at the    9 th omega   4.8980   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -4.375  -0.253  -2.482  -0.255  -2.488  -0.254  -2.482  -0.855  -3.365
+    1  -4.376  -0.253  -2.482  -0.255  -2.488  -0.254  -2.482  -0.855  -3.365
       -18.349 -12.448  -8.852 -12.447  -8.853 -12.447  -8.853  -8.661  -3.194
 
-    2  -0.253 -25.713  -2.476  -6.072  -5.619  -6.072  -5.621  -9.344  -7.401
+    2  -0.253 -25.714  -2.476  -6.072  -5.619  -6.072  -5.621  -9.344  -7.401
       -12.448 -19.058 -14.536  -7.232  -4.577  -7.231  -4.573 -13.220  -7.794
 
   chi0(G,G') at the   10 th omega   5.5102   0.0000 [eV]
@@ -2163,7 +2120,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
     1  -3.380   1.802  -0.732   1.802  -0.731   1.800  -0.732   0.494  -3.144
        -9.105  -6.406  -4.960  -6.405  -4.960  -6.405  -4.959  -4.764  -1.997
 
-    2   1.802 -28.831  -5.611  -3.273  -3.411  -3.280  -3.420 -11.560  -8.923
+    2   1.802 -28.832  -5.611  -3.273  -3.411  -3.280  -3.420 -11.560  -8.923
        -6.406 -12.374  -8.856  -4.809  -3.475  -4.806  -3.476  -9.207  -5.638
 
   chi0(G,G') at the   11 th omega   6.1224   0.0000 [eV]
@@ -2172,7 +2129,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -10.832  -8.648  -5.297  -8.639  -5.275  -8.652  -5.298  -6.395  -2.731
 
     2   1.545 -23.985  -1.720  -1.676  -2.771  -1.685  -2.782  -4.369  -4.187
-       -8.648 -27.876 -20.702 -10.444  -6.118 -10.465  -6.134 -23.928 -14.528
+       -8.648 -27.877 -20.702 -10.444  -6.118 -10.465  -6.134 -23.928 -14.528
 
   chi0(G,G') at the   12 th omega   6.7347   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2185,7 +2142,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the   13 th omega   7.3469   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.792   0.386  -2.883   0.375  -2.902   0.383  -2.882   0.221  -2.263
-      -24.715 -14.737 -12.523 -14.734 -12.524 -14.736 -12.527  -7.285  -5.405
+      -24.715 -14.737 -12.523 -14.734 -12.524 -14.736 -12.527  -7.285  -5.406
 
     2   0.386 -20.311   1.710   2.687   0.603   2.665   0.600   2.552  -1.398
       -14.737 -25.283 -19.145 -12.097  -8.424 -12.083  -8.433 -15.776 -10.540
@@ -2256,7 +2213,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    6 th omega   3.0612   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -15.533  -3.365  -2.508  -8.524  -8.522  -3.366  -2.512  -3.534  -2.685
-      -13.523  -9.168  -5.305   2.096   2.096  -9.168  -5.304   3.924   4.536
+      -13.523  -9.168  -5.305   2.096   2.096  -9.168  -5.305   3.924   4.536
 
     2  -3.365 -35.644 -10.925  -1.581  -1.584   1.366   1.017 -13.477 -11.390
        -9.168 -17.398 -11.169   8.119   8.118  -4.970  -3.414  -0.427   0.503
@@ -2272,7 +2229,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    8 th omega   4.2857   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -5.942  -0.696  -3.517  -6.339  -6.338  -0.700  -3.522  -6.958  -7.420
-      -10.560  -2.902  -0.111  -6.477  -6.477  -2.901  -0.113  -1.914   0.218
+      -10.561  -2.902  -0.111  -6.477  -6.477  -2.901  -0.113  -1.914   0.218
 
     2  -0.696 -23.030  -2.511  -8.503  -8.506  -1.560  -1.089 -10.591  -9.035
        -2.902 -14.909 -11.112  -0.382  -0.381   3.911   4.150  -9.513  -8.323
@@ -2296,7 +2253,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the   11 th omega   6.1224   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -5.471   2.338  -0.720  -1.035  -1.034   2.338  -0.719   0.748  -1.299
-       -6.897  -3.421  -1.142  -7.874  -7.874  -3.422  -1.136  -4.940  -3.322
+       -6.898  -3.421  -1.142  -7.874  -7.874  -3.422  -1.136  -4.940  -3.322
 
     2   2.338 -18.287   2.431  -2.402  -2.405  -1.106  -1.603  -3.624  -2.402
        -3.421 -25.738 -21.031  -6.467  -6.467  -4.641  -1.805 -21.040 -16.796
@@ -2346,7 +2303,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
        -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000
 
     2  -2.379 -32.035  -7.021   0.041  -0.286  -1.378  -1.380  -8.632  -7.116
-        0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+        0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.6122   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2378,7 +2335,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
        -1.871  -0.821  -0.821  -0.580   0.252  -0.822  -0.822   0.062   0.453
 
     2  -3.467 -37.637 -11.941   0.552   0.302  -0.141  -0.143 -12.044  -9.443
-       -0.821  -2.305  -2.049  -0.007   0.294   0.684   0.684  -1.249  -0.777
+       -0.821  -2.306  -2.049  -0.007   0.294   0.684   0.684  -1.249  -0.777
 
   chi0(G,G') at the    6 th omega   3.0612   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2410,7 +2367,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
        -6.047  -5.474  -5.474  -0.399   1.229  -5.477  -5.477  -1.433   0.337
 
     2  -0.709 -31.047  -3.728  -4.714  -3.391  -5.628  -5.630  -9.093  -8.279
-       -5.474 -10.636  -8.880  -2.486  -0.627  -5.877  -5.877  -6.935  -4.192
+       -5.474 -10.637  -8.880  -2.486  -0.627  -5.877  -5.877  -6.935  -4.192
 
   chi0(G,G') at the   10 th omega   5.5102   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2430,7 +2387,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   chi0(G,G') at the   12 th omega   6.7347   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -5.995  -1.678  -1.678   1.617  -1.581  -1.678  -1.678   0.614  -0.884
+    1  -5.996  -1.678  -1.678   1.617  -1.581  -1.678  -1.678   0.614  -0.884
        -2.275  -1.952  -1.952   0.240   0.548  -1.955  -1.955  -0.036   0.268
 
     2  -1.678 -25.421   1.825  -1.021  -0.671  -3.261  -3.263   0.900  -1.325
@@ -2442,7 +2399,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -12.451 -10.957 -10.957   1.361   2.066 -10.957 -10.957  -0.199   0.587
 
     2   1.473 -21.583   5.285   3.856   2.846   2.082   2.086   3.366  -0.486
-      -10.957 -30.555 -26.818  -4.902  -1.178 -15.278 -15.289 -15.932 -12.154
+      -10.957 -30.556 -26.818  -4.902  -1.178 -15.278 -15.289 -15.932 -12.154
 
   chi0(G,G') at the   14 th omega   7.9592   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2470,10 +2427,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -24.780  -3.508  -4.913  -8.010  -6.848  -8.010  -6.849  -0.917  -1.074
-       -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2  -3.508 -31.985  -6.586  -1.118  -1.125  -1.115  -1.149  -5.942  -5.838
-        0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000
 
   chi0(G,G') at the    2 th omega   0.6122   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2509,8 +2466,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   chi0(G,G') at the    6 th omega   3.0612   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -33.860  -5.335  -8.608 -12.650  -9.747 -12.650  -9.747  -0.362  -0.771
-      -12.661  -3.844  -9.986  -1.328  -0.572  -1.329  -0.571   1.806   0.967
+    1 -33.861  -5.335  -8.608 -12.650  -9.747 -12.650  -9.747  -0.362  -0.771
+      -12.662  -3.844  -9.986  -1.328  -0.572  -1.329  -0.571   1.806   0.967
 
     2  -5.335 -37.124 -12.345  -0.947  -0.486  -0.942  -0.507  -8.654  -7.943
        -3.844  -3.991  -5.754   0.799   1.150   0.803   1.153  -0.599  -0.039
@@ -2549,10 +2506,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   chi0(G,G') at the   11 th omega   6.1224   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -14.099  -3.530   1.721  -0.526  -2.793  -0.526  -2.802  -2.157  -1.139
+    1 -14.099  -3.530   1.721  -0.526  -2.792  -0.526  -2.802  -2.157  -1.139
       -21.026  -2.265  -7.596 -19.512 -13.948 -19.514 -13.961  -3.141  -6.207
 
-    2  -3.530 -28.973   0.823  -1.459  -2.625  -1.465  -2.678  -1.883  -3.249
+    2  -3.530 -28.974   0.823  -1.459  -2.625  -1.465  -2.678  -1.883  -3.249
        -2.265 -12.325 -12.499  -2.387  -0.957  -2.422  -0.960  -8.146  -8.035
 
   chi0(G,G') at the   12 th omega   6.7347   0.0000 [eV]
@@ -2569,7 +2526,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -16.850  -9.031 -10.352  -9.046  -7.471  -9.048  -7.472  -3.995  -4.546
 
     2  -5.817 -30.480  -2.927  -1.826  -2.172  -1.842  -2.240  -2.089  -4.555
-       -9.031 -11.682 -11.104  -3.784  -3.111  -3.831  -3.136  -4.663  -5.189
+       -9.031 -11.683 -11.104  -3.784  -3.111  -3.831  -3.136  -4.663  -5.189
 
   chi0(G,G') at the   14 th omega   7.9592   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2581,8 +2538,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   chi0(G,G') at the   15 th omega   8.5714   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -11.353   3.475  12.504   8.644   2.563   8.646   2.555   4.104   6.475
-      -21.389  -5.640  -6.802 -14.398 -13.294 -14.393 -13.294  -2.331  -4.353
+    1 -11.354   3.475  12.504   8.644   2.563   8.646   2.555   4.104   6.475
+      -21.389  -5.640  -6.801 -14.398 -13.294 -14.393 -13.294  -2.331  -4.353
 
     2   3.475 -27.770   4.543   4.587   3.464   4.607   3.425   0.731  -0.945
        -5.640  -9.220 -11.467  -2.662  -2.014  -2.692  -2.028  -3.992  -6.957
@@ -2597,7 +2554,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.783  -1.869  -2.717  -7.504  -7.507  -6.481  -5.562  -1.047  -0.991
-        0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
 
     2  -1.869 -30.655  -4.345  -1.132  -1.142   0.083  -0.152  -5.519  -6.399
         0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000
@@ -2664,7 +2621,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -20.976   0.326  -5.593 -16.498 -16.497 -14.050  -9.844  -1.388  -6.993
 
     2  -3.992 -26.103   3.558  -2.969  -2.974  -3.284  -3.529  -1.252  -2.098
-        0.326  -9.647 -11.917  -1.351  -1.350   2.314   2.123  -7.375  -9.599
+        0.326  -9.648 -11.917  -1.351  -1.350   2.314   2.123  -7.375  -9.599
 
   chi0(G,G') at the   10 th omega   5.5102   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2712,7 +2669,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -22.954  -4.687  -5.698 -14.238 -14.239 -17.354 -15.601  -1.811  -4.967
 
     2   0.106 -28.739   2.448   2.069   2.038   0.100  -0.211  -1.279  -2.256
-       -4.687  -8.439 -11.474  -1.664  -1.666  -4.713  -3.015  -2.969  -6.318
+       -4.687  -8.440 -11.474  -1.664  -1.666  -4.713  -3.015  -2.969  -6.318
 
  No. of calculated frequencies >  15, stop printing
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     65.63  [%]
@@ -2724,7 +2681,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -18.105   0.061  -0.127  -6.090  -6.090  -6.088  -6.090   0.039   0.421
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
+        0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
 
     2   0.061 -28.989  -1.613  -0.056  -0.056  -0.051  -0.077  -4.769  -5.458
         0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
@@ -2764,7 +2721,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    6 th omega   3.0612   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -19.361   2.737   5.413  -8.814  -8.814  -8.813  -8.815   1.468   1.987
-      -25.496  -3.828 -22.383  -4.327  -4.327  -4.327  -4.327   2.316  -1.959
+      -25.497  -3.828 -22.383  -4.327  -4.327  -4.327  -4.327   2.316  -1.959
 
     2   2.737 -32.309  -4.075   1.369   1.369   1.371   1.349  -7.024  -7.941
        -3.828  -2.704  -6.548   0.355   0.355   0.355   0.356  -0.951  -1.857
@@ -2822,7 +2779,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
     1 -17.556  -0.906   6.353  -0.207  -0.207  -0.201  -0.208   0.120   3.651
        -8.489   0.905   3.600  -3.860  -3.860  -3.861  -3.857   0.284  -0.995
 
-    2  -0.906 -28.324   1.210   0.844   0.844   0.845   0.787  -1.708  -2.134
+    2  -0.906 -28.324   1.210   0.844   0.844   0.846   0.787  -1.708  -2.134
         0.905  -3.754  -3.859  -0.474  -0.474  -0.490  -0.467  -1.965  -2.918
 
   chi0(G,G') at the   14 th omega   7.9592   0.0000 [eV]
@@ -2854,7 +2811,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
         0.000   0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
 
     2  -5.910 -33.766 -10.458  -0.968  -1.036  -3.004  -2.651  -4.468  -6.370
-       -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
   chi0(G,G') at the    2 th omega   0.6122   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2899,7 +2856,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    7 th omega   3.6735   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -48.496  -8.854 -15.688  -8.852 -15.686 -23.197 -17.609   0.968   0.742
-       -7.773  -1.178  -2.736  -1.172  -2.730  -4.062  -2.071   1.718   1.850
+       -7.774  -1.178  -2.736  -1.172  -2.730  -4.062  -2.071   1.718   1.850
 
     2  -8.854 -44.534 -22.416   2.081   2.137  -4.171  -2.619  -7.314 -12.659
        -1.178  -4.738  -5.361   2.053   2.270   0.422   0.766  -1.078  -2.241
@@ -2907,7 +2864,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    8 th omega   4.2857   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -12.610  -4.090  -0.312  -4.082  -0.318  -8.591 -10.774  -3.942  -4.244
-      -29.017  -4.883 -13.090  -4.896 -13.086 -13.964  -8.772   4.133   1.272
+      -29.018  -4.883 -13.090  -4.896 -13.086 -13.964  -8.772   4.133   1.272
 
     2  -4.090 -23.905   2.704  -5.514  -5.448  -9.451 -10.043  -1.946   0.642
        -4.883 -16.718 -19.210   4.956   4.407   1.630   2.927  -4.556 -10.846
@@ -2918,7 +2875,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -20.773  -7.159 -13.997  -7.166 -13.996 -14.249  -8.929  -1.088  -7.959
 
     2  -7.814 -30.827  -6.176  -5.639  -6.128  -7.740  -7.398  -4.578  -5.072
-       -7.159  -9.800 -12.515  -0.590  -2.832  -4.420  -2.529  -3.894  -8.788
+       -7.159  -9.801 -12.515  -0.590  -2.832  -4.420  -2.529  -3.894  -8.788
 
   chi0(G,G') at the   10 th omega   5.5102   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2939,7 +2896,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the   12 th omega   6.7347   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -13.244  -2.059   5.007  -2.058   5.011   3.903  -0.809   0.004   5.767
-      -13.986  -5.388  -7.550  -5.401  -7.546 -10.177  -8.028  -1.809  -3.432
+      -13.987  -5.388  -7.550  -5.401  -7.546 -10.177  -8.028  -1.809  -3.432
 
     2  -2.059 -27.228   0.432  -2.154  -0.303  -0.852  -1.700  -0.911   2.385
        -5.388  -7.681  -8.181  -1.247  -1.540  -3.083  -2.414  -3.146  -5.214
@@ -2955,7 +2912,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the   14 th omega   7.9592   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -35.587  -9.851  -9.122  -9.829  -9.139 -16.487 -16.360  -1.187  -2.328
-      -19.401  -7.219  -8.402  -7.215  -8.389 -15.065 -12.537   2.178   0.378
+      -19.402  -7.219  -8.402  -7.215  -8.389 -15.065 -12.537   2.178   0.378
 
     2  -9.851 -36.799 -13.137  -2.677  -3.578  -8.260  -7.304  -2.864  -5.820
        -7.219  -9.492 -11.361  -0.537  -0.583  -5.213  -4.081  -2.400  -4.539
@@ -2963,7 +2920,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the   15 th omega   8.5714   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -8.282   5.800  14.995   5.789  14.982  15.519   8.155   2.597  12.244
-      -26.437 -11.153 -14.406 -11.154 -14.409 -19.504 -16.858  -0.485  -5.807
+      -26.437 -11.153 -14.406 -11.154 -14.408 -19.504 -16.858  -0.485  -5.807
 
     2   5.800 -28.306   3.706   5.183   7.755   8.770   6.005   1.189   7.508
       -11.153 -12.970 -15.779  -2.012  -3.936  -7.241  -5.918  -3.669  -7.822
@@ -2978,7 +2935,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.333  -4.731  -6.679  -4.731  -6.679  -9.623  -9.624  -0.574   0.607
-        0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000
 
     2  -4.731 -32.962  -9.038  -0.039   0.223  -2.879  -2.899  -3.768  -5.293
        -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000
@@ -3018,10 +2975,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   chi0(G,G') at the    6 th omega   3.0612   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -36.944  -6.210 -10.053  -6.209 -10.052 -12.767 -12.768   0.728   1.315
-      -25.270 -11.472 -22.728 -11.472 -22.728  11.115  11.115  -5.143 -20.866
+      -25.271 -11.472 -22.728 -11.472 -22.728  11.115  11.115  -5.143 -20.866
 
     2  -6.210 -37.882 -14.290   1.700   1.858  -2.622  -2.640  -4.840  -7.718
-      -11.472  -9.252 -13.001  -2.962  -9.602   6.424   6.426  -3.633 -11.784
+      -11.472  -9.252 -13.000  -2.962  -9.602   6.424   6.426  -3.633 -11.784
 
   chi0(G,G') at the    7 th omega   3.6735   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -3037,19 +2994,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -20.062  -0.651  -5.241  -0.653  -5.238 -14.383 -14.382   5.604   8.217
 
     2  -4.986 -30.497  -4.187  -1.096  -1.911  -7.419  -7.436  -2.962  -2.275
-       -0.651 -12.378 -13.819   5.629   7.453  -0.268  -0.261  -2.675  -6.336
+       -0.651 -12.379 -13.819   5.629   7.452  -0.268  -0.261  -2.675  -6.336
 
   chi0(G,G') at the    9 th omega   4.8980   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.543  -5.580  -6.146  -5.578  -6.147 -11.756 -11.756  -4.569  -5.182
-      -19.367  -4.645  -9.663  -4.644  -9.663 -15.490 -15.490   2.726  -0.652
+      -19.368  -4.645  -9.663  -4.644  -9.663 -15.490 -15.490   2.726  -0.652
 
     2  -5.580 -29.269  -3.616  -3.815  -4.377  -5.783  -5.795  -3.250  -3.353
        -4.645  -9.975 -12.349   2.686   1.957  -4.841  -4.838  -2.870  -6.274
 
   chi0(G,G') at the   10 th omega   5.5102   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -25.655  -5.461  -5.044  -5.459  -5.045 -11.958 -11.960  -3.046  -1.827
+    1 -25.656  -5.461  -5.044  -5.459  -5.045 -11.958 -11.960  -3.046  -1.827
       -12.823  -3.739  -8.467  -3.738  -8.467 -11.144 -11.141  -1.481  -4.707
 
     2  -5.461 -31.180  -5.743  -2.434  -2.173  -5.698  -5.711  -3.333  -3.385
@@ -3061,7 +3018,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -24.342  -4.771 -13.610  -4.770 -13.610 -21.489 -21.487   0.771  -5.422
 
     2  -4.333 -30.657  -3.815  -1.957  -0.269  -6.470  -6.486  -2.287  -0.648
-       -4.771 -11.387 -12.395   3.006   0.963  -4.849  -4.818  -3.706  -7.697
+       -4.771 -11.388 -12.395   3.006   0.963  -4.849  -4.818  -3.706  -7.697
 
   chi0(G,G') at the   12 th omega   6.7347   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -3136,7 +3093,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   chi0(G,G') at the    5 th omega   2.4490   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -36.912  -8.687 -12.426  -8.700 -12.422  -8.686 -12.428  -3.353  -4.601
+    1 -36.913  -8.687 -12.426  -8.700 -12.422  -8.686 -12.428  -3.353  -4.601
        -0.941  -0.218  -0.422  -0.218  -0.422  -0.218  -0.422   0.055  -0.020
 
     2  -8.687 -36.412 -14.704  -2.588  -3.387  -2.576  -3.409  -6.045  -9.139
@@ -3144,7 +3101,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   chi0(G,G') at the    6 th omega   3.0612   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -41.792  -9.868 -14.795  -9.880 -14.790  -9.868 -14.797  -3.075  -4.836
+    1 -41.793  -9.868 -14.795  -9.880 -14.790  -9.868 -14.797  -3.075  -4.836
        -1.751  -0.431  -0.788  -0.431  -0.788  -0.431  -0.788   0.097  -0.079
 
     2  -9.868 -39.324 -17.893  -2.131  -3.060  -2.120  -3.083  -6.975 -11.000
@@ -3172,11 +3129,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       -15.323  -5.875 -11.155  -5.875 -11.153  -5.876 -11.156  -2.117  -7.678
 
     2 -11.542 -32.834 -10.964  -7.042  -9.644  -7.029  -9.669  -5.551  -8.547
-       -5.875  -7.486  -8.930  -1.646  -3.510  -1.646  -3.515  -3.320  -7.217
+       -5.875  -7.487  -8.930  -1.646  -3.510  -1.646  -3.515  -3.320  -7.217
 
   chi0(G,G') at the   10 th omega   5.5102   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -34.440 -10.554 -12.994 -10.567 -12.990 -10.554 -12.998  -7.001  -9.742
+    1 -34.440 -10.554 -12.994 -10.567 -12.990 -10.553 -12.998  -7.001  -9.742
       -19.415  -7.219 -14.468  -7.217 -14.467  -7.219 -14.470  -2.812 -10.261
 
     2 -10.554 -33.597 -10.858  -5.721  -7.624  -5.708  -7.650  -5.288  -7.392
@@ -3208,7 +3165,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   chi0(G,G') at the   14 th omega   7.9592   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -55.997 -21.999 -24.821 -22.030 -24.816 -21.999 -24.819  -8.107 -12.297
+    1 -55.998 -21.999 -24.821 -22.030 -24.816 -21.999 -24.819  -8.107 -12.297
       -26.741 -12.518 -15.819 -12.530 -15.808 -12.530 -15.812  -1.922  -6.288
 
     2 -21.999 -46.017 -27.868 -10.004 -12.271  -9.975 -12.290  -8.910 -16.316
@@ -3219,7 +3176,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
     1  10.249  16.844  29.483  16.828  29.478  16.851  29.477   9.501  26.222
       -25.265 -12.530 -16.966 -12.536 -16.963 -12.536 -16.964  -3.676 -10.327
 
-    2  16.844 -19.773  14.628  11.075  17.041  11.121  17.032   5.908  16.584
+    2  16.844 -19.774  14.628  11.075  17.041  11.121  17.032   5.908  16.584
       -12.530 -12.856 -15.435  -4.521  -6.936  -4.538  -6.940  -5.266  -9.889
 
  No. of calculated frequencies >  15, stop printing
@@ -3227,7 +3184,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =   16   -> not optimal: autoparal keyword recommended in input file
+-   nproc =   32
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -3255,9 +3212,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/V.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -3275,9 +3232,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -3295,9 +3252,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/O.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -3376,8 +3333,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.0038 eV
-     The bare interaction (for a renorm. wfn ) =     22.5848 eV
+     The bare interaction (no renormalization) =     16.3156 eV
+     The bare interaction (for a renorm. wfn ) =     23.0248 eV
  =======================================================================
 
  ==================================== 
@@ -3395,9 +3352,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................  592
+  Size of radial mesh ............................  910
   Size of radial mesh for partial waves...........  910
-  Size of radial mesh for [pseudo] core density...  592
+  Size of radial mesh for [pseudo] core density...  910
   Size of radial mesh for pseudo valence density..  910
   No of Q-points for tcorespl and tvalespl .......  300
   No of Q-points for the radial shape functions ..    0
@@ -3411,12 +3368,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Number of (i,j) elements for PAW+U or EXX .....    3
   Number of projectors on which U or EXX acts ....    2
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has Fock   .....................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
-  Has vhtnzc .....................................    0
-  Has vhnzc ......................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
   Has nabla ......................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -3441,9 +3400,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
   lmn2_size ......................................  171
   lmnmix_sz ......................................  171
-  Size of radial mesh ............................ 1084
+  Size of radial mesh ............................ 1500
   Size of radial mesh for partial waves........... 1500
-  Size of radial mesh for [pseudo] core density... 1084
+  Size of radial mesh for [pseudo] core density... 1500
   Size of radial mesh for pseudo valence density.. 1500
   No of Q-points for tcorespl and tvalespl .......  300
   No of Q-points for the radial shape functions ..    0
@@ -3454,12 +3413,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has Fock   .....................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
-  Has vhtnzc .....................................    0
-  Has vhnzc ......................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
   Has nabla ......................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -3483,9 +3444,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Max L+1 leading to non-zero Gaunt (pawlcutd) ...    3
   lmn2_size ......................................   36
   lmnmix_sz ......................................   36
-  Size of radial mesh ............................ 1311
+  Size of radial mesh ............................ 2001
   Size of radial mesh for partial waves........... 2001
-  Size of radial mesh for [pseudo] core density... 1311
+  Size of radial mesh for [pseudo] core density... 2001
   Size of radial mesh for pseudo valence density.. 2001
   No of Q-points for tcorespl and tvalespl .......  300
   No of Q-points for the radial shape functions ..    0
@@ -3496,12 +3457,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has Fock   .....................................    2
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    1
-  Has vhtnzc .....................................    0
-  Has vhnzc ......................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
   Has nabla ......................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
@@ -3518,8 +3481,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      5.992978791001829
- Compensation charge over fine fft grid    =      5.993710068172701
+ Compensation charge over spherical meshes =      5.992978791009687
+ Compensation charge over fine fft grid    =      5.993710068180687
 
 
  Total number of electrons per unit cell =   41.0000 (Spherical mesh),   41.0007 (FFT mesh)
@@ -3648,7 +3611,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    4  0.450  0.456  0.375 15.838  0.448
    5  0.210  0.452  0.530  0.448 16.290
 
-   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6268    0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6268   -0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
@@ -3682,9 +3645,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    4  2.505  2.593  3.022  3.493  2.603
    5  3.137  2.710  2.626  2.603  3.764
 
-  Hubbard cRPA interaction for w =  1, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    2.9218    0.0000
+  Hubbard cRPA interaction for w =  1, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    2.9218   -0.0000
 
-  (Hubbard cRPA interaction for w =   1, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.6565    0.0000)
+  (Hubbard cRPA interaction for w =   1, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.6565   -0.0000)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -3733,6 +3696,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    3  0.493  0.284  3.847  0.358  0.435
    4  0.418  0.423  0.358  3.466  0.422
    5  0.207  0.425  0.435  0.422  3.736
+
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5729   -0.0003
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -4362,7 +4327,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   Hubbard cRPA interaction for w = 18, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   -1.5524   -3.9392
 
-  (Hubbard cRPA interaction for w =  18, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   -0.8153   -3.9618)
+  (Hubbard cRPA interaction for w =  18, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   -0.8153   -3.9617)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4522,7 +4487,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   Hubbard cRPA interaction for w = 22, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   -7.2462   -6.9215
 
-  (Hubbard cRPA interaction for w =  22, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   -6.5294   -6.9731)
+  (Hubbard cRPA interaction for w =  22, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   -6.5293   -6.9731)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4548,7 +4513,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Diagonal cRPA interaction
    1 -6.974
    2 -6.530
-   3 -6.678
+   3 -6.677
    4 -7.200
    5 -6.703
 
@@ -4556,7 +4521,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  -      1      2      3      4      5
    1 -6.974 -7.753 -8.044 -8.095 -7.326
    2 -7.753 -6.530 -7.278 -7.869 -7.641
-   3 -8.044 -7.278 -6.678 -7.604 -7.916
+   3 -8.044 -7.278 -6.677 -7.604 -7.916
    4 -8.095 -7.869 -7.604 -7.200 -7.999
    5 -7.326 -7.641 -7.916 -7.999 -6.703
 
@@ -4568,7 +4533,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  -      1      2      3      4      5
    1 -6.974  0.433  0.499  0.425  0.207
    2  0.433 -6.530  0.286  0.428  0.430
-   3  0.499  0.286 -6.678  0.360  0.450
+   3  0.499  0.286 -6.677  0.360  0.450
    4  0.425  0.428  0.360 -7.200  0.426
    5  0.207  0.430  0.450  0.426 -6.703
 
@@ -4578,7 +4543,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  -      1      2      3      4      5
    1 -6.974  0.433  0.499  0.425  0.207
    2  0.433 -6.530  0.286  0.428  0.430
-   3  0.499  0.286 -6.678  0.360  0.450
+   3  0.499  0.286 -6.677  0.360  0.450
    4  0.425  0.428  0.360 -7.200  0.426
    5  0.207  0.430  0.450  0.426 -6.703
 
@@ -4600,9 +4565,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    4  0.249  0.573  1.063  1.261  0.540
    5  1.129  0.897  0.826  0.540  1.954
 
-  Hubbard cRPA interaction for w = 24, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    0.9645  -35.8162
+  Hubbard cRPA interaction for w = 24, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    0.9646  -35.8161
 
-  (Hubbard cRPA interaction for w =  24, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    1.7247  -35.8572)
+  (Hubbard cRPA interaction for w =  24, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    1.7248  -35.8570)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4634,15 +4599,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1 20.386 19.543 19.439 19.389 19.984
+   1 20.386 19.543 19.439 19.388 19.983
    2 19.543 20.719 20.166 19.565 19.603
    3 19.439 20.166 20.971 20.033 19.516
-   4 19.389 19.565 20.033 20.431 19.433
-   5 19.984 19.603 19.516 19.433 20.557
+   4 19.388 19.565 20.032 20.431 19.433
+   5 19.983 19.603 19.516 19.433 20.557
 
-  Hubbard cRPA interaction for w = 25, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   19.8562  -13.7879
+  Hubbard cRPA interaction for w = 25, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   19.8561  -13.7879
 
-  (Hubbard cRPA interaction for w =  25, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   20.6130  -13.8207)
+  (Hubbard cRPA interaction for w =  25, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   20.6128  -13.8207)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4680,7 +4645,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    4  3.408  3.598  3.923  4.441  3.416
    5  3.916  3.585  3.392  3.416  4.444
 
-  Hubbard cRPA interaction for w = 26, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    3.8057  -12.4934
+  Hubbard cRPA interaction for w = 26, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    3.8056  -12.4933
 
   (Hubbard cRPA interaction for w =  26, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    4.5433  -12.5408)
 
@@ -4710,7 +4675,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    2 19.509
    3 19.989
    4 19.251
-   5 19.732
+   5 19.731
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4718,11 +4683,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    2 18.358 19.509 19.061 18.351 18.569
    3 18.355 19.061 19.989 18.939 18.582
    4 18.220 18.351 18.939 19.251 18.409
-   5 19.002 18.569 18.582 18.409 19.732
+   5 19.002 18.569 18.582 18.409 19.731
 
   Hubbard cRPA interaction for w = 27, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   18.7770   -6.7022
 
-  (Hubbard cRPA interaction for w =  27, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   19.5468   -6.7338)
+  (Hubbard cRPA interaction for w =  27, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   19.5467   -6.7338)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4730,7 +4695,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    2  0.433 19.509  0.285  0.428  0.428
    3  0.498  0.285 19.989  0.360  0.476
    4  0.423  0.428  0.360 19.251  0.425
-   5  0.207  0.428  0.476  0.425 19.732
+   5  0.207  0.428  0.476  0.425 19.731
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5887   -0.0133
 
@@ -4740,7 +4705,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    2  0.433 19.509  0.285  0.428  0.428
    3  0.498  0.285 19.989  0.360  0.476
    4  0.423  0.428  0.360 19.251  0.425
-   5  0.207  0.428  0.476  0.425 19.732
+   5  0.207  0.428  0.476  0.425 19.731
 
  --- For frequency w =  28  -------------
 
@@ -4790,7 +4755,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    2 10.663
    3 10.950
    4 10.433
-   5 10.784
+   5 10.783
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4798,11 +4763,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    2  9.555 10.663 10.138  9.550  9.709
    3  9.487 10.138 10.950 10.029  9.659
    4  9.434  9.550 10.029 10.433  9.572
-   5 10.125  9.709  9.659  9.572 10.784
+   5 10.125  9.709  9.659  9.572 10.783
 
-  Hubbard cRPA interaction for w = 29, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    9.9113   -6.4012
+  Hubbard cRPA interaction for w = 29, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    9.9112   -6.4013
 
-  (Hubbard cRPA interaction for w =  29, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   10.6532   -6.4303)
+  (Hubbard cRPA interaction for w =  29, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   10.6532   -6.4304)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4810,7 +4775,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    2  0.431 10.663  0.285  0.426  0.428
    3  0.496  0.285 10.950  0.360  0.443
    4  0.422  0.426  0.360 10.433  0.424
-   5  0.207  0.428  0.443  0.424 10.784
+   5  0.207  0.428  0.443  0.424 10.783
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5777   -0.0147
 
@@ -4820,7 +4785,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    2  0.431 10.663  0.285  0.426  0.428
    3  0.496  0.285 10.950  0.360  0.443
    4  0.422  0.426  0.360 10.433  0.424
-   5  0.207  0.428  0.443  0.424 10.784
+   5  0.207  0.428  0.443  0.424 10.783
 
  --- For frequency w =  30  -------------
 
@@ -4834,15 +4799,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  8.768  7.919  7.790  7.767  8.411
+   1  8.768  7.918  7.790  7.767  8.410
    2  7.919  9.074  8.491  7.924  8.028
    3  7.790  8.491  9.254  8.355  7.917
    4  7.767  7.924  8.355  8.789  7.859
-   5  8.411  8.028  7.917  7.859  9.025
+   5  8.410  8.028  7.916  7.859  9.025
 
-  Hubbard cRPA interaction for w = 30, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    8.2332   -6.8496
+  Hubbard cRPA interaction for w = 30, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    8.2331   -6.8496
 
-  (Hubbard cRPA interaction for w =  30, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.9820   -6.8833)
+  (Hubbard cRPA interaction for w =  30, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.9819   -6.8833)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4882,7 +4847,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   Hubbard cRPA interaction for w = 31, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    8.1614   -5.7245
 
-  (Hubbard cRPA interaction for w =  31, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.8924   -5.7703)
+  (Hubbard cRPA interaction for w =  31, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.8923   -5.7703)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -4955,12 +4920,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
    1  6.207  5.378  5.273  5.233  5.860
-   2  5.378  6.565  6.001  5.414  5.499
+   2  5.378  6.565  6.001  5.413  5.499
    3  5.273  6.001  6.780  5.863  5.413
    4  5.233  5.413  5.863  6.278  5.339
    5  5.860  5.498  5.413  5.339  6.483
 
-  Hubbard cRPA interaction for w = 33, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    5.7144   -6.9569
+  Hubbard cRPA interaction for w = 33, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    5.7143   -6.9569
 
   (Hubbard cRPA interaction for w =  33, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    6.4626   -7.0073)
 
@@ -5000,9 +4965,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    4  3.619  3.775  4.184  4.620  3.715
    5  4.268  3.891  3.771  3.715  4.879
 
-  Hubbard cRPA interaction for w = 34, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    4.0829   -8.5150
+  Hubbard cRPA interaction for w = 34, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    4.0828   -8.5150
 
-  (Hubbard cRPA interaction for w =  34, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    4.8239   -8.5608)
+  (Hubbard cRPA interaction for w =  34, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    4.8239   -8.5607)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -5026,7 +4991,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 
   Diagonal cRPA interaction
-   1  6.533
+   1  6.532
    2  6.734
    3  7.082
    4  6.541
@@ -5034,7 +4999,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  6.533  5.626  5.568  5.515  6.252
+   1  6.532  5.626  5.568  5.515  6.252
    2  5.626  6.734  6.227  5.624  5.809
    3  5.568  6.227  7.082  6.143  5.769
    4  5.515  5.624  6.143  6.541  5.680
@@ -5046,7 +5011,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  6.533  0.439  0.502  0.429  0.208
+   1  6.532  0.439  0.502  0.429  0.208
    2  0.439  6.734  0.286  0.434  0.432
    3  0.502  0.286  7.082  0.363  0.458
    4  0.429  0.434  0.363  6.541  0.428
@@ -5056,7 +5021,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
-   1  6.533  0.439  0.502  0.429  0.208
+   1  6.532  0.439  0.502  0.429  0.208
    2  0.439  6.734  0.286  0.434  0.432
    3  0.502  0.286  7.082  0.363  0.458
    4  0.429  0.434  0.363  6.541  0.428
@@ -5066,7 +5031,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 
   Diagonal cRPA interaction
-   1  7.270
+   1  7.269
    2  7.580
    3  7.903
    4  7.213
@@ -5074,19 +5039,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  7.270  6.420  6.357  6.225  6.990
+   1  7.269  6.420  6.357  6.225  6.990
    2  6.420  7.580  7.065  6.386  6.606
-   3  6.357  7.065  7.903  6.890  6.560
-   4  6.225  6.386  6.890  7.213  6.391
+   3  6.357  7.065  7.903  6.889  6.560
+   4  6.225  6.386  6.889  7.213  6.391
    5  6.990  6.606  6.560  6.391  7.684
 
-  Hubbard cRPA interaction for w = 36, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    6.7773  -11.3640
+  Hubbard cRPA interaction for w = 36, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    6.7772  -11.3640
 
-  (Hubbard cRPA interaction for w =  36, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    7.5301  -11.4045)
+  (Hubbard cRPA interaction for w =  36, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    7.5300  -11.4044)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  7.270  0.437  0.501  0.429  0.208
+   1  7.269  0.437  0.501  0.429  0.208
    2  0.437  7.580  0.287  0.433  0.432
    3  0.501  0.287  7.903  0.362  0.456
    4  0.429  0.433  0.362  7.213  0.427
@@ -5096,7 +5061,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
-   1  7.270  0.437  0.501  0.429  0.208
+   1  7.269  0.437  0.501  0.429  0.208
    2  0.437  7.580  0.287  0.433  0.432
    3  0.501  0.287  7.903  0.362  0.456
    4  0.429  0.433  0.362  7.213  0.427
@@ -5120,9 +5085,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    4  7.124  7.285  7.804  8.153  7.278
    5  7.833  7.442  7.413  7.278  8.518
 
-  Hubbard cRPA interaction for w = 37, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    7.6491   -8.7908
+  Hubbard cRPA interaction for w = 37, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    7.6491   -8.7907
 
-  (Hubbard cRPA interaction for w =  37, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.4032   -8.8401)
+  (Hubbard cRPA interaction for w =  37, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.4031   -8.8401)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -5148,27 +5113,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Diagonal cRPA interaction
    1  8.652
    2  8.985
-   3  9.270
+   3  9.269
    4  8.659
    5  9.018
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
    1  8.652  7.829  7.762  7.660  8.350
-   2  7.829  8.985  8.462  7.831  7.994
-   3  7.762  8.462  9.270  8.303  7.947
+   2  7.829  8.985  8.461  7.831  7.994
+   3  7.762  8.461  9.269  8.303  7.947
    4  7.660  7.831  8.303  8.659  7.810
    5  8.350  7.994  7.947  7.810  9.018
 
-  Hubbard cRPA interaction for w = 38, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    8.1791   -8.4969
+  Hubbard cRPA interaction for w = 38, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    8.1790   -8.4969
 
-  (Hubbard cRPA interaction for w =  38, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.9166   -8.5382)
+  (Hubbard cRPA interaction for w =  38, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.9166   -8.5381)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
    1  8.652  0.439  0.501  0.430  0.207
    2  0.439  8.985  0.286  0.434  0.432
-   3  0.501  0.286  9.270  0.362  0.437
+   3  0.501  0.286  9.269  0.362  0.437
    4  0.430  0.434  0.362  8.659  0.427
    5  0.207  0.432  0.437  0.427  9.018
 
@@ -5178,7 +5143,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  -      1      2      3      4      5
    1  8.652  0.439  0.501  0.430  0.207
    2  0.439  8.985  0.286  0.434  0.432
-   3  0.501  0.286  9.270  0.362  0.437
+   3  0.501  0.286  9.269  0.362  0.437
    4  0.430  0.434  0.362  8.659  0.427
    5  0.207  0.432  0.437  0.427  9.018
 
@@ -5196,13 +5161,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  -      1      2      3      4      5
    1  8.494  7.667  7.583  7.504  8.165
    2  7.667  8.849  8.316  7.688  7.802
-   3  7.583  8.316  9.130  8.164  7.736
-   4  7.504  7.688  8.164  8.535  7.620
-   5  8.165  7.802  7.736  7.620  8.810
+   3  7.583  8.316  9.130  8.163  7.735
+   4  7.504  7.688  8.163  8.535  7.620
+   5  8.165  7.802  7.735  7.620  8.810
 
-  Hubbard cRPA interaction for w = 39, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    8.0124  -12.5033
+  Hubbard cRPA interaction for w = 39, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    8.0123  -12.5032
 
-  (Hubbard cRPA interaction for w =  39, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.7638  -12.5599)
+  (Hubbard cRPA interaction for w =  39, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.7636  -12.5598)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -5237,12 +5202,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    1 10.765  9.963  9.813  9.758 10.386
    2  9.963 11.141 10.537  9.951 10.048
    3  9.813 10.537 11.268 10.345  9.921
-   4  9.758  9.951 10.345 10.744  9.829
-   5 10.386 10.048  9.921  9.829 10.979
+   4  9.758  9.951 10.345 10.744  9.828
+   5 10.386 10.048  9.921  9.828 10.979
 
-  Hubbard cRPA interaction for w = 40, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   10.2399   -9.0164
+  Hubbard cRPA interaction for w = 40, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   10.2398   -9.0164
 
-  (Hubbard cRPA interaction for w =  40, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   10.9792   -9.0587)
+  (Hubbard cRPA interaction for w =  40, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   10.9791   -9.0587)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -5274,11 +5239,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  4.477  3.649  3.558  3.495  4.148
+   1  4.477  3.649  3.558  3.495  4.147
    2  3.649  4.790  4.238  3.659  3.787
    3  3.558  4.238  5.010  4.100  3.721
    4  3.495  3.659  4.100  4.497  3.622
-   5  4.148  3.787  3.721  3.622  4.786
+   5  4.147  3.787  3.721  3.622  4.786
 
   Hubbard cRPA interaction for w = 41, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    3.9805  -10.9954
 
@@ -5307,7 +5272,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   Diagonal cRPA interaction
    1 12.401
-   2 12.678
+   2 12.677
    3 12.906
    4 12.364
    5 12.666
@@ -5315,19 +5280,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
    1 12.401 11.564 11.480 11.393 12.049
-   2 11.564 12.678 12.132 11.543 11.680
-   3 11.480 12.132 12.906 11.986 11.621
-   4 11.393 11.543 11.986 12.364 11.500
+   2 11.564 12.677 12.132 11.543 11.680
+   3 11.480 12.132 12.906 11.985 11.621
+   4 11.393 11.543 11.985 12.364 11.500
    5 12.049 11.680 11.621 11.500 12.666
 
-  Hubbard cRPA interaction for w = 42, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   11.8764  -12.2961
+  Hubbard cRPA interaction for w = 42, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   11.8763  -12.2961
 
-  (Hubbard cRPA interaction for w =  42, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   12.6030  -12.3568)
+  (Hubbard cRPA interaction for w =  42, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   12.6029  -12.3568)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
    1 12.401  0.438  0.501  0.430  0.207
-   2  0.438 12.678  0.286  0.434  0.432
+   2  0.438 12.677  0.286  0.434  0.432
    3  0.501  0.286 12.906  0.362  0.422
    4  0.430  0.434  0.362 12.364  0.427
    5  0.207  0.432  0.422  0.427 12.666
@@ -5337,7 +5302,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1 12.401  0.438  0.501  0.430  0.207
-   2  0.438 12.678  0.286  0.434  0.432
+   2  0.438 12.677  0.286  0.434  0.432
    3  0.501  0.286 12.906  0.362  0.422
    4  0.430  0.434  0.362 12.364  0.427
    5  0.207  0.432  0.422  0.427 12.666
@@ -5360,9 +5325,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    4 11.266 11.357 11.746 12.192 11.321
    5 11.889 11.472 11.374 11.321 12.448
 
-  Hubbard cRPA interaction for w = 43, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   11.6782   -9.6035
+  Hubbard cRPA interaction for w = 43, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   11.6781   -9.6035
 
-  (Hubbard cRPA interaction for w =  43, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   12.3955   -9.6734)
+  (Hubbard cRPA interaction for w =  43, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   12.3954   -9.6734)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -5427,7 +5392,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   Diagonal cRPA interaction
    1  9.489
-   2  9.542
+   2  9.541
    3  9.793
    4  9.401
    5  9.716
@@ -5435,19 +5400,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
    1  9.489  8.550  8.487  8.459  9.121
-   2  8.550  9.542  9.014  8.501  8.657
+   2  8.550  9.541  9.014  8.501  8.657
    3  8.487  9.014  9.793  8.958  8.625
-   4  8.459  8.501  8.958  9.401  8.560
+   4  8.459  8.500  8.958  9.401  8.560
    5  9.121  8.657  8.625  8.560  9.716
 
   Hubbard cRPA interaction for w = 45, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    8.8721   -7.7747
 
-  (Hubbard cRPA interaction for w =  45, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    9.5880   -7.8667)
+  (Hubbard cRPA interaction for w =  45, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    9.5880   -7.8668)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
    1  9.489  0.443  0.507  0.430  0.207
-   2  0.443  9.542  0.287  0.436  0.433
+   2  0.443  9.541  0.287  0.436  0.433
    3  0.507  0.287  9.793  0.364  0.407
    4  0.430  0.436  0.364  9.401  0.433
    5  0.207  0.433  0.407  0.433  9.716
@@ -5457,7 +5422,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  9.489  0.443  0.507  0.430  0.207
-   2  0.443  9.542  0.287  0.436  0.433
+   2  0.443  9.541  0.287  0.436  0.433
    3  0.507  0.287  9.793  0.364  0.407
    4  0.430  0.436  0.364  9.401  0.433
    5  0.207  0.433  0.407  0.433  9.716
@@ -5482,7 +5447,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
   Hubbard cRPA interaction for w = 46, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    7.6704   -8.4952
 
-  (Hubbard cRPA interaction for w =  46, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.4369   -8.5779)
+  (Hubbard cRPA interaction for w =  46, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    8.4368   -8.5779)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -5600,9 +5565,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    4  8.822  8.957  9.480  9.804  8.974
    5  9.699  9.223  9.110  8.974 10.421
 
-  Hubbard cRPA interaction for w = 49, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    9.3903  -12.5686
+  Hubbard cRPA interaction for w = 49, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    9.3902  -12.5686
 
-  (Hubbard cRPA interaction for w =  49, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   10.1904  -12.6509)
+  (Hubbard cRPA interaction for w =  49, U=1/(2l+1) \sum U(m1,m1,m1,m1)=   10.1903  -12.6509)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -5638,7 +5603,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    2  9.078 10.239  9.736  9.064  9.238
    3  9.007  9.736 10.609  9.592  9.181
    4  8.915  9.064  9.592  9.943  9.051
-   5  9.667  9.238  9.181  9.051 10.349
+   5  9.667  9.237  9.181  9.051 10.349
 
   Hubbard cRPA interaction for w = 50, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    9.4466  -14.8254
 
@@ -5689,32 +5654,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
        12.245     -1.9661   -4.7952      0.5778   -0.0166
        12.857     -7.2462   -6.9215      0.5710   -0.0202
        13.469     -7.5653  -15.7684      0.5815   -0.0295
-       14.082      0.9645  -35.8162      0.5874   -0.0176
-       14.694     19.8562  -13.7879      0.5849   -0.0134
-       15.306      3.8057  -12.4934      0.5780   -0.0208
+       14.082      0.9646  -35.8161      0.5874   -0.0176
+       14.694     19.8561  -13.7879      0.5849   -0.0134
+       15.306      3.8056  -12.4933      0.5780   -0.0208
        15.918     18.7770   -6.7022      0.5887   -0.0133
        16.531     10.2570   -5.9448      0.5839   -0.0184
-       17.143      9.9113   -6.4013      0.5777   -0.0147
-       17.755      8.2332   -6.8496      0.5782   -0.0185
+       17.143      9.9112   -6.4013      0.5777   -0.0147
+       17.755      8.2331   -6.8496      0.5782   -0.0185
        18.367      8.1614   -5.7245      0.5726   -0.0241
        18.980      8.2101   -5.1434      0.5802   -0.0223
-       19.592      5.7144   -6.9569      0.5826   -0.0292
-       20.204      4.0829   -8.5150      0.5787   -0.0268
+       19.592      5.7143   -6.9569      0.5826   -0.0292
+       20.204      4.0828   -8.5150      0.5787   -0.0268
        20.816      6.0105  -11.1632      0.5871   -0.0289
-       21.429      6.7773  -11.3640      0.5854   -0.0265
-       22.041      7.6491   -8.7908      0.5894   -0.0256
-       22.653      8.1791   -8.4969      0.5798   -0.0266
-       23.265      8.0124  -12.5033      0.5863   -0.0285
-       23.878     10.2399   -9.0164      0.5801   -0.0210
+       21.429      6.7772  -11.3640      0.5854   -0.0265
+       22.041      7.6491   -8.7907      0.5894   -0.0256
+       22.653      8.1790   -8.4969      0.5798   -0.0266
+       23.265      8.0123  -12.5032      0.5863   -0.0285
+       23.878     10.2398   -9.0164      0.5801   -0.0210
        24.490      3.9805  -10.9954      0.5791   -0.0277
-       25.102     11.8764  -12.2961      0.5755   -0.0278
-       25.714     11.6782   -9.6035      0.5713   -0.0333
+       25.102     11.8763  -12.2961      0.5755   -0.0278
+       25.714     11.6781   -9.6035      0.5713   -0.0333
        26.327      9.9839   -7.3364      0.5811   -0.0419
        26.939      8.8721   -7.7747      0.5738   -0.0416
        27.551      7.6704   -8.4952      0.5894   -0.0398
        28.163      9.7477  -10.1802      0.5819   -0.0634
        28.776      3.8652  -11.7942      0.6055   -0.0478
-       29.388      9.3903  -12.5686      0.6015   -0.0377
+       29.388      9.3902  -12.5686      0.6015   -0.0377
        30.000      9.4466  -14.8254      0.5930   -0.0295
    -------------------------------------------------------------
 
@@ -5771,7 +5736,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
         freqremax1     0.00000000E+00 Hartree
         freqremax2     0.00000000E+00 Hartree
         freqremax3     1.10247976E+00 Hartree
@@ -6088,7 +6053,7 @@ P           mkmem           1
         pawprtvol           3
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         221
-           strten1     2.0903025575E-03  2.0903025575E-03  2.0903025575E-03
+           strten1     2.0903025574E-03  2.0903025574E-03  2.0903025574E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -6138,7 +6103,10 @@ P           mkmem           1
           usedmft2          1
           usedmft3          0
           usedmft4          0
-          usepawu           1
+          usepawu1          1
+          usepawu2         10
+          usepawu3          1
+          usepawu4          1
            useylm           1
               wtk        0.12500    0.37500    0.37500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -6184,21 +6152,25 @@ P           mkmem           1
 - to dynamical screening and self-consistency in uranium dioxide and cerium
 - B. Amadon, T. Applencourt and F. Bruneval  Phys. Rev. B 89, 125110 (2014).
 - Comment : Describes the cRPA implementation of the screened Coulomb interaction in PAW
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2014
 -
-- [2] Plane-wave based electronic strcture calculations for correlated materials.
+- [2] Plane-wave based electronic structure calculations for correlated materials.
 - using dynamical mean-field theory and projected local orbitals,
 - B. Amadon, F. Lechermann, A. Georges, F. Jollet, T.O. Wehling, A.I. Lichenstein,
 - Phys. Rev. B 77, 205112 (2008).
 - Comment : to be cited in case the computation of overlap operator for Wannier90 interface within PAW is used,
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2008
 -
 - [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
 - Comment : LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
 - Comment : PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
 - [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -6211,11 +6183,12 @@ P           mkmem           1
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
+- B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment : the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [6] ABINIT : First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
@@ -6228,6 +6201,7 @@ P           mkmem           1
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [7] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
@@ -6240,11 +6214,12 @@ P           mkmem           1
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        541.1  wall=        573.7
+- Proc.   0 individual time (sec): cpu=        666.3  wall=       1389.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       8710.7  wall=       9178.8
++Overall time at end (sec) : cpu=      21701.1  wall=      44467.1

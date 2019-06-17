@@ -20,6 +20,7 @@ subsuites = [
 #"dmft",
 #"moldyn",
 "string",
+"ucrpa",
 ]
 
 #: List of input files
