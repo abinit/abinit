@@ -480,6 +480,7 @@ module m_dvdb
  ! debugging tools.
  public :: dvdb_test_v1rsym        ! Check symmetries of the DFPT potentials.
  public :: dvdb_test_v1complete    ! Debugging tool used to test the symmetrization of the DFPT potentials.
+ public :: dvdb_test_addlr         ! Debugging tool used to test the model for the long-range of the potential.
  public :: dvdb_test_ftinterp      ! Test Fourier interpolation of DFPT potentials.
 
 !----------------------------------------------------------------------
@@ -2105,7 +2106,7 @@ pcase_loop: &
    workg = zero
 
    ! Reconstruct DFPT potential. Final results stored in v1g.
-   write(std_out,*)"Reconstructing idir:", idir, ", ipert:", ipert
+   if (debug) write(std_out,*)"Reconstructing idir:", idir, ", ipert:", ipert
    v1g = zero; cnt = 0
    do idir_eq=1,3
      if (symrec_eq(idir, idir_eq) == 0) cycle
@@ -5274,6 +5275,7 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
 !scalars
  integer,parameter :: master=0
  integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank,cnt
+ integer :: i1,i2,i3,n1,n2,n3,id1,id2,id3
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
  type(dvdb_t),target :: dvdb
@@ -5302,6 +5304,9 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
  call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
  nfft = product(ngfft(:3))
 
+ n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
+ id1 = n1/2+2; id2 = n2/2+2; id3 = n3/2+2
+
  ABI_MALLOC(pflag, (3, dvdb%natom))
 
  ! Initialize the list of perturbations rfpert and rdfir
@@ -5322,6 +5327,8 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
  cnt = 0
  do iqpt=1,dvdb%nqpt
    qpt = dvdb%qpts(:,iqpt)
+   write(std_out,*)
+   write(std_out,*) iqpt, qpt
 
    ! Examine the symmetries of the q wavevector
    call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dvdb%prtvol)
@@ -5353,10 +5360,11 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
    ! Compare values.
    do pcase=1,3*cryst%natom
      idir = mod(pcase-1, 3) + 1; ipert = (pcase - idir) / 3 + 1
-     if (pflag(idir,ipert) == 1) cycle
+     if (pflag(idir,ipert) /= 2) cycle
+     cnt = cnt+1
 
      do ispden=1,dvdb%nspden
-       write(std_out,"(4(a,i0),3a,es12.4)")"For iqpt: ", iqpt, ", idir: ", idir, &
+       write(std_out,"(5(a,i0),3a,es12.4)")"For cnt: ",cnt ,", iqpt: ", iqpt, ", idir: ", idir, &
                ", ipert: ", ipert, ", ispden: ", ispden, ", qpt: ", trim(ktoa(qpt)) ,", max_err: ", &
                maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
        !write(std_out,"(a,es10.3)")"  max(abs(f1-f2))", &
@@ -5370,23 +5378,36 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
          write(unt,*)"# idir: ",idir,", ipert: ",ipert,", ispden:", ispden
          write(unt,*)"# file_v1scf, symmetrized_v1scf, diff"
          if (cplex == 1) then
-           do ifft=1,nfft
-             write(unt,"(3(es12.4,2x))") &
-               file_v1scf(1,ifft,ispden,pcase), symm_v1scf(1,ifft,ispden,pcase), &
-               file_v1scf(1,ifft,ispden,pcase) - symm_v1scf(1,ifft,ispden,pcase)
+           !do ifft=1,nfft
+           do i3=1,n3
+             do i2=1,n2
+               do i1=1,n1
+                 ifft = i1+n1*((i2-1)+n2*(i3-1))
+                 write(unt,"(3i3,3(es12.4,2x))") &
+                   i1,i2,i3, &
+                   file_v1scf(1,ifft,ispden,pcase), symm_v1scf(1,ifft,ispden,pcase), &
+                   file_v1scf(1,ifft,ispden,pcase) - symm_v1scf(1,ifft,ispden,pcase)
+               end do
+             end do
            end do
          else
-           do ifft=1,nfft
-             write(unt, "(6(es12.4,2x))") &
-               file_v1scf(1,ifft,ispden,pcase), symm_v1scf(1,ifft,ispden,pcase),  &
-               file_v1scf(1,ifft,ispden,pcase) - symm_v1scf(1,ifft,ispden,pcase), &
-               file_v1scf(2,ifft,ispden,pcase), symm_v1scf(2,ifft,ispden,pcase),  &
-               file_v1scf(2,ifft,ispden,pcase) - symm_v1scf(2,ifft,ispden,pcase)
+           !do ifft=1,nfft
+           do i3=1,n3
+             do i2=1,n2
+               do i1=1,n1
+                 ifft = i1+n1*((i2-1)+n2*(i3-1))
+                 write(unt, "(3i3,6(es12.4,2x))") &
+                   i1,i2,i3, &
+                   file_v1scf(1,ifft,ispden,pcase), symm_v1scf(1,ifft,ispden,pcase),  &
+                   file_v1scf(1,ifft,ispden,pcase) - symm_v1scf(1,ifft,ispden,pcase), &
+                   file_v1scf(2,ifft,ispden,pcase), symm_v1scf(2,ifft,ispden,pcase),  &
+                   file_v1scf(2,ifft,ispden,pcase) - symm_v1scf(2,ifft,ispden,pcase)
+               end do
+             end do
            end do
          end if
          write(unt,*)
          write(unt,*)
-         cnt = cnt+1
        end if
 
      end do
@@ -5407,6 +5428,242 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
  if (unt /= -1) close(unt)
 
 end subroutine dvdb_test_v1complete
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_test_addlr
+!! NAME
+!!  dvdb_test_addlr
+!!
+!! FUNCTION
+!!  Debugging tool used to test the special treatment of the long-range part of the potentials
+!!
+!! INPUTS
+!!  dvdb_path=Filename
+!!  dvdb_ngqpt(3)=Divisions of the Q-mesh reported in the DVDB file
+!!  dvdb_add_lr=0 to disable treatment of long-range part in Fourier interpolation.
+!!  ddb_path=Path to DDB file. Used to treat LR part.
+!!  prtvol=Verbosity level.
+!!  comm=MPI communicator.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      mrgdv
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_test_addlr(dvdb_path, method, symv1, dvdb_add_lr, qdamp, ddb_path, dump_path, prtvol, comm)
+
+ use m_ddb
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: dvdb_path, ddb_path, dump_path
+ integer,intent(in) :: comm, prtvol, dvdb_add_lr, qdamp, method, symv1
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: brav1 = 1, master = 0, natifc0 = 0, rfmeth1 = 1, selectz0 = 0
+ integer :: nfft, iq, cplex, mu, ispden, comm_rpt, chneut, iblock_dielt, iblock_dielt_zeff, my_rank,  ierr
+ integer :: idir, ipert
+ integer :: i1,i2,i3,n1,n2,n3,id1,id2,id3
+ integer :: cnt, unt, ifft, iqpt
+ logical :: autotest
+ type(dvdb_t) :: dvdb
+ type(vdiff_t) :: vd_max
+ type(crystal_t) :: cryst_ddb
+ type(ddb_type) :: ddb
+ character(len=500) :: msg
+ character(len=fnlen) :: outwr_path
+!arrays
+ integer :: ngfft(18)
+ integer,allocatable :: dummy_atifc(:)
+ real(dp) :: qpt
+ real(dp),allocatable :: file_v1r(:,:,:,:),long_v1r(:,:,:,:),tmp_v1r(:,:,:,:), zeff(:,:,:), zeff_raw(:,:,:)
+ real(dp) :: dielt(3,3)
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
+
+ write(std_out,"(a)") " Testing Fourier long range part."
+ if (len_trim(ddb_path) > 0) then
+   write(std_out,"(a)")sjoin(" Reading Zeff and einf from DDB file:", ddb_path)
+   write(std_out,"(a)")sjoin(" dvdb_add_lr set to:", itoa(dvdb_add_lr))
+ end if
+
+ dvdb = dvdb_new(dvdb_path, comm)
+ dvdb%debug = .False.
+ ABI_CHECK(any(symv1 == [0, 1, 2]), sjoin("invalid value of symv1:", itoa(symv1)))
+ dvdb%symv1 = symv1
+ dvdb%add_lr = dvdb_add_lr
+
+ !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
+
+ iblock_dielt = 0; iblock_dielt_zeff = 0
+ if (len_trim(ddb_path) > 0) then
+   ABI_CALLOC(dummy_atifc, (dvdb%natom))
+   call ddb_from_file(ddb, ddb_path, brav1, dvdb%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=prtvol)
+   ABI_FREE(dummy_atifc)
+   call cryst_ddb%free()
+
+   ! Get Dielectric Tensor
+   iblock_dielt = ddb_get_dielt(ddb, rfmeth1, dielt)
+   dvdb%dielt = dielt
+
+   ! Get Dielectric Tensor and Effective Charges
+   ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
+   ABI_MALLOC(zeff, (3, 3, dvdb%natom))
+   ABI_MALLOC(zeff_raw, (3, 3, dvdb%natom))
+   chneut = 2
+   iblock_dielt_zeff = ddb_get_dielt_zeff(ddb, dvdb%cryst, rfmeth1, chneut, selectz0, dielt, zeff, zeff_raw=zeff_raw)
+   if (my_rank == master) then
+     if (iblock_dielt_zeff == 0) then
+       call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
+       call wrtout(ab_out, "Values initialized with zeros")
+     else
+       call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
+     end if
+   end if
+   if (iblock_dielt /= 0) then
+     dvdb%has_dielt = .True.
+     dvdb%dielt = dielt
+   end if
+   if (iblock_dielt_zeff /= 0) then
+     dvdb%has_zeff = .True.; dvdb%zeff = zeff; dvdb%zeff_raw = zeff_raw
+   end if
+   if (dvdb%has_dielt .and. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
+     if (dvdb%add_lr == 0)  then
+       call wrtout([std_out, ab_out], &
+         " WARNING: dvdb_add_lr set to 0. Long-range term won't be substracted in Fourier interpolation.")
+     end if
+   end if
+   ABI_FREE(zeff)
+   ABI_FREE(zeff_raw)
+ end if
+
+ call dvdb%print()
+
+ ! Define FFT mesh for real space representation.
+ call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
+ nfft = product(ngfft(1:3))
+ call dvdb%open_read(ngfft, comm)
+
+ n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
+ id1 = n1/2+2; id2 = n2/2+2; id3 = n3/2+2
+
+ ABI_MALLOC(long_v1r, (2, nfft, dvdb%nspden, dvdb%natom3))
+ ABI_MALLOC(file_v1r, (2, nfft, dvdb%nspden, dvdb%natom3))
+
+ ! Prepare FT interpolation.
+ comm_rpt = xmpi_comm_self
+
+ unt = -1
+ if (len_trim(dump_path) /= 0 .and. my_rank == master) then
+   if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   write(std_out,"(a)")sjoin("Will write potentials to:", dump_path)
+ end if
+
+ cnt = 0
+ do iq=1,dvdb%nqpt
+   iqpt = dvdb%findq(dvdb%qpts(:,iq))
+   ! Read data from DVDB file and store it in file_v1r
+   call dvdb%readsym_allv1(iqpt, cplex, nfft, ngfft, tmp_v1r, comm)
+
+   if (cplex == 1) then
+     file_v1r(1,:,:,:) = tmp_v1r(1,:,:,:)
+     file_v1r(2,:,:,:) = zero
+   else
+     file_v1r = tmp_v1r
+   end if
+   ABI_FREE(tmp_v1r)
+
+   ! Compute LR part
+   long_v1r = 0
+   if (dvdb_add_lr==1) then
+     do ispden=0,dvdb%nspden
+       do mu=1,dvdb%natom3
+         idir = dvdb%my_pinfo(1, mu); ipert = dvdb%my_pinfo(2, mu)
+         call dvdb%v1r_long_range(dvdb%qpts(:,iq),ipert,idir,nfft,ngfft,long_v1r(:,:,ispden,mu))
+       end do
+     end do
+   end if
+
+   write(std_out,"(a)")sjoin("=== For DVDB q-point:", ktoa(dvdb%qpts(:,iq)), "===")
+   do mu=1,dvdb%natom3
+     idir = dvdb%my_pinfo(1, mu); ipert = dvdb%my_pinfo(2, mu)
+     do ispden=1,dvdb%nspden
+       write(std_out, "(a)")"--- !DVDB_LONGRANGE_DIFF"
+       write(std_out,"(3a)")"  qpoint: ", trim(ktoa(dvdb%qpts(:,iq))), ","
+       write(std_out,"(a,i0,a)")"  iqpt: ", iq, ","
+       write(std_out,"(a,i0,a)")"  iatom3: ", mu, ","
+       write(std_out,"(a,i0,a)")"  ispden: ", ispden, ","
+       call vdiff_print(vdiff_eval(2, nfft, file_v1r(:,:,ispden,mu), long_v1r(:,:,ispden,mu), &
+                        dvdb%cryst%ucvol, vd_max=vd_max))
+       write(std_out,"(a)")"..."
+       !do ifft=1,nfft
+       !  write(std_out,*)file_v1r(1,ifft,ispden,mu),long_v1r(1,ifft,ispden,mu),&
+       !  file_v1r(2,ifft,ispden,mu),long_v1r(2,ifft,ispden,mu)
+       !end do
+
+       ! Debug: Write potentials to file.
+       if (unt /= -1) then
+         write(unt,*)"# count:", cnt
+         write(unt,*)"# q-point:", trim(ktoa(dvdb%qpts(:,iq))), ", iqpt: ", trim(itoa(iqpt))
+         write(unt,*)"# idir: ",idir,", ipert: ",ipert,", ispden:", ispden
+         write(unt,*)"# file_v1r, long_v1r, diff"
+         if (cplex == 1) then
+           !do ifft=1,nfft
+           do i3=1,n3
+             do i2=1,n2
+               do i1=1,n1
+                 ifft = i1+n1*((i2-1)+n2*(i3-1))
+                 write(unt,"(3i3,3(es12.4,2x))") &
+                   i1,i2,i3, &
+                   file_v1r(1,ifft,ispden,mu), long_v1r(1,ifft,ispden,mu), &
+                   file_v1r(1,ifft,ispden,mu) - long_v1r(1,ifft,ispden,mu)
+               end do
+             end do
+           end do
+         else
+           !do ifft=1,nfft
+           do i3=1,n3
+             do i2=1,n2
+               do i1=1,n1
+                 ifft = i1+n1*((i2-1)+n2*(i3-1))
+                 write(unt, "(3i3,6(es12.4,2x))") &
+                   i1,i2,i3, &
+                   file_v1r(1,ifft,ispden,mu), long_v1r(1,ifft,ispden,mu),  &
+                   file_v1r(1,ifft,ispden,mu) - long_v1r(1,ifft,ispden,mu), &
+                   file_v1r(2,ifft,ispden,mu), long_v1r(2,ifft,ispden,mu),  &
+                   file_v1r(2,ifft,ispden,mu) - long_v1r(2,ifft,ispden,mu)
+               end do
+             end do
+           end do
+         end if
+         write(unt,*)
+         write(unt,*)
+         cnt = cnt + 1
+       end if
+
+     end do
+   end do
+   write(std_out,*)" "
+ end do ! iq
+
+ ABI_FREE(long_v1r)
+ ABI_FREE(file_v1r)
+
+ call dvdb%free()
+ call ddb_free(ddb)
+
+end subroutine dvdb_test_addlr
 !!***
 
 !----------------------------------------------------------------------
