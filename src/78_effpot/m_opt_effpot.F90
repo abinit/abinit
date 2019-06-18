@@ -47,6 +47,7 @@ module m_opt_effpot
  public :: opt_getHOforterm
  public :: opt_getCombisforterm
  public :: opt_getHoTerms
+ public :: opt_getHOstrain
  public :: opt_filterdisp
 
  !!****
@@ -482,7 +483,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  !Loop over all original terms + 1 
  ! + 1 to bound pure strain
   do iterm =1,nterm+1 
-     if(iterm <=nterm)then 
+     if(iterm <=nterm)then
+	!MS DEVV 
+	cycle
        !Get this term (iterm) and infromations about it 
        !Get number of displacements and equivalent terms for this term
        !Chose term one to get ndisp. ndisp is equal for all terms of the term
@@ -501,6 +504,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
         call wrtout(ab_out,message,'COLL')
         call wrtout(std_out,message,'COLL')
       
+
        !Store for optimization
        terms(iterm) = iterm
        
@@ -582,25 +586,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
        call opt_getHoTerms(my_coeffs(nterm_start+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
      
      else ! if iterm = nterm + 1 => Take care about strain 
-       !Message: The world wants to know where we stand Batman
-       write(message, '(a,(80a),a)' ) ch10,&
-&      ('_',ii=1,80),ch10
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-        write(message,'(3a)' )ch10,&
-&       ' Chreate high order strain terms ',ch10 
-        call wrtout(ab_out,message,'COLL')
-        call wrtout(std_out,message,'COLL')
-       !1406 get count of high order even anharmonic strain terms and the strain terms itself  
-       call polynomial_coeff_getEvenAnhaStrain(strain_terms_tmp,eff_pot%crystal,ncombi,order_ran,comm)
-       ! Allocate my_coeffs with ncombi free space to work with 
-       nterm_start = eff_pot%anharmonics_terms%ncoeff
-       nterm_tot_tmp = eff_pot%anharmonics_terms%ncoeff + ncombi
-       ABI_DATATYPE_ALLOCATE(my_coeffs,(nterm_tot_tmp)) 
-       do icombi=1,ncombi
-          my_coeffs(nterm_start+icombi) = strain_terms_tmp(icombi)
-          my_coeffs(nterm_start+icombi)%coefficient = eff_pot%harmonics_terms%elastic_constants(1,1)
-       enddo
+       call opt_getHOstrain(my_coeffs,ncombi,nterm_start,eff_pot,order_ran,comm)     
      endif ! 
 
      exists=.FALSE.
@@ -659,17 +645,19 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
             
             !Optimizing coefficient  
             i = 0 
-            do while(msef/msef_ini >= 1.001)
+            do while((msef+mses)/(msef_ini+mses_ini) >= 1.001)
                i = i + 1 
                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
                call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                           natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                           compute_anharmonic=.TRUE.,print_file=.FALSE.)
-          
+	
+            write(*,*) "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
             enddo ! while mse/mse_ini>10 
 
             !Store new "inital precision for next coefficient
             msef_ini = msef
+            mses_ini = mses
              
      enddo ! icombi
 
@@ -1168,6 +1156,87 @@ call polynomial_coeff_init(coeff,nterm_of_term,term,terms,check=.TRUE.)
 
 end subroutine opt_filterdisp
 !!***
+
+!!****f* m_opt_effpot/opt_getHOstrain
+!!
+!! NAME
+!! opt_getHOstrain
+!!
+!! FUNCTION
+!! Get HO anharmnonic strain terms for bounding and add them to list 
+!! of existing terms in effective potential
+!!
+!! INPUTS
+!! eff_pot<effective_potential_type>: datatype with all the informations 
+!! 				      about the effective potential 
+!! power_strain(2): start and stop order for strain terms
+!! comm: mpi communicator (at the moment only sequential tested) 
+!! 
+!! OUTPUT
+!! terms<polynomial_coeff_type>: list with original terms in effective
+!!                               potential + HO even strain terms
+!!
+!! PARENTS
+!! opt_effpotbound
+!!
+!! CHILDREN
+!! m_polynomial_coeff.F90/polynomial_coeff_init 
+!!
+!! SOURCE
+
+subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
+
+ implicit none 
+         
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ type(polynomial_coeff_type),allocatable,intent(inout) :: terms(:)
+ type(effective_potential_type), intent(in) :: eff_pot 
+ integer,intent(in) :: power_strain(2) 
+ integer,intent(out) :: ncombi,nterm_start
+ !arrays 
+!Logicals
+!Strings 
+!Local variables ------------------------------
+!scalars
+ integer ::  nterm_tot_tmp,icombi 
+ integer :: ii 
+!reals 
+ type(crystal_t) :: crystal
+!arrays
+ type(polynomial_coeff_type),allocatable :: strain_terms_tmp(:)
+!Logicals
+!Strings
+ character(len=1000) :: message
+!*************************************************************************
+    !Get variables 
+    crystal = eff_pot%crystal
+
+    write(message, '(a,(80a),a)' ) ch10,&
+&   ('_',ii=1,80),ch10
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
+     write(message,'(3a)' )ch10,&
+&    ' Chreate high order strain terms ',ch10 
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+
+    !1406 get count of high order even anharmonic strain terms and the strain terms itself  
+    call polynomial_coeff_getEvenAnhaStrain(strain_terms_tmp,crystal,ncombi,power_strain,comm)
+    ! Allocate my_coeffs with ncombi free space to work with 
+
+    nterm_start = eff_pot%anharmonics_terms%ncoeff
+    nterm_tot_tmp = eff_pot%anharmonics_terms%ncoeff + ncombi
+    ABI_DATATYPE_ALLOCATE(terms,(nterm_tot_tmp)) 
+    do icombi=1,ncombi
+       terms(nterm_start+icombi) = strain_terms_tmp(icombi)
+       terms(nterm_start+icombi)%coefficient = 10000000      ! eff_pot%harmonics_terms%elastic_constants(1,1)
+    enddo
+
+end subroutine opt_getHOstrain
+!!***
+
 
 end module m_opt_effpot
 !!***
