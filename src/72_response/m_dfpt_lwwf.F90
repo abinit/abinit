@@ -2612,7 +2612,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Local variables-------------------------------
 !scalars
- integer :: iatpert,iband,idir,ipert,iq1grad,iq2grad,istrpert,ka,kb,
+ integer :: iatpert,iband,idir,ipert,ipw,iq1grad,iq2grad,istrpert,ka,kb
  integer :: nkpg,optlocal,optnl,tim_getgh1c,useylmgr1
  real(dp) :: doti,dotr
  type(pawfgr_type) :: pawfgr
@@ -2817,7 +2817,7 @@ frwfdq_k=zero
 !Compute (k+G) vectors
  nkpg=3;
  ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
- call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+ call mkkpg(kg_k,kpg_k,kpt,nkpg,npw_k)
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert= 1, natpert
