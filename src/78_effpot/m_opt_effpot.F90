@@ -485,9 +485,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  ! + 1 to bound pure strain
   do iterm =1,nterm+1 
      if(iterm <=nterm)then
+
        !Store for optimization
        terms(iterm) = iterm
-	!MS DEV
        !Message: The world wants to know where we stand Batman
        write(message, '(a,(80a),a)' ) ch10,&
 &      ('_',ii=1,80),ch10
@@ -502,101 +502,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
        !Skip term if it doesn't need bounding 
        if(to_cycle) cycle 
 
-       !Get this term (iterm) and infromations about it 
-       !Get number of displacements and equivalent terms for this term
-       !Chose term one to get ndisp. ndisp is equal for all terms of the term
-       !Get minimum oder for this term
-!       term = eff_pot%anharmonics_terms%coefficients(iterm)
-!       ndisp = term%terms(1)%ndisp
-!       nterm_of_term = term%nterm
-!      
-!       !Message: The world wants to know where we stand Batman
-!       write(message, '(a,(80a),a)' ) ch10,&
-!&      ('_',ii=1,80),ch10
-!       call wrtout(ab_out,message,'COLL')
-!       call wrtout(std_out,message,'COLL')
-!        write(message,'(2a,I3,a,I3,3a)' )ch10,&
-!&       ' Check term (',iterm,'/',nterm,'): ', trim(term%name),ch10 
-!        call wrtout(ab_out,message,'COLL')
-!        call wrtout(std_out,message,'COLL')
-!       
-!       ! Let's check if we really want all this mess 
-!       ! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all equivalent terms of term
-!       if(term%coefficient > 0 .and. .not. any(mod(term%terms(1)%power_disp(:),2) /= 0))then 
-!                ! Message to Output 
-!                write(message,'(3a)' )ch10,&
-!&               ' ==> No need for high order bounding term',ch10
-!                call wrtout(ab_out,message,'COLL')
-!                call wrtout(std_out,message,'COLL')
-!               cycle 
-!       end if
-!       ! Check if term has strain component. 
-!       ! If yes filter strain and fit high order atomic displacement terms
-!       had_strain = .FALSE.
-!       if(term%terms(1)%nstrain /= 0)then
-!                ! Message to Output 
-!                write(message,'(5a)' )ch10,&
-!&               '- Term has strain compenent',ch10,&
-!&               ' -> Filter Displacement',ch10
-!                call wrtout(ab_out,message,'COLL')
-!                call wrtout(std_out,message,'COLL')
-!                call opt_filterdisp(term,nterm_of_term,comm)
-!                !Get new value of symmetry equivalent term nterm_of_term 
-!                nterm_of_term = term%nterm
-!                !Remember if this term had strain
-!                had_strain = .TRUE.
-!               !cycle 
-!       endif 
-!       ! Ok we want it. Let's go. 
-!      
-!       ! get start and stop order for this term 
-!       call opt_getHOforterm(term,order_ran,order_start,order_stop,comm)
-!       if(order_start == 0)then 
-!                ! Message to Output 
-!                write(message,'(2a,I2,a,I2,3a)' )ch10,&
-!&               " ==> Term doesn't fit into specified order range from ", order_ran(1),' to ',order_ran(2),ch10,&        
-!&               ' ==> Can not construct high order bounding term',ch10
-!                call wrtout(ab_out,message,'COLL')
-!                call wrtout(std_out,message,'COLL')
-!               cycle 
-!       end if
-!       
-       ! get total amount of combinations and combinations per order for the term
-!       call opt_getCombisforterm(order_start,order_stop,ndisp,ncombi,ncombi_order,comm)
-             
-       ! Allocate my_coeffs with ncombi free space to work with 
-!       nterm_start = eff_pot%anharmonics_terms%ncoeff
-!       nterm_tot_tmp = eff_pot%anharmonics_terms%ncoeff + ncombi 
-!       ABI_DATATYPE_ALLOCATE(my_coeffs,(nterm_tot_tmp)) 
-       
-       !Copy original terms to my_coeffs 
-!       my_coeffs(1:nterm_start) =  eff_pot%anharmonics_terms%coefficients(:)
-       !Copy anharmonic strain terms to begin of new terms
-      
-       ! Copy current term to the ncombination elemenst a the end in array my_coeffs 
-       ! change the value of their coefficient to a start value
-       ! The start is estimed to not be larger then half the initial term's value
-       ! This is because higher order terms should have smaller coefficients 
-!       do icombi=1,ncombi 
-!           my_coeffs(nterm_start+icombi) = term
-!           coeff_ini = abs(my_coeffs(iterm)%coefficient / 2)
-!           my_coeffs(nterm_start+icombi)%coefficient = coeff_ini
-!           ! Set the power of all terms we want to add to two. We find the correct power later
-!           ! Change the weight of the term to 1 (even terms have allways weight=1)
-!           do iterm_of_term=1,nterm_of_term 
-!             my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%weight = 1
-!             do idisp=1,ndisp
-!                my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(idisp) = 2
-!             enddo !idisp
-!           enddo !iterm_of_term 
-!       enddo !icombi
-       
-       !If term had strain we had to reinitialize it in the process 
-       !Refree memory
-!       if(had_strain) call polynomial_coeff_free(term)  
-      
-!       call opt_getHoTerms(my_coeffs(nterm_start+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
-     
      else ! if iterm = nterm + 1 => Take care about strain 
        call opt_getHOstrain(my_coeffs,ncombi,nterm_start,eff_pot,order_ran,comm)     
      endif ! 
