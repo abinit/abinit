@@ -43,6 +43,7 @@ module m_dfpt_lwwf
  use m_getgh1c
  use m_mklocl
  use m_time, only : cwtime
+ use m_kg, only : mkkpg
 
  implicit none
 
@@ -2555,7 +2556,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !!
 !! OUTPUT
 !!
-!!  frwfdq_k(2,natpert,nq1grad,nstrpert)=frozen wave function dependent part of the 1st q-gradient of
+!!  frwfdq_k(2,natpert,nstrpert,nq1grad)=frozen wave function dependent part of the 1st q-gradient of
 !!                            internal strain tensor
 !!
 !! SIDE EFFECTS
@@ -2601,7 +2602,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  integer,intent(in) :: pert_atdis(3,natpert),pert_strain(6,nstrpert)
  integer,intent(in) :: q1grad(3,nq1grad)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
- real(dp),intent(out) :: frwfdq_k(2,natpert,nq1grad,nstrpert)
+ real(dp),intent(out) :: frwfdq_k(2,nq1grad,nstrpert,natpert)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rmet(3,3) 
@@ -2611,7 +2612,8 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Local variables-------------------------------
 !scalars
- integer :: iatpert,iband,idir,ipert,iq1grad,iq2grad,nkpg,optlocal,optnl,tim_getgh1c,useylmgr1
+ integer :: iatpert,iband,idir,ipert,iq1grad,iq2grad,istrpert,ka,kb,
+ integer :: nkpg,optlocal,optnl,tim_getgh1c,useylmgr1
  real(dp) :: doti,dotr
  type(pawfgr_type) :: pawfgr
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -2699,7 +2701,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
        & idir,ipert,mpi_enreg,optlocal,optnl,iq1grad,rf_hamkq)
 
        !Calculate:
-       !(<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma} | u_{i,k}^{(0)} >)*
+       !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma} | u_{i,k}^{(0)} >
        call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqc, &
      & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
  
@@ -2733,7 +2735,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  ABI_ALLOCATE(ghatdisdqdq_c0m,(2,npw_k*dtset%nspinor,nband_k,3,3,natpert))
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
- do iatpert= 1, natpert
+ do iatpert=1,natpert
    ipert=pert_atdis(1,iatpert)
    idir=pert_atdis(2,iatpert)
 
@@ -2798,11 +2800,8 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
  end do !iatpert
 
-
-
 !Deallocations
  ABI_DEALLOCATE(dum_cwaveprj)
- ABI_DEALLOCATE(gh1dqc)
  ABI_DEALLOCATE(gvloc1dqc)
  ABI_DEALLOCATE(gvnl1dqc)
  ABI_DEALLOCATE(vpsp1dq)
@@ -2810,8 +2809,80 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  ABI_DEALLOCATE(dum_vpsp)
  ABI_DEALLOCATE(dum_vlocal)
 
+!--------------------------------------------------------------------------------------
+! Acumulates the three frozen wf terms of the q-gradient of the internal strain
+!--------------------------------------------------------------------------------------
+frwfdq_k=zero
+
+!Compute (k+G) vectors
+ nkpg=3;
+ ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+ call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+
+!LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
+ do iatpert= 1, natpert
+  
+   !LOOP OVER STRAIN PERTURBATIONS
+   do istrpert= 1, nstrpert
+     ka=pert_strain(3,istrpert)
+     kb=pert_strain(4,istrpert)
+
+     !LOOP OVER Q1-GRADIENT
+     do iq1grad=1,3
+
+       !LOOP OVER BANDS
+       do iband=1,nband_k
+
+         if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+         !First complete the term involving the 2nd q-gradient of atdis Hamiltonian:
+         !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma\delta} (k+G)_{\beta} | u_{i,k}^{(0)} >
+         !--------------------------------------------------------------------------
+         !Read ket ground-state wavefunctions
+         cwave0i(:,:)=cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
+
+         !LOOP OVER PLANE-WAVES
+         do ipw=1,npw_k
+           gh1dqc(:,ipw)=ghatdisdqdq_c0m(:,ipw,iband,iq1grad,iq2grad,iatpert)*kpg_k(ipw,ka)
+         end do
+
+         call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqc, &
+       & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+         !Accumulate this term (take here into account the -i·-i prefactors and the conjugate comple)
+         frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-dotr
+         frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+doti
+           
+
+         !Next complete the other two terms involving the 1st q-gradient of atdis Hamiltonian:
+         !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma} \frac{\delta_{\beta\delta}}{2} | u_{i,k}^{(0)} >
+         !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\delta} \frac{\delta_{\beta\gamma}}{2} | u_{i,k}^{(0)} >
+         !--------------------------------------------------------------------------
+         if (ka==kb) then
+           frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-   &
+         & half*c0_hatdisdq_c0_bks(1,iband,iq1grad,iatpert)
+           frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+   &
+         & half*c0_hatdisdq_c0_bks(2,iband,iq1grad,iatpert)
+         end if
+         if (ka==iq1grad) then
+           frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-   &
+         & half*c0_hatdisdq_c0_bks(1,iband,kb,iatpert)
+           frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+   &
+         & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert)
+         end if
+
+       end do !iband
+
+     end do !iq1grad
+
+   end do !istrpert
+
+ end do !iatpert
+
+!Deallocations
  ABI_DEALLOCATE(c0_hatdisdq_c0_bks)
  ABI_DEALLOCATE(ghatdisdqdq_c0m)
+ ABI_DEALLOCATE(gh1dqc)
  DBG_EXIT("COLL")
 
  end subroutine dfpt_isdqfr

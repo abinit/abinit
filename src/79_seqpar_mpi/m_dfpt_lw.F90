@@ -2520,8 +2520,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Allocate arrays for wf contributions to the first q-gradient of the internal strain tensor 
  if (lw_flexo==1.or.lw_flexo==4) then 
-   ABI_ALLOCATE(frwfdq,(2,natpert,nq1grad,nstrpert))
-   ABI_ALLOCATE(frwfdq_k,(2,natpert,nq1grad,nstrpert))
+   ABI_ALLOCATE(frwfdq,(2,nq1grad,nstrpert,natpert))
+   ABI_ALLOCATE(frwfdq_k,(2,nq1grad,nstrpert,natpert))
    frwfdq=zero
  end if
 
