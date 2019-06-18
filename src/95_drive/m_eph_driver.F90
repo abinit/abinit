@@ -564,6 +564,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! This to symmetrize the DFPT potentials.
    dvdb%symv1 = dtset%symv1scf > 0
 
+   ! Set qdamp from frohl_params
+   if (dtset%frohl_params(4)/=0) then
+     dvdb%qdamp = dtset%frohl_params(4)
+   end if
+
    !dvdb%diel = 13.103 * dvdb%dielt
    !do ii=1,dvdb%natom
    !  dvdb%qstar(:,:,:,ii) = (-1 ** (ii + 1)) * abs(levi_civita_3()) * 13.368_dp
