@@ -2350,10 +2350,10 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    end if
  end do
 
- ! if(iam_master)then
- !   filename = "terms_set.xml"
- !   call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
- ! end if
+!  if(iam_master)then
+!    filename = "terms_set.xml"
+!    call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
+!  end if
   
  if(need_verbose)then
    write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
@@ -3068,7 +3068,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
  type(polynomial_term_type),dimension(:),allocatable :: terms
  type(polynomial_coeff_type),allocatable :: coeffs_tmp(:)
 !TEST_AM
-! character(len=fnlen) :: filename
+ character(len=fnlen) :: filename
 !TEST_AM
 ! *************************************************************************
 
@@ -3184,8 +3184,8 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
  end do
 
 !TEST_AM
-! filename = "terms_1st_order.xml"
-! call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
+ filename = "terms_1st_order.xml"
+ call polynomial_coeff_writeXML(coeffs_out,ncoeff_out,filename=filename)
 !TEST_AM
 
  write(message,'(a,1x,I0,a)') ch10,&

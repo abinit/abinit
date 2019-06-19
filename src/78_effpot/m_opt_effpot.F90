@@ -50,7 +50,9 @@ module m_opt_effpot
  public :: opt_getHOstrain
  public :: opt_getHOcrossdisp
  public :: opt_filterdisp
-
+ public :: opt_getSingleDispTerms
+ public :: opt_getHOSingleDispTerms
+ 
  !!****
 CONTAINS 
       
@@ -366,25 +368,24 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 !Local variables ------------------------------
 !scalars
  integer :: i,ii, info,natom_sc,ntime,iterm,nterm,idisp,ndisp
- integer :: jterm,nterm_of_term, nterm_inloop, iterm_of_term,iterm2
- integer :: iorder, iorder1, iorder2, order,order_start,order_stop, ncombi
- integer :: power_tot,icombi,icombi_start,icombi_stop,jdisp,sec
- integer :: nterm_start,nterm_tot_tmp,nterm2,norder,jdisp1,jdisp2 
+ integer :: jterm,iterm2, ncombi,ncombi2
+ integer :: power_tot,icombi
+ integer :: nterm_start,nterm_tot_tmp,nterm2
  !1406
- integer :: ncombi_strain 
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.0001
  real(dp) :: to_divide,divided,divider1,divider2
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
  integer :: sc_size(3)
- integer,allocatable :: ncombi_order(:),terms(:)
+ integer,allocatable :: terms(:)
  logical,allocatable :: exists(:) 
  type(fit_data_type) :: fit_data
  type(polynomial_coeff_type) :: term
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
  !1406 strain_temrs_tmp
- type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:),strain_terms_tmp(:)
+ type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:)
+ type(polynomial_coeff_type),allocatable :: singledisp_terms(:)
 !Logicals
  logical :: need_print_anh=.FALSE.,file_opened,equal_term_done ! MARCUS FOR THE MOMENT PRINT NO FILES
  logical :: had_strain,to_cycle
@@ -397,11 +398,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 !*************************************************************************
   
   ! Say hello to the world!
-  write(message, '(a,(80a),a)' ) ch10,&
-& ('=',ii=1,80),ch10
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
-
   write(message, '(3a)' )'-Start Bound optimization of Anharmonic Potential ',ch10
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
@@ -411,13 +407,10 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
   nterm =eff_pot%anharmonics_terms%ncoeff
-  norder = abs(((order_ran(2)-order_ran(1))/2)) + 1 
   if(present(print_anh)) need_print_anh = print_anh
   ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
   ABI_ALLOCATE(exists,(nterm))
-  ABI_ALLOCATE(ncombi_order,(norder))
   ABI_ALLOCATE(terms,(nterm))
-  ncombi_order = 0 
   call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
  &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
  
@@ -479,13 +472,15 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
+ !MS DEV 
+ call opt_getSingleDispTerms(singledisp_terms,eff_pot%crystal,sc_size,comm) 
+
  !For the moment order loop commented
  !do iorder=order(1),order(2),2, Order will be done per term 
  !Loop over all original terms + 1 
  ! + 1 to bound pure strain
   do iterm =1,nterm+1 
      if(iterm <=nterm)then
-
        !Store for optimization
        terms(iterm) = iterm
        !Message: The world wants to know where we stand Batman
@@ -497,10 +492,16 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 &       ' Check term (',iterm,'/',nterm,'): ', trim(term%name),ch10 
         call wrtout(ab_out,message,'COLL')
         call wrtout(std_out,message,'COLL')
-       !Get List of high order Terms for term 
+       !Get List of high order single Terms for terms 
+       call opt_getHOSingleDispTerms(eff_pot%anharmonics_terms%coefficients(iterm),& 
+&                                     singledisp_terms,order_ran,ncombi2,comm)
+
+       !Get List of high order cross Terms for term 
        call opt_getHOcrossdisp(my_coeffs,ncombi,nterm_start,to_cycle,eff_pot,order_ran,iterm,comm)
        !Skip term if it doesn't need bounding 
        if(to_cycle) cycle 
+
+ 
 
      else ! if iterm = nterm + 1 => Take care about strain 
        call opt_getHOstrain(my_coeffs,ncombi,nterm_start,eff_pot,order_ran,comm)     
@@ -598,7 +599,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   ABI_DEALLOCATE(symbols)
   ABI_DEALLOCATE(exists)
   ABI_DEALLOCATE(terms)
-  ABI_DEALLOCATE(ncombi_order)
   !ABI_DATATYPE_DEALLOCATE(my_coeffs)  
   call fit_data_free(fit_data)
 end subroutine opt_effpotbound
@@ -1319,8 +1319,300 @@ subroutine opt_getHOcrossdisp(terms,ncombi,nterm_start,to_cycle,eff_pot,power_di
 
 end subroutine opt_getHOcrossdisp
 !!***
+ 
+!!****f* m_opt_effpot/opt_getSingleDispTerms
+!!
+!! NAME
+!! opt_getSingleDispTerms
+!!
+!! FUNCTION
+!! Get polynomial terms (<polynomial_coeff_type>) with single displacements 
+!! at second order inside a given range defined by the supercell size 
+!!
+!! INPUTS
+!! sc_size(3): supercell size
+!! crystal<type(crystal_t)>: all information about the crystal
+!! comm: mpi communicator (at the moment only sequential tested) 
+!! 
+!! OUTPUT
+!! terms<polynomial_coeff_type>: list single displacement polynomial_coeffs
+!!
+!! PARENTS
+!! opt_effpotbound
+!!
+!! CHILDREN
+!! m_polynomial_coeff.F90/polynomial_coeff_init 
+!!
+!! SOURCE
 
+subroutine opt_getSingleDispTerms(terms,crystal,sc_size,comm)
+
+ implicit none 
+         
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ type(polynomial_coeff_type),allocatable,intent(inout) :: terms(:)
+ type(crystal_t),intent(inout) :: crystal
+ !arrays
+ integer :: sc_size(3) 
+!Logicals
+!Strings 
+!Local variables ------------------------------
+!scalars
+ integer :: natom,nsym,nrpt,ncoeff_sym,nstr_sym
+ integer :: ncoeff,ncoeff_out,power_strph,option_GN,option
+ integer :: nterms_out
+ integer :: lim1,lim2,lim3
+ integer :: ii,ia,ib,r1,r2,r3
+ integer :: irpt,irpt_ref
+ integer :: master,nproc,my_rank
+ real(dp) :: norm, cutoff
+!arrays
+ integer :: ncell(3),power_disp(2)
+ integer, allocatable :: cell(:,:)
+ integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:)
+ !type(polynomial_coeff_type),allocatable :: terms(:)
+ real(dp),allocatable :: xcart(:,:),xred(:,:),rpt(:,:)
+ real(dp) :: rprimd(3,3),range_ifc(3)
+ real(dp),allocatable :: dist(:,:,:,:)
+ character(len=5),allocatable :: symbols(:)
+!Logicals
+ logical :: iam_master,need_verbose 
+!Strings
+ character(len=1000) :: message
+!*************************************************************************
+
+option = 2 
+
+if(option == 1)then 
+   !MPI variables
+   master = 0
+   nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+   iam_master = (my_rank == master)
+   
+   !Set/Get other variables
+   natom  = crystal%natom
+   nsym   = crystal%nsym
+   rprimd = crystal%rprimd
+   need_verbose = .TRUE.
+  
+   ABI_ALLOCATE(xcart,(3,natom))
+   ABI_ALLOCATE(xred,(3,natom))
+   xcart(:,:) = crystal%xcart(:,:)
+   xred(:,:)  = crystal%xred(:,:)
+  
+   !Compute the max range of the ifc with respect to the trainning set
+   range_ifc(:) = zero
+   do ii=1,3
+     norm = sqrt(rprimd(ii,1)**2+ rprimd(ii,2)**2+rprimd(ii,3)**2)
+     range_ifc(ii) = range_ifc(ii) + norm * sc_size(ii) / 2.0
+   end do
+  
+   !compute new ncell
+   ncell = sc_size
+   lim1=((ncell(1)/2)) + 1
+   lim2=((ncell(2)/2)) + 1
+   lim3=((ncell(3)/2)) + 1
+   if(mod(ncell(1),2)/=0) lim1=lim1+1
+   if(mod(ncell(2),2)/=0) lim2=lim2+1
+   if(mod(ncell(3),2)/=0) lim3=lim3+1
+   nrpt=(2*lim1+1)*(2*lim2+1)*(2*lim3+1)
+  
+   ncell(1) = 2*lim1+1
+   ncell(2) = 2*lim2+1
+   ncell(3) = 2*lim3+1
+  
+   !Build the rpt point
+   ABI_ALLOCATE(rpt,(3,nrpt))
+   ABI_ALLOCATE(cell,(3,nrpt))
+  
+   !WARNING:
+   !Put the reference cell into the first element
+   !the code will first deal with the atoms of the first cell
+   irpt = 1
+   irpt_ref = 1
+   rpt(:,1) = zero
+   cell(:,irpt)=0
+   !Fill other rpt:
+   do r1=lim1,-lim1,-1
+     do r2=lim2,-lim2,-1
+       do r3=lim3,-lim3,-1
+         if(r1==0.and.r2==0.and.r3==0) then
+           cycle
+         end if
+         irpt=irpt+1
+         rpt(1,irpt)=r1*rprimd(1,1)+r2*rprimd(1,2)+r3*rprimd(1,3)
+         rpt(2,irpt)=r1*rprimd(2,1)+r2*rprimd(2,2)+r3*rprimd(2,3)
+         rpt(3,irpt)=r1*rprimd(3,1)+r2*rprimd(3,2)+r3*rprimd(3,3)
+         cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
+       end do
+     end do
+   end do
+  
+   ABI_ALLOCATE(symbols,(natom))
+   call symbols_crystal(crystal%natom,crystal%ntypat,crystal%npsp,&
+&                     symbols,crystal%typat,crystal%znucl)
+
+   !Compute the distances between atoms
+   !Now dist(3,ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
+   ABI_ALLOCATE(dist,(3,natom,natom,nrpt))
+   dist = zero
+   do ia=1,natom
+     do ib=1,natom
+       do irpt=1,nrpt
+         dist(1,ia,ib,irpt) = xcart(1,ib)-xcart(1,ia)+rpt(1,irpt)
+         dist(2,ia,ib,irpt) = xcart(2,ib)-xcart(2,ia)+rpt(2,irpt)
+         dist(3,ia,ib,irpt) = xcart(3,ib)-xcart(3,ia)+rpt(3,irpt)
+       end do
+     end do
+   end do
+  
+  
+   if(need_verbose)then
+     write(message,'(1a)')' Generation of the list of all the possible coefficients'
+     call wrtout(std_out,message,'COLL')
+   end if
+   call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
+&                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,sc_size=sc_size)
+
+   ABI_DEALLOCATE(dist)
+   ABI_DEALLOCATE(rpt)
+ 
+   write(*,*) "polynomial_getList worked"
+
+   !Get Order1 term s
+   !Check difference between ncoeff_out, ncoeff 
+   call polynomial_coeff_getOrder1(cell,terms,list_symcoeff,natom,nterms_out,ncoeff_sym,nrpt,nsym,symbols)
+  
+   do ii=1,nterms_out
+      write(*,*) "Term(",ii,"/",nterms_out,"): ", terms(ii)%name 
+   enddo
+
+elseif(option == 2)then 
+   !Get/set variables 
+   power_disp = (/2,2/)
+   power_strph = zero 
+   option_GN = 0 
+   sc_size = (/2,2,2/)
+   cutoff = 0  
+
+   do ii=1,3
+      cutoff = cutoff + sqrt(crystal%rprimd(ii,1)**2 + &
+&                            crystal%rprimd(ii,2)**2 + &
+&                            crystal%rprimd(ii,3)**2)
+   enddo 
+
+
+call polynomial_coeff_getNorder(terms,crystal,cutoff,ncoeff,ncoeff_out,power_disp,& 
+&                               power_strph,option_GN,sc_size,comm,anharmstr=.false.,spcoupling=.false.,&
+&                               only_odd_power=.false.,only_even_power=.true.,verbose=.true.) 
+
+  
+   write(*,*) "behind call getNorder"
+   write(*,*) "ncoeff_out: ", ncoeff_out
+   do ii=1,ncoeff_out 
+      write(*,*) "Term(",ii,"/",ncoeff_out,"): ", terms(ii)%name 
+   enddo
+
+endif !option
+
+end subroutine opt_getSingleDispTerms
+!!***
+
+!!****f* m_opt_effpot/opt_getHOSingleDispTerms
+!!
+!! NAME
+!! opt_getHOSingleDispTerms
+!!
+!! FUNCTION
+!! For a givne anharmonic term that might consits of product of 
+!! terms find all even high order single displacement terms
+!! Example: Input term: x*y*z 
+!!          Input HO-range: 6 8
+!!          Output terms: x^6,x^8,y^6,y^8,z^6,z^8
+!!          Caution only atomic displacements are taken into account
+!!
+!! INPUTS
+!! term_in<polynomial_coeff_type>: input anharmanoc term 
+!! crystal<type(crystal_t)>: all information about the crystal
+!! single_disp_terms<polynomial_coeff_out>: list of single disp terms at 
+!!                                          second order to select terms from 
+!! power_disp(2): Start and stop power for HO terms
+!! comm: mpi communicator (at the moment only sequential tested) 
+!! 
+!! OUTPUT
+!! terms_out<polynomial_coeff_out>: output high order even terms 
+!! ncoeff: number of coefficients
+!!
+!! PARENTS
+!! opt_effpotbound
+!!
+!! CHILDREN
+!! m_polynomial_coeff.F90/polynomial_coeff_init 
+!!
+!! SOURCE
+
+subroutine opt_getHOSingleDispTerms(term_in,single_disp_terms,power_disp,ncoeff,comm)
+
+ implicit none 
+         
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ integer,intent(out) :: ncoeff
+ type(polynomial_coeff_type),intent(in) :: term_in
+ type(polynomial_coeff_type),intent(in) :: single_disp_terms(:)
+ !type(polynomial_coeff_type),allocatable,intent(out) :: terms_out(:) 
+ !type(crystal_t),intent(inout) :: crystal
+ !arrays
+ integer, intent(in) :: power_disp(2)
+!Logicals
+!Strings 
+!Local variables ------------------------------
+!scalars
+integer :: ndisp,norder
+integer :: idisp, iterm  
+!arrays
+ type(polynomial_coeff_type),allocatable :: terms_out(:)
+ integer,allocatable :: equi_term(:) 
+!Logicals
+ logical :: iam_master,need_verbose 
+!Strings
+ character(len=1000) :: message
+!*************************************************************************
+
+!Get/Set Variables 
+!Number of output terms
+ndisp = term_in%terms(1)%ndisp  
+norder = abs(power_disp(2)-power_disp(1))/2 + 1
+ncoeff = norder * ndisp
+!Allocate output terms 
+ABI_DATATYPE_ALLOCATE(terms_out,(ncoeff))
+ABI_ALLOCATE(equi_term,(ndisp))
+
+!find equivalent second order terms in list of single disp terms 
+!for each displacement in input term 
+write(*,*) "term", term_in%name 
+write(*,*) "ndisp of this term", ndisp 
+
+do idisp=1,ndisp 
+   do iterm=1,size(single_disp_terms)
+      if(all(term_in%terms(1)%atindx(:,idisp) == single_disp_terms(iterm)%terms(1)%atindx(:,1)))then 
+         if(all(term_in%terms(1)%cell(:,:,idisp) == single_disp_terms(iterm)%terms(1)%cell(:,:,1)))then 
+            if(term_in%terms(1)%direction(idisp) == single_disp_terms(iterm)%terms(1)%direction(1))then 
+               equi_term(idisp) = iterm 
+               write(*,*) "equi_term(",idisp,") found: ", single_disp_terms(iterm)%name
+            endif
+        endif
+      endif 
+   enddo 
+enddo
+
+ABI_DATATYPE_DEALLOCATE(terms_out)
+
+end subroutine opt_getHOSingleDispTerms
+!!***
 
 end module m_opt_effpot
 !!***
-     
