@@ -70,10 +70,10 @@ kptbounds2  1/4 1/4 1/4 #R'
 #%% psp_files= V.LDA_PW-JTH.xml,  Sr.LDA_PW-JTH.xml, O.LDA_PW-JTH.xml
 #%% [shell] 
 #%% [paral_info]
-#%% max_nprocs = 32
-#%% nprocs_to_test = 32
-#%% [NCPU_32]
-#%% files_to_test = tucrpa_1_MPI32.out, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%% max_nprocs = 24
+#%% nprocs_to_test = 24
+#%% [NCPU_24]
+#%% files_to_test = tucrpa_1_MPI24.out, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
 #%% [extra_info]
 #%% keywords = LDA, FATBANDS
 #%% authors = B. Amadon
