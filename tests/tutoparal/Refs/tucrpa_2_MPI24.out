@@ -1,6 +1,6 @@
 
 .Version 8.11.8 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,16 +15,16 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 19 Jun 2019.
-- ( at 09h50 )
+- ( at 11h16 )
   
 - input  file    -> tucrpa_2.in
 - output file    -> tucrpa_2_MPI24.out
 - root for input  files -> tucrpa_2_MPI24i
 - root for output files -> tucrpa_2_MPI24o
 
-- inpspheads : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -178,7 +178,7 @@ _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
@@ -245,7 +245,7 @@ _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
              iscf2         -2
              iscf3         17
              iscf4         17
-              ixc           7
+              ixc       -1012
            jdtset        1    2    3    4
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01
@@ -704,11 +704,6 @@ P           mkmem           2
 == DATASET  1 ==================================================================
 -   nproc =   24   -> not optimal: autoparal keyword recommended in input file
 
- Exchange-correlation functional for the present dataset will be:
-  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
- Citation for XC functional:
-  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
  R(2)=  0.0000000  7.2605000  0.0000000  G(2)=  0.0000000  0.1377316  0.0000000
@@ -727,9 +722,9 @@ P           mkmem           2
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -747,9 +742,9 @@ P           mkmem           2
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -767,9 +762,9 @@ P           mkmem           2
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -1374,7 +1369,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT  2  -152.25985515629    -5.307E-01 8.421E-03 1.139E+02
+ ETOT  2  -152.25985515637    -5.307E-01 8.421E-03 1.139E+02
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.24197   Average Vxc (hartree)=  -0.44033
@@ -1892,7 +1887,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT  3  -151.96503607001     2.948E-01 8.166E-03 3.753E+00
+ ETOT  3  -151.96503607087     2.948E-01 8.166E-03 3.753E+00
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.32437   Average Vxc (hartree)=  -0.44018
@@ -2410,7 +2405,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT  4  -151.93491640379     3.012E-02 2.106E-03 7.060E-01
+ ETOT  4  -151.93491640427     3.012E-02 2.106E-03 7.060E-01
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.30014   Average Vxc (hartree)=  -0.43986
@@ -2928,7 +2923,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT  5  -151.92870443120     6.212E-03 1.216E-03 4.507E-02
+ ETOT  5  -151.92870443009     6.212E-03 1.216E-03 4.507E-02
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28091   Average Vxc (hartree)=  -0.43955
@@ -3184,7 +3179,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
       occupation numbers for kpt#  16
    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000
    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000
-   2.00000    2.00000    2.00000    2.00000    1.70686    1.35232    1.34207    0.00000
+   2.00000    2.00000    2.00000    2.00000    1.70687    1.35232    1.34207    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
@@ -3224,7 +3219,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  kpt#  19, nband= 50, wtk=  0.03125, kpt= -0.3750  0.1250  0.3750 (reduced coord)
   -2.10812   -1.15985   -1.15981   -1.15853   -0.96070   -0.41213   -0.39192   -0.38374
   -0.30220   -0.29419   -0.28968    0.04373    0.05675    0.06237    0.09574    0.10311
-   0.12818    0.16946    0.17475    0.21095    0.31841    0.32056    0.33001    0.39169
+   0.12818    0.16946    0.17475    0.21095    0.31841    0.32057    0.33001    0.39169
    0.47190    0.51853    0.53341    0.55007    0.55964    0.58340    0.63637    0.72128
    0.73177    0.78564    0.80274    0.80824    0.83547    0.88775    0.99679    1.01235
    1.02077    1.08486    1.11019    1.14106    1.14281    1.17501    1.20151    1.26081
@@ -3446,7 +3441,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT  6  -151.92845729109     2.471E-04 4.115E-04 5.531E-03
+ ETOT  6  -151.92845729101     2.471E-04 4.115E-04 5.531E-03
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28337   Average Vxc (hartree)=  -0.43949
@@ -4482,7 +4477,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT  8  -151.92841096932     8.527E-06 2.407E-06 1.822E-04
+ ETOT  8  -151.92841096933     8.527E-06 2.407E-06 1.822E-04
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28501   Average Vxc (hartree)=  -0.43945
@@ -6554,7 +6549,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 12  -151.92840909773     2.271E-10 2.432E-09 3.787E-10
+ ETOT 12  -151.92840909773     2.270E-10 2.432E-09 3.787E-10
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -7072,7 +7067,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 13  -151.92840909773    -7.390E-13 4.905E-10 6.158E-11
+ ETOT 13  -151.92840909773    -4.832E-13 4.905E-10 6.158E-11
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -7590,7 +7585,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 14  -151.92840909773    -1.421E-13 8.788E-11 1.573E-11
+ ETOT 14  -151.92840909773    -5.684E-14 8.788E-11 1.573E-11
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -8108,7 +8103,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 15  -151.92840909773     3.411E-13 1.981E-11 2.835E-13
+ ETOT 15  -151.92840909773     8.527E-14 1.981E-11 2.835E-13
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -8626,7 +8621,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 16  -151.92840909773     0.000E+00 4.088E-12 2.952E-14
+ ETOT 16  -151.92840909773    -2.558E-13 4.088E-12 2.953E-14
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -9147,9 +9142,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  At SCF step   16       nres2   =  2.95E-14 < tolvrs=  1.00E-13 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60160625E-13
-  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12337906E-12
-  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07521814E-12
+  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60140977E-13
+  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12337837E-12
+  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07535560E-12
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -9163,8 +9158,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      5.992978840244052
- Compensation charge over fine fft grid    =      5.993710080171822
+ Compensation charge over spherical meshes =      5.992978840243965
+ Compensation charge over fine fft grid    =      5.993710080168048
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -9253,260 +9248,260 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   87.346E-16; max=  40.884E-13
-   0.1250  0.1250  0.1250    1  2.61511E-12 kpt; spin; max resid(k); each band:
-  5.07E-21 8.65E-22 9.82E-22 1.05E-21 2.27E-21 5.68E-21 4.33E-21 2.86E-21
+   0.1250  0.1250  0.1250    1  2.61510E-12 kpt; spin; max resid(k); each band:
+  5.04E-21 8.65E-22 9.83E-22 1.05E-21 2.27E-21 5.68E-21 4.32E-21 2.86E-21
   2.83E-22 6.39E-22 7.44E-22 3.19E-21 1.27E-20 1.80E-20 3.10E-20 3.07E-20
   1.85E-20 1.48E-21 2.88E-20 4.52E-20 1.48E-20 1.49E-20 1.61E-20 1.50E-20
-  2.69E-20 8.14E-21 1.03E-20 3.20E-21 8.37E-21 7.41E-20 2.71E-20 9.54E-21
-  6.61E-21 8.34E-21 3.50E-21 1.52E-18 5.39E-21 3.74E-21 9.46E-20 1.69E-19
+  2.68E-20 8.14E-21 1.03E-20 3.20E-21 8.37E-21 7.41E-20 2.71E-20 9.53E-21
+  6.61E-21 8.33E-21 3.50E-21 1.52E-18 5.39E-21 3.74E-21 9.46E-20 1.69E-19
   2.57E-22 9.55E-21 1.70E-20 2.16E-21 6.38E-21 5.99E-19 7.09E-20 6.47E-18
   1.28E-12 2.62E-12
-   0.3750  0.1250  0.1250    1  1.30778E-15 kpt; spin; max resid(k); each band:
-  4.67E-21 1.31E-21 1.25E-21 1.39E-21 2.59E-21 3.66E-21 7.74E-22 2.51E-21
-  4.20E-22 5.14E-22 6.52E-22 1.88E-20 2.33E-20 1.51E-20 2.50E-20 1.80E-20
-  1.64E-20 2.57E-20 8.00E-21 1.67E-20 1.51E-20 9.74E-22 5.01E-22 2.65E-20
+   0.3750  0.1250  0.1250    1  1.30782E-15 kpt; spin; max resid(k); each band:
+  4.64E-21 1.31E-21 1.25E-21 1.39E-21 2.59E-21 3.66E-21 7.74E-22 2.51E-21
+  4.20E-22 5.14E-22 6.52E-22 1.87E-20 2.32E-20 1.51E-20 2.50E-20 1.80E-20
+  1.64E-20 2.57E-20 7.99E-21 1.67E-20 1.51E-20 9.74E-22 5.01E-22 2.65E-20
   1.98E-20 5.15E-21 1.57E-20 1.20E-21 2.78E-20 1.68E-21 3.47E-21 6.23E-21
-  8.17E-21 6.06E-21 1.50E-20 2.93E-20 1.44E-20 1.04E-20 6.17E-21 1.56E-21
+  8.18E-21 6.06E-21 1.50E-20 2.93E-20 1.44E-20 1.04E-20 6.17E-21 1.56E-21
   1.36E-19 5.56E-21 4.40E-21 8.65E-21 1.10E-19 1.90E-20 5.55E-21 1.26E-20
   5.12E-19 1.31E-15
-  -0.3750  0.1250  0.1250    1  9.72791E-16 kpt; spin; max resid(k); each band:
-  4.73E-21 1.31E-21 1.19E-21 1.38E-21 2.55E-21 3.69E-21 7.76E-22 2.53E-21
-  4.38E-22 5.45E-22 6.08E-22 9.02E-22 2.38E-20 1.88E-20 2.23E-20 1.73E-20
-  1.54E-20 2.84E-20 7.56E-21 1.43E-20 1.47E-20 8.72E-22 5.31E-22 8.36E-22
-  1.99E-20 5.15E-21 1.10E-21 1.24E-21 2.67E-20 1.73E-21 3.01E-21 6.17E-21
-  8.24E-21 6.06E-21 1.52E-20 2.80E-20 1.42E-20 1.09E-20 6.50E-21 1.51E-21
-  3.64E-19 5.13E-20 4.25E-21 8.69E-21 8.68E-21 1.67E-20 5.38E-21 1.16E-20
-  4.94E-19 9.73E-16
+  -0.3750  0.1250  0.1250    1  9.74265E-16 kpt; spin; max resid(k); each band:
+  4.71E-21 1.31E-21 1.19E-21 1.38E-21 2.55E-21 3.69E-21 7.76E-22 2.53E-21
+  4.38E-22 5.45E-22 6.08E-22 9.01E-22 2.38E-20 1.88E-20 2.23E-20 1.73E-20
+  1.54E-20 2.84E-20 7.56E-21 1.43E-20 1.46E-20 8.71E-22 5.30E-22 8.36E-22
+  1.99E-20 5.15E-21 1.10E-21 1.24E-21 2.67E-20 1.73E-21 3.00E-21 6.17E-21
+  8.25E-21 6.06E-21 1.52E-20 2.80E-20 1.42E-20 1.08E-20 6.50E-21 1.51E-21
+  3.65E-19 5.13E-20 4.25E-21 8.69E-21 8.67E-21 1.67E-20 5.38E-21 1.16E-20
+  4.94E-19 9.74E-16
   -0.1250  0.1250  0.1250    1  4.08839E-12 kpt; spin; max resid(k); each band:
-  8.13E-21 8.84E-22 9.46E-22 1.03E-21 2.16E-21 5.72E-21 4.46E-21 3.01E-21
+  8.11E-21 8.84E-22 9.46E-22 1.03E-21 2.16E-21 5.72E-21 4.46E-21 3.01E-21
   4.25E-22 6.86E-22 6.52E-22 3.47E-21 1.24E-20 2.01E-20 2.87E-20 3.06E-20
   2.25E-20 1.37E-21 2.82E-20 4.01E-20 1.72E-20 1.47E-20 1.54E-20 1.36E-20
-  2.07E-20 7.77E-21 1.04E-20 3.25E-21 8.00E-21 7.06E-20 3.10E-20 3.79E-21
-  6.06E-21 7.38E-21 3.66E-21 1.64E-18 5.52E-21 3.98E-21 1.01E-19 1.66E-19
-  4.37E-22 7.47E-21 1.65E-20 2.23E-21 3.12E-20 4.51E-19 6.70E-20 6.05E-18
+  2.07E-20 7.77E-21 1.04E-20 3.25E-21 8.00E-21 7.06E-20 3.10E-20 3.78E-21
+  6.06E-21 7.37E-21 3.65E-21 1.64E-18 5.52E-21 3.98E-21 1.01E-19 1.66E-19
+  4.37E-22 7.47E-21 1.65E-20 2.23E-21 3.12E-20 4.51E-19 6.70E-20 6.04E-18
   4.09E-12 3.12E-12
-   0.1250  0.3750  0.1250    1  7.18762E-16 kpt; spin; max resid(k); each band:
-  3.97E-21 2.22E-21 1.09E-21 1.24E-21 1.92E-22 3.39E-21 3.20E-21 2.43E-21
-  4.50E-22 3.44E-22 9.51E-22 3.20E-20 2.71E-20 1.35E-20 2.57E-20 2.26E-20
-  2.07E-20 2.35E-20 8.24E-21 2.22E-20 1.01E-20 2.57E-20 1.77E-20 1.68E-20
-  1.88E-20 1.41E-20 1.30E-20 6.19E-21 1.53E-20 2.41E-20 3.54E-21 3.36E-20
-  5.99E-21 5.25E-20 6.12E-20 3.12E-20 1.29E-20 1.58E-20 6.54E-21 2.65E-19
+   0.1250  0.3750  0.1250    1  7.20120E-16 kpt; spin; max resid(k); each band:
+  3.95E-21 2.22E-21 1.09E-21 1.24E-21 1.92E-22 3.39E-21 3.20E-21 2.43E-21
+  4.50E-22 3.44E-22 9.51E-22 3.20E-20 2.70E-20 1.35E-20 2.57E-20 2.26E-20
+  2.07E-20 2.35E-20 8.25E-21 2.22E-20 1.01E-20 2.57E-20 1.77E-20 1.68E-20
+  1.88E-20 1.42E-20 1.30E-20 6.19E-21 1.53E-20 2.42E-20 3.54E-21 3.36E-20
+  5.99E-21 5.24E-20 6.12E-20 3.12E-20 1.29E-20 1.58E-20 6.54E-21 2.65E-19
   1.63E-20 6.00E-21 1.18E-21 6.76E-20 3.45E-20 2.18E-20 8.86E-21 2.97E-20
-  2.59E-19 7.19E-16
-   0.3750  0.3750  0.1250    1  1.08459E-17 kpt; spin; max resid(k); each band:
-  2.81E-21 1.52E-21 1.27E-21 1.48E-21 2.47E-22 3.13E-21 3.81E-21 4.17E-21
-  2.35E-22 8.18E-22 7.86E-22 2.83E-20 3.02E-20 1.44E-20 2.04E-20 2.55E-20
-  1.68E-20 1.21E-20 6.36E-21 2.34E-21 1.50E-20 1.48E-20 1.75E-20 2.25E-20
-  1.19E-20 1.42E-20 3.45E-21 1.26E-20 1.92E-21 2.18E-21 2.62E-21 6.16E-21
+  2.59E-19 7.20E-16
+   0.3750  0.3750  0.1250    1  1.08973E-17 kpt; spin; max resid(k); each band:
+  2.82E-21 1.52E-21 1.27E-21 1.48E-21 2.47E-22 3.13E-21 3.81E-21 4.17E-21
+  2.35E-22 8.18E-22 7.86E-22 2.82E-20 3.02E-20 1.44E-20 2.04E-20 2.55E-20
+  1.68E-20 1.21E-20 6.35E-21 2.34E-21 1.50E-20 1.48E-20 1.75E-20 2.25E-20
+  1.19E-20 1.42E-20 3.45E-21 1.26E-20 1.92E-21 2.18E-21 2.62E-21 6.15E-21
   2.75E-21 7.60E-21 5.41E-21 2.27E-21 8.02E-21 1.88E-20 3.56E-20 2.18E-20
   3.38E-19 2.83E-20 4.68E-21 7.28E-21 2.04E-20 5.51E-20 1.99E-20 1.11E-19
-  9.91E-20 1.08E-17
-  -0.3750  0.3750  0.1250    1  1.02294E-17 kpt; spin; max resid(k); each band:
-  4.39E-21 1.64E-21 1.08E-21 1.44E-21 2.08E-22 3.14E-21 3.81E-21 4.36E-21
-  2.22E-22 9.17E-22 6.98E-22 3.28E-20 2.39E-20 1.44E-20 2.23E-20 2.41E-20
+  9.92E-20 1.09E-17
+  -0.3750  0.3750  0.1250    1  9.99141E-18 kpt; spin; max resid(k); each band:
+  4.37E-21 1.64E-21 1.08E-21 1.44E-21 2.08E-22 3.14E-21 3.81E-21 4.36E-21
+  2.22E-22 9.17E-22 6.98E-22 3.27E-20 2.38E-20 1.44E-20 2.23E-20 2.41E-20
   2.18E-20 1.12E-20 5.97E-21 2.34E-21 1.63E-20 1.34E-20 1.96E-20 2.24E-20
   1.19E-20 1.77E-20 1.83E-20 1.22E-20 2.28E-21 1.28E-20 2.55E-21 6.02E-21
-  2.54E-21 7.40E-21 5.52E-21 2.17E-21 3.52E-20 1.79E-21 2.75E-21 3.27E-20
-  2.68E-19 2.30E-21 4.59E-21 8.32E-21 2.24E-20 5.09E-20 1.92E-20 1.12E-19
-  8.08E-20 1.02E-17
+  2.54E-21 7.39E-21 5.52E-21 2.17E-21 3.52E-20 1.79E-21 2.75E-21 3.27E-20
+  2.68E-19 2.30E-21 4.59E-21 8.32E-21 2.23E-20 5.09E-20 1.92E-20 1.12E-19
+  8.08E-20 9.99E-18
   -0.1250  0.3750  0.1250    1  1.93503E-15 kpt; spin; max resid(k); each band:
-  4.37E-21 2.19E-21 1.08E-21 1.14E-21 2.43E-22 3.37E-21 3.20E-21 2.22E-21
-  4.58E-22 4.01E-22 9.60E-22 3.28E-20 2.71E-20 1.59E-20 2.34E-20 2.18E-20
-  1.84E-20 2.64E-20 8.33E-21 2.02E-20 9.74E-21 2.72E-20 1.82E-20 1.53E-20
-  1.89E-20 1.38E-20 2.66E-21 5.27E-22 1.43E-20 2.22E-20 3.68E-21 3.06E-20
+  4.35E-21 2.19E-21 1.08E-21 1.14E-21 2.43E-22 3.37E-21 3.20E-21 2.22E-21
+  4.57E-22 4.01E-22 9.60E-22 3.28E-20 2.71E-20 1.59E-20 2.33E-20 2.18E-20
+  1.84E-20 2.64E-20 8.34E-21 2.02E-20 9.74E-21 2.72E-20 1.82E-20 1.53E-20
+  1.89E-20 1.38E-20 2.66E-21 5.27E-22 1.42E-20 2.22E-20 3.68E-21 3.06E-20
   5.88E-21 5.05E-20 6.73E-20 3.20E-20 1.29E-20 1.53E-20 6.76E-21 1.17E-20
   1.09E-19 5.69E-21 1.23E-21 4.46E-21 2.88E-20 1.75E-20 9.18E-21 2.71E-20
   2.75E-19 1.94E-15
-   0.1250 -0.3750  0.1250    1  1.65281E-16 kpt; spin; max resid(k); each band:
-  3.83E-21 2.22E-21 1.04E-21 1.23E-21 2.12E-22 3.38E-21 3.16E-21 2.24E-21
+   0.1250 -0.3750  0.1250    1  1.65286E-16 kpt; spin; max resid(k); each band:
+  3.81E-21 2.22E-21 1.04E-21 1.23E-21 2.12E-22 3.37E-21 3.16E-21 2.23E-21
   4.80E-22 3.99E-22 9.68E-22 3.24E-20 2.72E-20 1.60E-20 2.38E-20 2.20E-20
-  1.87E-20 2.61E-20 8.75E-21 2.03E-20 1.00E-20 2.72E-20 1.85E-20 1.54E-20
-  1.88E-20 1.70E-21 1.55E-20 6.30E-21 1.48E-20 2.29E-20 3.50E-21 3.20E-20
-  6.23E-21 5.16E-20 6.60E-20 3.18E-20 1.26E-20 1.53E-20 6.72E-21 1.18E-20
+  1.87E-20 2.61E-20 8.76E-21 2.03E-20 1.00E-20 2.71E-20 1.85E-20 1.54E-20
+  1.88E-20 1.70E-21 1.55E-20 6.30E-21 1.48E-20 2.29E-20 3.51E-21 3.20E-20
+  6.24E-21 5.16E-20 6.60E-20 3.18E-20 1.26E-20 1.53E-20 6.72E-21 1.18E-20
   3.69E-19 5.61E-21 1.20E-21 4.43E-21 3.08E-20 1.91E-20 8.96E-21 2.96E-20
   2.51E-19 1.65E-16
-   0.3750 -0.3750  0.1250    1  1.11781E-17 kpt; spin; max resid(k); each band:
-  4.49E-21 1.64E-21 1.07E-21 1.44E-21 2.06E-22 3.11E-21 3.80E-21 4.35E-21
-  2.20E-22 9.23E-22 6.95E-22 3.27E-20 2.40E-20 1.44E-20 2.24E-20 2.40E-20
-  2.17E-20 1.13E-20 5.92E-21 2.31E-21 1.62E-20 1.34E-20 1.96E-20 2.24E-20
+   0.3750 -0.3750  0.1250    1  1.11836E-17 kpt; spin; max resid(k); each band:
+  4.48E-21 1.64E-21 1.07E-21 1.44E-21 2.06E-22 3.11E-21 3.80E-21 4.35E-21
+  2.20E-22 9.23E-22 6.95E-22 3.27E-20 2.39E-20 1.44E-20 2.24E-20 2.40E-20
+  2.17E-20 1.13E-20 5.92E-21 2.31E-21 1.62E-20 1.34E-20 1.96E-20 2.23E-20
   1.19E-20 1.77E-20 1.81E-20 1.23E-20 2.29E-21 1.30E-20 2.58E-21 5.99E-21
-  2.61E-21 7.31E-21 5.49E-21 2.24E-21 3.49E-20 1.80E-21 2.75E-21 3.26E-20
-  2.64E-19 2.30E-21 4.57E-21 8.30E-21 2.27E-20 5.11E-20 1.91E-20 1.10E-19
+  2.61E-21 7.31E-21 5.49E-21 2.24E-21 3.49E-20 1.80E-21 2.76E-21 3.26E-20
+  2.64E-19 2.30E-21 4.57E-21 8.30E-21 2.26E-20 5.11E-20 1.91E-20 1.10E-19
   8.27E-20 1.12E-17
-  -0.3750 -0.3750  0.1250    1  9.89412E-18 kpt; spin; max resid(k); each band:
-  3.99E-21 1.48E-21 1.27E-21 1.51E-21 2.34E-22 3.14E-21 3.82E-21 4.17E-21
-  2.33E-22 8.22E-22 8.16E-22 2.81E-20 3.04E-20 1.45E-20 2.01E-20 2.56E-20
+  -0.3750 -0.3750  0.1250    1  9.89313E-18 kpt; spin; max resid(k); each band:
+  4.00E-21 1.48E-21 1.27E-21 1.51E-21 2.34E-22 3.14E-21 3.82E-21 4.17E-21
+  2.33E-22 8.22E-22 8.16E-22 2.80E-20 3.04E-20 1.45E-20 2.01E-20 2.55E-20
   1.63E-20 1.15E-20 6.30E-21 2.34E-21 1.46E-20 1.46E-20 1.75E-20 2.25E-20
   1.20E-20 1.47E-20 3.51E-21 1.24E-20 1.75E-21 2.16E-21 2.70E-21 6.05E-21
   2.81E-21 7.51E-21 5.21E-21 1.99E-21 8.34E-21 1.94E-20 3.58E-20 2.28E-20
-  3.30E-19 2.78E-20 4.54E-21 7.09E-21 1.90E-20 5.57E-20 1.90E-20 1.11E-19
+  3.30E-19 2.77E-20 4.54E-21 7.09E-21 1.90E-20 5.57E-20 1.90E-20 1.11E-19
   1.02E-19 9.89E-18
   -0.1250 -0.3750  0.1250    1  1.46198E-15 kpt; spin; max resid(k); each band:
-  4.35E-21 2.23E-21 1.15E-21 1.16E-21 2.43E-22 3.37E-21 3.18E-21 2.45E-21
+  4.33E-21 2.23E-21 1.15E-21 1.16E-21 2.43E-22 3.37E-21 3.18E-21 2.45E-21
   4.38E-22 3.43E-22 9.64E-22 3.16E-20 2.73E-20 1.33E-20 2.59E-20 2.27E-20
-  2.09E-20 2.33E-20 7.75E-21 2.23E-20 9.79E-21 2.52E-20 1.71E-20 1.70E-20
+  2.09E-20 2.33E-20 7.75E-21 2.23E-20 9.78E-21 2.52E-20 1.71E-20 1.70E-20
   1.88E-20 1.34E-20 1.37E-20 6.48E-21 1.51E-20 2.32E-20 3.41E-21 3.31E-20
-  6.05E-21 5.12E-20 6.05E-20 3.23E-20 1.32E-20 1.60E-20 6.62E-21 1.17E-20
+  6.04E-21 5.12E-20 6.05E-20 3.23E-20 1.32E-20 1.60E-20 6.62E-21 1.17E-20
   1.71E-20 6.14E-21 1.20E-21 6.72E-20 3.43E-20 2.27E-20 9.10E-21 2.91E-20
   2.84E-19 1.46E-15
-   0.1250 -0.1250  0.1250    1  1.04899E-12 kpt; spin; max resid(k); each band:
-  8.06E-21 9.13E-22 9.60E-22 9.97E-22 2.32E-21 5.64E-21 4.30E-21 2.91E-21
+   0.1250 -0.1250  0.1250    1  1.04898E-12 kpt; spin; max resid(k); each band:
+  8.04E-21 9.13E-22 9.60E-22 9.98E-22 2.32E-21 5.64E-21 4.30E-21 2.91E-21
   3.61E-22 7.21E-22 6.51E-22 3.35E-21 1.26E-20 2.00E-20 2.81E-20 3.09E-20
-  2.23E-20 1.38E-21 2.85E-20 4.03E-20 1.61E-20 1.46E-20 1.40E-20 1.38E-20
-  2.05E-20 7.83E-21 1.07E-20 3.23E-21 8.19E-21 7.28E-20 3.06E-20 3.93E-21
+  2.23E-20 1.38E-21 2.84E-20 4.03E-20 1.61E-20 1.46E-20 1.40E-20 1.38E-20
+  2.05E-20 7.82E-21 1.07E-20 3.23E-21 8.19E-21 7.28E-20 3.06E-20 3.92E-21
   5.95E-21 7.48E-21 3.61E-21 1.63E-18 5.57E-21 3.73E-21 9.49E-20 1.69E-19
   2.72E-22 9.08E-21 1.95E-20 2.24E-21 3.08E-20 4.93E-19 6.52E-20 3.46E-18
   1.05E-12 1.98E-13
-   0.3750 -0.1250  0.1250    1  1.07251E-15 kpt; spin; max resid(k); each band:
-  5.23E-21 1.28E-21 1.28E-21 1.28E-21 2.71E-21 3.69E-21 7.75E-22 2.48E-21
-  4.15E-22 5.79E-22 6.15E-22 9.03E-22 2.36E-20 1.90E-20 2.15E-20 1.70E-20
-  1.60E-20 2.86E-20 7.99E-21 1.45E-20 1.40E-20 8.47E-22 1.01E-20 8.13E-22
+   0.3750 -0.1250  0.1250    1  1.07250E-15 kpt; spin; max resid(k); each band:
+  5.20E-21 1.28E-21 1.28E-21 1.28E-21 2.71E-21 3.69E-21 7.75E-22 2.48E-21
+  4.15E-22 5.79E-22 6.14E-22 9.02E-22 2.36E-20 1.89E-20 2.15E-20 1.70E-20
+  1.60E-20 2.86E-20 7.99E-21 1.45E-20 1.40E-20 8.47E-22 1.01E-20 8.12E-22
   1.99E-20 5.17E-21 1.07E-21 1.23E-21 2.65E-20 2.27E-20 2.99E-21 6.11E-21
-  7.64E-21 5.86E-21 1.52E-20 2.90E-20 1.49E-20 1.10E-20 6.58E-21 1.59E-21
-  1.13E-19 6.38E-21 4.34E-21 9.42E-21 9.25E-21 1.57E-20 5.73E-21 1.01E-20
+  7.65E-21 5.86E-21 1.52E-20 2.90E-20 1.49E-20 1.10E-20 6.59E-21 1.59E-21
+  1.13E-19 6.38E-21 4.34E-21 9.41E-21 9.25E-21 1.57E-20 5.73E-21 1.01E-20
   5.45E-19 1.07E-15
-  -0.3750 -0.1250  0.1250    1  8.70665E-16 kpt; spin; max resid(k); each band:
-  4.44E-21 1.31E-21 1.34E-21 1.30E-21 2.66E-21 3.73E-21 7.76E-22 2.56E-21
-  3.93E-22 5.35E-22 6.42E-22 1.84E-20 2.31E-20 1.50E-20 2.47E-20 1.81E-20
-  1.66E-20 2.54E-20 8.32E-21 1.74E-20 1.43E-20 9.12E-22 5.34E-22 2.64E-20
+  -0.3750 -0.1250  0.1250    1  8.70574E-16 kpt; spin; max resid(k); each band:
+  4.41E-21 1.31E-21 1.34E-21 1.30E-21 2.66E-21 3.73E-21 7.75E-22 2.56E-21
+  3.93E-22 5.35E-22 6.41E-22 1.84E-20 2.31E-20 1.50E-20 2.47E-20 1.81E-20
+  1.66E-20 2.53E-20 8.32E-21 1.73E-20 1.43E-20 9.12E-22 5.34E-22 2.64E-20
   1.98E-20 5.16E-21 1.58E-20 1.22E-21 2.77E-20 1.64E-21 3.43E-21 6.20E-21
-  8.22E-21 5.83E-21 1.51E-20 3.02E-20 1.50E-20 1.03E-20 6.30E-21 1.58E-21
-  1.81E-20 4.97E-21 4.26E-21 8.70E-21 1.08E-19 1.95E-20 5.64E-21 1.19E-20
+  8.23E-21 5.83E-21 1.51E-20 3.02E-20 1.50E-20 1.03E-20 6.30E-21 1.58E-21
+  1.81E-20 4.98E-21 4.26E-21 8.70E-21 1.08E-19 1.95E-20 5.64E-21 1.19E-20
   5.68E-19 8.71E-16
-  -0.1250 -0.1250  0.1250    1  1.28015E-12 kpt; spin; max resid(k); each band:
-  4.78E-21 9.03E-22 9.93E-22 9.63E-22 2.24E-21 5.63E-21 4.29E-21 2.97E-21
+  -0.1250 -0.1250  0.1250    1  1.28016E-12 kpt; spin; max resid(k); each band:
+  4.76E-21 9.03E-22 9.94E-22 9.63E-22 2.24E-21 5.63E-21 4.29E-21 2.97E-21
   2.85E-22 6.37E-22 7.59E-22 3.13E-21 1.24E-20 1.83E-20 3.13E-20 3.07E-20
   1.66E-20 1.41E-21 2.89E-20 4.58E-20 1.31E-20 1.50E-20 1.64E-20 1.51E-20
-  2.70E-20 8.30E-21 1.05E-20 3.23E-21 8.59E-21 7.48E-20 2.54E-20 1.06E-20
-  6.87E-21 8.38E-21 3.29E-21 2.98E-20 5.43E-21 3.63E-21 9.04E-20 1.65E-19
-  2.81E-22 9.76E-21 1.62E-20 2.13E-21 3.81E-21 5.97E-19 7.61E-20 7.61E-18
+  2.70E-20 8.30E-21 1.05E-20 3.23E-21 8.59E-21 7.48E-20 2.54E-20 1.05E-20
+  6.87E-21 8.37E-21 3.29E-21 2.98E-20 5.43E-21 3.63E-21 9.04E-20 1.65E-19
+  2.81E-22 9.76E-21 1.62E-20 2.13E-21 3.81E-21 5.97E-19 7.61E-20 7.59E-18
   1.28E-12 2.91E-13
-   0.1250  0.1250  0.3750    1  1.50994E-15 kpt; spin; max resid(k); each band:
-  5.30E-21 1.76E-21 1.13E-21 1.30E-21 2.35E-21 7.06E-21 1.32E-21 7.26E-21
+   0.1250  0.1250  0.3750    1  1.50995E-15 kpt; spin; max resid(k); each band:
+  5.27E-21 1.76E-21 1.13E-21 1.30E-21 2.35E-21 7.06E-21 1.32E-21 7.26E-21
   4.88E-22 5.60E-22 1.47E-21 2.92E-20 2.39E-20 1.74E-20 2.46E-20 1.98E-20
-  1.90E-20 2.60E-20 9.15E-21 2.10E-20 1.16E-20 2.04E-20 1.59E-20 2.10E-20
-  2.11E-20 1.69E-20 1.73E-21 7.46E-22 1.67E-20 2.26E-20 4.27E-21 6.21E-21
-  6.08E-21 5.12E-21 1.38E-20 2.16E-20 1.68E-20 1.46E-20 7.52E-21 1.86E-20
-  3.81E-19 5.91E-21 4.81E-21 8.67E-21 2.25E-20 1.52E-20 8.72E-21 1.38E-20
+  1.90E-20 2.60E-20 9.16E-21 2.10E-20 1.15E-20 2.04E-20 1.59E-20 2.10E-20
+  2.11E-20 1.69E-20 1.73E-21 7.46E-22 1.67E-20 2.26E-20 4.28E-21 6.21E-21
+  6.08E-21 5.12E-21 1.38E-20 2.16E-20 1.68E-20 1.45E-20 7.52E-21 1.86E-20
+  3.81E-19 5.91E-21 4.81E-21 8.66E-21 2.25E-20 1.52E-20 8.72E-21 1.38E-20
   4.00E-19 1.51E-15
-   0.3750  0.1250  0.3750    1  3.71052E-18 kpt; spin; max resid(k); each band:
-  3.85E-21 1.32E-21 9.66E-22 1.65E-21 2.69E-21 4.08E-21 1.76E-21 3.39E-21
-  3.28E-22 7.72E-22 8.52E-22 3.10E-20 2.08E-20 1.20E-20 2.70E-20 1.81E-20
-  3.42E-20 1.93E-20 4.61E-21 1.18E-21 1.36E-20 1.33E-20 1.58E-20 3.12E-20
-  8.51E-21 2.21E-20 1.72E-20 1.06E-20 1.68E-21 1.90E-21 3.06E-21 4.04E-21
+   0.3750  0.1250  0.3750    1  3.72312E-18 kpt; spin; max resid(k); each band:
+  3.84E-21 1.32E-21 9.66E-22 1.65E-21 2.69E-21 4.08E-21 1.76E-21 3.39E-21
+  3.28E-22 7.72E-22 8.52E-22 3.09E-20 2.08E-20 1.20E-20 2.70E-20 1.81E-20
+  3.42E-20 1.94E-20 4.61E-21 1.18E-21 1.36E-20 1.33E-20 1.58E-20 3.12E-20
+  8.50E-21 2.21E-20 1.72E-20 1.06E-20 1.68E-21 1.90E-21 3.06E-21 4.04E-21
   1.70E-21 8.55E-21 6.63E-21 1.64E-21 8.79E-21 1.69E-21 3.54E-21 4.00E-20
   3.81E-19 2.92E-20 2.20E-21 8.74E-21 2.11E-20 6.19E-20 1.96E-20 1.35E-19
-  2.30E-20 3.71E-18
-  -0.3750  0.1250  0.3750    1  5.54542E-18 kpt; spin; max resid(k); each band:
+  2.30E-20 3.72E-18
+  -0.3750  0.1250  0.3750    1  5.54728E-18 kpt; spin; max resid(k); each band:
   3.59E-21 1.47E-21 9.93E-22 1.67E-21 2.65E-21 4.08E-21 1.83E-21 3.37E-21
-  4.21E-22 7.87E-22 7.62E-22 3.12E-20 2.20E-20 1.19E-20 2.73E-20 1.78E-20
+  4.21E-22 7.87E-22 7.62E-22 3.11E-20 2.20E-20 1.19E-20 2.73E-20 1.78E-20
   3.70E-20 2.56E-20 4.66E-21 1.10E-21 1.55E-20 1.30E-20 1.51E-20 3.15E-20
   8.44E-21 2.06E-20 1.76E-20 1.13E-20 1.88E-21 3.40E-21 2.84E-21 4.10E-21
   1.65E-21 8.60E-21 6.26E-21 1.57E-21 3.74E-20 1.59E-21 2.97E-21 4.44E-20
-  5.96E-20 3.81E-20 2.56E-21 9.09E-21 1.83E-20 5.81E-20 2.16E-20 1.40E-19
+  5.96E-20 3.81E-20 2.56E-21 9.09E-21 1.82E-20 5.81E-20 2.16E-20 1.40E-19
   2.75E-20 5.55E-18
-  -0.1250  0.1250  0.3750    1  6.62553E-16 kpt; spin; max resid(k); each band:
-  4.63E-21 1.80E-21 1.21E-21 1.24E-21 2.27E-21 7.06E-21 1.30E-21 7.43E-21
+  -0.1250  0.1250  0.3750    1  6.62705E-16 kpt; spin; max resid(k); each band:
+  4.60E-21 1.80E-21 1.21E-21 1.24E-21 2.27E-21 7.06E-21 1.30E-21 7.43E-21
   6.97E-22 4.01E-22 1.47E-21 2.96E-20 2.67E-20 1.59E-20 2.80E-20 1.82E-20
-  2.00E-20 2.44E-20 1.89E-20 1.98E-20 1.32E-20 2.28E-20 1.41E-20 2.11E-20
-  2.08E-20 1.99E-21 1.35E-20 8.61E-22 1.98E-20 2.46E-21 4.40E-21 3.15E-20
-  7.79E-21 5.52E-20 1.35E-20 2.88E-20 1.53E-20 1.18E-20 6.87E-21 1.23E-20
+  2.00E-20 2.44E-20 1.89E-20 1.98E-20 1.32E-20 2.27E-20 1.41E-20 2.11E-20
+  2.08E-20 1.99E-21 1.36E-20 8.61E-22 1.98E-20 2.46E-21 4.40E-21 3.15E-20
+  7.78E-21 5.52E-20 1.34E-20 2.88E-20 1.53E-20 1.18E-20 6.87E-21 1.23E-20
   1.42E-19 5.85E-21 4.32E-21 7.70E-21 2.45E-20 1.85E-20 7.93E-21 1.68E-20
   2.86E-19 6.63E-16
-   0.1250  0.3750  0.3750    1  1.28341E-17 kpt; spin; max resid(k); each band:
+   0.1250  0.3750  0.3750    1  1.28255E-17 kpt; spin; max resid(k); each band:
   3.89E-21 1.72E-21 1.36E-21 1.34E-21 2.65E-22 3.30E-21 1.67E-21 3.58E-21
-  2.91E-22 6.01E-21 5.54E-22 3.35E-20 4.44E-20 2.09E-20 1.68E-20 2.18E-20
+  2.91E-22 6.01E-21 5.54E-22 3.34E-20 4.44E-20 2.09E-20 1.68E-20 2.18E-20
   1.33E-20 1.01E-20 4.50E-21 9.03E-22 1.65E-20 1.83E-20 2.53E-20 1.14E-20
   1.41E-20 1.24E-20 2.98E-21 1.28E-20 1.58E-21 2.47E-21 2.41E-21 6.58E-21
   5.77E-21 6.65E-21 4.92E-21 1.83E-21 6.41E-20 1.73E-21 2.75E-21 2.47E-20
   8.47E-20 3.16E-20 1.10E-21 7.73E-21 2.91E-20 5.37E-20 2.09E-20 8.22E-20
   1.68E-19 1.28E-17
-   0.3750  0.3750  0.3750    1  5.90958E-18 kpt; spin; max resid(k); each band:
-  3.52E-21 1.79E-21 1.98E-21 2.26E-21 2.67E-21 3.01E-21 2.65E-21 2.55E-21
+   0.3750  0.3750  0.3750    1  5.90835E-18 kpt; spin; max resid(k); each band:
+  3.50E-21 1.79E-21 1.99E-21 2.26E-21 2.67E-21 3.01E-21 2.65E-21 2.55E-21
   5.38E-22 7.34E-22 1.02E-21 9.13E-22 1.78E-20 2.81E-20 2.64E-20 1.78E-20
-  2.49E-20 2.19E-21 1.34E-21 1.15E-21 2.75E-21 1.72E-20 2.11E-20 1.55E-20
+  2.49E-20 2.19E-21 1.33E-21 1.15E-21 2.75E-21 1.72E-20 2.11E-20 1.55E-20
   2.78E-20 1.76E-20 2.46E-21 2.80E-21 4.34E-22 4.11E-22 2.90E-21 3.21E-21
-  4.86E-21 1.12E-21 7.20E-21 4.37E-20 2.41E-20 4.48E-21 1.09E-20 9.11E-21
+  4.85E-21 1.12E-21 7.20E-21 4.37E-20 2.41E-20 4.48E-21 1.09E-20 9.11E-21
   1.46E-21 5.48E-20 1.10E-20 1.34E-20 4.52E-21 4.21E-20 7.01E-20 3.02E-20
   7.93E-19 5.91E-18
-  -0.3750  0.3750  0.3750    1  7.88394E-18 kpt; spin; max resid(k); each band:
-  3.20E-21 1.99E-21 1.87E-21 2.20E-21 3.17E-22 3.01E-21 2.67E-21 2.42E-21
+  -0.3750  0.3750  0.3750    1  7.87232E-18 kpt; spin; max resid(k); each band:
+  3.19E-21 1.99E-21 1.87E-21 2.20E-21 3.17E-22 3.01E-21 2.67E-21 2.42E-21
   6.57E-22 7.73E-22 9.17E-22 1.23E-21 1.77E-20 2.81E-20 2.49E-20 1.82E-20
   2.40E-20 2.14E-21 1.37E-21 1.10E-21 2.68E-20 1.69E-20 2.10E-20 1.55E-20
-  2.81E-20 2.02E-20 2.47E-21 2.86E-21 4.24E-22 3.91E-22 2.93E-21 3.37E-21
+  2.81E-20 2.02E-20 2.47E-21 2.86E-21 4.24E-22 3.92E-22 2.93E-21 3.37E-21
   4.34E-21 1.08E-21 7.59E-21 4.35E-20 2.30E-20 4.12E-21 1.06E-20 9.28E-21
   2.37E-21 5.78E-20 1.08E-20 1.28E-20 5.56E-21 4.18E-20 7.71E-20 3.00E-20
-  7.38E-19 7.88E-18
-  -0.1250  0.3750  0.3750    1  1.56297E-17 kpt; spin; max resid(k); each band:
-  2.64E-21 1.77E-21 1.35E-21 1.35E-21 2.84E-22 3.30E-21 1.65E-21 3.67E-21
+  7.34E-19 7.87E-18
+  -0.1250  0.3750  0.3750    1  1.56384E-17 kpt; spin; max resid(k); each band:
+  2.64E-21 1.77E-21 1.35E-21 1.35E-21 2.84E-22 3.30E-21 1.64E-21 3.67E-21
   4.02E-22 6.10E-21 4.73E-22 3.46E-20 4.47E-20 2.08E-20 1.74E-20 2.19E-20
-  1.23E-20 9.68E-21 6.09E-21 8.48E-22 1.77E-20 1.88E-20 2.44E-20 1.13E-20
-  1.40E-20 1.20E-20 2.95E-21 1.16E-20 1.45E-21 2.71E-21 2.31E-21 6.73E-21
+  1.23E-20 9.68E-21 6.07E-21 8.48E-22 1.77E-20 1.88E-20 2.44E-20 1.12E-20
+  1.40E-20 1.20E-20 2.95E-21 1.16E-20 1.45E-21 2.70E-21 2.31E-21 6.73E-21
   4.31E-21 6.89E-21 4.75E-21 1.80E-21 7.41E-21 1.64E-21 2.67E-21 2.63E-20
   8.46E-20 3.15E-20 1.06E-21 8.00E-21 3.17E-20 5.00E-20 2.19E-20 8.87E-20
   1.78E-19 1.56E-17
-   0.1250 -0.3750  0.3750    1  9.18576E-18 kpt; spin; max resid(k); each band:
-  3.72E-21 1.88E-21 1.38E-21 1.36E-21 2.58E-22 3.30E-21 1.64E-21 3.64E-21
-  4.01E-22 6.04E-21 4.55E-22 3.35E-20 4.61E-20 2.08E-20 1.73E-20 2.17E-20
-  1.18E-20 9.53E-21 6.31E-21 8.46E-22 1.84E-20 1.86E-20 2.37E-20 1.12E-20
-  1.40E-20 1.18E-20 2.92E-21 1.18E-20 1.65E-21 3.18E-21 2.29E-21 6.66E-21
-  4.40E-21 6.89E-21 4.79E-21 1.87E-21 3.52E-20 1.76E-20 2.60E-21 2.80E-20
-  2.36E-19 3.00E-20 1.05E-21 7.85E-21 3.10E-20 5.10E-20 2.21E-20 8.52E-20
+   0.1250 -0.3750  0.3750    1  9.18737E-18 kpt; spin; max resid(k); each band:
+  3.73E-21 1.88E-21 1.38E-21 1.36E-21 2.58E-22 3.30E-21 1.64E-21 3.64E-21
+  4.01E-22 6.04E-21 4.55E-22 3.34E-20 4.61E-20 2.08E-20 1.73E-20 2.17E-20
+  1.18E-20 9.53E-21 6.29E-21 8.46E-22 1.84E-20 1.86E-20 2.37E-20 1.12E-20
+  1.40E-20 1.18E-20 2.92E-21 1.18E-20 1.65E-21 3.17E-21 2.29E-21 6.66E-21
+  4.40E-21 6.88E-21 4.79E-21 1.87E-21 3.52E-20 1.76E-20 2.60E-21 2.80E-20
+  2.36E-19 3.00E-20 1.05E-21 7.85E-21 3.10E-20 5.09E-20 2.21E-20 8.52E-20
   1.74E-19 9.19E-18
-   0.3750 -0.3750  0.3750    1  3.14570E-14 kpt; spin; max resid(k); each band:
-  3.15E-21 1.99E-21 1.86E-21 2.19E-21 2.86E-22 2.97E-21 2.68E-21 2.45E-21
+   0.3750 -0.3750  0.3750    1  3.14571E-14 kpt; spin; max resid(k); each band:
+  3.14E-21 1.99E-21 1.86E-21 2.19E-21 2.86E-22 2.97E-21 2.68E-21 2.45E-21
   6.36E-22 8.14E-22 9.17E-22 1.10E-21 1.75E-20 2.80E-20 2.51E-20 1.72E-20
   2.46E-20 2.20E-21 1.33E-21 1.10E-21 2.69E-20 1.69E-20 2.12E-20 1.55E-20
   2.79E-20 1.97E-20 2.47E-21 2.88E-21 4.31E-22 4.05E-22 3.00E-21 3.30E-21
   4.55E-21 1.10E-21 7.50E-21 4.48E-20 2.34E-20 3.77E-21 1.09E-20 9.04E-21
   7.59E-21 5.73E-20 1.02E-20 1.37E-20 5.91E-21 3.96E-20 7.56E-20 3.15E-20
   4.61E-15 3.15E-14
-  -0.3750 -0.3750  0.3750    1  5.58913E-18 kpt; spin; max resid(k); each band:
-  4.46E-21 1.79E-21 1.98E-21 2.13E-21 2.64E-21 3.02E-21 2.65E-21 2.55E-21
+  -0.3750 -0.3750  0.3750    1  5.58806E-18 kpt; spin; max resid(k); each band:
+  4.45E-21 1.79E-21 1.98E-21 2.14E-21 2.64E-21 3.02E-21 2.65E-21 2.55E-21
   5.48E-22 7.14E-22 1.06E-21 7.95E-22 1.76E-20 2.81E-20 2.83E-20 1.71E-20
   2.48E-20 2.23E-21 1.35E-21 1.12E-21 2.88E-21 1.74E-20 2.17E-20 1.55E-20
-  2.77E-20 1.78E-20 2.44E-21 2.78E-21 4.21E-22 4.18E-22 2.81E-21 3.22E-21
-  5.37E-21 1.11E-21 6.83E-21 4.55E-20 2.47E-20 4.28E-21 1.06E-20 8.65E-21
+  2.77E-20 1.78E-20 2.44E-21 2.78E-21 4.22E-22 4.18E-22 2.82E-21 3.22E-21
+  5.37E-21 1.11E-21 6.82E-21 4.55E-20 2.47E-20 4.29E-21 1.06E-20 8.64E-21
   2.30E-21 5.64E-20 1.12E-20 1.42E-20 4.53E-21 4.30E-20 6.02E-20 3.20E-20
   1.01E-18 5.59E-18
-  -0.1250 -0.3750  0.3750    1  8.23742E-18 kpt; spin; max resid(k); each band:
-  3.30E-21 1.78E-21 1.39E-21 1.38E-21 2.38E-22 3.30E-21 1.62E-21 3.60E-21
-  2.98E-22 5.96E-21 5.57E-22 3.24E-20 4.57E-20 2.09E-20 1.72E-20 2.16E-20
-  1.30E-20 9.78E-21 4.08E-21 9.09E-22 1.65E-20 1.79E-20 2.46E-20 1.14E-20
-  1.41E-20 1.22E-20 3.12E-21 1.20E-20 1.54E-21 2.58E-21 2.44E-21 6.44E-21
+  -0.1250 -0.3750  0.3750    1  8.23817E-18 kpt; spin; max resid(k); each band:
+  3.31E-21 1.78E-21 1.39E-21 1.38E-21 2.38E-22 3.30E-21 1.62E-21 3.60E-21
+  2.98E-22 5.96E-21 5.57E-22 3.23E-20 4.57E-20 2.09E-20 1.72E-20 2.16E-20
+  1.30E-20 9.78E-21 4.09E-21 9.08E-22 1.65E-20 1.79E-20 2.46E-20 1.14E-20
+  1.41E-20 1.22E-20 3.12E-21 1.20E-20 1.53E-21 2.57E-21 2.44E-21 6.44E-21
   5.83E-21 5.91E-21 4.91E-21 1.84E-21 6.39E-20 1.69E-21 2.76E-21 2.60E-20
-  2.12E-19 2.86E-20 1.08E-21 7.50E-21 2.43E-20 5.41E-20 2.04E-20 8.00E-20
+  2.12E-19 2.86E-20 1.08E-21 7.50E-21 2.43E-20 5.40E-20 2.04E-20 8.00E-20
   1.94E-19 8.24E-18
-   0.1250 -0.1250  0.3750    1  8.83190E-16 kpt; spin; max resid(k); each band:
-  4.18E-21 1.81E-21 1.22E-21 1.24E-21 2.38E-21 7.05E-21 1.29E-21 7.23E-21
-  7.16E-22 3.98E-22 1.48E-21 2.93E-20 2.66E-20 1.58E-20 2.83E-20 1.84E-20
+   0.1250 -0.1250  0.3750    1  8.83177E-16 kpt; spin; max resid(k); each band:
+  4.16E-21 1.81E-21 1.22E-21 1.24E-21 2.38E-21 7.04E-21 1.29E-21 7.23E-21
+  7.16E-22 3.98E-22 1.48E-21 2.92E-20 2.66E-20 1.58E-20 2.83E-20 1.84E-20
   1.99E-20 2.44E-20 1.85E-20 1.98E-20 1.32E-20 2.25E-20 1.38E-20 2.11E-20
-  2.08E-20 1.98E-21 1.35E-20 8.35E-22 1.98E-20 2.51E-21 4.53E-21 3.16E-20
+  2.08E-20 1.98E-21 1.35E-20 8.36E-22 1.98E-20 2.51E-21 4.53E-21 3.16E-20
   7.91E-21 5.49E-20 1.34E-20 2.91E-20 1.54E-20 1.19E-20 6.99E-21 1.24E-20
   1.45E-19 5.83E-21 4.50E-21 7.91E-21 2.43E-20 1.87E-20 7.97E-21 1.65E-20
   2.85E-19 8.83E-16
-   0.3750 -0.1250  0.3750    1  3.93756E-18 kpt; spin; max resid(k); each band:
-  2.94E-21 1.37E-21 9.78E-22 1.67E-21 2.45E-22 4.08E-21 1.81E-21 3.31E-21
-  4.16E-22 7.98E-22 7.93E-22 3.16E-20 2.05E-20 1.20E-20 2.76E-20 1.79E-20
-  3.72E-20 2.57E-20 4.70E-21 1.13E-21 1.46E-20 1.35E-20 1.55E-20 3.15E-20
-  8.48E-21 2.14E-20 1.72E-20 1.10E-20 1.72E-21 2.95E-21 2.95E-21 4.09E-21
+   0.3750 -0.1250  0.3750    1  3.93722E-18 kpt; spin; max resid(k); each band:
+  2.93E-21 1.37E-21 9.78E-22 1.67E-21 2.45E-22 4.08E-21 1.81E-21 3.31E-21
+  4.16E-22 7.98E-22 7.93E-22 3.16E-20 2.05E-20 1.19E-20 2.76E-20 1.79E-20
+  3.72E-20 2.57E-20 4.69E-21 1.13E-21 1.46E-20 1.35E-20 1.55E-20 3.14E-20
+  8.47E-21 2.14E-20 1.72E-20 1.10E-20 1.72E-21 2.95E-21 2.95E-21 4.09E-21
   1.71E-21 8.45E-21 6.21E-21 1.61E-21 3.85E-20 1.63E-21 3.28E-21 4.25E-20
   3.92E-19 2.94E-20 2.49E-21 9.19E-21 1.86E-20 5.54E-20 2.10E-20 1.39E-19
   2.73E-20 3.94E-18
-  -0.3750 -0.1250  0.3750    1  1.89649E-18 kpt; spin; max resid(k); each band:
-  3.53E-21 1.38E-21 9.83E-22 1.68E-21 2.59E-21 4.08E-21 1.79E-21 3.42E-21
+  -0.3750 -0.1250  0.3750    1  1.89737E-18 kpt; spin; max resid(k); each band:
+  3.54E-21 1.38E-21 9.83E-22 1.68E-21 2.59E-21 4.08E-21 1.79E-21 3.42E-21
   3.23E-22 7.66E-22 8.54E-22 3.03E-20 2.24E-20 1.20E-20 2.70E-20 1.80E-20
   3.60E-20 2.23E-20 4.60E-21 1.14E-21 1.40E-20 1.25E-20 1.54E-20 3.12E-20
-  8.49E-21 2.18E-20 1.79E-20 1.07E-20 1.71E-21 2.19E-21 3.06E-21 3.76E-21
+  8.49E-21 2.18E-20 1.79E-20 1.07E-20 1.71E-21 2.18E-21 3.06E-21 3.76E-21
   1.67E-21 8.67E-21 6.58E-21 1.70E-21 8.81E-21 1.69E-21 3.41E-21 4.38E-20
-  3.85E-19 2.87E-20 2.07E-21 8.38E-21 2.08E-20 6.41E-20 1.86E-20 1.31E-19
+  3.85E-19 2.87E-20 2.78E-21 8.38E-21 2.08E-20 6.41E-20 1.86E-20 1.31E-19
   2.62E-20 1.90E-18
-  -0.1250 -0.1250  0.3750    1  1.05901E-15 kpt; spin; max resid(k); each band:
-  7.00E-21 1.79E-21 1.13E-21 1.31E-21 2.36E-21 7.07E-21 1.33E-21 7.43E-21
+  -0.1250 -0.1250  0.3750    1  1.05903E-15 kpt; spin; max resid(k); each band:
+  6.97E-21 1.79E-21 1.13E-21 1.31E-21 2.36E-21 7.06E-21 1.33E-21 7.43E-21
   4.81E-22 5.48E-22 1.47E-21 2.88E-20 2.35E-20 1.73E-20 2.50E-20 2.02E-20
-  2.02E-20 2.37E-20 9.28E-21 2.13E-20 1.16E-20 2.00E-20 1.59E-20 2.11E-20
-  2.10E-20 1.69E-20 1.34E-20 7.29E-22 1.71E-20 2.25E-20 4.10E-21 6.28E-21
-  6.51E-21 4.96E-21 1.39E-20 2.15E-20 1.67E-20 1.37E-20 7.54E-21 1.83E-20
+  2.02E-20 2.36E-20 9.29E-21 2.12E-20 1.16E-20 2.00E-20 1.59E-20 2.11E-20
+  2.10E-20 1.70E-20 1.34E-20 7.29E-22 1.71E-20 2.25E-20 4.10E-21 6.27E-21
+  6.52E-21 4.96E-21 1.39E-20 2.15E-20 1.66E-20 1.36E-20 7.54E-21 1.83E-20
   1.92E-20 5.54E-21 4.72E-21 8.31E-21 2.29E-20 1.72E-20 8.55E-21 1.44E-20
   3.99E-19 1.06E-15
  reduced coordinates (array xred) for    5 atoms
@@ -9515,11 +9510,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
        0.500000000000      0.000000000000      0.000000000000
        0.000000000000      0.500000000000      0.000000000000
        0.000000000000      0.000000000000      0.500000000000
- rms dE/dt=  1.8277E-09; max dE/dt=  3.1822E-09; dE/dt below (all hartree)
+ rms dE/dt=  1.8277E-09; max dE/dt=  3.1823E-09; dE/dt below (all hartree)
     1       0.000000000052      0.000000001757      0.000000000976
-    2      -0.000000002403     -0.000000002529      0.000000001603
+    2      -0.000000002402     -0.000000002529      0.000000001603
     3      -0.000000001979      0.000000000503      0.000000001472
-    4       0.000000000780     -0.000000001461     -0.000000001042
+    4       0.000000000780     -0.000000001460     -0.000000001042
     5       0.000000003182      0.000000000457     -0.000000003291
 
  cartesian coordinates (angstrom) at end:
@@ -9530,20 +9525,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
     5      0.00000000000000     0.00000000000000     1.92104556148385
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000001730    -0.00000000027703    -0.00000000014221
-    2      0.00000000032081     0.00000000031324    -0.00000000022854
-    3      0.00000000026244    -0.00000000010429    -0.00000000021051
-    4     -0.00000000011756     0.00000000016611     0.00000000013575
-    5     -0.00000000044840    -0.00000000009803     0.00000000044550
- frms,max,avg= 2.5080958E-10 4.4839950E-10   1.011E-11  3.505E-11  7.810E-12 h/b
+    1     -0.00000000001728    -0.00000000027702    -0.00000000014220
+    2      0.00000000032080     0.00000000031324    -0.00000000022853
+    3      0.00000000026245    -0.00000000010429    -0.00000000021051
+    4     -0.00000000011756     0.00000000016610     0.00000000013575
+    5     -0.00000000044841    -0.00000000009804     0.00000000044550
+ frms,max,avg= 2.5080922E-10 4.4840546E-10   1.010E-11  3.505E-11  7.811E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000088943    -0.00000001424522    -0.00000000731263
-    2      0.00000001649696     0.00000001610722    -0.00000001175176
-    3      0.00000001349532    -0.00000000536257    -0.00000001082493
-    4     -0.00000000604522     0.00000000854146     0.00000000698080
-    5     -0.00000002305763    -0.00000000504090     0.00000002290852
- frms,max,avg= 1.2897146E-08 2.3057628E-08   5.199E-10  1.803E-09  4.016E-10 e/A
+    1     -0.00000000088857    -0.00000001424496    -0.00000000731235
+    2      0.00000001649607     0.00000001610757    -0.00000001175173
+    3      0.00000001349582    -0.00000000536266    -0.00000001082502
+    4     -0.00000000604538     0.00000000854124     0.00000000698074
+    5     -0.00000002305793    -0.00000000504119     0.00000002290837
+ frms,max,avg= 1.2897128E-08 2.3057934E-08   5.193E-10  1.802E-09  4.017E-10 e/A
  length scales=  7.260500000000  7.260500000000  7.260500000000 bohr
               =  3.842091122968  3.842091122968  3.842091122968 angstroms
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
@@ -10071,30 +10066,30 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.22101101655599E+01
-    Hartree energy  =  3.42934572736327E+01
-    XC energy       = -1.94923345610365E+01
+    Kinetic energy  =  4.22101101655755E+01
+    Hartree energy  =  3.42934572736325E+01
+    XC energy       = -1.94923345610364E+01
     Ewald energy    = -1.14220316979058E+02
     PspCore energy  =  6.33972391350157E+00
-    Loc. psp. energy= -1.09494290735327E+02
-    Spherical terms =  8.43864081978080E+00
-    >>>>> Internal E= -1.51925010102947E+02
+    Loc. psp. energy= -1.09494290735322E+02
+    Spherical terms =  8.43864081978105E+00
+    >>>>> Internal E= -1.51925010102926E+02
 
-    -kT*entropy     = -3.39894393249160E-03
-    >>>>>>>>> Etotal= -1.51928409046879E+02
+    -kT*entropy     = -3.39894393249036E-03
+    >>>>>>>>> Etotal= -1.51928409046858E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -1.47235864829360E+01
+    Band energy     = -1.47235864829347E+01
     Ewald energy    =-1.14220316979058E+02
     PspCore energy  =  6.33972391350157E+00
-    Dble-C XC-energy= -3.05329761331902E+01
-    Spherical terms =  1.21214552788043E+00
+    Dble-C XC-energy= -3.05329761331903E+01
+    Spherical terms =  1.21214552787930E+00
     >>>>> Internal E= -1.51925010153802E+02
 
-    -kT*entropy     = -3.39894393249160E-03
+    -kT*entropy     = -3.39894393249036E-03
     >>>> Etotal (DC)= -1.51928409097734E+02
 
-  >Total energy in eV           = -4.13418225781372E+03
+  >Total energy in eV           = -4.13418225781315E+03
   >Total DC energy in eV        = -4.13418225919756E+03
 --------------------------------------------------------------------------------
 
@@ -10112,7 +10107,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  nonlocal contribution to red. grads
     1      -0.000000000661      0.000000000688     -0.000000000332
     2      -0.000000000195     -0.000000000414      0.000000000169
-    3      -0.000000000697      0.000000000532      0.000000000515
+    3      -0.000000000696      0.000000000532      0.000000000515
     4       0.000000000123     -0.000000000637     -0.000000000396
     5       0.000000001251      0.000000000355     -0.000000000936
  local psp contribution to red. grads
@@ -10135,25 +10130,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
     5      -0.000000001109     -0.000000000264      0.000000000863
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60160625E-13
-  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12337906E-12
-  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07521814E-12
+  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60140977E-13
+  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12337837E-12
+  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07535560E-12
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.1499E+01 GPa]
-- sigma(1 1)=  6.14988163E+01  sigma(3 2)= -2.82488961E-08
-- sigma(2 2)=  6.14988156E+01  sigma(3 1)= -3.30509474E-08
-- sigma(3 3)=  6.14988152E+01  sigma(2 1)= -1.19897037E-07
+- sigma(1 1)=  6.14988163E+01  sigma(3 2)= -2.82483181E-08
+- sigma(2 2)=  6.14988156E+01  sigma(3 1)= -3.30509272E-08
+- sigma(3 3)=  6.14988152E+01  sigma(2 1)= -1.19901081E-07
 
 ================================================================================
 == DATASET  2 ==================================================================
 -   nproc =   24   -> not optimal: autoparal keyword recommended in input file
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
-
- Exchange-correlation functional for the present dataset will be:
-  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
- Citation for XC functional:
-  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
@@ -10245,7 +10235,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   2.96E-19  4.30E-19  2.18E-19  2.60E-19  2.03E-19  2.41E-19  6.71E-19  3.92E-19
   9.55E-19  1.88E-19  2.13E-19  2.30E-19  4.16E-19  7.71E-19  8.11E-19  5.28E-19
   8.70E-19  4.11E-19  1.49E-19  9.86E-19  2.34E-19  7.75E-19  3.44E-19  7.43E-19
-  7.57E-19  2.71E-19  5.57E-19  1.25E-19  8.00E-19  2.30E-19  1.14E-19  3.65E-19
+  7.57E-19  2.71E-19  5.57E-19  1.25E-19  8.00E-19  2.29E-19  1.14E-19  3.65E-19
   6.58E-19  3.55E-19  7.23E-19  7.28E-19  8.56E-19  2.73E-19  4.94E-19  1.59E-08
   2.73E-07  9.33E-06
  -2.1011E+00 -1.1520E+00 -1.1520E+00 -1.1520E+00 -9.6527E-01 -4.2839E-01
@@ -10295,7 +10285,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   1.3111E+00  1.3680E+00
   prteigrs : nnsclo,ikpt=   40    3 max resid (incl. the buffer)=  1.07380E-06
  Non-SCF case, kpt    4 ( -0.12500  0.12500  0.12500), residuals and eigenvalues=
-  2.23E-19  3.58E-19  1.61E-19  7.66E-19  1.62E-19  3.45E-19  8.13E-20  3.67E-19
+  2.23E-19  3.58E-19  1.61E-19  7.66E-19  1.62E-19  3.45E-19  8.14E-20  3.67E-19
   1.50E-19  4.09E-19  1.11E-19  4.12E-19  3.06E-19  1.93E-19  4.40E-19  6.65E-19
   4.76E-19  4.20E-19  2.88E-19  3.17E-19  8.93E-19  8.62E-19  7.57E-19  2.93E-19
   7.51E-19  5.73E-19  7.43E-20  6.95E-19  6.48E-19  3.49E-19  1.04E-19  4.57E-19
@@ -10828,7 +10818,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =      5.992978803002044
+ Compensation charge over spherical meshes =      5.992978802998276
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -10931,7 +10921,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   2.96E-19 4.30E-19 2.18E-19 2.60E-19 2.03E-19 2.41E-19 6.71E-19 3.92E-19
   9.55E-19 1.88E-19 2.13E-19 2.30E-19 4.16E-19 7.71E-19 8.11E-19 5.28E-19
   8.70E-19 4.11E-19 1.49E-19 9.86E-19 2.34E-19 7.75E-19 3.44E-19 7.43E-19
-  7.57E-19 2.71E-19 5.57E-19 1.25E-19 8.00E-19 2.30E-19 1.14E-19 3.65E-19
+  7.57E-19 2.71E-19 5.57E-19 1.25E-19 8.00E-19 2.29E-19 1.14E-19 3.65E-19
   6.58E-19 3.55E-19 7.23E-19 7.28E-19 8.56E-19 2.73E-19 4.94E-19 1.59E-08
   2.73E-07 9.33E-06
    0.3750  0.1250  0.1250    1  2.38027E-06 kpt; spin; max resid(k); each band:
@@ -10951,7 +10941,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   1.30E-19 2.64E-19 7.82E-19 5.55E-19 6.39E-19 9.78E-19 6.90E-19 6.12E-16
   2.06E-12 1.07E-06
   -0.1250  0.1250  0.1250    1  7.30168E-05 kpt; spin; max resid(k); each band:
-  2.23E-19 3.58E-19 1.61E-19 7.66E-19 1.62E-19 3.45E-19 8.13E-20 3.67E-19
+  2.23E-19 3.58E-19 1.61E-19 7.66E-19 1.62E-19 3.45E-19 8.14E-20 3.67E-19
   1.50E-19 4.09E-19 1.11E-19 4.12E-19 3.06E-19 1.93E-19 4.40E-19 6.65E-19
   4.76E-19 4.20E-19 2.88E-19 3.17E-19 8.93E-19 8.62E-19 7.57E-19 2.93E-19
   7.51E-19 5.73E-19 7.43E-20 6.95E-19 6.48E-19 3.49E-19 1.04E-19 4.57E-19
@@ -11468,11 +11458,6 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
- Exchange-correlation functional for the present dataset will be:
-  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
- Citation for XC functional:
-  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
-
  SCREENING: Calculation of the susceptibility and dielectric matrices 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
@@ -11490,9 +11475,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -11510,9 +11495,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -11530,9 +11515,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -11819,8 +11804,8 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      5.992978803002044
- Compensation charge over fine fft grid    =      5.993710080171822
+ Compensation charge over spherical meshes =      5.992978802998276
+ Compensation charge over fine fft grid    =      5.993710080168048
 
 
  Total number of electrons per unit cell =   41.0000 (Spherical mesh),   41.0007 (FFT mesh)
@@ -11847,14 +11832,14 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
    0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.07738 ...
    ...  only 12  components have been written...
  Atom #  5
-   0.59758  -1.75345  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000
+   0.59758  -1.75345  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
   -1.75345   5.20994   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
   -0.00000   0.00000  -0.30103   0.00000   0.00000   0.87372   0.00000   0.00000
-  -0.00000   0.00000   0.00000  -0.30242   0.00000   0.00000   0.88079   0.00000
+   0.00000   0.00000   0.00000  -0.30242   0.00000   0.00000   0.88079   0.00000
   -0.00000   0.00000   0.00000   0.00000  -0.30103   0.00000   0.00000   0.87372
-   0.00000  -0.00000   0.87372   0.00000   0.00000   0.11627   0.00000  -0.00000
-   0.00000  -0.00000   0.00000   0.88079   0.00000   0.00000   0.08201  -0.00000
-   0.00000  -0.00000   0.00000   0.00000   0.87372  -0.00000  -0.00000   0.11627
+   0.00000  -0.00000   0.87372   0.00000   0.00000   0.11627  -0.00000   0.00000
+   0.00000  -0.00000   0.00000   0.88079   0.00000  -0.00000   0.08201   0.00000
+   0.00000  -0.00000   0.00000   0.00000   0.87372   0.00000   0.00000   0.11627
 
 
  Augmentation waves occupancies Rhoij:
@@ -11923,10 +11908,10 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
-        0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
 
     2   0.000 -26.907  -5.713  -0.338  -0.337  -0.342  -0.343  -7.557  -8.328
-        0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   5.1787
@@ -11968,10 +11953,10 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.474   0.099  -0.177  -2.348  -2.348  -2.347  -2.348  -0.049   0.317
-       -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2   0.099 -25.389  -4.773  -0.305  -0.305  -0.306  -0.315  -5.832  -7.672
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     52.79  [%]
 
@@ -11983,10 +11968,10 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -24.000  -3.065  -5.033  -7.963  -6.512  -7.964  -6.513  -0.944  -0.917
-        0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -3.065 -24.978  -7.306  -1.151  -1.021  -1.151  -1.028  -5.021  -6.966
-       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     40.87  [%]
 
@@ -12031,7 +12016,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
        -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -4.316 -30.403 -10.178  -1.165  -1.348  -1.169  -1.352  -9.046  -9.735
-       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000
+       -0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    7 :     47.00  [%]
 
@@ -12058,10 +12043,10 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.999  -7.963  -6.508  -3.062  -5.033  -7.964  -6.517  -0.944  -1.418
-       -0.000   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2  -7.963 -32.136 -12.788  -1.147  -0.919  -3.310  -3.154  -6.503  -5.941
-       -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    9 :     40.87  [%]
 
@@ -12073,7 +12058,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -2.039  -2.677  -2.039  -2.677  -4.315  -4.315  -0.281   0.197
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -2.039 -27.076  -7.283  -0.252  -0.036  -1.344  -1.355  -5.078  -6.860
        -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12103,7 +12088,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -1.434  -2.874  -5.257  -6.483  -7.336  -7.338  -0.388   0.240
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -1.434 -23.757  -5.085  -0.019   0.041  -1.122  -1.141  -3.438  -5.095
        -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12133,7 +12118,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -2.677  -2.039  -2.038  -2.677  -4.315  -4.315   0.197  -0.281
-        0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
+       -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
 
     2  -2.677 -27.272  -7.283  -0.037   0.438  -1.173  -1.170  -6.871  -6.243
         0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12166,7 +12151,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
         0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
 
     2  -5.963 -31.658 -12.391  -0.047   0.467  -3.304  -3.307  -5.423  -6.185
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   16 :     44.03  [%]
 
@@ -12193,7 +12178,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -5.258  -6.483  -1.434  -2.874  -7.337  -7.337  -0.388   0.263
-        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2  -5.258 -29.324 -11.557  -0.019   0.240  -3.091  -3.102  -4.197  -5.627
        -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12208,7 +12193,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.998  -3.062  -5.032  -6.507  -7.964  -7.967  -6.512  -1.418  -1.084
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -3.062 -24.976  -7.304  -1.009  -1.159  -1.154  -1.024  -4.175  -5.929
        -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
@@ -12226,7 +12211,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
        -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -4.268 -25.755  -9.697   0.148   0.190  -2.859  -2.877  -2.932  -4.047
-       -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   20 :     40.38  [%]
 
@@ -12238,7 +12223,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.201  -3.837  -4.786  -3.832  -4.784  -4.786  -3.836  -1.386  -1.115
-       -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
 
     2  -3.837 -28.380  -9.317  -1.242  -1.234  -1.233  -1.255  -5.811  -7.611
        -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12253,7 +12238,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -4.314  -4.315  -2.038  -2.677  -2.678  -2.040  -1.251  -1.251
-       -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -4.314 -30.400 -10.177  -1.339  -1.170  -1.172  -1.349  -7.439  -8.208
        -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12268,7 +12253,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.812  -2.676  -2.035  -4.317  -4.316  -2.678  -2.038  -1.149  -1.251
-       -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2  -2.676 -27.272  -7.284  -1.165  -1.170   0.435  -0.039  -8.868  -7.947
         0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
@@ -12283,7 +12268,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -1.436  -2.874  -7.334  -7.336  -6.484  -5.258  -1.084  -0.964
-        0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
 
     2  -1.436 -23.759  -5.084  -1.122  -1.132   0.042  -0.030  -4.619  -6.665
        -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12298,10 +12283,10 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -2.040  -2.678  -4.313  -4.314  -2.677  -2.038  -1.251  -1.147
-        0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -2.040 -27.077  -7.284  -1.340  -1.349  -0.037  -0.261  -6.598  -8.516
-       -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   25 :     47.01  [%]
 
@@ -12313,7 +12298,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.474  -2.348  -2.347  -2.348  -2.347  -0.177   0.099  -1.349  -1.349
-       -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -2.348 -28.882  -8.186  -1.393  -1.400   0.071  -0.311  -8.441  -9.185
        -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
@@ -12331,7 +12316,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
        -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000   0.000
 
     2  -7.968 -32.135 -12.790  -3.306  -3.162  -1.163  -0.916 -11.003  -9.803
-       -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   27 :     40.86  [%]
 
@@ -12343,7 +12328,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.899  -5.420  -8.242 -10.061  -8.268  -5.429  -8.240  -2.815  -3.411
-        0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2  -5.420 -26.464 -11.098  -3.013  -2.535  -0.792  -1.072  -6.028  -8.298
         0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000
@@ -12376,7 +12361,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
        -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
     2  -7.338 -32.465 -13.588  -3.280  -3.100  -1.136  -0.966 -10.282 -10.935
-        0.000   0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   30 :     42.24  [%]
 
@@ -12388,7 +12373,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.901 -10.065  -8.269  -5.427  -8.238  -5.427  -8.238  -2.828  -3.012
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
+        0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
 
     2 -10.065 -33.474 -14.730  -3.021  -3.419  -3.016  -3.414  -7.665  -6.847
        -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
@@ -12406,7 +12391,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
         0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000
 
     2  -6.989 -27.095 -13.315  -2.198  -2.955  -2.181  -2.971  -4.581  -5.807
-       -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   32 :     38.60  [%]
 
@@ -12417,8 +12402,8 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -27.182  -9.339  -9.345  -4.270  -6.724  -4.265  -6.724  -2.864  -2.862
-        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000
+    1 -27.182  -9.339  -9.345  -4.270  -6.724  -4.266  -6.724  -2.864  -2.862
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000
 
     2  -9.339 -33.266 -15.462  -2.863  -3.293  -2.857  -3.292  -7.228  -7.730
        -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
@@ -12433,10 +12418,10 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.157  -6.485  -5.259  -7.335  -7.333  -1.433  -2.874  -3.602  -3.272
-       -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000
+        0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000
 
     2  -6.485 -31.054 -11.560  -3.281  -3.293   0.036   0.667 -10.326  -9.160
-       -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   34 :     42.23  [%]
 
@@ -12466,7 +12451,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
        -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
 
     2  -5.963 -31.651 -12.398  -3.297  -3.309  -0.052   0.466  -9.690 -10.356
-       -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   36 :     44.03  [%]
 
@@ -12477,11 +12462,6 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
-
- Exchange-correlation functional for the present dataset will be:
-  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
- Citation for XC functional:
-  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -12500,9 +12480,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/V.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -12520,9 +12500,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -12540,9 +12520,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /media/disquedur/ABINIT/GIT/abinit_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/amadon_dmft_spectralfunction_new/tests/Psps_for_tests/O.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -12823,8 +12803,8 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      5.992978803002044
- Compensation charge over fine fft grid    =      5.993710080171822
+ Compensation charge over spherical meshes =      5.992978802998276
+ Compensation charge over fine fft grid    =      5.993710080168048
 
 
  Total number of electrons per unit cell =   41.0000 (Spherical mesh),   41.0007 (FFT mesh)
@@ -12851,14 +12831,14 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
    0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.07738 ...
    ...  only 12  components have been written...
  Atom #  5
-   0.59758  -1.75345  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000
+   0.59758  -1.75345  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
   -1.75345   5.20994   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
   -0.00000   0.00000  -0.30103   0.00000   0.00000   0.87372   0.00000   0.00000
-  -0.00000   0.00000   0.00000  -0.30242   0.00000   0.00000   0.88079   0.00000
+   0.00000   0.00000   0.00000  -0.30242   0.00000   0.00000   0.88079   0.00000
   -0.00000   0.00000   0.00000   0.00000  -0.30103   0.00000   0.00000   0.87372
-   0.00000  -0.00000   0.87372   0.00000   0.00000   0.11627   0.00000  -0.00000
-   0.00000  -0.00000   0.00000   0.88079   0.00000   0.00000   0.08201  -0.00000
-   0.00000  -0.00000   0.00000   0.00000   0.87372  -0.00000  -0.00000   0.11627
+   0.00000  -0.00000   0.87372   0.00000   0.00000   0.11627  -0.00000   0.00000
+   0.00000  -0.00000   0.00000   0.88079   0.00000  -0.00000   0.08201   0.00000
+   0.00000  -0.00000   0.00000   0.00000   0.87372   0.00000   0.00000   0.11627
 
 
  Augmentation waves occupancies Rhoij:
@@ -13002,7 +12982,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
    4  0.435  0.436  0.378  3.434  0.446
    5  0.247  0.442  0.444  0.446  3.641
 
-   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997   -0.0000
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997    0.0000
 
   Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
@@ -13016,7 +12996,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
             Average U and J as a function of frequency
    -------------------------------------------------------------
          omega           U(omega)            J(omega)
-        0.000      2.7546   -0.0000      0.5997   -0.0000
+        0.000      2.7546   -0.0000      0.5997    0.0000
    -------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -13057,11 +13037,11 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
            etotal1    -1.5192840910E+02
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
-            fcart1    -1.7296667953E-11 -2.7702539203E-10 -1.4220799311E-10
-                       3.2081480553E-10  3.1323558291E-10 -2.2853544571E-10
-                       2.6244213913E-10 -1.0428538302E-10 -2.1051134206E-10
-                      -1.1756077299E-10  1.6610500636E-10  1.3575495924E-10
-                      -4.4839950372E-10 -9.8029814219E-11  4.4549982164E-10
+            fcart1    -1.7280025505E-11 -2.7702048207E-10 -1.4220264993E-10
+                       3.2079743914E-10  3.1324238759E-10 -2.2853485321E-10
+                       2.6245201812E-10 -1.0428715562E-10 -2.1051322393E-10
+                      -1.1756397576E-10  1.6610072988E-10  1.3575374334E-10
+                      -4.4840545600E-10 -9.8035479786E-11  4.4549698374E-10
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -13105,7 +13085,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
              iscf2         -2
              iscf3         17
              iscf4         17
-              ixc           7
+              ixc       -1012
            jdtset        1    2    3    4
               kpt      1.25000000E-01  1.25000000E-01  1.25000000E-01
                        3.75000000E-01  1.25000000E-01  1.25000000E-01
@@ -14078,8 +14058,8 @@ P           mkmem           2
            prtvol          10
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
-           strten1     2.0903026310E-03  2.0903026065E-03  2.0903025949E-03
-                      -9.6016062533E-13 -1.1233790586E-12 -4.0752181351E-12
+           strten1     2.0903026309E-03  2.0903026065E-03  2.0903025948E-03
+                      -9.6014097687E-13 -1.1233783727E-12 -4.0753555995E-12
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -14178,7 +14158,13 @@ P           mkmem           2
 - Comment : PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [5] Recent developments in the ABINIT software package.
+- [5] Libxc: A library of exchange and correlation functionals for density functional theory.
+- M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
+- Comment : to be cited when LibXC is used (negative value of ixc)
+- Strong suggestion to cite this paper.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#marques2012
+-
+- [6] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -14196,7 +14182,7 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [6] ABINIT : First-principles approach of materials and nanosystem properties.
+- [7] ABINIT : First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -14209,7 +14195,7 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [7] A brief introduction to the ABINIT software package.
+- [8] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -14222,10 +14208,10 @@ P           mkmem           2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        414.5  wall=        652.5
+- Proc.   0 individual time (sec): cpu=        447.2  wall=        449.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=      10320.7  wall=      15657.3
++Overall time at end (sec) : cpu=      10748.2  wall=      10773.2
