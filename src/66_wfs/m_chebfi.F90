@@ -169,7 +169,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  integer, parameter :: timer_subdiago = 1604, timer_subham = 1605, timer_ortho = 1606, timer_getghc = 1607
  integer, parameter :: timer_residuals = 1608, timer_update_eigen = 1609, timer_sync = 1610
 
-  type(xgBlock_t) :: xgx0
+  !type(xgBlock_t) :: xgx0
   
 
 ! *************************************************************************
@@ -189,9 +189,9 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 
  ghc=zero; gvnlxc=zero
 
- call xgBlock_map(xgx0,cg,SPACE_CR,2*npw*nspinor,nband,mpi_enreg%comm_bandspinorfft) 
- call debug_helper(xgx0, mpi_enreg%comm_bandspinorfft, mpi_enreg%bandpp) 
- stop
+ !call xgBlock_map(xgx0,cg,SPACE_CR,2*npw*nspinor,nband,mpi_enreg%comm_bandspinorfft) 
+ !call debug_helper(xgx0, mpi_enreg%comm_bandspinorfft, mpi_enreg%bandpp) 
+ !stop
 
  !print *, "AJDE" 
 
@@ -219,6 +219,8 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    ! Load balancing, so that each processor has approximately the same number of converged and non-converged bands
    ! for two procs, rearrange 1 2 3 4 5 6 as 1 4 2 5 3 6
    !
+   
+   !stop
    ! trick to save memory: ghc has the necessary size, and will be overwritten afterwards anyway
 #define cg_loadbalanced ghc
    shift = 0
@@ -261,7 +263,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    ghc_filter => ghc
    gvnlxc_filter => gvnlxc
  end if
-  
+  !stop
  ! from here to the next alltoall, all computation is done on _filter variables, agnostic
  ! to whether it's nband x npw (paral_kgb == 0) or ndatarecv*bandpp (paral_kgb = 1)
 
@@ -288,15 +290,17 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    cpopt = -1
  end if
 
- call xgBlock_map(xgx0,cg_filter,SPACE_CR,2*npw_filter*nspinor,nband_filter,mpi_enreg%comm_bandspinorfft) 
+ !call xgBlock_map(xgx0,cg_filter,SPACE_CR,2*npw_filter*nspinor,nband_filter,mpi_enreg%comm_bandspinorfft) 
     
- call debug_helper(xgx0, mpi_enreg%comm_bandspinorfft, mpi_enreg%bandpp) 
- stop
+ !call debug_helper(xgx0, mpi_enreg%comm_bandspinorfft, mpi_enreg%bandpp) 
+ !stop
  !======================================================================================================
  ! Data in npfft x npband distribution. First getghc, update eigenvalues and residuals
  !======================================================================================================
  !write(message, *) 'First getghc'
  !call wrtout(std_out,message,'COLL')
+
+ !stop
 
  ! get_ghc on cg
  call timab(timer_getghc, 1, tsec)
@@ -309,7 +313,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  end if
  call timab(timer_getghc, 2, tsec)
  
-
+ !stop
  ! Debug barrier: should be invisible
  call timab(timer_sync, 1, tsec)
  call xmpi_barrier(mpi_enreg%comm_band)
@@ -357,8 +361,8 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  call xmpi_max(MAXVAL(eig(1:nband_filter)),maxeig,mpi_enreg%comm_band,ierr)
  call xmpi_min(MINVAL(eig(1:nband_filter)),mineig,mpi_enreg%comm_band,ierr)
  filter_low = maxeig
- print *, "maxeig", maxeig
- stop
+ !print *, "maxeig", maxeig
+ !stop
  
  call timab(timer_update_eigen, 2, tsec)
  

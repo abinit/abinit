@@ -398,6 +398,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    =========================================================================
        else if (wfopta10 == 1) then
          if ( .not. newchebfi) then
+           !print *, "OLD CB"
            call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
          else

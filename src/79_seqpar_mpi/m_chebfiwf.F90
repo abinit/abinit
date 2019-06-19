@@ -225,13 +225,21 @@ module m_chebfiwf
   
   !print *, "l_icplx*l_npw*l_nspinor", l_icplx*l_npw*l_nspinor
   !stop
+  !print *, "l_npw", l_npw
+  !print *, "nband", nband
+  !stop
     
   if ( l_istwf == 2 ) then ! Real only
     ! Scale cg
-    call xgBlock_scale(xgx0,sqrt2,1)
+    call xgBlock_scale(xgx0,sqrt2,1)  !ALL MPI processes do this
    
     ! This is possible since the memory in cg and xgx0 is the same
     ! Don't know yet how to deal with this with xgBlock
+    !print *, "npw", npw
+    !print *, "nspinor", nspinor
+    !print *, "nband", nband
+    !stop
+    !MPI HANDLES THIS AUTOMATICALLY (only proc 0 is me_g0)
     if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2 
        
   end if

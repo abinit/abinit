@@ -525,6 +525,11 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end if
  end if
  if(cpopt>=0) then
+   print *, "size(cprjin)", size(cprjin)
+   print *, "hamk%natom", hamk%natom
+   print *, "my_nspinor", my_nspinor
+   print *, "ndat", ndat
+   
    if (size(cprjin)/=hamk%natom*my_nspinor*ndat) then
      msg = 'Incorrect size for cprjin!'
      MSG_BUG(msg)

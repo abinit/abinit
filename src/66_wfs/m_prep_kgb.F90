@@ -291,6 +291,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
    call DCOPY(2*ndatarecv*my_nspinor*bandpp, cwavef, 1, cwavef_alltoall2, 1)
  end if
 
+ !stop
+
  if(gs_hamk%istwf_k==2) then
    old_me_g0=mpi_enreg%me_g0
    if (mpi_enreg%me_fft==0) then
@@ -303,6 +305,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 !====================================================================
  if ((.not.(flag_inv_sym)) .and. (bandpp==1)) then
    !print *, "flag_inv_sym 1"
+   !stop
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.my_nspinor==2)then
      call timab(632,3,tsec)
 !    Sort to have all ispinor=1 first, then all ispinor=2
@@ -331,7 +334,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 !  -------------------------------------------------------------
 !  Computation of the index to class the waves functions below bandpp
 !  -------------------------------------------------------------
-   !print *, "flag_inv_sym 2"
+   print *, "flag_inv_sym 2"
+   print *, "bandpp", bandpp
    !stop
    if(do_transpose) then
      call timab(632,3,tsec)
@@ -343,7 +347,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
      cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
      call timab(632,2,tsec)
    end if
-
+   !stop
 !  ----------------------
 !  Fourier transformation
 !  ----------------------
@@ -351,7 +355,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
    call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
 &   gvnlxc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,0)
    call timab(636,2,tsec)
-
+   !stop
 !  -----------------------------------------------------
 !  Sorting of waves functions below the processors
 !  -----------------------------------------------------
