@@ -98,6 +98,10 @@ module m_polynomial_coeff
    module procedure coeffs_compare
  end interface operator (==)
 
+ interface operator (+)
+   module procedure coeffs_list_conc
+ end interface operator (+)
+
 CONTAINS  !===========================================================================================
 
 
@@ -3342,6 +3346,54 @@ pure function coeffs_compare(c1,c2) result (res)
   if(.not.any(blkval(:,:)==0))res = .true.
 
 end function coeffs_compare
+!!***
+
+
+!!****f* m_polynomial_coeff/coeffs_list_conc
+!! NAME
+!! coeff_list_conc
+!!
+!! FUNCTION
+!! 
+!! Concatenate list1 and list2 of type polynomial_coeff and store it in list_out
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+pure function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
+!Arguments ------------------------------------
+ implicit none
+
+!Arguments ------------------------------------
+  type(polynomial_coeff_type), intent(in) :: coeff_list1(:),coeff_list2(:)
+  type(polynomial_coeff_type),allocatable :: coeff_list_out(:)
+!local
+!variable
+  integer :: ncoeff1,ncoeff2,ncoeff_out 
+!array
+! *************************************************************************
+
+!Free output 
+ if(allocated(coeff_list_out))then
+   ABI_DATATYPE_DEALLOCATE(coeff_list_out) 
+ endif
+
+!Get sizes of coeff_list1/2
+ ncoeff1 = size(coeff_list1) 
+ ncoeff2 = size(coeff_list2)
+ ncoeff_out = ncoeff1 + ncoeff2
+
+ !Allocate output 
+ ABI_DATATYPE_ALLOCATE(coeff_list_out,(ncoeff_out)) 
+
+ !Copy input list into output lists 
+ coeff_list_out(1:ncoeff1) = coeff_list1 
+ coeff_list_out(ncoeff1+1:) = coeff_list2   
+ 
+end function coeffs_list_conc
 !!***
 
 end module m_polynomial_coeff
