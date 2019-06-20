@@ -160,6 +160,30 @@ The `Constraint` class hosts the code to build a constraint, to identify candida
 to its application and to apply it. The identification is based on the type of the
 candidate which is compared to a reference type or as set of types.
 
+## How to extend the test suite
+
+### Main entry points
+
+There are three main entry points to the system that are discussed in order of increasing complexity.
+The first one is the YAML configuration file.
+It does not require any Python knowledge, only a basic comprehension of the conventions
+used for writing tests. Being fully *declarative* (no logic) it should be quite easy
+to learn its usage from the available examples.
+The second one is the *~abinit/tests/pymods/yaml_tests/conf_parser.py* file. It
+contains the declarations of the available constraints and parameters. A basic
+python understanding is required in order to modify this file. Comments and doc strings
+should help users to grasp the meaning of this file. More details available
+[in this section](./yaml_tools_api#constraints-and-parameters-registration).
+The third one is the file *~abinit/tests/pymods/yaml_tests/structures/*. It
+defines the structures used by the YAML parser when encountering a tag (starting
+with !), or in some cases when reaching a given pattern (__undef__ for example).
+The *structures* directory is a package organised by features (ex: there is a
+file *structures/ground_state.py*). Each file define structures for a given
+feature. All files are imported by the main script `structures/__init__.py`.
+Even if the abstraction layer on top of the _yaml_ module should help, it is
+better to have a good understanding of more "advanced" python concepts like
+*inheritance*, *decorators*, *classmethod* etc.
+
 ## Tag registration and classes implicit methods and attributes
 
 ### Basic tag registration tools

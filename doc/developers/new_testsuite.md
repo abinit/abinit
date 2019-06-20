@@ -555,8 +555,8 @@ states of iterations without having to rewrite everything from scratch.
 
 ### Filter declaration
 
-A filter can specify all currently known iterators: dtset, timimage, image, and time. 
-For each iterator, a set of integers can be defined with three methods:
+A filter can specify all currently known iterators: **dtset**, **timimage**, **image**, and **time**.
+For each iterator, a set of integers can be defined with three different methods:
 
 - a single integer value (`dtset: 1`)
 - a YAML list of values (`dtset: [1, 2, 5]`)
@@ -608,12 +608,12 @@ filters:
 
 When a test is defined, the default tree is overridden by the user-defined tree.
 When a filtered tree is used, it overrides the less specific tree. Trees are
-sequentially applied to the tree from the most general to the most specific.
+sequentially applied to the tree from the most general to the most specific one.
 The overriding process is often used, though it is important to know how it
-works. By default, only what is explicitly specified is overridden which means
+works. By default, only what is explicitly specified in the file is overridden which means
 that if a constraint is defined at a deeper level on the default tree than what
 is done on the new tree, the original constraints will be kept. For example let
-`f1`  and `f2` two filters such that `f2` is included in `f1`.
+`f1`  and `f2` be two filters such that `f2` is included in `f1`.
 
 ```yaml
 f1:
@@ -676,6 +676,51 @@ results_gs:
     Here again the `explore` shell could be of great help to know what is inherited
     from the other trees and what is overridden.
 
+### How to use equation and callback
+
+**equation** and **callback** are special constraints because their
+actual effects are defined directly in the configuration file. They have been introduced to
+increase the flexibility of the configuration file without having to change the python code.
+
+**equation** takes a string in input. This string will
+be interpreted as a python expression that must return in a number. The
+absolute value of this number will be compared to the value of the `tol_eq`
+parameter and if `tol_eq` is greater the test will succeed. The expression can
+also result in a numpy array. In this case, the returned value if the euclidean norm of the
+array that will be compared to `tol_eq` value.
+A minimal example:
+
+```yaml
+Etot:
+    tol_eq: 1.0e-6
+    equation: 'this["Etotal"] - this["Total energy(eV)"]/27.2114'
+```
+
+**equations** works exactly the same but has a list of string as value. 
+Each string is a different expression
+that will be tested independently from the others. In both case the tested
+object can be referred as `this` and the reference object can be referred as `ref`.
+
+
+**callback** requires a bit of python coding since it will invoke a method of the
+structure. Suppose we have a tag `!AtomSpeeds` associated
+to a class `AtomSpeeds` and to a document labeled `Atomic speeds` in the data
+tree. The `AtomSpeeds` class have a method `not_going_anywhere` that checks
+that the atoms are not going to try to leave the box. We would like to
+pass some kind of tolerance `d_min` the minimal distance atoms can approach
+the border of the box. The signature of the method have to be
+`not_going_anywhere(self, tested, d_min=DEFAULT_VALUE)` and should return
+`True`, `False` or an instance of `FailDetail` (see __Add a new constraint__
+for explanations about those). Note that `self` will be the reference
+instance. We can then use it by with the following configuration:
+
+```yaml
+Atomic speeds:
+    callback:
+        method: not_going_anywhere
+        d_min: 1.0e-2
+```
+
 ## Command line interface
 
 The `~abinit/tests/testtools.py` script provides a command line interface to facilitate 
@@ -704,75 +749,3 @@ explore
     It provides a shell like interface in which the user can explore
     the tree defined by the configuration file and print the constraints. 
     It also provides documentation about constraints and parameters via the *show* command.
-
-## How to extend the test suite
-
-### Main entry points
-
-There are three main entry points to the system that are discussed in order of increasing complexity.
-The first one is the YAML configuration file.
-It does not require any Python knowledge, only a basic comprehension of the conventions
-used for writing tests. Being fully *declarative* (no logic) it should be quite easy
-to learn its usage from the available examples.
-The second one is the *~abinit/tests/pymods/yaml_tests/conf_parser.py* file. It
-contains the declarations of the available constraints and parameters. A basic
-python understanding is required in order to modify this file. Comments and doc strings
-should help users to grasp the meaning of this file. More details available
-[in this section](./yaml_tools_api#constraints-and-parameters-registration).
-The third one is the file *~abinit/tests/pymods/yaml_tests/structures/*. It
-defines the structures used by the YAML parser when encountering a tag (starting
-with !), or in some cases when reaching a given pattern (__undef__ for example).
-The *structures* directory is a package organised by features (ex: there is a
-file *structures/ground_state.py*). Each file define structures for a given
-feature. All files are imported by the main script `structures/__init__.py`.
-Even if the abstraction layer on top of the _yaml_ module should help, it is
-better to have a good understanding of more "advanced" python concepts like
-*inheritance*, *decorators*, *classmethod* etc.
-
-### The special constraints equation, equations and callback
-
-`equation`, `equations` and `callback` are special constraints because their
-actual effects are defined directly in the configuration file. They have been introduced to
-increase the flexibility of the configuration file without having to dive into the python code.
-
-equation and equations
-
-: These two are sisters. `equation` takes a string in input. This string will
-  be interpreted as a python expression that must return in a number. The
-  absolute value of this number will be compared to the value of the `tol_eq`
-  parameter and if `tol_eq` is greater the test will succeed. The expression can
-  also result in a numpy array. In this case, the returned value if the euclidean norm of the
-  array that will be compared to `tol_eq` value. `equations` works exactly the
-  same but has a list of string as value. Each string is a different expression
-  that will be tested independently from the others. In both case the tested
-  object can be referred as `this` and the reference object can be referred as `ref`.
-
-
-A minimal example:
-
-```yaml
-Etot:
-    tol_eq: 1.0e-6
-    equation: 'this["Etotal"] - this["Total energy(eV)"]/27.2114'
-```
-
-callback
-
-: This one requires a bit of python coding since it will invoke a method of the
-  structure. Suppose we have a tag `!AtomSpeeds` associated
-  to a class `AtomSpeeds` and to a document labeled `Atomic speeds` in the data
-  tree. The `AtomSpeeds` class have a method `not_going_anywhere` that checks
-  that the atoms are not going to try to leave the box. We would like to
-  pass some kind of tolerance `d_min` the minimal distance atoms can approach
-  the border of the box. The signature of the method have to be
-  `not_going_anywhere(self, tested, d_min=DEFAULT_VALUE)` and should return
-  `True`, `False` or an instance of `FailDetail` (see __Add a new constraint__
-  for explanations about those). Note that `self` will be the reference
-  instance. We can then use it by with the following configuration:
-
-```yaml
-Atomic speeds:
-    callback:
-        method: not_going_anywhere
-        d_min: 1.0e-2
-```
