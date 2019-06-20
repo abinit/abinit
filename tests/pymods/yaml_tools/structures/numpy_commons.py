@@ -12,12 +12,12 @@ yaml_seq(BaseArray)
 
 @yaml_seq
 class Atoms3D(BaseArray):
-    """Base class for (natom, 3) arrays."""
+    '''Base class for (natom, 3) arrays.'''
 
 
 @yaml_seq
 class CartForces(Atoms3D):
-    """Cartesian forces as (natom, 3) array"""
+    '''Cartesian forces as (natom, 3) array'''
 
 
 @yaml_seq
@@ -41,7 +41,7 @@ class Matrix33(BaseArray):
 class Tensor(Matrix33):
 
     def is_symetric(self):
-        """Return true is tensor is symmetric."""
+        '''Return true if tensor is symmetric.'''
         for i in range(3):
             for j in range(i, 3):
                 if self[i, j] != self[j, i]:
@@ -49,7 +49,7 @@ class Tensor(Matrix33):
         return True
 
     def is_anti_symetric(self):
-        """Retur true is tensor is anti-symmetric """
+        '''Return true if tensor is anti-symmetric '''
         for i in range(3):
             for j in range(i, 3):
                 if self[i, j] != -self[j, i]:
