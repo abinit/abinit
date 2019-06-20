@@ -1,5 +1,5 @@
 '''
-    Define structures depending on Numpy to be found in Abinit YAML formated
+    Define structures depending on numpy to be found in Abinit YAML formatted
     output extending the possible operations on the extracted data.
 '''
 from __future__ import print_function, division, unicode_literals
@@ -12,12 +12,12 @@ yaml_seq(BaseArray)
 
 @yaml_seq
 class Atoms3D(BaseArray):
-    pass
+    """Base class for (natom, 3) arrays."""
 
 
 @yaml_seq
 class CartForces(Atoms3D):
-    pass
+    """Cartesian forces as (natom, 3) array"""
 
 
 @yaml_seq
@@ -39,7 +39,9 @@ class Matrix33(BaseArray):
 
 @yaml_seq
 class Tensor(Matrix33):
+
     def is_symetric(self):
+        """Return true is tensor is symmetric."""
         for i in range(3):
             for j in range(i, 3):
                 if self[i, j] != self[j, i]:
@@ -47,6 +49,7 @@ class Tensor(Matrix33):
         return True
 
     def is_anti_symetric(self):
+        """Retur true is tensor is anti-symmetric """
         for i in range(3):
             for j in range(i, 3):
                 if self[i, j] != -self[j, i]:

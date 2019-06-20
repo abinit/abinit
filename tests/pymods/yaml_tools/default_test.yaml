@@ -12,6 +12,6 @@ results_gs:
 
 Etot steps:
     data:
-        callback:  # callback take a mapping as its value
+        callback:  # callback takes a mapping as its value
             method: last_iter
             tol_iter: 3
