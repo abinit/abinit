@@ -2608,13 +2608,14 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !    Compute the wf contributions to the first q-gradient of the internal strain tensor
      if (lw_flexo==1.or.lw_flexo==4) then
-
 !      First calculate the frozen wf contribution
        call dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
        &  isppol,istwf_k,kg_k,kpoint,mkmem_rbz,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
        &  pert_strain,ph1d,psps,q1grad,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
 
+!      Add the contribution from each k-point
+       frwfdq=frwfdq + frwfdq_k
      end if
 
 !    Keep track of total number of bands
@@ -2679,7 +2680,24 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      call xmpi_sum(ddmdqwf_t3,spaceworld,ierr)
    end if
 
+   if (lw_flexo==1.or.lw_flexo==4) then
+     call xmpi_sum(frwfdq,spaceworld,ierr)
+   end if
+
  end if
+
+ do iatpert= 1, natpert
+   do istrpert= 1, nstrpert
+     ka=pert_strain(3,istrpert)
+     kb=pert_strain(4,istrpert)
+     do iq1grad=1,3
+       write(100,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
+     & frwfdq(1,iq1grad,istrpert,iatpert), frwfdq(2,iq1grad,istrpert,iatpert)
+     end do
+   end do
+ end do
+
+
 
 !Anounce finalization of calculations
  if (lw_flexo==1.or.lw_flexo==2) then

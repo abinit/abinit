@@ -2731,6 +2731,9 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 !  < g | H^{\tau_{\kappa\alpha}_{\gamma\delta} | u_{i,k}^{(0)} >
 !-----------------------------------------------------------------------------------------------
 
+!tmp
+optlocal=0
+
 !Specific allocations
  ABI_ALLOCATE(ghatdisdqdq_c0m,(2,npw_k*dtset%nspinor,nband_k,3,3,natpert))
 
@@ -2858,18 +2861,22 @@ frwfdq_k=zero
          !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma} \frac{\delta_{\beta\delta}}{2} | u_{i,k}^{(0)} >
          !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\delta} \frac{\delta_{\beta\gamma}}{2} | u_{i,k}^{(0)} >
          !--------------------------------------------------------------------------
-         if (ka==kb) then
-           frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-   &
-         & half*c0_hatdisdq_c0_bks(1,iband,iq1grad,iatpert)
-           frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+   &
-         & half*c0_hatdisdq_c0_bks(2,iband,iq1grad,iatpert)
-         end if
-         if (ka==iq1grad) then
-           frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-   &
-         & half*c0_hatdisdq_c0_bks(1,iband,kb,iatpert)
-           frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+   &
-         & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert)
-         end if
+!         if (ka==kb) then
+!           frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-   &
+!         & half*c0_hatdisdq_c0_bks(1,iband,iq1grad,iatpert)
+!           frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+   &
+!         & half*c0_hatdisdq_c0_bks(2,iband,iq1grad,iatpert)
+!         end if
+!         if (ka==iq1grad) then
+!           frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-   &
+!         & half*c0_hatdisdq_c0_bks(1,iband,kb,iatpert)
+!           frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+   &
+!         & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert)
+!         end if
+
+         !Take into account band occupations and kpt weights
+         frwfdq_k(:,iq1grad,istrpert,iatpert)=frwfdq_k(:,iq1grad,istrpert,iatpert)* &
+       & wtk_k * occ_k(iband) 
 
        end do !iband
 
