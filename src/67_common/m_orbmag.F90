@@ -186,6 +186,7 @@ module m_orbmag
   private :: make_onsite_l
   private :: make_onsite_l_k
   private :: make_S1trace
+  private :: make_rhorij1
   private :: make_smat
   private :: make_VVI
   private :: make_VVII
@@ -3245,6 +3246,135 @@ end subroutine make_S1trace
 !!***
 
 !{\src2tex{textfont=tt}}
+!!****f* ABINIT/make_rhorij1
+!! NAME
+!! make_rhorij1
+!!
+!! FUNCTION
+!! Compute Trace[\rho_0 \rho_Rij(1) ] in orbital magnetism context
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,&
+     & nattyp,nband_k,paw_ij,pawtab,rhorij1)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: adir,mcprj,nband_k
+  complex(dpc),intent(out) :: rhorij1
+  type(MPI_type), intent(inout) :: mpi_enreg
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat)
+  type(pawcprj_type),intent(in) :: cprj(dtset%natom,mcprj)
+  type(paw_ij_type),intent(in) :: paw_ij(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: bdir,icprj,epsabg,gdir,iatom,ierr,ikpt,ilmn,isppol,itypat
+  integer :: jlmn,klmn,me,my_nspinor,ncpgr,nn,nproc,spaceComm
+  complex(dpc) :: cpb,cdij,cpk
+
+  !arrays
+  integer,allocatable :: dimlmn(:)
+  type(pawcprj_type),allocatable :: cprj_k(:,:)
+
+!----------------------------------------------------------------
+
+  !Init MPI
+  spaceComm=mpi_enreg%comm_cell
+  nproc=xmpi_comm_size(spaceComm)
+  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+  me = mpi_enreg%me_kpt
+
+  isppol = 1
+  ncpgr = cprj(1,1)%ncpgr
+  ABI_ALLOCATE(dimlmn,(dtset%natom))
+  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'R')
+  ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,nband_k))
+  call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
+
+  rhorij1 = czero
+  icprj = 0
+  do ikpt = 1, dtset%nkpt
+
+     ! if the current kpt is not on the current processor, cycle
+     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+
+     call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
+          &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
+
+     do epsabg = 1, -1, -2
+
+        if (epsabg .EQ. 1) then
+           bdir = modulo(adir,3)+1
+           gdir = modulo(adir+1,3)+1
+        else
+           bdir = modulo(adir+1,3)+1
+           gdir = modulo(adir,3)+1
+        end if
+
+        do nn = 1, nband_k
+           do iatom=1,dtset%natom
+              itypat=dtset%typat(iatom)
+              do ilmn=1,pawtab(itypat)%lmn_size
+                 do jlmn=1,pawtab(itypat)%lmn_size
+                    klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+                    cpb=cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+                    cpk=cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
+                    if (paw_ij(iatom)%cplex_dij .EQ. 2) then
+                       cdij=cmplx(paw_ij(iatom)%dij(2*klmn-1,1),paw_ij(iatom)%dij(2*klmn,1),KIND=dpc)
+                       if (jlmn .GT. ilmn) cdij=conjg(cdij)
+                    else
+                       cdij=cmplx(paw_ij(iatom)%dij(klmn,1),zero,KIND=dpc)
+                    end if
+                    rhorij1=rhorij1+half*j_dpc*epsabg*conjg(cpb)*cdij*cpk
+                 end do ! end loop over jlmn
+              end do ! end loop over ilmn
+           end do ! end loop over atoms
+        end do ! end loop over bands
+     end do ! end loop over epsabg
+
+     icprj = icprj + nband_k
+
+  end do ! end loop over kpt
+
+  ! ---- parallel communication
+  if(nproc > 1) then
+     call xmpi_sum(rhorij1,spaceComm,ierr)
+  end if
+
+  ABI_DEALLOCATE(dimlmn)
+  call pawcprj_free(cprj_k)
+  ABI_DATATYPE_DEALLOCATE(cprj_k)
+     
+end subroutine make_rhorij1
+!!***
+
+!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_CCIV_dsdk
 !! NAME
 !! make_CCIV_dsdk
@@ -4046,13 +4176,14 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  integer :: nband_k,ncpgr,ncpgrb
  real(dp) :: ucvol,finish_time,start_time
  complex(dpc) :: CCI_dir,VVI_dir,VVII_dir,VVIII_dir
- complex(dpc) :: CCIV_dir,onsite_l_dir,s1trace_dir
+ complex(dpc) :: CCIV_dir,onsite_l_dir,rhorij1_dir,s1trace_dir
  character(len=500) :: message
 
  !arrays
  integer,allocatable :: dimlmn(:)
  real(dp) :: CCI(2,3),CCIV(2,3),gmet(3,3),gprimd(3,3)
- real(dp) :: onsite_l(2,3),orbmagvec(2,3),rmet(3,3),s1trace(2,3),VVI(2,3),VVII(2,3),VVIII(2,3)
+ real(dp) :: onsite_l(2,3),orbmagvec(2,3),rhorij1(2,3)
+ real(dp) :: rmet(3,3),s1trace(2,3),VVI(2,3),VVII(2,3),VVIII(2,3)
  real(dp),allocatable :: dsdk(:,:,:,:,:,:)
  real(dp),allocatable :: eeig(:,:),eeig123(:,:,:,:,:,:),smat_all_indx(:,:,:,:,:,:)
  type(pawcprj_type),allocatable :: cprj_kb_k(:,:,:,:)
@@ -4163,6 +4294,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     s1trace(1,adir) = real(s1trace_dir)
     s1trace(2,adir) = aimag(s1trace_dir)
 
+    call make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,nband_k,paw_ij,pawtab,rhorij1_dir)
+    rhorij1(1,adir) = real(rhorij1_dir)
+    rhorij1(2,adir) = aimag(rhorij1_dir)
+
     call make_CCI(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
     CCI(1,adir) = real(CCI_dir)
     CCI(2,adir) = aimag(CCI_dir)
@@ -4198,6 +4333,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  s1trace(1,1:3) = ucvol*MATMUL(gprimd,s1trace(1,1:3))
  s1trace(2,1:3) = ucvol*MATMUL(gprimd,s1trace(2,1:3))
 
+ rhorij1(1,1:3) = ucvol*MATMUL(gprimd,rhorij1(1,1:3))
+ rhorij1(2,1:3) = ucvol*MATMUL(gprimd,rhorij1(2,1:3))
+
  CCI(1,1:3) = ucvol*MATMUL(gprimd,CCI(1,1:3))
  CCI(2,1:3) = ucvol*MATMUL(gprimd,CCI(2,1:3))
 
@@ -4219,6 +4357,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ! converting integral over k space to a sum gives a factor of Omega_BZ/N_k or 1/ucvol*N_k
  onsite_l(1:2,1:3) = onsite_l(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
  s1trace(1:2,1:3) = s1trace(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+ rhorij1(1:2,1:3) = rhorij1(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
  CCI(1:2,1:3) = CCI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
  VVII(1:2,1:3) = VVII(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
  VVI(1:2,1:3) = VVI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
@@ -4227,6 +4366,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  write(std_out,'(a,3es16.8)')' JWZ debug onsite_l ',onsite_l(1,1),onsite_l(1,2),onsite_l(1,3)
  write(std_out,'(a,3es16.8)')' JWZ debug s1trace ',s1trace(1,1),s1trace(1,2),s1trace(1,3)
+ write(std_out,'(a,3es16.8)')' JWZ debug rhorij1 ',rhorij1(1,1),rhorij1(1,2),rhorij1(1,3)
  write(std_out,'(a,3es16.8)')' JWZ debug CCI ',CCI(1,1),CCI(1,2),CCI(1,3)
  write(std_out,'(a,3es16.8)')' JWZ debug CCIV ',CCIV(1,1),CCIV(1,2),CCIV(1,3)
  write(std_out,'(a,3es16.8)')' JWZ debug VVII ',VVII(1,1),VVII(1,2),VVII(1,3)
@@ -4237,6 +4377,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
                   & - s1trace(1:2,1:3) &
+                  & + rhorij1(1:2,1:3) &
                   & + VVII(1:2,1:3) &
                   & + VVI(1:2,1:3) &
                   & + VVIII(1:2,1:3) &
