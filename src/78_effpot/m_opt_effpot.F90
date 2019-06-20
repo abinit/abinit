@@ -52,7 +52,7 @@ module m_opt_effpot
  public :: opt_filterdisp
  public :: opt_getSingleDispTerms
  public :: opt_getHOSingleDispTerms
- 
+ private :: opt_boundcoeff
  !!****
 CONTAINS 
       
@@ -369,18 +369,19 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 !scalars
  integer :: i,ii, info,natom_sc,ntime,iterm,nterm,idisp,ndisp
  integer :: jterm,iterm2, ncombi,ncombi1,ncombi2
- integer :: power_tot,icombi
+ integer :: power_tot,icombi,nterm_opt
  integer :: nterm_start,nterm_tot_tmp,nterm2
  !1406
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.0001
  real(dp) :: to_divide,divided,divider1,divider2
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
- integer :: sc_size(3)
+ integer :: sc_size(3),optterm(1)
  integer,allocatable :: terms(:)
  logical,allocatable :: exists(:) 
  type(fit_data_type) :: fit_data
  type(polynomial_coeff_type) :: term
+ real(dp) :: msefs_arr(2),coeff_opt(2)
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
  !1406 strain_temrs_tmp
@@ -565,32 +566,64 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 &           '   ==> Optimizing coefficient',ch10
             call wrtout(ab_out,message,'COLL')
             call wrtout(std_out,message,'COLL')
-          
-            call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
- &                                        natom_sc,ntime,fit_data%training_set%sqomega,&
- &                                        compute_anharmonic=.TRUE.,print_file=.FALSE.)
+             
+            ! MS 2006 Decomment for old style optimization  
+!            call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
+! &                                        natom_sc,ntime,fit_data%training_set%sqomega,&
+! &                                        compute_anharmonic=.TRUE.,print_file=.FALSE.)
             ! Deallocation in loop 
             ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)  
             
-            !Optimizing coefficient  
-            i = 0
-            write(*,*) "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
-            write(*,*) "cycle ", i ," (msef+mses): ", (msef+mses)
-            do i=1,5 ! while((msef+mses)/(msef_ini+mses_ini) >= 1.001)
-               !i = i + 1 
+            !Optimizing coefficient old style 
+!            i = 0
+!            write(*,*) "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+!            write(*,*) "cycle ", i ," (msef+mses): ", (msef+mses)
+!            do  while((msef+mses)/(msef_ini+mses_ini) >= 1.001)
+!               i = i + 1 
+!               eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
+!               call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
+! &                                           natom_sc,ntime,fit_data%training_set%sqomega,&
+! &                                           compute_anharmonic=.TRUE.,print_file=.FALSE.)
+!	
+!            write(*,*) "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+!            write(*,*) "cycle ", i ," (msef+mses): ", (msef+mses)
+!            enddo ! while mse/mse_ini>10 
+!            write(*,*) "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
+!            msef_ini = msef
+!            mses_ini = mses
+
+!           !Optimize coefficient with opt routine 
+!           optterm(1)= nterm2 
+!           nterm_opt = 1
+!           call opt_effpot(eff_pot,nterm_opt,optterm,hist,comm,print_anh=.FALSE.)
+!           write(*,*) "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
+!            !Store new "inital precision for next coefficient
+!            msef_ini = msef
+!            mses_ini = mses
+
+            !Optimizing coefficient precisely ?
+            do i=1,2 
                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
                call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                           natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                           compute_anharmonic=.TRUE.,print_file=.FALSE.)
-	
-            write(*,*) "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
-            write(*,*) "cycle ", i ," (msef+mses): ", (msef+mses)
-            enddo ! while mse/mse_ini>10 
+            
+                write(*,*) "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+                write(*,*) "cycle ", i ," (msef+mses): ", (msef+mses)
+               coeff_opt(i) =  coeff_ini / 2**i
+               msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
+            enddo ! while mse/mse_ini>10
+            eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = opt_boundcoeff(msefs_arr,coeff_opt)
+            write(*,*) "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
+            call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
+ &                                           natom_sc,ntime,fit_data%training_set%sqomega,&
+ &                                           compute_anharmonic=.TRUE.,print_file=.FALSE.)
 
-            !Store new "inital precision for next coefficient
+            write(*,*) "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
+
             msef_ini = msef
             mses_ini = mses
-            
+
            !DEALLOCATION 
            ABI_DEALLOCATE(exists)
      enddo ! icombi
@@ -1306,7 +1339,7 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,to_cycle,term_in,power_disp,comm)
        ! This is because higher order terms should have smaller coefficients 
        do icombi=1,ncombi 
            terms_out(icombi) = term
-           coeff_ini = abs(terms_out(icombi)%coefficient / 2)
+           coeff_ini = 0.01 !abs(terms_out(icombi)%coefficient / 2)
            terms_out(icombi)%coefficient = coeff_ini
            ! Set the power of all terms we want to add to two. We find the correct power later
            ! Change the weight of the term to 1 (even terms have allways weight=1)
@@ -1615,6 +1648,7 @@ do idisp=1,ndisp
                do iorder=1,norder
                   icoeff = icoeff + 1
                   terms_out(icoeff)=single_disp_terms(iterm1)
+                  terms_out(icoeff)%coefficient = 0.001
                   nterm_of_term = terms_out(icoeff)%nterm 
                   !Change order of term 
                   do iterm2=1,nterm_of_term
@@ -1636,5 +1670,63 @@ enddo
 end subroutine opt_getHOSingleDispTerms
 !!***
 
+
+
+!!****f* m_opt_effpot/opt_boundcoeff
+!! NAME
+!! opt_boundcoeff
+!!
+!! FUNCTION
+!!
+!! optimize a bound coefficient if optimized value is negative 
+!! put an positive value that respects a precision penalty  
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+function opt_boundcoeff(yvalues,cvalues) result (coeff)
+!Arguments ------------------------------------
+ implicit none
+
+!Arguments ------------------------------------
+  real(dp),intent(in) :: yvalues(2),cvalues(2)
+  real(dp) :: coeff
+!local
+!variable
+ real(dp) :: a,b,coeff_tmp,x1,x2
+!array
+! *************************************************************************
+ 
+ a = ( (yvalues(1) - 1) - (yvalues(2)-1)*(cvalues(1)/cvalues(2))) / (cvalues(1)**2 - cvalues(1)*cvalues(2)) 
+ 
+ b = ( (yvalues(2) - 1)/cvalues(2) ) - ( (yvalues(1) -1)*cvalues(2) - (yvalues(2) - 1)*cvalues(1) ) / (cvalues(1)**2 - cvalues(1)*cvalues(2)) 
+ 
+ write(*,*) "a", a
+ write(*,*) "b", b
+ 
+ coeff_tmp = -b/(2*a)
+ write(*,*) "coeff_tmp", coeff_tmp 
+ if(coeff_tmp > 0)then
+   coeff = coeff_tmp 
+ elseif(coeff_tmp <= 0)then 
+   x1 = (-b + sqrt(b**2 + 4*a*0.001)) / (2*a) ! 1.001 penalty value 
+   x2 = (-b - sqrt(b**2 + 4*a*0.001)) / (2*a)
+   write(*,*) "x1", x1 
+   write(*,*) "x2", x2
+   if(x1>0)then 
+     coeff = x1 
+   else 
+     coeff = x2 
+   endif
+ endif
+
+end function opt_boundcoeff
+!!***
+
+
 end module m_opt_effpot
 !!***
+
