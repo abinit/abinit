@@ -275,6 +275,11 @@ elec_eval = .FALSE.
    call global_set_print_parameters(printgeom,printeigv,printeltic,printorbocc,&
 &                                  inp%scup_dtset%scup_printbands) 
 
+   !Set SCF controling variables (values contain defaults, if not specified in the input)
+   call global_set_scf_parameters(inp%scup_dtset%scup_scfmixing,inp%scup_dtset%scup_scfthresh,&
+&                                 inp%scup_dtset%scup_maxscfstep,inp%scup_dtset%scup_startpulay)
+
+
    !Create kpath if printbands=true and pass it to SCALE UP 
    if(inp%scup_dtset%scup_printbands)then 
 

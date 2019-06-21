@@ -65,6 +65,8 @@ module m_scup_dataset
  integer :: scup_nspeck
  integer :: scup_ndivsm
  integer :: scup_printniter
+ integer :: scup_startpulay 
+ integer :: scup_maxscfstep
 !Logicals 
  logical :: scup_elec_model
  logical :: scup_initorbocc
@@ -77,7 +79,8 @@ module m_scup_dataset
  logical :: scup_printorbocc
 !Real 
  real*8   :: scup_tcharge 
-
+ real*8   :: scup_scfmixing
+ real*8   :: scup_scfthresh 
 !Integer Array
  integer :: scup_ksamp(3)
 
@@ -140,8 +143,10 @@ scup_dtset%scup_printeltic  = .FALSE.
 scup_dtset%scup_printgeom   = .FALSE.  
 scup_dtset%scup_printniter  =  0  
 scup_dtset%scup_printorbocc = .FALSE. 
-
-
+scup_dtset%scup_scfmixing   =  0.3 
+scup_dtset%scup_scfthresh   =  tol6
+scup_dtset%scup_startpulay  =  3
+scup_dtset%scup_maxscfstep  =  100
 
 end subroutine  scup_dtset_init
 !!***
@@ -264,6 +269,11 @@ subroutine outvars_scup(scup_dtset,nunit)
    write(nunit,'(1x,a16,I3)')     'scup_printorbocc',int_porbocc 
    write(nunit,'(1x,a16,I3)')     '     scup_nspeck',scup_dtset%scup_nspeck
    write(nunit,'(1x,a16,I3)')     '     scup_ndivsm',scup_dtset%scup_ndivsm
+   write(nunit,'(1x,a16,F7.3)')   '  scup_scfmixing',scup_dtset%scup_scfmixing 
+   write(nunit,'(1x,a16,ES10.2)')  '  scup_scfthresh',scup_dtset%scup_scfthresh 
+   write(nunit,'(1x,a16,I3)')     ' scup_startpulay',scup_dtset%scup_startpulay
+   write(nunit,'(1x,a16,I3)')     ' scup_maxscfstep',scup_dtset%scup_maxscfstep
+
    !Debug write kpoints to output 
    !if(allocated(scup_dtset%scup_speck))then 
    !   write(nunit,string)     '      scup_speck',scup_dtset%scup_speck
@@ -412,7 +422,17 @@ tmp_int=0
  end do
 
 !L 
-!M 
+!M
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_maxscfstep',tread,'INT')
+ if(tread==1) scup_dtset%scup_maxscfstep=intarr(1)
+ if(scup_dtset%scup_maxscfstep<=0)then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_maxscfstep is',scup_dtset%scup_maxscfstep,', but the only allowed values',ch10,&
+&   'greater than 0',ch10,&
+&   'Action: correct scup_maxscfstep in your input file.'
+   MSG_ERROR(message)
+ end if
+
 !N
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_ndivsm',tread,'INT')
@@ -510,7 +530,38 @@ tmp_int=0
 
 !Q
 !R
-!S 
+!S
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_startpulay',tread,'INT')
+ if(tread==1) scup_dtset%scup_startpulay=intarr(1)
+ if(scup_dtset%scup_startpulay<3)then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_startpulay is',scup_dtset%scup_startpulay,', but the only allowed values',ch10,&
+&   'are greater than 3',ch10,&
+&   'Action: correct scup_startpulay in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_scfmixing',tread,'DPR')
+ if(tread==1) scup_dtset%scup_scfmixing=dprarr(1)
+ if(scup_dtset%scup_scfmixing<0)then
+   write(message, '(a,f10.2,a,a,a,a,a)' )&
+&   'scup_scfmixing is',scup_dtset%scup_scfmixing,', but the only allowed value',ch10,&
+&   'is superior to 0.',ch10,&
+&   'Action: correct scup_scfmixing in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_scfthresh',tread,'DPR')
+ if(tread==1) scup_dtset%scup_scfthresh=dprarr(1)
+ if(scup_dtset%scup_scfthresh<0)then
+   write(message, '(a,f10.2,a,a,a,a,a)' )&
+&   'scup_scfthresh is',scup_dtset%scup_scfthresh,', but the only allowed value',ch10,&
+&   'is superior to 0.',ch10,&
+&   'Action: correct scup_scfthresh in your input file.'
+   MSG_ERROR(message)
+ end if
+
 !T
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_tcharge',tread,'DPR')
  if(tread==1) scup_dtset%scup_tcharge=dprarr(1)
