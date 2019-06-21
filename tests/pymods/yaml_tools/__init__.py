@@ -6,7 +6,6 @@ from __future__ import print_function, division, unicode_literals
 
 import warnings
 from .errors import NoYAMLSupportError, UntaggedDocumentError
-from .common import string, get_yaml_tag
 
 try:
     import yaml
@@ -37,7 +36,7 @@ if is_available:
                       " doesn't you may have to install libyaml yourself.")
         Loader = yaml.SafeLoader
 
-    from .common import Undef, IterStart
+    from .common import Undef, IterStart, string, get_yaml_tag
 
     def yaml_parse(content, *args, **kwargs):
         from .register_tag import yaml_implicit_scalar, yaml_map
