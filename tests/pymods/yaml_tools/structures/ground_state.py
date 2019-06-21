@@ -47,6 +47,13 @@ class EtotDC(object):
 
 
 @yaml_auto_map
+class EtotSteps(object):
+    '''
+    Detail of the values of Etot through the steps of self consistent cycle.
+    '''
+
+
+@yaml_auto_map
 class ResultsGS(object):
     '''
     Miscellaneous results from ground state computations.
