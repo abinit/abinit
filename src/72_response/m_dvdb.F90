@@ -5224,9 +5224,9 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank
+ integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank, ncid
 #ifdef HAVE_NETCDF
- integer :: ncid, ncerr
+ integer :: ncerr
 #endif
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
