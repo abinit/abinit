@@ -173,7 +173,7 @@ class Tester(object):
                        .format(doc_id))
                 self.issues.append(Failure(self.conf, msg))
             with self.conf.use_filter(ref_doc.iterators):
-                self.check_this(ref_doc.obj['label'], ref_doc.obj,
+                self.check_this(ref_doc.tag, ref_doc.obj,
                                 self.tested[doc_id].obj)
 
         return self.issues

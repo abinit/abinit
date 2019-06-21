@@ -9,10 +9,19 @@ from .pandas_commons import has_pandas
 
 @yaml_auto_map
 class Etot(object):
+    '''
+    Component if total energy.
+    '''
     __yaml_tag = 'ETOT'
 
-    def __init__(self, label='nothing', comment='no comment'):
-        self.label = label
+    not_components = {
+        'Etotal',
+        'comment',
+        'Band energy',
+        'Total energy(eV)'
+    }
+
+    def __init__(self, comment='no comment'):
         self.comment = comment
 
     @classmethod
@@ -20,15 +29,30 @@ class Etot(object):
         new = super(Etot, cls).from_map(map)
         new.components = {
             name: value for name, value in new.__dict__.items()
-            if name not in [
-                'Etotal',
-                'label',
-                'comment',
-                'Band energy',
-                'Total energy(eV)'
-            ]
+            if name not in cls.not_components
         }
         return new
+
+
+@yaml_auto_map
+class EtotDC(object):
+    '''
+    Components of total energy in Double Counting.
+    '''
+    not_components = {
+        'Etotal (DC)',
+        'comment',
+        'Band energy',
+        '-kT*entropy',
+        'Total DC energy(eV)'
+    }
+
+
+@yaml_auto_map
+class ResultsGS(object):
+    '''
+    Miscellaneous results from ground state computations.
+    '''
 
 
 if has_pandas:

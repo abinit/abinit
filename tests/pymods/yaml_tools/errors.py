@@ -94,16 +94,15 @@ class NotAvailableTagError(InputFileError):
         YAMLTestError.__init__(self, msg)
 
 
-class UnlabeledDocumentError(InputFileError):
+class UntaggedDocumentError(InputFileError):
     def __init__(self, line):
-        msg = ('This document does not have a label field. It cannot be'
-               ' identified.')
+        msg = ('This document does not have a tag. It cannot be identified.')
         InputFileError.__init__(self, line, msg)
 
 
 class DuplicateDocumentError(InputFileError):
     def __init__(self, line, id):
-        msg = ('There are two document with the same label and iteration'
-               ' state ({}). Please change the label of one of them to make it'
+        msg = ('There are two document with the same tag and iteration'
+               ' state ({}). Please change the tag of one of them to make it'
                ' unique.').format(id)
         InputFileError.__init__(self, line, msg)

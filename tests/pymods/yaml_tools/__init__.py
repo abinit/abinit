@@ -5,7 +5,8 @@
 from __future__ import print_function, division, unicode_literals
 
 import warnings
-from .errors import NoYAMLSupportError, UnlabeledDocumentError
+from .errors import NoYAMLSupportError, UntaggedDocumentError
+from .tricks import string
 
 try:
     import yaml
@@ -28,7 +29,7 @@ except ImportError:
 
 if is_available:
     # use the C binding (faster) if possible
-    if hasattr(yaml, 'CSafeLoader'):  
+    if hasattr(yaml, 'CSafeLoader'):
         Loader = yaml.CSafeLoader
     else:
         warnings.warn("The libyaml binding is not available, tests will take"
@@ -59,12 +60,16 @@ class Document(object):
         self.start = start
         self.end = -1
         self.lines = lines
+        self._tag = None
         self._obj = None
         self._corrupted = False
         self._id = None
 
     def _parse(self):
-        """Parse lines, set `obj` property."""
+        '''
+        Parse lines, set `obj` property.
+        Raise an error if the document is untagged.
+        '''
         if is_available:
             content = '\n'.join(self.lines)
             try:
@@ -72,6 +77,13 @@ class Document(object):
             except yaml.YAMLError as e:
                 self._obj = e
                 self._corrupted = True
+                self._tag = 'Corrupted'
+
+            # use type in instead of isinstance because inheritance is fine
+            if type(self._obj) in {dict, list, tuple, string}:
+                raise UntaggedDocumentError(self.start)
+            else:
+                self._tag = type(self._tag).__name__
         else:
             raise NoYAMLSupportError('Try to access YAML document but YAML is'
                                      ' not available in this environment.')
@@ -79,29 +91,39 @@ class Document(object):
     @property
     def id(self):
         '''
-            Produce a string id that should be unique.
+        Produce a string id that should be unique.
         '''
         if self._id is None:
             state = []
-            if 'label' not in self.obj:
-                raise UnlabeledDocumentError(self.start)
 
             for key, val in self.iterators.items():
                 state.append('{}={}'.format(key, val))
 
-            self._id = ','.join(state) + ' ' + self.obj['label']
+            self._id = ','.join(state) + ' ' + self.tag
         return self._id
 
     @property
     def obj(self):
-        """The python object constructed by Pyyaml."""
+        '''
+        The python object constructed by Pyyaml.
+        '''
         if self._obj is None:
             self._parse()
         return self._obj
 
+    def tag(self):
+        '''
+        The document tag.
+        '''
+        if self._tag is None:
+            self._parse()
+        return self._tag
+
     @property
     def corrupted(self):
-        """True if Yaml document is corrupted."""
+        '''
+        True if Yaml document is corrupted.
+        '''
         if self._obj is None:
             self._parse()
         return self._corrupted
