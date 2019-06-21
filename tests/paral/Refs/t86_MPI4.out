@@ -390,8 +390,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     753.188     753.111
   sigma(2 2)=  3.56483996E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.56483996E-03  sigma(2 1)=  0.00000000E+00
 
----
-label: Etot steps
+--- !EtotSteps
 data: !EtotIters |
     
      iter   Etot(hartree)      deltaE(h)  residm     nres2
@@ -514,8 +513,7 @@ data: !EtotIters |
 
 
 
----
-label     : results_gs
+--- !ResultsGS
 comment   : Summary of ground states results.
 natom     :        5
 nsppol    :        1
@@ -698,8 +696,7 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
 
 
---- !ETOT
-label               : Etot
+--- !Etot
 comment             : Components of total free energy (in Hartree)
 Kinetic energy      :  4.323825067238190201E+01
 Hartree energy      :  3.133994553363548619E+01
@@ -716,8 +713,7 @@ Total energy(eV)    : -4.122733899322517573E+03
 
 
 
---- !ETOT
-label               : Etot DC
+--- !EtotDC
 comment             : '"Double-counting" decomposition of free energy'
 Band energy         : -1.473142751049871890E+01
 Ewald energy        : -1.142203169790575572E+02
@@ -940,8 +936,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.438     188.419
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  1.168E-04 exceeds toldfe=  1.000E-08
 
----
-label: Etot steps
+--- !EtotSteps
 data: !EtotIters |
     
      iter   Etot(hartree)      deltaE(h)  residm     nres2
@@ -1056,8 +1051,7 @@ data: !EtotIters |
 
 
 
----
-label     : results_gs
+--- !ResultsGS
 comment   : Summary of ground states results.
 natom     :        5
 nsppol    :        1
@@ -1222,8 +1216,7 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
 
 
---- !ETOT
-label               : Etot
+--- !Etot
 comment             : Components of total free energy (in Hartree)
 Kinetic energy      :  4.311836595104540493E+01
 Hartree energy      :  3.130289914056712774E+01
@@ -1239,8 +1232,7 @@ Total energy(eV)    : -4.126493322589622039E+03
 
 
 
---- !ETOT
-label               : Etot DC
+--- !EtotDC
 comment             : '"Double-counting" decomposition of free energy'
 Band energy         : -1.468734668477278760E+01
 Ewald energy        : -1.142203169790575572E+02

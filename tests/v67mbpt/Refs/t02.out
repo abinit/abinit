@@ -447,8 +447,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.181     288.126
   sigma(2 2)=  2.76864062E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.76864062E-05  sigma(2 1)=  0.00000000E+00
 
----
-label: Etot steps
+--- !EtotSteps
 data: !EtotIters |
     
      iter   Etot(hartree)      deltaE(h)  residm     vres2
@@ -465,8 +464,7 @@ data: !EtotIters |
  Atom  Sphere_radius  Integrated_density
     1        2.00000          1.71651242
     2        2.00000          1.71651242
----
-label     : results_gs
+--- !ResultsGS
 comment   : Summary of ground states results.
 natom     :        2
 nsppol    :        1
@@ -543,8 +541,7 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
 
 
---- !ETOT
-label               : Etot
+--- !Etot
 comment             : Components of total free energy (in Hartree)
 Kinetic energy      :  3.029236750829611413E+00
 Hartree energy      :  5.399655679792308982E-01
@@ -1203,8 +1200,7 @@ dtset:     3
  E^GW_gap         3.104
  DeltaE^GW_gap    0.578
 
---- !GwSigma
-label: GW Sigma perturbative
+--- !GwSigmaPerturbative
 k point: [   0.000,    0.000,    0.000, ]
 E^0_gap:   2.52645830621329992E+00
 E^GW_gap:   3.10415465048926276E+00
@@ -1359,8 +1355,7 @@ dtset:     4
  E^GW_gap         3.104
  DeltaE^GW_gap    0.578
 
---- !GwSigma
-label: GW Sigma perturbative
+--- !GwSigmaPerturbative
 k point: [   0.000,    0.000,    0.000, ]
 E^0_gap:   2.52645830621329992E+00
 E^GW_gap:   3.10415465048926276E+00
@@ -1515,8 +1510,7 @@ dtset:     5
  E^GW_gap         3.104
  DeltaE^GW_gap    0.578
 
---- !GwSigma
-label: GW Sigma perturbative
+--- !GwSigmaPerturbative
 k point: [   0.000,    0.000,    0.000, ]
 E^0_gap:   2.52645830621329992E+00
 E^GW_gap:   3.10415465048926276E+00

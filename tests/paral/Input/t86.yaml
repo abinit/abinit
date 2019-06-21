@@ -5,13 +5,13 @@ lda:
     # tolvrs 1.0e-7
     tol_abs: 5.0e-7
     tol_rel: 5.0e-7
-    results_gs!:
+    ResultsGS!:
         convergence:
             ceil: 1.0e-6
         stress tensor:
             tensor_is_symetric: true
 
-    Etot steps:
+    EtotSteps:
         data:
             callback:
                 method: last_iter
@@ -28,7 +28,7 @@ lda:
 dmft:
     tol_abs: 2.0e-8
     tol_rel: 5.0e-9
-    results_gs!:  # hard reset result_gs
+    ResultsGS!:  # hard reset result_gs
         convergence:
             ceil: 1.0e-6
             deltae:
@@ -44,13 +44,13 @@ dmft:
         Total energy eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-8
-    Etot DC:
+    EtotDC:
         tol_abs: 1.0e-7
         Total DC energy eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-8
 
-    Etot steps:
+    EtotSteps:
         data:
             callback:
                 method: last_iter
