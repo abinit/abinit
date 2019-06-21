@@ -1695,6 +1695,12 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  real(dp),allocatable :: elqgradhart(:,:,:,:,:)
  real(dp),allocatable :: frwfdq(:,:,:,:,:),frwfdq_k(:,:,:,:,:)
  real(dp),allocatable :: isdq_qgradhart(:,:,:,:,:)
+ real(dp),allocatable :: isdqwf(:,:,:,:,:),isdqwf_k(:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t1(:,:,:,:,:),isdqwf_t1_k(:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t2(:,:,:,:,:),isdqwf_t2_k(:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t3(:,:,:,:,:),isdqwf_t3_k(:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t4(:,:,:,:,:),isdqwf_t4_k(:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t5(:,:,:,:,:),isdqwf_t5_k(:,:,:,:,:)
  real(dp),allocatable :: kpt_rbz(:,:)
  real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
  real(dp),allocatable :: occ_k(:),occ_rbz(:)
@@ -2564,7 +2570,24 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  if (lw_flexo==1.or.lw_flexo==4) then 
    ABI_ALLOCATE(frwfdq,(2,natpert,3,3,nq1grad))
    ABI_ALLOCATE(frwfdq_k,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_k,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t1,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t1_k,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t2,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t2_k,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t3,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t3_k,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t4,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t4_k,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t5,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t5_k,(2,natpert,3,3,nq1grad))
    frwfdq=zero
+   isdqwf_t1=zero
+   isdqwf_t2=zero
+   isdqwf_t3=zero
+   isdqwf_t4=zero
+   isdqwf_t5=zero
  end if
 
 !LOOP OVER SPINS
@@ -2660,6 +2683,16 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !      Add the contribution from each k-point
        frwfdq=frwfdq + frwfdq_k
+
+!      Now comute the 1st order wf contributions
+       call dfpt_isdqwf(cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isdqwf_k, &
+       &  isdqwf_t1_k,isdqwf_t2_k,isdqwf_t3_k,isdqwf_t4_k,isdqwf_t5_k,isppol,istwf_k, &
+       &  kg_k,kpoint,mkmem_rbz,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
+       &  npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
+       &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
+       &  vhxc1_atdis,vhxc1_strain,wfk_t_atdis,wfk_t_ddk, &
+       &  wfk_t_strain,wtk_k,ylm_k,ylmgr_k)
+
      end if
 
 !    Keep track of total number of bands
@@ -2760,6 +2793,12 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
+ if (lw_flexo==1.or.lw_flexo==4) then
+   write(msg, '(a,a,a)' ) ch10, &
+   'Internal strain tensor 1st q-gradient calculation completed ',ch10
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end if
 
 !Gather the different terms in the flexoelectric tensor and print them out
  if (me==0) then
@@ -2822,6 +2861,18 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  if (lw_flexo==1.or.lw_flexo==4) then 
    ABI_DEALLOCATE(frwfdq)
    ABI_DEALLOCATE(frwfdq_k)
+   ABI_DEALLOCATE(isdqwf)
+   ABI_DEALLOCATE(isdqwf_k)
+   ABI_DEALLOCATE(isdqwf_t1)
+   ABI_DEALLOCATE(isdqwf_t1_k)
+   ABI_DEALLOCATE(isdqwf_t2)
+   ABI_DEALLOCATE(isdqwf_t2_k)
+   ABI_DEALLOCATE(isdqwf_t3)
+   ABI_DEALLOCATE(isdqwf_t3_k)
+   ABI_DEALLOCATE(isdqwf_t4)
+   ABI_DEALLOCATE(isdqwf_t4_k)
+   ABI_DEALLOCATE(isdqwf_t5)
+   ABI_DEALLOCATE(isdqwf_t5_k)
  end if
  ABI_DEALLOCATE(q1grad)
  ABI_DEALLOCATE(ph1d)
