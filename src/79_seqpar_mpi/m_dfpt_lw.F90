@@ -1693,7 +1693,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  real(dp),allocatable :: elflexowf_t4(:,:,:,:,:),elflexowf_t4_k(:,:,:,:,:)
  real(dp),allocatable :: elflexowf_t5(:,:,:,:,:),elflexowf_t5_k(:,:,:,:,:)
  real(dp),allocatable :: elqgradhart(:,:,:,:,:)
- real(dp),allocatable :: frwfdq(:,:,:,:),frwfdq_k(:,:,:,:)
+ real(dp),allocatable :: frwfdq(:,:,:,:,:),frwfdq_k(:,:,:,:,:)
  real(dp),allocatable :: isdq_qgradhart(:,:,:,:,:)
  real(dp),allocatable :: kpt_rbz(:,:)
  real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
@@ -2562,8 +2562,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Allocate arrays for wf contributions to the first q-gradient of the internal strain tensor 
  if (lw_flexo==1.or.lw_flexo==4) then 
-   ABI_ALLOCATE(frwfdq,(2,nq1grad,nstrpert,natpert))
-   ABI_ALLOCATE(frwfdq_k,(2,nq1grad,nstrpert,natpert))
+   ABI_ALLOCATE(frwfdq,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(frwfdq_k,(2,natpert,3,3,nq1grad))
    frwfdq=zero
  end if
 
@@ -2650,7 +2650,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !    Compute the wf contributions to the first q-gradient of the internal strain tensor
      if (lw_flexo==1.or.lw_flexo==4) then
-!      First calculate the frozen wf contribution
+
+!      First calculate the frozen wf contribution (notice the type-I indexing of
+!      this term)
        call dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
        &  isppol,istwf_k,kg_k,kpoint,mkmem_rbz,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
@@ -2728,13 +2730,14 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
  end if
 
+!TMP: Writing of individual terms
  do iatpert= 1, natpert
    do istrpert= 1, nstrpert
      ka=pert_strain(3,istrpert)
      kb=pert_strain(4,istrpert)
      do iq1grad=1,3
        write(100,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
-     & frwfdq(1,iq1grad,istrpert,iatpert), frwfdq(2,iq1grad,istrpert,iatpert)
+     & frwfdq(1,iatpert,ka,kb,iq1grad), frwfdq(2,iatpert,ka,kb,iq1grad)
        write(101,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
      & isdq_qgradhart(re,iatpert,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert)), &
      & isdq_qgradhart(im,iatpert,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))

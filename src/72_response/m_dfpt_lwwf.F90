@@ -2556,7 +2556,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !!
 !! OUTPUT
 !!
-!!  frwfdq_k(2,natpert,nstrpert,nq1grad)=frozen wave function dependent part of the 1st q-gradient of
+!!  frwfdq_k(2,natpert,3,3,nq1grad)=frozen wave function dependent part of the 1st q-gradient of
 !!                            internal strain tensor
 !!
 !! SIDE EFFECTS
@@ -2602,7 +2602,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  integer,intent(in) :: pert_atdis(3,natpert),pert_strain(6,nstrpert)
  integer,intent(in) :: q1grad(3,nq1grad)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
- real(dp),intent(out) :: frwfdq_k(2,nq1grad,nstrpert,natpert)
+ real(dp),intent(out) :: frwfdq_k(2,natpert,3,3,nq1grad)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rmet(3,3) 
@@ -2853,8 +2853,8 @@ frwfdq_k=zero
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
          !Accumulate this term (take here into account the -i·-i prefactors and the conjugate comple)
-         frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-dotr
-         frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+doti
+         frwfdq_k(1,iatpert,ka,kb,iq1grad)=frwfdq_k(1,iatpert,ka,kb,iq1grad)-dotr
+         frwfdq_k(2,iatpert,ka,kb,iq1grad)=frwfdq_k(2,iatpert,ka,kb,iq1grad)+doti
            
 
          !Next complete the other two terms involving the 1st q-gradient of atdis Hamiltonian:
@@ -2862,20 +2862,20 @@ frwfdq_k=zero
          !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\delta} \frac{\delta_{\beta\gamma}}{2} | u_{i,k}^{(0)} >
          !--------------------------------------------------------------------------
          if (ka==kb) then
-           frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-   &
+           frwfdq_k(1,iatpert,ka,kb,iq1grad)=frwfdq_k(1,iatpert,ka,kb,iq1grad)-   &
          & half*c0_hatdisdq_c0_bks(1,iband,iq1grad,iatpert)
-           frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+   &
+           frwfdq_k(2,iatpert,ka,kb,iq1grad)=frwfdq_k(2,iatpert,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(2,iband,iq1grad,iatpert)
          end if
          if (ka==iq1grad) then
-           frwfdq_k(1,iq1grad,istrpert,iatpert)=frwfdq_k(1,iq1grad,istrpert,iatpert)-   &
+           frwfdq_k(1,iatpert,ka,kb,iq1grad)=frwfdq_k(1,iatpert,ka,kb,iq1grad)-   &
          & half*c0_hatdisdq_c0_bks(1,iband,kb,iatpert)
-           frwfdq_k(2,iq1grad,istrpert,iatpert)=frwfdq_k(2,iq1grad,istrpert,iatpert)+   &
+           frwfdq_k(2,iatpert,ka,kb,iq1grad)=frwfdq_k(2,iatpert,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert)
          end if
 
          !Take into account band occupations and kpt weights
-         frwfdq_k(:,iq1grad,istrpert,iatpert)=frwfdq_k(:,iq1grad,istrpert,iatpert)* &
+         frwfdq_k(:,iatpert,ka,kb,iq1grad)=frwfdq_k(:,iatpert,ka,kb,iq1grad)* &
        & wtk_k * occ_k(iband) 
 
        end do !iband
