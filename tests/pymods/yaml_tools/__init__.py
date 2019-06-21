@@ -83,7 +83,7 @@ class Document(object):
             if type(self._obj) in {dict, list, tuple, string}:
                 raise UntaggedDocumentError(self.start)
             else:
-                self._tag = type(self._tag).__name__
+                self._tag = type(self._obj).__name__
         else:
             raise NoYAMLSupportError('Try to access YAML document but YAML is'
                                      ' not available in this environment.')
@@ -111,6 +111,7 @@ class Document(object):
             self._parse()
         return self._obj
 
+    @property
     def tag(self):
         '''
         The document tag.
