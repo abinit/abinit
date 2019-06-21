@@ -49,7 +49,7 @@ MODULE m_mpinfo
 
  private
 
-#if defined HAVE_MPI1 || (defined HAVE_MPI && defined FC_G95)
+#if defined HAVE_MPI1
  include 'mpif.h'
 #endif
 
