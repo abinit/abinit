@@ -2376,6 +2376,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' scup_istddft scup_printbands scup_printgeom scup_printeigv scup_printeltic ' 
  list_vars=trim(list_vars)//' scup_printorbocc scup_printniter scup_nspeck scup_speck scup_ndivsm'
  list_vars=trim(list_vars)//' scup_scfmixing scup_scfthresh scup_startpulay scup_maxscfstep'
+ list_vars=trim(list_vars)//' scup_smearing scup_freezden'
 !End SCALE-UP variables 
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'

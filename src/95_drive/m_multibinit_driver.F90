@@ -277,7 +277,8 @@ elec_eval = .FALSE.
 
    !Set SCF controling variables (values contain defaults, if not specified in the input)
    call global_set_scf_parameters(inp%scup_dtset%scup_scfmixing,inp%scup_dtset%scup_scfthresh,&
-&                                 inp%scup_dtset%scup_maxscfstep,inp%scup_dtset%scup_startpulay)
+&                                 inp%scup_dtset%scup_smearing,inp%scup_dtset%scup_maxscfstep,&          
+&                                 inp%scup_dtset%scup_startpulay,inp%scup_dtset%scup_freezden)
 
 
    !Create kpath if printbands=true and pass it to SCALE UP 

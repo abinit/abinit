@@ -77,10 +77,12 @@ module m_scup_dataset
  logical :: scup_printeltic 
  logical :: scup_printgeom 
  logical :: scup_printorbocc
+ logical :: scup_freezden
 !Real 
  real*8   :: scup_tcharge 
  real*8   :: scup_scfmixing
  real*8   :: scup_scfthresh 
+ real*8   :: scup_smearing
 !Integer Array
  integer :: scup_ksamp(3)
 
@@ -143,8 +145,10 @@ scup_dtset%scup_printeltic  = .FALSE.
 scup_dtset%scup_printgeom   = .FALSE.  
 scup_dtset%scup_printniter  =  0  
 scup_dtset%scup_printorbocc = .FALSE. 
+scup_dtset%scup_freezden    = .FALSE. 
 scup_dtset%scup_scfmixing   =  0.3 
 scup_dtset%scup_scfthresh   =  tol6
+scup_dtset%scup_smearing    =  0.00091873313 ! Room Temperature in Hartree
 scup_dtset%scup_startpulay  =  3
 scup_dtset%scup_maxscfstep  =  100
 
@@ -234,19 +238,21 @@ subroutine outvars_scup(scup_dtset,nunit)
 !integers for printing
  integer :: int_inorb=0,int_mgn=0,int_tddft=0,int_pband=0
  integer :: int_peigv=0,int_peltic=0,int_pgeom=0,int_porbocc=0
+ integer :: int_freezden=0
 !Character for defining fromat string 
  character(len=32) :: string
 !*********************************************************************
    
    !Check if logicals are true, if yes set integers to one for printing
-   if(scup_dtset%scup_initorbocc)   int_inorb   =1
-   if(scup_dtset%scup_ismagnetic)   int_mgn     =1
-   if(scup_dtset%scup_istddft)      int_tddft   =1
-   if(scup_dtset%scup_printbands)   int_pband   =1
-   if(scup_dtset%scup_printeigv)    int_peigv   =1
-   if(scup_dtset%scup_printeltic)   int_peltic  =1
-   if(scup_dtset%scup_printgeom)    int_pgeom   =1
-   if(scup_dtset%scup_printorbocc)  int_porbocc =1
+   if(scup_dtset%scup_initorbocc)   int_inorb    =1
+   if(scup_dtset%scup_ismagnetic)   int_mgn      =1
+   if(scup_dtset%scup_istddft)      int_tddft    =1
+   if(scup_dtset%scup_printbands)   int_pband    =1
+   if(scup_dtset%scup_printeigv)    int_peigv    =1
+   if(scup_dtset%scup_printeltic)   int_peltic   =1
+   if(scup_dtset%scup_printgeom)    int_pgeom    =1
+   if(scup_dtset%scup_printorbocc)  int_porbocc  =1
+   if(scup_dtset%scup_freezden)     int_freezden =1
    
    !Debug format string for writing kpoints to output
    !Write format string for special kpoints 
@@ -267,10 +273,12 @@ subroutine outvars_scup(scup_dtset,nunit)
    write(nunit,'(1x,a16,I3)')     '  scup_printgeom',int_pgeom    
    write(nunit,'(1x,a16,I3)')     ' scup_printniter',scup_dtset%scup_printniter
    write(nunit,'(1x,a16,I3)')     'scup_printorbocc',int_porbocc 
+   write(nunit,'(1x,a16,I3)')     '   scup_freezden',int_freezden
    write(nunit,'(1x,a16,I3)')     '     scup_nspeck',scup_dtset%scup_nspeck
    write(nunit,'(1x,a16,I3)')     '     scup_ndivsm',scup_dtset%scup_ndivsm
    write(nunit,'(1x,a16,F7.3)')   '  scup_scfmixing',scup_dtset%scup_scfmixing 
-   write(nunit,'(1x,a16,ES10.2)')  '  scup_scfthresh',scup_dtset%scup_scfthresh 
+   write(nunit,'(1x,a16,ES10.2)') '  scup_scfthresh',scup_dtset%scup_scfthresh 
+   write(nunit,'(1x,a16,ES10.2)') '   scup_smearing',scup_dtset%scup_smearing 
    write(nunit,'(1x,a16,I3)')     ' scup_startpulay',scup_dtset%scup_startpulay
    write(nunit,'(1x,a16,I3)')     ' scup_maxscfstep',scup_dtset%scup_maxscfstep
 
@@ -368,7 +376,19 @@ tmp_int=0
  tmp_int = 0 
 
 !F 
-!G 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_freezden',tread,'INT')
+ if(tread==1) tmp_int=intarr(1)
+ if(tmp_int<0 .or. tmp_int>1 )then
+   write(message, '(a,I3,a,a,a,a,a)' )&
+&   'scup_freezden is',tmp_int,', but the only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct scup_freezden in your input file.'
+   MSG_ERROR(message)
+ end if
+ if(tmp_int == 1) scup_dtset%scup_freezden = .TRUE.
+ tmp_int = 0 
+
+ !G 
 !H 
 !I 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_initorbocc',tread,'INT')
@@ -554,11 +574,21 @@ tmp_int=0
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_scfthresh',tread,'DPR')
  if(tread==1) scup_dtset%scup_scfthresh=dprarr(1)
- if(scup_dtset%scup_scfthresh<0)then
+ if(scup_dtset%scup_scfthresh <= 0)then
    write(message, '(a,f10.2,a,a,a,a,a)' )&
 &   'scup_scfthresh is',scup_dtset%scup_scfthresh,', but the only allowed value',ch10,&
 &   'is superior to 0.',ch10,&
 &   'Action: correct scup_scfthresh in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_smearing',tread,'DPR')
+ if(tread==1) scup_dtset%scup_smearing=dprarr(1)
+ if(scup_dtset%scup_smearing < 0)then
+   write(message, '(a,f10.2,a,a,a,a,a)' )&
+&   'scup_smearing is',scup_dtset%scup_smearing,', but the only allowed value',ch10,&
+&   'is superior to or equal to 0.',ch10,&
+&   'Action: correct scup_smearing in your input file.'
    MSG_ERROR(message)
  end if
 
