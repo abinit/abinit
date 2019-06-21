@@ -127,7 +127,7 @@ contains
 ! temporary variables for testing SCALE-UP with Multibinit
   !Variable to pass tu effpot_evaluate routine of multibinit
   !To declare evaluation of electronice model 
-  logical  :: elec_eval
+  logical  :: elec_eval,err_init_elec
 #if defined DEV_MS_SCALEUP 
   !Variables needed to call SCALE-UP
   logical*1 :: needlattice = .FALSE.
