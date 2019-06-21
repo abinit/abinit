@@ -1670,7 +1670,8 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  integer,allocatable :: ddmdq_flg(:,:,:,:,:),elflexoflg(:,:,:,:)
  integer,allocatable :: indkpt1(:), indkpt1_tmp(:)
  integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:)
- integer,allocatable :: istwfk_rbz(:),kg(:,:),kg_k(:,:)
+ integer,allocatable :: istwfk_rbz(:),isdq_flg(:,:,:,:)
+ integer,allocatable :: kg(:,:),kg_k(:,:)
  integer,allocatable :: nband_rbz(:),npwarr(:),npwtot(:)
  integer,allocatable :: pert_atdis(:,:),pert_atdis_tmp(:,:)
  integer,allocatable :: pert_efield(:,:),pert_efield_tmp(:,:)
@@ -1693,6 +1694,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  real(dp),allocatable :: elflexowf_t5(:,:,:,:,:),elflexowf_t5_k(:,:,:,:,:)
  real(dp),allocatable :: elqgradhart(:,:,:,:,:)
  real(dp),allocatable :: frwfdq(:,:,:,:),frwfdq_k(:,:,:,:)
+ real(dp),allocatable :: isdq_qgradhart(:,:,:,:,:)
  real(dp),allocatable :: kpt_rbz(:,:)
  real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
  real(dp),allocatable :: occ_k(:),occ_rbz(:)
@@ -2154,6 +2156,50 @@ end if
      end do
    end do
  end if 
+
+!1st g-gradient of internal strain tensor contribution
+ if (lw_flexo==1.or.lw_flexo==4) then
+   ABI_ALLOCATE(isdq_qgradhart,(2,natpert,3,3,3))
+   ABI_ALLOCATE(isdq_flg,(2,natpert,3,3,3))
+   isdq_flg=0
+   rhor1_tmp=zero
+   do iq1grad=1,nq1grad
+     qdir=q1grad(2,iq1grad)
+     do iatpert=1,natpert
+
+       rhog1_tmp(:,:)=rhog1_atdis(iatpert,:,:)
+       call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qdir,rhog1_tmp,vqgradhart) 
+
+       do istrpert=1,nstrpert
+
+         !Calculate the electrostatic energy term with the first order strain density 
+         if (timrev==1) then
+           do ii=1,nfft
+             jj=ii*2
+             rhor1_tmp(jj-1,:)=rhor1_strain(istrpert,ii,:)
+           end do
+         else if (timrev==0) then
+           rhor1_tmp(:,:)=rhor1_strain(istrpert,:,:)
+         end if
+       
+         call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+
+!TODO: to adapt from here
+         elqgradhart(re,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
+         elqgradhart(im,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
+         elflexoflg(pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
+
+         blkflg(pert_efield(2,iefipert),pert_efield(1,iefipert), &
+       &        pert_strain(2,istrpert),pert_strain(1,istrpert), &
+       &        q1grad(2,iq1grad),matom+8)=1           
+     
+       end do
+
+     end do
+
+   end do
+
+ end if
 
  ABI_DEALLOCATE(rhor1_tmp)
  ABI_DEALLOCATE(rhog1_tmp)
