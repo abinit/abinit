@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon,AGerossier)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon,AGerossier,ROuterovitch)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -329,7 +329,7 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!! outscfcv,screening_driver,fullbz_plowannier
+!! outscfcv,screening_driver,sigma_driver,fullbz_plowannier
 !!
 !! CHILDREN
 !!
@@ -2359,7 +2359,6 @@ end subroutine compute_coeff_plowannier
           do iatom=1,wan%natom_wan
             do il=1,wan%nbl_atom_wan(iatom)
               do im=1,2*wan%latom_wan(iatom)%lcalc(il)+1
-                !atom, l, m , real(psichi), imag(psichi)
                 write(unt,'(8x,3i3,2x,2f23.15)')iatom,wan%latom_wan(iatom)%lcalc(il),im,&
                 &real(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))&
                 &,aimag(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))
@@ -2389,10 +2388,10 @@ end subroutine compute_coeff_plowannier
 !! wan 
 !! 
 !! PARENTS
-!! outscfcv
+!! outscfcv,cchi0, cchi0q0, prep_calc_ucrpa
 !!
 !! CHILDREN
-!! cchi0, cchi0q0, prep_calc_ucrpa
+!! open_file,
 !! SOURCE
 
  subroutine get_plowannier(wan)
@@ -3382,7 +3381,6 @@ subroutine init_operwan_realspace(wan,operwan_realspace)
          end do
        end do
      end do
-    ! .write(6,*)"taille", iatom1,iatom2,size(operwan_realspace(iatom1,iatom2)%position,1),size(operwan_realspace(iatom1,iatom2)%position,2)
    end do
  end do
 

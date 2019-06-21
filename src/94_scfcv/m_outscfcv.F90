@@ -201,7 +201,7 @@ contains
 !!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
 !!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
 !!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy
-!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,prt_cif,prtfatbands
+!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,print_plowannier,prt_cif,prtfatbands
 !!      read_atomden,simpson_int,sort_dp,spline,splint,timab,wrtout,xmpi_sum
 !!      xmpi_sum_master
 !!

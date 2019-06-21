@@ -1088,7 +1088,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
 &Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
 &Dtset%kpt,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,wanibz)
-  ! call init_plowannier(Dtset,wanbz)
    call get_plowannier(wanibz)
    call fullbz_plowannier(Dtset,Kmesh,Cryst,wanibz,wanbz)
  endif
