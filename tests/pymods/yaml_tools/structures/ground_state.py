@@ -12,8 +12,6 @@ class Etot(object):
     '''
     Component if total energy.
     '''
-    __yaml_tag = 'ETOT'
-
     not_components = {
         'Etotal',
         'comment',

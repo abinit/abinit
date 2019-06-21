@@ -268,7 +268,7 @@ module m_neat
     real(kind=dp),intent(in) :: k(3), e0, egw, degw
     character(len=*),intent(in) :: header, comment
 
-    call yaml_open_doc('GWSigmaPerturbative', comment, stream=stream)
+    call yaml_open_doc('GwSigmaPerturbative', comment, stream=stream)
 
     call yaml_add_real1d('k point', 3, k, stream=stream, real_fmt='(3f8.3)')
     call yaml_add_realfield('E^0_gap', e0, stream=stream)
@@ -365,7 +365,7 @@ module m_neat
 
     call yaml_open_doc('EtotSteps', comment, stream=stream)
 
-    call yaml_open_tabular('data', stream=stream)
+    call yaml_open_tabular('data', stream=stream, tag='EtotIters')
     call yaml_add_tabular_line(header, stream=stream)
     
   end subroutine neat_open_etot
