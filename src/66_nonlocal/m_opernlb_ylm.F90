@@ -477,7 +477,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 #ifdef MR_DEV
 !        ------
-         if (choice==25) then ! mixed derivative w.r.t. atm. pos and thwo q vectors (at q=0)
+         if (choice==25) then ! mixed derivative w.r.t. atm. pos and two q vectors (at q=0)
            !Use same notation as the notes for clarity
            ialpha=nalpha(idir)
            idelta=nbeta(idir)

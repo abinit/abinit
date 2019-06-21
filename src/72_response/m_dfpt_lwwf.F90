@@ -2731,6 +2731,9 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 !  < g | H^{\tau_{\kappa\alpha}_{\gamma\delta} | u_{i,k}^{(0)} >
 !-----------------------------------------------------------------------------------------------
 
+!tmp
+optlocal=0
+
 !Specific allocations
  ABI_ALLOCATE(ghatdisdqdq_c0m,(2,npw_k*dtset%nspinor,nband_k,3,3,natpert))
 

@@ -1387,7 +1387,7 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
  real(dp) :: lambda,weight
 
 !arrays
- integer,parameter :: ngamma(3,3)=reshape((/1,9,8,6,2,7,5,4,3/),(/3,3/))
+ integer,parameter :: ngamma(3,3)=reshape((/1,6,5,9,2,4,8,7,3/),(/3,3/))
  real(dp) :: enlout(1),svectout_dum(1,1)
  real(dp),ABI_CONTIGUOUS pointer :: gvnl1dqc_(:,:)
  real(dp), allocatable :: work(:,:,:,:)
