@@ -2160,7 +2160,7 @@ end if
 !1st g-gradient of internal strain tensor contribution
  if (lw_flexo==1.or.lw_flexo==4) then
    ABI_ALLOCATE(isdq_qgradhart,(2,natpert,3,3,3))
-   ABI_ALLOCATE(isdq_flg,(2,natpert,3,3,3))
+   ABI_ALLOCATE(isdq_flg,(natpert,3,3,3))
    isdq_flg=0
    rhor1_tmp=zero
    do iq1grad=1,nq1grad
@@ -2184,21 +2184,17 @@ end if
        
          call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
 
-!TODO: to adapt from here
-         elqgradhart(re,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
-         elqgradhart(im,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
-         elflexoflg(pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
+         isdq_qgradhart(re,iatpert,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
+         isdq_qgradhart(im,iatpert,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
+         isdq_flg(iatpert,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
 
-         blkflg(pert_efield(2,iefipert),pert_efield(1,iefipert), &
+         blkflg(pert_atdis(2,iatpert),pert_atdis(1,iatpert), &
        &        pert_strain(2,istrpert),pert_strain(1,istrpert), &
        &        q1grad(2,iq1grad),matom+8)=1           
      
        end do
-
      end do
-
    end do
-
  end if
 
  ABI_DEALLOCATE(rhor1_tmp)
@@ -2739,6 +2735,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      do iq1grad=1,3
        write(100,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
      & frwfdq(1,iq1grad,istrpert,iatpert), frwfdq(2,iq1grad,istrpert,iatpert)
+       write(101,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+     & isdq_qgradhart(re,iatpert,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert)), &
+     & isdq_qgradhart(im,iatpert,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))
      end do
    end do
  end do
