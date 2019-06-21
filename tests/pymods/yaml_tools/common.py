@@ -98,6 +98,28 @@ class BaseDictWrapper(object):
         for key in self.__dict__:
             yield key
 
+    def __len__(self):
+        return len(self.__dict__)
+
+    def __eq__(self, other):
+        try:
+            if len(self) != len(other):
+                return False
+
+            for (sk, si) in self.items():
+                if sk not in other or other[sk] != si:
+                    return False
+
+            for key in other:
+                if key not in self:
+                    return False
+            return True
+        except Exception:
+            return False
+
+    def __ne__(self, other):
+        return not self == other
+
     def keys(self):
         return self.__dict__.keys()
 
