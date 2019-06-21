@@ -1984,7 +1984,6 @@ end function qcache_make_room
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_dvdb/v1phq_complete
 !! NAME
 !! v1phq_complete
@@ -2106,6 +2105,11 @@ pcase_loop: &
      cnt = cnt + 1
      pcase_eq = idir_eq + (ipert_eq-1)*3
      if (debug) write(std_out,*)"idir_eq, ipert_eq, tsign",idir_eq, ipert_eq, tsign
+
+     !if (pflag(idir_eq, ipert_eq) == 0) then
+     !  write(msg, *)"pflag for idir_eq, ipert_eq", idir_eq, ipert_eq, "cannot be zero"
+     !  MSG_ERROR(msg)
+     !end if
 
      do ispden=1,nspden
        ! Get symmetric perturbation in G-space in workg_eq array.
@@ -5221,15 +5225,18 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
 !scalars
  integer,parameter :: master=0
  integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank
+#ifdef HAVE_NETCDF
+ integer :: ncid, ncerr
+#endif
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
  type(dvdb_t),target :: dvdb
 !arrays
- integer :: ngfft(18),rfdir(3)
+ integer :: ngfft(18), rfdir(3)
  integer,allocatable :: pflag(:,:)
  real(dp) :: qpt(3)
  integer,allocatable :: pertsy(:,:),rfpert(:),symq(:,:,:)
- real(dp),allocatable :: file_v1scf(:,:,:,:),symm_v1scf(:,:,:,:)
+ real(dp),allocatable :: file_v1scf(:,:,:,:),symm_v1scf(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
 
@@ -5258,17 +5265,37 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
  ABI_MALLOC(symq, (4,2,cryst%nsym))
  ABI_MALLOC(pertsy, (3,dvdb%mpert))
 
- unt = -1
+ unt = -1; ncid = nctk_noid
  if (len_trim(dump_path) /= 0 .and. my_rank == master) then
-   if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
-     MSG_ERROR(msg)
-   end if
    write(std_out,"(a)")sjoin("Will write potentials to:", dump_path)
+   if (endswith(dump_path, ".nc")) then
+#ifdef HAVE_NETCDF
+     NCF_CHECK(nctk_open_create(ncid, dump_path, xmpi_comm_self))
+     NCF_CHECK(dvdb%cryst%ncwrite(ncid))
+     ncerr = nctk_def_dims(ncid, [&
+       nctkdim_t("two", 2), nctkdim_t("three", 3), nctkdim_t("nfft", nfft), nctkdim_t("nspden", dvdb%nspden), &
+       nctkdim_t("natom3", cryst%natom * 3), nctkdim_t("nqpt", dvdb%nqpt)], defmode=.True.)
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("qpts", "dp", "three, nqpt")))
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("origin_v1scf", "dp", "two, nfft, nspden, natom3, nqpt")))
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("symm_v1scf", "dp", "two, nfft, nspden, natom3, nqpt")))
+     NCF_CHECK(nctk_set_datamode(ncid))
+     ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+       "symv1scf"], [symv1scf])
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts"), dvdb%qpts))
+#endif
+   else
+     if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
+       MSG_ERROR(msg)
+     end if
+   end if
  end if
+
+ ABI_CALLOC(work2, (2, nfft, dvdb%nspden, dvdb%natom3))
 
  do iqpt=1,dvdb%nqpt
    qpt = dvdb%qpts(:,iqpt)
-
    ! Examine the symmetries of the q wavevector
    call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dvdb%prtvol)
 
@@ -5296,6 +5323,20 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
    ! Complete potentials
    call v1phq_complete(cryst,qpt,ngfft,cplex,nfft,dvdb%nspden,dvdb%nsppol,dvdb%mpi_enreg,dvdb%symv1,pflag,symm_v1scf)
 
+#ifdef HAVE_NETCDF
+   if (ncid /= nctk_noid) then
+     work2 = zero
+     if (cplex == 1) work2(1,:,:,:) = file_v1scf(1,:,:,:)
+     if (cplex == 2) work2 = file_v1scf
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "origin_v1scf"), work2, start=[1,1,1,1,iqpt])
+     NCF_CHECK(ncerr)
+     if (cplex == 1) work2(1,:,:,:) = symm_v1scf(1,:,:,:)
+     if (cplex == 2) work2 = symm_v1scf
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "symm_v1scf"), work2, start=[1,1,1,1,iqpt])
+     NCF_CHECK(ncerr)
+   end if
+#endif
+
    ! Compare values.
    do pcase=1,3*cryst%natom
      idir = mod(pcase-1, 3) + 1; ipert = (pcase - idir) / 3 + 1
@@ -5303,11 +5344,10 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
 
      write(std_out,"(2(a,i0),2a)")"For idir: ",idir, ", ipert: ", ipert, ", qpt: ",trim(ktoa(qpt))
      do ispden=1,dvdb%nspden
-       !write(std_out,"(a,es10.3)")"  max(abs(f1-f2))", &
-       ! maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
+       !write(std_out,"(a,es10.3)")" max(abs(f1-f2))", maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
        call vdiff_print(vdiff_eval(cplex,nfft,file_v1scf(:,:,ispden,pcase),symm_v1scf(:,:,ispden,pcase),cryst%ucvol))
 
-       ! Debug: Write potentials to file.
+       ! Debug: write potentials to file.
        if (unt /= -1) then
          write(unt,*)"# q-point:", trim(ktoa(qpt))
          write(unt,*)"# idir: ",idir,", ipert: ",ipert,", ispden:", ispden
@@ -5337,6 +5377,7 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
    ABI_FREE(file_v1scf)
  end do
 
+ ABI_FREE(work2)
  ABI_FREE(pflag)
  ABI_FREE(rfpert)
  ABI_FREE(symq)
@@ -5345,6 +5386,11 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
  call dvdb%free()
 
  if (unt /= -1) close(unt)
+#ifdef HAVE_NETCDF
+ if (ncid /= nctk_noid) then
+   NCF_CHECK(nf90_close(ncid))
+ end if
+#endif
 
 end subroutine dvdb_test_v1complete
 !!***
@@ -5409,13 +5455,13 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 
  write(std_out,"(a)")sjoin(" Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(dvdb_ngqpt))
  if (len_trim(ddb_path) > 0) then
-   write(std_out,"(a)")sjoin(" Reading Zeff and einf from DDB file:", ddb_path)
+   write(std_out,"(a)")sjoin(" Reading Zeff and eps_inf from DDB file:", ddb_path)
    write(std_out,"(a)")sjoin(" dvdb_add_lr set to:", itoa(dvdb_add_lr))
  end if
 
  dvdb = dvdb_new(dvdb_path, comm)
  dvdb%debug = .False.
- ABI_CHECK(any(symv1 == [0, 1]), sjoin("invalid value of symv1:", itoa(symv1)))
+ ABI_CHECK(any(symv1 == [0, 1]), sjoin("Invalid value of symv1:", itoa(symv1)))
  dvdb%symv1 = symv1 == 1
  dvdb%add_lr = dvdb_add_lr
 
