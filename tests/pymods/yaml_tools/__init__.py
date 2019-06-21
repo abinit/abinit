@@ -6,7 +6,7 @@ from __future__ import print_function, division, unicode_literals
 
 import warnings
 from .errors import NoYAMLSupportError, UntaggedDocumentError
-from .common import string
+from .common import string, get_yaml_tag
 
 try:
     import yaml
@@ -83,7 +83,7 @@ class Document(object):
             if type(self._obj) in {dict, list, tuple, string}:
                 raise UntaggedDocumentError(self.start)
             else:
-                self._tag = type(self._obj).__name__
+                self._tag = get_yaml_tag(type(self._obj))
         else:
             raise NoYAMLSupportError('Try to access YAML document but YAML is'
                                      ' not available in this environment.')

@@ -22,6 +22,10 @@ else:
     basestring = basestring
 
 
+def get_yaml_tag(cls):
+    return getattr(cls, '_' + cls.__name__.lstrip('_') + '__yaml_tag', cls.__name__)
+
+
 def normalize_attr(string):
     return '_'.join(re_word.findall(string))  # .lower()
 

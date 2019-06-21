@@ -12,13 +12,8 @@ import yaml
 
 from inspect import ismethod
 from . import Loader
-from .common import BaseDictWrapper
+from .common import BaseDictWrapper, get_yaml_tag
 from .errors import NotAvailableTagError
-
-
-def yaml_tag_mangle(cls):
-    """Return the mangled name of the attribute __yaml_tag."""
-    return '_' + cls.__name__.lstrip('_') + '__yaml_tag'
 
 
 def yaml_map(cls):
@@ -29,7 +24,7 @@ def yaml_map(cls):
     It can be a classmethod or a normal method but in
     the latter case 'cls()' must be a valid initialisation.
     '''
-    tag = '!' + getattr(cls, yaml_tag_mangle(cls), cls.__name__)
+    tag = '!' + get_yaml_tag(cls)
 
     def constructor(loader, node):
         map = dict(loader.construct_mapping(node, deep=True))
@@ -55,7 +50,7 @@ def yaml_seq(cls):
     It can be a class method or a normal method but in
     the latter case 'cls()' must be a valid initialisation.
     '''
-    tag = '!' + getattr(cls, yaml_tag_mangle(cls), cls.__name__)
+    tag = '!' + get_yaml_tag(cls)
 
     def constructor(loader, node):
         seq = list(loader.construct_sequence(node, deep=True))
@@ -81,7 +76,7 @@ def yaml_scalar(cls):
     It can be a class method or a normal method but in
     the latter case 'cls()' must be a valid initialisation.
     '''
-    tag = '!' + getattr(cls, yaml_tag_mangle(cls), cls.__name__)
+    tag = '!' + get_yaml_tag(cls)
 
     def constructor(loader, node):
         scalar = loader.construct_scalar(node)
@@ -103,7 +98,7 @@ def auto_map(Cls):
     '''
         Automatically append methods from_map, to_map and __repr__ to a
         class intended to be used with YAML tag, provided __getitem__
-        and __setitem__ are defined. Attribute names are normalized to 
+        and __setitem__ are defined. Attribute names are normalized to
         be accessible as regular property even if the
         original name contained spaces or special characters. The original
         name can still be used in dict like access.
@@ -162,7 +157,7 @@ def yaml_implicit_scalar(cls):
     object of this same regex.
     '''
     yaml_scalar(cls)  # register the constructor and the representer
-    tag = '!' + getattr(cls, yaml_tag_mangle(cls), cls.__name__)
+    tag = '!' + get_yaml_tag(cls)
 
     re_pattern = cls.yaml_pattern
     if not hasattr(re_pattern, 'match'):
