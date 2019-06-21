@@ -6,7 +6,7 @@ from __future__ import print_function, division, unicode_literals
 
 import warnings
 from .errors import NoYAMLSupportError, UntaggedDocumentError
-from .tricks import string
+from .common import string
 
 try:
     import yaml
