@@ -381,10 +381,9 @@ module m_yaml_out
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine yaml_open_doc(label, comment, tag, file_d, string, stream, newline, width)
-    character(len=*),intent(in) :: label
+  subroutine yaml_open_doc(tag, comment, file_d, string, stream, newline, width)
+    character(len=*),intent(in) :: tag
     character(len=*),intent(in) :: comment
-    character(len=*),intent(in),optional :: tag
     integer,intent(in), optional :: file_d
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
@@ -398,17 +397,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    if(present(tag)) then
-      call interm%write('---'//' !'//trim(tag)//eol//'label')
-    else
-      call interm%write('---'//eol//'label')
-    end if
-    if(present(width)) then
-      if(width > 5) then
-        call interm%write(repeat(' ', width - 5))
-      end if
-    end if
-    call interm%write(': '//trim(label))
+    call interm%write('---'//' !'//trim(tag)//eol)
 
     if (comment /= '') then
       call interm%write(eol//'comment')
@@ -1376,7 +1365,7 @@ module m_yaml_out
 !!  the output destination.
 !!
 !! INPUTS
-!!  label <character(len=*)>=
+!!  tag <character(len=*)>=
 !!  comment <character(len=*)>=
 !!  pl <type(pair_list)>=
 !!  key_size <integer>=maximum storage size for the keys of pl
@@ -1402,13 +1391,13 @@ module m_yaml_out
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine yaml_single_dict(label, comment, pl, key_size, string_size, file_d, string, stream, tag, &
+  subroutine yaml_single_dict(tag, comment, pl, key_size, string_size, file_d, string, stream, &
 &                             int_fmt, real_fmt, string_fmt, newline, width)
     type(pair_list),intent(inout) :: pl
-    character(len=*),intent(in) :: label
+    character(len=*),intent(in) :: tag
     character(len=*),intent(in) :: comment
     integer,intent(in) :: key_size, string_size
-    character(len=*),intent(in),optional :: tag, int_fmt, real_fmt, string_fmt
+    character(len=*),intent(in),optional :: int_fmt, real_fmt, string_fmt
     integer,intent(in), optional :: file_d, width
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
@@ -1433,13 +1422,7 @@ module m_yaml_out
     SET_DEFAULT(sfmt, string_fmt, default_sfmt)
     SET_DEFAULT(w, width, 0)
 
-    call interm%write('---')
-    if(present(tag)) then
-      call interm%write(' !'//tag)
-    end if
-    call interm%write(eol)
-    call yaml_start_field(interm, 'label', width=width)
-    call interm%write(' '//label)
+    call interm%write('--- !'//tag)
 
     if (comment /= '') then
       call interm%write(eol)
