@@ -397,7 +397,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    call interm%write('---'//' !'//trim(tag)//eol)
+    call interm%write('---'//' !'//trim(tag))
 
     if (comment /= '') then
       call interm%write(eol//'comment')
