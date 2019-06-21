@@ -1792,7 +1792,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  if(e_components_dc%length() > 1) then
    call wrtout(iout, ch10, 'COLL')
-   call neat_energies(e_components_dc, iout, label='Etot DC')
+   call neat_energies(e_components_dc, iout, tag='EtotDC')
    call e_components_dc%free()
  end if
 
