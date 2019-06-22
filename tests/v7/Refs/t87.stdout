@@ -71,7 +71,7 @@ Merged successfully 14 files
  Number of q-points in DVDB: 8
 -P Number of CPUs for parallelism over perturbations: 1
 -P Number of perturbations treated by this CPU: 3
- Activate symmetrization of v1scf(r): no
+ Option for symmetrization of v1scf(r): 0
  List of q-points: min(10, nqpt)
 [ 1 ] [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 [ 2 ] [ 2.5000E-01,  0.0000E+00,  0.0000E+00]

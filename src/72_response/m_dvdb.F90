@@ -2074,10 +2074,10 @@ pcase_loop: &
    if (pflag(idir, ipert) /= 0) cycle ! This pcase is available
 
    ! Find symmetry which links to the perturbation requested (pcase)
-   call find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt, allow_g0=.false.)
-   if (isym_eq == -1) then
-     call find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt, allow_g0=.true.)
-   end if
+   call find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt, allow_g0=.true.)
+   !if (isym_eq == -1) then
+   !  call find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt, allow_g0=.true.)
+   !end if
 
    if (isym_eq == -1) then
      if (debug) write(std_out,*)"Cannot find isym eq for idir, ipert:", idir,ipert
