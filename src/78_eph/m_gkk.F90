@@ -647,12 +647,14 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
 
 !************************************************************************
 
- call wrtout(std_out, sjoin("Writing \delta V_{q,nu)(r) potentials to file:", path), do_flush=.True.)
+ call wrtout(std_out, sjoin("Writing Delta V_{q,nu)(r) potentials to file:", path), do_flush=.True.)
 
  comm = xmpi_comm_self
  call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:,1)); nfftf = product(ngfftf(1:3))
 
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+ call dvdb%print()
+ !call dvdb%list_perts([-1, -1, -1])
 
  ! Create netcdf file.
 #ifdef HAVE_NETCDF
@@ -686,22 +688,31 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
    call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
    ! Find the index of the q-point in the DVDB.
-   db_iqpt = dvdb%findq(qpt)
-
    ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
+   db_iqpt = dvdb%findq(qpt)
    if (db_iqpt /= -1) then
      if (prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
      ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
      ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
      call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
    else
-     MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
+     MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB file"))
    end if
+
+   !cplex = 2
+   !ABI_CALLOC(v1scf, (cplex, nfftf, db%nspden, 3*db%natom))
+   !do idir=1,3
+   !  do ipert=1,db%natom
+   !    ip = (ipert - 1) * 3 + idir
+   !    call db%v1r_long_range(qpt, ipert, idir, nfftf, ngfftf, v1scf(:,:,1,ip))
+   !    if (db%nspden == 2) v1scf(:,:,2,ip) = v1scf(:,:,1,ip)
+   !  end do
+   !end do
 
    do nu=1,dvdb%natom3
      ! v1qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
      ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
-     !v1qnu(2, nfftf, nspden, natom3), v1scf(cplex, nfftf, nspden, natom3)
+     ! v1qnu(2, nfftf, nspden, natom3), v1scf(cplex, nfftf, nspden, natom3)
      v1qnu(:, :, :, nu) = zero
      do ip=1,dvdb%natom3
        do ispden=1,dvdb%nspden
@@ -712,8 +723,7 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
              displ_red(2,ip,nu) * v1scf(1,:,ispden,ip) + displ_red(1,ip,nu) * v1scf(2,:,ispden,ip)
          else
            ! Gamma point. d(q) = d(-q)* --> d is real.
-           v1qnu(1, :, ispden, nu) = v1qnu(1, :, ispden, nu) + &
-             displ_red(1,ip,nu) * v1scf(1,:,ispden,ip)
+           v1qnu(1, :, ispden, nu) = v1qnu(1, :, ispden, nu) + displ_red(1,ip,nu) * v1scf(1,:,ispden,ip)
          end if
        end do
      end do

@@ -77,9 +77,9 @@ program mrgdv
  comm = xmpi_world
  my_rank = xmpi_comm_rank(comm)
 
-!Initialize memory profiling if it is activated
-!if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
-!note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if it is activated
+ ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
+ ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
 #endif

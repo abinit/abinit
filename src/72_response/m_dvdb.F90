@@ -950,26 +950,27 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin(" Have Born effective charges:", yesno(db%has_zeff))
  !write(std_out,"(a)")sjoin(" Have Dynamical quadrupoles:", yesno(db%has_quadrupoles))
  write(std_out,"(a)")sjoin(" Treatment of long-range part in V1scf:", itoa(db%add_lr))
+
  if (db%has_dielt) then
-   write(std_out, '(a,3(/,3es16.6))') ' Dielectric Tensor:', &
+   write(std_out, '(a,3(/,3es16.6))') ' Dielectric tensor in Cart coords:', &
      db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
      db%dielt(2,1), db%dielt(2,2), db%dielt(2,3), &
      db%dielt(3,1), db%dielt(3,2), db%dielt(3,3)
  end if
  if (db%has_zeff) then
-   write(std_out, '(a)') ' Effectives Charges: '
+   write(std_out, '(a)') ' Born effectives charges in Cart coords: '
    do iatom=1,db%natom
-     write(std_out,'(a,i0,2a,3(/,3es16.6))')' iatom: ', iatom, db%cryst%symbol_iatom(iatom), ch10, &
+     write(std_out,'(a,i0,1x,2a,3(/,3es16.6),a)')' iatom: ', iatom, ", type: ", db%cryst%symbol_iatom(iatom), &
        db%zeff(1,1,iatom), db%zeff(1,2,iatom), db%zeff(1,3,iatom), &
        db%zeff(2,1,iatom), db%zeff(2,2,iatom), db%zeff(2,3,iatom), &
-       db%zeff(3,1,iatom), db%zeff(3,2,iatom), db%zeff(3,3,iatom)
+       db%zeff(3,1,iatom), db%zeff(3,2,iatom), db%zeff(3,3,iatom), ch10
    end do
-   !write(std_out, '(a)') ' Effectives Charges before chneut: '
+   !write(std_out, '(a)') ' Born effectives charges before chneut: '
    !do iatom=1,db%natom
-   !  write(std_out,'(a,i0,2a,3(/,3es16.6))')' iatom: ', iatom, db%crystal%symbol_iatom(iatom), ch10, &
+   !  write(std_out,'(a,i0,1x,2a,3(/,3es16.6)),a')' iatom: ', iatom, ", type: ", db%crystal%symbol_iatom(iatom), &
    !    db%zeff_raw(1,1,iatom), db%zeff_raw(1,2,iatom), db%zeff_raw(1,3,iatom), &
    !    db%zeff_raw(2,1,iatom), db%zeff_raw(2,2,iatom), db%zeff_raw(2,3,iatom), &
-   !    db%zeff_raw(3,1,iatom), db%zeff_raw(3,2,iatom), db%zeff_raw(3,3,iatom)
+   !    db%zeff_raw(3,1,iatom), db%zeff_raw(3,2,iatom), db%zeff_raw(3,3,iatom), ch10
    !end do
  end if
  !if (db%has_quadrupoles) then
@@ -2935,7 +2936,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
 
  iqst = 0
  do iq_ibz=1,nqibz
-
    call cwtime(cpu, wall, gflops, "start")
    !
    ! Here all procs get all potentials for this IBZ q-point on the real-space FFT mesh.
@@ -3011,7 +3011,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
            ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
        end if
 
-
        !if (db%me_pert == 0) then
        !do imyp=1,db%my_npert
        !  ipc = db%my_pinfo(3, imyp)
@@ -3073,7 +3072,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
  ! TODO
  write_maxw = len_trim(outwr_path) > 0
- write_maxw = .False.
+ !write_maxw = .False.
  if (write_maxw) then
    ABI_CALLOC(maxw, (nrtot, db%natom3))
    do imyp=1,db%my_npert
@@ -5274,11 +5273,14 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
      NCF_CHECK(dvdb%cryst%ncwrite(ncid))
      ncerr = nctk_def_dims(ncid, [&
        nctkdim_t("two", 2), nctkdim_t("three", 3), nctkdim_t("nfft", nfft), nctkdim_t("nspden", dvdb%nspden), &
-       nctkdim_t("natom3", cryst%natom * 3), nctkdim_t("nqpt", dvdb%nqpt)], defmode=.True.)
+       nctkdim_t("natom3", cryst%natom * 3), nctkdim_t("mpert", dvdb%mpert), nctkdim_t("nqpt", dvdb%nqpt)], &
+       defmode=.True.)
      NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "symv1scf"]))
      NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("qpts", "dp", "three, nqpt")))
      NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("origin_v1scf", "dp", "two, nfft, nspden, natom3, nqpt")))
-     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("symm_v1scf", "dp", "two, nfft, nspden, natom3, nqpt")))
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("recons_v1scf", "dp", "two, nfft, nspden, natom3, nqpt")))
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("pertsy_qpt", "int", "three, mpert, nqpt")))
      NCF_CHECK(nctk_set_datamode(ncid))
      ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
        "symv1scf"], [symv1scf])
@@ -5332,8 +5334,9 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
      NCF_CHECK(ncerr)
      if (cplex == 1) work2(1,:,:,:) = symm_v1scf(1,:,:,:)
      if (cplex == 2) work2 = symm_v1scf
-     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "symm_v1scf"), work2, start=[1,1,1,1,iqpt])
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "recons_v1scf"), work2, start=[1,1,1,1,iqpt])
      NCF_CHECK(ncerr)
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "pertsy_qpt"), pertsy, start=[1,1,iqpt]))
    end if
 #endif
 
@@ -5596,6 +5599,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 
    ! Prepare FT interpolation using coarse q-mesh.
    outwr_path = strcat(dvdb_path, "_QCOARSE_WR.nc")
+   outwr_path = ""
    call coarse_dvdb%ftinterp_setup(coarse_ngqpt, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
 
    do iq=1,dvdb%nqpt
