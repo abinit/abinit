@@ -497,7 +497,7 @@ module m_xg
     xgBlock%cols = cols
     xgBlock%normal = 'n'
     if ( present(comm) ) xgBlock%spacedim_comm = comm
-    print *, "MAPIRANO"
+    !print *, "MAPIRANO"
   end subroutine xgBlock_map
 !!***
 

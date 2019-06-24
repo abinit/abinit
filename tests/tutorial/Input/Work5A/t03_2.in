@@ -7,10 +7,11 @@
 # npkpt 1 npband 8 npfft 8   # 64 MPI processes -1
 # npkpt 1 npband 16 npfft 4  # 64 MPI processes -2
 # npkpt 1 npband 16 npfft 8  # 128 MPI processes
+use_gemm_nonlop 1
 paral_kgb 1
 npband 2
 npfft 1
-#bandpp 2
+#bandpp 4
 
 #Plane wave basis
 ecut 8.
@@ -18,7 +19,7 @@ pawecutdg 10.
 
 #Self-consistent cycle parameters
 toldfe 1.d-5
-nstep 80
+nstep 40
 nline 4
 
 #K-points and symetries

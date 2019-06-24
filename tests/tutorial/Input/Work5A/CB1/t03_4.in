@@ -1,4 +1,4 @@
-#ABINIT - INPUT FILE
+#ABINIT - INPUT F
 #GOLD 31 ATOMS
 
 #Process distribution (parallelism) - TO BE ADAPTED
@@ -7,9 +7,8 @@
 # npkpt 1 npband 8 npfft 8   # 64 MPI processes -1
 # npkpt 1 npband 16 npfft 4  # 64 MPI processes -2
 # npkpt 1 npband 16 npfft 8  # 128 MPI processes
-#use_gemm_nonlop 1
 paral_kgb 1
-npband 1
+npband 4
 npfft 1
 #bandpp 4
 
@@ -51,7 +50,7 @@ typat 31*1
 znucl 56.
 chkprim 0
 
-wfoptalg 111
+wfoptalg 1
 istwfk 1
 #istwfk 2
 

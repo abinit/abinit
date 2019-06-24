@@ -1,0 +1,24 @@
+
+.Version 8.11.8 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
+
+.Copyright (C) 1998-2019 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Fri 21 Jun 2019.
+- ( at 17h27 )
+  
+- input  file    -> t03.in
+- output file    -> t03_x.out
+- root for input  files -> t03_xi
+- root for output files -> t03_xo
+ 
