@@ -116,7 +116,7 @@ def auto_map(Cls):
         >>> a['attr w/ spaces']
         82
         >>> # be careful, simple normalization imply collisions
-        >>> a['attr .w. --spaces']
+        ... a['attr .w. --spaces']
         82
     '''
     class AutoMap(Cls, BaseDictWrapper):

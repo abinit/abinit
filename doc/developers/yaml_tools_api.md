@@ -67,7 +67,8 @@ The new infrastructure has been designed with extensibility and ease-of-use in m
 From the perspective of the developer, adding support for the YAML-based approach requires two steps:
 
 1. Implement the output of the YAML document in Fortran using the pre-existent API.
-   Associate a **label** and possibly a **tag** to the new document.
+   Associate a **tag** to the new document. The tag identify the document and
+   its structure.
 
 2. Create a YAML configuration file defining the quantities that should be compared
    with the corresponding tolerances.
@@ -76,7 +77,7 @@ If new tags are needed to implement new documents, a third step is
 required to register the tag and the associated class in the
 python code. Further details about this procedure can be found below.
 An example will help clarify. Let's assume we want to implement the output of
-the `!ETOT` dictionary with the different components of the total free energy.
+the `!Etot` dictionary with the different components of the total free energy.
 <!--
 The workflow is split in two parts. The idea is to separate the computation
 from the composition of the document, and separate the composition of the
@@ -108,10 +109,10 @@ subroutine neat_etot(components, abiout)
 type(pair_list), intent(in) :: components
 integer, intent(in) :: abiout
 
-call yaml_single_dict("Etot", "", components, 35, 500, tag="ETOT", &
-                      width=20, file=abiout, real_fmt='(ES20.13)')
+call yaml_single_dict("Etot", "", components, 35, 500, width=20, &
+                      file=abiout, real_fmt='(ES20.13)')
  !
- ! 35 -> max size of the label, needed to extract from the pairlist,
+ ! 35 -> max size of the labels, needed to extract from the pairlist,
  ! 500 -> max size of the strings, needed to extract the comment
  !
  ! width -> width of the field name side, permit a nice alignment of the values
@@ -365,20 +366,18 @@ Is it a dictionary, a scalar or a list/sequence ?
 In the majority of the cases, one wants the `tester` to browse the children of the structure and apply
 the relevant constraints on it and to access attributes through their original name
 from the data. In this case, the simpler way to register a new tag is to use
-`yaml_auto_map`. For example to register a tag ETOT that simply register all
+`yaml_auto_map`. For example to register a tag Etot that simply register all
 fields from the data tree and let the tester check them with `tol_abs` or
 `tol_rel` we would put the following in *~abinit/tests/pymods/yaml_tools/structures/ground_state.py*:
 
 ```python
 @yaml_auto_map
 class Etot(object):
-    __yaml_tag = 'ETOT'
+    pass
 ```
 
-ETOT does not match the python naming conventions, so we use `Etot` as a class
-name, however since we want to use the tag `!ETOT` we use the special attribute
-`__yaml_tag` to declare our custom tag. If this attribute is not used the name
-of the class is the default tag.
+Now the name of the class "Etot" is associated with a tag recognized by the YAML
+parser.
 
 `yaml_auto_map` does several things for us:
 
@@ -403,8 +402,6 @@ from the data tree by the YAML parser and should return an instance of our class
 ```python
 @yaml_map
 class Etot(object):
-    __yaml_tag = 'ETOT'
-
     def __init__(self, kin, hart, xc, ew):
         self.kinetic = kin
         self.hartree = hart
@@ -434,9 +431,6 @@ In `~abinit/tests/pymods/yaml_tools/structure/ground_state.py`
 ```python
 @yaml_map
 class Etot(object):
-
-    __yaml_tag = 'ETOT'
-
     # same code as the previous example
 
     def check_components(self, tested):
@@ -585,7 +579,7 @@ subroutine neat_my_new_document(data_1, data_2,... , iout)
   type(stream_string) :: stream
 
   ! open the document
-  call yaml_open_doc('my label', 'some comments on the document', stream=stream)
+  call yaml_open_doc('MyTag', 'some comments on the document', stream=stream)
 
   ! fill the document
   ...
@@ -616,15 +610,17 @@ In a nutshell:
 
 * no savage usage of write statements!
 * In the majority of the cases, YAML documents should be opened and closed in the same routine!
-* A document with a tag is considered a standardized document i.e. a document for which there's
-  an official commitment from the ABINIT community to maintain backward compatibility.
-  Official YAML documents may be used by third-party software to implement post-processing tools.
 * To be discussed: `crystal%yaml_write(stream, indent=4)`
 * `tol_rel`, `tol_abs` etc are now reserved keywords that cannot be used in YAML documents. This will confuse the parser.
   We should add a check in the Fortran code and stop the code in a reserved keyword is used. 
 * One should also promote the use of python-friendly keys: white space replaced by underscore, no number as first character,
   tags should be CamelCase
-* Is Yaml mode supported only for main output files? What happens to the other files in the files_to_test section?
+* Is Yaml mode supported only for main output files? What happens to the other files in the files\_to\_test section?
+<!-- Tags are now mandatory for documents
+* A document with a tag is considered a standardized document i.e. a document for which there's
+  an official commitment from the ABINIT community to maintain backward compatibility.
+  Official YAML documents may be used by third-party software to implement post-processing tools.
+-->
 
 <!--
 ## Further developments

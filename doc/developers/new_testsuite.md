@@ -104,8 +104,7 @@ to the total free energy using:
 
 
 ```yaml
---- !ETOT
-label               : Etot
+--- !Etot
 comment             : Components of total free energy (in Hartree)
 Kinetic energy      :  5.279019930263079807E+00
 Hartree energy      :  8.846303409910728499E-01
@@ -297,7 +296,7 @@ Document tree
 : The YAML document is a dictionary that can be treated as a tree
   whose nodes have a label and leaf are scalars or special data structures
   identified by a tag (note however that not all tags mark a leaf).
-  The top-level node is the YAML document.
+  The top-level nodes are the YAML documents and their labels are the names of their tag.
 
 Config tree
 : The YAML configuration also takes the form of a tree where nodes are
@@ -334,10 +333,9 @@ Iteration state
 
 A few conventions on documents writing
 
-: The *label* field appears in all data document. It should be a unique identifier
-  at the scale of an _iteration state_. The tag is not necessarily unique, it
-  describes the structure of the document and there is no need to use it unless
-  special logic have to be implemented for the document. The *comment* field is
+: All data document have a **tag**. It should be a unique identifier
+  at the scale of an _iteration state_. It also describes the structure of the document
+  like other uses of tags but in this case it identify the document. The *comment* field is
   optional but it is recommended especially when the purpose of the document is not obvious.
 
 ### A more complicated example
@@ -348,8 +346,7 @@ that represents the results stored in the corresponding Fortran datatype used in
 The YAML document is now given by:
 
 ```yaml
----
-label     : results_gs
+--- !ResultsGS
 comment   : Summary of ground states results.
 natom     :        5
 nsppol    :        1
@@ -388,7 +385,7 @@ Etot:
         tol_abs: 1.0e-5
         tol_rel: 1.0e-10
 
-results_gs:
+ResultsGS:
     tol_rel: 1.0e-8
 ```
 
@@ -401,7 +398,7 @@ In this case, it makes more sense to check that all the residues are below a cer
 This is what the **ceil** constraint is for:
 
 ```yaml
-results_gs:
+ResultsGS:
     tol_rel: 1.0e-8
     convergence:
         ceil: 3.0e-7
@@ -429,7 +426,7 @@ and the output arrays. Since we also want to apply this constraint to
 `cartesian_force`, we will define the constraint at the top level of `results_gs`.
 
 ```yaml
-results_gs:
+ResultsGS:
     tol_rel: 1.0e-8
     tol_vec: 1.0e-5
     convergence:
@@ -488,7 +485,7 @@ lda:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-10
 
-    results_gs:
+    ResultsGS:
         tol_rel: 1.0e-8
         tol_vec: 1.0e-5
         convergence:
@@ -515,7 +512,7 @@ lda:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-10
 
-    results_gs:
+    ResultsGS:
         tol_rel: 1.0e-8
         tol_vec: 1.0e-5
         convergence:
@@ -525,7 +522,7 @@ dmft:
     tol_abs: 2.0e-8
     tol_rel: 5.0e-9
 
-    results_gs:
+    ResultsGS:
         convergence:
             ceil: 1.0e-6
             diffor:
@@ -703,9 +700,8 @@ object can be referred as `this` and the reference object can be referred as `re
 
 
 **callback** requires a bit of python coding since it will invoke a method of the
-structure. Suppose we have a tag `!AtomSpeeds` associated
-to a class `AtomSpeeds` and to a document labeled `Atomic speeds` in the data
-tree. The `AtomSpeeds` class have a method `not_going_anywhere` that checks
+structure. Suppose we have a tag `!AtomSpeeds` associated to a document and
+a class `AtomSpeeds`. The `AtomSpeeds` class have a method `not_going_anywhere` that checks
 that the atoms are not going to try to leave the box. We would like to
 pass some kind of tolerance `d_min` the minimal distance atoms can approach
 the border of the box. The signature of the method have to be
