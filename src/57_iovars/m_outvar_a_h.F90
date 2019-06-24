@@ -605,6 +605,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dmft_iter
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_iter','INT',0)
 
+! intarr(1,:)=dtsets(:)%dmft_kspectralfunc
+! call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_kspectralfunc','INT',0)
+
  dprarr(1,:)=dtsets(:)%dmft_mxsf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_mxsf','DPR',0)
 
