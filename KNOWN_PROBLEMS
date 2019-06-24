@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.10.2 is for production
+The present release ABINITv8.10.3 is for production
 
 0. List of platforms
 1. Batteries of tests
@@ -14,7 +14,7 @@ The present release ABINITv8.10.2 is for production
 ================================================================
 0. Platforms
 
-For ABINITv8.10.1, list closed on 2019 01 17
+For ABINITv8.10.3, list closed on 2019 06 24
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
