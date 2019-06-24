@@ -7,13 +7,19 @@ authors: TC
 
 This page gives an overview of the internal implementation in order 
 to facilitate future developments and extensions.
+In the first part we discuss how to write new Yaml documents using the low-level Fortran API.
+In the second part, we describe the python implementation and the steps required to 
+register a new Yaml document in the framework.
+Finally, we provide recommendations for the name of the variables used in Yaml documents in 
+order to improve readability and facilitate the integration between Yaml documents and the python code.
 
 ## Fortran API
 
-Several low-level tools have already been implemented:
-As concerns the Fortran implementation, we provide:
+The low-level Fortran API consists of the following modules:
 
-- a Fortran module for constructing dictionaries mapping strings to values.
+**m_pair_list.F90**:
+
+: a Fortran module for constructing dictionaries mapping strings to values.
   Internally, the dictionary is implemented in C in terms of a list of key-value pairs.
   The pair list can dynamically hold either real, integer or string values.
   It implements the basic getter and setter methods and an iterator system to allow looping
@@ -24,27 +30,147 @@ As concerns the Fortran implementation, we provide:
   given that there will never be a lot of elements in the table.
   -->
 
-- a Fortran module providing tools to manipulate variable length
-  strings with a file like interface (*stream* object)
+**m_stream_string.F90**:
 
-- a Fortran module based on the two previous modules providing the API
-  to easily output YAML documents from Fortran.
+:  a Fortran module providing tools to manipulate variable length
+  strings with a file like interface (**stream** object)
+
+**m_yaml_out.F90:**
+
+:  a Fortran module to easily output YAML documents from Fortran.
   This module represents the main entry point for client code and may be used
   to implement methods to output Fortran objects.
   It provides basic routines to produce YAML documents based on a mapping at the root
-  and containing well formatted
-  (as human readable as possible and valid YAML) 1D and 2D arrays of numbers
+  and containing well formatted (as human readable as possible and valid YAML) 1D and 2D arrays of numbers
   (integer or real), key-value mapping (using pair lists), list of key-value
-  mapping and scalar fields.  Routines support tags for specifying special data structures.
+  mapping and scalar fields.
+  Routines support tags for specifying special data structures.
 
-- a higher level module called *m_neat* (NEw Abinit Test system)
-  provides Fortran procedures to create specific
+**m_neat.F90** (NEw Abinit Test system):
+
+: a higher level module providing Fortran procedures to create specific
   documents associated to important physical properties. Currently routines
-  for total energy components and ground state general results are implemented.
+  for total energy components and ground state results are implemented.
 
+<!--
 A more detailed example is provided [below](#creating-a-new-document-in-fortran).
+The new infrastructure has been designed with extensibility and ease-of-use in mind.
+-->
+From the perspective of the developer, adding a new YAML document requires three steps:
 
-As concerns the python implementation:
+1. Implement the output of the YAML document in Fortran using the pre-existent API.
+   Associate a **unique tag** to the new document.
+
+2. register the tag and the associated class in the python code. 
+   Further details about this procedure can be found below.
+
+3. Create a YAML configuration file defining the quantities that should be compared
+   with the corresponding tolerances.
+
+An example will help clarify. Let's assume we want to implement the output of
+the `!ETOT` document with the different components of the total free energy.
+<!--
+The workflow is split in two parts. The idea is to separate the computation
+from the composition of the document, and separate the composition of the
+document from the actual rendering.
+-->
+The Fortran code that builds the list of (key, values) entries will look like:
+**MG: The Fortran examples should be refactored and merged with the text in Creating a new document in Fortran**
+
+```fortran
+! Import modules
+use m_neat, only: neat_etot
+use m_pair_list, only: pair_list
+
+real(dp) :: etot
+type(pair_list) :: e_components  ! List of (key, value) entries
+
+call e_components%set("comment", s="Total energie and its components")
+call e_components%set("Total Energy", r=etot)
+
+! footer of the routine, once all data have been stored
+call neat_etot(e_components, unit)
+```
+
+In *47_neat/m\_neat.F90* we will implement *neat\_etot*:
+
+```fortran
+subroutine neat_etot(components, unit)
+
+type(pair_list), intent(in) :: components
+integer, intent(in) :: unit
+
+call yaml_single_dict("Etot", "", components, 35, 500, tag="ETOT", &
+                      width=20, file=unit, real_fmt='(ES20.13)')
+ !
+ ! 35 -> max size of the label, needed to extract from the pairlist,
+ ! 500 -> max size of the strings, needed to extract the comment
+ !
+ ! width -> width of the field name side, permit a nice alignment of the values
+
+end subroutine neat_etot
+```
+
+### Creating a new document in Fortran
+
+Developers are invited to browse the sources of `m_neat` and `m_yaml_out` to
+have a comprehensive overview of the available tools. Indeed the routines are
+documented and commented and creating a hand-written reference is likely to go
+out of sync quicker than on-site documentation. Here we show a little example to
+give the feeling of the process.
+
+The simplest way to create a YAML document have been introduced above with the
+use of `yaml_single_dict`. However this method is limited to scalars only. It is
+possible to put 1D and 2D arrays, dictionaries and even tabular data.
+The best way to create a new document is to have a routine `neat_my_new_document` 
+that will take all required data in argument and will do all the formatting work at once.
+This routine will declare a `stream_string` object to build the YAML document
+inside, open the document with `yaml_open_doc`, fill it, close it with
+`yaml_close_doc` and finally print it with `wrtout_stream`.
+Here come a basic skeleton of `neat` routine:
+
+```fortran
+subroutine neat_my_new_document(data_1, data_2,... , iout)
+  ! declare your pieces of data... (arrays, numbers, pair_list...)
+  ...
+  integer,intent(in) :: iout  ! this is the output file descriptor
+!Local variables-------------------------------
+  type(stream_string) :: stream
+
+  ! open the document
+  call yaml_open_doc('my label', 'some comments on the document', stream=stream)
+
+  ! fill the document
+  ...
+
+  ! close and output the document
+  call yaml_close_doc(stream=stream)
+  call wrtout_stream(stream, iout)
+
+end subroutine neat_my_new_document
+```
+
+Suppose we want a 2D matrix of real number with the tag `!NiceMatrix` in our document
+for the field name 'that matrix' we will add the following to the middle section:
+
+```fortran
+call yaml_add_real2d('that matrix', dimension_1, dimension_2, mat_data, &
+                     tag='NiceMatrix', stream=stream)
+```
+
+Other `m_yaml_out` routines provide a similar interface: first the label, then the
+data and its structural metadata, then a bunch of optional arguments for
+formatting, adding tags, tweaking spacing etc.
+
+## Python API
+
+<!--
+Roughly speaking, one can group the python modules into three different parts:
+
+- the *fldiff* algorithm
+- the interface with the PyYAML library and the parsing of the output data
+- the parsing of the YAML configuration file and the testing logic
+-->
 
 - The fldiff algorithm has been slightly modified to extract YAML
   documents from the output file and store them for later treatment.
@@ -63,69 +189,6 @@ As concerns the python implementation:
 - A command line tool `testtools.py` to allow doing different manual actions
   (see Test CLI)
 
-The new infrastructure has been designed with extensibility and ease-of-use in mind.
-From the perspective of the developer, adding support for the YAML-based approach requires two steps:
-
-1. Implement the output of the YAML document in Fortran using the pre-existent API.
-   Associate a **label** and possibly a **tag** to the new document.
-
-2. Create a YAML configuration file defining the quantities that should be compared
-   with the corresponding tolerances.
-
-If new tags are needed to implement new documents, a third step is
-required to register the tag and the associated class in the
-python code. Further details about this procedure can be found below.
-An example will help clarify. Let's assume we want to implement the output of
-the `!ETOT` dictionary with the different components of the total free energy.
-<!--
-The workflow is split in two parts. The idea is to separate the computation
-from the composition of the document, and separate the composition of the
-document from the actual rendering.
--->
-The Fortran code will look like:
-
-```fortran
-! Import modules
-use m_neat, only: neat_etot
-use m_pair_list, only: pair_list
-...
-
-real(dp) :: etot
-type(pair_list) :: e_components  ! List of (key, value) entries
-
-call e_components%set("comment", s="Total energie and its components")
-call e_components%set("Total Energy", r=etot)
-
-! footer of the routine, once all data have been stored
-call neat_etot(e_components)
-```
-
-In *47_neat/m\_neat.F90* we will implement *neat\_etot*:
-
-```fortran
-subroutine neat_etot(components, abiout)
-
-type(pair_list), intent(in) :: components
-integer, intent(in) :: abiout
-
-call yaml_single_dict("Etot", "", components, 35, 500, tag="ETOT", &
-                      width=20, file=abiout, real_fmt='(ES20.13)')
- !
- ! 35 -> max size of the label, needed to extract from the pairlist,
- ! 500 -> max size of the strings, needed to extract the comment
- !
- ! width -> width of the field name side, permit a nice alignment of the values
-
-end subroutine neat_etot
-```
-
-## Python API
-
-Roughly speaking, one can group the python modules into three different parts:
-
-- the *fldiff* algorithm
-- the interface with the PyYAML library and the parsing of the output data
-- the parsing of the YAML configuration file and the testing logic
 
 ### fldiff algorithm
 
@@ -144,10 +207,12 @@ The `__init__.py` module exposes the public API that consists in:
 
 - the `yaml_parse` function that parses documents from the output files
 - the `Document` class that gives an interface to an extracted document with its metadata.
+
 <!--
 - flags `is_available` (`True` if both PyYAML and Numpy are available) and
   `has_pandas` (`True` if Pandas is available)
 -->
+
 - *register_tag.py* defines tools to register tags.
    See below for further details.
 
@@ -558,60 +623,57 @@ class YAMLComplex(complex):
         return cls(scal.replace('i', 'j').replace(' ', ''))
 ```
 
-### Creating a new document in Fortran
+## Recommend conventions for Yaml documents
 
-Developers are invited to browse the sources of `m_neat` and `m_yaml_out` to
-have a comprehensive overview of the available tools. Indeed the routines are
-documented and commented and creating a hand-written reference is likely to go
-out of sync quicker than on-site documentation. Here we show a little example to
-give the feeling of the process.
+This section discusses the basic conventions that should be followed when writing YAML documents in Fortran.
+Note that these conventions are motivated by technical aspects that will facilitate the integration with the
+python language as well as the implementation of post-processing tools.
 
-The simplest way to create a YAML document have been introduced above with the
-use of `yaml_single_dict`. However this method is limited to scalars only. It is
-possible to put 1D and 2D arrays, dictionaries and even tabular data.
-The best way to create a new document is to have a routine `neat_my_new_document` 
-that will take all required data in argument and will do all the formatting work at once.
-This routine will declare a `stream_string` object to build the YAML document
-inside, open the document with `yaml_open_doc`, fill it, close it with
-`yaml_close_doc` and finally print it with `wrtout_stream`.
-Here come a basic skeleton of `neat` routine:
+* The tag name should use CamelCase so that one can directly map tag names to python classes
+  that are usually given following this convention (see also [PEP8](https://www.python.org/dev/peps/pep-0008/)).
 
-```fortran
-subroutine neat_my_new_document(data_1, data_2,... , iout)
-  ! declare your pieces of data... (arrays, numbers, pair_list...)
-  ...
-  integer,intent(in) :: iout  ! this is the output file descriptor
-!Local variables-------------------------------
-  type(stream_string) :: stream
+*  The tag name should be self-explanatory and **unique** inside the document.
 
-  ! open the document
-  call yaml_open_doc('my label', 'some comments on the document', stream=stream)
+* Whenever possible, the keywords should be a **valid python identifier**. This means one should avoid white spaces
+  as much possible and avoid names starting with non-alphabetic characters. White spaces should be replaced by
+  underscores. Prefer lower-case names whenever possible.
 
-  ! fill the document
-  ...
+* By default, quantities are supposed to be given in **atomic units**. If the document contains quantities given
+  in other units, we recommended to encode this information in the name using the syntax: `foo_eV`.
 
-  ! close and output the document
-  call yaml_close_doc(stream=stream)
-  call wrtout_stream(stream, iout)
+*  Avoid names starting with an underscore because these names are reserved for future additions 
+   in the python infrastructure.
 
-end subroutine neat_my_new_document
+* `tol_abs`, `tol_rel`, `tol_vec`, `equation`, `equations`, `callback` and `callbacks` are reserved 
+   keywords that shall not be used in Yaml documents.
+
+* The *comment* field is optional but it is recommended especially when the purpose of the document is not obvious.
+
+An example of well-formed document
+
+```yaml
+--- !EnergyTerms
+comment             : Components of total free energy (in Hartree)
+kinetic_energy      :  5.279019930263079807E+00
+hartree_energy      :  8.846303409910728499E-01
+xc_energy           : -4.035286123400158687E+00
+total_energy_eV     : -2.756386620520307815E+02
+...
 ```
 
-Suppose we want a 2D matrix of real number with the tag `!NiceMatrix` in our document
-for the field name 'that matrix' we will add the following to the middle section:
+An example of Yaml document that does not follow our guidelines:
 
-```fortran
-call yaml_add_real2d('that matrix', dimension_1, dimension_2, mat_data, &
-                     tag='NiceMatrix', stream=stream)
+```yaml
+--- !ETOT
+Kinetic energy      :  5.279019930263079807E+00
+Hartree energy      :  8.846303409910728499E-01
+_XC energy          : -4.035286123400158687E+00
+Total energy(eV)    : -2.756386620520307815E+02
+equation            : 1 + 1 = 3
+...
 ```
 
-Other `m_yaml_out` routines provide a similar interface: first the label, then the
-data and its structural metadata, then a bunch of optional arguments for
-formatting, adding tags, tweaking spacing etc.
-
-## Coding rules
-
-This section discusses the basic rules that should be followed when writing YAML documents in Fortran.
+<!--
 In a nutshell:
 
 * no savage usage of write statements!
@@ -625,6 +687,13 @@ In a nutshell:
 * One should also promote the use of python-friendly keys: white space replaced by underscore, no number as first character,
   tags should be CamelCase
 * Is Yaml mode supported only for main output files? What happens to the other files in the files_to_test section?
+
+
+: The *label* field appears in all data document. It should be a unique identifier
+  at the scale of an _iteration state_. The tag is not necessarily unique, it
+  describes the structure of the document and there is no need to use it unless
+  special logic have to be implemented for the document. 
+-->
 
 <!--
 ## Further developments

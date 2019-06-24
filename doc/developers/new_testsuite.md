@@ -41,7 +41,7 @@ Ideally, we would like to be able to
 * use **different tolerances** for particular quantities that are selected by keyword
 * be able to replace the check on the absolute and relative difference with a **threshold check**
   (is this quantity smaller that the give threshold?)
-* have some sort of syntax to apply different rules depending on the **iteration state** e.g. the dataset index.
+* have some sort of syntax to apply different rules depending on the **iteration state** e.g. the dataset index
 * execute python code (**callbacks**) that operates on the data to perform more advanced tests requiring 
   some sort of post-processing
 * provide an easy-to-use **declarative interface** that allows developers to define the logic
@@ -90,7 +90,7 @@ test suite, the syntax used to define tests and the modifications required to ex
 ## Implementation details
 
 For reasons that will be clear later, implementing smart algorithms requires metadata and context.
-In other words the python code needs to have some basic understanding of the meaning of the numerical values 
+In other words, the python code needs to have some basic understanding of the meaning of the numerical values 
 extracted from the output file and must be able to locate a particular property by name or by its "position"
 inside the output file.
 For this reason, the most important physical results are now written in the main output file (*ab_out*)
@@ -237,9 +237,11 @@ Etot:
 
 The `tol_abs` keyword defines the **constraint** that will applied to **all the children** of the `Etot` document.
 In other words, all the entries in the `Etot` dictionary will be compared with 
-an absolute tolerance of 1.0e-7 and a default value for the relative difference `tol_rel`.
-In order to pass the test, all the absolute differences must be smaller that `tol_abs`.
+an absolute tolerance of 1.0e-7 and the **default value** for the relative difference `tol_rel` as this 
+tolerance is not explicitly specified.
+
 <!--
+In order to pass the test, all the absolute differences must be smaller that `tol_abs`.
 If this condition is not fulfilled, the test will fail and python will list the entries that did not pass the test.
 -->
 
@@ -263,8 +265,8 @@ Etot:
 ```
 
 However the `tol_abs` constraint defined in `Etot` is _inherited_ by `Total
-energy (eV)` which mean we will not only check `tol_rel` with a tolerance of
-1.0e-10 but also `tol_abs` with a tolerance of 1.0e-7. Most of the time it is
+energy (eV)` which means that the comparison will be performed with a relative tolerance `tol_rel` of
+1.0e-10 **and** and absolute tolerance `tol_abs` of 1.0e-7. Most of the time it is
 what we need even though here it's not. So we will just use a different
 tolerance for `tol_abs` in `Total energy (eV)`.
 -->
@@ -280,6 +282,19 @@ Etot:
 Now we achieve the same relative precision and the test does not fail because
 of the looser absolute precision of the total energy in eV.
 -->
+
+To change the default value for the relative difference, it is sufficient to specify the 
+constraint outside of the document:
+
+```yaml
+tol_rel: 1.0e-2
+
+Etot:
+    tol_abs: 1.0e-7
+    Total energy (eV):
+        tol_abs: 1.0e-5
+```
+
 
 ### Basic concepts
 
@@ -302,7 +317,7 @@ Document tree
 Config tree
 : The YAML configuration also takes the form of a tree where nodes are
   **specializations** and its leaf represent **parameters** or **constraints**.
-  Its structure match the structure of the **document tree** thus one can define rules
+  Its structure matches the structure of the **document tree** thus one can define rules
   (constraint and parameters) that will be applied to a specific part of the **document tree**.
 
 Specialization
@@ -321,7 +336,7 @@ Iteration state
   in the run (e.g. idtset = 2, itimimage = not used, image = 5, time = not used).
   It gives information on the current state of the run. Documents are implicitly
   associated to their iteration state. This information is made available to
-  the test engine through specialized YAML documents using the `IterStart` tag.
+  the test engine through specialized YAML documents with `IterStart` tag.
 
 !!! tip
 
@@ -332,6 +347,7 @@ Iteration state
     and type `show *`. You can then type for example `show tol_eq` to learn more
     about a specific constraint or parameter.
 
+<!--
 A few conventions on documents writing
 
 : The *label* field appears in all data document. It should be a unique identifier
@@ -339,6 +355,7 @@ A few conventions on documents writing
   describes the structure of the document and there is no need to use it unless
   special logic have to be implemented for the document. The *comment* field is
   optional but it is recommended especially when the purpose of the document is not obvious.
+-->
 
 ### A more complicated example
 
@@ -496,9 +513,9 @@ lda:
 
 ```
 
-By putting the configuration under the `lda` node, we specify that these rules
+By inserting the configuration options under the `lda` node, we specify that these rules
 apply only to the first dataset. We will then create a new `dmft` node and create a
-configuration following the same procedure as before. 
+configuration following the same procedure as before.
 We end up with something like this:
 
 ```yaml
@@ -558,18 +575,18 @@ states of iterations without having to rewrite everything from scratch.
 A filter can specify all currently known iterators: **dtset**, **timimage**, **image**, and **time**.
 For each iterator, a set of integers can be defined with three different methods:
 
-- a single integer value (`dtset: 1`)
-- a YAML list of values (`dtset: [1, 2, 5]`)
+- a single integer value e.g. `dtset: 1`
+- a YAML list of values e.g. `dtset: [1, 2, 5]`
 - a mapping with the optional members "from" and "to" specifying the boundaries (both
-  included) of the integer interval (`dtset: {from: 1, to: 5}`). If "from" is omitted, the default is 1. If
-  "to" is omitted the default is no upper boundary. 
+  included) of the integer interval e.g. `dtset: {from: 1, to: 5}`. 
+  If "from" is omitted, the default is 1. If "to" is omitted the default is no upper boundary. 
 
 ### Filter overlapping
 
-Several filters can apply to the same document if they overlap. However, they
-are required to have a trivial order of *specificity*. Though the first example
-below is fine because _f2_ is included (i.e. is more specific) in _f1_ but the
-second example will raise an error because _f4_ is not included in _f3_.
+Several filters can apply to the same document even when they overlap. Note, however, 
+that overlapping filters must have a trivial order of *specificity*.
+In other words, one filter must be a subset of the other one.
+The example below is OK because _f2_ is included in _f1_  i.e. is more specific:
 
 ```yaml
 # this is fine
@@ -588,6 +605,8 @@ filters:
         - 5
         - 6
 ```
+
+whereas this second example will raise an error because _f4_ is not included in _f3_.
 
 ```yaml
 # this will raise an error
