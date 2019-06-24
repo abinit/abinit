@@ -1,3 +1,13 @@
+/*
+ * Author: Theo Cavignac
+ * Implementation of a simple pair list structure.
+ * Unless you really know what you are doing you probably should
+ * look at the Fortran interface instead: m_pair_list.F90
+ *
+ * Possible improvement:
+ * - Add new type to be stored
+ * - Optimise memory allocation
+ */
 #include <stdlib.h>
 
 #include <stdio.h>

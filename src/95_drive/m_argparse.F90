@@ -41,7 +41,7 @@ module m_argparse
  use m_io_tools,        only : open_file
  use m_cppopts_dumper,  only : dump_cpp_options
  use m_optim_dumper,    only : dump_optim
- use m_fstrings,        only : atoi, itoa, firstchar, startswith, sjoin
+ use m_fstrings,        only : atoi, atof, itoa, firstchar, startswith, sjoin
  use m_time,            only : str2sec
  use m_libpaw_tools,    only : libpaw_log_flag_set
 
@@ -54,6 +54,7 @@ module m_argparse
  interface get_arg
    module procedure get_arg_int
    module procedure get_arg_dp
+   module procedure get_arg_str
  end interface get_arg
 
  public :: get_arg_list    ! Parse array argument from command line. Return exit code.
@@ -77,15 +78,18 @@ module m_argparse
 
  type,public :: args_t
 
-   integer :: exit=0
+   integer :: exit = 0
      ! /=0 to exit after having parsed the command line options.
 
-   integer :: abimem_level=0
+   integer :: abimem_level = 0
 
-   integer :: dry_run=0
+   integer :: dry_run = 0
      ! /= 0 to exit after the validation of the input file.
 
-   character(len=500) :: cmdline=""
+   real(dp) :: abimem_limit_mb = 20_dp
+     ! Optional memory limit in Mb. used when abime_level == 3
+
+   character(len=500) :: cmdline = ""
      ! The entire command line
 
  end type args_t
@@ -156,6 +160,10 @@ type(args_t) function args_parser() result(args)
     else if (arg == "--abimem-level") then
       call get_command_argument(ii + 1, arg)
       args%abimem_level = atoi(arg)
+
+    else if (arg == "--abimem-limit-mb") then
+      call get_command_argument(ii + 1, arg)
+      args%abimem_limit_mb = atof(arg)
 
     else if (arg == "-j" .or. arg == "--omp-num-threads") then
       call get_command_argument(ii+1, arg)
@@ -229,6 +237,7 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"-d, --dry-run              Validate input file and exit."
         write(std_out,*)"-j, --omp-num-threads      Set the number of OpenMp threads."
         write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING"
+        write(std_out,*)"--abimem-limit-mb NUM      Log malloc/free only if size > limit in Megabytes. Requires abimem-level 3"
         write(std_out,*)"--ieee-halt                Halt the code if one of the *usual* IEEE exceptions is raised."
         write(std_out,*)"--ieee-signal              Signal the occurrence of the *usual* IEEE exceptions."
         write(std_out,*)"--fft-ialltoall[=bool]     Use non-blocking ialltoall in MPI-FFT (used only if ndat>1 and MPI3)."
@@ -363,7 +372,7 @@ end function parse_yesno
 !!****f* m_argparse/get_arg_int
 !! NAME
 !!  get_arg_int
-
+!!
 !! FUNCTION
 !!  Parse scalar argument from command line. Return exit code.
 !!
@@ -371,7 +380,7 @@ end function parse_yesno
 !!  argname= Argument name
 !!  [default]= Default value.
 !!  [exclude]= argname and exclude are mutually exclusive.
-!!  
+!!
 !! OUTPUT
 !!  argval= Value of argname
 !!  msg= Error message
@@ -414,7 +423,7 @@ integer function get_arg_int(argname, argval, msg, default, exclude) result(ierr
          ierr = ierr + 1; msg = sjoin(msg, ch10, iomsg)
        end if
      else
-       ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument") 
+       ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument")
      end if
    end if
  end do
@@ -438,7 +447,7 @@ end function get_arg_int
 !!  argname= Argument name
 !!  [default]= Default value
 !!  [exclude]= argname and exclude are mutually exclusive.
-!! 
+!!
 !! OUTPUT
 !!   argval= Value of argname
 !!   msg= Error message
@@ -478,8 +487,8 @@ integer function get_arg_dp(argname, argval, msg, default, exclude) result(ierr)
        if (istat /= 0) then
          ierr = ierr + 1; msg = sjoin(msg, ch10, iomsg)
        end if
-     else 
-       ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument") 
+     else
+       ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument")
      end if
    end if
  end do
@@ -494,6 +503,71 @@ end function get_arg_dp
 
 !----------------------------------------------------------------------
 
+!!****f* m_argparse/get_arg_str
+!! NAME
+!!  get_arg_str
+!!
+!! FUNCTION
+!!  Parse scalar argument from command line. Return exit code.
+!!
+!! INPUTS
+!!  argname= Argument name
+!!  [default]= Default value
+!!  [exclude]= argname and exclude are mutually exclusive.
+!!
+!! OUTPUT
+!!   argval= Value of argname
+!!   msg= Error message
+!!
+!! SOURCE
+
+integer function get_arg_str(argname, argval, msg, default, exclude) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: argname
+ character(len=*),intent(out) :: argval
+ character(len=*),intent(out) :: msg
+ character(len=*),optional,intent(in) :: default
+ character(len=*),optional,intent(in) :: exclude
+
+!Local variables-------------------------------
+ integer :: ii, istat
+ logical :: found_argname, found_excl
+ character(len=500) :: arg, iomsg
+
+! *************************************************************************
+
+ ierr = 0; msg = ""; if (present(default)) argval = default
+ found_argname = .False.; found_excl = .False.
+
+ do ii=1,command_argument_count()
+   call get_command_argument(ii, arg)
+   if (present(exclude)) then
+     if (arg == "--" // trim(exclude)) found_excl = .True.
+   end if
+   if (arg == "--" // trim(argname)) then
+     found_argname = .True.
+     call get_command_argument(ii + 1, arg, status=istat)
+     if (istat == 0) then
+       read(arg, *, iostat=istat, iomsg=iomsg) argval
+       if (istat /= 0) then
+         ierr = ierr + 1; msg = sjoin(msg, ch10, iomsg)
+       end if
+     else
+       ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument")
+     end if
+   end if
+ end do
+
+ if (ierr /= 0) msg = sjoin("Error while reading argument: ", argname, ch10, msg)
+ if (found_argname .and. found_excl) then
+   ierr = ierr + 1; msg = sjoin("Variables", argname, "and", exclude, "are mutually exclusive", ch10, msg)
+ end if
+
+end function get_arg_str
+!!***
+
 !!****f* m_argparse/get_arg_list_int
 !! NAME
 !!  get_arg_list_int
@@ -507,7 +581,7 @@ end function get_arg_dp
 !!  [default_list]= Default value (vector)
 !!  [exclude]= argname and exclude are mutually exclusive.
 !!  [want_len]= Require want_len items in CLI.
-!!  
+!!
 !! OUTPUT
 !!  argval= Value of argname
 !!  msg= Error message
@@ -537,7 +611,7 @@ integer function get_arg_list_int(argname, argval, lenr, msg, default, default_l
  ierr = 0; msg = ""; lenr = 0
  found_argname = .False.; found_excl = .False.
 
- maxlen = size(argval); 
+ maxlen = size(argval);
  if (maxlen == 0) then
    ierr = ierr + 1; msg = "zero-sized argval!"; return
  end if
@@ -567,7 +641,7 @@ integer function get_arg_list_int(argname, argval, lenr, msg, default, default_l
        else
          ! If there are less than NUMBER arguments specified at the command line, VALUE will be filled with blanks.
          if (arg == "") exit
-         ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument") 
+         ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument")
        end if
      end do
    end if
@@ -586,7 +660,7 @@ integer function get_arg_list_int(argname, argval, lenr, msg, default, default_l
      end if
    else
      ierr = ierr + 1
-     msg = sjoin("Cannot find", argname, "in cli and want_len:", itoa(want_len), ch10, msg)
+     msg = sjoin("Cannot find", argname, "in CLI and want_len:", itoa(want_len), ch10, msg)
    end if
  end if
 
@@ -607,7 +681,7 @@ end function get_arg_list_int
 !!  [default_list]
 !!  [exclude]
 !!  [want_len]
-!!  
+!!
 !! OUTPUT
 !!  argval
 !!  msg
@@ -637,7 +711,7 @@ integer function get_arg_list_dp(argname, argval, lenr, msg, default, default_li
  ierr = 0; msg = ""; lenr = 0
  found_argname = .False.; found_excl = .False.
 
- maxlen = size(argval); 
+ maxlen = size(argval);
  if (maxlen == 0) then
    ierr = ierr + 1; msg = "zero-sized argval!"; return
  end if
@@ -667,7 +741,7 @@ integer function get_arg_list_dp(argname, argval, lenr, msg, default, default_li
        else
          ! If there are less than NUMBER arguments specified at the command line, VALUE will be filled with blanks.
          if (arg == "") exit
-         ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument") 
+         ierr = ierr + 1; msg = sjoin(msg, ch10, "Error in get_command_argument")
        end if
      end do
    end if
@@ -686,7 +760,7 @@ integer function get_arg_list_dp(argname, argval, lenr, msg, default, default_li
      end if
    else
      ierr = ierr + 1
-     msg = sjoin("Cannot find ", argname, "in cli and want_len:", itoa(want_len), ch10, msg)
+     msg = sjoin("Cannot find ", argname, "in CLI and want_len:", itoa(want_len), ch10, msg)
    end if
  end if
 
@@ -726,7 +800,7 @@ subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
  real(dp) :: my_shiftk(3 * MAX_NSHIFTK)
 
 ! *************************************************************************
- 
+
  ABI_CHECK(get_arg("kptopt", kptopt, msg, default=1) == 0, msg)
  ABI_CHECK(get_arg("chksymbreak", chksymbreak, msg, default=1) == 0, msg)
  ABI_CHECK(get_arg_list("ngkpt", ngkpt, lenr, msg, exclude="kptrlatt", want_len=3) == 0, msg)

@@ -745,8 +745,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case (RUNL_EPH)
-     !call dtset_free_nkpt_arrays(dtsets(idtset))
-     !call dtset_free_nkpt_arrays(dtset)
+     call dtset_free_nkpt_arrays(dtsets(0))
+     call dtset_free_nkpt_arrays(dtsets(idtset))
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case default
@@ -830,10 +830,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ! several problems in outvars since one should take into account
    ! the new dimensions (e.g. nkptgw) and their maximum value.
    ! For the time being, we continue to pass a copy of dtsets(idtset).
-#if 0
-   call dtset_free(dtsets(idtset))
-   call dtset_copy(dtsets(idtset),dtset)
-#endif
+   !call dtset_free(dtsets(idtset))
+   !call dtset_copy(dtsets(idtset),dtset)
 
    call dtset_free(dtset)
 

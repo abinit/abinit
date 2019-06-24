@@ -174,7 +174,7 @@ module m_neat
 
     call dict%set('ecut', r=ecut)
     call dict%set('pawecutdg', r=pawecutdg)
-    call yaml_add_dict('cut', dict, width=10, stream=stream)
+    call yaml_add_dict('cutoff energies', dict, width=10, stream=stream)
     call dict%free()
 
     call dict%set('deltae', r=results%deltae)

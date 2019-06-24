@@ -192,10 +192,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
  ABI_CHECK(nstates <= hexc_size,"nstates cannot be greater that hexc size!")
 
  ! Divide the columns of the Hamiltonian among the nodes.
- call xmpi_split_work(hexc_size,comm,my_t1,my_t2,msg,ierr)
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work(hexc_size,comm,my_t1,my_t2)
 
  my_nt = my_t2-my_t1+1
  write(msg,'(a,i0,a)')" Will handle ",my_nt," columns of the excitonic Hamiltonian. "

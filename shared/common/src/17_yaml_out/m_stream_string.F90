@@ -14,9 +14,9 @@
 module m_stream_string
 
   use defs_basis
-  use m_errors 
+  use m_errors
   use m_profiling_abi
-  
+
   implicit none
 
   integer,parameter :: chunk_size=248
@@ -48,8 +48,27 @@ module m_stream_string
 
   contains
 
-! free stream. Most of the time this is not needed since
-! routines to access the content free the stream
+!!****f* m_stream_string/stream_free
+!! NAME
+!! stream_free
+!!
+!! FUNCTION
+!!  free stream. Most of the time this is not needed since
+!!  routines to access the content free the stream
+!!
+!! INPUTS
+!!  stream <class(stream_string)>=
+!!
+!! OUTPUT
+!!  stream <class(stream_string)>=
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine stream_free(stream)
     class(stream_string),intent(inout) :: stream
     type(stream_chunk), pointer :: cursor, prev
@@ -62,8 +81,30 @@ module m_stream_string
     stream%head => NULL()
     stream%length = 0
   end subroutine stream_free
+!!*** m_stream_string/stream_free
 
-! copy src content to dest without altering src
+!!****f* m_stream_string/stream_copy
+!! NAME
+!! stream_copy
+!!
+!! FUNCTION
+!!  copy src content to dest without altering src
+!!
+!! INPUTS
+!!  src <class(stream_string)>=
+!!  dest <class(stream_string)>=
+!!
+!! OUTPUT
+!!  src <class(stream_string)>=
+!!  dest <class(stream_string)>=
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine stream_copy(src, dest)
     class(stream_string),intent(inout) :: src, dest
     type(stream_chunk), pointer :: cursor
@@ -73,8 +114,29 @@ module m_stream_string
       cursor => cursor%next
     end do
   end subroutine stream_copy
+!!*** m_stream_string/stream_copy
 
-! Write string to stream, allocating memory if needed
+!!****f* m_stream_string/stream_write
+!! NAME
+!! stream_write
+!!
+!! FUNCTION
+!!  Write string to stream, allocating memory if needed
+!!
+!! INPUTS
+!!  stream <class(stream_string)>=
+!!  string <character(len=*)>=
+!!
+!! OUTPUT
+!!  stream <class(stream_string)>=
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine stream_write(stream, string)
     class(stream_string),intent(inout) :: stream
     character(len=*),intent(in) :: string
@@ -92,7 +154,7 @@ module m_stream_string
       cursor => cursor%next
       offset = offset - chunk_size
     end do
-    
+
     room_left = chunk_size - offset
     if (room_left < len(string)) then
       cursor%chunk(offset+1:chunk_size) = string(1:room_left)
@@ -109,8 +171,29 @@ module m_stream_string
     end if
     stream%length = stream%length + len(string)
   end subroutine stream_write
+!!*** m_stream_string/stream_write
 
-! Remove the last chunk of stream an put its content in string
+!!****f* m_stream_string/stream_get_chunk
+!! NAME
+!! stream_get_chunk
+!!
+!! FUNCTION
+!!  Remove the last chunk of stream an put its content in string
+!!
+!! INPUTS
+!!  stream <class(stream_string)>=
+!!
+!! OUTPUT
+!!  stream <class(stream_string)>=
+!!  string <character(len=chunk_size)>=
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine stream_get_chunk(stream, string)
     class(stream_string),intent(inout) :: stream
     character(len=chunk_size),intent(out) :: string
@@ -131,9 +214,30 @@ module m_stream_string
       stream%length = 0
     end if
   end subroutine stream_get_chunk
+!!*** m_stream_string/stream_get_chunk
 
-! Copy the content of stream to string, freeing stream
-! string HAVE to be large enough
+!!****f* m_stream_string/stream_to_string
+!! NAME
+!! stream_to_string
+!!
+!! FUNCTION
+!!  Copy the content of stream to string, freeing stream
+!!  string HAVE to be large enough
+!!
+!! INPUTS
+!!  stream <class(stream_string)>=
+!!
+!! OUTPUT
+!!  stream <class(stream_string)>=
+!!  string <character(len=*)>=
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine stream_to_string(stream, string)
     class(stream_string),intent(inout) :: stream
     character(len=*),intent(out) :: string
@@ -149,8 +253,29 @@ module m_stream_string
       offset = offset + chunk_size
     end do
   end subroutine stream_to_string
+!!*** m_stream_string/stream_to_string
 
-! Write the content of stream to the file, freeing stream
+!!****f* m_stream_string/stream_to_file
+!! NAME
+!! stream_to_file
+!!
+!! FUNCTION
+!!  Write the content of stream to the file, freeing stream
+!!
+!! INPUTS
+!!  stream <class(stream_string)>=
+!!  file_d <integer>=
+!!
+!! OUTPUT
+!!  stream <class(stream_string)>=
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine stream_to_file(stream, file_d)
     class(stream_string),intent(inout) :: stream
     integer,intent(in) :: file_d
@@ -165,10 +290,32 @@ module m_stream_string
       offset = offset + chunk_size
     end do
   end subroutine stream_to_file
+!!*** m_stream_string/stream_to_file
 
-! Copy the content of src to dest, freeing src
-! If possible does not reallocate memory and just have
-! dest point to src content
+!!****f* m_stream_string/stream_transfer
+!! NAME
+!! stream_transfer
+!!
+!! FUNCTION
+!!  Copy the content of src to dest, freeing src
+!!  If possible does not reallocate memory and just have
+!!  dest point to src content
+!!
+!! INPUTS
+!!  src <class(stream_string)>=
+!!  dest <class(stream_string)>=
+!!
+!! OUTPUT
+!!  src <class(stream_string)>=
+!!  dest <class(stream_string)>=
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine stream_transfer(src, dest)
     class(stream_string),intent(inout) :: src, dest
     character(len=chunk_size) :: chunk
@@ -190,8 +337,28 @@ module m_stream_string
       end do
     end if
   end subroutine stream_transfer
+!!*** m_stream_string/stream_transfer
 
-! Show the content of the chunks on stdout
+!!****f* m_stream_string/stream_debug
+!! NAME
+!! stream_debug
+!!
+!! FUNCTION
+!!  Show the content of the chunks on stdout
+!!
+!! INPUTS
+!!  src <class(stream_string)>=
+!!
+!! OUTPUT
+!!  src <class(stream_string)>=
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine stream_debug(src)
     class(stream_string),intent(inout) :: src
     type(stream_chunk), pointer :: cursor
@@ -205,5 +372,6 @@ module m_stream_string
       c = c + 1
     end do
   end subroutine stream_debug
+!!*** m_stream_string/stream_debug
 
 end module m_stream_string

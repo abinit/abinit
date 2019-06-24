@@ -34,13 +34,14 @@ module m_multibinit_cell
   !use m_multibinit_supercell, only: mb_supercell_t
   use m_supercell_maker , only: supercell_maker_t
   use m_multibinit_dataset, only : multibinit_dtset_type
+  use m_crystal, only : crystal_t
   implicit none
 
 !!***
   private
   ! TODO: use crystal_t
-  type, public :: mbcell_lattice_t
-  !type, public, extends(crystal_t) :: mbcell_lattice_t
+  !type, public :: mbcell_lattice_t
+  type, public, extends(crystal_t) :: mbcell_lattice_t
    contains
      procedure :: initialize => latt_initialize
      procedure :: finalize => latt_finalize

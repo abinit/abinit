@@ -63,7 +63,7 @@ module m_yaml_out
   subroutine write_indent(input, output, n)
     class(stream_string),intent(inout) :: input, output
     integer,intent(in) :: n
-    
+
     integer :: buffstart, buffstop, length
     character(len=chunk_size) :: buffer
 
@@ -285,6 +285,35 @@ module m_yaml_out
   end subroutine yaml_print_string
 
 ! public
+
+!!****f* m_yaml_out/yaml_iterstart
+!! NAME
+!! yaml_iterstart
+!!
+!! FUNCTION
+!!  Mark the start of an iteration named by label and numbered by file
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  val <integer>=
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_iterstart(label, val, file_d, string, stream, newline, width)
     integer,intent(in) :: val
     character(len=*),intent(in) :: label
@@ -321,7 +350,37 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_iterstart
+!!*** m_yaml_out/yaml_iterstart
 
+!!****f* m_yaml_out/yaml_open_doc
+!! NAME
+!! yaml_open_doc
+!!
+!! FUNCTION
+!!  Open a yaml document
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  comment <character(len=*)>=
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_open_doc(label, comment, tag, file_d, string, stream, newline, width)
     character(len=*),intent(in) :: label
     character(len=*),intent(in) :: comment
@@ -338,7 +397,7 @@ module m_yaml_out
 
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
-  
+
     if(present(tag)) then
       call interm%write('---'//' !'//trim(tag)//eol//'label')
     else
@@ -373,7 +432,37 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_open_doc
+!!*** m_yaml_out/yaml_open_doc
 
+!!****f* m_yaml_out/yaml_add_realfield
+!! NAME
+!! yaml_add_realfield
+!!
+!! FUNCTION
+!!  Add a real number field to a document
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  real_fmt <character(len=*)>=optional  override the default formating
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_realfield(label, val, file_d, string, stream, tag, &
 &                               real_fmt, newline, width)
     real(kind=dp) :: val
@@ -417,7 +506,37 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_realfield
+!!*** m_yaml_out/yaml_add_realfield
 
+!!****f* m_yaml_out/yaml_add_intfield
+!! NAME
+!! yaml_add_intfield
+!!
+!! FUNCTION
+!!  Add an integer field to a document
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  int_fmt <character(len=*)>=optional  override the default formating
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_intfield(label, val, file_d, string, stream, tag, &
 &                              int_fmt, newline, width)
     integer :: val
@@ -461,7 +580,36 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_intfield
+!!*** m_yaml_out/yaml_add_intfield
 
+!!****f* m_yaml_out/yaml_add_stringfield
+!! NAME
+!! yaml_add_stringfield
+!!
+!! FUNCTION
+!!  Add a string field to a document
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_stringfield(label, val, file_d, string, stream, tag, newline, width)
     character(len=*) :: val
     character(len=*),intent(in) :: label
@@ -499,7 +647,40 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_stringfield
+!!*** m_yaml_out/yaml_add_stringfield
 
+!!****f* m_yaml_out/yaml_add_real1d
+!! NAME
+!! yaml_add_real1d
+!!
+!! FUNCTION
+!!  Add a field containing a 1D array of real numbers
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  length <integer>=
+!!  arr(length) <real(kind=dp)>=
+!!  multiline_trig <integer>=optional minimun number of elements before switching to multline representation
+!!  tag <character(len=*)>=optional add a tag to the field
+!!  real_fmt <character(len=*)>=optional  override the default formating
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_real1d(label, length, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline, width)
     integer,intent(in) :: length
     integer,intent(in),optional :: multiline_trig
@@ -544,7 +725,40 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_real1d
+!!*** m_yaml_out/yaml_add_real1d
 
+!!****f* m_yaml_out/yaml_add_int1d
+!! NAME
+!! yaml_add_int1d
+!!
+!! FUNCTION
+!!  Add a field containing a 1D integer array
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  length <integer>=
+!!  arr(length) <integer>=
+!!  multiline_trig <integer>=optional minimun number of elements before switching to multline representation
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  int_fmt <character(len=*)>=optional  override the default formating
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_int1d(label, length, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline, width)
     integer,intent(in) :: length
     integer,intent(in),optional :: multiline_trig
@@ -589,7 +803,45 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_int1d
+!!*** m_yaml_out/yaml_add_int1d
 
+!!****f* m_yaml_out/yaml_add_dict
+!! NAME
+!! yaml_add_dict
+!!
+!! FUNCTION
+!!  Add a field containing a dictionary/pair_list
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  pl <type(pair_list)>=
+!!  string_size <integer>=optional maximum storage size for strings found in a pair_list
+!!  key_size <integer>=optional maximum storage size for keys of a pair_list
+!!  multiline_trig <integer>=optional minimun number of elements before switching to multline representation
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  key_fmt <character(len=*)>=optional  override the default formating
+!!  int_fmt <character(len=*)>=optional  override the default formating
+!!  real_fmt <character(len=*)>=optional  override the default formating
+!!  string_fmt <character(len=*)>=optional  override the default formating
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  pl <type(pair_list)>=
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_dict(label, pl, file_d, string, stream, tag, key_size, string_size, key_fmt, int_fmt, real_fmt, string_fmt, &
 &                          multiline_trig, newline, width)
     type(pair_list),intent(inout) :: pl
@@ -642,7 +894,41 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_dict
+!!*** m_yaml_out/yaml_add_dict
 
+!!****f* m_yaml_out/yaml_add_real2d
+!! NAME
+!! yaml_add_real2d
+!!
+!! FUNCTION
+!!  Add a field containing a 2D real number array
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  m <integer>=
+!!  n <integer>=
+!!  arr(m, n) <real(kind=dp)>=
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  real_fmt <character(len=*)>=optional  override the default formating
+!!  multiline_trig <integer>=optional minimun number of elements before switching to multline representation
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_real2d(label, m, n, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline, width)
     integer,intent(in) :: m, n
     real(kind=dp),intent(in) :: arr(m, n)
@@ -693,7 +979,41 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_real2d
+!!*** m_yaml_out/yaml_add_real2d
 
+!!****f* m_yaml_out/yaml_add_int2d
+!! NAME
+!! yaml_add_int2d
+!!
+!! FUNCTION
+!!  Add a field containing a 2D integer array
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  m <integer>=
+!!  n <integer>=
+!!  arr(m, n) <integer>=
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  int_fmt <character(len=*)>=optional  override the default formating
+!!  multiline_trig <integer>=optional minimun number of elements before switching to multline representation
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_int2d(interm, label, m, n, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline, width)
     integer,intent(in) :: m, n
     integer,intent(in) :: arr(m, n)
@@ -744,7 +1064,46 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_int2d
+!!*** m_yaml_out/yaml_add_int2d
 
+!!****f* m_yaml_out/yaml_add_dictlist
+!! NAME
+!! yaml_add_dictlist
+!!
+!! FUNCTION
+!!  Add a field containing a list of dictionaries/array of pair_list
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  n <integer>=
+!!  plarr(n) <type(pair_list)>=
+!!  key_size <integer>=optional maximum storage size for keys of a pair_list
+!!  string_size <integer>=optional maximum storage size for strings of a pair_list
+!!  multiline_trig <integer>=optional minimun number of elements before switching to multline representation
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  key_fmt <character(len=*)>=optional  override the default formating
+!!  int_fmt <character(len=*)>=optional  override the default formating
+!!  real_fmt <character(len=*)>=optional  override the default formating
+!!  string_fmt <character(len=*)>=optional  override the default formating
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! OUTPUT
+!!  plarr(n) <type(pair_list)>=
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_dictlist(label, n, plarr, file_d, string, stream, tag, key_size, string_size, key_fmt, int_fmt, &
 &                              real_fmt, string_fmt, multiline_trig, newline, width)
     integer,intent(in) :: n
@@ -805,7 +1164,36 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_dictlist
+!!*** m_yaml_out/yaml_add_dictlist
 
+!!****f* m_yaml_out/yaml_open_tabular
+!! NAME
+!! yaml_open_tabular
+!!
+!! FUNCTION
+!!  Open a field for tabular data
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional set to false to prevent adding newlines after fields
+!!  indent <integer>=optional number of spaces to add to the header
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_open_tabular(label, tag, file_d, string, stream, indent, newline)
     character(len=*),intent(in) :: label
     character(len=*),intent(in),optional :: tag
@@ -821,7 +1209,7 @@ module m_yaml_out
 
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(n, indent, 4)
-  
+
     if(n > 4) then
       call interm%write(repeat(' ', n-4))
     end if
@@ -843,7 +1231,35 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_open_tabular
+!!*** m_yaml_out/yaml_open_tabular
 
+!!****f* m_yaml_out/yaml_add_tabular_line
+!! NAME
+!! yaml_add_tabular_line
+!!
+!! FUNCTION
+!!  Add a line of tabular data in an already opened table field
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  line <character(len=*)>=
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  indent <integer>=optional number of spaces to add to the line
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_tabular_line(line, file_d, string, stream, newline, indent)
     character(len=*),intent(in) :: line
     integer,intent(in),optional :: file_d
@@ -858,7 +1274,7 @@ module m_yaml_out
 
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(n, indent, 4)
-  
+
     call interm%write(repeat(' ', n)//trim(line))
 
     if(nl) then
@@ -875,7 +1291,38 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_tabular_line
+!!*** m_yaml_out/yaml_add_tabular_line
 
+!!****f* m_yaml_out/yaml_add_tabular
+!! NAME
+!! yaml_add_tabular
+!!
+!! FUNCTION
+!!  Add a field with a complete table data
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  input <type(stream_string)>=stream containing an already built table
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!  indent <integer>=optional number of spaces to add to each line
+!!
+!! OUTPUT
+!!  input <type(stream_string)>=
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_add_tabular(label, input, tag, file_d, string, stream, newline, indent)
     character(len=*),intent(in) :: label
     type(stream_string),intent(inout) :: input
@@ -894,9 +1341,9 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(n, indent, 4)
     SET_DEFAULT(t, tag, 'Tabular')
-  
+
     call yaml_open_tabular(label, tag=t, stream=interm, newline=nl)
-    
+
     if(n > 4) then
       call interm%write(repeat(' ', n - 4))
     end if
@@ -917,7 +1364,44 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_tabular
+!!*** m_yaml_out/yaml_add_tabular
 
+!!****f* m_yaml_out/yaml_single_dict
+!! NAME
+!! yaml_single_dict
+!!
+!! FUNCTION
+!!  Create a full document from a single dictionary
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  label <character(len=*)>=
+!!  comment <character(len=*)>=
+!!  pl <type(pair_list)>=
+!!  key_size <integer>=maximum storage size for the keys of pl
+!!  string_size <integer>=maximum storage size for the strings found in pl
+!!  tag <character(len=*)>=optional  add a tag to the field
+!!  int_fmt <character(len=*)>=optional  override the default formating
+!!  real_fmt <character(len=*)>=optional  override the default formating
+!!  string_fmt <character(len=*)>=optional  override the default formating
+!!  file_d <integer>=optional output file descriptor
+!!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!
+!! OUTPUT
+!!  pl <type(pair_list)>=
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_single_dict(label, comment, pl, key_size, string_size, file_d, string, stream, tag, &
 &                             int_fmt, real_fmt, string_fmt, newline, width)
     type(pair_list),intent(inout) :: pl
@@ -938,7 +1422,7 @@ module m_yaml_out
     character(len=50) :: tmp_i, tmp_r
     real(kind=dp) :: vr
     logical :: nl
-    
+
     SET_DEFAULT(nl, newline, .true.)
 
     kfmt = '                              '
@@ -1000,7 +1484,33 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_single_dict
+!!*** m_yaml_out/yaml_single_dict
 
+!!****f* m_yaml_out/yaml_close_doc
+!! NAME
+!! yaml_close_doc
+!!
+!! FUNCTION
+!!  Close a previously opened document
+!!  One and only one of file_d, stream or string have to be provided as
+!!  the output destination.
+!!
+!! INPUTS
+!!  file_d <integer>=optional output file descriptor
+!!  stream <type(stream_string)>=optional output stream
+!!  newline <logical>=optional  set to false to prevent adding newlines after fields
+!!
+!! OUTPUT
+!!  stream <type(stream_string)>=optional
+!!  string <character(len=*)>=optional
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
   subroutine yaml_close_doc(file_d, string, stream, newline)
     integer,intent(in), optional :: file_d
     type(stream_string),intent(inout),optional :: stream
@@ -1029,4 +1539,6 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_close_doc
+!!*** m_yaml_out/yaml_close_doc
+
 end module m_yaml_out

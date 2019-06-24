@@ -48,6 +48,8 @@ program abitk
  use defs_datatypes,   only : ebands_t
  use m_fstrings,       only : sjoin, strcat, basename
  use m_specialmsg,     only : herald
+ use m_symtk,          only : matr3inv
+ use m_unittests,      only : tetra_unittests, kptrank_unittests
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
 
@@ -69,7 +71,9 @@ program abitk
  type(t_tetrahedron) :: tetra
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
+ integer,allocatable :: bz2ibz(:), indkk(:,:)
  !real(dp):: params(4)
+ real(dp) :: klatt(3,3), rlatt(3,3)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
 
 !*******************************************************
@@ -120,8 +124,9 @@ program abitk
      !write(std_out,"(a)")"ebands_skw_path FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
      write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
-     write(std_out,"(a)")"test_mjv                             Old tetrahedron routine"
-     write(std_out,"(a)")"test_unit_tests                      Run unit tests for tetrahedron routines."
+     write(std_out,"(a)")"tetra_mjv                             Old tetrahedron routine"
+     write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
+     write(std_out,"(a)")"kptrank_unit_tests                    Run unit tests for kptrank routines."
      goto 100
    end if
  end do
@@ -137,7 +142,7 @@ program abitk
    !rdwr = 3; if (prtvol > 0) rdwr = 4
    rdwr = 4
    call hdr_echo(hdr, fform, rdwr, unit=std_out)
-   
+
  case ("ibz")
    ! Print list of kpoints in the IBZ with the corresponding weights
    call get_path_cryst(path, cryst, comm)
@@ -170,7 +175,7 @@ program abitk
  case ("crystal_print")
     call get_path_cryst(path, cryst, comm)
     call crystal_print(cryst, unit=std_out, prtvol=prtvol)
- 
+
  case ("ebands_print", "ebands_xmgrace", "ebands_gnuplot")
    call get_path_ebands(path, ebands, comm)
    if (command == "ebands_print") then
@@ -254,16 +259,25 @@ program abitk
    ABI_CHECK(any(kptrlatt /= 0), "ngkpt or kptrlatt must be specified")
 
    call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk) !, bz2ibz)  ! Optional
+      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk, bz2ibz=indkk)
 
    new_nshiftk = size(new_shiftk, dim=2)
-   tetra = tetra_from_kptrlatt(cryst, kptopt, new_kptrlatt, new_nshiftk, new_shiftk, nkibz, kibz, comm, msg, ierr)
+   rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
+
+   ABI_MALLOC(bz2ibz,(nkbz))
+   bz2ibz(:) = indkk(1,:)
+   call init_tetra(bz2ibz, cryst%gprimd, klatt, kbz, nkbz, tetra, ierr, msg, comm)
+   ABI_FREE(bz2ibz)
+
    ABI_CHECK(ierr == 0, msg)
    call tetra_write(tetra, nkibz, kibz, strcat(basename(path), "_TETRA"))
    call destroy_tetra(tetra)
 
  case ("tetra_unit_tests")
-   !call phdos_unittests(comm)
+   call tetra_unittests(comm)
+
+ case ("kptrank_unit_tests")
+   call kptrank_unittests(comm)
 
  case default
    MSG_ERROR(sjoin("Unknown command:", command))
@@ -283,7 +297,7 @@ program abitk
 
  100 call xmpi_end()
 
-contains 
+contains
 !!***
 
 !!****f* abitk/get_path_ebands_cryst

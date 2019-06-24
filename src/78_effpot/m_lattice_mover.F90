@@ -40,16 +40,28 @@ module m_lattice_mover
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
+  use m_random_xoroshiro128plus, only:  rng_t
+
 !!***
 
   implicit none
   private
+
   type ,public, extends(abstract_mover_t) :: lattice_mover_t
      ! This is the abstract class of mover
      ! It do the following things:
      ! calculate d(var)/dt and integrate new var. 
      ! call functions to calculate observables.
      ! interact with hist file.
+     type(multibinit_dtset_type), pointer :: params=>null()
+     real(dp), allocatable :: masses(:)
+     integer :: natom
+     real(dp) :: stress(3,3), strain(3,3)
+     real(dp), allocatable :: current_xcart(:,:), current_vcart(:,:), &
+          & forces(:,:), displacement(:,:)
+     real(dp) :: energy
+     !type(lattice_hist_t) :: hist
    contains
      procedure:: initialize       ! perhaps each effpot type should have own 
      procedure :: finalize
@@ -61,21 +73,35 @@ module m_lattice_mover
      procedure :: write_hist       ! write hist file
   end type lattice_mover_t
 
+
 contains
 
-  subroutine initialize(self, params, fnames)
+  subroutine initialize(self, params, supercell)
     class(lattice_mover_t), intent(inout) :: self
-    type(multibinit_dtset_type), intent(in) :: params
-    character(len=fnlen), intent(in) :: fnames(:)
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(params)
-    ABI_UNUSED_A(fnames)
+    type(multibinit_dtset_type),target, intent(in) :: params
+    type(mbsupercell_t),target, intent(in) :: supercell
+    self%params=>params
+    self%supercell=>supercell
+    self%label="Lattice Mover"
+    !TODO: self%natom = supercell%natom
+    ABI_ALLOCATE(self%masses, (self%natom))
+    ABI_ALLOCATE(self%displacement, (3, self%natom))
+    ABI_ALLOCATE(self%current_xcart, (3, self%natom))
+    ABI_ALLOCATE(self%current_vcart, (3, self%natom))
+    ABI_ALLOCATE(self%forces, (3,self%natom))
 
   end subroutine initialize
 
   subroutine finalize(self)
     class(lattice_mover_t), intent(inout) :: self
-    ABI_UNUSED_A(self)
+    ABI_DEALLOCATE(self%masses)
+    nullify(self%supercell)
+    nullify(self%params)
+    self%label="Destroyed lattice mover"
+    ABI_DEALLOCATE(self%masses)
+    ABI_DEALLOCATE(self%current_xcart)
+    ABI_DEALLOCATE(self%current_vcart)
+    ABI_DEALLOCATE(self%forces)
   end subroutine finalize
 
   subroutine set_params(self, params)
@@ -91,8 +117,19 @@ contains
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(mode)
+    real(dp) :: xi(3, self%natom)
+    integer :: i
+
+    if(mode==1) then ! using a boltzmann distribution. 
+       call self%rng%rand_normal_array(xi, 3*self%natom)
+       do i=1, self%natom
+          self%current_vcart(:,i) = xi(:, i) *sqrt(3.0*self%temperature/self%masses(i))
+       end do
+       self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
+    else 
+       
+
+    end if
 
   end subroutine set_initial_state
 
@@ -147,3 +184,4 @@ contains
   end subroutine get_state
 
 end module m_lattice_mover
+

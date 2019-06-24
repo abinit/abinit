@@ -213,7 +213,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  nband_kq=mband_kq; bks_mask_kq=.False.; keep_ur_kq=.False.
 
  ! Distribute the k-points over the processors
- call xmpi_split_work(nkpt,comm,my_kstart,my_kstop,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_kstart,my_kstop)
  do ik=1,nkpt
  if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
 
