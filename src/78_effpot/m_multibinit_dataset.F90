@@ -340,7 +340,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%spin_calc_thermo_obs=1
  multibinit_dtset%spin_calc_correlation_obs=0
  multibinit_dtset%spin_dipdip=0
- multibinit_dtset%spin_dynamics=1
+ multibinit_dtset%spin_dynamics=0
  multibinit_dtset%spin_init_state=1
  multibinit_dtset%spin_ntime_pre=0
  multibinit_dtset%spin_ntime=10000
