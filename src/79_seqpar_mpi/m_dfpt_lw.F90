@@ -2685,13 +2685,13 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        frwfdq=frwfdq + frwfdq_k
 
 !      Now comute the 1st order wf contributions
-       call dfpt_isdqwf(cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isdqwf_k, &
+       call dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isdqwf_k, &
        &  isdqwf_t1_k,isdqwf_t2_k,isdqwf_t3_k,isdqwf_t4_k,isdqwf_t5_k,isppol,istwf_k, &
        &  kg_k,kpoint,mkmem_rbz,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
        &  npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
        &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
        &  vhxc1_atdis,vhxc1_strain,wfk_t_atdis,wfk_t_ddk, &
-       &  wfk_t_strain,wtk_k,ylm_k,ylmgr_k)
+       &  wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
 
      end if
 
