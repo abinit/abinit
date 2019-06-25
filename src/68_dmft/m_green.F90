@@ -899,7 +899,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
      end if
    endif
    if (option==5) then
-     tmpfil = trim(paw_dmft%filapp)//'SpFunc_kresolved_'//trim(char1)
+     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved_'//trim(char1)
      if (open_file(tmpfil, message, newunit=spfkresolved_unt, status='unknown', form='formatted') /= 0) then
        MSG_ERROR(message)
      end if
@@ -908,12 +908,13 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
    ABI_ALLOCATE(sf_corr,(green%nw))
    iall=0
    if (option==5) then
-     do isppol = 1 , nsppol
        do ikpt = 1, nkpt
          sf=czero
          do ifreq=1,green%nw
-           do ib=1,mbandc
-             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+           do isppol = 1 , nsppol
+             do ib=1,mbandc
+               sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+             enddo
            enddo
            write(message,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
            call wrtout(spfkresolved_unt,message,'COLL')
@@ -923,20 +924,20 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
        write(message,*) ch10
        call wrtout(spfkresolved_unt,message,'COLL')
-     enddo
-     do isppol = 1 , nsppol
-       do ikpt = 1, nkpt
-         do ib=1,mbandc
-           sf=czero
-           write(71,*)  
-           write(71,*)  "#", ikpt, ib
-           do ifreq=1,green%nw
-             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
-             write(71,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
-           enddo
-         enddo
-       enddo
-     enddo
+! 
+!     do isppol = 1 , nsppol
+!       do ikpt = 1, nkpt
+!         do ib=1,mbandc
+!           sf=czero
+!           write(71,*)  
+!           write(71,*)  "#", ikpt, ib
+!           do ifreq=1,green%nw
+!             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+!             write(71,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
+!           enddo
+!         enddo
+!       enddo
+!     enddo
    endif
    if (option==4) then
      do isppol = 1 , nsppol
@@ -949,36 +950,38 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
      enddo
    endif
-   sf_corr=czero
-   do iatom=1,natom
-     call int2char4(iatom,tag_at)
-     ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-     tmpfil = trim(paw_dmft%filapp)//'SpFunc-cor_orb-'//trim(char1)//'_iatom'//trim(tag_at)
-     if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
-       MSG_ERROR(message)
-     end if
-     write(message,*) "#", nspinor,nsppol,ndim,green%nw
-     call wrtout(spcorb_unt,message,'COLL')
-     if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
-       write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
+   if(paw_dmft%dmft_kspectralfunc==0) then
+     sf_corr=czero
+     do iatom=1,natom
+       call int2char4(iatom,tag_at)
+       ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+       if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
+         MSG_ERROR(message)
+       end if
+       write(message,*) "#", nspinor,nsppol,ndim,green%nw
        call wrtout(spcorb_unt,message,'COLL')
-       ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
-       do isppol = 1 , nsppol
-         do ispinor=1, nspinor
-           do im=1,ndim
-             do ifreq=1,green%nw
-               sf_corr(ifreq)=sf_corr(ifreq)+ green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
+       if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+         write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
+         call wrtout(spcorb_unt,message,'COLL')
+         ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
+         do isppol = 1 , nsppol
+           do ispinor=1, nspinor
+             do im=1,ndim
+               do ifreq=1,green%nw
+                 sf_corr(ifreq)=sf_corr(ifreq)+ green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
+               enddo
              enddo
            enddo
          enddo
+       endif
+       do ifreq=1,green%nw
+         write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
+         call wrtout(spcorb_unt,message,'COLL')
        enddo
-     endif
-     do ifreq=1,green%nw
-       write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
-       call wrtout(spcorb_unt,message,'COLL')
+       close(spcorb_unt)
      enddo
-     close(spcorb_unt)
-   enddo
+   endif
    if (option==4) then
      do ifreq=1,green%nw
        write(message,*) green%omega(ifreq),(-aimag(sf(ifreq)))/3.141592653589793238_dp
