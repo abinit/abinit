@@ -69,8 +69,6 @@ CONTAINS  !===========================================================
 
 subroutine invsqrt_matrix(matrix,tndim)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tndim 
@@ -79,8 +77,8 @@ subroutine invsqrt_matrix(matrix,tndim)
 
 !Local variables-------------------------------
 !scalars
- integer :: im,im1,im2,info,lwork
- character(len=500) :: message
+ integer :: im,im1,im2,info,lwork,nb_of_zero
+ character(len=5000) :: message
  real(dp) :: pawprtvol
 !arrays
  real(dp),allocatable :: eig(:),rwork(:)
@@ -97,7 +95,7 @@ subroutine invsqrt_matrix(matrix,tndim)
 #endif
 
  DBG_ENTER("COLL")
- pawprtvol=2
+ pawprtvol=4
 
  ABI_ALLOCATE(initialmatrix,(tndim,tndim))
  initialmatrix=matrix
@@ -108,6 +106,16 @@ subroutine invsqrt_matrix(matrix,tndim)
  ABI_ALLOCATE(eig,(tndim))
  
  call zheev('v','u',tndim,matrix,tndim,eig,zwork,lwork,rwork,info)
+ if(pawprtvol>3) then
+   write(message,'(2a)') ch10,'  - rotation matrix - '
+   call wrtout(std_out,message,'COLL')
+   do im1=1,tndim
+     write(message,'(12(1x,18(1x,"(",f7.3,",",f7.3,")")))')&
+!     write(message,'(12(1x,18(1x,"(",f20.16,",",f20.16,")")))')&
+&     (matrix(im1,im2),im2=1,tndim)
+    call wrtout(std_out,message,'COLL')
+   end do
+ endif
  
  
  ABI_DEALLOCATE(zwork)
@@ -120,13 +128,22 @@ subroutine invsqrt_matrix(matrix,tndim)
 !  == Secondly Compute sqrt(diagonalized matrix)
  ABI_ALLOCATE(diag,(tndim,tndim))
  diag=czero
+ nb_of_zero=0
  do im=1,tndim
 
-   if(eig(im)<tol16) then
+   if(eig(im)<-tol8) then
      message = "  - Eigenvalues from zheev are negative or zero ! - "
+     write(std_out,*)
+     write(std_out,*) "    Eigenvalue=",eig(im)
+     write(std_out,*) "    Matrix is"
+     do im1=1,tndim
+       write(std_out,'(100f7.3)') (initialmatrix(im1,im2),im2=1,tndim)
+     enddo
      MSG_ERROR(message)
+   else if(abs(eig(im))<tol8) then
+     nb_of_zero=nb_of_zero+1
    else
-     diag(im,im)=cmplx(sqrt(eig(im)),zero,kind=dp)
+     diag(im,im)=cmplx(one/sqrt(eig(im)),zero,kind=dp)
    endif
  enddo
  ABI_DEALLOCATE(eig)
@@ -138,7 +155,7 @@ subroutine invsqrt_matrix(matrix,tndim)
  ABI_ALLOCATE(sqrtmat,(tndim,tndim))
  ABI_ALLOCATE(zhdp2,(tndim,tndim))
  if(pawprtvol>3) then
-   write(message,'(2a)') ch10,'  - sqrt(Eigenmatrix) - '
+   write(message,'(2a)') ch10,'  - 1.0/sqrt(Eigenmatrix) - '
    call wrtout(std_out,message,'COLL')
    do im1=1,tndim
      write(message,'(12(1x,18(1x,"(",f7.3,",",f7.3,")")))')&
@@ -152,7 +169,7 @@ subroutine invsqrt_matrix(matrix,tndim)
  call zgemm('n','n',tndim,tndim,tndim,cone,matrix,tndim,zhdp2,tndim,czero,sqrtmat,tndim)
 ! if(abs(pawprtvol)>=3) then
  if(pawprtvol>3) then
-   write(message,'(3a)') ch10,"  - Sqrt root of matrix is - "
+   write(message,'(3a)') ch10,"  - inverse Sqrt root of matrix is - "
    call wrtout(std_out,message,'COLL')
    do im1=1,tndim
      write(message,'(12(1x,18(1x,"(",f20.16,",",f20.16,")")))')&
@@ -165,7 +182,7 @@ subroutine invsqrt_matrix(matrix,tndim)
 
 !  == Forthly Compute the inverse of the square root
 ! call matcginv_dpc(sqrtmat,tndim,tndim)
- call xginv(sqrtmat,tndim)
+ !call xginv(sqrtmat,tndim)
  ABI_ALLOCATE(sqrtmatinv,(tndim,tndim))
  sqrtmatinv=sqrtmat
  if(pawprtvol>3) then
@@ -221,8 +238,6 @@ end subroutine invsqrt_matrix
 
 subroutine blockdiago_fordsyev(matrix,tndim,eig)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tndim
@@ -232,19 +247,18 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
 
 !Local variables-------------------------------
 !scalars
- integer :: im1,im2,im3,info,lwork,im4,im5,indice_formax,shift
+ integer :: im1,im2,im3,info,lwork,im4,indice_formax,shift !im5,
  character(len=500) :: message
  real(dp):: tmpx,maxvalue
  integer(dp):: tmpi,newstarting,current_dege,prtopt
 !arrays
- real(dp),allocatable :: rwork(:)
  real(dp),allocatable :: work(:)
  real(dp),allocatable :: Permutcol(:,:)
  real(dp),allocatable :: Apermutcol(:,:)
  real(dp),allocatable :: Apermutline(:,:)
  real(dp),allocatable :: Apermutlineback(:,:)
  real(dp),allocatable :: Permutline(:,:)
- real(dp),allocatable :: matrix_save(:,:),W(:)
+ real(dp),allocatable :: matrix_save(:,:) !,W(:)
  integer,allocatable :: nonnul(:)
  integer,allocatable :: nonnuldege(:)
  logical :: testdege,swap
@@ -583,8 +597,6 @@ end subroutine blockdiago_fordsyev
 
 subroutine blockdiago_forzheev(matrix,tndim,eig)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tndim
@@ -606,7 +618,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  complex(dpc),allocatable :: Apermutline(:,:)
  complex(dpc),allocatable :: Apermutlineback(:,:)
  real(dp),allocatable :: Permutline(:,:)
- complex(dpc),allocatable :: matrix_save(:,:),W(:)
+ complex(dpc),allocatable :: matrix_save(:,:) !,W(:)
  integer,allocatable :: nonnul(:)
  
 ! *************************************************************************
