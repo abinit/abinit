@@ -383,8 +383,7 @@ program mrgscr
      ! Initialize the G-sphere.
      call gsph_init(Gsphere,Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
 
-     ABI_STAT_MALLOC(epsm1,(Hscr0%npwe,Hscr0%npwe,Hscr0%nomega,1), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in epsm1')
+     ABI_MALLOC_OR_DIE(epsm1,(Hscr0%npwe,Hscr0%npwe,Hscr0%nomega,1), ierr)
 
      ! Give option to output epsilon instead of chi0
      calc_epsilon = .FALSE.
@@ -988,11 +987,9 @@ program mrgscr
              nfft,Gsphere%gvec,ngfft,rhor(:,1),iqibz)
 
              ! Prepare ratios and density for the f-sum rule
-             ABI_STAT_MALLOC(qratio,(orig_npwe,orig_npwe), ierr)
-             ABI_CHECK(ierr==0, "out-of-memory in qratio")
+             ABI_MALLOC_OR_DIE(qratio,(orig_npwe,orig_npwe), ierr)
 
-             ABI_STAT_MALLOC(rhoggp,(Er%npwe,Er%npwe), ierr)
-             ABI_CHECK(ierr==0, "out-of-memory in rhoggp")
+             ABI_MALLOC_OR_DIE(rhoggp,(Er%npwe,Er%npwe), ierr)
 
              call cqratio(orig_npwe,Gsphere%gvec,qtmp,Cryst%gmet,Cryst%gprimd,qratio)
              ! Arrange n(G-G')->n(G,G')

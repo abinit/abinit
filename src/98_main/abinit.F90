@@ -114,20 +114,22 @@ program abinit
  use m_libpaw_tools,only : libpaw_spmsg_getcount
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
+ use m_neat,        only : enable_yaml
  use m_chkinp,      only : chkinp
  use m_dtset,       only : chkvars, dtset_free
  use m_dtfil,       only : iofn1
  use m_outxml,      only : outxml_open, outxml_finalise
- use m_parser,      only : parsefile
  use m_out_acknowl, only : out_acknowl
  use m_timana,      only : timana
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
  use m_driver,       only : driver
+
 #ifdef HAVE_GPU_CUDA
- use m_initcuda,     only: setdevice_cuda, unsetdevice_cuda
+ use m_gpu_toolbox
 #endif
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
 #endif
@@ -157,7 +159,7 @@ program abinit
 ! Declarations
 ! Define "level of the routine", for debugging purposes
  integer,parameter :: level=1
- integer :: choice,dmatpuflag,ierr,iexit,ii,iounit,ios
+ integer :: choice,dmatpuflag,ierr,ii,iounit,ios
  integer :: lenstr,me,print_mem_report
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
@@ -205,11 +207,11 @@ program abinit
  ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
 
- ! Initialize memory profiling if it is activated
- ! if a full memocc.prc report is desired, set the argument of abimem_init to "2" instead of "0"
- ! note that memocc.prc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if activated at configure time.
+ ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
+ ! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(args%abimem_level)
+ call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
 !------------------------------------------------------------------------------
@@ -254,10 +256,10 @@ program abinit
    call dump_cpp_options(std_out)
    ! Write names of files
    write(message, '(a,a,a,a,a,a,a,a,a,a,a,a)' )&
-&   '- input  file    -> ',trim(filnam(1)),ch10,&
-&   '- output file    -> ',trim(filnam(2)),ch10,&
-&   '- root for input  files -> ',trim(filnam(3)),ch10,&
-&   '- root for output files -> ',trim(filnam(4)),ch10
+    '- input  file    -> ',trim(filnam(1)),ch10,&
+    '- output file    -> ',trim(filnam(2)),ch10,&
+    '- root for input  files -> ',trim(filnam(3)),ch10,&
+    '- root for output files -> ',trim(filnam(4)),ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
@@ -354,6 +356,9 @@ program abinit
 
 !------------------------------------------------------------------------------
 
+ ! Enable or disable yaml output
+ call enable_yaml(dtsets(1)%use_yaml == 1)
+
 !14) Print more information, and activate GPU
 
  if (me == 0) then
@@ -382,10 +387,9 @@ program abinit
 
  test_exit=.false.
  prtvol=dtsets(1)%prtvol
- if (prtvol==-level .or. prtvol==-2.or.args%dry_run/=0) then
+ if (prtvol == -level .or. prtvol == -2 .or. args%dry_run /= 0) then
    write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip driver '
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    test_exit=.true.
  end if
 
@@ -614,7 +618,7 @@ program abinit
 
  call xpapi_shutdown()
 
- !Writes information on file about the memory before ending mpi module, if memory profiling is enabled
+ ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam(4), print_mem_report=print_mem_report)
 
  call flush_unit(std_out)

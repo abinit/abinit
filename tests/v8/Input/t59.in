@@ -68,6 +68,6 @@ znucl 14.0
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT
 #%% description = 
-#%% Calculation of velocity matrix elements (DDK) with
-#%% optdriver 8 and wfk_task4 "wfk_ddk".
+#%%   Calculation of velocity matrix elements (DDK) with
+#%%   optdriver 8 and wfk_task4 "wfk_ddk".
 #%%<END TEST_INFO>

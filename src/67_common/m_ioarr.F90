@@ -48,7 +48,7 @@ MODULE m_ioarr
  use defs_abitypes,   only : hdr_type, mpi_type, dataset_type
  use defs_datatypes,  only : ebands_t
  use defs_wvltypes,   only : wvl_denspot_type
- use m_time,          only : cwtime
+ use m_time,          only : cwtime, cwtime_report
  use m_io_tools,      only : iomode_from_fname, iomode2str, open_file, get_unit
  use m_fstrings,      only : sjoin, itoa, endswith
  use m_numeric_tools, only : interpolate_denpot
@@ -136,8 +136,6 @@ CONTAINS  !=====================================================================
 
 subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 &                ngfft,cplex,nfft,pawrhoij,rdwr,rdwrpaw,wvl_den,single_proc)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -325,7 +323,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
            end if
 
            call fourier_interpol(cplex,hdr0%nspden,0,0,nfftot_in,ngfft_in,nfftot_out,ngfft_out,&
-&           0,MPI_enreg_seq,rhor_file,rhor_out,rhog_in,rhog_out)
+            MPI_enreg_seq,rhor_file,rhor_out,rhog_in,rhog_out)
 
            call destroy_mpi_enreg(MPI_enreg_seq)
 
@@ -354,7 +352,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        if (accessfil == 4) call xmpi_bcast(my_fildata,master,spaceComm,ierr)
      end if
 
-     if(accessfil == 4) then
+     if (accessfil == 4) then
        unt = get_unit()
        call WffOpen(iomode,spaceComm,my_fildata,ierr,wff,0,me,unt,spaceComm_io)
        call hdr_io(fform_dum,hdr0,rdwr,wff)
@@ -372,17 +370,17 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      end if
      etotal=hdr0%etot
 
-!    NOTE : should check that restart is possible !!
+     ! NOTE: should check that restart is possible !!
      !call ptabs_fourdp(mpi_enreg,ngfft(2),ngfft(3),fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
-!    If nspden[file] /= nspden, need a temporary array
+     ! If nspden[file] /= nspden, need a temporary array
      if (hdr0%nspden/=nspden) then
        ABI_MALLOC(arr_file,(cplex*nfft,hdr0%nspden))
      else
        arr_file => arr
      end if
 
-!    Read data
+     ! Read data
      do ispden=1,hdr0%nspden
        if(accessfil == 4) then
          call xderiveRRecInit(wff,ierr)
@@ -429,7 +427,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      ! Compare the internal header and the header from the file
      call hdr_check(fform, fform_dum, hdr, hdr0, 'COLL', restart, restartpaw)
 
-!    If nspden[file] /= nspden, need a temporary array
+     ! If nspden[file] /= nspden, need a temporary array
      if (hdr0%nspden/=nspden) then
        ABI_MALLOC(arr_file,(cplex*nfft,hdr0%nspden))
      else
@@ -468,7 +466,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
    etotal=hdr0%etot
 
-!  Possibly need to convert the potential/density spin components
+   ! Possibly need to convert the potential/density spin components
    if (hdr0%nspden/=nspden) then
      call denpot_spin_convert(arr_file,hdr0%nspden,arr,nspden,fform)
      ABI_FREE(arr_file)
@@ -478,19 +476,17 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
    if (rdwrpaw==1.and.restartpaw/=0) then
      if (size(hdr0%pawrhoij) /= size(pawrhoij)) then
        call pawrhoij_copy(hdr0%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
-&                         keep_nspden=.true.)
+                          keep_nspden=.true.)
      else
        call pawrhoij_copy(hdr0%pawrhoij,pawrhoij,keep_nspden=.true.)
      end if
    end if
 
-   if (accessfil == 0 .or. accessfil == 3 .or. accessfil == 4) then
-     call hdr_free(hdr0)
-   end if
+   if (accessfil == 0 .or. accessfil == 3 .or. accessfil == 4) call hdr_free(hdr0)
 
-!  =======================================
-!  Set up for writing data
-!  =======================================
+ ! =======================================
+ ! Set up for writing data
+ ! =======================================
  else if (rdwr==2) then
 
 !  In the wavelet case (isolated boundary counditions), the
@@ -626,16 +622,14 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      ABI_DEALLOCATE(my_density)
    end if
 
-   call wrtout(std_out,sjoin('data written to disk file:', fildata),'COLL')
+   call wrtout(std_out,sjoin(' Data written to disk file:', fildata),'COLL')
 
  else
    write(message,'(a,i0,a)')'Called with rdwr = ',rdwr,' not allowed.'
    MSG_BUG(message)
  end if
 
- call cwtime(cputime, walltime, gflops, "stop")
- write(message,'(2(a,f9.1),a)')" IO operation completed. cpu_time: ",cputime," [s], walltime: ",walltime," [s]"
- call wrtout(std_out, message, "COLL", do_flush=.True.)
+ call cwtime_report(" IO operation", cputime, walltime, gflops)
 
  DBG_EXIT("COLL")
 
@@ -699,8 +693,6 @@ end subroutine ioarr
 
 subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg,ebands)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iomode,cplex,nfft,nspden
@@ -751,7 +743,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  if (my_iomode /= IO_MODE_ETSF .and. nproc_fft == 1) my_iomode = IO_MODE_FORTRAN
  if (nproc_fft > 1 .and. my_iomode == IO_MODE_FORTRAN) my_iomode = IO_MODE_MPI
 
- call wrtout(std_out, sjoin(" fftdatar_write: About to write data to:", path, "with iomode", iomode2str(my_iomode)))
+ call wrtout(std_out, sjoin(ch10, "  fftdatar_write: About to write data to:", path, "with iomode:",iomode2str(my_iomode)))
  call cwtime(cputime, walltime, gflops, "start")
 
  ! Get MPI-FFT tables from input ngfft
@@ -867,9 +859,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    MSG_ERROR(sjoin("Wrong iomode:",itoa(my_iomode)))
  end select
 
- call cwtime(cputime, walltime, gflops, "stop")
- write(msg,'(2(a,f9.1),a)')" IO operation completed. cpu_time: ",cputime," [s], walltime: ",walltime," [s]"
- call wrtout(std_out, msg, "COLL", do_flush=.True.)
+ call cwtime_report(" IO operation", cputime, walltime, gflops)
 
  return
 
@@ -908,8 +898,6 @@ end subroutine fftdatar_write
 !! SOURCE
 
 subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspden,datar,mpi_enreg,eigen)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -962,10 +950,11 @@ end subroutine fftdatar_write_from_hdr
 !!
 !! FUNCTION
 !!  Read the DEN file with name fname reporting the density on the real FFT mesh
-!!  specified through the input variable ngfft. If the FFT mesh asked and that found
-!!  on file differ, perform a FFT interpolation and renormalize the density so that it
-!!  integrates to the correct number of electrons. If the two FFT meshes coincides
-!!  just report the array stored on file.
+!!  specified through the input variable ngfft. If the FFT mesh asked in input and that found
+!!  on file differ, the routine performs a FFT interpolation and renormalize the density so that it
+!!  integrates to the correct number of electrons. The interpolation is done only for NC.
+!!  For PAW, this is not possible because one should include the onsite contribution so this task
+!!  is delegated to the caller.
 !!
 !! INPUTS
 !! fname=Name of the density file
@@ -1012,8 +1001,6 @@ end subroutine fftdatar_write_from_hdr
 subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
   check_hdr, allow_interp) ! Optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,pawread,comm
@@ -1029,7 +1016,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0,paral_kgb0=0
+ integer,parameter :: master=0
  integer :: unt,fform,iomode,my_rank,mybase,globase,cplex_file
 !integer :: optin,optout
  integer :: ispden,ifft,nfftot_file,nprocs,ierr,i1,i2,i3,i3_local,n1,n2,n3
@@ -1059,7 +1046,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); have_mpifft = (nfft /= product(ngfft(1:3)))
  allow_interp__ = .False.; if (present(allow_interp)) allow_interp__ = allow_interp
 
- call wrtout(std_out, sjoin(" About to read data(r) from:", fname), 'COLL')
+ call wrtout(std_out, sjoin(" About to read data(r) from:", fname), do_flush=.True.)
  call cwtime(cputime, walltime, gflops, "start")
 
  ! Master node opens the file, read the header and the FFT data
@@ -1083,7 +1070,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      if (fform /= fform_den) then
-       write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
+       write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file. fform: ',fform,", expecting: ", fform_den
        MSG_WARNING(msg)
      end if
      cplex_file = 1
@@ -1152,7 +1139,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      !call init_distribfft_seq(MPI_enreg_seq%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
 
      call fourier_interpol(cplex,ohdr%nspden,optin,optout,nfftot_file,ngfft_file,nfft,ngfft,&
-       paral_kgb0,mpi_enreg,rhor_file,orhor,rhogdum,rhogdum)
+       mpi_enreg,rhor_file,orhor,rhogdum,rhogdum)
 
      !call destroy_mpi_enreg(MPI_enreg_seq)
 #endif
@@ -1170,7 +1157,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      ! Renormalize charge to avoid errors due to the interpolation.
      ! Do this only for NC since for PAW we should add the onsite contribution.
      ! This is left to the caller.
-     if (ohdr%usepaw == 0) then
+     !if (ohdr%usepaw == 0) then
+     if (ohdr%usepaw == 0 .and. fform == fform_den) then
        call metric(gmet, gprimd, -1, rmet, ohdr%rprimd, ucvol)
        ratio = ohdr%nelect / (sum(rhor_file(:,1))*ucvol/ product(ngfft(1:3)))
        rhor_file = rhor_file * ratio
@@ -1196,11 +1184,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
     !call hdr_check(fform_den, fform, check_hdr, ohdr, "COLL", restart, restartpaw)
   end if
 
-
  end if ! master
 
  if (nprocs == 1) then
-   if (ohdr%nspden==nspden) then
+   if (ohdr%nspden == nspden) then
      orhor = rhor_file
    else
      call denpot_spin_convert(rhor_file,ohdr%nspden,orhor,nspden,fform)
@@ -1278,8 +1265,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    ABI_DT_FREE(pawrhoij_file)
  end if
 
-!Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
-!  Add a small real to the magnetization
+! Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
+! Add a small real to the magnetization
  if (nspden==4) orhor(:,4)=orhor(:,4)+tol14
  if (ohdr%usepaw==1.and.size(pawrhoij)>0) then
    if (pawrhoij(1)%nspden==4) then
@@ -1289,10 +1276,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    end if
  end if
 
- call cwtime(cputime, walltime, gflops, "stop")
- write(msg,'(2(a,f9.1),a)')" IO operation completed. cpu_time: ",cputime," [s], walltime: ",walltime," [s]"
- call wrtout(std_out, msg, "COLL", do_flush=.True.)
-
+ call cwtime_report(" read_rhor", cputime, walltime, gflops)
  return
 
  ! Handle Fortran IO error
@@ -1323,8 +1307,6 @@ end subroutine read_rhor
 !! SOURCE
 
 integer function fort_denpot_skip(unit, msg) result(ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: unit
@@ -1391,8 +1373,6 @@ end function fort_denpot_skip
 
 subroutine denpot_spin_convert(denpot_in,nspden_in,denpot_out,nspden_out,fform,&
 &                              istart_in,istart_out,nelem) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

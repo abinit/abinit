@@ -63,13 +63,13 @@ tolwfr3   1.0d-9
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% description = 
 #%% keywords = 
 #%% authors = Unknown
-#%%MG: No command found!
-#%%MG: No tolerances found
-#%% 81. Nitrogen atom in a big box, spin-polarized.
-#%% Compute Berry phase for atom at different positions.
-#%% WARNING : HAS BEEN TRANSFERRED TO tests/seq
+## MG: No command found!
+## MG: No tolerances found
+#%% description = 
+#%%   81. Nitrogen atom in a big box, spin-polarized.
+#%%   Compute Berry phase for atom at different positions.
+#%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
 #%% topics = Berry
 #%%<END TEST_INFO>

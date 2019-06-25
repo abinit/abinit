@@ -232,11 +232,12 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
    green%w_type="imag"
  endif
 
+
  if(green%w_type=="imag") then
    nw=paw_dmft%dmft_nwlo
    green%omega=>paw_dmft%omega_lo
  else if(green%w_type=="real") then
-   nw=2*paw_dmft%dmft_nwr
+   nw=size(paw_dmft%omega_r)
    green%omega=>paw_dmft%omega_r
  endif
 
@@ -680,6 +681,7 @@ end subroutine printocc_green
 !!         2 print KS green function
 !!         3 print both local and KS green function
 !!         4 print spectral function is green%w_type="real"
+!!         5 print k-resolved spectral function is green%w_type="real"
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  pawprtvol = printing option
 !!  opt_wt=1 print green function as a function of frequency
@@ -714,7 +716,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 
 !local variables-------------------------------
  integer :: iall,iatom,ib,ifreq,ikpt,im,ispinor,isppol,itau
- integer :: lsub,mbandc,natom,ndim,nkpt,nspinor,nsppol,optwt,spf_unt,spcorb_unt
+ integer :: lsub,mbandc,natom,ndim,nkpt,nspinor,nsppol,optwt,spf_unt,spfkresolved_unt,spcorb_unt
  character(len=2000) :: message
  integer,allocatable :: unitgreenfunc_arr(:)
  integer,allocatable :: unitgreenloc_arr(:)
@@ -887,61 +889,105 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
    ABI_DEALLOCATE(unitgreenloc_arr)
  endif
 
- if((green%w_type=="real".and.option==4).and.green%oper(1)%has_operks==1) then
+ if((green%w_type=="real".and.option>=4).and.green%oper(1)%has_operks==1) then
    write(message,'(a,a)') ch10,"  == About to print spectral function"
    call wrtout(std_out,message,'COLL')
-   tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
-   if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
-     MSG_ERROR(message)
-   end if
+   if (option==4) then
+     tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
+     if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
+       MSG_ERROR(message)
+     end if
+   endif
+   if (option==5) then
+     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved_'//trim(char1)
+     if (open_file(tmpfil, message, newunit=spfkresolved_unt, status='unknown', form='formatted') /= 0) then
+       MSG_ERROR(message)
+     end if
+   endif
    ABI_ALLOCATE(sf,(green%nw))
    ABI_ALLOCATE(sf_corr,(green%nw))
    iall=0
-   sf=czero
-   do isppol = 1 , nsppol
-     do ikpt = 1, nkpt
-       do ib=1,mbandc
-         iall=iall+1
+   if (option==5) then
+       do ikpt = 1, nkpt
+         sf=czero
          do ifreq=1,green%nw
-           sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)*green%oper(1)%wtk(ikpt)
-         enddo
-       enddo
-     enddo
-   enddo
-   sf_corr=czero
-   do iatom=1,natom
-     call int2char4(iatom,tag_at)
-     ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-     tmpfil = trim(paw_dmft%filapp)//'SpFunc-cor_orb-'//trim(char1)//'_iatom'//trim(tag_at)
-     if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
-       MSG_ERROR(message)
-     end if
-     write(message,*) "#", nspinor,nsppol,ndim,green%nw
-     call wrtout(spcorb_unt,message,'COLL')
-     if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
-       write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
-       call wrtout(spcorb_unt,message,'COLL')
-       ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
-       do isppol = 1 , nsppol
-         do ispinor=1, nspinor
-           do im=1,ndim
-             do ifreq=1,green%nw
-               sf_corr(ifreq)=sf_corr(ifreq)+ green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
+           do isppol = 1 , nsppol
+             do ib=1,mbandc
+               sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
              enddo
+           enddo
+           write(message,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
+           call wrtout(spfkresolved_unt,message,'COLL')
+         enddo
+           write(message,*)
+           call wrtout(spfkresolved_unt,message,'COLL')
+       enddo
+       write(message,*) ch10
+       call wrtout(spfkresolved_unt,message,'COLL')
+! 
+!     do isppol = 1 , nsppol
+!       do ikpt = 1, nkpt
+!         do ib=1,mbandc
+!           sf=czero
+!           write(71,*)  
+!           write(71,*)  "#", ikpt, ib
+!           do ifreq=1,green%nw
+!             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
+!             write(71,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ifreq)))/pi/Ha_eV,ikpt
+!           enddo
+!         enddo
+!       enddo
+!     enddo
+   endif
+   if (option==4) then
+     do isppol = 1 , nsppol
+       do ikpt = 1, nkpt
+         do ib=1,mbandc
+           do ifreq=1,green%nw
+             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)*green%oper(1)%wtk(ikpt)
            enddo
          enddo
        enddo
-     endif
-     do ifreq=1,green%nw
-       write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
-       call wrtout(spcorb_unt,message,'COLL')
      enddo
-     close(spcorb_unt)
-   enddo
-   do ifreq=1,green%nw
-     write(message,*) green%omega(ifreq),(-aimag(sf(ifreq)))/3.141592653589793238_dp
-     call wrtout(spf_unt,message,'COLL')
-   enddo
+   endif
+   if(paw_dmft%dmft_kspectralfunc==0) then
+     sf_corr=czero
+     do iatom=1,natom
+       call int2char4(iatom,tag_at)
+       ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+       if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
+         MSG_ERROR(message)
+       end if
+       write(message,*) "#", nspinor,nsppol,ndim,green%nw
+       call wrtout(spcorb_unt,message,'COLL')
+       if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+         write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
+         call wrtout(spcorb_unt,message,'COLL')
+         ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
+         do isppol = 1 , nsppol
+           do ispinor=1, nspinor
+             do im=1,ndim
+               do ifreq=1,green%nw
+                 sf_corr(ifreq)=sf_corr(ifreq)+ green%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
+               enddo
+             enddo
+           enddo
+         enddo
+       endif
+       do ifreq=1,green%nw
+         write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
+         call wrtout(spcorb_unt,message,'COLL')
+       enddo
+       close(spcorb_unt)
+     enddo
+   endif
+   if (option==4) then
+     do ifreq=1,green%nw
+       write(message,*) green%omega(ifreq),(-aimag(sf(ifreq)))/3.141592653589793238_dp
+       call wrtout(spf_unt,message,'COLL')
+     enddo
+   endif
    close(spf_unt)
    ABI_DEALLOCATE(sf)
    ABI_DEALLOCATE(sf_corr)
@@ -1132,14 +1178,19 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      if(green%w_type=="imag") then
        omega_current=cmplx(zero,green%omega(ifreq),kind=dp)
      else if(green%w_type=="real") then
-       omega_current=cmplx(green%omega(ifreq),0.1/27.211_dp,kind=dp)
+       omega_current=cmplx(green%omega(ifreq),paw_dmft%temp,kind=dp)
      endif
      call init_oper(paw_dmft,self_minus_hdc_oper)
      call init_oper(paw_dmft,green_temp)
 
      call add_matlu(self%oper(ifreq)%matlu,self%hdc%matlu,&
 &                   self_minus_hdc_oper%matlu,green%oper(ifreq)%natom,-1)
-     if(paw_dmft%dmft_solv==4)  then
+! do iatom = 1 , natom
+   !write(6,*) 'self matlu', ifreq, self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
+   !write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
+   !write(6,*) 'self_minus_hdc_oper  ', ifreq, self_minus_hdc_oper%matlu(1)%mat(1,1,1,1,1)
+! enddo ! natom
+     if(paw_dmft%dmft_solv==4)  then 
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
      endif
@@ -1148,7 +1199,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      end if
 
      procb_ifreq=green%procb(ifreq,:)
-     call upfold_oper(self_minus_hdc_oper,paw_dmft,1,procb=procb_ifreq,iproc=myproc)
+     call upfold_oper(self_minus_hdc_oper,paw_dmft,1,procb=procb_ifreq,iproc=myproc,prt=1)
      do ib1 = 1 , paw_dmft%mbandc
        do ib = 1 , paw_dmft%mbandc
          do ikpt = 1 , paw_dmft%nkpt
@@ -1160,10 +1211,9 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 &               + fermilevel                               &
 &               - paw_dmft%eigen_lda(is,ikpt,ib)) * Id(ib,ib1) &
 &               - self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
-
-
-
-
+          !if(ikpt==2.and.ib==ib1) then
+          !  write(6,*) "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
+          !endif
 !&               - (self%oper(ifreq)%ks(is,ikpt,ib,ib1)-self%hdc%ks(is,ikpt,ib,ib1))
 !               if(prtopt>5) then
 !               if(ikpt==1.and.(ifreq==1.or.ifreq==3).and.ib==16.and.ib1==16) then
@@ -1249,7 +1299,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 !       ! ok
 !     endif
 ! call flush(std_out)
-     call sym_matlu(cryst_struc,green_temp%matlu,pawang)
+     call sym_matlu(cryst_struc,green_temp%matlu,pawang,paw_dmft)
      call copy_matlu(green_temp%matlu,green%oper(ifreq)%matlu,natom)
 !     if(ifreq==1.and.ifreq==11) then
 !       write(std_out,*) ifreq,nproc,'after sym'
@@ -1523,14 +1573,14 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      endif
 
 !  - Symetrise: continue sum over k-point: Full BZ
-     call sym_matlu(cryst_struc,green%occup%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup%matlu,pawang,paw_dmft)
      if(abs(prtopt)>2) then
        write(message,'(a,a,i10,a)') ch10,&
 &       "  = green%occup%matlu from int(gloc(w)) with symetrization"
        call wrtout(std_out,message,'COLL')
        call print_matlu(green%occup%matlu,natom,prtopt=3,opt_diag=-1)
      endif
-     call sym_matlu(cryst_struc,matlu_temp,pawang)
+     call sym_matlu(cryst_struc,matlu_temp,pawang,paw_dmft)
 
 !  - Post-treatment for summation over negative and positive frequencies:
 !    necessary in the case of nspinor==2 AND nspinor==1, but valid anywhere
@@ -1710,7 +1760,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      endif
 
 !  - Symetrise: continue sum over k-point: Full BZ
-     call sym_matlu(cryst_struc,green%occup%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup%matlu,pawang,paw_dmft)
      if(abs(prtopt)>=2) then
 !       write(message,'(a,a,i10,a)') ch10,&
 !&        "  = green%occup%matlu from projection of int(gks(w)) with symetrization"
@@ -2049,7 +2099,7 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
        enddo ! ikpt
      enddo ! isppol
      call loc_oper(green%occup_tau,paw_dmft,1)
-     call sym_matlu(cryst_struc,green%occup_tau%matlu,pawang)
+     call sym_matlu(cryst_struc,green%occup_tau%matlu,pawang,paw_dmft)
      write(message,'(a,a,i10,a)') ch10,"  green%occup_tau%matlu from green_occup_tau%ks"
      call wrtout(std_out,message,'COLL')
      call print_matlu(green%occup_tau%matlu,natom,prtopt=3)
@@ -2955,6 +3005,7 @@ end subroutine occup_green_tau
  procb(:,:)=-1
 
  if(nproc.ge.2*nw) then
+ !write(6,*) "AA"
    ratio=nproc/nw
    ABI_ALLOCATE(proca,(nw,nproc/nw))
    do ir=1,ratio
@@ -2986,6 +3037,7 @@ end subroutine occup_green_tau
    ABI_DEALLOCATE(proca)
 
  else if (nproc.ge.nw) then
+ !write(6,*) "BB"
    do iw=1,nw
      procb(iw,:)= iw
      proct(iw,iw)=1
@@ -2997,7 +3049,9 @@ end subroutine occup_green_tau
    nw_perproc=1
 
  else if (nproc.le.nw) then
+ !write(6,*) "CC"
    ratio=nw/nproc
+ !write(6,*) "ratio", ratio
    do iproc=0,nproc-1
      do iw=1,nw
        if (mod(iw-1,nproc)==iproc) then
@@ -3006,6 +3060,9 @@ end subroutine occup_green_tau
        endif
      enddo
    enddo
+    ! do iw=1,nw
+    !   write(6,*) "iw, iproc", iw, procb(iw,1)
+    ! enddo
    nw_perproc=ratio+1
 !  some procs will compute a number of frequency which is ratio and some
 !  other will compute a number of frequency which is ratio+1.
@@ -3121,8 +3178,7 @@ end subroutine occup_green_tau
 !======================================================================
 ! Symetrize
 !======================================================================
-   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang)
-
+   call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang,paw_dmft)
  enddo
  write(message,'(a,2x,a,f13.5)') ch10," == Print LDA Green's function for last frequency"
  call wrtout(std_out,message,'COLL')

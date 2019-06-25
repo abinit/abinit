@@ -7,7 +7,6 @@ EXTRA_DIST += \
 	README_xlf.md \
 	RELNOTES \
 	autogen.sh \
-	mkrobodoc.sh \
 	wipeout.sh
 
 # Additional files to clean
@@ -73,7 +72,9 @@ help_dev dev_help dev:
 # robodoc-html-x.x.x.tar contains all html files produced by ROBODOC
 robodoc:
 	rm -rf tmp-robodoc robodoc-html && mkdir tmp-robodoc
-	cp -rf $(top_srcdir)/src/[0-9]* tmp-robodoc
+	cp -rf $(top_srcdir)/shared/common/src/[0-3]* tmp-robodoc
+	cp -rf $(top_srcdir)/shared/libpaw/src tmp-robodoc/39_libpaw
+	cp -rf $(top_srcdir)/src/[4-9]* tmp-robodoc
 	cp $(top_srcdir)/config/robodoc/robodoc-html.rc tmp-robodoc/robodoc.rc
 	cd tmp-robodoc && rm -f */*.in && rm -f */interfaces* && robodoc > ../robodoc.log 2> ../robodoc.err
 	mv -f tmp-robodoc/www/robodoc robodoc-html

@@ -13,7 +13,7 @@ LIBPAW_CFG_DIR = $(LIBPAW_DIR)/config
 
 #Define ABINIT directories
 ABINIT_SRC_DIR = $(abinit_srcdir)
-LIBPAW_ABINIT_DIR = $(ABINIT_SRC_DIR)/src/42_libpaw
+LIBPAW_ABINIT_DIR = $(ABINIT_SRC_DIR)/shared/libpaw/src
 
 #Useful names
 LIBPAW_VERSION = @libpaw_version@

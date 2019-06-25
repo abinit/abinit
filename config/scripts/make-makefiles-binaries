@@ -107,8 +107,8 @@ if ( os.path.exists(cnf_file) ):
 else:
   include_dirs = []
 
-# FIXME: hard-coded include list
-include_dirs = ["incs"]
+# Common and core include lists
+include_dirs = ["common", "core"]
 
 for tmp in include_dirs:
   inc_list += " \\\n\t@src_%s_incs@" % (tmp)

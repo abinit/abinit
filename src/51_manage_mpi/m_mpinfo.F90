@@ -49,7 +49,7 @@ MODULE m_mpinfo
 
  private
 
-#if defined HAVE_MPI1 || (defined HAVE_MPI && defined FC_G95)
+#if defined HAVE_MPI1
  include 'mpif.h'
 #endif
 
@@ -1300,14 +1300,13 @@ subroutine initmpi_grid(mpi_enreg)
      call xmpi_comm_free(commcart_4d)
    end if
 
-!  Write some data
-   write(msg,'(a,4i5)') 'npfft, npband, npspinor and npkpt: ',&
-&   mpi_enreg%nproc_fft,mpi_enreg%nproc_band, &
-&   mpi_enreg%nproc_spinor,mpi_enreg%nproc_kpt
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(a,4i5)') 'me_fft, me_band, me_spinor , me_kpt: ',&
-&   mpi_enreg%me_fft,mpi_enreg%me_band,&
-&   mpi_enreg%me_spinor, mpi_enreg%me_kpt
+   !Write some data
+   !write(msg,'(a,4i5)') 'npfft, npband, npspinor and npkpt: ',&
+   !mpi_enreg%nproc_fft,mpi_enreg%nproc_band, mpi_enreg%nproc_spinor,mpi_enreg%nproc_kpt
+   !call wrtout(std_out,msg,'COLL')
+   !write(msg,'(a,4i5)') 'me_fft, me_band, me_spinor , me_kpt: ',&
+   !mpi_enreg%me_fft,mpi_enreg%me_band,mpi_enreg%me_spinor, mpi_enreg%me_kpt
+   !call wrtout(std_out,msg,'COLL')
 
  else ! paral_hf==1
 !* Option Hartree-Fock is active and more than 1 processor is dedicated to the parallelization over occupied states.
@@ -1363,6 +1362,7 @@ subroutine initmpi_grid(mpi_enreg)
    write(msg,'(a,2(1x,i0))') 'nphf and npkpt: ',mpi_enreg%nproc_hf, mpi_enreg%nproc_kpt
    call wrtout(std_out,msg,'COLL')
    write(msg,'(a,2(1x,i0))') 'me_hf, me_kpt: ',mpi_enreg%me_hf, mpi_enreg%me_kpt
+   call wrtout(std_out,msg,'COLL')
  end if
 #endif
 
@@ -2285,7 +2285,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 &     'nproc_kpt=',nproc_kpt,' >= nkpt=',nkpt,'* nsppol=',nsppol,ch10,&
 &     'The number of processors is larger than nkpt*nsppol. This is a waste.'
      MSG_WARNING(message)
-   else if(mod(nkpt*nsppol,nproc_kpt)/=0) then
+   else if (mod(nkpt*nsppol,nproc_kpt) /= 0) then
 !    nkpt not a multiple of nproc_kpt
      write(message,'(a,i0,a,i0,3a)')&
 &     'nkpt*nsppol (', nkpt*nsppol, ') is not a multiple of nproc_kpt (',nproc_kpt, ')', ch10,&

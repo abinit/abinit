@@ -44,7 +44,6 @@ module m_mover
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
- use m_crystal,            only : crystal_t, crystal_init
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron,   only : electronpositron_type
@@ -73,6 +72,7 @@ module m_mover
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef 
+
  implicit none
 
  private
@@ -198,8 +198,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
 & effective_potential,filename_ddb,verbose,writeHIST)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
 type(scfcv_t),intent(inout) :: scfcv_args
@@ -226,12 +224,12 @@ type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
-integer :: irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: nloop,nshell,ntime,option,comm, mxhist 
+integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
+integer :: ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request,unit_out
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
-character(len=500) :: dilatmx_errmsg
+!character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename,fname_ddb
@@ -244,7 +242,6 @@ logical :: skipcycle, file_opened
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
-type(crystal_t) :: crystal
 logical :: file_exists
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
@@ -319,7 +316,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  comm=scfcv_args%mpi_enreg%comm_cell
  me=xmpi_comm_rank(comm)
 
- mxhist=zero 
 
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
@@ -331,7 +327,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    end if
    call abihist_bcast(hist_prev,master,comm)
 
-   mxhist = hist_prev%mxhist ! Wirte number of MD-steps into mxhist  
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
@@ -381,13 +376,9 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1 .and. mxhist >= 3)then   ! then .and. hist%mxhist > 3 
+ if(specs%nhist/=-1)then   
   nhisttot = specs%nhist! We don't need to store all the history
- elseif(mxhist > 0 .and. mxhist  < 3)then
-  nhisttot = mxhist ! Less than three MD-Steps
- end if
-
- write(*,*) "mxhist", mxhist
+ endif 
 
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
@@ -615,11 +606,11 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
            INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
              if(file_opened .eqv. .TRUE.)then
-               write(unit_out,'(I7)',advance='no') itime !If wanted Write cycle to anharmonic_energy_contribution file
+               write(unit_out,'(I7)',advance='no') itime  !Write cycle to anharmonic_energy_contribution file
              endif
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
-               xred(:,:) = hist%xred(:,:,hist%mxhist) ! Fill xred with new ordering
+               xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
              end if 
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
@@ -627,7 +618,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
 
 !          Check if the simulation did not diverge...
-           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E2)then
+           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E5)then
 !            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
@@ -874,7 +865,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if (skipcycle) exit
 
 !DEBUG
-     write(std_out,*)' m_mover : will call precpred_1geo'
+!    write(std_out,*)' m_mover : will call precpred_1geo'
 !    call flush(std_out)
 !ENDDEBUG
 
@@ -1022,8 +1013,6 @@ contains
 
 subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,tolmxf)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itime,natom,ntime,optcell
@@ -1144,8 +1133,6 @@ end subroutine fconv
 
 subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itime,itime_hist,ntime
@@ -1243,8 +1230,6 @@ end subroutine mover
 !! SOURCE
 
 subroutine prtxfase(ab_mover,hist,itime,iout,pos)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1510,8 +1495,6 @@ implicit none
 
 subroutine gettag(atlist,index,natom,prtallatoms,tag)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
   logical,intent(in) :: prtallatoms
@@ -1570,8 +1553,6 @@ implicit none
 
 
 subroutine prtnatom(atlist,iout,message,natom,prtallatoms,thearray)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1667,7 +1648,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
  use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
- implicit none
 
 !Arguments ------------------------------------
 !scalars

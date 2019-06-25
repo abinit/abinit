@@ -4013,7 +4013,6 @@ end subroutine indfftrisc
 
 subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mpw,npw)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,ikg,ikpt,istwf_k,mkmem,mpw
@@ -4533,11 +4532,11 @@ subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
 ! *********************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
- !
- ! * Calculate the number of G-vectors for this k-point.
+
+ ! Calculate the number of G-vectors for this k-point.
  call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
- !
- ! * Allocate and calculate the set of G-vectors.
+
+ ! Allocate and calculate the set of G-vectors.
  ABI_MALLOC(kg_k,(3,npw_k))
  call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem_,MPI_enreg_seq,npw_k,npw_k_test)
 
@@ -4597,9 +4596,9 @@ subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
 
-!Use the following indexing (N means ngfft of the adequate direction)
-!0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= kg
-!1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index
+ ! Use the following indexing (N means ngfft of the adequate direction)
+ ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= kg
+ ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index
 
  me_fft=mpi_enreg%me_fft
  nd2=(n2-1)/mpi_enreg%nproc_fft+1
@@ -4628,8 +4627,8 @@ subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
      indpw_k(ig)=0
      mask(ig)=.false.
    end if
-   if ( ANY(kg_k(:,ig)>ngfft(1:3)/2) .or. ANY(kg_k(:,ig)<-(ngfft(1:3)-1)/2) ) then
-     write(msg,'(a,i0,a)')" The G-vector with ig: ",ig," falls outside the FFT box."
+   if (any(kg_k(:,ig)>ngfft(1:3)/2) .or. any(kg_k(:,ig)<-(ngfft(1:3)-1)/2) ) then
+     write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ig)," falls outside the FFT box. Increase boxcutmin (?)"
      MSG_ERROR(msg)
    end if
  end do

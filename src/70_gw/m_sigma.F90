@@ -44,6 +44,8 @@ MODULE m_sigma
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
  use m_screening,      only : epsilonm1_results
+ use m_neat,           only : neat_open_gw_sigma_pert, neat_gw_sigma_pert_add_line, neat_finish_gw_sigma_pert
+ use m_stream_string,  only : stream_string
 
  implicit none
 
@@ -459,6 +461,8 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
  character(len=500) :: msg
 !arrays
  character(len=12) :: tag_spin(2)
+!types
+ type(stream_string) :: stream
 
 ! *************************************************************************
 
@@ -489,6 +493,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    end if
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
+   call neat_open_gw_sigma_pert(stream, '', Sigp%kptgw(:,ikcalc), Sr%e0gap(ikibz,is)*Ha_eV, &
+&                               Sr%egwgap(ikibz,is)*Ha_eV, Sr%degwgap(ikibz,is)*Ha_eV, &
+&                               msg, tag='GwSigma')
 
    write(unt_gw,'(3f10.6)')Sigp%kptgw(:,ikcalc)
    write(unt_gw,'(i4)')Sigp%maxbnd(ikcalc,is)-Sigp%minbnd(ikcalc,is)+1
@@ -504,7 +511,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp>=10) then
-       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=ab_out)
+       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=ab_out, stream=stream)
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
 
        write(unt_gwdiag,'(i6,3f9.4)')                                  &
@@ -517,9 +524,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
        ! If not ppmodel, write out also the imaginary part in ab_out
        SELECT CASE(mod10)
        CASE(1,2)
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,prtvol=1)
+         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,stream=stream,prtvol=1)
        CASE DEFAULT
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out)
+         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,stream=stream)
        END SELECT
        call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=std_out,prtvol=1)
      end if
@@ -544,6 +551,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
    end if
+
+   call neat_finish_gw_sigma_pert(stream, ab_out)
+
    !
    ! === Output of the spectral function ===
    do io=1,Sr%nomega_r
@@ -639,7 +649,7 @@ end function gw_spectral_function
 !!
 !! SOURCE
 
-subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader)
+subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader,stream)
 
 !Arguments ------------------------------------
 !scalars
@@ -648,6 +658,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
  character(len=*),optional,intent(in) :: mode_paral
  logical,optional,intent(in) :: witheader
  type(sigma_t),intent(in) :: Sr
+ type(stream_string),intent(inout),optional :: stream
 
 !Local variables-------------------------------
 !scalars
@@ -682,6 +693,9 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &      REAL(Sr%degw        (iband,ik_ibz,1))*Ha_eV, &
 &      REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
+     if(present(stream)) then
+       call neat_gw_sigma_pert_add_line(stream, msg)
+     end if
      if (verbose/=0) then
        write(msg,'(i5,9f8.3)')                         &
 &              iband,                                  &
@@ -695,6 +709,9 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &        AIMAG(Sr%degw        (iband,ik_ibz,1))*Ha_eV, &
 &        AIMAG(Sr%egw         (iband,ik_ibz,1))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
+       if(present(stream)) then
+         call neat_gw_sigma_pert_add_line(stream, msg)
+       end if
      end if
   else
     write(msg,'(i5,9f8.3)')                     &
@@ -709,6 +726,9 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &     REAL(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
 &     REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
     call wrtout(my_unt,msg,my_mode)
+    if(present(stream)) then
+      call neat_gw_sigma_pert_add_line(stream, msg)
+    end if
 
     if (verbose/=0) then
       write(msg,'(i5,9f8.3)')                       &
@@ -723,6 +743,9 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &        AIMAG(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
 &        AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
+       if(present(stream)) then
+         call neat_gw_sigma_pert_add_line(stream, msg)
+       end if
     end if
   end if
 
@@ -741,6 +764,9 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &    REAL(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
 &    REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
    call wrtout(my_unt,msg,my_mode)
+   if(present(stream)) then
+     call neat_gw_sigma_pert_add_line(stream, msg)
+   end if
 
    if (verbose/=0) then
      write(msg,'(i5,10f8.3)')                    &
@@ -756,6 +782,9 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &     AIMAG(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
 &     AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
       call wrtout(my_unt,msg,my_mode)
+     if(present(stream)) then
+       call neat_gw_sigma_pert_add_line(stream, msg)
+     end if
    end if
  end if
 
@@ -783,7 +812,7 @@ end subroutine print_Sigma_perturbative
 !!
 !! SOURCE
 
-subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
+subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,stream)
 
 !Arguments ------------------------------------
 !scalars
@@ -792,6 +821,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
  character(len=*),intent(in),optional :: mode_paral
  type(sigma_t),intent(in) :: Sr
  type(ebands_t),intent(in) :: KS_BSt
+ type(stream_string),intent(inout),optional :: stream
 
 !Local variables-------------------------------
 !scalars
@@ -826,6 +856,9 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
 &      REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV,       &
 &           Sr%en_qp_diago (iband,ik_ibz,1)*Ha_eV
      call wrtout(my_unt,msg,my_mode)
+     if(present(stream)) then
+       call neat_gw_sigma_pert_add_line(stream, msg)
+     end if
 
      write(msg,'(i5,12(2x,f8.3))')                         &
 &            iband,                                        &
@@ -843,6 +876,9 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
 &            zero
      if (verbose/=0) then
        call wrtout(my_unt,msg,my_mode)
+       if(present(stream)) then
+         call neat_gw_sigma_pert_add_line(stream, msg)
+       end if
      end if
    else
      write(msg,'(i5,12(2x,f8.3))')                        &
@@ -860,6 +896,9 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
 &      REAL(Sr%egw        (iband,ik_ibz,isp))*Ha_eV,      &
 &           Sr%en_qp_diago(iband,ik_ibz,isp)*Ha_eV
      call wrtout(my_unt,msg,my_mode)
+     if(present(stream)) then
+       call neat_gw_sigma_pert_add_line(stream, msg)
+     end if
 
      write(msg,'(i5,12(2x,f8.3))')                        &
 &            iband,                                       &
@@ -877,6 +916,9 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
 &            zero
      if (verbose/=0) then
        call wrtout(my_unt,msg,my_mode)
+       if(present(stream)) then
+         call neat_gw_sigma_pert_add_line(stream, msg)
+       end if
      end if
    end if
 
@@ -897,7 +939,7 @@ end subroutine print_Sigma_QPSC
 !! Main creation method for the sigma_t data type.
 !!
 !! INPUTS
-!! usepawu=1 if we used LDA+U as starting point (only for PAW)
+!! usepawu= /=0 if we used LDA+U as starting point (only for PAW)
 !!
 !! OUTPUT
 !!

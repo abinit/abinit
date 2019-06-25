@@ -29,6 +29,7 @@ module m_cgtk
  use defs_basis
  use m_errors
  use m_abicore
+ use m_time
 
  use m_symtk,     only : mati3inv
  use m_geometry,  only : getspinrot
@@ -107,10 +108,13 @@ subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
 !arrays
  integer,parameter :: no_shift(3)=0,atindx(1)=1
  integer :: symm(3,3),symrel_conv(3,3)
- real(dp) :: phktnons(2,1),tnons_conv(3),spinrot(4)
+ real(dp) :: phktnons(2,1),tnons_conv(3),spinrot(4),tsec(2)
  real(dp),allocatable :: phase1d(:,:),phase3d(:,:),wavef1(:,:)
 
 !************************************************************************
+
+ ! Keep track of total time spent.
+ call timab(1780, 1, tsec)
 
  n1=work_ngfft(1); n2=work_ngfft(2); n3=work_ngfft(3)
  n4=work_ngfft(4); n5=work_ngfft(5); n6=work_ngfft(6)
@@ -206,6 +210,8 @@ subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
    ABI_FREE(phase3d)
    ABI_FREE(phase1d)
  end if
+
+ call timab(1780, 2, tsec)
 
 end subroutine cgtk_rotate
 !!***

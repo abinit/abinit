@@ -127,9 +127,9 @@ contains
   type(Symetries_Variables_type), intent(inout) :: Sym
   double precision, intent(in) :: xred_ideal(3,InVar%natom)
 
-  integer :: iout,ptgroupma,option,isym,jatom,ii,jj,ncoeff,mu
+  integer :: ptgroupma,isym,jatom,ii,jj,mu
   integer :: nsym,iatom_unitcell,jatom_unitcell,iatom
-  integer :: berryopt,jellslab,noncoll,use_inversion,chkprim,jatcell,counter,nzchempot
+  integer :: berryopt,jellslab,noncoll,use_inversion,chkprim,counter,nzchempot
   integer :: bravais(11)
   integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
   integer, allocatable :: symrel(:,:,:),symrel_tmp(:,:,:)

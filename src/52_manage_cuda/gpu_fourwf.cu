@@ -95,7 +95,7 @@
 #include "abi_common.h"
 #include "stdio.h"
 #include "cuda_header.h" 
-#include "gpu_four_header.h"
+#include "abi_gpu_header.h"
 
 
 //STATIC vars to avoid too much cuda overhead

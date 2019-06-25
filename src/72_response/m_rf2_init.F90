@@ -226,8 +226,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  eig1_k_stored=zero
 
 ! "dudk" contains du/dpert1 for every bands and ndir (=1 or 2) directions
- ABI_STAT_ALLOCATE(dudk,(2,rf2%ndir*nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in m_rf2 : dudk")
+ ABI_MALLOC_OR_DIE(dudk,(2,rf2%ndir*nband_k*size_wf), ierr)
  dudk=zero
  has_dudkprj=.false.
  if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
@@ -345,8 +344,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  gvnlx1(:,:) = zero
 
 ! "dsusdu" contains dS/dpert_dir |u_band> + S|du_band/dpert1> for every bands and ndir (=1 or 2) directions
- ABI_STAT_ALLOCATE(dsusdu,(2,rf2%ndir*nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in rf2_init : dsusdu")
+ ABI_MALLOC_OR_DIE(dsusdu,(2,rf2%ndir*nband_k*size_wf), ierr)
  dsusdu=zero
 
  ABI_ALLOCATE(rf2%amn,(2,nband_k**2))
@@ -565,8 +563,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! COMPUTATION OF "RHS_Stern", THE LAST PART OF "A_mn" AND A PART OF "Lambda_mn"
 ! **************************************************************************************************
 
- ABI_STAT_ALLOCATE(rf2%RHS_Stern,(2,nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in m_rf2 : RHS_Stern")
+ ABI_MALLOC_OR_DIE(rf2%RHS_Stern,(2,nband_k*size_wf), ierr)
  rf2%RHS_Stern(:,:)=zero
 
 !Computation of terms containing H^(2)
@@ -846,8 +843,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !  COMPUTATION OF "dcwavef" AND "Lambda_mn" FROM "A_mn"
 ! **************************************************************************************************
 
- ABI_STAT_ALLOCATE(rf2%dcwavef,(2,nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in m_rf2 : dcwavef")
+ ABI_MALLOC_OR_DIE(rf2%dcwavef,(2,nband_k*size_wf), ierr)
  rf2%dcwavef=zero
 
  do jband=1,nband_k

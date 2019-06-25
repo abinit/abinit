@@ -34,6 +34,8 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+### FIXME
+#%% no_check = yes
 #%% [shell]
 #%% pre_commands = w_touch abinit.exit
 #%% [files]

@@ -81,6 +81,10 @@ MODULE m_paw_dmft
   integer :: dmft_iter
   ! Nb of iterations for dmft
 
+  integer :: dmft_kspectralfunc
+  ! =0 Default
+  ! =1 Activate calculation of k-resolved spectral function
+
   integer :: dmft_solv
   ! choice of solver for DMFT
 
@@ -165,6 +169,8 @@ MODULE m_paw_dmft
   real(dp) :: dmftqmc_n
   ! qmc number of sweeps
 
+  integer :: dmftqmc_x2my2d
+  ! for doing qmc with x2my2d only (for testing purposes)
 
   integer :: dmftqmc_t2g
   ! for doing qmc with t2g only (for testing purposes)
@@ -242,11 +248,14 @@ MODULE m_paw_dmft
 
   real(dp) :: fermie
 
+
   real(dp) :: fermie_lda
 
   real(dp) :: nelectval
 
   character(len=fnlen) :: filapp
+
+  character(len=fnlen) :: filnamei
 
   real(dp) :: temp
 
@@ -544,7 +553,7 @@ end subroutine init_sc_dmft
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 !!
 
-subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmft, pawtab, psps, typat)
+subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor, paw_dmft, pawtab, psps, typat)
 
  use defs_abitypes
  use m_splines
@@ -561,15 +570,18 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  type(pawtab_type),intent(in)  :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type),intent(inout) :: paw_dmft
  character(len=fnlen), intent(in) :: fnametmp_app
+ character(len=fnlen), intent(in) :: fnamei
 !arrays
  integer,intent(in) :: typat(dtset%natom)
  real(dp),intent(in),target :: dmatpawu(:,:,:,:)
 !Local variables ------------------------------------
- integer :: ikpt,isym,itypat,nsppol,mbandc,maxlpawu, iatom, ifreq
- integer :: nflavor
+ integer :: grid_unt,ikpt,isym,itypat,nsppol,mbandc,maxlpawu, iatom, ifreq, ioerr
+ integer :: nflavor,ngrid,iexist2
+ character(len=fnlen) :: tmpfil
  real(dp) :: sumwtk
  character(len=500) :: message
  real(dp) :: unit_e,step
+ logical :: lexist
 ! *********************************************************************
 
  nsppol = dtset%nsppol
@@ -617,10 +629,12 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
    paw_dmft%nelectval= dtset%nelect-float(paw_dmft%dmftbandi-1)*paw_dmft%nsppol
  endif
  paw_dmft%filapp= fnametmp_app
+ paw_dmft%filnamei= fnamei
  paw_dmft%natpawu=dtset%natpawu
  paw_dmft%natom=dtset%natom
  paw_dmft%temp=dtset%tsmear!*unit_e
  paw_dmft%dmft_iter=dtset%dmft_iter
+ paw_dmft%dmft_kspectralfunc=dtset%dmft_kspectralfunc
  paw_dmft%dmft_dc=dtset%dmft_dc
  !paw_dmft%idmftloop=0
  paw_dmft%prtvol = dtset%prtvol
@@ -691,7 +705,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  else
    paw_dmft%dmft_nwlo=dtset%dmft_nwli
  endif
- paw_dmft%dmft_nwr=32
+ paw_dmft%dmft_nwr=800
  paw_dmft%dmft_rslf=dtset%dmft_rslf
  paw_dmft%dmft_mxsf=dtset%dmft_mxsf
  paw_dmft%dmftqmc_l=dtset%dmftqmc_l
@@ -699,6 +713,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  paw_dmft%dmftqmc_seed=dtset%dmftqmc_seed
  paw_dmft%dmftqmc_therm=dtset%dmftqmc_therm
  paw_dmft%dmftqmc_t2g=dtset%dmft_t2g
+ paw_dmft%dmftqmc_x2my2d=dtset%dmft_x2my2d
  paw_dmft%dmftctqmc_basis =dtset%dmftctqmc_basis
  paw_dmft%dmftctqmc_check =dtset%dmftctqmc_check
  paw_dmft%dmftctqmc_correl=dtset%dmftctqmc_correl
@@ -729,7 +744,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 ! allocate(paw_dmft%wtk(paw_dmft%nkpt))
  paw_dmft%wtk=>dtset%wtk
  if(dtset%iscf<0) then
- paw_dmft%wtk=one/float(dtset%nkpt)
+   paw_dmft%wtk=one/float(dtset%nkpt)
  endif
  sumwtk=0
  do ikpt=1,paw_dmft%nkpt
@@ -743,6 +758,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  do iatom=1,paw_dmft%natom
    paw_dmft%lpawu(iatom)=pawtab(typat(iatom))%lpawu
    if(paw_dmft%dmftqmc_t2g==1.and.paw_dmft%lpawu(iatom)==2) paw_dmft%lpawu(iatom)=1
+   if(paw_dmft%dmftqmc_x2my2d==1.and.paw_dmft%lpawu(iatom)==2) paw_dmft%lpawu(iatom)=0
  enddo
  paw_dmft%maxlpawu=maxval(paw_dmft%lpawu(:))
  maxlpawu = paw_dmft%maxlpawu
@@ -756,23 +772,66 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
 !=======================
 ! Real      frequencies
 !=======================
- ABI_ALLOCATE(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
 
-! Set up real frequencies for spectral function in Hubbard one.
- step=0.0015_dp
- paw_dmft%omega_r(2*paw_dmft%dmft_nwr)=pi*step*(two*float(paw_dmft%dmft_nwr-1)+one)
- do ifreq=1,2*paw_dmft%dmft_nwr-1
-  paw_dmft%omega_r(ifreq)=pi*step*(two*float(ifreq-1)+one)-paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
-!  write(std_out,*) ifreq,paw_dmft%omega_r(ifreq)
- enddo
+ iexist2=1
+ if(dtset%iscf<0.and.(paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8)) then
+     tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
+     inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
+   !  write(6,*) "inquire",lexist
+     if((.not.lexist)) then
+       iexist2=0
+       write(message,'(4x,a,i5,3a)') "File number",grid_unt,&
+&       " called ",trim(tmpfil)," does not exist"
+       call wrtout(std_out,message,'COLL')
+       message = "Cannot continue: the missing file coming from Maxent code is needed"
+       MSG_WARNING(message)
+     endif
+     
+     if(iexist2==1) then
+#ifdef FC_NAG
+       open (unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted',recl=ABI_RECL)
+#else
+       open (unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted')
+#endif
+       rewind(grid_unt)
+      ! if (open_file(tmpfil, message, newunit=grid_unt, status='unknown', form='formatted') /= 0) then
+      !   MSG_ERROR(message)
+      ! end if
+       write(message,'(3a)') ch10,"  == Read  grid frequency in file ",trim(tmpfil)
+       call wrtout(std_out,message,'COLL')
+       write(message,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', grid_unt
+       call wrtout(std_out,message,'COLL')
+       read(grid_unt,*) ngrid
+       ABI_ALLOCATE(paw_dmft%omega_r,(ngrid))
+       if(ioerr<0) then
+         message = "Error reading grid file"
+         MSG_ERROR(message)
+       endif
+       do ifreq=1,ngrid
+         read(grid_unt,*) paw_dmft%omega_r(ifreq)
+         paw_dmft%omega_r(ifreq)=paw_dmft%omega_r(ifreq)
+       enddo
+       if(ioerr<0) then
+         message = "Error reading grid file"
+         MSG_ERROR(message)
+       endif
+     endif
+ else
+  ABI_ALLOCATE(paw_dmft%omega_r,(2*paw_dmft%dmft_nwr))
+  ! Set up real frequencies for spectral function in Hubbard one.
+   step=0.00005_dp
+   paw_dmft%omega_r(2*paw_dmft%dmft_nwr)=pi*step*(two*float(paw_dmft%dmft_nwr-1)+one)
+   do ifreq=1,2*paw_dmft%dmft_nwr-1
+    paw_dmft%omega_r(ifreq)=pi*step*(two*float(ifreq-1)+one)-paw_dmft%omega_r(2*paw_dmft%dmft_nwr)
+  !  write(std_out,*) ifreq,paw_dmft%omega_r(ifreq)
+   enddo
 
-
+ endif
 !=======================
 ! Imaginary frequencies
 !=======================
 ! Set up log frequencies
  if(dtset%ucrpa==0) call construct_nwlo_dmft(paw_dmft)
-
 
 !=========================================================
 !== if we use ctqmc impurity solver

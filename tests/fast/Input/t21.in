@@ -61,6 +61,6 @@
 #%% authors = Unknown
 #%% keywords = 
 #%% description = 
-#%% 21. Conduct same relaxation but use ionmov=1 (molecular dynamics).
+#%%   21. Conduct same relaxation but use ionmov=1 (molecular dynamics).
 #%% topics = MolecularDynamics
 #%%<END TEST_INFO>

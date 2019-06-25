@@ -111,8 +111,6 @@ CONTAINS  !=====================================================================
 &               mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,&
 &               pawrad,pawtab)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mkmem,mpsang,mpw,natom,nkpt,nsppol
@@ -139,7 +137,7 @@ CONTAINS  !=====================================================================
  integer :: me,me_kpt,my_nspinor,nband_k,nband_cprj_k,npw_k,sender
  integer :: spaceComm_band,spaceComm_bandfftspin,spaceComm_fft,spaceComm_k,spaceComm_spin,spaceComm_w
  logical :: already_has_nabla,cprj_paral_band,mykpt
- real(dp) :: cgnm1,cgnm2,cpnm1,cpnm2,intg
+ real(dp) :: cgnm1,cgnm2,cpnm1,cpnm2
  character(len=500) :: message
 !arrays
  integer :: tmp_shape(3)
@@ -519,8 +517,6 @@ CONTAINS  !=====================================================================
  subroutine optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen0,filpsp,hdr,&
 &               mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawrad,pawtab)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcprj,mkmem,mpsang,natom,nkpt,nsppol
@@ -538,16 +534,16 @@ CONTAINS  !=====================================================================
 
 !Local variables-------------------------------
 !scalars
- integer :: basis_size,bdtot_index,cplex,etiq,iatom,ib,ibg
- integer :: ierr,ikpt,il,ilmn,iln,ount
+ integer :: bdtot_index,cplex,etiq,iatom,ib,ibg
+ integer :: ierr,ikpt,ilmn,iln,ount
  integer :: iorder_cprj,ispinor,isppol,istwf_k,itypat
- integer :: jb,jbsp,jl,jlmn,lmn_size,lmncmax,mband_cprj
- integer :: me,me_kpt,mesh_size,my_nspinor,nband_cprj_k,nband_k,nphicor
+ integer :: jb,jbsp,jlmn,lmn_size,lmncmax,mband_cprj
+ integer :: me,me_kpt,my_nspinor,nband_cprj_k,nband_k,nphicor
  integer :: sender,spaceComm_bandspin,spaceComm_k,spaceComm_w
  integer :: iomode,fformopt
  logical :: already_has_nabla,cprj_paral_band,ex,mykpt
  character(len=fnlen) :: filecore
- real(dp) :: cpnm1,cpnm2,intg
+ real(dp) :: cpnm1,cpnm2
 !arrays
  integer,allocatable :: indlmn_core(:,:),lcor(:),ncor(:)
  real(dp) :: tsec(2)
@@ -619,7 +615,7 @@ CONTAINS  !=====================================================================
    write(ount)(eigen0(ib),ib=1,mband*nkpt*nsppol)
    write(ount) nphicor
    do iln=1,nphicor
-     write(ount) ncor(iln),lcor(iln),half*energy_cor(iln)
+     write(ount) ncor(iln),lcor(iln),energy_cor(iln)
    end do
  end if
 
@@ -840,8 +836,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine linear_optics_paw(filnam,filnam_out,mpi_enreg_seq)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars

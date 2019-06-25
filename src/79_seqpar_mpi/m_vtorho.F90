@@ -83,6 +83,10 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
@@ -194,6 +198,8 @@ contains
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj=1 if cprj datastructure is stored in memory
 !!  wffnew,unit numbers for wf disk files.
+!!  with_vectornd = 1 if vectornd allocated
+!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
 !!  vxctau=(only for meta-GGA): derivative of XC energy density with respect to
 !!    kinetic energy density (depsxcdtau). The arrays vxctau(nfft,nspden,4) contains also
@@ -281,14 +287,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
-&           ucvol,usecprj,wffnew,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
-
- implicit none
+&           ucvol,usecprj,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,xred,&
+&           ylm,ylmgr,ylmdiel)
 
 !Arguments -------------------------------
  integer, intent(in) :: afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
  integer, intent(in) :: my_natom,natom,nfftf,nfftdiel,nkxc,npwdiel
- integer, intent(in) :: ntypat,optforces,optres,pwind_alloc,usecprj
+ integer, intent(in) :: ntypat,optforces,optres,pwind_alloc,usecprj,with_vectornd
  real(dp), intent(in) :: cpus,etotal,gsqcut,ucvol
  real(dp), intent(out) :: compch_fft,nres2,residm
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -316,7 +321,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: phnonsdiel(2,nfftdiel**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),rmet(3,3),rprimd(3,3)
- real(dp), intent(inout) :: vtrial(nfftf,dtset%nspden)
+ real(dp), intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
  real(dp), intent(inout) :: xred(3,natom)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp), intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -352,7 +357,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
- logical :: berryflag,computesusmat,fixed_occ
+ logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
  real(dp) :: dmft_ldaocc
@@ -370,7 +375,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vlocal_tmp(:,:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
@@ -661,6 +667,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ABI_ALLOCATE(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
    end if
 
+   has_vectornd = (with_vectornd .EQ. 1)
+   if(has_vectornd) then
+      ABI_ALLOCATE(vectornd_pac,(n4,n5,n6,gs_hamk%nvloc,3))
+   end if
+
 !  LOOP OVER SPINS
    do isppol=1,dtset%nsppol
      call timab(982,1,tsec)
@@ -706,10 +717,25 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      rhoaug(:,:,:,:)=zero
 
+     ! if vectornd is present, set it up for addition to gs_hamk similarly to how it's done for
+     ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
+     ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
+     if(has_vectornd) then
+        do idir = 1, 3
+           ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+           call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
+           ABI_DEALLOCATE(cgrvtrial)
+        end do
+     end if
+
 !    Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
      if (with_vxctau) then
        call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
+     end if
+     if (has_vectornd) then
+        call load_spin_hamiltonian(gs_hamk,isppol,vectornd=vectornd_pac)
      end if
 
      call timab(982,2,tsec)
@@ -847,19 +873,19 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         psps%usepaw,psps%useylm,ylm_k,ylmgr)
        end if
 
-!     compute and load nuclear dipole Hamiltonian at current k point
-       if(any(abs(gs_hamk%nucdipmom)>0.0)) then
-         if(allocated(nucdipmom_k)) then
-           ABI_DEALLOCATE(nucdipmom_k)
-         end if
-         ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
-         call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
-         if(allocated(gs_hamk%nucdipmom_k)) then
-            ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
-         end if
-         ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_k*(npw_k+1)/2))
-         call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
-       end if
+! !     compute and load nuclear dipole Hamiltonian at current k point
+!        if(any(abs(gs_hamk%nucdipmom)>0.0)) then
+!          if(allocated(nucdipmom_k)) then
+!            ABI_DEALLOCATE(nucdipmom_k)
+!          end if
+!          ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
+!          call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
+!          if(allocated(gs_hamk%nucdipmom_k)) then
+!             ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
+!          end if
+!          ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_k*(npw_k+1)/2))
+!          call load_k_hamiltonian(gs_hamk,nucdipmom_k=nucdipmom_k)
+!        end if
 
 
 !      Load k-dependent part in the Hamiltonian datastructure
@@ -1086,6 +1112,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if(with_vxctau) then
      ABI_DEALLOCATE(vxctaulocal)
    end if
+   if(has_vectornd) then
+      ABI_DEALLOCATE(vectornd_pac)
+   end if
 
    call timab(988,2,tsec)
 
@@ -1263,7 +1292,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
 
 !        ==  allocate paw_dmft%psichi and paw_dmft%eigen_lda
-         call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+         call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,&
+&         dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !        ==  gather crystal structure date into data "cryst_struc"
@@ -1285,6 +1315,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         paw_dmft,paw_ij,pawang,pawtab,psps,usecprj_local,dtfil%unpaw)
          call timab(620,2,tsec)
          call flush_unit(std_out)
+
 
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)
@@ -1577,10 +1608,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(994,1,tsec)
        if (psps%usepaw==0) then
          call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,&
-&         dtset%nsppol,dtset%nsym,dtset%paral_kgb,phnons,rhog  ,rhor  ,rprimd,dtset%symafm,dtset%symrel)
+&         dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
        else
          call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,&
-&         dtset%nsppol,dtset%nsym,dtset%paral_kgb,phnons,rhowfg,rhowfr,rprimd,dtset%symafm,dtset%symrel)
+&         dtset%nsppol,dtset%nsym,phnons,rhowfg,rhowfr,rprimd,dtset%symafm,dtset%symrel)
        end if
        call timab(994,2,tsec)
 !      We now have both rho(r) and rho(G), symmetrized, and if dtset%nsppol=2
@@ -1856,8 +1887,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 subroutine wvl_nscf_loop()
 
- implicit none
-
 !Arguments ------------------------------------
 ! integer, intent(in)                    :: istep,mcprj,nfft,nnsclo
 ! real(dp), intent(inout)                :: residm
@@ -1960,8 +1989,6 @@ subroutine wvl_nscf_loop()
 
 subroutine wvl_nscf_loop_bigdft()
 
- implicit none
-
 !Arguments ------------------------------------
 ! integer, intent(in)                    :: istep,mcprj,nfft,nnsclo
 ! real(dp), intent(inout)                :: residm
@@ -2053,8 +2080,6 @@ subroutine wvl_nscf_loop_bigdft()
 
 subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
- implicit none
-
 !Arguments ------------------------------------
  integer , intent(in)  :: mband,nkpt,nsppol
  integer , intent(in)  :: nband(nkpt*nsppol)
@@ -2113,8 +2138,6 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
 subroutine wvl_occ()
 
- implicit none
-
 !Local variables-------------------------------
  real(dp):: doccde_(dtset%mband*dtset%nkpt*dtset%nsppol)
 ! *************************************************************************
@@ -2167,8 +2190,6 @@ subroutine wvl_occ()
 
 subroutine wvl_occ_bigdft()
 
- implicit none
-
 ! *************************************************************************
 
    DBG_ENTER("COLL")
@@ -2220,8 +2241,6 @@ subroutine wvl_occ_bigdft()
 !! SOURCE
 
 subroutine wvl_comm_eigen()
-
- implicit none
 
 !Arguments ------------------------------------
 
@@ -2319,8 +2338,6 @@ end subroutine vtorho
 subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,mcgq,&
 &                      me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
 &                      npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: ikpt,ikpt_loc,isppol,me_distrb,mcg,mcgq,mkgq,my_nspinor,nband_k

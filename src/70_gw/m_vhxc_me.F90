@@ -26,6 +26,30 @@
 
 module m_vhxc_me
 
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_abicore
+ use m_errors
+ use m_xcdata
+ use libxc_functionals
+
+ use m_pawang,      only : pawang_type
+ use m_pawtab,      only : pawtab_type
+ use m_paw_an,      only : paw_an_type
+ use m_paw_ij,      only : paw_ij_type
+ use m_pawfgrtab,   only : pawfgrtab_type
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_denpot,  only : paw_mknewh0
+ use m_hide_blas,   only : xdotc
+ use m_wfd,         only : wfd_t
+ use m_crystal,     only : crystal_t
+ use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
+ use m_dtset,       only : dtset_copy, dtset_free
+ use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
+ use m_kg,          only : mkkin
+ use m_rhotoxc,     only : rhotoxc
+
  implicit none
 
  private
@@ -108,33 +132,9 @@ contains
 
 
 subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
-&  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
-&  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
-&  taug,taur) ! optional arguments
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_errors
- use m_xcdata
- use libxc_functionals
-
- use m_pawang,      only : pawang_type
- use m_pawtab,      only : pawtab_type
- use m_paw_an,      only : paw_an_type
- use m_paw_ij,      only : paw_ij_type
- use m_pawfgrtab,   only : pawfgrtab_type
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_paw_denpot,  only : paw_mknewh0
- use m_hide_blas,   only : xdotc
- use m_wfd,         only : wfd_t
- use m_crystal,     only : crystal_t
- use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
- use m_dtset,       only : dtset_copy, dtset_free
- use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
- use m_kg,          only : mkkin
- use m_rhotoxc,     only : rhotoxc
+  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
+  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
+  taug,taur) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -171,7 +171,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
  complex(dpc) :: cdot
- logical :: ltest,non_magnetic_xc
+ logical :: ltest,nmxc
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
  type(xcdata_type) :: xcdata,xcdata_hybrid
@@ -203,8 +203,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ! Usually FFT meshes for wavefunctions and potentials are not equal. Two approaches are possible:
  ! Either we Fourier interpolate potentials on the coarse WF mesh or we FFT the wfs on the dense mesh.
  ! The later approach is used, more CPU demanding but more accurate.
- non_magnetic_xc=(Dtset%usepawu==4).or.(Dtset%usepawu==14)
-
  if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,ngfftf)
 
  ! Fake MPI_type for sequential part
@@ -256,6 +254,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  nkxc   = 0 ! No computation of XC kernel
  n3xccc_= 0 ! No core
  nk3xc  = 0 ! k3xc not needed
+ nmxc=(Dtset%usepaw==1.and.mod(abs(Dtset%usepawu),10)==4)
 
  ABI_MALLOC(xccc3d_,(n3xccc_))
  ABI_MALLOC(kxc_,(nfftf,nkxc))
@@ -264,7 +263,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  call xcdata_init(xcdata,dtset=Dtset)
 
  call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+& nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
 & strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taug=taug,taur=taur)
 
  ! FABIEN's development
@@ -299,12 +298,12 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
    if(ixc_sigma<0)then
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
      call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
    else
      call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
-&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc_,option,dtset%paral_kgb,rhor,Cryst%rprimd,&
+&     nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
 &     strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
    end if
 
@@ -406,7 +405,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      if (Mflags%has_hbare==1) then
        ABI_MALLOC(kinpw,(npw_k))
        ABI_MALLOC(kinwf2,(npw_k*nspinor))
-       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass_free,Cryst%gmet,kg_k,kinpw,kpt,Wfd%npwwfn,0,0)
+       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass_free,Cryst%gmet,kg_k,kinpw,kpt,npw_k,0,0)
        where (kinpw>HUGE(zero)*1.d-11)
          kinpw=zero
        end where
@@ -552,7 +551,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
    ! For LDA+U
    do iat=1,Cryst%natom
      itypat=Cryst%typat(iat)
-     if (Pawtab(itypat)%usepawu>0) then
+     if (Pawtab(itypat)%usepawu/=0) then
        ltest=(allocated(Paw_ij(iat)%dijU))
        ABI_CHECK(ltest,"LDA+U but dijU not allocated")
      end if
@@ -686,7 +685,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
                      ! * Accumulate U term of the PAW Hamiltonian (only onsite AE contribution)
                      if (Mflags%has_vu==1) then
-                       if (Pawtab(itypat)%usepawu>0) then
+                       if (Pawtab(itypat)%usepawu/=0) then
                          dijU(1)=Paw_ij(iat)%dijU(klmn,is)
                          tmp_U(1,1)=tmp_U(1,1) + dijU(1)*re_p*fact
                          tmp_U(2,1)=tmp_U(2,1) + dijU(1)*im_p*fact
@@ -726,7 +725,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
                      ! TODO "ADD LDA+U and SO"
                      ! check this part
                      if (Mflags%has_vu==1) then
-                       if (Pawtab(itypat)%usepawu>0) then
+                       if (Pawtab(itypat)%usepawu/=0) then
                          ! Accumulate the U term of the PAW Hamiltonian (only onsite AE contribution)
                          dijU(1)=Paw_ij(iat)%dijU(klmn1  ,iab)
                          dijU(2)=Paw_ij(iat)%dijU(klmn1+1,iab)

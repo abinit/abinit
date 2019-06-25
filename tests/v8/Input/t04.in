@@ -1,5 +1,5 @@
 # Interpolation of electronic bands.
-ndtset 3
+ndtset 2
 
 prtebands 2    # Output bands in gnuplot format.
 ndivsm   20    # The variables below define the k-path 
@@ -43,21 +43,6 @@ tolwfr2   1e-14
 getwfk2   1
 getden2   1
 
-#################
-### DATASET 3 ###
-#################
-# Use B-spline to interpolate the eigenvalues 
-# along the path defined by nkpath, kptbounds and ndivsm. 
-ngkpt3        8 8 8 
-#ngkpt3       32 32 32
-nshiftk3      1
-shiftk3       0.0 0.0 0.0
-getwfk3    1
-getden3    1
-einterp3   2 3 3 3   # (cubic) B-spline interpolation 
-iscf3     -2
-tolwfr3   1e-14
-
 # Common data
 ecut   8.0
 nband  8
@@ -85,7 +70,6 @@ znucl  13
 #%% files_to_test = 
 #%%   t04.out, tolnlines=50, tolabs=5.0e-02, tolrel=1.0e-02;
 #%%   t04o_DS1_INTERP_EBANDS.data, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%%   t04o_DS3_INTERP_EBANDS.data, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%% psp_files = Al-psval.psp8
 #%% [paral_info]
 #%% max_nprocs = 8

@@ -108,8 +108,6 @@ contains
 
 subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elph_tr_ds)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ntemper
@@ -1063,8 +1061,6 @@ end subroutine mka2f_tr
 
 subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr_ds)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ntemper
@@ -1684,8 +1680,6 @@ end subroutine mka2f_tr_lova
 
 subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
- implicit none
-
 !Arguments ------------------------------------
  type(crystal_t),intent(in) :: Cryst
  type(ifc_type),intent(in) :: ifc
@@ -2273,7 +2267,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  if (elph_ds%prtbltztrp == 1) then
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
-&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,natom,nband,elph_ds%nelect,new_nkptirr, &
+&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,nband,elph_ds%nelect,new_nkptirr, &
 &   elph_ds%nspinor,nsppol,Cryst%nsym,Cryst%rprimd,Cryst%symrel,tmp_tau_k)
  end if !prtbltztrp
  ABI_DEALLOCATE(tmp_eigenGS)

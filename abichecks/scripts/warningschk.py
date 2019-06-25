@@ -18,11 +18,9 @@ from tests.pymods.termcolor import cprint
 gnu_warnings = { # ( warning_string, warno, src_excluded )
     #3  : ( 'Unused variable', ['12_hide_mpi','64_psp','68_dmft'] ),
     3  : ( 'Unused variable', [] ),
-    #4  : ( 'Unused dummy argument',  ['64_psp'] ),
     4  : ( 'Unused dummy argument',  [] ),
     5  : ( 'Nonstandard type declaration',  ['interfaces','28_numeric_noabirule','01_macroavnew_ext','01_linalg_ext','11_memory_mpi'] ),
     6  : ( 'Same actual argument associated with INTENT', []),  
-    #7  : ( 'CHARACTER expression will be truncated in assignment',  ["57_iopsp_parser",] ),
     7  : ( 'CHARACTER expression will be truncated in assignment',  [] ),
     8  : ( 'Limit of 39 continuations exceeded',  [] ),
     9  : ( 'DOUBLE COMPLEX at (1) does not conform to the Fortran 95 standard',  ['interfaces','01_linalg_ext'] ),
@@ -35,28 +33,11 @@ gnu_warnings = { # ( warning_string, warno, src_excluded )
     20 : ( 'Wunused-value', [] ),
 }
 
-def abinit_suite_generator():
-
-  def make_callable(wno):
-    def test_func(abenv):
-       try:
-         return main(wno, home_dir=abenv.home_dir)
-       except Exception:
-         import sys
-         raise sys.exc_info()[1] # Reraise current exception (py2.4 compliant)
-    test_func.__doc__ = gnu_warnings[wno][0]
-    return test_func
-
-  warnos = list(gnu_warnings.keys())
-  warnos.sort()
-  for wno in warnos:
-    yield {"test_func" : make_callable(wno)}
-
 def usage():
     print("\n Usage: warningschk test_number \n ")
 
+
 def main(warno, home_dir=""):
-  from os.path import join as pj
   debug = 0
 
   if not home_dir:
@@ -69,8 +50,9 @@ def main(warno, home_dir=""):
         home_dir = os.path.join(cwd_dir,"../../..")
 
   else:
-    inp_dir = pj(home_dir, "abichecks", "abirules", "Input")
+    inp_dir = os.path.join(home_dir, "abichecks", "abirules", "Input")
   
+  assert os.path.isdir(inp_dir)
   warno = int(warno)
   Warning      = gnu_warnings[warno][0]
   Warning_len  = len(Warning.split(" "))
@@ -81,7 +63,9 @@ def main(warno, home_dir=""):
   print( "Warning pattern : '"+Warning+"'")
   print( "**********************************************************************")
 
-  makelog = pj(home_dir, "make.log")
+  makelog = os.path.join(home_dir, "make.log")
+  if not os.path.exists(makelog):
+      raise RuntimeError("Cannot find `make.log` file in `%s`.\nUse `make -O multi -j8 > make.log 2>&1`" % home_dir)
   # make.log contains utf-8 characters
   #import io
   #logfile = io.open(makelog, "r", encoding="utf-8")
@@ -118,8 +102,7 @@ def main(warno, home_dir=""):
                       sourceline = sourceline.split(".")[0]
                   except IndexError:
                       pass
-                  pattern = pj(home_dir, "src") + "/*/"+source
-                  #pattern = '../../../src/*/'+source
+                  pattern = os.path.join(home_dir, "src") + "/*/"+source
                   path = glob.glob(pattern)
                   assert len(path) < 2
                   try:
@@ -160,8 +143,7 @@ def main(warno, home_dir=""):
           else:
               source = Buffer[4].split(":")[0]
               sourceline = Buffer[4].split(":")[1]
-              pattern = pj(home_dir, "src") + "/*/"+source
-              #pattern = '../../../src/*/'+source
+              pattern = os.path.join(home_dir, "src") + "/*/"+source
               path = glob.glob(pattern)
               source_dir = path[0].split('/')
               if debug: print ("[DEBUG] source_dir :" + source_dir[-2])
@@ -190,5 +172,4 @@ if __name__ == "__main__":
   except IndexError:
     home_dir = ""
 
-  exit_status = main(warno, home_dir=home_dir) 
-  sys.exit(exit_status)
+  sys.exit(main(warno, home_dir=home_dir))

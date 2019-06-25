@@ -35,11 +35,11 @@ module m_hidecudarec
  use defs_basis
  use defs_rectypes
  use m_abicore
-#if defined HAVE_GPU_CUDA
- use m_initcuda
-#endif
-
  use m_fft,        only : fourdp
+
+#if defined HAVE_GPU_CUDA
+ use m_gpu_toolbox
+#endif
 
  implicit none
 

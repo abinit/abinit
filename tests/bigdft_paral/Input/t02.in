@@ -72,14 +72,14 @@ prteig 0
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% nprocs_to_test = 4, 10
-#%%[NCPU_4]
+#%% [NCPU_4]
 #%% files_to_test = t02_MPI4.out,  tolnlines = 40, tolabs = 0.11, tolrel = 7.0e-2
-#%%[NCPU_10]
+#%% [NCPU_10]
 #%% files_to_test = t02_MPI10.out, tolnlines = 40, tolabs = 0.11, tolrel = 7.0e-2
 #%% [extra_info]
 #%% authors = T. Rangel, M. Torrent
 #%% keywords =  PAW, WVL
 #%% description = CO2 in a box (PAW). ABINIT routines are used (wvl_bigdft_comp=0)
-#%% Test: DIIS, density mixing
+#%%   Test: DIIS, density mixing
 #%% topics = Wavelets
 #%%<END TEST_INFO>

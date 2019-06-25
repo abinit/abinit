@@ -209,13 +209,14 @@ see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]
 ## 10 Other physical properties (e.g. positron)
   
   1. [[topic:positron|Positron calculations]]
-  2. [[topic:LDAminushalf|The LDA-1/2 approach]] (not in production)
+  2. [[topic:LDAminushalf|The LDA-1/2 approach]] 
 
 ## 11 Analysis/postprocessing tools
   
   1. [[topic:Abipy|Abipy - ABINIT swiss knife]]
   2. [[topic:APPA|Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis]]
   3. [[topic:Band2eps|Band2eps for phonon dispersion curves]]
+  4. [[topic:Tdep|Temperature Dependent Effective Potential, for thermodynamical properties]]
 
 ## 12 Miscellaneous topics
   

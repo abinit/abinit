@@ -188,8 +188,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,&
 &          xccc3d,xred,ylm,ylmgr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: forces_needed,ifirst_gs,istep,mcg,mcprj,mgfft,my_natom,n3xccc,nfft
@@ -437,7 +435,7 @@ type(fock_type),pointer, intent(inout) :: fock
        call getcut(boxcut_dum,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,std_out,qphon,ngfft)
        call initro(atindx,dtset%densty,gmet,gsqcut_eff,dtset%usepaw,mgfft,mpi_enreg,&
 &       psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,dtset%ntypat,&
-&       dtset%paral_kgb,psps,pawtab,ph1d,psps%qgrid_vl,rhog_ep,electronpositron%rhor_ep,&
+&       psps,pawtab,ph1d,psps%qgrid_vl,rhog_ep,electronpositron%rhor_ep,&
 &       dtset%spinat,ucvol,dtset%usepaw,dtset%ziontypat,dtset%znucl)
        if (dtset%usepaw==1) then
          if (size(electronpositron%pawrhoij_ep)>0) then
@@ -518,7 +516,7 @@ type(fock_type),pointer, intent(inout) :: fock
          call getcut(boxcut_dum,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,std_out,qphon,ngfft)
          call initro(atindx,dtset%densty,gmet,gsqcut_eff,dtset%usepaw,mgfft,mpi_enreg,&
 &         psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,dtset%ntypat,&
-&         dtset%paral_kgb,psps,pawtab,ph1d,psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,&
+&         psps,pawtab,ph1d,psps%qgrid_vl,rhog,rhor,dtset%spinat,ucvol,&
 &         dtset%usepaw,dtset%ziontypat,dtset%znucl)
 
          if (dtset%usepaw==1) then
@@ -592,7 +590,7 @@ type(fock_type),pointer, intent(inout) :: fock
      call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    end if
    if (history_level/=-1) then
-     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_ep,rprimd,&
+     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,rhog_ep,rprimd,&
 &     electronpositron%vha_ep)
      electronpositron%vha_ep=-electronpositron%vha_ep
    else
@@ -908,8 +906,6 @@ end subroutine setup_positron
 subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,nfft,ngfft,nhat,&
 &                      option,pawang,pawrad,pawrhoij,pawtab,rate,rate_paw,rhor,ucvol,xccc3d,&
 &                      rhor_dop_el,pawrhoij_dop_el,pawrhoij_ep) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1849,8 +1845,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &                     filpsp,kg,mcg,mcprj,mpi_enreg,my_natom,&
 &                     n3xccc,nfft,ngfft,nhat,npwarr,occ,pawang,pawrad,&
 &                     pawrhoij,pawtab,rhor,xccc3d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3338,8 +3332,6 @@ end subroutine posdoppler
 subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enreg,&
 &                      option,pawang,pawrad,pawrhoij,pawrhoij_ep,&
 &                      pawtab,rate,rhocorej)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

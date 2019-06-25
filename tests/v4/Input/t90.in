@@ -73,5 +73,5 @@ nsppol 2
 #%%   the first column is sometimes filled by "meaningful" characters,
 #%%   instead of the symbols or blanks needed to process it
 #%%   and compare it with the reference, thanks to the fldiff.pl script.
-#%% WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
 #%%<END TEST_INFO>

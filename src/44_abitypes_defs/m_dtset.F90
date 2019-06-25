@@ -39,8 +39,9 @@ MODULE m_dtset
  private
 
  public :: dtset_chkneu
- public :: dtset_copy
- public :: dtset_free
+ public :: dtset_copy              ! Copy object.
+ public :: dtset_free              ! Free dynamic memory.
+ public :: dtset_free_nkpt_arrays  ! Free arrays that depend on input nkpt (used in EPH code)
  public :: find_getdtset     ! Find the number of the dataset (iget) for a given value of a "get" variable (getvalue)
  public :: get_npert_rbz     ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
  public :: testsusmat        ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
@@ -430,6 +431,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dmft_entropy       = dtin%dmft_entropy
  dtout%dmft_charge_prec   = dtin%dmft_charge_prec
  dtout%dmft_iter          = dtin%dmft_iter
+ dtout%dmft_kspectralfunc = dtin%dmft_kspectralfunc
  dtout%dmft_nlambda       = dtin%dmft_nlambda
  dtout%dmft_mxsf          = dtin%dmft_mxsf
  dtout%dmft_nwlo          = dtin%dmft_nwlo
@@ -439,6 +441,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dmft_rslf          = dtin%dmft_rslf
  dtout%dmft_solv          = dtin%dmft_solv
  dtout%dmft_t2g           = dtin%dmft_t2g
+ dtout%dmft_x2my2d         = dtin%dmft_x2my2d
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmftbandi          = dtin%dmftbandi
@@ -479,26 +482,34 @@ subroutine dtset_copy(dtout, dtin)
 
  dtout%eph_mustar         = dtin%eph_mustar
  dtout%eph_intmeth        = dtin%eph_intmeth
+ dtout%eph_tols_idelta    = dtin%eph_tols_idelta
+ dtout%eph_phrange        = dtin%eph_phrange
  dtout%eph_extrael        = dtin%eph_extrael
  dtout%eph_fermie         = dtin%eph_fermie
  dtout%eph_frohlichm      = dtin%eph_frohlichm
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
+ dtout%eph_np_pqbks       = dtin%eph_np_pqbks
+ dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
+ dtout%eph_stern          = dtin%eph_stern
  dtout%eph_transport      = dtin%eph_transport
 
  dtout%ph_wstep          = dtin%ph_wstep
  dtout%ph_intmeth        = dtin%ph_intmeth
  dtout%symdynmat         = dtin%symdynmat
+ dtout%symv1scf          = dtin%symv1scf
  dtout%ph_nqshift        = dtin%ph_nqshift
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
+ dtout%dvdb_add_lr       = dtin%dvdb_add_lr
 
  dtout%sigma_bsum_range = dtin%sigma_bsum_range
+ dtout%sigma_erange = dtin%sigma_erange
  dtout%sigma_ngkpt = dtin%sigma_ngkpt
  dtout%sigma_nshiftk = dtin%sigma_nshiftk
  if (allocated(dtin%sigma_shiftk)) call alloc_copy(dtin%sigma_shiftk, dtout%sigma_shiftk)
@@ -796,6 +807,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtefmas           = dtin%prtefmas
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
+ dtout%prteliash          = dtin%prteliash
  dtout%prtfc              = dtin%prtfc
  dtout%prtfull1wf         = dtin%prtfull1wf
  dtout%prtfsurf           = dtin%prtfsurf
@@ -892,6 +904,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%usewvl             = dtin%usewvl
  dtout%usexcnhat_orig     = dtin%usexcnhat_orig
  dtout%useylm             = dtin%useylm
+ dtout%use_yaml           = dtin%use_yaml
  dtout%vacnum             = dtin%vacnum
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
@@ -1082,146 +1095,83 @@ subroutine dtset_copy(dtout, dtin)
 !Use alloc_copy to allocate and copy the allocatable arrays
 
 !integer allocatables
- call alloc_copy( dtin%algalch, dtout%algalch)
-
- call alloc_copy( dtin%bdgw, dtout%bdgw)
-
- call alloc_copy( dtin%bs_loband, dtout%bs_loband)
-
- call alloc_copy( dtin%dynimage, dtout%dynimage)
-
- call alloc_copy( dtin%efmas_bands, dtout%efmas_bands)
-
- call alloc_copy( dtin%iatfix, dtout%iatfix)
-
- call alloc_copy( dtin%iatsph, dtout%iatsph)
-
- call alloc_copy( dtin%istwfk, dtout%istwfk)
-
- call alloc_copy( dtin%kberry, dtout%kberry)
-
- call alloc_copy( dtin%lexexch, dtout%lexexch)
-
- call alloc_copy( dtin%ldaminushalf, dtout%ldaminushalf)
-
- call alloc_copy( dtin%lpawu, dtout%lpawu)
-
- call alloc_copy( dtin%nband, dtout%nband)
-
- call alloc_copy( dtin%plowan_iatom, dtout%plowan_iatom)
-
- call alloc_copy( dtin%plowan_it, dtout%plowan_it)
-
- call alloc_copy( dtin%plowan_nbl, dtout%plowan_nbl)
-
- call alloc_copy( dtin%plowan_lcalc, dtout%plowan_lcalc)
-
- call alloc_copy( dtin%plowan_projcalc, dtout%plowan_projcalc)
-
- call alloc_copy( dtin%prtatlist, dtout%prtatlist)
-
- call alloc_copy( dtin%so_psp, dtout%so_psp)
-
- call alloc_copy( dtin%symafm, dtout%symafm)
-
- call alloc_copy( dtin%symrel, dtout%symrel)
-
- call alloc_copy( dtin%typat, dtout%typat)
+ call alloc_copy(dtin%algalch, dtout%algalch)
+ call alloc_copy(dtin%bdgw, dtout%bdgw)
+ call alloc_copy(dtin%bs_loband, dtout%bs_loband)
+ call alloc_copy(dtin%dynimage, dtout%dynimage)
+ call alloc_copy(dtin%efmas_bands, dtout%efmas_bands)
+ call alloc_copy(dtin%iatfix, dtout%iatfix)
+ call alloc_copy(dtin%iatsph, dtout%iatsph)
+ call alloc_copy(dtin%istwfk, dtout%istwfk)
+ call alloc_copy(dtin%kberry, dtout%kberry)
+ call alloc_copy(dtin%lexexch, dtout%lexexch)
+ call alloc_copy(dtin%ldaminushalf, dtout%ldaminushalf)
+ call alloc_copy(dtin%lpawu, dtout%lpawu)
+ call alloc_copy(dtin%nband, dtout%nband)
+ call alloc_copy(dtin%plowan_iatom, dtout%plowan_iatom)
+ call alloc_copy(dtin%plowan_it, dtout%plowan_it)
+ call alloc_copy(dtin%plowan_nbl, dtout%plowan_nbl)
+ call alloc_copy(dtin%plowan_lcalc, dtout%plowan_lcalc)
+ call alloc_copy(dtin%plowan_projcalc, dtout%plowan_projcalc)
+ call alloc_copy(dtin%prtatlist, dtout%prtatlist)
+ call alloc_copy(dtin%so_psp, dtout%so_psp)
+ call alloc_copy(dtin%symafm, dtout%symafm)
+ call alloc_copy(dtin%symrel, dtout%symrel)
+ call alloc_copy(dtin%typat, dtout%typat)
 
 !Allocate and copy real allocatable
- call alloc_copy( dtin%acell_orig, dtout%acell_orig)
-
- call alloc_copy( dtin%amu_orig, dtout%amu_orig)
-
- call alloc_copy( dtin%atvshift, dtout%atvshift)
-
- call alloc_copy( dtin%cd_imfrqs, dtout%cd_imfrqs)
-
- call alloc_copy( dtin%chempot, dtout%chempot)
-
- call alloc_copy( dtin%corecs, dtout%corecs)
-
- call alloc_copy( dtin%densty, dtout%densty)
-
- call alloc_copy( dtin%dmatpawu, dtout%dmatpawu)
-
- call alloc_copy( dtin%efmas_dirs, dtout%efmas_dirs)
-
- call alloc_copy( dtin%f4of2_sla, dtout%f4of2_sla)
-
- call alloc_copy( dtin%f6of2_sla, dtout%f6of2_sla)
-
- call alloc_copy( dtin%gw_qlwl, dtout%gw_qlwl)
-
- call alloc_copy( dtin%gw_freqsp, dtout%gw_freqsp)
-
- call alloc_copy( dtin%gwls_list_proj_freq, dtout%gwls_list_proj_freq)
-
- call alloc_copy( dtin%jpawu, dtout%jpawu)
-
- call alloc_copy( dtin%kpt, dtout%kpt)
-
- call alloc_copy( dtin%kptgw, dtout%kptgw)
-
- call alloc_copy( dtin%kptns, dtout%kptns)
-
- call alloc_copy( dtin%kptns_hf, dtout%kptns_hf)
-
- call alloc_copy( dtin%mixalch_orig, dtout%mixalch_orig)
-
- call alloc_copy( dtin%mixesimgf, dtout%mixesimgf)
-
- call alloc_copy( dtin%nucdipmom, dtout%nucdipmom)
-
- call alloc_copy( dtin%occ_orig, dtout%occ_orig)
-
- call alloc_copy( dtin%pimass, dtout%pimass)
-
- call alloc_copy( dtin%ptcharge, dtout%ptcharge)
-
- call alloc_copy( dtin%qmass, dtout%qmass)
-
- call alloc_copy( dtin%qptdm, dtout%qptdm)
-
- call alloc_copy( dtin%quadmom, dtout%quadmom)
-
- call alloc_copy( dtin%ratsph, dtout%ratsph)
-
- call alloc_copy( dtin%rprim_orig, dtout%rprim_orig)
-
- call alloc_copy( dtin%rprimd_orig, dtout%rprimd_orig)
-
- call alloc_copy( dtin%shiftk, dtout%shiftk)
-
- call alloc_copy( dtin%spinat, dtout%spinat)
-
- call alloc_copy( dtin%tnons, dtout%tnons)
-
- call alloc_copy( dtin%upawu, dtout%upawu)
-
- call alloc_copy( dtin%vel_orig, dtout%vel_orig)
-
- call alloc_copy( dtin%vel_cell_orig, dtout%vel_cell_orig)
-
- call alloc_copy( dtin%wtatcon, dtout%wtatcon)
-
- call alloc_copy( dtin%wtk, dtout%wtk)
-
- call alloc_copy( dtin%xred_orig, dtout%xred_orig)
-
- call alloc_copy( dtin%xredsph_extra, dtout%xredsph_extra)
-
- call alloc_copy( dtin%ziontypat, dtout%ziontypat)
-
- call alloc_copy( dtin%znucl, dtout%znucl)
-
- DBG_EXIT("COLL")
+ call alloc_copy(dtin%acell_orig, dtout%acell_orig)
+ call alloc_copy(dtin%amu_orig, dtout%amu_orig)
+ call alloc_copy(dtin%atvshift, dtout%atvshift)
+ call alloc_copy(dtin%cd_imfrqs, dtout%cd_imfrqs)
+ call alloc_copy(dtin%chempot, dtout%chempot)
+ call alloc_copy(dtin%corecs, dtout%corecs)
+ call alloc_copy(dtin%densty, dtout%densty)
+ call alloc_copy(dtin%dmatpawu, dtout%dmatpawu)
+ call alloc_copy(dtin%efmas_dirs, dtout%efmas_dirs)
+ call alloc_copy(dtin%f4of2_sla, dtout%f4of2_sla)
+ call alloc_copy(dtin%f6of2_sla, dtout%f6of2_sla)
+ call alloc_copy(dtin%gw_qlwl, dtout%gw_qlwl)
+ call alloc_copy(dtin%gw_freqsp, dtout%gw_freqsp)
+ call alloc_copy(dtin%gwls_list_proj_freq, dtout%gwls_list_proj_freq)
+ call alloc_copy(dtin%jpawu, dtout%jpawu)
+ call alloc_copy(dtin%kpt, dtout%kpt)
+ call alloc_copy(dtin%kptgw, dtout%kptgw)
+ call alloc_copy(dtin%kptns, dtout%kptns)
+ call alloc_copy(dtin%kptns_hf, dtout%kptns_hf)
+ call alloc_copy(dtin%mixalch_orig, dtout%mixalch_orig)
+ call alloc_copy(dtin%mixesimgf, dtout%mixesimgf)
+ call alloc_copy(dtin%nucdipmom, dtout%nucdipmom)
+ call alloc_copy(dtin%occ_orig, dtout%occ_orig)
+ call alloc_copy(dtin%pimass, dtout%pimass)
+ call alloc_copy(dtin%ptcharge, dtout%ptcharge)
+ call alloc_copy(dtin%qmass, dtout%qmass)
+ call alloc_copy(dtin%qptdm, dtout%qptdm)
+ call alloc_copy(dtin%quadmom, dtout%quadmom)
+ call alloc_copy(dtin%ratsph, dtout%ratsph)
+ call alloc_copy(dtin%rprim_orig, dtout%rprim_orig)
+ call alloc_copy(dtin%rprimd_orig, dtout%rprimd_orig)
+ call alloc_copy(dtin%shiftk, dtout%shiftk)
+ call alloc_copy(dtin%spinat, dtout%spinat)
+ call alloc_copy(dtin%tnons, dtout%tnons)
+ call alloc_copy(dtin%upawu, dtout%upawu)
+ call alloc_copy(dtin%vel_orig, dtout%vel_orig)
+ call alloc_copy(dtin%vel_cell_orig, dtout%vel_cell_orig)
+ call alloc_copy(dtin%wtatcon, dtout%wtatcon)
+ call alloc_copy(dtin%wtk, dtout%wtk)
+ call alloc_copy(dtin%xred_orig, dtout%xred_orig)
+ call alloc_copy(dtin%xredsph_extra, dtout%xredsph_extra)
+ call alloc_copy(dtin%ziontypat, dtout%ziontypat)
+ call alloc_copy(dtin%znucl, dtout%znucl)
 
  dtout%ndivsm = dtin%ndivsm
  dtout%nkpath = dtin%nkpath
  dtout%einterp = dtin%einterp
  call alloc_copy(dtin%kptbounds, dtout%kptbounds)
  dtout%tmesh = dtin%tmesh
+ dtout%getkerange_path = dtin%getkerange_path
+
+ DBG_EXIT("COLL")
 
 end subroutine dtset_copy
 !!***
@@ -1258,224 +1208,118 @@ subroutine dtset_free(dtset)
 
  !@dataset_type
 !integer allocatable
- if (allocated(dtset%algalch))     then
-   ABI_DEALLOCATE(dtset%algalch)
- end if
- if (allocated(dtset%bdgw))        then
-   ABI_DEALLOCATE(dtset%bdgw)
- end if
-  if (allocated(dtset%bs_loband))  then
-    ABI_DEALLOCATE(dtset%bs_loband)
-  end if
-
- if (allocated(dtset%dynimage))    then
-   ABI_DEALLOCATE(dtset%dynimage)
- end if
- if (allocated(dtset%efmas_bands))        then
-   ABI_DEALLOCATE(dtset%efmas_bands)
- end if
- if (allocated(dtset%iatfix))      then
-   ABI_DEALLOCATE(dtset%iatfix)
- end if
- if (allocated(dtset%iatsph))      then
-   ABI_DEALLOCATE(dtset%iatsph)
- end if
- if (allocated(dtset%istwfk))      then
-   ABI_DEALLOCATE(dtset%istwfk)
- end if
- if (allocated(dtset%kberry))      then
-   ABI_DEALLOCATE(dtset%kberry)
- end if
- if (allocated(dtset%lexexch))     then
-   ABI_DEALLOCATE(dtset%lexexch)
- end if
- if (allocated(dtset%ldaminushalf))     then
-   ABI_DEALLOCATE(dtset%ldaminushalf)
- end if
- if (allocated(dtset%lpawu))       then
-   ABI_DEALLOCATE(dtset%lpawu)
- end if
- if (allocated(dtset%nband))       then
-   ABI_DEALLOCATE(dtset%nband)
- end if
- if (allocated(dtset%ph_freez_disp_ampl)) then
-   ABI_DEALLOCATE(dtset%ph_freez_disp_ampl)
- end if
- if (allocated(dtset%ph_qpath)) then
-   ABI_DEALLOCATE(dtset%ph_qpath)
- end if
- if (allocated(dtset%ph_qshift)) then
-   ABI_DEALLOCATE(dtset%ph_qshift)
- end if
- if (allocated(dtset%plowan_iatom))       then
-   ABI_DEALLOCATE(dtset%plowan_iatom)
- end if
- if (allocated(dtset%plowan_it))       then
-   ABI_DEALLOCATE(dtset%plowan_it)
- end if
- if (allocated(dtset%plowan_lcalc))       then
-   ABI_DEALLOCATE(dtset%plowan_lcalc)
- end if
- if (allocated(dtset%plowan_nbl))       then
-   ABI_DEALLOCATE(dtset%plowan_nbl)
- end if
- if (allocated(dtset%plowan_projcalc))       then
-   ABI_DEALLOCATE(dtset%plowan_projcalc)
- end if
- if (allocated(dtset%prtatlist))   then
-   ABI_DEALLOCATE(dtset%prtatlist)
- end if
- if (allocated(dtset%so_psp))      then
-   ABI_DEALLOCATE(dtset%so_psp)
- end if
- if (allocated(dtset%symafm))      then
-   ABI_DEALLOCATE(dtset%symafm)
- end if
- if (allocated(dtset%symrel))      then
-   ABI_DEALLOCATE(dtset%symrel)
- end if
- if (allocated(dtset%typat))       then
-   ABI_DEALLOCATE(dtset%typat)
- end if
+ ABI_SFREE(dtset%algalch)
+ ABI_SFREE(dtset%bdgw)
+ ABI_SFREE(dtset%bs_loband)
+ ABI_SFREE(dtset%dynimage)
+ ABI_SFREE(dtset%efmas_bands)
+ ABI_SFREE(dtset%iatfix)
+ ABI_SFREE(dtset%iatsph)
+ ABI_SFREE(dtset%istwfk)
+ ABI_SFREE(dtset%kberry)
+ ABI_SFREE(dtset%lexexch)
+ ABI_SFREE(dtset%ldaminushalf)
+ ABI_SFREE(dtset%lpawu)
+ ABI_SFREE(dtset%nband)
+ ABI_SFREE(dtset%ph_freez_disp_ampl)
+ ABI_SFREE(dtset%ph_qpath)
+ ABI_SFREE(dtset%ph_qshift)
+ ABI_SFREE(dtset%plowan_iatom)
+ ABI_SFREE(dtset%plowan_it)
+ ABI_SFREE(dtset%plowan_lcalc)
+ ABI_SFREE(dtset%plowan_nbl)
+ ABI_SFREE(dtset%plowan_projcalc)
+ ABI_SFREE(dtset%prtatlist)
+ ABI_SFREE(dtset%so_psp)
+ ABI_SFREE(dtset%symafm)
+ ABI_SFREE(dtset%symrel)
+ ABI_SFREE(dtset%typat)
 
 !real allocatable
- if (allocated(dtset%acell_orig))  then
-   ABI_DEALLOCATE(dtset%acell_orig)
- end if
- if (allocated(dtset%amu_orig))    then
-   ABI_DEALLOCATE(dtset%amu_orig)
- end if
- if (allocated(dtset%atvshift))    then
-   ABI_DEALLOCATE(dtset%atvshift)
- end if
- if (allocated(dtset%cd_imfrqs))   then
-   ABI_DEALLOCATE(dtset%cd_imfrqs)
- end if
- if (allocated(dtset%chempot))    then
-   ABI_DEALLOCATE(dtset%chempot)
- end if
- if (allocated(dtset%corecs))      then
-   ABI_DEALLOCATE(dtset%corecs)
- end if
- if (allocated(dtset%densty))      then
-   ABI_DEALLOCATE(dtset%densty)
- end if
- if (allocated(dtset%dmatpawu))    then
-   ABI_DEALLOCATE(dtset%dmatpawu)
- end if
- if (allocated(dtset%efmas_dirs))        then
-   ABI_DEALLOCATE(dtset%efmas_dirs)
- end if
- if (allocated(dtset%gw_qlwl))     then
-   ABI_DEALLOCATE(dtset%gw_qlwl)
- end if
- if (allocated(dtset%gw_freqsp))   then
-   ABI_DEALLOCATE(dtset%gw_freqsp)
- end if
- if (allocated(dtset%gwls_list_proj_freq))   then
-   ABI_DEALLOCATE(dtset%gwls_list_proj_freq)
- end if
- if (allocated(dtset%f4of2_sla))   then
-   ABI_DEALLOCATE(dtset%f4of2_sla)
- end if
- if (allocated(dtset%f6of2_sla))   then
-   ABI_DEALLOCATE(dtset%f6of2_sla)
- end if
- if (allocated(dtset%jpawu))       then
-   ABI_DEALLOCATE(dtset%jpawu)
- end if
- if (allocated(dtset%kpt))         then
-   ABI_DEALLOCATE(dtset%kpt)
- end if
- if (allocated(dtset%kptbounds)) then
-   ABI_DEALLOCATE(dtset%kptbounds)
- end if
- if (allocated(dtset%kptgw))       then
-   ABI_DEALLOCATE(dtset%kptgw)
- end if
- if (allocated(dtset%kptns))       then
-   ABI_DEALLOCATE(dtset%kptns)
- end if
- if (allocated(dtset%kptns_hf))       then
-   ABI_DEALLOCATE(dtset%kptns_hf)
- end if
- if (allocated(dtset%mixalch_orig))     then
-   ABI_DEALLOCATE(dtset%mixalch_orig)
- end if
- if (allocated(dtset%mixesimgf))     then
-   ABI_DEALLOCATE(dtset%mixesimgf)
- end if
- if (allocated(dtset%nucdipmom))      then
-   ABI_DEALLOCATE(dtset%nucdipmom)
- end if
- if (allocated(dtset%occ_orig))    then
-   ABI_DEALLOCATE(dtset%occ_orig)
- end if
- if (allocated(dtset%pimass))      then
-   ABI_DEALLOCATE(dtset%pimass)
- end if
- if (allocated(dtset%ptcharge))    then
-   ABI_DEALLOCATE(dtset%ptcharge)
- end if
- if (allocated(dtset%qmass))       then
-   ABI_DEALLOCATE(dtset%qmass)
- end if
- if (allocated(dtset%qptdm))       then
-   ABI_DEALLOCATE(dtset%qptdm)
- end if
- if (allocated(dtset%quadmom))     then
-   ABI_DEALLOCATE(dtset%quadmom)
- end if
- if (allocated(dtset%ratsph))      then
-   ABI_DEALLOCATE(dtset%ratsph)
- end if
- if (allocated(dtset%rprim_orig))  then
-   ABI_DEALLOCATE(dtset%rprim_orig)
- end if
- if (allocated(dtset%rprimd_orig)) then
-   ABI_DEALLOCATE(dtset%rprimd_orig)
- end if
- if (allocated(dtset%shiftk))      then
-   ABI_DEALLOCATE(dtset%shiftk)
- end if
- if (allocated(dtset%spinat)) then
-   ABI_DEALLOCATE(dtset%spinat)
- end if
- if (allocated(dtset%tnons)) then
-   ABI_DEALLOCATE(dtset%tnons)
- end if
- if (allocated(dtset%sigma_shiftk)) then
-   ABI_DEALLOCATE(dtset%sigma_shiftk)
- end if
- if (allocated(dtset%upawu)) then
-   ABI_DEALLOCATE(dtset%upawu)
- end if
- if (allocated(dtset%vel_orig))    then
-   ABI_DEALLOCATE(dtset%vel_orig)
- end if
- if (allocated(dtset%vel_cell_orig))    then
-   ABI_DEALLOCATE(dtset%vel_cell_orig)
- end if
- if (allocated(dtset%wtatcon))     then
-   ABI_DEALLOCATE(dtset%wtatcon)
- end if
- if (allocated(dtset%wtk))         then
-   ABI_DEALLOCATE(dtset%wtk)
- end if
- if (allocated(dtset%xred_orig))   then
-   ABI_DEALLOCATE(dtset%xred_orig)
- end if
- if (allocated(dtset%xredsph_extra))   then
-   ABI_DEALLOCATE(dtset%xredsph_extra)
- end if
- if (allocated(dtset%ziontypat))   then
-   ABI_DEALLOCATE(dtset%ziontypat)
- end if
- if (allocated(dtset%znucl)) then
-   ABI_DEALLOCATE(dtset%znucl)
- end if
+ ABI_SFREE(dtset%acell_orig)
+ ABI_SFREE(dtset%amu_orig)
+ ABI_SFREE(dtset%atvshift)
+ ABI_SFREE(dtset%cd_imfrqs)
+ ABI_SFREE(dtset%chempot)
+ ABI_SFREE(dtset%corecs)
+ ABI_SFREE(dtset%densty)
+ ABI_SFREE(dtset%dmatpawu)
+ ABI_SFREE(dtset%efmas_dirs)
+ ABI_SFREE(dtset%gw_qlwl)
+ ABI_SFREE(dtset%gw_freqsp)
+ ABI_SFREE(dtset%gwls_list_proj_freq)
+ ABI_SFREE(dtset%f4of2_sla)
+ ABI_SFREE(dtset%f6of2_sla)
+ ABI_SFREE(dtset%jpawu)
+ ABI_SFREE(dtset%kpt)
+ ABI_SFREE(dtset%kptbounds)
+ ABI_SFREE(dtset%kptgw)
+ ABI_SFREE(dtset%kptns)
+ ABI_SFREE(dtset%kptns_hf)
+ ABI_SFREE(dtset%mixalch_orig)
+ ABI_SFREE(dtset%mixesimgf)
+ ABI_SFREE(dtset%nucdipmom)
+ ABI_SFREE(dtset%occ_orig)
+ ABI_SFREE(dtset%pimass)
+ ABI_SFREE(dtset%ptcharge)
+ ABI_SFREE(dtset%qmass)
+ ABI_SFREE(dtset%qptdm)
+ ABI_SFREE(dtset%quadmom)
+ ABI_SFREE(dtset%ratsph)
+ ABI_SFREE(dtset%rprim_orig)
+ ABI_SFREE(dtset%rprimd_orig)
+ ABI_SFREE(dtset%shiftk)
+ ABI_SFREE(dtset%spinat)
+ ABI_SFREE(dtset%tnons)
+ ABI_SFREE(dtset%sigma_shiftk)
+ ABI_SFREE(dtset%upawu)
+ ABI_SFREE(dtset%vel_orig)
+ ABI_SFREE(dtset%vel_cell_orig)
+ ABI_SFREE(dtset%wtatcon)
+ ABI_SFREE(dtset%wtk)
+ ABI_SFREE(dtset%xred_orig)
+ ABI_SFREE(dtset%xredsph_extra)
+ ABI_SFREE(dtset%ziontypat)
+ ABI_SFREE(dtset%znucl)
 
 end subroutine dtset_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dtset/dtset_free_nkpt_arrays
+!! NAME
+!! dtset_free_nkpt_arrays
+!!
+!! FUNCTION
+!!  Free arrays that depend on input nkpt (used in EPH code, because EPH has its own
+!!  treatment of BZ sampling and we don't want to waste memory with large and useless arrays
+!!  especially if very dense k-meshes are used.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dtset_free_nkpt_arrays(dtset)
+
+!Arguments ------------------------------------
+!scalars
+ type(dataset_type),intent(inout) :: dtset
+
+! *************************************************************************
+
+ ABI_SFREE(dtset%istwfk)
+ !ABI_SFREE(dtset%nband)
+ ABI_SFREE(dtset%kpt)
+ ABI_SFREE(dtset%kptns)
+ ABI_SFREE(dtset%occ_orig)
+ ABI_SFREE(dtset%wtk)
+ ! Free HF k-points as well.
+ ABI_SFREE(dtset%kptns_hf)
+
+end subroutine dtset_free_nkpt_arrays
 !!***
 
 !!****f* m_dtset/find_getdtset
@@ -1521,7 +1365,7 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
 !Local variables-------------------------------
  integer :: iimage
  real(dp) :: newimage_get,ratio
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1536,18 +1380,17 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
      if(iget==idtset)then
 !      The index of the dataset, from which the data ought to be taken,
 !      does not correspond to a previous dataset.
-       write(message, '(a,i3,4a,i3,7a)' )&
-&       'The component number',idtset,' of the input variable ',trim(getname),',',&
-&       ' equal to',getvalue,',',ch10,&
-&       'does not correspond to an existing index.',ch10,&
-&       'Action: correct ',trim(getname),' or jdtset in your input file.'
-       MSG_ERROR(message)
+       write(msg, '(a,i0,4a,i3,7a)' )&
+        'The component number ',idtset,' of the input variable ',trim(getname),',',' equal to ',getvalue,',',ch10,&
+        'does not correspond to an existing index.',ch10,&
+        'Action: correct ',trim(getname),' or jdtset in your input file.'
+       MSG_ERROR(msg)
      end if
    end if
-   write(message, '(3a,i3,2a)' )&
+   write(msg, '(3a,i3,2a)' )&
 &   ' find_getdtset : ',trim(getname),'/=0, take data from output of dataset with index',dtsets(iget)%jdtset,'.',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
 !For the time being, uses a simple interpolation when the images do not match. If only one image, take the first get image.
@@ -1616,7 +1459,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
  integer :: rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
  integer,allocatable :: indkpt1(:,:),indsym(:,:,:),pertsy(:,:),rfpert(:),symq(:,:,:),symrec(:,:,:)
  integer, allocatable :: pert_tmp(:,:), pert_calc(:,:)
- integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:)
+ integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:), bz2ibz_smap(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),allocatable :: tnons1_tmp(:,:),wtk_folded(:)
 
@@ -1836,10 +1679,11 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
    ABI_DEALLOCATE(symrl1)
 
    ABI_ALLOCATE(wtk_folded,(dtset%nkpt))
+   ABI_ALLOCATE(bz2ibz_smap, (6, dtset%nkpt))
    timrev_pert=timrev
    if(dtset%ieig2rf>0) then
      call symkpt(0,gmet,indkpt1(:,icase),std_out,dtset%kptns,dtset%nkpt,nkpt_rbz(icase),&
-&     1,symrc1,0,dtset%wtk,wtk_folded)
+&     1,symrc1,0,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    else
 !    For the time being, the time reversal symmetry is not used
 !    for ddk, elfd, mgfd perturbations.
@@ -1847,8 +1691,9 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 &     ipert==dtset%natom+2 .or. dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7  &
 &     .or. dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17 )timrev_pert=0  !!HONG
      call symkpt(0,gmet,indkpt1(:,icase),std_out,dtset%kptns,dtset%nkpt,nkpt_rbz(icase),&
-     nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded)
+     nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    end if
+   ABI_DEALLOCATE(bz2ibz_smap)
    ABI_DEALLOCATE(wtk_folded)
    ABI_DEALLOCATE(symrc1)
  end do
@@ -2250,16 +2095,13 @@ subroutine macroin2(dtsets,ndtset_alloc)
    pawujat=pawujat-count(dtsets(idtset)%lpawu( dtsets(idtset)%typat( 1:pawujat ))<0)
 
    if (dtsets(idtset)%macro_uj>0) then
-!    Level shift atom with amplitude pawujv
+     ! Level shift atom with amplitude pawujv
      dtsets(idtset)%atvshift(:,:,pawujat)=dtsets(idtset)%pawujv
-
-!    Case level shift only on one spin channel
+     ! Case level shift only on one spin channel
      if ((dtsets(idtset)%macro_uj==2.or.dtsets(idtset)%macro_uj==3).and.dtsets(idtset)%nsppol==2) then
        dtsets(idtset)%atvshift(:,2,pawujat)=0_dp
      end if
-
    end if ! macro_uj
-
  end do
 
 end subroutine macroin2
@@ -2324,13 +2166,13 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
 !D
- list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_qcache_mb delayperm densfor_pred densty dfield'
+ list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_add_lr dvdb_qcache_mb delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmft_entropy dmft_nlambda'
- list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_iter dmft_mxsf dmft_nwli dmft_nwlo'
- list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv dmft_t2g'
+ list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_iter dmft_kspectralfunc dmft_mxsf dmft_nwli dmft_nwlo'
+ list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv dmft_t2g dmft_x2my2d'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka'
@@ -2345,9 +2187,9 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit eshift'
- list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm'
- list_vars=trim(list_vars)//' eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
- list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_task eph_transport'
+ list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm eph_phrange'
+ list_vars=trim(list_vars)//' eph_tols_idelta eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
+ list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_np_pqbks eph_restart eph_stern eph_task eph_transport'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
@@ -2361,10 +2203,9 @@ subroutine chkvars (string)
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
- list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getdvdb getefmas getgam_eig2nkq'
+ list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getdvdb getefmas getkerange_path getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getqps getscr'
- list_vars=trim(list_vars)//' getwfkfine'
- list_vars=trim(list_vars)//' getsuscep '
+ list_vars=trim(list_vars)//' getwfkfine getsuscep '
  list_vars=trim(list_vars)//' getvel getwfk getwfq getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
@@ -2442,7 +2283,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff ppmfrq ppmodel'
  list_vars=trim(list_vars)//' prepanl prepgkk papiopt'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prtelf'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
  list_vars=trim(list_vars)//' prt_model prt_names prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
@@ -2463,7 +2304,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
- list_vars=trim(list_vars)//' sigma_bsum_range sigma_ngkpt sigma_nshiftk sigma_shiftk'
+ list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
  list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
@@ -2476,7 +2317,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' spin_temperature_nstep spin_tolavg spin_tolvar spin_var_temperature spin_write_traj'
  list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
- list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma'
+ list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
 !T
  list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
@@ -2487,6 +2328,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk'
+ list_vars=trim(list_vars)//' use_yaml'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'

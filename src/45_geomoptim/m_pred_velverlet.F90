@@ -91,8 +91,6 @@ contains
 
 subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,ncycle)
 
- implicit none
-
 !Arguments ------------------------------------
  type(abimover),intent(in)   :: ab_mover
  type(abihist),intent(inout) :: hist
@@ -107,12 +105,12 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 !Local variables-------------------------------
 
  integer  :: ii,jj                                                              ! dummy integers for loop indexes
- real(dp) :: epot,ekin,ekin_tmp                                                 ! potential (electronic), kinetic (ionic) energies
+ real(dp) :: epot,ekin !,ekin_tmp                                                ! potential (electronic), kinetic (ionic) energies
  real(dp) :: xcart(3,ab_mover%natom)                                            ! Cartesian coordinates of all ions
  real(dp) :: xred(3,ab_mover%natom)                                             ! reduced coordinates of all ions
  real(dp) :: vel(3,ab_mover%natom)                                              ! ionic velocities in Cartesian coordinates
  real(dp) :: fcart(3,ab_mover%natom),fred(3,ab_mover%natom)                     ! forces, Cartesian and reduced coordinates
- real(dp) :: factor                                                             ! factor, indicating change of time step at last iteration
+ !real(dp) :: factor                                                             ! factor, indicating change of time step at last iteration
  integer :: hmcflag_
  integer :: icycle_
  integer :: ncycle_
@@ -127,22 +125,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 
  DBG_ENTER("COLL")
 
-! if (option/=1 .and. option/=2 ) then
-!   write(msg,'(3a,i0)')&
-!&   'The argument option should be 1 or 2,',ch10,&
-!&   'however, option=',option
-!   MSG_BUG(msg)
-! end if
-!
-! if (sizein<1) then
-!   write(msg,'(3a,i0)')&
-!&   'The argument sizein should be a positive number,',ch10,&
-!&   'however, sizein=',sizein
-!   MSG_ERROR(msg)
-! end if
-
- DBG_EXIT("COLL")
-
+ ABI_UNUSED((/ntime/))
 
  hmcflag_=0
  if(present(hmcflag))then
@@ -293,6 +276,8 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 
  hist%vel(:,:,hist%ihist)=vel(:,:)
  hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
+
+ DBG_EXIT("COLL")
 
 end subroutine pred_velverlet
 !!***

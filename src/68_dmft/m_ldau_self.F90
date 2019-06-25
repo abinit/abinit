@@ -91,7 +91,6 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
  use m_pawdij, only : pawpupot
  use m_paw_dmft, only : paw_dmft_type
  use m_paw_correlations, only : setnoccmmp
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -115,6 +114,8 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
  type(pawtab_type),pointer :: pawtab_
 
 !************************************************************************
+
+ ABI_UNUSED(opt_ldau)
 
  natom=cryst_struc%natom
  nsppol=paw_dmft%nsppol

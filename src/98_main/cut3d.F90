@@ -78,7 +78,7 @@ program cut3d
 !Local variables-------------------------------
  character(len=1) :: outputchar,blank=' '
 !scalars
- integer,parameter :: paral_kgb0=0,mfiles=10,exchn2n3d0=0
+ integer,parameter :: mfiles=10,exchn2n3d0=0
  integer :: fform0,gridshift1,gridshift2,gridshift3,i1,i2,i3
  integer :: iatom,ifiles,ii,ii1,ii2,ii3,index,iprompt,ir1,ir2,ir3,ispden,cplex
  integer :: itask,jfiles,natom,nfiles,nr1,nr2,unt,comm,iomode,nprocs,my_rank
@@ -251,7 +251,7 @@ program cut3d
      iprompt = 0 ! this needs to be initialized, as it is used after the loop on files...
 
      call cut3d_wffile(filrho,hdr%ecut_eff,exchn2n3d0,hdr%istwfk,hdr%kptns,natom,hdr%nband,hdr%nkpt,hdr%npwarr,&
-&     nr1,nr2,nr3,hdr%nspinor,hdr%nsppol,ntypat,paral_kgb0,rprimd,xcart,hdr%typat,hdr%znucltypat)
+&     nr1,nr2,nr3,hdr%nspinor,hdr%nsppol,ntypat,rprimd,xcart,hdr%typat,hdr%znucltypat)
      call hdr_free(hdr)
 
 !    -------------------------------------------------------------------------

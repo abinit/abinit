@@ -420,6 +420,6 @@ AC_DEFUN([ABI_GPU_DETECT],[
   fi
 
   dnl Inform Automake
-  AM_CONDITIONAL(DO_BUILD_15_GPU_TOOLBOX,[test "${lib_gpu_flavor}" != "none"])
+  AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${lib_gpu_flavor}" != "none"])
   AM_CONDITIONAL(DO_BUILD_52_MANAGE_CUDA,[test "${lib_gpu_flavor}" = "cuda-double" -o "${lib_gpu_flavor}" = "cuda-single"])
 ]) # ABI_GPU_DETECT

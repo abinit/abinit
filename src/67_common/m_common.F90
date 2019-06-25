@@ -28,7 +28,6 @@
 module m_common
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_exit
@@ -38,10 +37,32 @@ module m_common
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_nctk
+ use m_crystal
+ use m_wfk
+ use m_ebands
+ use m_hdr
+ use m_xmpi
+ use m_dtset
+ use m_xpapi
 
- use m_fstrings,         only : indent
- use m_electronpositron, only : electronpositron_type
+ use m_fstrings,          only : indent, endswith, sjoin
+ use m_electronpositron,  only : electronpositron_type
  use m_energies,          only : energies_type, energies_eval_eint
+ use m_pair_list,         only : pair_list
+ use m_neat,              only : neat_energies, neat_open_etot, neat_finish_etot, neat_etot_add_line, stream_string
+ use m_geometry,          only : mkrdim, metric
+ use m_kg,                only : getcut
+ use m_parser,            only : parsefile
+ use m_invars1,           only : invars0, invars1m, indefo
+ use m_invars2
+ use m_time,              only : timab, time_set_papiopt
+ use defs_abitypes,       only : dataset_type, ab_dimensions, hdr_type, MPI_type
+ use defs_datatypes,      only : pspheader_type, ebands_t
+ use m_pspheads,          only : inpspheads, pspheads_comm
 
  implicit none
 
@@ -52,7 +73,12 @@ module m_common
  public :: setup1
  public :: prteigrs
  public :: prtene
- public :: get_dtsets_pspheads
+ public :: get_dtsets_pspheads     ! Parse input file, get list of pseudos for files file and build list of datasets
+                                   ! pseudopotential headers, maxval of dimensions needed in outvars
+ public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files 
+ public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file 
+                                   ! with file extension in [".abi", ".in"]
+ type(stream_string) :: etot_yaml_doc
 !!***
 
 contains
@@ -92,7 +118,7 @@ contains
 !!   | prtvol= control print volume
 !!   | usedmatpu=LDA+U: number of SCF steps keeping occ. matrix fixed
 !!   | usefock=1 if Fock operator is present (hence possibility of a double loop)
-!!   | usepawu=0 if no LDA+U; 1 if LDA+U
+!!   | usepawu=0 if no LDA+U; /=0 if LDA+U
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  etotal=total energy (hartree)
@@ -159,8 +185,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  vxcavg,wtk,xred,conv_retcode,&
 &  electronpositron, fock) ! optional arguments)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,initGS,iscf,istep,istep_fock_outer,istep_mix
@@ -186,7 +210,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !scalars
  integer,parameter :: master=0
  integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank 
+ integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank
  integer :: nband_index,nband_k,nnsclohf
  integer :: openexit,option,tmagnet,usefock
 #if defined DEV_YP_VDWXC
@@ -324,6 +348,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          end if
        end if
      end if
+     call neat_open_etot(etot_yaml_doc, '', message)
      call wrtout(ab_out,message,'COLL')
    end if
 
@@ -430,6 +455,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &         firstchar,'ETOT',istep,etotal,deltae,residm,res2
        end if
      end if
+     if (etot_yaml_doc%length /= 0) then
+       call neat_etot_add_line(etot_yaml_doc, message)
+     end if
      call wrtout(ab_out,message,'COLL')
 
      if(mpi_enreg%paral_pert==1) then
@@ -507,7 +535,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if (iexit/=0) quit=1
 
    ! In special cases, do not quit even if convergence is reached
-   noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu>0).and.&
+   noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu/=0).and.&
 &   (dtset%usedmatpu/=0).and.(istep<=abs(dtset%usedmatpu)).and.&
 &   (dtset%usedmatpu<0.or.initGS==0))
 
@@ -813,7 +841,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
      end if
 
+     ! If enabled, output a YAML document with the ETOT iterations
+     call neat_finish_etot(etot_yaml_doc, ab_out)
+
    end if ! nstep == 0 : no output
+
 
  case default
    write(message, '(a,i0,a)' )' choice = ',choice,' is not an allowed value.'
@@ -984,17 +1016,13 @@ end subroutine scprqt
 !! SOURCE
 
 subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
-&  gprimd,gsqcut_eff,gsqcutc_eff,natom,ngfft,ngfftc,nkpt,nsppol,&
+&  gprimd,gsqcut_eff,gsqcutc_eff,ngfft,ngfftc,nkpt,nsppol,&
 &  response,rmet,rprim,rprimd,ucvol,usepaw)
-
- use m_geometry,   only : mkrdim, metric
- use m_kg,         only : getcut
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
- integer,intent(in) :: natom,nkpt,nsppol
+ integer,intent(in) :: nkpt,nsppol
  integer,intent(in) :: response,usepaw
  integer,intent(out) :: bantot
  real(dp),intent(in) :: ecut_eff,ecutc_eff
@@ -1007,7 +1035,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,ikpt,isppol
+ integer :: ikpt,isppol
  real(dp) :: boxcut,boxcutc
  character(len=500) :: message
 !arrays
@@ -1025,9 +1053,9 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
  if(dtset%nqpt>1.or.dtset%nqpt<0) then
    write(message,'(a,i0,5a)')&
-&   'nqpt =',dtset%nqpt,' is not allowed',ch10,&
-&   '(only 0 or 1 are allowed).',ch10,&
-&   'Action: correct your input file.'
+   'nqpt =',dtset%nqpt,' is not allowed',ch10,&
+   '(only 0 or 1 are allowed).',ch10,&
+   'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1066,9 +1094,9 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  ! Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
  if (boxcut<2.0_dp.and.dtset%intxc==1) then
    write(message, '(a,es12.4,a,a,a,a,a)' )&
-&   'boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
-&   'Need larger ngfft to use intxc=1.',ch10,&
-&   'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
+   'boxcut= ',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
+   'Need larger ngfft to use intxc=1.',ch10,&
+   'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
    MSG_ERROR(message)
  end if
 
@@ -1138,7 +1166,6 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 &  nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
 
  use m_io_tools,  only : open_file
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1434,8 +1461,6 @@ end subroutine prteigrs
 
 subroutine prtene(dtset,energies,iout,usepaw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,usepaw
@@ -1448,8 +1473,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
  logical :: directE_avail,testdmft
  real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal
  ! Do not modify the length of these strings
- character(len=22) :: eneName
+ character(len=14) :: eneName
  character(len=500) :: msg
+ type(pair_list) :: e_components, e_components_dc
 !arrays
  character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1489,53 +1515,65 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !============= Printing of Etotal by direct scheme ===========
 
  if (dtset%icoulomb == 1) then
-   write(eneName, "(A)") "    Ion-ion energy  = "
+   write(eneName, "(A)") "Ion-ion energy"
  else
-   write(eneName, "(A)") "    Ewald energy    = "
+   write(eneName, "(A)") "Ewald energy"
  end if
  enevalue = energies%e_ewald
+
 
  if (optdc==0.or.optdc==2) then
 
    if (directE_avail) then
      write(msg, '(2a)' ) ' Components of total free energy (in Hartree) :',ch10
      call wrtout(iout,msg,'COLL')
+     call e_components%set('comment', s='Components of total free energy (in Hartree)')
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
      call wrtout(iout,msg,'COLL')
+     call e_components%set('Kinetic energy', r=energies%e_kinetic)
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
 !XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
-!      At present, there is still a problem with the variational formulation for the Fock term with PAW. 
+!      At present, there is still a problem with the variational formulation for the Fock term with PAW.
 !      So, for the time being, keep it inside.
        if(usepaw==1)exc_semilocal=exc_semilocal+energies%e_fock
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
 &       '    Hartree energy  = ',energies%e_hartree,ch10,&
 &       '    XC energy       = ',exc_semilocal,ch10,&
-&       eneName            ,enevalue,ch10,&
+&       '    '//eneName//'  = ',enevalue,ch10,&
 &       '    PspCore energy  = ',energies%e_corepsp
        call wrtout(iout,msg,'COLL')
+       call e_components%set('Hartree energy', r=energies%e_hartree)
+       call e_components%set('XC energy', r=exc_semilocal)
+       call e_components%set(eneName, r=enevalue)
+       call e_components%set('PsPCore', r=energies%e_corepsp)
 #if defined DEV_YP_VDWXC
        if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) .and. (xc_vdw_status()) ) then
          write(msg, '(a,es21.14)' )'    vdW-DF energy   = ',energies%e_xc_vdw
          call wrtout(iout,msg,'COLL')
+         call e_components%set('vdW-DF energy', r=energies%e_xc_vdw)
        end if
 #endif
      end if
      write(msg, '(a,es21.14)' ) '    Loc. psp. energy= ',energies%e_localpsp
      call wrtout(iout,msg,'COLL')
+     call e_components%set('Loc. psp. energy', r=energies%e_localpsp)
      if (usepaw==0) then
        if(abs(energies%e_fock0)<tol8)then
          write(msg, '(a,es21.14)' ) &
 &         '    NL   psp  energy= ',energies%e_nlpsp_vfock
+         call e_components%set('NL psp energy', r=energies%e_nlpsp_vfock)
        else
          write(msg, '(a,es21.14)' ) &
 &         '    NL(psp+X) energy= ',energies%e_nlpsp_vfock-energies%e_fock0
+         call e_components%set('NL(psp+X) energy', r=energies%e_nlpsp_vfock-energies%e_fock0)
        endif
        call wrtout(iout,msg,'COLL')
      else
        write(msg, '(a,es21.14)' ) &
 &       '    Spherical terms = ',energies%e_paw
        call wrtout(iout,msg,'COLL')
+       call e_components%set('Spherical terms', r=energies%e_paw)
 !XG20181025 Does not work (yet)...
 !       if(abs(energies%e_nlpsp_vfock)>tol8)then
 !         write(msg, '(a,es21.14)' ) &
@@ -1549,18 +1587,22 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
        call wrtout(iout,msg,'COLL')
+       call e_components%set('Vd Waals DFT-D', r=energies%e_vdw_dftd)
      end if
      if (dtset%nzchempot>=1) then
        write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
        call wrtout(iout,msg,'COLL')
+       call e_components%set('Chem. potential', r=energies%e_chempot)
      end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
+       call e_components%set('Internal E', r=etotal-eent)
        if(.not.testdmft) then
          write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
 &         '    >>>>> Internal E= ',etotal-eent,ch10,ch10,&
 &         '    -kT*entropy     = ',eent
          call wrtout(iout,msg,'COLL')
-       else if (testdmft) then
+         call e_components%set('-kT*entropy', r=eent)
+       else
          write(msg, '(a,es21.14,a)' ) &
 &         '    >>>>> Internal E= ',etotal-eent,ch10
          call wrtout(iout,msg,'COLL')
@@ -1569,15 +1611,20 @@ subroutine prtene(dtset,energies,iout,usepaw)
        if (dtset%occopt>=3.and.dtset%occopt<=8) then
          write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
          call wrtout(iout,msg,'COLL')
+         call e_components%set('-kT*entropy', r=eent)
        end if
        write(msg, '(3a,es21.14,a)' ) &
 &       '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron &
 &       -energies%e_electronpositron,ch10
        call wrtout(iout,msg,'COLL')
+       call e_components%set(EPName(ipositron)//' E', r=etotal- &
+&                                       energies%e0_electronpositron-energies%e_electronpositron)
        write(msg, '(3a,es21.14,2a,es21.14)' ) &
 &       '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
 &       '    EP interaction E= '             ,energies%e_electronpositron
        call wrtout(iout,msg,'COLL')
+       call e_components%set(EPName(3-ipositron)//' ener.', r=energies%e0_electronpositron)
+       call e_components%set('EP interaction E', r=energies%e_electronpositron)
      end if
      if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 &     dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) .and.ipositron/=1) then
@@ -1585,9 +1632,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
        call wrtout(iout,msg,'COLL')
        write(msg, '(a,es21.14)' ) '    Kohn-Sham energy= ',etotal-energies%e_elecfield
        call wrtout(iout,msg,'COLL')
+       call e_components%set('Electric energy', r=energies%e_elecfield)
+       call e_components%set('Kohn-Sham energy', r=etotal-energies%e_elecfield)
      end if
      write(msg, '(a,es21.14)' ) '    >>>>>>>>> Etotal= ',etotal
      call wrtout(iout,msg,'COLL')
+     call e_components%set('Etotal', r=etotal)
 
    else
      write(msg, '(9a)' ) &
@@ -1597,8 +1647,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     '  without the knowledge of imaginary part of Rhoij atomic occupancies',ch10,&
 &     '  (computed only when pawcpxocc=2).'
      call wrtout(iout,msg,'COLL')
+     call e_components%set('comment', s='"Direct" decomposition of total free energy cannot be printed out !!!'//ch10// &
+&                       'PAW contribution due to spin-orbit coupling cannot be evaluated'//ch10// &
+&                       'without the knowledge of imaginary part of Rhoij atomic occupancies'//ch10// &
+&                       '(computed only when pawcpxocc=2).')
    end if
-
  end if
 !============= Printing of Etotal by double-counting scheme ===========
 
@@ -1608,31 +1661,40 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &   ' "Double-counting" decomposition of free energy:',ch10,&
 &   '    Band energy     = ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
+   call e_components_dc%set('comment', s='"Double-counting" decomposition of free energy')
+   call e_components_dc%set('Band energy', r=energies%e_eigenvalues)
    if (ipositron/=1) then
      write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
-&     eneName            ,enevalue,ch10,&
+&     '    '//eneName//'  =',enevalue,ch10,&
 &     '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
 &     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc&
 &     -energies%e_fock0+&
 &     energies%e_hybcomp_E0-energies%e_hybcomp_v0
      call wrtout(iout,msg,'COLL')
+     call e_components_dc%set(eneName, r=enevalue)
+     call e_components_dc%set('PspCore energy', r=energies%e_corepsp-energies%e_corepspdc)
+     call e_components_dc%set('Dble-C XC-energy', r=-energies%e_hartree+energies%e_xc-energies%e_xcdc)
    end if
    if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 &   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Electric field  = ',energies%e_elecfield
      call wrtout(iout,msg,'COLL')
+     call e_components_dc%set('Electric field', r=energies%e_elecfield)
    end if
    if (usepaw==1) then
      write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_pawdc
      call wrtout(iout,msg,'COLL')
+     call e_components_dc%set('Spherical terms', r=energies%e_pawdc)
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
      call wrtout(iout,msg,'COLL')
+     call e_components_dc%set('Vd Waals DFT-D', r=energies%e_vdw_dftd)
    end if
    if (dtset%nzchempot>=1) then
      write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
      call wrtout(iout,msg,'COLL')
+     call e_components_dc%set('Chem. potential', r=energies%e_chempot)
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
      if(.not.testdmft) then
@@ -1640,14 +1702,18 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &       '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
 &       '    -kT*entropy     = ',eent
        call wrtout(iout,msg,'COLL')
-     else if (testdmft) then
+       call e_components_dc%set('Internal E', r=etotaldc-eent)
+       call e_components_dc%set('-kT*entropy', r=eent)
+     else
        write(msg, '(a,es21.14,a)' ) '    >>>>> Internal E= ',etotaldc-eent,ch10
        call wrtout(iout,msg,'COLL')
+       call e_components_dc%set('Internal E', r=etotaldc-eent)
      end if
    else if (ipositron/=0) then
      if (dtset%occopt>=3 .and. dtset%occopt<=8) then
        write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
        call wrtout(iout,msg,'COLL')
+       call e_components_dc%set('-kT*entropy', r=eent)
      end if
      write(msg, '(a,es21.14,4a,es21.14,a)' ) &
 &     '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
@@ -1658,9 +1724,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
 &     '    EP interaction E= '            ,energies%e_electronpositron
      call wrtout(iout,msg,'COLL')
+     call e_components_dc%set('EP dble-ct En.', r=-energies%edc_electronpositron)
+     call e_components_dc%set(EPName(ipositron)//' E', r=etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
+     call e_components_dc%set(EPName(3-ipositron)//' E', r=energies%e0_electronpositron)
+     call e_components_dc%set('EP interaction E', r=energies%e_electronpositron)
    end if
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    call wrtout(iout,msg,'COLL')
+   call e_components_dc%set('Etotal (DC)', r=etotaldc)
+
  end if
 
 !======= Additional printing for compatibility  ==========
@@ -1670,17 +1742,21 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &   ' Other information on the energy :',ch10,&
 &   '    Total energy(eV)= ',etotal*Ha_eV,' ; Band energy (Ha)= ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
+   call e_components%set('Band energy', r=energies%e_eigenvalues)
+   call e_components%set('Total energy(eV)', r=etotal*Ha_eV)
  end if
 
  if ((optdc==0.or.optdc==2).and.(.not.directE_avail)) then
    write(msg, '(a,a,es18.10)' ) ch10,' Band energy (Ha)= ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
+   call e_components%set('Band energy', r=energies%e_eigenvalues)
  end if
 
  if (usepaw==1) then
    if ((optdc==0.or.optdc==2).and.(directE_avail)) then
      write(msg, '(a,a,es21.14)' ) ch10,'  >Total energy in eV           = ',etotal*Ha_eV
      call wrtout(iout,msg,'COLL')
+     call e_components%set('Total energy(eV)', r=etotal*Ha_eV)
    end if
    if (optdc>=1) then
      if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,&
@@ -1688,6 +1764,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if (optdc==2) write(msg, '(a,es21.14)' ) &
 &     '  >Total DC energy in eV        = ',etotaldc*Ha_eV
      call wrtout(iout,msg,'COLL')
+     call e_components_dc%set('Total DC energy(eV)', r=etotal*Ha_eV)
    end if
  end if
 
@@ -1701,10 +1778,24 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call wrtout(iout,msg,'COLL')
    write(msg, '(a,es21.14)' ) '    Monopole correction (eV)=',energies%e_monopole*Ha_eV
    call wrtout(iout,msg,'COLL')
+   call e_components%set('Monopole correction', r=energies%e_monopole)
+   call e_components%set('Monopole correction (eV)', r=energies%e_monopole*Ha_eV)
  end if
 
  write(msg,'(a,80a)')('-',mu=1,80)
  call wrtout(iout,msg,'COLL')
+
+ call wrtout(iout, ch10, 'COLL')
+
+ call neat_energies(e_components, iout)
+ call e_components%free()
+
+ if(e_components_dc%length() > 1) then
+   call wrtout(iout, ch10, 'COLL')
+   call neat_energies(e_components_dc, iout, label='Etot DC')
+   call e_components_dc%free()
+ end if
+
 
 end subroutine prtene
 !!***
@@ -1740,23 +1831,9 @@ end subroutine prtene
 
 subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
 
- use m_xmpi
- use m_dtset
- use m_xpapi
-
- use m_parser,       only : parsefile
- use m_invars1,      only : invars0, invars1m, indefo
- use m_invars2
- use m_time,         only : timab, time_set_papiopt
- use defs_abitypes,  only : dataset_type, ab_dimensions
- use defs_datatypes, only : pspheader_type
- use m_pspheads,     only : inpspheads, pspheads_comm
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- integer, intent(out) :: lenstr, ndtset
+ integer,intent(out) :: lenstr, ndtset
  type(ab_dimensions),intent(out) :: mx
  character(len=strlen), intent(out) :: string
  character(len=*),intent(in) :: path
@@ -1768,7 +1845,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
 !Local variables-------------------------------
 !scalars
- integer :: jdtset,ipsp,ios, me, ndtset_alloc, nprocs
+ integer :: ipsp,ios, me, ndtset_alloc, nprocs
  integer :: istatr,istatshft, papiopt, npsp, ii, idtset, msym, usepaw
  character(len=fnlen) :: filpsp
  character(len=500) :: msg
@@ -1786,7 +1863,6 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  ! Read the file, stringify it and return the number of datasets.
  call parsefile(path, lenstr, ndtset, string, comm)
 
- !subroutine ab7_invars_load(dtsetsId, string, lenstr, ndtset, with_psp, with_mem, pspfilnam)
  ndtset_alloc = ndtset; if (ndtset == 0) ndtset_alloc=1
  ABI_DATATYPE_ALLOCATE(dtsets, (0:ndtset_alloc))
 
@@ -1794,7 +1870,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
  ! Continue to analyze the input string, get upper dimensions, and allocate the remaining arrays.
  call invars0(dtsets, istatr, istatshft, lenstr, msym, mx%natom, mx%nimage, mx%ntypat, &
-              ndtset, ndtset_alloc, npsp, papiopt, timopt, string)
+              ndtset, ndtset_alloc, npsp, papiopt, timopt, string, comm)
 
  ! Enable PAPI timers
  call time_set_papiopt(papiopt)
@@ -1822,26 +1898,26 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  pspheads(:)%usewvl = dtsets(1)%usewvl
  if (me == 0) then
     !if (.not. present(pspfilnam)) then
-       ! Read the name of the psp file
-       ABI_MALLOC(pspfilnam_,(npsp))
-       do ipsp=1,npsp
-         write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
-         read (std_in, '(a)' , iostat=ios ) filpsp
-         ! It might be that a file name is missing
-         if (ios/=0) then
-           write(msg, '(7a)' )&
-           'There are not enough names of pseudopotentials',ch10,&
-           'provided in the files file.',ch10,&
-           'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
-           'if they are correct, complete your files file.'
-           MSG_ERROR(msg)
-         end if
-         pspfilnam_(ipsp) = trim(filpsp)
-         write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
-       end do ! ipsp=1,npsp
+    ! Read the name of the psp file
+    ABI_MALLOC(pspfilnam_,(npsp))
+    do ipsp=1,npsp
+      write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
+      read (std_in, '(a)' , iostat=ios ) filpsp
+      ! It might be that a file name is missing
+      if (ios/=0) then
+        write(msg, '(7a)' )&
+        'There are not enough names of pseudopotentials',ch10,&
+        'provided in the files file.',ch10,&
+        'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
+        'if they are correct, complete your files file.'
+        MSG_ERROR(msg)
+      end if
+      pspfilnam_(ipsp) = trim(filpsp)
+      write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
+    end do ! ipsp=1,npsp
 
-       call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
-       ABI_FREE(pspfilnam_)
+    call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
+    ABI_FREE(pspfilnam_)
     !else
     !   call inpspheads(pspfilnam, npsp, pspheads, ecut_tmp)
     !end if
@@ -1882,7 +1958,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
  ! Get MAX dimension over datasets
  call invars1m(dmatpuflag, dtsets, ab_out, lenstr, mband_upper_, mx,&
-               msym, ndtset, ndtset_alloc, string, npsp, zionpsp)
+               msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
  ABI_FREE(zionpsp)
  call timab(42,2,tsec)
@@ -1901,7 +1977,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  end if
 
  ! Call the main input routine.
- call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
+ call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string, comm)
 
  call macroin2(dtsets, ndtset_alloc)
 
@@ -1915,6 +1991,134 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  ABI_FREE(mband_upper_)
 
 end subroutine get_dtsets_pspheads
+!!***
+
+
+!!****f* ABINIT/ebands_from_file
+!! NAME
+!! ebands_from_file
+!!
+!! FUNCTION
+!!  Build and ebands_t object from file. Supports Fortran and netcdf files 
+!!  provided they have a Abinit header and obviously GS eigenvalues
+!!
+!! INPUTS
+!!  path: File name.
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+type(ebands_t) function ebands_from_file(path, comm) result(new)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: fform, ncid
+ type(hdr_type) :: hdr
+!arrays
+ real(dp),pointer :: gs_eigen(:,:,:)
+
+! *************************************************************************
+
+ ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK 
+ if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
+   call hdr_read_from_fname(hdr, path, fform, comm)
+   ABI_CHECK(fform /= 0, "fform == 0")
+   call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
+   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   
+ else if (endswith(path, ".nc")) then
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nctk_open_read(ncid, path, comm))
+   call hdr_ncread(hdr, ncid, fform)
+   ABI_MALLOC(gs_eigen, (hdr%mband, hdr%nkpt, hdr%nsppol))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), gs_eigen))
+   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   NCF_CHECK(nf90_close(ncid))
+#endif
+ else
+   MSG_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
+ end if
+
+ ABI_FREE(gs_eigen)
+ call hdr_free(hdr)
+
+end function ebands_from_file
+!!***
+
+
+!!****f* ABINIT/crystal_from_file
+!! NAME
+!! crystal_from_file
+!!
+!! FUNCTION
+!!  Build crystal_t object from netcdf file or Abinit input file with file extension in [".abi", ".in"]
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+type(crystal_t) function crystal_from_file(path, comm) result(new)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: fform, timrev !, lenstr, ndtset, timopt, dmatpuflag
+ !character(len=strlen) :: string
+ type(hdr_type) :: hdr
+ !type(ab_dimensions) :: mx
+!arrays
+ !type(dataset_type),allocatable :: dtsets(:)
+ !type(pspheader_type),allocatable :: pspheads(:)
+
+! *************************************************************************
+
+ if (endswith(path, ".abi") .or. endswith(path, ".in")) then
+   NOT_IMPLEMENTED_ERROR()
+
+   ! TODO
+   ! This routine prompts for the list of pseudos! One should get rid of the files file 
+   ! before activating this part.
+   !call get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
+   !call crystal_init(dtset%amu_orig(:,1), new, dtset%spgroup, dtset%natom, dtset%npsp, &
+   !  psps%ntypat,dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl,1, &
+   !  dtset%nspden==2.and.dtset%nsppol==1, remove_inv, psps%title, &
+   !  symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
+   !ABI_FREE(dtsets)
+   !ABI_FREE(pspheads)
+
+ else
+    ! Assume file header
+    call hdr_read_from_fname(hdr, path, fform, comm)
+    ABI_CHECK(fform /= 0, "fform == 0")
+    timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
+    new = hdr_get_crystal(hdr, timrev)
+    call hdr_free(hdr)
+ end if
+
+end function crystal_from_file
 !!***
 
 end module m_common

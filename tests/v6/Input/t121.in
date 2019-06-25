@@ -33,7 +33,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%%  files_to_test =
+#%% files_to_test =
 #%%    t121.out,  tolnlines=  1, tolabs=  1.2e-01,   tolrel=  5.7e-1, fld_options=-ridiculous
 #%% psp_files= 82pb.960808c_mod, 22ti.psp_mod, 8o.psp_mod 
 #%% [paral_info]
@@ -42,9 +42,9 @@
 #%% authors = J. Hong
 #%% keywords = 
 #%% description = 
-#%% PbTiO3 in the tetragonal geometry.
-#%% Test berryopt=14 (finite reduced electric field calculation,relaxing cell 
-#%% parameters, e.g. optcell=2)
-#%% (XG120616 : tranferred to tests/seq)
+#%%   PbTiO3 in the tetragonal geometry.
+#%%   Test berryopt=14 (finite reduced electric field calculation,relaxing cell 
+#%%   parameters, e.g. optcell=2)
+#%%   (XG120616 : tranferred to tests/seq)
 #%% topics = Berry
 #%%<END TEST_INFO>

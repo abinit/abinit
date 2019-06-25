@@ -49,6 +49,7 @@ module m_gstateimg
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
  use m_specialmsg,   only : specialmsg_mpisum
+ use m_neat,         only : neat_start_iter
  use m_libpaw_tools, only : libpaw_spmsg_mpisum
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
@@ -192,8 +193,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &                    rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 &                    filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nimage
@@ -261,12 +260,26 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   '                                                            ',& ! 11
 &   '                                                            ',& ! 12
 &   'PATH-INTEGRAL MOLECULAR DYNAMICS (CHAIN OF THERMOSTATS)     '/) ! 13
+ character(len=24),parameter :: stgalgo_str(0:2)=(/ &
+&   'ORIGINAL ALGO.          ',& ! 0
+&   'SIMPLIFIED + EQUAL ARC  ',& ! 1
+&   'SIMPLIFIED + ENERGY-WGTH'/) ! 2
+ character(len=20),parameter :: nebalgo_str(0:2)=(/ &
+&   'ORIGINAL ALGO.      ',& ! 0
+&   'IMPROVED TANGENT    ',& ! 1
+&   'CLIMBING IMAGE      '/) ! 2
+ character(len=20),parameter :: mepsolver_str(0:4)=(/ &
+&   'STEEPEST-DESCENT    ',& ! 0
+&   'QUICK-MIN OPT.      ',& ! 1
+&   'L-BFGS              ',& ! 2
+&   'GL-BFGS             ',& ! 3
+&   'ORDER 4 RUNGE-KUTTA '/) ! 4
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),tsec(2),vel_cell(3,3)
  real(dp),allocatable :: amass(:,:),occ(:),vel(:,:),xred(:,:)
  type(abihist),allocatable :: hist(:),hist_prev(:)
  type(results_img_type),pointer :: results_img(:,:),res_img(:)
  type(scf_history_type),allocatable :: scf_history(:)
- type(abiforstr) :: preconforstr ! Preconditioned forces and stress ... Only needed to deallocate an internal matrix in prec_simple
+ !type(abiforstr) :: preconforstr ! Preconditioned forces and stress ... Only needed to deallocate an internal matrix in prec_simple
 
 ! ***********************************************************************
 
@@ -471,6 +484,15 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &       '--------------------------------------------------------------------------------',&
 &       ch10,' ',trim(imagealgo_str(dtset%imgmov))
      end if
+     if (dtset%imgmov==2) then
+       write(msg,'(6a)') trim(msg),' (',trim(stgalgo_str(mep_param%string_algo)),' + ',&
+&                        trim(mepsolver_str(mep_param%mep_solver)),')'
+     end if
+     if (dtset%imgmov==5) then
+       ii=merge(mep_param%neb_algo,1,mep_param%neb_algo/=2.or.itimimage>=mep_param%cineb_start)
+       write(msg,'(6a)') trim(msg),' (',trim(nebalgo_str(ii)),' + ',&
+&                        trim(mepsolver_str(mep_param%mep_solver)),')'
+     end if
      if (dtset%ntimimage==1) write(msg,'(2a)')    trim(msg),' FOR 1 TIME STEP'
      if (dtset%ntimimage >1) write(msg,'(2a,i5)') trim(msg),' - TIME STEP ',itimimage
      if (dtset%prtvolimg<2) then
@@ -480,6 +502,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      call wrtout(ab_out ,msg,'COLL')
      call wrtout(std_out,msg,'PERS')
    end if
+   call neat_start_iter(itimimage, 'timimage', ab_out)
 
    call timab(704,2,tsec)
 
@@ -522,6 +545,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
            call wrtout(std_out,msg,'PERS')
          end if
        end if
+       call neat_start_iter(iimage, 'image', ab_out)
 
        acell(:)     =res_img(iimage)%acell(:)
        rprim(:,:)   =res_img(iimage)%rprim(:,:)
@@ -811,8 +835,6 @@ end subroutine gstateimg
 subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot,&
 &                 prt_all_images,prtvolimg,resimg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nimage_tot,dynimage(nimage_tot),imgmov,iout,nimage,prtvolimg !vz_d
@@ -1017,7 +1039,6 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  use m_predict_steepest, only : predict_steepest
  use m_predict_pimd,    only : predict_pimd
  use m_predict_string, only : predict_string
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1053,7 +1074,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 !Specific case of 4th-order RK algorithm
  if (mep_param%mep_solver==4) then
    if (mod(itimimage,4)==0) then
-     write(msg,'(2a,i1,2a)') trim(msg),&
+     write(msg,'(4a)') trim(msg),&
 &     ' Fourth-order Runge-Kutta algorithm - final step',ch10
      if (itimimage>4) write(msg,'(2a,es11.3,2a)') trim(msg),&
 &     ' Average[Abs(Etotal(t)-Etotal(t-dt))]=',deltae,' Hartree',ch10
@@ -1167,8 +1188,6 @@ end subroutine predictimg
 subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 &                       ntimimage_stored,results_img)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage_eff,ndynimage,nimage,ntimimage_stored
@@ -1248,8 +1267,6 @@ end subroutine predict_copy
 !! SOURCE
 
 subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

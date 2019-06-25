@@ -437,7 +437,7 @@ P           mkmem           1
 == DATASET  1 ==================================================================
 
 --------------------------------------------------------------------------------
- STRING METHOD FOR 1 TIME STEP
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) FOR 1 TIME STEP
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     2   -2.94337495E+01  -4.97167E-11   3.78810E-07   4.37071E-13   5.84810E-11

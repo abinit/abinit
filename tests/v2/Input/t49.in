@@ -54,7 +54,7 @@
 #%%   Si2 molecule, static, spin-polarized.
 #%%   Same system as test 17 of fast, except lower ecut.
 #%%   Test ionmov=6 (Verlet) as well as ionmov=7.
-#%% Cannote be executed in parallel:
+#%%   Cannot be executed in parallel:
 #%%   --- !ERROR
 #%%   message: |
 #%%   the number of bands in the spin up case must be equal to

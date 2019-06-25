@@ -65,7 +65,6 @@ znucl 14.0
 #%% [files]
 #%% files_to_test = 
 #%%   t36.out, tolnlines = 6, tolabs = 1.100e-03, tolrel = 3.000e-03;
-#%%   t36o_DS2_TETRA, tolnlines=1, tolabs = 1.0e-06, tolrel = 1.000e-05;
 #%% psp_files = Si-LDA.paw
 #%% [paral_info]
 #%% max_nprocs = 4

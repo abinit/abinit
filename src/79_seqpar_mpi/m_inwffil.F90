@@ -183,8 +183,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &           nsppol,nsym,occ,optorth,symafm,symrel,tnons,unkg,wff1,&
 &           wffnow,unwff1,wffnm,wvl)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ask_accurate,exchn2n3d,formeig,ireadwf,localrdwf,mband,mcg,mkmem,mpw
  integer,intent(in) :: nkpt,nsppol,nsym,optorth,unkg,unwff1
@@ -1126,8 +1124,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 &                  nspinor0,nsppol,nsppol0,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,squeeze,symrel,tnons,wff1)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: exchn2n3d,formeig,headform0,localrdwf,mband,mcg,mcg_disk
  integer, intent(in) :: mpw,mpw0,nkassoc,nkpt,nkpt0,nspinor,nspinor0,nsppol,nsppol0,nsym
@@ -1849,8 +1845,6 @@ end subroutine wfsinp
 subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 &  spin,mcg,mpi_enreg,nband_k,nkpt,npw,nspinor,occ_k,wff1)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: formeig,headform,icg,ikpt,spin,mcg,nband_k,nkpt,npw,nspinor
@@ -1932,11 +1926,11 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
  end if
 
 !Check the number of bands on disk file against desired number. These are not required to agree)
- if (nband_disk/=nband_k) then
+ if (nband_disk /= nband_k) then
    write(msg,'(2(a,i0),3a,i0,3a)')&
-&   'For kpt number ',ikpt,' disk file has ',nband_disk,' bands',ch10,&
-&   'but input file gave nband= ',nband_k,'.',ch10,&
-&   'This is not fatal. Bands are skipped or filled with random numbers.'
+   'For kpt number ',ikpt,' disk file has ',nband_disk,' bands',ch10,&
+   'but input file gave nband= ',nband_k,'.',ch10,&
+   'This is not fatal. Bands are skipped or filled with random numbers.'
    MSG_COMMENT(msg)
  end if
 
@@ -2087,8 +2081,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &                  ngfft1,ngfft2,nkpt1,nkpt2,npwarr1,npwarr2,nspinor1,nspinor2,&
 &                  nsppol1,nsppol2,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,symrel,tnons,unkg2,wffinp,wffout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2683,8 +2675,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 & kg1,kg2,kptns1,kptns2,mband1,mband2,mcg1,mcg2,mpi_enreg1,mpi_enreg2,&
 & mpw1,mpw2,nbd1,nbd2,ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,&
 & nsym,occ_k1,occ_k2,optorth,randalg,restart,rprimd2,sppoldbl,symrel,tnons)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

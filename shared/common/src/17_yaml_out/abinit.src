@@ -1,0 +1,27 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 70_gw library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "c_pair_list.c",
+ "m_type_pair_list.F90",
+ "m_pair_list.F90",
+ "m_stream_string.F90",
+ "m_yaml_out.F90",
+ ]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

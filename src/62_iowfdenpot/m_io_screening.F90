@@ -1656,8 +1656,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
      ! Have to allocate workspace for dpc data.
      ! FIXME: Change the file format of the SCR and SUC file so that
      ! they are written in single precision if not HAVE_GW_DPC
-     ABI_STAT_MALLOC(bufdc3d,(npweA,npweA,nomegaA), ierr)
-     ABI_CHECK(ierr==0, "out of memory bufdc3d")
+     ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
 
      call mpiotk_read_fsuba_dpc3D(mpi_fh,offset, [HScr%npwe,HScr%npwe,HScr%nomega], [npweA,npweA,nomegaA], [1,1,1],&
         buf_dim,bufdc3d,xmpio_chunk_bsize,sc_mode,comm,ierr)
@@ -1683,8 +1682,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
      ABI_CHECK(ierr==0,"Fortran record too big")
 #else
      ! Have to allocate workspace for dpc data.
-     ABI_STAT_MALLOC(bufdc3d,(npweA,npweA,nomegaA), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in bufdc3d, change the code to loop over frequencies!')
+     ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
      sc_mode = xmpio_collective
 
      do iqibz=1,Hscr%nqibz
@@ -2014,8 +2012,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  npwe4m   = ohscr%npwe
  nomega4m = ohscr%nomega
 
- ABI_STAT_MALLOC(epsm1,(npwe4m,npwe4m,nomega4m,1), ierr)
- ABI_CHECK(ierr==0, 'out of memory in epsm1')
+ ABI_MALLOC_OR_DIE(epsm1,(npwe4m,npwe4m,nomega4m,1), ierr)
 
  do iqibz=1,ohscr%nqibz
    ifile = merge_table(iqibz,1)
@@ -2145,8 +2142,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
 
  nqibzA=1; nomega_asked=hscr%nomega; npwe_asked=hscr%npwe
 
- ABI_STAT_MALLOC(epsm1,(npwe_asked,npwe_asked,nomega_asked,1), ierr)
- ABI_CHECK(ierr==0, 'out of memory in epsm1')
+ ABI_MALLOC_OR_DIE(epsm1,(npwe_asked,npwe_asked,nomega_asked,1), ierr)
 
  do iqiA=1,hscr_recov%nqibz
    call read_screening(varname,ipath,npwe_asked,nqibzA,nomega_asked,epsm1,iomode,comm,iqiA=iqiA)
@@ -2407,8 +2403,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  npwe4mI = ohscr%npwe*ohscr%nI
  npwe4mJ = ohscr%npwe*ohscr%nJ
  nomega4m = ohscr%nomega
- ABI_STAT_MALLOC(epsm1,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
- ABI_CHECK(ierr==0, 'out of memory in epsm1')
+ ABI_MALLOC_OR_DIE(epsm1,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
 
  do iqibz=1,ohscr%nqibz
 
@@ -2417,8 +2412,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
      npwe4mI = Hscr_file(ifile)%npwe*Hscr_file(ifile)%nI
      npwe4mJ = Hscr_file(ifile)%npwe*Hscr_file(ifile)%nJ
      nomega4m = Hscr_file(ifile)%nomega
-     ABI_STAT_MALLOC(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in epsm1_temp')
+     ABI_MALLOC_OR_DIE(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
 
      ! read screening
      call read_screening(varname,filenames(ifile),npwe4mI,1,nomega4m,epsm1_temp,iomode,comm,iqiA=iqibz)
@@ -2570,16 +2564,14 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  npwe4mI = ohscr%npwe*ohscr%nI; npwe4mJ = ohscr%npwe*ohscr%nJ
  nomega4m = ohscr%nomega
 
- ABI_STAT_MALLOC(epsm1, (npwe4mI,npwe4mJ,nomega4m), ierr)
- ABI_CHECK(ierr==0, 'out of memory in epsm1')
+ ABI_MALLOC_OR_DIE(epsm1, (npwe4mI,npwe4mJ,nomega4m), ierr)
 
  do iqibz=1,ohscr%nqibz
    ! allocate temporary array
    npwe4mI = ihscr%npwe * ihscr%nI
    npwe4mJ = ihscr%npwe * ihscr%nJ
    nomega4m = ihscr%nomega
-   ABI_STAT_MALLOC(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m), ierr)
-   ABI_CHECK(ierr==0, 'out of memory in epsm1_temp')
+   ABI_MALLOC_OR_DIE(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m), ierr)
 
    ! read full screening matrix for this q-point
    call read_screening(varname,inpath,npwe4mI,1,nomega4m,epsm1_temp,iomode,comm,iqiA=iqibz)

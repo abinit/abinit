@@ -120,7 +120,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_hu(cryst_struc,pawtab,hu,t2g)
+subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2my2d)
 
  use defs_basis
  use m_crystal, only : crystal_t
@@ -131,7 +131,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
  type(crystal_t),intent(in) :: cryst_struc
  type(pawtab_type), target, intent(in)  :: pawtab(cryst_struc%ntypat)
  type(hu_type), intent(inout) :: hu(cryst_struc%ntypat)
- integer, intent(in) :: t2g
+ integer, intent(in) :: t2g,x2my2d
 !Local variables ------------------------------------
  integer :: itypat,i,ij,ij1,ij2,j,lpawu,ms,ms1,m,m1,ndim
  integer :: ns,ns1,n,n1
@@ -152,6 +152,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
    hu(itypat)%lpawu=pawtab(itypat)%lpawu
    hu(itypat)%jmjbasis=.false.
    if(t2g==1.and.hu(itypat)%lpawu==2) hu(itypat)%lpawu=1
+   if(x2my2d==1.and.hu(itypat)%lpawu==2) hu(itypat)%lpawu=0
    lpawu=hu(itypat)%lpawu
    if(lpawu.ne.-1) then
      hu(itypat)%upawu=pawtab(itypat)%upawu
@@ -195,7 +196,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
      ABI_ALLOCATE(hu(itypat)%uqmc,(ndim*(2*ndim-1)))
      ABI_ALLOCATE(hu(itypat)%udens,(2*ndim,2*ndim))
      ABI_ALLOCATE(xij,(2*ndim,2*ndim))
-     if(t2g==0) then
+     if(t2g==0.and.x2my2d==0) then
        hu(itypat)%vee => pawtab(itypat)%vee
 !   t2g case begin
      else if(t2g==1.and.hu(itypat)%lpawu==1) then
@@ -222,7 +223,12 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
          enddo
        enddo
 !   t2g case end
+!   x2my2d case begin
+     else if(x2my2d==1.and.hu(itypat)%lpawu==0) then
+       ABI_ALLOCATE(hu(itypat)%vee,(ndim,ndim,ndim,ndim))
+       hu(itypat)%vee(1,1,1,1)=pawtab(itypat)%upawu
      endif
+!   x2my2d case end
 
      hu(itypat)%udens=zero
      ij=0
@@ -319,7 +325,7 @@ end subroutine init_hu
 !!
 !! SOURCE
 
-subroutine destroy_hu(hu,ntypat,t2g)
+subroutine destroy_hu(hu,ntypat,t2g,x2my2d)
 
  use defs_basis
  use m_crystal, only : crystal_t
@@ -329,7 +335,7 @@ subroutine destroy_hu(hu,ntypat,t2g)
 !scalars
  integer, intent(in) :: ntypat
  type(hu_type),intent(inout) :: hu(ntypat)
- integer, intent(in) :: t2g
+ integer, intent(in) :: t2g,x2my2d
 
 !Local variables-------------------------------
  integer :: itypat
@@ -345,6 +351,8 @@ subroutine destroy_hu(hu,ntypat,t2g)
     ABI_DEALLOCATE(hu(itypat)%udens)
   end if
   if(t2g==1.and.hu(itypat)%lpawu==1) then
+    ABI_DEALLOCATE(hu(itypat)%vee)
+  else if(x2my2d==1.and.hu(itypat)%lpawu==0) then
     ABI_DEALLOCATE(hu(itypat)%vee)
   else
     hu(itypat)%vee => null()
@@ -657,16 +665,22 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        call vee_ndim2tndim_hu(lpawu,hu(itypat)%vee,veeslm2,1)
 
 !!     veeslm(m1,m2,m3,m4)=cmplx(vee(m1,m2,m3,m4),zero)
+     !  ABI_DEALLOCATE(veeslm)
        veeslm(:,:,:,:)=cmplx(hu(itypat)%vee(:,:,:,:),zero)
+       !ABI_DEALLOCATE(veeslm)! ici cela plante
 
 !!     build udens in the Slm basis and print it
        call vee2udensatom_hu(ndim,nspinor,udens_atoms(iatom)%value,real(veeslm),"slm")
+       !ABI_DEALLOCATE(veeslm) ! ici cela plante
 
        dim_vee=ndim
        basis_vee='Slm'
 !     first print veeslm
        !call printvee_hu(ndim,real(veeslm),1,basis_vee)
        call printvee_hu(tndim,real(veeslm2),1,basis_vee)
+
+      ! ABI_DEALLOCATE(veeslm)
+
 !      ==================================
 !      Then compute veerotated
 !      ==================================
@@ -801,7 +815,6 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
            uaver=uaver+udens_atoms(iatom)%value(ms,ms1)
          enddo
        enddo
-       !write(6,*) "u average",uaver/float(4*ndim*ndim)
 
        call vee2udensatom_hu(ndim,nspinor,udens_atoms(iatom)%value,real(veenew),"basis_vee",prtonly=1)
 

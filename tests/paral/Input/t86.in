@@ -4,24 +4,26 @@
 ndtset 2
 jdtset 1 2
 
+use_yaml 1
+
 getwfk -1
-nline1 7
-nnsclo1 7
-nline2 10
-nnsclo2 10
+# nline1 7
+# nnsclo1 7
+# nline2 10
+# nnsclo2 10
 
 prtvol    4
 pawprtvol 3
 
 ##### CONVERGENCE PARAMETERS
 nstep1   30
-nstep2   2
+nstep2   10
 ecut      12 # low cutoff !
 ngfft 32 32 32
 ngfftdg 32 32 32
 pawecutdg 20
 tolvrs1 1.0d-7
-toldfe2 1.0d-10
+toldfe2 1.0d-8
 nband     32
 nbdbuf    2
 occopt 3 tsmear 1200 K
@@ -85,20 +87,19 @@ bandpp2 8
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = ubu_intel_13.1_openmpi
 #%% [files]
-#%% files_to_test =
-#%%   t86.out, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -medium
 #%% psp_files = 23v.paw, 38sr.paw, 8o.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t86_MPI4.out, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -easy;
+#%%   t86_MPI4.out, use_yaml = yes, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -easy;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, FAILS_IFMPI
 #%% description = DFT+DMFT for SrVO3 using Hubard I code with KGB parallelism
 #%% topics = DMFT, parallelism
+#%% [yaml_test]
+#%% file = ./t86.yaml
 #%%<END TEST_INFO>

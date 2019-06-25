@@ -301,7 +301,7 @@ P           mkmem          10
 
 
 ================================================================================
- STRING METHOD - TIME STEP     1
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     1
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -1093,7 +1093,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     2
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     2
 ================================================================================
 
 
@@ -1643,7 +1643,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     3
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     3
 ================================================================================
 
 
@@ -2193,7 +2193,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     4
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     4
 ================================================================================
 
 
@@ -2743,7 +2743,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     5
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     5
 ================================================================================
 
 
@@ -3293,7 +3293,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     6
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     6
 ================================================================================
 
 
@@ -3842,7 +3842,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     7
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     7
 ================================================================================
 
 
@@ -4391,7 +4391,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     8
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     8
 ================================================================================
 
 
@@ -4938,7 +4938,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     9
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     9
 ================================================================================
 
 
@@ -5496,7 +5496,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     1
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     1
 ================================================================================
 
 ----------------------------------------------------------------------
@@ -5750,7 +5750,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     2
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     2
 ================================================================================
 
 ----------------------------------------------------------------------
@@ -5935,7 +5935,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     3
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     3
 ================================================================================
 
 ----------------------------------------------------------------------
@@ -6120,7 +6120,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     4
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     4
 ================================================================================
 
 ----------------------------------------------------------------------
@@ -6305,7 +6305,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     5
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     5
 ================================================================================
 
 ----------------------------------------------------------------------
@@ -6490,7 +6490,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     6
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     6
 ================================================================================
 
 ----------------------------------------------------------------------
@@ -6675,7 +6675,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     7
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     7
 ================================================================================
 
 ----------------------------------------------------------------------
@@ -6860,7 +6860,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     8
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     8
 ================================================================================
 
 ----------------------------------------------------------------------
@@ -7045,7 +7045,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
 
 ================================================================================
- STRING METHOD - TIME STEP     9
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     9
 ================================================================================
 
 ----------------------------------------------------------------------
@@ -7240,7 +7240,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
 --------------------------------------------------------------------------------
- STRING METHOD - TIME STEP     1
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     1
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     1   -1.06148401E+00  -1.99840E-15   6.94483E-09   7.93862E-18   6.13187E-15
@@ -7255,7 +7255,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Moving images of the cell...
 
 --------------------------------------------------------------------------------
- STRING METHOD - TIME STEP     2
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     2
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     2   -1.05749638E+00  -1.15463E-14   1.05129E-08   4.92869E-17   2.02044E-13
@@ -7269,7 +7269,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Moving images of the cell...
 
 --------------------------------------------------------------------------------
- STRING METHOD - TIME STEP     3
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     3
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     2   -1.04633257E+00  -4.50973E-13   3.40539E-08   3.93774E-15   7.95938E-13
@@ -7283,7 +7283,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Moving images of the cell...
 
 --------------------------------------------------------------------------------
- STRING METHOD - TIME STEP     4
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     4
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     2   -1.05666258E+00  -5.66214E-14   1.04427E-08   5.38482E-16   3.57290E-13
@@ -7297,7 +7297,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Moving images of the cell...
 
 --------------------------------------------------------------------------------
- STRING METHOD - TIME STEP     5
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     5
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     2   -1.05909723E+00  -1.04361E-14   6.21801E-09   6.60002E-17   2.06782E-13
@@ -7311,7 +7311,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Moving images of the cell...
 
 --------------------------------------------------------------------------------
- STRING METHOD - TIME STEP     6
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     6
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     2   -1.05274613E+00  -1.89626E-13   1.49406E-08   1.62861E-15   4.30571E-13
@@ -7325,7 +7325,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Moving images of the cell...
 
 --------------------------------------------------------------------------------
- STRING METHOD - TIME STEP     7
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     7
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     2   -1.06118201E+00  -1.37668E-14   4.14245E-09   1.57517E-16   3.02770E-13
@@ -7339,7 +7339,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Moving images of the cell...
 
 --------------------------------------------------------------------------------
- STRING METHOD - TIME STEP     8
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     8
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     2   -1.06116724E+00  -1.99840E-14   1.46879E-08   2.04875E-16   2.02425E-13
@@ -7353,7 +7353,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Moving images of the cell...
 
 --------------------------------------------------------------------------------
- STRING METHOD - TIME STEP     9
+ STRING METHOD (SIMPLIFIED + EQUAL ARC + STEEPEST-DESCENT) - TIME STEP     9
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     2   -1.06116353E+00  -3.81917E-14   2.43513E-08   2.85134E-16   5.45246E-13

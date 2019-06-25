@@ -806,7 +806,7 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
  atvshmusk=.false.
  nnocctot=zero
  typawujat=dtset%typat(pawujat)
- usepawu=(count(pawtab(:)%usepawu>0)>0)
+ usepawu=(count(pawtab(:)%usepawu/=0)>0)
 
 !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
@@ -821,7 +821,7 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
    do iatom=1,my_natom
      iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
      itypat=paw_ij(iatom)%itypat;ll=pawtab(itypat)%lpawu
-     if ((ll>=0).and.(pawtab(itypat)%usepawu>0).and.itypat==typawujat) then
+     if ((ll>=0).and.(pawtab(itypat)%usepawu/=0).and.itypat==typawujat) then
        musk(:,iatom_tot)=(/.true., .true., .true. /)
        atvshmusk(:,:,iatom_tot)=reshape((/ (( (im1==1), im1=1,natvshift)  ,im2=1,nspden ) /),(/natvshift,nspden/))
        do ispden=1,nspden
