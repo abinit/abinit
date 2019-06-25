@@ -27,9 +27,9 @@ structured data in YAML format and Python code to parse the output files and ana
 
 ### Motivations
 
-__Current situation__
+__Situation in ABINITv8__
 
-In its current state, the ABINIT test suite is based on input files with the
+In ABINITv8 and previous versions, the ABINIT test suite is based on input files with the
 corresponding reference output files.  Roughly speaking, an automatic test
 consists in comparing the reference file with the output file in a line-oriented
 fashion by computing differences between floating-point numbers without any
@@ -59,7 +59,8 @@ __Solution__
 
 One of the goals of this project is to implement a python-based infrastructure
 that allows developers to implement more rigorous tests on the portability of
-important physical quantities while ignoring intermediate results.  This goal is
+important physical quantities while ignoring intermediate results, or using more relaxed
+criteria for them. This goal is
 achieved by providing a *declarative* interface that allows developers to define
 the logic to be used to compare selected physical quantities.  We also provide a
 declarative API to check that the results computed by the ab-initio code
@@ -71,7 +72,7 @@ to minimize the amount of (coding) work required to express such logic.  There
 are therefore basic rules and design principles Abinit developers should be
 aware of in order to take fully advantage of the new infrastructure.  In what
 follows, we briefly describe the philosophy employed to implement the YAML-based
-test suite, the syntax used to define tests and the modifications required to
+test procedure, the syntax used to compare outputs with references and the modifications required to
 extend the framework.
 
 <!--
@@ -94,12 +95,12 @@ participation of the ABINIT community.
         pip install numpy pyyaml pandas --user
 
     If these dependencies are not available, the new test system will be
-    disable. Also you will have a warning saying so.
+    disabled. Also you will have a warning saying so.
 
 
 ## Implementation details
 
-The most important physical results are written in the main output file (aka
+The most important physical results are inserted in the main output file (aka
 *ab_out*) inside machine-readable [YAML](https://en.wikipedia.org/wiki/YAML)
 documents. A YAML document starts with three hyphens (---) followed by an
 (optional) tag beginning with an exclamation mark (e.g. `!ETOT`).  Three periods
@@ -142,7 +143,7 @@ implementation, indeed, supports only a subset of the YAML specifications:
 
 * scalars
 * arrays of one or two dimensions
-* mapping containing scalars
+* mappings containing scalars
 * tables in CSV format (which is more like an extension of the standard)
 
 !!! important
@@ -155,7 +156,7 @@ implementation, indeed, supports only a subset of the YAML specifications:
     when it comes to storing large data structures with lots of metadata.
 
     Note also that we do not plan to rewrite entirely the main output file in YAML syntax
-    but we prefer to focus on those physical properties that will be used by the new test suite 
+    but we prefer to focus on those physical properties that will be used by the new test procedure
     to validate new developments.
     This approach, indeed, will facilitate the migration to the new YAML-based approach as only selected portions
     of the output file will be ported to the new format thus maintaining the look and the feel relatively 
@@ -175,7 +176,7 @@ On the Fortran side, we provide:
   over the key-value pairs easily in Fortran.
 
 - a Fortran module providing tools to manipulate variable length
-  strings with a file like interface (stream object)
+  strings with a file-like interface (stream object)
 
 - a Fortran module based on the two previous modules providing the API
   to easily output YAML documents from Fortran. 
@@ -233,7 +234,7 @@ python side. More about that can be found below.
 
 An example will help clarify.  Let's assume we want to implement the output of
 the `!ETOT` dictionary with the different components of the total free energy.
-The workflow is splitted in two parts. The idea is to separate the computation
+The workflow is split in two parts. The idea is to separate the computation
 from the composition of the document, and separate the composition of the
 document from the actual rendering.
 
@@ -252,7 +253,7 @@ type(pair_list) :: e_components
 
 !! body of the routine
 call e_components%set("comment", s="Total energie and its components")
-call e_components%set("Total Energie", r=etot)
+call e_components%set("Total Energy", r=etot)
 ...
 
 !! footer of the routine, once all data have been stored
@@ -281,21 +282,21 @@ The integration of the new YAML-based tests with the pre-existent infrastructure
 is obtained via two modifications of the current specifications.
 More specifically:
 
-- the *files_to_test* section now accepts the optional argument *use_yaml*. 
-  Possible values are:
-  
-  * "yes" --> activate YAML based test
-  * "no" -->  do not use YAML test (default)
-  * "only" --> use YAML based test but not legacy fldiff algorithm
+(1) the *files_to_test* section now accepts the optional argument *use_yaml*. 
+   Possible values are:
 
-- a new (optional) section `[yaml_test]` is added with two possible fields: 
+   - "yes" --> activate YAML based test
+   - "no" -->  do not use YAML test (default)
+   - "only" --> use YAML based test but not legacy fldiff algorithm
 
-  * *test* --> the value is used as the YAML test specification source, it may
-  be used for really short configuration heavily relying on the default.
-  * *file* --> the value is the path to the file containing the YAML test
-  specification. The path is relative to the Abinit input file. A natural choice
-  would be to use the path "./t21.yaml" associated to the input file "t21.in"
-  unless we decide to create a dedicated directory.
+(2) a new (optional) section `[yaml_test]` is added with two possible fields: 
+
+   - *test* --> the value is used as the YAML test specification source, it may
+   be used for really short configuration heavily relying on the default.
+   - *file* --> the value is the path to the file containing the YAML test
+   specification. The path is relative to the Abinit input file. A natural choice
+   would be to use the path "./t21.yaml" associated to the input file "t21.in"
+   unless we decide to create a dedicated directory.
 
 !!! important
     Until the basic document list is considered stable enough the printing of
@@ -316,9 +317,9 @@ Data tree
   YAML documents themselves.
 
 Config tree
-: The configuration also take the form of a tree. Its nodes are
+: The configuration also takes the form of a tree. Its nodes are
   _specializations_ and its leaf are _parameters_ or _constraints_.
-  Its structure match the structure of the _data tree_ so one can define rules
+  Its structure matches the structure of the _data tree_ so one can define rules
   (constraint and parameters) that apply to a specific place of the _data tree_.
 
 Specialization
@@ -336,7 +337,7 @@ Parameter
 
 Iteration state
 : An iteration state describe how much iterations of each possible level have
-  append in the run (ex: idtset=2, itimimage=not used, image=5, time=not used).
+  happened in the run (ex: idtset=2, itimimage=not used, image=5, time=not used).
   It give information on the current state of the run. Documents are implicitly
   associated to their iteration state. These informations are available to
   the test engine through special YAML documents using the `IterStart` tag.
@@ -352,7 +353,7 @@ Iteration state
 
 A few conventions on documents writing
 : The label field appear in all data document. It should be a unique identifier
-  a the scale of an _iteration state_. The tag is not necessarily unique, it 
+  at the scale of an _iteration state_. The tag is not necessarily unique, it 
   describe the structure of the document and there is no need to use it unless
   special logic have to be implemented for the document. The comment field is
   optional but is appreciated where the purpose of the document is not obvious
@@ -371,9 +372,9 @@ Etot:
     tol_abs: 1.0e-7
 ```
 
-The `tol_abs` keyword is a _constraint_. It will check for each children of
-`Etot` that the value doesn't differ of more than 1.0e-7 Ha. If one does, the
-test will fail and the report will tell you what component is wrong.
+The `tol_abs` keyword is a _constraint_. It will check for every child of
+`Etot` that the value does not differ by more than 1.0e-7 Ha with the reference. 
+If one does, the test will fail and the report will tell you which component is wrong.
 
 In the `Etot` document one can find the total energy in eV. Since the unit is
 different the absolute tolerance have not the same impact on the precision.
@@ -391,9 +392,9 @@ Etot:
 ```
 
 However the `tol_abs` constraint defined in `Etot` is _inherited_ by `Total
-energy (eV)` which mean we will not only check `tol_rel` with a tolerance of
-1.0e-10 but also `tol_abs` with a tolerance of 1.0e-7. Most of the time it is
-what we need even though here it's not. So we will just use a different
+energy (eV)` which mean we will not only check `tol_rel` with a relative tolerance of
+1.0e-10 but also `tol_abs` with an absolute tolerance of 1.0e-7. Most of the time it is
+what we need, even though here, it is not. So we will just use a different
 tolerance for `tol_abs` in `Total energy (eV)`.
 
 ```yaml
@@ -408,7 +409,7 @@ Now we achieve the same relative precision and the test does not fail because
 of the looser absolute precision of the total energy in eV.
 
 The `Etot` document is the simplest possible document. It only contains fields
-with real values. We now will have a look at the `results_gs` document. It come
+with real values. We now will have a look at the `results_gs` document. It comes
 from the structure of the same name in ABINIT code. In the ABINIT output file it
 look like this:
 

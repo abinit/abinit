@@ -10,6 +10,7 @@ This part aims at giving an overview of the code structure to make easier future
 developments.
 
 We can identify three logical units in the code:
+
 - The fldiff algorithm
 - The interface with PyYAML and the parsing of output data
 - The parsing of test configuration and the testing logic
@@ -31,6 +32,7 @@ modules to perform the YAML based tests and produce the final report.
 The use of PyYAML library is abstracted away mainly by two modules of *~abinit/tests/pymods/yaml_tools/*.
 
 In *__init__.py* are defined:
+
 - the `yaml_parse` function that can parse documents from Abinit output files
   with all registered tag available.
 - the Document class that give an interface to an extracted document with its
@@ -140,7 +142,7 @@ provided.
 
 ## Constraints and parameters registration
 
-### Add a new parameter
+### Adding a new parameter
 To have the parser recognise a new token as a parameter one should edit the
 *~abinit/tests/pymods/conf_parser.py*.
 
