@@ -52,15 +52,12 @@ implicit none
 
 private
 
-public :: psml_die
 #ifdef HAVE_PSML
 public :: psxml2abheader
 !public :: psxml2abfull
-#endif
 
 CONTAINS
 
-#ifdef HAVE_PSML
 subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 
  implicit none
@@ -379,6 +376,10 @@ end subroutine psxml2abheader
 ! end test on compiling with LIBPSML enabled
 #endif
 
+end module m_psxml2ab
+!!***
+
+!{\src2tex{textfont=tt}}
 !!****f* ABINIT/psml_die
 !! NAME
 !! psml_die
@@ -417,5 +418,3 @@ subroutine psml_die(str)
 end subroutine psml_die
 !!***
 
-end module m_psxml2ab
-!!***
