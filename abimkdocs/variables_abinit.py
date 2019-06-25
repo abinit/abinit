@@ -17575,6 +17575,18 @@ If set to 1, enable the use of ScaLapack within LOBPCG.
 ),
 
 Variable(
+    abivarname="use_yaml",
+    varset="dev",
+    vartype="integer",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="USE YAML",
+    characteristics=['[[DEVELOP]]'],
+    text="If set to 1, enable the printing of YAML document in ouput.",
+),
+
+Variable(
     abivarname="usedmatpu",
     varset="paw",
     vartype="integer",
