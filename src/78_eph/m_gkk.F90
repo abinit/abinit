@@ -634,14 +634,14 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
 
 !Local variables-------------------------------
 !scalars
- integer :: ip,nu,iq,db_iqpt,cplex,ispden,nfftf,comm
+ integer :: ip,nu,iq,db_iqpt,cplex,ispden,nfft,comm
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
  !character(len=500) :: msg
 !arrays
- integer :: ngfftf(18)
- real(dp) :: phfrq(3*cryst%natom),qpt(3)
+ integer :: ngfft(18)
+ real(dp) :: phfreqs(3*cryst%natom),qpt(3)
  real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom),displ_red(2,3*cryst%natom,3*cryst%natom)
  real(dp),allocatable :: v1scf(:,:,:,:),v1qnu(:,:,:,:)
 
@@ -650,9 +650,9 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
  call wrtout(std_out, sjoin("Writing Delta V_{q,nu)(r) potentials to file:", path), do_flush=.True.)
 
  comm = xmpi_comm_self
- call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:,1)); nfftf = product(ngfftf(1:3))
+ call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1)); nfft = product(ngfft(1:3))
 
- call dvdb%open_read(ngfftf, xmpi_comm_self)
+ call dvdb%open_read(ngfft, xmpi_comm_self)
  call dvdb%print()
  !call dvdb%list_perts([-1, -1, -1])
 
@@ -663,48 +663,47 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
 
  ! Add other dimensions.
  ncerr = nctk_def_dims(ncid, [ &
-   nctkdim_t("nfftf", nfftf), nctkdim_t("nspden", dvdb%nspden), &
+   nctkdim_t("nfft", nfft), nctkdim_t("nspden", dvdb%nspden), &
    nctkdim_t("natom3", 3 * cryst%natom), nctkdim_t("nqlist", nqlist)], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ! Define arrays
  ncerr = nctk_def_arrays(ncid, [ &
-   nctkarr_t("ngfftf", "int", "three"), &
+   nctkarr_t("ngfft", "int", "three"), &
    nctkarr_t("qlist", "dp", "three, nqlist"), &
-   nctkarr_t("wqlist", "dp", "natom3, nqlist"), &
+   nctkarr_t("phfreqs", "dp", "natom3, nqlist"), &
    nctkarr_t("displ_cart", "dp", "two, natom3, natom3, nqlist"), &
-   nctkarr_t("v1qnu", "dp", "two, nfftf, nspden, natom3, nqlist")])
+   nctkarr_t("v1qnu", "dp", "two, nfft, nspden, natom3, nqlist")])
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfftf"), ngfftf(1:3)))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qlist"), qlist))
 #endif
 
- ABI_MALLOC(v1qnu, (2, nfftf, dvdb%nspden, dvdb%natom3))
+ ABI_MALLOC(v1qnu, (2, nfft, dvdb%nspden, dvdb%natom3))
 
  do iq=1,nqlist
    qpt = qlist(:,iq)
-   call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+   call ifc_fourq(ifc, cryst, qpt, phfreqs, displ_cart, out_displ_red=displ_red)
 
    ! Find the index of the q-point in the DVDB.
-   ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
    db_iqpt = dvdb%findq(qpt)
    if (db_iqpt /= -1) then
      if (prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
      ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
-     ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-     call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
+     ! This call allocates v1scf(cplex, nfft, nspden, 3*natom))
+     call dvdb%readsym_allv1(db_iqpt, cplex, nfft, ngfft, v1scf, comm)
    else
      MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB file"))
    end if
 
    !cplex = 2
-   !ABI_CALLOC(v1scf, (cplex, nfftf, db%nspden, 3*db%natom))
+   !ABI_CALLOC(v1scf, (cplex, nfft, db%nspden, 3*db%natom))
    !do idir=1,3
    !  do ipert=1,db%natom
    !    ip = (ipert - 1) * 3 + idir
-   !    call db%v1r_long_range(qpt, ipert, idir, nfftf, ngfftf, v1scf(:,:,1,ip))
+   !    call db%v1r_long_range(qpt, ipert, idir, nfft, ngfft, v1scf(:,:,1,ip))
    !    if (db%nspden == 2) v1scf(:,:,2,ip) = v1scf(:,:,1,ip)
    !  end do
    !end do
@@ -712,7 +711,7 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
    do nu=1,dvdb%natom3
      ! v1qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
      ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
-     ! v1qnu(2, nfftf, nspden, natom3), v1scf(cplex, nfftf, nspden, natom3)
+     ! v1qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)
      v1qnu(:, :, :, nu) = zero
      do ip=1,dvdb%natom3
        do ispden=1,dvdb%nspden
@@ -730,7 +729,7 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
    end do
    ! Save results to file.
 #ifdef HAVE_NETCDF
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wqlist"), phfrq, start=[1, iq]))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfreqs, start=[1, iq]))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "displ_cart"), displ_cart, start=[1, 1, 1, iq]))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1qnu"), v1qnu, start=[1, 1, 1, 1, iq]))
 #endif

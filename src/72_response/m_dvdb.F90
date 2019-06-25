@@ -2973,6 +2973,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
+             if (db%add_lr == 3 .and. ispden == 1) then
+               write(std_out,*)"q=0: Reshifting v1r_lr with average", sum(v1r_qibz(1, :, ispden, ipc)) / nfft
+               write(std_out,*)"Average of v1r_lr: ", sum(v1r_lr(1, :, imyp)) /nfft
+               v1r_lr(1, :, imyp) = v1r_lr(1, :, imyp) + sum(v1r_qibz(1, :, ispden, ipc)) / nfft
+             end if
              v1r_qibz(1, :, ispden, ipc) = v1r_qibz(1, :, ispden, ipc) - v1r_lr(1, :, imyp)
            end do
          end do
@@ -3029,6 +3034,12 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
+             !if (db%add_lr >= 3 .and. ispden == 1) then
+             !  write(std_out,*)"q != 0: Reshifting v1r_lr with cplx average", sum(v1r_qbz(:,:,ispden, ipc), dim=2) / nfft
+             !  write(std_out,*)"Average of v1r_lr: ", sum(v1r_lr(1, :, imyp)) /nfft
+             !  v1r_lr(1,:,imyp) = v1r_lr(1,:,imyp) - sum(v1r_lr(1,:,imyp)) / nfft + sum(v1r_qbz(1,:,ispden,ipc)) / nfft
+             !  v1r_lr(2,:,imyp) = v1r_lr(2,:,imyp) - sum(v1r_lr(2,:,imyp)) / nfft + sum(v1r_qbz(2,:,ispden,ipc)) / nfft
+             !end if
              v1r_qbz(1, :, ispden, ipc) = v1r_qbz(1, :, ispden, ipc) - v1r_lr(1, :, imyp)
              v1r_qbz(2, :, ispden, ipc) = v1r_qbz(2, :, ispden, ipc) - v1r_lr(2, :, imyp)
            end do
@@ -3123,6 +3134,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
        "has_dielt", "has_zeff", "has_quadrupoles", "dvdb_add_lr", "symv1"])
      NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"]))
      ncerr = nctk_def_arrays(ncid, [ &
         nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
         nctkarr_t("maxw", "dp", "nrpt, natom3"), &
@@ -3134,8 +3146,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        "has_dielt", "has_zeff", "has_quadrupoles", "symv1" ], &
        l2int([db%has_dielt, db%has_zeff, db%has_quadrupoles, db%symv1]))
      NCF_CHECK(ncerr)
-     ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "dvdb_add_lr"], [db%add_lr])
-     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "dvdb_add_lr"], [db%add_lr]))
+     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [db%qdamp]))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), ngqpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
@@ -5861,7 +5873,38 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
 
  ! Compute the long-range potential in G-space
  v1G_lr = zero
- !write(std_out, *)"qdamp", db%qdamp
+if (db%add_lr == 2) then
+  ! New implementation
+  ! The gradient wrt one atom behaves like: Z^t* (q+G)
+  ! We need the projection along the (normalized) reduced direction a_i in direct space.
+  ! hence we have to take the projection with the dual vector b_i
+  ! In theory Z is symmetric but in practice it's not so use Z^t in equation.
+  ll = sqrt(sum(rprimd(:, idir) ** 2))
+  do ig=1,nfft
+   qG_red = qpt + gfft(:,ig)
+   ! Include 2pi in qG_cart
+   qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
+   qG_mod = sqrt(sum(qG_cart ** 2))
+   denom = dot_product(qG_cart, matmul(db%dielt, qG_cart))
+   if (abs(denom) < tol8) cycle
+   denom_inv = one / denom
+   if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
+   ! <b_i | Z^t (q+G) > in Cartesian coords
+   ! Multiply by ll because we want the projection along a_i/ll and b_i is contravariant.
+   qgZ = ll * dot_product(db%cryst%gprimd(:, idir), matmul(transpose(db%zeff(:,:,iatom)), qG_cart))
+
+   ! Phase factor exp(-i (q+G) . tau)
+   qtau = - two_pi * dot_product(qG_red, tau_red)
+   phre = cos(qtau); phim = sin(qtau)
+
+   re = zero
+   im = fac * qGZ * denom_inv
+   v1G_lr(1,ig) = phre * re - phim * im
+   v1G_lr(2,ig) = phim * re + phre * im
+  end do
+
+else
+ ! Previous implementation.
  do ig=1,nfft
    ! (q + G)
    qG_red = qpt + gfft(:,ig)
@@ -5875,9 +5918,7 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
    if (qG_mod < tol8) cycle
    denom_inv = one / denom
    if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
-   !if (db%has_quadrupoles) then
-   !  db%qstar(:,:,:,iatom)
-   !end if
+   !if (db%has_quadrupoles) db%qstar(:,:,:,iatom)
 
    ! Phase factor exp(-i (q+G) . tau)
    qtau = - two_pi * dot_product(qG_red, tau_red)
@@ -5888,6 +5929,7 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
    v1G_lr(1,ig) = phre * re - phim * im
    v1G_lr(2,ig) = phim * re + phre * im
  end do
+end if
 
  ABI_FREE(gfft)
 
