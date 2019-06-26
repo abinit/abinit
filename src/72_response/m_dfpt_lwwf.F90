@@ -2635,15 +2635,24 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 
 !Local variables-------------------------------
 !scalars
- integer :: iatpert,berryopt,g0term,iband,idir,ipert,istr,istrpert,jband
- integer :: nkpg,nkpg1
+ integer :: iatpert,iq1grad,berryopt,g0term,iband,idir,ii,ipert,istr,istrpert,jband
+ integer :: ka,kb,nkpg,nkpg1,npw_disk
  integer :: opt_gvnl1,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
  real(dp) :: doti,dotr,dum_lambda
+ character(len=500) :: msg                   
  type(rf_hamiltonian_type) :: rf_hamkq
  type(pawfgr_type) :: pawfgr
  
 !arrays
  real(dp) :: dum_grad_berry(1,1),dum_gs1(1,1),dum_gvnl1(1,1)
+ real(dp),allocatable :: cg1_atdis(:,:)
+ real(dp),allocatable :: c1atdis_dQcalHstrain_c0_bks(:,:,:,:,:)
+ real(dp),allocatable :: c1atdis_Hmetricdqdq_c0_bks(:,:,:,:,:)
+ real(dp),allocatable :: c1atdis_q1gradH0_c1strain_bks(:,:,:,:,:)
+ real(dp),allocatable :: cg1_ddk(:,:)
+ real(dp),allocatable :: cg1_strain(:,:),cg1_strain_ar(:,:,:,:)
+ real(dp),allocatable :: c0_HatdisdagdQ_c1strain_bks(:,:,:,:,:)
+ real(dp),allocatable :: c0_Hatdisdqdag_c1strain_bks(:,:,:,:,:)
  real(dp),allocatable :: ci_h1vatdisdag_cj(:,:,:,:),cj_h1vstrain_ci(:,:,:,:)
  real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:)
  real(dp),allocatable :: dkinpw(:)
@@ -2833,8 +2842,6 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
        ci_h1vatdisdag_cj(1,iatpert,jband,iband)=dotr
        ci_h1vatdisdag_cj(2,iatpert,jband,iband)=-doti
 
-       write(90,*) dotr,-doti
-
      end do !jband
 
    end do !iband
@@ -2860,14 +2867,212 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  ABI_DEALLOCATE(vlocal1)
 
 
+!----------------------------------------------------------------------------------------
+! Terms that involve first order response functions
+!----------------------------------------------------------------------------------------
+
+!Allocation of bks (band, k-point and spin) dependent terms 
+ABI_ALLOCATE(c1atdis_q1gradH0_c1strain_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+ABI_ALLOCATE(c1atdis_dQcalHstrain_c0_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+ABI_ALLOCATE(c0_HatdisdagdQ_c1strain_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+ABI_ALLOCATE(c0_Hatdisdqdag_c1strain_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+ABI_ALLOCATE(c1atdis_Hmetricdqdq_c0_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+c1atdis_dQcalHstrain_c0_bks=zero
+c0_HatdisdagdQ_c1strain_bks=zero
+
+!Allocation of wf1s
+ ABI_ALLOCATE(cg1_strain,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(cg1_strain_ar,(3,3,2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(cg1_atdis,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(cg1_ddk,(2,npw_k*dtset%nspinor))
+
+!Check correspondance with the data in wf1 files
+ !Atomic displacements
+ do iatpert=1,natpert
+   !k-point index check
+   ii = wfk_findk(wfk_t_atdis(iatpert), kpt(:))
+   ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt in atomic displacement wf1 file")
+   !npw check
+   npw_disk = wfk_t_atdis(iatpert)%hdr%npwarr(ii)
+   if (npw_k /= npw_disk) then
+     write(unit=msg,fmt='(a,i5,a,i5,a,a,i5,a,a,i5)')&
+&    'For ikpt = ',ikpt,', and pertcase= ',pert_atdis(3,iatpert),ch10,&
+&    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
+&     'while it should be ',npw_k
+     MSG_BUG(msg)
+   end if
+ end do
+
+ !ddk 
+ do iq1grad=1,nq1grad
+   !k-point index check
+   ii = wfk_findk(wfk_t_ddk(iq1grad), kpt(:))
+   ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in ddk wf1 file")
+   !npw check
+   npw_disk = wfk_t_ddk(iq1grad)%hdr%npwarr(ii)
+   if (npw_k /= npw_disk) then
+     write(unit=msg,fmt='(a,i5,a,i5,a,a,i5,a,a,i5)')&
+&    'For ikpt = ',ikpt,', and pertcase= ',q1grad(3,iq1grad),ch10,&
+&    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
+&     'while it should be ',npw_k
+     MSG_BUG(msg)
+   end if
+ end do
+
+ !strain 
+ do istrpert=1,nstrpert
+   ka=pert_strain(3,istrpert)
+   kb=pert_strain(4,istrpert)
+   !k-point index check
+   ii = wfk_findk(wfk_t_strain(ka,kb), kpt(:))
+   ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in strain wf1 file")
+   !npw check
+   npw_disk = wfk_t_strain(ka,kb)%hdr%npwarr(ii)
+   if (npw_k /= npw_disk) then
+     write(unit=msg,fmt='(a,i5,a,i5,a,a,i5,a,a,i5)')&
+&    'For ikpt = ',ikpt,', and pertcase= ',pert_strain(5,istrpert),ch10,&
+&    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
+&     'while it should be ',npw_k
+     MSG_BUG(msg)
+   end if
+ end do
+
+!--------------------------------------------------------------------------------------
+!q1-gradient of gs Hamiltonian: 
+! < u_{i,k}^{\tau_{\kappa\alpha}} | \partial_{gamma} H^{(0)} | u_{i,k}^{n_{\beta\delta}} >
+!--------------------------------------------------------------------------------------
+
+!Specific allocations
+ ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+
+!Specific definitions
+ vlocal1=zero
+ useylmgr1=1
+ dum_lambda=zero
+ berryopt=0;optlocal=0;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
+
+!LOOP OVER Q1-GRADIENT
+ do iq1grad=1,nq1grad
+   ipert=q1grad(1,iq1grad)
+   idir=q1grad(2,iq1grad)
+
+   !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
+   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
+ & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+
+   !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+   call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
+   kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
+   npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&                    ! In
+   dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
+
+   !LOOP OVER BANDS
+   do iband=1,nband_k
+
+     if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+     !LOOP OVER STRAIN PERTURBATION
+     do istrpert=1,nstrpert
+       ka=pert_strain(3,istrpert)
+       kb=pert_strain(4,istrpert)
+
+       !Read strain field wf1
+       if (ka>=kb) then
+         call wfk_read_bks(wfk_t_strain(ka,kb), iband, indkpt1(ikpt), &
+       & isppol, xmpio_single, cg_bks=cg1_strain)
+         cg1_strain_ar(ka,kb,:,:)=cg1_strain
+       else
+         cg1_strain=cg1_strain_ar(kb,ka,:,:)
+       end if
+
+       !Compute < g |\partial_{gamma} H^{(0)} | u_{i,k}^{n_{\beta\delta}} >
+       call getgh1c(berryopt,cg1_strain,dum_cwaveprj,gv1c,dum_grad_berry,&
+  &    dum_gs1,gs_hamkq,dum_gvnl1,idir,ipert,dum_lambda,mpi_enreg,optlocal,&
+  &    optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+
+       !LOOP OVER ATOMIC DISPLACEMENT PERTURBATION
+       do iatpert=1,natpert
+
+         !Read atomic displacement wf1
+         call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+       & isppol, xmpio_single, cg_bks=cg1_atdis)
+
+         !calculate: 
+         ! < u_{i,k}^{\tau_{\kappa\alpha}} | \partial_{gamma} H^{(0)} | u_{i,k}^{n_{\beta\delta}} >
+         call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_atdis,gv1c, &
+       & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+         c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert)=dotr
+         c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)=doti
+
+         write(90,*) dotr,doti
+
+       end do !iefipert
+
+     end do !istrpert
+
+   end do !iband
+
+   !Clean the ddk rf_hamiltonian
+   call destroy_rf_hamiltonian(rf_hamkq)
+
+   !Deallocations
+   ABI_DEALLOCATE(kpg_k)
+   ABI_DEALLOCATE(kpg1_k)
+   ABI_DEALLOCATE(dkinpw)
+   ABI_DEALLOCATE(kinpw1)
+   ABI_DEALLOCATE(ffnlk)
+   ABI_DEALLOCATE(ffnl1)
+   ABI_DEALLOCATE(ph3d)
+
+ end do !iq1grad
+
+!Deallocations
+ ABI_DEALLOCATE(gv1c)
+ ABI_DEALLOCATE(vlocal1)
+ !ABI_DEALLOCATE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
+ ABI_DEALLOCATE(part_ylmgr_k)
 
 
+!--------------------------------------------------------------------------------------
+! Acumulates all the wf dependent terms of the flexoelectric tensor
+!--------------------------------------------------------------------------------------
+ isdqwf_k=zero
+ isdqwf_t1_k=zero
+ isdqwf_t2_k=zero
+ isdqwf_t3_k=zero
+ isdqwf_t4_k=zero
+ isdqwf_t5_k=zero
+ do istrpert=1,nstrpert
+   ka=pert_strain(3,istrpert)
+   kb=pert_strain(4,istrpert)
+   do iq1grad=1,nq1grad
+     do iatpert=1,natpert
+       do iband=1,nband_k
+    
+         if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+         !All terms toghether except T4 that needs further treatment
+         isdqwf_k(1,iatpert,iq1grad,ka,kb)=isdqwf_k(1,iatpert,iq1grad,ka,kb) +        &
+      &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) ) !T1
+
+         isdqwf_k(2,iatpert,iq1grad,ka,kb)=isdqwf_k(2,iatpert,iq1grad,ka,kb) +        &
+      &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) ) !T1
+
+         !Separate them
+         !T1
+         isdqwf_t1_k(1,iatpert,iq1grad,ka,kb)=isdqwf_t1_k(1,iatpert,iq1grad,ka,kb) + &
+      &  occ_k(iband) * c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) 
+
+         isdqwf_t1_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t1_k(2,iatpert,iq1grad,ka,kb) + &
+      &  occ_k(iband) * c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) 
 
 
-
-
-
-
+      end do
+    end do
+  end do
+end do
 
  DBG_EXIT("COLL")
 
