@@ -466,7 +466,7 @@ from the data tree by the YAML parser and should return an instance of our class
 
 ```python
 @yaml_map
-class Etot(object):
+class EnergyTerms(object):
     def __init__(self, kin, hart, xc, ew):
         self.kinetic = kin
         self.hartree = hart
@@ -479,9 +479,9 @@ class Etot(object):
         # something else if we subclass Etot)
         # d is a dictionary built from the data tree
 
-        kin = d['Kinetic energy']
-        hart = d['Hartree energy']
-        xc = d['XC energy']
+        kin = d['kinetic']
+        hart = d['hartree']
+        xc = d['xc']
         ew = d['Ewald energy']
         return cls(kin, hart, xc, ew)
 ```
@@ -495,7 +495,7 @@ In `~abinit/tests/pymods/yaml_tools/structure/ground_state.py`
 
 ```python
 @yaml_map
-class Etot(object):
+class EnergyTerms(object):
     # same code as the previous example
 
     def check_components(self, tested):
@@ -511,7 +511,7 @@ class Etot(object):
 In the configuration file
 
 ```yaml
-Etotal:
+EnergyTerms:
     callback:
         method: check_components
 ```
@@ -523,10 +523,7 @@ what you gave him.
 
 ```python
 @yaml_map
-class Etot(object):
-
-    __yaml_tag = 'ETOT'
-
+class EnergyTerms(object):
     # same code as the previous example
 
     def get_children(self):

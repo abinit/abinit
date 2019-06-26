@@ -104,18 +104,19 @@ to the total free energy using:
 
 
 ```yaml
---- !Etot
+--- !EnergyTerms
 comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  5.279019930263079807E+00
-Hartree energy      :  8.846303409910728499E-01
-XC energy           : -4.035286123400158687E+00
-Ewald energy        : -1.095155892074578219E+01
-PsPCore             :  1.549159282251551528E-01
-Loc. psp. energy    : -3.356800625695788298E+00
-NL psp energy       :  1.895544586353373973E+00
-Etotal              : -1.012953488400904689E+01
-Band energy         :  1.406569063148472631E+00
-Total energy(eV)    : -2.756386620520307815E+02
+kinetic             :  4.323825067238190201E+01
+hartree             :  3.133994553363548619E+01
+xc                  : -2.246182631222462689E+01
+Ewald energy        : -1.142203169790575572E+02
+psp_core            :  6.536925226004570710E+00
+local_psp           : -9.852521179991468614E+01
+spherical_terms     :  2.587718945528139081E+00
+internal            : -1.515045147136467563E+02
+'-kT*entropy'       : -3.174881766478041684E-03
+total_energy        : -1.515076895954132397E+02
+total_energy_eV     : -4.122733899322517573E+03
 ...
 ```
 
@@ -393,12 +394,12 @@ This YAML document is more complicated as it contains scalar fields, dictionarie
 **MG: Are integer values always compared without tolerance?**
 Still, the parsers will be able to locate the entire document via its tag/label and address all the entries by name.
 To specify the tolerance for the relative difference for all the scalar quantities in `ResultsGS`,
-we just add a new entry to the YAML configuration file similarly to what we did for `Etot`: 
+we just add a new entry to the YAML configuration file similarly to what we did for `EnergyTerms`: 
 
 ```yaml
-Etot:
+EnergyTerms:
     tol_abs: 1.0e-7
-    Total energy (eV):
+    total_energy_eV:
         tol_abs: 1.0e-5
         tol_rel: 1.0e-10
 
@@ -502,9 +503,9 @@ filters:
         dtset: 2
 
 ks:
-    Etot:
+    EnergyTerms:
         tol_abs: 1.0e-7
-        Total energy (eV):
+        total_energy_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-10
 
@@ -529,9 +530,9 @@ filters:
         dtset: 2
 
 ks:
-    Etot:
+    EnergyTerms:
         tol_abs: 1.0e-7
-        Total energy (eV):
+        total_energy_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-10
 
@@ -556,14 +557,14 @@ dmft:
 
         stress tensor:
             ignore: true
-    Etot:
-        Total energy eV:
+    EnergyTerms:
+        total_energy_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-8
 
-    Etot DC:
+    EnergyTermsDC:
         tol_abs: 1.0e-7
-        Total DC energy eV:
+        total_energy_dc_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-8
 ```
@@ -719,7 +720,7 @@ array that will be compared to `tol_eq` value.
 A minimal example:
 
 ```yaml
-Etot:
+EnergyTerms:
     tol_eq: 1.0e-6
     equation: 'this["Etotal"] - this["Total energy(eV)"]/27.2114'
 ```
@@ -742,7 +743,7 @@ for explanations about those). Note that `self` will be the reference
 instance. We can then use it by with the following configuration:
 
 ```yaml
-Atomic speeds:
+AtomSpeeds:
     callback:
         method: not_going_anywhere
         d_min: 1.0e-2
