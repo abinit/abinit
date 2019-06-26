@@ -638,7 +638,7 @@ python language as well as the implementation of post-processing tools.
 *  Avoid names starting with an underscore because these names are reserved for future additions 
    in the python infrastructure.
 
-* `tol_abs`, `tol_rel`, `tol_vec`, `equation`, `equations`, `callback` and `callbacks` are reserved 
+* `tol_abs`, `tol_rel`, `tol_vec`, `tol_eq`, `ceil`, `ignore`, `equation`, `equations`, `callback` and `callbacks` are reserved 
    keywords that shall not be used in Yaml documents.
 
 * The *comment* field is optional but it is recommended especially when the purpose of the document is not obvious.
