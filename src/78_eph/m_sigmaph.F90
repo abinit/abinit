@@ -1020,6 +1020,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    dvdb%has_zeff = has_zeff
    dvdb%has_quadrupoles = has_quadrupoles
    !dvdb%qstar = qstar
+   !dvdb%alpha_gmin = alpha_gmin
    dvdb%add_lr = add_lr
    ! Naive q-point check
    do iq_ibz=1,cnt-1

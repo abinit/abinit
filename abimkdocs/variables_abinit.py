@@ -19783,4 +19783,18 @@ at the input [[qpt]].
 """,
 ),
 
+Variable(
+    abivarname="eph_alpha_gmin",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EPH ALPHA times norm of GMIN.",
+    text=r"""
+This is an *advanced option* used to compute the long-range part of the DFTP potential.
+TO BE DESCRIBED WHEN WE ENTER PRODUCTION
+""",
+),
+
 ]

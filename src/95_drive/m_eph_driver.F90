@@ -588,6 +588,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
    end if
 
+   ! Allow user to change alpha_gmin parameter
+   dvdb%alpha_gmin = dtset%eph_alpha_gmin
+
    if (my_rank == master) then
      call dvdb%print()
      call dvdb%list_perts([-1, -1, -1], unit=ab_out)

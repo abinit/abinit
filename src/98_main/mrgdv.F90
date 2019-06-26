@@ -59,6 +59,7 @@ program mrgdv
 !Local variables-------------------------------
 !scalars
  integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, method, symv1scf
+ real(dp) :: alpha_gmin
  character(len=24) :: codename
  character(len=500) :: command,arg, msg
  character(len=fnlen) :: dvdb_path, dump_file, ddb_path
@@ -186,8 +187,10 @@ program mrgdv
      ABI_CHECK(get_arg("method", method, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
+     ABI_CHECK(get_arg("alpha-gmin", alpha_gmin, msg, default=sqrt(five)) == 0, msg)
      ABI_CHECK(get_arg_list("coarse-ngqpt", coarse_ngqpt, lenr, msg, default=0, want_len=3) == 0, msg)
-     call dvdb_test_ftinterp(dvdb_path, method, symv1scf, ngqpt, dvdb_add_lr, ddb_path, prtvol, coarse_ngqpt, comm)
+     call dvdb_test_ftinterp(dvdb_path, method, symv1scf, ngqpt, dvdb_add_lr, alpha_gmin, &
+                             ddb_path, prtvol, coarse_ngqpt, comm)
 
    case ("downsample")
      call get_command_argument(2, dvdb_path)
@@ -221,7 +224,6 @@ program mrgdv
  end if
 
  call wrtout(std_out," Done")
-
  call abinit_doctor("__mrgdv")
 
  100 call xmpi_end()
