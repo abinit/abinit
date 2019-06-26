@@ -42,14 +42,14 @@ module m_hightemp
   type,public :: hightemp_type
     logical :: enabled
     integer :: bcut,nbcut
-    real(dp) :: ebcut,int_energycontrib,int_rhocontrib,u0,ucvol
+    real(dp) :: ebcut,energycontrib,nfreeel,u0,ucvol
   contains
-    procedure :: compute_int_energycontrib,compute_int_rhocontrib
+    procedure :: compute_energycontrib,compute_nfreeel
     procedure :: compute_obj,compute_u0,init
     final :: finalize
   end type hightemp_type
 
-  public :: freedos,hightemp_addtoenergy,hightemp_addtorho,prt_eigocc
+  public :: freedos,hightemp_addtoenergy,hightemp_addtorho,prt_eigocc,hightemp_getnfreeel
 contains
 
   !!****f* ABINIT/m_hightemp/init
@@ -92,9 +92,9 @@ contains
       call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
       this%bcut=mband
       this%nbcut=nbcut
+      this%nfreeel=zero
       this%ebcut=zero
-      this%int_energycontrib=zero
-      this%int_rhocontrib=zero
+      this%energycontrib=zero
       this%u0=zero
     end if
   end subroutine init
@@ -169,13 +169,13 @@ contains
 
     ! *********************************************************************
 
-    call this%compute_u0(eigen,eknk,mband,nband,nkpt,nsppol,wtk)
-    call this%compute_int_rhocontrib(fermie,1024,tsmear)
-    call this%compute_int_energycontrib(fermie,1024,tsmear)
+    ! call this%compute_u0(eigen,eknk,mband,nband,nkpt,nsppol,wtk)
+    ! call this%compute_nfreeel(fermie,1024,tsmear)
+    ! call this%compute_energycontrib(fermie,1024,tsmear)
 
-    write(0,*) "U_0 = ", this%u0
-    write(0,*) "Density contribution = ", this%int_rhocontrib
-    write(0,*) "Energy contribution = ", this%int_energycontrib
+    ! write(0,*) "U_0 = ", this%u0
+    ! write(0,*) "Free electrons = ", this%nfreeel
+    ! write(0,*) "Energy contribution = ", this%energycontrib
   end subroutine compute_obj
 
   !!****f* ABINIT/m_hightemp/compute_u0
@@ -217,43 +217,73 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: bdtot_index,iband,ikpt,isppol,nband_k,niter
+    integer :: bdtot_index,iband,ikpt,isppol,krow,nband_k,niter
+    real(dp) :: buf,bufkin
     ! Arrays
     real(dp) :: eig_n(mband),ek_n(mband)
+    real(dp) :: eigentemp(mband*nkpt*nsppol)
+    real(dp) :: eknktemp(mband*nkpt*nsppol)
+    logical :: mk(mband*nkpt*nsppol)
 
     ! *********************************************************************
 
-    eig_n(:)=zero
-    ek_n(:)=zero
-    bdtot_index=1
-    do isppol=1,nsppol
-      do ikpt=1,nkpt
-        nband_k=nband(ikpt+(isppol-1)*nkpt)
-        do iband=1,nband_k
-          eig_n(iband)=eig_n(iband)+wtk(ikpt)*eigen(bdtot_index)
-          ek_n(iband)=ek_n(iband)+wtk(ikpt)*eknk(bdtot_index)
-          bdtot_index=bdtot_index+1
-        end do
-      end do
+    ! eig_n(:)=zero
+    ! ek_n(:)=zero
+    ! bdtot_index=1
+    ! do isppol=1,nsppol
+    !   do ikpt=1,nkpt
+    !     nband_k=nband(ikpt+(isppol-1)*nkpt)
+    !     do iband=1,nband_k
+    !       eig_n(iband)=eig_n(iband)+wtk(ikpt)*eigen(bdtot_index)
+    !       ek_n(iband)=ek_n(iband)+wtk(ikpt)*eknk(bdtot_index)
+    !       bdtot_index=bdtot_index+1
+    !     end do
+    !   end do
+    ! end do
+    !
+    ! this%u0=zero
+    ! niter=0
+    ! do iband=this%bcut-this%bcut/10,this%bcut
+    !   this%u0=this%u0+(eig_n(iband)-ek_n(iband))
+    !   niter=niter+1
+    ! end do
+    ! this%u0=this%u0/niter
+    ! this%ebcut=eig_n(this%bcut)
+    !
+    ! write(0,*) 'Legacy U_0 value = ', this%u0
+    ! write(0,*) 'E_bc', this%ebcut
+
+
+    eigentemp(:)=zero
+    eknktemp(:)=zero
+    mk(:)=.true.
+
+    ! Sorting eigen and eknk in ascending energy order.
+    do iband=1,this%bcut*nkpt*nsppol
+      krow=minloc(eigen,dim=1,mask=mk)
+      mk(minloc(eigen,dim=1,mask=mk))=.false.
+      eigentemp(iband)=eigen(krow)
+      eknktemp(iband)=eknk(krow)
     end do
 
-    this%u0=zero
+    ! Doing the average over the 25 lasts states...
     niter=0
-    do iband=this%bcut-this%bcut/10,this%bcut
-      this%u0=this%u0+(eig_n(iband)-ek_n(iband))
+    this%u0=zero
+    do iband=this%bcut*nkpt*nsppol-25,this%bcut*nkpt*nsppol
+      this%u0=this%u0+(eigentemp(iband)-eknktemp(iband))
       niter=niter+1
     end do
     this%u0=this%u0/niter
-    this%ebcut=eig_n(this%bcut)
+    this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
   end subroutine compute_u0
 
-  !!****f* ABINIT/m_hightemp/compute_int_rhocontrib
+  !!****f* ABINIT/m_hightemp/compute_nfreeel
   !! NAME
-  !! compute_int_rhocontrib
+  !! compute_nfreeel
   !!
   !! FUNCTION
-  !! Compute the value of the integral corresponding to the residual of density after the band cut
-  !! I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon
+  !! Compute the value of the integral corresponding to the missing free electrons after energy cut.
+  !! I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}\Omega}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon
   !!
   !! INPUTS
   !! this=hightemp_type object concerned
@@ -269,7 +299,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_int_rhocontrib(this,fermie,mrgrid,tsmear)
+  subroutine compute_nfreeel(this,fermie,mrgrid,tsmear)
 
     ! Arguments -------------------------------
     ! Scalars
@@ -289,14 +319,14 @@ contains
     step=(1/this%ebcut)/mrgrid
     do ii=1,mrgrid
       ix=(ii)*step
-      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,this%u0,this%ucvol)/(ix*ix)/this%ucvol
+      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,this%u0,this%ucvol)/(ix*ix)
     end do
-    this%int_rhocontrib=simpson(step,values)
-  end subroutine compute_int_rhocontrib
+    this%nfreeel=simpson(step,values)
+  end subroutine compute_nfreeel
 
-  !!****f* ABINIT/m_hightemp/compute_int_energycontrib
+  !!****f* ABINIT/m_hightemp/compute_energycontrib
   !! NAME
-  !! compute_int_energycontrib
+  !! compute_energycontrib
   !!
   !! FUNCTION
   !! Compute the value of the integral corresponding to the residual of energy after the band cut
@@ -316,7 +346,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_int_energycontrib(this,fermie,mrgrid,tsmear)
+  subroutine compute_energycontrib(this,fermie,mrgrid,tsmear)
 
     ! Arguments -------------------------------
     ! Scalars
@@ -338,9 +368,8 @@ contains
       ix=(ii)*step
       values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,this%u0,this%ucvol)*(1/ix-this%u0)/(ix*ix)
     end do
-    this%int_energycontrib=simpson(step,values)
-
-  end subroutine compute_int_energycontrib
+    this%energycontrib=simpson(step,values)
+  end subroutine compute_energycontrib
 
   ! *********************************************************************
 
@@ -513,6 +542,53 @@ contains
     close(temp_unit)
   end subroutine prt_eigocc
 
+  !!****f* ABINIT/m_hightemp/hightemp_getnfreeel
+  !! NAME
+  !! hightemp_getnfreeel
+  !!
+  !! FUNCTION
+  !! Compute the value of the integral corresponding to the missing free electrons after energy cut.
+  !! I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}\Omega}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon
+  !!
+  !! INPUTS
+  !! this=hightemp_type object concerned
+  !! fermie=fermi energy (Hartree)
+  !! mrgrid=number of grid points to compute the integral
+  !! tsmear=smearing width (or temperature)
+  !!
+  !! OUTPUT
+  !! this=hightemp_type object concerned
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine hightemp_getnfreeel(ebcut,fermie,mrgrid,nfreeel,tsmear,u0,ucvol)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    integer,intent(in) :: mrgrid
+    real(dp),intent(in) :: ebcut,fermie,tsmear,u0
+    real(dp),intent(out) :: nfreeel
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: ii
+    real(dp) :: ix,step,ucvol
+    ! Arrays
+    real(dp) :: values(mrgrid)
+
+    ! *********************************************************************
+
+    step=(1/ebcut)/mrgrid
+    do ii=1,mrgrid
+      ix=(ii)*step
+      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,u0,ucvol)/(ix*ix)
+    end do
+    nfreeel=simpson(step,values)
+  end subroutine hightemp_getnfreeel
+
   !!****f* ABINIT/m_hightemp/hightemp_addtorho
   !! NAME
   !! hightemp_addtorho
@@ -528,24 +604,18 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_addtorho(int_rhocontrib,nfft,nspden,rhor)
+  subroutine hightemp_addtorho(int_rhocontrib,nfft,nspden,rhor,ucvol)
 
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: nfft,nspden
-    real(dp),intent(in) :: int_rhocontrib
+    real(dp),intent(in) :: int_rhocontrib,ucvol
     ! Arrays
     real(dp),intent(inout) :: rhor(nfft,nspden)
 
     ! *********************************************************************
 
-    if(nspden==1) then
-      rhor(:,:)=rhor(:,:)+int_rhocontrib
-    else if(nspden==2) then
-      rhor(:,:)=rhor(:,:)+.5*int_rhocontrib
-    end if
-
-    ! SHOULD WE ADD A CONTRIBUTION TO RHOG ?
+    rhor(:,:)=rhor(:,:)+int_rhocontrib/ucvol/nspden
   end subroutine hightemp_addtorho
 
   !!****f* ABINIT/m_hightemp/hightemp_addtorho
@@ -563,16 +633,16 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_addtoenergy(int_energycontrib,etotal)
+  subroutine hightemp_addtoenergy(energycontrib,etotal)
 
     ! Arguments -------------------------------
     ! Scalars
-    real(dp),intent(in) :: int_energycontrib
+    real(dp),intent(in) :: energycontrib
     real(dp),intent(inout) :: etotal
 
     ! *********************************************************************
 
-    etotal=etotal+int_energycontrib
+    etotal=etotal+energycontrib
   end subroutine hightemp_addtoenergy
 
 end module m_hightemp

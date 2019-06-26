@@ -31,6 +31,7 @@ module m_occ
  use m_abicore
  use m_splines
  use m_xmpi
+ use m_hightemp
 
  use m_time,         only : timab
  use m_fstrings,     only : sjoin, itoa
@@ -402,13 +403,14 @@ end subroutine getnel
 !! SOURCE
 
 subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
-&  nelect,nkpt,nspinor,nsppol,occ,occopt,prtvol,stmbias,tphysel,tsmear,wtk)
+&  nelect,nkpt,nspinor,nsppol,occ,occopt,prtvol,stmbias,tphysel,tsmear,wtk,hightemp)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,nkpt,nspinor,nsppol,occopt,prtvol
  real(dp),intent(in) :: spinmagntarget,nelect,stmbias,tphysel,tsmear
  real(dp),intent(out) :: entropy,fermie
+ type(hightemp_type),intent(inout),optional :: hightemp
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),wtk(nkpt)
@@ -486,6 +488,13 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  call getnel(doccde,dosdeltae,eigen,entropy,fermilo,maxocc,mband,nband,&
 & nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
 
+!Blanchet - Compute the number of free electrons with corresponding chemical
+!potential and add to nelect bounds.
+ if(hightemp%enabled) then
+   call hightemp_getnfreeel(hightemp%ebcut,fermilo,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
+   nelectlo=nelectlo+nelect_tmp
+ end if
+
  fermihi=maxval(eigen(1:nband(1)*nkpt*nsppol))+6.001_dp*tsmear
 !safety value
  fermihi = min(fermihi, 1.e6_dp)
@@ -493,6 +502,13 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
  call getnel(doccde,dosdeltae,eigen,entropy,fermihi,maxocc,mband,nband,&
 & nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
+
+!Blanchet - Compute the number of free electrons with corresponding chemical
+!potential and add to nelect bounds.
+ if(hightemp%enabled) then
+   call hightemp_getnfreeel(hightemp%ebcut,fermihi,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
+   nelecthi=nelecthi+nelect_tmp
+ end if
 
 !Prepare fixed moment calculation
  if(abs(spinmagntarget+99.99_dp)>1.0d-10)then
@@ -534,6 +550,13 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !    Produce nelectmid from fermimid
      call getnel(doccde,dosdeltae,eigen,entropy,fermimid,maxocc,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
+     !Blanchet - Compute the number of free electrons with corresponding chemical
+     !potential and add to nelect bounds.
+     if(hightemp%enabled) then
+       call hightemp_getnfreeel(hightemp%ebcut,fermimid,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
+       nelectmid=nelectmid+nelect_tmp
+     end if
+
 !    write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
      if(nelectmid>nelect*(one-tol14))then
        fermihi=fermimid

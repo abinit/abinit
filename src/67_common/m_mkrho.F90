@@ -32,7 +32,7 @@ module m_mkrho
  use m_abicore
  use m_xmpi
  use m_errors
- ! use m_hightemp
+ use m_hightemp
 
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary
@@ -138,12 +138,13 @@ contains
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
-&                option) !optional
+&                option,hightemp) !optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,tim_mkrho
  integer,intent(in),optional :: option
+ type(hightemp_type),intent(inout),optional :: hightemp
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
@@ -729,7 +730,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  select case (ioption)
  case(0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-               phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+               phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,hightemp=hightemp)
    if(ioption==1)then
 !$OMP PARALLEL DO
      do ifft=1,dtset%nfft

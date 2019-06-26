@@ -32,6 +32,7 @@ module m_spacepar
  use m_errors
  use m_xmpi
  use m_sort
+ use m_hightemp
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
@@ -46,7 +47,7 @@ module m_spacepar
 !!***
 
 public :: hartre            ! Given rho(G), compute Hartree potential (=FFT of rho(G)/pi/(G+q)**2)
-public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space 
+public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space
 public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
 public :: laplacian         ! Compute the laplacian of a function defined in real space
 public :: redgr             ! Compute reduced gradients of a real function on the usual unshifted FFT grid.
@@ -143,7 +144,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
        nd_m(:,nd_atom_tot) = nucdipmom(:,iatom)
     end if
  end do
- 
+
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
@@ -202,7 +203,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
        ! Final inner loop on the first dimension (note the lower limit)
        do i1=ii1,n1
           gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-          ig1 = i1 - (i1/id1)*n1 -1 
+          ig1 = i1 - (i1/id1)*n1 -1
           ii=i1+i23
 
           gred(1) = one*ig1; gred(2) = one*ig2; gred(3) = one*ig3
@@ -277,12 +278,12 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,1)=ndvecr(:)
  ABI_DEALLOCATE(work1)
- 
+
  ndvecr=zero
  call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,2) = ndvecr(:)
  ABI_DEALLOCATE(work2)
- 
+
  ndvecr=zero
  call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,3) = ndvecr(:)
@@ -1304,12 +1305,13 @@ end subroutine hartrestr
 !! SOURCE
 
 subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,&
-&                 phnons,rhog,rhor,rprimd,symafm,symrel)
+&                 phnons,rhog,rhor,rprimd,symafm,symrel,hightemp)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nfftot,nspden,nsppol,nsym
  type(MPI_type),intent(in) :: mpi_enreg
+ type(hightemp_type),intent(inout),optional :: hightemp
 !arrays
  integer,intent(in) :: irrzon(nfftot**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4)),ngfft(18)
  integer,intent(in) :: symafm(nsym),symrel(3,3,nsym)
@@ -1379,6 +1381,11 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
    if(nspden==2 .and. nsppol==1) then ! There must be at least one anti-ferromagnetic operation
      MSG_BUG('In the antiferromagnetic case, nsym cannot be 1')
+   end if
+
+!  Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
+   if(hightemp%enabled) then
+     call hightemp_addtorho(hightemp%nfreeel,nfft,nspden,rhor,hightemp%ucvol)
    end if
 
 !  If not using symmetry, still want total density in G space rho(G).
@@ -1651,6 +1658,11 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
        ABI_DEALLOCATE(symafm_used)
 
      end if ! nspden==4
+
+!    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
+     if(hightemp%enabled) then
+       call hightemp_addtorho(hightemp%nfreeel,nfft,nspden_eff,rhor,hightemp%ucvol)
+     end if
 
      call timab(17,2,tsec)
 

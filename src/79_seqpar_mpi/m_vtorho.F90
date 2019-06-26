@@ -1221,12 +1221,23 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_kpt>1
 
+!    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
+     if(hightemp%enabled) then
+       call hightemp%compute_u0(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+     end if
+
 !    Compute the new occupation numbers from eigen
      call timab(990,1,tsec)
      call newocc(doccde,eigen,energies%entropy,energies%e_fermie,dtset%spinmagntarget,&
 &     dtset%mband,dtset%nband,dtset%nelect,dtset%nkpt,dtset%nspinor,&
-&     dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
+&     dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk,hightemp)
      call timab(990,2,tsec)
+
+!     Blanchet Once we have occupation, compute number of free electrons
+      if(hightemp%enabled) then
+        call hightemp%compute_nfreeel(energies%e_fermie,1024,dtset%tsmear)
+        call hightemp%compute_energycontrib(energies%e_fermie,1024,dtset%tsmear)
+      end if
 
 !    !=========  DMFT call begin ============================================
      dmft_ldaocc=0
@@ -1484,7 +1495,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+&       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,hightemp=hightemp)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
@@ -1788,14 +1799,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  if(psps%usepaw==1.and.(iscf>=0.or.iscf==-3))  then
    ABI_DEALLOCATE(rhowfr)
    ABI_DEALLOCATE(rhowfg)
- end if
-
-!blanchet - Compute the free_transfactor u0 and add contribution to rho
- if(hightemp%enabled) then
-   call hightemp%compute_obj(eigen,eknk,energies%e_fermie,&
-&   dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
-&   dtset%tsmear,dtset%wtk)
-   call hightemp_addtorho(hightemp%int_rhocontrib,dtset%nfft,dtset%nspden,rhor)
  end if
 
  ABI_DEALLOCATE(eknk)

@@ -2235,7 +2235,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  if(allocated(vectornd)) then
     ABI_DEALLOCATE(vectornd)
  end if
- 
+
  if((nstep>0.and.dtset%iscf>0).or.dtset%iscf==-1) then
    ABI_DEALLOCATE(dielinv)
  end if
@@ -2647,9 +2647,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
    end if
 
-   ! write(0,*) etotal
-   if(hightemp%enabled) call hightemp_addtoenergy(hightemp%int_energycontrib,etotal)
-   ! write(0,*) etotal
+   if(hightemp%enabled) call hightemp_addtoenergy(hightemp%energycontrib,etotal)
+   write(0,*) 'Energy = ',etotal, "Fermi Energy = ", energies%e_fermie, "U_0 = ",hightemp%u0
 
 !  Compute energy residual
    deltae=etotal-elast

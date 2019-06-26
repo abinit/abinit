@@ -20,7 +20,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "defs_rectypes.F90",
  "m_hidecudarec.F90",
- "m_hightemp.F90",
  "m_pretty_rec.F90",
  "m_rec.F90",
  "m_rec_tools.F90",
