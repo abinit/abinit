@@ -474,28 +474,29 @@ Let's declare two filters with the syntax:
 
 ```yaml
 filters:
-    lda:
+    ks:
         dtset: 1
     dmft:
         dtset: 2
 ```
 
-Here we are simply saying that we want to associate the label `lda` to all
-documents created in the first dataset and the label `dmft` to all document created in the second dataset.
-This is the simplest filter declaration possible.
-See [here](#filters-api) for more info on filter declarations.
-Now we can use our filters. First of all we will associate the configuration
-we already wrote to the `lda` filter so we can have a different configuration
-for the second dataset. The YAML file now reads
+Here we are simply saying that we want to associate the label `ks` to all
+documents created in the first dataset and the label `dmft` to all document
+created in the second dataset. The chose of the names `ks` and `dmft` are
+absolutely arbitrary. Pick anything that make sense to your test. This is the
+simplest filter declaration possible.  See [here](#filters-api) for more info on
+filter declarations.  Now we can use our filters. First of all we will associate
+the configuration we already wrote to the `ks` filter so we can have a different
+configuration for the second dataset. The YAML file now reads
 
 ```yaml
 filters:
-    lda:
+    ks:
         dtset: 1
     dmft:
         dtset: 2
 
-lda:
+ks:
     Etot:
         tol_abs: 1.0e-7
         Total energy (eV):
@@ -510,19 +511,19 @@ lda:
 
 ```
 
-By inserting the configuration options under the `lda` node, we specify that these rules
+By inserting the configuration options under the `ks` node, we specify that these rules
 apply only to the first dataset. We will then create a new `dmft` node and create a
 configuration following the same procedure as before.
 We end up with something like this:
 
 ```yaml
 filters:
-    lda:
+    ks:
         dtset: 1
     dmft:
         dtset: 2
 
-lda:
+ks:
     Etot:
         tol_abs: 1.0e-7
         Total energy (eV):
@@ -578,6 +579,12 @@ For each iterator, a set of integers can be defined with three different methods
   included) of the integer interval e.g. `dtset: {from: 1, to: 5}`. 
   If "from" is omitted, the default is 1. If "to" is omitted the default is no upper boundary. 
 
+!!! tip
+
+    The order is never relevant in parsing YAML (unless you are writing a list
+    of course). As a consequence you can define filter wherever you want in the
+    file.
+
 ### Filter overlapping
 
 Several filters can apply to the same document even when they overlap. Note, however, 
@@ -632,6 +639,13 @@ is done on the new tree, the original constraints will be kept. For example let
 `f1`  and `f2` be two filters such that `f2` is included in `f1`.
 
 ```yaml
+filters:
+    f1:
+        dtset: 1
+    f2:
+        dtset: 1
+        image: 5
+
 f1:
     results_gs:
         tol_abs: 1.0e-6
@@ -645,13 +659,6 @@ f2:
         tol_rel: 1.0e-7
         convergence:
             ceil: 1.0e-7
-
-filters:
-    f1:
-        dtset: 1
-    f2:
-        dtset: 1
-        image: 5
 ```
 
 When the tester will reach the fifth image of the first dataset, the config tree

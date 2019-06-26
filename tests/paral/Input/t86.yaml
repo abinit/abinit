@@ -1,7 +1,7 @@
 tol_eq: 1.0e-6
 tol_vec: 1.0e-5
 
-lda:
+ks:
     # tolvrs 1.0e-7
     tol_abs: 5.0e-7
     tol_rel: 5.0e-7
@@ -66,7 +66,7 @@ dmft:
 
 
 filters:
-    lda:
+    ks:
         dtset: 1
     dmft:
         dtset: 2
