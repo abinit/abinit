@@ -36,13 +36,9 @@ if is_available:
                       " doesn't you may have to install libyaml yourself.")
         Loader = yaml.SafeLoader
 
-    from .common import Undef, IterStart, string, get_yaml_tag
+    from .common import string, get_yaml_tag
 
     def yaml_parse(content, *args, **kwargs):
-        from .register_tag import yaml_implicit_scalar, yaml_map
-        yaml_implicit_scalar(Undef)
-        yaml_map(IterStart)
-
         from . import structures
         return yaml.load(content, *args, Loader=Loader, **kwargs)
 
