@@ -504,6 +504,7 @@ subroutine dtset_copy(dtout, dtin)
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
+ dtout%dvdb_ngqpt        = dtin%dvdb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
  dtout%dvdb_add_lr       = dtin%dvdb_add_lr
@@ -2166,7 +2167,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
 !D
- list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_add_lr dvdb_qcache_mb delayperm densfor_pred densty dfield'
+ list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'

@@ -3190,6 +3190,33 @@ end subroutine dvdb_ftinterp_setup
 
 !----------------------------------------------------------------------
 
+!!****f* m_dvdb/dvdb_ftinterp_write
+!! NAME
+!!  dvdb_ftinterp_write
+!!
+!! FUNCTION
+!!
+subroutine dvdb_ftinterp_write
+
+end subroutine dvdb_ftinterp_write
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_ftinterp_load
+!! NAME
+!!  dvdb_ftinterp_load
+!!
+!! FUNCTION
+!!
+subroutine dvdb_ftinterp_load
+
+end subroutine dvdb_ftinterp_load
+!!***
+
+
+!----------------------------------------------------------------------
+
 !!****f* m_dvdb/dvdb_ftinterp_qpt
 !! NAME
 !!  dvdb_ftinterp_qpt
@@ -4176,8 +4203,10 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
      ! Add the long-range part of the potential
      if (db%add_lr > 0) then
-       v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
-       v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
+       !v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
+       !v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
+       v1scf_qpt(1,ifft,ispden) = v1r_lr(1,ifft)
+       v1scf_qpt(2,ifft,ispden) = v1r_lr(2,ifft)
      end if
    end do ! ifft
 
@@ -6113,9 +6142,9 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
 
  ! Transform the Born effective charge tensor from Cartesian to reduced coordinates
  ! and select the relevant direction.
- ll = sqrt(sum(rprimd(:, idir) ** 2))
- ll = one
- Zstar = matmul(transpose(gprimd), matmul(db%zeff(:,:,iatom), rprimd(:,idir) / ll)) * two_pi
+ !ll = sqrt(sum(rprimd(:, idir) ** 2))
+ !ll = one
+ Zstar = matmul(transpose(gprimd), matmul(db%zeff(:,:,iatom), rprimd(:,idir))) * two_pi
  !Zstar = matmul(transpose(gprimd), matmul(db%zeff_raw(:,:,iatom), rprimd(:,idir) / ll)) * two_pi
 
  ! Transform the dielectric tensor from Cartesian to reduced coordinates.

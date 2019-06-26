@@ -1045,7 +1045,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call dvdb%open_read(ngfftf, xmpi_comm_self)
    if (dtset%prtvol > 10) dvdb%debug = .True.
    ! This to symmetrize the DFPT potentials.
-   dvdb%symv1 = dtset%symv1scf > 0
+   dvdb%symv1 = dtset%symv1scf
    if (sigma%nprocs_pert > 1) then
      call dvdb%set_pert_distrib(sigma%my_npert, natom3, sigma%my_pinfo, sigma%pert_table, sigma%comm_pert)
    end if
@@ -1789,8 +1789,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
                      if (ediff <= TOL_EDIFF .and. sigma%frohl_model == 3) then
+                       write(*,*) 'GKQ', sqrt(sum(two_pi*matmul(cryst%gprimd, qpt)**2)), gkq2/weight_q, sigma%ephwg%frohl_ibz(iq_ibz_frohl,nu)
                        gkq2_dfrohl = sigma%ephwg%frohl_ibz(iq_ibz_fine,nu) - sigma%ephwg%frohl_ibz(iq_ibz_frohl,nu)
                        gkq2_pf = gkq2_pf + weight_q*gkq2_dfrohl
+                     else
+                       write(*,*) 'GKQ', sqrt(sum(two_pi*matmul(cryst%gprimd, qpt)**2)), gkq2/weight_q
                      end if
 
                      if (sigma%imag_only) then
@@ -2310,7 +2313,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! Define q-mesh for integration of the self-energy.
  ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
- new%ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
+ new%ngqpt = dtset%dvdb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
  if (all(dtset%eph_ngqpt_fine /= 0)) then
    new%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
  end if
@@ -3177,6 +3180,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      nctkarr_t("eph_ngqpt_fine", "int", "three"), &
      nctkarr_t("eph_phrange", "int", "two"), &
      nctkarr_t("ddb_ngqpt", "int", "three"), &
+     nctkarr_t("dvdb_ngqpt", "int", "three"), &
      nctkarr_t("ph_ngqpt", "int", "three"), &
      nctkarr_t("sigma_ngkpt", "int", "three"), &
      nctkarr_t("sigma_erange", "dp", "two"), &
@@ -3280,6 +3284,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), self%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "dvdb_ngqpt"), dtset%dvdb_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_ngkpt"), dtset%sigma_ngkpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
@@ -4744,6 +4749,7 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin(" Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
  write(unt,"(a)")sjoin(" Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))
+ write(unt,"(a)")sjoin(" Ab-initio q-mesh from DVDB file:", ltoa(dtset%dvdb_ngqpt))
  write(unt,"(a)")sjoin(" Q-mesh used for self-energy integration [ngqpt]:", ltoa(self%ngqpt))
  write(unt,"(a)")sjoin(" Number of q-points in the IBZ:", itoa(self%nqibz))
  write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))

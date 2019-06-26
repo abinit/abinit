@@ -951,6 +951,7 @@ type dataset_type
  integer :: prteliash = 0
  real(dp) :: ph_wstep
  real(dp) :: ph_smear
+ integer :: dvdb_ngqpt(3)
  integer :: ddb_ngqpt(3)
  real(dp) :: ddb_shiftq(3)
 
