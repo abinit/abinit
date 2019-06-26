@@ -1725,7 +1725,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  
 !Anounce start of flexoelectric tensor calculation
  write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
-&   ' ==> Compute Flexoelectric Tensor <== ',ch10
+&   ' ==> Compute Flexoelectric Tensor Related Magnitudes <== ',ch10
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
@@ -2570,18 +2570,18 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  if (lw_flexo==1.or.lw_flexo==4) then 
    ABI_ALLOCATE(frwfdq,(2,natpert,3,3,nq1grad))
    ABI_ALLOCATE(frwfdq_k,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_k,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t1,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t1_k,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t2,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t2_k,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t3,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t3_k,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf,(2,natpert,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_k,(2,natpert,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t1,(2,natpert,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t1_k,(2,natpert,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t2,(2,natpert,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t2_k,(2,natpert,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t3,(2,natpert,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t3_k,(2,natpert,nq1grad,3,3))
    ABI_ALLOCATE(isdqwf_t4,(2,natpert,3,3,nq1grad))
    ABI_ALLOCATE(isdqwf_t4_k,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t5,(2,natpert,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t5_k,(2,natpert,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t5,(2,natpert,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t5_k,(2,natpert,nq1grad,3,3))
    frwfdq=zero
    isdqwf_t1=zero
    isdqwf_t2=zero
@@ -2698,6 +2698,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        isdqwf_t1=isdqwf_t1 + isdqwf_t1_k
        isdqwf_t2=isdqwf_t2 + isdqwf_t2_k
        isdqwf_t3=isdqwf_t3 + isdqwf_t3_k
+       isdqwf_t4=isdqwf_t4 + isdqwf_t4_k
 
      end if
 
@@ -2769,6 +2770,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      call xmpi_sum(isdqwf_t1,spaceworld,ierr)
      call xmpi_sum(isdqwf_t2,spaceworld,ierr)
      call xmpi_sum(isdqwf_t3,spaceworld,ierr)
+     call xmpi_sum(isdqwf_t4,spaceworld,ierr)
    end if
 
  end if
@@ -2790,6 +2792,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      & isdqwf_t2(re,iatpert,iq1grad,ka,kb),isdqwf_t2(im,iatpert,iq1grad,ka,kb)
        write(103,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
      & isdqwf_t3(re,iatpert,iq1grad,ka,kb),isdqwf_t3(im,iatpert,iq1grad,ka,kb)
+       write(104,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
+     & isdqwf_t3(re,iatpert,ka,kb,iq1grad), isdqwf_t3(im,iatpert,ka,kb,iq1grad)
      end do
    end do
  end do

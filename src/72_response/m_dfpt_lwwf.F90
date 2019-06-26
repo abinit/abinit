@@ -2618,10 +2618,10 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  integer,intent(in) :: pert_atdis(3,natpert),pert_strain(6,nstrpert)
  integer,intent(in) :: q1grad(3,nq1grad)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
- real(dp),intent(out) :: isdqwf_k(2,natpert,3,3,nq1grad)
- real(dp),intent(out) :: isdqwf_t1_k(2,natpert,3,3,nq1grad),isdqwf_t2_k(2,natpert,3,3,nq1grad)
- real(dp),intent(out) :: isdqwf_t3_k(2,natpert,3,3,nq1grad),isdqwf_t4_k(2,natpert,3,3,nq1grad)
- real(dp),intent(out) :: isdqwf_t5_k(2,natpert,3,3,nq1grad)
+ real(dp),intent(out) :: isdqwf_k(2,natpert,nq1grad,3,3)
+ real(dp),intent(out) :: isdqwf_t1_k(2,natpert,nq1grad,3,3),isdqwf_t2_k(2,natpert,nq1grad,3,3)
+ real(dp),intent(out) :: isdqwf_t3_k(2,natpert,nq1grad,3,3),isdqwf_t4_k(2,natpert,3,3,nq1grad)
+ real(dp),intent(out) :: isdqwf_t5_k(2,natpert,nq1grad,3,3)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rhog(2,nfft),rmet(3,3)
@@ -2637,7 +2637,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 !scalars
  integer :: iatpert,iq1grad,berryopt,g0term,iband,idir,ii,ipert,istr,istrpert,jband
  integer :: ka,kb,nkpg,nkpg1,npw_disk
- integer :: opt_gvnl1,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
+ integer :: opt_gvnl1,opthartdqdq,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
  real(dp) :: cprodr,cprodi,doti,dotr,dum_lambda
  character(len=500) :: msg                   
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -2659,6 +2659,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
  real(dp),allocatable :: gh1dqdqc(:,:),gvloc1dqdqc(:,:),gvnl1dqdqc(:,:),gv1c(:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
+ real(dp),allocatable :: vhart1dqdq(:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),vlocal1dqdq(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vpsp1(:),vpsp1dqdq(:)
  real(dp),allocatable :: dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
@@ -3145,10 +3146,111 @@ c0_HatdisdagdQ_c1strain_bks=zero
  ABI_DEALLOCATE(cj_h1vstrain_ci)
  ABI_DEALLOCATE(cg1_ddk)
 
+!--------------------------------------------------------------------------------------
+!Two terms involving a q-gradient of first order Hamiltonians
+!--------------------------------------------------------------------------------------
 
+!--------------------------------------------------------------------------------------
+! q1-gradient of the strain first order Hamiltonian:
+! i/2 < u_{i,k}^{\tau_{\kappa\alpha} | H^{n_{\beta\delta}}_{\gamma} | u_{i,k}^{(0)} >
+! Computed as the second order q-gradient of the first order metric Hamiltonian:
+! 1/2 < u_{i,k}^{\tau_{\kappa\alpha} | H^{(\beta)}_{\gamma\delta} | u_{i,k}^{(0)} >
+!--------------------------------------------------------------------------------------
 
+!Specific allocations
+ ABI_ALLOCATE(vhart1dqdq,(2*nfft))
+ ABI_ALLOCATE(vpsp1dqdq,(2*nfft))
+ ABI_ALLOCATE(vlocal1dqdq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_ALLOCATE(gh1dqdqc,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(gvloc1dqdqc,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(gvnl1dqdqc,(2,npw_k*dtset%nspinor))
 
+!Specific definitions
+ useylmgr1=1;optlocal=1;optnl=1;opthartdqdq=1;
 
+!LOOP OVER STRAIN PERTURBATIONS
+ do istrpert=1,nstrpert
+   ipert=pert_strain(1,istrpert)
+   idir=pert_strain(6,istrpert)
+   
+   !LOOP OVER Q1-GRADIENT
+   do iq1grad=1,nq1grad
+
+     !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
+     !contribution from ground state density
+     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,mpi_enreg, &
+     &  psps%mqgrid_vl,dtset%natom, &
+     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),opthartdqdq, &
+     &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
+     &  dtset%qptn,rhog,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq)
+
+     !Merge both local contributions
+     vpsp1dqdq=vpsp1dqdq+vhart1dqdq
+
+     !Set up q-gradient of strain potential vlocal1dqdq with proper dimensioning
+     call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
+     &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dqdq,dum_vlocal,vlocal1dqdq)
+
+     !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
+     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
+     & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
+     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
+
+     !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+     call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
+   & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
+
+     !LOOP OVER BANDS
+     do iband=1,nband_k
+
+       if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+       !Read ket ground-state wavefunctions
+       cwave0i(:,:)=cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
+
+       !Compute < g | H^{(\beta)}_{\gamma\delta} | u_{i,k}^{(0)} >
+       call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqdqc,gvloc1dqdqc,gvnl1dqdqc,gs_hamkq, &
+       & idir,ipert,mpi_enreg,optlocal,optnl,q1grad(2,iq1grad),rf_hamkq)
+
+       !LOOP OVER ATOMIC DISPLACEMENT PERTURBATION
+       do iatpert=1,natpert
+
+         !Read atomic displacement wf1
+         call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+       & isppol, xmpio_single, cg_bks=cg1_atdis)
+
+         !calculate: 
+         ! < u_{i,k}^{\tau_{\kappa\alpha}} | H^{(\beta)}_{\gamma\delta} | u_{i,k}^{(0)} >  
+         call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_atdis,gh1dqdqc, &
+       & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+         c1atdis_Hmetricdqdq_c0_bks(1,iband,iatpert,iq1grad,istrpert)=half*dotr
+         c1atdis_Hmetricdqdq_c0_bks(2,iband,iatpert,iq1grad,istrpert)=half*doti
+
+       end do !iatpert
+
+     end do !iband
+
+     !Clean the rf_hamiltonian
+     call destroy_rf_hamiltonian(rf_hamkq)
+
+     !Deallocations
+     ABI_DEALLOCATE(kpg_k)
+     ABI_DEALLOCATE(kpg1_k)
+     ABI_DEALLOCATE(dkinpw)
+     ABI_DEALLOCATE(kinpw1)
+     ABI_DEALLOCATE(ffnlk)
+     ABI_DEALLOCATE(ffnl1)
+     ABI_DEALLOCATE(ph3d)
+
+   end do !iq1grad
+
+ end do !istrpert
+
+!Deallocations
+ ABI_DEALLOCATE(cg1_atdis)
+ ABI_DEALLOCATE(vhart1dqdq)
 
 !--------------------------------------------------------------------------------------
 ! Acumulates all the wf dependent terms of the flexoelectric tensor
@@ -3200,6 +3302,13 @@ c0_HatdisdagdQ_c1strain_bks=zero
          isdqwf_t3_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t3_k(2,iatpert,iq1grad,ka,kb) + &
       &  occ_k(iband) * c0_HatdisdagdQ_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)
 
+         !T4 has type-I ordering for the array indexes
+         isdqwf_t4_k(1,iatpert,ka,kb,iq1grad)=isdqwf_t4_k(1,iatpert,ka,kb,iq1grad) + &
+      &  occ_k(iband) * c1atdis_Hmetricdqdq_c0_bks(1,iband,iatpert,iq1grad,istrpert)
+
+         isdqwf_t4_k(2,iatpert,ka,kb,iq1grad)=isdqwf_t4_k(2,iatpert,ka,kb,iq1grad) + &
+      &  occ_k(iband) * c1atdis_Hmetricdqdq_c0_bks(2,iband,iatpert,iq1grad,istrpert)
+
       end do
     end do
   end do
@@ -3209,12 +3318,14 @@ end do
  isdqwf_t1_k=isdqwf_t1_k * wtk_k
  isdqwf_t2_k=isdqwf_t2_k * wtk_k
  isdqwf_t3_k=isdqwf_t3_k * wtk_k
+ isdqwf_t4_k=isdqwf_t4_k * wtk_k
  isdqwf_k=isdqwf_k * wtk_k
 
 !Deallocations
  ABI_DEALLOCATE(c1atdis_q1gradH0_c1strain_bks)
  ABI_DEALLOCATE(c1atdis_dQcalHstrain_c0_bks)
-
+ ABI_DEALLOCATE(c0_HatdisdagdQ_c1strain_bks)
+ ABI_DEALLOCATE(c1atdis_Hmetricdqdq_c0_bks)
 
  DBG_EXIT("COLL")
 
