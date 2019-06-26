@@ -696,34 +696,34 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
 
 
---- !Etot
+--- !EnergyTerms
 comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  4.323825067238190201E+01
-Hartree energy      :  3.133994553363548619E+01
-XC energy           : -2.246182631222462689E+01
+kinetic             :  4.323825067238190201E+01
+hartree             :  3.133994553363548619E+01
+xc                  : -2.246182631222462689E+01
 Ewald energy        : -1.142203169790575572E+02
-PsPCore             :  6.536925226004570710E+00
-Loc. psp. energy    : -9.852521179991468614E+01
-Spherical terms     :  2.587718945528139081E+00
-Internal E          : -1.515045147136467563E+02
+psp_core            :  6.536925226004570710E+00
+local_psp           : -9.852521179991468614E+01
+spherical_terms     :  2.587718945528139081E+00
+internal            : -1.515045147136467563E+02
 '-kT*entropy'       : -3.174881766478041684E-03
-Etotal              : -1.515076895954132397E+02
-Total energy(eV)    : -4.122733899322517573E+03
+total_energy        : -1.515076895954132397E+02
+total_energy_eV     : -4.122733899322517573E+03
 ...
 
 
 
---- !EtotDC
+--- !EnergyTermsDC
 comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -1.473142751049871890E+01
+band_energy         : -1.473142751049871890E+01
 Ewald energy        : -1.142203169790575572E+02
-PspCore energy      :  6.536925226004570710E+00
-'Dble-C XC-energy'  : -2.441177133385859221E+01
-Spherical terms     : -4.677946228483357061E+00
-Internal E          : -1.515045368258936662E+02
+psp_core            :  6.536925226004570710E+00
+xc_dc               : -2.441177133385859221E+01
+spherical_terms     : -4.677946228483357061E+00
+internal            : -1.515045368258936662E+02
 '-kT*entropy'       : -3.174881766478041684E-03
-Etotal (DC)         : -1.515077117076601496E+02
-Total DC energy(eV) : -4.122733899322517573E+03
+total_energy_dc     : -1.515077117076601496E+02
+total_energy_dc_eV  : -4.122733899322517573E+03
 ...
 
 
@@ -1218,30 +1218,30 @@ cartesian forces: !CartForces
 
 --- !Etot
 comment             : Components of total free energy (in Hartree)
-Kinetic energy      :  4.311836595104540493E+01
-Hartree energy      :  3.130289914056712774E+01
-XC energy           : -2.247254202033941795E+01
+kinetic             :  4.311836595104540493E+01
+hartree             :  3.130289914056712774E+01
+xc                  : -2.247254202033941795E+01
 Ewald energy        : -1.142203169790575572E+02
-PsPCore             :  6.536925226004570710E+00
-Loc. psp. energy    : -9.850462805134246480E+01
-Spherical terms     :  2.593450868757609662E+00
-Internal E          : -1.516458458643647305E+02
-Etotal              : -1.516458458643647305E+02
-Total energy(eV)    : -4.126493322589622039E+03
+psp_core            :  6.536925226004570710E+00
+local_psp           : -9.850462805134246480E+01
+spherical_terms     :  2.593450868757609662E+00
+internal            : -1.516458458643647305E+02
+total_energy        : -1.516458458643647305E+02
+total_energy_eV     : -4.126493322589622039E+03
 ...
 
 
 
---- !EtotDC
+--- !EnergyTermsDC
 comment             : '"Double-counting" decomposition of free energy'
-Band energy         : -1.468734668477278760E+01
+band_energy         : -1.468734668477278760E+01
 Ewald energy        : -1.142203169790575572E+02
-PspCore energy      :  6.536925226004570710E+00
-'Dble-C XC-energy'  : -2.437127990976835790E+01
-Spherical terms     : -4.733021605770507456E+00
-Internal E          : -1.514750399533646430E+02
-Etotal (DC)         : -1.514750399533646430E+02
-Total DC energy(eV) : -4.126493322589622039E+03
+psp_core            :  6.536925226004570710E+00
+xc_dc               : -2.437127990976835790E+01
+spherical_terms     : -4.733021605770507456E+00
+internal            : -1.514750399533646430E+02
+total_energy_dc     : -1.514750399533646430E+02
+total_energy_dc_eV  : -4.126493322589622039E+03
 ...
 
 
