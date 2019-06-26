@@ -673,17 +673,13 @@ In a nutshell:
 * no savage usage of write statements!
 * In the majority of the cases, YAML documents should be opened and closed in the same routine!
 * To be discussed: `crystal%yaml_write(stream, indent=4)`
-* `tol_rel`, `tol_abs` etc are now reserved keywords that cannot be used in YAML documents. This will confuse the parser.
-  We should add a check in the Fortran code and stop the code in a reserved keyword is used. 
 * One should also promote the use of python-friendly keys: white space replaced by underscore, no number as first character,
   tags should be CamelCase
 * Is Yaml mode supported only for main output files? What happens to the other files in the files\_to\_test section?
-<!--
 Tags are now mandatory for documents
 * A document with a tag is considered a standardized document i.e. a document for which there's
   an official commitment from the ABINIT community to maintain backward compatibility.
   Official YAML documents may be used by third-party software to implement post-processing tools.
--->
 
 
 : The *label* field appears in all data document. It should be a unique identifier
