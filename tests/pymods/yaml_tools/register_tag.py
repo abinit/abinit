@@ -1,8 +1,8 @@
 '''
-    This module provides facilities to use YAML formatted data.
-    It defines several decorators to easily create YAML compatible
-    classes which will be used both when parsing YAML formatted data
-    and whwn writing YAML formatted data.
+This module provides facilities to use YAML formatted data.
+It defines several decorators to easily create YAML compatible
+classes which will be used both when parsing YAML formatted data
+and when writing YAML formatted data.
 '''
 from __future__ import print_function, division, unicode_literals
 
@@ -13,7 +13,20 @@ import yaml
 from inspect import ismethod
 from . import Loader
 from .common import BaseDictWrapper, get_yaml_tag
-from .errors import NotAvailableTagError
+from .errors import NotAvailableTagError, AlreadyRegisteredTagError
+
+
+known_tags = set()
+
+
+def reserve_tag(tag):
+    '''
+    Prevent multiple registration of the same tag.
+    '''
+    if tag in known_tags:
+        raise AlreadyRegisteredTagError(tag)
+    else:
+        known_tags.add(tag)
 
 
 def yaml_map(cls):
@@ -25,6 +38,8 @@ def yaml_map(cls):
     the latter case 'cls()' must be a valid initialisation.
     '''
     tag = '!' + get_yaml_tag(cls)
+
+    reserve_tag(tag)
 
     def constructor(loader, node):
         map = dict(loader.construct_mapping(node, deep=True))
@@ -52,6 +67,8 @@ def yaml_seq(cls):
     '''
     tag = '!' + get_yaml_tag(cls)
 
+    reserve_tag(tag)
+
     def constructor(loader, node):
         seq = list(loader.construct_sequence(node, deep=True))
         if ismethod(cls.from_seq):
@@ -77,6 +94,8 @@ def yaml_scalar(cls):
     the latter case 'cls()' must be a valid initialisation.
     '''
     tag = '!' + get_yaml_tag(cls)
+
+    reserve_tag(tag)
 
     def constructor(loader, node):
         scalar = loader.construct_scalar(node)
@@ -175,6 +194,8 @@ def yaml_not_available_tag(tag, reason, fatal=False):
     is an empty dictionary.
     '''
     msg = 'The tag !{} is used but is not available:\n{}'.format(tag, reason)
+
+    reserve_tag('!' + tag)
 
     def constructor(loader, node):
         if fatal:

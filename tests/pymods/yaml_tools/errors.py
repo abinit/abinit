@@ -1,8 +1,12 @@
+'''
+Define all error types used in yaml_tools.
+All errors must inherit from YAMLTestError.
+'''
 from __future__ import print_function, division, unicode_literals
 
 
 class YAMLTestError(Exception):
-    """Base class."""
+    """Base class for all other errors."""
 
 
 class ConfigContextError(YAMLTestError):
@@ -27,6 +31,12 @@ class UnknownParamError(ConfigParserError):
         msg = ('Encounterd an unknown parameter name "{}"'
                ' when registering constraint "{}".')
         super(UnknownParamError, self).__init__(msg.format(param, cons))
+
+
+class AlreadyRegisteredTagError(ConfigParserError):
+    def __init__(self, tag):
+        msg = 'Attempt to register {} twice.'
+        super(ConfigParserError, self).__init__(msg.format(tag))
 
 
 ###############################################################################

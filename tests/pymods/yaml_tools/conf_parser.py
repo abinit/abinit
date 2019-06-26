@@ -1,12 +1,12 @@
 '''
-    The tokens recognised by the configuration parser are declared here.
-    There are two kind of tokens:
-    - the parameters are just variables with a default value. They are used by constraints.
-    - the constraints represent an actual check of the data. They consist in a
-    function returning a boolean. The docstring of the function is used as the
-    description for the testconf_explorer. There is no point in defining
-    value_type, inherited, apply_to or use_params in the docstring but you
-    should explain when the test fails and when it succeeds.
+The tokens recognised by the configuration parser are declared here.
+There are two kind of tokens:
+- the parameters are just variables with a default value. They are used by constraints.
+- the constraints represent an actual check of the data. They consist in a
+function returning a boolean. The docstring of the function is used as the
+description for the testconf_explorer. There is no point in defining
+value_type, inherited, apply_to or use_params in the docstring but you
+should explain when the test fails and when it succeeds.
 '''
 from __future__ import print_function, division, unicode_literals
 
@@ -138,6 +138,10 @@ def tensor_is_symetric(sym, ref, tested):
 
 @conf_parser.constraint(value_type=dict, apply_to='this')
 def callback(locs, ref, tested):
+    '''
+        Call a method of the reference data with the tested data as first parameter
+        and the other parameters as keyword arguments. Return the result of the call.
+    '''
     method = locs.pop('method')
     if hasattr(ref, method):
         return getattr(ref, method)(tested, **locs)
