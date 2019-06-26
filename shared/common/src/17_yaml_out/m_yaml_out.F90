@@ -30,6 +30,9 @@ module m_yaml_out
   integer,parameter :: default_keysize=30
   integer,parameter :: default_stringsize=500
 
+  character,parameter :: reserved_keywords(10) = (/ character(len=10) :: "tol_abs", "tol_rel", "tol_vec", "tol_eq", "ignore", &
+&                                                  "ceil", "equation", "equations", "callback", "callbacks" /)
+
   public :: yaml_open_doc, yaml_close_doc, yaml_single_dict, yaml_iterstart
   public :: yaml_add_realfield, yaml_add_intfield, yaml_add_stringfield
   public :: yaml_add_real1d, yaml_add_real2d
@@ -124,6 +127,18 @@ module m_yaml_out
     endif
   end function yaml_quote_string
 
+  subroutine forbid_reserved_label(label)
+    character(len=*),intent(in) :: label
+    character(len=100) :: msg
+
+    do i=1,size(reserved_keywords)
+      if (reserved_keywords(i) == label) then
+        write(msg,*) label, 'is a reserved keyword and cannot be used as a YAML label.'
+        MSG_ERROR(msg)
+      end if
+    end do
+  end subroutine
+
   subroutine yaml_start_field(stream, label, tag, width)
     type(stream_string),intent(inout) :: stream
     character(len=*),intent(in) :: label
@@ -131,6 +146,7 @@ module m_yaml_out
     character(len=*),intent(in),optional :: tag
     character(len=len_trim(label)+2) :: quoted
 
+    call forbid_reserved_label(trim(label))
     quoted = yaml_quote_string(label)
     if(present(width)) then
       if(width > len_trim(label)) then
@@ -235,6 +251,8 @@ module m_yaml_out
     call pl%restart()
     do i=1,pl%length()
       call pl%iter(key, type_code, vi, vr, vs)
+
+      call forbid_reserved_label(trim(key))
 
       call string_clear(tmp_key)
       write(tmp_key, kfmt) '"'//trim(key)//'"'
