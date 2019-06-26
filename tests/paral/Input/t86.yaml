@@ -9,7 +9,7 @@ ks:
         convergence:
             ceil: 1.0e-6
         stress tensor:
-            tensor_is_symetric: true
+            tol_vec: 1.0e-7
 
     EtotSteps:
         data:
