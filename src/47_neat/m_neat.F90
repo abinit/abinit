@@ -119,7 +119,7 @@ module m_neat
     if(present(tag)) then
       call yaml_single_dict(tag, '', energies, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
     else
-      call yaml_single_dict('Etot', '', energies, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
+      call yaml_single_dict('EnergyTerms', '', energies, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
     end if
 
     call wrtout_stream(stream, iout)
@@ -174,7 +174,7 @@ module m_neat
 
     call dict%set('ecut', r=ecut)
     call dict%set('pawecutdg', r=pawecutdg)
-    call yaml_add_dict('cutoff energies', dict, width=10, stream=stream)
+    call yaml_add_dict('cutoff_energies', dict, width=10, stream=stream)
     call dict%free()
 
     call dict%set('deltae', r=results%deltae)
