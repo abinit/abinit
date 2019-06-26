@@ -13,9 +13,7 @@ from __future__ import print_function, division, unicode_literals
 from numpy import ndarray
 from numpy.linalg import norm
 from .meta_conf_parser import ConfParser
-from .structures import Tensor
 from .errors import MissingCallbackError
-from .common import FailDetail
 
 conf_parser = ConfParser()
 
@@ -55,22 +53,6 @@ def tol_vec(tol, ref, tested):
         the given tolerance.
     '''
     return norm(ref - tested) < tol
-
-
-@conf_parser.constraint(exclude={'ceil', 'tol_abs', 'tol_rel', 'ignore'})
-def tol(tolv, ref, tested):
-    '''
-        Valid if both relative and absolute differences between the values
-        are below the given tolerance.
-    '''
-    if abs(ref) + abs(tested) == 0.0:
-        return True
-    elif abs(ref - tested) / (abs(ref) + abs(tested)) >= tolv:
-        return FailDetail('Relative error above tolerance.')
-    elif abs(ref - tested) >= tolv:
-        return FailDetail('Absolute error above tolerance.')
-    else:
-        return True
 
 
 @conf_parser.constraint(exclude={'tol', 'tol_abs', 'tol_rel', 'ignore'})
@@ -120,20 +102,6 @@ def equations(eqs, ref, tested, tol_eq):
         else:
             if abs(res) >= tol_eq:
                 return False
-
-
-@conf_parser.constraint(value_type=bool, inherited=False, apply_to=Tensor)
-def tensor_is_symetric(sym, ref, tested):
-    '''
-        If value is true:
-            valid if tested tensor is symetric
-        If value is false:
-            valid if tested tensor is anti symetric
-    '''
-    if sym:
-        return tested.is_symetric()
-    else:
-        return tested.is_anti_symetric()
 
 
 @conf_parser.constraint(value_type=dict, apply_to='this')
