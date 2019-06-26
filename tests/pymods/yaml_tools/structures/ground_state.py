@@ -8,15 +8,15 @@ from .pandas_commons import has_pandas
 
 
 @yaml_auto_map
-class Etot(object):
+class EnergyTerms(object):
     '''
     Component if total energy.
     '''
     not_components = {
-        'Etotal',
+        'total_energy',
         'comment',
-        'Band energy',
-        'Total energy(eV)'
+        'band_energy',
+        'total_energy_eV'
     }
 
     def __init__(self, comment='no comment'):
@@ -24,7 +24,7 @@ class Etot(object):
 
     @classmethod
     def from_map(cls, map):
-        new = super(Etot, cls).from_map(map)
+        new = super(EnergyTerms, cls).from_map(map)
         new.components = {
             name: value for name, value in new.__dict__.items()
             if name not in cls.not_components
@@ -33,16 +33,16 @@ class Etot(object):
 
 
 @yaml_auto_map
-class EtotDC(object):
+class EnergyTermsDC(object):
     '''
     Components of total energy in Double Counting.
     '''
     not_components = {
-        'Etotal (DC)',
+        'total_energy_dc',
         'comment',
-        'Band energy',
+        'band_energy',
         '-kT*entropy',
-        'Total DC energy(eV)'
+        'total_energy_dc_eV'
     }
 
 
