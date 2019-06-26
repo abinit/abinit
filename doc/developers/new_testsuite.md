@@ -358,7 +358,7 @@ A few conventions on documents writing
 ### A more complicated example
 
 The `Etot` document is the simplest possible document. It only contains fields
-with real values. Now we will have a look at the `ResultGS` document
+with real values. Now we will have a look at the `ResultsGS` document
 that represents the results stored in the corresponding Fortran datatype used in Abinit.
 The YAML document is now given by:
 
@@ -392,7 +392,7 @@ cartesian forces: !CartForces
 This YAML document is more complicated as it contains scalar fields, dictionaries and even 2D arrays.
 **MG: Are integer values always compared without tolerance?**
 Still, the parsers will be able to locate the entire document via its tag/label and address all the entries by name.
-To specify the tolerance for the relative difference for all the scalar quantities in `ResultGS`,
+To specify the tolerance for the relative difference for all the scalar quantities in `ResultsGS`,
 we just add a new entry to the YAML configuration file similarly to what we did for `Etot`: 
 
 ```yaml
@@ -412,7 +412,7 @@ For example in the above example ResultsGS is subject to the default absolute
 tolerance, whereas the default relative tolerance have been overridden.
 
 <!--
-For simplicity sake I will only write the `ResultGS` part in next examples.
+For simplicity sake I will only write the `ResultsGS` part in next examples.
 -->
 Unfortunately, such a strict value for `tol_rel` will become very problematic
 when we have to compare the residues stored in the `convergence` dictionary!
@@ -438,14 +438,14 @@ whereas the entries in the `convergence` dictionary will be tested against `ceil
 
 Up to now we have been focusing on scalar quantities for which the concept of 
 relative and absolute difference is unambiguously defined but how do we compare vectors and matrices?
-Fields with the `!Tensor` tags are leafs of the tree. The tester routine
+Fields with the `!TensorCart` tags are leafs of the tree. The tester routine
 won't try to compare each individual coefficient with `tol_rel`. However we
 still want to check that it does not change too much. For that purpose we use the
 `tol_vec` constraint which apply to all arrays derived from `BaseArray` (most
 arrays with a tag). `BaseArray` let us use the capabilities of Numpy arrays with
 YAML defined arrays. `tol_vec` check the euclidean distance between the reference
 and the output arrays. Since we also want to apply this constraint to
-`cartesian_force`, we will define the constraint at the top level of `ResultGS`.
+`cartesian_force`, we will define the constraint at the top level of `ResultsGS`.
 
 ```yaml
 ResultsGS:
@@ -652,7 +652,7 @@ filters:
         image: 5
 
 f1:
-    ResultGS:
+    ResultsGS:
         tol_abs: 1.0e-6
         convergence:
             ceil: 1.0e-6
@@ -660,7 +660,7 @@ f1:
                 1.0e-4
 
 f2:
-    ResultGS:
+    ResultsGS:
         tol_rel: 1.0e-7
         convergence:
             ceil: 1.0e-7
@@ -670,7 +670,7 @@ When the tester will reach the fifth image of the first dataset, the config tree
 used will be the following:
 
 ```yaml
-ResultGS:
+ResultsGS:
     tol_abs: 1.0e-6  # this come from application of f1
     tol_rel: 1.0e-7  # this has been appended without modifying anything else when appling f2
     convergence:
@@ -685,7 +685,7 @@ replace it. Let the `f2` tree be:
 
 ```yaml
 f2:
-    ResultGS:
+    ResultsGS:
         convergence!:
             ceil: 1.0e-7
 ```
@@ -693,7 +693,7 @@ f2:
 and now the resulting tree for the fifth image of the first dataset is:
 
 ```yaml
-ResultGS:
+ResultsGS:
     tol_abs: 1.0e-6
     convergence:  # the whole convergence node have been overriden
         ceil: 1.0e-7
