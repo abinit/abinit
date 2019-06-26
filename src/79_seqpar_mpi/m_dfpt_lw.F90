@@ -2693,6 +2693,11 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        &  vhxc1_atdis,vhxc1_strain,wfk_t_atdis,wfk_t_ddk, &
        &  wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
 
+!      Add the contribution from each k-point
+       isdqwf=isdqwf + isdqwf_k
+       isdqwf_t1=isdqwf_t1 + isdqwf_t1_k
+       isdqwf_t2=isdqwf_t2 + isdqwf_t2_k
+
      end if
 
 !    Keep track of total number of bands
@@ -2759,6 +2764,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
    if (lw_flexo==1.or.lw_flexo==4) then
      call xmpi_sum(frwfdq,spaceworld,ierr)
+     call xmpi_sum(isdqwf,spaceworld,ierr)
+     call xmpi_sum(isdqwf_t1,spaceworld,ierr)
+     call xmpi_sum(isdqwf_t2,spaceworld,ierr)
    end if
 
  end if
@@ -2769,11 +2777,15 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      ka=pert_strain(3,istrpert)
      kb=pert_strain(4,istrpert)
      do iq1grad=1,3
-       write(100,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
+       write(98,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
      & frwfdq(1,iatpert,ka,kb,iq1grad), frwfdq(2,iatpert,ka,kb,iq1grad)
-       write(101,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+       write(99,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
      & isdq_qgradhart(re,iatpert,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert)), &
      & isdq_qgradhart(im,iatpert,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))
+       write(101,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+     & isdqwf_t1(re,iatpert,iq1grad,ka,kb),isdqwf_t1(im,iatpert,iq1grad,ka,kb)
+       write(102,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+     & isdqwf_t2(re,iatpert,iq1grad,ka,kb),isdqwf_t2(im,iatpert,iq1grad,ka,kb)
      end do
    end do
  end do

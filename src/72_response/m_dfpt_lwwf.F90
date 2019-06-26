@@ -1513,7 +1513,7 @@ c0_VefielddQ_c1strain_bks=zero
  ABI_DEALLOCATE(part_ylmgr_k)
 
 !--------------------------------------------------------------------------------------
-!Other three therms
+!Other three terms
 !--------------------------------------------------------------------------------------
  !LOOP OVER BANDS
  do iband=1,nband_k
@@ -1549,7 +1549,7 @@ c0_VefielddQ_c1strain_bks=zero
            cprodr=dotr*cj_h1vstrain_ci(1,istrpert,jband,iband) - &
          &        doti*cj_h1vstrain_ci(2,istrpert,jband,iband)
            cprodi=dotr*cj_h1vstrain_ci(2,istrpert,jband,iband) + &
-         &         doti*cj_h1vstrain_ci(1,istrpert,jband,iband)
+         &        doti*cj_h1vstrain_ci(1,istrpert,jband,iband)
 
            c1efield_dQcalHstrain_c0_bks(1,iband,iefipert,iq1grad,istrpert)= &
          & c1efield_dQcalHstrain_c0_bks(1,iband,iefipert,iq1grad,istrpert)-cprodr
@@ -1833,19 +1833,19 @@ c0_VefielddQ_c1strain_bks=zero
 end do
 
 !scale by the k-point weight
-elflexowf_t1_k=elflexowf_t1_k * wtk_k
-elflexowf_t2_k=elflexowf_t2_k * wtk_k
-elflexowf_t3_k=elflexowf_t3_k * wtk_k
-elflexowf_t4_k=elflexowf_t4_k * wtk_k
-elflexowf_t5_k=elflexowf_t5_k * wtk_k
-elflexowf_k=elflexowf_k * wtk_k
+ elflexowf_t1_k=elflexowf_t1_k * wtk_k
+ elflexowf_t2_k=elflexowf_t2_k * wtk_k
+ elflexowf_t3_k=elflexowf_t3_k * wtk_k
+ elflexowf_t4_k=elflexowf_t4_k * wtk_k
+ elflexowf_t5_k=elflexowf_t5_k * wtk_k
+ elflexowf_k=elflexowf_k * wtk_k
 
 !Deallocations
-ABI_DEALLOCATE(c1efield_q1gradH0_c1strain_bks)
-ABI_DEALLOCATE(c1efield_dQcalHstrain_c0_bks)
-ABI_DEALLOCATE(c0_VefielddQ_c1strain_bks)
-ABI_DEALLOCATE(c1efield_Hmetricdqdq_c0_bks)
-ABI_DEALLOCATE(c1dkdk_c1strain_bks)
+ ABI_DEALLOCATE(c1efield_q1gradH0_c1strain_bks)
+ ABI_DEALLOCATE(c1efield_dQcalHstrain_c0_bks)
+ ABI_DEALLOCATE(c0_VefielddQ_c1strain_bks)
+ ABI_DEALLOCATE(c1efield_Hmetricdqdq_c0_bks)
+ ABI_DEALLOCATE(c1dkdk_c1strain_bks)
 
 
  DBG_EXIT("COLL")
@@ -2638,7 +2638,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  integer :: iatpert,iq1grad,berryopt,g0term,iband,idir,ii,ipert,istr,istrpert,jband
  integer :: ka,kb,nkpg,nkpg1,npw_disk
  integer :: opt_gvnl1,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
- real(dp) :: doti,dotr,dum_lambda
+ real(dp) :: cprodr,cprodi,doti,dotr,dum_lambda
  character(len=500) :: msg                   
  type(rf_hamiltonian_type) :: rf_hamkq
  type(pawfgr_type) :: pawfgr
@@ -3034,6 +3034,66 @@ c0_HatdisdagdQ_c1strain_bks=zero
  !ABI_DEALLOCATE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
  ABI_DEALLOCATE(part_ylmgr_k)
 
+!--------------------------------------------------------------------------------------
+!Two terms involving a q-gradient of projector operators
+!--------------------------------------------------------------------------------------
+ !LOOP OVER BANDS
+ do iband=1,nband_k
+
+   if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+   !LOOP OVER ATOMIC DISPLACEMENT PERTURBATION
+   do iatpert=1,natpert
+
+     !Read atomic displacement wf1
+     call wfk_read_bks(wfk_t_atdis(iatpert), iband, indkpt1(ikpt), &
+   & isppol, xmpio_single, cg_bks=cg1_atdis)
+
+     !LOOP OVER q1-GRADIENT
+     do iq1grad=1,nq1grad
+
+       !LOOP OVER BANDS
+       do jband=1,nband_k
+
+         !Read ddk wf1
+         call wfk_read_bks(wfk_t_ddk(iq1grad), jband, indkpt1(ikpt), &
+       & isppol, xmpio_single, cg_bks=cg1_ddk)
+
+         !Calculate: < u_{i,k}^{\tau_{\kappa\alpha}} | u_{j,k}^{k_{\gamma}} >
+         call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_atdis,cg1_ddk, &
+       & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+         !LOOP OVER STRAIN PERTURBATION
+         do istrpert=1,nstrpert
+
+           !Calculate: -\sum_{j} < u_{i,k}^{\tau_{\kappa\alpha}} | u_{j,k}^{k_{\gamma}} > *
+           ! < u_{j,k}^{(0)} | H^{n_{\beta\delta}}+V^{n_{\beta\delta}} | u_{i,k}^{(0)} >
+           cprodr=dotr*cj_h1vstrain_ci(1,istrpert,jband,iband) - &
+         &        doti*cj_h1vstrain_ci(2,istrpert,jband,iband)
+           cprodi=dotr*cj_h1vstrain_ci(2,istrpert,jband,iband) + &
+         &        doti*cj_h1vstrain_ci(1,istrpert,jband,iband)
+
+           c1atdis_dQcalHstrain_c0_bks(1,iband,iatpert,iq1grad,istrpert)= &
+         & c1atdis_dQcalHstrain_c0_bks(1,iband,iatpert,iq1grad,istrpert)-cprodr
+           c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert)= &
+         & c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert)-cprodi
+
+         end do !istrpert
+
+       end do !jband
+
+     end do !iq1grad
+
+   end do !iatpert
+
+
+ end do !iband
+
+
+
+
+
+
 
 !--------------------------------------------------------------------------------------
 ! Acumulates all the wf dependent terms of the flexoelectric tensor
@@ -3054,11 +3114,12 @@ c0_HatdisdagdQ_c1strain_bks=zero
          if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
 
          !All terms toghether except T4 that needs further treatment
-         isdqwf_k(1,iatpert,iq1grad,ka,kb)=isdqwf_k(1,iatpert,iq1grad,ka,kb) +        &
-      &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) ) !T1
-
-         isdqwf_k(2,iatpert,iq1grad,ka,kb)=isdqwf_k(2,iatpert,iq1grad,ka,kb) +        &
-      &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) ) !T1
+         isdqwf_k(1,iatpert,iq1grad,ka,kb)=isdqwf_k(1,iatpert,iq1grad,ka,kb) +              &
+      &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) + & !T1
+      &  c1atdis_dQcalHstrain_c0_bks(1,iband,iatpert,iq1grad,istrpert) )                      !T2
+         isdqwf_k(2,iatpert,iq1grad,ka,kb)=isdqwf_k(2,iatpert,iq1grad,ka,kb) +              &
+      &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) + & !T1
+      &   c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert) )                     !T2 
 
          !Separate them
          !T1
@@ -3068,11 +3129,27 @@ c0_HatdisdagdQ_c1strain_bks=zero
          isdqwf_t1_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t1_k(2,iatpert,iq1grad,ka,kb) + &
       &  occ_k(iband) * c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) 
 
+         !T2
+         isdqwf_t2_k(1,iatpert,iq1grad,ka,kb)=isdqwf_t2_k(1,iatpert,iq1grad,ka,kb) + &
+      &  occ_k(iband) * c1atdis_dQcalHstrain_c0_bks(1,iband,iatpert,iq1grad,istrpert)
+
+         isdqwf_t2_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t2_k(2,iatpert,iq1grad,ka,kb) + &
+      &  occ_k(iband) * c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert)
 
       end do
     end do
   end do
 end do
+
+!scale by the k-point weight
+ isdqwf_t1_k=isdqwf_t1_k * wtk_k
+ isdqwf_t2_k=isdqwf_t2_k * wtk_k
+ isdqwf_k=isdqwf_k * wtk_k
+
+!Deallocations
+ ABI_DEALLOCATE(c1atdis_q1gradH0_c1strain_bks)
+ ABI_DEALLOCATE(c1atdis_dQcalHstrain_c0_bks)
+
 
  DBG_EXIT("COLL")
 
@@ -3312,9 +3389,6 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 !  2nd q-gradient of atomic displacement 1st order hamiltonian projected on gs wfs: 
 !  < g | H^{\tau_{\kappa\alpha}_{\gamma\delta} | u_{i,k}^{(0)} >
 !-----------------------------------------------------------------------------------------------
-
-!tmp
-optlocal=0
 
 !Specific allocations
  ABI_ALLOCATE(ghatdisdqdq_c0m,(2,npw_k*dtset%nspinor,nband_k,3,3,natpert))
