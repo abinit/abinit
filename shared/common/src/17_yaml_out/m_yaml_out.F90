@@ -130,6 +130,7 @@ module m_yaml_out
   subroutine forbid_reserved_label(label)
     character(len=*),intent(in) :: label
     character(len=100) :: msg
+    integer :: i
 
     do i=1,size(reserved_keywords)
       if (reserved_keywords(i) == label) then
@@ -137,7 +138,7 @@ module m_yaml_out
         MSG_ERROR(msg)
       end if
     end do
-  end subroutine
+  end subroutine forbid_reserved_label
 
   subroutine yaml_start_field(stream, label, tag, width)
     type(stream_string),intent(inout) :: stream
