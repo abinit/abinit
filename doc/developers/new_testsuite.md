@@ -13,8 +13,6 @@ tolerances, parameters and constraints is also discussed.
 The new infrastructure consists of a set of Fortran modules to output 
 structured data in YAML format and Python code to parse the output files and analyze data.
 
-### Motivations
-
 ## Motivations
 
 In ABINITv8 and previous versions, the ABINIT test suite is based on input files with the
@@ -228,9 +226,9 @@ with the associated YAML configuration file given by:
     Until the basic document list is considered stable enough the printing of
     YAML documents is disabled by default. To enable it, add [[use_yaml]] 1 in the input file 
 
-### Out first example of YAML configuration file 
+### Our first example of YAML configuration file 
 
-Let's start with a minimalistic example in which we compare the components of
+Let us start with a minimalistic example in which we compare the components of
 the total free energy in the `Etot` document with an absolute tolerance of 1.0e-7 Ha.
 The YAML configuration file will look like:
 
