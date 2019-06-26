@@ -48,14 +48,14 @@ class ValueTypeError(TypeError, ConfigError):
     def __init__(self, name, exp, found):
         msg = ('The value found in config does not match the type expected for'
                ' {}. Expected {} and found {} of type {}.')
-        TypeError.__init__(self, msg.format(name, exp, found, type(found)))
+        super(TypeError, self).__init__(msg.format(name, exp, found, type(found)))
 
 
 class InvalidNodeError(ConfigError):
     def __init__(self, name, value):
         msg = ('The node labeled {} is not a known parameter or constraint and'
                ' have not the form of a specialisation. Value: {}')
-        super(InputFileError, self).__init__(msg.format(name, value))
+        super(InvalidNodeError, self).__init__(msg.format(name, value))
 
 
 class EmptySetError(ConfigError):
@@ -101,13 +101,13 @@ class NotAvailableTagError(InputFileError):
     def __init__(self, tag, msg):
         msg = ('Tag {} is not available in this installation : {}'
                .format(tag, msg))
-        YAMLTestError.__init__(self, msg)
+        YAMLTestError.__init__(msg)
 
 
 class UntaggedDocumentError(InputFileError):
     def __init__(self, line):
         msg = ('This document does not have a tag. It cannot be identified.')
-        InputFileError.__init__(self, line, msg)
+        super(UntaggedDocumentError, self).__init__(line, msg)
 
 
 class DuplicateDocumentError(InputFileError):
@@ -115,4 +115,4 @@ class DuplicateDocumentError(InputFileError):
         msg = ('There are two document with the same tag and iteration'
                ' state ({}). Please change the tag of one of them to make it'
                ' unique.').format(id)
-        InputFileError.__init__(self, line, msg)
+        super(DuplicateDocumentError, self).__init__(self, line, msg)

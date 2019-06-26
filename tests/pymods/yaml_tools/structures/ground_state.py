@@ -33,7 +33,7 @@ class EnergyTerms(object):
 
 
 @yaml_auto_map
-class EnergyTermsDC(object):
+class EnergyTermsDC(EnergyTerms):
     '''
     Components of total energy in Double Counting.
     '''
