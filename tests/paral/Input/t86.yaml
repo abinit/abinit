@@ -40,13 +40,13 @@ dmft:
             tol_rel: 1.0e-8
         stress tensor:
             ignore: true
-    Etot:
-        Total energy eV:
+    EnergyTerms:
+        total_energy_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-8
-    EtotDC:
+    EnergyTermsDC:
         tol_abs: 1.0e-7
-        Total DC energy eV:
+        total_energy_dc_eV:
             tol_abs: 1.0e-5
             tol_rel: 1.0e-8
 

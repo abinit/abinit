@@ -2,7 +2,7 @@ tol_abs: 1.0e-10
 tol_rel: 1.0e-10
 tol_vec: 1.0e-5
 
-Etot:
+EnergyTerms:
     tol_abs: 1.0e-7
 
 ResultsGS:
