@@ -3086,9 +3086,64 @@ c0_HatdisdagdQ_c1strain_bks=zero
 
    end do !iatpert
 
+   !LOOP OVER STRAIN PERTURBATION
+   do istrpert=1,nstrpert
+     ka=pert_strain(3,istrpert)
+     kb=pert_strain(4,istrpert)
+
+     !Read strain field wf1
+     if (ka>=kb) then
+       call wfk_read_bks(wfk_t_strain(ka,kb), iband, indkpt1(ikpt), &
+     & isppol, xmpio_single, cg_bks=cg1_strain)
+       cg1_strain_ar(ka,kb,:,:)=cg1_strain
+     else
+       cg1_strain=cg1_strain_ar(kb,ka,:,:)
+     end if
+
+     !LOOP OVER q1-GRADIENT
+     do iq1grad=1,nq1grad
+
+       !LOOP OVER BANDS
+       do jband=1,nband_k
+
+         !Read ddk wf1
+         call wfk_read_bks(wfk_t_ddk(iq1grad), jband, indkpt1(ikpt), &
+       & isppol, xmpio_single, cg_bks=cg1_ddk)
+
+         !Calculate: < u_{j,k}^{k_{\gamma}} | u_{i,k}^{n_{\beta\delta}} >
+         call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_ddk,cg1_strain, &
+       & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+         !LOOP OVER ATOMIC DISPLACEMENT PERTURBATION
+         do iatpert=1,natpert
+ 
+           !Calculate: -\sum_{j} 
+!  < u_{i,k}^{(0)} | (H^{\tau_{\kappa\alpha}}+V^{\tau_{\kappa\alpha}})^{\dagger} | u_{j,k}^{(0)} >
+!  < u_{j,k}^{k_{\gamma}} | u_{i,k}^{n_{\beta\delta}} >           
+           cprodr=dotr*ci_h1vatdisdag_cj(1,iatpert,jband,iband) - &
+         &        doti*ci_h1vatdisdag_cj(2,iatpert,jband,iband)
+           cprodi=dotr*ci_h1vatdisdag_cj(2,iatpert,jband,iband) + &
+         &        doti*ci_h1vatdisdag_cj(1,iatpert,jband,iband)
+
+           c0_HatdisdagdQ_c1strain_bks(1,iband,iatpert,iq1grad,istrpert)= &
+         & c0_HatdisdagdQ_c1strain_bks(1,iband,iatpert,iq1grad,istrpert)-cprodr
+           c0_HatdisdagdQ_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)= &
+         & c0_HatdisdagdQ_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)-cprodi
+
+         end do !iatpert
+
+       end do !jband
+ 
+     end do !iq1grad
+
+   end do !istrpert
 
  end do !iband
 
+!Deallocations
+ ABI_DEALLOCATE(ci_h1vatdisdag_cj)
+ ABI_DEALLOCATE(cj_h1vstrain_ci)
+ ABI_DEALLOCATE(cg1_ddk)
 
 
 
@@ -3116,10 +3171,12 @@ c0_HatdisdagdQ_c1strain_bks=zero
          !All terms toghether except T4 that needs further treatment
          isdqwf_k(1,iatpert,iq1grad,ka,kb)=isdqwf_k(1,iatpert,iq1grad,ka,kb) +              &
       &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) + & !T1
-      &  c1atdis_dQcalHstrain_c0_bks(1,iband,iatpert,iq1grad,istrpert) )                      !T2
+      &  c1atdis_dQcalHstrain_c0_bks(1,iband,iatpert,iq1grad,istrpert) +                    & !T2
+      &  c0_HatdisdagdQ_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) )                      !T3
          isdqwf_k(2,iatpert,iq1grad,ka,kb)=isdqwf_k(2,iatpert,iq1grad,ka,kb) +              &
       &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) + & !T1
-      &   c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert) )                     !T2 
+      &   c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert) +                   & !T2 
+      &  c0_HatdisdagdQ_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) )                      !T3
 
          !Separate them
          !T1
@@ -3136,6 +3193,13 @@ c0_HatdisdagdQ_c1strain_bks=zero
          isdqwf_t2_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t2_k(2,iatpert,iq1grad,ka,kb) + &
       &  occ_k(iband) * c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert)
 
+         !T3
+         isdqwf_t3_k(1,iatpert,iq1grad,ka,kb)=isdqwf_t3_k(1,iatpert,iq1grad,ka,kb) + &
+      &  occ_k(iband) * c0_HatdisdagdQ_c1strain_bks(1,iband,iatpert,iq1grad,istrpert)
+
+         isdqwf_t3_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t3_k(2,iatpert,iq1grad,ka,kb) + &
+      &  occ_k(iband) * c0_HatdisdagdQ_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)
+
       end do
     end do
   end do
@@ -3144,6 +3208,7 @@ end do
 !scale by the k-point weight
  isdqwf_t1_k=isdqwf_t1_k * wtk_k
  isdqwf_t2_k=isdqwf_t2_k * wtk_k
+ isdqwf_t3_k=isdqwf_t3_k * wtk_k
  isdqwf_k=isdqwf_k * wtk_k
 
 !Deallocations
