@@ -2957,7 +2957,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      qpt_bz = qbz(:, iq_bz)
      isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
 
-     ! Compute long-range part of the coupling potential.
+     ! Compute long-range part of the coupling potential at qpt_bz.
      if (db%add_lr /= 0) then
        do imyp=1,db%my_npert
          idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3042,8 +3042,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
              !  v1r_lr(1,:,imyp) = v1r_lr(1,:,imyp) - sum(v1r_lr(1,:,imyp)) / nfft + sum(v1r_qbz(1,:,ispden,ipc)) / nfft
              !  v1r_lr(2,:,imyp) = v1r_lr(2,:,imyp) - sum(v1r_lr(2,:,imyp)) / nfft + sum(v1r_qbz(2,:,ispden,ipc)) / nfft
              !end if
-             v1r_qbz(1, :, ispden, ipc) = v1r_qbz(1, :, ispden, ipc) - v1r_lr(1, :, imyp)
-             v1r_qbz(2, :, ispden, ipc) = v1r_qbz(2, :, ispden, ipc) - v1r_lr(2, :, imyp)
+             v1r_qbz(:, :, ispden, ipc) = v1r_qbz(:, :, ispden, ipc) - v1r_lr(:, :, imyp)
            end do
          end do
        end if
@@ -5894,27 +5893,30 @@ if (db%add_lr == 2) then
   ! hence we have to take the projection with the dual vector b_i
   ! In theory Z is symmetric but in practice it's not so use Z^t in equation.
   ll = sqrt(sum(rprimd(:, idir) ** 2))
+  !ll = one
   do ig=1,nfft
-   qG_red = qpt + gfft(:,ig)
-   ! Include 2pi in qG_cart
-   qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
-   qG_mod = sqrt(sum(qG_cart ** 2))
-   denom = dot_product(qG_cart, matmul(db%dielt, qG_cart))
-   if (abs(denom) < tol8) cycle
-   denom_inv = one / denom
-   if (qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * qdamp))
-   ! <b_i | Z^t (q+G) > in Cartesian coords
-   ! Multiply by ll because we want the projection along a_i/ll and b_i is contravariant.
-   qgZ = ll * dot_product(db%cryst%gprimd(:, idir), matmul(transpose(db%zeff(:,:,iatom)), qG_cart))
+    qG_red = qpt + gfft(:,ig)
+    ! Include 2pi in qG_cart
+    qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
+    qG_mod = sqrt(sum(qG_cart ** 2))
+    denom = dot_product(qG_cart, matmul(db%dielt, qG_cart))
+    if (abs(denom) < tol8) cycle
+    denom_inv = one / denom
+    if (qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * qdamp))
+    ! <b_i | Z^t (q+G) > in Cartesian coords
+    ! Multiply by ll because we want the projection along a_i/ll and b_i is contravariant.
+    !qgZ = (one / ll) * dot_product(db%cryst%rprimd(:, idir), matmul(transpose(db%zeff(:,:,iatom)), qG_cart))
+    qgZ = dot_product(db%cryst%rprimd(:, idir), matmul(transpose(db%zeff(:,:,iatom)), qG_cart))
+    !qgZ = ll * dot_product(db%cryst%gprimd(:, idir), matmul(transpose(db%zeff(:,:,iatom)), qG_cart))
 
-   ! Phase factor exp(-i (q+G) . tau)
-   qtau = - two_pi * dot_product(qG_red, tau_red)
-   phre = cos(qtau); phim = sin(qtau)
+    ! Phase factor exp(-i (q+G) . tau)
+    qtau = - two_pi * dot_product(qG_red, tau_red)
+    phre = cos(qtau); phim = sin(qtau)
 
-   re = zero
-   im = fac * qGZ * denom_inv
-   v1G_lr(1,ig) = phre * re - phim * im
-   v1G_lr(2,ig) = phim * re + phre * im
+    re = zero
+    im = fac * qGZ * denom_inv
+    v1G_lr(1,ig) = phre * re - phim * im
+    v1G_lr(2,ig) = phim * re + phre * im
   end do
 
 else
@@ -6306,7 +6308,6 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
                              dvdb%my_nrpt, dvdb%nspden, ipert, v1scf_rpt, comm)
 
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1scf_rpt"), v1scf_rpt, start=[1,1,1,1,ipert]))
-
      call cwtime_report(" v1scf_rpt built", cpu, wall, gflops)
 
      do iq=1,nqpt_interpolate
@@ -6483,9 +6484,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
  do iq=1,nqibz
    ! Find the index of the q-point in the DVDB.
    db_iqpt = dvdb_findq(dvdb, qibz(:, iq))
-   if (db_iqpt == -1) then
-     MSG_ERROR(sjoin("Q-point:", ktoa(qibz(:, iq)), "not found in DVDB!"))
-   end if
+   ABI_CHECK(db_iqpt /= -1, sjoin("Q-point:", ktoa(qibz(:, iq)), "not found in DVDB!"))
    iq_read(iq) = db_iqpt
 
    ! Count the number of perturbations.
