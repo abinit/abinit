@@ -264,7 +264,7 @@ module m_pair_list
 !! pair_list_set
 !!
 !! FUNCTION
-!!  set a key-value par into the list. If the key is already presen, the
+!!  set a key-value par into the list. If the key is already present, the
 !!  corresponding pair is updated. If not the pair is created.
 !!  Only one of i and r should be provided (i is the default if both are
 !!  provided). Nothing happen if none of them are provided.
