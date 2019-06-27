@@ -3469,7 +3469,8 @@ end subroutine dfpt_isdqwf
 !!
 !! FUNCTION
 !!  This routine computes the frozen wf contribution to the q-gradient of the
-!!  internal strain tensor
+!!  internal strain tensor. The four directions involved in the derivatives are
+!!  taken along the reduced coordinates.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2018 ABINIT group (MR,MS)

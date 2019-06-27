@@ -2836,6 +2836,11 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      call dfpt_ddmdqout(ddmdq_flg,ddmdq_qgradhart,ddmdqwf,ddmdqwf_t1,ddmdqwf_t2,ddmdqwf_t3,d3etot,&
    & dyewdq,gprimd,dtset%kptopt,matom,mpert,natpert,nq1grad,pert_atdis,dtset%prtvol,q1grad,rprimd)
    end if
+   if (lw_flexo==1.or.lw_flexo==4) then
+     call dfpt_isdqout(d3etot,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
+   & isdqwf_t3,isdqwf_t4,isdqwf_t5,dtset%kptopt,matom,mpert,natpert, &
+   & nstrpert,nq1grad,pert_atdis,pert_strain,dtset%prtvol,q1grad,rprimd)
+   end if
  end if
 
 !Deallocattions
@@ -2943,11 +2948,12 @@ end subroutine dfpt_flexo
 !!                                             q-gradient of the Hartree potential
 !!  elflexoflg(3,3,3,3)=array that indicates which elements of the electronic contribution to the
 !!                                             flexoelectric tensor have been calculated
-!!  elflexowf(2,3,3,3,3)=total wave function contribution to the electronic flexoelectric tensor 
+!!  elflexowf(2,3,3,3,3)=total wave function contributions to the electronic flexoelectric tensor 
+!!                       (except t4)
 !!  elflexowf_t1(2,3,3,3,3)=term 1 of the wave function contribution 
 !!  elflexowf_t2(2,3,3,3,3)=term 2 of the wave function contribution 
 !!  elflexowf_t3(2,3,3,3,3)=term 3 of the wave function contribution 
-!!  elflexowf_t4(2,3,3,3,3)=term 3 of the wave function contribution 
+!!  elflexowf_t4(2,3,3,3,3)=term 4 of the wave function contribution (type-I)
 !!  elflexowf_t5(2,3,3,3,3)=term 5 of the wave function contribution 
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
@@ -3031,11 +3037,13 @@ end subroutine dfpt_flexo
  real(dp),allocatable :: elec_flexotens_cart(:,:,:,:,:),elec_flexotens_red(:,:,:,:,:)
  real(dp),allocatable :: elflexowf_buffer_cart(:,:,:,:,:,:),elflexowf_t4_cart(:,:,:,:,:)
 
+! *************************************************************************
+
  DBG_ENTER("COLL")
 
 !Gather the different terms in the electronic contribution to the flexoelectric tensor
  ABI_ALLOCATE(elec_flexotens_red,(2,3,3,3,3))
- elec_flexotens_red=zero
+! elec_flexotens_red=zero
  ucvolinv= 1.0_dp/ucvol
 
  if (kptopt==3) then
@@ -3853,6 +3861,218 @@ end subroutine dfpt_flexoout
 
  DBG_EXIT("COLL")
  end subroutine dfpt_ddmdqout
+
+!!****f* ABINIT/dfpt_isdqout
+!! NAME
+!!  dfpt_isdqout
+!!
+!! FUNCTION
+!!  This subroutine gathers the different terms entering the q-gradient of the
+!!  internal strain tensor, perfofms the transformation from reduced to cartesian coordinates and 
+!!  writes out the tensor in output files in type-II formulation.
+!!  
+!! COPYRIGHT
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  frwfdq(2,natpert,3,3,nq1grad)=frozen wf contribution (type-I)
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  isdq_flg(natpert,nq1grad,3,3)=array that indicates which elements of the q-gradient of
+!!                                  internal strain tensor have been calculated
+!!  isdq_qgradhart(2,natpert,nq1grad,3,3)=electronic electrostatic contribution from the 
+!!                                             q-gradient of the Hartree potential
+!!  isdqwf(2,natpert,nq1grad,3,3)=total wave function contributions to the q-gradient of
+!!                          internal strain tensor (except t4)
+!!  isdqwf_t1(2,natpert,nq1grad,3,3)=term 1 of the wave function contribution 
+!!  isdqwf_t2(2,natpert,nq1grad,3,3)=term 2 of the wave function contribution 
+!!  isdqwf_t3(2,natpert,nq1grad,3,3)=term 3 of the wave function contribution 
+!!  isdqwf_t4(2,natpert,3,3,nq1grad)=term 4 of the wave function contribution (type-I) 
+!!  isdqwf_t5(2,natpert,nq1grad,3,3)=term 5 of the wave function contribution 
+!!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
+!!  matom=number of atoms 
+!!  mpert=maximum number of perturbations
+!!  natpert=number of atomic displacement perturbations
+!!  nstrpert=number of strain perturbations
+!!  nq1grad=number of q1 (q_{\gamma}) gradients
+!!  pert_atdis(3,natpert)=array with the info for the atomic displacement perturbations
+!!  pert_strain(6,nstrpert)=array with the info for the strain perturbations
+!!  prtvol=volume of information to be printed. 1-> The different contributions to the quadrupole are printed.
+!!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  
+!! OUTPUT
+!!  d3etot(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!!  dfpt_flexo
+!!
+!! CHILDREN
+!!
+!!  cart39 
+!!
+!! SOURCE
+
+ subroutine dfpt_isdqout(d3etot,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
+   & isdqwf_t3,isdqwf_t4,isdqwf_t5,kptopt,matom,mpert,natpert, &
+   & nstrpert,nq1grad,pert_atdis,pert_strain,prtvol,q1grad,rprimd)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_isdqout'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: kptopt,matom,mpert,natpert,nstrpert,nq1grad,prtvol
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
+
+!arrays
+ integer,intent(in) :: isdq_flg(natpert,nq1grad,3,3)
+ integer,intent(in) :: pert_atdis(3,natpert)
+ integer,intent(in) :: pert_strain(6,nstrpert)
+ integer,intent(in) :: q1grad(3,nq1grad)
+ real(dp),intent(in) :: isdqwf(2,natpert,nq1grad,3,3)
+ real(dp),intent(inout) :: frwfdq(2,natpert,3,3,nq1grad)
+ real(dp),intent(inout) :: isdq_qgradhart(2,natpert,nq1grad,3,3)
+ real(dp),intent(inout) :: isdqwf_t1(2,natpert,nq1grad,3,3)
+ real(dp),intent(inout) :: isdqwf_t2(2,natpert,nq1grad,3,3)
+ real(dp),intent(inout) :: isdqwf_t3(2,natpert,nq1grad,3,3)
+ real(dp),intent(inout) :: isdqwf_t4(2,natpert,3,3,nq1grad)
+ real(dp),intent(inout) :: isdqwf_t5(2,natpert,nq1grad,3,3)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: rprimd(3,3)
+ 
+!Local variables-------------------------------
+!scalars
+ integer :: iatpert,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
+ integer, parameter :: re=1,im=2
+ real(dp) :: tmpim,tmpre
+
+!arrays
+ real(dp),allocatable :: frwfdq_cart(:,:,:,:,:)
+ real(dp),allocatable :: isdqtens_cart(:,:,:,:,:),isdqtens_red(:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t4_cart(:,:,:,:,:)
+ real(dp),allocatable :: isdqtens_buffer_cart(:,:,:,:,:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Gather the different terms in the q-gradient of the internal strain tensor
+ ABI_ALLOCATE(isdqtens_red,(2,natpert,nq1grad,3,3))
+! isdqtens_red=zero
+
+ if (kptopt==3) then
+
+   !Compute real and 'true' imaginary parts of isdq tensor and independent
+   !terms. The T4 term and the frozen wf contributions need further treatment 
+   !and they will be lately added to the cartesian coordinates
+   !version of the isdq tensor
+   do istrpert=1,nstrpert
+     istr1dir=pert_strain(3,istrpert)
+     istr2dir=pert_strain(4,istrpert)
+     do iq1grad=1,nq1grad
+       iq1dir=q1grad(2,iq1grad)
+       do iatpert=1,natpert
+
+         if (isdq_flg(iatpert,iq1dir,istr1dir,istr2dir)==1) then  
+        
+           !The interesting magnitude is minus the gradient of the second order Energy
+           isdqtens_red(re,iatpert,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+         & ( isdq_qgradhart(re,iatpert,iq1dir,istr1dir,istr2dir) + &
+         &   isdqwf(re,iatpert,iq1dir,istr1dir,istr2dir) )
+           isdqtens_red(im,iatpert,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+         & ( isdq_qgradhart(im,iatpert,iq1dir,istr1dir,istr2dir) + &
+         &   isdqwf(im,iatpert,iq1dir,istr1dir,istr2dir) )
+
+           !Multiply by the imaginary unit that has been factorized out
+           tmpre=isdqtens_red(re,iatpert,iq1dir,istr1dir,istr2dir)
+           tmpim=isdqtens_red(im,iatpert,iq1dir,istr1dir,istr2dir)
+           isdqtens_red(re,iatpert,iq1dir,istr1dir,istr2dir)=-tmpim
+           isdqtens_red(im,iatpert,iq1dir,istr1dir,istr2dir)=tmpre
+
+           !Do the smae for the T4 term 
+           !(This is different from the flexoout routine because the factorized -i in the T4
+           ! has to be multiplied by -1 as we did for the rest of contributions)
+           tmpre=isdqwf_t4(re,iatpert,istr1dir,istr2dir,iq1dir)
+           tmpim=isdqwf_t4(im,iatpert,istr1dir,istr2dir,iq1dir)
+           isdqwf_t4(re,iatpert,istr1dir,istr2dir,iq1dir)=-tmpim
+           isdqwf_t4(im,iatpert,istr1dir,istr2dir,iq1dir)=tmpre
+
+           !Multiply by -1 the frozen wf contribution 
+           tmpre=frwfdq(re,iatpert,istr1dir,istr2dir,iq1dir)
+           tmpim=frwfdq(im,iatpert,istr1dir,istr2dir,iq1dir)
+           frwfdq(re,iatpert,istr1dir,istr2dir,iq1dir)=-tmpre
+           frwfdq(im,iatpert,istr1dir,istr2dir,iq1dir)=-tmpim
+
+           !Compute and save individual terms in mixed coordinates
+           if (prtvol==1) then
+             
+             tmpre=isdq_qgradhart(re,iatpert,iq1dir,istr1dir,istr2dir)
+             tmpim=isdq_qgradhart(im,iatpert,iq1dir,istr1dir,istr2dir)
+             isdq_qgradhart(re,iatpert,iq1dir,istr1dir,istr2dir)=tmpim
+             isdq_qgradhart(im,iatpert,iq1dir,istr1dir,istr2dir)=-tmpre
+
+             tmpre=isdqwf_t1(re,iatpert,iq1dir,istr1dir,istr2dir)
+             tmpim=isdqwf_t1(im,iatpert,iq1dir,istr1dir,istr2dir)
+             isdqwf_t1(re,iatpert,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t1(im,iatpert,iq1dir,istr1dir,istr2dir)=-tmpre
+
+             tmpre=isdqwf_t2(re,iatpert,iq1dir,istr1dir,istr2dir)
+             tmpim=isdqwf_t2(im,iatpert,iq1dir,istr1dir,istr2dir)
+             isdqwf_t2(re,iatpert,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t2(im,iatpert,iq1dir,istr1dir,istr2dir)=-tmpre
+
+             tmpre=isdqwf_t3(re,iatpert,iq1dir,istr1dir,istr2dir)
+             tmpim=isdqwf_t3(im,iatpert,iq1dir,istr1dir,istr2dir)
+             isdqwf_t3(re,iatpert,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t3(im,iatpert,iq1dir,istr1dir,istr2dir)=-tmpre
+
+             tmpre=isdqwf_t5(re,iatpert,iq1dir,istr1dir,istr2dir)
+             tmpim=isdqwf_t5(im,iatpert,iq1dir,istr1dir,istr2dir)
+             isdqwf_t5(re,iatpert,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t5(im,iatpert,iq1dir,istr1dir,istr2dir)=-tmpre
+
+           end if
+
+         end if
+
+       end do
+     end do
+   end do
+
+ end if
+
+!Transform to complete cartesian coordinates all the contributions
+ ABI_ALLOCATE(isdqtens_cart,(2,natpert,nq1grad,3,3))
+ ABI_ALLOCATE(isdqwf_t4_cart,(2,natpert,3,3,nq1grad))
+ ABI_ALLOCATE(frwfdq_cart,(2,natpert,3,3,nq1grad))
+ isdqtens_cart=isdqtens_red
+ isdqwf_t4_cart=isdqwf_t4
+ frwfdq_cart=frwfdq
+
+ if (prtvol==1) then
+   ABI_ALLOCATE(isdqtens_buffer_cart(5,2,natpert,nq1grad,3,3))
+   isdqtens_buffer_cart(1,:,:,:,:,:)=isdqwf_t1(:,:,:,:,:)
+   isdqtens_buffer_cart(2,:,:,:,:,:)=isdqwf_t2(:,:,:,:,:)
+   isdqtens_buffer_cart(3,:,:,:,:,:)=isdqwf_t3(:,:,:,:,:)
+   isdqtens_buffer_cart(4,:,:,:,:,:)=isdq_qgradhart(:,:,:,:,:)
+   isdqtens_buffer_cart(5,:,:,:,:,:)=isdqwf_t5(:,:,:,:,:)
+ end if
+
+ DBG_EXIT("COLL")
+ end subroutine dfpt_isdqout
 
 end module m_dfpt_lw
 !!***
