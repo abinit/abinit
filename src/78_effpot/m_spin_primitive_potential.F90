@@ -460,7 +460,6 @@ contains
              call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=Rj_sc)
              val_sc(:)= self%coeff%val%data(inz)
              do i=1, scmaker%ncells
-                ! this subroutine can be run on only master node.
                 call scpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
              end do
              if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)

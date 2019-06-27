@@ -47,14 +47,14 @@ module m_supercell_maker
 !!***
 
   type ,public :: supercell_maker_t
-     integer :: scmat(3,3)
-     real(dp) :: inv_scmat(3,3)
-     integer :: ncells
-     integer, allocatable :: rvecs(:,:)
+     integer :: scmat(3,3)  ! supercell matrix
+     real(dp) :: inv_scmat(3,3) ! inverse of supercell matrix
+     integer :: ncells         ! number of cells in supercell
+     integer, allocatable :: rvecs(:,:) ! R vectors for cells in supercell. dim:(3, ncells)
    contains
      procedure :: initialize
      procedure :: finalize
-     procedure :: to_red_sc
+     procedure :: to_red_sc  
      procedure :: build_rvec
      procedure :: sc_cell
      procedure :: R_to_sc
@@ -89,21 +89,18 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-
     self%scmat(:,:)=sc_matrix
     call xmpi_bcast(self%scmat, master, comm, ierr)
     self%ncells=abs(mat33det(self%scmat))
-    call xmpi_bcast(self%ncells, master, comm, ierr)
+    ! call xmpi_bcast(self%ncells, master, comm, ierr)
     ABI_ALLOCATE(self%rvecs, (3, self%ncells))
     ! Why transpose?
-    !if(iam_master) then
-       tmp(:,:)=transpose(self%scmat)
-       call matr3inv(tmp, self%inv_scmat)
-       call self%build_rvec()
-    !end if
-    call xmpi_bcast(self%inv_scmat, master, comm, ierr)
-    call xmpi_bcast(self%ncells, master, comm, ierr)
-    call xmpi_bcast(self%rvecs, master, comm, ierr)
+    tmp(:,:)=transpose(self%scmat)
+    call matr3inv(tmp, self%inv_scmat)
+    call self%build_rvec()
+    !call xmpi_bcast(self%inv_scmat, master, comm, ierr)
+    !call xmpi_bcast(self%ncells, master, comm, ierr)
+    !call xmpi_bcast(self%rvecs, master, comm, ierr)
   end subroutine initialize
 
   subroutine finalize(self)
@@ -114,6 +111,7 @@ contains
        ABI_DEALLOCATE(self%rvecs)
     end if
   end subroutine finalize
+
 
 
   function to_red_sc(self, pos) result(ret)
@@ -198,9 +196,6 @@ contains
   ! R: R index using primitive cell parameter
   ! R_sc: R index using supercell parameter
   ! ind_sc: index of cell INSIDE supercell in primitive cell.
-  ! TODO: The speed can be improved by using a bisect search instead.
-  ! TODO: The speed can be improved by caching at least last n result, since in many cases,
-  !       the next R is sill the same. 
   subroutine R_to_sc(self, R, R_sc, ind_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: R(3)
@@ -459,6 +454,8 @@ contains
 
 
 !===================================================================================
+! The functions below are deprecated!!!
+! They are used with the m_supercell module. 
   ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
   subroutine find_R_PBC(scell, R, R_sc, R_prim)
     type(supercell_type) , intent(in):: scell
