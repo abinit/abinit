@@ -772,6 +772,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
      &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
 
+
      !Set up q-gradient of local potential vlocal1dq with proper dimensioning
      call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
@@ -785,7 +786,6 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
    & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
    & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
-
 
      !LOOP OVER BANDS
      do iband=1,nband_k
@@ -2636,7 +2636,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 !Local variables-------------------------------
 !scalars
  integer :: iatpert,iq1grad,berryopt,g0term,iband,idir,ii,ipert,istr,istrpert,jband
- integer :: ka,kb,nkpg,nkpg1,npw_disk
+ integer :: ka,kb,nkpg,nkpg1,npw_disk,nylmgrpart
  integer :: opt_gvnl1,opthartdqdq,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
  real(dp) :: cprodr,cprodi,doti,dotr,dum_lambda
  character(len=500) :: msg                   
@@ -2657,11 +2657,14 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:)
  real(dp),allocatable :: dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
- real(dp),allocatable :: gh1dqdqc(:,:),gvloc1dqdqc(:,:),gvnl1dqdqc(:,:),gv1c(:,:)
+ real(dp),allocatable :: gh1dqc(:,:),gh1dqdqc(:,:)
+ real(dp),allocatable :: gvloc1dqc(:,:),gvloc1dqdqc(:,:)
+ real(dp),allocatable :: gvnl1dqc(:,:),gvnl1dqdqc(:,:),gv1c(:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: vhart1dqdq(:)
- real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),vlocal1dqdq(:,:,:,:),dum_vpsp(:)
- real(dp),allocatable :: vpsp1(:),vpsp1dqdq(:)
+ real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:)
+ real(dp),allocatable :: vlocal1dq(:,:,:,:),vlocal1dqdq(:,:,:,:),dum_vpsp(:)
+ real(dp),allocatable :: vpsp1(:),vpsp1dq(:),vpsp1dqdq(:)
  real(dp),allocatable :: dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
@@ -3033,7 +3036,6 @@ c0_HatdisdagdQ_c1strain_bks=zero
  ABI_DEALLOCATE(gv1c)
  ABI_DEALLOCATE(vlocal1)
  !ABI_DEALLOCATE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
- ABI_DEALLOCATE(part_ylmgr_k)
 
 !--------------------------------------------------------------------------------------
 !Two terms involving a q-gradient of projector operators
@@ -3251,6 +3253,125 @@ c0_HatdisdagdQ_c1strain_bks=zero
 !Deallocations
  ABI_DEALLOCATE(cg1_atdis)
  ABI_DEALLOCATE(vhart1dqdq)
+ ABI_DEALLOCATE(gh1dqdqc)
+ ABI_DEALLOCATE(gvloc1dqdqc)
+ ABI_DEALLOCATE(gvnl1dqdqc)
+ ABI_DEALLOCATE(vpsp1dqdq)
+ ABI_DEALLOCATE(vlocal1dqdq)
+
+!--------------------------------------------------------------------------------------
+! q1-gradient of atomic displacement 1st-order Hamiltonian: 
+! < u_{i,k}^{(0)} | (H^{\tau_{\kappa\alpha}}_{\gamma})^{dagger} | u_{i,k}^{n_{\beta\delta}} >
+! calculated as:
+! (<u_{i,k}^{n_{\beta\delta} | H^{\tau_{\kappa\alpha}}_{\gamma} | u_{i,k}^{(0)} >)*
+!--------------------------------------------------------------------------------------
+
+!Specific allocations
+ ABI_ALLOCATE(vpsp1dq,(2*nfft))
+ ABI_ALLOCATE(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_ALLOCATE(gh1dqc,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(gvloc1dqc,(2,npw_k*dtset%nspinor))
+ ABI_ALLOCATE(gvnl1dqc,(2,npw_k*dtset%nspinor))
+
+!Specific definitions
+ useylmgr1=1;nylmgrpart=3;optlocal=1;optnl=1
+
+!LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
+ do iatpert= 1, natpert
+   ipert=pert_atdis(1,iatpert)
+   idir=pert_atdis(2,iatpert)
+
+   !LOOP OVER Q1-GRADIENT
+   do iq1grad=1,nq1grad
+
+     !Get q-gradient of first-order local part of the pseudopotential
+     call dfpt_vlocaldq(atindx,2,gs_hamkq%gmet,gsqcut,idir,ipert,mpi_enreg, &
+     &  psps%mqgrid_vl,dtset%natom,&
+     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
+     &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
+     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
+
+     !Set up q-gradient of local potential vlocal1dq with proper dimensioning
+     call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
+     &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
+
+     !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
+     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
+     & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
+     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
+
+     !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+     call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrpart,useylmgr1,kg_k, &
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
+
+     !LOOP OVER BANDS
+     do iband=1,nband_k
+
+       if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+       !Read ket ground-state wavefunctions
+       cwave0i(:,:)=cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
+
+       !Compute < g |H^{\tau_{\kappa\beta}}_{\gamma} | u_{i,k}^{(0)} >
+       call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
+       & idir,ipert,mpi_enreg,optlocal,optnl,q1grad(2,iq1grad),rf_hamkq)
+
+       !LOOP OVER STRAIN PERTURBATION
+       do istrpert=1,nstrpert
+         ka=pert_strain(3,istrpert)
+         kb=pert_strain(4,istrpert)
+    
+         !Read strain field wf1
+         if (ka>=kb) then
+           call wfk_read_bks(wfk_t_strain(ka,kb), iband, indkpt1(ikpt), &
+         & isppol, xmpio_single, cg_bks=cg1_strain)
+           cg1_strain_ar(ka,kb,:,:)=cg1_strain
+         else
+           cg1_strain=cg1_strain_ar(kb,ka,:,:)
+         end if
+
+         !Calculate:
+         !(<u_{i,k}^{n_{\beta\delta} | H^{\tau_{\kappa\alpha}}_{\gamma} | u_{i,k}^{(0)} >)*
+         call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_strain,gh1dqc, &
+       & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+         !Apply the -i factor that has been factorized in the
+         !H^{\tau_{\kappa\beta}}_{\gamma} terms. (And consider the complex
+         !conjugate too)
+         c0_Hatdisdqdag_c1strain_bks(1,iband,iatpert,iq1grad,istrpert)= doti
+         c0_Hatdisdqdag_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)= dotr
+
+       end do !istrpert
+
+     end do !iband
+
+     !Clean the rf_hamiltonian
+     call destroy_rf_hamiltonian(rf_hamkq)
+
+     !Deallocations
+     ABI_DEALLOCATE(kpg_k)
+     ABI_DEALLOCATE(kpg1_k)
+     ABI_DEALLOCATE(dkinpw)
+     ABI_DEALLOCATE(kinpw1)
+     ABI_DEALLOCATE(ffnlk)
+     ABI_DEALLOCATE(ffnl1)
+     ABI_DEALLOCATE(ph3d)
+
+   end do !iq1grad
+
+ end do !iatpert
+
+!Deallocations
+ ABI_DEALLOCATE(part_ylmgr_k)
+ ABI_DEALLOCATE(dum_cwaveprj)
+ ABI_DEALLOCATE(gh1dqc)
+ ABI_DEALLOCATE(gvloc1dqc)
+ ABI_DEALLOCATE(gvnl1dqc)
+ ABI_DEALLOCATE(vpsp1dq)
+ ABI_DEALLOCATE(vlocal1dq)
+ ABI_DEALLOCATE(dum_vpsp)
+ ABI_DEALLOCATE(dum_vlocal)
 
 !--------------------------------------------------------------------------------------
 ! Acumulates all the wf dependent terms of the flexoelectric tensor
@@ -3274,11 +3395,13 @@ c0_HatdisdagdQ_c1strain_bks=zero
          isdqwf_k(1,iatpert,iq1grad,ka,kb)=isdqwf_k(1,iatpert,iq1grad,ka,kb) +              &
       &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) + & !T1
       &  c1atdis_dQcalHstrain_c0_bks(1,iband,iatpert,iq1grad,istrpert) +                    & !T2
-      &  c0_HatdisdagdQ_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) )                      !T3
+      &  c0_HatdisdagdQ_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) +                    & !T3
+      &  c0_Hatdisdqdag_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) )                      !T5
          isdqwf_k(2,iatpert,iq1grad,ka,kb)=isdqwf_k(2,iatpert,iq1grad,ka,kb) +              &
       &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) + & !T1
       &   c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert) +                   & !T2 
-      &  c0_HatdisdagdQ_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) )                      !T3
+      &  c0_HatdisdagdQ_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) +                    & !T3
+      &  c0_Hatdisdqdag_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) )                      !T5
 
          !Separate them
          !T1
@@ -3309,6 +3432,13 @@ c0_HatdisdagdQ_c1strain_bks=zero
          isdqwf_t4_k(2,iatpert,ka,kb,iq1grad)=isdqwf_t4_k(2,iatpert,ka,kb,iq1grad) + &
       &  occ_k(iband) * c1atdis_Hmetricdqdq_c0_bks(2,iband,iatpert,iq1grad,istrpert)
 
+         !T5
+         isdqwf_t5_k(1,iatpert,iq1grad,ka,kb)=isdqwf_t5_k(1,iatpert,iq1grad,ka,kb) + &
+      &  occ_k(iband) * c0_Hatdisdqdag_c1strain_bks(1,iband,iatpert,iq1grad,istrpert)
+
+         isdqwf_t5_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t5_k(2,iatpert,iq1grad,ka,kb) + &
+      &  occ_k(iband) * c0_Hatdisdqdag_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)
+
       end do
     end do
   end do
@@ -3319,6 +3449,7 @@ end do
  isdqwf_t2_k=isdqwf_t2_k * wtk_k
  isdqwf_t3_k=isdqwf_t3_k * wtk_k
  isdqwf_t4_k=isdqwf_t4_k * wtk_k
+ isdqwf_t5_k=isdqwf_t5_k * wtk_k
  isdqwf_k=isdqwf_k * wtk_k
 
 !Deallocations
@@ -3326,6 +3457,7 @@ end do
  ABI_DEALLOCATE(c1atdis_dQcalHstrain_c0_bks)
  ABI_DEALLOCATE(c0_HatdisdagdQ_c1strain_bks)
  ABI_DEALLOCATE(c1atdis_Hmetricdqdq_c0_bks)
+ ABI_DEALLOCATE(c0_Hatdisdqdag_c1strain_bks)
 
  DBG_EXIT("COLL")
 

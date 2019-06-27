@@ -2699,6 +2699,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        isdqwf_t2=isdqwf_t2 + isdqwf_t2_k
        isdqwf_t3=isdqwf_t3 + isdqwf_t3_k
        isdqwf_t4=isdqwf_t4 + isdqwf_t4_k
+       isdqwf_t5=isdqwf_t5 + isdqwf_t5_k
 
      end if
 
@@ -2771,6 +2772,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      call xmpi_sum(isdqwf_t2,spaceworld,ierr)
      call xmpi_sum(isdqwf_t3,spaceworld,ierr)
      call xmpi_sum(isdqwf_t4,spaceworld,ierr)
+     call xmpi_sum(isdqwf_t5,spaceworld,ierr)
    end if
 
  end if
@@ -2794,6 +2796,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      & isdqwf_t3(re,iatpert,iq1grad,ka,kb),isdqwf_t3(im,iatpert,iq1grad,ka,kb)
        write(104,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
      & isdqwf_t3(re,iatpert,ka,kb,iq1grad), isdqwf_t3(im,iatpert,ka,kb,iq1grad)
+       write(105,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+     & isdqwf_t5(re,iatpert,iq1grad,ka,kb),isdqwf_t5(im,iatpert,iq1grad,ka,kb)
      end do
    end do
  end do
