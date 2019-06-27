@@ -77,11 +77,10 @@ class Tester(object):
         self.tested = tested_docs
         self.conf = config
         self.issues = []
-        self.issues = []
 
     def check_this(self, name, ref, tested):
         '''
-            Check constraints applying to the 'tested' node (of name 'name')
+            Check constraints applying to the 'tested' node of name 'name'
             against 'ref'
         '''
 

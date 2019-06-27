@@ -325,10 +325,7 @@ function abi_cpu_time() result(cpu)
  real :: cpu_sp
 #elif defined FC_IBM
  integer :: mclock
-#elif defined FC_SUN
- real :: tmp(2)
- real :: etime
-#elif defined FC_COMPAQ || defined HAVE_OS_MACOSX
+#elif defined HAVE_OS_MACOSX
  real :: tmp(2) !real array only needed by etime
  real(dp) :: etime
 #else
@@ -349,14 +346,8 @@ function abi_cpu_time() result(cpu)
 #elif defined FC_IBM
  cpu = mclock()*0.01d0
 
-#elif defined HAVE_OS_MACOSX || defined FC_COMPAQ || defined FC_SUN
+#elif defined HAVE_OS_MACOSX
  cpu = clib_etime(tmp)
-
-#elif defined FC_FUJITSU
- call clock(cpu,0,2)
-
-#elif defined FC_HITACHI
- call xclock(cpu,5)
 
 #else
 !This is the Fortran90 standard subroutine, might not always be sufficiently accurate

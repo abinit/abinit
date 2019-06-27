@@ -1082,7 +1082,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !    ==  compute psichi
      call init_oper(paw_dmft,lda_occup)
 
-     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie,dtset%iscf &
+     call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie &
 &     ,lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)
@@ -1092,33 +1092,41 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 
      ! Compute k-resolved spectral function in DMFT.
-     if(dtset%iscf<0) then
-      !write(6,*) "datafordmft done"
+     if(dtset%dmft_kspectralfunc==1) then
+      ! Initialize self on real axis
        call initialize_self(selfr,paw_dmft,wtype='real')
-      !write(6,*) "init self done"
+
+      ! Initialize self on  imag axis
        call initialize_self(self,paw_dmft)
-      !write(6,*) "init self done"
+
+      ! Initialize green on real axis
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
-      !write(6,*) "init green done with allocation of green%oper"
+
+      ! Read self energy in imag. Matsubara freq (for double counting
+      ! and limit at high frequency)
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
-     !write(6,*) "self%hdc outscfcv",self%hdc%matlu(1)%mat(1,1,1,1,1)
-     !write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(1,1,1,1,1)
-     !write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(2,2,1,1,1)
-     !write(6,*) "limit",self%oper(self%nw)%matlu(1)%mat(3,3,1,1,1)
-      !write(6,*) "init green done with allocation of green%oper"
-      !write(6,*) "opt_imagonly",opt_imagonly
+
+      ! Read self energy on real axis obtained from Maxent
        call rw_self(selfr,paw_dmft,prtopt=5,opt_rw=1,opt_imagonly=opt_imagonly, &                
-     &  opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu)
-     !!write(6,*) "self2r",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
-     !write(6,*) "selfr%hdc outscfcv",selfr%hdc%matlu(1)%mat(1,1,1,1,1)
-      !write(6,*) "read self done"
-       call selfreal2imag_self(selfr,self)
-      !write(6,*) "selfreal2imag_self done"
+     & opt_selflimit=self%oper(self%nw)%matlu,opt_hdc=self%hdc%matlu,pawang=pawang,cryst_struc=crystal)
+
+      ! Check: from self on real axis, recompute self on Imaginary axis.
+       call selfreal2imag_self(selfr,self,paw_dmft%filapp)
+
+      !  paw_dmft%fermie=hdr%fermie ! for tests
+       write(std_out,*) "    Fermi level is",paw_dmft%fermie
+
+       ! selfr does not have any double couting in self%hdc 
+       ! hdc from self%hdc has been put in real part of self in rw_self.
+       ! For the LDA BS: use opt_self=0 and fermie=fermie_lda
+
+      ! Compute green  function on real axis
        call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,&
 &       opt_self=1,opt_nonxsum=0)
+
       !write(6,*) "compute green done"
        if(me==master) then
-         call print_green("forspectralfunction",greenr,5,paw_dmft,&
+         call print_green("from_realaxisself",greenr,5,paw_dmft,&
 &         pawprtvol=3,opt_wt=1)
         !write(6,*) "print green done"
        endif
