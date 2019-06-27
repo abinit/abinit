@@ -2991,6 +2991,14 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
            end do
          end do
        end if
+       if (db%add_lr == 4) then
+         do imyp=1,db%my_npert
+           ipc = db%my_pinfo(3, imyp)
+           do ispden=1,db%nspden
+             v1r_qibz(1, :, ispden, ipc) = - v1r_lr(1, :, imyp)
+           end do
+         end do
+       end if
 
        !if (db%me_pert == 0) then
        !do imyp=1,db%my_npert
@@ -3046,6 +3054,15 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
            do ispden=1,db%nspden
              v1r_qbz(1, :, ispden, ipc) = v1r_qbz(1, :, ispden, ipc) - v1r_lr(1, :, imyp)
              v1r_qbz(2, :, ispden, ipc) = v1r_qbz(2, :, ispden, ipc) - v1r_lr(2, :, imyp)
+           end do
+         end do
+       end if
+       if (db%add_lr == 4) then
+         do imyp=1,db%my_npert
+           ipc = db%my_pinfo(3, imyp)
+           do ispden=1,db%nspden
+             v1r_qbz(1, :, ispden, ipc) = - v1r_lr(1, :, imyp)
+             v1r_qbz(2, :, ispden, ipc) = - v1r_lr(2, :, imyp)
            end do
          end do
        end if
@@ -4203,8 +4220,10 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
      ! Add the long-range part of the potential
      if (db%add_lr > 0) then
-       !v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
-       !v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
+       v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
+       v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
+     end if
+     if (db%add_lr == 4) then
        v1scf_qpt(1,ifft,ispden) = v1r_lr(1,ifft)
        v1scf_qpt(2,ifft,ispden) = v1r_lr(2,ifft)
      end if
