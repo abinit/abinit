@@ -185,6 +185,7 @@ module m_orbmag
   private :: make_eeig123
   private :: make_onsite_l
   private :: make_onsite_l_k
+  private :: make_onsite_bm
   private :: make_S1trace
   private :: make_rhorij1
   private :: make_smat
@@ -1896,6 +1897,148 @@ subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_
   ABI_DATATYPE_DEALLOCATE(cprj_k)
 
 end subroutine make_onsite_l
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/make_onsite_bm
+!! NAME
+!! make_onsite_bm
+!!
+!! FUNCTION
+!! Compute A_0.A_N onsite term for magnetic field + nuclear magnetic dipole moment
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_bm,pawrad,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: idir,mcprj,nband_k
+  complex(dpc),intent(out) :: onsite_bm
+  type(MPI_type), intent(inout) :: mpi_enreg
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx1(dtset%natom)
+  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iatom,icprj,ierr,ikpt,ikpt_loc,il,im,ilmn,isppol,itypat
+  integer :: jl,jm,jlmn,klmn,kln,me,mesh_size,my_nspinor,ncpgr,nn,nproc,spaceComm
+  real(dp) :: bm1,intg,scale_conversion
+  complex(dpc) :: cpb,cpk
+  
+  !arrays
+  integer :: nattyp_dum(dtset%ntypat)
+  integer,allocatable :: dimlmn(:)
+  real(dp),allocatable :: ff(:)
+  type(pawcprj_type),allocatable :: cprj_k(:,:)
+
+  ! ***********************************************************************
+
+  ! this term can only be non-zero if some nucdipmom is nonzero
+  scale_conversion = half*FineStructureConstant2
+  onsite_bm = czero
+
+  ! TODO: generalize to nsppol > 1
+  isppol = 1
+  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+  
+  !Init MPI
+  spaceComm=mpi_enreg%comm_cell
+  nproc=xmpi_comm_size(spaceComm)
+  me = mpi_enreg%me_kpt
+  
+  ncpgr = cprj(1,1)%ncpgr
+  ABI_ALLOCATE(dimlmn,(dtset%natom))
+  call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
+  ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,nband_k))
+  call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
+
+  ! loop over kpts on each processor
+
+  ikpt_loc = 0
+  ! loop over all the kpts
+  do ikpt = 1, dtset%nkpt
+     
+     ! if the current kpt is not on the current processor, cycle
+     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+
+     ikpt_loc = ikpt_loc + 1
+     icprj= (ikpt_loc - 1)*nband_k
+     call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt_loc,0,isppol,dtset%mband,&
+          &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
+     
+     do iatom=1,dtset%natom
+        itypat=dtset%typat(iatom)
+        mesh_size=pawtab(itypat)%mesh_size
+        ABI_ALLOCATE(ff,(mesh_size))
+        do jlmn=1,pawtab(itypat)%lmn_size
+           jl=pawtab(itypat)%indlmn(1,jlmn)
+           jm=pawtab(itypat)%indlmn(2,jlmn)
+           do ilmn=1,pawtab(itypat)%lmn_size
+              il=pawtab(itypat)%indlmn(1,ilmn)
+              im=pawtab(itypat)%indlmn(2,ilmn)
+              klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+              kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
+              ! compute integral of (phi_i*phi_j - tphi_i*tphi_j)/r
+              ff(2:mesh_size)=(pawtab(itypat)%phiphj(2:mesh_size,kln) - &
+                   &           pawtab(itypat)%tphitphj(2:mesh_size,kln)) / &
+                   &           pawrad(itypat)%rad(2:mesh_size)
+              call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+              call simp_gen(intg,ff,pawrad(itypat))
+              ! term B.m r^2/r^3
+              bm1=zero
+              if ( (jl .EQ. il) .AND. (jm .EQ. im) .AND. (abs(dtset%nucdipmom(idir,iatom)) .GT. tol8) ) then
+                 bm1 = scale_conversion*dtset%nucdipmom(idir,iatom)*intg
+              end if
+              do nn = 1, nband_k
+                 cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+                 cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
+                 onsite_bm=onsite_bm+conjg(cpb)*bm1*cpk
+              end do ! end loop over nn
+           end do ! end loop over ilmn
+        end do ! end loop over jlmn
+        ABI_DEALLOCATE(ff)
+     end do ! end loop over atoms
+  end do ! end loop over local k points
+
+  ! ---- parallel communication
+  if(nproc > 1) then
+     call xmpi_sum(onsite_bm,spaceComm,ierr)
+  end if
+  
+  !---------clean up memory-------------------
+     
+  ABI_DEALLOCATE(dimlmn)
+  call pawcprj_free(cprj_k)
+  ABI_DATATYPE_DEALLOCATE(cprj_k)
+
+end subroutine make_onsite_bm
 !!***
 
 !{\src2tex{textfont=tt}}
@@ -4176,13 +4319,13 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  integer :: nband_k,ncpgr,ncpgrb
  real(dp) :: ucvol,finish_time,start_time
  complex(dpc) :: CCI_dir,VVI_dir,VVII_dir,VVIII_dir
- complex(dpc) :: CCIV_dir,onsite_l_dir,rhorij1_dir,s1trace_dir
+ complex(dpc) :: CCIV_dir,onsite_bm_dir,onsite_l_dir,rhorij1_dir,s1trace_dir
  character(len=500) :: message
 
  !arrays
  integer,allocatable :: dimlmn(:)
  real(dp) :: CCI(2,3),CCIV(2,3),gmet(3,3),gprimd(3,3)
- real(dp) :: onsite_l(2,3),orbmagvec(2,3),rhorij1(2,3)
+ real(dp) :: onsite_bm(2,3),onsite_l(2,3),orbmagvec(2,3),rhorij1(2,3)
  real(dp) :: rmet(3,3),s1trace(2,3),VVI(2,3),VVII(2,3),VVIII(2,3)
  real(dp),allocatable :: dsdk(:,:,:,:,:,:)
  real(dp),allocatable :: eeig(:,:),eeig123(:,:,:,:,:,:),smat_all_indx(:,:,:,:,:,:)
@@ -4298,6 +4441,14 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     rhorij1(1,adir) = real(rhorij1_dir)
     rhorij1(2,adir) = aimag(rhorij1_dir)
 
+    if (any(abs(dtset%nucdipmom)>tol8)) then
+       call make_onsite_bm(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_bm_dir,pawrad,pawtab)
+       onsite_bm(1,adir) = real(onsite_bm_dir)
+       onsite_bm(2,adir) = aimag(onsite_bm_dir)
+    else
+       onsite_bm(:,adir) = zero
+    end if
+
     call make_CCI(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
     CCI(1,adir) = real(CCI_dir)
     CCI(2,adir) = aimag(CCI_dir)
@@ -4328,7 +4479,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ! convert terms to cartesian coordinates as needed
  ! note that terms like <dv/dk| x |dw/dk> computed in reduced coords,
  ! become ucvol*gprimd*<dv/dk| x |dw/dk> when expressed in cartesian coords
- ! onsite_l is already cartesian
+ ! onsite_l and onsite_bm are already cartesian
 
  s1trace(1,1:3) = ucvol*MATMUL(gprimd,s1trace(1,1:3))
  s1trace(2,1:3) = ucvol*MATMUL(gprimd,s1trace(2,1:3))
@@ -4356,6 +4507,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ! factor of 2 in numerator is the band occupation (two electrons in normal insulator)
  ! converting integral over k space to a sum gives a factor of Omega_BZ/N_k or 1/ucvol*N_k
  onsite_l(1:2,1:3) = onsite_l(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
+ onsite_bm(1:2,1:3) = onsite_bm(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
  s1trace(1:2,1:3) = s1trace(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
  rhorij1(1:2,1:3) = rhorij1(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
  CCI(1:2,1:3) = CCI(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
@@ -4365,6 +4517,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  CCIV(1:2,1:3) = CCIV(1:2,1:3)*two/(ucvol*dtorbmag%fnkpt)
 
  write(std_out,'(a,3es16.8)')' JWZ debug onsite_l ',onsite_l(1,1),onsite_l(1,2),onsite_l(1,3)
+ write(std_out,'(a,3es16.8)')' JWZ debug onsite_bm ',onsite_bm(1,1),onsite_bm(1,2),onsite_bm(1,3)
  write(std_out,'(a,3es16.8)')' JWZ debug s1trace ',s1trace(1,1),s1trace(1,2),s1trace(1,3)
  write(std_out,'(a,3es16.8)')' JWZ debug rhorij1 ',rhorij1(1,1),rhorij1(1,2),rhorij1(1,3)
  write(std_out,'(a,3es16.8)')' JWZ debug CCI ',CCI(1,1),CCI(1,2),CCI(1,3)
@@ -4376,6 +4529,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ! accumulate in orbmagvec
 
  orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
+                  & + onsite_bm(1:2,1:3) &
                   & - s1trace(1:2,1:3) &
                   & + rhorij1(1:2,1:3) &
                   & + VVII(1:2,1:3) &
