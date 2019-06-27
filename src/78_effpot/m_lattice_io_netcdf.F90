@@ -35,6 +35,9 @@ module m_lattice_harmonic_primitive_potential
   use defs_basis
   use m_abicore
   use m_errors
+!#if defined HAVE_NETCDF
+  use netcdf
+!#endif
   use m_xmpi
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_cell, only: mbcell_t
@@ -87,6 +90,7 @@ contains
       class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
       character(len=fnlen) :: fname
       ! TODO: 
+      
 
     end subroutine load_from_netcdf
 
