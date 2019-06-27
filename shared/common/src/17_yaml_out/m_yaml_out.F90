@@ -1,3 +1,28 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_yaml_out
+!! NAME
+!!  m_yaml_out
+!!
+!! FUNCTION
+!!  This module defines low-level routines to format data into YAML documents.
+!!  Supported data include numeric arrays of one and two dimensions,
+!!  strings, numbers, dictionaries from m_pair_list and 1D arrays of dictionaries.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2009-2019 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!   m_neat
+!!
+!! CHILDREN
+!!   m_stream_string, m_pair_list
+!!
+!! SOURCE
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -20,6 +45,7 @@ module m_yaml_out
   implicit none
 
   private
+!!***
 
   integer,parameter :: dp=kind(1.0D0)
   character(len=1),parameter :: eol=char(10)
@@ -1544,3 +1570,4 @@ module m_yaml_out
 !!*** m_yaml_out/yaml_close_doc
 
 end module m_yaml_out
+!!***

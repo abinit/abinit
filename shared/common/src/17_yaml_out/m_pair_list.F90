@@ -1,3 +1,29 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pair_list
+!! NAME
+!!  m_pair_list
+!!
+!! FUNCTION
+!!  This module define the interface to a type representing a
+!!  dictionary containing string keys and numeric or string values.
+!!  It is implemented in C as a simple linked pair list
+!!  (associative list).
+!!
+!! COPYRIGHT
+!! Copyright (C) 2009-2019 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!   m_yaml_out, m_neat, m_common
+!!
+!! CHILDREN
+!!   m_type_pair_list
+!!
+!! SOURCE
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
