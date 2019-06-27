@@ -1216,7 +1216,7 @@ cartesian forces: !CartForces
 --------------------------------------------------------------------------------
 
 
---- !Etot
+--- !EnergyTerms
 comment             : Components of total free energy (in Hartree)
 kinetic             :  4.311836595104540493E+01
 hartree             :  3.130289914056712774E+01
