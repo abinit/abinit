@@ -249,7 +249,7 @@ module m_chebfiwf
     !print *, "nband", nband
     !print *, "npw", npw
   !end if
-  
+  !stop
   !call xmpi_barrier(l_mpi_enreg%comm_bandspinorfft)
   
   !stop
@@ -311,7 +311,8 @@ module m_chebfiwf
   !###########################################################################
   !################    RUUUUUUUN    ##########################################
   !###########################################################################
-  print *, "BEFORE"
+  !print *, "BEFORE"
+  !stop
   call xg_getPointer(xgx0)   
   !stop
   ! Run chebfi
@@ -544,11 +545,12 @@ module m_chebfiwf
     type(pawcprj_type), allocatable :: cwaveprj_next(:,:) !dummy
         
     call xgBlock_getSize(X,spacedim,blockdim)
+    !call xgBlock_getSize(Bm1X,spacedim,blockdim)
     spacedim = spacedim/l_icplx
     
     !print *, "spacedim", spacedim
     !print *, "BLOCKDIM", blockdim
-    !stop
+    !print *, "l_icplx", l_icplx
     
     !print *, "spacedim*blockdim 2", spacedim*blockdim
     !stop

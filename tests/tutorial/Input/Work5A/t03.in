@@ -2,16 +2,17 @@
 #GOLD 31 ATOMS
 
 #Process distribution (parallelism) - TO BE ADAPTED
-# autoparal 1
+#autoparal 1
 # npkpt 1 npband 8 npfft 4   # 32 MPI processes
 # npkpt 1 npband 8 npfft 8   # 64 MPI processes -1
 # npkpt 1 npband 16 npfft 4  # 64 MPI processes -2
 # npkpt 1 npband 16 npfft 8  # 128 MPI processes
-#use_gemm_nonlop 1
+#max_ncpus 500
+use_gemm_nonlop 1
 paral_kgb 1
 npband 1
 npfft 1
-#bandpp 4
+#bandpp 192
 
 #Plane wave basis
 ecut 8.

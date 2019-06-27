@@ -522,12 +522,18 @@ module m_xg
           write(std_out,*) xgBlock%cols,xgBlock%Ldim,cols,rows
           write(std_out,*) xgBlock%cols*xgBlock%Ldim,cols*rows
           MSG_ERROR("Bad reverseMapping")
+          stop
       end if
       cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
       call c_f_pointer(cptr,array,(/ rows, cols /))
     case ( SPACE_C )
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
+          print *, "cols", cols
+          print *, "rows", rows
+          print *, "xgBlock%cols", xgBlock%cols
+          print *, "xgBlock%Ldim", xgBlock%Ldim
           MSG_ERROR("Bad complex reverseMapping")
+          stop
       end if
       cptr = getClocC(xgBlock%Ldim,xgBlock%cols,xgBlock%vecC(:,:))
       call c_f_pointer(cptr,array,(/ 2*rows, cols /))

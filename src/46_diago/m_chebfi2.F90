@@ -207,7 +207,10 @@ module m_chebfi2
 !    print *, "chebfi%bandpp", chebfi%bandpp
 !    stop
     
-
+      !print *, "neigenpairs", neirgenpairs
+      !print *, "chebfi%nproc_band", chebfi%nproc_band
+      !call xmpi_barrier(chebfi%spacecom)
+      !stop
     
     if (chebfi%paral_kgb == 0) then
       chebfi%total_spacedim = spacedim
@@ -234,10 +237,13 @@ module m_chebfi2
       !stop
       !ovde ako nije deljivo sa 2 zauzeti za X_NP jedan red vise pa onda posle prepakovati
       chebfi%total_spacedim = total_spacedim
+      !chebfi%bandpp = neigenpairs/chebfi%nproc_band
       !ovako nesto mora da bi se dobio tacan broj redova
 !      if (MOD(total_spacedim,xmpi_comm_size(xmpi_world)) /=0) then
 !        remainder = MOD(total_spacedim,xmpi_comm_size(xmpi_world))
 !      end if
+      !print *, "chebfi%bandpp", chebfi%bandpp
+      !stop
       !ne moze se dodati jos jedan dummy red jer posle ldim propadne za x_next i x_prev
       call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom) !transposed arrays
       call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,total_spacedim,chebfi%bandpp)  
@@ -472,7 +478,7 @@ module m_chebfi2
       !call xg_getPointer(chebfi%X_next)
       !stop 
     !end if
-
+    !stop
     ! Transpose
     if (chebfi%paral_kgb == 1) then
       
@@ -570,7 +576,7 @@ module m_chebfi2
       call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
     end if
     
-  
+    !stop
     
     !print *, "AAAAAAAAAAAAAAAAAAAA"
     !stop
@@ -667,7 +673,8 @@ module m_chebfi2
     !call debug_helper_linalg(chebfi%X, chebfi, 1) 
     !stop
        
-    !print *, "AAAAAAAAAAAAAAAAAAAA"
+   ! print *, "AAAAAAAAAAAAAAAAAAAA"
+    !stop
     do iline = 0, nline - 1 
     
       
@@ -675,6 +682,7 @@ module m_chebfi2
       call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
       call timab(tim_next_p,2,tsec)   
       
+      !stop
       !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
       !call debug_helper_linalg(chebfi%X, chebfi, 1) 
       !stop
@@ -1051,7 +1059,7 @@ module m_chebfi2
 !        call xg_getPointer(chebfi%X_next)
 !        stop 
 !      end if
-      
+      !stop
       call getBm1X(chebfi%xAXColsRows, chebfi%X_next) 
       
 !      if (iline == 2) then
@@ -1062,6 +1070,7 @@ module m_chebfi2
 !      end if
 
       !print *, "PPPPP"
+      !stop
       !call debug_helper(chebfi%xAXColsRows, chebfi) 
       !call debug_helper(chebfi%X_next, chebfi) 
       !stop

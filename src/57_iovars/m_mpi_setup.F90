@@ -271,24 +271,17 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      MSG_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1')
    end if
 
-!  Read again some input data to take into account a possible change of paral_kgb
-   wfoptalg_read=.false.
-   !print *, "wfoptalg_read before DTSETS", dtsets(:)%bandpp
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfoptalg',tread0,'INT')
-   if(tread0==1) then
-     dtsets(idtset)%wfoptalg=intarr(1)
-     wfoptalg_read=.true.
-   else
+!  Take into account a possible change of paral_kgb (change of thwe default algorithm)
+   if (.not.wfoptalg_read) then
      if (dtsets(idtset)%usepaw==0) dtsets(idtset)%wfoptalg=0
      if (dtsets(idtset)%usepaw/=0) dtsets(idtset)%wfoptalg=10
-     if ((optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS).and.dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%wfoptalg=114 
+     if ((optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS).and.dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%wfoptalg=114
      if (mod(dtsets(idtset)%wfoptalg,10)==4) then
        do iikpt=1,dtsets(idtset)%nkpt
          if (any(abs(dtsets(idtset)%kpt(:,iikpt))>tol8)) dtsets(idtset)%istwfk(iikpt)=1
        end do
      end if
    end if
-   !print *, "wfoptalg_read after DTSETS", dtsets(:)%bandpp
 
    dtsets(idtset)%densfor_pred=2
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'densfor_pred',tread0,'INT')
@@ -310,7 +303,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  LOTF need densfor_pred=2
    if(dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2
 #endif
-   !print *, "USEPAW before ortalg", dtsets(:)%ortalg
+
    if (usepaw==0) then
      dtsets(idtset)%ortalg=2
    else
@@ -324,7 +317,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else if (dtsets(idtset)%wfoptalg>=10 .and. dtsets(idtset)%ortalg>0) then
      dtsets(idtset)%ortalg=-dtsets(idtset)%ortalg
    end if
-   !print *, "USEPAW after ortalg", dtsets(:)%ortalg
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iomode',tread0,'INT')
    if(tread0==1) then
      dtsets(idtset)%iomode=intarr(1)
@@ -346,7 +339,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    nproc=mpi_enregs(idtset)%nproc_cell
 
 !  Cycle if the processor is not used
-   if (mpi_enregs(idtset)%me<0) then
+   if (mpi_enregs(idtset)%me<0.or.iexit>0) then
      ABI_DEALLOCATE(intarr)
      ABI_DEALLOCATE(dprarr)
      cycle
@@ -358,13 +351,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 &   dtsets(idtset)%rfuser/=0 .or. dtsets(idtset)%rfmagn/=0) response=1
 
 !  If no MPI, set all npxxx variables to 1
-   !print *, "no MPI, before DTSETS", dtsets(:)%bandpp
    if (nproc==1) then
      dtsets(idtset)%npkpt    = 1 ; dtsets(idtset)%npband   = 1
      dtsets(idtset)%npfft    = 1 ; dtsets(idtset)%npspinor = 1
      dtsets(idtset)%nphf     = 1
    end if
-   !print *, "no MPI, after DTSETS", dtsets(:)%bandpp
+
 !    --IF CUDA AND RECURSION:ONLY BAND PARALLELISATION
    if(dtsets(idtset)%tfkinfunc==2 .and. nproc/=1)then
      dtsets(idtset)%npband = dtsets(idtset)%npband*dtsets(idtset)%npkpt*dtsets(idtset)%npspinor*dtsets(idtset)%npfft
@@ -426,13 +418,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        MSG_ERROR(message)
      end if
    end if
-   !print *, "LOBPCG and ChebFi before DTSETS", dtsets(:)%bandpp
+
 !  LOBPCG and ChebFi need paral_kgb=1 in parallel
    if ((dtsets(idtset)%npband*dtsets(idtset)%npfft>1).and. &
 &   (mod(dtsets(idtset)%wfoptalg,10)==1.or.mod(dtsets(idtset)%wfoptalg,10)==4)) then
      dtsets(idtset)%paral_kgb=1
    end if
-   !print *, "LOBPCG and ChebFi before DTSETS", dtsets(:)%bandpp
+
 !  Check size of Scalapack communicator
 #ifdef HAVE_LINALG_ELPA
    if(dtsets(idtset)%paral_kgb>0.and.dtsets(idtset)%np_slk>0) then
@@ -488,15 +480,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if ! Fock
 
    !When using chebfi, the number of blocks is equal to the number of processors
-   !print *, "ChebFi before DTSETS", dtsets(:)%bandpp
-   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then   !new Chebfi == 111
+   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then
      !Nband might have different values for different kpoint, but not bandpp.
      !In this case, we just use the largest nband, andthe input will probably fail
      !at the bandpp check later on
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
    end if
-   !print *, "ChebFi after DTSETS", dtsets(:)%bandpp
-   
+
 !  Set mpi_enreg
    mpi_enregs(idtset)%paral_kgb=dtsets(idtset)%paral_kgb
    if(dtsets(idtset)%paral_kgb/=0)then
@@ -956,7 +946,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !This is not a very clean exit in case of paral_kgb<0
  if (iexit/=0)then
-   MSG_ERROR_NODUMP("aborting now")
+   message="Stopping now!"
+   MSG_STOP(message)
  end if
 
  DBG_EXIT("COLL")
@@ -1032,37 +1023,37 @@ end subroutine mpi_setup
 !Local variables-------------------------------
 !scalars
 !128 should be a reasonable maximum for npfft (scaling is very poor for npfft>20)
- integer,parameter :: NPFMAX=128
- integer,parameter :: MAXCOUNT=250,MAXBENCH=25,NPF_CUTOFF=20
- integer :: bpp,bpp_max,bpp_min,optdriver,autoparal
+ integer,parameter :: ALGO_NOT_SET=-1, ALGO_DEFAULT_PAR=2
+ integer,parameter :: ALGO_CG=0, ALGO_LOBPCG_OLD=1, ALGO_LOBPCG_NEW=2, ALGO_CHEBFI=3, ALGO_CHEBFI_NEW=4
+ integer,parameter :: NPFMAX=128,BLOCKSIZE_MAX=3000,MAXBAND_PRINT=10
+ integer,parameter :: MAXCOUNT=250,MAXPRINT=10,MAXBENCH=25,MAXABIPY=5,NPF_CUTOFF=20
+ real(dp),parameter :: relative_nband_range=0.025
+ integer :: wf_algo,wf_algo_global,bpp,bpp_max,bpp_min,optdriver,autoparal,nblocks,blocksize
  integer :: npi_max,npi_min,npc,npc_max,npc_min
  integer :: npk,npk_max,npk_min,npp_max,npp_min
  integer :: nps,nps_max,nps_min,npf,npf_max,npf_min
- integer :: npb,npb_max,npb_min,max_ncpus,ount
+ integer :: npb,npb_max,npb_min,max_ncpus,ount,paral_kgb
  integer :: work_size,nks_per_proc,tot_ncpus
- integer :: icount,ii,imin,jj,mcount,mcount_eff,mpw
+ integer :: ib1,ib2,ibest,icount,ii,imin,jj,kk,mcount,mcount_eff,mpw
  integer :: n2,n3,ncell_eff,ncount,nimage_eff,nkpt_eff,npert_eff
- integer :: nproc,nproc1,nprocmin,np_slk,use_linalg_gpu,omp_ncpus
- logical,parameter :: new_version=.true.
+ integer :: nproc,nproc1,nprocmin,np_slk,nthreads,use_linalg_gpu,omp_ncpus
  logical :: dtset_found,file_found,first_bpp,iam_master
- real(dp):: acc_c,acc_k,acc_kgb,acc_kgb_0,acc_s,ecut_eff,ucvol,weight0
- real(dp):: eff
+ logical :: with_image,with_pert,with_kpt,with_spinor,with_fft,with_band,with_bandpp,with_thread
+ real(dp):: acc_c,acc_k,acc_kgb,acc_kgb_0,acc_s,ecut_eff,eff,ucvol,weight0
  character(len=9) :: suffix
- character(len=500) :: message
+ character(len=20) :: strg
+ character(len=500) :: msg,msgttl
  character(len=fnlen) :: filden
  type(hdr_type) :: hdr0
 !arrays
  integer :: idum(1),idum3(3),ngmax(3),ngmin(3)
- integer,allocatable :: isort(:),jdtset_(:),my_distp(:,:)
+ integer,allocatable :: nband_best(:),isort(:),jdtset_(:)
+ integer,allocatable :: my_algo(:),my_distp(:,:),nproc_best(:)
  integer,pointer :: nkpt_rbz(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),allocatable :: weight(:)
  real(dp),pointer :: nband_rbz(:,:)
  type(dataset_type),pointer :: dtset
-!Cut-off function for npfft
-! cutoff(nn)= &
-!&    0.2_dp+(one-0.2_dp)*(sin((pi*(nn-NPF_CUTOFF))/(one*(NPFMAX-NPF_CUTOFF))) &
-!&                           /((pi*(nn-NPF_CUTOFF))/(one*(NPFMAX-NPF_CUTOFF))))**2
 
 !******************************************************************
 
@@ -1075,75 +1066,42 @@ end subroutine mpi_setup
  autoparal = dtset%autoparal
  if (autoparal==0) return
 
- ! Handy local variables
- iam_master = (mpi_enreg%me==0)
- optdriver = dtset%optdriver
- max_ncpus = dtset%max_ncpus
-
- if (max_ncpus > 0 .and. autoparal/=0) then
-   iexit = iexit + 1 ! will stop in the parent.
+!Is it available
+ if ((dtset%usefock==1).AND.(dtset%nphf/=1)) then
+   msg="autoparal>0 not available for Hartree-Fock or hybrid XC calculations!"
+   MSG_ERROR(msg)
+ end if
+ if ((autoparal>1).and.dtset%wfoptalg/=4.and.dtset%wfoptalg/=14) then
+   msg="autoparal>1 only available for the old LOBPCG algorithm (wfoptalg=4/14)!"
+   MSG_ERROR(msg)
  end if
 
- ! Unit number used for outputting the autoparal sections
- ount = std_out
+!Unit number used for outputting the autoparal sections
  ount = ab_out
 
- ! Small hack: set paral_kgb to -max_ncpus so that I don't have to change the previous implementation.
- !if (dtset%paral_kgb == 1 .and. max_ncpus > 0) then
- !  dtset%paral_kgb = -max_ncpus
- !end if
-
- if (optdriver==RUNL_GSTATE .and. dtset%paral_kgb==0 .and. &
-& max_ncpus>0 .and. autoparal/=0) then
-   if (iam_master) then
-     ! This corresponds to the simplest algorithm for GS (band-by-band CG)
-     ! with distribution of k-points and spin.
-     work_size = dtset%nkpt * dtset%nsppol
-     write(ount,"(2a)")ch10,"--- !Autoparal"
-     write(ount,"(a)")"# Autoparal section for GS run (band-by-band CG method)"
-     write(ount,"(a)")   "info:"
-     write(ount,"(a,i0)")"    autoparal: ",autoparal
-     write(ount,"(a,i0)")"    paral_kgb: ",dtset%paral_kgb
-     write(ount,"(a,i0)")"    max_ncpus: ",max_ncpus
-     write(ount,"(a,i0)")"    nspinor: ",dtset%nspinor
-     write(ount,"(a,i0)")"    nsppol: ",dtset%nsppol
-     write(ount,"(a,i0)")"    nkpt: ",dtset%nkpt
-     write(ount,"(a,i0)")"    mband: ",mband
-
-     ! List of configurations.
-     ! Assuming an OpenMP implementation with perfect speedup!
-     write(ount,"(a)")"configurations:"
-
-     do ii=1,max_ncpus
-       if (ii > work_size) cycle
-       do omp_ncpus=1,xomp_get_max_threads()
-         nks_per_proc = work_size / ii
-         nks_per_proc = nks_per_proc + MOD(work_size, ii)
-         eff = (one * work_size) / (ii * nks_per_proc)
-
-         write(ount,"(a,i0)")"    - tot_ncpus: ",ii * omp_ncpus
-         write(ount,"(a,i0)")"      mpi_ncpus: ",ii
-         write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus
-         write(ount,"(a,f12.9)")"      efficiency: ",eff
-         !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
-       end do
-     end do
-     write(ount,'(a)')"..."
-   end if
-   ! Return immediately, will stop in the parent.
-   iexit = iexit + 1
-   RETURN
- end if
-
-
+!Handy local variables
+ iam_master = (mpi_enreg%me==0)
+ optdriver = dtset%optdriver
+ max_ncpus = dtset%max_ncpus ; if (dtset%paral_kgb<0) max_ncpus=abs(dtset%paral_kgb)
+ nthreads=xomp_get_max_threads()
  nproc=mpi_enreg%nproc
- !if (xmpi_paral==1.and.dtset%paral_kgb <0) nproc=-dtset%paral_kgb
- if (max_ncpus > 0) nproc = dtset%max_ncpus
- !if (xmpi_paral==1.and.dtset%paral_kgb <0) nproc=dtset%max_ncpus
- if (xmpi_paral==0.and.dtset%paral_kgb>=0) nproc=1
+ if (max_ncpus>0) nproc = dtset%max_ncpus/nthreads
+ if (xmpi_paral==0.and.max_ncpus<=0) nproc=1
 
- if (dtset%paral_kgb>=0) then
-   if (nproc==1) then
+ nprocmin=2
+ if (xmpi_paral==1.and.max_ncpus<=0) nprocmin=max(2,nproc-100)
+ if (max_ncpus>0.and.autoparal/=0) nprocmin=1
+
+ wf_algo_global=ALGO_NOT_SET
+ if (dtset%wfoptalg==0.and.tread(1)==1) wf_algo_global=ALGO_CG
+ if (dtset%wfoptalg==4.or.dtset%wfoptalg==14) wf_algo_global=ALGO_LOBPCG_OLD
+ if (dtset%wfoptalg==114) wf_algo_global=ALGO_LOBPCG_NEW
+ if (dtset%wfoptalg==1) wf_algo_global=ALGO_CHEBFI
+ if (dtset%wfoptalg==111) wf_algo_global=ALGO_CHEBFI_NEW
+
+!Some peculiar cases (with direct exit)
+ if (max_ncpus<=0) then
+   if (nproc==1.and.max_ncpus<=0) then
      if (tread(1)==0.or.xmpi_paral==0) dtset%paral_kgb= 0
      if (tread(2)==0.or.xmpi_paral==0) dtset%npimage  = 1
      if (tread(3)==0.or.xmpi_paral==0) dtset%nppert   = 1
@@ -1157,7 +1115,7 @@ end subroutine mpi_setup
      return
    end if
    if ((dtset%optdriver/=RUNL_GSTATE.and.dtset%optdriver/=RUNL_RESPFN.and.dtset%optdriver/=RUNL_GWLS).or. &
-&   (dtset%optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
+&    (dtset%optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
      dtset%paral_kgb= 0
      dtset%npimage  = max(1,dtset%npimage)
      dtset%nppert   = max(1,dtset%nppert)
@@ -1169,10 +1127,6 @@ end subroutine mpi_setup
      return
    end if
  end if
-
- nprocmin=2
- if (xmpi_paral==1.and.dtset%paral_kgb>=0) nprocmin=max(2,nproc-100)
- if (max_ncpus > 0 .and. autoparal/=0) nprocmin = 1
 
 !Need the metric tensor
  call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
@@ -1187,13 +1141,9 @@ end subroutine mpi_setup
    mpw = nint(ucvol*((two*ecut_eff)**1.5_dp)/(six*pi**2)) ! Crude estimation
    if (all(dtset%istwfk(1:dtset%nkpt)>1)) mpw=mpw/2+1
    call kpgcount(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,dtset%kpt,ngmax,ngmin,dtset%nkpt)
-   write(message,'(a,i8)') ' getmpw sequential formula gave: ',mpw
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,i8)') ' getmpw sequential formula gave: ',mpw
+   call wrtout(std_out,msg,'COLL')
  end if
-
- write(message,'(2a,i0)')  ch10,&
-& ' Computing all possible proc distrib for this input with nproc less than ',nproc
- call wrtout(std_out,message,'COLL')
 
 !Parallelization over images
  npi_min=1;npi_max=1;nimage_eff=1
@@ -1229,8 +1179,8 @@ end subroutine mpi_setup
        npp_max=dtset%nppert
        if (npp_max>npert_eff) then
          npp_min=npert_eff;npp_max=npert_eff
-         message='nppert is bigger than npert; we set nppert=npert'
-         MSG_WARNING(message)
+         msg='nppert is bigger than npert; we set nppert=npert'
+         MSG_WARNING(msg)
        end if
      end if
      npk_min=1
@@ -1254,26 +1204,36 @@ end subroutine mpi_setup
 
 !KGB Parallelization
 
-!>> FFT level
  npf_min=1;npf_max=1
  npb_min=1;npb_max=1
  bpp_min=1;bpp_max=1
  n2=0;n3=0
  if (dtset%optdriver==RUNL_GSTATE) then
+
+!  >> FFT level
    npf_min=max(1,dtset%npfft)
    npf_min=min(npf_min,ngmin(2))
    npf_max=min(nproc,NPFMAX)
    if (tread(6)==1) then
      npf_max=dtset%npfft
      if (npf_max>ngmin(2)) then
-       write(message,'(3a)') &
+       write(msg,'(3a)') &
 &       "Value of npfft given in input file is too high for the FFT grid!",ch10,&
 &       "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end if
    npf_max=min(npf_max,ngmin(2))
+   !Deactivate MPI FFT parallelism for GPU
    if (dtset%use_gpu_cuda==1) then
+     npf_min=1;npf_max=1
+   end if
+   !Deactivate MPI FFT parallelism for GPU
+   if (tread(1)==1.and.dtset%paral_kgb==0) then
+     npf_min=1;npf_max=1
+   end if
+   !Deactivate MPI FFT parallelism for multi-threaded LOBPCG / CHEBFI
+   if ((wf_algo_global==ALGO_LOBPCG_NEW.or.wf_algo_global==ALGO_CHEBFI.or.wf_algo_global==ALGO_CHEBFI_NEW).and.nthreads>1) then
      npf_min=1;npf_max=1
    end if
 
@@ -1289,7 +1249,6 @@ end subroutine mpi_setup
          jj=dtset%getden;if (jj<0) jj=dtset%jdtset+jj
          if (dtsets(ii)%jdtset==jj) then
            dtset_found=.true.
-!          n2=dtsets(ii)%nfftdg;n3=0
            n2=dtsets(ii)%ngfftdg(2);n3=dtsets(ii)%ngfftdg(3)
          end if
        end do
@@ -1322,58 +1281,57 @@ end subroutine mpi_setup
    npb_min=max(1,dtset%npband)
    npb_max=min(nproc,mband)
    if (tread(7)==1) npb_max=dtset%npband
+   if (tread(1)==1.and.dtset%paral_kgb==0) then
+     npb_min=1;npb_max=1
+   end if
 
 !  >> banddp level
    bpp_min=max(1,dtset%bandpp)
-   bpp_max=max(4,nint(mband/10.)) ! reasonnable bandpp max
+   bpp_max=mband
+   if (wf_algo_global==ALGO_LOBPCG_OLD) bpp_max=max(4,nint(mband/10.)) ! reasonnable bandpp max
    if (tread(8)==1) bpp_max=dtset%bandpp
- end if
+   if (wf_algo_global==ALGO_CHEBFI) bpp_min=1 ! bandpp not used with ChebFi
+   if (wf_algo_global==ALGO_CHEBFI) bpp_max=1
+   if (wf_algo_global==ALGO_CHEBFI_NEW) bpp_min=1 ! bandpp not used with ChebFi
+   if (wf_algo_global==ALGO_CHEBFI_NEW) bpp_max=1 ! bandpp not used with ChebFi
+   
+ end if ! RUNL_GSTATE
 
 !Disable KGB parallelisation in some cases:
 !  - no GS
 !  - paral_kgb=0 present in input file
 !  - nstep=0
-!  - Self-consistent DMFT
 !  - Hartree-Fock or hybrid calculation (for now on)
- if ( (optdriver/=RUNL_GSTATE) .or. (dtset%paral_kgb==0.and.tread(1)==1) .or. &
-& (dtset%nstep==0).or. (dtset%usedmft==1.and.dtset%nstep>1) .or. &
-& (dtset%usefock==1) ) then
+ if ( (optdriver/=RUNL_GSTATE).or.(dtset%paral_kgb==0.and.tread(1)==1).or. &
+&     (dtset%nstep==0).or.(dtset%usefock==1)) then
    nps_min=1; nps_max=1
    npf_min=1; npf_max=1
    npb_min=1; npb_max=1
    bpp_min=1; bpp_max=1
  end if
 
-!Print title
- if (iam_master) then
-   if (optdriver==RUNL_GSTATE) then
-     write(message, '(8(a12,a1),a,8(i4,a4,i4,a1))' )  &
-     'npimage','|','npkpt','|','npspinor','|','npfft','|','npband','|',' bandpp ' ,'|','nproc','|','weight','|', ch10, &
-     npi_min,' -> ',npi_max,'|',npk_min,' -> ',npk_max,'|',nps_min,' -> ',nps_max,'|', &
-     npf_min,' -> ',npf_max,'|',npb_min,' -> ',npb_max,'|',bpp_min,' -> ',bpp_max,'|', &
-     nprocmin,' -> ',nproc,'|', 1 ,' -> ',nproc,'|'
-   end if
-   if (optdriver==RUNL_RESPFN) then
-     write(message, '(4(a12,a1),a,4(i4,a4,i4,a1))' )  &
-     'nppert','|','npkpt','|','nproc','|','weight','|', ch10, &
-     npp_min,' -> ',npp_max,'|',      npk_min,' -> ',npk_max,'|', &
-     nprocmin,' -> ',nproc,'|', 1 ,' -> ',nproc,'|'
-   end if
-   call wrtout(std_out,message,'COLL')
-   if(max_ncpus>0) then
-     call wrtout(ab_out,message,'COLL')
-   end if
- end if
+!Which levels of parallelism do we have?
+ with_image =(npi_min/=1.or.npi_max/=1)
+ with_pert  =(npp_min/=1.or.npp_max/=1)
+ with_kpt   =(npk_min/=1.or.npk_max/=1)
+ with_spinor=(nps_min/=1.or.nps_max/=1)
+ with_fft   =(npf_min/=1.or.npf_max/=1)
+ with_band  =(npb_min/=1.or.npb_max/=1)
+ with_bandpp=(bpp_min/=1.or.bpp_max/=1)
+ with_thread=(nthreads>1)
 
 !Allocate lists
  ABI_ALLOCATE(my_distp,(10,MAXCOUNT))
  ABI_ALLOCATE(weight,(MAXCOUNT))
+ ABI_ALLOCATE(my_algo,(MAXCOUNT))
  my_distp(1:7,:)=0;weight(:)=zero
  my_distp(8,:)=dtset%use_slk
  my_distp(9,:)=dtset%np_slk
  my_distp(10,:)=dtset%gpu_linalg_limit
+ my_algo(:)=wf_algo_global
  icount=0;imin=1
 
+!Cells= images or perturbations
  npc_min=1;npc_max=1;ncell_eff=1
  if (optdriver==RUNL_GSTATE) then
    ncell_eff=nimage_eff;npc_min=npi_min;npc_max=npi_max
@@ -1384,181 +1342,169 @@ end subroutine mpi_setup
 
 !Loop over all possibilities
 !Computation of weight~"estimated acceleration"
- if (new_version) then
+!================================================================
 
-!  ======= NEW VERSION ========
-   do npc=npc_min,npc_max
-     acc_c=one;if (npc>1) acc_c=0.99_dp*speedup_fdp(ncell_eff,npc)
+!Cells= images or perturbations
+ npc_min=1;npc_max=1;ncell_eff=1
+ if (optdriver==RUNL_GSTATE) then
+   ncell_eff=nimage_eff;npc_min=npi_min;npc_max=npi_max
+ end if
+ if (optdriver==RUNL_RESPFN) then
+   ncell_eff=npert_eff;npc_min=npp_min;npc_max=npp_max
+ end if
 
-     do npk=npk_min,npk_max
-!      -> for DFPT runs, impose that nsppol divide npk
-       if (optdriver==RUNL_RESPFN.and.modulo(npk,dtset%nsppol)>0.and.npk>1) cycle
-       acc_k=one;if (npk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,npk)
+!>>>>> CELLS
+ do npc=npc_min,npc_max
+   acc_c=one;if (npc>1) acc_c=0.99_dp*speedup_fdp(ncell_eff,npc)
 
-       do nps=nps_min,nps_max
-         acc_s=one;if (nps>1) acc_s=0.85_dp*speedup_fdp(dtset%nspinor,nps)
+!  >>>>> K-POINTS
+   do npk=npk_min,npk_max
+!    -> for DFPT runs, impose that nsppol divide npk
+     if (optdriver==RUNL_RESPFN.and.modulo(npk,dtset%nsppol)>0.and.npk>1) cycle
+     acc_k=one;if (npk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,npk)
 
-         do npf=npf_min,npf_max
-!          -> npf should divide ngfft if set (if unset, ngfft=0 so the modulo test is ok)
-           if((modulo(n2,npf)>0).or.(modulo(n3,npf)>0)) cycle
-!          -> npf should be only divisible by 2, 3 or 5
-           ii=npf
-           do while (modulo(ii,2)==0)
-             ii=ii/2
-           end do
-           do while (modulo(ii,3)==0)
-             ii=ii/3
-           end do
-           do while (modulo(ii,5)==0)
-             ii=ii/5
-           end do
-           if(ii/=1) cycle
+!    >>>>> SPINORS
+     do nps=nps_min,nps_max
+       acc_s=one;if (nps>1) acc_s=0.85_dp*speedup_fdp(dtset%nspinor,nps)
 
-           do npb=npb_min,npb_max
-             nproc1=npc*npk*nps*npf*npb
-             if (nproc1<nprocmin)     cycle
-             if (nproc1>nproc)        cycle
-             if (modulo(mband,npb)>0) cycle
+!      >>>>> FFT
+       do npf=npf_min,npf_max
+!        -> npf should divide ngfft if set (if unset, ngfft=0 so the modulo test is ok)
+         if((modulo(n2,npf)>0).or.(modulo(n3,npf)>0)) cycle
+!        -> npf should be only divisible by 2, 3 or 5
+         ii=npf
+         do while (modulo(ii,2)==0)
+           ii=ii/2
+         end do
+         do while (modulo(ii,3)==0)
+           ii=ii/3
+         end do
+         do while (modulo(ii,5)==0)
+           ii=ii/5
+         end do
+         if(ii/=1) cycle
 
-!            Base speedup
-             acc_kgb_0=one;if (npb*npf>1) acc_kgb_0=0.7_dp*speedup_fdp(mpw,(npb*npf))
+!        Change algo if npfft>1
+         wf_algo=wf_algo_global
+         if (optdriver==RUNL_GSTATE.and.npf>1.and. &
+&            wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
 
-             if (npb*npf>4) then
-!              Promote npb=npf
-               acc_kgb_0=acc_kgb_0*min((one*npf)/(one*npb),(one*npb)/(one*npf))
-!              Promote npf<=20
-               if (npf>20)then
-                 acc_kgb_0=acc_kgb_0* &
+!        FFT parallelism not compatible with multithreading
+         if (wf_algo==ALGO_LOBPCG_NEW.or.wf_algo==ALGO_CHEBFI.or.wf_algo==ALGO_CHEBFI_NEW) then
+           if (nthreads>1.and.npf>1) cycle
+         end if
+
+!        >>>>> BANDS
+         do npb=npb_min,npb_max
+           nproc1=npc*npk*nps*npf*npb
+           if (nproc1<nprocmin)     cycle
+           if (nproc1>nproc)        cycle
+           if (modulo(mband,npb)>0) cycle
+
+!          Change algo if npband>1
+           if (optdriver==RUNL_GSTATE.and.npb>1.and. &
+&              wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
+
+!          Base speedup
+           acc_kgb_0=one;if (npb*npf*nthreads>1) acc_kgb_0=0.7_dp*speedup_fdp(mpw,(npb*npf*nthreads))
+
+           if (npb*npf>4.and.wf_algo==ALGO_LOBPCG_OLD) then
+!            Promote npb=npf
+             acc_kgb_0=acc_kgb_0*min((one*npf)/(one*npb),(one*npb)/(one*npf))
+!            Promote npf<=20
+             if (npf>20)then
+               acc_kgb_0=acc_kgb_0* &
 &                 0.2_dp+(one-0.2_dp)*(sin((pi*(npf-NPF_CUTOFF))/(one*(NPFMAX-NPF_CUTOFF))) &
 &                 /((pi*(npf-NPF_CUTOFF))/(one*(NPFMAX-NPF_CUTOFF))))**2
-               end if
              end if
+           end if
 
-             first_bpp=.true.
-             do bpp=bpp_min,bpp_max
+           first_bpp=.true.
+           do bpp=bpp_min,bpp_max
+
+             if (wf_algo==ALGO_LOBPCG_NEW) then
+               blocksize=npb*bpp;nblocks=mband/blocksize
+               if (modulo(bpp,nthreads)>0) cycle
+               if ((bpp>1).and.(modulo(bpp,2)>0)) cycle
+               if (modulo(mband,npb*bpp)>0) cycle
+             else if (wf_algo==ALGO_LOBPCG_OLD) then
+               blocksize=npb*bpp;nblocks=mband/blocksize
                if (modulo(mband/npb,bpp)>0) cycle
                if ((bpp>1).and.(modulo(bpp,2)>0)) cycle
                if (one*npb*bpp >max(1.,mband/3.).and.(mband>30)) cycle
                if (npb*npf<=4.and.(.not.first_bpp)) cycle
-               first_bpp=.false.
+             else if (wf_algo==ALGO_CHEBFI .or. wf_algo==ALGO_CHEBFI_NEW) then
+               !Nothing
+             else
+               if (bpp/=1.or.npb/=1) cycle
+             end if
 
-               acc_kgb=acc_kgb_0
-!              Promote bpp*npb>mband/3
+             first_bpp=.false.
+
+             acc_kgb=acc_kgb_0
+!            OLD LOBPCG: promote bpp*npb>mband/3
+             if (wf_algo==ALGO_LOBPCG_OLD) then
                if (npb*npf>4.and.mband>30) acc_kgb=acc_kgb*(one-(three*bpp*npb)/(one*mband))
+             end if
+!            NEW LOBPCG: promote minimal number of blocks
+!                        promote block size <= BLOCKSIZE_MAX
+             if (wf_algo==ALGO_LOBPCG_NEW) then
+               acc_kgb=acc_kgb*(one-0.9_dp*dble(nblocks-1)/dble(mband-1))
+               if (blocksize>BLOCKSIZE_MAX) acc_kgb=acc_kgb*max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX))
+               if (nthreads==1) then
+!                Promote npband vs bandpp & npfft
+                 if (blocksize>1) acc_kgb=acc_kgb*(0.1_dp*bpp+0.9_dp-blocksize)/(one-blocksize)
+                 if (npb*npf>4.and.mband>100) acc_kgb=acc_kgb*(one-0.8_dp*((three*bpp*npb)/(one*mband)-one)**2)
+                 tot_ncpus=max(npb,npf);if (tot_ncpus==2) tot_ncpus=0
+                 acc_kgb=acc_kgb*(one-0.8_dp*((dble(npb)/dble(npf))-2_dp)**2/(tot_ncpus-2_dp)**2)
+                 eff=max(npf,20);acc_kgb=acc_kgb*(one-0.8_dp*min(one,(eff-20)**2))
+               end if
+             end if
 
-!              Resulting speedup
-!              weight0=acc_c*acc_k*acc_s*acc_kgb
-               weight0=nproc1*(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
-
-!              Store data
-               icount=icount+1
-               if (icount<=MAXCOUNT) then
-                 my_distp(1:7,icount)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
-                 weight(icount)=weight0
-                 if (weight0<weight(imin)) imin=icount
-               else
-                 if (weight0>weight(imin)) then
-                   my_distp(1:7,imin)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
-                   weight(imin)=weight0
-                   idum=minloc(weight);imin=idum(1)
+!            CHEBFI: promote npfft=npband and nband>=npfft
+             if (wf_algo==ALGO_CHEBFI .or. wf_algo==ALGO_CHEBFI_NEW) then
+               if (npf>1) then
+                 if (npb>npf) then
+                   acc_kgb=acc_kgb*(one-0.8_dp*0.25_dp*((dble(npb)/dble(npf))-one)**2/(nproc1-one)**2)
+                 else
+                   acc_kgb=acc_kgb*(one-0.8_dp*nproc1**2*((dble(npb)/dble(npf))-one)**2/(nproc1-one)**2)
                  end if
                end if
+             end if
 
-             end do ! bpp
-           end do ! npb
-         end do ! npf
-       end do ! nps
-     end do ! npk
-   end do ! npc
- else
+!            Resulting "weight"
+!            weight0=acc_c*acc_k*acc_s*acc_kgb
+             weight0=nproc1*(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
 
-!  ======= OLD VERSION ========
-   do npc=npc_min,npc_max
-     acc_c=one;if (npc>1) acc_c = 0.99_dp*ncell_eff/((ncell_eff+npc-1)/npc)
-
-     do npk=npk_min,npk_max
-       acc_k=one;if (npk>1) acc_k = 0.96_dp*nkpt_eff/((nkpt_eff+npk-1)/npk)
-
-       do nps=nps_min,nps_max
-         acc_s=one;if (nps>1) acc_s = 0.85_dp*dtset%nspinor/ ((dtset%nspinor+nps-1)/nps)
-
-         do npf=npf_min,npf_max
-!          -> npf should divide ngfft if set (if unset, ngfft=0 so the modulo test is ok)
-           if((modulo(n2,npf)>0).or.(modulo(n3,npf)>0)) cycle
-!          -> npf should be only divisible by 2, 3, 5, 7 or 11
-           npb=npf ! Note that here, npb is used as a temp var
-           do while (modulo(npb,2)==0)
-             npb=npb/2
-           end do
-           do while (modulo(npb,3)==0)
-             npb=npb/3
-           end do
-           do while (modulo(npb,5)==0)
-             npb=npb/5
-           end do
-           do while (modulo(npb,7)==0)
-             npb=npb/7
-           end do
-           do while (modulo(npb,11)==0)
-             npb=npb/11
-           end do
-           if(npb/=1) cycle
-
-           do npb=npb_min,npb_max
-             nproc1=npc*npk*nps*npf*npb
-             if (nproc1<nprocmin) cycle
-             if (nproc1>nproc) cycle
-             if(modulo(mband,npb)>0) cycle
-
-             do bpp=bpp_max,bpp_min,-1
-               if(modulo(mband/npb,bpp)>0) cycle
-               if((bpp>1).and.(modulo(bpp,2)>0)) cycle
-               if (1.*npb*bpp >max(1.,mband/3.)) cycle
-
-               acc_kgb=one
-               if (npb*npf>4) then
-                 acc_kgb=min((one*npf)/(one*npb),(one*npb)/(one*npf))  * &
-                 (mpw/(mpw/(npb*npf)))*(one-(three*bpp*npb)/mband)
-               else if (npb*npf >1) then
-                 acc_kgb=(mpw*mband/(mband*mpw/(npb*npf)))*0.7_dp
+!            Store data
+             icount=icount+1
+             if (icount<=MAXCOUNT) then
+               my_algo(icount)=merge(ALGO_CG,wf_algo,wf_algo==ALGO_NOT_SET)
+               my_distp(1:7,icount)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+               weight(icount)=weight0
+               if (weight0<weight(imin)) imin=icount
+             else
+               if (weight0>weight(imin)) then
+                 my_algo(imin)=merge(ALGO_CG,wf_algo,wf_algo==ALGO_NOT_SET)
+                 my_distp(1:7,imin)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+                 weight(imin)=weight0
+                 idum=minloc(weight);imin=idum(1)
                end if
+             end if
 
-!              Weight average for efficiency and estimated acceleration
-               weight0=(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
-               weight0=weight0*nproc1
+           end do ! bpp
+         end do ! npb
+       end do ! npf
+     end do ! nps
+   end do ! npk
+ end do ! npc
 
-!              Store data
-               icount=icount+1
-               if (icount<=MAXCOUNT) then
-                 my_distp(1:7,icount)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
-                 weight(icount)=weight0
-                 if (weight0<weight(imin)) imin=icount
-               else
-                 if (weight0>weight(imin)) then
-                   my_distp(1:7,imin)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
-                   weight(imin)=weight0
-                   idum=minloc(weight);imin=idum(1)
-                 end if
-               end if
-
-             end do ! bpp
-           end do ! npb
-         end do ! npf
-       end do ! nps
-     end do ! npk
-   end do ! npc
-
-!  New or old version
- end if
-
+!Compute number of selected distributions
  mcount_eff=icount
  mcount=min(mcount_eff,MAXCOUNT)
 
+!Stop if no solution found
  if (mcount==0) then
-   write(message,'(a,i0,2a,i0,a)')  &
-   'Your input dataset does not let Abinit find an appropriate process distribution with nproc=',nproc,ch10, &
-   'Try to comment all the np* vars and set paral_kgb=',-nproc,' to have advices on process distribution.'
-   MSG_WARNING(message)
 !  Override here the 0 default value changed in indefo1
    dtset%npimage  = max(1,dtset%npimage)
    dtset%nppert   = max(1,dtset%nppert)
@@ -1567,156 +1513,275 @@ end subroutine mpi_setup
    dtset%npfft    = max(1,dtset%npfft)
    dtset%npband   = max(1,dtset%npband)
    dtset%bandpp   = max(1,dtset%bandpp)
-   ABI_DEALLOCATE(my_distp)
-   ABI_DEALLOCATE(weight)
-   return
- end if
-
-!* HF or hybrid calculation: no use of the fonction "autoparal"
- if ((dtset%usefock==1).AND.(dtset%nphf/=1)) then
-   write(message,'(a,i5,2a,i6,a)')  &
-   'Hartree-Fock or hybrid calculation : Your input dataset does not let Abinit find an appropriate process distribution.'
-   MSG_WARNING(message)
-!  Override here the 0 default value changed in indefo1
-   dtset%npimage  = max(1,dtset%npimage)
-   dtset%npkpt    = max(1,dtset%npkpt)
-   dtset%npspinor = max(1,dtset%npspinor)
-   dtset%npfft    = max(1,dtset%npfft)
-   dtset%npband   = max(1,dtset%npband)
-   dtset%bandpp   = max(1,dtset%bandpp)
-   ABI_DEALLOCATE(my_distp)
-   ABI_DEALLOCATE(weight)
-   return
+   write(msg,'(a,i0,2a,i0,a)')  &
+&  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
+&  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
+   MSG_WARNING(msg)
+   if (max_ncpus>0) then
+     call wrtout(ab_out,msg,'COLL')
+     call flush_unit(ab_out)
+   end if
+   iexit=iexit+1
  end if
 
 !Sort data by increasing weight
- ABI_ALLOCATE(isort,(mcount))
- isort=(/(ii,ii=1,mcount)/)
- call sort_dp(mcount,weight,isort,tol6)
-
- ncount=mcount;if (dtset%paral_kgb>=0) ncount=min(mcount,5)
- if (iam_master) then
-   do jj=mcount,mcount-ncount+1,-1
-     ii=isort(jj)
-     if (optdriver==RUNL_GSTATE) then
-       write(message, '(7(i12,a1),f11.2,a2)') &
-&       my_distp(1,ii),'|',my_distp(2,ii),'|',my_distp(3,ii),'|',my_distp(4,ii),'|', &
-&       my_distp(5,ii),'|',my_distp(6,ii),'|',my_distp(7,ii),'|',weight(jj),' |'
-     end if
-     if (optdriver==RUNL_RESPFN) then
-       write(message, '(3(i12,a1),f11.2,a2)') &
-&       my_distp(1,ii),'|',my_distp(2,ii),'|',my_distp(7,ii),'|',weight(jj),' |'
-     end if
-     call wrtout(std_out,message,'COLL')
-     if(max_ncpus>0) then
-       call wrtout(ab_out,message,'COLL')
-     end if
-   end do
+ if (mcount>0) then
+   ABI_ALLOCATE(isort,(mcount))
+   isort=(/(ii,ii=1,mcount)/)
+   call sort_dp(mcount,weight,isort,tol6)
+   ncount=min(mcount,MAXPRINT)
  end if
 
- if (max_ncpus>0.and.(mcount_eff>MAXCOUNT)) then
-   write(message,'(a,i0,a,i0,a)') &
-&   ' Received max_ncpus ',max_ncpus,' possible choices for nproc; only the first ',MAXCOUNT,' ones are printed...'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+!Deduce a global value for paral_kgb
+ paral_kgb=dtset%paral_kgb
+ if (tread(1)==0) then
+   if (any(my_algo(:)/=ALGO_CG)) paral_kgb=1
  end if
 
- !if (iam_master .and. dtset%paral_kgb<0) then
- if (iam_master .and. max_ncpus>0) then
+!Print output for abipy
+ if (iam_master.and.max_ncpus>0.and. &
+&    (mcount>0.or.wf_algo_global==ALGO_CG)) then
    write(ount,'(2a)')ch10,"--- !Autoparal"
-
-   if (optdriver==RUNL_GSTATE) then
-     write(ount,"(a)")"#Autoparal section for GS calculations with paral_kgb"
+   if (optdriver==RUNL_GSTATE.and.paral_kgb==0) then
+     write(ount,"(a)")"# Autoparal section for GS run (band-by-band CG method)"
+   else if (optdriver==RUNL_GSTATE) then
+     write(ount,'(a)')'#Autoparal section for GS calculations with paral_kgb'
    else if (optdriver==RUNL_RESPFN) then
-     write(ount,"(a)")'#Autoparal section for DFPT calculations'
+     write(ount,'(a)')'#Autoparal section for DFPT calculations'
    else
-     MSG_ERROR("Unsupported optdriver")
+    msg='Unsupported optdriver'
+     MSG_ERROR(msg)
    end if
-
    write(ount,"(a)")   "info:"
    write(ount,"(a,i0)")"    autoparal: ",autoparal
-   write(ount,"(a,i0)")"    paral_kgb: ",dtset%paral_kgb
+   write(ount,"(a,i0)")"    paral_kgb: ",paral_kgb
    write(ount,"(a,i0)")"    max_ncpus: ",max_ncpus
    write(ount,"(a,i0)")"    nspinor: ",dtset%nspinor
    write(ount,"(a,i0)")"    nsppol: ",dtset%nsppol
    write(ount,"(a,i0)")"    nkpt: ",dtset%nkpt
    write(ount,"(a,i0)")"    mband: ",mband
-
-   ! List of configurations.
    write(ount,"(a)")"configurations:"
-
-   if (optdriver==RUNL_GSTATE) then
-
-     do jj=mcount,mcount-ncount+1,-1
+   if (optdriver==RUNL_GSTATE.and.paral_kgb==0) then
+     work_size = dtset%nkpt * dtset%nsppol
+     do ii=1,max_ncpus
+       if (ii > work_size) cycle
+       do omp_ncpus=1,nthreads
+         nks_per_proc = work_size / ii
+         nks_per_proc = nks_per_proc + MOD(work_size, ii)
+         eff = (one * work_size) / (ii * nks_per_proc)
+         write(ount,"(a,i0)")"    - tot_ncpus: ",ii * omp_ncpus
+         write(ount,"(a,i0)")"      mpi_ncpus: ",ii
+         write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus
+         write(ount,"(a,f12.9)")"      efficiency: ",eff
+         !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
+       end do
+     end do
+   else if (optdriver==RUNL_GSTATE) then
+     omp_ncpus=nthreads
+     do jj=mcount,mcount-min(ncount,MAXABIPY)+1,-1
        ii=isort(jj)
        tot_ncpus = my_distp(7,ii)
        eff = weight(jj) / tot_ncpus
-
-       write(ount,"(a,i0)")"    - tot_ncpus: ",tot_ncpus
-       write(ount,"(a,i0)")"      mpi_ncpus: ",tot_ncpus
-       !write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus !OMP not supported  (yet)
-       write(ount,"(a,f12.9)")"      efficiency: ",eff
-       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
-
-       ! list of variables to use.
-       !'npimage','|','npkpt','|','npspinor','|','npfft','|','npband','|',' bandpp ' ,'|','nproc','|','weight','|'
-       write(ount,"(a)"   )"      vars: {"
-       write(ount,"(a,i0,a)")"            npimage: ",my_distp(1,ii),","
-       write(ount,"(a,i0,a)")"            npkpt: ", my_distp(2,ii),","
-       write(ount,"(a,i0,a)")"            npspinor: ",my_distp(3,ii),","
-       write(ount,"(a,i0,a)")"            npfft: ", my_distp(4,ii),","
-       write(ount,"(a,i0,a)")"            npband: ",my_distp(5,ii),","
-       write(ount,"(a,i0,a)")"            bandpp: ",my_distp(6,ii),","
-       write(ount,"(a)")   "            }"
+       write(ount,'(a,i0)')'    - tot_ncpus: ',tot_ncpus
+       write(ount,'(a,i0)')'      mpi_ncpus: ',tot_ncpus
+       write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus
+       write(ount,'(a,f12.9)')'      efficiency: ',eff
+       !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
+       write(ount,'(a)'   )'      vars: {'
+       write(ount,'(a,i0,a)')'            npimage: ',my_distp(1,ii),','
+       write(ount,'(a,i0,a)')'            npkpt: ', my_distp(2,ii),','
+       write(ount,'(a,i0,a)')'            npspinor: ',my_distp(3,ii),','
+       write(ount,'(a,i0,a)')'            npfft: ', my_distp(4,ii),','
+       write(ount,'(a,i0,a)')'            npband: ',my_distp(5,ii),','
+       write(ount,'(a,i0,a)')'            bandpp: ',my_distp(6,ii),','
+       write(ount,'(a)')   '            }'
      end do
-
    else if (optdriver==RUNL_RESPFN) then
-
-     do jj=mcount,mcount-ncount+1,-1
+     do jj=mcount,mcount-min(ncount,MAXABIPY)+1,-1
        ii=isort(jj)
        tot_ncpus = my_distp(7,ii)
        eff = weight(jj) / tot_ncpus
-
-       write(ount,"(a,i0)")"    - tot_ncpus: ",tot_ncpus
-       write(ount,"(a,i0)")"      mpi_ncpus: ",tot_ncpus
-       !write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus !OMP not supported  (yet)
-       write(ount,"(a,f12.9)")"      efficiency: ",eff
-       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
-       ! list of variables to use.
-       !'nppert','|','npkpt','|','nproc','|','weight','|',
-       write(ount,"(a)"   )"      vars: {"
-       write(ount,"(a,i0,a)")"             nppert: ", my_distp(1,ii),","
-       write(ount,"(a,i0,a)")"             npkpt: ", my_distp(2,ii),","
-       write(ount,"(a)")   "            }"
-     end do
-
+       write(ount,'(a,i0)')'    - tot_ncpus: ',tot_ncpus
+       write(ount,'(a,i0)')'      mpi_ncpus: ',tot_ncpus
+       !write(ount,'(a,i0)')'      omp_ncpus: ',omp_ncpus !OMP not supported  (yet)
+       write(ount,'(a,f12.9)')'      efficiency: ',eff
+       !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
+       write(ount,'(a)'   )'      vars: {'
+       write(ount,'(a,i0,a)')'             nppert: ', my_distp(1,ii),','
+       write(ount,'(a,i0,a)')'             npkpt: ', my_distp(2,ii),','
+       write(ount,'(a)')   '            }'
+      end do
    end if
    write(ount,'(a)')"..."
-   iexit = iexit + 1
  end if
 
- icount=isort(mcount)
+!Print out tab with selected choices
+ if (mcount>0.and.iam_master) then
+   if (nthreads==1) then
+     write(msg,'(a,1x,100("="),2a,i0,2a)') ch10,ch10,&
+&     ' Searching for all possible proc distributions for this input with #CPUs<=',nthreads*nproc,':',ch10
+   else
+     write(msg,'(a,1x,100("="),2a,i0,a,i0,2a)')  ch10,ch10,&
+&     ' Searching for all possible proc distributions for this input with #CPUs<=',nthreads*nproc,&
+&     ' and ',nthreads,' openMP threads:',ch10
+   end if
+   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   !Titles of columns
+   msgttl='~'
+   if (with_image)  msgttl=trim(msgttl)//'~~~~~~~~~~~'
+   if (with_pert)   msgttl=trim(msgttl)//'~~~~~~~~~~~'
+   msgttl=trim(msgttl)//'~~~~~~~~~~~~~' ! kpt
+   if (with_spinor) msgttl=trim(msgttl)//'~~~~~~~~~~'
+   if (with_fft)    msgttl=trim(msgttl)//'~~~~~~~~~~~~~'
+   if (with_band)   msgttl=trim(msgttl)//'~~~~~~~~~~~~~'
+   if (with_bandpp) msgttl=trim(msgttl)//'~~~~~~~~~~~~~'
+   if (with_thread) msgttl=trim(msgttl)//'~~~~~~~~~~'
+   msgttl=trim(msgttl)//'~~~~~~~~~~~~~' ! nproc
+   if (with_thread) msgttl=trim(msgttl)//'~~~~~~~~~~~~~'
+   msgttl=trim(msgttl)//'~~~~~~~~~~~'   ! CPUs
+   msgttl=' '//trim(msgttl)
+   call wrtout(std_out,msgttl,'COLL');if(max_ncpus>0) call wrtout(ab_out,msgttl,'COLL')
+   msg='|'
+   if (with_image)  msg=trim(msg)//'   npimage|'
+   if (with_pert)   msg=trim(msg)//'    nppert|'
+   msg=trim(msg)//'       npkpt|'
+   if (with_spinor) msg=trim(msg)//' npspinor|'
+   if (with_fft)    msg=trim(msg)//'       npfft|'
+   if (with_band)   msg=trim(msg)//'      npband|'
+   if (with_bandpp) msg=trim(msg)//'      bandpp|'
+   if (with_thread) msg=trim(msg)//' #Threads|'
+   msg=trim(msg)//'  #MPI(proc)|'
+   if (with_thread) msg=trim(msg)//'       #CPUs|'
+   msg=trim(msg)//'    WEIGHT|'
+   msg=' '//trim(msg)
+   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   msg='|'
+   write(strg,'(i4,a,i4,a)') npi_min,'<<',npi_max,'|';if (with_image)  msg=trim(msg)//trim(strg)
+   write(strg,'(i4,a,i4,a)') npp_min,'<<',npp_max,'|';if (with_pert)   msg=trim(msg)//trim(strg)
+   write(strg,'(i5,a,i5,a)') npk_min,'<<',npk_max,'|';                 msg=trim(msg)//trim(strg)
+   write(strg,'(i5,a,i2,a)') nps_min,'<<',nps_max,'|';if (with_spinor) msg=trim(msg)//trim(strg)
+   write(strg,'(i5,a,i5,a)') npf_min,'<<',npf_max,'|';if (with_fft)    msg=trim(msg)//trim(strg)
+   write(strg,'(i5,a,i5,a)') npb_min,'<<',npb_max,'|';if (with_band)   msg=trim(msg)//trim(strg)
+   write(strg,'(i5,a,i5,a)') bpp_min,'<<',bpp_max,'|';if (with_bandpp) msg=trim(msg)//trim(strg)
+   write(strg,'(i9,a)'     ) nthreads            ,'|';if (with_thread) msg=trim(msg)//trim(strg)
+   write(strg,'(i5,a,i5,a)') 1      ,'<<',nproc  ,'|';                 msg=trim(msg)//trim(strg)
+   write(strg,'(i4,a,i6,a)') nthreads,'<<',nthreads*nproc,'|';if (with_thread) msg=trim(msg)//trim(strg)
+   write(strg,'(a,i6,a)')   '  <=',nthreads*nproc,'|';                 msg=trim(msg)//trim(strg)
+   msg=' '//trim(msg)
+   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msgttl,'COLL');if(max_ncpus>0) call wrtout(ab_out,msgttl,'COLL')
+   !Loop over selected choices
+   do jj=mcount,mcount-ncount+1,-1
+     ii=isort(jj)
+     msg='|'
+     write(strg,'(i10,a)') my_distp(1,ii),'|';if (with_image)  msg=trim(msg)//trim(strg)
+     write(strg,'(i10,a)') my_distp(1,ii),'|';if (with_pert)   msg=trim(msg)//trim(strg)
+     write(strg,'(i12,a)') my_distp(2,ii),'|';                 msg=trim(msg)//trim(strg)
+     write(strg,'(i9,a)')  my_distp(3,ii),'|';if (with_spinor) msg=trim(msg)//trim(strg)
+     write(strg,'(i12,a)') my_distp(4,ii),'|';if (with_fft)    msg=trim(msg)//trim(strg)
+     write(strg,'(i12,a)') my_distp(5,ii),'|';if (with_band)   msg=trim(msg)//trim(strg)
+     write(strg,'(i12,a)') my_distp(6,ii),'|';if (with_bandpp) msg=trim(msg)//trim(strg)
+     write(strg,'(i9,a)')  nthreads      ,'|';if (with_thread) msg=trim(msg)//trim(strg)
+     write(strg,'(i12,a)') my_distp(7,ii),'|';                 msg=trim(msg)//trim(strg)
+     write(strg,'(i12,a)') nthreads*my_distp(7,ii),'|';if (with_thread) msg=trim(msg)//trim(strg)
+     write(strg,'(f10.3,a)') weight(jj)  ,'|';                 msg=trim(msg)//trim(strg)
+     msg=' '//trim(msg)
+     call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   end do
+   !End of tab
+   call wrtout(std_out,msgttl,'COLL');if(max_ncpus>0) call wrtout(ab_out,msgttl,'COLL')
+   write(msg,'(a,i6,a,i6,a)')' Only the best possible choices for nproc are printed...'
+   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+ end if ! mcount>0
+
+!Determine an optimal number of bands
+ if (optdriver==RUNL_GSTATE.and. &
+&    (any(my_algo(1:mcount)==ALGO_LOBPCG_OLD.or. &
+&         my_algo(1:mcount)==ALGO_LOBPCG_NEW.or. &
+&         my_algo(1:mcount)==ALGO_CHEBFI.or. &
+&         my_algo(1:mcount)==ALGO_CHEBFI_NEW))) then
+   if (mcount>0) then
+     icount=isort(mcount)
+     npc=my_distp(1,icount);npk=my_distp(2,icount)
+     nps=my_distp(3,icount);npf=my_distp(4,icount)
+   else
+     npc=1;if (with_image ) npc=npi_min
+     npk=1;if (with_kpt   ) npk=npk_min
+     nps=1;if (with_spinor) nps=nps_min
+     npf=1;if (with_fft   ) npf=npf_min
+   end if
+   nproc1=npc*npk*nps*npf
+   msg=ch10//' >>> Possible (best) choices for the number of bands (nband) are:'
+   if (with_image.or.with_kpt.or.with_spinor.or.with_fft) msg=trim(msg)//ch10//'     with:'
+   write(strg,'(a,i0)') ' npimage=' ,npc;if (with_image)  msg=trim(msg)//trim(strg)
+   write(strg,'(a,i0)') ' npkpt='   ,npk;if (with_kpt)    msg=trim(msg)//trim(strg)
+   write(strg,'(a,i0)') ' npspinor=',nps;if (with_spinor) msg=trim(msg)//trim(strg)
+   write(strg,'(a,i0)') ' npfft='   ,npf;if (with_fft)    msg=trim(msg)//trim(strg)
+   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   ib1=mband-int(mband*relative_nband_range);if (my_algo(icount)==ALGO_CHEBFI .or. my_algo(icount)==ALGO_CHEBFI_NEW) ib1=mband
+   ib2=mband+int(mband*relative_nband_range)
+   ABI_ALLOCATE(nproc_best,(1+ib2-ib1))
+   ABI_ALLOCATE(nband_best,(1+ib2-ib1))
+   nproc_best(:)=1
+   nband_best=(/(ii,ii=ib1,ib2)/)
+   bpp=merge(1,nthreads,my_algo(icount)==ALGO_CHEBFI .or. my_algo(icount)==ALGO_CHEBFI_NEW)
+   do ii=ib1,ib2
+     do jj=1,nproc/nproc1
+       ibest=1
+       do kk=1,jj
+         if (mod(jj,kk)/=0) cycle
+         if (mod(ii,kk*bpp)==0) ibest=max(ibest,kk)
+       end do
+       nproc_best(1+ii-ib1)=max(nproc_best(1+ii-ib1),ibest)
+     end do
+   end do
+   call sort_int(1+ib2-ib1,nproc_best,nband_best)
+   kk=-1
+   do ii=1+ib2-ib1,max(ib2-ib1-MAXBAND_PRINT,1),-1
+     write(msg,'(3(a,i6),a,i3,a,i5,a)') '     nband=',nband_best(ii),' using ',nproc1*nproc_best(ii)*nthreads,&
+&        ' CPUs =',nproc1*nproc_best(ii),' MPI x',nthreads,' threads (npband=',nproc_best(ii),')'
+     call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+     if (nband_best(ii)==mband) kk=nproc_best(ii)
+   end do
+   if (kk==maxval(nproc_best(:))) then
+     if (my_algo(icount)/=ALGO_CHEBFI .or. my_algo(icount)/=ALGO_CHEBFI_NEW) then
+       write(msg,'(a,i6,a)') ' >>> The present nband value (',mband,') seems to be the best choice!'
+     end if
+     if (my_algo(icount)==ALGO_CHEBFI .or. my_algo(icount)/=ALGO_CHEBFI_NEW) then
+       write(msg,'(a,i6,a)') ' >>> The present nband value (',mband,') seems to be a good choice!'
+     end if
+     call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   end if
+   ABI_DEALLOCATE(nproc_best)
+   ABI_DEALLOCATE(nband_best)
+ end if
+
+ if (optdriver==RUNL_GSTATE.and.(any(my_algo(1:mcount)==ALGO_CHEBFI .or. my_algo(1:mcount)==ALGO_CHEBFI_NEW))) then
+   write(msg,'(5a)') &
+&   ' >>> Note that with the "Chebyshev Filtering" algorithm, it is often',ch10,&
+&   '     better to increase the number of bands (10% more or a few tens more).',ch10,&
+&   '     Advice: increase nband and put nbdbuf input variable to (nband_new-nband_old).'
+   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+ end if
 
 !Refinement of the process distribution by mean of a LinAlg routines benchmarking
- if (optdriver==RUNL_GSTATE.and.autoparal/=1) then
+ if (mcount>0.and.optdriver==RUNL_GSTATE.and.autoparal/=1) then
+   icount=isort(mcount)
    if (autoparal/=3) then
      if (autoparal==2) then
-       write(message,'(5a,9(a10,a1))') ch10, &
+       write(msg,'(5a,9(a10,a1))') ch10, &
 &       ' Values below have been tested with respect to Linear Algebra performance;',ch10,&
 &       ' Weights below are corrected according:',ch10,&
 &       'npimage','|','npkpt' ,'|','npspinor'  ,'|','npfft'     ,'|','npband','|',' bandpp ' ,'|',&
 &       'nproc'  ,'|','weight','|','new weight','|'
      else
-       write(message,'(5a,11(a10,a1))') ch10, &
+       write(msg,'(5a,11(a10,a1))') ch10, &
 &       ' Values below have been tested with respect to Linear Algebra performance;',ch10,&
 &       ' Weights below are corrected according:',ch10,&
 &       'npimage','|','npkpt' ,'|','npspinor'  ,'|','npfft'     ,'|','npband','|',' bandpp ' ,'|',&
 &       'nproc'  ,'|','weight','|','new weight','|','best npslk','|','linalggpu' ,'|'
      end if
-     call wrtout(std_out,message,'COLL')
-     if (max_ncpus > 0) then
-       call wrtout(ab_out,message,'COLL')
-     end if
+     call wrtout(std_out,msg,'COLL');if (max_ncpus > 0) call wrtout(ab_out,msg,'COLL')
    end if
    acc_k=zero
    ncount=min(MAXBENCH,mcount);if (autoparal==3) ncount=1
@@ -1730,7 +1795,7 @@ end subroutine mpi_setup
          my_distp(9,ii)=np_slk
          if (np_slk>0) my_distp(8,ii)=1
 !        * gpu_linalg_limit:
-!        No use of GPU: huge value ~2  *vectsize*blocksize**2 tested
+!        No use of GPU: htgspw_01.outuge value ~2  *vectsize*blocksize**2 tested
 !        Use of GPU:    tiny value ~0.5*vectsize*blocksize**2 tested
          my_distp(10,ii)=2*dtset%mpw*(npb*bpp)**2/npf
          if (use_linalg_gpu==1) my_distp(10,ii)=my_distp(10,ii)/4
@@ -1739,23 +1804,20 @@ end subroutine mpi_setup
 !      * Weight (corrected by 10% of the computed ratio)
        weight0=weight(jj)*(one + 0.1_dp*acc_k/acc_kgb)
        if (autoparal==2) then
-         write(message, '(7(i10,a1),f9.2,a2,f9.5,a2)') &
+         write(msg, '(7(i10,a1),f9.2,a2,f9.5,a2)') &
 &         my_distp(1,ii),'|',my_distp(2,ii),'|',my_distp(3,ii),'|',my_distp(4,ii),'|',&
 &         my_distp(5,ii),'|',my_distp(6,ii),'|',my_distp(7,ii),'|',weight(jj),'=>', weight0,' |'
        else if (autoparal==3) then
-         write(message,'(a,5(a,i3))') ch10,' For npband=',npb,', npfft=',npf,' and bandpp=',bpp, &
+         write(msg,'(a,5(a,i3))') ch10,' For npband=',npb,', npfft=',npf,' and bandpp=',bpp, &
 &         ', compute_kgb_indicator recommends you to set np_slk=',my_distp(9,ii),&
 &         ' and use_linalg_gpu=',use_linalg_gpu
        else
-         write(message, '(7(i10,a1),f9.2,a2,f9.5,a2,2(i10,a1))') &
+         write(msg, '(7(i10,a1),f9.2,a2,f9.5,a2,2(i10,a1))') &
 &         my_distp(1,ii),'|',my_distp(2,ii),'|',my_distp(3,ii),'|',my_distp(4,ii),'|',&
 &         my_distp(5,ii),'|',my_distp(6,ii),'|',my_distp(7,ii),'|',weight(jj),'=>', weight0,' |',&
 &         my_distp(9,ii),'|',use_linalg_gpu,'|'
        end if
-       call wrtout(std_out,message,'COLL')
-       if (max_ncpus>0) then
-         call wrtout(ab_out,message,'COLL')
-       end if
+       call wrtout(std_out,msg,'COLL');if (max_ncpus>0) call wrtout(ab_out,msg,'COLL')
 !      We store the best value in weight(mcount) and keep icount
        if (weight0 > weight(mcount)) then
          icount=ii;weight(mcount)=weight0
@@ -1764,20 +1826,9 @@ end subroutine mpi_setup
    end do
  end if
 
-!Final advice in case max_ncpus > 0
- if (max_ncpus>0) then
-   write(message,'(6a)') ch10,&
-&   ' Launch a parallel version of ABINIT with a number of processors among the above list,',ch10,&
-&   ' and the associated input variables npkpt, npband, npfft and bandpp. ',ch10,&
-&   ' The optimal weight is close to nproc and the higher should be better.'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
-   iexit=iexit+1
-   GOTO 100
- end if
-
 !Store new process distribution
- if (dtset%paral_kgb>=0) then
+ if (mcount>0.and.max_ncpus<=0) then
+   icount=isort(mcount)
    nproc1=my_distp(7,icount)
 !  Work load distribution
    if (optdriver==RUNL_GSTATE) then
@@ -1794,16 +1845,17 @@ end subroutine mpi_setup
    dtset%npfft    = my_distp(4,icount)
    dtset%npband   = my_distp(5,icount)
    dtset%bandpp   = my_distp(6,icount)
+   if (tread(1)==0)  dtset%paral_kgb= merge(0,1,my_algo(icount)==ALGO_CG)
 !  The following lines are mandatory : the DFT+DMFT must use ALL the
 !  available procs specified by the user. So nproc1=nproc.
-!  Works only if paral_kgb is not activated.
-   if (dtset%usedmft/=0.and.optdriver==RUNL_GSTATE.and.dtset%paral_kgb==0) then
-     dtset%npspinor = 1
-     dtset%npfft    = 1
-     dtset%npband   = 1
-     dtset%bandpp   = 1
-     dtset%npimage  = 1
-     nproc1         = nproc
+!  Works only if paral_kgb is not activated??
+   if (dtset%usedmft/=0.and.optdriver==RUNL_GSTATE) then
+     if (dtset%paral_kgb==0) then
+       dtset%npspinor = 1 ; dtset%npfft    = 1
+       dtset%npband   = 1 ; dtset%bandpp   = 1
+       dtset%npimage  = 1
+     end if
+     nproc1 = nproc
    end if
    if (dtset%npband*dtset%npfft*dtset%bandpp>1) dtset%paral_kgb=1
 !  LinAlg parameters: we change values only if they are not present in input file
@@ -1821,11 +1873,30 @@ end subroutine mpi_setup
    call initmpi_world(mpi_enreg,nproc1)
  end if
 
- 100 continue
+!Final advice in case max_ncpus > 0
+ if (max_ncpus>0.and.mcount>0) then
+   write(msg,'(6a)') ch10,&
+&   ' Launch a parallel version of ABINIT with a distribution of processors among the above list,',ch10,&
+&   ' and the associated input variables (npkpt, npband, npfft, bandpp, etc.).',ch10,&
+&   ' The higher weight should be better.'
+   call wrtout(std_out,msg,'COLL');if (max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+ end if
 
- ABI_DEALLOCATE(isort)
+ if (mcount>0) then
+   ABI_DEALLOCATE(isort)
+ end if
  ABI_DEALLOCATE(my_distp)
+ ABI_DEALLOCATE(my_algo)
  ABI_DEALLOCATE(weight)
+
+!Final line
+ write(msg,'(a,100("="),2a)') " ",ch10,ch10
+ call wrtout(std_out,msg,'COLL');if (max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+
+!max_ncpus requires a stop
+ if (max_ncpus>0) then
+   iexit = iexit + 1 ! will stop in the parent.
+ end if
 
  DBG_EXIT("COLL")
 
