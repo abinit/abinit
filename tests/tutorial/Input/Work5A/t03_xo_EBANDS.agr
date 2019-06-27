@@ -13,7 +13,7 @@
 @world xmin 0.00
 @world xmax 1
 @world ymin  -3.19657223E+01
-@world ymax   8.98191716E+00
+@world ymax   8.98191715E+00
 @default linewidth 1.5
 @xaxis  tick on
 @xaxis  tick major 1
@@ -985,5 +985,5 @@
 &
 @target G0.S191
 @type xy
-0   8.98191716E+00
+0   8.98191715E+00
 &

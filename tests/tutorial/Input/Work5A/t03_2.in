@@ -11,7 +11,7 @@ use_gemm_nonlop 1
 paral_kgb 1
 npband 2
 npfft 1
-#bandpp 4
+#bandpp 96
 
 #Plane wave basis
 ecut 8.
