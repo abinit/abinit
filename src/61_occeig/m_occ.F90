@@ -491,7 +491,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
  if(hightemp%enabled) then
-   call hightemp_getnfreeel(hightemp%ebcut,fermilo,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
+   call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermilo,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
    nelectlo=nelectlo+nelect_tmp
  end if
 
@@ -506,7 +506,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
  if(hightemp%enabled) then
-   call hightemp_getnfreeel(hightemp%ebcut,fermihi,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
+   call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermihi,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
    nelecthi=nelecthi+nelect_tmp
  end if
 
@@ -553,8 +553,10 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      !Blanchet - Compute the number of free electrons with corresponding chemical
      !potential and add to nelect bounds.
      if(hightemp%enabled) then
-       call hightemp_getnfreeel(hightemp%ebcut,fermimid,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
+       call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermimid,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
        nelectmid=nelectmid+nelect_tmp
+       entropy=entropy-entropy_tmp
+       ! write(0,*) 'entropy contrib = ',entropy_tmp
      end if
 
 !    write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
@@ -683,6 +685,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  end if !  End of logical on fixed moment calculations
 
 !write(std_out,*) "kT*Entropy:", entropy*tsmear
+write(0,*) "kT*Entropy:", entropy*tsmear
 
  nkpt_eff=nkpt
  if(prtvol==0)nkpt_eff=min(nkpt_max,nkpt)

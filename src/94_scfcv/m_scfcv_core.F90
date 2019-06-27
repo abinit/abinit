@@ -2647,8 +2647,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
    end if
 
+!  Blanchet Add the energy contribution to the internal energy
    if(hightemp%enabled) call hightemp_addtoenergy(hightemp%energycontrib,etotal)
-   write(0,*) 'Energy = ',etotal, "Fermi Energy = ", energies%e_fermie, "U_0 = ",hightemp%u0
 
 !  Compute energy residual
    deltae=etotal-elast
