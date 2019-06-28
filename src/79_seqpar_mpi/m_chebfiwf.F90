@@ -70,6 +70,7 @@ module m_chebfiwf
   logical,save  :: l_paw
   integer,save  :: l_prtvol
   integer,save  :: l_sij_opt
+  integer, save :: l_paral_kgb
   real(dp), allocatable,save :: l_gvnlc(:,:)
   real(dp), allocatable,save ::  l_pcon(:)
   type(mpi_type),pointer,save :: l_mpi_enreg
@@ -159,6 +160,7 @@ module m_chebfiwf
   l_mpi_enreg => mpi_enreg
   l_gs_hamk => gs_hamk
   l_nband_filter = nband
+  l_paral_kgb = dtset%paral_kgb
  
   !Variables
   nline=dtset%nline
@@ -237,7 +239,7 @@ module m_chebfiwf
     ! Don't know yet how to deal with this with xgBlock
     !print *, "npw", npw
     !print *, "nspinor", nspinor
-    !print *, "nband", nband
+    !print *, "l_mpi_enreg%me_g0", l_mpi_enreg%me_g0
     !stop
     !MPI HANDLES THIS AUTOMATICALLY (only proc 0 is me_g0)
     if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2 
@@ -404,8 +406,9 @@ module m_chebfiwf
  
   end subroutine chebfiwf2
  
-  subroutine getghc_gsc1(X,AX,BX)	
+  subroutine getghc_gsc1(X,AX,BX,transposer)	
     use m_xg, only : xg_t, xgBlock_get, xgBlock_set, xgBlock_getSize, xgBlock_t
+    use m_xgTransposer !, only xgTransposer, xgTransposer_getCPURow
 #ifdef HAVE_OPENMP
     use omp_lib
 #endif
@@ -419,6 +422,7 @@ module m_chebfiwf
     type(xgBlock_t), intent(inout) :: X
     type(xgBlock_t), intent(inout) :: AX
     type(xgBlock_t), intent(inout) :: BX
+    type(xgTransposer_t), optional, intent(inout) :: transposer
     integer         :: blockdim
     integer         :: spacedim
     type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,0) 
@@ -428,6 +432,8 @@ module m_chebfiwf
     double precision, pointer :: cg(:,:)
     double precision, pointer :: ghc(:,:)
     double precision, pointer :: gsc(:,:)
+    
+    integer :: cpuRow
     
     call xgBlock_getSize(X,spacedim,blockdim)
 
@@ -467,7 +473,14 @@ module m_chebfiwf
       !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
       call xgBlock_scale(X,inv_sqrt2,1)
       !suppress scaling to debug MPI
-      if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
+      if (l_paral_kgb == 0) then
+        if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
+      else
+        call xgTransposer_getCPURow(transposer, cpuRow)
+        if (cpuRow == 0) then
+          cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
+        end if
+      end if
     end if
       
     !call debug_helper(X, blockdim)
@@ -505,14 +518,29 @@ module m_chebfiwf
       call xgBlock_scale(X,sqrt2,1)
       call xgBlock_scale(AX,sqrt2,1)
       !suppress scaling to debug MPI
-      if(l_mpi_enreg%me_g0 == 1) then
-        cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-        ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-      endif
+      if (l_paral_kgb == 0) then
+        if(l_mpi_enreg%me_g0 == 1) then
+          !print *, "RANK", xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
+          cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+          ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+        endif
+      else 
+        if (cpuRow == 0) then
+          !print *, "RANK", xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
+          cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+          ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+        end if
+      end if
       if(l_paw) then
         !gsc(:,1:spacedim*blockdim) = gsc(:,1:spacedim*blockdim) * sqrt2
         call xgBlock_scale(BX,sqrt2,1)
-        if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+        if (l_paral_kgb == 0) then
+          if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+        else
+          if (cpuRow == 0) then
+            gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+          end if
+        end if
       end if
     end if
     

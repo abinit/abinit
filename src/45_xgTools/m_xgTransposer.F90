@@ -84,6 +84,7 @@ module m_xgTransposer
     integer :: state
     type(mpiData_t), private :: mpiData(4)
     integer, allocatable, private :: lookup(:)
+    !integer, allocatable, private :: me_g0_lookup(:,:)
     integer, pointer, private :: nrowsLinalg(:) => null()
     integer :: nrowsColsRows
     integer :: ncolsColsRows
@@ -96,6 +97,7 @@ module m_xgTransposer
   public :: xgTransposer_init
   public :: xgTransposer_transpose
   public :: xgTransposer_free
+  public :: xgTransposer_getCPURow
 
 
   contains
@@ -216,6 +218,7 @@ module m_xgTransposer
       !print *, "NCPUCOLS", ncpuCols
       !stop
       ABI_MALLOC(xgTransposer%lookup,(1:ncols))
+      !ABI_MALLOC(xgTransposer%me_g0_lookup,())
       do icol = 0, ncols-1
         xgTransposer%lookup(icol+1) = MOD(icol,ncpuCols)
       end do
@@ -286,16 +289,16 @@ module m_xgTransposer
     xgTransposer%mpiData(MPI_ROWS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_ROWS)%comm)
     xgTransposer%mpiData(MPI_ROWS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_ROWS)%comm)
     
-!    print *, "xgTransposer%mpiData(MPI_ROWS)%rank", xgTransposer%mpiData(MPI_ROWS)%rank
-!    print *, "xgTransposer%mpiData(MPI_ROWS)%size", xgTransposer%mpiData(MPI_ROWS)%size 
-!    stop
+    print *, "xgTransposer%mpiData(MPI_ROWS)%rank", xgTransposer%mpiData(MPI_ROWS)%rank
+    print *, "xgTransposer%mpiData(MPI_ROWS)%size", xgTransposer%mpiData(MPI_ROWS)%size 
+    !stop
 
     xgTransposer%mpiData(MPI_COLS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_COLS)%comm)
     xgTransposer%mpiData(MPI_COLS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_COLS)%comm)
 
-!    print *, "xgTransposer%mpiData(MPI_COLS)%rank", xgTransposer%mpiData(MPI_COLS)%rank
-!    print *, "xgTransposer%mpiData(MPI_COLS)%size", xgTransposer%mpiData(MPI_COLS)%size 
-!    stop
+    print *, "xgTransposer%mpiData(MPI_COLS)%rank", xgTransposer%mpiData(MPI_COLS)%rank
+    print *, "xgTransposer%mpiData(MPI_COLS)%size", xgTransposer%mpiData(MPI_COLS)%size 
+    !stop
 
     call xgBlock_setComm(xgTransposer%xgBlock_colsrows,xgTransposer%mpiData(MPI_ROWS)%comm)
 
@@ -933,6 +936,14 @@ module m_xgTransposer
   end subroutine xgTransposer_free
 !!***
 
+  subroutine xgTransposer_getCPURow(xgTransposer, row)
+  
+    type(xgTransposer_t), intent(inout) :: xgTransposer
+    type(integer), intent(inout) :: row
+    
+    row = xgTransposer%mpiData(MPI_ROWS)%rank
+  
+  end subroutine xgTransposer_getCPURow
 
 end module m_xgTransposer
 !!***
