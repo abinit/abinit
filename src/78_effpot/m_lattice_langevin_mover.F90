@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! This module contains the langevin  (NVT) lattice mover.
-!! 
+!!
 !!
 !!
 !! Datatypes:
@@ -89,7 +89,7 @@ contains
     ABI_DEALLOCATE(self%eta)
     call self%lattice_mover_t%finalize()
   end subroutine finalize
- 
+
 
   subroutine update_vars(self)
     class(lattice_langevin_mover_t), intent(inout) :: self
@@ -113,6 +113,10 @@ contains
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     integer :: i
 
+    ! do not use displacement and strain because they are stored in the mover.
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
          & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
     call self%rng%rand_normal_array(self%xi, 3*self%natom)
@@ -120,10 +124,10 @@ contains
 
     ! First half of velocity update
     do i =1, self%natom
-       self%current_vcart(:, i) = self%current_vcart(:,i) + &
-            & self%c1 * self%forces(:,i) / self.masses(i) - &
-            & self.c2 * self.current_vcart(:,i) + &
-            & self.c3(i) * self.xi(:, i) - self.c4(i) * self.eta(:,i) 
+       self%current_vcart(:,i) = self%current_vcart(:,i) + &
+            & self%c1 * self%forces(:,i) / self%masses(i) - &
+            & self%c2 * self%current_vcart(:,i) + &
+            & self%c3(i) * self%xi(:, i) - self%c4(i) * self%eta(:,i) 
 
        self%displacement(:, i) = self%displacement(:, i) &
             & + self%dt * self%current_vcart(:, i) * self%c5( i) *self%eta(:,i)
@@ -133,10 +137,10 @@ contains
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
          & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
     do i =1, self%natom
-       self%current_vcart(:, i) = self%current_vcart(:,i) + &
-            &self%c1 * self%forces(:,i) / self.masses(i) - &
-            & self.c2 * self.current_vcart(:,i) + &
-            & self.c3(i) * self.xi(:, i) - self.c4(i) * self.eta(:,i) 
+       self%current_vcart(:,i) = self%current_vcart(:,i) + &
+            &self%c1 * self%forces(:,i) / self%masses(i) - &
+            & self%c2 * self%current_vcart(:,i) + &
+            & self%c3(i) * self%xi(:, i) - self%c4(i) * self%eta(:,i) 
     end do
 
   end subroutine run_one_step

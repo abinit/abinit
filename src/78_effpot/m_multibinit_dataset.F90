@@ -831,13 +831,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%dynamics=intarr(1)
+ ! >100: the builtin multibinit lattice movers
  if(multibinit_dtset%dynamics/=0.and.multibinit_dtset%dynamics/=6.and.&
-&   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13.and.&
-&   multibinit_dtset%dynamics/=27.and.&
-&   multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25) then
+      &   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13.and.&
+      &   multibinit_dtset%dynamics/=27.and.&
+      &   multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25 .and. &
+      &   multibinit_dtset%dynamics/=101.and.multibinit_dtset%dynamics/=102 .and. & 
+      &   multibinit_dtset%dynamics/=103   &
+    ) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
-&   'are 6,12,24,25 or  13 (see ionmov in abinit documentation).',ch10,&
+&   'are 6,12,24,25 or  13, 101, 102, 103 (see ionmov in abinit documentation).',ch10,&
 &   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
  end if
@@ -1169,11 +1173,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%spin_dynamics=intarr(1)
- if(multibinit_dtset%spin_dynamics< 0 .or.&
-      &   multibinit_dtset%spin_dynamics > 3) then
+ if(  multibinit_dtset%spin_dynamics > 3) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'spin_dynamics is',multibinit_dtset%spin_dynamics,', but the only allowed values',ch10,&
-         &   'are 0, 1, 2, and 3.',ch10,&
+         &   'are 0, 1, 2, and 3 and negative values.',ch10,&
          &   'Action: correct spin_dynamics in your input file.'
     MSG_ERROR(message)
  end if

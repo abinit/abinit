@@ -52,14 +52,15 @@ module m_lattice_mover
      !> This is the abstract lattice mover
 
      type(multibinit_dtset_type), pointer :: params=>null() ! input parameters
-     real(dp), allocatable :: masses(:)  ! masses
      integer :: natom     ! number of atoms
      real(dp) :: stress(3,3), strain(3,3)  ! stress and strain
-     real(dp), allocatable :: current_xcart(:,:)
-     real(dp), allocatable :: current_vcart(:,:)
-     real(dp), allocatable :: forces(:,:)
-     real(dp), allocatable :: displacement(:,:)
+     real(dp), allocatable :: masses(:)  ! masses
+     real(dp), allocatable :: current_xcart(:,:) ! xcart of current step
+     real(dp), allocatable :: current_vcart(:,:) ! vcart of current step
+     real(dp), allocatable :: forces(:,:)        ! forces
+     real(dp), allocatable :: displacement(:,:)  ! displacement
      real(dp) :: energy
+     logical :: is_null = .True.
      !> TODO: hist 
      !type(lattice_hist_t) :: hist
    contains
@@ -89,19 +90,23 @@ contains
     ABI_ALLOCATE(self%current_xcart, (3, self%natom))
     ABI_ALLOCATE(self%current_vcart, (3, self%natom))
     ABI_ALLOCATE(self%forces, (3,self%natom))
+    self%is_null=.False.
 
   end subroutine initialize
 
   subroutine finalize(self)
     class(lattice_mover_t), intent(inout) :: self
-    ABI_DEALLOCATE(self%masses)
     nullify(self%supercell)
     nullify(self%params)
     self%label="Destroyed lattice mover"
-    ABI_DEALLOCATE(self%masses)
-    ABI_DEALLOCATE(self%current_xcart)
-    ABI_DEALLOCATE(self%current_vcart)
-    ABI_DEALLOCATE(self%forces)
+    if (.not.self%is_null) then
+       ABI_DEALLOCATE(self%masses)
+       ABI_DEALLOCATE(self%current_xcart)
+       ABI_DEALLOCATE(self%current_vcart)
+       ABI_DEALLOCATE(self%forces)
+       ABI_DEALLOCATE(self%displacement)
+    endif
+    self%is_null=.True.
   end subroutine finalize
 
   subroutine set_params(self, params)
@@ -149,6 +154,27 @@ contains
     ABI_UNUSED_A(lwf)
 
   end subroutine run_one_step
+
+
+  subroutine run_time(self, effpot)
+    ! run one step. (For MC also?)
+    class(lattice_mover_t), intent(inout) :: self
+    ! array of effective potentials so that there can be multiple of them.
+    class(abstract_potential_t), intent(inout) :: effpot
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    if(present(displacement) .or. present(strain)) then
+       MSG_ERROR("displacement and strain should not be input for lattice mover")
+    end if
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(effpot)
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(spin)
+    ABI_UNUSED_A(lwf)
+
+  end subroutine run_one_step
+
+
 
   subroutine reset(self)
     ! reset the state of mover (e.g. counter->0)

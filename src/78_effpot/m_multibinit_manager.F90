@@ -42,24 +42,36 @@ module m_multibinit_manager
   use m_mathfuncs, only: diag
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
        outvars_multibinit, multibinit_dtset_free
+ ! cells
   use m_supercell_maker, only: supercell_maker_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
+
+  ! primitive potential
   use m_primitive_potential_list, only: primitive_potential_list_t
   use m_primitive_potential, only: primitive_potential_t
-  use m_spin_primitive_potential, only: spin_primitive_potential_t
+
+  ! 
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
   use m_abstract_mover, only: abstract_mover_t
   use m_lattice_effpot, only : lattice_effpot_t
+
+  ! Spin
+  use m_spin_primitive_potential, only: spin_primitive_potential_t
   use m_spin_potential, only : spin_potential_t
   use m_spin_mover, only : spin_mover_t
   use m_mpi_scheduler, only: init_mpi_info
   ! TODO : should these be moved into spin mover?
   use m_spin_ncfile, only: spin_ncfile_t
 
+  ! Lattice harmonic
   use m_lattice_harmonic_primitive_potential, only: lattice_harmonic_primitive_potential_t
   use m_lattice_harmonic_potential, only: lattice_harmonic_potential_t
+
+  ! Lattice movers
   use m_lattice_mover, only: lattice_mover_t
+
+  ! Spin lattice coupling
   use m_spin_lattice_coupling_effpot, only : spin_lattice_coupling_effpot_t
   implicit none
   private
@@ -79,7 +91,7 @@ module m_multibinit_manager
      type(primitive_potential_list_t) :: prim_pots  ! list of primitive potentials
      type(potential_list_t) :: pots     ! potential list
      ! a polymorphic lattice mover so multiple mover could be used.
-     class(lattice_mover_t), pointer :: lattice_mover
+     class(lattice_mover_t), pointer :: lattice_mover=> null()
      ! as for the spin, there is only one mover which has several  methods
      type(spin_mover_t) :: spin_mover  
      ! type(lwf_mover_t) :: lwf_mover
@@ -90,6 +102,11 @@ module m_multibinit_manager
      ! TODO: this is temporary. Remove after moving to multibinit_main2
      ! It means the parsing of the params are already done outside the manager.
      logical :: use_external_params=.True.
+
+     logical :: has_displacement = .False.
+     logical :: has_strain = .False.
+     logical :: has_spin = .False.
+     logical :: has_lwf = .False.
    contains
      procedure :: initialize
      procedure :: finalize
@@ -100,6 +117,7 @@ module m_multibinit_manager
      procedure :: set_movers
      procedure :: run_spin_dynamics
      procedure :: run_MvT
+     procedure :: run_lattice_dynamics
      procedure :: run
      procedure :: run_all
   end type mb_manager_t
@@ -116,6 +134,7 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
+    self%filenames(:)=filenames(:)
 
     !TODO: remove params as argument. It is here because the params are read
     ! in the multibinit_main function. Once we use multibinit_main2, remove it.
@@ -126,10 +145,21 @@ contains
        ABI_MALLOC_SCALAR(self%params)
        call self%read_params()
     endif
-    self%filenames=filenames
+
+
     call xmpi_bcast(self%filenames, master, comm, ierr)
     call self%prepare_params()
     ! read potentials from
+
+    if(self%params%spin_dynamics>0) then
+       self%has_spin=.True.
+    endif
+    if(self%params%dynamics >0) then
+       self%has_displacement=.True.
+       self%has_strain=.True.
+    endif
+    ! lwf
+
   end subroutine initialize
 
 
@@ -144,7 +174,12 @@ contains
     call self%prim_pots%finalize()
     call self%pots%finalize()
     call self%spin_mover%finalize()
-    call self%lattice_mover%finalize()
+    ! Note that lattice mover is a pointer.
+    ! It might be null if there is no lattice part.
+    if (associated(self%lattice_mover)) then
+       call self%lattice_mover%finalize()
+       nullify(self%lattice_mover)
+    end if
     if(.not. self%use_external_params) then
        call multibinit_dtset_free(self%params)
        if (associated(self%params)) then
@@ -154,6 +189,11 @@ contains
     endif
     nullify(self%params)
     !call self%lwf_mover%finalize()
+
+    self%has_displacement=.False.
+    self%has_strain=.False.
+    self%has_spin=.False.
+    self%has_lwf=.False.
   end subroutine finalize
 
   !-------------------------------------------------------------------!
@@ -188,7 +228,13 @@ contains
        call wrtout(std_out,message,'COLL')
     end if
 
-    call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
+    print*,"Filenames", trim(self%filenames(1)), trim(self%filenames(2))
+
+    !FIXME: This should not be here.
+    ! It is only for lattice potential
+    if(.False.) then
+       call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
+    endif
 
     !Read the input file, and store the information in a long string of characters
     !strlen from defs_basis module
@@ -224,9 +270,11 @@ contains
     class(mb_manager_t), intent(inout) :: self
     ! Kelvin to Hartree (In input file, the spin temperature is in K.
     ! convert to a.u.)
-    self%params%spin_temperature = self%params%spin_temperature/Ha_K
-    self%params%spin_temperature_start=self%params%spin_temperature_start/Ha_K
-    self%params%spin_temperature_end=self%params%spin_temperature_end/Ha_K
+    if(self%has_spin) then
+       self%params%spin_temperature = self%params%spin_temperature/Ha_K
+       self%params%spin_temperature_start=self%params%spin_temperature_start/Ha_K
+       self%params%spin_temperature_end=self%params%spin_temperature_end/Ha_K
+    end if
   end subroutine prepare_params
 
 
@@ -260,10 +308,11 @@ contains
           call self%prim_pots%append(spin_pot)
        end select
     end if
-    if(self%params%dynamics>0) then
+    if(self%params%spin_dynamics<0 .and. self%params%dynamics>100) then
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
        select type(lat_ham_pot)
        type is (lattice_harmonic_primitive_potential_t)
+          call lat_ham_pot%initialize(self%unitcell)
           call lat_ham_pot%load_from_files(self%params, self%filenames)
           call self%prim_pots%append(lat_ham_pot)
        end select
@@ -308,8 +357,12 @@ contains
        call self%spin_mover%initialize(params=self%params, supercell=self%supercell)
     end if
 
+
     if (self%params%dynamics>0) then
-       call self%lattice_mover%initialize(params=self%params, supercell=self%supercell)
+       if (self%params%dynamics ==11) then
+          !ABI_DATATYPE_ALLOCATE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
+       endif
+       !call self%lattice_mover%initialize(params=self%params, supercell=self%supercell)
     end if
 
     ! TODO: LWF MOVER
@@ -335,6 +388,7 @@ contains
     call self%spin_mover%spin_ncfile%close()
   end subroutine run_spin_dynamics
 
+
   subroutine run_MvT(self)
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
@@ -345,6 +399,25 @@ contains
     call self%set_movers()
     call self%spin_mover%run_MvT(self%pots, self%filenames(2))
   end subroutine run_MvT
+
+
+  !-------------------------------------------------------------------!
+  ! Run lattice only dynamics
+  !-------------------------------------------------------------------!
+
+  subroutine run_lattice_dynamics(self)
+    class(mb_manager_t), intent(inout) :: self
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%fill_supercell()
+    call self%set_movers()
+    call self%lattice_mover%run_time(self%pots)
+
+  end subroutine run_lattice_dynamics
+
+
+
 
   !-------------------------------------------------------------------!
   ! Run all jobs
@@ -361,7 +434,9 @@ contains
           call self%run_MvT()
        end if
     end if
-    ! if ...
+    if (self%params%dynamics>0) then
+       call self%run_lattice_dynamics()
+    end if
   end subroutine run
 
 

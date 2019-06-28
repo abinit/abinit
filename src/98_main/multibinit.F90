@@ -79,7 +79,7 @@ program multibinit
   character(len=fnlen) :: filnam(17),tmpfilename
   character(len=500) :: message, arg
   type(args_t) :: args
-  integer :: ii, nargs, iarg
+  integer :: ii
   logical :: unittest=.False. , use_f03=.False.
   integer :: master, my_rank, comm, nproc, ierr
   logical :: iam_master
@@ -177,7 +177,9 @@ program multibinit
 
   !***************************************************************************************
   !***************************************************************************************
-  if(use_f03) then
+  if(args%multibinit_F03_mode==1) then
+     ! Use the F03 mode, which has only spin and a simple harmonic lattice now
+     ! After everything is migrated, it will becomes default and multibinit_main will be deprecated.
      call multibinit_main2(filnam)
   else
      call multibinit_main(filnam, args%dry_run)

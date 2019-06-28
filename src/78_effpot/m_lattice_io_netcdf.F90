@@ -36,9 +36,9 @@ module m_lattice_harmonic_primitive_potential
   use m_abicore
   use m_errors
   use m_nctk
-  !#if defined HAVE_NETCDF
+!#if defined HAVE_NETCDF
   use netcdf
-  !#endif
+!#endif
   use m_xmpi
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_cell, only: mbcell_t
@@ -50,20 +50,35 @@ module m_lattice_harmonic_primitive_potential
   use m_lattice_harmonic_potential, only: lattice_harmonic_potential_t
   implicit none
   private
-  !!*** 
+  !!***
+
+
+  !-------------------------------------------------------------------!
+  ! An harmonic potential which has only the IFC (with no dipole-dipole)
+  !
+  ! IFC is written in a coefficient matrix M(R, i, j)=val
+  !-------------------------------------------------------------------!
   type, public, extends(primitive_potential_t) :: lattice_harmonic_primitive_potential_t
-     integer :: natom
-     type(ndcoo_mat_t) :: coeff  ! 
-     integer, allocatable :: Rlist(:,:) ! 
+     integer :: natom    ! number of atoms
+     type(ndcoo_mat_t) :: coeff  !  A N-dimensional COO matrix.
+                                 !  The indices are (ind_R, i, j). Note that xyz is included in i and j.
+     integer, allocatable :: Rlist(:,:) ! The list of R points (3, number of R-points)
+                                        !. Rlist(:, ind_R) is a R-vector.
    contains
      procedure:: initialize
      procedure:: finalize
-     procedure :: load_from_netcdf
-     procedure:: fill_supercell
+     procedure :: load_from_files   ! load potential from files listed in files file
+     procedure :: load_from_netcdf  ! load potential from a netcdf file
+     procedure:: fill_supercell     ! fill a supercell potential
   end type lattice_harmonic_primitive_potential_t
 
 contains
 
+  !-------------------------------------------------------------------!
+  ! Initialize
+  !  Input:
+  !    primcell: the reference primitive cell.
+  !-------------------------------------------------------------------!
   subroutine initialize(self, primcell)
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     type(mbcell_t), target, intent(inout) :: primcell
@@ -77,6 +92,9 @@ contains
   end subroutine initialize
 
 
+  !-------------------------------------------------------------------!
+  ! Finalize
+  !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     call self%coeff%finalize()
@@ -97,48 +115,73 @@ contains
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
-    call self%load_from_netcdf( fnames(1))
+    call self%load_from_netcdf( fnames(3))
     ABI_UNUSED_A(params)
   end subroutine load_from_files
 
+  !-------------------------------------------------------------------!
+  ! load potential from netcdf file
+  ! Note that the lattic part of the primitive cell is also loaded.
+  ! Input:
+  !  fname: filename
+  !-------------------------------------------------------------------!
   subroutine load_from_netcdf(self, fname)
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     character(len=fnlen), intent(in) :: fname
     integer :: ncid, ierr
-    integer :: iR, R(3), nR, natom, natom3
+    integer :: iR, nR, natom, natom3
     real(dp) :: cell(3,3)
     real(dp), allocatable :: xcart(:,:), masses(:)
     integer, allocatable :: zion(:)
     real(dp), allocatable :: ifc_vallist(:,:,:)
-    integer :: varid, i, j, d(3)
-
-
-    ierr=nf90_open(fname, NF90_NOWRITE, ncid)
-
+    integer :: varid, i, j
+!#if defined HAVE_NETCDF
+    ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
+    call nc_handle_err(ierr)
 
     ierr=nctk_get_dim(ncid, "ifc_nR" , nR)
     ierr=nctk_get_dim(ncid, "natom", natom)
     ierr=nctk_get_dim(ncid, "natom3", natom3)
 
+    print*,"natom",  natom
+
     ABI_ALLOCATE(masses, (natom))
     ABI_ALLOCATE(xcart, (3, natom))
-    ABI_ALLOCATE(zion,(nR))
+    ABI_ALLOCATE(zion,(natom))
 
-    ABI_ALLOCATE(ifc_vallist, (nR, natom3, natom3))
+    ABI_ALLOCATE(ifc_vallist, (natom3, natom3, nR))
     ABI_ALLOCATE(self%Rlist,(3, nR))
 
-    call self%coeff%initialize([ nR, natom3, natom3 ])
-    call self%primcell%set_lattice(natom, cell, xcart, masses, zion)
 
     ierr =nf90_inq_varid(ncid, "ref_masses", varid)
+    call nc_handle_err(ierr)
     ierr = nf90_get_var(ncid, varid, masses)
+    call nc_handle_err(ierr)
+    print *, "masses", masses
 
     ierr =nf90_inq_varid(ncid, "ref_xcart", varid)
+    call nc_handle_err(ierr)
     ierr = nf90_get_var(ncid, varid, xcart)
+    call nc_handle_err(ierr)
+    print *, "xcart", xcart
 
     ierr =nf90_inq_varid(ncid, "ref_cell", varid)
+    call nc_handle_err(ierr)
     ierr = nf90_get_var(ncid, varid, cell)
+    call nc_handle_err(ierr)
+    print *, "cell", cell
 
+    ierr =nf90_inq_varid(ncid, "ref_zion", varid)
+    call nc_handle_err(ierr)
+    ierr = nf90_get_var(ncid, varid, zion)
+    call nc_handle_err(ierr)
+
+    print *, "zion", zion
+
+
+    call self%primcell%set_lattice(natom, cell, xcart, masses, zion)
+
+    call self%coeff%initialize([ nR, natom3, natom3 ])
     ierr =nf90_inq_varid(ncid, "ifc_Rlist", varid)
     ierr = nf90_get_var(ncid, varid, self%Rlist)
 
@@ -148,7 +191,7 @@ contains
     do iR =1, nR
        do i=1 , natom3
           do j=1, natom3
-             call self%coeff%add_entry([iR, i, j], ifc_vallist(iR, i, j))
+             call self%coeff%add_entry([iR, i, j], ifc_vallist(i, j, iR))
           end do
        end do
     end do
@@ -159,16 +202,31 @@ contains
     ABI_DEALLOCATE(xcart)
     ABI_DEALLOCATE(zion)
     ABI_DEALLOCATE(ifc_vallist)
+!# else
+!   MSG_ERROR("Error: Netcdf should be installed with Multibinit to read the netcdf potential file.")
+!#endif
   end subroutine load_from_netcdf
 
 
+  !-------------------------------------------------------------------!
+  !Fill supercell
+  ! Inputs:
+  !  scmaker : supercell_maker_t
+  ! Output:
+  !  scpot: a class pointer to an ABSTRACT potential.
+  !         Not a harmonic potential because this is inherited from
+  !         an abstract_primitive_potential_t, which doesn't know
+  !         the type of the supercell potential.
+  !
+  !-------------------------------------------------------------------!
   subroutine fill_supercell(self, scmaker, scpot)
     class(lattice_harmonic_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t), intent(inout):: scmaker
     class(abstract_potential_t), pointer, intent(inout) :: scpot
     integer :: natom, sc_natom
+    integer :: inz, iR, R(3), i, j, icell
     integer, allocatable :: ilist_sc(:), jlist_sc(:), Rlist_sc(:,:)
-    real, allocatable :: vallist_sc(:)
+    real(dp):: val
 
     natom=self%natom
     sc_natom= natom* scmaker%ncells
@@ -176,7 +234,8 @@ contains
     !! NOTE: the code below can be used as a pattern to build supercell from primitivecell.
     ! Step 1: allocate the scpot as a corresponding supercell potential
     ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_potential_t, scpot)
-    ! Fortran does not know the type of the generic pointer
+    ! Fortran does not know the functions specific to the derived class pointer.
+    ! Only the ones inheritated from abstract class,
     ! unless select type is used:
     select type(scpot)
     type is (lattice_harmonic_potential_t)
@@ -186,17 +245,38 @@ contains
        ! list of i: coeff%ind%data(2, 1:coeff%nnz)
        ! list of j: coeff%ind%data(3, 1:coeff%nnz)
        ! IFC: (ind) = val
-       ! TODO
-       ! trans_ilist: for each i, it will find one i' for each cell in supercell (total: ncell)
-       ! nbasis: number of degrees of freedom in primitive cell, here is 3natom.
+       do inz =1 , self%coeff%nnz
+          ! For each non-zero entry in the coeff matrix
+          ! get the R, i, and j, val
+          iR=self%coeff%ind%data(1,inz)
+          R(:) = self%Rlist(:, iR)
+          i=self%coeff%ind%data(2, inz)
+          j=self%coeff%ind%data(3, inz)
+          val=self%coeff%val%data(inz)
+          ! translate i to i in supercell.
+          ! No need to allocate, but remember to deallocate!
+          ! nbasis is the number in one primitive cell.
+          ! e.g. there are 3*natom possible i (3: x, y, z) in each primitive cell.
+          call scmaker%trans_i(nbasis=self%natom*3, i=i, i_sc=ilist_sc )
+          ! translate j, Rj to supercell.
+          call scmaker%trans_j_and_Rj(nbasis=self%natom*3, j=j, Rj=R, j_sc=jlist_sc, Rj_sc=Rlist_sc)
+          ! values are repeated in cells
+          do icell=0, scmaker%ncells
+             call scpot%add_term(i, j, val )
+          end do
+       end do
     end select
     ABI_DEALLOCATE(ilist_sc)
     ABI_DEALLOCATE(jlist_sc)
     ABI_DEALLOCATE(Rlist_sc)
-    ABI_DEALLOCATE(vallist_sc)
   end subroutine fill_supercell
 
-
-
+  subroutine nc_handle_err(ierr)
+    integer, intent ( in) ::ierr
+    if(ierr/= nf90_noerr) then
+       print *, trim(nf90_strerror(ierr))
+       stop "Stopped"
+    end if
+  end subroutine nc_handle_err
 
 end module m_lattice_harmonic_primitive_potential

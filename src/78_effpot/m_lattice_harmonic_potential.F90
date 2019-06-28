@@ -41,34 +41,66 @@ module m_lattice_harmonic_potential
   private
 
   type, public, extends(abstract_potential_t) :: lattice_harmonic_potential_t
-     integer :: natom
-     real(dp), allocatable :: ref_xcart(:,:)
-     type(COO_mat_t) :: coeff
+     integer :: natom           ! number of atoms
+     !real(dp):: ref_cell(3,3)   ! reference structure cell parameters.Not needed.
+     !real(dp), allocatable :: ref_xcart(:,:) ! reference xcart. not needed
+     type(COO_mat_t) :: coeff  ! coefficient. A COO sparse matrix (3N*3N).
    contains
      procedure :: initialize
      procedure :: finalize
      procedure :: set_supercell
      procedure :: calculate
+     procedure :: add_term
   end type lattice_harmonic_potential_t
 
 contains
 
+
+  !-------------------------------------------------------------------!
+  ! initialize
+  ! Input:
+  !  natom: number of atoms
+  !-------------------------------------------------------------------!
   subroutine initialize(self, natom)
     class(lattice_harmonic_potential_t), intent(inout) :: self
     integer, intent(in) :: natom
     self%has_displacement = .True.
+    self%is_null = .False.
     self%label="Lattice_harmonic_potential"
     self%natom=natom
     call self%coeff%initialize(mshape= [3*self%natom, 3*self%natom])
+    !ABI_MALLOC(self%ref_xcart, (3, self%natom))
   end subroutine initialize
 
+  !-------------------------------------------------------------------!
+  ! Finalize
+  !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(lattice_harmonic_potential_t), intent(inout) :: self
     self%has_displacement=.False.
     call self%coeff%finalize()
     call self%abstract_potential_t%finalize()
+    self%is_null=.True.
+    self%natom=0
   end subroutine finalize
 
+  !-------------------------------------------------------------------!
+  ! Add a term to the potential
+  !-------------------------------------------------------------------!
+  subroutine add_term(self, i,j, val)
+    class(lattice_harmonic_potential_t), intent(inout) :: self
+    integer, intent(in) :: i, j
+    real(dp), intent(in) :: val
+    call self%coeff%add_entry([i,j], val)
+  end subroutine add_term
+
+
+  !-------------------------------------------------------------------!
+  ! set_supercell
+  !  link the supercell with potential.
+  ! Inputs:
+  !   supercell: mbsupercell_t
+  !-------------------------------------------------------------------!
   subroutine set_supercell(self, supercell)
     class(lattice_harmonic_potential_t), intent(inout) :: self
     type(mbsupercell_t), target, intent(inout) :: supercell
@@ -76,6 +108,13 @@ contains
   end subroutine set_supercell
 
 
+  !-------------------------------------------------------------------!
+  ! calculate force and energy from harmonic potential
+  ! F= - IFC .matmul. displacement
+  ! E = 1/2 (-F) .dot. displacement
+  ! Input:
+  !   displacement: required.
+  !-------------------------------------------------------------------!
   subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
     ! This function calculate the energy and its first derivative
     ! the inputs and outputs are optional so that each effpot can adapt to its
@@ -95,6 +134,9 @@ contains
     ABI_UNUSED_A(bfield)
     ABI_UNUSED_A(lwf_force)
 
+    if (.not. present(displacement)) then
+       MSG_BUG("displacment should be provided to lattice_harmonic potential")
+    end if
     call self%coeff%mv(displacement, f)
     force(:,:) = force(:,:) - f
     energy =energy + 0.5_dp * sum(f*displacement)

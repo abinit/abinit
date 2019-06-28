@@ -402,7 +402,7 @@ contains
 
     ! Run spin dynamics
     !****************************************************************************************
-    if(inp%spin_dynamics>0) then
+    if(inp%spin_dynamics/=0) then
        !call spin_model%run()
        call manager%run()
     end if
@@ -411,7 +411,7 @@ contains
 
     !Free the effective_potential and dataset
     !****************************************************************************************
-    if(inp%spin_dynamics>0) then
+    if(inp%spin_dynamics/=0) then
        call manager%finalize()
     end if
     call effective_potential_free(reference_effective_potential)

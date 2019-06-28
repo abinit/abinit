@@ -118,7 +118,8 @@ contains
     integer, intent(in) :: natom, zion(:)
     real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
     self%has_lattice=.True.
-    call self%lattice%initialize(natom, cell, xcart, masses, zion)
+    call self%lattice%initialize(natom=natom, cell=cell, &
+         &xcart=xcart, masses=masses, zion=zion)
   end subroutine set_lattice
 
 
@@ -206,7 +207,7 @@ contains
 !================================Lattice====================================
 
   subroutine latt_initialize(self, natom, cell, xcart, masses, zion)
-    class(mbcell_lattice_t) :: self
+    class(mbcell_lattice_t), intent(inout) :: self
     integer, intent(in) :: natom, zion(:)
     real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
     self%natom=natom
@@ -223,9 +224,15 @@ contains
   subroutine latt_finalize(self)
     class(mbcell_lattice_t) :: self
     self%natom=0
-    ABI_DEALLOCATE(self%xcart)
-    ABI_DEALLOCATE(self%masses)
-    ABI_DEALLOCATE(self%zion)
+    if (allocated(self%xcart)) then
+       ABI_DEALLOCATE(self%xcart)
+    endif
+    if (allocated(self%masses)) then
+       ABI_DEALLOCATE(self%masses)
+    endif
+    if (allocated(self%zion)) then
+       ABI_DEALLOCATE(self%zion)
+    endif
   end subroutine latt_finalize
 
 
@@ -234,6 +241,7 @@ contains
     type(supercell_maker_t), intent(inout):: sc_maker
     type(mbcell_lattice_t), intent(inout):: supercell
     !TODO;
+    
 
   end subroutine latt_fill_supercell
 
