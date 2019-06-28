@@ -2526,6 +2526,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !!  istwf_k=parameter that describes the storage of wfs
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kpt(3)=reduced coordinates of k point
+!!  matom= number of atoms in the unit cell
 !!  mkmem =number of k points treated by this node
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
@@ -2566,13 +2567,13 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !!
 !! OUTPUT
 !!
-!!  isdqwf_k(2,natpert,3,3,nq1grad)=wave function dependent part of the electronic flexoelectric tensor
+!!  isdqwf_k(2,matom,3,3,3,nq1grad)=wave function dependent part of the electronic flexoelectric tensor
 !!                         for the k-point kpt
-!!  isdqwf_t1_k(2,natpert,3,3,nq1grad)=t1 term (see notes) of isdqwf_k
-!!  isdqwf_t2_k(2,natpert,3,3,nq1grad)=t2 term (see notes) of isdqwf_k
-!!  isdqwf_t3_k(2,natpert,3,3,nq1grad)=t3 term (see notes) of isdqwf_k   
-!!  isdqwf_t4_k(2,natpert,3,3,nq1grad)=t5 term (see notes) of isdqwf_k
-!!  isdqwf_t5_k(2,natpert,3,3,nq1grad)=t5 term (see notes) of isdqwf_k
+!!  isdqwf_t1_k(2,matom,3,nq1grad,3,3)=t1 term (see notes) of isdqwf_k
+!!  isdqwf_t2_k(2,matom,3,nq1grad,3,3)=t2 term (see notes) of isdqwf_k
+!!  isdqwf_t3_k(2,matom,3,nq1grad,3,3)=t3 term (see notes) of isdqwf_k   
+!!  isdqwf_t4_k(2,matom,3,3,3,nq1grad)=t4 term (see notes) of isdqwf_k   
+!!  isdqwf_t5_k(2,matom,3,nq1grad,3,3)=t5 term (see notes) of isdqwf_k
 !!
 !! SIDE EFFECTS
 !!
@@ -2586,7 +2587,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
 subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isdqwf_k, & 
      &  isdqwf_t1_k,isdqwf_t2_k,isdqwf_t3_k,isdqwf_t4_k,isdqwf_t5_k,isppol,istwf_k, &
-     &  kg_k,kpt,mkmem,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
+     &  kg_k,kpt,matom,mkmem,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
      &  npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
      &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
      &  vhxc1_atdis,vhxc1_strain,wfk_t_atdis,wfk_t_ddk, &
@@ -2603,7 +2604,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
- integer,intent(in) :: mkmem,mpw,natpert,nband_k,nfft
+ integer,intent(in) :: matom,mkmem,mpw,natpert,nband_k,nfft
  integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr
  integer,intent(in) :: useylmgr
  real(dp),intent(in) :: gsqcut,ucvol,wtk_k
@@ -2618,10 +2619,10 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  integer,intent(in) :: pert_atdis(3,natpert),pert_strain(6,nstrpert)
  integer,intent(in) :: q1grad(3,nq1grad)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
- real(dp),intent(out) :: isdqwf_k(2,natpert,nq1grad,3,3)
- real(dp),intent(out) :: isdqwf_t1_k(2,natpert,nq1grad,3,3),isdqwf_t2_k(2,natpert,nq1grad,3,3)
- real(dp),intent(out) :: isdqwf_t3_k(2,natpert,nq1grad,3,3),isdqwf_t4_k(2,natpert,3,3,nq1grad)
- real(dp),intent(out) :: isdqwf_t5_k(2,natpert,nq1grad,3,3)
+ real(dp),intent(out) :: isdqwf_k(2,matom,3,nq1grad,3,3)
+ real(dp),intent(out) :: isdqwf_t1_k(2,matom,3,nq1grad,3,3),isdqwf_t2_k(2,matom,3,nq1grad,3,3)
+ real(dp),intent(out) :: isdqwf_t3_k(2,matom,3,nq1grad,3,3),isdqwf_t4_k(2,matom,3,3,3,nq1grad)
+ real(dp),intent(out) :: isdqwf_t5_k(2,matom,3,nq1grad,3,3)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rhog(2,nfft),rmet(3,3)
@@ -2635,7 +2636,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 
 !Local variables-------------------------------
 !scalars
- integer :: iatpert,iq1grad,berryopt,g0term,iband,idir,ii,ipert,istr,istrpert,jband
+ integer :: iatdir,iatom,iatpert,iq1grad,berryopt,g0term,iband,idir,ii,ipert,istr,istrpert,jband
  integer :: ka,kb,nkpg,nkpg1,npw_disk,nylmgrpart
  integer :: opt_gvnl1,opthartdqdq,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
  real(dp) :: cprodr,cprodi,doti,dotr,dum_lambda
@@ -3387,17 +3388,19 @@ c0_HatdisdagdQ_c1strain_bks=zero
    kb=pert_strain(4,istrpert)
    do iq1grad=1,nq1grad
      do iatpert=1,natpert
+       iatom=pert_atdis(1,iatpert)
+       iatdir=pert_atdis(2,iatpert)
        do iband=1,nband_k
     
          if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
 
          !All terms toghether except T4 that needs further treatment
-         isdqwf_k(1,iatpert,iq1grad,ka,kb)=isdqwf_k(1,iatpert,iq1grad,ka,kb) +              &
+         isdqwf_k(1,iatom,iatdir,iq1grad,ka,kb)=isdqwf_k(1,iatom,iatdir,iq1grad,ka,kb) +              &
       &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) + & !T1
       &  c1atdis_dQcalHstrain_c0_bks(1,iband,iatpert,iq1grad,istrpert) +                    & !T2
       &  c0_HatdisdagdQ_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) +                    & !T3
       &  c0_Hatdisdqdag_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) )                      !T5
-         isdqwf_k(2,iatpert,iq1grad,ka,kb)=isdqwf_k(2,iatpert,iq1grad,ka,kb) +              &
+         isdqwf_k(2,iatom,iatdir,iq1grad,ka,kb)=isdqwf_k(2,iatom,iatdir,iq1grad,ka,kb) +              &
       &  occ_k(iband) * ( c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) + & !T1
       &   c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert) +                   & !T2 
       &  c0_HatdisdagdQ_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) +                    & !T3
@@ -3405,38 +3408,38 @@ c0_HatdisdagdQ_c1strain_bks=zero
 
          !Separate them
          !T1
-         isdqwf_t1_k(1,iatpert,iq1grad,ka,kb)=isdqwf_t1_k(1,iatpert,iq1grad,ka,kb) + &
+         isdqwf_t1_k(1,iatom,iatdir,iq1grad,ka,kb)=isdqwf_t1_k(1,iatom,iatdir,iq1grad,ka,kb) + &
       &  occ_k(iband) * c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert) 
 
-         isdqwf_t1_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t1_k(2,iatpert,iq1grad,ka,kb) + &
+         isdqwf_t1_k(2,iatom,iatdir,iq1grad,ka,kb)=isdqwf_t1_k(2,iatom,iatdir,iq1grad,ka,kb) + &
       &  occ_k(iband) * c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert) 
 
          !T2
-         isdqwf_t2_k(1,iatpert,iq1grad,ka,kb)=isdqwf_t2_k(1,iatpert,iq1grad,ka,kb) + &
+         isdqwf_t2_k(1,iatom,iatdir,iq1grad,ka,kb)=isdqwf_t2_k(1,iatom,iatdir,iq1grad,ka,kb) + &
       &  occ_k(iband) * c1atdis_dQcalHstrain_c0_bks(1,iband,iatpert,iq1grad,istrpert)
 
-         isdqwf_t2_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t2_k(2,iatpert,iq1grad,ka,kb) + &
+         isdqwf_t2_k(2,iatom,iatdir,iq1grad,ka,kb)=isdqwf_t2_k(2,iatom,iatdir,iq1grad,ka,kb) + &
       &  occ_k(iband) * c1atdis_dQcalHstrain_c0_bks(2,iband,iatpert,iq1grad,istrpert)
 
          !T3
-         isdqwf_t3_k(1,iatpert,iq1grad,ka,kb)=isdqwf_t3_k(1,iatpert,iq1grad,ka,kb) + &
+         isdqwf_t3_k(1,iatom,iatdir,iq1grad,ka,kb)=isdqwf_t3_k(1,iatom,iatdir,iq1grad,ka,kb) + &
       &  occ_k(iband) * c0_HatdisdagdQ_c1strain_bks(1,iband,iatpert,iq1grad,istrpert)
 
-         isdqwf_t3_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t3_k(2,iatpert,iq1grad,ka,kb) + &
+         isdqwf_t3_k(2,iatom,iatdir,iq1grad,ka,kb)=isdqwf_t3_k(2,iatom,iatdir,iq1grad,ka,kb) + &
       &  occ_k(iband) * c0_HatdisdagdQ_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)
 
          !T4 has type-I ordering for the array indexes
-         isdqwf_t4_k(1,iatpert,ka,kb,iq1grad)=isdqwf_t4_k(1,iatpert,ka,kb,iq1grad) + &
+         isdqwf_t4_k(1,iatom,iatdir,ka,kb,iq1grad)=isdqwf_t4_k(1,iatom,iatdir,ka,kb,iq1grad) + &
       &  occ_k(iband) * c1atdis_Hmetricdqdq_c0_bks(1,iband,iatpert,iq1grad,istrpert)
 
-         isdqwf_t4_k(2,iatpert,ka,kb,iq1grad)=isdqwf_t4_k(2,iatpert,ka,kb,iq1grad) + &
+         isdqwf_t4_k(2,iatom,iatdir,ka,kb,iq1grad)=isdqwf_t4_k(2,iatom,iatdir,ka,kb,iq1grad) + &
       &  occ_k(iband) * c1atdis_Hmetricdqdq_c0_bks(2,iband,iatpert,iq1grad,istrpert)
 
          !T5
-         isdqwf_t5_k(1,iatpert,iq1grad,ka,kb)=isdqwf_t5_k(1,iatpert,iq1grad,ka,kb) + &
+         isdqwf_t5_k(1,iatom,iatdir,iq1grad,ka,kb)=isdqwf_t5_k(1,iatom,iatdir,iq1grad,ka,kb) + &
       &  occ_k(iband) * c0_Hatdisdqdag_c1strain_bks(1,iband,iatpert,iq1grad,istrpert)
 
-         isdqwf_t5_k(2,iatpert,iq1grad,ka,kb)=isdqwf_t5_k(2,iatpert,iq1grad,ka,kb) + &
+         isdqwf_t5_k(2,iatom,iatdir,iq1grad,ka,kb)=isdqwf_t5_k(2,iatom,iatdir,iq1grad,ka,kb) + &
       &  occ_k(iband) * c0_Hatdisdqdag_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)
 
       end do
@@ -3469,8 +3472,7 @@ end subroutine dfpt_isdqwf
 !!
 !! FUNCTION
 !!  This routine computes the frozen wf contribution to the q-gradient of the
-!!  internal strain tensor. The four directions involved in the derivatives are
-!!  taken along the reduced coordinates.
+!!  internal strain tensor
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2018 ABINIT group (MR,MS)
@@ -3492,6 +3494,7 @@ end subroutine dfpt_isdqwf
 !!  istwf_k=parameter that describes the storage of wfs
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kpt(3)=reduced coordinates of k point
+!!  matom= number of atoms in the cell
 !!  mkmem =number of k points treated by this node
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
@@ -3524,7 +3527,7 @@ end subroutine dfpt_isdqwf
 !!
 !! OUTPUT
 !!
-!!  frwfdq_k(2,natpert,3,3,nq1grad)=frozen wave function dependent part of the 1st q-gradient of
+!!  frwfdq_k(2,matom,3,3,3,nq1grad)=frozen wave function dependent part of the 1st q-gradient of
 !!                            internal strain tensor
 !!
 !! SIDE EFFECTS
@@ -3540,7 +3543,7 @@ end subroutine dfpt_isdqwf
 !! SOURCE
            
 subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
-       &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,&
+       &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
        &  pert_strain,ph1d,psps,q1grad,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
 
@@ -3555,7 +3558,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
- integer,intent(in) :: mkmem,mpw,natpert,nband_k,nfft
+ integer,intent(in) :: matom,mkmem,mpw,natpert,nband_k,nfft
  integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr
  integer,intent(in) :: useylmgr
  real(dp),intent(in) :: gsqcut,ucvol,wtk_k
@@ -3570,7 +3573,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  integer,intent(in) :: pert_atdis(3,natpert),pert_strain(6,nstrpert)
  integer,intent(in) :: q1grad(3,nq1grad)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
- real(dp),intent(out) :: frwfdq_k(2,natpert,3,3,nq1grad)
+ real(dp),intent(out) :: frwfdq_k(2,matom,3,3,3,nq1grad)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rmet(3,3) 
@@ -3580,7 +3583,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Local variables-------------------------------
 !scalars
- integer :: iatpert,iband,idir,ipert,ipw,iq1grad,iq2grad,istrpert,ka,kb
+ integer :: iatdir,iatom,iatpert,iband,idir,ipert,ipw,iq1grad,iq2grad,istrpert,ka,kb
  integer :: nkpg,optlocal,optnl,tim_getgh1c,useylmgr1
  real(dp) :: doti,dotr
  type(pawfgr_type) :: pawfgr
@@ -3789,6 +3792,8 @@ frwfdq_k=zero
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert= 1, natpert
+   iatom=pert_atdis(1,iatpert)
+   iatdir=pert_atdis(2,iatpert)
   
    !LOOP OVER STRAIN PERTURBATIONS
    do istrpert= 1, nstrpert
@@ -3818,8 +3823,8 @@ frwfdq_k=zero
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
          !Accumulate this term (take here into account the -i·-i prefactors and the conjugate comple)
-         frwfdq_k(1,iatpert,ka,kb,iq1grad)=frwfdq_k(1,iatpert,ka,kb,iq1grad)-dotr
-         frwfdq_k(2,iatpert,ka,kb,iq1grad)=frwfdq_k(2,iatpert,ka,kb,iq1grad)+doti
+         frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)-dotr
+         frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)+doti
            
 
          !Next complete the other two terms involving the 1st q-gradient of atdis Hamiltonian:
@@ -3827,20 +3832,20 @@ frwfdq_k=zero
          !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\delta} \frac{\delta_{\beta\gamma}}{2} | u_{i,k}^{(0)} >
          !--------------------------------------------------------------------------
          if (ka==kb) then
-           frwfdq_k(1,iatpert,ka,kb,iq1grad)=frwfdq_k(1,iatpert,ka,kb,iq1grad)-   &
+           frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)-   &
          & half*c0_hatdisdq_c0_bks(1,iband,iq1grad,iatpert)
-           frwfdq_k(2,iatpert,ka,kb,iq1grad)=frwfdq_k(2,iatpert,ka,kb,iq1grad)+   &
+           frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(2,iband,iq1grad,iatpert)
          end if
          if (ka==iq1grad) then
-           frwfdq_k(1,iatpert,ka,kb,iq1grad)=frwfdq_k(1,iatpert,ka,kb,iq1grad)-   &
+           frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)-   &
          & half*c0_hatdisdq_c0_bks(1,iband,kb,iatpert)
-           frwfdq_k(2,iatpert,ka,kb,iq1grad)=frwfdq_k(2,iatpert,ka,kb,iq1grad)+   &
+           frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)+   &
          & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert)
          end if
 
          !Take into account band occupations and kpt weights
-         frwfdq_k(:,iatpert,ka,kb,iq1grad)=frwfdq_k(:,iatpert,ka,kb,iq1grad)* &
+         frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)* &
        & wtk_k * occ_k(iband) 
 
        end do !iband
