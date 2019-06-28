@@ -49,25 +49,25 @@ module m_lattice_mover
   private
 
   type ,public, extends(abstract_mover_t) :: lattice_mover_t
-     ! This is the abstract class of mover
-     ! It do the following things:
-     ! calculate d(var)/dt and integrate new var. 
-     ! call functions to calculate observables.
-     ! interact with hist file.
-     type(multibinit_dtset_type), pointer :: params=>null()
-     real(dp), allocatable :: masses(:)
-     integer :: natom
-     real(dp) :: stress(3,3), strain(3,3)
-     real(dp), allocatable :: current_xcart(:,:), current_vcart(:,:), &
-          & forces(:,:), displacement(:,:)
+     !> This is the abstract lattice mover
+
+     type(multibinit_dtset_type), pointer :: params=>null() ! input parameters
+     real(dp), allocatable :: masses(:)  ! masses
+     integer :: natom     ! number of atoms
+     real(dp) :: stress(3,3), strain(3,3)  ! stress and strain
+     real(dp), allocatable :: current_xcart(:,:)
+     real(dp), allocatable :: current_vcart(:,:)
+     real(dp), allocatable :: forces(:,:)
+     real(dp), allocatable :: displacement(:,:)
      real(dp) :: energy
+     !> TODO: hist 
      !type(lattice_hist_t) :: hist
    contains
      procedure:: initialize       ! perhaps each effpot type should have own 
      procedure :: finalize
      procedure :: set_params
      procedure :: set_initial_state ! initial state
-     procedure:: run_one_step 
+     procedure:: run_one_step
      procedure :: reset            ! reset the mover
      procedure :: calc_observables ! call functions to calculate observables
      procedure :: write_hist       ! write hist file
@@ -126,9 +126,8 @@ contains
           self%current_vcart(:,i) = xi(:, i) *sqrt(3.0*self%temperature/self%masses(i))
        end do
        self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
-    else 
-       
-
+    !else
+       ! other modes.
     end if
 
   end subroutine set_initial_state

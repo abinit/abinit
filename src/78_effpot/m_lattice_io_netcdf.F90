@@ -30,14 +30,15 @@
 
 module m_lattice_harmonic_primitive_potential
   use iso_c_binding
-  use m_dynamic_array, only: int_array_type, real_array_type, int2d_array_type
-  use m_mathfuncs
+  !use m_dynamic_array, only: int_array_type, real_array_type, int2d_array_type
+  !use m_mathfuncs
   use defs_basis
   use m_abicore
   use m_errors
-!#if defined HAVE_NETCDF
+  use m_nctk
+  !#if defined HAVE_NETCDF
   use netcdf
-!#endif
+  !#endif
   use m_xmpi
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_cell, only: mbcell_t
@@ -53,7 +54,7 @@ module m_lattice_harmonic_primitive_potential
   type, public, extends(primitive_potential_t) :: lattice_harmonic_primitive_potential_t
      integer :: natom
      type(ndcoo_mat_t) :: coeff  ! 
-     type(int2d_array_type) :: Rlist  ! 
+     integer, allocatable :: Rlist(:,:) ! 
    contains
      procedure:: initialize
      procedure:: finalize
@@ -63,36 +64,102 @@ module m_lattice_harmonic_primitive_potential
 
 contains
 
-    subroutine initialize(self, primcell)
-      class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
-      type(mbcell_t), target, intent(inout) :: primcell
-      !integer, intent(in) :: nspin
-      self%primcell=>primcell
-      self%label="lattice_harmonic_primitive_potential"
-      self%has_spin=.False.
-      self%has_displacement=.True.
-      self%has_strain=.False.
-      self%has_lwf=.False.
-    end subroutine initialize
+  subroutine initialize(self, primcell)
+    class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
+    type(mbcell_t), target, intent(inout) :: primcell
+    !integer, intent(in) :: nspin
+    self%primcell=>primcell
+    self%label="lattice_harmonic_primitive_potential"
+    self%has_spin=.False.
+    self%has_displacement=.True.
+    self%has_strain=.False.
+    self%has_lwf=.False.
+  end subroutine initialize
 
 
-    subroutine finalize(self)
-      class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
-      call self%coeff%finalize()
-      call self%Rlist%finalize()
-      nullify(self%primcell)
-      self%natom=0
-      self%label="Destroyed lattice_harmonic_primitive_potential"
-      call self%primitive_potential_t%finalize()
-    end subroutine finalize
+  subroutine finalize(self)
+    class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
+    call self%coeff%finalize()
+    ABI_DEALLOCATE(self%Rlist)
+    nullify(self%primcell)
+    self%natom=0
+    self%label="Destroyed lattice_harmonic_primitive_potential"
+    call self%primitive_potential_t%finalize()
+  end subroutine finalize
 
-    subroutine load_from_netcdf(self, fname)
-      class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
-      character(len=fnlen) :: fname
-      ! TODO: 
-      
 
-    end subroutine load_from_netcdf
+  !-------------------------------------------------------------------!
+  ! Load from files:
+  !> params: parameters
+  !> fnames: file names from files file
+  !-------------------------------------------------------------------!
+  subroutine load_from_files(self, params, fnames)
+    class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
+    type(multibinit_dtset_type), intent(in) :: params
+    character(len=fnlen), intent(in) :: fnames(:)
+    call self%load_from_netcdf( fnames(1))
+    ABI_UNUSED_A(params)
+  end subroutine load_from_files
+
+  subroutine load_from_netcdf(self, fname)
+    class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
+    character(len=fnlen), intent(in) :: fname
+    integer :: ncid, ierr
+    integer :: iR, R(3), nR, natom, natom3
+    real(dp) :: cell(3,3)
+    real(dp), allocatable :: xcart(:,:), masses(:)
+    integer, allocatable :: zion(:)
+    real(dp), allocatable :: ifc_vallist(:,:,:)
+    integer :: varid, i, j, d(3)
+
+
+    ierr=nf90_open(fname, NF90_NOWRITE, ncid)
+
+
+    ierr=nctk_get_dim(ncid, "ifc_nR" , nR)
+    ierr=nctk_get_dim(ncid, "natom", natom)
+    ierr=nctk_get_dim(ncid, "natom3", natom3)
+
+    ABI_ALLOCATE(masses, (natom))
+    ABI_ALLOCATE(xcart, (3, natom))
+    ABI_ALLOCATE(zion,(nR))
+
+    ABI_ALLOCATE(ifc_vallist, (nR, natom3, natom3))
+    ABI_ALLOCATE(self%Rlist,(3, nR))
+
+    call self%coeff%initialize([ nR, natom3, natom3 ])
+    call self%primcell%set_lattice(natom, cell, xcart, masses, zion)
+
+    ierr =nf90_inq_varid(ncid, "ref_masses", varid)
+    ierr = nf90_get_var(ncid, varid, masses)
+
+    ierr =nf90_inq_varid(ncid, "ref_xcart", varid)
+    ierr = nf90_get_var(ncid, varid, xcart)
+
+    ierr =nf90_inq_varid(ncid, "ref_cell", varid)
+    ierr = nf90_get_var(ncid, varid, cell)
+
+    ierr =nf90_inq_varid(ncid, "ifc_Rlist", varid)
+    ierr = nf90_get_var(ncid, varid, self%Rlist)
+
+    ierr =nf90_inq_varid(ncid, "ifc_varlist", varid)
+    ierr = nf90_get_var(ncid, varid, ifc_vallist)
+
+    do iR =1, nR
+       do i=1 , natom3
+          do j=1, natom3
+             call self%coeff%add_entry([iR, i, j], ifc_vallist(iR, i, j))
+          end do
+       end do
+    end do
+
+    ierr=nf90_close(ncid)
+
+    ABI_DEALLOCATE(masses)
+    ABI_DEALLOCATE(xcart)
+    ABI_DEALLOCATE(zion)
+    ABI_DEALLOCATE(ifc_vallist)
+  end subroutine load_from_netcdf
 
 
   subroutine fill_supercell(self, scmaker, scpot)
@@ -114,7 +181,6 @@ contains
     select type(scpot)
     type is (lattice_harmonic_potential_t)
        call scpot%initialize(sc_natom)
-
        ! IFC is an COO_mat_t, which has the index of R1, R2, R3, i, j and the value of val
        ! list of index R: coeff%ind%data(1, 1:coeff%nnz)
        ! list of i: coeff%ind%data(2, 1:coeff%nnz)
@@ -123,10 +189,6 @@ contains
        ! TODO
        ! trans_ilist: for each i, it will find one i' for each cell in supercell (total: ncell)
        ! nbasis: number of degrees of freedom in primitive cell, here is 3natom.
-       
-
-
-
     end select
     ABI_DEALLOCATE(ilist_sc)
     ABI_DEALLOCATE(jlist_sc)

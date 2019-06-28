@@ -54,7 +54,7 @@ module m_lattice_langevin_mover
      real(dp) :: c1, c2
      real(dp), allocatable :: c3(:), c4(:), c5(:)
      real(dp) :: fr   ! friction
-     real(dp), allocatable :: xi(:), eta(:)
+     real(dp), allocatable :: xi(:,:), eta(:,:)
    contains
      procedure :: initialize
      procedure :: finalize
@@ -91,7 +91,7 @@ contains
   end subroutine finalize
  
 
-  subroutine update_vars(self):
+  subroutine update_vars(self)
     class(lattice_langevin_mover_t), intent(inout) :: self
     real(dp) :: dt, T, fr, sigma(self%natom)
 
@@ -115,15 +115,15 @@ contains
 
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
          & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
-    call self%rng%rand_normal_array(xi, 3*self%natom)
-    call self%rng%rand_normal_array(eta, 3*self%natom)
+    call self%rng%rand_normal_array(self%xi, 3*self%natom)
+    call self%rng%rand_normal_array(self%eta, 3*self%natom)
 
     ! First half of velocity update
     do i =1, self%natom
        self%current_vcart(:, i) = self%current_vcart(:,i) + &
-            & (self%c1 * self%forces(:,i) / self.masses(i) - &
+            & self%c1 * self%forces(:,i) / self.masses(i) - &
             & self.c2 * self.current_vcart(:,i) + &
-            & self.c3(i) * self.xi(:, i) - self.c4(i) * self.eta(:,i) )
+            & self.c3(i) * self.xi(:, i) - self.c4(i) * self.eta(:,i) 
 
        self%displacement(:, i) = self%displacement(:, i) &
             & + self%dt * self%current_vcart(:, i) * self%c5( i) *self%eta(:,i)
@@ -134,9 +134,9 @@ contains
          & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
     do i =1, self%natom
        self%current_vcart(:, i) = self%current_vcart(:,i) + &
-            & (self%c1 * self%forces(:,i) / self.masses(i) - &
+            &self%c1 * self%forces(:,i) / self.masses(i) - &
             & self.c2 * self.current_vcart(:,i) + &
-            & self.c3(i) * self.xi(:, i) - self.c4(i) * self.eta(:,i) )
+            & self.c3(i) * self.xi(:, i) - self.c4(i) * self.eta(:,i) 
     end do
 
   end subroutine run_one_step

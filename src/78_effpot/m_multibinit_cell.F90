@@ -41,7 +41,12 @@ module m_multibinit_cell
   private
   ! TODO: use crystal_t
   !type, public :: mbcell_lattice_t
-  type, public, extends(crystal_t) :: mbcell_lattice_t
+  !type, public, extends(crystal_t) :: mbcell_lattice_t
+  type, public ::mbcell_lattice_t
+     integer:: natom
+     integer, allocatable  :: zion(:)
+     real(dp), allocatable :: masses(:), xcart(:,:)
+     real(dp) :: cell(3,3)
    contains
      procedure :: initialize => latt_initialize
      procedure :: finalize => latt_finalize
@@ -108,10 +113,12 @@ contains
   end subroutine initialize
 
   !TODO: Implement
-  subroutine set_lattice(self)
+  subroutine set_lattice(self, natom, cell, xcart, masses, zion)
     class(mbcell_t), intent(inout) :: self
+    integer, intent(in) :: natom, zion(:)
+    real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
     self%has_lattice=.True.
-    call self%lattice%initialize()
+    call self%lattice%initialize(natom, cell, xcart, masses, zion)
   end subroutine set_lattice
 
 
@@ -197,14 +204,28 @@ contains
   end subroutine supercell_finalize
 
 !================================Lattice====================================
-  subroutine latt_initialize(self)
+
+  subroutine latt_initialize(self, natom, cell, xcart, masses, zion)
     class(mbcell_lattice_t) :: self
-    ABI_UNUSED_A(self)
+    integer, intent(in) :: natom, zion(:)
+    real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
+    self%natom=natom
+    ABI_ALLOCATE(self%zion, (natom))
+    ABI_ALLOCATE(self%xcart, (3, natom))
+    ABI_ALLOCATE(self%masses, (natom))
+
+    self%zion(:) = zion(:)
+    self%cell(:,:) =cell(:,:)
+    self%xcart(:,:) = xcart(:,:)
+    self%masses(:) = masses(:)
   end subroutine latt_initialize
 
   subroutine latt_finalize(self)
     class(mbcell_lattice_t) :: self
-    ABI_UNUSED_A(self)
+    self%natom=0
+    ABI_DEALLOCATE(self%xcart)
+    ABI_DEALLOCATE(self%masses)
+    ABI_DEALLOCATE(self%zion)
   end subroutine latt_finalize
 
 
@@ -212,9 +233,8 @@ contains
     class(mbcell_lattice_t), intent(inout):: self
     type(supercell_maker_t), intent(inout):: sc_maker
     type(mbcell_lattice_t), intent(inout):: supercell
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(sc_maker)
-    ABI_UNUSED_A(supercell)
+    !TODO;
+
   end subroutine latt_fill_supercell
 
   subroutine latt_from_unitcell(self, sc_maker, unitcell)

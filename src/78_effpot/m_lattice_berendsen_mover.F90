@@ -58,7 +58,6 @@ module m_lattice_berendsen_mover
      procedure :: initialize
      procedure :: finalize
      procedure :: run_one_step
-     procedure :: update_vars
   end type lattice_berendsen_mover_t
 
 contains
@@ -75,32 +74,11 @@ contains
 
   subroutine finalize(self)
     class(lattice_berendsen_mover_t), intent(inout) :: self
-    ABI_DEALLOCATE(self%c3)
-    ABI_DEALLOCATE(self%c4)
-    ABI_DEALLOCATE(self%c5)
-    ABI_DEALLOCATE(self%xi)
-    ABI_DEALLOCATE(self%eta)
     call self%lattice_mover_t%finalize()
   end subroutine finalize
  
 
-  subroutine update_vars(self):
-    class(lattice_berendsen_mover_t), intent(inout) :: self
-    real(dp) :: dt, T, fr, sigma(self%natom)
-
-    dt=self%dt
-    T= self%temperature
-    fr=self%fr
-    sigma(:) = sqrt(2.0*T*fr/self%masses(:))
-    self%c1 = dt / 2.0 - dt * dt * fr / 8.0
-    self%c2 = dt * fr / 2.0 - dt * dt * fr * fr / 8.0
-    self%c3 = sqrt(dt) * sigma / 2.0 - dt**1.5 * fr * sigma / 8.0
-    self%c5 = dt**1.5 * sigma / (2.0 * sqrt(3.0))
-    self%c4 = fr / 2. * self%c5
-  end subroutine update_vars
-
-
-  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf )
+    subroutine run_one_step(self, effpot,displacement, strain, spin, lwf )
     class(lattice_berendsen_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
@@ -108,30 +86,13 @@ contains
 
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
          & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
-    call self%rng%rand_normal_array(xi, 3*self%natom)
-    call self%rng%rand_normal_array(eta, 3*self%natom)
+    call self%rng%rand_normal_array(self%xi, 3*self%natom)
+    call self%rng%rand_normal_array(self%eta, 3*self%natom)
 
-    ! First half of velocity update
-    do i =1, self%natom
-       self%current_vcart(:, i) = self%current_vcart(:,i) + &
-            & (self%c1 * self%forces(:,i) / self.masses(i) - &
-            & self.c2 * self.current_vcart(:,i) + &
-            & self.c3(i) * self.xi(:, i) - self.c4(i) * self.eta(:,i) )
-
-       self%displacement(:, i) = self%displacement(:, i) &
-            & + self%dt * self%current_vcart(:, i) * self%c5( i) *self%eta(:,i)
-    end do
 
     ! second half, update the velocity but not the displacement.
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
          & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
-    do i =1, self%natom
-       self%current_vcart(:, i) = self%current_vcart(:,i) + &
-            & (self%c1 * self%forces(:,i) / self.masses(i) - &
-            & self.c2 * self.current_vcart(:,i) + &
-            & self.c3(i) * self.xi(:, i) - self.c4(i) * self.eta(:,i) )
-    end do
-
   end subroutine run_one_step
 
 end module m_lattice_berendsen_mover

@@ -52,12 +52,14 @@ module m_multibinit_manager
   use m_abstract_mover, only: abstract_mover_t
   use m_lattice_effpot, only : lattice_effpot_t
   use m_spin_potential, only : spin_potential_t
-  use m_lattice_mover, only : lattice_mover_t
   use m_spin_mover, only : spin_mover_t
   use m_mpi_scheduler, only: init_mpi_info
   ! TODO : should these be moved into spin mover?
   use m_spin_ncfile, only: spin_ncfile_t
 
+  use m_lattice_harmonic_primitive_potential, only: lattice_harmonic_primitive_potential_t
+  use m_lattice_harmonic_potential, only: lattice_harmonic_potential_t
+  use m_lattice_mover, only: lattice_mover_t
   use m_spin_lattice_coupling_effpot, only : spin_lattice_coupling_effpot_t
   implicit none
   private
@@ -69,19 +71,24 @@ module m_multibinit_manager
   !-------------------------------------------------------------------!
   type, public :: mb_manager_t
      character(len=fnlen) :: filenames(17)
-     type(multibinit_dtset_type), pointer :: params=>null()
-     type(supercell_maker_t) :: sc_maker
-     type(mbcell_t) :: unitcell
-     type(mbsupercell_t) :: supercell
-     type(primitive_potential_list_t) :: prim_pots
-     type(potential_list_t) :: pots
-
-     type(lattice_mover_t) :: lattice_mover
-     type(spin_mover_t) :: spin_mover
+     ! pointer to parameters. it is a pointer because it is initialized outside manager
+     type(multibinit_dtset_type), pointer :: params=>null() 
+     type(supercell_maker_t) :: sc_maker  ! supercell maker
+     type(mbcell_t) :: unitcell         ! unitcell
+     type(mbsupercell_t) :: supercell   ! supercell
+     type(primitive_potential_list_t) :: prim_pots  ! list of primitive potentials
+     type(potential_list_t) :: pots     ! potential list
+     ! a polymorphic lattice mover so multiple mover could be used.
+     class(lattice_mover_t), pointer :: lattice_mover
+     ! as for the spin, there is only one mover which has several  methods
+     type(spin_mover_t) :: spin_mover  
      ! type(lwf_mover_t) :: lwf_mover
+
+     ! spin netcdf hist file
      type(spin_ncfile_t) :: spin_ncfile
 
      ! TODO: this is temporary. Remove after moving to multibinit_main2
+     ! It means the parsing of the params are already done outside the manager.
      logical :: use_external_params=.True.
    contains
      procedure :: initialize
@@ -151,6 +158,9 @@ contains
 
   !-------------------------------------------------------------------!
   ! read_params: read parameters from input file
+  ! TODO: This function is copied from the implementation before using F03
+  ! Some work need to be done to move the initialization of effective
+  ! potential out of this function.
   !-------------------------------------------------------------------!
   subroutine read_params(self)
     use m_fstrings,   only : replace, inupper
@@ -166,7 +176,7 @@ contains
     character(len=strlen) :: string
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     !To automate a maximum calculation, multibinit reads the number of atoms
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
@@ -226,6 +236,7 @@ contains
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
     class(primitive_potential_t), pointer :: spin_pot
+    class(primitive_potential_t), pointer :: lat_ham_pot
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -235,7 +246,10 @@ contains
     ! spin
     call xmpi_bcast(self%params%spin_dynamics, master, comm, ierr)
     if(self%params%spin_dynamics>0) then
+       ! The pointer will be allocated and added to the list
+       ! and eventually deallocated by the list%finalize
        ABI_DATATYPE_ALLOCATE_SCALAR(spin_primitive_potential_t, spin_pot)
+
        ! One may wonder why unitcell does not read data from files
        ! That is because the spin_pot (which has an pointer to unitcell)
        ! read the file and set the spin unitcell.
@@ -247,9 +261,13 @@ contains
        end select
     end if
     if(self%params%dynamics>0) then
-       !TODO: LATT
-    endif
-
+       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
+       select type(lat_ham_pot)
+       type is (lattice_harmonic_primitive_potential_t)
+          call lat_ham_pot%load_from_files(self%params, self%filenames)
+          call self%prim_pots%append(lat_ham_pot)
+       end select
+    end if
     !LWF : TODO
   end subroutine read_potentials
 
