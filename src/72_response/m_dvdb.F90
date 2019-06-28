@@ -921,7 +921,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol,iv1,iq,idir,ipert,iatom
+ integer :: my_unt,my_prtvol,iv1,iq,idir,ipert
  character(len=4) :: my_mode
  character(len=500) :: msg
 
@@ -961,20 +961,8 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
      db%dielt(3,1), db%dielt(3,2), db%dielt(3,3)
  end if
  if (db%has_zeff) then
-   write(my_unt, '(a)') ' Born effectives charges in Cart coords: '
-   do iatom=1,db%natom
-     write(my_unt,'(a,i0,1x,2a,3(/,3es16.6),a)')' iatom: ', iatom, ", type: ", db%cryst%symbol_iatom(iatom), &
-       db%zeff(1,1,iatom), db%zeff(1,2,iatom), db%zeff(1,3,iatom), &
-       db%zeff(2,1,iatom), db%zeff(2,2,iatom), db%zeff(2,3,iatom), &
-       db%zeff(3,1,iatom), db%zeff(3,2,iatom), db%zeff(3,3,iatom), ch10
-   end do
-   !write(my_unt, '(a)') ' Born effectives charges before chneut: '
-   !do iatom=1,db%natom
-   !  write(my_unt,'(a,i0,1x,2a,3(/,3es16.6)),a')' iatom: ', iatom, ", type: ", db%crystal%symbol_iatom(iatom), &
-   !    db%zeff_raw(1,1,iatom), db%zeff_raw(1,2,iatom), db%zeff_raw(1,3,iatom), &
-   !    db%zeff_raw(2,1,iatom), db%zeff_raw(2,2,iatom), db%zeff_raw(2,3,iatom), &
-   !    db%zeff_raw(3,1,iatom), db%zeff_raw(3,2,iatom), db%zeff_raw(3,3,iatom), ch10
-   !end do
+   call print_zeff(my_unt, db%zeff, db%cryst, title=' Born effectives charges in Cart coords:')
+   !call print_zeff(my_unt, db%zeff_raw, db%cryst, title=' Born effectives charges before chneut: ')
  end if
  !if (db%has_quadrupoles) then
  !  write(my_unt, '(a)') ' Dynamical Quadrupoles: '
@@ -1001,6 +989,43 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
        ftoa(db%rhog1_g0(1, iv1)), ftoa(db%rhog1_g0(2, iv1)))
    end do
  end if
+
+contains
+
+subroutine print_zeff(unt, zeff, cryst, title)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: unt
+ character(len=*),optional,intent(in) :: title
+ type(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: zeff(3,3,cryst%natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iatom
+
+! *************************************************************************
+
+ if (present(title)) then
+   write(unt, "(a)")trim(title)
+ else
+   write(unt, '(a)') ' Born effectives charges in Cartesian coordinates: '
+ end if
+
+ do iatom=1,cryst%natom
+   write(unt,'(a,i0,1x,2a,3(/,3es16.6),a)')' iatom: ', iatom, ", type: ", cryst%symbol_iatom(iatom), &
+     zeff(1,1,iatom), zeff(1,2,iatom), zeff(1,3,iatom), &
+     zeff(2,1,iatom), zeff(2,2,iatom), zeff(2,3,iatom), &
+     zeff(3,1,iatom), zeff(3,2,iatom), zeff(3,3,iatom), ch10
+ end do
+
+ write(unt,'(2a,3(/,3es16.6),a)')ch10,' Fulfillment of charge neutrality, F_{ij} = \sum_{atom} Z^*_{ij,atom} ', &
+   sum(zeff(1,1,:)), sum(zeff(1,2,:)), sum(zeff(1,3,:)), &
+   sum(zeff(2,1,:)), sum(zeff(2,2,:)), sum(zeff(2,3,:)), &
+   sum(zeff(3,1,:)), sum(zeff(3,2,:)), sum(zeff(3,3,:)), ch10
+
+end subroutine print_zeff
 
 end subroutine dvdb_print
 !!***
@@ -5298,11 +5323,13 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
      NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("origin_v1scf", "dp", "two, nfft, nspden, natom3, nqpt")))
      NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("recons_v1scf", "dp", "two, nfft, nspden, natom3, nqpt")))
      NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("pertsy_qpt", "int", "three, mpert, nqpt")))
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("ngfft", "int", "three")))
      NCF_CHECK(nctk_set_datamode(ncid))
      ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
        "symv1scf"], [symv1scf])
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts"), dvdb%qpts))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
 #endif
    else
      if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then

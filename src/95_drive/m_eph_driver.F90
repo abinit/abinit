@@ -159,9 +159,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0,sppoldbl1=1,timrev1=1
- integer,parameter :: nsphere0=0,prtsrlr0=0
- integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
+ integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0
+ integer,parameter :: nsphere0=0, prtsrlr0=0
+ integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,jj
  integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc, comm_rpt, method
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
@@ -496,6 +496,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
    end if
  end if
+ !do ii=1,3; do jj=1,3; if (ii /= jj) dielt(ii, jj) = zero; enddo; enddo
 
  call ifc_init(ifc,cryst,ddb,&
    brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
