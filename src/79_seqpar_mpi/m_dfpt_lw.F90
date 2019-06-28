@@ -3957,6 +3957,7 @@ end subroutine dfpt_flexoout
  
 !Local variables-------------------------------
 !scalars
+ integer :: alpha,beta,delta,gamma
  integer :: iatdir,iatom,iatpert,ibuf,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
  integer, parameter :: re=1,im=2
  real(dp) :: tmpim,tmpre
@@ -4097,22 +4098,22 @@ end subroutine dfpt_flexoout
            end do
 
            do iatdir=1,3
-             vec1(iatdir)=isdqwf_t4_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             vec1(iatdir)=isdqwf_t4_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
              flg1(iatdir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
            end do
            call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
            do iatdir=1,3
-             isdqwf_t4_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iatdir)
-             typeI_cartflag(iatom,iatdir,iq1dir,istr1dir,istr2dir)=flg2(iatdir)
+             isdqwf_t4_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(iatdir)
+             typeI_cartflag(iatom,iatdir,istr1dir,istr2dir,iq1dir)=flg2(iatdir)
            end do
 
            do iatdir=1,3
-             vec1(iatdir)=frwfdq_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             vec1(iatdir)=frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
              flg1(iatdir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
            end do
            call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
            do iatdir=1,3
-             frwfdq_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iatdir)
+             frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(iatdir)
            end do
 
          end do 
@@ -4164,12 +4165,12 @@ end subroutine dfpt_flexoout
            end do
 
            do iq1dir=1,3
-             vec1(iq1dir)=frwfdq_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             vec1(iq1dir)=frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
              flg1(iq1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
            end do
            call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
            do iq1dir=1,3
-             frwfdq_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)
+             frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(iq1dir)
            end do
 
          end do 
@@ -4213,12 +4214,12 @@ end subroutine dfpt_flexoout
          do ii=1,2
 
            do istr1dir=1,3
-             vec1(istr1dir)=frwfdq_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             vec1(istr1dir)=frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
              flg1(istr1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
            end do
            call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
            do istr1dir=1,3
-             frwfdq_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(istr1dir)
+             frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(istr1dir)
            end do
 
          end do 
@@ -4236,12 +4237,12 @@ end subroutine dfpt_flexoout
          do ii=1,2
 
            do istr2dir=1,3
-             vec1(istr2dir)=frwfdq_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             vec1(istr2dir)=frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
              flg1(istr2dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
            end do
            call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
            do istr2dir=1,3
-             frwfdq_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(istr2dir)
+             frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(istr2dir)
            end do
 
          end do 
@@ -4266,7 +4267,22 @@ end subroutine dfpt_flexoout
  write(ab_out,*)' '
  write(ab_out,*)' q-gradient of internal strain tensor, in cartesian coordinates,'
  write(ab_out,*)' atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
+ do istr2dir=1,3
+   delta=istr2dir
+   do istr1dir=1,3
+     beta=istr1dir
+     do iq1dir=1,3
+       gamma=iq1dir
+       do iatom=1,matom
+         do iatdir=1,3
+           alpha=iatdir
 
+
+         end do
+       end do
+     end do
+   end do
+ end do
 
  DBG_EXIT("COLL")
  end subroutine dfpt_isdqout
