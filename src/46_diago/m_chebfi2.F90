@@ -385,11 +385,13 @@ module m_chebfi2
     double precision :: tsec(2)
                     
     interface
-      subroutine getAX_BX(X,AX,BX)
+      subroutine getAX_BX(X,AX,BX,transposer)
         use m_xg, only : xgBlock_t
+        use m_xgTransposer !, only: xgTransposer_t
         type(xgBlock_t), intent(inout) :: X
         type(xgBlock_t), intent(inout) :: AX
         type(xgBlock_t), intent(inout) :: BX
+        type(xgTransposer_t), optional, intent(inout) :: transposer
       end subroutine getAX_BX
     end interface
     interface
@@ -458,6 +460,11 @@ module m_chebfi2
 
     !call debug_helper(chebfi%X, chebfi) 
     !stop
+    
+    !call debug_me_g0_LINALG(chebfi%X, chebfi)  !OK 1-2 ISTWFK2 MPI
+    !stop
+    
+    
     
     !print *, "AJDE" 
    
@@ -578,6 +585,9 @@ module m_chebfi2
     
     !stop
     
+    !call debug_me_g0_COLROWS(chebfi%xXColsRows, chebfi) !OK 1-2 ISTWFK2 MPI
+    !stop
+    
     !print *, "AAAAAAAAAAAAAAAAAAAA"
     !stop
     !call debug_helper(chebfi%xXColsRows, chebfi) 
@@ -587,10 +597,11 @@ module m_chebfi2
     
     call timab(tim_getAX_BX,1,tsec)         
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
-    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
+    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
     
-    !print *, "PROSAO getAX_BX"
+    
+    print *, "PROSAO getAX_BX"
     !stop
     !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
     !call debug_helper_linalg(chebfi%X, chebfi, 1) 
@@ -598,9 +609,13 @@ module m_chebfi2
     
     !!on nproc 2 for some reason
     !call debug_helper(chebfi%xXColsRows, chebfi) 
-    !call debug_helper(chebfi%xAXColsRows, chebfi) 
+    call debug_helper(chebfi%xAXColsRows, chebfi) 
     !call debug_helper(chebfi%xBXColsRows, chebfi) 
-    !stop
+    stop
+    
+    print *, "getAXBX"
+    call debug_me_g0_COLROWS(chebfi%xXColsRows, chebfi)
+    stop
       
     if (chebfi%paral_kgb == 1) then   
       call xmpi_barrier(chebfi%spacecom)
@@ -1826,6 +1841,51 @@ module m_chebfi2
    end do
 
   end function cheb_poly1
+  
+  subroutine debug_me_g0_LINALG(debugBlock, chebfi)
+  
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(chebfi_t) , intent(inout) :: chebfi
+    type(xgBlock_t) :: HELPER
+    
+    call xmpi_barrier(chebfi%spacecom)
+    
+    !if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+    if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+      call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_size(xmpi_world)) 
+    end if
+    !else 
+    
+    !end if
+    call xmpi_barrier(chebfi%spacecom)   
+    
+  end subroutine
+  
+  subroutine debug_me_g0_COLROWS(debugBlock, chebfi)
+  
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(chebfi_t) , intent(inout) :: chebfi
+    type(xgBlock_t) :: HELPER
+    
+    call xmpi_barrier(chebfi%spacecom)
+    
+    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+      if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+        call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
+        call xgBlock_print(HELPER, 100) 
+      
+        call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, 2, 5) 
+        call xgBlock_print(HELPER, 101) 
+      end if
+    else 
+      call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
+      call xgBlock_print(HELPER, 200 + xmpi_comm_rank(chebfi%spacecom)) 
+    end if
+    
+    call xmpi_barrier(chebfi%spacecom)   
+    
+  end subroutine
   
   subroutine debug_helper(debugBlock, chebfi)
       
