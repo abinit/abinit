@@ -63,6 +63,7 @@ module m_supercell_maker
      ! with values unchanged (therefore just repeat ncells times)
      generic :: repeat => repeat_int1d, repeat_real1d, repeat_real2d, repeat_realmat
      procedure :: repeat_int1d
+     procedure :: repeat_int1d_noalloc
      procedure :: repeat_real1d
      procedure :: repeat_real2d
      procedure :: repeat_realmat
@@ -72,8 +73,10 @@ module m_supercell_maker
      procedure :: trans_xred
      procedure :: trans_xcart
      procedure :: trans_i
+     procedure :: trans_i_noalloc
      procedure :: trans_ilist
      procedure :: trans_j_and_Rj
+     procedure :: trans_j_and_Rj_noalloc
      procedure :: trans_jlist_and_Rj
      procedure :: rvec_for_each
   end type supercell_maker_t
@@ -182,8 +185,13 @@ contains
   subroutine trans_xcart(self, primcell, xcart, scxcart)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: xcart(:,:), primcell(3,3)
-    real(dp), intent(inout) :: scxcart(3,size(xcart, dim=2)*self%ncells)
+    real(dp), allocatable, intent(inout) :: scxcart(:,:)
     integer :: npos, icell, ipos, counter=0
+
+    npos=size(xcart, dim=2)
+    if (.not. allocated(scxcart)) then
+       ABI_ALLOCATE(scxcart, (3,npos*self%ncells))
+    end if
     do icell = 1, self%ncells
        do ipos=1 , npos
           counter=counter+1
@@ -215,13 +223,10 @@ contains
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: i, nbasis
     integer, allocatable, intent(inout) :: i_sc(:)
-    integer :: icell
     if(.not. allocated(i_sc)) then
        ABI_ALLOCATE(i_sc, (self%ncells))
     end if
-    do icell =1, self%ncells
-       i_sc(icell)=nbasis*(icell-1)+i
-    end do
+    call self%trans_i_noalloc(nbasis, i, i_sc)
   end subroutine trans_i
 
   subroutine trans_i_noalloc(self, nbasis, i, i_sc)
@@ -253,17 +258,13 @@ contains
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: j, Rj(3), nbasis
     integer, allocatable , intent(inout) :: j_sc(:), Rj_sc(:, :)
-    integer :: i,jj
     if(.not. allocated(j_sc)) then
        ABI_ALLOCATE(j_sc, (self%ncells))
     endif
     if(.not. allocated(Rj_sc)) then
        ABI_ALLOCATE(Rj_sc, (3, self%ncells))
     endif
-    do i =1, self%ncells
-       call self%R_to_sc(Rj + self%rvecs(:,i), Rj_sc(:,i), jj)
-       j_sc(i)=nbasis*(jj-1)+j
-    end do
+    call self%trans_j_and_Rj_noalloc(nbasis, j, Rj, j_sc, Rj_sc)
   end subroutine trans_j_and_Rj
 
   subroutine trans_j_and_Rj_noalloc(self, nbasis, j, Rj, j_sc, Rj_sc)
@@ -312,6 +313,19 @@ contains
        ret((i-1)*n+1: i*n) = a(:)
     end do
   end subroutine repeat_int1d
+
+
+  subroutine repeat_int1d_noalloc(self, a, ret)
+    class(supercell_maker_t), intent(inout) :: self
+    integer, intent(in) :: a(:)
+    integer :: ret(:)
+    integer :: n, i
+    n=size(a)
+    do i =1, self%ncells
+       ret((i-1)*n+1: i*n) = a(:)
+    end do
+  end subroutine repeat_int1d_noalloc
+
 
   subroutine repeat_real1d(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self

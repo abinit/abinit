@@ -52,7 +52,10 @@ module m_abstract_mover
      ! interact with hist file.
      type(mbsupercell_t), pointer:: supercell=>null()
      character (len=200) :: label="Abstract Mover"
-     real(dp) :: dt, total_time, temperature, thermal_time
+     real(dp) :: dt= 0.0
+     real(dp) :: total_time =0.0
+     real(dp) :: temperature =0.0
+     real(dp) :: thermal_time =0.0
      type(rng_t) :: rng
 
    contains

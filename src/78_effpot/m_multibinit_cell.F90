@@ -112,7 +112,6 @@ contains
     ABI_UNUSED_A(self)
   end subroutine initialize
 
-  !TODO: Implement
   subroutine set_lattice(self, natom, cell, xcart, masses, zion)
     class(mbcell_t), intent(inout) :: self
     integer, intent(in) :: natom, zion(:)
@@ -236,15 +235,39 @@ contains
   end subroutine latt_finalize
 
 
+  !-------------------------------------------------------------------!
+  ! latt_fill_supercell: make a lattice supercell from primitive cell
+  ! Inputs:
+  !> sc_maker: supercell maker
+  ! Output:
+  !> supercell: supercell
+  !-------------------------------------------------------------------!
   subroutine latt_fill_supercell(self, sc_maker, supercell)
     class(mbcell_lattice_t), intent(inout):: self
     type(supercell_maker_t), intent(inout):: sc_maker
     type(mbcell_lattice_t), intent(inout):: supercell
-    !TODO;
-    
 
+    real(dp) :: sc_cell(3,3)
+    real(dp), allocatable :: sc_xcart(:,:)
+    real(dp), allocatable :: sc_masses(:)
+    integer, allocatable :: sc_zion(:)
+
+    sc_cell(:,:) = sc_maker%sc_cell(self%cell)
+    call sc_maker%trans_xcart(self%cell, self%xcart, sc_xcart)
+    call sc_maker%repeat(self%masses, sc_masses)
+    call sc_maker%repeat(self%zion, sc_zion)
+    call supercell%initialize(natom=self%natom*sc_maker%ncells, cell=sc_cell, xcart= sc_xcart, masses=sc_masses, zion=sc_zion)
+
+    ABI_SFREE(sc_xcart)
+    ABI_SFREE(sc_masses)
+    ABI_SFREE(sc_zion)
   end subroutine latt_fill_supercell
 
+
+  !-------------------------------------------------------------------!
+  !latt_from_unitcell: build lattice supercell from primitive cell
+  ! same as above, only the order of argument differs.
+  !-------------------------------------------------------------------!
   subroutine latt_from_unitcell(self, sc_maker, unitcell)
     class(mbcell_lattice_t), intent(inout):: self
     type(supercell_maker_t), intent(inout):: sc_maker
@@ -329,9 +352,6 @@ contains
     if (allocated(self%rvec)) then
        ABI_DEALLOCATE(self%rvec)
     end if
-
-
-
   end subroutine spin_finalize
 
   subroutine spin_fill_supercell(self, sc_maker, supercell)

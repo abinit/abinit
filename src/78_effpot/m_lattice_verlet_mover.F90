@@ -88,22 +88,38 @@ contains
     integer :: i
 
     ! first half of velocity update. And full displacement update.
+    ! v(t+1/2 dt) = v(t) + F/m * 1/2 dt
+    ! x(t+dt) = x(t) + v(t+1/2 dt) * dt
+    self%forces(:, :) =0.0
+    self%energy = 0.0
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
          & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
     do i=1, self%natom
        self%current_vcart(:,i) = self%current_vcart(:,i) + &
-            & 0.5_dp * self%dt * self%forces(:,i)/self%masses(i)
-       self%displacement(:,i) = self%displacement(:,i)+self%current_vcart(:,i) * self%dt
-       self%current_xcart(:,i) = self%supercell%lattice%xcart(:,i) + self%displacement(:,i)
+            & (0.5_dp * self%dt) * self%forces(:,i)/self%masses(i)
     end do
+    call self%force_stationary()
+
+    self%displacement(:,:) = self%displacement(:,:)+self%current_vcart(:,:) * self%dt
+    ! No need to update xcart.
+    !self%current_xcart(:,:) = self%supercell%lattice%xcart(:,:) + self%displacement(:,:)
+
 
     ! second half of velocity update.
-    call effpot%calculate( displacement=self%displacement, strain=self%strain, &
-         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
+    ! v(t+dt) = v(t + 1/2 dt) + F/m * 1/2 dt
+    ! NOTE: energy and forces should be initialized before every calculation!
+    self%energy=0.0
+    self%forces(:,:)=0.0
+    call effpot%calculate( displacement=self%displacement, &
+         & strain=self%strain, spin=spin, lwf=lwf, force=self%forces, &
+         & stress=self%stress,  energy=self%energy)
     do i=1, self%natom
-       self%current_vcart(:,i) = self%current_vcart(:,i) + 0.5_dp * self%dt * self%forces(:,i)/self%masses(i)
+       self%current_vcart(:,i) = self%current_vcart(:,i) &
+            & + (0.5_dp * self%dt) * self%forces(:,i)/self%masses(i)
     end do
-
+    call self%force_stationary()
+    ABI_UNUSED_A(strain)
+    ABI_UNUSED_A(displacement)
   end subroutine run_one_step
 
 

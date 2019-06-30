@@ -53,7 +53,7 @@ module m_lattice_langevin_mover
   type, public, extends(lattice_mover_t) :: lattice_langevin_mover_t
      real(dp) :: c1, c2
      real(dp), allocatable :: c3(:), c4(:), c5(:)
-     real(dp) :: fr   ! friction
+     real(dp) :: fr =0.0  ! friction
      real(dp), allocatable :: xi(:,:), eta(:,:)
    contains
      procedure :: initialize
@@ -70,6 +70,10 @@ contains
     type(multibinit_dtset_type), target, intent(in):: params
     type(mbsupercell_t), target, intent(in) :: supercell
     call self%lattice_mover_t%initialize(params, supercell)
+
+    ! TODO: add friction 
+    !self%fr = params%latt_friction
+
     ABI_ALLOCATE(self%c3, (self%natom))
     ABI_ALLOCATE(self%c4, (self%natom))
     ABI_ALLOCATE(self%c5, (self%natom))

@@ -111,7 +111,7 @@ contains
   !-------------------------------------------------------------------!
   ! calculate force and energy from harmonic potential
   ! F= - IFC .matmul. displacement
-  ! E = 1/2 (-F) .dot. displacement
+  ! E = 1/2 (-F) .dot. displacement = 1/2<disp|IFC|disp>
   ! Input:
   !   displacement: required.
   !-------------------------------------------------------------------!

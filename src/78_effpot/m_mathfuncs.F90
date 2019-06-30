@@ -122,6 +122,15 @@ contains
     endif
   end function binsearch_left_integer
 
+  !-------------------------------------------------------------------!
+  !Binaray search in a interger list.
+  !  Once it find one match, the index is returned
+  ! Input:
+  !  a: the list.
+  !  x: the element to search for
+  ! Output:
+  !  ix: the index of x. If x is not in a, ix =0. 
+  !-------------------------------------------------------------------!
   function binsearch_left_integerlist(a, x) result(ix)
     integer, intent(in):: a(:,:), x(:)
     integer :: n,ix, ub, lb, nx
@@ -217,7 +226,14 @@ contains
     !a(:,1)=0.2
   end subroutine rand_normal_builtin
 
-
+  !-------------------------------------------------------------------!
+  ! real_mat33det
+  ! 3*3 real(dp) matrix determinant.
+  ! Input:
+  !  A: 3*3 real matrix
+  ! Output:
+  !  det: the determinant
+  !-------------------------------------------------------------------!
   function real_mat33det(A) result(det)
     real(dp), intent(in) :: A(3,3)
     real(dp) :: det
@@ -229,6 +245,14 @@ contains
          - A(1,3)*A(2,2)*A(3,1)
   end function real_mat33det
 
+  !-------------------------------------------------------------------!
+  ! int_mat33det
+  ! 3*3 integer matrix determinant.
+  ! Input:
+  !  A: 3*3 interger matrix
+  ! Output:
+  !  det: the determinant
+  !-------------------------------------------------------------------!
   function int_mat33det(A) result(det)
     integer, intent(in) :: A(3,3)
     integer :: det
@@ -239,6 +263,39 @@ contains
          + A(1,3)*A(2,1)*A(3,2)  &
          - A(1,3)*A(2,2)*A(3,1)
   end function int_mat33det
+
+
+  !-------------------------------------------------------------------!
+  ! Shortcut for Hermitian matrix eigen value and eigen vectors.
+  ! Input:
+  !   evecs
+  ! Output:
+  !  evals: eigen values
+  !  evecs: eigen vectors
+  !-------------------------------------------------------------------!
+  subroutine eigensh(evals, evecs)
+    real(dp), intent(inout) :: evals(:)
+    complex(dp), intent(inout) :: evecs(:,:)
+    complex(dp), allocatable  :: work(:)
+    integer ::  info, lwork
+    real(dp) ::  Rwork(3*size(evecs,1)-2)
+    integer :: ndim
+    external ZHEEV
+    ndim = size(evecs, 1)
+    lwork = -1
+    ABI_ALLOCATE(work , (1))
+    call ZHEEV('V', 'U', ndim, evecs, ndim, evals, work, lwork, rwork, info)
+    lwork= INT(work(1))
+    ABI_SFREE(work)
+
+    ABI_ALLOCATE(work , (lwork))
+    call ZHEEV('V', 'U', ndim, evecs, ndim, evals, work, lwork, rwork, info)
+    ABI_SFREE(work)
+    IF( INFO.gt.0 ) THEN
+       MSG_ERROR('The zheev algorithm failed to compute eigenvalues.')
+       STOP
+    END IF
+  end subroutine eigensh
 
 
 end module m_mathfuncs

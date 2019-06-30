@@ -115,6 +115,7 @@ module m_multibinit_manager
      procedure :: read_potentials ! read primitve cell and potential
      procedure :: fill_supercell
      procedure :: set_movers
+     procedure :: set_lattice_mover
      procedure :: run_spin_dynamics
      procedure :: run_MvT
      procedure :: run_lattice_dynamics
@@ -148,8 +149,6 @@ contains
 
 
     call xmpi_bcast(self%filenames, master, comm, ierr)
-    call self%prepare_params()
-    ! read potentials from
 
     if(self%params%spin_dynamics>0) then
        self%has_spin=.True.
@@ -158,6 +157,10 @@ contains
        self%has_displacement=.True.
        self%has_strain=.True.
     endif
+
+    call self%prepare_params()
+    ! read potentials from
+
     ! lwf
 
   end subroutine initialize
@@ -275,6 +278,9 @@ contains
        self%params%spin_temperature_start=self%params%spin_temperature_start/Ha_K
        self%params%spin_temperature_end=self%params%spin_temperature_end/Ha_K
     end if
+    if(self%has_displacement) then
+       self%params%temperature = self%params%temperature/Ha_K
+    end if
   end subroutine prepare_params
 
 
@@ -308,7 +314,8 @@ contains
           call self%prim_pots%append(spin_pot)
        end select
     end if
-    if(self%params%spin_dynamics<0 .and. self%params%dynamics>100) then
+
+    if(self%params%dynamics>100) then
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
        select type(lat_ham_pot)
        type is (lattice_harmonic_primitive_potential_t)
@@ -359,14 +366,39 @@ contains
 
 
     if (self%params%dynamics>0) then
-       if (self%params%dynamics ==11) then
-          !ABI_DATATYPE_ALLOCATE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
-       endif
-       !call self%lattice_mover%initialize(params=self%params, supercell=self%supercell)
+       call self%set_lattice_mover()
     end if
 
     ! TODO: LWF MOVER
   end subroutine set_movers
+
+
+  !-------------------------------------------------------------------!
+  !Set_lattice_mover
+  !-------------------------------------------------------------------!
+
+  !-------------------------------------------------------------------!
+  ! initialize movers needed.
+  !-------------------------------------------------------------------!
+  subroutine set_lattice_mover(self)
+    use m_lattice_langevin_mover, only: lattice_langevin_mover_t
+    use m_lattice_verlet_mover, only: lattice_verlet_mover_t
+    use m_lattice_berendsen_mover, only: lattice_berendsen_mover_t
+    class(mb_manager_t), intent(inout) :: self
+    select case(self%params%dynamics)
+    case (101)
+       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_verlet_mover_t, self%lattice_mover)
+    case(102)
+       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
+    case(103)
+       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_mover_t, self%lattice_mover)
+    end select
+    print *, "mover allocated!"
+    call self%lattice_mover%initialize(params=self%params, supercell=self%supercell)
+  end subroutine set_lattice_mover
+
+ 
+
 
 
   !-------------------------------------------------------------------!
@@ -407,12 +439,23 @@ contains
 
   subroutine run_lattice_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
+    print *,"potential prim initialized"
     call self%prim_pots%initialize()
+    print *,"reading primitive potentials"
     call self%read_potentials()
+    print *, "initialize supercell maker"
     call self%sc_maker%initialize(diag(self%params%ncell))
+    print *, "filling supercell"
     call self%fill_supercell()
+    print *, "setting movers"
     call self%set_movers()
+    print *, "natom",  self%lattice_mover%natom
+    print *, "dt",  self%lattice_mover%dt
+    print *, "total_t",  self%lattice_mover%total_time
+    print *, "temperature",  self%lattice_mover%temperature
+    print *, "run lattice mover"
     call self%lattice_mover%run_time(self%pots)
+    print *, "mover run finished"
 
   end subroutine run_lattice_dynamics
 
