@@ -43,7 +43,7 @@ module m_lattice_verlet_mover
   use m_abstract_mover, only: abstract_mover_t
   use m_lattice_mover, only: lattice_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
-
+  use m_random_xoroshiro128plus, only:  rng_t
 !!***
 
   implicit none
@@ -60,11 +60,13 @@ module m_lattice_verlet_mover
 contains
 
 
-  subroutine initialize(self,params, supercell)
+  subroutine initialize(self,params, supercell, rng)
     class(lattice_verlet_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target, intent(in):: params
     type(mbsupercell_t), target, intent(in) :: supercell
-    call self%lattice_mover_t%initialize(params, supercell)
+    type(rng_t), target, intent(in) :: rng
+    call self%lattice_mover_t%initialize(params, supercell, rng)
+    self%label = "Velocity Verlet lattice mover"
   end subroutine initialize
 
   subroutine finalize(self)

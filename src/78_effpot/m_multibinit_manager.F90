@@ -42,6 +42,9 @@ module m_multibinit_manager
   use m_mathfuncs, only: diag
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
        outvars_multibinit, multibinit_dtset_free
+ ! random number generator
+  use m_random_xoroshiro128plus, only: rng_t
+
  ! cells
   use m_supercell_maker, only: supercell_maker_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
@@ -70,6 +73,11 @@ module m_multibinit_manager
 
   ! Lattice movers
   use m_lattice_mover, only: lattice_mover_t
+  use m_lattice_langevin_mover, only: lattice_langevin_mover_t
+  use m_lattice_verlet_mover, only: lattice_verlet_mover_t
+  use m_lattice_berendsen_NVT_mover, only: lattice_berendsen_NVT_mover_t
+  use m_lattice_berendsen_NPT_mover, only: lattice_berendsen_NPT_mover_t
+
 
   ! Spin lattice coupling
   use m_spin_lattice_coupling_effpot, only : spin_lattice_coupling_effpot_t
@@ -98,6 +106,7 @@ module m_multibinit_manager
 
      ! spin netcdf hist file
      type(spin_ncfile_t) :: spin_ncfile
+     type(rng_t) :: rng
 
      ! TODO: this is temporary. Remove after moving to multibinit_main2
      ! It means the parsing of the params are already done outside the manager.
@@ -133,6 +142,7 @@ contains
     type(multibinit_dtset_type), target, optional, intent(in) :: params
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
+    integer :: i
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     self%filenames(:)=filenames(:)
@@ -147,6 +157,14 @@ contains
        call self%read_params()
     endif
 
+
+    ! Initialize the random number generator
+    call self%rng%set_seed([111111_dp, 2_dp])
+    if(my_rank>0) then
+       do i =1,my_rank
+          call self%rng%jump()
+       end do
+    end if
 
     call xmpi_bcast(self%filenames, master, comm, ierr)
 
@@ -361,7 +379,8 @@ contains
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
     if (self%params%spin_dynamics>0) then
-       call self%spin_mover%initialize(params=self%params, supercell=self%supercell)
+       call self%spin_mover%initialize(params=self%params,&
+            & supercell=self%supercell, rng=self%rng)
     end if
 
 
@@ -381,20 +400,19 @@ contains
   ! initialize movers needed.
   !-------------------------------------------------------------------!
   subroutine set_lattice_mover(self)
-    use m_lattice_langevin_mover, only: lattice_langevin_mover_t
-    use m_lattice_verlet_mover, only: lattice_verlet_mover_t
-    use m_lattice_berendsen_mover, only: lattice_berendsen_mover_t
     class(mb_manager_t), intent(inout) :: self
     select case(self%params%dynamics)
-    case (101)
+    case (101)  ! Velocity Verlet (NVE)
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_verlet_mover_t, self%lattice_mover)
-    case(102)
+    case(102)   ! Langevin (NVT)
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
-    case(103)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_mover_t, self%lattice_mover)
+    case(103)   ! Berendsen NVT
+       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NVT_mover_t, self%lattice_mover)
+    case(104)
+       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
     end select
     print *, "mover allocated!"
-    call self%lattice_mover%initialize(params=self%params, supercell=self%supercell)
+    call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
   end subroutine set_lattice_mover
 
  

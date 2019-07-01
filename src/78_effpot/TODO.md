@@ -38,7 +38,6 @@ State: First draft in multibinit_note.md
 
 State: One file exist for spin/spin-lattice coupling.
 
-### [TODO] 
 
 ---
 
@@ -50,15 +49,20 @@ State:
 
 ### [TODO] Mover
 
-#### [TODO] set intial state:
-       * [TODO] implement get_temperature and get_kinetic_energy
+#### [TODO] set intial state:  (hexu) [time: July 2019]
+       * [DONE] implement get_temperature and get_kinetic_energy
        * [TODO] More options other than Maxwell-Boltzmann distribution
-       * [TODO] make center of mass fixed.
-       * [TODO] make sure there is no rotation.
+       * [DONE] make center of mass fixed.
+       * [TODO] make sure there is no rotation. (useful for non-periodic structure only.)
 
-#### [TODO] implement movers. Langevin (NVT) and Verlet velocity (NVE) implemented. Not test yet.
-      
-      * [TODO] add friction parameter for langevin
+#### [TODO] implement movers. (hexu) [time: July 2019]
+      * [DONE] implement Velocity Verlet mover
+      * [DONE] implement Langevin mover
+      * [DONE] implement Berendsen NVT
+      * [TODO] implement Berendsen NPT
+      * [TODO] add friction parameter for langevin, taut for Berendsen, (taup) for Be
+      * [TODO?] Add documentation to input variables
+
 
 ---
 

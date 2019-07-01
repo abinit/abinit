@@ -94,10 +94,11 @@ contains
   !> params: input parameters
   !> supercell: supercell.
   !-------------------------------------------------------------------!
-  subroutine initialize(self, params, supercell)
+  subroutine initialize(self, params, supercell, rng)
     class(lattice_mover_t), intent(inout) :: self
     type(multibinit_dtset_type),target, intent(in) :: params
     type(mbsupercell_t),target, intent(in) :: supercell
+    type(rng_t), target, intent(in) :: rng
     self%params=>params
     self%supercell=>supercell
     self%label="Lattice Mover"
@@ -113,6 +114,7 @@ contains
     self%forces(:,:) =0.0
     self%displacement(:,:) =0.0
     call self%set_params(params)
+    call self%set_rng(rng)
   end subroutine initialize
 
   !-------------------------------------------------------------------!

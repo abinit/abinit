@@ -5,7 +5,12 @@
 !!
 !! FUNCTION
 !! This module contains the langevin  (NVT) lattice mover.
-!!
+!! It is a translation from the ASE (GPL licenced) Langevin mover python code to fortran.
+!! The original code can be found at
+!! https://gitlab.com/ase/ase/blob/master/ase/md/langevin.py
+!! The method is described in
+!! E. V.-Eijnden, and G. Ciccotti, Chem. Phys. Lett. 429, 310 (2006)
+!!  https://doi.org/10.1016/j.cplett.2006.07.086
 !!
 !!
 !! Datatypes:
@@ -43,17 +48,24 @@ module m_lattice_langevin_mover
   use m_abstract_mover, only: abstract_mover_t
   use m_lattice_mover, only: lattice_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
-
+  use m_random_xoroshiro128plus, only:  rng_t
 !!***
 
   implicit none
 
   private
 
+  !-------------------------------------------------------------------!
+  ! Lattice_langevin_mover_t
+  ! 
+  !-------------------------------------------------------------------!
   type, public, extends(lattice_mover_t) :: lattice_langevin_mover_t
+     ! c1 to c5 are a constants (temperature and mass dependent)
+     ! c3 c4 c5 has dimension of natom.
      real(dp) :: c1, c2
      real(dp), allocatable :: c3(:), c4(:), c5(:)
      real(dp) :: fr =1e-4 ! friction
+     ! xi and eta: random numbers of dimension (3, natom)
      real(dp), allocatable :: xi(:,:), eta(:,:)
    contains
      procedure :: initialize
@@ -64,12 +76,17 @@ module m_lattice_langevin_mover
 
 contains
 
-
-  subroutine initialize(self,params, supercell)
+  !-------------------------------------------------------------------!
+  ! Initialize:
+  !  read parameters
+  !  allocate memory and call update_vars()
+  !-------------------------------------------------------------------!
+  subroutine initialize(self,params, supercell, rng)
     class(lattice_langevin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target, intent(in):: params
     type(mbsupercell_t), target, intent(in) :: supercell
-    call self%lattice_mover_t%initialize(params, supercell)
+    type(rng_t), target, intent(in) :: rng
+    call self%lattice_mover_t%initialize(params, supercell, rng)
 
     ! TODO: add friction 
     !self%fr = params%latt_friction
@@ -84,6 +101,9 @@ contains
   end subroutine initialize
 
 
+  !-------------------------------------------------------------------!
+  ! Finalize
+  !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(lattice_langevin_mover_t), intent(inout) :: self
     ABI_DEALLOCATE(self%c3)
@@ -94,7 +114,11 @@ contains
     call self%lattice_mover_t%finalize()
   end subroutine finalize
 
-
+  !-------------------------------------------------------------------!
+  ! update_vars:
+  !  calculate c1 to c5 from dt, masses and temperature
+  !  It is called by the initialization function.
+  !-------------------------------------------------------------------!
   subroutine update_vars(self)
     class(lattice_langevin_mover_t), intent(inout) :: self
     real(dp) :: dt, T, fr, sigma(self%natom)

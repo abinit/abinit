@@ -235,7 +235,6 @@ contains
   end subroutine COO_to_dense
 
 
-
 !  subroutine LCO_to_CSR(lco, csr)
 !    type(LCO_mat_t), intent(inout) :: lco
 !    type(CSR_mat_t), intent(inout) :: csr
