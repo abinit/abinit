@@ -562,7 +562,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    dvdb = dvdb_new(dvdb_path, comm)
    if (dtset%prtvol > 10) dvdb%debug = .True.
    ! This to symmetrize the DFPT potentials.
-   dvdb%symv1 = dtset%symv1scf > 0
+   dvdb%symv1 = dtset%symv1scf
 
    ! Set qdamp from frohl_params
    if (dtset%frohl_params(4)/=0) then
