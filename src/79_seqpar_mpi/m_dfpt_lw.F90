@@ -2583,6 +2583,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ABI_ALLOCATE(isdqwf_t5,(2,matom,3,nq1grad,3,3))
    ABI_ALLOCATE(isdqwf_t5_k,(2,matom,3,nq1grad,3,3))
    frwfdq=zero
+   isdqwf=zero
    isdqwf_t1=zero
    isdqwf_t2=zero
    isdqwf_t3=zero
@@ -3960,7 +3961,7 @@ end subroutine dfpt_flexoout
  integer :: alpha,beta,delta,gamma
  integer :: iatdir,iatom,iatpert,ibuf,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
  integer, parameter :: re=1,im=2
- real(dp) :: tmpim,tmpre
+ real(dp) :: tfrim,tfrre,t4im,tmpim,tmpre,t4re
 
 !arrays
  integer :: flg1(3),flg2(3)
@@ -4266,7 +4267,7 @@ end subroutine dfpt_flexoout
 
  write(ab_out,*)' '
  write(ab_out,*)' q-gradient of internal strain tensor, in cartesian coordinates,'
- write(ab_out,*)' atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
+ write(ab_out,'(a85)')'atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
  do istr2dir=1,3
    delta=istr2dir
    do istr1dir=1,3
@@ -4277,12 +4278,92 @@ end subroutine dfpt_flexoout
          do iatdir=1,3
            alpha=iatdir
 
+           if (typeI_cartflag(iatom,alpha,beta,delta,gamma)==1 .and. &
+          &    typeI_cartflag(iatom,alpha,delta,gamma,beta)==1 .and. & 
+          &    typeI_cartflag(iatom,alpha,gamma,beta,delta)==1 ) then
+
+             !Converts the T4 term to type-II form
+             t4re= isdqwf_t4_cart(re,iatom,alpha,beta,delta,gamma) + &
+                 & isdqwf_t4_cart(re,iatom,alpha,delta,gamma,beta) - &
+                 & isdqwf_t4_cart(re,iatom,alpha,gamma,beta,delta) 
+             t4im= isdqwf_t4_cart(im,iatom,alpha,beta,delta,gamma) + &
+                 & isdqwf_t4_cart(im,iatom,alpha,delta,gamma,beta) - &
+                 & isdqwf_t4_cart(im,iatom,alpha,gamma,beta,delta) 
+
+             !Converts the frozen wf term to type-II form
+             tfrre= frwfdq_cart(re,iatom,alpha,beta,delta,gamma) + &
+                  & frwfdq_cart(re,iatom,alpha,delta,gamma,beta) - & 
+                  & frwfdq_cart(re,iatom,alpha,gamma,beta,delta) 
+             tfrim= frwfdq_cart(im,iatom,alpha,beta,delta,gamma) + &
+                  & frwfdq_cart(im,iatom,alpha,delta,gamma,beta) - & 
+                  & frwfdq_cart(im,iatom,alpha,gamma,beta,delta) 
+
+             !Add the type-II T4 and frozen wf contributions 
+             isdqtens_cart(re,iatom,alpha,gamma,beta,delta)= &
+           & isdqtens_cart(re,iatom,alpha,gamma,beta,delta) + t4re + tfrre
+             isdqtens_cart(im,iatom,alpha,gamma,beta,delta)= &
+           & isdqtens_cart(im,iatom,alpha,gamma,beta,delta) + t4im + tfrim
+
+             !Writes the complete q-gradient of internal strain tensor
+             write(ab_out,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+           & isdqtens_cart(re,iatom,alpha,gamma,beta,delta), &
+           & isdqtens_cart(im,iatom,alpha,gamma,beta,delta)
+ 
+             if (prtvol==1) then
+               write(71,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(1,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(1,im,iatom,alpha,gamma,beta,delta)
+   
+               write(72,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(2,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(2,im,iatom,alpha,gamma,beta,delta)
+
+               write(73,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(3,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(3,im,iatom,alpha,gamma,beta,delta)
+
+               write(74,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta,t4re,t4im
+
+               write(75,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(5,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(5,im,iatom,alpha,gamma,beta,delta)
+
+               write(76,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(4,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(4,im,iatom,alpha,gamma,beta,delta)
+
+               write(77,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta,tfrre,tfrim
+             end if 
+
+           end if
 
          end do
        end do
+       write(ab_out,*)' '
+       if (prtvol==1) then
+         write(71,*)' ' 
+         write(72,*)' ' 
+         write(73,*)' ' 
+         write(74,*)' ' 
+         write(75,*)' ' 
+         write(76,*)' ' 
+         write(77,*)' ' 
+         write(78,*)' ' 
+       end if
      end do
    end do
  end do
+
+ if (prtvol==1) then
+   close(71)
+   close(72)
+   close(73)
+   close(74)
+   close(75)
+   close(76)
+   close(77)
+   close(78)
+ end if
 
  DBG_EXIT("COLL")
  end subroutine dfpt_isdqout

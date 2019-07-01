@@ -3011,8 +3011,6 @@ c0_HatdisdagdQ_c1strain_bks=zero
          c1atdis_q1gradH0_c1strain_bks(1,iband,iatpert,iq1grad,istrpert)=dotr
          c1atdis_q1gradH0_c1strain_bks(2,iband,iatpert,iq1grad,istrpert)=doti
 
-         write(90,*) dotr,doti
-
        end do !iefipert
 
      end do !istrpert
@@ -3844,9 +3842,10 @@ frwfdq_k=zero
          & half*c0_hatdisdq_c0_bks(2,iband,kb,iatpert)
          end if
 
-         !Take into account band occupations and kpt weights
+         !Take into account band occupations, kpt weights and two pi factor from the term 
+         !(\hat{p}_{k\beta + \frac{q_{\beta}}{2}}) appearing before the double q-derivation
          frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)* &
-       & wtk_k * occ_k(iband) 
+       & wtk_k * occ_k(iband) * two_pi
 
        end do !iband
 
