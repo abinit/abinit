@@ -913,6 +913,7 @@ module m_chebfi2
     
     !print *, "PROSAO TRANSPOSE"
     !stop
+    
     !!TODO TRANSPOSE IS NOT WORKING CORRECTLY FOR ISTWFK2 (or some other thing)
     call debug_helper_linalg(chebfi%X, chebfi, 1, 1)  !!TODO FROM HERE
     !call debug_helper_linalg(chebfi%AX%self, chebfi, 1, 1) 
