@@ -84,9 +84,6 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
 
-!blanchet
- use m_hightemp
-
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
@@ -1237,6 +1234,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
       if(hightemp%enabled) then
         call hightemp%compute_nfreeel(energies%e_fermie,1024,dtset%tsmear)
         call hightemp%compute_energycontrib(energies%e_fermie,1024,dtset%tsmear)
+        ! write(0,*) hightemp%entropycontrib, hightemp%energycontrib, hightemp%nfreeel, hightemp%u0
       end if
 
 !    !=========  DMFT call begin ============================================

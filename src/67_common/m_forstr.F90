@@ -37,6 +37,7 @@ module m_forstr
  use m_fock
  use m_cgtools
  use m_xcdata
+ use m_hightemp
 
  use m_time,             only : timab
  use m_geometry,         only : xred2xcart, metric, stresssym
@@ -253,7 +254,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &                 pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,psps,rhog,rhor,rprimd,stress_needed,&
 &                 strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
-&                 vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
+&                 vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero,hightemp)
 
 !Arguments ------------------------------------
 !scalars
@@ -299,6 +300,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
+ type(hightemp_type),intent(in),optional :: hightemp
 
 !Local variables-------------------------------
 !scalars
@@ -506,7 +508,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   dtset%typat,dtset%usefock,psps%usepaw,&
 &   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxc_hf,psps%xccc1d,xccc3d,psps%xcccrc,xred,&
 &   psps%ziontypat,psps%znucltypat,qvpotzero,&
-&   electronpositron=electronpositron)
+&   electronpositron=electronpositron,hightemp=hightemp)
  end if
 
 !Memory deallocation

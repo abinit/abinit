@@ -36,6 +36,7 @@ module m_afterscfloop
  use m_efield
  use m_ab7_mixing
  use m_hdr
+ use m_hightemp
 
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
@@ -295,7 +296,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
 & taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxcavg,with_vectornd,wvl,&
-& xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
+& xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode,hightemp)
 
 !Arguments ------------------------------------
 !scalars
@@ -359,6 +360,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
+ type(hightemp_type),intent(in),optional :: hightemp
 
 !Local variables-------------------------------
 !scalars
@@ -925,7 +927,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
 &   paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
 &   psps,rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,&
-&   ucvol,usecprj,vhartr,vpsp,vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
+&   ucvol,usecprj,vhartr,vpsp,vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero,hightemp=hightemp)
  end if
 
  if (optfor==1) computed_forces=1

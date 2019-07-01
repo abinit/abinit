@@ -43,6 +43,7 @@ module m_scfcv_core
  use m_hdr
  use m_xcdata
  use m_cgtools
+ use m_hightemp
 
  use m_berryphase_new,   only : update_e_field_vars
  use m_time,             only : timab
@@ -115,9 +116,6 @@ module m_scfcv_core
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_rhohxc
  use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
-
-!blanchet
- use m_hightemp
 
  implicit none
 
@@ -2130,7 +2128,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 & prtxml,psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
 & taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxcavg,with_vectornd,wvl,&
-& xccc3d,xred,ylm,ylmgr,dtset%charge*SUM(vpotzero(:)),conv_retcode)
+& xccc3d,xred,ylm,ylmgr,dtset%charge*SUM(vpotzero(:)),conv_retcode,&
+& hightemp=hightemp)
 
 !Before leaving the present routine, save the current value of xred.
  xred_old(:,:)=xred(:,:)

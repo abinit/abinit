@@ -32,6 +32,7 @@ module m_stress
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_hightemp
 
  use m_time,             only : timab
  use m_geometry,         only : metric, stresssym
@@ -177,7 +178,7 @@ contains
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
 &                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
-&                  electronpositron) ! optional argument
+&                  electronpositron,hightemp) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -203,6 +204,7 @@ contains
  real(dp),intent(out) :: strten(6)
  type(pawrad_type),intent(in) :: pawrad(ntypat*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
+ type(hightemp_type),intent(in),optional :: hightemp
 
 !Local variables-------------------------------
 !scalars
@@ -548,6 +550,11 @@ contains
    uncorr(mu)=strten(mu)+strsii
    strten(mu)=uncorr(mu)
  end do
+
+!Blanchet - Adding the hightemp continous contribution to stress tensor
+ if(hightemp%enabled) then
+   call hightemp_addtostress(hightemp%energycontrib,strten)
+ end if
 
 !=======================================================================
 !================ Print out info about stress tensor ===================

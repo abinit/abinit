@@ -227,6 +227,7 @@ contains
     real(dp),intent(in) :: fermie,tsmear
 
     ! *********************************************************************
+
     call hightemp_getnfreeel(this%ebcut,this%entropycontrib,fermie,mrgrid,&
     & this%nfreeel,tsmear,this%u0,this%ucvol)
   end subroutine compute_nfreeel
@@ -491,7 +492,6 @@ contains
     real(dp) :: ix,step,ucvol
     ! Arrays
     real(dp) :: valuesnel(mrgrid),valuesent(mrgrid)
-    real(dp) :: small=1.E-37
 
     ! *********************************************************************
 
@@ -499,21 +499,13 @@ contains
     do ii=1,mrgrid
       ix=(ii)*step
       valuesnel(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,u0,ucvol)/(ix*ix)
-
-      write(0,*) ix,max(fermi_dirac(1./ix,fermie,tsmear),small),log(fermi_dirac(1./ix,fermie,tsmear)),fermi_dirac(1./ix,fermie,tsmear)*log(fermi_dirac(1./ix,fermie,tsmear))
-      ! write(0,*) ix,fermi_dirac(1./ix,fermie,tsmear)*log(fermi_dirac(1./ix,fermie,tsmear)),&
-      ! & (1.-fermi_dirac(1./ix,fermie,tsmear))*log(1.-fermi_dirac(1./ix,fermie,tsmear)),&
-      ! & freedos(1/ix,u0,ucvol)/(ix*ix)
-
-      valuesent(ii)=(fermi_dirac(1./ix,fermie,tsmear)*log(fermi_dirac(1./ix,fermie,tsmear))+&
+      valuesent(ii)=(fermi_dirac(1./ix,fermie,tsmear)*max(log(fermi_dirac(1./ix,fermie,tsmear)),-0.001_dp*huge(0.0_dp))+&
       & (1.-fermi_dirac(1./ix,fermie,tsmear))*log(1.-fermi_dirac(1./ix,fermie,tsmear)))*&
       & freedos(1/ix,u0,ucvol)/(ix*ix)
     end do
 
     nfreeel=simpson(step,valuesnel)
     entropy=simpson(step,valuesent)
-
-    write(0,*) nfreeel, entropy
   end subroutine hightemp_getnfreeel
 
   !!****f* ABINIT/m_hightemp/hightemp_addtorho
@@ -584,5 +576,40 @@ contains
 
     etotal=etotal+energycontrib
   end subroutine hightemp_addtoenergy
+
+  !!****f* ABINIT/m_hightemp/hightemp_addtostress
+  !! NAME
+  !! hightemp_addtostress
+  !!
+  !! FUNCTION
+  !! Add the free continous part corresponding to free particle model to stress tensor.
+  !!
+  !! INPUTS
+  !! energycontrib=computed free particle part integral corresponding to energy of free electrons
+  !!
+  !! OUTPUT
+  !! strten(6)=components of the stress tensor (hartree/bohr^3) for the
+  !!    6 unique components of this symmetric 3x3 tensor:
+  !!    Given in order (1,1), (2,2), (3,3), (3,2), (3,1), (2,1).
+  !!    The diagonal components of the returned stress tensor are
+  !!    CORRECTED for the Pulay stress.
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine hightemp_addtostress(energycontrib,strten)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: energycontrib
+    ! Arrays
+    real(dp),intent(inout) :: strten(6)
+
+    ! *********************************************************************
+
+    strten(1:3) = strten(1:3)+-(2./3.)*energycontrib
+  end subroutine hightemp_addtostress
 
 end module m_hightemp
