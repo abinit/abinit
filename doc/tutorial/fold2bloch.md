@@ -163,9 +163,9 @@ You should see the following:
 That output tells us which K-point was processed, total number of K-points
 processed, output file, and the format that the data is written in.
 
-Now take a look at the *fold2Bloch.out*. The first few lines should be as follows:
+Now take a look at the *fold2Bloch.f2b*. The first few lines should be as follows:
 
-    less fold2Bloch.out
+    less fold2Bloch.f2b
     
     0.000000  -0.250000   0.000000  -0.317960   0.579542
     0.000000  -0.250000   0.333333  -0.317960   0.000000
