@@ -89,7 +89,7 @@ contains
     call self%lattice_mover_t%initialize(params, supercell, rng)
 
     ! TODO: add friction 
-    !self%fr = params%latt_friction
+    self%fr = params%latt_friction
 
     ABI_ALLOCATE(self%c3, (self%natom))
     ABI_ALLOCATE(self%c4, (self%natom))

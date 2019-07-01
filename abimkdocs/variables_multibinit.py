@@ -543,7 +543,7 @@ Variable(
     defaultval=0,
     mnemonics="Dynamics option for Multibinit",
     text=r"""
-Set the Dynamics option for Multibinit. This option is equivalent to [[abinit:ionmov]]:
+Set the Dynamics option for Multibinit. This option is equivalent to [[abinit:ionmov]] for numbers < 100. For numbers >100, it uses algorithms implemented inside Multibinit:
 
 * 0 --> do nothing
 
@@ -559,7 +559,35 @@ addition.
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[mdtemp]]), the number of thermostats ([[nnos]]), and the masses of
 thermostats ([[qmass]]).
+
+* 101 --> NVE ensemble with velocity Verlet algorithm  [[cite:Swope1982]] . 
+**Purpose:** Molecular dynamics
+**Cell optimization:** No (Use [[optcell]]=0 only)
+**Related variables:** The time step ([[dtion]]), the temperatures
+([[temperature]]).
+
+
+* 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] . 
+**Purpose:** Molecular dynamics
+**Cell optimization:** No (Use [[optcell]]=0 only)
+**Related variables:** The time step ([[dtion]]), the temperatures
+([[temperature]]), the friction [[latt_friction]].
+
+
+* 103 --> NVT ensemble. The temperature is approached by scaling the velocity of atoms. The method is proposed by Berendsen et al. in  J. Chem. Phys., 81 3684–3690 (1984) [[cite:Berendsen1984]]. Note that this method does NOT generate properly the thermostated ensemble. It does not have the correct distribution of the kinetic energy but have the correct average.  However, it approches the target temperature exponentially without oscillation, for which the steps can be easily controlled.
+**Purpose:** Molecular dynamics
+**Cell optimization:** No (Use [[optcell]]=0 only)
+**Related variables:** The time step ([[dtion]]), the temperatures
+([[temperature]]), the ion relaxation time [[latt_taut]].
+
+* 104 --> NPT ensemble with method. Similar to option 103, except the pressure is also scaled. 
+**Purpose:** Molecular dynamics
+**Cell optimization:** No (Use [[optcell]]=0 only)
+**Related variables:** The time step ([[dtion]]), the temperatures
+([[temperature]]), the ion relaxation time [[latt_taut]], the pressure relaxation time [[latt_taup]].
+
 """,
+
 ),
 
 Variable(
@@ -574,6 +602,50 @@ Variable(
 See [[abinit:dtion]]
 """,
 ),
+
+Variable(
+    abivarname="latt_friction@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1e-4,
+    mnemonics="LATTice dynamics FRICTION parameter",
+    text=r"""
+    Parameter of the friction used in Langevin dynamcis [[dynamics]] =101.
+""",
+),
+
+
+Variable(
+    abivarname="latt_taut@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1000,
+    mnemonics="LATTice dynamics relaxation time TAUT",
+    text=r"""
+    Parameter used in Berendsen lattice dynamcis [[dynamics]] =102 and 103, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of latt_taut.
+    The unit is atomic unit, same as [[dtion]].
+""",
+),
+
+Variable(
+    abivarname="latt_taup@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1000,
+    mnemonics="LATTice dynamics relaxation time TAUT",
+    text=r"""
+    Parameter used in Berendsen lattice dynamcis [[dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup.
+    The unit is atomic unit, same as [[dtion]].
+""",
+),
+
+
 
 Variable(
     abivarname="ntime@multibinit",

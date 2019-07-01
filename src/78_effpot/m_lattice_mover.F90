@@ -271,6 +271,7 @@ contains
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     integer :: i, nstep
+    character(len=90) :: msg
     if(present(displacement) .or. present(strain)) then
        MSG_ERROR("displacement and strain should not be input for lattice mover")
     end if
@@ -282,19 +283,44 @@ contains
     !TODO: add set_initial mode to input file
     call self%set_initial_state(mode=1)
 
+    
+    msg=repeat("=", 90)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    write(msg, '(A22)') "Lattice dynamic steps:"
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    msg=repeat("=", 90)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+
+    write(msg, "(A13, 4X, A15, 4X, A15, 4X, A15, 4X, A15)")  "Iteration", "temperature(K)", "Ekin(Ha/uc)", "Epot(Ha/uc)", "ETOT(Ha/uc)"
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+
     nstep=floor(self%thermal_time/self%dt)
     do i =1, nstep
-       print *, "Run step", i
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf)
     end do
 
     nstep=floor(self%total_time/self%dt)
     do i =1, nstep
        call self%get_T_and_Ek()
-       print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
+       !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf)
+       
+       write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
+            & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, (self%Ek+self%energy)/self%supercell%ncell
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+
        !TODO: output, observables
     end do
+
+    msg=repeat("=", 90)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+
 
 
   end subroutine run_time

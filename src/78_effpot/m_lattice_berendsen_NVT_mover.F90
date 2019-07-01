@@ -77,7 +77,7 @@ contains
     type(rng_t), target, intent(in) :: rng
     !self%taut = params%latt_taut
     ! TODO: implement the latt_taut parameter in input
-    self%taut = 10
+    self%taut = params%latt_taut
     call self%lattice_mover_t%initialize(params, supercell, rng)
   end subroutine initialize
 

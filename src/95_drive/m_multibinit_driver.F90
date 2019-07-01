@@ -414,6 +414,7 @@ contains
     if(inp%spin_dynamics/=0) then
        call manager%finalize()
     end if
+
     call effective_potential_free(reference_effective_potential)
     call multibinit_dtset_free(inp)
     call abihist_free(hist)

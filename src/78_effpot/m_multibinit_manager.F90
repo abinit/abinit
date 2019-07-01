@@ -249,7 +249,6 @@ contains
        call wrtout(std_out,message,'COLL')
     end if
 
-    print*,"Filenames", trim(self%filenames(1)), trim(self%filenames(2))
 
     !FIXME: This should not be here.
     ! It is only for lattice potential
@@ -411,7 +410,6 @@ contains
     case(104)
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
     end select
-    print *, "mover allocated!"
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
   end subroutine set_lattice_mover
 
@@ -457,23 +455,12 @@ contains
 
   subroutine run_lattice_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
-    print *,"potential prim initialized"
     call self%prim_pots%initialize()
-    print *,"reading primitive potentials"
     call self%read_potentials()
-    print *, "initialize supercell maker"
     call self%sc_maker%initialize(diag(self%params%ncell))
-    print *, "filling supercell"
     call self%fill_supercell()
-    print *, "setting movers"
     call self%set_movers()
-    print *, "natom",  self%lattice_mover%natom
-    print *, "dt",  self%lattice_mover%dt
-    print *, "total_t",  self%lattice_mover%total_time
-    print *, "temperature",  self%lattice_mover%temperature
-    print *, "run lattice mover"
     call self%lattice_mover%run_time(self%pots)
-    print *, "mover run finished"
 
   end subroutine run_lattice_dynamics
 
