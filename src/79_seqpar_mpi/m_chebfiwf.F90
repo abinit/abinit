@@ -449,7 +449,7 @@ module m_chebfiwf
     
     !call xgBlock_getSize(BX,spacedim,blockdim)
     
-    !print *, "spacedim BX", spacedim
+   ! print *, "spacedim BX", spacedim
     !print *, "blockdim BX", blockdim
     
     !stop
@@ -538,6 +538,8 @@ module m_chebfiwf
           if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
         else
           if (cpuRow == 0) then
+            !print *, "USAO CPUROW0"
+            !stop
             gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
           end if
         end if
@@ -554,9 +556,9 @@ module m_chebfiwf
     !call xgBlock_set(BX,gsc(:,1:blockdim*spacedim),0,spacedim)
   end subroutine getghc_gsc1
  
-  subroutine getBm1X(X,Bm1X)
+  subroutine getBm1X(X,Bm1X,transposer)
     use m_xg, only : xgBlock_t, xgBlock_gemm
-
+    use m_xgTransposer !, only xgTransposer, xgTransposer_getCPURow
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -565,13 +567,16 @@ module m_chebfiwf
 
     type(xgBlock_t), intent(inout) :: X
     type(xgBlock_t), intent(inout) :: Bm1X
+    type(xgTransposer_t), optional, intent(inout) :: transposer
     integer         :: blockdim
     integer         :: spacedim   
+    
+    integer :: cpuRow
 
     double precision, pointer :: ghc_filter(:,:)
     double precision, pointer :: gsm1hc_filter(:,:)
     type(pawcprj_type), allocatable :: cwaveprj_next(:,:) !dummy
-        
+    
     call xgBlock_getSize(X,spacedim,blockdim)
     !call xgBlock_getSize(Bm1X,spacedim,blockdim)
     spacedim = spacedim/l_icplx
@@ -594,11 +599,23 @@ module m_chebfiwf
     if(l_istwf == 2) then 
       !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
       call xgBlock_scale(X,inv_sqrt2,1)
-      if(l_mpi_enreg%me_g0 == 1) ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+      if (l_paral_kgb == 0) then
+        if(l_mpi_enreg%me_g0 == 1) ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+      else
+        call xgTransposer_getCPURow(transposer, cpuRow)
+        if (cpuRow == 0) then
+          ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+        end if
+      end if
       if(l_paw) then
         !gsc(:,1:spacedim*blockdim) = gsc(:,1:spacedim*blockdim) * sqrt2
         call xgBlock_scale(Bm1X,inv_sqrt2,1)
-        if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+        if (l_paral_kgb == 0) then
+          if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2 
+          if (cpuRow == 0) then
+            gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+          end if
+        end if
       end if
     end if
     
@@ -629,13 +646,25 @@ module m_chebfiwf
       !cg(:,1:spacedim*blockdim) = cg(:,precond1:spacedim*blockdim) * sqrt2
       !ghc(:,1:spacedim*blockdim) = ghc(:,1:spacedim*blockdim) * sqrt2
       call xgBlock_scale(X,sqrt2,1)
-      if(l_mpi_enreg%me_g0 == 1) then
-        ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-      endif
+      if (l_paral_kgb == 0) then
+        if(l_mpi_enreg%me_g0 == 1) then
+          ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+        endif
+      else
+        if (cpuRow == 0) then
+          ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+        end if
+      end if
       if(l_paw) then
         !gsc(:,1:spacedim*blockdim) = gsc(:,1:spacedim*blockdim) * sqrt2
         call xgBlock_scale(Bm1X,sqrt2,1)
-        if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+        if (l_paral_kgb == 0) then
+          if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+        else
+          if (cpuRow == 0) then
+            gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+          end if
+        end if
       end if
     end if
 
@@ -690,13 +719,13 @@ module m_chebfiwf
     if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
       !print *, "ZASTO NISTA NE ISPISUJE"
       call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)) 
       
       call xgBlock_setBlock(debugBlock, HELPER, nband/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)+1) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)+1) 
     else
       call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)) 
     end if
     
     !print *, "debugBlock%rows", rows(debugBlock)
