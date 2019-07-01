@@ -107,7 +107,7 @@ Edit *plot_band.m* file and point to the newly created *tfold2bloch_1o_DS2_EIG.d
 
 Then, run the *plot_band.m* script in MatLab
 
-    >&gtplot;_band
+    plot_band.m
 
 This will plot the band structure of the 6 atom Hydrogen supercell created.
 
@@ -139,7 +139,7 @@ arguments. For this example the multiplicity used was (1:2:3)
 
 Execute the following command:
 
-    fold2Bloch tfold2bloch_WFK 1:2:3
+    fold2Bloch tfold2bloch_1o_DS2_WFK 1:2:3
 
 You should see the following:
     
