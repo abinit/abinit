@@ -78,7 +78,7 @@ The input file has two datasets,
 the first to generate the *WFK* file, and the second to draw the band structure.
 Now you are ready to run Abinit. Issue the following:
 
-    abinit tfold2bloch_1.files > & tfold1bloch_1.log &
+    abinit < tfold2bloch_1.files > & tfold1bloch_1.log &
 
 This will generate a self consistent charge density for the 6 Hydrogen atom
 supercell structure, and the wave function file, *tfold2bloch_1o_WFK*, which is
