@@ -53,7 +53,7 @@ module m_lattice_langevin_mover
   type, public, extends(lattice_mover_t) :: lattice_langevin_mover_t
      real(dp) :: c1, c2
      real(dp), allocatable :: c3(:), c4(:), c5(:)
-     real(dp) :: fr =0.0  ! friction
+     real(dp) :: fr =1e-4 ! friction
      real(dp), allocatable :: xi(:,:), eta(:,:)
    contains
      procedure :: initialize
@@ -121,6 +121,8 @@ contains
     ABI_UNUSED_A(displacement)
     ABI_UNUSED_A(strain)
 
+    self%energy = 0.0
+    self%forces(:,:) =0.0
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
          & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
     call self%rng%rand_normal_array(self%xi, 3*self%natom)
@@ -134,17 +136,19 @@ contains
             & self%c3(i) * self%xi(:, i) - self%c4(i) * self%eta(:,i) 
 
        self%displacement(:, i) = self%displacement(:, i) &
-            & + self%dt * self%current_vcart(:, i) * self%c5( i) *self%eta(:,i)
+            & + self%dt * self%current_vcart(:, i) + self%c5( i) *self%eta(:,i)
     end do
 
     ! second half, update the velocity but not the displacement.
+    self%energy=0.0
+    self%forces=0.0
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
          & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
     do i =1, self%natom
        self%current_vcart(:,i) = self%current_vcart(:,i) + &
             &self%c1 * self%forces(:,i) / self%masses(i) - &
             & self%c2 * self%current_vcart(:,i) + &
-            & self%c3(i) * self%xi(:, i) - self%c4(i) * self%eta(:,i) 
+            & self%c3(i) * self%xi(:, i) - self%c4(i) * self%eta(:,i)
     end do
 
   end subroutine run_one_step
