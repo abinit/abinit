@@ -31,7 +31,7 @@ module m_chebfi2
   
   integer, parameter :: EIGENV = 1
   integer, parameter :: EIGENVD = 2
-  integer, parameter :: DEBUG_ROWS = 2
+  integer, parameter :: DEBUG_ROWS = 10
   integer, parameter :: DEBUG_COLUMNS = 5
   
 #ifdef HAVE_OPENMP 
@@ -395,10 +395,12 @@ module m_chebfi2
       end subroutine getAX_BX
     end interface
     interface
-      subroutine getBm1X(X,Bm1X)
+      subroutine getBm1X(X,Bm1X,transposer)
         use m_xg, only : xgBlock_t
+        use m_xgTransposer !, only: xgTransposer_t
         type(xgBlock_t), intent(inout) :: X
         type(xgBlock_t), intent(inout) :: Bm1X
+        type(xgTransposer_t), optional, intent(inout) :: transposer
       end subroutine getBm1X
     end interface 
     interface
@@ -442,6 +444,9 @@ module m_chebfi2
 !    write(*,*) "Num threads", OMP_GET_MAX_THREADS()
 !    WRITE(*,*) "Num procs", omp_get_num_procs()
 !    stop
+
+    !print *, "KRENUO"
+    !stop
     
     if (chebfi%paral_kgb == 0) then
       allocate(nline_bands(neigenpairs))
@@ -485,6 +490,9 @@ module m_chebfi2
       !call xg_getPointer(chebfi%X_next)
       !stop 
     !end if
+    !stop
+    
+    !print *, "RANK", xmpi_comm_rank(chebfi%spacecom)
     !stop
     ! Transpose
     if (chebfi%paral_kgb == 1) then
@@ -594,6 +602,7 @@ module m_chebfi2
     !stop
    
     !call debug_helper(chebfi%xAXColsRows, chebfi) 
+    !call debug_helper(chebfi%xBXColsRows, chebfi) 
     
     call timab(tim_getAX_BX,1,tsec)         
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
@@ -609,13 +618,13 @@ module m_chebfi2
     
     !!on nproc 2 for some reason
     !call debug_helper(chebfi%xXColsRows, chebfi) 
-    call debug_helper(chebfi%xAXColsRows, chebfi) 
+    !call debug_helper(chebfi%xAXColsRows, chebfi) 
     !call debug_helper(chebfi%xBXColsRows, chebfi) 
-    stop
+    !stop
     
-    print *, "getAXBX"
-    call debug_me_g0_COLROWS(chebfi%xXColsRows, chebfi)
-    stop
+    !print *, "getAXBX"
+    !call debug_me_g0_COLROWS(chebfi%xXColsRows, chebfi)
+    !stop
       
     if (chebfi%paral_kgb == 1) then   
       call xmpi_barrier(chebfi%spacecom)
@@ -685,7 +694,9 @@ module m_chebfi2
     
 
     !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
-    !call debug_helper_linalg(chebfi%X, chebfi, 1) 
+    !call debug_helper(chebfi%xXColsRows, chebfi) 
+    !call debug_helper(chebfi%xAXColsRows, chebfi) 
+    !call debug_helper(chebfi%xBXColsRows, chebfi) 
     !stop
        
    ! print *, "AAAAAAAAAAAAAAAAAAAA"
@@ -700,6 +711,9 @@ module m_chebfi2
       !stop
       !call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
       !call debug_helper_linalg(chebfi%X, chebfi, 1) 
+      !call debug_helper(chebfi%xXColsRows, chebfi) 
+      !call debug_helper(chebfi%xAXColsRows, chebfi) 
+      !call debug_helper(chebfi%xBXColsRows, chebfi) 
       !stop
       
       !stop      
@@ -742,7 +756,7 @@ module m_chebfi2
       !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
       !stop
       !print *, "getAX_BX before"
-      call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)  !OVO SAD MORA SVUDA DA SE MENJA
+      call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
       !print *, "getAX_BX after"
       !stop
       !call debug_helper(chebfi%xXColsRows, chebfi) 
@@ -891,6 +905,7 @@ module m_chebfi2
     
     !call xgBlock_setBlock(chebfi%xXColsRows, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
     !call xgBlock_print(HELPER, 200 + chebfi%paral_kgb) 
+    !call debug_helper(chebfi%xXColsRows, chebfi) 
     !stop
      
     !call debug_helper_linalg(chebfi%X, chebfi, 1) 
@@ -898,11 +913,11 @@ module m_chebfi2
     
     !print *, "PROSAO TRANSPOSE"
     !stop
-
-    !call debug_helper_linalg(chebfi%X, chebfi, 1) 
-    !call debug_helper_linalg(chebfi%AX%self, chebfi, 1) 
+    !!TODO TRANSPOSE IS NOT WORKING CORRECTLY FOR ISTWFK2 (or some other thing)
+    call debug_helper_linalg(chebfi%X, chebfi, 1, 1)  !!TODO FROM HERE
+    !call debug_helper_linalg(chebfi%AX%self, chebfi, 1, 1) 
     !call debug_helper_linalg(chebfi%BX%self, chebfi, 1) 
-    !stop 
+    stop 
     
     !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS) !proba ali ne radi bas kako treba :(
     !stop
@@ -1053,10 +1068,12 @@ module m_chebfi2
     double precision :: tsec(2)   
              
     interface
-      subroutine getBm1X(X,Bm1X)
+      subroutine getBm1X(X,Bm1X,transposer)
         use m_xg, only : xgBlock_t
+        use m_xgTransposer !, only: xgTransposer_t
         type(xgBlock_t), intent(inout) :: X
         type(xgBlock_t), intent(inout) :: Bm1X
+        type(xgTransposer_t), optional, intent(inout) :: transposer    
       end subroutine getBm1X
     end interface
 
@@ -1075,8 +1092,11 @@ module m_chebfi2
 !        stop 
 !      end if
       !stop
-      call getBm1X(chebfi%xAXColsRows, chebfi%X_next) 
+      call getBm1X(chebfi%xAXColsRows, chebfi%X_next, chebfi%xgTransposerX) 
       
+      !call debug_helper(chebfi%xAXColsRows, chebfi) 
+      !call debug_helper(chebfi%X_next, chebfi) 
+      !stop
 !      if (iline == 2) then
 !        call debug_helper_linalg(chebfi%X, chebfi) 
 !        call xg_getPointer(chebfi%X)
@@ -1898,14 +1918,14 @@ module m_chebfi2
     if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
       !print *, "USAOOSOOSOSOSO"
       call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
       
       call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)+1) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
     else
       !print *, "2222222222222222222"
       call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
     end if
     
     !print *, "debugBlock%rows", rows(debugBlock)

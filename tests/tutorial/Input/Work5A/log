@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_2_x.out to t03_2_x.out0032
+    Renaming old t03_2_x.out to t03_2_x.out0067
 ...
  
 
@@ -42,8 +42,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 28 Jun 2019.
-- ( at 18h19 )
+.Starting date : Mon  1 Jul 2019.
+- ( at 16h39 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -560,14 +560,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ITER STEP NUMBER     1
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  Invovl built
-     7942592
-     7942592
- -2146843648
- -2146843648
+ -1596395072
+ -1596395072
+   283665408
+   283665408
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
@@ -596,3 +596,100 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  bandpp_sym          48
  PROSAO getAX_BX
  PROSAO getAX_BX
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+    55357888
+ -1819733184
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           0        1944
+ chebfi%spacedim-1        1943
+ spacedim        1944
+ STAMPAM MPI2
+ rank, spacedim           1        1944
