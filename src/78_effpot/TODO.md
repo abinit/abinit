@@ -20,8 +20,7 @@ State:
 #### [DONE] implement primitive potentail (read from netcdf file). Tested.
 #### [DONE] implement supercell potential, fill_supercell
 #### [DONE] add the data structure to the manager.
-
-###[TODO] move random number generator to manager and use pointer in each mover.
+###  [DONE] move random number generator to manager and use pointer in each mover.
 
 ---
 
@@ -60,8 +59,8 @@ State:
       * [DONE] implement Langevin mover
       * [DONE] implement Berendsen NVT
       * [TODO] implement Berendsen NPT
-      * [TODO] add friction parameter for langevin, taut for Berendsen, (taup) for Be
-      * [TODO?] Add documentation to input variables
+      * [DONE] add friction parameter for langevin, taut for Berendsen, (taup) for Be
+      * [DONE] Add documentation to input variables
 
 
 ---

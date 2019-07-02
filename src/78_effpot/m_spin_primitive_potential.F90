@@ -36,6 +36,11 @@ module m_spin_primitive_potential
   use m_abicore
   use m_errors
   use m_xmpi
+  use m_nctk
+  !#if defined HAVE_NETCDF
+  use netcdf
+  !#endif
+
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_io_xml, only: xml_read_spin, xml_free_spin
@@ -46,13 +51,24 @@ module m_spin_primitive_potential
   use m_supercell_maker, only: supercell_maker_t
   use m_spmat_ndcoo, only: ndcoo_mat_t
   use m_spin_potential, only: spin_potential_t
+
   implicit none
   private
   !!*** 
   type, public, extends(primitive_potential_t) :: spin_primitive_potential_t
-     integer :: natoms, nspin    ! on every mpi node
-     type(ndcoo_mat_t) :: coeff  ! on only master node
-     type(int2d_array_type) :: Rlist  ! on only master node
+     integer :: natoms  
+     integer ::  nspin    ! on every mpi node
+     type(ndcoo_mat_t) :: coeff  ! only on master node
+     type(int2d_array_type) :: Rlist !only on master node
+
+     ! Here the coeff is a NOCOO matrix, which has the indices and values.
+     ! The indices is a 2d integer matrix.
+     ! |     indices    | value|
+     ! |  i1 | j1| indR1| val1 |
+     ! |  i2 | j2| indR2| val2 |
+     !
+     ! and the Rlist is a list of R values.
+     ! for  the k'th element ik, jk, indRk, valk, the R value is Rlist(indRk).
    contains
      procedure:: initialize
      procedure:: finalize
@@ -65,6 +81,7 @@ module m_spin_primitive_potential
      procedure :: add_input_sia
      procedure :: load_from_files
      procedure:: read_xml
+     procedure :: read_netcdf
      procedure:: fill_supercell
   end type spin_primitive_potential_t
 
@@ -129,13 +146,14 @@ contains
     class(spin_primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
-    character(len=fnlen) :: xml_fname
+    character(len=fnlen)  :: fname
     character(len=500) :: message
     integer :: ii
     logical:: use_sia, use_exchange, use_dmi, use_bi
+    integer :: filetype ! 1. xml 2. netcdf
 
+    fname=fnames(3)
     if (xmpi_comm_rank(xmpi_world)==0) then
-       xml_fname=fnames(3)
        write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
             &     'reading spin terms.'
        call wrtout(ab_out,message,'COLL')
@@ -147,8 +165,13 @@ contains
     use_bi=.True.
     ! Do not use sia term in xml if spin_sia_add is set to 1.
     if(params%spin_sia_add == 1) use_sia=.False.
-    call self%read_xml( trim(xml_fname)//char(0), &
-         & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
+
+    if(endswith(trim(fname), ".xml")) then
+       call self%read_xml( trim(fname)//char(0), &
+            & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
+    elseif(endswith(trim(fname), ".nc")) then
+       call self%read_netcdf(trim(fname))
+    endif
     if (params%spin_sia_add /= 0 ) then
        call self%add_input_sia(params%spin_sia_k1amp, &
             & params%spin_sia_k1dir)
@@ -156,14 +179,192 @@ contains
   end subroutine load_from_files
 
 
+  !-------------------------------------------------------------------!
+  ! load_from_netcdf
+  ! Load spin primitive potential from a netcdf file.
+  !-------------------------------------------------------------------!
+  subroutine read_netcdf(self, fname)
+    class(spin_primitive_potential_t), intent(inout) :: self
+    character(len=fnlen), intent(in) :: fname
+    integer :: ierr, ncid, varid
+    integer :: i
+
+    integer :: nspin, natom
+    real(dp) :: cell(3,3)
+    integer, allocatable :: index_spin(:)
+    real(dp), allocatable :: spinat(:,:)
+    real(dp), allocatable :: xcart(:,:)
+    real(dp), allocatable :: gyroratio(:)
+    real(dp), allocatable :: gilbert_damping(:)
+
+    integer :: spin_exchange_nterm
+    integer , allocatable:: spin_exchange_ilist(:)
+    integer , allocatable:: spin_exchange_jlist(:)
+    integer , allocatable:: spin_exchange_Rlist(:,:)
+    real(dp), allocatable:: spin_exchange_vallist(:,:)
+
+    integer :: spin_bilinear_nterm
+    integer , allocatable:: spin_bilinear_ilist(:)
+    integer , allocatable:: spin_bilinear_jlist(:)
+    integer , allocatable:: spin_bilinear_Rlist(:,:)
+    real(dp), allocatable:: spin_bilinear_vallist(:,:,:)
+
+!#if defined HAVE_NETCDF
+
+    ! open netcdf file
+    ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
+    call nc_handle_err(ierr)
+
+    ! read primcell info
+    ierr=nctk_get_dim(ncid, "natom", natom)
+    ierr=nctk_get_dim(ncid, "nspin", nspin)
+
+    ! allocate for primcell
+    ABI_ALLOCATE(xcart, (3, natom))
+    ABI_ALLOCATE(spinat, (3, natom))
+    ABI_ALLOCATE(index_spin, (natom))
+    ABI_ALLOCATE(gyroratio, (nspin))
+    ABI_ALLOCATE(gilbert_damping, (nspin))
+
+
+    ierr =nf90_inq_varid(ncid, "ref_cell", varid)
+    call nc_handle_err(ierr, "ref_cell")
+    ierr = nf90_get_var(ncid, varid, cell)
+    call nc_handle_err(ierr, "ref_cell")
+
+    ierr =nf90_inq_varid(ncid, "ref_xcart", varid)
+    call nc_handle_err(ierr, "ref_xcart")
+    ierr = nf90_get_var(ncid, varid, xcart)
+    call nc_handle_err(ierr, "ref_xcart")
+
+    ierr =nf90_inq_varid(ncid, "spinat", varid)
+    call nc_handle_err(ierr, "spinat")
+    ierr = nf90_get_var(ncid, varid, spinat)
+    call nc_handle_err(ierr, "spinat")
+
+    ierr =nf90_inq_varid(ncid, "index_spin", varid)
+    call nc_handle_err(ierr, "index_spin")
+    ierr = nf90_get_var(ncid, varid, index_spin)
+    call nc_handle_err(ierr, "index_spin")
+
+    ierr =nf90_inq_varid(ncid, "gyroratio", varid)
+    call nc_handle_err(ierr, "gyroratio")
+    ierr = nf90_get_var(ncid, varid, gyroratio)
+    call nc_handle_err(ierr, "gyroratio")
+
+    ierr =nf90_inq_varid(ncid, "gilbert_damping", varid)
+    call nc_handle_err(ierr, "gilbert_damping")
+    ierr = nf90_get_var(ncid, varid, gilbert_damping)
+    call nc_handle_err(ierr, "gilbert_damping")
+
+    call self%set_spin_primcell( natoms=natom, unitcell=cell, positions=xcart, &
+         & nspin=nspin, index_spin=index_spin, spinat=spinat, &
+         & gyroratios=gyroratio, damping_factors=gilbert_damping )
+
+    ABI_SFREE(xcart)
+    ABI_SFREE(spinat)
+    ABI_SFREE(index_spin)
+    ABI_SFREE(gyroratio)
+    ABI_SFREE(gilbert_damping)
+
+
+    !== read exchange terms
+    ierr=nctk_get_dim(ncid, "spin_exchange_nterm", spin_exchange_nterm)
+    ABI_ALLOCATE(spin_exchange_ilist, (spin_exchange_nterm))
+    ABI_ALLOCATE(spin_exchange_jlist, (spin_exchange_nterm))
+    ABI_ALLOCATE(spin_exchange_Rlist, (3,spin_exchange_nterm))
+    ABI_ALLOCATE(spin_exchange_vallist, (3,spin_exchange_nterm))
+
+    ierr =nf90_inq_varid(ncid, "spin_exchange_ilist", varid)
+    call nc_handle_err(ierr, "spin_exchange_ilist")
+    ierr = nf90_get_var(ncid, varid, spin_exchange_ilist)
+    call nc_handle_err(ierr, "spin_exchange_ilist")
+
+    ierr =nf90_inq_varid(ncid, "spin_exchange_jlist", varid)
+    call nc_handle_err(ierr, "spin_exchange_jlist")
+    ierr = nf90_get_var(ncid, varid, spin_exchange_jlist)
+    call nc_handle_err(ierr, "spin_exchange_jlist")
+
+    ierr =nf90_inq_varid(ncid, "spin_exchange_Rlist", varid)
+    call nc_handle_err(ierr, "spin_exchange_Rlist")
+    ierr = nf90_get_var(ncid, varid, spin_exchange_Rlist)
+    call nc_handle_err(ierr, "spin_exchange_Rlist")
+
+    
+    ierr =nf90_inq_varid(ncid, "spin_exchange_vallist", varid)
+    call nc_handle_err(ierr, "spin_exchange_vallist")
+    ierr = nf90_get_var(ncid, varid, spin_exchange_vallist)
+    call nc_handle_err(ierr, "spin_exchange_vallist")
+
+    spin_exchange_vallist(:,:) = spin_exchange_vallist(:,:) * eV_Ha
+
+    call self%set_exchange( n=spin_exchange_nterm, ilist=spin_exchange_ilist, &
+         & jlist=spin_exchange_jlist, Rlist=spin_exchange_Rlist, &
+         & vallist=spin_exchange_vallist)
+
+    ABI_SFREE(spin_exchange_ilist)
+    ABI_SFREE(spin_exchange_jlist)
+    ABI_SFREE(spin_exchange_Rlist)
+    ABI_SFREE(spin_exchange_vallist)
+
+    ! read bilinear terms
+    ierr=nctk_get_dim(ncid, "spin_bilinear_nterm", spin_bilinear_nterm)
+    ABI_ALLOCATE(spin_bilinear_ilist, (spin_bilinear_nterm))
+    ABI_ALLOCATE(spin_bilinear_jlist, (spin_bilinear_nterm))
+    ABI_ALLOCATE(spin_bilinear_Rlist, (3,spin_bilinear_nterm))
+    ABI_ALLOCATE(spin_bilinear_vallist, (3,3,spin_bilinear_nterm))
+
+    ierr =nf90_inq_varid(ncid, "spin_bilinear_ilist", varid)
+    call nc_handle_err(ierr, "spin_bilinear_ilist")
+    ierr = nf90_get_var(ncid, varid, spin_bilinear_ilist)
+    call nc_handle_err(ierr, "spin_bilinear_ilist")
+
+    ierr =nf90_inq_varid(ncid, "spin_bilinear_jlist", varid)
+    call nc_handle_err(ierr, "spin_bilinear_jlist")
+    ierr = nf90_get_var(ncid, varid, spin_bilinear_jlist)
+    call nc_handle_err(ierr, "spin_bilinear_jlist")
+
+    ierr =nf90_inq_varid(ncid, "spin_bilinear_Rlist", varid)
+    call nc_handle_err(ierr, "spin_bilinear_Rlist")
+    ierr = nf90_get_var(ncid, varid, spin_bilinear_Rlist)
+    call nc_handle_err(ierr, "spin_bilinear_Rlist")
+
+    ierr =nf90_inq_varid(ncid, "spin_bilinear_vallist", varid)
+    call nc_handle_err(ierr, "spin_bilinear_vallist")
+    ierr = nf90_get_var(ncid, varid, spin_bilinear_vallist)
+    call nc_handle_err(ierr, "spin_bilinear_vallist")
+
+    spin_bilinear_vallist(:,:,:) = spin_bilinear_vallist(:,:,:) * eV_Ha
+    call self%set_bilinear( n=spin_bilinear_nterm, ilist=spin_bilinear_ilist, &
+         & jlist=spin_bilinear_jlist, Rlist=spin_bilinear_Rlist, &
+         & vallist=spin_bilinear_vallist)
+
+    ABI_SFREE(spin_bilinear_ilist)
+    ABI_SFREE(spin_bilinear_jlist)
+    ABI_SFREE(spin_bilinear_Rlist)
+    ABI_SFREE(spin_bilinear_vallist)
+
+    ! set values to primitive potential
+
+
+  end subroutine read_netcdf
+
+
+  !-------------------------------------------------------------------!
+  ! set_bilinear_1term:
+  !   Add a bilinear term
+  ! Inputs:
+  ! i: index of spin i
+  ! j: index of spin j
+  ! R: cell vector R (vector3)
+  ! val : a 3*3 matrix. 
+  !-------------------------------------------------------------------!
   subroutine set_bilinear_1term(self, i, j, R, val)
     class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: i, j, R(3)
     real(dp), intent(in) :: val(3,3)
     real(dp) :: v
     integer :: indR, iv, jv
-
-
 
     if (xmpi_comm_rank(xmpi_world)==0) then
        call self%Rlist%push_unique(R, position=indR)
@@ -176,12 +377,20 @@ contains
     endif
   end subroutine set_bilinear_1term
 
+  !-------------------------------------------------------------------!
+  ! set_bilinear:
+  !Inputs:
+  ! n: number of terms
+  ! ilist: list of i (length n)
+  ! jlist: list of j (length n)
+  ! Rlist: list of R mat(3,  n)
+  ! vallist: list of val . mat(3,3,n)
+  !-------------------------------------------------------------------!
   subroutine  set_bilinear(self, n, ilist, jlist, Rlist, vallist)
     class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(n), jlist(n), Rlist(3,n)
     real(dp), intent(in) :: vallist(3, 3,n)
     integer :: idx
-
     if (xmpi_comm_rank(xmpi_world)==0) then
        do idx = 1, n
           call self%set_bilinear_1term(ilist(idx), jlist(idx), Rlist(:,idx), vallist(:,:, idx))
@@ -189,6 +398,10 @@ contains
     endif
   end subroutine set_bilinear
 
+  !-------------------------------------------------------------------!
+  ! set_exchange terms.
+  !  same as set_bilinear, except the vallist only have the diagonal.
+  !-------------------------------------------------------------------!
   subroutine set_exchange(self, n, ilist, jlist, Rlist, vallist)
     class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
@@ -208,6 +421,10 @@ contains
   end subroutine set_exchange
 
 
+  !-------------------------------------------------------------------!
+  ! set the DMI term.
+  ! here vallist is a list(n) of 3-vectors. 
+  !-------------------------------------------------------------------!
   subroutine set_dmi(self, n, ilist, jlist, Rlist, vallist)
     class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
@@ -230,6 +447,12 @@ contains
     endif
   end subroutine set_dmi
 
+  !-------------------------------------------------------------------!
+  ! set_sia:
+  !  set a list of single ion anisotropy
+  !   k1list: amplitudes  mat(n)
+  !   k1dirlist: directions  mat(3, n)
+  !-------------------------------------------------------------------!
   subroutine set_sia(self, n, ilist, k1list, k1dirlist)
 
     class(spin_primitive_potential_t), intent(inout) :: self
@@ -248,7 +471,12 @@ contains
     endif
   end subroutine set_sia
 
-  ! add user inputed SIA.
+  !-------------------------------------------------------------------!
+  ! add a SIA for every spin, usually from a user input.
+  ! input_sia_k1amp: amplitude of SIA, a scalar
+  ! input_sia_k1dir: direction of SIA, a vector
+  !-------------------------------------------------------------------!
+
   subroutine add_input_sia(self,  input_sia_k1amp, input_sia_k1dir)
     class(spin_primitive_potential_t), intent(inout) :: self
     real(dp), intent(in):: input_sia_k1amp, input_sia_k1dir(3)
@@ -269,6 +497,15 @@ contains
   end subroutine add_input_sia
 
 
+  !-------------------------------------------------------------------!
+  ! Read potential from xml file
+  ! Inputs:
+  !  xml_fname: filename
+  !  use_exchange: whether to read exchange term
+  !  use_dmi: whether to read DMI term
+  !  use_sia: whether to read SIA term
+  !  use_bi: whether to read bilinear term (added on top of other terms.)
+  !-------------------------------------------------------------------!
   subroutine read_xml(self, xml_fname, use_exchange, use_dmi, use_sia, use_bi)
     class(spin_primitive_potential_t), intent(inout) :: self
     character(kind=C_CHAR) :: xml_fname(*)
@@ -428,7 +665,13 @@ contains
 
   end subroutine read_xml
 
-
+  !-------------------------------------------------------------------!
+  ! fill_supercell:
+  !  generate a supercell potential from primitive potential
+  ! Input:
+  !  scmaker: supercell maker helper class
+  !  scpot: supercell potential (a pointer to a abstract potential)
+  !-------------------------------------------------------------------!
   subroutine fill_supercell(self, scmaker, scpot)
     class(spin_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t), intent(inout):: scmaker
@@ -445,8 +688,8 @@ contains
     call xmpi_bcast(sc_nspin, master, comm, ierr)
     !ABI_MALLOC_SCALAR(spin_potential_t::scpot)
     ABI_DATATYPE_ALLOCATE_SCALAR(spin_potential_t, scpot)
-    select type(scpot)
-    type is (spin_potential_t)
+    select type(scpot) ! use select type because properties only defined for spin_potential is used.
+    type is (spin_potential_t) 
        call scpot%initialize(sc_nspin)
        if (iam_master) then
           call self%coeff%sum_duplicates()
@@ -469,5 +712,33 @@ contains
        endif
     end select
   end subroutine fill_supercell
+
+  !-------------------------------------------------------------------!
+  ! check if a string1 ends with string2.
+  ! used to check if file is .nc or .xml
+  !-------------------------------------------------------------------!
+  function  endswith(string1, string2) result(answer)
+    implicit none
+    character(len=*), intent(in) :: string1
+    character(len=*), intent(in) :: string2
+    logical :: answer
+    answer = .False.
+    if(len(string2)>len(string1)) return
+    if(string1(len(string1)-len(string2)+1:)==string2) answer = .True.
+  end function endswith
+
+  subroutine nc_handle_err(ierr, name)
+    integer, intent ( in) ::ierr
+    character(*), optional, intent(in) :: name
+    if(ierr/= nf90_noerr) then
+       if (present(name)) then
+          write(std_out, *)  trim(nf90_strerror(ierr)), "when trying to read ", name
+       else
+          write(std_out, *)  trim(nf90_strerror(ierr))
+       end if
+       stop "Stopped"
+    end if
+  end subroutine nc_handle_err
+
 
 end module m_spin_primitive_potential
