@@ -1,18 +1,17 @@
 '''
-    This file solve problems that can only be solved either by a trick or by
+    This file solves problems that can only be solved either by a trick or by
     a global refactoring such as python 2 compatibility (should be dropped
     soon) or problems related to the modified sys.path.
 '''
-
 from __future__ import print_function, division, unicode_literals
 
 
 def cstm_isinstance(obj, cls):
     '''
         Rely on the true isinstance when possible.
-        Only exists because custom sys.path make issubclass work unexpectedly
-        when two different path are used to access the same class.
-        Recursively browse parent classes until it found a match or reach
+        Only exists because custom sys.path makes issubclass work unexpectedly
+        when two different paths are used to access the same class.
+        Recursively browses parent classes until it founds a match or reaches
         the top class. Consider that an eventual tests prefix in the path
         is not significant.
     '''
@@ -28,9 +27,9 @@ def cstm_isinstance(obj, cls):
 def cstm_issubclass(cls_test, cls_ref):
     '''
         Rely on the true issubclass when possible.
-        Only exists because custom sys.path make issubclass work unexpectedly
+        Only exists because custom sys.path make issubclass works unexpectedly
         when two different path are used to access the same class.
-        Recursively browse parent classes until it found a match or reach
+        Recursively browses parent classes until it founds a match or reaches
         the top class. Consider that an eventual tests prefix in the path
         is not significant.
     '''

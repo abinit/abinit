@@ -188,6 +188,7 @@ type dataset_type
  integer :: dmft_dc
  integer :: dmft_entropy
  integer :: dmft_iter
+ integer :: dmft_kspectralfunc
  integer :: dmft_nlambda
  integer :: dmft_nwli
  integer :: dmft_nwlo
@@ -937,6 +938,7 @@ type dataset_type
  integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
+ real(dp) :: eph_alpha_gmin = zero !sqrt(5)
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  integer :: eph_phrange(2) = 0
 

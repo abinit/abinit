@@ -77,9 +77,9 @@ program mrgdv
  comm = xmpi_world
  my_rank = xmpi_comm_rank(comm)
 
-!Initialize memory profiling if it is activated
-!if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
-!note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if it is activated
+ ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
+ ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
 #endif
@@ -120,7 +120,7 @@ program mrgdv
        write(std_out,*)" "
        write(std_out,*)"=== Options for developers ==="
        write(std_out,*)" "
-       write(std_out,*)"test_v1complete FILE [--symv1scf]"
+       write(std_out,*)"test_v1complete FILE [--symv1scf 1] [--potfile foo.nc]"
        write(std_out,*)"                           Test symmetrization of DFPT potentials with symv1scf option"
        write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (use prep_gkk)."
        write(std_out,*)"test_v1rsym [--symv1scf]   Test symmetries of DFPT potentials in real space."
@@ -130,7 +130,7 @@ program mrgdv
        write(std_out,*)"test_addlr in_DVDB [--qdamp -1] [--symv1scf]"
        write(std_out,*)"downsample in_DVDB out_DVDB [n1, n2, n3] Produce new DVDB with q-subsmesh"
        !write(std_out,*)"convert in_old_DVDB out_DVDB.nc  Convert old DVDB format to new DVDB in netcdf format"
-       !write(std_out,*)"add_gspot in_POT in_DVDB.nc  Add GS potential to DVDB file (required for Sternheimer."
+       !write(std_out,*)"add_gspot in_POT in_DVDB.nc  Add GS potential to DVDB file (required for Sternheimer)."
        goto 100
      end if
    end do
@@ -169,8 +169,9 @@ program mrgdv
    case ("test_v1comp", "test_v1complete")
      call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB, pass extra argument to dump v1(r)) to file")
      call get_command_argument(2, dvdb_path)
-     dump_file = ""; if (nargs > 2) call get_command_argument(3, dump_file)
+     !dump_file = ""; if (nargs > 2) call get_command_argument(3, dump_file)
      ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
+     ABI_CHECK(get_arg("potfile", dump_file, msg, default="") == 0, msg)
      call dvdb_test_v1complete(dvdb_path, symv1scf, dump_file, comm)
 
    case ("test_v1rsym")
@@ -188,7 +189,8 @@ program mrgdv
      ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
      ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=-1) == 0, msg)
      ABI_CHECK(get_arg_list("coarse-ngqpt", coarse_ngqpt, lenr, msg, default=0, want_len=3) == 0, msg)
-     call dvdb_test_ftinterp(dvdb_path, method, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, ddb_path, prtvol, coarse_ngqpt, comm)
+     call dvdb_test_ftinterp(dvdb_path, method, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
+                             ddb_path, prtvol, coarse_ngqpt, comm)
 
    case ("test_addlr")
      call get_command_argument(2, dvdb_path)
@@ -231,7 +233,6 @@ program mrgdv
  end if
 
  call wrtout(std_out," Done")
-
  call abinit_doctor("__mrgdv")
 
  100 call xmpi_end()

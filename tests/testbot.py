@@ -268,7 +268,7 @@ class TestBot(object):
             runner = self.mpi_runner
 
         results = test_suite.run_tests(
-            self.build_env, workdir, runner,
+            self.build_env, workdir, runner, make_html_diff=1,
             nprocs=mpi_nprocs, py_nprocs=py_nprocs, runmode=self.runmode)
         # Cannot use this option on the test farm because hdf5 is not thread-safe.
         # See https://www.hdfgroup.org/hdf5-quest.html#tsafe

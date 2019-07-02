@@ -159,11 +159,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0,sppoldbl1=1,timrev1=1
- integer,parameter :: nsphere0=0,prtsrlr0=0
- integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
+ integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0
+ integer,parameter :: nsphere0=0, prtsrlr0=0
+ integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,jj
  integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr,brav1
- integer :: omp_ncpus, work_size, nks_per_proc
+ integer :: omp_ncpus, work_size, nks_per_proc, comm_rpt, method
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -173,7 +173,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk,use_wfq,use_dvdb
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
+ character(len=fnlen) :: wfk0_path, wfq_path, ddb_path, dvdb_path, path
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
@@ -496,6 +496,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
    end if
  end if
+ !do ii=1,3; do jj=1,3; if (ii /= jj) dielt(ii, jj) = zero; enddo; enddo
 
  call ifc_init(ifc,cryst,ddb,&
    brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
@@ -593,15 +594,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
    end if
 
+   ! Allow user to change qdamp parameter
+   dvdb%qdamp = dtset%frohl_params(4)
+
    if (my_rank == master) then
      call dvdb%print()
      call dvdb%list_perts([-1, -1, -1], unit=ab_out)
    end if
 
-   ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
-   if (.False. .and. my_rank == master) then
-     call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
-   end if
  end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
@@ -682,9 +682,23 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! Compute phonon limited transport from SIGEPH file
    call transport(dtfil, dtset, ebands, cryst, comm)
 
- !case (15)
-   !call dvdb%ftinterp_setup(ngqpt, nqshift, qshift, nfft, ngfft, outwr_path, comm_rpt)
-   !call dvdb%write_real_space(dtset, cryst, comm)
+ case (15)
+   comm_rpt = xmpi_comm_self
+   method = dtset%userid
+   path = strcat(dtfil%filnam_ds(4), "_WRMAX")
+   call wrtout(std_out, sjoin("Saving W(r, R) to file:", path))
+   call dvdb%open_read(ngfftf, xmpi_comm_self)
+   ! This to symmetrize the DFPT potentials.
+   dvdb%symv1 = dtset%symv1scf > 0
+   call dvdb%print()
+   !call dvdb%list_perts([-1, -1, -1])
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, path, comm_rpt)
+
+ case (16)
+   ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
+   if (my_rank == master) then
+     call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
+   end if
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

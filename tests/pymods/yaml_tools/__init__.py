@@ -1,6 +1,6 @@
 '''
-    This package gather all tools used by the Abinit test suite for
-    manipulating YAML formated data.
+    This package gathers all tools used by the Abinit test suite for
+    manipulating YAML formatted data.
 '''
 from __future__ import print_function, division, unicode_literals
 
@@ -10,7 +10,6 @@ from .errors import NoYAMLSupportError, UnlabeledDocumentError
 try:
     import yaml
     import numpy  # numpy is also required
-
     is_available = True
 
 except ImportError:
@@ -28,12 +27,13 @@ except ImportError:
 
 
 if is_available:
-    if hasattr(yaml, 'CSafeLoader'):  # use the C binding (faster) if possible
+    # use the C binding (faster) if possible
+    if hasattr(yaml, 'CSafeLoader'):  
         Loader = yaml.CSafeLoader
     else:
-        warnings.warn('The libyaml binding is not available, tests will take'
-                      ' more time. Using python 3 may solve the problem. If it'
-                      ' doesn\'t you may have to install libyaml yourself.')
+        warnings.warn("The libyaml binding is not available, tests will take"
+                      " more time. Using python 3 may solve the problem. If it"
+                      " doesn't you may have to install libyaml yourself.")
         Loader = yaml.SafeLoader
 
     from .common import Undef, IterStart
@@ -51,7 +51,7 @@ if is_available:
 
 class Document(object):
     '''
-        Represent a document with all its metadata from the original file.
+        Represent a document with all its metadata extracted from the original file.
     '''
 
     def __init__(self, iterators, start, lines):
@@ -64,6 +64,7 @@ class Document(object):
         self._id = None
 
     def _parse(self):
+        """Parse lines, set `obj` property."""
         if is_available:
             content = '\n'.join(self.lines)
             try:
@@ -93,12 +94,14 @@ class Document(object):
 
     @property
     def obj(self):
+        """The python object constructed by Pyyaml."""
         if self._obj is None:
             self._parse()
         return self._obj
 
     @property
     def corrupted(self):
+        """True if Yaml document is corrupted."""
         if self._obj is None:
             self._parse()
         return self._corrupted

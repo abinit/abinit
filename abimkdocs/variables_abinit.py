@@ -8079,7 +8079,6 @@ Variable(
     dimensions="scalar",
     defaultval=3,
     mnemonics="Index of the XC ROTation method used to calculate first-order exchange-correlation potential in non-collinear DFPT calculations",
-    characteristics=['[[DEVELOP]]'],
     text=r"""
 Method of calculation of the 1st order XC potential in non-collinear DFPT
 calculations. The possible values 1,2 and 3 correspond to the following
@@ -8092,7 +8091,7 @@ methods
 In theory, all methods give identical results. However, due to different
 implementation approaches, the round-off errors can lead to slight differences
 intermediate and final results obtained using methods 1,2 and 3. The choice of
-the method can also affect the convergence.
+the method can also affect the convergence. For more details, see [[cite:Ricci2019]].
 
 !!! note
     For non-zero perturbation wavevector, only ixcrot=3 implementation is currently available.
@@ -15639,7 +15638,7 @@ Variable(
     text=r"""
 [[rfmagn]] allows one to run response function calculations with respect to
 external magnetic field if set to 1. Currently, orbital magnetism is not taken into
-account and the perturbing potential has Zeeman form.
+account and the perturbing potential has Zeeman form. For more details, see [[cite:Ricci2019]].
 """,
 ),
 
@@ -17573,6 +17572,18 @@ Variable(
     text=r"""
 If set to 1, enable the use of ScaLapack within LOBPCG.
 """,
+),
+
+Variable(
+    abivarname="use_yaml",
+    varset="dev",
+    vartype="integer",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="USE YAML",
+    characteristics=['[[DEVELOP]]'],
+    text="If set to 1, enable the printing of YAML document in ouput.",
 ),
 
 Variable(
@@ -19781,6 +19792,20 @@ and stops is the q-point in not found in the file.
 When *eph_use_ftinterp* is set to 1, the input DVDB file (assumed to be on the [[ddb_ngqpt]] q-mesh)
 will be used to generate the real-space representation of the DFPT potentials and interpolated the potential
 at the input [[qpt]].
+""",
+),
+
+Variable(
+    abivarname="eph_alpha_gmin",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EPH ALPHA times norm of GMIN.",
+    text=r"""
+This is an *advanced option* used to compute the long-range part of the DFTP potential.
+TO BE DESCRIBED WHEN WE ENTER PRODUCTION
 """,
 ),
 

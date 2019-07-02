@@ -504,8 +504,7 @@ All the independent perturbations are available
 
  Computation of electron-phonon coupling matrix elements (GKK files)
 
- Computation of electron-phonon coupling matrix elements (GKK files) completed
-
+ Computation of gkq matrix elements with (GKK files)
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -654,8 +653,7 @@ All the independent perturbations are available
 
  Computation of electron-phonon coupling matrix elements GKQ file
 
- Computation of electron-phonon coupling matrix elements GKQ file completed
-
+ Computation of gkq matrix elements with GKQ file
 
 == END DATASET(S) ==============================================================
 ================================================================================

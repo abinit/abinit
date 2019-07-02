@@ -2008,7 +2008,7 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff,unit)
      zeff(1,1,iatom),zeff(1,2,iatom),zeff(1,3,iatom),&
      zeff(2,1,iatom),zeff(2,2,iatom),zeff(2,3,iatom),&
      zeff(3,1,iatom),zeff(3,2,iatom),zeff(3,3,iatom)
-    call wrtout(std_out, msg)
+    call wrtout(unt, msg)
  end do
 
 end subroutine dtech9
