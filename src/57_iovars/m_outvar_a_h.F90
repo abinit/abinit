@@ -808,10 +808,10 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_ngqpt','INT',0)
 
- !do idtset=0,ndtset_alloc
- !  intarr(1:3,idtset)=dtsets(idtset)%dvdb_ngqpt
- !end do
- !call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'dvdb_ngqpt','INT',0)
+ do idtset=0,ndtset_alloc
+   intarr(1:3,idtset)=dtsets(idtset)%dvdb_ngqpt
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'dvdb_ngqpt','INT',0)
 
  dprarr(1,:)=dtsets(:)%ddb_shiftq(1)
  dprarr(2,:)=dtsets(:)%ddb_shiftq(2)

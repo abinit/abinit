@@ -3104,7 +3104,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
  ! TODO
  write_maxw = len_trim(outwr_path) > 0
- write_maxw = .False.
+ write_maxw = .True.
  if (write_maxw) then
    ABI_CALLOC(maxw, (nrtot, db%natom3))
    do imyp=1,db%my_npert
@@ -6188,8 +6188,10 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
    ! (q + G) . dielt . (q + G)
    denom = dot_product(qG_red, matmul(dielt_red, qG_red))
    ! Avoid (q+G) = 0
-   if (qG_mod < tol8 .or. denom < tol8) cycle
+   if (denom < tol8) cycle
    denom_inv = one / denom
+   ! HM hard cutoff, in this case qdamp takes the meaning of an energy cutoff in Hartree (hardcoded to 1 for the moment)
+   if (half*qG_mod**2 > 1) cycle
    if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
    !if (db%has_quadrupoles) then
    !  db%qstar(:,:,:,iatom)
