@@ -1,20 +1,21 @@
 '''
-    The token recognised by the configuration parser are declared here.
-    There are two kind of token:
-    - the parameters are just variables with a defautl value. They are used by
-    constraints.
+    The tokens recognised by the configuration parser are declared here.
+    There are two kind of tokens:
+    - the parameters are just variables with a default value. They are used by constraints.
     - the constraints represent an actual check of the data. They consist in a
     function returning a boolean. The docstring of the function is used as the
-    description for the testconf_explorer. There is not point in putting
+    description for the testconf_explorer. There is no point in defining
     value_type, inherited, apply_to or use_params in the docstring but you
-    should explain when the test fail and when it succeed.
+    should explain when the test fails and when it succeeds.
 '''
 from __future__ import print_function, division, unicode_literals
+
 from numpy import ndarray
 from numpy.linalg import norm
 from .meta_conf_parser import ConfParser
 from .structures import Tensor
 from .errors import MissingCallbackError
+from .common import FailDetail
 
 conf_parser = ConfParser()
 
@@ -64,8 +65,12 @@ def tol(tolv, ref, tested):
     '''
     if abs(ref) + abs(tested) == 0.0:
         return True
-    return (abs(ref - tested) / (abs(ref) + abs(tested)) < tolv
-            and abs(ref - tested) < tolv)
+    elif abs(ref - tested) / (abs(ref) + abs(tested)) >= tolv:
+        return FailDetail('Relative error above tolerance.')
+    elif abs(ref - tested) >= tolv:
+        return FailDetail('Absolute error above tolerance.')
+    else:
+        return True
 
 
 @conf_parser.constraint(exclude={'tol', 'tol_abs', 'tol_rel', 'ignore'})
@@ -90,8 +95,8 @@ def ignore(yes, ref, tested):
                         use_params=['tol_eq'])
 def equation(eq, ref, tested, tol_eq):
     '''
-        If the given expression return a number, its absolute value is compared
-        to the optional tol_eq parameter. If the expression return a vector,
+        If the given expression returns a number, its absolute value is compared
+        to the optional tol_eq parameter. If the expression returns a vector,
         it is the euclidian norm that is used.
     '''
     res = eval(eq, {}, {'this': tested, 'ref': ref})

@@ -742,7 +742,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Psps%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,1,nscf,&
-&   nfftf,ngfftf,Cryst%ucvol,Dtset%paral_kgb,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,rhor_p,prev_Pawrhoij)
+   nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,rhor_p,prev_Pawrhoij)
 
    ABI_FREE(rhor_p)
    ABI_DT_FREE(prev_Pawrhoij)
@@ -2221,7 +2221,7 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
 
 !Local variables-------------------------------
 !scalars
- integer :: my_nspins,my_maxb,my_minb,isp,spin,distr_err,nsppol,band,rank_spin,ib
+ integer :: my_nspins,my_maxb,my_minb,isp,spin,nsppol,band,rank_spin,ib
  character(len=500) :: msg
  logical :: store_ur
 !arrays
@@ -2277,13 +2277,7 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
        ABI_MALLOC(istart,(nprocs_spin(spin)))
        ABI_MALLOC(istop,(nprocs_spin(spin)))
 
-       call xmpi_split_work2_i4b(nbcw,nprocs_spin(spin),istart,istop,msg,distr_err)
-
-       if (distr_err==2) then
-         ! Too many processors.
-         !MSG_WARNING(msg)
-         ierr=1
-       end if
+       call xmpi_split_work2_i4b(nbcw,nprocs_spin(spin),istart,istop)
 
        my_minb = nbvw + istart(rank_spin+1)
        my_maxb = nbvw + istop (rank_spin+1)
@@ -2291,11 +2285,11 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
        ABI_FREE(istart)
        ABI_FREE(istop)
 
-       if (my_maxb-my_minb+1<=0) then
+       if (my_maxb - my_minb + 1 <= 0) then
          write(msg,'(3a,2(i0,a),2a)')&
-&         'One or more processors has zero number of bands ',ch10,&
-&         'my_minb= ',my_minb,' my_maxb= ',my_maxb,ch10,&
-&         'This is a waste, decrease the number of processors.'
+          'One or more processors has zero number of bands ',ch10,&
+          'my_minb= ',my_minb,' my_maxb= ',my_maxb,ch10,&
+          'This is a waste, decrease the number of processors.'
          MSG_ERROR(msg)
        end if
 

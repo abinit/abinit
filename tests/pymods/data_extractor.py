@@ -1,6 +1,6 @@
 '''
     Implement the steps to extract data from an Abinit output file.
-    Extract lines associated with their "metacharacter" (that make sense in
+    Extract lines associated with their "meta character" (that make sense in
     fldiff), and valid YAML documents associated with there iteration context.
 '''
 from __future__ import print_function, division, unicode_literals
@@ -15,9 +15,9 @@ doc_start_re = re.compile(r'---( !!?\w+)?\n?$')
 doc_end_re = re.compile(r'\.\.\.\n?$')
 
 
-class DataExtractor:
+class DataExtractor(object):
     '''
-        Setup extraction of formated documents and significant lines.
+        Setup extraction of formatted documents and significant lines.
     '''
 
     def __init__(self, use_yaml, ignore=True, ignoreP=True, xml_mode=False):
@@ -31,7 +31,7 @@ class DataExtractor:
 
     def _get_metachar(self, line):
         '''
-            Return a metacharacter wich give the behaviour of the line
+            Return a meta character which gives the behaviour of the line
             independently from options.
         '''
         if not line or line.isspace():  # blank line
@@ -58,10 +58,9 @@ class DataExtractor:
 
     def extract(self, src_lines):
         '''
-            Extract formated documents and significant lines for the source.
+            Extract formatted documents and significant lines from list of strings.
         '''
-
-        # Reset those states to allow several extract with the same instance
+        # Reset internal state to allow several extractions with the same instance
         self.iterators_state = {}
         self.corrupted_docs = []
         lines, docs, ignored = [], {}, []
@@ -76,8 +75,7 @@ class DataExtractor:
                     if self.use_yaml:
                         current_doc.end = i
 
-                        if getattr(current_doc.obj, '_is_iter_start',
-                                   False):
+                        if getattr(current_doc.obj, '_is_iter_start', False):
                             # special case of IterStart
                             curr_it = current_doc.obj.iterator
 
@@ -95,8 +93,7 @@ class DataExtractor:
                             # Signal corruption but ignore the document
                             self.corrupted_docs.append(current_doc)
 
-                        elif getattr(current_doc.obj, '_is_abinit_message',
-                                     False):
+                        elif getattr(current_doc.obj, '_is_abinit_message', False):
                             # Special case of Warning, Error etc..
                             # store it for later use
                             self.abinit_messages.append(current_doc)
@@ -119,7 +116,8 @@ class DataExtractor:
                                            i, [line])
                 else:
                     ignored.append((i, line))
-            else:  # significant line not in a doc
+            else:
+                # significant line not in a doc
                 lines.append((i, self._get_metachar(line), line))
 
         return lines, docs, ignored

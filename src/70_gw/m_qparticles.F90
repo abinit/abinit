@@ -271,11 +271,11 @@ end subroutine wrqps
 !! SOURCE
 
 subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
-& nfftot,ngfftf,ucvol,paral_kgb,Cryst,Pawtab,MPI_enreg,nbsc,m_lda_to_qp,rhor_out,Pawrhoij)
+& nfftot,ngfftf,ucvol,Cryst,Pawtab,MPI_enreg,nbsc,m_lda_to_qp,rhor_out,Pawrhoij)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfftot,nspden,usepaw,paral_kgb,dimrho
+ integer,intent(in) :: nfftot,nspden,usepaw,dimrho
  integer,intent(out) :: nbsc,nscf
  real(dp),intent(in) :: ucvol
  character(len=*),intent(in) :: fname
@@ -321,15 +321,13 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
  ! Check whether file exists or not.
  write(msg,'(5a)')ch10,&
-&  ' rdqps: reading QP wavefunctions of the previous step ',ch10,&
-&  '        looking for file ',TRIM(fname)
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+  ' rdqps: reading QP wavefunctions of the previous step ',ch10,&
+  '        looking for file ',TRIM(fname)
+ call wrtout([std_out, ab_out], msg)
 
  if (.not.file_exists(fname)) then
    write(msg,'(2a)')' file not found, 1st iteration initialized with KS eigenelements ',ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out, msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    nscf=0; RETURN
  end if
 
@@ -341,8 +339,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
    ! TODO the _QPS file should contain additional information
    read(unqps,*)nscf
    write(msg,'(a,i4,a)')' Number of iteration(s) already performed: ',nscf,ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
 
    read(unqps,*)nkibzR
    if (nkibzR/=BSt%nkpt) then
@@ -355,15 +352,15 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
    if (nbsc/=BSt%mband) then
      write(msg,'(3a,i4,a,i4)')&
-&      'QPS file contains less bands than that used in the present calculation ',ch10,&
-&      'Required: ',BSt%mband,', Found: ',nbandR
+      'QPS file contains less bands than that used in the present calculation ',ch10,&
+      'Required: ',BSt%mband,', Found: ',nbandR
      MSG_WARNING(msg)
    end if
 
    if (nbsc/=nbandR) then
      write(msg,'(3a,i4,a)')&
-&      'The QPS file contains more bands than that used in the present calculation ',ch10,&
-&      'only the first ',nbandR,' bands will be read'
+      'The QPS file contains more bands than that used in the present calculation ',ch10,&
+      'only the first ',nbandR,' bands will be read'
      MSG_COMMENT(msg)
    end if
 
@@ -420,8 +417,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        read(unqps,*)rhor_out(:,:)
      else
        write(msg,'(2a,a,5(i3,a),i3)')&
-&        'FFT meshes differ. Performing Fourier interpolation. ',ch10,&
-&        'Found: ',n1,' x',n2,' x',n3,'; Expected: ',ngfftf(1),' x',ngfftf(2),' x',ngfftf(3)
+        'FFT meshes differ. Performing Fourier interpolation. ',ch10,&
+        'Found: ',n1,' x',n2,' x',n3,'; Expected: ',ngfftf(1),' x',ngfftf(2),' x',ngfftf(3)
        MSG_COMMENT(msg)
 
        ABI_MALLOC(rhor_tmp,(n1*n2*n3,nspden))
@@ -443,7 +440,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          call init_distribfft(MPI_enreg%distribfft,'f',MPI_enreg%nproc_fft,ngfft_found(2),ngfft_found(3))
 
          call fourier_interpol(cplex_fft,nspden,optin,optout,nfft_found,ngfft_found,nfftot,ngfftf,&
-&          paral_kgb,MPI_enreg,rhor_tmp,rhor_out,rhogdum,rhogdum)
+           MPI_enreg,rhor_tmp,rhor_out,rhogdum,rhogdum)
 
        else
          ! Linear interpolation.
@@ -471,8 +468,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
      if (usepaw==0) then
        nelect_qps=SUM(rhor_out(:,1))*ucvol/nfftot; ratio=BSt%nelect/nelect_qps
        write(msg,'(3(a,f9.4))')&
-&        ' Number of electrons calculated using the QPS density = ',nelect_qps,' Expected = ',BSt%nelect,' ratio = ',ratio
-       call wrtout(std_out,msg,'COLL')
+         ' Number of electrons calculated using the QPS density = ',nelect_qps,' Expected = ',BSt%nelect,' ratio = ',ratio
+       call wrtout(std_out, msg)
        !!rhor_out(:,:)=ratio*rhor_out(:,:)
      end if
 
@@ -510,7 +507,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        ABI_CHECK(nspdenR==nspden    ,"mismatch in nspden")
 
        call pawrhoij_io(pawrhoij,unqps,BSt%nsppol,BSt%nspinor,nspden,nlmn_type,Cryst%typat,&
-&                    HDR_LATEST_HEADFORM,"Read",form="formatted")
+                        HDR_LATEST_HEADFORM,"Read",form="formatted")
        !% call pawrhoij_io(pawrhoij,std_out,BSt%nsppol,BSt%nspinor,nspden,nlmn_type,Cryst%typat,HDR_LATEST_HEADFORM,"Echo")
 
        ABI_FREE(nlmn_type)

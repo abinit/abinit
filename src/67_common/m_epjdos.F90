@@ -29,7 +29,7 @@ module m_epjdos
  use m_abicore
  use m_xmpi
  use m_errors
- use m_tetrahedron
+ use m_htetrahedron
  use m_splines
  use m_cgtools
  use m_atomdata
@@ -367,7 +367,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  logical :: bigDOS,iam_master
  character(len=10) :: tag
  character(len=500) :: frmt,frmt_extra,msg
- type(t_tetrahedron) :: tetra
+ type(t_htetrahedron) :: tetra
 !arrays
  integer,allocatable :: unt_atsph(:)
  real(dp) :: list_dp(3)
@@ -409,7 +409,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
    dtset%shiftk, dtset%nkpt, dtset%kpt, comm, msg, ierr)
  if (ierr /= 0) then
-   call destroy_tetra(tetra)
+   call htetra_free(tetra)
    MSG_WARNING(msg)
    return
  end if
@@ -536,7 +536,8 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
         ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
         tmp_eigen(:) = ebands%eig(iband, :, isppol)
-        call tetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        call htetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        wdt = wdt*ebands%wtk(ikpt)
         eig_dos = eig_dos + wdt
 
         ! Accumulate L-DOS.
@@ -717,7 +718,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
    ABI_FREE(dos_pawt1)
  end if
 
- call destroy_tetra(tetra)
+ call htetra_free(tetra)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"

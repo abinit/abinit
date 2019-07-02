@@ -227,6 +227,8 @@ module defs_basis
  real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time, in seconds
  real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
  real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
+ real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec**2 ! Siemens in SI
+ real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI
 !EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
  real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
  real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units

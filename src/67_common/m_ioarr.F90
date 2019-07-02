@@ -323,7 +323,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
            end if
 
            call fourier_interpol(cplex,hdr0%nspden,0,0,nfftot_in,ngfft_in,nfftot_out,ngfft_out,&
-&           0,MPI_enreg_seq,rhor_file,rhor_out,rhog_in,rhog_out)
+            MPI_enreg_seq,rhor_file,rhor_out,rhog_in,rhog_out)
 
            call destroy_mpi_enreg(MPI_enreg_seq)
 
@@ -352,7 +352,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        if (accessfil == 4) call xmpi_bcast(my_fildata,master,spaceComm,ierr)
      end if
 
-     if(accessfil == 4) then
+     if (accessfil == 4) then
        unt = get_unit()
        call WffOpen(iomode,spaceComm,my_fildata,ierr,wff,0,me,unt,spaceComm_io)
        call hdr_io(fform_dum,hdr0,rdwr,wff)
@@ -370,17 +370,17 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      end if
      etotal=hdr0%etot
 
-!    NOTE : should check that restart is possible !!
+     ! NOTE: should check that restart is possible !!
      !call ptabs_fourdp(mpi_enreg,ngfft(2),ngfft(3),fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
-!    If nspden[file] /= nspden, need a temporary array
+     ! If nspden[file] /= nspden, need a temporary array
      if (hdr0%nspden/=nspden) then
        ABI_MALLOC(arr_file,(cplex*nfft,hdr0%nspden))
      else
        arr_file => arr
      end if
 
-!    Read data
+     ! Read data
      do ispden=1,hdr0%nspden
        if(accessfil == 4) then
          call xderiveRRecInit(wff,ierr)
@@ -427,7 +427,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      ! Compare the internal header and the header from the file
      call hdr_check(fform, fform_dum, hdr, hdr0, 'COLL', restart, restartpaw)
 
-!    If nspden[file] /= nspden, need a temporary array
+     ! If nspden[file] /= nspden, need a temporary array
      if (hdr0%nspden/=nspden) then
        ABI_MALLOC(arr_file,(cplex*nfft,hdr0%nspden))
      else
@@ -466,7 +466,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
    etotal=hdr0%etot
 
-!  Possibly need to convert the potential/density spin components
+   ! Possibly need to convert the potential/density spin components
    if (hdr0%nspden/=nspden) then
      call denpot_spin_convert(arr_file,hdr0%nspden,arr,nspden,fform)
      ABI_FREE(arr_file)
@@ -476,19 +476,17 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
    if (rdwrpaw==1.and.restartpaw/=0) then
      if (size(hdr0%pawrhoij) /= size(pawrhoij)) then
        call pawrhoij_copy(hdr0%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
-&                         keep_nspden=.true.)
+                          keep_nspden=.true.)
      else
        call pawrhoij_copy(hdr0%pawrhoij,pawrhoij,keep_nspden=.true.)
      end if
    end if
 
-   if (accessfil == 0 .or. accessfil == 3 .or. accessfil == 4) then
-     call hdr_free(hdr0)
-   end if
+   if (accessfil == 0 .or. accessfil == 3 .or. accessfil == 4) call hdr_free(hdr0)
 
-!  =======================================
-!  Set up for writing data
-!  =======================================
+ ! =======================================
+ ! Set up for writing data
+ ! =======================================
  else if (rdwr==2) then
 
 !  In the wavelet case (isolated boundary counditions), the
@@ -1018,7 +1016,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0,paral_kgb0=0
+ integer,parameter :: master=0
  integer :: unt,fform,iomode,my_rank,mybase,globase,cplex_file
 !integer :: optin,optout
  integer :: ispden,ifft,nfftot_file,nprocs,ierr,i1,i2,i3,i3_local,n1,n2,n3
@@ -1141,7 +1139,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      !call init_distribfft_seq(MPI_enreg_seq%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
 
      call fourier_interpol(cplex,ohdr%nspden,optin,optout,nfftot_file,ngfft_file,nfft,ngfft,&
-       paral_kgb0,mpi_enreg,rhor_file,orhor,rhogdum,rhogdum)
+       mpi_enreg,rhor_file,orhor,rhogdum,rhogdum)
 
      !call destroy_mpi_enreg(MPI_enreg_seq)
 #endif

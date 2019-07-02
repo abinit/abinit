@@ -1,13 +1,14 @@
 '''\
-This is the explore_test shell. This tool let you inspect and explore YAML
-files defining a test for Abinit. It also provide documentation about the
-constraints and parameters available in test config files.
+This is the explore_test shell. This tool lets you inspect and explore YAML
+files defining Abinit tests. It also provides documentation about the
+constraints and parameters available in the test config files.
 '''
-
 from __future__ import print_function, division, unicode_literals
+
 import os
 import glob
 import cmd
+
 from subprocess import call
 from .driver_test_conf import DriverTestConf, DEFAULT_CONF_PATH
 from .conf_parser import conf_parser
@@ -15,12 +16,12 @@ from .errors import ConfigError
 
 intro = '''\
 Welcome to the explore_test shell.
-This tool let you inspect and explore a YAML file defining a test for Abinit.
-You can also browse informations about parameters and constraints used to
-define tests with the command show.
+This tool lets you inspect and explore a YAML file defining an Abinit test.
+You can also browse the information about parameters and constraints used to
+define tests with the `show` command.
 
-If your Python platform has readline support you can use TAB to auto-complete
-command and some arguments.
+If your Python platform has readline support you can use <TAB >to auto-complete
+commands and some arguments.
 
 Type help or ? to get the list of commands.
 '''
@@ -47,13 +48,13 @@ def print_iter(it):
 class ExtendedTestConf(DriverTestConf):
     def get_spec(self):
         '''
-            Return the list of the specializations known at the current path.
+            Return the list of specializations known at the current path.
         '''
         return self.tree.get_spec_at(self.current_path)
 
     def get_spec_at(self, path):
         '''
-            Return the list of the specializations known at the current path.
+            Return the list of specializations known at the current path.
         '''
         new_path = list(self.current_path)
         for sp in path:
@@ -75,7 +76,7 @@ class ExtendedTestConf(DriverTestConf):
 
     def get_all_constraints_here(self):
         '''
-            return a dict of the constraints in the current scope.
+            return a dict with the constraints in the current scope.
         '''
         cons_list = self.get_constraints_for(None)
         constraints = {cons.name: cons for cons in cons_list}
@@ -83,7 +84,7 @@ class ExtendedTestConf(DriverTestConf):
 
     def get_all_parameters_here(self):
         '''
-            return a dict of the parameters in the current scope.
+            return a dict with the parameters in the current scope.
         '''
         parameters = {}
 

@@ -1,11 +1,12 @@
 from __future__ import print_function, division, unicode_literals
 from .errors import EmptySetError, NotOrderedOverlappingSetError
-ITERATORS = [  # order matter
+
+ITERATORS = [  # order matters
     'dtset',
     'timimage',
     'image',
     'time',
-    'step'
+    'step',
 ]
 
 # associate an iterator with its deepness in the global computation
@@ -212,7 +213,7 @@ class IterStateFilter(object):
 
         return True
 
-    def __neq__(self, other):
+    def __ne__(self, other):
         return not (self == other)
 
     def __lt__(self, other):

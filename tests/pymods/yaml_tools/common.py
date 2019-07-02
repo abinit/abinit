@@ -1,8 +1,8 @@
 '''
-    Define classes usefull in several places and structures required by other
-    modules.
+Define classes useful in several places and structures required by other modules.
 '''
 from __future__ import print_function, division, unicode_literals
+
 import re
 import sys
 import numpy as np
@@ -28,9 +28,9 @@ def normalize_attr(string):
 
 class BaseDictWrapper(object):
     '''
-        Allow attribute access and key access to the values of dictionary to
-        keep a consistent behaviour with AutoMap structures. It does not
-        inherit from dict but it implement the complete interface.
+    Allow attribute access and key access to the values of dictionary to
+    keep a consistent behaviour with AutoMap structures. It does not
+    inherit from dict but it implements the complete interface.
     '''
     is_dict_like = True
 
@@ -144,7 +144,7 @@ class FailDetail(object):
 class BaseArray(np.ndarray):
     '''
         Define a base class for YAML tags converted to numpy compatible
-        objects.  Can be used for converting any YAML array of number of any
+        objects. Can be used for converting any YAML array of number of any
         dimension into a numpy compatible array.
     '''
 

@@ -2,7 +2,7 @@ from __future__ import print_function, division, unicode_literals
 
 
 class YAMLTestError(Exception):
-    pass
+    """Base class."""
 
 
 class ConfigContextError(YAMLTestError):
@@ -14,7 +14,7 @@ class ConfigContextError(YAMLTestError):
 
 
 class NoYAMLSupportError(YAMLTestError):
-    pass
+    """Raised when Yaml library is not installed."""
 
 
 ###############################################################################
