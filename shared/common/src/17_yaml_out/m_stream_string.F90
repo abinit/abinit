@@ -1,3 +1,29 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_stream_string
+!! NAME
+!!  m_stream_string
+!!
+!! FUNCTION
+!!  This module define a type representing a variable size
+!!  string. It can be used in a file-like way by writing to it
+!!  or reading it.
+!!  Memory is automatically allocated on writing and freed on reading.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2009-2019 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!   m_yaml_out, m_neat
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
