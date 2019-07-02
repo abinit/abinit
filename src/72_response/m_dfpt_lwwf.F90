@@ -3582,7 +3582,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 !Local variables-------------------------------
 !scalars
  integer :: iatdir,iatom,iatpert,iband,idir,ipert,ipw,iq1grad,iq2grad,istrpert,ka,kb
- integer :: nkpg,optlocal,optnl,tim_getgh1c,useylmgr1
+ integer :: nkpg,nylmgrpart,optlocal,optnl,tim_getgh1c,useylmgr1
  real(dp) :: doti,dotr
  type(pawfgr_type) :: pawfgr
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -3627,6 +3627,11 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Specific allocations
  ABI_ALLOCATE(c0_hatdisdq_c0_bks,(2,nband_k,3,natpert))
+ ABI_ALLOCATE(part_ylmgr_k,(npw_k,3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3,:)
+
+!Specific definitions
+ nylmgrpart=3
 
 !LOOP OVER HAMILTONIAN ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert=1,natpert
@@ -3654,8 +3659,8 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,iq1grad, &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
-   & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrpart,useylmgr1,kg_k, &
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS
      do iband=1,nband_k
@@ -3694,6 +3699,8 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
    end do !iq1grad
 
  end do !iatpert
+
+ ABI_DEALLOCATE(part_ylmgr_k)
 
 !-----------------------------------------------------------------------------------------------
 !  2nd q-gradient of atomic displacement 1st order hamiltonian projected on gs wfs: 
@@ -3820,7 +3827,7 @@ frwfdq_k=zero
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqc, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         !Accumulate this term (take here into account the -i·-i prefactors and the conjugate comple)
+         !Accumulate this term (take here into account the -i·-i prefactors and the conjugate complex)
          frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)-dotr
          frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)+doti
            
