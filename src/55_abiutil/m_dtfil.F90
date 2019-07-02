@@ -34,7 +34,7 @@ module m_dtfil
  use m_build_info
 
  use m_clib,         only : clib_rename
- use m_fstrings,     only : int2char4
+ use m_fstrings,     only : int2char4, rmquotes
  use m_io_tools,     only : open_file
  use m_libpaw_tools, only : libpaw_log_flag_set
 
@@ -251,6 +251,11 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'; stringvar='ddb'
  call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read)
+
+ ! According to getpot, build _POT file name
+ stringfile='_POT'; stringvar='pot'
+ call mkfilename(filnam, dtfil%filpotin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                  getpath=dtset%getpot_path)
 
 ! According to getdvdb, build _DVDB file name
 ! A default is available if getden is 0
@@ -897,6 +902,7 @@ end subroutine dtfil_init_img
 !! stringfil=the string of characters to be appended e.g. '_WFK' or '_DEN'
 !! stringvar=the string of characters to be appended
 !!   that defines the 'get' or 'ird' variables, e.g. 'wfk' or 'ddk'
+!! [getpath]=String with filename to be used as input, exclude get and ird option.
 !!
 !! OUTPUT
 !! filnam_out=the new file name
@@ -910,7 +916,8 @@ end subroutine dtfil_init_img
 !!
 !! SOURCE
 
-subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read)
+subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read, &
+                      getpath) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -919,6 +926,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  character(len=*),intent(in) :: stringfil
  character(len=*),intent(in) :: stringvar
  character(len=fnlen),intent(out) :: filnam_out
+ character(len=fnlen),optional,intent(in) :: getpath
 !arrays
  integer,intent(in) :: jdtset_(0:ndtset)
  character(len=fnlen),intent(in) :: filnam(5)
@@ -943,12 +951,23 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  end if
  filnam_out = trim(filnam_appen)//trim(stringfil)
 
- !if (present(get_path)) then
- !  filnam_out = rmquotes(get_path)
- !  write(msg, '(4a)' )' mkfilename: get',trim(stringvar) ,"file from: ",trim(get_path)
- !  call wrtout([std_out, ab_out], msg)
- !  will_read = 1; return
- !end if
+ if (present(getpath)) then
+   if (getpath /= ABI_NOFILE) then
+     if (ird /= 0 .and. get /= 0)then
+       write(msg, '(11a,i0,3a,i0,a,i0,7a)' ) &
+       'When the input variable: ', trim(getpath), ' is used ',ch10, &
+       'the input variables ird',trim(stringvar),' and get',trim(stringvar),' cannot be',ch10,&
+       'simultaneously non-zero, while for idtset = ',idtset,',',ch10,&
+       'they are ',ird,', and ',get,'.',ch10,&
+       'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
+       MSG_ERROR(msg)
+     end if
+     filnam_out = rmquotes(getpath)
+     write(msg, '(4a)' )' mkfilename: get',trim(stringvar) ,"file from: ",trim(getpath)
+     call wrtout([std_out, ab_out], msg)
+     will_read = 1; return
+   end if
+ end if
 
  ! Treatment of the multi-dataset case (get is not relevant otherwise)
  if (ndtset /= 0) then

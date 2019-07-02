@@ -559,6 +559,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gethaydock         = dtin%gethaydock
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
+ dtout%getpot_path        = dtin%getpot_path
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
  dtout%getsuscep          = dtin%getsuscep
@@ -2207,7 +2208,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getdvdb getefmas getkerange_path getgam_eig2nkq'
- list_vars=trim(list_vars)//' gethaydock getocc getpawden getqps getscr'
+ list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_path getqps getscr'
  list_vars=trim(list_vars)//' getwfkfine getsuscep '
  list_vars=trim(list_vars)//' getvel getwfk getwfq getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'

@@ -131,9 +131,9 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    ! Check that ndtset is not negative
    if (ndtset<0 .or. ndtset>9999) then
      write(message, '(a,i0,4a)' )&
-&     'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
-&     'This is not allowed.',ch10,&
-&     'Action: modify ndtset in the input file.'
+     'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
+     'This is not allowed.',ch10,&
+     'Action: modify ndtset in the input file.'
      MSG_ERROR(message)
    end if
  end if ! master
@@ -202,9 +202,9 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
 
 ! *************************************************************************
 
-!write(std_out,*)'inread : enter '
-!write(std_out,*)'string(1:ndig)=',string(1:ndig)
-!write(std_out,*)'typevarphys=',typevarphys
+ !write(std_out,*)'inread: enter '
+ !write(std_out,*)'string(1:ndig)=',string(1:ndig)
+ !write(std_out,*)'typevarphys=',typevarphys
 
  if (typevarphys=='INT') then
 
@@ -213,18 +213,16 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    if(errcod/=0)then
 !    integer reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
-&     ' inread: ERROR -',&
-&     '  Attempted to read ndig=',ndig,' integer digits,'
-     write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),&
-&     ', to initialize an integer variable'
+     ' inread: ERROR -',&
+     '  Attempted to read ndig=',ndig,' integer digits,'
+     write(std_out,'(3a)' ) '   from string(1:ndig)= ',string(1:ndig),', to initialize an integer variable'
      errcod=1
    end if
 
  else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
-&     .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
+         .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
 !  real(dp) input section
-
 !  Special treatment of SQRT(xxx) or -SQRT(xxx) chains of characters, where xxx can be a fraction
    done=0
    if (ndig>5) then
@@ -259,7 +257,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
      end if
    end if
 
-!  Special treatment of fractions
+   ! Special treatment of fractions
    if(done==0)then
      index_slash=index(string(1:ndig),'/')
      if(index_slash/=0)then
@@ -278,19 +276,18 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
      end if
    end if
 
-!  Normal treatment of floats
+   ! Normal treatment of floats
    if(done==0)then ! Normal treatment of float numbers
      read (unit=string(1:ndig),fmt=*,iostat=errcod) outr
    end if
 
-!  Treatment of errors
+   !  Treatment of errors
    if(errcod/=0)then
-!    real(dp) data reading error
+     ! real(dp) data reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
-&     'inread : ERROR -',&
-&     'Attempted to read ndig=',ndig,' floating point digits,'
-     write(std_out,'(a,a,a)' ) '   from string(1:ndig) ',string(1:ndig),&
-&     ', to initialize a floating variable.'
+      'inread : ERROR -',&
+      'Attempted to read ndig=',ndig,' floating point digits,'
+     write(std_out,'(a,a,a)' ) '   from string(1:ndig) ',string(1:ndig),', to initialize a floating variable.'
      errcod=2
    end if
 
@@ -298,10 +295,10 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
 
    read (unit=string(1:ndig),fmt=*,iostat=errcod) logi
    if(errcod/=0)then
-!    integer reading error
+     ! integer reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
-&     'inread: ERROR -',&
-&     'Attempted to read ndig=',ndig,' integer digits,'
+     'inread: ERROR -',&
+     'Attempted to read ndig=',ndig,' integer digits,'
      write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),', to initialize a logical variable.'
      errcod=3
    end if
@@ -310,8 +307,8 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
 
  else
    write(msg,'(4a)' ) &
-&   'Argument typevarphys must be INT,DPR,LEN,ENE,BFI,TIM or LOG ',ch10,&
-&   'but input value was: ',trim(typevarphys)
+   'Argument typevarphys must be INT, DPR, LEN, ENE, BFI, TIM or LOG ',ch10,&
+   'but input value was: ',trim(typevarphys)
    MSG_ERROR(msg)
  end if
 
@@ -319,9 +316,9 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    do idig=1,ndig
      if( string(idig:idig) == 'O' )then
        write(std_out,'(/,a,/,a,a,a)' ) &
-&       'inread: WARNING -',&
-&       'Note that this string contains the letter O. ',ch10,&
-&       'It is likely that this letter should be replaced by the number 0.'
+       'inread: WARNING -',&
+       'Note that this string contains the letter O. ',ch10,&
+       'It is likely that this letter should be replaced by the number 0.'
        exit
      end if
    end do
@@ -391,27 +388,27 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
 !read in string from file
 !%%%%%%%%%%%%%%%%%%%%%%%%
 
-!The file can be included in another (prevent too many include levels)
+ ! The file can be included in another (prevent too many include levels)
  include_level=include_level+1
  if (include_level>2) then
    write(msg, '(3a)' ) &
-&   'At least 4 levels of included files are present in input file !',ch10,&
-&   'This is not allowed. Action: change your input file.'
+   'At least 4 levels of included files are present in input file !',ch10,&
+   'This is not allowed. Action: change your input file.'
    MSG_ERROR(msg)
  end if
 
-!Open data file and read one line at a time, compressing data
-!and concatenating into single string:
+ ! Open data file and read one line at a time, compressing data
+ ! and concatenating into single string:
  if (open_file(filnam,msg,newunit=input_unit,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(msg)
  end if
  rewind (unit=input_unit)
 
-!Initialize string to blanks
+ ! Initialize string to blanks
  string=blank
  lenstr=1
 
-!Set maximum number lines to be read to some large number
+ ! Set maximum number lines to be read to some large number
  mline=50000
  do iline=1,mline
 
@@ -427,7 +424,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
 !  write(std_out,*)' instrng, iline=',iline,' ios=',ios,' echo :',trim(line(1:fnlen+20))
 !  ENDDEBUG
 
-!  Exit the reading loop when arrived at the end
+   ! Exit the reading loop when arrived at the end
    if(ios/=0)then
      backspace(input_unit)
      read (unit=input_unit,fmt= '(a1)' ,iostat=ios) string1
@@ -436,59 +433,59 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
      read (unit=input_unit,fmt= '(a3)' ,iostat=ios) string3
      if(string3=='end')exit
      write(msg, '(3a,i0,11a)' ) &
-&     'It is observed in the input file: ',TRIM(filnam),', line number ',iline,',',ch10,&
-&     'that there is a non-zero IO signal.',ch10,&
-&     'This is normal when the file is completely read.',ch10,&
-&     'However, it seems that the error appears while your file has not been completely read.',ch10,&
-&     'Action: correct your file. If your file seems correct, then,',ch10,&
-&     'add the keyword ''end'' at the very beginning of the last line of your input file.'
+      'It is observed in the input file: ',TRIM(filnam),', line number ',iline,',',ch10,&
+      'that there is a non-zero IO signal.',ch10,&
+      'This is normal when the file is completely read.',ch10,&
+      'However, it seems that the error appears while your file has not been completely read.',ch10,&
+      'Action: correct your file. If your file seems correct, then,',ch10,&
+      'add the keyword ''end'' at the very beginning of the last line of your input file.'
      MSG_ERROR(msg)
    end if
 
-!  Find length of input line ignoring delimiter characters (# or !)
-!  and any characters beyond it (allows for comments beyond # or !)
+   ! Find length of input line ignoring delimiter characters (# or !)
+   ! and any characters beyond it (allows for comments beyond # or !)
    ii1=index(line(1:fnlen+20),'#')
    ii2=index(line(1:fnlen+20),'!')
    if ( (ii1==0 .and. ii2==0) .or. option==0 ) then
-!    delimiter character was not found on line so use full line
+     ! delimiter character was not found on line so use full line
      ii=fnlen+20
    else if(ii1==0)then
-!    ii will represent length of line up to but not including !
+     ! ii will represent length of line up to but not including !
      ii=ii2-1
    else if(ii2==0)then
-!    ii will represent length of line up to but not including #
+     ! ii will represent length of line up to but not including #
      ii=ii1-1
    else
      ii=min(ii1,ii2)-1
    end if
 
-!  Checks that nothing is left beyond fnlen
+   ! Checks that nothing is left beyond fnlen
    if(ii>fnlen)then
      do ij=fnlen+1,ii
        if(line(ij:ij)/=' ')then
          write(msg,'(3a,i0,3a,i0,3a)' ) &
-&         'It is observed in the input file: ',TRIM(filnam),' line number ',iline,',',ch10,&
-&         'that more than ',fnlen,' columns are used.',ch10,&
-&         'This is not allowed. Change this line of your input file.'
+          'It is observed in the input file: ',TRIM(filnam),' line number ',iline,',',ch10,&
+          'that more than ',fnlen,' columns are used.',ch10,&
+          'This is not allowed. Change this line of your input file.'
          MSG_ERROR(msg)
        end if
      end do
    end if
 
    if (ii>0) then
-!    Check for the occurence of a minus sign followed by a blank
+     ! Check for the occurence of a minus sign followed by a blank
      ij=index(line(1:ii),'- ')
      if (ij>0 .and. option==1) then
        write(msg, '(3a,i0,11a)' ) &
-&       'It is observed in the input file:, ',TRIM(filnam),' line number ',iline,',',ch10,&
-&       'the occurence of a minus sign followed',ch10,&
-&       'by a blank. This is forbidden.',ch10,&
-&       'If the minus sign is meaningful, do not leave a blank',ch10,&
-&       'between it and the number to which it applies.',ch10,&
-&       'Otherwise, remove it.'
+       'It is observed in the input file:, ',TRIM(filnam),' line number ',iline,',',ch10,&
+       'the occurence of a minus sign followed',ch10,&
+       'by a blank. This is forbidden.',ch10,&
+       'If the minus sign is meaningful, do not leave a blank',ch10,&
+       'between it and the number to which it applies.',ch10,&
+       'Otherwise, remove it.'
        MSG_ERROR(msg)
      end if
-!    Check for the occurence of a tab
+     ! Check for the occurence of a tab
      ij=index(line(1:ii),char(9))
      if (ij>0 .and. option==1 ) then
        write(msg, '(3a,i0,3a)' ) &
@@ -522,85 +519,84 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
          end if
          if (ex) then
            write(msg, '(6a)' ) &
-&           'A "include" statement has been found in input file: ',TRIM(filnam),ch10,&
-&           'but there must be a problem with the quotes.',ch10,&
-&           'Action: change your input file.'
+            'A "include" statement has been found in input file: ',TRIM(filnam),ch10,&
+            'but there must be a problem with the quotes.',ch10,&
+            'Action: change your input file.'
            MSG_ERROR(msg)
          end if
-!        Store included file name
+         ! Store included file name
          filnam_inc=line(ij+7+ii1:ij+5+ii1+ii2)
-!        Extract include statement from line
+         ! Extract include statement from line
          lenc=ii1+ii2+7
          msg(1:ii-lenc)=line(1:ij-1)//line(ij+lenc:ii)
          ii=ii-lenc;line(1:ii)=msg(1:ii)
        end if
      end if
 
-!    Compress: remove repeated blanks, make all ASCII characters
-!    less than a blank (and '=') to become a blank.
+     ! Compress: remove repeated blanks, make all ASCII characters
+     ! less than a blank (and '=') to become a blank.
      call incomprs(line(1:ii),lenc)
 
    else
-!    ii=0 means line starts with #, is entirely a comment line
+     ! ii=0 means line starts with #, is entirely a comment line
      lenc=0;include_found=.false.
    end if
 
-!  Check resulting total string length
+   ! Check resulting total string length
    if (lenstr+lenc>strln) then
      write(msg, '(8a)' ) &
-&     'The size of your input file: ',TRIM(filnam),' is such that the internal',ch10,&
-&     'character string that should contain it is too small.',ch10,&
-&     'Action: decrease the size of your input file,',ch10,&
-&     'or contact the ABINIT group.'
+      'The size of your input file: ',TRIM(filnam),' is such that the internal',ch10,&
+      'character string that should contain it is too small.',ch10,&
+      'Action: decrease the size of your input file,',ch10,&
+      'or contact the ABINIT group.'
      MSG_ERROR(msg)
    end if
 
    if (lenc>0) then
-!    Concatenate new compressed characters
-!    with previous part of compressed string (unless all blank)
+     ! Concatenate new compressed characters
+     ! with previous part of compressed string (unless all blank)
      string(lenstr+1:lenstr+lenc)=line(1:lenc)
    end if
-!  Keep track of total string length
+   ! Keep track of total string length
    lenstr=lenstr+lenc
 
-!  Eventually (recursively) read included file
+   ! Eventually (recursively) read included file
    if (include_found) then
-!    Check file existence
+     ! Check file existence
      inquire(file=filnam_inc ,iostat=iost,exist=ex)
-     if ((.not.ex).or.(iost/=0)) then
+     if (.not. ex .or. iost /= 0) then
        write(msg, '(5a)' ) &
-&       'Input file: ',TRIM(filnam),' reading: the included file ',trim(filnam_inc),' cannot be found !'
+        'Input file: ',TRIM(filnam),' reading: the included file ',trim(filnam_inc),' cannot be found !'
        MSG_ERROR(msg)
      end if
-!    Read included file (warning: recursive call !)
+     ! Read included file (warning: recursive call !)
      ABI_ALLOCATE(string_inc,)
      call instrng(trim(filnam_inc),lenstr_inc,option,strln-lenstr,string_inc)
-!    Check resulting total string length
+     ! Check resulting total string length
      if (lenstr+lenstr_inc>strln) then
        write(msg, '(6a)' ) &
-&       'The size of your input file: ',TRIM(filnam),' (including included files) is such that',ch10,&
-&       'the internal character string that should contain it is too small !',ch10,&
-&       'Action: decrease the size of your input file.'
+        'The size of your input file: ',TRIM(filnam),' (including included files) is such that',ch10,&
+        'the internal character string that should contain it is too small !',ch10,&
+        'Action: decrease the size of your input file.'
        MSG_ERROR(msg)
      end if
-!    Concatenate total string
+     ! Concatenate total string
      string(lenstr+1:lenstr+lenstr_inc)=string_inc(1:lenstr_inc)
      lenstr=lenstr+lenstr_inc
      ABI_DEALLOCATE(string_inc)
    end if
 
-!  If mline is reached, something is wrong
+   ! If mline is reached, something is wrong
    if (iline>=mline) then
      write(msg, '(a,i0,2a,i0,4a)' ) &
-&     'The number of lines already read from input file=',iline,ch10,&
-&     'is equal or greater than maximum allowed mline=',mline,ch10,&
-&     'Action: you could decrease the length of the input file, or',ch10,&
-&     'contact the ABINIT group.'
+     'The number of lines already read from input file=',iline,ch10,&
+     'is equal or greater than maximum allowed mline=',mline,ch10,&
+     'Action: you could decrease the length of the input file, or',ch10,&
+     'contact the ABINIT group.'
      MSG_ERROR(msg)
    end if
 
-!  End loop on iline. Note that there is an "exit" instruction in the loop
- end do
+ end do !  End loop on iline. Note that there is an "exit" instruction in the loop
 
  nline1=iline-1
  close (unit=input_unit)
@@ -794,10 +790,10 @@ subroutine incomprs(string,length)
 !    Add blank on end unless string had no extra space
      if (lcut==stringlen) then
        write(message,'(a,i7,a,a,a,a,a,a,a,a)')&
-&       'For input file, with data forming a string of',stringlen,' characters,',ch10,&
-&       'no double blanks or tabs were found.',ch10,&
-&       'This is unusual for an input file (or any file),',ch10,&
-&       'and may cause parsing trouble.  Is this a binary file?',ch10
+       'For input file, with data forming a string of',stringlen,' characters,',ch10,&
+       'no double blanks or tabs were found.',ch10,&
+       'This is unusual for an input file (or any file),',ch10,&
+       'and may cause parsing trouble.  Is this a binary file?',ch10
        MSG_WARNING(message)
      else
        length=lcut+1
@@ -1049,17 +1045,17 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      itoken2=index(string,cs1(1:cslen), BACK=.true. )
      if(itoken1/=itoken2)then
        write(message, '(7a)' )&
-&       'There are two occurences of the keyword "',cs1(1:cslen),'" in the input file.',ch10,&
-&       'This is confusing, so it has been forbidden.',ch10,&
-&       'Action: remove one of the two occurences.'
+       'There are two occurences of the keyword "',cs1(1:cslen),'" in the input file.',ch10,&
+       'This is confusing, so it has been forbidden.',ch10,&
+       'Action: remove one of the two occurences.'
        MSG_ERROR(message)
      end if
 
      if(itoken/=0 .and. itoken1/=0)then
        write(message, '(9a)' )&
-&       'The keywords "',cs(1:cslen),'" and "',cs1(1:cslen),'"',ch10,&
-&       'cannot be used together in the input file.',ch10,&
-&       'Action: remove one of the two keywords.'
+       'The keywords "',cs(1:cslen),'" and "',cs1(1:cslen),'"',ch10,&
+       'cannot be used together in the input file.',ch10,&
+       'Action: remove one of the two keywords.'
        MSG_ERROR(message)
      end if
 
@@ -1129,25 +1125,24 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      if(jdtset==0)then
 
 !      If the multi-dataset mode is not used, no token should have been found
-       if(itoken_colon+itoken_plus+itoken_times+&
-&       itoken_2colon+itoken_2plus+itoken_2times > 0 ) then
+       if(itoken_colon+itoken_plus+itoken_times+ itoken_2colon+itoken_2plus+itoken_2times > 0 ) then
          write(message,'(a,a,a,a,a,a,a,a,a,a,a,a, a)' )&
-&         'Although the multi-dataset mode is not activated,',ch10,&
-&         'the keyword "',trim(cs),'" has been found',ch10,&
-&         'appended with  + * or :  .',ch10,&
-&         'This is not allowed.',ch10,&
-&         'Action: remove the appended keyword, or',ch10,&
-&         'use the multi-dataset mode (ndtset/=0).'
+         'Although the multi-dataset mode is not activated,',ch10,&
+         'the keyword "',trim(cs),'" has been found',ch10,&
+         'appended with  + * or :  .',ch10,&
+         'This is not allowed.',ch10,&
+         'Action: remove the appended keyword, or',ch10,&
+         'use the multi-dataset mode (ndtset/=0).'
          MSG_ERROR(message)
        end if
        if(itoken_1colon+itoken_1plus+itoken_1times > 0 ) then
          write(message, '(a,a,a,a,a,a,a,a,a,a,a,a,a)' )&
-&         'Although the multi-dataset mode is not activated,',ch10,&
-&         'the keyword "',trim(cs),'" has been found',ch10,&
-&         'appended with ? , then + * or :  .',ch10,&
-&         'This is not allowed.',ch10,&
-&         'Action: remove the appended keyword, or',ch10,&
-&         'use the multi-dataset mode (ndtset/=0).'
+         'Although the multi-dataset mode is not activated,',ch10,&
+         'the keyword "',trim(cs),'" has been found',ch10,&
+         'appended with ? , then + * or :  .',ch10,&
+         'This is not allowed.',ch10,&
+         'Action: remove the appended keyword, or',ch10,&
+         'use the multi-dataset mode (ndtset/=0).'
          MSG_ERROR(message)
        end if
 
@@ -1166,12 +1161,12 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        if(itoken_2times/=0)sum_token=sum_token+1
 
        if(sum_token/=0 .and. sum_token/=2) then
-         write(message, '(a,a,a,a,a,i3,a,a,a,a,a,a,a)' )&
-&         'The keyword "',trim(cs),'" has been found to take part',ch10,&
-&         'to series definition in the multi-dataset mode',sum_token,' times.',ch10,&
-&         'This is not allowed, since it should be used once with ":",',ch10,&
-&         'and once with "+" or "*".',ch10,&
-&         'Action: change the number of occurences of this keyword.'
+         write(message, '(a,a,a,a,a,i0,a,a,a,a,a,a,a)' )&
+         'The keyword "',trim(cs),'" has been found to take part',ch10,&
+         'to series definition in the multi-dataset mode',sum_token,' times.',ch10,&
+         'This is not allowed, since it should be used once with ":",',ch10,&
+         'and once with "+" or "*".',ch10,&
+         'Action: change the number of occurences of this keyword.'
          MSG_ERROR(message)
        end if
 
@@ -1207,9 +1202,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        end if
        if(ier==1)then
          write(message, '(a,a,a,a,a,a,a)' )&
-&         'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
-&         'This is confusing, so it has been forbidden.',ch10,&
-&         'Action: remove one of the two occurences.'
+         'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+         'This is confusing, so it has been forbidden.',ch10,&
+         'Action: remove one of the two occurences.'
          MSG_ERROR(message)
        end if
 
@@ -1236,26 +1231,26 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !      Make sure that the proper combination of : + and * is found .
        if(itoken_colon > 0 .and. (itoken_plus==0 .and. itoken_times==0) )then
          write(message, '(13a)' )&
-&         'The keyword "',cscolon(1:cslen),'" initiate a series,',ch10,&
-&         'but there is no occurence of "',csplus(1:cslen),'" or "',cstimes(1:cslen),'".',ch10,&
-&         'Action: either suppress the series, or make the increment',ch10,&
-&         'or the factor available.'
+         'The keyword "',cscolon(1:cslen),'" initiate a series,',ch10,&
+         'but there is no occurence of "',csplus(1:cslen),'" or "',cstimes(1:cslen),'".',ch10,&
+         'Action: either suppress the series, or make the increment',ch10,&
+         'or the factor available.'
          MSG_ERROR(message)
        end if
        if(itoken_plus/=0 .and. itoken_times/=0)then
          write(message, '(a,a, a,a,a,a,a)' )&
-&         'The combined occurence of keywords "',csplus(1:cslen),'" and "',cstimes(1:cslen),'" is not allowed.',ch10,&
-&         'Action: suppress one of them in your input file.'
+         'The combined occurence of keywords "',csplus(1:cslen),'" and "',cstimes(1:cslen),'" is not allowed.',ch10,&
+         'Action: suppress one of them in your input file.'
          MSG_ERROR(message)
        end if
        if(itoken_colon==0 .and. (itoken_plus/=0 .or. itoken_times/=0) ) then
          cs=csplus
          if(itoken_times/=0)cs=cstimes
          write(message, '(a,a,a,a,a,a,a,a,a,a,a)' )&
-&         'The keyword "',cscolon(1:cslen),'" does not appear in the input file.',ch10,&
-&         'However, the keyword "',cs(1:cslen),'" appears.',ch10,&
-&         'This is forbidden.',ch10,&
-&         'Action: make the first appear, or suppress the second.'
+         'The keyword "',cscolon(1:cslen),'" does not appear in the input file.',ch10,&
+         'However, the keyword "',cs(1:cslen),'" appears.',ch10,&
+         'This is forbidden.',ch10,&
+         'Action: make the first appear, or suppress the second.'
          MSG_ERROR(message)
        end if
 
@@ -1287,9 +1282,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
        write(message, '(a,a,a,a,a,a,a)' )&
-&       'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
-&       'This is confusing, so it has been forbidden.',ch10,&
-&       'Action: remove one of the two occurences.'
+       'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+       'This is confusing, so it has been forbidden.',ch10,&
+       'Action: remove one of the two occurences.'
        MSG_ERROR(message)
      end if
 
@@ -1320,16 +1315,16 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        if(itoken2/=0)then
          if(trial_jdtset==0)then
            write(message, '(a,a,a,a,a,a,a)' )&
-&           'There is an occurence of the keyword "',trim(token),'" appended with 0 in the input file.',ch10,&
-&           'This is forbidden.',ch10,&
-&           'Action: remove this occurence.'
+           'There is an occurence of the keyword "',trim(token),'" appended with 0 in the input file.',ch10,&
+           'This is forbidden.',ch10,&
+           'Action: remove this occurence.'
            call wrtout(std_out,message,'COLL')
          else
            write(message, '(a,a,a,a,a,i1,a,a,a,a,a)' )&
-&           'In the input file, there is an occurence of the ',ch10,&
-&           'keyword "',trim(token),'", appended with the digit "',trial_jdtset,'".',ch10,&
-&           'This is forbidden when ndtset==0 .',ch10,&
-&           'Action: remove this occurence, or change ndtset.'
+           'In the input file, there is an occurence of the ',ch10,&
+           'keyword "',trim(token),'", appended with the digit "',trial_jdtset,'".',ch10,&
+           'This is forbidden when ndtset==0 .',ch10,&
+           'Action: remove this occurence, or change ndtset.'
            call wrtout(std_out,message,'COLL')
          end if
          MSG_ERROR(message)
@@ -1349,23 +1344,23 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  tread = 0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
-&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. &
+    typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  if(typevarphys=='KEY')then
    if(opttoken>=2)then
      write(message, '(9a)' )&
-&     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
-&     'a series has been defined in the input file.',ch10,&
-&     'This is forbidden.',ch10,&
-&     'Action: check your input file.'
+     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+     'a series has been defined in the input file.',ch10,&
+     'This is forbidden.',ch10,&
+     'Action: check your input file.'
      MSG_ERROR(message)
    end if
    if(narr>=2)then
      write(message, '(9a)' )&
-&     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
-&     'the number of data requested is larger than 1.',ch10,&
-&     'This is forbidden.',ch10,&
-&     'Action: check your input file.'
+     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+     'the number of data requested is larger than 1.',ch10,&
+     'This is forbidden.',ch10,&
+     'Action: check your input file.'
      MSG_ERROR(message)
    end if
    typevar='KEY'
@@ -1742,8 +1737,8 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
  index_already_done=1
  ixyz=0
 
- do    ! Infinite do-loop, to identify the presence of the xyzFILE token
-
+ do
+   ! Infinite do-loop, to identify the presence of the xyzFILE token
    index_xyz_token=index(string_upper(index_already_done:lenstr),"XYZFILE")
    if(index_xyz_token==0)exit
 
@@ -1767,10 +1762,10 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
 
    if(index_xyz_fname_end ==0 )then
      write(message, '(5a,i4,2a)' )&
-&     'Could not find the name of the xyz file.',ch10,&
-&     'index_xyz_fname_end should be non-zero, while it is :',ch10,&
-&     'index_xyz_fname_end=',index_xyz_fname_end,ch10,&
-&     'Action: check the filename that was provided after the XYZFILE input variable keyword.'
+     'Could not find the name of the xyz file.',ch10,&
+     'index_xyz_fname_end should be non-zero, while it is :',ch10,&
+     'index_xyz_fname_end=',index_xyz_fname_end,ch10,&
+     'Action: check the filename that was provided after the XYZFILE input variable keyword.'
      MSG_ERROR(message)
    end if
 
@@ -1781,17 +1776,14 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    xyz_fname=repeat(blank,fnlen)                  ! Initialize xyz_fname to a blank line
    xyz_fname=string_raw(index_xyz_fname:index_xyz_fname_end-1)
 
-   write(message, '(3a)') ch10,&
-&   ' importxyz : Identified token XYZFILE, referring to file ',trim(xyz_fname)
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(message, '(3a)') ch10, ' importxyz : Identified token XYZFILE, referring to file ',trim(xyz_fname)
+   call wrtout([std_out, ab_out],message,'COLL')
 
 !  Append the data from the xyz file to the string, and update the length of the string
    call append_xyz(dtset_char,lenstr,string_upper,xyz_fname,strln)
 
 !  erase the file name from string_upper
    string_upper(index_xyz_fname:index_xyz_fname_end-1) = blank
-
  end do
 
  if (index_already_done > 1) then
@@ -1919,8 +1911,8 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
    znucl = atom%znucl
    if (znucl > 200) then
      write (message,'(5a)')&
-&     'Error: found element beyond Z=200 ', ch10,&
-&     'Solution: increase size of atomspecies in append_xyz', ch10
+     'found element beyond Z=200 ', ch10,&
+     'Solution: increase size of atomspecies in append_xyz', ch10
      MSG_ERROR(message)
    end if
 !  found a new atom type
@@ -1966,8 +1958,8 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
 !Check the length of the string
  if(lenstr_new>strln)then
    write(message,'(3a)')&
-&   'The maximal size of the input variable string has been exceeded.',ch10,&
-&   'The use of a xyz file is more character-consuming than the usual input file. Sorry.'
+   'The maximal size of the input variable string has been exceeded.',ch10,&
+   'The use of a xyz file is more character-consuming than the usual input file. Sorry.'
    MSG_BUG(message)
  end if
 
@@ -2041,9 +2033,7 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 !******************************************************************
 
  if(cond_number<0 .or. cond_number>4)then
-   write(message,'(a,i6,a)' )&
-&   'The value of cond_number is',cond_number,&
-&   'but it should be positive and < 5.'
+   write(message,'(a,i0,a)' )'The value of cond_number is ',cond_number,'but it should be positive and < 5.'
    MSG_BUG(message)
  end if
 
@@ -2061,42 +2051,36 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
      do icond=1,cond_number
 !      The following format restricts cond_values(icond) to be between -99 and 999
        write(message, '(2a,a,a,a,i4,a)' ) trim(message),ch10,&
-&       '  Context : the value of the variable ',&
-&       trim(cond_string(icond)),' is',cond_values(icond),'.'
+       '  Context : the value of the variable ',trim(cond_string(icond)),' is',cond_values(icond),'.'
      end do
    end if
    write(message, '(2a,a,a,a,es20.12,a)' ) trim(message),ch10,&
-&   '  The value of the input variable ',trim(input_name),&
-&   ' is',input_value,','
+    '  The value of the input variable ',trim(input_name),' is',input_value,','
    if(minimal_flag==0)then
      write(message, '(2a,a,es20.12,a)' ) trim(message),ch10,&
      '  while it must be equal to ',reference_value,'.'
    else if(minimal_flag==1)then
      write(message, '(2a,a,es20.12,a)' ) trim(message),ch10,&
-&     '  while it must be larger or equal to',reference_value,'.'
+       '  while it must be larger or equal to',reference_value,'.'
    else if(minimal_flag==-1)then
      write(message, '(2a,a,es20.12,a)' ) trim(message),ch10,&
-&     '  while it must be smaller or equal to',reference_value,'.'
+      '  while it must be smaller or equal to',reference_value,'.'
    end if
 
    if(cond_number==0 .or. advice_change_cond==0)then
      write(message, '(2a,a,a,a)' ) trim(message),ch10,&
-&     '  Action: you should change the input variable ',trim(input_name),'.'
+     '  Action: you should change the input variable ',trim(input_name),'.'
    else if(cond_number==1)then
      write(message, '(2a,a,a,a,a,a)' ) trim(message),ch10,&
-&     '  Action: you should change the input variables ',trim(input_name),&
-&     ' or ',trim(cond_string(1)),'.'
+     '  Action: you should change the input variables ',trim(input_name),' or ',trim(cond_string(1)),'.'
    else if(cond_number==2)then
      write(message, '(2a,a,a,a,a,a,a,a,a,a)' ) trim(message),ch10,&
-&     '  Action: you should change one of the input variables ',&
-&     trim(input_name),',',ch10,&
-&     '   ',trim(cond_string(1)),' or ',trim(cond_string(2)),'.'
+     '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
+     '   ',trim(cond_string(1)),' or ',trim(cond_string(2)),'.'
    else if(cond_number==3)then
      write(message, '(2a,a,a,a,a,a,a,a,a,a,a,a)' ) trim(message),ch10,&
-&     '  Action: you should change one of the input variables ',&
-&     trim(input_name),',',ch10,&
-&     '   ',trim(cond_string(1)),', ',trim(cond_string(2)),&
-&     ' or ',trim(cond_string(3)),'.'
+     '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
+     '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
    end if
 
    call wrtout(unit,message,'COLL')
@@ -2657,14 +2641,12 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 !******************************************************************
 
  if(cond_number<0 .or. cond_number>4)then
-   write(message,'(a,i0,a)' )&
-&   'The value of cond_number is ',cond_number,' but it should be positive and < 5.'
+   write(message,'(a,i0,a)' )'The value of cond_number is ',cond_number,' but it should be positive and < 5.'
    MSG_BUG(message)
  end if
 
  if(list_number<0 .or. list_number>40)then
-   write(message,'(a,i0,a)' )&
-&   'The value of list_number is',list_number,' but it should be between 0 and 40.'
+   write(message,'(a,i0,a)' )'The value of list_number is',list_number,' but it should be between 0 and 40.'
    MSG_BUG(messagE)
  end if
 
@@ -2683,8 +2665,7 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
  if(minmax_flag==2)then
    write(message, '(3a,20(i0,1x))' ) trim(message),ch10,&
    '  different from one of the following: ',list_values(1:list_number)
- else if(list_number>1 .or. &
-&   minmax_flag==0 .or. list_values(1)/=minmax_value )then
+ else if(list_number>1 .or. minmax_flag==0 .or. list_values(1)/=minmax_value )then
 !  The following format restricts list_values to be between -99 and 999
    if(list_number/=1)then
      write(message, '(3a,40(i0,1x))' ) trim(message),ch10,&
@@ -2695,19 +2676,17 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
    if(minmax_flag==1)then
 !    The following format restricts minmax_value to be between -99 and 999
      write(message, '(3a,i0,a)' ) trim(message),ch10,&
-&     '  or it must be larger or equal to ',minmax_value,'.'
+      '  or it must be larger or equal to ',minmax_value,'.'
    else if(minmax_flag==-1)then
      write(message, '(3a,i0,a)' ) trim(message),ch10,&
-&     '  or it must be smaller or equal to ',minmax_value,'.'
+      '  or it must be smaller or equal to ',minmax_value,'.'
    end if
  else if(minmax_flag==1)then
 !  The following format restricts minmax_value to be between -99 and 999
-   write(message, '(3a,i0,a)' ) trim(message),ch10,&
-&   '  larger or equal to ',minmax_value,'.'
+   write(message, '(3a,i0,a)' ) trim(message),ch10,'  larger or equal to ',minmax_value,'.'
  else if(minmax_flag==-1)then
 !  The following format restricts minmax_value to be between -99 and 999
-   write(message, '(3a,i0,a)' ) trim(message),ch10,&
-&   '  smaller or equal to ',minmax_value,'.'
+   write(message, '(3a,i0,a)' ) trim(message),ch10,'  smaller or equal to ',minmax_value,'.'
  end if
  if(cond_number==0 .or. advice_change_cond==0)then
    write(message, '(5a)' ) trim(message),ch10,&
@@ -2858,22 +2837,22 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 
  if(len_trim(token)>16)then
    write(message, '(3a,i0,2a)' )&
-&   'The length of the name of the input variable ',trim(token),' is ',len_trim(token),ch10,&
-&   'This exceeds 16 characters, the present maximum in routine prttagm.'
+   'The length of the name of the input variable ',trim(token),' is ',len_trim(token),ch10,&
+   'This exceeds 16 characters, the present maximum in routine prttagm.'
    MSG_ERROR(message)
  end if
 
  if(ndtset_alloc<1)then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'ndtset_alloc=',ndtset_alloc,', while it should be >= 1.',ch10,&
-&   'This happened for token=',token,'.'
+   'ndtset_alloc=',ndtset_alloc,', while it should be >= 1.',ch10,&
+   'This happened for token=',token,'.'
    MSG_BUG(message)
  end if
 
  if(ndtset_alloc>9999)then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'ndtset_alloc=',ndtset_alloc,', while it must be lower than 10000.',ch10,&
-&   'This happened for token=',token,'.'
+   'ndtset_alloc=',ndtset_alloc,', while it must be lower than 10000.',ch10,&
+   'This happened for token=',token,'.'
    MSG_BUG(message)
  end if
 

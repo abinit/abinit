@@ -325,7 +325,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
  ! Read lifetimes to ebands object
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with sigma_ngkpt k-mesh, we need to downsample ebands.
-   call wrtout(std_out, sjoin("Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
+   call wrtout(std_out, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%sigma_ngkpt(1)
    kptrlatt(2,2) = dtset%sigma_ngkpt(2)

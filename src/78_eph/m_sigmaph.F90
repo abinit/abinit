@@ -934,9 +934,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_CALLOC(vlocal, (n4, n5, n6, gs_hamkq%nvloc))
 
  if (dtset%eph_stern == 1) then
-   ! Read vtrial from POT file (in principle one may store vtrial in the DVDB!)
-   call wrtout(std_out, " Reading vtrial potential for Sternheimer from external file.")
-   call read_rhor("foo_POT", cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
+   ! Read GS POT (vtrial) from input POT file
+   ! Iin principle one may store vtrial in the DVDB but this is simpler to implement.
+   call wrtout(std_out, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
+   call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
    call hdr_free(pot_hdr)
  end if
@@ -1397,6 +1398,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
            ! TODO: Ideally, dfpt_cgwf should be modified so that we can pass cgq that is MPI distributed over nband_kq
+           ! bsum_range is not compatible with Sternheimer. There's a check at the level of the parser in chkinp.
            do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
              if (isirr_kq) then
                 call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1498,7 +1500,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(vlocal1)
        ABI_FREE(v1scf)
 
-       ! Add contribution to Fan-Migdal self-energy stemming from Sternheimer.
+       ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          call xmpi_sum(cg1s_kq, comm, ierr)
          ! h1kets_kq are MPI distributed inside comm_pert but we need off-diagonal pp' terms --> collect results.
@@ -1576,7 +1578,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! This can happen if we have loaded the wavefunctions inside the energy range.
          if (sigma%imag_only .and. sigma%qint_method == 1) then
            if (.not. wfd%ihave_ug(ibsum_kq, ikq_ibz, spin)) then
-             ignore_kq = ignore_kq + 1; cycle
+             ignore_ibsum_kq = ignore_ibsum_kq + 1; cycle
            end if
          end if
 
@@ -2027,7 +2029,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end if ! not %imag_only
 
      if (dtset%prteliash /= 0) then
-       ! Compute Eliashberg function (useful but cost is not negligible so it must be activated by user).
+       ! Compute Eliashberg function (useful but cost is not negligible so it must be activated by the user).
        call cwtime(cpu, wall, gflops, "start", msg=sjoin(" Computing Eliashberg function with nomega: ", &
            itoa(sigma%gfw_nomega)))
 

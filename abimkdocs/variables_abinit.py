@@ -19597,7 +19597,7 @@ Variable(
 This variable can be used to introduce a cutoff on the q-points when computing the imaginary
 part of the electron-phonon self-energy ([[eph_task]] = -4) with the tetrahedron method ([[eph_intmeth]] = 2)
 The first entry refers to phonon absorption while the second one is associated to phonon emission.
-A q-point is included in the sum if the tetrahedron weights for phonon absorption/emission are larger that these values.
+A q-point is included in the sum of the tetrahedron weights for phonon absorption/emission are larger that these values.
 """,
 ),
 
@@ -19611,8 +19611,8 @@ Variable(
     mnemonics="EPH PHonon mode RANGE.",
     text=r"""
 This variable is used to select the range of phonon modes included in the computation of the phonon self-energy.
-By default [0, 0] all phonon modes are included, otherwise only the modes with index between the first 
-and second entries are included.
+By default all phonon modes are included ([0, 0]), otherwise only the phonon modes with index between the first 
+and second entry are included.
 """,
 ),
 
@@ -19652,6 +19652,7 @@ the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1 in the GS run
 and the specification of [[tolwfr]] in the input file.
+The path to the POT file is specified via [[getpot_path]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
 !!! important
@@ -19708,10 +19709,17 @@ This flag is used in the Fourier interpolation in q-space of the DFPT potentials
 In polar materials there is a long range (LR) component in the first-order variation
 of the KS potential that can be modeled in terms of the Born effective charges and 
 the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]].
+Possible values are [0, -1, 1].
+
+Setting this flag to 0 deactivates the treatment of the LR contribution (not recommended).
+
 If *dvdb_add_lr* is set to 1, this part is removed when computing the real-space representation
-of the DFPT potentials so that the potential is short-ranged and ameneable to Fourier interpolation.
-The long-range contribution is added back when interpolating the DFPT potentials at arbitrary q-points
-Setting this flag to zero deactivates the treatment of the LR contribution.
+of the DFPT potentials so that the potential in real space is short-ranged and ameneable to Fourier interpolation.
+The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
+
+If *dvdb_add_lr* is set to -1, the long range part is removed before computing the real-space representation
+but the LR term is **not** added back during the interpolation in $\qq$-space. This option is mainly used 
+for debugging purposes.
 
 By default, the code will always treat the LR term is the DDB file contains Born effective charges 
 and the macroscopic dielectric tensor.
@@ -19806,6 +19814,23 @@ Variable(
     text=r"""
 This is an *advanced option* used to compute the long-range part of the DFTP potential.
 TO BE DESCRIBED WHEN WE ENTER PRODUCTION
+""",
+),
+
+Variable(
+    abivarname="getpot_path",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the KS POTential from PATH",
+    text=r"""
+This variable defines the path of the POT file containing the KS ground-state potential
+that should be used in input. 
+At present, it is mainly used in EPH code when performing calculation with the Sternheimer equation. 
+Note that the path must be inserted between quotation marks.
+Note also that relative paths are interpreted according to the working directory in which Abinit is executed!
 """,
 ),
 

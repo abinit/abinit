@@ -2751,7 +2751,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,jj,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
- integer :: ifft, ierr, nrtot, my_rstart, my_rstop, iatom
+ integer :: ifft, ierr, nrtot, my_rstart, my_rstop, iatom, my_ir0
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
 #endif
@@ -2879,6 +2879,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
    end if
  end if
  MSG_WARNING_IF(db%my_nrpt == 0, "my_nrpt == 0!")
+
+ my_ir0 = -1
+ do irpt=1,db%my_nrpt
+   if (all(abs(db%my_rpt(:,irpt)) <= 1.0d-10)) then
+     my_ir0 = irpt; exit
+   end if
+ end do
 
  ABI_SFREE(all_cell)
  ABI_SFREE(all_wghatm)
@@ -3107,6 +3114,59 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
 
  !call xmpi_sum(db%v1scf_rpt, db%comm, ierr)
  db%v1scf_rpt = db%v1scf_rpt / nqbz
+
+#if 0
+ ! Enforce ASR. Use v1r_qbz as workspace array.
+ call wrtout(std_out, "Enforcing ASR on potentials.")
+
+ v1r_qbz = zero
+
+ !do imyp=1,db%my_npert
+ !  idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp); ipc = db%my_pinfo(3, imyp)
+ !  do ispden=1,db%nspden
+ !    v1r_qbz(:, :, ispden, idir) = v1r_qbz(:, :, ispden, idir) = sum(db%v1scf_rpt(:, :, :, ispden, imyp), dim=2)
+ !  end do
+ !end do
+ !if (db%nprocs_pert /= 1) call xmpi_sum(v1r_qbz, db%comm_pert, ierr)
+ !v1r_qbz = v1r_qbz / (nrtot * db%natom)
+
+ !if (my_ir0 /= -1) then
+ !  do imyp=1,db%my_npert
+ !    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp); ipc = db%my_pinfo(3, imyp)
+ !    do ispden=1,db%nspden
+ !      !write(std_out, *)"imyp ispden:", imyp, ispden, "max: ", maxval(v1r_qbz(:, :, ispden, imyp), dim=2)
+ !      db%v1scf_rpt(:, my_ir0, :, ispden, imyp) = db%v1scf_rpt(:, my_ir0, :, ispden, imyp) - v1r_qbz(:, :, ispden, idir)
+ !    end do
+ !  end do
+ !end if
+
+ do imyp=1,db%my_npert
+   do ispden=1,db%nspden
+     v1r_qbz(:, :, ispden, imyp) = sum(db%v1scf_rpt(:, :, :, ispden, imyp), dim=2)
+   end do
+ end do
+
+ if (db%nprocs_pert /= 1) call xmpi_sum(v1r_qbz, db%comm_pert, ierr)
+
+ if (my_ir0 /= -1) then
+   do imyp=1,db%my_npert
+     do ispden=1,db%nspden
+       write(std_out, *)"imyp ispden:", imyp, ispden, "max: ", maxval(v1r_qbz(:, :, ispden, imyp), dim=2)
+       db%v1scf_rpt(:, my_ir0, :, ispden, imyp) = db%v1scf_rpt(:, my_ir0, :, ispden, imyp) - v1r_qbz(:, :, ispden, imyp)
+     end do
+   end do
+ end if
+
+ !v1r_qbz = v1r_qbz / nrtot
+ !do imyp=1,db%my_npert
+ !  do ispden=1,db%nspden
+ !    write(std_out, *)"imyp ispden:", imyp, ispden, "max: ", maxval(v1r_qbz(:, :, ispden, imyp), dim=2)
+ !    do irpt=1,db%my_nrpt
+ !      db%v1scf_rpt(:, irpt, :, ispden, imyp) = db%v1scf_rpt(:, irpt, :, ispden, imyp) - v1r_qbz(:, :, ispden, imyp)
+ !    end do
+ !  end do
+ !end do
+#endif
 
  ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
  ! TODO

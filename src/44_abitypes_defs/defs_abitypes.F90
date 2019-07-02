@@ -984,7 +984,7 @@ type dataset_type
  real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
  character(len=fnlen) :: getkerange_path = ABI_NOFILE
- !character(len=fnlen) :: getpot_path = ABI_NOFILE
+ character(len=fnlen) :: getpot_path = ABI_NOFILE
  !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
 
  end type dataset_type
@@ -1381,6 +1381,10 @@ type dataset_type
    ! if no dataset mode             : abi//'DVDB'
    ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
    ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetden)//'DVDB'
+
+  character(len=fnlen) :: filpotin
+   ! Filename used to read POT file.
+   ! Initialize via getpot_path
 
   character(len=fnlen) :: filkdensin
    ! if no dataset mode             : abi//'KDEN'
