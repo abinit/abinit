@@ -612,6 +612,7 @@ module m_chebfiwf
         call xgBlock_scale(Bm1X,inv_sqrt2,1)
         if (l_paral_kgb == 0) then
           if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2 
+        else
           if (cpuRow == 0) then
             gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
           end if

@@ -194,9 +194,9 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  !stop
 
  !print *, "AJDE" 
- print *, "xmpi_comm_rank(comm)", xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
+ !print *, "xmpi_comm_rank(comm)", xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
  
- stop
+ !stop
 
  ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
  if (dtset%paral_kgb == 1) then
