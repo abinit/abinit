@@ -325,18 +325,16 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
              wtk_folded(ind_ikpt) = wtk_folded(ind_ikpt) + wtk_folded(ind_ikpt2)
              wtk_folded(ind_ikpt2) = zero
 
-             !if (present(bz2ibz_smap)) then
-               ! Fill entries following listkk convention.
-               bz2ibz_smap(1, ind_ikpt2) = ind_ikpt
-               bz2ibz_smap(2, ind_ikpt2) = isym
-               ! Compute difference with respect to kpt2, modulo a lattice vector
-               ! TODO
-               !dk(:) = kptns2(:,ikpt2) - kpt1a(:)
-               !dkint(:) = nint(dk(:) + tol12)
-               !bz2ibz_smap(3:5, ind_ikpt2) = g0
-               ii = 0; if (itim == -1) ii = 1
-               bz2ibz_smap(6, ind_ikpt2) = ii
-             !end if
+             ! Fill entries following listkk convention.
+             ! Note however that here we always use symrec whereas listkk uses symrel^T by default
+             ! so pay attention when using these tables to symmetrize wavefunctions.
+             bz2ibz_smap(1, ind_ikpt2) = ind_ikpt
+             bz2ibz_smap(2, ind_ikpt2) = isym
+             ! Compute difference with respect to kpt2, modulo a lattice vector
+             ! Sk1 + G0 = k2
+             !bz2ibz_smap(3:5, ind_ikpt2) = nint(-ksym(:) + kbz(:, ind_ikpt2) + tol12)
+             ii = 0; if (itim == -1) ii = 1
+             bz2ibz_smap(6, ind_ikpt2) = ii
 
              ! Go to the next ikpt2 if the symmetric was found
              quit = 1; exit

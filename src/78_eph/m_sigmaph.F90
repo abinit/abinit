@@ -71,6 +71,7 @@ module m_sigmaph
  use m_double_grid,    only : double_grid_t
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
+ use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ioarr,          only : read_rhor
  use m_pawang,         only : pawang_type, gauleg
@@ -190,10 +191,10 @@ module m_sigmaph
   integer :: coords(3)
 
   integer :: nqbz
-  ! Number of q-points in the BZ.
+  ! Number of q-points in the (dense) BZ for sigma integration
 
   integer :: nqibz
-  ! Number of q-points in the IBZ.
+  ! Number of q-points in the (dense) IBZ for sigma integration
 
   integer :: nqibz_k
   ! Number of q-points in the IBZ(k). Depends on ikcalc.
@@ -5317,7 +5318,8 @@ end subroutine eval_sigfrohl2
 !!
 !! FUNCTION
 !!  This function tries to predict the **full** list of q-points needed to compute the lifetimes
-!!  once we know sigma%nkcalc. It uses a energy window computed from the max phonon frequency times sigma%winfact
+!!  once we know sigma%nkcalc. It uses an energy window computed from the max phonon frequency
+!!  multiplied by sigma%winfact.
 !!
 !! INPUT
 !! cryst=Crystalline structure
@@ -5358,6 +5360,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  character(len=500) :: msg
  type(kptrank_type) :: kptrank
 !arrays
+ integer :: g0(3)
  integer,allocatable :: qbz_count(:), qbz2qpt(:,:), bz2ibz(:,:)
  real(dp) :: kq(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
@@ -5391,7 +5394,6 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
  ! Make full k-point rank arrays
  call mkkptrank(kbz, nkbz, kptrank)
- ABI_FREE(kbz)
 
  ABI_ICALLOC(qbz_count, (nqbz))
  cnt = 0
@@ -5405,9 +5407,8 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
        kq = kk + qbz(:, iq_bz)
        call get_rank_1kpt(kq, kq_rank, kptrank)
        ikq_bz = kptrank%invrank(kq_rank)
-       if (ikq_bz < 1) then
-         MSG_ERROR(sjoin("Cannot find kq: ", ktoa(kq)))
-       end if
+       ABI_CHECK(ikq_bz > 0, sjoin("Cannot find kq: ", ktoa(kq)))
+       ABI_CHECK(isamek(kq, kbz(:, ikq_bz), g0), "Wrong invrank")
        !ikq_ibz = bz2ibz(ikq_bz,1)
        ikq_ibz = bz2ibz(1, ikq_bz)
        do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
@@ -5417,17 +5418,14 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
            eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
            ediff = eig0nk - eig0mkq
            ! Perform check on the energy difference to exclude this q-point.
-           !if (eig0mkq >= sigma%elow - sigma%winfact * sigma%wmax .and. &
-           !    eig0mkq <= sigma%ehigh + sigma%winfact * sigma%wmax) then
-           if (abs(ediff) <= sigma%winfact * sigma%wmax) then
-             qbz_count(iq_bz) = qbz_count(iq_bz) + 1
-           end if
+           if (abs(ediff) <= sigma%winfact * sigma%wmax) qbz_count(iq_bz) = qbz_count(iq_bz) + 1
          end do
        end do
      end do
    end do
  end do
 
+ ABI_FREE(kbz)
  call destroy_kptrank(kptrank)
 
  call xmpi_sum(qbz_count, comm, ierr)

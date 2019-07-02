@@ -130,6 +130,7 @@ end function kpts_timrev_from_kptopt
 !!  kbz(3,nkbz) = k-points in the BZ.
 !!  [new_kptrlatt] = New value of kptrlatt returned by getkgrid
 !!  [new_shiftk(3,new_nshiftk)] = New set of shifts returned by getkgrid
+!!  [bz2ibz(6,nkbz)]=Mapping BZ --> IBZ
 !!
 !! PARENTS
 !!      m_dvdb,m_ebands,m_gruneisen,m_ifc,m_kpts,m_phgamma,m_phonons,m_sigmaph
@@ -988,6 +989,7 @@ end subroutine getkgrid
 !! If nkpt/=0  the following are also output:
 !!   kpt(3,nkpt)=reduced coordinates of k points.
 !!   wtk(nkpt)=weight assigned to each k point.
+!! bz2ibz_smap(nkbz, 6)= Mapping BZ --> IBZ.
 !! [fullbz(3,nkpt_fullbz)]=k-points generated in the full Brillouin zone.
 !!   In output: allocated array with the list of k-points in the BZ.
 !! [kpthf(3,nkpthf)]=k-points generated in the full Brillouin zone, possibly downsampled (for Fock).
