@@ -10,9 +10,12 @@ in the main output file.
 The connection with the ABINIT test suite and the yaml syntax used to define
 tolerances, parameters and constraints is also discussed.
 
+The new infrastructure consists of a set of Fortran modules to output 
+structured data in YAML format and Python code to parse the output files and analyze data.
+
 ## Motivations
 
-In its current state, the ABINIT test suite is based on input files with the
+In ABINITv8 and previous versions, the ABINIT test suite is based on input files with the
 associated reference output files.
 Roughly speaking, an automatic test consists in comparing the reference file with
 the output file in a **line-oriented fashion**
@@ -149,7 +152,7 @@ Our Fortran implementation, indeed, supports only a subset of the YAML specifica
     when it comes to storing large data structures with lots of metadata.
 
     Note also that we do not plan to rewrite entirely the main output file in YAML syntax
-    but we prefer to focus on those physical properties that will be used by the new test suite
+    but we prefer to focus on those physical properties that will be used by the new test procedure
     to validate new developments.
     This approach, indeed, will facilitate the migration to the new YAML-based approach as only selected portions
     of the output file will be ported to the new format thus maintaining the look and the feel relatively
@@ -218,15 +221,14 @@ with the associated YAML configuration file given by:
 
 {% dialog tests/paral/Input/t86.yaml %}
 
-
 !!! important
 
     Until the basic document list is considered stable enough the printing of
     YAML documents is disabled by default. To enable it, add [[use_yaml]] 1 in the input file 
 
-### Out first example of YAML configuration file 
+### Our first example of YAML configuration file 
 
-Let's start with a minimalistic example in which we compare the components of
+Let us start with a minimalistic example in which we compare the components of
 the total free energy in the `Etot` document with an absolute tolerance of 1.0e-7 Ha.
 The YAML configuration file will look like:
 
@@ -263,9 +265,9 @@ Etot:
 ```
 
 However the `tol_abs` constraint defined in `Etot` is _inherited_ by `Total
-energy (eV)` which mean we will not only check `tol_rel` with a tolerance of
-1.0e-10 but also `tol_abs` with a tolerance of 1.0e-7. Most of the time it is
-what we need even though here it's not. So we will just use a different
+energy (eV)` which mean we will not only check `tol_rel` with a relative tolerance of
+1.0e-10 but also `tol_abs` with an absolute tolerance of 1.0e-7. Most of the time it is
+what we need, even though here, it is not. So we will just use a different
 tolerance for `tol_abs` in `Total energy (eV)`.
 -->
 
