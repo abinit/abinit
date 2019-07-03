@@ -430,12 +430,12 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
 
  call cwtime_report(" lgroup_new", cpu, wall, gflops)
 
- ! TODO: Use symrec conventions although this means that we cannot reuse these tables
- ! to symmetrize wavefunctions and potentials that require S-1 i.e. the symrel convention.
-
- ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
- ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
  if (do_mapping) then
+   ! TODO: Use symrec conventions although this means that we cannot reuse these tables
+   ! to symmetrize wavefunctions and potentials that require S-1 i.e. the symrel convention.
+
+   ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
+   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
    call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
       sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
 
@@ -451,9 +451,8 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
    call alloc_copy(indkk(:, 1), self%lgk2ibz)
    ABI_FREE(indkk)
    call cwtime_report(" listkk1", cpu, wall, gflops)
- end if
 
- if (do_mapping) then
+
    ! Get mapping (k + q) --> initial IBZ.
    do ii=1,self%nq_k
      self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
@@ -480,24 +479,6 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
 
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
-
- ! Old version
- !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
- !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
-
- ! Use symmetries of the little group
- ! This version should be OK but now we used the symmetry tables computed in symkpt
- ! tetra integration depends on the indkk mapping.
- !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
- !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
-
- !if (dksqmax > tol12) then
- !  write(msg, '(a,es16.6)' ) &
- !   "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
- !  MSG_ERROR(msg)
- !end if
-
- !ABI_CHECK(all(self%lgk%bz2ibz_smap(1, :) == indkk(:, 1)), "bz2ibz_smap != indkk")
  indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
