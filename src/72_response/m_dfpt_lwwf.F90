@@ -3790,7 +3790,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 !--------------------------------------------------------------------------------------
  frwfdq_k=zero
 
- !Generate k+G vectors
+!Generate k+G vectors
  nkpg=3;                                                                                              
  ABI_ALLOCATE(kpg_k,(npw_k,nkpg))                                                                    
  call mkkpg(kg_k,kpg_k,kpt,nkpg,npw_k)  
