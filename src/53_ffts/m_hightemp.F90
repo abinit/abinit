@@ -49,7 +49,7 @@ module m_hightemp
     final :: finalize
   end type hightemp_type
 
-  public :: freedos,hightemp_addtoenergy,hightemp_addtorho,prt_eigocc,hightemp_getnfreeel
+  public ::freedos,hightemp_addtoenergy,hightemp_addtorho,prt_eigocc,hightemp_getnfreeel
 contains
 
   !!****f* ABINIT/m_hightemp/init
@@ -74,12 +74,11 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine init(this,activate,mband,nbcut,rprimd)
+  subroutine init(this,mband,nbcut,rprimd)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
-    logical,intent(in) :: activate
     integer,intent(in) :: mband,nbcut
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
@@ -90,17 +89,14 @@ contains
 
     ! *********************************************************************
 
-    this%enabled = activate
-    if(this%enabled) then
-      this%bcut=mband
-      this%nbcut=nbcut
-      this%ebcut=zero
-      this%energycontrib=zero
-      this%entropycontrib=zero
-      this%nfreeel=zero
-      this%u0=zero
-      call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
-    end if
+    this%bcut=mband
+    this%nbcut=nbcut
+    this%ebcut=zero
+    this%energycontrib=zero
+    this%entropycontrib=zero
+    this%nfreeel=zero
+    this%u0=zero
+    call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
 
   !!****f* ABINIT/m_hightemp/finalize

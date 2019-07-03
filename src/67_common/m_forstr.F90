@@ -248,13 +248,13 @@ contains
 !! SOURCE
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
-&                 forold,fred,grchempottn,gresid,grewtn,grhf,grvdw,grxc,gsqcut,indsym,&
+&                 forold,fred,grchempottn,gresid,grewtn,grhf,grvdw,grxc,gsqcut,hightemp,indsym,&
 &                 kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,&
 &                 nfftf,ngfftf,ngrvdw,nhat,nkxc,npwarr,&
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &                 pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,psps,rhog,rhor,rprimd,stress_needed,&
 &                 strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
-&                 vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero,hightemp)
+&                 vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
 
 !Arguments ------------------------------------
 !scalars
@@ -263,6 +263,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),intent(in) :: gsqcut,qvpotzero,ucvol
  real(dp),intent(inout) :: diffor,maxfor
  type(electronpositron_type),pointer :: electronpositron
+ type(hightemp_type),pointer :: hightemp
  type(MPI_type),intent(inout) :: mpi_enreg
  type(efield_type),intent(in) :: dtefield
  type(dataset_type),intent(in) :: dtset
@@ -300,7 +301,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
- type(hightemp_type),intent(in),optional :: hightemp
 
 !Local variables-------------------------------
 !scalars
@@ -501,14 +501,14 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      end if
    end if
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
-&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,dtset%ixc,kinstr,mgfftf,&
+&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,hightemp,dtset%ixc,kinstr,mgfftf,&
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &   dtset%typat,dtset%usefock,psps%usepaw,&
 &   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxc_hf,psps%xccc1d,xccc3d,psps%xcccrc,xred,&
 &   psps%ziontypat,psps%znucltypat,qvpotzero,&
-&   electronpositron=electronpositron,hightemp=hightemp)
+&   electronpositron=electronpositron)
  end if
 
 !Memory deallocation

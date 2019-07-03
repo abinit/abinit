@@ -410,7 +410,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  integer,intent(in) :: mband,nkpt,nspinor,nsppol,occopt,prtvol
  real(dp),intent(in) :: spinmagntarget,nelect,stmbias,tphysel,tsmear
  real(dp),intent(out) :: entropy,fermie
- type(hightemp_type),intent(inout),optional :: hightemp
+ type(hightemp_type),pointer,optional :: hightemp
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),wtk(nkpt)
@@ -490,9 +490,12 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
- if(hightemp%enabled) then
-   call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermilo,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
-   nelectlo=nelectlo+nelect_tmp
+ if(present(hightemp)) then
+   if(associated(hightemp)) then
+     call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermilo,1024,nelect_tmp,&
+     & tsmear,hightemp%u0,hightemp%ucvol)
+     nelectlo=nelectlo+nelect_tmp
+   end if
  end if
 
  fermihi=maxval(eigen(1:nband(1)*nkpt*nsppol))+6.001_dp*tsmear
@@ -505,9 +508,12 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
- if(hightemp%enabled) then
-   call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermihi,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
-   nelecthi=nelecthi+nelect_tmp
+ if(present(hightemp)) then
+   if(associated(hightemp)) then
+     call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermihi,1024,nelect_tmp,&
+     & tsmear,hightemp%u0,hightemp%ucvol)
+     nelecthi=nelecthi+nelect_tmp
+   end if
  end if
 
 !Prepare fixed moment calculation
@@ -552,10 +558,13 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      !Blanchet - Compute the number of free electrons with corresponding chemical
      !potential and add to nelect bounds.
-     if(hightemp%enabled) then
-       call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermimid,1024,nelect_tmp,tsmear,hightemp%u0,hightemp%ucvol)
-       nelectmid=nelectmid+nelect_tmp
-       entropy=entropy-entropy_tmp
+     if(present(hightemp)) then
+       if(associated(hightemp)) then
+         call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermimid,1024,nelect_tmp,&
+         & tsmear,hightemp%u0,hightemp%ucvol)
+         nelectmid=nelectmid+nelect_tmp
+         entropy=entropy-entropy_tmp
+       end if
      end if
 
 !    write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid

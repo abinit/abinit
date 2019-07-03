@@ -144,7 +144,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !scalars
  integer,intent(in) :: mcg,tim_mkrho
  integer,intent(in),optional :: option
- type(hightemp_type),intent(inout),optional :: hightemp
+ type(hightemp_type),pointer,optional :: hightemp
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
@@ -729,8 +729,13 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  select case (ioption)
  case(0, 1)
-   call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-               phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,hightemp=hightemp)
+   if(present(hightemp)) then
+     call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
+&     phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,hightemp=hightemp)
+   else
+     call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
+&     phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+   end if
    if(ioption==1)then
 !$OMP PARALLEL DO
      do ifft=1,dtset%nfft

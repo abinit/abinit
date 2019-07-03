@@ -172,13 +172,13 @@ contains
 !!
 !! SOURCE
 
- subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,ixc,kinstr,&
+ subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,hightemp,ixc,kinstr,&
 &                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
 &                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
-&                  electronpositron,hightemp) ! optional argument
+&                  electronpositron) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -188,6 +188,7 @@ contains
  type(efield_type),intent(in) :: dtefield
  type(pseudopotential_type),intent(in) :: psps
  type(electronpositron_type),pointer,optional :: electronpositron
+ type(hightemp_type),pointer :: hightemp
  type(MPI_type),intent(in) :: mpi_enreg
  type(fock_type),pointer, intent(inout) :: fock
 !arrays
@@ -204,7 +205,6 @@ contains
  real(dp),intent(out) :: strten(6)
  type(pawrad_type),intent(in) :: pawrad(ntypat*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
- type(hightemp_type),intent(in),optional :: hightemp
 
 !Local variables-------------------------------
 !scalars
@@ -552,7 +552,7 @@ contains
  end do
 
 !Blanchet - Adding the hightemp continous contribution to stress tensor
- if(hightemp%enabled) then
+ if(associated(hightemp)) then
    call hightemp_addtostress(hightemp%energycontrib,strten)
  end if
 

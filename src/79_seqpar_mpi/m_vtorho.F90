@@ -301,7 +301,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(energies_type), intent(inout) :: energies
  type(hdr_type), intent(inout) :: hdr
 !blanchet
- type(hightemp_type), intent(out) :: hightemp
+ type(hightemp_type),pointer :: hightemp
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
@@ -1219,7 +1219,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if ! nproc_kpt>1
 
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
-     if(hightemp%enabled) then
+     if(associated(hightemp)) then
        call hightemp%compute_u0(eigen,eknk,dtset%mband,dtset%nkpt,dtset%nsppol)
      end if
 
@@ -1231,10 +1231,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(990,2,tsec)
 
 !     Blanchet Once we have occupation, compute number of free electrons
-      if(hightemp%enabled) then
+      if(associated(hightemp)) then
         call hightemp%compute_nfreeel(energies%e_fermie,1024,dtset%tsmear)
         call hightemp%compute_energycontrib(energies%e_fermie,1024,dtset%tsmear)
-        ! write(0,*) hightemp%entropycontrib, hightemp%energycontrib, hightemp%nfreeel, hightemp%u0
+        write(0,*) hightemp%entropycontrib, hightemp%energycontrib, hightemp%nfreeel, hightemp%u0
       end if
 
 !    !=========  DMFT call begin ============================================
