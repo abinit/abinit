@@ -122,14 +122,14 @@ contains
   end subroutine set_lattice
 
 
-  subroutine set_spin(self,nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim)
+  subroutine set_spin(self,nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim)
     class(mbcell_t) , intent(inout):: self
     integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
+    real(dp), intent(in) :: ms(nspin), rprimd(3,3), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
     integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
     self%has_spin=.True.
     call self%spin%initialize(nspin)
-    call self%spin%set(nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
+    call self%spin%set(nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
   end subroutine set_spin
 
   subroutine set_lwf(self)
@@ -253,6 +253,8 @@ contains
     integer, allocatable :: sc_zion(:)
 
     sc_cell(:,:) = sc_maker%sc_cell(self%cell)
+
+    ! the trans_xcart and repeat does the allocation
     call sc_maker%trans_xcart(self%cell, self%xcart, sc_xcart)
     call sc_maker%repeat(self%masses, sc_masses)
     call sc_maker%repeat(self%zion, sc_zion)
@@ -295,10 +297,11 @@ contains
   end subroutine spin_initialize
 
 
-  Subroutine spin_set(self, nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
+  Subroutine spin_set(self, nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
     class(mbcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
+    real(dp), intent(in) :: ms(nspin), rprimd(3,3), &
+         &spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
     integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
     integer :: i
     integer :: master, my_rank, comm, nproc, ierr
@@ -306,6 +309,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if (iam_master) then
        self%ms(:) = ms(:)
+       self%rprimd(:,:) = rprimd(:,:)
        self%spin_positions(:,:)=spin_positions(:,:)
        self%gyro_ratio(:)=gyro_ratio(:)
        self%gilbert_damping(:)=gilbert_damping(:)
@@ -323,6 +327,7 @@ contains
        end if
     endif
     call xmpi_bcast(self%spin_positions, master, comm, ierr)
+    call xmpi_bcast(self%rprimd, master, comm, ierr)
     call xmpi_bcast(self%ms, master, comm, ierr)
     call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
     call xmpi_bcast(self%gilbert_damping, master, comm, ierr)
@@ -372,6 +377,7 @@ contains
        call sc_maker%repeat(self%gilbert_damping, supercell%gilbert_damping)
        call sc_maker%repeat([(i ,i=1, self%nspin)], supercell%ispin_prim)
        supercell%rprimd(:,:)=sc_maker%sc_cell(self%rprimd)
+
        call sc_maker%trans_xcart(self%rprimd, self%spin_positions, supercell%spin_positions)
        call sc_maker%rvec_for_each(self%nspin, supercell%rvec)
     end if

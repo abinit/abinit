@@ -55,6 +55,8 @@ module m_spin_primitive_potential
   implicit none
   private
   !!*** 
+
+
   type, public, extends(primitive_potential_t) :: spin_primitive_potential_t
      integer :: natoms  
      integer ::  nspin    ! on every mpi node
@@ -72,17 +74,17 @@ module m_spin_primitive_potential
    contains
      procedure:: initialize
      procedure:: finalize
-     procedure :: set_spin_primcell
-     procedure :: set_bilinear_1term
-     procedure:: set_bilinear
-     procedure:: set_exchange
-     procedure:: set_dmi
-     procedure:: set_sia
-     procedure :: add_input_sia
-     procedure :: load_from_files
-     procedure:: read_xml
-     procedure :: read_netcdf
-     procedure:: fill_supercell
+     procedure :: set_spin_primcell   ! set primitve cell infor (rprimd, xcart, ...)
+     procedure :: set_bilinear_1term  ! set one (i,j,R) val(3,3) 
+     procedure:: set_bilinear         ! set list of bilinear terms (ilist, jlist, Rlist, valllist)
+     procedure:: set_exchange         ! set list of exchange terms 
+     procedure:: set_dmi              ! set list of dmi terms
+     procedure:: set_sia             ! set list of sia terms
+     procedure :: add_input_sia       ! add a SIA term from input file
+     procedure :: load_from_files    ! read potential from files
+     procedure:: read_xml            ! read potential from one xml file
+     procedure :: read_netcdf        ! read potential from one netcdf file
+     procedure:: fill_supercell      ! fill supercell.
   end type spin_primitive_potential_t
 
 contains
@@ -138,7 +140,7 @@ contains
           end if
        end do
     endif
-    call self%primcell%set_spin(nspin, ms, spin_positions, gyroratios, damping_factors)
+    call self%primcell%set_spin(nspin, ms, unitcell,  spin_positions, gyroratios, damping_factors)
   end subroutine set_spin_primcell
 
 
@@ -210,8 +212,6 @@ contains
 !#if defined HAVE_NETCDF
 
     ! open netcdf file
-    print *, fname
-    print *, trim(fname)//char(0)
     ierr=nf90_open(trim(fname)//char(0), NF90_NOWRITE, ncid)
     call nc_handle_err(ierr)
 
@@ -231,11 +231,14 @@ contains
     call nc_handle_err(ierr, "ref_cell")
     ierr = nf90_get_var(ncid, varid, cell)
     call nc_handle_err(ierr, "ref_cell")
+    cell(:,:)=cell(:,:)/ Bohr_Ang
 
     ierr =nf90_inq_varid(ncid, "ref_xcart", varid)
     call nc_handle_err(ierr, "ref_xcart")
     ierr = nf90_get_var(ncid, varid, xcart)
     call nc_handle_err(ierr, "ref_xcart")
+
+    xcart(:,:)=xcart(:,:)/ Bohr_Ang
 
     ierr =nf90_inq_varid(ncid, "spinat", varid)
     call nc_handle_err(ierr, "spinat")
@@ -257,6 +260,7 @@ contains
     ierr = nf90_get_var(ncid, varid, gilbert_damping)
     call nc_handle_err(ierr, "gilbert_damping")
 
+
     call self%set_spin_primcell( natoms=natom, unitcell=cell, positions=xcart, &
          & nspin=nspin, index_spin=index_spin, spinat=spinat, &
          & gyroratios=gyroratio, damping_factors=gilbert_damping )
@@ -270,7 +274,7 @@ contains
 
     !== read exchange terms
     ierr=nf90_inq_dimid(ncid, "spin_exchange_nterm", spin_exchange_nterm)
-    if (ierr==0) then
+    if (ierr==0) then ! if has exchange
        ierr=nctk_get_dim(ncid, "spin_exchange_nterm", spin_exchange_nterm)
        ABI_ALLOCATE(spin_exchange_ilist, (spin_exchange_nterm))
        ABI_ALLOCATE(spin_exchange_jlist, (spin_exchange_nterm))
@@ -312,7 +316,7 @@ contains
 
     ! read bilinear terms
     ierr=nf90_inq_dimid(ncid, "spin_bilinear_nterm", varid)
-    if (ierr==0) then
+    if (ierr==0) then  ! if has bilinear
        ABI_ALLOCATE(spin_bilinear_ilist, (spin_bilinear_nterm))
        ABI_ALLOCATE(spin_bilinear_jlist, (spin_bilinear_nterm))
        ABI_ALLOCATE(spin_bilinear_Rlist, (3,spin_bilinear_nterm))

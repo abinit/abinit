@@ -186,8 +186,9 @@ contains
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: xcart(:,:), primcell(3,3)
     real(dp), allocatable, intent(inout) :: scxcart(:,:)
-    integer :: npos, icell, ipos, counter=0
+    integer :: npos, icell, ipos, counter
 
+    counter =0
     npos=size(xcart, dim=2)
     if (.not. allocated(scxcart)) then
        ABI_ALLOCATE(scxcart, (3,npos*self%ncells))

@@ -129,6 +129,7 @@ module m_multibinit_manager
      procedure :: run_MvT
      procedure :: run_lattice_dynamics
      procedure :: run_spin_latt_dynamics
+     procedure :: run_coupled_spin_latt_dynamics
      procedure :: run
      procedure :: run_all
   end type mb_manager_t
@@ -313,7 +314,18 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     call self%unitcell%initialize()
-    ! latt : TODO
+
+    ! latt : TODO (replace this with full lattice)
+    ! only toy harmonic part 
+    if(self%params%dynamics>100) then
+       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
+       select type(lat_ham_pot)
+       type is (lattice_harmonic_primitive_potential_t)
+          call lat_ham_pot%initialize(self%unitcell)
+          call lat_ham_pot%load_from_files(self%params, self%filenames)
+          call self%prim_pots%append(lat_ham_pot)
+       end select
+    end if
 
     ! spin
     call xmpi_bcast(self%params%spin_dynamics, master, comm, ierr)
@@ -333,15 +345,7 @@ contains
        end select
     end if
 
-    if(self%params%dynamics>100) then
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
-       select type(lat_ham_pot)
-       type is (lattice_harmonic_primitive_potential_t)
-          call lat_ham_pot%initialize(self%unitcell)
-          call lat_ham_pot%load_from_files(self%params, self%filenames)
-          call self%prim_pots%append(lat_ham_pot)
-       end select
-    end if
+
     !LWF : TODO
   end subroutine read_potentials
 
@@ -467,7 +471,7 @@ contains
 
 
   !-------------------------------------------------------------------!
-  ! Run lattice only dynamics
+  ! Run  spin and lattice dynamics sequentially.
   !-------------------------------------------------------------------!
   subroutine run_spin_latt_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
@@ -479,6 +483,46 @@ contains
     call self%spin_mover%run_time(self%pots)
     call self%lattice_mover%run_time(self%pots)
   end subroutine run_spin_latt_dynamics
+
+  !-------------------------------------------------------------------!
+  ! Run coupled lattice spin dynamics
+  ! TODO: This is only a prototype. It does not have the proper logic
+  ! to decide the time step, etc.
+  ! TODO: move this to somewhere else, perhaps a spin-lattice mover file.
+  !-------------------------------------------------------------------!
+  subroutine run_coupled_spin_latt_dynamics(self)
+    class(mb_manager_t), intent(inout) :: self
+    integer :: istep
+    character(len=90) :: msg
+
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    
+    call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%fill_supercell()
+    call self%set_movers()
+    ! use
+    msg=repeat("=", 90)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    do istep = 1 , self%params%ntime
+       call self%spin_mover%run_one_step(self%pots)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+       call self%lattice_mover%run_one_step(self%pots)
+       write(msg, "(A13, 4X,  I13)")  "Latt_Iter", istep
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+
+       call self%spin_mover%run_one_step(self%pots)
+       write(msg, "(A13, 4X,  I13)")  "Spin_Iter", istep
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+    end do
+    msg=repeat("=", 90)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+  end subroutine run_coupled_spin_latt_dynamics
 
 
   !-------------------------------------------------------------------!
@@ -499,7 +543,8 @@ contains
        call self%run_lattice_dynamics()
 
     else if (self%params%dynamics>0 .and. self%params%spin_dynamics>0) then
-       call self%run_spin_latt_dynamics()
+       !call self%run_spin_latt_dynamics()
+       call self%run_coupled_spin_latt_dynamics()
     end if
 
   end subroutine run
