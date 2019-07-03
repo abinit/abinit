@@ -1791,11 +1791,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
                      if (ediff <= TOL_EDIFF .and. sigma%frohl_model == 3) then
-                       write(*,*) 'GKQ', sqrt(sum(two_pi*matmul(cryst%gprimd, qpt)**2)), gkq2/weight_q, sigma%ephwg%frohl_ibz(iq_ibz_frohl,nu)
                        gkq2_dfrohl = sigma%ephwg%frohl_ibz(iq_ibz_fine,nu) - sigma%ephwg%frohl_ibz(iq_ibz_frohl,nu)
                        gkq2_pf = gkq2_pf + weight_q*gkq2_dfrohl
-                     else
-                       write(*,*) 'GKQ', sqrt(sum(two_pi*matmul(cryst%gprimd, qpt)**2)), gkq2/weight_q
                      end if
 
                      if (sigma%imag_only) then
