@@ -686,7 +686,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wrtout(std_out, sjoin("Saving W(r, R) to file:", path))
    call dvdb%open_read(ngfftf, xmpi_comm_self)
    ! This to symmetrize the DFPT potentials.
-   dvdb%symv1 = dtset%symv1scf > 0
+   dvdb%symv1 = dtset%symv1scf
    call dvdb%print()
    !call dvdb%list_perts([-1, -1, -1])
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, path, comm_rpt)

@@ -5591,13 +5591,13 @@ end subroutine dvdb_test_v1complete
 !!
 !! SOURCE
 
-subroutine dvdb_test_addlr(dvdb_path, method, symv1, dvdb_add_lr, qdamp, ddb_path, dump_path, prtvol, comm)
+subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, ddb_path, dump_path, prtvol, comm)
 
  use m_ddb
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: dvdb_path, ddb_path, dump_path
- integer,intent(in) :: comm, prtvol, dvdb_add_lr, qdamp, method, symv1
+ integer,intent(in) :: comm, prtvol, dvdb_add_lr, symv1
 
 !Local variables-------------------------------
 !scalars
