@@ -73,6 +73,7 @@ module m_stream_string
   end type stream_string
 
   contains
+!!***
 
 !!****f* m_stream_string/stream_free
 !! NAME
@@ -107,7 +108,7 @@ module m_stream_string
     stream%head => NULL()
     stream%length = 0
   end subroutine stream_free
-!!*** m_stream_string/stream_free
+!!***
 
 !!****f* m_stream_string/stream_copy
 !! NAME
@@ -140,7 +141,7 @@ module m_stream_string
       cursor => cursor%next
     end do
   end subroutine stream_copy
-!!*** m_stream_string/stream_copy
+!!***
 
 !!****f* m_stream_string/stream_write
 !! NAME
@@ -197,7 +198,7 @@ module m_stream_string
     end if
     stream%length = stream%length + len(string)
   end subroutine stream_write
-!!*** m_stream_string/stream_write
+!!***
 
 !!****f* m_stream_string/stream_get_chunk
 !! NAME
@@ -240,7 +241,7 @@ module m_stream_string
       stream%length = 0
     end if
   end subroutine stream_get_chunk
-!!*** m_stream_string/stream_get_chunk
+!!***
 
 !!****f* m_stream_string/stream_to_string
 !! NAME
@@ -279,7 +280,7 @@ module m_stream_string
       offset = offset + chunk_size
     end do
   end subroutine stream_to_string
-!!*** m_stream_string/stream_to_string
+!!***
 
 !!****f* m_stream_string/stream_to_file
 !! NAME
@@ -316,7 +317,7 @@ module m_stream_string
       offset = offset + chunk_size
     end do
   end subroutine stream_to_file
-!!*** m_stream_string/stream_to_file
+!!***
 
 !!****f* m_stream_string/stream_transfer
 !! NAME
@@ -363,7 +364,7 @@ module m_stream_string
       end do
     end if
   end subroutine stream_transfer
-!!*** m_stream_string/stream_transfer
+!!***
 
 !!****f* m_stream_string/stream_debug
 !! NAME
@@ -398,7 +399,7 @@ module m_stream_string
       c = c + 1
     end do
   end subroutine stream_debug
-!!*** m_stream_string/stream_debug
+!!***
 
 end module m_stream_string
 !!***
