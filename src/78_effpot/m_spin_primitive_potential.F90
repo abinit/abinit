@@ -203,6 +203,19 @@ contains
     integer , allocatable:: spin_exchange_Rlist(:,:)
     real(dp), allocatable:: spin_exchange_vallist(:,:)
 
+    integer :: spin_dmi_nterm
+    integer , allocatable:: spin_dmi_ilist(:)
+    integer , allocatable:: spin_dmi_jlist(:)
+    integer , allocatable:: spin_dmi_Rlist(:,:)
+    real(dp), allocatable:: spin_dmi_vallist(:,:)
+
+    
+    integer :: spin_SIA_nterm
+    integer , allocatable:: spin_SIA_ilist(:)
+    real(dp), allocatable:: spin_SIA_k1list(:)
+    real(dp), allocatable:: spin_SIA_k1dirlist(:,:)
+
+
     integer :: spin_bilinear_nterm
     integer , allocatable:: spin_bilinear_ilist(:)
     integer , allocatable:: spin_bilinear_jlist(:)
@@ -314,6 +327,86 @@ contains
        ABI_SFREE(spin_exchange_vallist)
     endif
 
+
+
+    !== read dmi terms
+    ierr=nf90_inq_dimid(ncid, "spin_dmi_nterm", spin_dmi_nterm)
+    if (ierr==0) then ! if has dmi
+       ierr=nctk_get_dim(ncid, "spin_dmi_nterm", spin_dmi_nterm)
+       ABI_ALLOCATE(spin_dmi_ilist, (spin_dmi_nterm))
+       ABI_ALLOCATE(spin_dmi_jlist, (spin_dmi_nterm))
+       ABI_ALLOCATE(spin_dmi_Rlist, (3,spin_dmi_nterm))
+       ABI_ALLOCATE(spin_dmi_vallist, (3,spin_dmi_nterm))
+
+       ierr =nf90_inq_varid(ncid, "spin_dmi_ilist", varid)
+       call nc_handle_err(ierr, "spin_dmi_ilist")
+       ierr = nf90_get_var(ncid, varid, spin_dmi_ilist)
+       call nc_handle_err(ierr, "spin_dmi_ilist")
+
+       ierr =nf90_inq_varid(ncid, "spin_dmi_jlist", varid)
+       call nc_handle_err(ierr, "spin_dmi_jlist")
+       ierr = nf90_get_var(ncid, varid, spin_dmi_jlist)
+       call nc_handle_err(ierr, "spin_dmi_jlist")
+
+       ierr =nf90_inq_varid(ncid, "spin_dmi_Rlist", varid)
+       call nc_handle_err(ierr, "spin_dmi_Rlist")
+       ierr = nf90_get_var(ncid, varid, spin_dmi_Rlist)
+       call nc_handle_err(ierr, "spin_dmi_Rlist")
+
+
+       ierr =nf90_inq_varid(ncid, "spin_dmi_vallist", varid)
+       call nc_handle_err(ierr, "spin_dmi_vallist")
+       ierr = nf90_get_var(ncid, varid, spin_dmi_vallist)
+       call nc_handle_err(ierr, "spin_dmi_vallist")
+
+       spin_dmi_vallist(:,:) = spin_dmi_vallist(:,:) * eV_Ha
+
+       call self%set_dmi(n=spin_dmi_nterm, ilist=spin_dmi_ilist, &
+            & jlist=spin_dmi_jlist, Rlist=spin_dmi_Rlist, &
+            & vallist=spin_dmi_vallist)
+
+       ABI_SFREE(spin_dmi_ilist)
+       ABI_SFREE(spin_dmi_jlist)
+       ABI_SFREE(spin_dmi_Rlist)
+       ABI_SFREE(spin_dmi_vallist)
+    endif
+
+    !== read SIA terms
+    ierr=nf90_inq_dimid(ncid, "spin_SIA_nterm", spin_SIA_nterm)
+    if (ierr==0) then ! if has SIA
+       ierr=nctk_get_dim(ncid, "spin_SIA_nterm", spin_SIA_nterm)
+       ABI_ALLOCATE(spin_SIA_ilist, (spin_SIA_nterm))
+       ABI_ALLOCATE(spin_SIA_k1list, (spin_SIA_nterm))
+       ABI_ALLOCATE(spin_SIA_k1dirlist, (3,spin_SIA_nterm))
+
+       ierr =nf90_inq_varid(ncid, "spin_SIA_ilist", varid)
+       call nc_handle_err(ierr, "spin_SIA_ilist")
+       ierr = nf90_get_var(ncid, varid, spin_SIA_ilist)
+       call nc_handle_err(ierr, "spin_SIA_ilist")
+
+       ierr =nf90_inq_varid(ncid, "spin_SIA_k1list", varid)
+       call nc_handle_err(ierr, "spin_SIA_k1list")
+       ierr = nf90_get_var(ncid, varid, spin_SIA_k1list)
+       call nc_handle_err(ierr, "spin_SIA_k1list")
+
+       
+       ierr =nf90_inq_varid(ncid, "spin_SIA_k1dirlist", varid)
+       call nc_handle_err(ierr, "spin_SIA_k1dirlist")
+       ierr = nf90_get_var(ncid, varid, spin_SIA_k1dirlist)
+       call nc_handle_err(ierr, "spin_SIA_k1dirlist")
+
+       spin_SIA_k1list(:) = spin_SIA_k1list(:) * eV_Ha
+
+       call self%set_SIA(n=spin_SIA_nterm, ilist=spin_SIA_ilist, &
+            & k1list=spin_SIA_k1list, k1dirlist=spin_SIA_k1dirlist)
+
+       ABI_SFREE(spin_SIA_ilist)
+       ABI_SFREE(spin_SIA_k1list)
+       ABI_SFREE(spin_SIA_k1dirlist)
+    endif
+
+
+
     ! read bilinear terms
     ierr=nf90_inq_dimid(ncid, "spin_bilinear_nterm", varid)
     if (ierr==0) then  ! if has bilinear
@@ -352,8 +445,10 @@ contains
        ABI_SFREE(spin_bilinear_jlist)
        ABI_SFREE(spin_bilinear_Rlist)
        ABI_SFREE(spin_bilinear_vallist)
-
     end if
+
+
+
 
 
   end subroutine read_netcdf
