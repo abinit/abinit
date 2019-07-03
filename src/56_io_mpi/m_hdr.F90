@@ -325,6 +325,8 @@ integer function fform_from_ext(abiext) result(fform)
    end if
  end if
 
+ MSG_ERROR(sjoin("Cannot find fform associated to extension:", abiext))
+
 end function fform_from_ext
 !!***
 
@@ -4605,7 +4607,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 ! *************************************************************************
 
  if (.not. iexp == ifound) then
-   write(msg,'(3a,i0,a,i0)')' Mismatch in '//trim(vname),' Expected = ', iexp, ' Found = ', ifound
+   write(msg,'(2a,i0,a,i0)')' Mismatch in '//trim(vname),' Expected = ', iexp, ' Found = ', ifound
    call wrtout(std_out, msg)
    ! Increase ierr to signal we should stop in the caller.
    ierr = ierr + 1

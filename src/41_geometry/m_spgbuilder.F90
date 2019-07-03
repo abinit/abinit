@@ -91,8 +91,6 @@ contains
 
 subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: msym,shubnikov,spgaxor,spgorig,spgroup,spgroupma
@@ -598,8 +596,6 @@ end subroutine gensymspgr
 !! SOURCE
 
 subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1306,8 +1302,6 @@ end subroutine gensymshub
 !! SOURCE
 
 subroutine gensymshub4(genafm,msym,nsym,symafm,symrel,tnons)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

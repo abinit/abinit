@@ -15,6 +15,7 @@ from numpy.linalg import norm
 from .meta_conf_parser import ConfParser
 from .structures import Tensor
 from .errors import MissingCallbackError
+from .common import FailDetail
 
 conf_parser = ConfParser()
 
@@ -64,8 +65,12 @@ def tol(tolv, ref, tested):
     '''
     if abs(ref) + abs(tested) == 0.0:
         return True
-    return (abs(ref - tested) / (abs(ref) + abs(tested)) < tolv
-            and abs(ref - tested) < tolv)
+    elif abs(ref - tested) / (abs(ref) + abs(tested)) >= tolv:
+        return FailDetail('Relative error above tolerance.')
+    elif abs(ref - tested) >= tolv:
+        return FailDetail('Absolute error above tolerance.')
+    else:
+        return True
 
 
 @conf_parser.constraint(exclude={'tol', 'tol_abs', 'tol_rel', 'ignore'})

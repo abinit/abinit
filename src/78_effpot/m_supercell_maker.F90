@@ -47,14 +47,14 @@ module m_supercell_maker
 !!***
 
   type ,public :: supercell_maker_t
-     integer :: scmat(3,3)
-     real(dp) :: inv_scmat(3,3)
-     integer :: ncells
-     integer, allocatable :: rvecs(:,:)
+     integer :: scmat(3,3)  ! supercell matrix
+     real(dp) :: inv_scmat(3,3) ! inverse of supercell matrix
+     integer :: ncells         ! number of cells in supercell
+     integer, allocatable :: rvecs(:,:) ! R vectors for cells in supercell. dim:(3, ncells)
    contains
      procedure :: initialize
      procedure :: finalize
-     procedure :: to_red_sc
+     procedure :: to_red_sc  
      procedure :: build_rvec
      procedure :: sc_cell
      procedure :: R_to_sc
@@ -63,6 +63,7 @@ module m_supercell_maker
      ! with values unchanged (therefore just repeat ncells times)
      generic :: repeat => repeat_int1d, repeat_real1d, repeat_real2d, repeat_realmat
      procedure :: repeat_int1d
+     procedure :: repeat_int1d_noalloc
      procedure :: repeat_real1d
      procedure :: repeat_real2d
      procedure :: repeat_realmat
@@ -72,8 +73,10 @@ module m_supercell_maker
      procedure :: trans_xred
      procedure :: trans_xcart
      procedure :: trans_i
+     procedure :: trans_i_noalloc
      procedure :: trans_ilist
      procedure :: trans_j_and_Rj
+     procedure :: trans_j_and_Rj_noalloc
      procedure :: trans_jlist_and_Rj
      procedure :: rvec_for_each
   end type supercell_maker_t
@@ -89,21 +92,18 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
-
     self%scmat(:,:)=sc_matrix
     call xmpi_bcast(self%scmat, master, comm, ierr)
     self%ncells=abs(mat33det(self%scmat))
-    call xmpi_bcast(self%ncells, master, comm, ierr)
+    ! call xmpi_bcast(self%ncells, master, comm, ierr)
     ABI_ALLOCATE(self%rvecs, (3, self%ncells))
     ! Why transpose?
-    !if(iam_master) then
-       tmp(:,:)=transpose(self%scmat)
-       call matr3inv(tmp, self%inv_scmat)
-       call self%build_rvec()
-    !end if
-    call xmpi_bcast(self%inv_scmat, master, comm, ierr)
-    call xmpi_bcast(self%ncells, master, comm, ierr)
-    call xmpi_bcast(self%rvecs, master, comm, ierr)
+    tmp(:,:)=transpose(self%scmat)
+    call matr3inv(tmp, self%inv_scmat)
+    call self%build_rvec()
+    !call xmpi_bcast(self%inv_scmat, master, comm, ierr)
+    !call xmpi_bcast(self%ncells, master, comm, ierr)
+    !call xmpi_bcast(self%rvecs, master, comm, ierr)
   end subroutine initialize
 
   subroutine finalize(self)
@@ -114,6 +114,7 @@ contains
        ABI_DEALLOCATE(self%rvecs)
     end if
   end subroutine finalize
+
 
 
   function to_red_sc(self, pos) result(ret)
@@ -184,8 +185,14 @@ contains
   subroutine trans_xcart(self, primcell, xcart, scxcart)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: xcart(:,:), primcell(3,3)
-    real(dp), intent(inout) :: scxcart(3,size(xcart, dim=2)*self%ncells)
-    integer :: npos, icell, ipos, counter=0
+    real(dp), allocatable, intent(inout) :: scxcart(:,:)
+    integer :: npos, icell, ipos, counter
+
+    counter =0
+    npos=size(xcart, dim=2)
+    if (.not. allocated(scxcart)) then
+       ABI_ALLOCATE(scxcart, (3,npos*self%ncells))
+    end if
     do icell = 1, self%ncells
        do ipos=1 , npos
           counter=counter+1
@@ -198,9 +205,6 @@ contains
   ! R: R index using primitive cell parameter
   ! R_sc: R index using supercell parameter
   ! ind_sc: index of cell INSIDE supercell in primitive cell.
-  ! TODO: The speed can be improved by using a bisect search instead.
-  ! TODO: The speed can be improved by caching at least last n result, since in many cases,
-  !       the next R is sill the same. 
   subroutine R_to_sc(self, R, R_sc, ind_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: R(3)
@@ -220,13 +224,10 @@ contains
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: i, nbasis
     integer, allocatable, intent(inout) :: i_sc(:)
-    integer :: icell
     if(.not. allocated(i_sc)) then
        ABI_ALLOCATE(i_sc, (self%ncells))
     end if
-    do icell =1, self%ncells
-       i_sc(icell)=nbasis*(icell-1)+i
-    end do
+    call self%trans_i_noalloc(nbasis, i, i_sc)
   end subroutine trans_i
 
   subroutine trans_i_noalloc(self, nbasis, i, i_sc)
@@ -258,17 +259,13 @@ contains
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: j, Rj(3), nbasis
     integer, allocatable , intent(inout) :: j_sc(:), Rj_sc(:, :)
-    integer :: i,jj
     if(.not. allocated(j_sc)) then
        ABI_ALLOCATE(j_sc, (self%ncells))
     endif
     if(.not. allocated(Rj_sc)) then
        ABI_ALLOCATE(Rj_sc, (3, self%ncells))
     endif
-    do i =1, self%ncells
-       call self%R_to_sc(Rj + self%rvecs(:,i), Rj_sc(:,i), jj)
-       j_sc(i)=nbasis*(jj-1)+j
-    end do
+    call self%trans_j_and_Rj_noalloc(nbasis, j, Rj, j_sc, Rj_sc)
   end subroutine trans_j_and_Rj
 
   subroutine trans_j_and_Rj_noalloc(self, nbasis, j, Rj, j_sc, Rj_sc)
@@ -317,6 +314,19 @@ contains
        ret((i-1)*n+1: i*n) = a(:)
     end do
   end subroutine repeat_int1d
+
+
+  subroutine repeat_int1d_noalloc(self, a, ret)
+    class(supercell_maker_t), intent(inout) :: self
+    integer, intent(in) :: a(:)
+    integer :: ret(:)
+    integer :: n, i
+    n=size(a)
+    do i =1, self%ncells
+       ret((i-1)*n+1: i*n) = a(:)
+    end do
+  end subroutine repeat_int1d_noalloc
+
 
   subroutine repeat_real1d(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
@@ -459,6 +469,8 @@ contains
 
 
 !===================================================================================
+! The functions below are deprecated!!!
+! They are used with the m_supercell module. 
   ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
   subroutine find_R_PBC(scell, R, R_sc, R_prim)
     type(supercell_type) , intent(in):: scell

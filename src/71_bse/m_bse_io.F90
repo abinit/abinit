@@ -45,7 +45,7 @@ MODULE m_bse_io
  use m_fstrings,       only : toupper
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : arth
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_bs_defs,        only : excparam
  use m_bz_mesh,        only : kmesh_t
 
@@ -1381,10 +1381,10 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
       !
       do iw=1,nw ! Accumulate
         xx = wmesh(iw) - ene_rt
-        amplitude(iw) = amplitude(iw) + ampl_eh * dirac_delta(xx,stdev)
+        amplitude(iw) = amplitude(iw) + ampl_eh * gaussian(xx, stdev)
         if (Bsp%use_coupling>0) then
           xx = wmesh(iw) + ene_rt
-          amplitude(iw) = amplitude(iw) + ampl_he * dirac_delta(xx,stdev)
+          amplitude(iw) = amplitude(iw) + ampl_he * gaussian(xx, stdev)
         end if
       end do
       !

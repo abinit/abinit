@@ -63,6 +63,11 @@ module m_spmat_NDCOO
   public:: test_ndcoo
 contains
 
+  !-------------------------------------------------------------------!
+  ! ndcoo_mat_t initializer:
+  ! Input:
+  !  mshape: the shape of the N-dimension matrix. array(ndim)
+  !-------------------------------------------------------------------!
   subroutine initialize(self, mshape)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
@@ -74,6 +79,9 @@ contains
     self%is_unique=.False.
   end subroutine initialize
 
+  !-------------------------------------------------------------------!
+  ! Finalizer of ndcoo_mat_t
+  !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(ndcoo_mat_t), intent(inout) :: self
     self%ndim=0
@@ -87,6 +95,14 @@ contains
     call self%val%finalize()
   end subroutine finalize
 
+  !-------------------------------------------------------------------!
+  ! Add one entry to the ndcoo_mat_t
+  ! Inputs:
+  !   ind: indices of the matrix.
+  !   val: value of matrix.
+  ! Example:
+  !  call m%add_entry([1,2,3], 0.5)
+  !-------------------------------------------------------------------!
   subroutine add_entry(self, ind, val)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: ind(self%ndim)
@@ -175,6 +191,9 @@ contains
     self%is_unique=.True.
   end subroutine sum_duplicates
 
+  !-------------------------------------------------------------------!
+  ! Get the i'th value of the matrix.
+  !-------------------------------------------------------------------!
   function get_val_inz(self, i) result(v)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: i
@@ -183,6 +202,13 @@ contains
   end function get_val_inz
 
 
+  !-------------------------------------------------------------------!
+  ! get all the indices for the ith entry
+  ! Input:
+  !  i: ith entry
+  ! Return:
+  !  a integer array of indices.
+  !-------------------------------------------------------------------!
   function get_ind_inz(self, i) result(ind)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: i
@@ -190,6 +216,15 @@ contains
     ind(:)=self%ind%data(:,i)
   end function get_ind_inz
 
+  !-------------------------------------------------------------------!
+  ! Group the sparse matrix by the first dimension
+  !> Output:
+  !> ngroup: number of groups
+  !> i1_list: list of 1st indices (array(ngroup))
+  !> istartend: start and end of each group (array(ngroup+1))
+  !>           The starts will be istartend(1:ngroup)
+  !>           The ends will be istartend(2: ngroup+1)-1
+  !-------------------------------------------------------------------!
   subroutine group_by_1dim(self, ngroup, i1_list, istartend)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(inout) :: ngroup
@@ -234,6 +269,13 @@ contains
     call jstartend%finalize()
   end subroutine group_by_1dim
 
+  !-------------------------------------------------------------------!
+  ! Get the indices of the dim'th dimension
+  ! Input:
+  !   dim: dimension
+  ! Returns:
+  !   a integer array(nnz)
+  !-------------------------------------------------------------------!
   function get_ind(self, dim) result(ilist)
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: dim

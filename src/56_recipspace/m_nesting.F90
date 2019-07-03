@@ -278,7 +278,9 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
  end do
 
  ABI_MALLOC(tmprank, (nqptfull))
- tmprank = kptrank_t%rank
+ do ikpt=1,nqptfull
+   call get_rank_1kpt(qptfull(:,ikpt),tmprank(ikpt),kptrank_t)
+ end do
  call sort_int(nqptfull, tmprank, ktable)
  ABI_FREE(tmprank)
  call destroy_kptrank (kptrank_t)

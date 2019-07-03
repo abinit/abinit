@@ -34,13 +34,19 @@ module m_multibinit_cell
   !use m_multibinit_supercell, only: mb_supercell_t
   use m_supercell_maker , only: supercell_maker_t
   use m_multibinit_dataset, only : multibinit_dtset_type
+  use m_crystal, only : crystal_t
   implicit none
 
 !!***
   private
   ! TODO: use crystal_t
-  type, public :: mbcell_lattice_t
+  !type, public :: mbcell_lattice_t
   !type, public, extends(crystal_t) :: mbcell_lattice_t
+  type, public ::mbcell_lattice_t
+     integer:: natom
+     integer, allocatable  :: zion(:)
+     real(dp), allocatable :: masses(:), xcart(:,:)
+     real(dp) :: cell(3,3)
    contains
      procedure :: initialize => latt_initialize
      procedure :: finalize => latt_finalize
@@ -106,22 +112,24 @@ contains
     ABI_UNUSED_A(self)
   end subroutine initialize
 
-  !TODO: Implement
-  subroutine set_lattice(self)
+  subroutine set_lattice(self, natom, cell, xcart, masses, zion)
     class(mbcell_t), intent(inout) :: self
+    integer, intent(in) :: natom, zion(:)
+    real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
     self%has_lattice=.True.
-    call self%lattice%initialize()
+    call self%lattice%initialize(natom=natom, cell=cell, &
+         &xcart=xcart, masses=masses, zion=zion)
   end subroutine set_lattice
 
 
-  subroutine set_spin(self,nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim)
+  subroutine set_spin(self,nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim)
     class(mbcell_t) , intent(inout):: self
     integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
+    real(dp), intent(in) :: ms(nspin), rprimd(3,3), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
     integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
     self%has_spin=.True.
     call self%spin%initialize(nspin)
-    call self%spin%set(nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
+    call self%spin%set(nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
   end subroutine set_spin
 
   subroutine set_lwf(self)
@@ -196,26 +204,72 @@ contains
   end subroutine supercell_finalize
 
 !================================Lattice====================================
-  subroutine latt_initialize(self)
-    class(mbcell_lattice_t) :: self
-    ABI_UNUSED_A(self)
+
+  subroutine latt_initialize(self, natom, cell, xcart, masses, zion)
+    class(mbcell_lattice_t), intent(inout) :: self
+    integer, intent(in) :: natom, zion(:)
+    real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
+    self%natom=natom
+    ABI_ALLOCATE(self%zion, (natom))
+    ABI_ALLOCATE(self%xcart, (3, natom))
+    ABI_ALLOCATE(self%masses, (natom))
+
+    self%zion(:) = zion(:)
+    self%cell(:,:) =cell(:,:)
+    self%xcart(:,:) = xcart(:,:)
+    self%masses(:) = masses(:)
   end subroutine latt_initialize
 
   subroutine latt_finalize(self)
     class(mbcell_lattice_t) :: self
-    ABI_UNUSED_A(self)
+    self%natom=0
+    if (allocated(self%xcart)) then
+       ABI_DEALLOCATE(self%xcart)
+    endif
+    if (allocated(self%masses)) then
+       ABI_DEALLOCATE(self%masses)
+    endif
+    if (allocated(self%zion)) then
+       ABI_DEALLOCATE(self%zion)
+    endif
   end subroutine latt_finalize
 
 
+  !-------------------------------------------------------------------!
+  ! latt_fill_supercell: make a lattice supercell from primitive cell
+  ! Inputs:
+  !> sc_maker: supercell maker
+  ! Output:
+  !> supercell: supercell
+  !-------------------------------------------------------------------!
   subroutine latt_fill_supercell(self, sc_maker, supercell)
     class(mbcell_lattice_t), intent(inout):: self
     type(supercell_maker_t), intent(inout):: sc_maker
     type(mbcell_lattice_t), intent(inout):: supercell
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(sc_maker)
-    ABI_UNUSED_A(supercell)
+
+    real(dp) :: sc_cell(3,3)
+    real(dp), allocatable :: sc_xcart(:,:)
+    real(dp), allocatable :: sc_masses(:)
+    integer, allocatable :: sc_zion(:)
+
+    sc_cell(:,:) = sc_maker%sc_cell(self%cell)
+
+    ! the trans_xcart and repeat does the allocation
+    call sc_maker%trans_xcart(self%cell, self%xcart, sc_xcart)
+    call sc_maker%repeat(self%masses, sc_masses)
+    call sc_maker%repeat(self%zion, sc_zion)
+    call supercell%initialize(natom=self%natom*sc_maker%ncells, cell=sc_cell, xcart= sc_xcart, masses=sc_masses, zion=sc_zion)
+
+    ABI_SFREE(sc_xcart)
+    ABI_SFREE(sc_masses)
+    ABI_SFREE(sc_zion)
   end subroutine latt_fill_supercell
 
+
+  !-------------------------------------------------------------------!
+  !latt_from_unitcell: build lattice supercell from primitive cell
+  ! same as above, only the order of argument differs.
+  !-------------------------------------------------------------------!
   subroutine latt_from_unitcell(self, sc_maker, unitcell)
     class(mbcell_lattice_t), intent(inout):: self
     type(supercell_maker_t), intent(inout):: sc_maker
@@ -243,10 +297,11 @@ contains
   end subroutine spin_initialize
 
 
-  Subroutine spin_set(self, nspin, ms, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
+  Subroutine spin_set(self, nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
     class(mbcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
+    real(dp), intent(in) :: ms(nspin), rprimd(3,3), &
+         &spin_positions(3, nspin), gyro_ratio(nspin), gilbert_damping(nspin)
     integer, optional, intent(in) :: rvec(3, nspin), ispin_prim(nspin)
     integer :: i
     integer :: master, my_rank, comm, nproc, ierr
@@ -254,6 +309,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if (iam_master) then
        self%ms(:) = ms(:)
+       self%rprimd(:,:) = rprimd(:,:)
        self%spin_positions(:,:)=spin_positions(:,:)
        self%gyro_ratio(:)=gyro_ratio(:)
        self%gilbert_damping(:)=gilbert_damping(:)
@@ -271,6 +327,7 @@ contains
        end if
     endif
     call xmpi_bcast(self%spin_positions, master, comm, ierr)
+    call xmpi_bcast(self%rprimd, master, comm, ierr)
     call xmpi_bcast(self%ms, master, comm, ierr)
     call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
     call xmpi_bcast(self%gilbert_damping, master, comm, ierr)
@@ -300,9 +357,6 @@ contains
     if (allocated(self%rvec)) then
        ABI_DEALLOCATE(self%rvec)
     end if
-
-
-
   end subroutine spin_finalize
 
   subroutine spin_fill_supercell(self, sc_maker, supercell)
@@ -323,6 +377,7 @@ contains
        call sc_maker%repeat(self%gilbert_damping, supercell%gilbert_damping)
        call sc_maker%repeat([(i ,i=1, self%nspin)], supercell%ispin_prim)
        supercell%rprimd(:,:)=sc_maker%sc_cell(self%rprimd)
+
        call sc_maker%trans_xcart(self%rprimd, self%spin_positions, supercell%spin_positions)
        call sc_maker%rvec_for_each(self%nspin, supercell%rvec)
     end if

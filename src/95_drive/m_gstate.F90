@@ -44,7 +44,7 @@ module m_gstate
  use m_bandfft_kpt
  use m_invovl
  use m_gemm_nonlop
- use m_tetrahedron
+ use m_htetrahedron
  use m_wfk
  use m_nctk
  use m_hdr
@@ -284,7 +284,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
  type(ebands_t) :: bstruct,ebands
- type(t_tetrahedron) :: tetra
+ !type(t_htetrahedron) :: tetra
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
@@ -1437,16 +1437,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
 
    ! Write tetrahedron tables.
-   cryst = hdr_get_crystal(hdr, 2)
-   tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-   dtset%shiftk, dtset%nkpt, dtset%kptns, xmpi_comm_self, message, ierr)
-   if (ierr == 0) then
-     call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-   else
-     MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, message))
-   end if
+   !cryst = hdr_get_crystal(hdr, 2)
+   !tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
+   !dtset%shiftk, dtset%nkpt, dtset%kptns, xmpi_comm_self, message, ierr)
+   !if (ierr == 0) then
+   !  call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
+   !else
+   !  MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, message))
+   !end if
 
-   call destroy_tetra(tetra)
+   !call destroy_tetra(tetra)
    call cryst%free()
  end if
 

@@ -73,7 +73,7 @@ module m_potential_list
   !!
   !! SOURCE
   type, public, extends(abstract_potential_t) :: potential_list_t
-     integer :: size, capacity
+     integer :: size=0, capacity=0
      type(effpot_pointer_t), allocatable :: list(:)
    contains
      procedure :: initialize ! make an empty list
@@ -105,7 +105,7 @@ contains
     class(abstract_potential_t), pointer :: ipot
     ipot=>self%list(i)%ptr
   end function ipot
-  
+
   subroutine set_supercell(self, supercell)
     class (potential_list_t), intent(inout) :: self
     type (mbsupercell_t), target, intent(inout) :: supercell

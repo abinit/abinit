@@ -939,17 +939,17 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! Allocate u(g) and, if required, also u(r)
  ug_size = one*nspinor*mpw*COUNT(bks_mask)
- write(msg,'(a,f12.1,a)')' Memory needed for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb]'
+ write(msg,'(a,f12.1,a)')' Memory needed for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  if (Wfd%usepaw==1) then
    cprj_size = one * nspinor*SUM(Wfd%nlmn_atm)*COUNT(bks_mask)
-   write(msg,'(a,f12.1,a)')' Memory needed for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb]'
+   write(msg,'(a,f12.1,a)')' Memory needed for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(std_out, msg)
  end if
 
  ur_size = one*nspinor*Wfd%nfft*COUNT(Wfd%keep_ur)
- write(msg,'(a,f12.1,a)')' Memory needed for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb]'
+ write(msg,'(a,f12.1,a)')' Memory needed for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  ABI_DT_MALLOC(Wfd%Wave,(Wfd%mband,Wfd%nkibz,Wfd%nsppol))
@@ -1678,23 +1678,23 @@ subroutine wfd_print(Wfd,header,unit,prtvol,mode_paral)
 
  ! Info on memory needed for u(g), u(r) and PAW cprj
  ug_size = one * Wfd%nspinor * mpw * count(Wfd%Wave(:,:,:)%has_ug >= WFD_ALLOCATED)
- write(msg,'(a,f12.1,a)')' Memory allocated for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb]'
+ write(msg,'(a,f12.1,a)')' Memory allocated for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  ur_size = one * Wfd%nspinor * Wfd%nfft * count(Wfd%Wave(:,:,:)%has_ur >= WFD_ALLOCATED)
- write(msg,'(a,f12.1,a)')' Memory allocated for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb]'
+ write(msg,'(a,f12.1,a)')' Memory allocated for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  if (Wfd%usepaw==1) then
    cprj_size = one * Wfd%nspinor * sum(Wfd%nlmn_atm) * count(Wfd%Wave(:,:,:)%has_cprj >= WFD_ALLOCATED)
-   write(msg,'(a,f12.1,a)')' Memory allocated for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb]'
+   write(msg,'(a,f12.1,a)')' Memory allocated for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(std_out, msg)
  end if
 
  !TODO
  ! Add addition info
  !kdata_bsize = nkibz * (four * (3 * mpw) + dp * two * mpw * natom)
- !write(msg,'(a,f12.1,a)')' Memory allocated for Kdata = ',kdata_bsize * b2Mb,' [Mb]'
+ !write(msg,'(a,f12.1,a)')' Memory allocated for Kdata = ',kdata_bsize * b2Mb,' [Mb] <<< MEM'
 
 end subroutine wfd_print
 !!***

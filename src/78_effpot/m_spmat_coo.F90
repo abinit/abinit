@@ -54,7 +54,9 @@ contains
   subroutine initialize(self, mshape)
     class(coo_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
-    if (size(mshape)/=2) stop 1
+    if (size(mshape)/=2) then
+       MSG_BUG(" COO matrix should be 2D (mshape should be of length 2).")
+    end if
     call self%ndcoo_mat_t%initialize(mshape)
   end subroutine initialize
 
@@ -65,7 +67,7 @@ contains
     real(dp), intent(out) :: b(self%mshape(2))
     integer:: ind, ind_i, ind_j
     b(:)=0.0D0
-    do ind = 1, self%nnz, 1
+    do ind = 1, self%nnz
        ind_i=self%ind%data(1, ind)
        ind_j=self%ind%data(2, ind)
        b(ind_i)=b(ind_i)+self%val%data(ind)*x(ind_j)
@@ -88,5 +90,14 @@ contains
     !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
     call xmpi_sum_master(b, 0, xmpi_world, ierr )
   end subroutine COO_mat_t_mv_mpi
+
+  subroutine test_COO_mv()
+    type(coo_mat_t) :: mat
+    real(dp) :: x(3), b(3)
+    x(:)=1.0
+    call mat%initialize([3,3])
+    call mat%add_entry([1,1], 3.0_dp)
+    call mat%mv(x, b)
+  end subroutine test_COO_mv
 
 end module m_spmat_COO

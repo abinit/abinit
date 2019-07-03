@@ -54,7 +54,8 @@ module m_spmat_convert
      procedure  COO_to_CSR
      !procedure LCO_to_CSR
   end interface spmat_convert
- 
+
+  public :: COO_to_dense
 contains
   subroutine dense_to_LIL(mat, ll)
     ! check shape
@@ -152,6 +153,10 @@ contains
     end do
   end subroutine dense_to_CSR
 
+  !-------------------------------------------------------------------!
+  ! dense_to_coo
+  ! Dense to COO matrix convertion
+  !-------------------------------------------------------------------!
   subroutine dense_to_coo(mat, coo)
     real(dp), intent(in) :: mat(:,:)
     type(coo_mat_t), intent(inout) :: coo
@@ -166,7 +171,15 @@ contains
     end do
   end subroutine dense_to_coo
 
-
+  !-------------------------------------------------------------------!
+  ! COO_to_CSR:
+  !  translate COO matrix to CSR matrix
+  !  NOTE: This can be quite slow when it is large due to the sort algorithm 
+  ! Input:
+  !  COO matrix
+  ! Output:
+  !   CSR matrix
+  !-------------------------------------------------------------------!
   subroutine COO_to_CSR(coo, csr)
     type(COO_mat_t), intent(inout) :: coo
     type(CSR_mat_t), intent(inout) :: csr
@@ -198,6 +211,30 @@ contains
     endif
   end subroutine COO_to_CSR
 
+
+  !-------------------------------------------------------------------!
+  ! COO_to_dense
+  !   COO matrix to dense matrix
+  ! Input:
+  !   COO: coo matrix
+  ! Output:
+  !   dense: dense matrix
+  !-------------------------------------------------------------------!
+  subroutine COO_to_dense(coo, dense)
+    type(COO_mat_t), intent(inout) :: coo
+    real(dp), intent(inout) :: dense(:,:)
+    integer :: i, j, inz
+    real(dp) :: val
+    dense(:,:) =0.0
+    do inz =1, coo%nnz
+       i=coo%ind%data(1, inz)
+       j=coo%ind%data(2, inz)
+       val= coo%val%data(inz)
+       dense(i,j) = dense(i,j) + val
+    end do
+  end subroutine COO_to_dense
+
+
 !  subroutine LCO_to_CSR(lco, csr)
 !    type(LCO_mat_t), intent(inout) :: lco
 !    type(CSR_mat_t), intent(inout) :: csr
@@ -206,6 +243,8 @@ contains
 !    integer :: i, irow
 !
 !  end subroutine LCO_to_CSR
+
+
 
   subroutine spmat_convert_unittest()
     real(dp) ::mat(4,4), x(4), b(4)

@@ -44,20 +44,39 @@ module m_abstract_mover
 !!***
 
   private
+
+  !-------------------------------------------------------------------!
+  ! Abstract_mover_t:
+  !  abstract mover. All the movers should be derived from this
+  !-------------------------------------------------------------------!
   type ,public :: abstract_mover_t
      ! This is the abstract class of mover
      ! It do the following things:
      ! calculate d(var)/dt and integrate new var. 
      ! call functions to calculate observables.
      ! interact with hist file.
-     type(mbsupercell_t), pointer:: supercell=>null()
+
+     ! a pointer to the supercell structure
+     type(mbsupercell_t), pointer:: supercell=>null() 
+     ! a label for each mover. For printing out information
      character (len=200) :: label="Abstract Mover"
-     real(dp) :: dt, total_time, temperature, thermal_time
-     type(rng_t) :: rng
+     ! time step. 
+     real(dp) :: dt= 0.0
+     ! total time
+     real(dp) :: total_time =0.0
+     ! temperature (NOTE: It is not the real temperature of
+     ! the structure, but a preset value, even when it is not
+     ! a constant temperature mover!!!)
+     real(dp) :: temperature =0.0
+     ! time for themalization
+     real(dp) :: thermal_time =0.0
+     ! A pointer to the random number generator
+     type(rng_t), pointer :: rng=>null()
 
    contains
      !procedure:: initialize       ! perhaps each effpot type should have own
      !procedure :: finalize
+     procedure :: set_rng
      procedure :: set_params
      procedure :: set_initial_state ! initial state
      procedure:: run_one_step
@@ -70,6 +89,20 @@ module m_abstract_mover
 
 contains
 
+  !-------------------------------------------------------------------!
+  ! set_rng:
+  ! set the random number generator.
+  !-------------------------------------------------------------------!
+  subroutine set_rng(self, rng)
+    class(abstract_mover_t), intent(inout) :: self
+    type(rng_t), target, intent(in) :: rng
+    self%rng => rng
+  end subroutine set_rng
+
+  !-------------------------------------------------------------------!
+  ! set_parms:
+  !  set the variables using the input params
+  !-------------------------------------------------------------------!
   subroutine set_params(self, params)
     ! set parameters from input file. (something else, like temperature for MvT calculation?)
     class(abstract_mover_t), intent(inout) :: self
@@ -79,13 +112,19 @@ contains
     MSG_ERROR("set_params not implemented for this mover")
   end subroutine set_params
 
-
+  !-------------------------------------------------------------------!
+  ! set_supercell:
+  !  set the pointer to supercell
+  !-------------------------------------------------------------------!
   subroutine set_supercell(self, supercell)
     class(abstract_mover_t), intent(inout) :: self
     type(mbsupercell_t), target :: supercell
     self%supercell=>supercell
   end subroutine set_supercell
 
+  !-------------------------------------------------------------------!
+  ! set_initial_state:
+  !-------------------------------------------------------------------!
   subroutine set_initial_state(self, mode)
     ! set initial positions, spin, etc
     class(abstract_mover_t), intent(inout) :: self
@@ -95,6 +134,16 @@ contains
     ABI_UNUSED(mode)
   end subroutine set_initial_state
 
+  !-------------------------------------------------------------------!
+  ! Run_one_step:
+  ! Input:
+  !   effpot: the potential (which do the calculation of E and dE/dvar)
+  !
+  ! NOTE: No need to pass the variable already saved in the mover.
+  !     e.g. For spin mover, do NOT pass the spin to it.
+  !    The other variables are only required if there is coupling with
+  !    the mover variable.
+  !-------------------------------------------------------------------!
   subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
     ! run one step. (For MC also?)
     class(abstract_mover_t), intent(inout) :: self
@@ -109,6 +158,12 @@ contains
     MSG_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 
+  !-------------------------------------------------------------------!
+  ! Reset:
+  ! Reset the mover.
+  ! It is used, when multiple sets of move are needed, e.g. for various
+  ! temperature.
+  !-------------------------------------------------------------------!
   subroutine reset(self)
     ! reset the state of mover (e.g. counter->0)
     ! so it can be reused.
@@ -117,6 +172,10 @@ contains
     MSG_ERROR("reset not implemented for this mover")
   end subroutine reset
 
+  !-------------------------------------------------------------------!
+  ! calc_observables
+  !  calculate observables
+  !-------------------------------------------------------------------!
   subroutine calc_observables(self)
     ! call functions to calculate observables.
     class(abstract_mover_t), intent(inout) :: self
@@ -124,6 +183,10 @@ contains
     MSG_ERROR("calc_observables not implemented for this mover")
   end subroutine calc_observables
 
+  !-------------------------------------------------------------------!
+  ! Write_hist:
+  !  write to hist file.
+  !-------------------------------------------------------------------!
   subroutine write_hist(self)
     ! write to hist file
     class(abstract_mover_t), intent(inout) :: self
@@ -131,6 +194,10 @@ contains
     MSG_ERROR("write_hist not implemented for this mover")
   end subroutine write_hist
 
+  !-------------------------------------------------------------------!
+  ! Get_state:
+  !  get the current state.
+  !-------------------------------------------------------------------!
   subroutine get_state(self, displacement, strain, spin, lwf, ihist)
     ! get the state of the ihist(th) step. ihist can be 0 (current), -1 (last), ... -maxhist..
     !Note that the params are optional so it will be returned only if asked for.

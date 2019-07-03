@@ -78,8 +78,8 @@ program multibinit
   character(len=24) :: codename,start_datetime
   character(len=fnlen) :: filnam(17),tmpfilename
   character(len=500) :: message, arg
-  !type(args_t) :: args
-  integer :: ii, nargs, iarg
+  type(args_t) :: args
+  integer :: ii
   logical :: unittest=.False. , use_f03=.False.
   integer :: master, my_rank, comm, nproc, ierr
   logical :: iam_master
@@ -103,28 +103,28 @@ program multibinit
   iam_master = (my_rank == master)
 
   ! Parse command line arguments.
-  !args = args_parser(); if (args%exit /= 0) goto 100
+  args = args_parser(); if (args%exit /= 0) goto 100
 
-  nargs = command_argument_count()
-  do iarg=1,nargs
-     call get_command_argument(number=iarg, value=arg)
-     if (arg == "-v" .or. arg == "--version") then
-        write(std_out,"(a)") trim(abinit_version); goto 100
-        goto 100
-     else if (arg == "--unittest") then
-        unittest=.True.
-        call mb_test_main()
-        goto 100
-     else if(arg== "-F03") then
-        use_f03=.True.
-     endif
-  end do
+ ! nargs = command_argument_count()
+ ! do iarg=1,nargs
+ !    call get_command_argument(number=iarg, value=arg)
+ !    if (arg == "-v" .or. arg == "--version") then
+ !       write(std_out,"(a)") trim(abinit_version); goto 100
+ !       goto 100
+ !    else if (arg == "--unittest") then
+ !       unittest=.True.
+ !       call mb_test_main()
+ !       goto 100
+ !    else if(arg== "-F03") then
+ !       use_f03=.True.
+ !    endif
+ ! end do
 
-  !Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
-  !set the argument of abimem_init to "2" instead of "0"
-  !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if activated at configure time.
+ ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
+ ! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
-  call abimem_init(0)
+ call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
   !Initialisation of the timing
@@ -136,7 +136,6 @@ program multibinit
   end if
 
   start_datetime = asctime()
-
   !Print the number of cpus in log file
   write(message,'(a,i5,a)') '-  nproc =',nproc,ch10
   call wrtout(std_out,message,'COLL')
@@ -178,10 +177,12 @@ program multibinit
 
   !***************************************************************************************
   !***************************************************************************************
-  if(use_f03) then
+  if(args%multibinit_F03_mode==1) then
+     ! Use the F03 mode, which has only spin and a simple harmonic lattice now
+     ! After everything is migrated, it will becomes default and multibinit_main will be deprecated.
      call multibinit_main2(filnam)
   else
-     call multibinit_main(filnam)
+     call multibinit_main(filnam, args%dry_run)
   end if
   ! Final message
   !****************************************************************************************

@@ -17,7 +17,7 @@ Variable(
     dimensions=['[[tdep:ntypat]]'],
     defaultval="[[tdep:ntypat]]*0.d0",
     mnemonics="Atomic masses in Mass Units",
-    text="""
+    text=r"""
 Defines the masses in atomic mass units for each kind of atom. See the ABINIT variable [[amu]] for more details. (Only required when the NetCDF file is absent).
 """,
 ),
@@ -30,7 +30,7 @@ Variable(
     dimensions="scalar",
     defaultval="90.d0",
     mnemonics="ANGLE alpha",
-    text="""
+    text=r"""
 This angle has to be defined if the bravais lattice is monoclinic. That is to say if [[tdep:brav]](1)=2. 
 """,
 ),
@@ -46,7 +46,7 @@ Variable(
     text="""
 These two parameters define the Bravais lattice (as defined in the ABINIT code) and the primitive vectors [[rprim]] in the TDEP code.
 
-- For bravais(1): The holohedral groups are numbered as follows (see international tables for crystallography (1983), p. 13) :
+- For bravais(1): The holohedral groups are numbered as follows (see international tables for crystallography (1983), p. 13):
 iholohedry=1   triclinic      1bar
 iholohedry=2   monoclinic     2/m
 iholohedry=3   orthorhombic   mmm
@@ -55,7 +55,7 @@ iholohedry=5   trigonal       3bar m
 iholohedry=6   hexagonal      6/mmm
 iholohedry=7   cubic          m3bar m
 
-- For bravais(2): The centering is defined as follows :
+- For bravais(2): The centering is defined as follows:
 center=0        no centering
 center=-1       body-centered
 center=-3       face-centered
@@ -74,8 +74,8 @@ Variable(
     dimensions="'[[tdep:bzpath]](1)'+1",
     defaultval="0",
     mnemonics="Brillouin Zone PATH",
-    text="""
-OPTIONAL : Defines the path in the Brillouin Zone for the phonon spectrum calculation. The first value defines the number of special points used in the path. The other values define the special points of the BZ (only the letters fixed by convention for the present lattice are allowed : L, X, M... and G for $\Gamma$). 
+    text=r"""
+OPTIONAL: Defines the path in the Brillouin Zone for the phonon spectrum calculation. The first value defines the number of special points used in the path. The other values define the special points of the BZ (only the letters fixed by convention for the present lattice are allowed: L, X, M... and G for $\Gamma$). 
 """,
 ),
 
@@ -88,7 +88,7 @@ Variable(
     defaultval="4.5d-6",
     mnemonics="DOS delta Energy",
     text="""
-OPTIONAL : Defines the smearing used for the phonon Density Of State calculation.
+OPTIONAL: Defines the smearing used for the phonon Density Of State calculation.
 """,
 ),
 
@@ -101,7 +101,7 @@ Variable(
     defaultval="0",
     mnemonics="ENergy UNIT",
     text="""
-OPTIONAL : Defines the energy unit used for the phonon spectrum (0 for meV, 1 for cm-1 and 2 for Ha).
+OPTIONAL: Defines the energy unit used for the phonon spectrum (0 for meV, 1 for cm-1 and 2 for Ha).
 """,
 ),
 
@@ -113,13 +113,15 @@ Variable(
     dimensions=[3,3],
     defaultval="9*0.d0",
     mnemonics="MULTIPLICITY",
-    text="""
-Defines the multiplicity of the SUPERCELL with respect to the primitive UNICELL. See the ABINIT variables [[rprimd]], [[acell]] and [[rprim]] for more details. The multiplicity [[tdep:multiplicity]] and the SUPERCELL lattice parameters [[tdep:rprimd]] are used to find the UNITCELL lattice parameters acell_unitcell such as :
+    text=r"""
+Defines the multiplicity of the SUPERCELL with respect to the primitive UNICELL. See the ABINIT variables [[rprimd]], [[acell]] and [[rprim]] for more details. The multiplicity [[tdep:multiplicity]] and the SUPERCELL lattice parameters [[tdep:rprimd]] are used to find the UNITCELL lattice parameters acell_unitcell such as:
+
 $$ \text{rprimd}_{i,j}=\sum_{k=1}^3 \text{acell_unitcell}_i * \text{multiplicity}_{i,k}*\text{rprim_tmp}_{k,j} $$
 
-For example :
-- for a fcc lattice : rprim = ( 0 1/2 1/2 ; 1/2 0 1/2 ; 1/2 1/2 0) and acell = (a a a). If the SUPERCELL is rprimd = (3a 0 0 ; 0 3a 0 ; 0 0 3a), the multiplicity = ( -3 3 3 ; 3 -3 3 ; 3 3 -3) 
-- for a bcc lattice : rprim = ( -1/2 1/2 1/2 ; 1/2 -1/2 1/2 ; 1/2 1/2 -1/2) and acell = (a a a). If the SUPERCELL is rprimd = (3a 0 0 ; 0 3a 0 ; 0 0 3a), the multiplicity = ( 0 3 3 ; 3 0 3 ; 3 3 0) 
+For example:
+
+- for a fcc lattice: rprim = ( 0 1/2 1/2 ; 1/2 0 1/2 ; 1/2 1/2 0) and acell = (a a a). If the SUPERCELL is rprimd = (3a 0 0 ; 0 3a 0 ; 0 0 3a), the multiplicity = ( -3 3 3 ; 3 -3 3 ; 3 3 -3) 
+- for a bcc lattice: rprim = ( -1/2 1/2 1/2 ; 1/2 -1/2 1/2 ; 1/2 1/2 -1/2) and acell = (a a a). If the SUPERCELL is rprimd = (3a 0 0 ; 0 3a 0 ; 0 0 3a), the multiplicity = ( 0 3 3 ; 3 0 3 ; 3 3 0) 
 """,
 ),
 
@@ -157,8 +159,8 @@ Variable(
     dimensions=[3],
     defaultval=[8, 8, 8],
     mnemonics="Number of Grid points for Q PoinTs generation (coarse)",
-    text="""
-OPTIONAL : Defines the COARSE grid of q-points for the dynamical matrix output (in DDB).
+    text=r"""
+OPTIONAL: Defines the COARSE grid of q-points for the dynamical matrix output (in DDB).
 """,
 ),
 
@@ -171,7 +173,7 @@ Variable(
     defaultval=[32, 32, 32],
     mnemonics="Number of Grid points for Q PoinTs generation (fine)",
     text="""
-OPTIONAL : Defines the FINE grid of q-points for the DOS and thermodynamic quantity calculations.
+OPTIONAL: Defines the FINE grid of q-points for the DOS and thermodynamic quantity calculations.
 """,
 ),
 
@@ -223,7 +225,7 @@ Variable(
     defaultval="2",
     mnemonics="ORDER for the IFC",
     text="""
-OPTIONAL : Defines at which order the calculation of the IFCs is performed. If the first value [[tdep:order]](1)=3, that turns on a third order calculation and the second value [[tdep:order]](2) defines the cutoff radius. 
+OPTIONAL: Defines at which order the calculation of the IFCs is performed. If the first value [[tdep:order]](1)=3, that turns on a third order calculation and the second value [[tdep:order]](2) defines the cutoff radius. 
 """,
 ),
 
@@ -262,7 +264,7 @@ Variable(
     defaultval="1",
     mnemonics="SLICE",
     text="""
-OPTIONAL : Defines the slice used to include some configurations in the calculations. Only the ([[tdep:nstep_max]]-[[tdep:nstep_min]])/[[tdep:slice]] configurations will be considered in the calculations of the IFCs.
+OPTIONAL: Defines the slice used to include some configurations in the calculations. Only the ([[tdep:nstep_max]]-[[tdep:nstep_min]])/[[tdep:slice]] configurations will be considered in the calculations of the IFCs.
 """,
 ),
 
@@ -315,7 +317,7 @@ Variable(
     defaultval="1",
     mnemonics="USE IDEAL POSITIONS",
     text="""
-OPTIONAL : Defines if the ideal ([[tdep:use_ideal_positions]]=1) or averaged ([[tdep:use_ideal_positions]]=0) positions are used during the calculations. It can affect strongly the phonon spectrum (and other quantities) if the system is close to an instability (soft mode,...).
+OPTIONAL: Defines if the ideal ([[tdep:use_ideal_positions]]=1) or averaged ([[tdep:use_ideal_positions]]=0) positions are used during the calculations. It can affect strongly the phonon spectrum (and other quantities) if the system is close to an instability (soft mode,...).
 """,
 ),
 

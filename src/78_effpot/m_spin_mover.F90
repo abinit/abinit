@@ -126,12 +126,13 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine initialize(self, params, supercell)
+  subroutine initialize(self, params, supercell, rng)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target :: params
     type(mbsupercell_t), target :: supercell
+    type(rng_t), target, intent(in) :: rng
     !real(dp):: damping(self%supercell%nspin)
-    integer :: i, nspin
+    integer ::  nspin
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
@@ -139,6 +140,7 @@ contains
 
     self%params=>params
     self%supercell=>supercell
+    self%rng => rng
     if (iam_master) then
        nspin=supercell%spin%nspin
        self%nspin=nspin
@@ -159,12 +161,6 @@ contains
     call xmpi_bcast(self%total_time, master, comm, ierr)
     call xmpi_bcast(self%temperature, master, comm, ierr)
     call xmpi_bcast(self%method, master, comm, ierr)
-    call set_seed(self%rng, [111111_dp, 2_dp])
-    if(my_rank>0) then
-       do i =1,my_rank
-          call self%rng%jump()
-       end do
-    end if
 
     ABI_ALLOCATE(self%ms, (self%nspin) )
     ABI_ALLOCATE(self%gyro_ratio, (self%nspin) )
@@ -971,6 +967,7 @@ contains
 
     nullify(self%supercell)
     nullify(self%params)
+    nullify(self%rng)
     call self%mps%finalize()
     call self%hist%finalize()
     call self%spin_ob%finalize()
