@@ -311,7 +311,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  interpolated = 0
  if (dtset%eph_use_ftinterp /= 0) then
-   MSG_WARNING(sjoin("Enforcing FT interpolation as could not find q-point:", ktoa(qpt), "in DVDB"))
+   MSG_WARNING(sjoin("Enforcing FT interpolation for q-point", ktoa(qpt)))
    comm_rpt = xmpi_comm_self
    wr_path = ""
    method = dtset%userid

@@ -332,7 +332,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
              bz2ibz_smap(2, ind_ikpt2) = isym
              ! Compute difference with respect to kpt2, modulo a lattice vector
              ! Sk1 + G0 = k2
-             !bz2ibz_smap(3:5, ind_ikpt2) = nint(-ksym(:) + kbz(:, ind_ikpt2) + tol12)
+             bz2ibz_smap(3:5, ind_ikpt2) = nint(-ksym(:) + kbz(:, ind_ikpt2) + tol12)
              ii = 0; if (itim == -1) ii = 1
              bz2ibz_smap(6, ind_ikpt2) = ii
 
