@@ -134,12 +134,11 @@ contains
     ABI_UNUSED_A(bfield)
     ABI_UNUSED_A(lwf_force)
 
-    if (.not. present(displacement)) then
-       MSG_BUG("displacment should be provided to lattice_harmonic potential")
-    end if
-    call self%coeff%mv(displacement, f)
-    force(:,:) = force(:,:) - f
-    energy =energy + 0.5_dp * sum(f*displacement)
+    if (present(force)) then
+       call self%coeff%mv(displacement, f)
+       force(:,:) = force(:,:) - f
+       energy =energy + 0.5_dp * sum(f*displacement)
+    endif
   end subroutine calculate
 
 end module m_lattice_harmonic_potential

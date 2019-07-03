@@ -150,7 +150,6 @@ contains
     character(len=500) :: message
     integer :: ii
     logical:: use_sia, use_exchange, use_dmi, use_bi
-    integer :: filetype ! 1. xml 2. netcdf
 
     fname=fnames(3)
     if (xmpi_comm_rank(xmpi_world)==0) then
@@ -169,8 +168,8 @@ contains
     if(endswith(trim(fname), ".xml")) then
        call self%read_xml( trim(fname)//char(0), &
             & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
-    elseif(endswith(trim(fname), ".nc")) then
-       call self%read_netcdf(trim(fname))
+    else if(endswith(trim(fname), ".nc")) then
+       call self%read_netcdf(fname)
     endif
     if (params%spin_sia_add /= 0 ) then
        call self%add_input_sia(params%spin_sia_k1amp, &
@@ -187,7 +186,6 @@ contains
     class(spin_primitive_potential_t), intent(inout) :: self
     character(len=fnlen), intent(in) :: fname
     integer :: ierr, ncid, varid
-    integer :: i
 
     integer :: nspin, natom
     real(dp) :: cell(3,3)
@@ -212,7 +210,9 @@ contains
 !#if defined HAVE_NETCDF
 
     ! open netcdf file
-    ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
+    print *, fname
+    print *, trim(fname)//char(0)
+    ierr=nf90_open(trim(fname)//char(0), NF90_NOWRITE, ncid)
     call nc_handle_err(ierr)
 
     ! read primcell info
@@ -269,82 +269,87 @@ contains
 
 
     !== read exchange terms
-    ierr=nctk_get_dim(ncid, "spin_exchange_nterm", spin_exchange_nterm)
-    ABI_ALLOCATE(spin_exchange_ilist, (spin_exchange_nterm))
-    ABI_ALLOCATE(spin_exchange_jlist, (spin_exchange_nterm))
-    ABI_ALLOCATE(spin_exchange_Rlist, (3,spin_exchange_nterm))
-    ABI_ALLOCATE(spin_exchange_vallist, (3,spin_exchange_nterm))
+    ierr=nf90_inq_dimid(ncid, "spin_exchange_nterm", spin_exchange_nterm)
+    if (ierr==0) then
+       ierr=nctk_get_dim(ncid, "spin_exchange_nterm", spin_exchange_nterm)
+       ABI_ALLOCATE(spin_exchange_ilist, (spin_exchange_nterm))
+       ABI_ALLOCATE(spin_exchange_jlist, (spin_exchange_nterm))
+       ABI_ALLOCATE(spin_exchange_Rlist, (3,spin_exchange_nterm))
+       ABI_ALLOCATE(spin_exchange_vallist, (3,spin_exchange_nterm))
 
-    ierr =nf90_inq_varid(ncid, "spin_exchange_ilist", varid)
-    call nc_handle_err(ierr, "spin_exchange_ilist")
-    ierr = nf90_get_var(ncid, varid, spin_exchange_ilist)
-    call nc_handle_err(ierr, "spin_exchange_ilist")
+       ierr =nf90_inq_varid(ncid, "spin_exchange_ilist", varid)
+       call nc_handle_err(ierr, "spin_exchange_ilist")
+       ierr = nf90_get_var(ncid, varid, spin_exchange_ilist)
+       call nc_handle_err(ierr, "spin_exchange_ilist")
 
-    ierr =nf90_inq_varid(ncid, "spin_exchange_jlist", varid)
-    call nc_handle_err(ierr, "spin_exchange_jlist")
-    ierr = nf90_get_var(ncid, varid, spin_exchange_jlist)
-    call nc_handle_err(ierr, "spin_exchange_jlist")
+       ierr =nf90_inq_varid(ncid, "spin_exchange_jlist", varid)
+       call nc_handle_err(ierr, "spin_exchange_jlist")
+       ierr = nf90_get_var(ncid, varid, spin_exchange_jlist)
+       call nc_handle_err(ierr, "spin_exchange_jlist")
 
-    ierr =nf90_inq_varid(ncid, "spin_exchange_Rlist", varid)
-    call nc_handle_err(ierr, "spin_exchange_Rlist")
-    ierr = nf90_get_var(ncid, varid, spin_exchange_Rlist)
-    call nc_handle_err(ierr, "spin_exchange_Rlist")
+       ierr =nf90_inq_varid(ncid, "spin_exchange_Rlist", varid)
+       call nc_handle_err(ierr, "spin_exchange_Rlist")
+       ierr = nf90_get_var(ncid, varid, spin_exchange_Rlist)
+       call nc_handle_err(ierr, "spin_exchange_Rlist")
 
-    
-    ierr =nf90_inq_varid(ncid, "spin_exchange_vallist", varid)
-    call nc_handle_err(ierr, "spin_exchange_vallist")
-    ierr = nf90_get_var(ncid, varid, spin_exchange_vallist)
-    call nc_handle_err(ierr, "spin_exchange_vallist")
 
-    spin_exchange_vallist(:,:) = spin_exchange_vallist(:,:) * eV_Ha
+       ierr =nf90_inq_varid(ncid, "spin_exchange_vallist", varid)
+       call nc_handle_err(ierr, "spin_exchange_vallist")
+       ierr = nf90_get_var(ncid, varid, spin_exchange_vallist)
+       call nc_handle_err(ierr, "spin_exchange_vallist")
 
-    call self%set_exchange( n=spin_exchange_nterm, ilist=spin_exchange_ilist, &
-         & jlist=spin_exchange_jlist, Rlist=spin_exchange_Rlist, &
-         & vallist=spin_exchange_vallist)
+       spin_exchange_vallist(:,:) = spin_exchange_vallist(:,:) * eV_Ha
 
-    ABI_SFREE(spin_exchange_ilist)
-    ABI_SFREE(spin_exchange_jlist)
-    ABI_SFREE(spin_exchange_Rlist)
-    ABI_SFREE(spin_exchange_vallist)
+       call self%set_exchange(n=spin_exchange_nterm, ilist=spin_exchange_ilist, &
+            & jlist=spin_exchange_jlist, Rlist=spin_exchange_Rlist, &
+            & vallist=spin_exchange_vallist)
+
+       ABI_SFREE(spin_exchange_ilist)
+       ABI_SFREE(spin_exchange_jlist)
+       ABI_SFREE(spin_exchange_Rlist)
+       ABI_SFREE(spin_exchange_vallist)
+    endif
 
     ! read bilinear terms
-    ierr=nctk_get_dim(ncid, "spin_bilinear_nterm", spin_bilinear_nterm)
-    ABI_ALLOCATE(spin_bilinear_ilist, (spin_bilinear_nterm))
-    ABI_ALLOCATE(spin_bilinear_jlist, (spin_bilinear_nterm))
-    ABI_ALLOCATE(spin_bilinear_Rlist, (3,spin_bilinear_nterm))
-    ABI_ALLOCATE(spin_bilinear_vallist, (3,3,spin_bilinear_nterm))
+    ierr=nf90_inq_dimid(ncid, "spin_bilinear_nterm", varid)
+    if (ierr==0) then
+       ABI_ALLOCATE(spin_bilinear_ilist, (spin_bilinear_nterm))
+       ABI_ALLOCATE(spin_bilinear_jlist, (spin_bilinear_nterm))
+       ABI_ALLOCATE(spin_bilinear_Rlist, (3,spin_bilinear_nterm))
+       ABI_ALLOCATE(spin_bilinear_vallist, (3,3,spin_bilinear_nterm))
 
-    ierr =nf90_inq_varid(ncid, "spin_bilinear_ilist", varid)
-    call nc_handle_err(ierr, "spin_bilinear_ilist")
-    ierr = nf90_get_var(ncid, varid, spin_bilinear_ilist)
-    call nc_handle_err(ierr, "spin_bilinear_ilist")
+       ierr =nf90_inq_varid(ncid, "spin_bilinear_ilist", varid)
+       call nc_handle_err(ierr, "spin_bilinear_ilist")
+       ierr = nf90_get_var(ncid, varid, spin_bilinear_ilist)
+       call nc_handle_err(ierr, "spin_bilinear_ilist")
 
-    ierr =nf90_inq_varid(ncid, "spin_bilinear_jlist", varid)
-    call nc_handle_err(ierr, "spin_bilinear_jlist")
-    ierr = nf90_get_var(ncid, varid, spin_bilinear_jlist)
-    call nc_handle_err(ierr, "spin_bilinear_jlist")
+       ierr =nf90_inq_varid(ncid, "spin_bilinear_jlist", varid)
+       call nc_handle_err(ierr, "spin_bilinear_jlist")
+       ierr = nf90_get_var(ncid, varid, spin_bilinear_jlist)
+       call nc_handle_err(ierr, "spin_bilinear_jlist")
 
-    ierr =nf90_inq_varid(ncid, "spin_bilinear_Rlist", varid)
-    call nc_handle_err(ierr, "spin_bilinear_Rlist")
-    ierr = nf90_get_var(ncid, varid, spin_bilinear_Rlist)
-    call nc_handle_err(ierr, "spin_bilinear_Rlist")
+       ierr =nf90_inq_varid(ncid, "spin_bilinear_Rlist", varid)
+       call nc_handle_err(ierr, "spin_bilinear_Rlist")
+       ierr = nf90_get_var(ncid, varid, spin_bilinear_Rlist)
+       call nc_handle_err(ierr, "spin_bilinear_Rlist")
 
-    ierr =nf90_inq_varid(ncid, "spin_bilinear_vallist", varid)
-    call nc_handle_err(ierr, "spin_bilinear_vallist")
-    ierr = nf90_get_var(ncid, varid, spin_bilinear_vallist)
-    call nc_handle_err(ierr, "spin_bilinear_vallist")
+       ierr =nf90_inq_varid(ncid, "spin_bilinear_vallist", varid)
+       call nc_handle_err(ierr, "spin_bilinear_vallist")
+       ierr = nf90_get_var(ncid, varid, spin_bilinear_vallist)
+       call nc_handle_err(ierr, "spin_bilinear_vallist")
 
-    spin_bilinear_vallist(:,:,:) = spin_bilinear_vallist(:,:,:) * eV_Ha
-    call self%set_bilinear( n=spin_bilinear_nterm, ilist=spin_bilinear_ilist, &
-         & jlist=spin_bilinear_jlist, Rlist=spin_bilinear_Rlist, &
-         & vallist=spin_bilinear_vallist)
+       spin_bilinear_vallist(:,:,:) = spin_bilinear_vallist(:,:,:) * eV_Ha
 
-    ABI_SFREE(spin_bilinear_ilist)
-    ABI_SFREE(spin_bilinear_jlist)
-    ABI_SFREE(spin_bilinear_Rlist)
-    ABI_SFREE(spin_bilinear_vallist)
+       call self%set_bilinear( n=spin_bilinear_nterm, ilist=spin_bilinear_ilist, &
+            & jlist=spin_bilinear_jlist, Rlist=spin_bilinear_Rlist, &
+            & vallist=spin_bilinear_vallist)
 
-    ! set values to primitive potential
+       ABI_SFREE(spin_bilinear_ilist)
+       ABI_SFREE(spin_bilinear_jlist)
+       ABI_SFREE(spin_bilinear_Rlist)
+       ABI_SFREE(spin_bilinear_vallist)
+
+    end if
 
 
   end subroutine read_netcdf
