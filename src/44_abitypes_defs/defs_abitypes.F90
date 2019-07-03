@@ -965,6 +965,9 @@ type dataset_type
 
  real(dp) :: sigma_erange(2) = -one
 
+ integer :: transport_ngkpt(3) = 0
+ ! K-mesh for Transport calculation.
+
  integer :: sigma_ngkpt(3) = 0
  ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
 

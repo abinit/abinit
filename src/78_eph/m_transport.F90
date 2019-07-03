@@ -328,7 +328,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
  ! Read lifetimes to ebands object
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with sigma_ngkpt k-mesh, we need to downsample ebands.
-   call wrtout(std_out, sjoin("Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
+   call wrtout(std_out, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%sigma_ngkpt(1)
    kptrlatt(2,2) = dtset%sigma_ngkpt(2)
@@ -344,12 +344,13 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
 
  ! Perform further downsampling (usefull for debugging purposes)
  ! TODO: introduce transport_ngkpt variable
- if (all(dtset%bs_interp_kmult < 0)) then
-   call wrtout(std_out, sjoin("Downsampling the k-point mesh before computing transport:", ltoa(-dtset%bs_interp_kmult)))
+ if (any(dtset%transport_ngkpt/=0)) then
+
+   call wrtout(std_out, sjoin(" Downsampling the k-point mesh before computing transport:", ltoa(dtset%transport_ngkpt)))
    kptrlatt = 0
-   kptrlatt(1,1) = -dtset%bs_interp_kmult(1)
-   kptrlatt(2,2) = -dtset%bs_interp_kmult(2)
-   kptrlatt(3,3) = -dtset%bs_interp_kmult(3)
+   kptrlatt(1,1) = dtset%transport_ngkpt(1)
+   kptrlatt(2,2) = dtset%transport_ngkpt(2)
+   kptrlatt(3,3) = dtset%transport_ngkpt(3)
    tmp_ebands = ebands_downsample(new%ebands, cryst, kptrlatt, 1, [zero,zero,zero])
 
    ! Map the points of downsampled bands to dense ebands
@@ -908,6 +909,7 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
                                     [self%eph_extrael, self%eph_fermie, self%transport_extrael, self%transport_fermie])
  NCF_CHECK(ncerr)
 
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_ngkpt"), dtset%transport_ngkpt))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_mu_e"), self%eph_mu_e))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_mu_e"), self%transport_mu_e))

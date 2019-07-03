@@ -517,6 +517,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%sigma_nshiftk = dtin%sigma_nshiftk
  if (allocated(dtin%sigma_shiftk)) call alloc_copy(dtin%sigma_shiftk, dtout%sigma_shiftk)
 
+ dtout%transport_ngkpt = dtin%transport_ngkpt
+
  dtout%ph_freez_disp_addStrain = dtin%ph_freez_disp_addStrain
  dtout%ph_freez_disp_option = dtin%ph_freez_disp_option
  dtout%ph_freez_disp_nampl  = dtin%ph_freez_disp_nampl
@@ -2325,7 +2327,7 @@ subroutine chkvars (string)
 !T
  list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
- list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'
+ list_vars=trim(list_vars)//' tolvrs tolwfr tphysel transport_ngkpt ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
