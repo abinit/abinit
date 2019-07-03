@@ -47,6 +47,7 @@ module m_multibinit_manager
   use m_primitive_potential_list, only: primitive_potential_list_t
   use m_primitive_potential, only: primitive_potential_t
   use m_spin_primitive_potential, only: spin_primitive_potential_t
+  use m_slc_primitive_potential, only: slc_primitive_potential_t
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
   use m_abstract_mover, only: abstract_mover_t
@@ -226,6 +227,7 @@ contains
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
     class(primitive_potential_t), pointer :: spin_pot
+    class(primitive_potential_t), pointer :: slc_pot
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -251,6 +253,15 @@ contains
     endif
 
     !LWF : TODO
+
+    if(self%params%slc_coupling>0) then
+       ABI_DATATYPE_ALLOCATE_SCALAR(slc_primitive_potential_t, slc_pot)
+       select type(slc_pot)
+       type is (slc_primitive_potential_t)
+          call slc_pot%initialize(self%unitcell)
+          call slc_pot%load_from_files(self%params, self%filenames)
+       end select 
+    endif
   end subroutine read_potentials
 
   !-------------------------------------------------------------------!

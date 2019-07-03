@@ -143,6 +143,9 @@ module m_multibinit_dataset
   integer :: spin_var_temperature
   integer :: spin_write_traj
 
+  ! TODO nh: add parameters for spin-lattice coupling
+  integer :: slc_coupling
+
 ! Real(dp)
   real(dp) :: bmass
   real(dp) :: conf_power_fact_disp
@@ -363,6 +366,8 @@ multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above.
 
 multibinit_dtset%spin_var_temperature=0 
 multibinit_dtset%spin_write_traj=1 
+
+multibinit_dtset%slc_coupling=0
 
 !=======================================================================
 !Arrays
@@ -1389,6 +1394,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
+ multibinit_dtset%slc_coupling=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_coupling',tread,'INT')
+ if(tread==1) multibinit_dtset%slc_coupling=intarr(1)
+ if(multibinit_dtset%slc_coupling < 0 .or.& 
+      &   multibinit_dtset%slc_coupling > 2) then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'slc_coupling is',multibinit_dtset%slc_coupling,', but the only allowed values',ch10,&
+         &   'are 0, 1, and 2.',ch10,&
+         &   'Action: correct slc_coupling in your input file.'
+    MSG_ERROR(message)
+ end if
 
 
  multibinit_dtset%symdynmat=1
@@ -2254,6 +2270,10 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit, '(6x, a22, 5x, I12.1)') 'spin_temperature_nstep', multibinit_dtset%spin_temperature_nstep
     write(nunit, '(13x, a15, I12.1)') 'spin_write_traj', multibinit_dtset%spin_write_traj
  end if
+
+ if(multibinit_dtset%slc_coupling/=0) then
+   write(nunit,'(a)')' Spin-Lattice coupling :'
+ endif
 
  if(multibinit_dtset%confinement==1)then
    write(nunit,'(a)')' Confinement information :'

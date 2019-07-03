@@ -2372,6 +2372,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
+ list_vars=trim(list_vars)//' slc_coupling'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
  list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
  list_vars=trim(list_vars)//' spin_damping'
