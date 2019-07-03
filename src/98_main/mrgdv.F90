@@ -199,7 +199,7 @@ program mrgdv
      ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
      ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=-1) == 0, msg)
-     call dvdb_test_addlr(dvdb_path, method, symv1scf, dvdb_add_lr, dvdb_qdamp, ddb_path, dump_file, prtvol, comm)
+     call dvdb_test_addlr(dvdb_path, symv1scf, dvdb_add_lr, dvdb_qdamp, ddb_path, dump_file, prtvol, comm)
 
    case ("downsample")
      call get_command_argument(2, dvdb_path)

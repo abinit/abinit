@@ -5591,13 +5591,13 @@ end subroutine dvdb_test_v1complete
 !!
 !! SOURCE
 
-subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, ddb_path, dump_path, prtvol, comm)
+subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_path, prtvol, comm)
 
  use m_ddb
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: dvdb_path, ddb_path, dump_path
- integer,intent(in) :: comm, prtvol, dvdb_add_lr, symv1
+ integer,intent(in) :: comm, prtvol, dvdb_add_lr, symv1, qdamp
 
 !Local variables-------------------------------
 !scalars
@@ -5635,6 +5635,7 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, ddb_path, dump_path, p
  ABI_CHECK(any(symv1 == [0, 1, 2]), sjoin("invalid value of symv1:", itoa(symv1)))
  dvdb%symv1 = symv1
  dvdb%add_lr = dvdb_add_lr
+ dvdb%qdamp = qdamp
 
  !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
