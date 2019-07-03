@@ -1305,13 +1305,12 @@ end subroutine hartrestr
 !! SOURCE
 
 subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,&
-&                 phnons,rhog,rhor,rprimd,symafm,symrel,hightemp)
+&                 phnons,rhog,rhor,rprimd,symafm,symrel)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nfftot,nspden,nsppol,nsym
  type(MPI_type),intent(in) :: mpi_enreg
- type(hightemp_type),pointer,optional :: hightemp
 !arrays
  integer,intent(in) :: irrzon(nfftot**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4)),ngfft(18)
  integer,intent(in) :: symafm(nsym),symrel(3,3,nsym)
@@ -1383,11 +1382,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
      MSG_BUG('In the antiferromagnetic case, nsym cannot be 1')
    end if
 
-!  Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
-   if(present(hightemp)) then
-     if(associated(hightemp)) then
-       call hightemp_addtorho(hightemp%nfreeel,nfft,nspden,rhor,hightemp%ucvol)
-     end if
+!  Blanchet Add free electron gas contribution
+   if(associated(hightemp)) then
+     call hightemp_addtorho(hightemp%nfreeel,nfft,nspden,rhor,hightemp%ucvol)
    end if
 
 !  If not using symmetry, still want total density in G space rho(G).
@@ -1661,11 +1658,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
      end if ! nspden==4
 
-!    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
-     if(present(hightemp)) then
-       if(associated(hightemp)) then
-         call hightemp_addtorho(hightemp%nfreeel,nfft,nspden_eff,rhor,hightemp%ucvol)
-       end if
+!    Blanchet Add free electron gas contribution
+     if(associated(hightemp)) then
+       call hightemp_addtorho(hightemp%nfreeel,nfft,nspden_eff,rhor,hightemp%ucvol)
      end if
 
      call timab(17,2,tsec)

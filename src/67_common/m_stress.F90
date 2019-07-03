@@ -172,7 +172,7 @@ contains
 !!
 !! SOURCE
 
- subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,hightemp,ixc,kinstr,&
+ subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,ixc,kinstr,&
 &                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
@@ -188,7 +188,6 @@ contains
  type(efield_type),intent(in) :: dtefield
  type(pseudopotential_type),intent(in) :: psps
  type(electronpositron_type),pointer,optional :: electronpositron
- type(hightemp_type),pointer :: hightemp
  type(MPI_type),intent(in) :: mpi_enreg
  type(fock_type),pointer, intent(inout) :: fock
 !arrays

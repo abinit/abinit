@@ -37,7 +37,6 @@ module m_forstr
  use m_fock
  use m_cgtools
  use m_xcdata
- use m_hightemp
 
  use m_time,             only : timab
  use m_geometry,         only : xred2xcart, metric, stresssym
@@ -248,7 +247,7 @@ contains
 !! SOURCE
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
-&                 forold,fred,grchempottn,gresid,grewtn,grhf,grvdw,grxc,gsqcut,hightemp,indsym,&
+&                 forold,fred,grchempottn,gresid,grewtn,grhf,grvdw,grxc,gsqcut,indsym,&
 &                 kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,&
 &                 nfftf,ngfftf,ngrvdw,nhat,nkxc,npwarr,&
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
@@ -263,7 +262,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),intent(in) :: gsqcut,qvpotzero,ucvol
  real(dp),intent(inout) :: diffor,maxfor
  type(electronpositron_type),pointer :: electronpositron
- type(hightemp_type),pointer :: hightemp
  type(MPI_type),intent(inout) :: mpi_enreg
  type(efield_type),intent(in) :: dtefield
  type(dataset_type),intent(in) :: dtset
@@ -501,7 +499,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      end if
    end if
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
-&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,hightemp,dtset%ixc,kinstr,mgfftf,&
+&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,dtset%ixc,kinstr,mgfftf,&
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&

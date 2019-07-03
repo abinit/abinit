@@ -49,7 +49,8 @@ module m_hightemp
     final :: finalize
   end type hightemp_type
 
-  public ::freedos,hightemp_addtoenergy,hightemp_addtorho,prt_eigocc,hightemp_getnfreeel
+  type(hightemp_type),save,pointer :: hightemp=>null()
+  public :: freedos,hightemp_addtoenergy,hightemp_addtorho,prt_eigocc,hightemp_getnfreeel
 contains
 
   !!****f* ABINIT/m_hightemp/init

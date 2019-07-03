@@ -36,7 +36,6 @@ module m_afterscfloop
  use m_efield
  use m_ab7_mixing
  use m_hdr
- use m_hightemp
 
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
@@ -288,7 +287,7 @@ contains
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
-& gresid,grewtn,grhf,grhor,grvdw,grxc,gsqcut,hdr,hightemp,indsym,irrzon,&
+& gresid,grewtn,grhf,grhor,grvdw,grxc,gsqcut,hdr,indsym,irrzon,&
 & istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
@@ -313,7 +312,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(efield_type),intent(inout) :: dtefield
  type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer :: electronpositron
- type(hightemp_type),pointer :: hightemp
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
@@ -921,7 +919,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
 &   eigen,electronpositron,energies,favg,fcart,fock,&
 &   forold,fred,grchempottn,gresid,grewtn,&
-&   grhf,grvdw,grxc,gsqcut,hightemp,indsym,&
+&   grhf,grvdw,grxc,gsqcut,indsym,&
 &   kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &   n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
