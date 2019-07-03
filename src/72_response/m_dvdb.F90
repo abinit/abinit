@@ -5933,8 +5933,8 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 
  autotest = .False.
  if (autotest) then
-   outwr_path = strcat(dvdb_path, "_WR.nc")
-   outwr_path = ""
+   outwr_path = strcat(dvdb_path, "_WRMAX")
+   !outwr_path = ""
    call dvdb%ftinterp_setup(dvdb_ngqpt, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
 
    ! First step: Use FT interpolation to get q-points in the initial ab-initio mesh.
@@ -6005,8 +6005,8 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
    !call coarse_dvdb%print()
 
    ! Prepare FT interpolation using coarse q-mesh.
-   outwr_path = strcat(dvdb_path, "_QCOARSE_WR.nc")
-   outwr_path = ""
+   outwr_path = strcat(dvdb_path, "_QCOARSE_WRMAX")
+   !outwr_path = ""
    call coarse_dvdb%ftinterp_setup(coarse_ngqpt, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
 
    do iq=1,dvdb%nqpt

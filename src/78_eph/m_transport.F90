@@ -883,6 +883,7 @@ subroutine transport_rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(cryst%ncwrite(ncid))
 
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.))
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('transport_ngkpt', "int", "three")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('kTmesh', "dp", "ntemp")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_tau', "dp", "edos_nw, nsppol_plus1, three, three, ntemp")]))
