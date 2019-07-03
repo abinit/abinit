@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_2_x.out to t03_2_x.out0212
+    Renaming old t03_2_x.out to t03_2_x.out0139
 ...
  
 
@@ -42,8 +42,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  2 Jul 2019.
-- ( at 17h24 )
+.Starting date : Wed  3 Jul 2019.
+- ( at 18h53 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -51,7 +51,7 @@ message: |
  === Build Information === 
   Version       : 8.11.8
   Build target  : x86_64_linux_intel19.0
-  Build date    : 20190627
+  Build date    : 20190628
  
  === Compiler Suite === 
   C compiler       : gnu7.4
@@ -59,13 +59,13 @@ message: |
   Fortran compiler : intel19.0
   CFLAGS           :  -g -O2 -mtune=native -march=native
   CXXFLAGS         :  -g -O2 -mtune=native -march=native
-  FCFLAGS          : -O2 -qopenmp -heap-arrays 1000000 -traceback
+  FCFLAGS          : -O2 -qopenmp -heap-arrays 1000000
   FC_LDFLAGS       :    -static-intel -static-libgcc
  
  === Optimizations === 
   Debug level        : basic
   Optimization level : standard
-  Architecture       : intel_xeon
+  Architecture       : intel_core_i3
  
  === Multicore === 
   Parallel build : yes
@@ -433,7 +433,7 @@ P           mkmem           1
   ==== OpenMP parallelism is ON ====
 - Max_threads:       2
 - Num_threads:       2
-- Num_procs:         6
+- Num_procs:         2
 - Dynamic:           F
 - Nested:            F
  
@@ -542,49 +542,49 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
-   0.33615   0.05206   0.00347   0.00000   0.00347  -0.00021  -0.00000  -0.00021  -0.00060  -0.00000   0.00035   0.00000 ...
-   0.05206   0.00679   0.00068   0.00000   0.00068   0.00029   0.00000   0.00029  -0.00015  -0.00000   0.00009   0.00000 ...
-   0.00347   0.00068  -0.20099  -0.00000  -0.00084  -0.00031  -0.00000  -0.00042   0.00085   0.00000  -0.00049   0.00000 ...
-   0.00000   0.00000  -0.00000  -0.20015   0.00000  -0.00000   0.00011   0.00000   0.00000   0.00068   0.00000   0.00068 ...
+   0.33615   0.05206   0.00347   0.00000   0.00347  -0.00021  -0.00000  -0.00021  -0.00060   0.00000   0.00035   0.00000 ...
+   0.05206   0.00679   0.00068   0.00000   0.00068   0.00029   0.00000   0.00029  -0.00015   0.00000   0.00009   0.00000 ...
+   0.00347   0.00068  -0.20099   0.00000  -0.00084  -0.00031   0.00000  -0.00042   0.00085   0.00000  -0.00049   0.00000 ...
+   0.00000   0.00000   0.00000  -0.20015   0.00000   0.00000   0.00011   0.00000   0.00000   0.00068   0.00000   0.00068 ...
    0.00347   0.00068  -0.00084   0.00000  -0.20099  -0.00042   0.00000  -0.00031   0.00085   0.00000  -0.00049   0.00000 ...
-  -0.00021   0.00029  -0.00031  -0.00000  -0.00042  -1.17007  -0.00000  -0.00111   0.00049   0.00000  -0.00029   0.00000 ...
-  -0.00000   0.00000  -0.00000   0.00011   0.00000  -0.00000  -1.16896   0.00000   0.00000   0.00032   0.00000   0.00032 ...
+  -0.00021   0.00029  -0.00031   0.00000  -0.00042  -1.17007   0.00000  -0.00111   0.00049   0.00000  -0.00029   0.00000 ...
+  -0.00000   0.00000   0.00000   0.00011   0.00000   0.00000  -1.16896   0.00000   0.00000   0.00032   0.00000   0.00032 ...
   -0.00021   0.00029  -0.00042   0.00000  -0.00031  -0.00111   0.00000  -1.17007   0.00049   0.00000  -0.00029   0.00000 ...
-  -0.00060  -0.00015   0.00085   0.00000   0.00085   0.00049   0.00000   0.00049  -0.03395   0.00000   0.00015  -0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.03381   0.00000  -0.00011 ...
-   0.00035   0.00009  -0.00049   0.00000  -0.00049  -0.00029   0.00000  -0.00029   0.00015   0.00000  -0.03383  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000  -0.00000  -0.00011  -0.00000  -0.03381 ...
+  -0.00060  -0.00015   0.00085   0.00000   0.00085   0.00049   0.00000   0.00049  -0.03395   0.00000   0.00015   0.00000 ...
+   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.03381   0.00000  -0.00011 ...
+   0.00035   0.00009  -0.00049   0.00000  -0.00049  -0.00029   0.00000  -0.00029   0.00015   0.00000  -0.03383   0.00000 ...
+   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.00011   0.00000  -0.03381 ...
    ...  only 12  components have been written...
  
  
  ITER STEP NUMBER     1
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  Invovl built
-  1497158080
-  1497158080
-   483189760
-   483189760
+  1577857472
+  1577857472
+   953332736
+   953332736
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
@@ -599,63 +599,30 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ************************
  BITNI POINTERI PRE LOOPA
  xXcolsRows
-  1270460800
+  1344659840
  X
-  1497158080
+  1577857472
  X_next
-  1279443776
+  1353642816
  X_prev
-  1282429760
+  1356628800
  X_NP
-  1279443776
+  1353642816
  ***********************
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
+ ILINE           0
  X_next before getBm1X
-  1270460800
+  1353642816
+ X_prev before getBm1X
+  1356628800
+ X_xXColsRows before getBm1X
+  1344659840
+ CPUROW0
+ CPUROW0
  size(cprjin)        2976
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
  hamk%natom          31
  my_nspinor           1
  ndat          96
@@ -667,9 +634,69 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ ILINE           0
  X_next after getBm1X
-  1270460800
+  1353642816
+ X_prev after getBm1X
+  1356628800
+ X_xXColsRows after getBm1X
+  1344659840
+ flag_inv_sym 3
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ ILINE           1
+ X_next before getBm1X
+  1356628800
+ X_prev before getBm1X
+  1344659840
+ X_xXColsRows before getBm1X
+  1353642816
+ CPUROW0
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
  ndat          96
+ CPUROW0
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ ILINE           1
+ X_next after getBm1X
+  1356628800
+ X_prev after getBm1X
+  1344659840
+ X_xXColsRows after getBm1X
+  1353642816
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
+ chebfi%total_spacedim        3888
+ chebfi%bandpp          96
+ CPUROW0
+ USAO U getBm1X
+ ILINE           2
+ X_next before getBm1X
+  1344659840
+ X_prev before getBm1X
+  1353642816
+ X_xXColsRows before getBm1X
+  1356628800
+ chebfi%total_spacedim        3888
+ chebfi%bandpp          96
+ CPUROW0
+ USAO U getBm1X

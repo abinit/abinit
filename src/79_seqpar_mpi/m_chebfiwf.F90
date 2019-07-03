@@ -76,6 +76,9 @@ module m_chebfiwf
   type(mpi_type),pointer,save :: l_mpi_enreg
   type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
   
+    integer, parameter :: DEBUG_ROWS = 10
+  integer, parameter :: DEBUG_COLUMNS = 20
+  
   type(c_ptr) :: cptr
  
   public :: chebfiwf2
@@ -461,7 +464,7 @@ module m_chebfiwf
     call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)
     call xgBlock_reverseMap(BX,gsc,l_icplx,spacedim*blockdim)
     
-    !call debug_helper(X, blockdim)
+    !call debug_helper_colrows(X, blockdim)
     !stop
     
     !print *, "spacedim", spacedim
@@ -483,7 +486,7 @@ module m_chebfiwf
       end if
     end if
       
-    !call debug_helper(X, blockdim)
+    !call debug_helper_colrows(X, blockdim)
     !stop 
 
     if ( size(l_gvnlc) < 2*blockdim*spacedim ) then
@@ -508,7 +511,7 @@ module m_chebfiwf
     
     !print *, "after getghc"  
     
-    !call debug_helper(AX, blockdim)
+    !call debug_helper_colrows(AX, blockdim)
     !stop
   
     ! scale cg, ghc, gsc
@@ -547,7 +550,7 @@ module m_chebfiwf
     end if
     
     !print *, "BAJA DO JAJA"
-    !call debug_helper(AX, blockdim)
+    !call debug_helper_colrows(AX, blockdim)
     !stop
     
     if ( .not. l_paw ) call xgBlock_copy(X,BX)
@@ -556,7 +559,7 @@ module m_chebfiwf
     !call xgBlock_set(BX,gsc(:,1:blockdim*spacedim),0,spacedim)
   end subroutine getghc_gsc1
  
-  subroutine getBm1X(X,Bm1X,transposer)
+  subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,transposer)
     use m_xg, only : xgBlock_t, xgBlock_gemm
     use m_xgTransposer !, only xgTransposer, xgTransposer_getCPURow
 !This section has been created automatically by the script Abilint (TD).
@@ -567,6 +570,9 @@ module m_chebfiwf
 
     type(xgBlock_t), intent(inout) :: X
     type(xgBlock_t), intent(inout) :: Bm1X
+    type(integer), intent(inout) :: iline_t
+    type(xgBlock_t), intent(inout) :: xXColsRows
+    type(xgBlock_t), intent(inout) :: X1
     type(xgTransposer_t), optional, intent(inout) :: transposer
     integer         :: blockdim
     integer         :: spacedim   
@@ -587,6 +593,14 @@ module m_chebfiwf
     
     !print *, "spacedim*blockdim 2", spacedim*blockdim
     !stop
+!    if (iline_t == 2) then
+!      print *, "USAO U getBm1X"
+!      call xgBlock_setBlock(Bm1X, xXColsRows, 1, 3888, 96)  
+!      call xgTransposer_transpose(transposer,STATE_LINALG) !all_to_all
+!      !call xmpi_barrier(chebfi%spacecom)
+!      call debug_helper_linalg(X1)
+!      stop
+!    end if
     
     !stop
     call xgBlock_reverseMap(X,ghc_filter,l_icplx,spacedim*blockdim)
@@ -614,10 +628,29 @@ module m_chebfiwf
           if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2 
         else
           if (cpuRow == 0) then
+            print *, "CPUROW0"
+            !!TODO OVDE JE PROBLEM NE ZNAM ZASTO
             gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
           end if
+         if (iline_t == 2) then
+      print *, "USAO U getBm1X"
+      call xgBlock_setBlock(Bm1X, xXColsRows, 1, 3888, 96)  
+      call xgTransposer_transpose(transposer,STATE_LINALG) !all_to_all
+      !call xmpi_barrier(chebfi%spacecom)
+      call debug_helper_linalg(X1)
+      stop
+    end if
         end if
       end if
+    end if
+    
+    if (iline_t == 2) then
+      print *, "USAO U getBm1X"
+      call xgBlock_setBlock(Bm1X, xXColsRows, 1, 3888, 96)  
+      call xgTransposer_transpose(transposer,STATE_LINALG) !all_to_all
+      !call xmpi_barrier(chebfi%spacecom)
+      call debug_helper_linalg(X1)
+      stop
     end if
     
     !print *, "PROSAO 1"
@@ -700,127 +733,80 @@ module m_chebfiwf
 
   end subroutine precond1
   
-  subroutine debug_helper(debugBlock, nband)
-      
+  subroutine debug_me_g0_COLROWS(debugBlock, chebfi)
+  
     type(xgBlock_t) , intent(inout) :: debugBlock
-    type(integer) , intent(in) :: nband
+    type(chebfi_t) , intent(inout) :: chebfi
     type(xgBlock_t) :: HELPER
     
-    integer :: DEBUG_ROWS = 20
-    integer :: DEBUG_COLUMNS = 4
-
-!    call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-!    call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)) 
-! 
-!    if (xmpi_comm_size(comm) == 1) then !only one MPI proc
-!      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-!      call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)+1) 
-!    end if
+    call xmpi_barrier(chebfi%spacecom)
     
     if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-      !print *, "ZASTO NISTA NE ISPISUJE"
-      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)) 
-      
-      call xgBlock_setBlock(debugBlock, HELPER, nband/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)+1) 
-    else
-      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)) 
-    end if
-    
-    !print *, "debugBlock%rows", rows(debugBlock)
-    !print *, "debugBlock%cols", cols(debugBlock)
-
-  end subroutine debug_helper
-  
-  subroutine debug_helper_linalg(debugBlock, comm, spacedim, neigenpairs, set_option, first_row)
-      
-    type(xgBlock_t) , intent(inout) :: debugBlock
-    type(integer) , intent(in) :: comm
-    type(integer), intent(in) :: spacedim
-    type(integer), intent(in) :: neigenpairs
-    type(integer) , intent(in) :: set_option
-    type(integer), intent(in) :: first_row
-    type(xgBlock_t) :: HELPER
-    
-    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 20
-    
-    call xmpi_barrier(comm) 
-    
-    !print *, "chebfi%bandpp", chebfi%bandpp
-    !print *, "spacedim", spacedim
-    !stop
-    !stop
-    
-    if (set_option == 0) then
-      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-        ! *, "PISE 1"
-        call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 200+xmpi_comm_rank(comm)) 
-      
-        call xgBlock_setBlock(debugBlock, HELPER, neigenpairs/2+1, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 200+xmpi_comm_rank(comm)+1) 
-      else
-        !print *, "2222222222222222222"
-        !print *, "xmpi_comm_rank(comm)", xmpi_comm_rank(comm)
-        if (xmpi_comm_rank(comm) == 0) then
-          call xgBlock_setBlock(debugBlock, HELPER, 1, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm))
-        
-          call xgBlock_setBlock(debugBlock, HELPER, neigenpairs/2+1, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 100+xmpi_comm_rank(comm)+1)  
-        end if
-      end if
-    else
-      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-        print *, "STAMPAM MPI1"
-        print *, "spacedim/2", spacedim/2
-        call xgBlock_setBlock1(debugBlock, HELPER, spacedim/2, FCOL, DROWS, DCOLS) 
+      if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+        call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
         call xgBlock_print(HELPER, 100) 
       
-        call xgBlock_setBlock1(debugBlock, HELPER, spacedim/2+1, FCOL, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 101)
-        !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
-        
-        call xgBlock_setBlock1(debugBlock, HELPER, spacedim/2+2, FCOL, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 110) 
-      
-        call xgBlock_setBlock1(debugBlock, HELPER, spacedim/2+3, FCOL, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 111)
-         
-      else
-        !!TODO STOP DEBUGGING PARTS OF AX AND TRY TO PRINT THE SUM
-        !print *, "STAMPAM MPI2"
-        !print *, "rank, spacedim", xmpi_comm_rank(comm), spacedim
-        if (xmpi_comm_rank(comm) == 0) then
-          !print *, "spacedim-1", spacedim-1
-          !stop
-          
-          call xgBlock_setBlock1(debugBlock, HELPER, spacedim-1, FCOL, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 200)
-          
-          !print *, "spacedim", spacedim
-          !print *, "FCOL", FCOL
-          !print *, "00000000000000000000000000000000000000000000000000"
-          
-          
-          call xgBlock_setBlock1(debugBlock, HELPER, spacedim, FCOL, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 201)  
-        else !!TODO OVO IZNAD JE OK OVO ISPOD NE VALJA NE ZNAM ZASTO POLUDECU!!!!
-          !print *, "FROW, FCOL, DROWS, DCOLS", FROW, FCOL, DROWS, DCOLS
-          call xgBlock_setBlock1(debugBlock, HELPER, FROW, FCOL, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 210)
-        
-          call xgBlock_setBlock1(debugBlock, HELPER, FROW+1, FCOL, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 211)
-        end if
+        call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, 2, 5) 
+        call xgBlock_print(HELPER, 101) 
       end if
+    else 
+      call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
+      call xgBlock_print(HELPER, 200 + xmpi_comm_rank(chebfi%spacecom)) 
+    end if
+    
+    call xmpi_barrier(chebfi%spacecom)   
+    
+  end subroutine
+  
+  subroutine debug_helper_colrows(debugBlock, chebfi)
+      
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(chebfi_t) , intent(inout) :: chebfi
+    type(xgBlock_t) :: HELPER
+    
+    call xmpi_barrier(chebfi%spacecom)
+    
+    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+      !print *, "USAOOSOOSOSOSO"
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
+      
+      call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)+1) 
+    else
+      !print *, "2222222222222222222"
+      call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 200+xmpi_comm_rank(chebfi%spacecom)) 
     end if
     
     !print *, "debugBlock%rows", rows(debugBlock)
     !print *, "debugBlock%cols", cols(debugBlock)
-    call xmpi_barrier(comm)
+    call xmpi_barrier(chebfi%spacecom)
+
+  end subroutine debug_helper_colrows
+  
+  subroutine debug_helper_linalg(debugBlock)
+      
+    type(xgBlock_t) , intent(inout) :: debugBlock
+    type(xgBlock_t) :: HELPER
+    
+    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
+     
+      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+        call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 100) 
+        
+        call xgBlock_setBlock1(debugBlock, HELPER, 3888/2+1, FCOL, DROWS, DCOLS) 
+        call xgBlock_print(HELPER, 101)    
+      else
+        if (xmpi_comm_rank(xmpi_world) == 0) then
+          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+          call xgBlock_print(HELPER, 200)
+        else 
+          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+          call xgBlock_print(HELPER, 201)
+        end if
+      end if
 
   end subroutine debug_helper_linalg
   
