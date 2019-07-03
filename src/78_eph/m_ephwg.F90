@@ -394,12 +394,13 @@ end function ephwg_from_ebands
 !!
 !! SOURCE
 
-subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
+subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
 
 !Arguments ------------------------------------
 !scalars
  class(ephwg_t),target,intent(inout) :: self
  integer,intent(in) :: prtvol, comm
+ logical,optional,intent(in) :: skip_mapping
 !arrays
  real(dp),intent(in) :: kpoint(3)
 
@@ -407,6 +408,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 !scalars
  integer,parameter :: sppoldbl1=1
  integer :: ierr,ii
+ logical :: do_mapping
  real(dp) :: dksqmax, cpu, wall, gflops
  character(len=80) :: errorstring
  character(len=500) :: msg
@@ -416,6 +418,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
 !----------------------------------------------------------------------
 
+ do_mapping = .true.; if (present(skip_mapping)) do_mapping = .not. skip_mapping
  cryst => self%cryst
  call cwtime(cpu, wall, gflops, "start")
 
@@ -432,44 +435,48 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
  ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
- call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
+ if (do_mapping) then
+   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
 
- !call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, self%lgk%nsym_lg,&
- !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+   !call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, self%lgk%nsym_lg,&
+   !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
 
- if (dksqmax > tol12) then
-   write(msg, '(a,es16.6)' ) &
-    "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
-   MSG_ERROR(msg)
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6)' ) &
+      "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     MSG_ERROR(msg)
+   end if
+   ABI_SFREE(self%lgk2ibz)
+   call alloc_copy(indkk(:, 1), self%lgk2ibz)
+   ABI_FREE(indkk)
+   call cwtime_report(" listkk1", cpu, wall, gflops)
  end if
- ABI_SFREE(self%lgk2ibz)
- call alloc_copy(indkk(:, 1), self%lgk2ibz)
- ABI_FREE(indkk)
- call cwtime_report(" listkk1", cpu, wall, gflops)
 
- ! Get mapping (k + q) --> initial IBZ.
- do ii=1,self%nq_k
-   self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
- end do
- ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+ if (do_mapping) then
+   ! Get mapping (k + q) --> initial IBZ.
+   do ii=1,self%nq_k
+     self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
+   end do
+   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
 
- call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
+   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
 
- if (dksqmax > tol12) then
-   write(msg, '(a,es16.6)' ) &
-    "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
-   MSG_ERROR(msg)
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6)' ) &
+      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     MSG_ERROR(msg)
+   end if
+   call cwtime_report(" listkk2", cpu, wall, gflops)
+
+   ABI_SFREE(self%kq2ibz)
+   call alloc_copy(indkk(:, 1), self%kq2ibz)
+   ABI_FREE(indkk)
+   do ii=1,self%nq_k
+     self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) - kpoint
+   end do
  end if
- call cwtime_report(" listkk2", cpu, wall, gflops)
-
- ABI_SFREE(self%kq2ibz)
- call alloc_copy(indkk(:, 1), self%kq2ibz)
- ABI_FREE(indkk)
- do ii=1,self%nq_k
-   self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) - kpoint
- end do
 
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))

@@ -186,7 +186,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 !Local variables ------------------------------
 !scalars
  integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0,debug=0
- integer :: otimrev_k,ierr,itim,isym,ik_ibz,ik_bz,ksign
+ integer :: otimrev_k,ierr,itim,isym,ik_ibz,ik_bz,ksign,isym_lgk
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)
  real(dp) :: kred(3),shift(3)
@@ -242,7 +242,10 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  ABI_CALLOC(new%weights, (new%nibz))
 
  do ik_bz=1,nkbz
-   ik_ibz = new%bz2ibz_smap(1,ik_bz)
+   ik_ibz   = new%bz2ibz_smap(1,ik_bz)
+   isym_lgk = new%bz2ibz_smap(2,ik_bz)
+   new%bz2ibz_smap(2,ik_bz) = lgsym2glob(1,isym_lgk)
+   new%bz2ibz_smap(3,ik_bz) = lgsym2glob(2,isym_lgk)
    new%weights(ik_ibz) = new%weights(ik_ibz) + 1
  end do
  new%weights(:) = new%weights(:) / nkbz

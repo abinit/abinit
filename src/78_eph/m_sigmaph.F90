@@ -3878,7 +3878,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    if (self%use_doublegrid) then
      call self%ephwg%double_grid_setup_kpoint(self%eph_doublegrid, kk, prtvol, comm)
    else
-     call self%ephwg%setup_kpoint(kk, prtvol, comm)
+     call self%ephwg%setup_kpoint(kk, prtvol, comm, skip_mapping=.true.)
    end if
    call self%ephwg%report_stats()
  endif
@@ -3944,9 +3944,11 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    self%ind_ibzk2ibz = 0
    do ikpt=1,self%nqbz
      ibz_k    = lgk_ptr%bz2ibz_smap(1,ikpt)
-     isym_lgk = lgk_ptr%bz2ibz_smap(2,ikpt)
-     isym_k   = lgk_ptr%lgsym2glob(1,isym_lgk)
-     itim_k   = lgk_ptr%lgsym2glob(2,isym_lgk)
+     !isym_lgk = lgk_ptr%bz2ibz_smap(2,ikpt)
+     !isym_k   = lgk_ptr%lgsym2glob(1,isym_lgk)
+     !itim_k   = lgk_ptr%lgsym2glob(2,isym_lgk)
+     isym_k   = lgk_ptr%bz2ibz_smap(2,ikpt)
+     itim_k   = lgk_ptr%bz2ibz_smap(3,ikpt)
      ! I assume that isym=1 and itim_k=0 is identity but still verify the kpoint
      if (isym_k /= 1 .or. itim_k /= 1 .or. any(lgk_ptr%bz2ibz_smap(4:,ikpt)/=0)) cycle
      ! check IBZ_k --> BZ
@@ -4037,6 +4039,15 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  ABI_FREE(iqk2dvdb)
 
  call cwtime_report(" k+q --> ebands", cpu, wall, gflops)
+
+ if (self%qint_method > 0 .and. .not. self%use_doublegrid) then
+   !self%ephwg%lgk2ibz
+   ABI_REMALLOC(self%ephwg%lgk2ibz,(self%nqibz_k))
+   self%ephwg%lgk2ibz = self%ind_ibzk2ibz(1, :)
+   !self%ephwg%kq2ibz
+   ABI_REMALLOC(self%ephwg%kq2ibz,(self%nqibz_k))
+   self%ephwg%kq2ibz = self%indkk_kq(1, :)
+ end if
 
 end subroutine sigmaph_setup_kcalc
 !!***
