@@ -249,7 +249,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  if (my_rank == 0) then
    path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-   call transport_rta_ncwrite(transport_rta, cryst, ncid)
+   call transport_rta_ncwrite(transport_rta, cryst, dtset, ncid)
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
@@ -862,11 +862,12 @@ end subroutine transport_rta_compute_mobility
 !!
 !! SOURCE
 
-subroutine transport_rta_ncwrite(self, cryst, ncid)
+subroutine transport_rta_ncwrite(self, cryst, dtset, ncid)
 
 !Arguments --------------------------------------
  type(transport_rta_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
+ type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: ncid
 
 !Local variables --------------------------------
