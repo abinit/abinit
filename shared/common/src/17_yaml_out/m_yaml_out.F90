@@ -49,7 +49,7 @@ module m_yaml_out
 
   integer,parameter :: dp=kind(1.0D0)
   character(len=1),parameter :: eol=char(10)
-  character(len=9),parameter :: default_rfmt='(ES25.17)'
+  character(len=9),parameter :: default_rfmt='(ES23.15E3)'
   character(len=4),parameter :: default_ifmt='(I8)'
   character(len=13),parameter :: default_kfmt="(A)"
   character(len=13),parameter :: default_sfmt="(A)"
