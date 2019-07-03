@@ -1839,7 +1839,8 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
              gfact2=dot_product(gmet(delta,:),gvec(:))
              gfact=gvec(alpha)*gfact1*gfact2/gsquar
 
-             term1=delag*gfact2+delad*gfact1+deldg*gvec(alpha)*gmet(gamma,delta)
+!             term1=delag*gfact2+delad*gfact1+deldg*gvec(alpha)*gmet(gamma,delta)
+             term1=delag*gfact2+delad*gfact1+gvec(alpha)*gmet(gamma,delta)
              term1=term1-gfact
              term1=term1*vion1dq(1)/gmag
 

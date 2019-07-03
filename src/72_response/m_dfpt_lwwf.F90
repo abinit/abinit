@@ -3751,10 +3751,10 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
          !Read ket ground-state wavefunctions
          cwave0i(:,:)=cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
 
-         !Compute < g |H^{\tau_{\kappa\alpha}}_{\gamma\delta} | u_{i,k}^{(0)} >
-         call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
-         & idir,ipert,mpi_enreg,optlocal,optnl,iq1grad,rf_hamkq,qdir2=iq2grad)
-         ghatdisdqdq_c0m(:,:,iband,iq1grad,iq2grad,iatpert)=gh1dqc(:,:)
+        !Compute < g |H^{\tau_{\kappa\alpha}}_{\gamma\delta} | u_{i,k}^{(0)} >
+        call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
+        & idir,ipert,mpi_enreg,optlocal,optnl,iq1grad,rf_hamkq,qdir2=iq2grad)
+        ghatdisdqdq_c0m(:,:,iband,iq1grad,iq2grad,iatpert)=gh1dqc(:,:)
 
        end do !iband
 
@@ -3788,12 +3788,12 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 !--------------------------------------------------------------------------------------
 ! Acumulates the three frozen wf terms of the q-gradient of the internal strain
 !--------------------------------------------------------------------------------------
-frwfdq_k=zero
+ frwfdq_k=zero
 
-!Compute (k+G) vectors
- nkpg=3;
- ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
- call mkkpg(kg_k,kpg_k,kpt,nkpg,npw_k)
+ !Generate k+G vectors
+ nkpg=3;                                                                                              
+ ABI_ALLOCATE(kpg_k,(npw_k,nkpg))                                                                    
+ call mkkpg(kg_k,kpg_k,kpt,nkpg,npw_k)  
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert= 1, natpert
@@ -3830,7 +3830,6 @@ frwfdq_k=zero
          !Accumulate this term (take here into account the -i·-i prefactors and the conjugate complex)
          frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(1,iatom,iatdir,ka,kb,iq1grad)-dotr
          frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(2,iatom,iatdir,ka,kb,iq1grad)+doti
-           
 
          !Next complete the other two terms involving the 1st q-gradient of atdis Hamiltonian:
          !<u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma} \frac{\delta_{\beta\delta}}{2} | u_{i,k}^{(0)} >
@@ -3852,7 +3851,7 @@ frwfdq_k=zero
          !Take into account band occupations, kpt weights and two pi factor from the term 
          !(\hat{p}_{k\beta + \frac{q_{\beta}}{2}}) appearing before the double q-derivation
          frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)=frwfdq_k(:,iatom,iatdir,ka,kb,iq1grad)* &
-       & wtk_k * occ_k(iband) * two_pi
+       & wtk_k*occ_k(iband)*two_pi
 
        end do !iband
 
