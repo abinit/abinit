@@ -38,6 +38,10 @@ module m_spmat_dense
   implicit none
 !!***
   private
+  !-----------------------------------------------------------------------
+  !> @brief The Dense "sparse matrix" type
+  !> the real matrix is saved in a 2D array.
+  !-----------------------------------------------------------------------
   type, extends(base_mat2d_t), public :: dense_mat_t
      real(dp), allocatable :: mat(:,:)
    contains
@@ -47,6 +51,11 @@ module m_spmat_dense
   end type dense_mat_t
 
 contains
+  !-----------------------------------------------------------------------
+  !> @brief initialize
+  !> @param [in] mshape: shape of matrix, should be size 2.
+  !-----------------------------------------------------------------------
+
   subroutine dense_mat_t_initialize(self,  mshape)
     class(dense_mat_t), intent(inout) :: self
     integer, intent(in)::mshape(:)
@@ -59,6 +68,9 @@ contains
     self%mat(:,:)=0.0d0
   end subroutine dense_mat_t_initialize
 
+  !-----------------------------------------------------------------------
+  !> @brief finalize
+  !-----------------------------------------------------------------------
   subroutine dense_mat_t_finalize(self)
     class(dense_mat_t), intent(inout) :: self
     if (allocated(self%mat))  ABI_DEALLOCATE(self%mat)
@@ -68,6 +80,25 @@ contains
     self%ndim=0
   end subroutine dense_mat_t_finalize
 
+  !-----------------------------------------------------------------------
+  !> @brief add one entry to matrix
+  !> @param [in]  ind: the indices of the entry
+  !> @param [in]  val: the value of the entry
+  !-----------------------------------------------------------------------
+  subroutine add_entry(self, ind, val)
+    class(dense_mat_t), intent(inout) :: self
+    integer, intent(in) :: ind(self%ndim)
+    real(dp), intent(in) :: val
+    self%mat(ind(1), ind(2)) =   self%mat(ind(1), ind(2)) + val
+  end subroutine add_entry
+
+
+  !-----------------------------------------------------------------------
+  !> @brief  insert one entry to dense matrix. (Overwrite old value.)
+  !> @param [in] irow: row index
+  !> @param [in] icol: col index
+  !> @param [out] val: value
+  !-----------------------------------------------------------------------
   subroutine dense_mat_insert(self, irow, icol, val)
     class(dense_mat_t), intent(inout) :: self
     integer, intent(inout) :: irow, icol
@@ -75,7 +106,12 @@ contains
     self%mat(irow, icol)=val
   end subroutine dense_mat_insert
 
-  ! dense matrix-vector multiplication, using blas DGEMV
+  !-----------------------------------------------------------------------
+  !> @brief dense matrix-vector multiplication, using blas DGEMV
+  !>  M x=b
+  !> @param [in] x
+  !> @param [out] b
+  !-----------------------------------------------------------------------
   subroutine dense_mat_t_mv(self, x, b)
     class(dense_mat_t), intent(in) :: self
     real(dp), intent(in) :: x(self%ncol)
