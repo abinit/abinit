@@ -380,18 +380,19 @@ module m_chebfi2
     double precision :: tsec(2)
                     
     interface
-      subroutine getAX_BX(X,AX,BX,transposer)
+      subroutine getAX_BX(X,AX,BX,npband,transposer)
         use m_xg, only : xgBlock_t
         use m_xgTransposer !, only: xgTransposer_t
         type(xgBlock_t), intent(inout) :: X
         type(xgBlock_t), intent(inout) :: AX
         type(xgBlock_t), intent(inout) :: BX
+        type(integer), intent(inout) :: npband
         type(xgTransposer_t), optional, intent(inout) :: transposer
       end subroutine getAX_BX
     end interface
     interface
       !call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, xXColsRows, X, chebfi%xgTransposerX) !ovde pobrljavi X skroz za
-      subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,transposer)
+      subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,npband,transposer)
         use m_xg, only : xgBlock_t
         use m_xgTransposer !, only: xgTransposer_t
         type(xgBlock_t), intent(inout) :: X
@@ -399,6 +400,7 @@ module m_chebfi2
         type(integer), intent(inout) :: iline_t
         type(xgBlock_t), intent(inout) :: xXColsRows
         type(xgBlock_t), intent(inout) :: X1
+        type(integer), intent(inout) :: npband
         type(xgTransposer_t), optional, intent(inout) :: transposer
       end subroutine getBm1X
     end interface 
@@ -615,7 +617,7 @@ module m_chebfi2
     
     call timab(tim_getAX_BX,1,tsec)         
     !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
-    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
+    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%nproc_band,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
     call timab(tim_getAX_BX,2,tsec)
     
     
@@ -892,7 +894,7 @@ module m_chebfi2
       !call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
       !stop
       !print *, "getAX_BX before"
-      call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
+      call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%nproc_band,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
       !print *, "getAX_BX after"
       !stop
       !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
@@ -1276,7 +1278,7 @@ module m_chebfi2
     integer :: iline_t
              
     interface
-      subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,transposer)
+      subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,npband,transposer)
         use m_xg, only : xgBlock_t
         use m_xgTransposer !, only: xgTransposer_t
         type(xgBlock_t), intent(inout) :: X
@@ -1284,6 +1286,7 @@ module m_chebfi2
         type(integer), intent(inout) :: iline_t
         type(xgBlock_t), intent(inout) :: xXColsRows
         type(xgBlock_t), intent(inout) :: X1
+        type(integer), intent(inout) :: npband
         type(xgTransposer_t), optional, intent(inout) :: transposer    
       end subroutine getBm1X
     end interface
@@ -1326,7 +1329,7 @@ module m_chebfi2
       
       iline_t = iline
       !!TODO UCI U WRAPPER SA ILINE=2 i transposerom i probati transponovati unutra
-      call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, chebfi%xXColsRows, chebfi%X, chebfi%xgTransposerX) !ovde pobrljavi X skroz za iline 2 MPI istwfk 2
+      call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, chebfi%xXColsRows, chebfi%X, chebfi%nproc_band, chebfi%xgTransposerX) !ovde pobrljavi X skroz za iline 2 MPI istwfk 2
       
       if (xmpi_comm_rank(chebfi%spacecom) == 0) then
         print *, "ILINE", iline
