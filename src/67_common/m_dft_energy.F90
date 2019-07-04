@@ -37,6 +37,7 @@ module m_dft_energy
  use m_gemm_nonlop
  use m_xcdata
  use m_cgtools
+ use m_hightemp
 
  use m_time,             only : timab
  use m_geometry,         only : metric
@@ -814,7 +815,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  if (optene==0.or.optene==2) then
    etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
 !&   energies%e_nlpsp_vfock - energies%e_fock0 +
-!   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock 
+!   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock
 &   energies%e_nlpsp_vfock + energies%e_localpsp + energies%e_corepsp
    if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then
@@ -841,6 +842,13 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    if (optene==0.or.optene==2) electronpositron%e0=etotal
    if (optene==1.or.optene==3) electronpositron%e0=etotal-energies%edc_electronpositron
    etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
+ end if
+
+!  Blanchet Add the energy contribution
+ if(associated(hightemp)) then
+   energies%e_kin_freeel=hightemp%e_kin_freeel
+   energies%e_shiftfactor=hightemp%e_shiftfactor
+   etotal=etotal+energies%e_kin_freeel
  end if
 
 !Compute new charge density based on incoming wf

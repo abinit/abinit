@@ -552,9 +552,9 @@ contains
 
 !Blanchet - Adding the hightemp continous contribution to stress tensor
  if(associated(hightemp)) then
-   strten(1:3)=strten(1:3)-(2./3.)*hightemp%e_kin_freeel
+   strten(1:3)=strten(1:3)-(2./3.)*hightemp%e_kin_freeel/hightemp%ucvol
  end if
-
+ 
 !=======================================================================
 !================ Print out info about stress tensor ===================
 !=======================================================================

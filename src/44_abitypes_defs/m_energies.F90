@@ -547,6 +547,7 @@ end subroutine energies_to_array
 &   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) eint=eint+energies%e_elecfield    !!HONG
    eint = eint + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
    if (positron) eint=eint+energies%e0_electronpositron+energies%e_electronpositron
+   if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) eint=eint+energies%e_kin_freeel
  end if
  if (optdc>=1) then
    eintdc = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
