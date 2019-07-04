@@ -256,6 +256,11 @@ contains
     ! It is only for lattice potential
     if(.False.) then
        call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
+    else:
+       natom=0
+       ntypat=0
+       nph1l=0
+       nrpt=0
     endif
 
     !Read the input file, and store the information in a long string of characters
