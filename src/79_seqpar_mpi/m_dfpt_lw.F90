@@ -3185,7 +3185,7 @@ end subroutine dfpt_flexo
    end do
 
  else
-   write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for long-wave DFPT calculations'
    MSG_BUG(msg)
  end if
 
@@ -3448,7 +3448,6 @@ end subroutine dfpt_flexo
          call cart39(flg1,flg2,transpose(rprimd),matom+2,matom,transpose(gprimd),vec1,vec2)
          do iq1dir=1,3
            elec_flexotens_red(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)*fac
-           redflg(iefidir,iq1dir,istr1dir,istr2dir)=flg2(iq1dir)
          end do
        end do
      end do
@@ -3961,11 +3960,12 @@ end subroutine dfpt_flexoout
  integer :: alpha,beta,delta,gamma
  integer :: iatdir,iatom,iatpert,ibuf,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
  integer, parameter :: re=1,im=2
- real(dp) :: tfrim,tfrre,t4im,tmpim,tmpre,t4re
+ real(dp) :: fac,tfrim,tfrre,t4im,tmpim,tmpre,t4re
+ character(len=500) :: msg                   
 
 !arrays
  integer :: flg1(3),flg2(3)
- integer, allocatable :: typeI_cartflag(:,:,:,:,:)
+ integer, allocatable :: typeI_cartflag(:,:,:,:,:),redflg(:,:,:,:,:)
  real(dp) :: vec1(3),vec2(3)
  real(dp),allocatable :: frwfdq_cart(:,:,:,:,:,:)
  real(dp),allocatable :: isdqtens_cart(:,:,:,:,:,:),isdqtens_red(:,:,:,:,:,:)
@@ -4061,6 +4061,85 @@ end subroutine dfpt_flexoout
      end do
    end do
 
+ else if (kptopt==2) then
+
+   !Compute real part of isdq tensor and independent
+   !terms. The T4 term and the frozen wf contributions need further treatment 
+   !and they will be lately added to the cartesian coordinates
+   !version of the isdq tensor
+   do istrpert=1,nstrpert
+     istr1dir=pert_strain(3,istrpert)
+     istr2dir=pert_strain(4,istrpert)
+     do iq1grad=1,nq1grad
+       iq1dir=q1grad(2,iq1grad)
+       do iatpert=1,natpert
+         iatom=pert_atdis(1,iatpert)
+         iatdir=pert_atdis(2,iatpert)
+
+         if (isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)==1) then  
+        
+           !The interesting magnitude is minus the gradient of the second order Energy
+           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+         & ( isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
+         &   isdqwf(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
+           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+         & ( isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
+         &   isdqwf(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
+
+           !Multiply by the imaginary unit that has been factorized out
+           tmpre=isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           tmpim=isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpim
+           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+           !Do the smae for the T4 term 
+           !(This is different from the flexoout routine because the factorized -i in the T4
+           ! has to be multiplied by -1 as we did for the rest of contributions)
+           tmpre=isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           tmpim=isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpim
+           isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
+
+           !Multiply by -1 the frozen wf contribution 
+           tmpre=frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           tmpim=frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpre
+           frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
+
+           !Compute and save individual terms in mixed coordinates
+           if (prtvol==1) then
+             
+             tmpim=isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+             tmpim=isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t1(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+             tmpim=isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t2(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+             tmpim=isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t3(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+             tmpim=isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t5(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+           end if
+
+         end if
+
+       end do
+     end do
+   end do
+
+ else
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for long-wave DFPT calculations'
+   MSG_BUG(msg)
  end if
 
 !Transform to complete cartesian coordinates all the contributions
@@ -4364,6 +4443,58 @@ end subroutine dfpt_flexoout
    close(77)
    close(78)
  end if
+
+!Calculate the contribution to the d3etot in mixed (reduced/cartesian) coordinates
+ isdqtens_red=isdqtens_cart
+ ABI_DEALLOCATE(isdqtens_cart) 
+ ABI_DEALLOCATE(isdqwf_t4_cart)
+ ABI_DEALLOCATE(frwfdq_cart)
+ ABI_DEALLOCATE(typeI_cartflag)
+ ABI_ALLOCATE(redflg,(matom,3,3,3,3))
+
+!1st transform back coordinates of the electric field derivative of the flexoelectric tensor
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iq1dir=1,3
+       do ii=1,2
+         do iatom=1,matom
+           do iatdir=1,3
+             vec1(iatdir)=isdqtens_red(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             flg1(iatdir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,transpose(rprimd),iatom,matom,transpose(gprimd),vec1,vec2)
+           do iatdir=1,3
+             isdqtens_red(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iatdir)
+             redflg(iatom,iatdir,iq1dir,istr1dir,istr2dir)=flg2(iatdir)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!2nd transform back coordinates of the q-gradient (treat it as electric field)
+!of the flexoelectric tensor
+ fac=two_pi ** 2
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iatom=1,matom
+       do iatdir=1,3
+         do ii=1,2
+           do iq1dir=1,3
+           vec1(iq1dir)=isdqtens_red(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           flg1(iq1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,transpose(rprimd),matom+2,matom,transpose(gprimd),vec1,vec2)
+           do iq1dir=1,3
+             isdqtens_red(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)*fac
+             redflg(iatom,iatdir,iq1dir,istr1dir,istr2dir)=flg2(iq1dir)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
 
  DBG_EXIT("COLL")
  end subroutine dfpt_isdqout
