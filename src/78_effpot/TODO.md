@@ -22,6 +22,14 @@ State:
 #### [DONE] add the data structure to the manager.
 ###  [DONE] move random number generator to manager and use pointer in each mover.
 
+### [ISSUE] Where to store the total energy.
+	When there are multiple potential, each mover get part of the energies but not
+       all of them.
+	e.g. For spin+lattice. Spin mover get E(spin) + E(spin-lattice-coupling).
+            Lattice_mover get E(lattice) + E(spin-lattice-couping) 
+        Another problem is from the kinetic energy, which is not calculated by the potential
+	but the lattic mover.
+
 ---
 
 ## Documenation
@@ -52,14 +60,14 @@ State:
        * [DONE] implement get_temperature and get_kinetic_energy
        * [TODO] More options other than Maxwell-Boltzmann distribution
        * [DONE] make center of mass fixed.
-       * [TODO] make sure there is no rotation. (useful for non-periodic structure only.)
+       * [TODO] make sure there is no global rotation. (useful for non-periodic structure only.)
 
 #### [TODO] implement movers. (hexu) [time: July 2019]
       * [DONE] implement Velocity Verlet mover
       * [DONE] implement Langevin mover
       * [DONE] implement Berendsen NVT
-      * [TODO] implement Berendsen NPT
-      * [DONE] add friction parameter for langevin, taut for Berendsen, (taup) for Be
+      * [Pending] implement Berendsen NPT  (Pending due to no testcase available)
+      * [DONE] add friction parameter for langevin, taut for Berendsen, (taup) for Berendsen NPT
       * [DONE] Add documentation to input variables
 
 
@@ -75,13 +83,12 @@ State:
 
 ### [TODO?] biqudratic terms (as computed from TB2J)
 
-### [TODO] 
 
 ---
 
 ## Spin-Lattice coupling
 
-### [TODO] Test two dynamics without coupling (hexu) [time: July,2019]
+### [DONE] Test two dynamics without coupling (hexu) [time: July,2019]
 
 ### [TODO] Implement primitive Oiju potential
 
