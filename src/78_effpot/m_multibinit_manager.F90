@@ -239,8 +239,12 @@ contains
     character(len=strlen) :: string
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
+    
+    natom=0
+    nph1l=0
+    nrpt=0
+    ntypat=0
     call init_mpi_info(master, iam_master, my_rank, comm, nproc)
-
     !To automate a maximum calculation, multibinit reads the number of atoms
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
     !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
@@ -256,11 +260,6 @@ contains
     ! It is only for lattice potential
     if(.False.) then
        call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
-    else:
-       natom=0
-       ntypat=0
-       nph1l=0
-       nrpt=0
     endif
 
     !Read the input file, and store the information in a long string of characters
