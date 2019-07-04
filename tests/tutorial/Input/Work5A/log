@@ -23,7 +23,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1106
 message: |
-    Renaming old t03_2_x.out to t03_2_x.out0139
+    Renaming old t03_2_x.out to t03_2_x.out0253
 ...
  
 
@@ -42,8 +42,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  3 Jul 2019.
-- ( at 18h53 )
+.Starting date : Thu  4 Jul 2019.
+- ( at 17h07 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -51,7 +51,7 @@ message: |
  === Build Information === 
   Version       : 8.11.8
   Build target  : x86_64_linux_intel19.0
-  Build date    : 20190628
+  Build date    : 20190627
  
  === Compiler Suite === 
   C compiler       : gnu7.4
@@ -59,13 +59,13 @@ message: |
   Fortran compiler : intel19.0
   CFLAGS           :  -g -O2 -mtune=native -march=native
   CXXFLAGS         :  -g -O2 -mtune=native -march=native
-  FCFLAGS          : -O2 -qopenmp -heap-arrays 1000000
+  FCFLAGS          : -O2 -qopenmp -heap-arrays 1000000 -traceback
   FC_LDFLAGS       :    -static-intel -static-libgcc
  
  === Optimizations === 
   Debug level        : basic
   Optimization level : standard
-  Architecture       : intel_core_i3
+  Architecture       : intel_xeon
  
  === Multicore === 
   Parallel build : yes
@@ -145,7 +145,7 @@ message: |
 - root for input  files -> t03_xi
 - root for output files -> t03_xo
  
--instrng: 111 lines of input have been read from file t03_2.in
+-instrng: 112 lines of input have been read from file t03_2.in
  
 
  Please give name of formatted atomic psp file
@@ -166,6 +166,32 @@ message: |
  inkpts: Sum of 1 k point weights is    1.000000
  inkpts: Sum of 1 k point weights is    1.000000
  chkneu: initialized the occupation numbers for occopt= 3, spin-unpolarized or antiferromagnetic case:
+ getmpw sequential formula gave:     1951
+ 
+ ====================================================================================================
+ Searching for all possible proc distributions for this input with #CPUs<=24 and 12 openMP threads:
+ 
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ |       npkpt|      npband| #Threads|  #MPI(proc)|       #CPUs|    WEIGHT|
+ |    1<<    1|    1<<    2|       12|    1<<    2|  12<<    24|  <=    24|
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ |           1|           2|       12|           2|          24|     7.862|
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Only the best possible choices for nproc are printed...
+ 
+ >>> Possible (best) choices for the number of bands (nband) are:
+     nband=   192 using     24 CPUs =     2 MPI x 12 threads (npband=    2)
+     nband=   196 using     24 CPUs =     2 MPI x 12 threads (npband=    2)
+     nband=   194 using     24 CPUs =     2 MPI x 12 threads (npband=    2)
+     nband=   195 using     12 CPUs =     1 MPI x 12 threads (npband=    1)
+     nband=   193 using     12 CPUs =     1 MPI x 12 threads (npband=    1)
+ >>> The present nband value (   192) seems to be the best choice!
+ >>> Note that with the "Chebyshev Filtering" algorithm, it is often
+     better to increase the number of bands (10% more or a few tens more).
+     Advice: increase nband and put nbdbuf input variable to (nband_new-nband_old).
+ ====================================================================================================
+ 
+ 
 getng is called for the coarse grid:
  For input ecut=  8.000000E+00 best grid ngfft=      40      40      40
        max ecut=  8.388398E+00
@@ -222,12 +248,13 @@ _ WF disk file :      2.850 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    2
+-  max_nthreads =   12
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
             acell      1.5340000000E+01  1.5340000000E+01  1.5340000000E+01 Bohr
               amu      1.37327000E+02
+        autoparal           1
            bandpp          96
       chksymbreak           0
      densfor_pred           6
@@ -431,9 +458,9 @@ P           mkmem           1
  CHARACTER: Data type name: CHARACTER             Kind value: 1
 
   ==== OpenMP parallelism is ON ====
-- Max_threads:       2
-- Num_threads:       2
-- Num_procs:         2
+- Max_threads:       12
+- Num_threads:       12
+- Num_procs:         6
 - Dynamic:           F
 - Nested:            F
  
@@ -542,51 +569,51 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
-   0.33615   0.05206   0.00347   0.00000   0.00347  -0.00021  -0.00000  -0.00021  -0.00060   0.00000   0.00035   0.00000 ...
-   0.05206   0.00679   0.00068   0.00000   0.00068   0.00029   0.00000   0.00029  -0.00015   0.00000   0.00009   0.00000 ...
-   0.00347   0.00068  -0.20099   0.00000  -0.00084  -0.00031   0.00000  -0.00042   0.00085   0.00000  -0.00049   0.00000 ...
-   0.00000   0.00000   0.00000  -0.20015   0.00000   0.00000   0.00011   0.00000   0.00000   0.00068   0.00000   0.00068 ...
+   0.33615   0.05206   0.00347   0.00000   0.00347  -0.00021  -0.00000  -0.00021  -0.00060  -0.00000   0.00035   0.00000 ...
+   0.05206   0.00679   0.00068   0.00000   0.00068   0.00029   0.00000   0.00029  -0.00015  -0.00000   0.00009   0.00000 ...
+   0.00347   0.00068  -0.20099  -0.00000  -0.00084  -0.00031  -0.00000  -0.00042   0.00085   0.00000  -0.00049   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.20015   0.00000  -0.00000   0.00011   0.00000   0.00000   0.00068   0.00000   0.00068 ...
    0.00347   0.00068  -0.00084   0.00000  -0.20099  -0.00042   0.00000  -0.00031   0.00085   0.00000  -0.00049   0.00000 ...
-  -0.00021   0.00029  -0.00031   0.00000  -0.00042  -1.17007   0.00000  -0.00111   0.00049   0.00000  -0.00029   0.00000 ...
-  -0.00000   0.00000   0.00000   0.00011   0.00000   0.00000  -1.16896   0.00000   0.00000   0.00032   0.00000   0.00032 ...
+  -0.00021   0.00029  -0.00031  -0.00000  -0.00042  -1.17007  -0.00000  -0.00111   0.00049   0.00000  -0.00029   0.00000 ...
+  -0.00000   0.00000  -0.00000   0.00011   0.00000  -0.00000  -1.16896   0.00000   0.00000   0.00032   0.00000   0.00032 ...
   -0.00021   0.00029  -0.00042   0.00000  -0.00031  -0.00111   0.00000  -1.17007   0.00049   0.00000  -0.00029   0.00000 ...
-  -0.00060  -0.00015   0.00085   0.00000   0.00085   0.00049   0.00000   0.00049  -0.03395   0.00000   0.00015   0.00000 ...
-   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.03381   0.00000  -0.00011 ...
-   0.00035   0.00009  -0.00049   0.00000  -0.00049  -0.00029   0.00000  -0.00029   0.00015   0.00000  -0.03383   0.00000 ...
-   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.00011   0.00000  -0.03381 ...
+  -0.00060  -0.00015   0.00085   0.00000   0.00085   0.00049   0.00000   0.00049  -0.03395   0.00000   0.00015  -0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000   0.00000  -0.03381   0.00000  -0.00011 ...
+   0.00035   0.00009  -0.00049   0.00000  -0.00049  -0.00029   0.00000  -0.00029   0.00015   0.00000  -0.03383  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00068   0.00000   0.00000   0.00032   0.00000  -0.00000  -0.00011  -0.00000  -0.03381 ...
    ...  only 12  components have been written...
  
  
  ITER STEP NUMBER     1
  vtorho: nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  Invovl built
-  1577857472
-  1577857472
-   953332736
-   953332736
+   -87301056
+   -87301056
+ -1209761280
+ -1209761280
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_ROWS)%rank           0
+ xgTransposer%mpiData(MPI_COLS)%rank           1
+ xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
  xgTransposer%mpiData(MPI_COLS)%size           2
+ xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
  xgTransposer%mpiData(MPI_ROWS)%rank           0
- xgTransposer%mpiData(MPI_ROWS)%rank           0
  xgTransposer%mpiData(MPI_ROWS)%size           1
  xgTransposer%mpiData(MPI_COLS)%rank           0
- xgTransposer%mpiData(MPI_COLS)%size           2
- xgTransposer%mpiData(MPI_ROWS)%size           1
- xgTransposer%mpiData(MPI_COLS)%rank           1
  xgTransposer%mpiData(MPI_COLS)%size           2
  flag_inv_sym 3
  flag_inv_sym 3
@@ -599,30 +626,26 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ************************
  BITNI POINTERI PRE LOOPA
  xXcolsRows
-  1344659840
+ -2121907776
  X
-  1577857472
+ -1209761280
  X_next
-  1353642816
+ -2112924800
  X_prev
-  1356628800
+ -2109938816
  X_NP
-  1353642816
+ -2112924800
  ***********************
  ILINE           0
  X_next before getBm1X
-  1353642816
+ -2112924800
  X_prev before getBm1X
-  1356628800
+ -2109938816
  X_xXColsRows before getBm1X
-  1344659840
+ -2121907776
  CPUROW0
  CPUROW0
  size(cprjin)        2976
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  hamk%natom          31
  my_nspinor           1
  ndat          96
@@ -636,34 +659,29 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ndat          96
  ILINE           0
  X_next after getBm1X
-  1353642816
+ -2112924800
  X_prev after getBm1X
-  1356628800
+ -2109938816
  X_xXColsRows after getBm1X
-  1344659840
- flag_inv_sym 3
+ -2121907776
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
  ILINE           1
  X_next before getBm1X
-  1356628800
+ -2109938816
  X_prev before getBm1X
-  1344659840
+ -2121907776
  X_xXColsRows before getBm1X
-  1353642816
+ -2112924800
  CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
- CPUROW0
- size(cprjin)        2976
- hamk%natom          31
- my_nspinor           1
- ndat          96
  size(cprjin)        2976
  hamk%natom          31
  my_nspinor           1
@@ -674,28 +692,37 @@ _setup2: Arith. and geom. avg. npw (full set) are    1943.000    1943.000
  ndat          96
  ILINE           1
  X_next after getBm1X
-  1356628800
+ -2109938816
  X_prev after getBm1X
-  1344659840
+ -2121907776
  X_xXColsRows after getBm1X
-  1353642816
+ -2112924800
+ CPUROW0
  flag_inv_sym 3
  ndatarecv_tot        3887
  bandpp_sym          48
- flag_inv_sym 3
- ndatarecv_tot        3887
- bandpp_sym          48
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ ILINE           2
+ X_next before getBm1X
+ -2121907776
+ X_prev before getBm1X
+ -2112924800
+ X_xXColsRows before getBm1X
+ -2109938816
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
  CPUROW0
  USAO U getBm1X
- ILINE           2
- X_next before getBm1X
-  1344659840
- X_prev before getBm1X
-  1353642816
- X_xXColsRows before getBm1X
-  1356628800
+ size(cprjin)        2976
+ hamk%natom          31
+ my_nspinor           1
+ ndat          96
+ flag_inv_sym 3
+ ndatarecv_tot        3887
+ bandpp_sym          48
  chebfi%total_spacedim        3888
  chebfi%bandpp          96
  CPUROW0
