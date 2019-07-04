@@ -151,6 +151,7 @@ contains
 
   !-------------------------------------------------------------------!
   ! Remove zero entries in coo matrix.
+  !  zero means abs(x)<eps
   !-------------------------------------------------------------------!
   subroutine remove_zeros(self, eps)
     class(ndcoo_mat_t), intent(inout) :: self

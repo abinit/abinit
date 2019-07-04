@@ -382,7 +382,7 @@ contains
 
 
   !-------------------------------------------------------------------!
-  ! initialize movers needed.
+  ! initialize movers which are needed.
   !-------------------------------------------------------------------!
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
@@ -403,10 +403,6 @@ contains
   !-------------------------------------------------------------------!
   !Set_lattice_mover
   !-------------------------------------------------------------------!
-
-  !-------------------------------------------------------------------!
-  ! initialize movers needed.
-  !-------------------------------------------------------------------!
   subroutine set_lattice_mover(self)
     class(mb_manager_t), intent(inout) :: self
     select case(self%params%dynamics)
@@ -416,7 +412,7 @@ contains
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
     case(103)   ! Berendsen NVT
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NVT_mover_t, self%lattice_mover)
-    case(104)
+    case(104)   ! Berendsen NPT (not yet avaliable)
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
     end select
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
@@ -433,13 +429,9 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
-
     call self%sc_maker%initialize(diag(self%params%ncell))
-
     call self%fill_supercell()
-
     call self%set_movers()
-
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%spin_mover%run_time(self%pots)
     call self%spin_mover%spin_ncfile%close()
@@ -450,7 +442,6 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%sc_maker%initialize(diag(self%params%ncell))
-    ! read params
     call self%read_potentials()
     call self%fill_supercell()
     call self%set_movers()
@@ -469,10 +460,7 @@ contains
     call self%fill_supercell()
     call self%set_movers()
     call self%lattice_mover%run_time(self%pots)
-
   end subroutine run_lattice_dynamics
-
-
 
   !-------------------------------------------------------------------!
   ! Run  spin and lattice dynamics sequentially.
