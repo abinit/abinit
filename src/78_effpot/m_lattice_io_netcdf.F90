@@ -139,7 +139,7 @@ contains
     integer :: varid, i, j
 !#if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
-    call nc_handle_err(ierr)
+    NCF_CHECK_MSG(ierr, "Open netcdf file")
 
     ierr=nctk_get_dim(ncid, "ifc_nR" , nR)
     ierr=nctk_get_dim(ncid, "natom", natom)
@@ -155,24 +155,24 @@ contains
 
 
     ierr =nf90_inq_varid(ncid, "ref_masses", varid)
-    call nc_handle_err(ierr, "ref_masses")
+    NCF_CHECK_MSG(ierr, "ref_masses")
     ierr = nf90_get_var(ncid, varid, masses)
-    call nc_handle_err(ierr, "ref_masses")
+    NCF_CHECK_MSG(ierr, "ref_masses")
 
     ierr =nf90_inq_varid(ncid, "ref_xcart", varid)
-    call nc_handle_err(ierr, "ref_xcart")
+    NCF_CHECK_MSG(ierr, "ref_xcart")
     ierr = nf90_get_var(ncid, varid, xcart)
-    call nc_handle_err(ierr, "ref_xcart")
+    NCF_CHECK_MSG(ierr, "ref_xcart")
 
     ierr =nf90_inq_varid(ncid, "ref_cell", varid)
-    call nc_handle_err(ierr, "rec_cell")
+    NCF_CHECK_MSG(ierr, "rec_cell")
     ierr = nf90_get_var(ncid, varid, cell)
-    call nc_handle_err(ierr, "ref_cell")
+    NCF_CHECK_MSG(ierr, "ref_cell")
 
     ierr =nf90_inq_varid(ncid, "ref_zion", varid)
-    call nc_handle_err(ierr, "ref_zion")
+    NCF_CHECK_MSG(ierr, "ref_zion")
     ierr = nf90_get_var(ncid, varid, zion)
-    call nc_handle_err(ierr, "ref_zion")
+    NCF_CHECK_MSG(ierr, "ref_zion")
 
     masses(:)  = masses(:) * amu_emass
     cell(:,:) = cell(:,:) / Bohr_Ang
@@ -183,14 +183,14 @@ contains
 
     call self%coeff%initialize([ nR, natom3, natom3 ])
     ierr =nf90_inq_varid(ncid, "ifc_Rlist", varid)
-    call nc_handle_err(ierr, "ifc_Rlist")
+    NCF_CHECK_MSG(ierr, "ifc_Rlist")
     ierr = nf90_get_var(ncid, varid, self%Rlist)
-    call nc_handle_err(ierr, "ifc_Rlist")
+    NCF_CHECK_MSG(ierr, "ifc_Rlist")
 
     ierr =nf90_inq_varid(ncid, "ifc_vallist", varid)
-    call nc_handle_err(ierr, "ifc_vallist")
+    NCF_CHECK_MSG(ierr, "ifc_vallist")
     ierr = nf90_get_var(ncid, varid, ifc_vallist)
-    call nc_handle_err(ierr, "ifc_vallist")
+    NCF_CHECK_MSG(ierr, "ifc_vallist")
 
     ifc_vallist(:,:,:) = ifc_vallist(:,:,:) * eV_Ha * (Bohr_Ang * Bohr_Ang)
 
@@ -206,7 +206,7 @@ contains
     end do
 
     ierr=nf90_close(ncid)
-    call nc_handle_err(ierr)
+    NCF_CHECK_MSG(ierr, "Close netcdf file")
 
     ABI_DEALLOCATE(masses)
     ABI_DEALLOCATE(xcart)
@@ -326,24 +326,24 @@ contains
     call eigensh(evals, evecs)
   end subroutine get_eigen
 
-  !-------------------------------------------------------------------!
-  ! nc_handle_err:
-  ! Print the error message of an netcdf from an ierr number
-  ! Inputs:
-  !  ierr: the error number
-  !  name: a tag printed with the message so it is easier to debug.
-  !-------------------------------------------------------------------!
-  subroutine nc_handle_err(ierr, name)
-    integer, intent ( in) ::ierr
-    character(*), optional, intent(in) :: name
-    if(ierr/= nf90_noerr) then
-       if (present(name)) then
-          write(std_out, *)  trim(nf90_strerror(ierr)), "when trying to read ", name
-       else
-          write(std_out, *)  trim(nf90_strerror(ierr))
-       end if
-       stop "Stopped"
-    end if
-  end subroutine nc_handle_err
+!   !-------------------------------------------------------------------!
+!   ! nc_handle_err:
+!   ! Print the error message of an netcdf from an ierr number
+!   ! Inputs:
+!   !  ierr: the error number
+!   !  name: a tag printed with the message so it is easier to debug.
+!   !-------------------------------------------------------------------!
+!   subroutine nc_handle_err(ierr, name)
+!     integer, intent ( in) ::ierr
+!     character(*), optional, intent(in) :: name
+!     if(ierr/= nf90_noerr) then
+!        if (present(name)) then
+!           write(std_out, *)  trim(nf90_strerror(ierr)), "when trying to read ", name
+!        else
+!           write(std_out, *)  trim(nf90_strerror(ierr))
+!        end if
+!        stop "Stopped"
+!     end if
+!   end subroutine nc_handle_err
 
 end module m_lattice_harmonic_primitive_potential
