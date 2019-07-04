@@ -1679,7 +1679,7 @@ end if
    ider=1;idir0=qdir1
  !-- 2nd q-grad of atomic displacement perturbation
  else if (ipert<=natom.and.present(qdir2)) then
-   ider=2;idir0=0
+   ider=2;idir0=4
  !-- 2nd q-grad of metric (1st q-grad of strain) perturbation
  else if (ipert==natom+3.or.ipert==natom+4) then
    ider=2;idir0=0
@@ -1687,7 +1687,7 @@ end if
 
 !Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
  dimffnl1=1+ider
- if (ider==2.and.idir0==0) dimffnl1=3+7*psps%useylm
+ if (ider==2.and.(idir0==0.or.idir0==4)) dimffnl1=3+7*psps%useylm
  ABI_ALLOCATE(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
  call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
 & psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&

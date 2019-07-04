@@ -2693,7 +2693,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
        &  vhxc1_atdis,vhxc1_strain,wfk_t_atdis,wfk_t_ddk, &
        &  wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
-
+       
 !      Add the contribution from each k-point
        isdqwf=isdqwf + isdqwf_k
        isdqwf_t1=isdqwf_t1 + isdqwf_t1_k
