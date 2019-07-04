@@ -58,8 +58,8 @@ module m_lattice_berendsen_NVT_mover
   private
 
   type, public, extends(lattice_mover_t) :: lattice_berendsen_NVT_mover_t
-     real(dp) :: taut
-     !real(dp), allocatable :: xi(:), eta(:)
+     real(dp) :: taut ! the characteristic time of the relaxation of velocity.
+     ! usually larger than time step
    contains
      procedure :: initialize
      procedure :: finalize
@@ -70,18 +70,26 @@ module m_lattice_berendsen_NVT_mover
 contains
 
 
+  !----------------------------------------------------------------------
+  !> @brief initialize 
+  !>
+  !> @param[in]  params: input parameters
+  !> @param[in]  supercell: superell
+  !> @param[in]  rng: random number generator
+  !----------------------------------------------------------------------
   subroutine initialize(self,params, supercell, rng)
     class(lattice_berendsen_NVT_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target, intent(in):: params
     type(mbsupercell_t), target, intent(in) :: supercell
     type(rng_t), target, intent(in) :: rng
-    !self%taut = params%latt_taut
-    ! TODO: implement the latt_taut parameter in input
     self%taut = params%latt_taut
     call self%lattice_mover_t%initialize(params, supercell, rng)
   end subroutine initialize
 
 
+  !----------------------------------------------------------------------
+  !> @brief finalize
+  !----------------------------------------------------------------------
   subroutine finalize(self)
     class(lattice_berendsen_NVT_mover_t), intent(inout) :: self
     call self%lattice_mover_t%finalize()

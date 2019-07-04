@@ -294,7 +294,7 @@ contains
 
 
   !-------------------------------------------------------------------!
-  ! calculate hamiltonian at k point
+  ! calculate hamiltonian at k point (or more precisely, q point)
   ! H_ij(k) = sum_R H_ij(R) exp( i2pi k.dot.R)
   !-------------------------------------------------------------------!
   subroutine get_hamk(self, kpoint, hamk)
@@ -326,7 +326,13 @@ contains
     call eigensh(evals, evecs)
   end subroutine get_eigen
 
-
+  !-------------------------------------------------------------------!
+  ! nc_handle_err:
+  ! Print the error message of an netcdf from an ierr number
+  ! Inputs:
+  !  ierr: the error number
+  !  name: a tag printed with the message so it is easier to debug.
+  !-------------------------------------------------------------------!
   subroutine nc_handle_err(ierr, name)
     integer, intent ( in) ::ierr
     character(*), optional, intent(in) :: name

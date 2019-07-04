@@ -39,9 +39,13 @@ module m_multibinit_cell
 
 !!***
   private
-  ! TODO: use crystal_t
-  !type, public :: mbcell_lattice_t
-  !type, public, extends(crystal_t) :: mbcell_lattice_t
+  !----------------------------------------------------------------------
+  !> @brief  lattice cell type
+  !> NOTE: This is used as an example for how to build new potentials.
+  !> it is used with the lattice_harmonic_potentail.
+  !> It has contains the zion, masses, xcart, and cell info
+  ! TODO: use crystal_t or add it as another lattice type.
+  !----------------------------------------------------------------------
   type, public ::mbcell_lattice_t
      integer:: natom
      integer, allocatable  :: zion(:)
@@ -54,14 +58,18 @@ module m_multibinit_cell
      procedure :: from_unitcell => latt_from_unitcell
   end type mbcell_lattice_t
 
+  !----------------------------------------------------------------------
+  !> @brief spin cell type
+  !----------------------------------------------------------------------
   type, public :: mbcell_spin_t
-     integer :: nspin
-     real(dp) :: rprimd(3,3)
-     real(dp), allocatable :: ms(:)
-     real(dp), allocatable :: gyro_ratio(:)
-     real(dp), allocatable :: gilbert_damping(:)
-     real(dp), allocatable :: spin_positions(:,:)
-     integer, allocatable ::  ispin_prim(:), rvec(:,:)
+     integer :: nspin   ! number of spin
+     real(dp) :: rprimd(3,3)   ! cell parameters
+     real(dp), allocatable :: ms(:)   ! magnetic moments  array(nspin)
+     real(dp), allocatable :: gyro_ratio(:) ! gyromagnetic ratio array(nspin)
+     real(dp), allocatable :: gilbert_damping(:) ! damping factor defined for each spin
+     real(dp), allocatable :: spin_positions(:,:) ! poistions of spin (cartesion)
+     integer, allocatable ::  ispin_prim(:) ! index of primitive cell
+     integer, allocatable ::  rvec(:,:) ! R cell vectors for each spin (for supercell)
    contains
      procedure :: initialize => spin_initialize
      procedure :: set => spin_set
@@ -70,8 +78,11 @@ module m_multibinit_cell
      procedure :: from_unitcell=>spin_from_unitcell
   end type mbcell_spin_t
 
+  !----------------------------------------------------------------------
+  !> @brief lattice wannier function cell type
+  !----------------------------------------------------------------------
   type, public :: mbcell_lwf_t
-     integer :: nlwf
+     integer :: nlwf  ! number of lattice wannier functions
    contains
      procedure :: initialize => lwf_initialize
      procedure :: finalize => lwf_finalize
@@ -79,6 +90,10 @@ module m_multibinit_cell
      procedure :: from_unitcell => lwf_from_unitcell
   end type mbcell_lwf_t
 
+  !----------------------------------------------------------------------
+  !> @brief cell type
+  !> NOTE: to add a new kind of cell, add a subtype here and a tag.
+  !----------------------------------------------------------------------
   type ,public :: mbcell_t
      logical :: has_lattice=.False.
      logical :: has_spin=.False.
@@ -90,28 +105,46 @@ module m_multibinit_cell
    contains
      procedure:: initialize
      procedure :: finalize
-     procedure :: set_lattice
-     procedure :: set_spin
-     procedure :: fill_supercell
+     procedure :: set_lattice   ! intialize the lattice
+     procedure :: set_spin      ! initilzie the spin
+     procedure :: fill_supercell  ! fill supercell.
      !procedure :: from_unitcell
   end type mbcell_t
 
+  !----------------------------------------------------------------------
+  !> @brief supercell type, which is unitcell plus some supercell information
+  !> NOTE: to add a new kind of cell, add a subtype here and a tag.
+  !----------------------------------------------------------------------
   type, public, extends(mbcell_t):: mbsupercell_t
-     integer :: sc_matrix(3,3)
-     integer :: ncell
-     type(supercell_maker_t), pointer :: supercell_maker
-     type(mbcell_t), pointer :: unitcell
+     integer :: sc_matrix(3,3)   ! supercell matrix
+     integer :: ncell            ! number of cells in supercell
+     type(supercell_maker_t), pointer :: supercell_maker  ! pointer to a helper class object
+     type(mbcell_t), pointer :: unitcell  ! pointer to the unitcell which the supercell is built from
    contains
      procedure :: from_unitcell
   end type mbsupercell_t
 
 contains
 
+  !============================  mb_cell_t========================================
+
+  !----------------------------------------------------------------------
+  !> @brief intialize mb_cell_t
+  !----------------------------------------------------------------------
   subroutine initialize(self)
     class(mbcell_t), intent(inout) :: self
     ABI_UNUSED_A(self)
   end subroutine initialize
 
+  !----------------------------------------------------------------------
+  !> @brief set the lattice subtype infor
+  !>
+  !> @param[in]  natom: number of atoms
+  !> @param[in]  cell:  cell parameter matrix (3,3)
+  !> @param[in]  xcart: cartesion coordinates
+  !> @param[in]  masses: masses
+  !> @param[in]  zion: atomic numbers
+  !----------------------------------------------------------------------
   subroutine set_lattice(self, natom, cell, xcart, masses, zion)
     class(mbcell_t), intent(inout) :: self
     integer, intent(in) :: natom, zion(:)
@@ -122,6 +155,18 @@ contains
   end subroutine set_lattice
 
 
+  !----------------------------------------------------------------------
+  !> @brief initialize spin sub type
+  !>
+  !> @param[in]  nspin: number of spin
+  !> @param[in] ms: magnetic moments
+  !> @param[in] rprimd:  cell pareters
+  !> @param[in] spin_positions:  the cartesion coordinates of spins
+  !> @param[in] gyro_ratio: gyromagnetic ratio fro each spin
+  !> @param[in] gilbert_damping: damping factor for each spin
+  !> @param[in] rvec: R vectors for cell in supercell
+  !> @param[in] ispin_prim:  id in primitive cell for each spin
+  !----------------------------------------------------------------------
   subroutine set_spin(self,nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec,  ispin_prim)
     class(mbcell_t) , intent(inout):: self
     integer, intent(in) :: nspin
@@ -132,12 +177,23 @@ contains
     call self%spin%set(nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
   end subroutine set_spin
 
+  !----------------------------------------------------------------------
+  !> @brief initialize LWF sub type
+  !----------------------------------------------------------------------
   subroutine set_lwf(self)
     class(mbcell_t) , intent(inout):: self
     self%has_lwf=.True.
     call self%lwf%initialize()
   end subroutine set_lwf
 
+  !----------------------------------------------------------------------
+  !> @brief read cell from a file, which is not used in Multibinit
+  !> since all the primitive potentials are read by the primitive_cell potential reader
+  !> They have a pointer to the mbcell_t before reading potentials.
+  !>
+  !> @param[in]  parasm: input parameters
+  !> @param[in]  fnames: the names in files file
+  !----------------------------------------------------------------------
   subroutine read_from_file(self, params, fnames)
     class(mbcell_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
@@ -149,6 +205,10 @@ contains
   end subroutine read_from_file
 
 
+  !----------------------------------------------------------------------
+  !> @brief finalize
+  !>
+  !----------------------------------------------------------------------
   subroutine finalize(self)
     class(mbcell_t), intent(inout) :: self
     call self%lattice%finalize()
@@ -156,6 +216,12 @@ contains
     call self%lwf%finalize()
   end subroutine finalize
 
+  !----------------------------------------------------------------------
+  !> @brief fill the cell supercell
+  !>
+  !> @param[in]  sc_maker: the helper to build supercells
+  !> @param[out]supercell; the supercell to be built 
+  !----------------------------------------------------------------------
   subroutine fill_supercell(self, sc_maker, supercell)
     class(mbcell_t), target, intent(inout) :: self
     type(supercell_maker_t), target, intent(inout) :: sc_maker
@@ -189,6 +255,11 @@ contains
     call self%mbcell_t%initialize()
   end subroutine supercell_initialize
 
+  !----------------------------------------------------------------------
+  !> @brief build from unitcell
+  !> @param[in]  sc_maker
+  !> @param[in] unitcell
+  !----------------------------------------------------------------------
   subroutine from_unitcell(self, sc_maker, unitcell)
     class(mbsupercell_t), intent(inout) :: self
     type(supercell_maker_t),  intent(inout) :: sc_maker
@@ -196,6 +267,9 @@ contains
     call unitcell%fill_supercell(sc_maker, self)
   end subroutine from_unitcell
 
+  !----------------------------------------------------------------------
+  !> @brief finalize supercell
+  !----------------------------------------------------------------------
   subroutine supercell_finalize(self)
     class(mbsupercell_t), intent(inout) :: self
     call self%mbcell_t%finalize()
@@ -205,6 +279,15 @@ contains
 
 !================================Lattice====================================
 
+  !----------------------------------------------------------------------
+  !> @brief initalize the lattice type
+  !>
+  !> @param[in]  natom: number of atoms
+  !> @param[in]  cell:  cell matrix
+  !> @param[in]  xcart:  cartesion 
+  !> @param[in]  masses: masses of atoms
+  !> @param[in]  zion: zion of atoms
+  !----------------------------------------------------------------------
   subroutine latt_initialize(self, natom, cell, xcart, masses, zion)
     class(mbcell_lattice_t), intent(inout) :: self
     integer, intent(in) :: natom, zion(:)
@@ -220,6 +303,10 @@ contains
     self%masses(:) = masses(:)
   end subroutine latt_initialize
 
+
+!----------------------------------------------------------------------
+  !> @brief finalize lattice 
+  !----------------------------------------------------------------------
   subroutine latt_finalize(self)
     class(mbcell_lattice_t) :: self
     self%natom=0
@@ -280,6 +367,10 @@ contains
   !========================= SPIN =================================
 
 
+  !----------------------------------------------------------------------
+  !> @brief initialize spin
+  !> @param[in]  nspin: number of spin
+  !----------------------------------------------------------------------
   Subroutine spin_initialize(self, nspin)
     class(mbcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
@@ -297,6 +388,18 @@ contains
   end subroutine spin_initialize
 
 
+  !----------------------------------------------------------------------
+  !> @brief initialize spin sub type
+  !>
+  !> @param[in]  nspin: number of spin
+  !> @param[in] ms: magnetic moments
+  !> @param[in] rprimd:  cell pareters
+  !> @param[in] spin_positions:  the cartesion coordinates of spins
+  !> @param[in] gyro_ratio: gyromagnetic ratio fro each spin
+  !> @param[in] gilbert_damping: damping factor for each spin
+  !> @param[in] rvec: R vectors for cell in supercell
+  !> @param[in] ispin_prim:  id in primitive cell for each spin
+  !----------------------------------------------------------------------
   Subroutine spin_set(self, nspin, ms, rprimd, spin_positions, gyro_ratio, gilbert_damping, rvec, ispin_prim)
     class(mbcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
@@ -391,6 +494,11 @@ contains
     call xmpi_bcast(supercell%rprimd, master, comm, ierr)
   end subroutine spin_fill_supercell
 
+  !----------------------------------------------------------------------
+  !> @brief read from netcdf
+  !>
+  !> @build from a unitcell
+  !----------------------------------------------------------------------
   subroutine spin_from_unitcell(self, sc_maker, unitcell)
     class(mbcell_spin_t),intent(inout) :: self
     type(supercell_maker_t), intent(inout):: sc_maker

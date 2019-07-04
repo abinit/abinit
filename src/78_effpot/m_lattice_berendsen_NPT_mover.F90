@@ -58,8 +58,10 @@ module m_lattice_berendsen_NPT_mover
   private
 
   type, public, extends(lattice_mover_t) :: lattice_berendsen_NPT_mover_t
-     real(dp) :: taut
-     !real(dp), allocatable :: xi(:), eta(:)
+     real(dp) :: taut ! the characteristic time of the relaxation of velocity.
+     ! it is usually larger than the time step.
+     real(dp) :: taup !  the characteristic time of the relaxation of pressure.
+     real(dp) :: compressibility
    contains
      procedure :: initialize
      procedure :: finalize
@@ -70,14 +72,15 @@ module m_lattice_berendsen_NPT_mover
 contains
 
 
+
   subroutine initialize(self,params, supercell, rng)
     class(lattice_berendsen_NPT_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target, intent(in):: params
     type(mbsupercell_t), target, intent(in) :: supercell
     type(rng_t), target, intent(in) :: rng
-    !self%taut = params%latt_taut
-    ! TODO: implement the latt_taut parameter in input
-    self%taut = 10
+    self%taut = params%latt_taut
+    self%taup = params%latt_taup
+    self%compressibility =params%latt_compressibility
     call self%lattice_mover_t%initialize(params, supercell, rng)
     MSG_ERROR("The Berendsen NPT mover has not yet been implemented")
     !TODO: Implement

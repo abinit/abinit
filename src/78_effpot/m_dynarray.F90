@@ -212,6 +212,13 @@ end subroutine int_array_type_push
 !!***
 
 
+!----------------------------------------------------------------------
+!> @brief insertion_sort_int: sort a array using insertion sort algorithm
+!>  it is a memory safe method but is generally slow.
+!> @param[inout]  a: the array to be sorted. and will output inplace
+!> @param[inout] order (optional) the sorted index, it can be used to sort
+!>  other arrays so that the order in consistent.
+!----------------------------------------------------------------------
 subroutine insertion_sort_int(a, order)
   integer, intent(inout) :: a(:)
   integer, optional, intent(inout):: order(size(a))
@@ -237,7 +244,13 @@ subroutine insertion_sort_int(a, order)
 
 end subroutine insertion_sort_int
 
-! insertion sort
+!----------------------------------------------------------------------
+!> @brief insertion_sort_int: sort a DYNAMIC INT array using insertion sort algorithm
+!>  it is a memory safe method but is generally slow.
+!> @param[inout]  a: an dynamic array. the array to be sorted. and will output inplace
+!> @param[inout] order (optional) the sorted index, it can be used to sort
+!>  other arrays so that the order in consistent.
+!----------------------------------------------------------------------
 subroutine int_array_type_sort(self, order)
   class(int_array_type), intent(inout):: self
   integer, optional, intent(inout):: order(self%size)
@@ -404,6 +417,16 @@ subroutine int2d_array_type_finalize(self)
 
 end subroutine int2d_array_type_finalize
 
+!----------------------------------------------------------------------
+!> @brief sort a 2D DYNAMIC INT array using insertion sort algorithm
+!>  it is a memory safe method but is generally slow.
+!> it compares the elements in first dimension i.e. A(:, i) and sort the second dim.
+!>  The comparing is from left to right.
+!> @param[inout]  a: an dynamic array. the array to be sorted. and will output inplace
+!> @param[inout] order (optional) the sorted index, it can be used to sort
+!>  other arrays so that the order in consistent.
+!----------------------------------------------------------------------
+
 subroutine int2d_array_type_sort(self, order)
   class(int2d_array_type), intent(inout):: self
   integer, optional, intent(inout):: order(self%size)
@@ -427,6 +450,14 @@ subroutine int2d_array_type_sort(self, order)
   end do
   self%sorted=.True.
 end subroutine int2d_array_type_sort
+
+!----------------------------------------------------------------------
+!> @brief binary search 
+!>
+!> @param[in] self: the 2D array to be searched from
+!> @param[in] val: the value to be searched
+!> @param[out] i: the index of the first one found. returns 0 if not found.
+!----------------------------------------------------------------------
 
 function int2d_array_type_binsearch(self, val) result(i)
   class(int2d_array_type), intent(inout):: self

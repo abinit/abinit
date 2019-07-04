@@ -9,8 +9,8 @@
 !!
 !! Datatypes:
 !!
-!! * lnode: a node in the linked list
-!! * llist: linked list
+!! * lnode: a node in the linked list, in each node, there is an integer and a real(dp)
+!! * llist: linked list of lnode
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.
@@ -39,7 +39,11 @@ module m_linked_list
   implicit none
 !!***
 
-  ! node of linked list, which will be one non-zero entry in LIL matrix
+  ! node of linked list, which will be used as one non-zero entry in LIL matrix
+  ! each node has an integer (i) and a real(dp) (val).
+  ! That is because in a LIL sparse matrix, it saves the information of a
+  ! column/row indices (int) and values (real)
+  ! and the pointer points to the next node
   type, public:: lnode
      integer :: i
      real(dp):: val
@@ -48,22 +52,25 @@ module m_linked_list
 
   ! linked list of (i, val), it can be a column or a row of LIL sparse matrix
   type, public:: llist
-     type(lnode), pointer :: first=>null()
-     type(lnode), pointer :: last=>null()
-     type(lnode), pointer :: iter=>null()
-     integer :: length =0
-     contains
-         procedure :: finalize=>llist_finalize
-         procedure :: append => llist_append
-         procedure :: iter_restart => llist_iter_restart
-         procedure :: insert_after => llist_insert_after
-         procedure :: insert_head => llist_insert_head
-         procedure :: sorted_insert => llist_sorted_insert
-         procedure :: get_data => llist_get_data
+     type(lnode), pointer :: first=>null() ! pointer to first node
+     type(lnode), pointer :: last=>null()  ! pointer to last node
+     type(lnode), pointer :: iter=>null()  ! pointer to the current node (e.g. in a loop)
+     integer :: length =0                  ! number of nodes
+   contains
+     procedure :: finalize=>llist_finalize      ! free memory
+     procedure :: append => llist_append        ! add a new entry
+     procedure :: iter_restart => llist_iter_restart
+     procedure :: insert_after => llist_insert_after
+     procedure :: insert_head => llist_insert_head
+     procedure :: sorted_insert => llist_sorted_insert
+     procedure :: get_data => llist_get_data
   end type llist
 
   contains
 
+    !----------------------------------------------------------------------
+    !> @brief finalize: free memory
+    !----------------------------------------------------------------------
   recursive subroutine llist_finalize(self)
     class(llist), intent(inout) ::self
     type(lnode), pointer :: iter, tmp
@@ -80,6 +87,11 @@ module m_linked_list
     self%length=0
   end subroutine llist_finalize
 
+  !----------------------------------------------------------------------
+  !> @brief append to the end of the list
+  !> @param[in]  i: int 
+  !> @param[in]  val: real value
+  !----------------------------------------------------------------------
   subroutine llist_append(self, i, val)
     ! append a element at the end of list
     class(llist), intent(inout) ::self
@@ -98,12 +110,21 @@ module m_linked_list
     self%length = self%length+1
   end subroutine llist_append
 
+  !----------------------------------------------------------------------
+  !> @brief restart the iteration. set iter to first node
+  !----------------------------------------------------------------------
   subroutine llist_iter_restart(self)
-
     class(llist):: self
     self%iter=>self%first
   end subroutine llist_iter_restart
 
+  !----------------------------------------------------------------------
+  !> @brief insert to the node after one node ptr
+  !>
+  !> @param[in] ptr: a pointer to a node in the list
+  !> @param[in] i: the integer 
+  !> @param[in] val: the real value
+  !----------------------------------------------------------------------
   subroutine llist_insert_after(self, ptr, i, val)
     !insert a element so i is sorted.
     ! if mode=0: if i already exist, substitute i, val
@@ -125,7 +146,12 @@ module m_linked_list
     endif
   end subroutine llist_insert_after
 
-
+!----------------------------------------------------------------------
+  !> @brief inset to the head of the list
+  !>
+  !> @param[in]  i
+  !> @param[in] val
+  !----------------------------------------------------------------------
   subroutine llist_insert_head(self, i, val)
     class(llist):: self
     integer, intent(in) :: i
@@ -142,10 +168,17 @@ module m_linked_list
     self%length=self%length+1
   end subroutine llist_insert_head
 
+  !----------------------------------------------------------------------
+  !> @brief insert to a node so that the list is sorted by i
+  !>
+  !> @param[in]  i :  integer value
+  !> @param[in]  val : real value
+  !> @param[in]  mode : 
+  !> if mode=0: if i already exist, substitute i, val
+  !> if mode=1: val+=val
+  !----------------------------------------------------------------------
   subroutine llist_sorted_insert(self, i, val, mode)
     !insert a element so i is sorted.
-    ! if mode=0: if i already exist, substitute i, val
-    ! if mode=1: val+=val
     class(llist):: self
     integer, intent(in) :: i, mode
     real(dp), intent(in):: val
@@ -184,17 +217,12 @@ module m_linked_list
 
   end subroutine llist_sorted_insert
 
-!  subroutine llist_print_all(self)
-!
-!    class(llist), intent(inout)::self
-!    call llist_iter_restart(self)
-!    do while(associated(self%iter))
-!       !print*, "I: ", self%iter%i, "  val: ", self%iter%val
-!       self%iter=>self%iter%next
-!    enddo
-!  end subroutine llist_print_all
 
-
+  !----------------------------------------------------------------------
+  !> @brief get all the data to arrays of i and val
+  !> @param[out]  ilist: the array of i
+  !> @param[out]  vallist: the array of val
+  !----------------------------------------------------------------------
   subroutine llist_get_data(self, ilist, vallist)
 
     class(llist), intent(inout)::self

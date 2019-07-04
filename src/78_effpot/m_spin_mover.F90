@@ -410,17 +410,28 @@ contains
   end subroutine spin_mover_t_run_one_step_HeunP
 !!***
 
+  !----------------------------------------------------------------------
+  !> @brief rotate spin with a rotation matrix
+  !>
+  !> @param[in]  S_in: input spin array(3)
+  !> @param[in]  Heff: effective field
+  !> @param[in]  dt: time step
+  !> @param[out]  S_out: output spin
+  !----------------------------------------------------------------------
+
   pure function rotate_S_DM(S_in, Heff, dt) result(S_out)
     ! Depondt & Mertens method to rotate S_in
     real(dp), intent(in) :: S_in(3), Heff(3), dt
     real(dp) :: S_out(3)
     real(dp) :: B(3) , w, u, Bnorm, R(3,3), cosw, sinw
-    Bnorm=sqrt(sum(Heff*Heff))
-    B(:)=Heff(:)/Bnorm
-    w=Bnorm*dt
+    Bnorm=sqrt(sum(Heff*Heff)) 
+    B(:)=Heff(:)/Bnorm   ! axis of rotation
+    w=Bnorm*dt             ! amplitude of rotation
     sinw=sin(w)
     cosw=cos(w)
     u=1.0d0-cosw
+
+    ! R is rotation matrix
     R(1,1)=B(1)*B(1)*u+cosw
     R(2,1)=B(1)*B(2)*u+B(3)*sinw
     R(3,1)=B(1)*B(3)*u-B(2)*sinw
@@ -432,6 +443,7 @@ contains
     R(1,3)=B(1)*B(3)*u+B(2)*sinw
     R(2,3)=B(2)*B(3)*u-B(1)*sinw
     R(3,3)=B(3)*B(3)*u+cosw
+    ! rotate
     S_out=matmul(R, S_in)
   end function rotate_S_DM
 

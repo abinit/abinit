@@ -64,7 +64,7 @@ module m_lattice_langevin_mover
      ! c3 c4 c5 has dimension of natom.
      real(dp) :: c1, c2
      real(dp), allocatable :: c3(:), c4(:), c5(:)
-     real(dp) :: fr =1e-4 ! friction
+     real(dp) :: fr =1e-4 ! friction, usually 1e-2~1e-4
      ! xi and eta: random numbers of dimension (3, natom)
      real(dp), allocatable :: xi(:,:), eta(:,:)
    contains
@@ -134,7 +134,19 @@ contains
     self%c4 = fr / 2. * self%c5
   end subroutine update_vars
 
-
+  !-------------------------------------------------------------------!
+  !> @brief: Run_one_step using a Langevin heat bath.
+  !>   effpot: the potential (which do the calculation of E and dE/dvar)
+  !> param[in]: effpot
+  !> param[in]: (optional) displacement
+  !> param[in]: (optional) strain
+  !> param[in]: (optional) spin
+  !> param[in]: (optional) lwf
+  ! NOTE: No need to pass the variable already saved in the mover.
+  !     e.g. For spin mover, do NOT pass the spin to it.
+  !    The other variables are only required if there is coupling with
+  !    the mover variable.
+  !-------------------------------------------------------------------!
   subroutine run_one_step(self, effpot,displacement, strain, spin, lwf )
     class(lattice_langevin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot

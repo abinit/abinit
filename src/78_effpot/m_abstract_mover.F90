@@ -46,8 +46,12 @@ module m_abstract_mover
   private
 
   !-------------------------------------------------------------------!
-  ! Abstract_mover_t:
-  !  abstract mover. All the movers should be derived from this
+  !>@brief Abstract_mover_t:
+  !>  abstract mover. All the movers should be derived from this.
+  !> A mover defines the evolution of a structure.
+  !> it will call the potentials to calculate the energy derivative and E
+  !> and use that to move the states.
+  !
   !-------------------------------------------------------------------!
   type ,public :: abstract_mover_t
      ! This is the abstract class of mover
@@ -71,15 +75,16 @@ module m_abstract_mover
      ! time for themalization
      real(dp) :: thermal_time =0.0
      ! A pointer to the random number generator
+     ! It is initialized outside the mover (by the manager).
      type(rng_t), pointer :: rng=>null()
 
    contains
      !procedure:: initialize       ! perhaps each effpot type should have own
      !procedure :: finalize
-     procedure :: set_rng
-     procedure :: set_params
+     procedure :: set_rng          ! set the pointer to an random number generator
+     procedure :: set_params       ! set the parameters from input
      procedure :: set_initial_state ! initial state
-     procedure:: run_one_step
+     procedure:: run_one_step      ! defines how the system evolves.
      !procedure:: run_time
      !procedure:: run_temperature
      procedure :: reset            ! reset the mover
@@ -91,7 +96,8 @@ contains
 
   !-------------------------------------------------------------------!
   ! set_rng:
-  ! set the random number generator.
+  ! set the random number generator. The rng is already initialize
+  ! outside. 
   !-------------------------------------------------------------------!
   subroutine set_rng(self, rng)
     class(abstract_mover_t), intent(inout) :: self
@@ -112,9 +118,9 @@ contains
     MSG_ERROR("set_params not implemented for this mover")
   end subroutine set_params
 
-  !-------------------------------------------------------------------!
-  ! set_supercell:
-  !  set the pointer to supercell
+  !----------------------------------------------------------------------
+  !> @brief set the pointer to supercell
+  !> @param[in]  supercell
   !-------------------------------------------------------------------!
   subroutine set_supercell(self, supercell)
     class(abstract_mover_t), intent(inout) :: self
@@ -122,9 +128,11 @@ contains
     self%supercell=>supercell
   end subroutine set_supercell
 
-  !-------------------------------------------------------------------!
-  ! set_initial_state:
-  !-------------------------------------------------------------------!
+  !----------------------------------------------------------------------
+  !> @brief set initial state.
+  !>
+  !> @param[in]  mode: a integer to define the kind of initial state.
+  !----------------------------------------------------------------------
   subroutine set_initial_state(self, mode)
     ! set initial positions, spin, etc
     class(abstract_mover_t), intent(inout) :: self
@@ -135,10 +143,13 @@ contains
   end subroutine set_initial_state
 
   !-------------------------------------------------------------------!
-  ! Run_one_step:
-  ! Input:
-  !   effpot: the potential (which do the calculation of E and dE/dvar)
-  !
+  !> @brief: Run_one_step
+  !>   effpot: the potential (which do the calculation of E and dE/dvar)
+  !> param[in]: effpot
+  !> param[in]: (optional) displacement
+  !> param[in]: (optional) strain
+  !> param[in]: (optional) spin
+  !> param[in]: (optional) lwf
   ! NOTE: No need to pass the variable already saved in the mover.
   !     e.g. For spin mover, do NOT pass the spin to it.
   !    The other variables are only required if there is coupling with
@@ -173,8 +184,7 @@ contains
   end subroutine reset
 
   !-------------------------------------------------------------------!
-  ! calc_observables
-  !  calculate observables
+  !> @brief: calc_observables: calculate observables
   !-------------------------------------------------------------------!
   subroutine calc_observables(self)
     ! call functions to calculate observables.
@@ -184,8 +194,8 @@ contains
   end subroutine calc_observables
 
   !-------------------------------------------------------------------!
-  ! Write_hist:
-  !  write to hist file.
+  !> @brief Write_hist:
+  !   write to hist file.
   !-------------------------------------------------------------------!
   subroutine write_hist(self)
     ! write to hist file
@@ -195,8 +205,7 @@ contains
   end subroutine write_hist
 
   !-------------------------------------------------------------------!
-  ! Get_state:
-  !  get the current state.
+  !> @breif: Get_state: the current state
   !-------------------------------------------------------------------!
   subroutine get_state(self, displacement, strain, spin, lwf, ihist)
     ! get the state of the ihist(th) step. ihist can be 0 (current), -1 (last), ... -maxhist..
