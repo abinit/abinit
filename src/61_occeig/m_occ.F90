@@ -491,7 +491,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !potential and add to nelect bounds.
  if(associated(hightemp)) then
    call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermilo,1024,nelect_tmp,&
-   & tsmear,hightemp%u0,hightemp%ucvol)
+   & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
    nelectlo=nelectlo+nelect_tmp
  end if
 
@@ -507,7 +507,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !potential and add to nelect bounds.
  if(associated(hightemp)) then
    call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermihi,1024,nelect_tmp,&
-   & tsmear,hightemp%u0,hightemp%ucvol)
+   & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
    nelecthi=nelecthi+nelect_tmp
  end if
 
@@ -555,7 +555,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      !potential and add to nelect bounds.
      if(associated(hightemp)) then
        call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermimid,1024,nelect_tmp,&
-       & tsmear,hightemp%u0,hightemp%ucvol)
+       & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
        nelectmid=nelectmid+nelect_tmp
        entropy=entropy-entropy_tmp
      end if

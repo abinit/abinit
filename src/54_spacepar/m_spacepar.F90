@@ -1384,7 +1384,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
 !  Blanchet Add free electron gas contribution
    if(associated(hightemp)) then
-     call hightemp_addtorho(hightemp%nfreeel,nfft,nspden,rhor,hightemp%ucvol)
+     rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/nspden
    end if
 
 !  If not using symmetry, still want total density in G space rho(G).
@@ -1660,7 +1660,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
 !    Blanchet Add free electron gas contribution
      if(associated(hightemp)) then
-       call hightemp_addtorho(hightemp%nfreeel,nfft,nspden_eff,rhor,hightemp%ucvol)
+       rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/nspden
      end if
 
      call timab(17,2,tsec)

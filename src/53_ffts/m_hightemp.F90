@@ -42,15 +42,15 @@ module m_hightemp
   type,public :: hightemp_type
     logical :: enabled
     integer :: bcut,nbcut
-    real(dp) :: ebcut,energycontrib,entropycontrib,nfreeel,u0,ucvol
+    real(dp) :: ebcut,e_kin_freeel,e_ent_freeel,nfreeel,e_shiftfactor,ucvol
   contains
-    procedure :: compute_energycontrib,compute_nfreeel
-    procedure :: compute_u0,init
+    procedure :: compute_e_kin_freeel,compute_nfreeel
+    procedure :: compute_e_shiftfactor,init
     final :: finalize
   end type hightemp_type
 
   type(hightemp_type),save,pointer :: hightemp=>null()
-  public :: freedos,hightemp_addtoenergy,hightemp_addtorho,prt_eigocc,hightemp_getnfreeel
+  public :: hightemp_dosfreeel,hightemp_prt_eigocc,hightemp_getnfreeel
 contains
 
   !!****f* ABINIT/m_hightemp/init
@@ -93,10 +93,10 @@ contains
     this%bcut=mband
     this%nbcut=nbcut
     this%ebcut=zero
-    this%energycontrib=zero
-    this%entropycontrib=zero
+    this%e_kin_freeel=zero
+    this%e_ent_freeel=zero
     this%nfreeel=zero
-    this%u0=zero
+    this%e_shiftfactor=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
 
@@ -127,9 +127,9 @@ contains
     ! DEALLOCATE THINGS
   end subroutine finalize
 
-  !!****f* ABINIT/m_hightemp/compute_u0
+  !!****f* ABINIT/m_hightemp/compute_e_shiftfactor
   !! NAME
-  !! compute_u0
+  !! compute_e_shiftfactor
   !!
   !! FUNCTION
   !! Compute the shift factor $U_0$ that appears in the density of states of free electrons.
@@ -150,7 +150,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_u0(this,eigen,eknk,mband,nkpt,nsppol)
+  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,nkpt,nsppol)
 
     ! Arguments -------------------------------
     ! Scalars
@@ -184,14 +184,14 @@ contains
 
     ! Doing the average over the 25 lasts states...
     niter=0
-    this%u0=zero
+    this%e_shiftfactor=zero
     do ii=this%bcut*nkpt*nsppol-25,this%bcut*nkpt*nsppol
-      this%u0=this%u0+(eigentemp(ii)-eknktemp(ii))
+      this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
       niter=niter+1
     end do
-    this%u0=this%u0/niter
+    this%e_shiftfactor=this%e_shiftfactor/niter
     this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
-  end subroutine compute_u0
+  end subroutine compute_e_shiftfactor
 
   !!****f* ABINIT/m_hightemp/compute_nfreeel
   !! NAME
@@ -225,13 +225,13 @@ contains
 
     ! *********************************************************************
 
-    call hightemp_getnfreeel(this%ebcut,this%entropycontrib,fermie,mrgrid,&
-    & this%nfreeel,tsmear,this%u0,this%ucvol)
+    call hightemp_getnfreeel(this%ebcut,this%e_ent_freeel,fermie,mrgrid,&
+    & this%nfreeel,tsmear,this%e_shiftfactor,this%ucvol)
   end subroutine compute_nfreeel
 
-  !!****f* ABINIT/m_hightemp/compute_energycontrib
+  !!****f* ABINIT/m_hightemp/compute_e_kin_freeel
   !! NAME
-  !! compute_energycontrib
+  !! compute_e_kin_freeel
   !!
   !! FUNCTION
   !! Compute the value of the integral corresponding to the residual of energy after the band cut
@@ -251,7 +251,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_energycontrib(this,fermie,mrgrid,tsmear)
+  subroutine compute_e_kin_freeel(this,fermie,mrgrid,tsmear)
 
     ! Arguments -------------------------------
     ! Scalars
@@ -271,23 +271,24 @@ contains
     step=(1/this%ebcut)/mrgrid
     do ii=1,mrgrid
       ix=(ii)*step
-      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,this%u0,this%ucvol)*(1/ix-this%u0)/(ix*ix)
+      values(ii)=fermi_dirac(1./ix,fermie,tsmear)*&
+      & hightemp_dosfreeel(1/ix,this%e_shiftfactor,this%ucvol)*(1/ix-this%e_shiftfactor)/(ix*ix)
     end do
-    this%energycontrib=simpson(step,values)
-  end subroutine compute_energycontrib
+    this%e_kin_freeel=simpson(step,values)
+  end subroutine compute_e_kin_freeel
 
   ! *********************************************************************
 
-  !!****f* ABINIT/m_hightemp/free_dos
+  !!****f* ABINIT/m_hightemp/hightemp_free_dos
   !! NAME
-  !! free_dos
+  !! hightemp_free_dos
   !!
   !! FUNCTION
   !! Returns the free particle density of states for a given energy (in Hartree)
   !!
   !! INPUTS
   !! energy=get the value of the free particle density of states at this energy
-  !! u0=energy shift factor
+  !! e_shiftfactor=energy shift factor
   !! ucvol=unit cell volume (bohr^3)
   !!
   !! OUTPUT
@@ -298,21 +299,21 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  function freedos(energy,u0,ucvol)
+  function hightemp_dosfreeel(energy,e_shiftfactor,ucvol)
 
     ! Arguments -------------------------------
     ! Scalars
-    real(dp),intent(in) :: energy,u0,ucvol
-    real(dp) :: freedos
+    real(dp),intent(in) :: energy,e_shiftfactor,ucvol
+    real(dp) :: hightemp_dosfreeel
 
     ! *********************************************************************
 
-    freedos=sqrt(2.)*ucvol*sqrt(energy-u0)/(PI*PI)
-  end function freedos
+    hightemp_dosfreeel=sqrt(2.)*ucvol*sqrt(energy-e_shiftfactor)/(PI*PI)
+  end function hightemp_dosfreeel
 
-  !!****f* ABINIT/m_hightemp/prt_eigocc
+  !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
   !! NAME
-  !! prt_eigocc
+  !! hightemp_prt_eigocc
   !!
   !! FUNCTION
   !! Printing in a _EIGOCC file many informations like Fermi energy, Unit cell volume,
@@ -345,7 +346,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine prt_eigocc(eigen,etotal,energies,fnameabo_eig,iout,kptns,&
+  subroutine hightemp_prt_eigocc(eigen,etotal,energies,fnameabo_eig,iout,kptns,&
     & mband,nband,nkpt,nsppol,occ,rprimd,strten,tsmear,usepaw,wtk)
 
     ! Arguments -------------------------------
@@ -397,9 +398,15 @@ contains
       & ' Chemical potential = ',energies%e_fermie,' Ha         XC energy          = ',energies%e_xc,&
       & ' Ha         Total free energy  = ',etotal, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
+
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-      & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Hartree energy     = ',energies%e_hartree,&
-      & ' Ha         Ewald energy       = ',energies%e_ewald, ' Ha'
+    & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Kin. free el. E    = ',energies%e_kin_freeel,&
+    & ' Ha         Total kin. energy  = ',energies%e_kinetic+energies%e_kin_freeel, ' Ha'
+    call wrtout(temp_unit,msg,'COLL')
+
+    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
+    & ' Hartree energy     = ',energies%e_hartree,' Ha         Ewald energy       = ',energies%e_ewald,&
+    & ' Ha         E. Shift factor U0 = ',energies%e_shiftfactor, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
 
     if (usepaw==0) then
@@ -449,7 +456,7 @@ contains
     end do ! do isppol=1,nsppol
 
     close(temp_unit)
-  end subroutine prt_eigocc
+  end subroutine hightemp_prt_eigocc
 
   !!****f* ABINIT/m_hightemp/hightemp_getnfreeel
   !! NAME
@@ -464,7 +471,7 @@ contains
   !! fermie=fermi energy (Hartree)
   !! mrgrid=number of grid points to compute the integral
   !! tsmear=smearing width (or temperature)
-  !! u0=energy shift factor
+  !! e_shiftfactor=energy shift factor
   !! ucvol=unit cell volume (bohr^3)
   !!
   !! OUTPUT
@@ -475,12 +482,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_getnfreeel(ebcut,entropy,fermie,mrgrid,nfreeel,tsmear,u0,ucvol)
+  subroutine hightemp_getnfreeel(ebcut,entropy,fermie,mrgrid,nfreeel,tsmear,e_shiftfactor,ucvol)
 
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: mrgrid
-    real(dp),intent(in) :: ebcut,fermie,tsmear,u0
+    real(dp),intent(in) :: ebcut,fermie,tsmear,e_shiftfactor
     real(dp),intent(out) :: entropy,nfreeel
 
     ! Local variables -------------------------
@@ -495,118 +502,14 @@ contains
     step=(1/ebcut)/mrgrid
     do ii=1,mrgrid
       ix=(ii)*step
-      valuesnel(ii)=fermi_dirac(1./ix,fermie,tsmear)*freedos(1/ix,u0,ucvol)/(ix*ix)
+      valuesnel(ii)=fermi_dirac(1./ix,fermie,tsmear)*hightemp_dosfreeel(1/ix,e_shiftfactor,ucvol)/(ix*ix)
       valuesent(ii)=(fermi_dirac(1./ix,fermie,tsmear)*max(log(fermi_dirac(1./ix,fermie,tsmear)),-0.001_dp*huge(0.0_dp))+&
       & (1.-fermi_dirac(1./ix,fermie,tsmear))*log(1.-fermi_dirac(1./ix,fermie,tsmear)))*&
-      & freedos(1/ix,u0,ucvol)/(ix*ix)
+      & hightemp_dosfreeel(1/ix,e_shiftfactor,ucvol)/(ix*ix)
     end do
 
     nfreeel=simpson(step,valuesnel)
     entropy=simpson(step,valuesent)
   end subroutine hightemp_getnfreeel
-
-  !!****f* ABINIT/m_hightemp/hightemp_addtorho
-  !! NAME
-  !! hightemp_addtorho
-  !!
-  !! FUNCTION
-  !! Add the free continous part corresponding to free particle model to the existing electronic density.
-  !! $n = 2 \Sum_{i=1}^{N_c} f(\epsilon_i)|\psi_i(\mathbb{r})|^2 +
-  !! \Omega\int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}(\epsilon - U_0)^{3/2}d \epsilon$
-  !!
-  !! INPUTS
-  !! int_rhocontrib=computed free particle part integral which is the number of free electrons.
-  !! nfft=number of FFT points.
-  !! nspden=number of spin-density components
-  !! rhor(cplex*nfft,nspden)=array for electron density in electrons/bohr**3.
-  !! ucvol=unit cell volume (bohr^3)
-  !!
-  !! OUTPUT
-  !! rhor(cplex*nfft,nspden)=array for electron density in electrons/bohr**3.
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine hightemp_addtorho(nfreeel,nfft,nspden,rhor,ucvol)
-
-    ! Arguments -------------------------------
-    ! Scalars
-    integer,intent(in) :: nfft,nspden
-    real(dp),intent(in) :: nfreeel,ucvol
-    ! Arrays
-    real(dp),intent(inout) :: rhor(nfft,nspden)
-
-    ! *********************************************************************
-
-    rhor(:,:)=rhor(:,:)+nfreeel/ucvol/nspden
-  end subroutine hightemp_addtorho
-
-  !!****f* ABINIT/m_hightemp/hightemp_addtorho
-  !! NAME
-  !! hightemp_addtorho
-  !!
-  !! FUNCTION
-  !! Add the free continous part corresponding to free particle model to the energy.
-  !!
-  !! INPUTS
-  !! energycontrib=computed free particle part integral corresponding to energy of free electrons
-  !! etotal=energy in which we want to add the free part
-  !!
-  !! OUTPUT
-  !! etotal=energy in which we want to add the free part
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine hightemp_addtoenergy(energycontrib,etotal)
-
-    ! Arguments -------------------------------
-    ! Scalars
-    real(dp),intent(in) :: energycontrib
-    real(dp),intent(inout) :: etotal
-
-    ! *********************************************************************
-
-    etotal=etotal+energycontrib
-  end subroutine hightemp_addtoenergy
-
-  !!****f* ABINIT/m_hightemp/hightemp_addtostress
-  !! NAME
-  !! hightemp_addtostress
-  !!
-  !! FUNCTION
-  !! Add the free continous part corresponding to free particle model to stress tensor.
-  !!
-  !! INPUTS
-  !! energycontrib=computed free particle part integral corresponding to energy of free electrons
-  !!
-  !! OUTPUT
-  !! strten(6)=components of the stress tensor (hartree/bohr^3) for the
-  !!    6 unique components of this symmetric 3x3 tensor:
-  !!    Given in order (1,1), (2,2), (3,3), (3,2), (3,1), (2,1).
-  !!    The diagonal components of the returned stress tensor are
-  !!    CORRECTED for the Pulay stress.
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine hightemp_addtostress(energycontrib,strten)
-
-    ! Arguments -------------------------------
-    ! Scalars
-    real(dp),intent(in) :: energycontrib
-    ! Arrays
-    real(dp),intent(inout) :: strten(6)
-
-    ! *********************************************************************
-
-    strten(1:3) = strten(1:3)+-(2./3.)*energycontrib
-  end subroutine hightemp_addtostress
 
 end module m_hightemp

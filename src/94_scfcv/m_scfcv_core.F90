@@ -2645,7 +2645,11 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    end if
 
 !  Blanchet Add the energy contribution to the internal energy
-   if(associated(hightemp)) call hightemp_addtoenergy(hightemp%energycontrib,etotal)
+   if(associated(hightemp)) then
+     energies%e_kin_freeel=hightemp%e_kin_freeel
+     energies%e_shiftfactor=hightemp%e_shiftfactor
+     etotal=etotal+energies%e_kin_freeel
+   end if
 
 !  Compute energy residual
    deltae=etotal-elast

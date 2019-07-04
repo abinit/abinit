@@ -75,8 +75,8 @@ module m_common
  public :: prtene
  public :: get_dtsets_pspheads     ! Parse input file, get list of pseudos for files file and build list of datasets
                                    ! pseudopotential headers, maxval of dimensions needed in outvars
- public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files 
- public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file 
+ public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files
+ public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file
                                    ! with file extension in [".abi", ".in"]
  type(stream_string) :: etot_yaml_doc
 !!***
@@ -1531,6 +1531,17 @@ subroutine prtene(dtset,energies,iout,usepaw)
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
      call wrtout(iout,msg,'COLL')
      call e_components%set('Kinetic energy', r=energies%e_kinetic)
+     if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) then
+        write(msg, '(a,es21.14)' ) '    Kin. free el. E = ',energies%e_kin_freeel
+        call wrtout(iout,msg,'COLL')
+        call e_components%set('Kin. free el. E', r=energies%e_kin_freeel)
+        write(msg, '(a,es21.14)' ) '    Tot kin. energy = ',energies%e_kin_freeel+energies%e_kinetic
+        call wrtout(iout,msg,'COLL')
+        call e_components%set('Tot kin. energy', r=energies%e_kin_freeel+energies%e_kinetic)
+        write(msg, '(a,es21.14)' ) '    Shift factor U0 = ',energies%e_shiftfactor
+        call wrtout(iout,msg,'COLL')
+        call e_components%set('Shift factor U0', r=energies%e_shiftfactor)
+     end if
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
 !XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
@@ -1729,6 +1740,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call e_components_dc%set(EPName(3-ipositron)//' E', r=energies%e0_electronpositron)
      call e_components_dc%set('EP interaction E', r=energies%e_electronpositron)
    end if
+
+
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    call wrtout(iout,msg,'COLL')
    call e_components_dc%set('Etotal (DC)', r=etotaldc)
@@ -1999,7 +2012,7 @@ end subroutine get_dtsets_pspheads
 !! ebands_from_file
 !!
 !! FUNCTION
-!!  Build and ebands_t object from file. Supports Fortran and netcdf files 
+!!  Build and ebands_t object from file. Supports Fortran and netcdf files
 !!  provided they have a Abinit header and obviously GS eigenvalues
 !!
 !! INPUTS
@@ -2031,13 +2044,13 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 
 ! *************************************************************************
 
- ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK 
+ ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK
  if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
    call hdr_read_from_fname(hdr, path, fform, comm)
    ABI_CHECK(fform /= 0, "fform == 0")
    call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
-   
+
  else if (endswith(path, ".nc")) then
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, path, comm))
@@ -2099,7 +2112,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
    NOT_IMPLEMENTED_ERROR()
 
    ! TODO
-   ! This routine prompts for the list of pseudos! One should get rid of the files file 
+   ! This routine prompts for the list of pseudos! One should get rid of the files file
    ! before activating this part.
    !call get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
    !call crystal_init(dtset%amu_orig(:,1), new, dtset%spgroup, dtset%natom, dtset%npsp, &

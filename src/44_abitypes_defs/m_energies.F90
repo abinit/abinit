@@ -43,7 +43,7 @@ MODULE m_energies
  private
 
 !public parameter
- integer, public, parameter :: n_energies=33
+ integer, public, parameter :: n_energies=35
   ! Number of energies stored in energies datastructure
 
 !!***
@@ -119,6 +119,9 @@ MODULE m_energies
   real(dp) :: e_hartree=zero
    ! Hartree part of total energy (hartree units)
 
+  real(dp) :: e_kin_freeel=zero
+   ! Kinetic energy of free electrons gas
+
   real(dp) :: e_hybcomp_E0=zero
    ! First compensation energy in the case of hybrid functionals, due to the use of two different XC functionals
    ! Term related to energy, at frozen density
@@ -152,6 +155,9 @@ MODULE m_energies
 
   real(dp) :: e_pawdc=zero
    ! PAW spherical part double-counting energy
+
+  real(dp) :: e_shiftfactor=zero
+   ! Energy shift factor between Kohn-Sham calculation and free electron model
 
   real(dp) :: e_sicdc=zero
    ! Self-interaction energy double-counting
@@ -233,6 +239,7 @@ subroutine energies_init(energies)
  energies%e_fockdc      = zero
  energies%e_fock0       = zero
  energies%e_hartree     = zero
+ energies%e_kin_freeel  = zero
  energies%e_hybcomp_E0  = zero
  energies%e_hybcomp_v0  = zero
  energies%e_hybcomp_v   = zero
@@ -243,6 +250,7 @@ subroutine energies_init(energies)
  energies%e_nlpsp_vfock = zero
  energies%e_paw         = zero
  energies%e_pawdc       = zero
+ energies%e_shiftfactor = zero
  energies%e_sicdc       = zero
  energies%e_vdw_dftd    = zero
  energies%e_xc          = zero
@@ -302,8 +310,9 @@ end subroutine energies_init
  energies_out%e_fermie             = energies_in%e_fermie
  energies_out%e_fock               = energies_in%e_fock
  energies_out%e_fockdc             = energies_in%e_fockdc
- energies_out%e_fock0              = energies_in%e_fock0 
+ energies_out%e_fock0              = energies_in%e_fock0
  energies_out%e_hartree            = energies_in%e_hartree
+ energies_out%e_kin_freeel         = energies_in%e_kin_freeel
  energies_out%e_hybcomp_E0         = energies_in%e_hybcomp_E0
  energies_out%e_hybcomp_v0         = energies_in%e_hybcomp_v0
  energies_out%e_hybcomp_v          = energies_in%e_hybcomp_v
@@ -314,6 +323,7 @@ end subroutine energies_init
  energies_out%e_nlpsp_vfock        = energies_in%e_nlpsp_vfock
  energies_out%e_paw                = energies_in%e_paw
  energies_out%e_pawdc              = energies_in%e_pawdc
+ energies_out%e_shiftfactor        = energies_in%e_shiftfactor
  energies_out%e_sicdc              = energies_in%e_sicdc
  energies_out%e_vdw_dftd           = energies_in%e_vdw_dftd
  energies_out%e_xc                 = energies_in%e_xc
@@ -381,24 +391,26 @@ end subroutine energies_copy
    energies_array(13)=energies%e_fermie
    energies_array(14)=energies%e_fock
    energies_array(15)=energies%e_fockdc
-   energies_array(16)=energies%e_fock0 
+   energies_array(16)=energies%e_fock0
    energies_array(17)=energies%e_hartree
-   energies_array(18)=energies%e_hybcomp_E0
-   energies_array(19)=energies%e_hybcomp_v0
-   energies_array(20)=energies%e_hybcomp_v
-   energies_array(21)=energies%e_kinetic
-   energies_array(22)=energies%e_localpsp
-   energies_array(23)=energies%e_magfield
-   energies_array(24)=energies%e_monopole
-   energies_array(25)=energies%e_nlpsp_vfock
-   energies_array(26)=energies%e_paw
-   energies_array(27)=energies%e_pawdc
-   energies_array(28)=energies%e_sicdc
-   energies_array(29)=energies%e_vdw_dftd
-   energies_array(30)=energies%e_xc
-   energies_array(31)=energies%e_xcdc
-   energies_array(32)=energies%e_xc_vdw
-   energies_array(33)=energies%h0
+   energies_array(18)=energies%e_kin_freeel
+   energies_array(19)=energies%e_hybcomp_E0
+   energies_array(20)=energies%e_hybcomp_v0
+   energies_array(21)=energies%e_hybcomp_v
+   energies_array(22)=energies%e_kinetic
+   energies_array(23)=energies%e_localpsp
+   energies_array(24)=energies%e_magfield
+   energies_array(25)=energies%e_monopole
+   energies_array(26)=energies%e_nlpsp_vfock
+   energies_array(27)=energies%e_paw
+   energies_array(28)=energies%e_pawdc
+   energies_array(29)=energies%e_shiftfactor
+   energies_array(30)=energies%e_sicdc
+   energies_array(31)=energies%e_vdw_dftd
+   energies_array(32)=energies%e_xc
+   energies_array(33)=energies%e_xcdc
+   energies_array(34)=energies%e_xc_vdw
+   energies_array(35)=energies%h0
  end if
 
  if (option==-1) then
@@ -419,22 +431,24 @@ end subroutine energies_copy
    energies%e_fockdc             = energies_array(15)
    energies%e_fock0              = energies_array(16)
    energies%e_hartree            = energies_array(17)
-   energies%e_hybcomp_E0         = energies_array(18)
-   energies%e_hybcomp_v0         = energies_array(19)
-   energies%e_hybcomp_v          = energies_array(20)
-   energies%e_kinetic            = energies_array(21)
-   energies%e_localpsp           = energies_array(22)
-   energies%e_magfield           = energies_array(23)
-   energies%e_monopole           = energies_array(24)
-   energies%e_nlpsp_vfock        = energies_array(25)
-   energies%e_paw                = energies_array(26)
-   energies%e_pawdc              = energies_array(27)
-   energies%e_sicdc              = energies_array(28)
-   energies%e_vdw_dftd           = energies_array(29)
-   energies%e_xc                 = energies_array(30)
-   energies%e_xcdc               = energies_array(31)
-   energies%e_xc_vdw             = energies_array(32)
-   energies%h0                   = energies_array(33)
+   energies%e_kin_freeel         = energies_array(18)
+   energies%e_hybcomp_E0         = energies_array(19)
+   energies%e_hybcomp_v0         = energies_array(20)
+   energies%e_hybcomp_v          = energies_array(21)
+   energies%e_kinetic            = energies_array(22)
+   energies%e_localpsp           = energies_array(23)
+   energies%e_magfield           = energies_array(24)
+   energies%e_monopole           = energies_array(25)
+   energies%e_nlpsp_vfock        = energies_array(26)
+   energies%e_paw                = energies_array(27)
+   energies%e_pawdc              = energies_array(28)
+   energies%e_shiftfactor        = energies_array(29)
+   energies%e_sicdc              = energies_array(30)
+   energies%e_vdw_dftd           = energies_array(31)
+   energies%e_xc                 = energies_array(32)
+   energies%e_xcdc               = energies_array(33)
+   energies%e_xc_vdw             = energies_array(34)
+   energies%h0                   = energies_array(35)
  end if
 
 end subroutine energies_to_array
@@ -590,10 +604,10 @@ subroutine energies_ncwrite(enes,ncid)
 &  "e_chempot", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
 &  "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
 &  "e_entropy", "entropy", "e_ewald", &
-&  "e_exactX","e_fermie", &
-&  "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
+&  "e_exactX","e_fermie", "e_fock", "e_fockdc", "e_fock0", "e_hartree",&
+&  "e_kin_freeel", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
 &  "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
-&  "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd",&
+&  "e_paw", "e_pawdc", "e_shiftfactor", "e_sicdc", "e_vdw_dftd",&
 &  "e_xc", "e_xcdc", "e_xc_vdw",&
 &  "h0"],&
 !
@@ -601,9 +615,9 @@ subroutine energies_ncwrite(enes,ncid)
 &   enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
 &   enes%e_entropy, enes%entropy, enes%e_ewald, &
 &   enes%e_exactX, enes%e_fermie, enes%e_fock, enes%e_fockdc,enes%e_fock0,  enes%e_hartree, &
-&   enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
+&   enes%e_kin_freeel, enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
 &   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
-&   enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
+&   enes%e_paw, enes%e_pawdc, enes%e_shiftfactor, enes%e_sicdc, enes%e_vdw_dftd,&
 &   enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
 &   enes%h0])
 

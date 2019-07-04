@@ -103,7 +103,7 @@ module m_gstate
  use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
- use m_hightemp,         only : prt_eigocc
+ use m_hightemp,         only : hightemp_prt_eigocc
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -1456,7 +1456,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
 & resid,rhor,rprimd,results_gs%vxcavg,xred)
 
- call prt_eigocc(eigen,results_gs%etotal,results_gs%energies,dtfil%fnameabo_eig,std_out,&
+ call hightemp_prt_eigocc(eigen,results_gs%etotal,results_gs%energies,dtfil%fnameabo_eig,std_out,&
 & dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,occ,rprimd,results_gs%strten,&
 & dtset%tsmear,psps%usepaw,dtset%wtk)
 
