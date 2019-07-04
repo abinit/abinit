@@ -74,6 +74,7 @@ module m_mpi_scheduler
      procedure :: allgatherv_dp1d ! helper function to gather 1d real(dp) array from nodes.
      procedure :: allgatherv_dp2d ! helper function to gather 2d real(dp) array from nodes.
     ! procedure :: allgatherv_dp2d_inplace ! helper function to gather 2d real(dp) array from nodes.
+    ! disabled because an openmpi I tried does not support this. 
 
   end type mpi_scheduler_t
 
@@ -98,6 +99,9 @@ contains
   end subroutine init_mpi_info
 
 
+  !----------------------------------------------------------------------
+  !> @brief initialize mpi info type
+  !----------------------------------------------------------------------
   subroutine mb_mpi_info_t_initialize(self)
     class (mb_mpi_info_t):: self
     self%master = 0
@@ -108,8 +112,18 @@ contains
   end subroutine mb_mpi_info_t_initialize
 
 
+  !----------------------------------------------------------------------
+  !> @brief assign ntasks to ranks in mpi comm.
+  !> @param[in]  ntasks: number of tasks to be done. e.g. number of spins to be moved.
+  !> @param[in]  master: the id of master node
+  !> @param[in]  comm: the communicator
+  !> @param[in]  nblock: the task should be divided so that nblock are together.
+  !>              e.g. for 3*nspin tasks, nblock=3 will assure that the 3 direction of one
+  !>               spin is together.
+  !----------------------------------------------------------------------
+
   subroutine mpi_scheduler_t_initialize(self, ntasks, master, comm, nblock)
-    ! assign ntasks to ranks in mpi comm.
+    ! 
     ! ntask: number of tasks
     ! nblock: number of subtask per task. TODO: should improve the naming.
     class(mpi_scheduler_t), intent(inout) :: self
@@ -184,7 +198,12 @@ contains
 
 
 
-  ! find the proc id of which the index of task belong to
+  !----------------------------------------------------------------------
+  !> @brief find the proc id of which the index of task belong to
+  !>
+  !> @param[in]  i: the index of task
+  !> @param[out] iproc: the id of process which is in charge of the task
+  !----------------------------------------------------------------------
   function mpi_scheduler_t_get_iproc(self, i) result(iproc)
     class(mpi_scheduler_t), intent(in) :: self
     integer, intent(in) :: i
@@ -192,6 +211,12 @@ contains
     iproc=i/(self%ntasks/self%nproc)
   end function mpi_scheduler_t_get_iproc
 
+  !----------------------------------------------------------------------
+  !> @brief get the start of the id of work for the rank
+  !>
+  !> @param[in]  rank: the id of the rank
+  !> @param[out] i: the starting id of work
+  !----------------------------------------------------------------------
   function get_istart(self, rank) result(i)
     class(mpi_scheduler_t), intent(in) :: self
     integer, optional, intent(in):: rank
@@ -204,6 +229,12 @@ contains
     i=self%istart_list(r+1)
   end function get_istart
 
+  !----------------------------------------------------------------------
+  !> @brief get the end of the id of work for the rank
+  !>
+  !> @param[in]  rank: the id of the rank
+  !> @param[out] i: the end id of work
+  !----------------------------------------------------------------------
   function get_iend(self, rank) result(i)
     class(mpi_scheduler_t), intent(in) :: self
     integer, optional, intent(in):: rank
@@ -216,7 +247,12 @@ contains
     i=self%iend_list(r+1)
   end function get_iend
 
-  
+  !----------------------------------------------------------------------
+  !> @brief get the number of work for the rank
+  !>
+  !> @param[in]  rank: the id of the rank
+  !> @param[out] i: the number of works assigned to this rank
+  !----------------------------------------------------------------------
   function get_ntask(self, rank) result(i)
     class(mpi_scheduler_t), intent(in) :: self
     integer, optional, intent(in):: rank
@@ -229,6 +265,12 @@ contains
     i=self%ntask_list(r+1)
   end function get_ntask
 
+  !----------------------------------------------------------------------
+  !> @brief helper function to gather real(dp) 1D array to  master node
+  !>
+  !> @param[in]  data: the data array to be gathered
+  !> @param[out] buffer: a buffer to be used for the gathering.
+  !----------------------------------------------------------------------
   subroutine gatherv_dp1d(self, data, buffer)
     class(mpi_scheduler_t), intent(inout) :: self
     real(dp), intent(inout) :: data(self%ntasks)
@@ -243,6 +285,12 @@ contains
   data(:)=buffer(:)
   end subroutine gatherv_dp1d
 
+  !----------------------------------------------------------------------
+  !> @brief helper function to gather real(dp) 2D array to  master node
+  !>
+  !> @param[in]  data: the data array to be gathered
+  !> @param[out] buffer: a buffer to be used for the gathering.
+  !----------------------------------------------------------------------
   subroutine gatherv_dp2d(self, data, nrow, buffer)
     class(mpi_scheduler_t), intent(inout) :: self
     integer, intent(in) :: nrow
@@ -257,6 +305,12 @@ contains
     data(:,:)=buffer(:,:)
   end subroutine gatherv_dp2d
 
+  !----------------------------------------------------------------------
+  !> @brief helper function to gather real(dp) 1D array to  master node 
+  !>    and bcast to every node
+  !> @param[in]  data: the data array to be gathered
+  !> @param[out] buffer: a buffer to be used for the gathering.
+  !----------------------------------------------------------------------
   subroutine allgatherv_dp1d(self, data, buffer)
     class(mpi_scheduler_t), intent(inout) :: self
     real(dp), intent(inout) :: data(self%ntasks)
@@ -272,7 +326,12 @@ contains
   end subroutine allgatherv_dp1d
 
 
-
+  !----------------------------------------------------------------------
+  !> @brief helper function to gather real(dp) 2D array to  master node 
+  !>    and bcast to every node
+  !> @param[in]  data: the data array to be gathered
+  !> @param[out] buffer: a buffer to be used for the gathering.
+  !----------------------------------------------------------------------
   subroutine allgatherv_dp2d(self, data, nrow, buffer)
     class(mpi_scheduler_t), intent(inout) :: self
     integer, intent(in) :: nrow
@@ -305,7 +364,9 @@ contains
 !         & self%comm, ierr)
 !  end subroutine allgatherv_dp2d_inplace
 
-
+  !----------------------------------------------------------------------
+  !> @brief free memory used
+  !----------------------------------------------------------------------
   subroutine mpi_scheduler_t_finalize(self)
     class(mpi_scheduler_t), intent(inout) :: self
     if (allocated(self%istart_list)) then

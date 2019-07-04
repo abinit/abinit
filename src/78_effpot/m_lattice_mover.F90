@@ -93,6 +93,7 @@ contains
   ! Inputs:
   !> params: input parameters
   !> supercell: supercell.
+  !> rng: random number generator
   !-------------------------------------------------------------------!
   subroutine initialize(self, params, supercell, rng)
     class(lattice_mover_t), intent(inout) :: self

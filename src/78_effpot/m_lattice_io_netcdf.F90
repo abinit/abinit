@@ -327,6 +327,10 @@ contains
   end subroutine get_eigen
 
 
+  !-------------------------------------------------------------------!
+  ! print error message for netcdf functions
+  ! input: name: a tag to be printed so the error can be located.
+  !-------------------------------------------------------------------!
   subroutine nc_handle_err(ierr, name)
     integer, intent ( in) ::ierr
     character(*), optional, intent(in) :: name
