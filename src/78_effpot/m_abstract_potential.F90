@@ -44,18 +44,26 @@ module m_abstract_potential
   implicit none
 !!***
   private
+
+
   type ,public :: abstract_potential_t
      ! This is the abstract class of effective potential.
      ! It do the following things:
      ! calculate 0th, 1st,... derivative of energy related, e.g. Force for lattice model
-     ! labels for variables
+     ! labels for variables. If a new degree of freedom is to be added, a label
+     ! should be added here.
      logical :: has_displacement=.False.
      logical :: has_strain=.False.
      logical :: has_spin=.False.
      logical :: has_lwf = .False.
      logical :: is_null=.True.   ! if is_null, this term does not exist.
+     ! it is important to set it to True before initialization.
+     ! Because it is used as the tag for deallocatign memory. 
      type(mbsupercell_t) ,pointer :: supercell => null()
-     character (len=200) :: label="Abstract Potential"
+     ! every supercell potential has a pointer to the supercell,
+     ! which could be used for like reference structure.
+     character (len=200) :: label="Abstract Potential"  !
+     ! the label is used for printing information.
    contains
      procedure :: set_supercell   ! set_supercell
      procedure :: finalize        ! finalize
@@ -66,6 +74,11 @@ module m_abstract_potential
 
 contains
 
+  !----------------------------------------------------------------------
+  !> @brief link a supercell to the potential
+  !>
+  !> @param[in]  supercell: supercell object
+  !----------------------------------------------------------------------
   subroutine set_supercell(self, supercell)
     class(abstract_potential_t), intent(inout) :: self
     type(mbsupercell_t), target, intent(inout) :: supercell
@@ -74,6 +87,10 @@ contains
     MSG_ERROR("Every potential should override this set_supercell method to avoid mistake.")
   end subroutine set_supercell
 
+  !----------------------------------------------------------------------
+  !> @brief finalize
+  !>
+  !----------------------------------------------------------------------
   subroutine finalize(self)
     class(abstract_potential_t), intent(inout) :: self
     self%is_null=.True.
@@ -81,6 +98,11 @@ contains
     self%label="Destroyed potential"
   end subroutine finalize
 
+  !----------------------------------------------------------------------
+  !> @brief set_params: set the parameters from input file parameters
+  !>
+  !> @param[in]  params: multibinit_dtset_type: from input file
+  !----------------------------------------------------------------------
   subroutine set_params(self, params)
     class(abstract_potential_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
@@ -113,12 +135,24 @@ contains
   !   MSG_ERROR("set_spin not implemented.")
   ! end subroutine set_spin
 
+  !----------------------------------------------------------------------
+  !> @brief calculate energy and derivatives with given state.
+  !> This function calculate the energy and its first derivative
+  !> the inputs and outputs are optional so that each effpot can adapt to its
+  !> own.
+  !> In principle, the 1st derivatives are only calculated if
+  !> asked to (present).
+  !> However, they can be computed if it is simply convinient to do.
+  !> @param[in]  displacement (optional)
+  !> @param[in]  strain (optional)
+  !> @param[in]  spin (optional)
+  !> @param[in]  lwf (optional)
+  !> @param[out] force (optional)
+  !> @param[out] stress (optional)
+  !> @param[out] bfield (optional)
+  !----------------------------------------------------------------------
   subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
-    ! This function calculate the energy and its first derivative
-    ! the inputs and outputs are optional so that each effpot can adapt to its
-    ! own.
-    ! In principle, the 1st derivatives are only calculated if asked to (present). However, they can be computed if it is simply convinient to do.
-    class(abstract_potential_t), intent(inout) :: self  ! the effpot may save the states.
+      class(abstract_potential_t), intent(inout) :: self  ! the effpot may save the states.
 
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
@@ -138,6 +172,16 @@ contains
     MSG_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 
+  !----------------------------------------------------------------------
+  !> @brief get_delta_E: calculate the energy difference when a given spin
+  !> is changed. This is to be used for spin Monte Carlo. Currently the
+  !> only supported is the spin model. 
+  !>
+  !> @param[in]  S: spin of full structure. array of (3, nspin)
+  !> @param[in]  ispin: the index of spin changed. integer
+  !> @param[in]  snew: the new value of the changed spin. 
+  !> @param[out] deltaE: the energy difference
+  !----------------------------------------------------------------------
   subroutine get_delta_E(self, S, ispin, Snew, deltaE)
     ! for spin monte carlo
     ! calculate energy difference if one spin is moved.
