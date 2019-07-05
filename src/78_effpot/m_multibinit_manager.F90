@@ -148,6 +148,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     self%filenames(:)=filenames(:)
+    call xmpi_bcast(self%filenames, master, comm, ierr)
 
     !TODO: remove params as argument. It is here because the params are read
     ! in the multibinit_main function. Once we use multibinit_main2, remove it.
@@ -159,16 +160,15 @@ contains
        call self%read_params()
     endif
 
-
     ! Initialize the random number generator
     call self%rng%set_seed([111111_dp, 2_dp])
+    ! use jump so that each cpu generates independent random numbers.
     if(my_rank>0) then
        do i =1,my_rank
           call self%rng%jump()
        end do
     end if
 
-    call xmpi_bcast(self%filenames, master, comm, ierr)
 
     if(self%params%spin_dynamics>0) then
        self%has_spin=.True.

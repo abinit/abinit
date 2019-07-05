@@ -564,7 +564,7 @@ contains
     real(dp) :: bivallist(3,3, n)
     if (xmpi_comm_rank(xmpi_world)==0) then
        bivallist(:,:,:)=0.0d0
-       Rlist(:, :)=0.0d0
+       Rlist(:, :)=0
        do idx=1,n, 1
           bivallist(:,:, idx)= (- k1list(idx))*  &
                outer_product(k1dirlist(:,idx), k1dirlist(:, idx))
