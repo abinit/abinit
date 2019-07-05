@@ -5618,6 +5618,9 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
    end if
    ABI_FREE(zeff)
    ABI_FREE(zeff_raw)
+ else
+   dvdb%add_lr = 0
+   MSG_WARNING("ddb_path was not provided --> Setting dvdb_add_lr to zero")
  end if
 
  call dvdb%print()
@@ -5708,7 +5711,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 
    ! Prepare FT interpolation using coarse q-mesh.
    outwr_path = strcat(dvdb_path, "_QCOARSE_WR.nc")
-   outwr_path = ""
+   !outwr_path = ""
    call coarse_dvdb%ftinterp_setup(coarse_ngqpt, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
 
    do iq=1,dvdb%nqpt
