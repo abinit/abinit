@@ -1930,13 +1930,15 @@ end subroutine make_onsite_l
 !!
 !! SOURCE
 
-subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_bm,pawrad,pawtab)
+subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_bm,&
+     & pawang,pawrad,pawtab)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: idir,mcprj,nband_k
   complex(dpc),intent(out) :: onsite_bm
   type(MPI_type), intent(inout) :: mpi_enreg
+  type(pawang_type),intent(in) :: pawang
   type(dataset_type),intent(in) :: dtset
 
   !arrays
@@ -1947,9 +1949,9 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
 
   !Local variables -------------------------
   !scalars
-  integer :: iatom,icprj,ierr,ikpt,ikpt_loc,il,im,ilmn,isppol,itypat
-  integer :: jl,jm,jlmn,klmn,kln,me,mesh_size,my_nspinor,ncpgr,nn,nproc,spaceComm
-  real(dp) :: bm1,intg,scale_conversion
+  integer :: gint,iatom,icprj,ierr,ikpt,ikpt_loc,il,im,ilmn,isppol,itypat
+  integer :: jl,jm,jlmn,klmn,klm,kln,lpmp,me,mesh_size,my_nspinor,ncpgr,nn,nproc,spaceComm
+  real(dp) :: bm1,bm2,d00,d20,d22,dij,intg,scale_conversion
   complex(dpc) :: cpb,cpk
   
   !arrays
@@ -1962,6 +1964,10 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
 
   ! this term can only be non-zero if some nucdipmom is nonzero
   scale_conversion = half*FineStructureConstant2
+  d00 = sqrt(4.0*pi)/3.0
+  dij = sqrt(4.0*pi/15.0)
+  d20 = sqrt(16.0*pi/5.0)/6.0
+  d22 = sqrt(16.0*pi/15.0)/2.0
   onsite_bm = czero
 
   ! TODO: generalize to nsppol > 1
@@ -2005,6 +2011,7 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
               im=pawtab(itypat)%indlmn(2,ilmn)
               klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
               kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
+              klm = pawtab(itypat)%indklmn(1,klmn) ! need this for bm2 gaunt integral selection
               ! compute integral of (phi_i*phi_j - tphi_i*tphi_j)/r
               ff(2:mesh_size)=(pawtab(itypat)%phiphj(2:mesh_size,kln) - &
                    &           pawtab(itypat)%tphitphj(2:mesh_size,kln)) / &
@@ -2016,10 +2023,62 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
               if ( (jl .EQ. il) .AND. (jm .EQ. im) .AND. (abs(dtset%nucdipmom(idir,iatom)) .GT. tol8) ) then
                  bm1 = scale_conversion*dtset%nucdipmom(idir,iatom)*intg
               end if
+              bm2 = zero
+              ! xx, yy, zz cases all have the same contribution from S00
+              lpmp=1
+              gint = pawang%gntselect(lpmp,klm)
+              if (gint > 0) then
+                 bm2=bm2+scale_conversion*dtset%nucdipmom(idir,iatom)*d00*pawang%realgnt(gint)*intg
+              end if
+              ! all other contributions involve Gaunt integrals of S_{2m}
+              do lpmp = 5, 9
+                 gint = pawang%gntselect(lpmp,klm)
+                 if (gint > 0) then
+                    select case (lpmp)
+                    case (5) ! S_{2,-2} contributes to xy term
+                       select case (idir)
+                       case (1)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(2,iatom)*dij*pawang%realgnt(gint)*intg
+                       case (2)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(1,iatom)*dij*pawang%realgnt(gint)*intg
+                       end select
+                    case (6) ! S_{2,-1} contributes to yz term
+                       select case (idir)
+                       case (2)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(3,iatom)*dij*pawang%realgnt(gint)*intg
+                       case (3)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(2,iatom)*dij*pawang%realgnt(gint)*intg
+                       end select
+                    case (7) ! S_{2,0} contributes to xx, yy, and zz terms
+                       select case (idir)
+                          case (1)
+                             bm2=bm2-scale_conversion*dtset%nucdipmom(1,iatom)*d20*pawang%realgnt(gint)*intg
+                          case (2)
+                             bm2=bm2-scale_conversion*dtset%nucdipmom(2,iatom)*d20*pawang%realgnt(gint)*intg
+                          case (3)
+                             bm2=bm2+scale_conversion*dtset%nucdipmom(3,iatom)*2.0*d20*pawang%realgnt(gint)*intg
+                          end select
+                    case (8) ! S_{2,+1} contributes to xz term
+                       select case (idir)
+                       case (1)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(3,iatom)*dij*pawang%realgnt(gint)*intg
+                       case (3)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(1,iatom)*dij*pawang%realgnt(gint)*intg
+                       end select
+                    case (9) ! S_{2,2} contributes to xx, yy terms
+                       select case (idir)
+                       case (1)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(1,iatom)*d22*pawang%realgnt(gint)*intg
+                       case (2)
+                          bm2=bm2-scale_conversion*dtset%nucdipmom(2,iatom)*d22*pawang%realgnt(gint)*intg
+                       end select
+                    end select
+                 end if ! end check on nonzero gaunt integral
+              end do ! end loop over lp,mp
               do nn = 1, nband_k
                  cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
                  cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
-                 onsite_bm=onsite_bm+conjg(cpb)*bm1*cpk
+                 onsite_bm=onsite_bm+conjg(cpb)*(bm1-bm2)*cpk
               end do ! end loop over nn
            end do ! end loop over ilmn
         end do ! end loop over jlmn
@@ -4442,7 +4501,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     rhorij1(2,adir) = aimag(rhorij1_dir)
 
     if (any(abs(dtset%nucdipmom)>tol8)) then
-       call make_onsite_bm(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_bm_dir,pawrad,pawtab)
+       call make_onsite_bm(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_bm_dir,&
+            & pawang,pawrad,pawtab)
        onsite_bm(1,adir) = real(onsite_bm_dir)
        onsite_bm(2,adir) = aimag(onsite_bm_dir)
     else
