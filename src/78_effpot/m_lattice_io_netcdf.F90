@@ -137,7 +137,7 @@ contains
     integer, allocatable :: zion(:)
     real(dp), allocatable :: ifc_vallist(:,:,:)
     integer :: varid, i, j
-!#if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
     NCF_CHECK_MSG(ierr, "Open netcdf file")
 
@@ -212,9 +212,10 @@ contains
     ABI_DEALLOCATE(xcart)
     ABI_DEALLOCATE(zion)
     ABI_DEALLOCATE(ifc_vallist)
-!# else
-!   MSG_ERROR("Error: Netcdf should be installed with Multibinit to read the netcdf potential file.")
-!#endif
+#else
+    NETCDF_NOTENABLED_ERROR()
+#endif
+
   end subroutine load_from_netcdf
 
 

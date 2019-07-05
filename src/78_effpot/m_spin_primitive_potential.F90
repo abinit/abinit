@@ -37,9 +37,9 @@ module m_spin_primitive_potential
   use m_errors
   use m_xmpi
   use m_nctk
-  !#if defined HAVE_NETCDF
+  #if defined HAVE_NETCDF
   use netcdf
-  !#endif
+  #endif
 
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
@@ -222,7 +222,7 @@ contains
     integer , allocatable:: spin_bilinear_Rlist(:,:)
     real(dp), allocatable:: spin_bilinear_vallist(:,:,:)
 
-!#if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
 
     ! open netcdf file
     ierr=nf90_open(trim(fname)//char(0), NF90_NOWRITE, ncid)
@@ -448,7 +448,9 @@ contains
 
     ierr=nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
-
+#else
+    NETCDF_NOTENABLED_ERROR()
+#endif
   end subroutine read_netcdf
 
 
