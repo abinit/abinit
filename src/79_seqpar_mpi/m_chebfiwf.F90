@@ -653,11 +653,11 @@ module m_chebfiwf
             !print *, "blockdim", blockdim
             !print *, "l_npw", l_npw
             !stop
-            print *, "USAO U getBm1X"
-            call xgBlock_setBlock(Bm1X, xXColsRows, 1, 3888, 96)  
-            call xgTransposer_transpose(transposer,STATE_LINALG) !all_to_all
-            call debug_helper_linalg(X1)
-            stop
+            !print *, "USAO U getBm1X"
+            !call xgBlock_setBlock(Bm1X, xXColsRows, 1, 3888, 96)  
+            !call xgTransposer_transpose(transposer,STATE_LINALG) !all_to_all
+            !call debug_helper_linalg(X1)
+            !stop
           end if
         end if
       end if
