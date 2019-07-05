@@ -495,7 +495,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    call wrtout(ab_out,msg,'COLL')
    call neat_open_gw_sigma_pert(stream, '', Sigp%kptgw(:,ikcalc), Sr%e0gap(ikibz,is)*Ha_eV, &
 &                               Sr%egwgap(ikibz,is)*Ha_eV, Sr%degwgap(ikibz,is)*Ha_eV, &
-&                               msg, tag='GwSigma')
+&                               msg)
 
    write(unt_gw,'(3f10.6)')Sigp%kptgw(:,ikcalc)
    write(unt_gw,'(i4)')Sigp%maxbnd(ikcalc,is)-Sigp%minbnd(ikcalc,is)+1

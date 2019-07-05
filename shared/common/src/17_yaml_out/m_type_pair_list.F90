@@ -1,3 +1,26 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_type_pair_list
+!! NAME
+!!  m_pair_list
+!!
+!! FUNCTION
+!!  This module define the interface to the C implementation
+!!  of pair_list. See m_pair_list.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2009-2019 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!   m_pair_list
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -17,3 +40,4 @@ module m_type_pair_list
   end type c_pair_list
   contains
 end module m_type_pair_list
+!!***

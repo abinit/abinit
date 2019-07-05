@@ -1,3 +1,29 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_pair_list
+!! NAME
+!!  m_pair_list
+!!
+!! FUNCTION
+!!  This module define the interface to a type representing a
+!!  dictionary containing string keys and numeric or string values.
+!!  It is implemented in C as a simple linked pair list
+!!  (associative list).
+!!
+!! COPYRIGHT
+!! Copyright (C) 2009-2019 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!   m_yaml_out, m_neat, m_common
+!!
+!! CHILDREN
+!!   m_type_pair_list
+!!
+!! SOURCE
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -99,6 +125,7 @@ module m_pair_list
 ! -                                                                             -
 ! -------------------------------------------------------------------------------
   contains
+!!***
 
 !!****f* m_pair_list/pair_list_length
 !! NAME
@@ -124,7 +151,7 @@ module m_pair_list
     integer :: length
     length = pl%plc%length
   end function pair_list_length
-!!*** m_pair_list/pair_list_length
+!!***
 
 !!****f* m_pair_list/pair_list_get
 !! NAME
@@ -162,7 +189,7 @@ module m_pair_list
     real(kind=c_double),intent(out) :: r
     call pair_list_get_c(pl%plc, trim(key), type_code, i, r, s, len_trim(key), len(s))
   end subroutine pair_list_get
-!!*** m_pair_list/pair_list_get
+!!***
 
 !!****f* m_pair_list/pair_list_look
 !! NAME
@@ -205,7 +232,7 @@ module m_pair_list
     real(kind=c_double),intent(out) :: r
     call pair_list_look_c(pl%plc, key, type_code, i, r, s, len(key), len(s))
   end subroutine pair_list_look
-!!*** m_pair_list/pair_list_look
+!!***
 
 !!****f* m_pair_list/pair_list_next
 !! NAME
@@ -230,7 +257,7 @@ module m_pair_list
       class(pair_list),intent(in) :: pl
       call pair_list_next_c(pl%plc)
     end subroutine pair_list_next
-!!*** m_pair_list/pair_list_next
+!!***
 
 !!****f* m_pair_list/pair_list_free
 !! NAME
@@ -257,7 +284,7 @@ module m_pair_list
       class(pair_list),intent(inout) :: pl
       call pair_list_free_c(pl%plc)
     end subroutine pair_list_free
-!!*** m_pair_list/pair_list_free
+!!***
 
 !!****f* m_pair_list/pair_list_set
 !! NAME
@@ -299,7 +326,7 @@ module m_pair_list
         call pair_list_sets(pl%plc, trim(key), s, len_trim(key), len_trim(s))
     end if
   end subroutine pair_list_set
-!!*** m_pair_list/pair_list_set
+!!***
 
 !!****f* m_pair_list/pair_list_restart
 !! NAME
@@ -325,7 +352,7 @@ module m_pair_list
     class(pair_list),intent(inout) :: pl
     pl%plc%cursor = pl%plc%first;
   end subroutine pair_list_restart
-!!*** m_pair_list/pair_list_restart
+!!***
 
 !!****f* m_pair_list/pair_list_iter
 !! NAME
@@ -363,6 +390,7 @@ module m_pair_list
       call pair_list_next_c(pl%plc);
     end if
   end subroutine pair_list_iter
-!!*** m_pair_list/pair_list_iter
+!!***
 
 end module m_pair_list
+!!***

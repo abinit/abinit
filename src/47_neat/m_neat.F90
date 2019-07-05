@@ -97,7 +97,7 @@ module m_neat
 !! INPUTS
 !!  energies <type(pair_list)>=values of parts of total energy
 !!  iout= unit of output file
-!!  label= optional label to distinct the main from Etot document from secondary Etot(DC) for example
+!!  tag= optional tag to distinct the main Etot document from secondary Etot(DC) for example
 !!
 !! OUTPUT
 !!
@@ -109,17 +109,17 @@ module m_neat
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine neat_energies(energies, iout, label)
+  subroutine neat_energies(energies, iout, tag)
     type(pair_list),intent(inout) :: energies
     integer,intent(in) :: iout
-    character(len=*),intent(in),optional :: label
+    character(len=*),intent(in),optional :: tag
 !Local variables-------------------------------
     type(stream_string) :: stream
 
-    if(present(label)) then
-      call yaml_single_dict(label, '', energies, 35, 500, tag='ETOT', width=20, stream=stream, real_fmt='(ES25.18)')
+    if(present(tag)) then
+      call yaml_single_dict(tag, '', energies, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
     else
-      call yaml_single_dict('Etot', '', energies, 35, 500, tag='ETOT', width=20, stream=stream, real_fmt='(ES25.18)')
+      call yaml_single_dict('EnergyTerms', '', energies, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
     end if
 
     call wrtout_stream(stream, iout)
@@ -164,9 +164,9 @@ module m_neat
     integer :: j
 
     if(present(comment)) then
-      call yaml_open_doc('results_gs', comment, width=10, stream=stream)
+      call yaml_open_doc('ResultsGS', comment, width=10, stream=stream)
     else
-      call yaml_open_doc('results_gs', '', width=10, stream=stream)
+      call yaml_open_doc('ResultsGS', '', width=10, stream=stream)
     end if
 
     call yaml_add_intfield('natom', results%natom, width=10, stream=stream)
@@ -174,7 +174,7 @@ module m_neat
 
     call dict%set('ecut', r=ecut)
     call dict%set('pawecutdg', r=pawecutdg)
-    call yaml_add_dict('cutoff energies', dict, width=10, stream=stream)
+    call yaml_add_dict('cutoff_energies', dict, width=10, stream=stream)
     call dict%free()
 
     call dict%set('deltae', r=results%deltae)
@@ -263,17 +263,12 @@ module m_neat
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine neat_open_gw_sigma_pert(stream, comment, k, e0, egw, degw, header, tag)
+  subroutine neat_open_gw_sigma_pert(stream, comment, k, e0, egw, degw, header)
     type(stream_string),intent(inout) :: stream
     real(kind=dp),intent(in) :: k(3), e0, egw, degw
     character(len=*),intent(in) :: header, comment
-    character(len=*),intent(in),optional :: tag
 
-    if(present(tag)) then
-      call yaml_open_doc('GW Sigma perturbative', comment, tag=tag, stream=stream)
-    else
-      call yaml_open_doc('GW Sigma perturbative', comment, stream=stream)
-    end if
+    call yaml_open_doc('GwSigmaPerturbative', comment, stream=stream)
 
     call yaml_add_real1d('k point', 3, k, stream=stream, real_fmt='(3f8.3)')
     call yaml_add_realfield('E^0_gap', e0, stream=stream)
@@ -364,16 +359,11 @@ module m_neat
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine neat_open_etot(stream, comment, header, tag)
+  subroutine neat_open_etot(stream, comment, header)
     type(stream_string),intent(inout) :: stream
     character(len=*),intent(in) :: header, comment
-    character(len=*),intent(in),optional :: tag
 
-    if(present(tag)) then
-      call yaml_open_doc('Etot steps', comment, tag=tag, stream=stream)
-    else
-      call yaml_open_doc('Etot steps', comment, stream=stream)
-    end if
+    call yaml_open_doc('EtotSteps', comment, stream=stream)
 
     call yaml_open_tabular('data', stream=stream, tag='EtotIters')
     call yaml_add_tabular_line(header, stream=stream)

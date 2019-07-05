@@ -8,27 +8,56 @@ from .pandas_commons import has_pandas
 
 
 @yaml_auto_map
-class Etot(object):
-    __yaml_tag = 'ETOT'
+class EnergyTerms(object):
+    '''
+    Component if total energy.
+    '''
+    not_components = {
+        'total_energy',
+        'comment',
+        'band_energy',
+        'total_energy_eV'
+    }
 
-    def __init__(self, label='nothing', comment='no comment'):
-        self.label = label
+    def __init__(self, comment='no comment'):
         self.comment = comment
 
     @classmethod
     def from_map(cls, map):
-        new = super(Etot, cls).from_map(map)
+        new = super(EnergyTerms, cls).from_map(map)
         new.components = {
             name: value for name, value in new.__dict__.items()
-            if name not in [
-                'Etotal',
-                'label',
-                'comment',
-                'Band energy',
-                'Total energy(eV)'
-            ]
+            if name not in cls.not_components
         }
         return new
+
+
+@yaml_auto_map
+class EnergyTermsDC(EnergyTerms):
+    '''
+    Components of total energy in Double Counting.
+    '''
+    not_components = {
+        'total_energy_dc',
+        'comment',
+        'band_energy',
+        '-kT*entropy',
+        'total_energy_dc_eV'
+    }
+
+
+@yaml_auto_map
+class EtotSteps(object):
+    '''
+    Detail of the values of Etot through the steps of self consistent cycle.
+    '''
+
+
+@yaml_auto_map
+class ResultsGS(object):
+    '''
+    Miscellaneous results from ground state computations.
+    '''
 
 
 if has_pandas:

@@ -6,7 +6,7 @@ from .pandas_commons import has_pandas
 
 
 @yaml_auto_map
-class GwSigma(object):
+class GwSigmaPerturbative(object):
     pass
 
 
@@ -17,4 +17,4 @@ if has_pandas:
     class GwSigmaData(Table):
         pass
 else:
-    yaml_not_available_tag('GwSigmaData', 'Pandas module is not available')
+    yaml_not_available_tag('GWSigmaData', 'Pandas module is not available')
