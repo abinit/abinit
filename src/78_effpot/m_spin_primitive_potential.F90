@@ -37,9 +37,9 @@ module m_spin_primitive_potential
   use m_errors
   use m_xmpi
   use m_nctk
-  #if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
   use netcdf
-  #endif
+#endif
 
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type

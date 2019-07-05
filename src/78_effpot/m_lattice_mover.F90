@@ -211,6 +211,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine force_temperature(self)
     class(lattice_mover_t), intent(inout) :: self
+    ABI_UNUSED_A(self)
   end subroutine force_temperature
 
 

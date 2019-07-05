@@ -35,9 +35,9 @@ module m_lattice_harmonic_primitive_potential
   use m_abicore
   use m_errors
   use m_nctk
-!#if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
   use netcdf
-!#endif
+#endif
   use m_xmpi
   use m_mathfuncs, only: eigensh
   use m_multibinit_dataset, only: multibinit_dtset_type
@@ -326,25 +326,5 @@ contains
     call self%get_hamk(kpoint, evecs)
     call eigensh(evals, evecs)
   end subroutine get_eigen
-
-!   !-------------------------------------------------------------------!
-!   ! nc_handle_err:
-!   ! Print the error message of an netcdf from an ierr number
-!   ! Inputs:
-!   !  ierr: the error number
-!   !  name: a tag printed with the message so it is easier to debug.
-!   !-------------------------------------------------------------------!
-!   subroutine nc_handle_err(ierr, name)
-!     integer, intent ( in) ::ierr
-!     character(*), optional, intent(in) :: name
-!     if(ierr/= nf90_noerr) then
-!        if (present(name)) then
-!           write(std_out, *)  trim(nf90_strerror(ierr)), "when trying to read ", name
-!        else
-!           write(std_out, *)  trim(nf90_strerror(ierr))
-!        end if
-!        stop "Stopped"
-!     end if
-!   end subroutine nc_handle_err
 
 end module m_lattice_harmonic_primitive_potential
