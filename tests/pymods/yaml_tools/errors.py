@@ -1,8 +1,12 @@
+'''
+Define all error types used in yaml_tools.
+All errors must inherit from YAMLTestError.
+'''
 from __future__ import print_function, division, unicode_literals
 
 
 class YAMLTestError(Exception):
-    pass
+    """Base class for all other errors."""
 
 
 class ConfigContextError(YAMLTestError):
@@ -14,7 +18,7 @@ class ConfigContextError(YAMLTestError):
 
 
 class NoYAMLSupportError(YAMLTestError):
-    pass
+    """Raised when Yaml library is not installed."""
 
 
 ###############################################################################
@@ -29,6 +33,12 @@ class UnknownParamError(ConfigParserError):
         super(UnknownParamError, self).__init__(msg.format(param, cons))
 
 
+class AlreadyRegisteredTagError(ConfigParserError):
+    def __init__(self, tag):
+        msg = 'Attempt to register {} twice.'
+        super(ConfigParserError, self).__init__(msg.format(tag))
+
+
 ###############################################################################
 class ConfigError(YAMLTestError):
     pass
@@ -38,14 +48,14 @@ class ValueTypeError(TypeError, ConfigError):
     def __init__(self, name, exp, found):
         msg = ('The value found in config does not match the type expected for'
                ' {}. Expected {} and found {} of type {}.')
-        TypeError.__init__(self, msg.format(name, exp, found, type(found)))
+        super(TypeError, self).__init__(msg.format(name, exp, found, type(found)))
 
 
 class InvalidNodeError(ConfigError):
     def __init__(self, name, value):
         msg = ('The node labeled {} is not a known parameter or constraint and'
                ' have not the form of a specialisation. Value: {}')
-        super(InputFileError, self).__init__(msg.format(name, value))
+        super(InvalidNodeError, self).__init__(msg.format(name, value))
 
 
 class EmptySetError(ConfigError):
@@ -91,19 +101,18 @@ class NotAvailableTagError(InputFileError):
     def __init__(self, tag, msg):
         msg = ('Tag {} is not available in this installation : {}'
                .format(tag, msg))
-        YAMLTestError.__init__(self, msg)
+        YAMLTestError.__init__(msg)
 
 
-class UnlabeledDocumentError(InputFileError):
+class UntaggedDocumentError(InputFileError):
     def __init__(self, line):
-        msg = ('This document does not have a label field. It cannot be'
-               ' identified.')
-        InputFileError.__init__(self, line, msg)
+        msg = ('This document does not have a tag. It cannot be identified.')
+        super(UntaggedDocumentError, self).__init__(line, msg)
 
 
 class DuplicateDocumentError(InputFileError):
     def __init__(self, line, id):
-        msg = ('There are two document with the same label and iteration'
-               ' state ({}). Please change the label of one of them to make it'
+        msg = ('There are two document with the same tag and iteration'
+               ' state ({}). Please change the tag of one of them to make it'
                ' unique.').format(id)
-        InputFileError.__init__(self, line, msg)
+        super(DuplicateDocumentError, self).__init__(self, line, msg)

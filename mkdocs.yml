@@ -224,7 +224,7 @@ pages:
     - Abimkdocs: developers/abimkdocs.md
     - Markdown: developers/markdown.md
     - Test Suite:
-        - Test Suite Intro: developers/testsuite.md
+        - Test list: developers/testsuite.md
         - Test Suite Howto: developers/testsuite_howto.md
         - YAML-based test suite Howto: developers/new_testsuite.md
         - YAML-based test suite Python tools and API: developers/yaml_tools_api.md

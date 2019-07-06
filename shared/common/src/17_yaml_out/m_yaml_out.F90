@@ -1,3 +1,28 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_yaml_out
+!! NAME
+!!  m_yaml_out
+!!
+!! FUNCTION
+!!  This module defines low-level routines to format data into YAML documents.
+!!  Supported data include numeric arrays of one and two dimensions,
+!!  strings, numbers, dictionaries from m_pair_list and 1D arrays of dictionaries.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2009-2019 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!   m_neat
+!!
+!! CHILDREN
+!!   m_stream_string, m_pair_list
+!!
+!! SOURCE
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -20,15 +45,19 @@ module m_yaml_out
   implicit none
 
   private
+!!***
 
   integer,parameter :: dp=kind(1.0D0)
   character(len=1),parameter :: eol=char(10)
-  character(len=9),parameter :: default_rfmt='(ES25.17)'
+  character(len=11),parameter :: default_rfmt='(ES23.15E3)'
   character(len=4),parameter :: default_ifmt='(I8)'
   character(len=13),parameter :: default_kfmt="(A)"
   character(len=13),parameter :: default_sfmt="(A)"
   integer,parameter :: default_keysize=30
   integer,parameter :: default_stringsize=500
+
+  character,parameter :: reserved_keywords(10) = (/ character(len=10) :: "tol_abs", "tol_rel", "tol_vec", "tol_eq", "ignore", &
+&                                                  "ceil", "equation", "equations", "callback", "callbacks" /)
 
   public :: yaml_open_doc, yaml_close_doc, yaml_single_dict, yaml_iterstart
   public :: yaml_add_realfield, yaml_add_intfield, yaml_add_stringfield
@@ -124,6 +153,19 @@ module m_yaml_out
     endif
   end function yaml_quote_string
 
+  subroutine forbid_reserved_label(label)
+    character(len=*),intent(in) :: label
+    character(len=100) :: msg
+    integer :: i
+
+    do i=1,size(reserved_keywords)
+      if (reserved_keywords(i) == label) then
+        write(msg,*) label, 'is a reserved keyword and cannot be used as a YAML label.'
+        MSG_ERROR(msg)
+      end if
+    end do
+  end subroutine forbid_reserved_label
+
   subroutine yaml_start_field(stream, label, tag, width)
     type(stream_string),intent(inout) :: stream
     character(len=*),intent(in) :: label
@@ -131,6 +173,7 @@ module m_yaml_out
     character(len=*),intent(in),optional :: tag
     character(len=len_trim(label)+2) :: quoted
 
+    call forbid_reserved_label(trim(label))
     quoted = yaml_quote_string(label)
     if(present(width)) then
       if(width > len_trim(label)) then
@@ -235,6 +278,8 @@ module m_yaml_out
     call pl%restart()
     do i=1,pl%length()
       call pl%iter(key, type_code, vi, vr, vs)
+
+      call forbid_reserved_label(trim(key))
 
       call string_clear(tmp_key)
       write(tmp_key, kfmt) '"'//trim(key)//'"'
@@ -381,10 +426,9 @@ module m_yaml_out
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine yaml_open_doc(label, comment, tag, file_d, string, stream, newline, width)
-    character(len=*),intent(in) :: label
+  subroutine yaml_open_doc(tag, comment, file_d, string, stream, newline, width)
+    character(len=*),intent(in) :: tag
     character(len=*),intent(in) :: comment
-    character(len=*),intent(in),optional :: tag
     integer,intent(in), optional :: file_d
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
@@ -398,17 +442,7 @@ module m_yaml_out
     SET_DEFAULT(nl, newline, .true.)
     SET_DEFAULT(w, width, 0)
 
-    if(present(tag)) then
-      call interm%write('---'//' !'//trim(tag)//eol//'label')
-    else
-      call interm%write('---'//eol//'label')
-    end if
-    if(present(width)) then
-      if(width > 5) then
-        call interm%write(repeat(' ', width - 5))
-      end if
-    end if
-    call interm%write(': '//trim(label))
+    call interm%write('---'//' !'//trim(tag))
 
     if (comment /= '') then
       call interm%write(eol//'comment')
@@ -1376,7 +1410,7 @@ module m_yaml_out
 !!  the output destination.
 !!
 !! INPUTS
-!!  label <character(len=*)>=
+!!  tag <character(len=*)>=
 !!  comment <character(len=*)>=
 !!  pl <type(pair_list)>=
 !!  key_size <integer>=maximum storage size for the keys of pl
@@ -1402,13 +1436,13 @@ module m_yaml_out
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine yaml_single_dict(label, comment, pl, key_size, string_size, file_d, string, stream, tag, &
+  subroutine yaml_single_dict(tag, comment, pl, key_size, string_size, file_d, string, stream, &
 &                             int_fmt, real_fmt, string_fmt, newline, width)
     type(pair_list),intent(inout) :: pl
-    character(len=*),intent(in) :: label
+    character(len=*),intent(in) :: tag
     character(len=*),intent(in) :: comment
     integer,intent(in) :: key_size, string_size
-    character(len=*),intent(in),optional :: tag, int_fmt, real_fmt, string_fmt
+    character(len=*),intent(in),optional :: int_fmt, real_fmt, string_fmt
     integer,intent(in), optional :: file_d, width
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
@@ -1433,13 +1467,7 @@ module m_yaml_out
     SET_DEFAULT(sfmt, string_fmt, default_sfmt)
     SET_DEFAULT(w, width, 0)
 
-    call interm%write('---')
-    if(present(tag)) then
-      call interm%write(' !'//tag)
-    end if
-    call interm%write(eol)
-    call yaml_start_field(interm, 'label', width=width)
-    call interm%write(' '//label)
+    call interm%write('--- !'//tag)
 
     if (comment /= '') then
       call interm%write(eol)
@@ -1542,3 +1570,4 @@ module m_yaml_out
 !!*** m_yaml_out/yaml_close_doc
 
 end module m_yaml_out
+!!***

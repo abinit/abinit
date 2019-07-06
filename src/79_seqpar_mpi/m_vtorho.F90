@@ -1309,12 +1309,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call init_oper(paw_dmft,lda_occup)
          call flush_unit(std_out)
          call timab(620,1,tsec)
-         call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,iscf,&
+         call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,&
 &         lda_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
 &         dtset%nkpt,my_nspinor,dtset%nsppol,occ,&
 &         paw_dmft,paw_ij,pawang,pawtab,psps,usecprj_local,dtfil%unpaw)
          call timab(620,2,tsec)
          call flush_unit(std_out)
+
 
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)

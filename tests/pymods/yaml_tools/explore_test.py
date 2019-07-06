@@ -1,13 +1,14 @@
 '''\
-This is the explore_test shell. This tool let you inspect and explore YAML
-files defining a test for Abinit. It also provide documentation about the
-constraints and parameters available in test config files.
+This is the explore_test shell. This tool lets you inspect and explore YAML
+files defining Abinit tests. It also provides documentation about the
+constraints and parameters available in the test config files.
 '''
-
 from __future__ import print_function, division, unicode_literals
+
 import os
 import glob
 import cmd
+
 from subprocess import call
 from .driver_test_conf import DriverTestConf, DEFAULT_CONF_PATH
 from .conf_parser import conf_parser
@@ -15,12 +16,12 @@ from .errors import ConfigError
 
 intro = '''\
 Welcome to the explore_test shell.
-This tool let you inspect and explore a YAML file defining a test for Abinit.
-You can also browse informations about parameters and constraints used to
-define tests with the command show.
+This tool lets you inspect and explore a YAML file defining an Abinit test.
+You can also browse the information about parameters and constraints used to
+define tests with the `show` command.
 
-If your Python platform has readline support you can use TAB to auto-complete
-command and some arguments.
+If your Python platform has readline support you can use <TAB >to auto-complete
+commands and some arguments.
 
 Type help or ? to get the list of commands.
 '''
@@ -45,15 +46,18 @@ def print_iter(it):
 
 
 class ExtendedTestConf(DriverTestConf):
+    '''
+    Test configuration driver with additional introspection and movements.
+    '''
     def get_spec(self):
         '''
-            Return the list of the specializations known at the current path.
+            Return the list of specializations known at the current path.
         '''
         return self.tree.get_spec_at(self.current_path)
 
     def get_spec_at(self, path):
         '''
-            Return the list of the specializations known at the current path.
+            Return the list of specializations known at the current path.
         '''
         new_path = list(self.current_path)
         for sp in path:
@@ -75,7 +79,7 @@ class ExtendedTestConf(DriverTestConf):
 
     def get_all_constraints_here(self):
         '''
-            return a dict of the constraints in the current scope.
+            return a dict with the constraints in the current scope.
         '''
         cons_list = self.get_constraints_for(None)
         constraints = {cons.name: cons for cons in cons_list}
@@ -83,7 +87,7 @@ class ExtendedTestConf(DriverTestConf):
 
     def get_all_parameters_here(self):
         '''
-            return a dict of the parameters in the current scope.
+            return a dict with the parameters in the current scope.
         '''
         parameters = {}
 
@@ -132,6 +136,9 @@ class ExtendedTestConf(DriverTestConf):
 
 
 class Explorer(cmd.Cmd):
+    '''
+    Define the command line interface.
+    '''
     intro = intro
 
     debug = False
@@ -169,9 +176,10 @@ class Explorer(cmd.Cmd):
         return stop
 
     def precmd(self, line):
-        # most command should not be called if tree is not loaded
+        # exit on CTRL_D
         if line == 'EOF':
             line = 'exit'
+        # most command should not be called if tree is not loaded
         if not self.tree and line and line.split(' ')[0] not in [
             'load', 'edit',
             'default', 'show',
@@ -309,8 +317,8 @@ class Explorer(cmd.Cmd):
         '''
             Usage: show [ARG | *]
             If no argument is given, list all parameters and constraints
-            visible from the current level.  If argument is *, list all
-            parameters and constraints known.  If argument is ARG, show all
+            visible from the current level. If argument is *, list all
+            parameters and constraints known. If argument is ARG, show all
             informations about ARG.
         '''
         def show_cons(cons, used=False):
@@ -405,7 +413,8 @@ class Explorer(cmd.Cmd):
     def do_tree(self, arg):
         '''
             Usage: tree
-            Show the tree defined by the configuration.
+            Show the tree defined by the configuration starting at the current
+            level
         '''
         def show_rec(specs, indent=[]):
             for i, sp in enumerate(specs):
@@ -430,14 +439,14 @@ class Explorer(cmd.Cmd):
     def do_shell(self, arg):
         '''
             Usage: shell CMD ARG1 ARG2...
-            Pass command to the system shell.
+            Pass command to the system shell (environment variable SHELL)
         '''
         sh = os.environ.get('SHELL', '/bin/sh')
         try:
             call([sh, '-c', arg])
         except IOError:
             print('The shell command {} cannot be found.'.format(sh),
-                  'You may want to set your SHELL envrionment variable to',
+                  'You may want to set your SHELL environment variable to',
                   'select a different command.')
 
     def do_edit(self, arg):
@@ -448,7 +457,7 @@ class Explorer(cmd.Cmd):
             the following in a shell:
             $ export EDITOR='nano'
             Replace nano with any editor you like. Then restart
-            testconf_explorer.
+            explorer.
         '''
         ed = os.environ.get('EDITOR', 'nano')
         if arg:
@@ -490,6 +499,9 @@ class Explorer(cmd.Cmd):
 
 
 class DebugExplorer(Explorer):
+    '''
+    Command line interface with an additional debug command
+    '''
     def do_debug(self, arg):
         '''
             Usage debug PYTHON_EXPR

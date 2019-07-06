@@ -18,7 +18,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = tdep
-#%% exclude_builders  = atlas_gnu_9.1_openmpi
 #%% need_cpp_vars = HAVE_NETCDF
 #%% md_hist = t37_HIST.nc
 #%% [files]

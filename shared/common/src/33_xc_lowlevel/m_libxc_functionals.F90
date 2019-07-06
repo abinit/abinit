@@ -400,10 +400,6 @@ contains
  libxc_functionals_check=.true. ; msg=""
 
 #if defined HAVE_LIBXC
-#if defined FC_G95
- libxc_functionals_check=.false.
- msg='LibXC cannot be used with G95 Fortran compiler!'
-#endif
 #if defined HAVE_FC_ISO_C_BINDING
  if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
  if (XC_SINGLE_PRECISION==1) then
