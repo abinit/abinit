@@ -4,7 +4,7 @@
 #endif
 
 #include "abi_common.h"
-    
+
 module m_neat
 
   use defs_basis
@@ -13,7 +13,6 @@ module m_neat
   use m_stream_string
   use m_yaml_out
   use m_results_gs, only: results_gs_type
-  use m_crystal, only: crystal_t
 
   implicit none
 
@@ -80,7 +79,7 @@ module m_neat
     integer,intent(in) :: n, iout
     character(len=*),intent(in) :: name
     type(stream_string) :: stream
-    
+
     call yaml_iterstart(trim(name), n, stream=stream)
     call wrtout_stream(stream, iout)
   end subroutine neat_start_iter
@@ -198,13 +197,13 @@ module m_neat
     strten(3,1) = results%strten(5)
     strten(1,2) = results%strten(6)
     strten(2,1) = results%strten(6)
-    call yaml_add_real2d('stress tensor', 3, 3, strten, width=10, stream=stream, tag='Tensor')    
+    call yaml_add_real2d('stress tensor', 3, 3, strten, width=10, stream=stream, tag='Tensor')
     call stream%write(ch10)
 
     do j=1,3
       forces(:,j) = results%fcart(j,:)
     end do
-    call yaml_add_real2d('cartesian forces', results%natom, 3, forces, width=10, stream=stream, tag='CartForces')    
+    call yaml_add_real2d('cartesian forces', results%natom, 3, forces, width=10, stream=stream, tag='CartForces')
 
     call yaml_close_doc(stream=stream)
 
@@ -212,36 +211,6 @@ module m_neat
   end subroutine neat_results_gs
 !!***
 
-!!****f* m_neat/neat_crystal
-!!
-!! NAME
-!! neat_crystal
-!!
-!! FUNCTION
-!! Write neat_crystal
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!    Print a YAML document to output file
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-  subroutine neat_crystal(crystal, iout, comment)
-    type(crystal_t),intent(in) :: crystal
-    integer,intent(in) :: iout
-    character(len=*),intent(in),optional :: comment
-
-    write(std_out, *)"Unused neat_crystal", crystal%natom, iout, trim(comment)
-    
-  end subroutine neat_crystal
-!!*** 
 
 !!****f* m_neat/neat_open_gw_sigma_pert
 !!
@@ -277,7 +246,7 @@ module m_neat
 
     call yaml_open_tabular('data', stream=stream, tag='GwSigmaData')
     call yaml_add_tabular_line(header, stream=stream)
-    
+
   end subroutine neat_open_gw_sigma_pert
 !!***
 
@@ -367,7 +336,7 @@ module m_neat
 
     call yaml_open_tabular('data', stream=stream, tag='EtotIters')
     call yaml_add_tabular_line(header, stream=stream)
-    
+
   end subroutine neat_open_etot
 !!*** m_neat/neat_open_etot
 
@@ -386,7 +355,7 @@ module m_neat
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!     
+!!
 !!
 !! PARENTS
 !!

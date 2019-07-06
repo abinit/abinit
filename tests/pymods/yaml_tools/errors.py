@@ -110,9 +110,16 @@ class UntaggedDocumentError(InputFileError):
         super(UntaggedDocumentError, self).__init__(line, msg)
 
 
+class TagMismatchError(InputFileError):
+    def __init__(self, line, expected, found):
+        msg = ('This was supposed to be tagged {} but it was {}.'
+               .format(expected, found))
+        super(TagMismatchError, self).__init__(line, msg)
+
+
 class DuplicateDocumentError(InputFileError):
     def __init__(self, line, id):
         msg = ('There are two document with the same tag and iteration'
                ' state ({}). Please change the tag of one of them to make it'
                ' unique.').format(id)
-        super(DuplicateDocumentError, self).__init__(self, line, msg)
+        super(DuplicateDocumentError, self).__init__(line, msg)

@@ -36,6 +36,7 @@
 
 module m_yaml_out
 
+  use defs_basis
   use ieee_arithmetic
 
   use m_errors
@@ -47,18 +48,6 @@ module m_yaml_out
   private
 !!***
 
-  integer,parameter :: dp=kind(1.0D0)
-  character(len=1),parameter :: eol=char(10)
-  character(len=11),parameter :: default_rfmt='(ES23.15E3)'
-  character(len=4),parameter :: default_ifmt='(I8)'
-  character(len=13),parameter :: default_kfmt="(A)"
-  character(len=13),parameter :: default_sfmt="(A)"
-  integer,parameter :: default_keysize=30
-  integer,parameter :: default_stringsize=500
-
-  character,parameter :: reserved_keywords(10) = (/ character(len=10) :: "tol_abs", "tol_rel", "tol_vec", "tol_eq", "ignore", &
-&                                                  "ceil", "equation", "equations", "callback", "callbacks" /)
-
   public :: yaml_open_doc, yaml_close_doc, yaml_single_dict, yaml_iterstart
   public :: yaml_add_realfield, yaml_add_intfield, yaml_add_stringfield
   public :: yaml_add_real1d, yaml_add_real2d
@@ -66,6 +55,18 @@ module m_yaml_out
   public :: yaml_add_int1d, yaml_add_int2d
   public :: yaml_add_tabular
   public :: yaml_open_tabular, yaml_add_tabular_line
+
+  character(len=1),parameter :: eol=char(10)
+  character(len=11),parameter :: default_rfmt='(ES23.15E3)(len=4),parameter :: default_ifmt='(I8)'
+  character(len=13),parameter :: default_kfmt="(A)"
+  character(len=13),parameter :: default_sfmt="(A)"
+  integer,parameter :: default_keysize=30
+  integer,parameter :: default_stringsize=500
+
+  ! This is a list of reserved_keywords that shall not be used in Yaml documents.
+  character(len=12),parameter :: reserved_keywords(10) = [character(len=12) :: &
+    "tol_abs", "tol_rel", "tol_vec", "tol_eq", "ignore", &
+    "ceil", "equation", "equations", "callback", "callbacks"]
 
   contains
 
@@ -82,7 +83,7 @@ module m_yaml_out
 
     if(ieee_is_nan(val)) then  ! NaN
       write(dest, '(a)') '.nan'
-    else if (val == MAGIC_NAN) then
+    else if (val == MAGIC_UNDEF) then
       write(dest, '(a)') 'undef'
     else
       write(dest, trim(formt)) val
@@ -155,7 +156,7 @@ module m_yaml_out
 
   subroutine forbid_reserved_label(label)
     character(len=*),intent(in) :: label
-    character(len=100) :: msg
+    character(len=500) :: msg
     integer :: i
 
     do i=1,size(reserved_keywords)
