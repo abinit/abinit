@@ -465,7 +465,7 @@ data: !EtotIters |
     1        2.00000          1.71651242
     2        2.00000          1.71651242
 --- !ResultsGS
-comment   : Summary of ground states results.
+comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
 cutoff_energies: {"ecut":   8.00000000000000000E+00, "pawecutdg":  -1.00000000000000000E+00, }
@@ -476,12 +476,12 @@ convergence: {
 etotal    :  -8.87168809125275004E+00
 entropy   :   0.00000000000000000E+00
 fermie    :   2.17655487277611859E-01
-stress tensor: !CartTensor
+stress_tensor: !CartTensor
 - [  2.76864061740706878E-05,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
 - [  0.00000000000000000E+00,   2.76864061740706878E-05,   0.00000000000000000E+00, ]
 - [  0.00000000000000000E+00,   0.00000000000000000E+00,   2.76864061740706878E-05, ]
 
-cartesian forces: !CartForces
+cartesian_forces: !CartForces
 - [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
 - [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
 ...

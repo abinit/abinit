@@ -35,7 +35,6 @@ MODULE m_sigma
  use iso_c_binding
  use m_nctk
  use m_yaml_out
- use m_neat, only : wrtout_stream
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -560,7 +559,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    end if
 
    call yaml_close_doc(stream=stream)
-   call wrtout_stream(stream, ab_out)
+   call stream%dump(ab_out)
 
    ! === Output of the spectral function ===
    do io=1,Sr%nomega_r

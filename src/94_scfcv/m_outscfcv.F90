@@ -51,10 +51,9 @@ module m_outscfcv
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_oper,             only : oper_type,init_oper,destroy_oper
  use m_crystal,          only : crystal_init, crystal_t, prt_cif
- use m_results_gs,       only : results_gs_type, results_gs_ncwrite
+ use m_results_gs,       only : results_gs_type, results_gs_ncwrite, results_gs_yaml_write
  use m_ioarr,            only : ioarr, fftdatar_write
  use m_nucprop,          only : calc_efg,calc_fc
- use m_neat,             only : neat_results_gs
  use m_outwant,          only : outwant
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type, simp_gen, bound_deriv
@@ -1244,12 +1243,14 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
  ! YAML output
- call neat_results_gs(results_gs, ab_out, ecut, dtset%pawecutdg, comment="Summary of ground state results.")
+ if (me == master) then
+  call results_gs%yaml_write(ab_out, ecut, dtset%pawecutdg, comment="Summary of ground state results")
+ end if
 
  call crystal%free()
  call ebands_free(ebands)
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  call timab(969,2,tsec)

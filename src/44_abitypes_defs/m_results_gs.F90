@@ -32,13 +32,17 @@ MODULE m_results_gs
  use m_xmpi
  use m_energies
  use m_errors
+ use m_yaml_out
+ use m_stream_string
+ use m_pair_list
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use m_io_tools,  only : file_exists
- use m_fstrings,  only : sjoin
+ use m_io_tools,      only : file_exists
+ use m_fstrings,      only : sjoin
+ use m_numeric_tools, only : get_trace
 
  implicit none
 
@@ -184,6 +188,11 @@ MODULE m_results_gs
    ! The "sy" prefix refer to the fact that this gradient has been
    ! symmetrized.
 
+ contains
+
+  procedure :: yaml_write => results_gs_yaml_write
+    ! Write the most important results in Yaml format.
+
  end type results_gs_type
 
 !public procedures.
@@ -193,6 +202,7 @@ MODULE m_results_gs
  public :: destroy_results_gs_array
  public :: copy_results_gs
  public :: results_gs_ncwrite
+ public :: results_gs_yaml_write
 !!***
 
 CONTAINS
@@ -238,7 +248,6 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
 !Local variables-------------------------------
 !scalars
  logical :: full_init
-!arrays
 
 !************************************************************************
 
@@ -778,6 +787,99 @@ contains
  end function vid
 
 end function results_gs_ncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_results_gs/results_gs_yaml_write
+!!
+!! NAME
+!! results_gs_yaml_write
+!!
+!! FUNCTION
+!! Write results_gs in yaml format to unit iout
+!!
+!! INPUTS
+!!  results <type(results_gs_type)>=miscellaneous information about the system after ground state computation
+!!  iout= unit of output file
+!!  ecut= cutoff energy
+!!  pawecutdg= PAW cutoff energy for double grid.
+!!  comment= optional comment for the final docuemtn
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine results_gs_yaml_write(results, iout, ecut, pawecutdg, comment)
+
+ class(results_gs_type),intent(in) :: results
+ integer,intent(in) :: iout
+ real(dp),intent(in) :: ecut, pawecutdg
+ character(len=*),intent(in),optional :: comment
+
+!Local variables-------------------------------
+ integer,parameter :: width=10
+ integer :: j
+ type(stream_string) :: stream
+ type(pair_list) :: dict
+ real(dp) :: strten(3,3)
+ real(dp) :: forces(results%natom, 3)
+
+!************************************************************************
+
+ if (present(comment)) then
+   call yaml_open_doc('ResultsGS', comment, width=width, stream=stream)
+ else
+   call yaml_open_doc('ResultsGS', '', width=width, stream=stream)
+ end if
+
+ call yaml_add_intfield('natom', results%natom, width=width, stream=stream)
+ call yaml_add_intfield('nsppol', results%nsppol, width=width, stream=stream)
+
+ call dict%set('ecut', r=ecut)
+ call dict%set('pawecutdg', r=pawecutdg)
+ call yaml_add_dict('cutoff_energies', dict, width=width, stream=stream)
+ call dict%free()
+
+ call dict%set('deltae', r=results%deltae)
+ call dict%set('res2', r=results%res2)
+ call dict%set('residm', r=results%residm)
+ call dict%set('diffor', r=results%diffor)
+ call yaml_add_dict('convergence', dict, width=width, multiline_trig=2, stream=stream)
+ call dict%free()
+
+ call yaml_add_realfield('etotal', results%etotal, width=width, stream=stream)
+ call yaml_add_realfield('entropy', results%entropy, width=width, stream=stream)
+ call yaml_add_realfield('fermie', results%fermie, width=width, stream=stream)
+
+ strten(1,1) = results%strten(1)
+ strten(2,2) = results%strten(2)
+ strten(3,3) = results%strten(3)
+ strten(2,3) = results%strten(4)
+ strten(3,2) = results%strten(4)
+ strten(1,3) = results%strten(5)
+ strten(3,1) = results%strten(5)
+ strten(1,2) = results%strten(6)
+ strten(2,1) = results%strten(6)
+
+ call yaml_add_real2d('stress_tensor', 3, 3, strten, width=width, stream=stream, tag='CartTensor')
+ ! Add results in GPa as well
+ strten = strten * HaBohr3_GPa
+ call yaml_add_real2d('stress_tensor_GPa', 3, 3, strten, width=width, stream=stream, tag='CartTensor')
+ call yaml_add_realfield('pressure_GPa', get_trace(strten) / three, width=width, stream=stream)
+ call stream%write(ch10)
+
+ do j=1,3
+   forces(:,j) = results%fcart(j,:)
+ end do
+ call yaml_add_real2d('cartesian_forces', results%natom, 3, forces, width=width, stream=stream, tag='CartForces')
+
+ call yaml_close_doc(stream=stream)
+ call stream%dump(iout, newline=.True.)
+
+end subroutine results_gs_yaml_write
 !!***
 
 !----------------------------------------------------------------------

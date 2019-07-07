@@ -12,44 +12,15 @@ module m_neat
   use m_pair_list
   use m_stream_string
   use m_yaml_out
-  use m_results_gs, only: results_gs_type
 
   implicit none
 
   private
-  public :: neat_energies, neat_results_gs, neat_start_iter
+  public :: neat_energies, neat_start_iter
   public :: neat_etot_add_line, neat_open_etot, neat_finish_etot
-  public :: stream_string, enable_yaml
-  public :: wrtout_stream
-
-  logical :: enable = .false., switch_lock = .false.
+  public :: stream_string
 
   contains
-
-  ! Can only be called once, then it lock. This is to prevent unconsistent
-  ! behaviour with activating and disabling on demand (the parser on the python
-  ! side won't like it)
-  subroutine enable_yaml(yes)
-    logical, intent(in) :: yes
-    if (.not. switch_lock) then
-      enable = yes
-      switch_lock = .true.
-    end if
-  end subroutine enable_yaml
-
-  subroutine wrtout_stream(stream, iout)
-    type(stream_string),intent(inout) :: stream
-    integer,intent(in) :: iout
-
-    character(len=stream%length) :: s
-
-    if (enable) then
-      call stream%to_string(s)
-      call wrtout(iout, s, 'COLL')
-    endif
-
-    call stream%free()
-  end subroutine wrtout_stream
 
 !!***f* m_neat/neat_start_iter
 !!
@@ -61,7 +32,7 @@ module m_neat
 !!
 !! INPUTS
 !!     n integer= index of the iteration
-!!     iout integer= file descriptor to write in
+!!     unit integer= file descriptor to write in
 !!     name character(len=*)= name of the iteration (without i or n prefix)
 !!
 !! OUTPUT
@@ -72,16 +43,16 @@ module m_neat
 !! PARENTS
 !!
 !! CHILDREN
-!!     yaml_iterstart, wrtout_stream
+!!     yaml_iterstart
 !!
 !! SOURCE
-  subroutine neat_start_iter(n, name, iout)
-    integer,intent(in) :: n, iout
+  subroutine neat_start_iter(n, name, unit)
+    integer,intent(in) :: n, unit
     character(len=*),intent(in) :: name
     type(stream_string) :: stream
 
     call yaml_iterstart(trim(name), n, stream=stream)
-    call wrtout_stream(stream, iout)
+    call stream%dump(unit)
   end subroutine neat_start_iter
 !!***
 
@@ -95,7 +66,7 @@ module m_neat
 !!
 !! INPUTS
 !!  energies <type(pair_list)>=values of parts of total energy
-!!  iout= unit of output file
+!!  unit= unit of output file
 !!  tag= optional tag to distinct the main Etot document from secondary Etot(DC) for example
 !!
 !! OUTPUT
@@ -108,9 +79,9 @@ module m_neat
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine neat_energies(energies, iout, tag)
+  subroutine neat_energies(energies, unit, tag)
     type(pair_list),intent(inout) :: energies
-    integer,intent(in) :: iout
+    integer,intent(in) :: unit
     character(len=*),intent(in),optional :: tag
 !Local variables-------------------------------
     type(stream_string) :: stream
@@ -121,95 +92,8 @@ module m_neat
       call yaml_single_dict('EnergyTerms', '', energies, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
     end if
 
-    call wrtout_stream(stream, iout)
+    call stream%dump(unit)
   end subroutine neat_energies
-!!***
-
-!!****f* m_neat/neat_results_gs
-!!
-!! NAME
-!! neat_results_gs
-!!
-!! FUNCTION
-!! Write neat_results_gs
-!!
-!! INPUTS
-!!  results <type(results_gs_type)>=miscellaneous informations about the system after ground state computation
-!!  iout= unit of output file
-!!  ecut= cutoff energy
-!!  pawecutdg= PAW cutoff energy for double grid.
-!!  comment= optional comment for the final docuemtn
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!    Print a YAML document to output file
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-  subroutine neat_results_gs(results, iout, ecut, pawecutdg, comment)
-    type(results_gs_type),intent(in) :: results
-    integer,intent(in) :: iout
-    real(dp),intent(in) :: ecut, pawecutdg
-    character(len=*),intent(in),optional :: comment
-
-    type(stream_string) :: stream
-    type(pair_list) :: dict
-    real(dp) :: strten(3,3)
-    real(dp) :: forces(results%natom, 3)
-    integer :: j
-
-    if(present(comment)) then
-      call yaml_open_doc('ResultsGS', comment, width=10, stream=stream)
-    else
-      call yaml_open_doc('ResultsGS', '', width=10, stream=stream)
-    end if
-
-    call yaml_add_intfield('natom', results%natom, width=10, stream=stream)
-    call yaml_add_intfield('nsppol', results%nsppol, width=10, stream=stream)
-
-    call dict%set('ecut', r=ecut)
-    call dict%set('pawecutdg', r=pawecutdg)
-    call yaml_add_dict('cutoff_energies', dict, width=10, stream=stream)
-    call dict%free()
-
-    call dict%set('deltae', r=results%deltae)
-    call dict%set('res2', r=results%res2)
-    call dict%set('residm', r=results%residm)
-    call dict%set('diffor', r=results%diffor)
-    call yaml_add_dict('convergence', dict, width=10, multiline_trig=2, stream=stream)
-    call dict%free()
-
-    call yaml_add_realfield('etotal', results%etotal, width=10, stream=stream)
-    call yaml_add_realfield('entropy', results%entropy, width=10, stream=stream)
-    call yaml_add_realfield('fermie', results%fermie, width=10, stream=stream)
-
-    strten(1,1) = results%strten(1)
-    strten(2,2) = results%strten(2)
-    strten(3,3) = results%strten(3)
-
-    strten(2,3) = results%strten(4)
-    strten(3,2) = results%strten(4)
-    strten(1,3) = results%strten(5)
-    strten(3,1) = results%strten(5)
-    strten(1,2) = results%strten(6)
-    strten(2,1) = results%strten(6)
-    call yaml_add_real2d('stress tensor', 3, 3, strten, width=10, stream=stream, tag='CartTensor')
-    call stream%write(ch10)
-
-    do j=1,3
-      forces(:,j) = results%fcart(j,:)
-    end do
-    call yaml_add_real2d('cartesian forces', results%natom, 3, forces, width=10, stream=stream, tag='CartForces')
-
-    call yaml_close_doc(stream=stream)
-
-    call wrtout_stream(stream, iout)
-  end subroutine neat_results_gs
 !!***
 
 !!****f* m_neat/neat_open_etot
@@ -259,9 +143,6 @@ module m_neat
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -281,27 +162,24 @@ module m_neat
 !! neat_finish_etot
 !!
 !! FUNCTION
-!! Close the document and write the document to iout
+!! Close the document and write the document to unit
 !!
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
-!!    Print a YAML document to output file
 !!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine neat_finish_etot(stream, iout)
+  subroutine neat_finish_etot(stream, unit)
     type(stream_string),intent(inout) :: stream
-    integer,intent(in) :: iout
+    integer,intent(in) :: unit
 
     if(stream%length > 0) then
       call yaml_close_doc(stream=stream)
-      call wrtout_stream(stream, iout)
+      call stream%dump(unit)
     end if
   end subroutine neat_finish_etot
 !!***
