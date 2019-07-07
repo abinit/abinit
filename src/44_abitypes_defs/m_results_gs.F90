@@ -33,6 +33,7 @@ MODULE m_results_gs
  use m_energies
  use m_errors
  use m_yaml_out
+ use m_crystal
  use m_stream_string
  use m_pair_list
  use m_nctk
@@ -43,6 +44,7 @@ MODULE m_results_gs
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : sjoin
  use m_numeric_tools, only : get_trace
+ use defs_abitypes,   only : dataset_type
 
  implicit none
 
@@ -802,8 +804,6 @@ end function results_gs_ncwrite
 !! INPUTS
 !!  results <type(results_gs_type)>=miscellaneous information about the system after ground state computation
 !!  iout= unit of output file
-!!  ecut= cutoff energy
-!!  pawecutdg= PAW cutoff energy for double grid.
 !!  [comment] optional comment for the final document
 !!
 !! PARENTS
@@ -812,11 +812,12 @@ end function results_gs_ncwrite
 !!
 !! SOURCE
 
-subroutine results_gs_yaml_write(results, iout, ecut, pawecutdg, comment)
+subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
 
  class(results_gs_type),intent(in) :: results
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: iout
- real(dp),intent(in) :: ecut, pawecutdg
  character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
@@ -825,7 +826,6 @@ subroutine results_gs_yaml_write(results, iout, ecut, pawecutdg, comment)
  type(stream_string) :: stream
  type(pair_list) :: dict
  real(dp) :: strten(3,3)
- real(dp) :: forces(results%natom, 3)
 
 !************************************************************************
 
@@ -837,9 +837,13 @@ subroutine results_gs_yaml_write(results, iout, ecut, pawecutdg, comment)
 
  call yaml_add_intfield('natom', results%natom, width=width, stream=stream)
  call yaml_add_intfield('nsppol', results%nsppol, width=width, stream=stream)
+ call yaml_add_intfield('nspinor', dtset%nspinor, width=width, stream=stream)
+ call yaml_add_intfield('nspden', dtset%nspden, width=width, stream=stream)
+ call yaml_add_realfield("nelect", dtset%nelect, width=width, stream=stream)
+ call yaml_add_realfield("charge", dtset%charge, width=width, stream=stream)
 
- call dict%set('ecut', r=ecut)
- call dict%set('pawecutdg', r=pawecutdg)
+ call dict%set('ecut', r=dtset%ecut)
+ call dict%set('pawecutdg', r=dtset%pawecutdg)
  call yaml_add_dict('cutoff_energies', dict, width=width, stream=stream)
  call dict%free()
 
@@ -864,17 +868,14 @@ subroutine results_gs_yaml_write(results, iout, ecut, pawecutdg, comment)
  strten(1,2) = results%strten(6)
  strten(2,1) = results%strten(6)
 
- call yaml_add_real2d('stress_tensor', 3, 3, strten, width=width, stream=stream, tag='CartTensor')
+ call yaml_add_real2d('stress_tensor', strten, width=width, stream=stream, tag='CartTensor')
  ! Add results in GPa as well
  !strten = strten * HaBohr3_GPa
- !call yaml_add_real2d('stress_tensor_GPa', 3, 3, strten, width=width, stream=stream, tag='CartTensor')
+ !call yaml_add_real2d('stress_tensor_GPa', strten, width=width, stream=stream, tag='CartTensor')
  !call yaml_add_realfield('pressure_GPa', get_trace(strten) / three, width=width, stream=stream)
  !call stream%write(ch10)
 
- do j=1,3
-   forces(:,j) = results%fcart(j,:)
- end do
- call yaml_add_real2d('cartesian_forces', results%natom, 3, forces, width=width, stream=stream, tag='CartForces')
+ call yaml_add_real2d('cartesian_forces', results%fcart, width=width, stream=stream, tag='CartForces')
 
  call yaml_close_doc(stream=stream)
  call stream%dump(iout, newline=.True.)

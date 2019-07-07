@@ -1497,7 +1497,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if (directE_avail) then
      write(msg, '(2a)' ) ' Components of total free energy (in Hartree) :',ch10
      call wrtout(iout,msg,'COLL')
-     call e_components%set('comment', s='Components of total free energy (in Hartree)')
+     call e_components%set('comment', s='Components of total free energy in Hartree')
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
      call wrtout(iout,msg,'COLL')
      call e_components%set('kinetic', r=energies%e_kinetic)
@@ -1544,15 +1544,13 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &       '    Spherical terms = ',energies%e_paw
        call wrtout(iout,msg,'COLL')
        call e_components%set('spherical_terms', r=energies%e_paw)
-!XG20181025 Does not work (yet)...
-!       if(abs(energies%e_nlpsp_vfock)>tol8)then
-!         write(msg, '(a,es21.14)' ) &
-!&         '    Fock-type term  = ',energies%e_nlpsp_vfock
-!         call wrtout(iout,msg,'COLL')
-!         write(msg, '(a,es21.14)' ) &
-!&         '    -frozen Fock en.= ',-energies%e_fock0
-!         call wrtout(iout,msg,'COLL')
-!       endif
+       !XG20181025 Does not work (yet)...
+       !if(abs(energies%e_nlpsp_vfock)>tol8)then
+       !  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
+       !  call wrtout(iout,msg,'COLL')
+       !  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
+       !  call wrtout(iout,msg,'COLL')
+       !endif
      end if
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
@@ -1769,13 +1767,13 @@ subroutine prtene(dtset,energies,iout,usepaw)
  call wrtout(iout, ch10, 'COLL')
 
  ! Write components of total energies in a structured way
- call yaml_single_dict('EnergyTerms', '', e_components, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
+ call yaml_single_dict('EnergyTerms', '', e_components, 35, 500, width=20, stream=stream, real_fmt='(es21.14)')
  call stream%dump(iout)
  call e_components%free()
 
  if(e_components_dc%length() > 1) then
    call wrtout(iout, ch10, 'COLL')
-   call yaml_single_dict('EnergyTermsDC', '', e_components_dc, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
+   call yaml_single_dict('EnergyTermsDC', '', e_components_dc, 35, 500, width=20, stream=stream, real_fmt='(es21.14)')
    call stream%dump(iout)
    call e_components_dc%free()
  end if
