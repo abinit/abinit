@@ -866,10 +866,10 @@ subroutine results_gs_yaml_write(results, iout, ecut, pawecutdg, comment)
 
  call yaml_add_real2d('stress_tensor', 3, 3, strten, width=width, stream=stream, tag='CartTensor')
  ! Add results in GPa as well
- strten = strten * HaBohr3_GPa
- call yaml_add_real2d('stress_tensor_GPa', 3, 3, strten, width=width, stream=stream, tag='CartTensor')
- call yaml_add_realfield('pressure_GPa', get_trace(strten) / three, width=width, stream=stream)
- call stream%write(ch10)
+ !strten = strten * HaBohr3_GPa
+ !call yaml_add_real2d('stress_tensor_GPa', 3, 3, strten, width=width, stream=stream, tag='CartTensor')
+ !call yaml_add_realfield('pressure_GPa', get_trace(strten) / three, width=width, stream=stream)
+ !call stream%write(ch10)
 
  do j=1,3
    forces(:,j) = results%fcart(j,:)

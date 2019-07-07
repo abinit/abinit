@@ -459,11 +459,7 @@ data: !EtotIters |
         6  -8.8716880912528    -9.539E-13 8.968E-11 2.131E-11
 ...
 
- Integrated electronic density in atomic spheres:
- ------------------------------------------------
- Atom  Sphere_radius  Integrated_density
-    1        2.00000          1.71651242
-    2        2.00000          1.71651242
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -486,6 +482,11 @@ cartesian_forces: !CartForces
 - [ -0.00000000000000000E+00,  -0.00000000000000000E+00,  -0.00000000000000000E+00, ]
 ...
 
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          1.71651242
+    2        2.00000          1.71651242
 ================================================================================
 
  ----iterations are completed or convergence reached----

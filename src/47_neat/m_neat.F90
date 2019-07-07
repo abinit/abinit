@@ -16,7 +16,7 @@ module m_neat
   implicit none
 
   private
-  public :: neat_energies, neat_start_iter
+  public :: neat_start_iter
   public :: neat_etot_add_line, neat_open_etot, neat_finish_etot
   public :: stream_string
 
@@ -54,46 +54,6 @@ module m_neat
     call yaml_iterstart(trim(name), n, stream=stream)
     call stream%dump(unit)
   end subroutine neat_start_iter
-!!***
-
-!!****f* m_neat/neat_energies
-!!
-!! NAME
-!! neat_energies
-!!
-!! FUNCTION
-!! Write components of total energies in a structured way
-!!
-!! INPUTS
-!!  energies <type(pair_list)>=values of parts of total energy
-!!  unit= unit of output file
-!!  tag= optional tag to distinct the main Etot document from secondary Etot(DC) for example
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!    Print a YAML document to output file
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-  subroutine neat_energies(energies, unit, tag)
-    type(pair_list),intent(inout) :: energies
-    integer,intent(in) :: unit
-    character(len=*),intent(in),optional :: tag
-!Local variables-------------------------------
-    type(stream_string) :: stream
-
-    if(present(tag)) then
-      call yaml_single_dict(tag, '', energies, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
-    else
-      call yaml_single_dict('EnergyTerms', '', energies, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
-    end if
-
-    call stream%dump(unit)
-  end subroutine neat_energies
 !!***
 
 !!****f* m_neat/neat_open_etot

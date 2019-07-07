@@ -377,6 +377,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    my_atmtab_allocated = .true.
  end if
 
+ ! YAML output
+ if (me == master) then
+  call results_gs%yaml_write(ab_out, ecut, dtset%pawecutdg, comment="Summary of ground state results")
+ end if
+
 !wannier interface
  call timab(951,1,tsec)
  if (dtset%prtwant==2) then
@@ -1240,11 +1245,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
  if (nint(dtset%einterp(1)) /= 0) then
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
- end if
-
- ! YAML output
- if (me == master) then
-  call results_gs%yaml_write(ab_out, ecut, dtset%pawecutdg, comment="Summary of ground state results")
  end if
 
  call crystal%free()

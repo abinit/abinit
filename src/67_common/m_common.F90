@@ -48,17 +48,19 @@ module m_common
  use m_xmpi
  use m_dtset
  use m_xpapi
+ use m_stream_string
+ use m_yaml_out
+ use m_invars2
 
  use m_fstrings,          only : indent, endswith, sjoin
  use m_electronpositron,  only : electronpositron_type
  use m_energies,          only : energies_type, energies_eval_eint
  use m_pair_list,         only : pair_list
- use m_neat,              only : neat_energies, neat_open_etot, neat_finish_etot, neat_etot_add_line, stream_string
+ use m_neat,              only : neat_open_etot, neat_finish_etot, neat_etot_add_line
  use m_geometry,          only : mkrdim, metric
  use m_kg,                only : getcut
  use m_parser,            only : parsefile
  use m_invars1,           only : invars0, invars1m, indefo
- use m_invars2
  use m_time,              only : timab, time_set_papiopt
  use defs_abitypes,       only : dataset_type, ab_dimensions, hdr_type, MPI_type
  use defs_datatypes,      only : pspheader_type, ebands_t
@@ -75,8 +77,8 @@ module m_common
  public :: prtene
  public :: get_dtsets_pspheads     ! Parse input file, get list of pseudos for files file and build list of datasets
                                    ! pseudopotential headers, maxval of dimensions needed in outvars
- public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files 
- public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file 
+ public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files
+ public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file
                                    ! with file extension in [".abi", ".in"]
  type(stream_string) :: etot_yaml_doc
 !!***
@@ -1476,6 +1478,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
  character(len=14) :: eneName
  character(len=500) :: msg
  type(pair_list) :: e_components, e_components_dc
+ type(stream_string) :: stream
 !arrays
  character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1798,12 +1801,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  call wrtout(iout, ch10, 'COLL')
 
- call neat_energies(e_components, iout)
+ ! Write components of total energies in a structured way
+ call yaml_single_dict('EnergyTerms', '', e_components, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
+ call stream%dump(iout)
  call e_components%free()
 
  if(e_components_dc%length() > 1) then
    call wrtout(iout, ch10, 'COLL')
-   call neat_energies(e_components_dc, iout, tag='EnergyTermsDC')
+   call yaml_single_dict('EnergyTermsDC', '', e_components_dc, 35, 500, width=20, stream=stream, real_fmt='(ES25.18)')
+   call stream%dump(iout)
    call e_components_dc%free()
  end if
 
@@ -2010,7 +2016,7 @@ end subroutine get_dtsets_pspheads
 !! ebands_from_file
 !!
 !! FUNCTION
-!!  Build and ebands_t object from file. Supports Fortran and netcdf files 
+!!  Build and ebands_t object from file. Supports Fortran and netcdf files
 !!  provided they have a Abinit header and obviously GS eigenvalues
 !!
 !! INPUTS
@@ -2042,13 +2048,13 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 
 ! *************************************************************************
 
- ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK 
+ ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK
  if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
    call hdr_read_from_fname(hdr, path, fform, comm)
    ABI_CHECK(fform /= 0, "fform == 0")
    call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
-   
+
  else if (endswith(path, ".nc")) then
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, path, comm))
@@ -2110,7 +2116,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
    NOT_IMPLEMENTED_ERROR()
 
    ! TODO
-   ! This routine prompts for the list of pseudos! One should get rid of the files file 
+   ! This routine prompts for the list of pseudos! One should get rid of the files file
    ! before activating this part.
    !call get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
    !call crystal_init(dtset%amu_orig(:,1), new, dtset%spgroup, dtset%natom, dtset%npsp, &
