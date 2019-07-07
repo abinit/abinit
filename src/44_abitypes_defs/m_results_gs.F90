@@ -804,7 +804,7 @@ end function results_gs_ncwrite
 !!  iout= unit of output file
 !!  ecut= cutoff energy
 !!  pawecutdg= PAW cutoff energy for double grid.
-!!  comment= optional comment for the final docuemtn
+!!  [comment] optional comment for the final document
 !!
 !! PARENTS
 !!

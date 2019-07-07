@@ -80,7 +80,8 @@ module m_common
  public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files
  public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file
                                    ! with file extension in [".abi", ".in"]
- type(stream_string) :: etot_yaml_doc
+
+ type(stream_string),private,save :: etot_yaml_doc
 !!***
 
 contains
@@ -350,6 +351,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          end if
        end if
      end if
+     ! Will save iterations in this global variables.
      call neat_open_etot(etot_yaml_doc, '', message)
      call wrtout(ab_out,message,'COLL')
    end if
@@ -371,9 +373,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
    ! Conduct printing. If extra output follows, then put a blank line into the output here
    if (dtset%prtvol>=10) then
-     message = ' '
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     call wrtout([std_out, ab_out], ' ')
    end if
 
    ! Calculate up and down charge and magnetization
@@ -478,19 +478,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      if(tmagnet==1) then
        write(message,'(a,f11.6,a,f11.6,a,f10.6)')&
 &       ' #electrons spin up=',rhoup,', spin down=',rhodn,', magnetization=',magnet
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout([std_out, ab_out], message)
      end if
 
      ! Moreover, print atomic positions if dtset%ionmov==4, and moved_atm_inside==1
      if (dtset%ionmov==4 .and. moved_atm_inside==1)then
-       message = ' reduced coordinates :'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], ' reduced coordinates :')
        do iatom=1,dtset%natom
          write(message, '(i5,1x,3es21.11)' ) iatom,xred(:,iatom)
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
        end do
      end if
 
@@ -501,16 +497,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if(abs(favg(2))<1.0d-13)f_tmp(2)=zero
        if(abs(favg(3))<1.0d-13)f_tmp(3)=zero
        write(message, '(a,3es10.2)' )' cartesian forces (ha/bohr); non-corrected avg=',f_tmp(:)
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], message)
        do iatom=1,dtset%natom
          f_tmp(:)=fcart(:,iatom)
          if(abs(fcart(1,iatom))<1.0d-13)f_tmp(1)=zero
          if(abs(fcart(2,iatom))<1.0d-13)f_tmp(2)=zero
          if(abs(fcart(3,iatom))<1.0d-13)f_tmp(3)=zero
          write(message, '(i5,1x,3es21.11)' ) iatom,f_tmp(:)
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
        end do
      end if
 
@@ -572,8 +566,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
            ' At SCF step',istep,'   max grdnorm=',residm,' < tolwfr=',tolwfr,' =>converged.'
          end if
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
          quit=1
        else
          use_dpfft = residm < tol7
@@ -604,8 +597,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
 &         ' At SCF step',istep,', forces are converged : ',ch10,&
 &         '  for the second time, max diff in force=',diffor,' < toldff=',toldff
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
          quit=1
        end if
      end if
@@ -627,11 +619,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
        if(tolrff_ok==2 .and. (.not.noquit))then
          write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
-&         ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
-&         '  for the second time, max diff in force=',diffor,&
-&         ' is less than < tolrff=',tolrff, ' times max force'
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
+         '  for the second time, max diff in force=',diffor,&
+         ' is less than < tolrff=',tolrff, ' times max force'
+         call wrtout([std_out, ab_out], message)
          quit=1
        end if
      end if
@@ -650,15 +641,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if(toldfe_ok==2 .and. (.not.noquit))then
          if(usefock==0 .or. nnsclohf<2)then
            write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&           ' At SCF step',istep,', etot is converged : ',ch10,&
-&           '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+            ' At SCF step',istep,', etot is converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
          else
            write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
-&           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
-&           '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+            ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
          endif
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
          quit=1
        end if
        if(usefock==1 .and. nnsclohf>1)then
@@ -666,20 +656,18 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !          The change due to the update of the Fock operator is sufficiently small. No need to meet it a second times.
            if (abs(deltae)<toldfe) then
              write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
-&             ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - etot converged : ',ch10,&
-&             '  update of Fock operator yields diff in etot=',abs(deltae),' < toldfe=',toldfe
-             call wrtout(ab_out,message,'COLL')
-             call wrtout(std_out,message,'COLL')
+             ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - etot converged : ',ch10,&
+             '  update of Fock operator yields diff in etot=',abs(deltae),' < toldfe=',toldfe
+             call wrtout([std_out, ab_out], message)
              fock%fock_common%fock_converged=.true.
              quit=1
            endif
          endif
          if(istep_mix==nnsclohf .and. quit==0)then
            write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
-&           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot NOT converged : ',ch10,&
-&           '  diff in etot=',abs(deltae),' > toldfe=',toldfe
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot NOT converged : ',ch10,&
+           '  diff in etot=',abs(deltae),' > toldfe=',toldfe
+           call wrtout([std_out, ab_out], message)
          endif
        endif
 
@@ -714,8 +702,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
             ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
          end if
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
          quit=1
        else
          use_dpfft = res2 < tol5
@@ -724,9 +711,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
      if (quit==1.and.noquit) then
        write(message, '(a,a,a)' ) ch10, &
-&       ' SCF cycle will continue as it is in an initialization stage',' (occ. matrix was kept constant)...'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+        ' SCF cycle will continue as it is in an initialization stage',' (occ. matrix was kept constant)...'
+       call wrtout([std_out, ab_out], message)
      end if
 
    end if
@@ -746,38 +732,36 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
        if(iscf>=1 .or. iscf==-3 .or. iscf == 0)then
          write(message, '(a,a,a,a,i5,a)' ) ch10,&
-&         ' scprqt:  WARNING -',ch10,&
-&         '  nstep=',nstep,' was not enough SCF cycles to converge;'
+         ' scprqt:  WARNING -',ch10,&
+         '  nstep=',nstep,' was not enough SCF cycles to converge;'
 
          write(std_out,'(6a,i0,3a)')ch10,&
-&         "--- !ScfConvergenceWarning",ch10,&
-&         "message: |",ch10,&
-&         '    nstep ',nstep,' was not enough SCF cycles to converge.',ch10,&
-&         "..."
+         "--- !ScfConvergenceWarning",ch10,&
+         "message: |",ch10,&
+         '    nstep ',nstep,' was not enough SCF cycles to converge.',ch10,&
+         "..."
            !MSG_WARNING_CLASS(message, "ScfConvergenceWarning")
        else
          write(message, '(a,a,a,a,i5,a)' ) ch10,&
-&         ' scprqt:  WARNING -',ch10,&
-&         '  nstep=',nstep,' was not enough non-SCF iterations to converge;'
+         ' scprqt:  WARNING -',ch10,&
+         '  nstep=',nstep,' was not enough non-SCF iterations to converge;'
 
          write(std_out,'(8a)')ch10,&
-&         "--- !NscfConvergenceWarning",ch10,&
-&         "message: |",ch10,TRIM(indent(message)),ch10,&
-&         "..."
+         "--- !NscfConvergenceWarning",ch10,&
+         "message: |",ch10,TRIM(indent(message)),ch10,&
+         "..."
            !MSG_WARNING_CLASS(message, "NScfConvergenceWarning")
        end if
-
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], message)
 
        if (ttolwfr==1) then
          if (dtset%usewvl == 0) then
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  maximum residual=',residm,' exceeds tolwfr=',tolwfr,ch10
+           '  maximum residual=',residm,' exceeds tolwfr=',tolwfr,ch10
 
            write(message2, '(a,es11.3,2a)' ) &
-&           '  maximum residual each band. tolwfr= ',tolwfr,ch10,&
-&           '  iband, isppol, individual band residuals (max over all k-points):'
+           '  maximum residual each band. tolwfr= ',tolwfr,ch10,&
+           '  iband, isppol, individual band residuals (max over all k-points):'
            call wrtout(std_out, message2,'COLL')
            do isppol = 1, dtset%nsppol
              do iband = 1, dtset%mband
@@ -788,33 +772,31 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
          else
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  maximum grdnorm=',residm,' exceeds tolwfr=',tolwfr,ch10
+           '  maximum grdnorm=',residm,' exceeds tolwfr=',tolwfr,ch10
          end if
 
        else if (ttoldff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-&         '  maximum force difference=',diffor,' exceeds toldff=',toldff,ch10
+         '  maximum force difference=',diffor,' exceeds toldff=',toldff,ch10
 
        else if (ttolrff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-&         '  maximum force difference=',diffor,' exceeds tolrff*maxfor=',tolrff*maxfor,ch10
+         '  maximum force difference=',diffor,' exceeds tolrff*maxfor=',tolrff*maxfor,ch10
 
        else if (ttoldfe==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-&         '  maximum energy difference=',abs(deltae),' exceeds toldfe=',toldfe,ch10
+         '  maximum energy difference=',abs(deltae),' exceeds toldfe=',toldfe,ch10
 
        else if(ttolvrs==1)then
          if (optres==0) then
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  potential residual=',res2,' exceeds tolvrs=',tolvrs,ch10
+           '  potential residual=',res2,' exceeds tolvrs=',tolvrs,ch10
          else
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  density residual=',res2,' exceeds tolvrs=',tolvrs,ch10
+           '  density residual=',res2,' exceeds tolvrs=',tolvrs,ch10
          end if
        end if
-
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message, 'COLL')
+       call wrtout([std_out, ab_out], message)
 
        if (prtxml == 1) then
          write(ab_xml_out, "(A)", advance = "NO") '      <status cvState="Failed"'
@@ -845,9 +827,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
      ! If enabled, output a YAML document with the ETOT iterations
      call neat_finish_etot(etot_yaml_doc, ab_out)
-
    end if ! nstep == 0 : no output
-
 
  case default
    write(message, '(a,i0,a)' )' choice = ',choice,' is not an allowed value.'
@@ -897,8 +877,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &                 ' max. force from electronic calculation and max. force from positronic calculation',ch10,&
 &                 ' is converged :  diff(maxfor_el-maxfor_pos)=',diff_f,' < postoldff=',electronpositron%postoldff
                end if
-               call wrtout(ab_out,message,'COLL')
-               call wrtout(std_out,message,'COLL')
+               call wrtout([std_out, ab_out], message)
              else
                quit=0
              end if
@@ -914,8 +893,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &           '  posnstep=',dtset%posnstep,' was not enough SCF cycles to converge difference between',ch10,&
 &           '  etotal from electronic calculation and etotal from positronic calculation;',ch10,&
 &           '  diff=',diff_e,' exceeds postoldfe=',electronpositron%postoldfe
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           call wrtout([std_out, ab_out], message)
          end if
          if (diff_f>=electronpositron%postoldff.and.abs(dtset%postoldff)>tiny(0.0_dp)) then
            write(message, '(4a,i5,5a,es11.3,a,es11.3)' ) ch10,&
@@ -923,8 +901,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &           '  posnstep=',dtset%posnstep,' was not enough SCF cycles to converge difference between',ch10,&
 &           '  max. force from electronic calculation and max. force from positronic calculation;',ch10,&
 &           '  diff=',diff_e,' exceeds postoldff=',electronpositron%postoldff
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           call wrtout([std_out, ab_out], message)
          end if
        end if
      end if
@@ -939,14 +916,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    logical function converged()
 
-!   converged = .not.(                             &
-!&   (ttolwfr==1 .and. residm > tolwfr) .or.       &
-!&   (ttoldff==1 .and. diffor > toldff) .or.       &
-!&   (ttolrff==1 .and. diffor > tolrff*maxfor .and. maxfor > tol16) .or.&
-!&   (ttoldfe==1 .and. abs(deltae) > toldfe) .or.  &
-!&   (ttolvrs==1 .and. res2  > tolvrs) )
-
-   ! LB-02/01/2017 :
+   ! LB-02/01/2017:
    ! This code avoids evaluation of undefined variables (which could happen in respfn, apparently)
    logical :: loc_conv
    loc_conv = .true.
@@ -1076,17 +1046,14 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
  if(response==1 .and. dtset%nqpt==1)then
    k0(:)=dtset%qptn(:)
    write(message, '(a)' )' setup1 : take into account q-point for computing boxcut.'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
  end if
  if (usepaw==1) then
    write(message,'(2a)') ch10,' Coarse grid specifications (used for wave-functions):'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    call getcut(boxcutc,ecutc_eff,gmet,gsqcutc_eff,dtset%iboxcut,ab_out,k0,ngfftc)
    write(message,'(2a)') ch10,' Fine grid specifications (used for densities):'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
  else
    call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
@@ -1812,7 +1779,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call stream%dump(iout)
    call e_components_dc%free()
  end if
-
 
 end subroutine prtene
 !!***

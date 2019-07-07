@@ -4,10 +4,9 @@
 !!  m_pair_list
 !!
 !! FUNCTION
-!!  This module define the interface to a type representing a
-!!  dictionary containing string keys and numeric or string values.
-!!  It is implemented in C as a simple linked pair list
-!!  (associative list).
+!!  This module defines an API to build
+!!  dictionaries containing string keys and numeric or string values.
+!!  It is implemented in C as a simple linked pair list (associative list).
 !!
 !! COPYRIGHT
 !! Copyright (C) 2009-2019 ABINIT group (TC, MG)

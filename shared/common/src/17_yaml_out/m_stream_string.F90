@@ -5,12 +5,11 @@
 !!
 !! FUNCTION
 !!  This module define a type representing a variable size
-!!  string. It can be used in a file-like way by writing to it
-!!  or reading it.
+!!  string. It can be used in a file-like way by writing to it or reading it.
 !!  Memory is automatically allocated on writing and freed on reading.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG)
+!! Copyright (C) 2009-2019 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,8 +98,8 @@ subroutine wrtout_stream(stream, unit, newline)
   endif
 
   call stream%free()
-end subroutine wrtout_stream
 
+end subroutine wrtout_stream
 
 !!****f* m_stream_string/stream_free
 !! NAME
@@ -110,20 +109,14 @@ end subroutine wrtout_stream
 !!  free stream. Most of the time this is not needed since
 !!  routines to access the content free the stream
 !!
-!! INPUTS
-!!  stream <class(stream_string)>=
-!!
-!! OUTPUT
-!!  stream <class(stream_string)>=
-!!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
 subroutine stream_free(stream)
+
   class(stream_string),intent(inout) :: stream
   type(stream_chunk), pointer :: cursor, prev
   cursor => stream%head
@@ -134,6 +127,7 @@ subroutine stream_free(stream)
   end do
   stream%head => NULL()
   stream%length = 0
+
 end subroutine stream_free
 !!***
 
@@ -151,8 +145,6 @@ end subroutine stream_free
 !! OUTPUT
 !!  src <class(stream_string)>=
 !!  dest <class(stream_string)>=
-!!
-!! NOTES
 !!
 !! PARENTS
 !!
@@ -242,8 +234,6 @@ end subroutine stream_write
 !!  stream <class(stream_string)>=
 !!  string <character(len=chunk_size)>=
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -287,8 +277,6 @@ end subroutine stream_get_chunk
 !! OUTPUT
 !!  stream <class(stream_string)>=
 !!  string <character(len=*)>=
-!!
-!! NOTES
 !!
 !! PARENTS
 !!
@@ -369,8 +357,6 @@ end subroutine stream_to_file
 !!  src <class(stream_string)>=
 !!  dest <class(stream_string)>=
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -413,8 +399,6 @@ end subroutine stream_transfer
 !!
 !! OUTPUT
 !!  src <class(stream_string)>=
-!!
-!! NOTES
 !!
 !! PARENTS
 !!
