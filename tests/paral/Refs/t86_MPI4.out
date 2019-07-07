@@ -514,10 +514,10 @@ data: !EtotIters |
 
 
 --- !ResultsGS
-comment   : Summary of ground states results.
+comment   : Summary of ground state results.
 natom     :        5
 nsppol    :        1
-cutoff energies: {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
+cutoff_energies: {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
 convergence: {
     "deltae":   2.37409381043107715E-09, "res2":   1.41518780109792898E-08, 
     "residm":   2.60254842131463755E-07, "diffor": undef, 
@@ -525,7 +525,7 @@ convergence: {
 etotal    :  -1.51507711707660150E+02
 entropy   :   0.00000000000000000E+00
 fermie    :   3.09658145725792422E-01
-stress tensor: !Tensor
+stress tensor: !CartTensor
 - [  3.56483996349480498E-03,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
 - [  0.00000000000000000E+00,   3.56483996349480151E-03,   0.00000000000000000E+00, ]
 - [  0.00000000000000000E+00,   0.00000000000000000E+00,   3.56483996349478416E-03, ]
@@ -1052,10 +1052,10 @@ data: !EtotIters |
 
 
 --- !ResultsGS
-comment   : Summary of ground states results.
+comment   : Summary of ground state results.
 natom     :        5
 nsppol    :        1
-cutoff energies: {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
+cutoff_energies: {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
 convergence: {
     "deltae":   1.16787860122258280E-04, "res2":   1.55089824285158578E-01, 
     "residm":   5.75125273407124985E-13, "diffor":   0.00000000000000000E+00, 
@@ -1063,7 +1063,7 @@ convergence: {
 etotal    :  -1.51475039953364643E+02
 entropy   :   0.00000000000000000E+00
 fermie    :   3.04097071766542659E-01
-stress tensor: !Tensor
+stress tensor: !CartTensor
 - [  4.02224082195374102E-03,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
 - [  0.00000000000000000E+00,   4.02224082195372368E-03,   0.00000000000000000E+00, ]
 - [  0.00000000000000000E+00,   0.00000000000000000E+00,   4.02224082195374449E-03, ]

@@ -17,10 +17,10 @@ module m_neat
   implicit none
 
   private
-  public :: neat_energies, neat_results_gs, neat_crystal, neat_start_iter
-  public :: neat_open_gw_sigma_pert, neat_gw_sigma_pert_add_line, neat_finish_gw_sigma_pert
+  public :: neat_energies, neat_results_gs, neat_start_iter
   public :: neat_etot_add_line, neat_open_etot, neat_finish_etot
   public :: stream_string, enable_yaml
+  public :: wrtout_stream
 
   logical :: enable = .false., switch_lock = .false.
 
@@ -83,7 +83,7 @@ module m_neat
     call yaml_iterstart(trim(name), n, stream=stream)
     call wrtout_stream(stream, iout)
   end subroutine neat_start_iter
-!!*** m_neat/neat_start_iter
+!!***
 
 !!****f* m_neat/neat_energies
 !!
@@ -123,7 +123,7 @@ module m_neat
 
     call wrtout_stream(stream, iout)
   end subroutine neat_energies
-!!*** m_neat/neat_energies
+!!***
 
 !!****f* m_neat/neat_results_gs
 !!
@@ -136,8 +136,8 @@ module m_neat
 !! INPUTS
 !!  results <type(results_gs_type)>=miscellaneous informations about the system after ground state computation
 !!  iout= unit of output file
-!!  ecut= cut energy
-!!  pawecutdg= PAW cut energy
+!!  ecut= cutoff energy
+!!  pawecutdg= PAW cutoff energy for double grid.
 !!  comment= optional comment for the final docuemtn
 !!
 !! OUTPUT
@@ -150,6 +150,7 @@ module m_neat
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine neat_results_gs(results, iout, ecut, pawecutdg, comment)
     type(results_gs_type),intent(in) :: results
     integer,intent(in) :: iout
@@ -197,7 +198,7 @@ module m_neat
     strten(3,1) = results%strten(5)
     strten(1,2) = results%strten(6)
     strten(2,1) = results%strten(6)
-    call yaml_add_real2d('stress tensor', 3, 3, strten, width=10, stream=stream, tag='Tensor')
+    call yaml_add_real2d('stress tensor', 3, 3, strten, width=10, stream=stream, tag='CartTensor')
     call stream%write(ch10)
 
     do j=1,3
@@ -209,103 +210,6 @@ module m_neat
 
     call wrtout_stream(stream, iout)
   end subroutine neat_results_gs
-!!***
-
-
-!!****f* m_neat/neat_open_gw_sigma_pert
-!!
-!! NAME
-!! neat_open_gw_sigma_pert
-!!
-!! FUNCTION
-!! Open a document for GW Sigma_perturbative
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!    Write the beginning of the document to stream
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-  subroutine neat_open_gw_sigma_pert(stream, comment, k, e0, egw, degw, header)
-    type(stream_string),intent(inout) :: stream
-    real(kind=dp),intent(in) :: k(3), e0, egw, degw
-    character(len=*),intent(in) :: header, comment
-
-    call yaml_open_doc('GwSigmaPerturbative', comment, stream=stream)
-
-    call yaml_add_real1d('k point', 3, k, stream=stream, real_fmt='(3f8.3)')
-    call yaml_add_realfield('E^0_gap', e0, stream=stream)
-    call yaml_add_realfield('E^GW_gap', egw, stream=stream)
-    call yaml_add_realfield('DeltaE^GW_gap', degw, stream=stream)
-
-    call yaml_open_tabular('data', stream=stream, tag='GwSigmaData')
-    call yaml_add_tabular_line(header, stream=stream)
-
-  end subroutine neat_open_gw_sigma_pert
-!!***
-
-!!****f* m_neat/neat_gw_sigma_pert_add_line
-!!
-!! NAME
-!! neat_gw_sigma_pert_add_line
-!!
-!! FUNCTION
-!! Add a line to GW Sigma_perturbative document
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!    Print a YAML document to output file
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-  subroutine neat_gw_sigma_pert_add_line(stream, line)
-    type(stream_string),intent(inout) :: stream
-    character(len=*),intent(in) :: line
-
-    call yaml_add_tabular_line(line, stream=stream)
-  end subroutine neat_gw_sigma_pert_add_line
-!!***
-
-!!****f* m_neat/neat_finish_gw_sigma_pert
-!!
-!! NAME
-!! neat_finish_gw_sigma_pert
-!!
-!! FUNCTION
-!! Close the document and write it to iout
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!    Print a YAML document to output file
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-  subroutine neat_finish_gw_sigma_pert(stream, iout)
-    type(stream_string),intent(inout) :: stream
-    integer,intent(in) :: iout
-
-    call yaml_close_doc(stream=stream)
-
-    call wrtout_stream(stream, iout)
-  end subroutine neat_finish_gw_sigma_pert
 !!***
 
 !!****f* m_neat/neat_open_etot
@@ -328,6 +232,7 @@ module m_neat
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine neat_open_etot(stream, comment, header)
     type(stream_string),intent(inout) :: stream
     character(len=*),intent(in) :: header, comment
@@ -338,7 +243,7 @@ module m_neat
     call yaml_add_tabular_line(header, stream=stream)
 
   end subroutine neat_open_etot
-!!*** m_neat/neat_open_etot
+!!***
 
 !!***f* m_neat/neat_etot_add_line
 !!
@@ -368,7 +273,7 @@ module m_neat
 
     call yaml_add_tabular_line('  '//line(6:), stream=stream)
   end subroutine neat_etot_add_line
-!!*** m_neat/neat_etot_add_line
+!!***
 
 !!****f* m_neat/neat_finish_etot
 !!
@@ -396,10 +301,9 @@ module m_neat
 
     if(stream%length > 0) then
       call yaml_close_doc(stream=stream)
-
       call wrtout_stream(stream, iout)
     end if
   end subroutine neat_finish_etot
-!!*** m_neat/neat_finish_etot
+!!***
 end module m_neat
 !!***

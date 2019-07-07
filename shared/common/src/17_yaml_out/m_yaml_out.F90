@@ -30,15 +30,12 @@
 
 #include "abi_common.h"
 #define SET_DEFAULT(v, optv, defv) v = defv; if(present(optv)) v = optv
-#define ERROR_NO_OUT MSG_ERROR("No output medium have been provided.")
-
-#define MAGIC_NAN 9.9999999999D+99
+#define ERROR_NO_OUT MSG_ERROR("No output medium has been provided.")
 
 module m_yaml_out
 
   use defs_basis
   use ieee_arithmetic
-
   use m_errors
   use m_pair_list
   use m_stream_string
@@ -57,7 +54,8 @@ module m_yaml_out
   public :: yaml_open_tabular, yaml_add_tabular_line
 
   character(len=1),parameter :: eol=char(10)
-  character(len=11),parameter :: default_rfmt='(ES23.15E3)(len=4),parameter :: default_ifmt='(I8)'
+  character(len=11),parameter :: default_rfmt='(ES23.15E3)'
+  character(len=4),parameter :: default_ifmt='(I8)'
   character(len=13),parameter :: default_kfmt="(A)"
   character(len=13),parameter :: default_sfmt="(A)"
   integer,parameter :: default_keysize=30
@@ -156,13 +154,11 @@ module m_yaml_out
 
   subroutine forbid_reserved_label(label)
     character(len=*),intent(in) :: label
-    character(len=500) :: msg
     integer :: i
 
     do i=1,size(reserved_keywords)
       if (reserved_keywords(i) == label) then
-        write(msg,*) label, 'is a reserved keyword and cannot be used as a YAML label.'
-        MSG_ERROR(msg)
+        MSG_ERROR(trim(label)//' is a reserved keyword and cannot be used as a YAML label.')
       end if
     end do
   end subroutine forbid_reserved_label
@@ -325,7 +321,6 @@ module m_yaml_out
       auto_wrap = .false.
     end if
 
-
     quoted = yaml_quote_string(string)
     call stream%write(trim(quoted))
   end subroutine yaml_print_string
@@ -353,13 +348,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_iterstart(label, val, file_d, string, stream, newline, width)
     integer,intent(in) :: val
     character(len=*),intent(in) :: label
@@ -396,7 +390,7 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_iterstart
-!!*** m_yaml_out/yaml_iterstart
+!!***
 
 !!****f* m_yaml_out/yaml_open_doc
 !! NAME
@@ -420,13 +414,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_open_doc(tag, comment, file_d, string, stream, newline, width)
     character(len=*),intent(in) :: tag
     character(len=*),intent(in) :: comment
@@ -466,8 +459,9 @@ module m_yaml_out
     else
       ERROR_NO_OUT
     end if
+
   end subroutine yaml_open_doc
-!!*** m_yaml_out/yaml_open_doc
+!!***
 
 !!****f* m_yaml_out/yaml_add_realfield
 !! NAME
@@ -491,15 +485,13 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine yaml_add_realfield(label, val, file_d, string, stream, tag, &
-&                               real_fmt, newline, width)
+
+  subroutine yaml_add_realfield(label, val, file_d, string, stream, tag, real_fmt, newline, width)
     real(kind=dp) :: val
     character(len=*),intent(in) :: label
     character(len=*),intent(in),optional :: tag, real_fmt
@@ -541,7 +533,7 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_realfield
-!!*** m_yaml_out/yaml_add_realfield
+!!***
 
 !!****f* m_yaml_out/yaml_add_intfield
 !! NAME
@@ -565,15 +557,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine yaml_add_intfield(label, val, file_d, string, stream, tag, &
-&                              int_fmt, newline, width)
+  subroutine yaml_add_intfield(label, val, file_d, string, stream, tag, int_fmt, newline, width)
     integer :: val
     character(len=*),intent(in) :: label
     character(len=*),intent(in),optional :: tag, int_fmt
@@ -614,8 +603,9 @@ module m_yaml_out
     else
       ERROR_NO_OUT
     end if
+
   end subroutine yaml_add_intfield
-!!*** m_yaml_out/yaml_add_intfield
+!!***
 
 !!****f* m_yaml_out/yaml_add_stringfield
 !! NAME
@@ -638,13 +628,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_add_stringfield(label, val, file_d, string, stream, tag, newline, width)
     character(len=*) :: val
     character(len=*),intent(in) :: label
@@ -681,8 +670,9 @@ module m_yaml_out
     else
       ERROR_NO_OUT
     end if
+
   end subroutine yaml_add_stringfield
-!!*** m_yaml_out/yaml_add_stringfield
+!!***
 
 !!****f* m_yaml_out/yaml_add_real1d
 !! NAME
@@ -709,13 +699,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_add_real1d(label, length, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline, width)
     integer,intent(in) :: length
     integer,intent(in),optional :: multiline_trig
@@ -759,8 +748,9 @@ module m_yaml_out
     else
       ERROR_NO_OUT
     end if
+
   end subroutine yaml_add_real1d
-!!*** m_yaml_out/yaml_add_real1d
+!!***
 
 !!****f* m_yaml_out/yaml_add_int1d
 !! NAME
@@ -787,13 +777,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_add_int1d(label, length, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline, width)
     integer,intent(in) :: length
     integer,intent(in),optional :: multiline_trig
@@ -837,8 +826,9 @@ module m_yaml_out
     else
       ERROR_NO_OUT
     end if
+
   end subroutine yaml_add_int1d
-!!*** m_yaml_out/yaml_add_int1d
+!!***
 
 !!****f* m_yaml_out/yaml_add_dict
 !! NAME
@@ -870,15 +860,15 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine yaml_add_dict(label, pl, file_d, string, stream, tag, key_size, string_size, key_fmt, int_fmt, real_fmt, string_fmt, &
-&                          multiline_trig, newline, width)
+
+  subroutine yaml_add_dict(label, pl, file_d, string, stream, tag, key_size, string_size, key_fmt, &
+          int_fmt, real_fmt, string_fmt, multiline_trig, newline, width)
+
     type(pair_list),intent(inout) :: pl
     character(len=*),intent(in) :: label
     integer,intent(in),optional :: string_size, key_size, multiline_trig
@@ -928,8 +918,9 @@ module m_yaml_out
     else
       ERROR_NO_OUT
     end if
+
   end subroutine yaml_add_dict
-!!*** m_yaml_out/yaml_add_dict
+!!***
 
 !!****f* m_yaml_out/yaml_add_real2d
 !! NAME
@@ -957,13 +948,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_add_real2d(label, m, n, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline, width)
     integer,intent(in) :: m, n
     real(kind=dp),intent(in) :: arr(m, n)
@@ -1013,8 +1003,9 @@ module m_yaml_out
     else
       ERROR_NO_OUT
     end if
+
   end subroutine yaml_add_real2d
-!!*** m_yaml_out/yaml_add_real2d
+!!***
 
 !!****f* m_yaml_out/yaml_add_int2d
 !! NAME
@@ -1042,13 +1033,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_add_int2d(interm, label, m, n, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline, width)
     integer,intent(in) :: m, n
     integer,intent(in) :: arr(m, n)
@@ -1098,8 +1088,9 @@ module m_yaml_out
     else
       ERROR_NO_OUT
     end if
+
   end subroutine yaml_add_int2d
-!!*** m_yaml_out/yaml_add_int2d
+!!***
 
 !!****f* m_yaml_out/yaml_add_dictlist
 !! NAME
@@ -1132,15 +1123,14 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_add_dictlist(label, n, plarr, file_d, string, stream, tag, key_size, string_size, key_fmt, int_fmt, &
-&                              real_fmt, string_fmt, multiline_trig, newline, width)
+                               real_fmt, string_fmt, multiline_trig, newline, width)
     integer,intent(in) :: n
     type(pair_list),intent(inout) :: plarr(n)
     character(len=*),intent(in) :: label
@@ -1199,7 +1189,7 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_dictlist
-!!*** m_yaml_out/yaml_add_dictlist
+!!***
 
 !!****f* m_yaml_out/yaml_open_tabular
 !! NAME
@@ -1222,13 +1212,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_open_tabular(label, tag, file_d, string, stream, indent, newline)
     character(len=*),intent(in) :: label
     character(len=*),intent(in),optional :: tag
@@ -1266,7 +1255,7 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_open_tabular
-!!*** m_yaml_out/yaml_open_tabular
+!!***
 
 !!****f* m_yaml_out/yaml_add_tabular_line
 !! NAME
@@ -1288,13 +1277,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_add_tabular_line(line, file_d, string, stream, newline, indent)
     character(len=*),intent(in) :: line
     integer,intent(in),optional :: file_d
@@ -1326,7 +1314,7 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_add_tabular_line
-!!*** m_yaml_out/yaml_add_tabular_line
+!!***
 
 !!****f* m_yaml_out/yaml_add_tabular
 !! NAME
@@ -1351,14 +1339,14 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_add_tabular(label, input, tag, file_d, string, stream, newline, indent)
+
     character(len=*),intent(in) :: label
     type(stream_string),intent(inout) :: input
     character(len=*),intent(in),optional :: tag
@@ -1398,8 +1386,9 @@ module m_yaml_out
     else
       ERROR_NO_OUT
     end if
+
   end subroutine yaml_add_tabular
-!!*** m_yaml_out/yaml_add_tabular
+!!***
 
 !!****f* m_yaml_out/yaml_single_dict
 !! NAME
@@ -1430,13 +1419,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_single_dict(tag, comment, pl, key_size, string_size, file_d, string, stream, &
 &                             int_fmt, real_fmt, string_fmt, newline, width)
     type(pair_list),intent(inout) :: pl
@@ -1513,7 +1501,7 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_single_dict
-!!*** m_yaml_out/yaml_single_dict
+!!***
 
 !!****f* m_yaml_out/yaml_close_doc
 !! NAME
@@ -1533,13 +1521,12 @@ module m_yaml_out
 !!  stream <type(stream_string)>=optional
 !!  string <character(len=*)>=optional
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
+
   subroutine yaml_close_doc(file_d, string, stream, newline)
     integer,intent(in), optional :: file_d
     type(stream_string),intent(inout),optional :: stream
@@ -1568,7 +1555,7 @@ module m_yaml_out
       ERROR_NO_OUT
     end if
   end subroutine yaml_close_doc
-!!*** m_yaml_out/yaml_close_doc
+!!***
 
 end module m_yaml_out
 !!***

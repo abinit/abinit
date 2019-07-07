@@ -10,12 +10,17 @@
 !!  (associative list).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG)
+!! Copyright (C) 2009-2019 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
+!! This module provide an implementation of a pair list
+!! Possible improvement:
+!! - Simplify the usage of get by removing the limit in key and string size
+!! - Simplify the usage of get by removing the need for variable for all possible
+!!   content when you know what is stored
 !!
 !! PARENTS
 !!   m_yaml_out, m_neat, m_common
@@ -29,11 +34,6 @@
 #include "config.h"
 #endif
 
-! This module provide an implementation of a pair list
-! Possible improvement:
-! - Simplify the usage of get by removing the limit in key and string size
-! - Simplify the usage of get by removing the need for variable for all possible
-!   content when you know what is stored
 module m_pair_list
 
   use iso_c_binding

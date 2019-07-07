@@ -476,7 +476,7 @@ convergence: {
 etotal    :  -8.87168809125275004E+00
 entropy   :   0.00000000000000000E+00
 fermie    :   2.17655487277611859E-01
-stress tensor: !Tensor
+stress tensor: !CartTensor
 - [  2.76864061740706878E-05,   0.00000000000000000E+00,   0.00000000000000000E+00, ]
 - [  0.00000000000000000E+00,   2.76864061740706878E-05,   0.00000000000000000E+00, ]
 - [  0.00000000000000000E+00,   0.00000000000000000E+00,   2.76864061740706878E-05, ]
@@ -1200,12 +1200,13 @@ dtset:     3
  E^GW_gap         3.104
  DeltaE^GW_gap    0.578
 
---- !GwSigmaPerturbative
-k point: [   0.000,    0.000,    0.000, ]
-E^0_gap:   2.52645830621329992E+00
-E^GW_gap:   3.10415465048926276E+00
-DeltaE^GW_gap:   5.77696344275962725E-01
-data: !GwSigmaData |
+--- !SelfEnergy_ee
+kpoint: [   0.000,    0.000,    0.000, ]
+spin: 1
+KS_gap     :    2.526
+QP_gap     :    3.104
+Delta_QP_KS:    0.578
+data: !SigmaeeData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
         3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
@@ -1355,12 +1356,13 @@ dtset:     4
  E^GW_gap         3.104
  DeltaE^GW_gap    0.578
 
---- !GwSigmaPerturbative
-k point: [   0.000,    0.000,    0.000, ]
-E^0_gap:   2.52645830621329992E+00
-E^GW_gap:   3.10415465048926276E+00
-DeltaE^GW_gap:   5.77696344275962725E-01
-data: !GwSigmaData |
+--- !SelfEnergy_ee
+kpoint: [   0.000,    0.000,    0.000, ]
+spin: 1
+KS_gap     :    2.526
+QP_gap     :    3.104
+Delta_QP_KS:    0.578
+data: !SigmaeeData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
         3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232
@@ -1510,12 +1512,13 @@ dtset:     5
  E^GW_gap         3.104
  DeltaE^GW_gap    0.578
 
---- !GwSigmaPerturbative
-k point: [   0.000,    0.000,    0.000, ]
-E^0_gap:   2.52645830621329992E+00
-E^GW_gap:   3.10415465048926276E+00
-DeltaE^GW_gap:   5.77696344275962725E-01
-data: !GwSigmaData |
+--- !SelfEnergy_ee
+kpoint: [   0.000,    0.000,    0.000, ]
+spin: 1
+KS_gap     :    2.526
+QP_gap     :    3.104
+Delta_QP_KS:    0.578
+data: !SigmaeeData |
      Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.923 -11.256 -12.387   1.527   0.786  -0.272 -10.945   0.311   6.234
         3   5.923 -11.256 -12.389   1.526   0.786  -0.272 -10.946   0.309   6.232

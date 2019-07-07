@@ -22,8 +22,7 @@ class CartForces(Atoms3D):
 @yaml_seq
 class Matrix33(BaseArray):
     '''
-        Define a matrix of shape (3, 3) compatible with numpy arrays and
-        with YAML tags.
+    Define a matrix of shape (3, 3) compatible with numpy arrays and with YAML tags.
     '''
     def __init__(self, shape=(3, 3), *args, **kwargs):
         assert shape == (3, 3)
@@ -37,20 +36,18 @@ class Matrix33(BaseArray):
 
 
 @yaml_seq
-class TensorCart(Matrix33):
+class CartTensor(Matrix33):
 
-    def is_symetric(self):
-        '''Return true if tensor is symmetric.'''
+    def is_symmetric(self, tol_abs=1e-8):
+        """Return true if tensor is symmetric within absolute tolerance `tol_abs`."""
         for i in range(3):
             for j in range(i, 3):
-                if self[i, j] != self[j, i]:
-                    return False
+                if abs(self[i, j] - self[j, i]) > tol_abs: return False
         return True
 
-    def is_anti_symetric(self):
-        '''Return true if tensor is anti-symmetric '''
+    def is_antisymmetric(self, tol_abs=1e-8):
+        """Return true if tensor is anti-symmetric withing absolute tolerance tol_abs."""
         for i in range(3):
             for j in range(i, 3):
-                if self[i, j] != -self[j, i]:
-                    return False
+                if abs(self[i, j] + self[j, i]) > tol_abs: return False
         return True

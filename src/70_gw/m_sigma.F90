@@ -34,6 +34,8 @@ MODULE m_sigma
  use m_errors
  use iso_c_binding
  use m_nctk
+ use m_yaml_out
+ use m_neat, only : wrtout_stream
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -44,7 +46,6 @@ MODULE m_sigma
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
  use m_screening,      only : epsilonm1_results
- use m_neat,           only : neat_open_gw_sigma_pert, neat_gw_sigma_pert_add_line, neat_finish_gw_sigma_pert
  use m_stream_string,  only : stream_string
 
  implicit none
@@ -493,9 +494,15 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    end if
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-   call neat_open_gw_sigma_pert(stream, '', Sigp%kptgw(:,ikcalc), Sr%e0gap(ikibz,is)*Ha_eV, &
-&                               Sr%egwgap(ikibz,is)*Ha_eV, Sr%degwgap(ikibz,is)*Ha_eV, &
-&                               msg)
+
+   call yaml_open_doc('SelfEnergy_ee', "", stream=stream)
+   call yaml_add_real1d('kpoint', 3, Sigp%kptgw(:,ikcalc), stream=stream, real_fmt='(3f8.3)')
+   call yaml_add_intfield('spin', is, int_fmt="(i1)", stream=stream)
+   call yaml_add_realfield('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV, stream=stream, width=11, real_fmt="(f8.3)")
+   call yaml_add_realfield('QP_gap', Sr%egwgap(ikibz,is)*Ha_eV, stream=stream, width=11, real_fmt="(f8.3)")
+   call yaml_add_realfield('Delta_QP_KS', Sr%degwgap(ikibz,is)*Ha_eV, stream=stream, width=11, real_fmt="(f8.3)")
+   call yaml_open_tabular('data', stream=stream, tag='SigmaeeData')
+   call yaml_add_tabular_line(msg, stream=stream)
 
    write(unt_gw,'(3f10.6)')Sigp%kptgw(:,ikcalc)
    write(unt_gw,'(i4)')Sigp%maxbnd(ikcalc,is)-Sigp%minbnd(ikcalc,is)+1
@@ -552,9 +559,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      call wrtout(ab_out,msg,'COLL')
    end if
 
-   call neat_finish_gw_sigma_pert(stream, ab_out)
+   call yaml_close_doc(stream=stream)
+   call wrtout_stream(stream, ab_out)
 
-   !
    ! === Output of the spectral function ===
    do io=1,Sr%nomega_r
      write(unt_sig,'(100(e12.5,2x))')&
@@ -694,7 +701,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &      REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
      if(present(stream)) then
-       call neat_gw_sigma_pert_add_line(stream, msg)
+       call yaml_add_tabular_line(msg, stream=stream)
      end if
      if (verbose/=0) then
        write(msg,'(i5,9f8.3)')                         &
@@ -710,7 +717,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &        AIMAG(Sr%egw         (iband,ik_ibz,1))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
        if(present(stream)) then
-         call neat_gw_sigma_pert_add_line(stream, msg)
+         call yaml_add_tabular_line(msg, stream=stream)
        end if
      end if
   else
@@ -727,7 +734,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &     REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
     call wrtout(my_unt,msg,my_mode)
     if(present(stream)) then
-      call neat_gw_sigma_pert_add_line(stream, msg)
+      call yaml_add_tabular_line(msg, stream=stream)
     end if
 
     if (verbose/=0) then
@@ -744,7 +751,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &        AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
        if(present(stream)) then
-         call neat_gw_sigma_pert_add_line(stream, msg)
+         call yaml_add_tabular_line(msg, stream=stream)
        end if
     end if
   end if
@@ -765,7 +772,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &    REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
    call wrtout(my_unt,msg,my_mode)
    if(present(stream)) then
-     call neat_gw_sigma_pert_add_line(stream, msg)
+     call yaml_add_tabular_line(msg, stream=stream)
    end if
 
    if (verbose/=0) then
@@ -783,7 +790,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 &     AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
       call wrtout(my_unt,msg,my_mode)
      if(present(stream)) then
-       call neat_gw_sigma_pert_add_line(stream, msg)
+       call yaml_add_tabular_line(msg, stream=stream)
      end if
    end if
  end if
@@ -857,7 +864,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,st
 &           Sr%en_qp_diago (iband,ik_ibz,1)*Ha_eV
      call wrtout(my_unt,msg,my_mode)
      if(present(stream)) then
-       call neat_gw_sigma_pert_add_line(stream, msg)
+       call yaml_add_tabular_line(msg, stream=stream)
      end if
 
      write(msg,'(i5,12(2x,f8.3))')                         &
@@ -877,7 +884,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,st
      if (verbose/=0) then
        call wrtout(my_unt,msg,my_mode)
        if(present(stream)) then
-         call neat_gw_sigma_pert_add_line(stream, msg)
+         call yaml_add_tabular_line(msg, stream=stream)
        end if
      end if
    else
@@ -897,7 +904,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,st
 &           Sr%en_qp_diago(iband,ik_ibz,isp)*Ha_eV
      call wrtout(my_unt,msg,my_mode)
      if(present(stream)) then
-       call neat_gw_sigma_pert_add_line(stream, msg)
+       call yaml_add_tabular_line(msg, stream=stream)
      end if
 
      write(msg,'(i5,12(2x,f8.3))')                        &
@@ -917,7 +924,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,st
      if (verbose/=0) then
        call wrtout(my_unt,msg,my_mode)
        if(present(stream)) then
-         call neat_gw_sigma_pert_add_line(stream, msg)
+         call yaml_add_tabular_line(msg, stream=stream)
        end if
      end if
    end if
