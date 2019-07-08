@@ -1,7 +1,7 @@
-'''
-    Define structures depending on numpy to be found in Abinit YAML formatted
-    output extending the possible operations on the extracted data.
-'''
+"""
+Define structures depending on numpy to be found in Abinit YAML formatted
+output extending the possible operations on the extracted data.
+"""
 from __future__ import print_function, division, unicode_literals
 from ..common import BaseArray
 from ..register_tag import yaml_seq
@@ -11,19 +11,18 @@ yaml_seq(BaseArray)
 
 @yaml_seq
 class Atoms3D(BaseArray):
-    '''Base class for (natom, 3) arrays.'''
+    """Base class for (natom, 3) arrays."""
 
 
 @yaml_seq
 class CartForces(Atoms3D):
-    '''Cartesian forces as (natom, 3) array'''
+    """Cartesian forces as (natom, 3) array"""
 
 
 @yaml_seq
 class Matrix33(BaseArray):
-    '''
-    Define a matrix of shape (3, 3) compatible with numpy arrays and with YAML tags.
-    '''
+    """Define a matrix of shape (3, 3) compatible with numpy arrays and with YAML tags."""
+
     def __init__(self, shape=(3, 3), *args, **kwargs):
         assert shape == (3, 3)
         super(Matrix33, self).__init__(shape, *args, **kwargs)

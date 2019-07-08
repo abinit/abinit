@@ -822,10 +822,10 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
 
 !Local variables-------------------------------
  integer,parameter :: width=10
- integer :: j
+ integer :: ii
  type(stream_string) :: stream
  type(pair_list) :: dict
- real(dp) :: strten(3,3)
+ real(dp) :: strten(3,3), abc(3)
 
 !************************************************************************
 
@@ -853,6 +853,10 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  call dict%set('diffor', r=results%diffor)
  call yaml_add_dict('convergence', dict, width=width, multiline_trig=2, stream=stream)
  call dict%free()
+
+ abc(:) = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+ call yaml_add_real1d('abc', cryst%angdeg, width=width, stream=stream)
+ call yaml_add_real1d('alpha_beta_gamma_angles', cryst%angdeg, width=width, stream=stream)
 
  call yaml_add_realfield('etotal', results%etotal, width=width, stream=stream)
  call yaml_add_realfield('entropy', results%entropy, width=width, stream=stream)

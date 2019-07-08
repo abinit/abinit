@@ -495,7 +495,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    call wrtout(ab_out,msg,'COLL')
 
    call yaml_open_doc('SelfEnergy_ee', "", stream=stream)
-   call yaml_add_real1d('kpoint', 3, Sigp%kptgw(:,ikcalc), stream=stream, real_fmt='(3f8.3)')
+   call yaml_add_real1d('kpoint', Sigp%kptgw(:,ikcalc), stream=stream, real_fmt='(3f8.3)')
    call yaml_add_intfield('spin', is, int_fmt="(i1)", stream=stream)
    call yaml_add_realfield('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV, stream=stream, width=11, real_fmt="(f8.3)")
    call yaml_add_realfield('QP_gap', Sr%egwgap(ikibz,is)*Ha_eV, stream=stream, width=11, real_fmt="(f8.3)")

@@ -30,7 +30,7 @@
 
 #include "abi_common.h"
 
-#define SET_DEFAULT(v, optv, defv) v = defv; if(present(optv)) v = optv
+#define SET_DEFAULT(v, optv, defv) v = defv; if (present(optv)) v = optv
 #define ERROR_NO_OUT MSG_ERROR("No output medium has been provided.")
 
 module m_yaml_out
@@ -114,17 +114,17 @@ subroutine yaml_iterstart(label, val, file_d, string, stream, newline, width)
  SET_DEFAULT(w, width, 0)
  write(tmp_i, '(I6)') val
 
- if(present(stream)) then
+ if (present(stream)) then
    call stream%write('--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
-   if(nl) call stream%write(eol)
+   if (nl) call stream%write(eol)
  else if(present(string)) then
-   if(nl) then
+   if (nl) then
      write(string, '(A)') '--- !IterStart'//eol//label//':'//tmp_i//eol//'...'//eol
    else
      write(string, '(A)') '--- !IterStart'//eol//label//':'//tmp_i//eol//'...'
    end if
  else if(present(file_d)) then
-   if(nl) then
+   if (nl) then
      write(file_d, '(A)') '--- !IterStart'//eol//label//':'//tmp_i//eol//'...'
    else
      write(file_d, '(A)', advance='no') '--- !IterStart'//eol//label//':'//tmp_i//eol//'...'
@@ -183,8 +183,8 @@ subroutine yaml_open_doc(tag, comment, file_d, string, stream, newline, width)
 
  if (comment /= '') then
    call interm%write(eol//'comment')
-   if(present(width)) then
-     if(width > 7) then
+   if (present(width)) then
+     if (width > 7) then
        call interm%write(repeat(' ', width - 7))
      end if
    end if
@@ -193,11 +193,11 @@ subroutine yaml_open_doc(tag, comment, file_d, string, stream, newline, width)
  end if
  if (nl) call interm%write(eol)
 
- if(present(stream)) then
+ if (present(stream)) then
    call interm%transfer(stream)
- else if(present(string)) then
+ else if (present(string)) then
    call interm%to_string(string)
- else if(present(file_d)) then
+ else if (present(file_d)) then
    call interm%to_file(file_d)
  else
    ERROR_NO_OUT
@@ -255,7 +255,7 @@ subroutine yaml_add_realfield(label, val, file_d, string, stream, tag, real_fmt,
   SET_DEFAULT(w, width, 0)
   SET_DEFAULT(rfmt, real_fmt, default_rfmt)
 
-  if(present(tag)) then
+  if (present(tag)) then
     call yaml_start_field(interm, label, width=w, tag=tag)
   else
     call yaml_start_field(interm, label, width=w)
@@ -264,13 +264,13 @@ subroutine yaml_add_realfield(label, val, file_d, string, stream, tag, real_fmt,
   call interm%write(' ')
   call format_real(val, tmp_r, trim(rfmt))
   call interm%write(trim(tmp_r))
-  if(nl) call interm%write(eol)
+  if (nl) call interm%write(eol)
 
-  if(present(stream)) then
+  if (present(stream)) then
     call interm%transfer(stream)
-  else if(present(string)) then
+  else if (present(string)) then
     call interm%to_string(string)
-  else if(present(file_d)) then
+  else if (present(file_d)) then
     call interm%to_file(file_d)
   else
     ERROR_NO_OUT
@@ -328,7 +328,7 @@ subroutine yaml_add_intfield(label, val, file_d, string, stream, tag, int_fmt, n
  SET_DEFAULT(w, width, 0)
  SET_DEFAULT(ifmt, int_fmt, default_ifmt)
 
- if(present(tag)) then
+ if (present(tag)) then
    call yaml_start_field(interm, label, width=w, tag=tag)
  else
    call yaml_start_field(interm, label, width=w)
@@ -337,13 +337,13 @@ subroutine yaml_add_intfield(label, val, file_d, string, stream, tag, int_fmt, n
  call interm%write(' ')
  write(tmp_i, trim(ifmt)) val
  call interm%write(trim(tmp_i))
- if(nl) call interm%write(eol)
+ if (nl) call interm%write(eol)
 
- if(present(stream)) then
+ if (present(stream)) then
    call interm%transfer(stream)
- else if(present(string)) then
+ else if (present(string)) then
    call interm%to_string(string)
- else if(present(file_d)) then
+ else if (present(file_d)) then
    call interm%to_file(file_d)
  else
    ERROR_NO_OUT
@@ -397,7 +397,7 @@ subroutine yaml_add_stringfield(label, val, file_d, string, stream, tag, newline
   SET_DEFAULT(nl, newline, .true.)
   SET_DEFAULT(w, width, 0)
 
-  if(present(tag)) then
+  if (present(tag)) then
     call yaml_start_field(interm, label, width=w, tag=tag)
   else
     call yaml_start_field(interm, label, width=w)
@@ -405,13 +405,13 @@ subroutine yaml_add_stringfield(label, val, file_d, string, stream, tag, newline
 
   call interm%write(' ')
   call yaml_print_string(interm, val, 70)
-  if(nl) call interm%write(eol)
+  if (nl) call interm%write(eol)
 
-  if(present(stream)) then
+  if (present(stream)) then
     call interm%transfer(stream)
-  else if(present(string)) then
+  else if (present(string)) then
     call interm%to_string(string)
-  else if(present(file_d)) then
+  else if (present(file_d)) then
     call interm%to_file(file_d)
   else
     ERROR_NO_OUT
@@ -431,8 +431,7 @@ end subroutine yaml_add_stringfield
 !!
 !! INPUTS
 !!  label = key name
-!!  length = size of arr
-!!  arr(length)
+!!  arr(:)
 !!  [multiline_trig] = optional minimun number of elements before switching to multline representation
 !!  [tag] = optional, add a tag to the field
 !!  [real_fmt] = override the default formating
@@ -450,11 +449,10 @@ end subroutine yaml_add_stringfield
 !!
 !! SOURCE
 
-subroutine yaml_add_real1d(label, length, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline, width)
+subroutine yaml_add_real1d(label, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline, width)
 
-  integer,intent(in) :: length
   integer,intent(in),optional :: multiline_trig
-  real(dp),intent(in) :: arr(length)
+  real(dp),intent(in) :: arr(:)
   character(len=*),intent(in) :: label
   character(len=*),intent(in),optional :: tag, real_fmt
   integer,intent(in), optional :: file_d
@@ -464,26 +462,28 @@ subroutine yaml_add_real1d(label, length, arr, file_d, string, stream, tag, real
   integer,intent(in),optional :: width
 
   type(stream_string) :: interm
-  integer :: w
+  integer :: w, length
   character(len=30) :: rfmt
   integer :: vmax
   logical :: nl
+
+  length = size(arr)
 
   SET_DEFAULT(nl, newline, .true.)
   SET_DEFAULT(w, width, 0)
   SET_DEFAULT(rfmt, real_fmt, default_rfmt)
   SET_DEFAULT(vmax, multiline_trig, 5)
 
-  if(present(tag)) then
+  if (present(tag)) then
     call yaml_start_field(interm, label, width=w, tag=tag)
   else
     call yaml_start_field(interm, label, width=w)
   end if
 
   call yaml_print_real1d(interm, length, arr, trim(rfmt), vmax)
-  if(nl) call interm%write(eol)
+  if (nl) call interm%write(eol)
 
-  if(present(stream)) then
+  if (present(stream)) then
     call interm%transfer(stream)
   else if(present(string)) then
     call interm%to_string(string)
@@ -507,8 +507,7 @@ end subroutine yaml_add_real1d
 !!
 !! INPUTS
 !!  label = key name
-!!  length = size of arr
-!!  arr(length) <integer>=
+!!  arr(:) <integer>=
 !!  [multiline_trig] = optional minimun number of elements before switching to multline representation
 !!  [tag] : add a tag to the field
 !!  int_fmt <character(len=*)>=optional  override the default formating
@@ -526,11 +525,10 @@ end subroutine yaml_add_real1d
 !!
 !! SOURCE
 
-subroutine yaml_add_int1d(label, length, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline, width)
+subroutine yaml_add_int1d(label, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline, width)
 
-  integer,intent(in) :: length
   integer,intent(in),optional :: multiline_trig
-  integer,intent(in) :: arr(length)
+  integer,intent(in) :: arr(:)
   character(len=*),intent(in) :: label
   character(len=*),intent(in),optional :: tag, int_fmt
   integer,intent(in), optional :: file_d
@@ -541,29 +539,29 @@ subroutine yaml_add_int1d(label, length, arr, file_d, string, stream, tag, int_f
 
   type(stream_string) :: interm
   character(len=30) :: ifmt
-  integer :: w
-  integer :: vmax
+  integer :: w, length, vmax
   logical :: nl
 
   SET_DEFAULT(nl, newline, .true.)
   SET_DEFAULT(w, width, 0)
   SET_DEFAULT(ifmt, int_fmt, default_ifmt)
   SET_DEFAULT(vmax, multiline_trig, 5)
+  length = size(arr)
 
-  if(present(tag)) then
+  if (present(tag)) then
     call yaml_start_field(interm, label, width=w, tag=tag)
   else
     call yaml_start_field(interm, label, width=w)
   end if
 
   call yaml_print_int1d(interm, length, arr, trim(ifmt), vmax)
-  if(nl) call interm%write(eol)
+  if (nl) call interm%write(eol)
 
-  if(present(stream)) then
+  if (present(stream)) then
     call interm%transfer(stream)
-  else if(present(string)) then
+  else if (present(string)) then
     call interm%to_string(string)
-  else if(present(file_d)) then
+  else if (present(file_d)) then
     call interm%to_file(file_d)
   else
     ERROR_NO_OUT
@@ -608,7 +606,7 @@ end subroutine yaml_add_int1d
 !! SOURCE
 
 subroutine yaml_add_dict(label, pl, file_d, string, stream, tag, key_size, string_size, key_fmt, &
-        int_fmt, real_fmt, string_fmt, multiline_trig, newline, width)
+                         int_fmt, real_fmt, string_fmt, multiline_trig, newline, width)
 
   type(pair_list),intent(inout) :: pl
   character(len=*),intent(in) :: label
@@ -636,20 +634,20 @@ subroutine yaml_add_dict(label, pl, file_d, string, stream, tag, key_size, strin
   SET_DEFAULT(sfmt, string_fmt, default_sfmt)
   SET_DEFAULT(vmax, multiline_trig, 5)
 
-  if(present(tag)) then
+  if (present(tag)) then
     call yaml_start_field(interm, label, width=w, tag=tag)
   else
     call yaml_start_field(interm, label, width=w)
   end if
 
   call yaml_print_dict(interm, pl, ks, ss, trim(kfmt), trim(ifmt), trim(rfmt), trim(sfmt), vmax)
-  if(nl) call interm%write(eol)
+  if (nl) call interm%write(eol)
 
-  if(present(stream)) then
+  if (present(stream)) then
     call interm%transfer(stream)
-  else if(present(string)) then
+  else if (present(string)) then
     call interm%to_string(string)
-  else if(present(file_d)) then
+  else if (present(file_d)) then
     call interm%to_file(file_d)
   else
     ERROR_NO_OUT
@@ -716,7 +714,7 @@ subroutine yaml_add_real2d(label, arr, file_d, string, stream, tag, real_fmt, mu
   SET_DEFAULT(rfmt, real_fmt, default_rfmt)
   SET_DEFAULT(vmax, multiline_trig, 5)
 
-  if(present(tag)) then
+  if (present(tag)) then
     call yaml_start_field(interm, label, width=w, tag=tag)
   else
     call yaml_start_field(interm, label, width=w)
@@ -736,13 +734,13 @@ subroutine yaml_add_real2d(label, arr, file_d, string, stream, tag, real_fmt, mu
     end do
   end if
 
-  if(nl) call interm%write(eol)
+  if (nl) call interm%write(eol)
 
-  if(present(stream)) then
+  if (present(stream)) then
     call interm%transfer(stream)
-  else if(present(string)) then
+  else if (present(string)) then
     call interm%to_string(string)
-  else if(present(file_d)) then
+  else if (present(file_d)) then
     call interm%to_file(file_d)
   else
     ERROR_NO_OUT
@@ -810,7 +808,7 @@ subroutine yaml_add_int2d(label, arr, file_d, string, stream, tag, int_fmt, mult
   SET_DEFAULT(ifmt, int_fmt, default_ifmt)
   SET_DEFAULT(vmax, multiline_trig, 5)
 
-  if(present(tag)) then
+  if (present(tag)) then
     call yaml_start_field(interm, label, width=w, tag=tag)
   else
     call yaml_start_field(interm, label, width=w)
@@ -832,11 +830,11 @@ subroutine yaml_add_int2d(label, arr, file_d, string, stream, tag, int_fmt, mult
 
   if (nl) call interm%write(eol)
 
-  if(present(stream)) then
+  if (present(stream)) then
     call interm%transfer(stream)
-  else if(present(string)) then
+  else if (present(string)) then
     call interm%to_string(string)
-  else if(present(file_d)) then
+  else if (present(file_d)) then
     call interm%to_file(file_d)
   else
     ERROR_NO_OUT
@@ -910,7 +908,7 @@ subroutine yaml_add_dictlist(label, n, plarr, file_d, string, stream, tag, key_s
  SET_DEFAULT(ks, key_size, default_keysize)
  SET_DEFAULT(ss, string_size, default_keysize)
 
- if(present(tag)) then
+ if (present(tag)) then
    call yaml_start_field(interm, label, width=w, tag=tag)
  else
    call yaml_start_field(interm, label, width=w)
@@ -920,14 +918,14 @@ subroutine yaml_add_dictlist(label, n, plarr, file_d, string, stream, tag, key_s
  do i=1,n
    call interm%write('- ')
    call yaml_print_dict(interm, plarr(i), ks, ss, trim(kfmt), trim(ifmt), trim(rfmt), trim(sfmt), vmax)
-   if(nl .or. i/=n) call interm%write(eol)
+   if (nl .or. i/=n) call interm%write(eol)
  end do
 
- if(present(stream)) then
+ if (present(stream)) then
    call interm%transfer(stream)
- else if(present(string)) then
+ else if (present(string)) then
    call interm%to_string(string)
- else if(present(file_d)) then
+ else if (present(file_d)) then
    call interm%to_file(file_d)
  else
    ERROR_NO_OUT
@@ -978,22 +976,22 @@ subroutine yaml_open_tabular(label, tag, file_d, string, stream, indent, newline
  SET_DEFAULT(nl, newline, .true.)
  SET_DEFAULT(n, indent, 4)
 
- if(n > 4) then
+ if (n > 4) then
    call interm%write(repeat(' ', n-4))
  end if
 
- if(present(tag)) then
+ if (present(tag)) then
    call yaml_start_field(interm, label, tag=tag)
  else
    call yaml_start_field(interm, label, tag='Tabular')
  end if
  call interm%write(' |'//eol)
 
- if(present(stream)) then
+ if (present(stream)) then
    call interm%transfer(stream)
- else if(present(string)) then
+ else if (present(string)) then
    call interm%to_string(string)
- else if(present(file_d)) then
+ else if (present(file_d)) then
    call interm%to_file(file_d)
  else
    ERROR_NO_OUT
@@ -1043,13 +1041,13 @@ subroutine yaml_add_tabular_line(line, file_d, string, stream, newline, indent)
  SET_DEFAULT(n, indent, 4)
 
  call interm%write(repeat(' ', n)//trim(line))
- if(nl) call interm%write(eol)
+ if (nl) call interm%write(eol)
 
- if(present(stream)) then
+ if (present(stream)) then
    call interm%transfer(stream)
- else if(present(string)) then
+ else if (present(string)) then
    call interm%to_string(string)
- else if(present(file_d)) then
+ else if (present(file_d)) then
    call interm%to_file(file_d)
  else
    ERROR_NO_OUT
@@ -1108,16 +1106,16 @@ subroutine yaml_add_tabular(label, input, tag, file_d, string, stream, newline, 
 
  call yaml_open_tabular(label, tag=t, stream=interm, newline=nl)
 
- if(n > 4) call interm%write(repeat(' ', n - 4))
+ if (n > 4) call interm%write(repeat(' ', n - 4))
 
  call write_indent(input, interm, n)
  if (nl) call interm%write(eol)
 
- if(present(stream)) then
+ if (present(stream)) then
    call interm%transfer(stream)
- else if(present(string)) then
+ else if (present(string)) then
    call interm%to_string(string)
- else if(present(file_d)) then
+ else if (present(file_d)) then
    call interm%to_file(file_d)
  else
    ERROR_NO_OUT
@@ -1206,15 +1204,15 @@ subroutine yaml_single_dict(tag, comment, pl, key_size, string_size, file_d, str
 
    call yaml_start_field(interm, trim(key), width=width)
    call interm%write(' ')
-   if(type_code == TC_INT) then
+   if (type_code == TC_INT) then
      call string_clear(tmp_i)
      write(tmp_i, ifmt) vi
      call interm%write(trim(tmp_i))
-   else if(type_code == TC_REAL) then
+   else if (type_code == TC_REAL) then
      call string_clear(tmp_r)
      call format_real(vr, tmp_r, rfmt)
      call interm%write(trim(tmp_r))
-   else if(type_code == TC_STRING) then
+   else if (type_code == TC_STRING) then
      call string_clear(tmp_s)
      write(tmp_s, sfmt) vs
      call yaml_print_string(interm, trim(tmp_s), 100)
@@ -1224,11 +1222,11 @@ subroutine yaml_single_dict(tag, comment, pl, key_size, string_size, file_d, str
 
  call yaml_close_doc(stream=interm, newline=nl)
 
- if(present(stream)) then
+ if (present(stream)) then
    call interm%transfer(stream)
- else if(present(string)) then
+ else if (present(string)) then
    call interm%to_string(string)
- else if(present(file_d)) then
+ else if (present(file_d)) then
    call interm%to_file(file_d)
  else
    ERROR_NO_OUT
@@ -1271,17 +1269,17 @@ subroutine yaml_close_doc(file_d, string, stream, newline)
 
  SET_DEFAULT(nl, newline, .true.)
 
- if(present(stream)) then
+ if (present(stream)) then
    call stream%write('...')
-   if(nl) call stream%write(eol)
+   if (nl) call stream%write(eol)
  else if(present(string)) then
-   if(nl) then
+   if (nl) then
      write(string, '(A)') '...'//eol
    else
      write(string, '(A)') '...'
    end if
  else if(present(file_d)) then
-   if(nl) then
+   if (nl) then
      write(file_d, '(A)') '...'
    else
      write(file_d, '(A)', advance='no') '...'
@@ -1304,13 +1302,14 @@ subroutine format_real(val, dest, formt)
   character(len=*),intent(out) :: dest
   character(len=*),intent(in) :: formt
 
-  if(ieee_is_nan(val)) then  ! NaN
+  if (ieee_is_nan(val)) then  ! NaN
     write(dest, '(a)') '.nan'
   else if (val == MAGIC_UNDEF) then
     write(dest, '(a)') 'undef'
   else
     write(dest, trim(formt)) val
   end if
+
 end subroutine format_real
 
 subroutine write_indent(input, output, n)
@@ -1332,7 +1331,7 @@ subroutine write_indent(input, output, n)
         call output%write(buffer(buffstart:buffstop))
         call output%write(repeat(' ', n))
         buffstart = buffstop+1
-      else if(buffstart < min(length, chunk_size)) then
+      else if (buffstart < min(length, chunk_size)) then
         call output%write(buffer(buffstart:min(length, chunk_size)))
         buffstart = chunk_size
       end if
@@ -1380,7 +1379,7 @@ pure function yaml_quote_string(string) result(quoted)
 
   if (quote) then
     quoted='"'//string//'"'
-  else if(multiline .or. spec_char) then
+  else if (multiline .or. spec_char) then
     quoted="'"//string//"'"
   else
     quoted=string
@@ -1390,14 +1389,15 @@ end function yaml_quote_string
 subroutine yaml_start_field(stream, label, tag, width)
   type(stream_string),intent(inout) :: stream
   character(len=*),intent(in) :: label
-  integer,optional :: width
+  integer,optional,intent(in) :: width
   character(len=*),intent(in),optional :: tag
+
   character(len=len_trim(label)+2) :: quoted
 
   call forbid_reserved_label(trim(label))
   quoted = yaml_quote_string(label)
-  if(present(width)) then
-    if(width > len_trim(label)) then
+  if (present(width)) then
+    if (width > len_trim(label)) then
       call stream%write(trim(quoted)//repeat(' ', width-len_trim(quoted))//':')
     else
       call stream%write(trim(quoted)//':')
@@ -1405,9 +1405,8 @@ subroutine yaml_start_field(stream, label, tag, width)
   else
     call stream%write(trim(quoted)//':')
   end if
-  if (present(tag)) then
-    call stream%write(' !'//trim(tag))
-  end if
+  if (present(tag)) call stream%write(' !'//trim(tag))
+
 end subroutine yaml_start_field
 
 subroutine yaml_print_real1d(stream, length, arr, rfmt, vmax)
@@ -1436,9 +1435,7 @@ subroutine yaml_print_real1d(stream, length, arr, rfmt, vmax)
       call stream%write(', ')
     end if
   end do
-  if (length > vmax) then
-    call stream%write(eol)
-  end if
+  if (length > vmax) call stream%write(eol)
   call stream%write(']')
 
 end subroutine yaml_print_real1d
@@ -1470,9 +1467,7 @@ subroutine yaml_print_int1d(stream, length, arr, ifmt, vmax)
       call stream%write(', ')
     end if
   end do
-  if (length > vmax) then
-    call stream%write(eol)
-  end if
+  if (length > vmax) call stream%write(eol)
   call stream%write(']')
 
 end subroutine yaml_print_int1d
@@ -1509,7 +1504,7 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
     call string_clear(tmp_key)
     write(tmp_key, kfmt) '"'//trim(key)//'"'
     call stream%write(trim(tmp_key)//': ')
-    if(type_code == TC_INT) then
+    if (type_code == TC_INT) then
       call string_clear(tmp_i)
       write(tmp_i, ifmt) vi
       call stream%write(trim(tmp_i))
@@ -1529,9 +1524,7 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
     end if
   end do
 
-  if (pl%length() > vmax) then
-    call stream%write(eol)
-  end if
+  if (pl%length() > vmax) call stream%write(eol)
   call stream%write('}')
 
 end subroutine yaml_print_dict
@@ -1545,7 +1538,7 @@ subroutine yaml_print_string(stream, string, vmax)
 
   logical :: auto_wrap
 
-  if(len(string) > vmax) then
+  if (len(string) > vmax) then
     auto_wrap = .true.
   else
     auto_wrap = .false.

@@ -1,6 +1,4 @@
-'''
-    Structures dedicated to e-e self-energy e.g. GW computations
-'''
+"""Structures dedicated to e-e self-energy e.g. GW computations"""
 from ..register_tag import yaml_scalar, yaml_auto_map, yaml_not_available_tag
 from .pandas_commons import has_pandas
 
