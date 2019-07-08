@@ -99,6 +99,19 @@ subroutine invsqrt_matrix(matrix,tndim)
 
  ABI_ALLOCATE(initialmatrix,(tndim,tndim))
  initialmatrix=matrix
+ ! == Zero : print the initial matrix
+ 
+ if(pawprtvol>3) then
+   write(message,'(2a)') ch10,'  - initial matrix - '
+   call wrtout(std_out,message,'COLL')
+   do im1=1,tndim
+     write(message,'(12(16(2x,f6.3,1x,",",f6.3)))')&
+!     write(message,'(12(1x,18(1x,"(",f20.16,",",f20.16,")")))')&
+&     (initialmatrix(im1,im2),im2=1,tndim)
+    call wrtout(std_out,message,'COLL')
+   end do
+ endif
+ 
 !  == First diagonalize matrix and keep the matrix for the change of basis
  lwork=2*tndim-1
  ABI_ALLOCATE(rwork,(3*tndim-2))
@@ -106,11 +119,13 @@ subroutine invsqrt_matrix(matrix,tndim)
  ABI_ALLOCATE(eig,(tndim))
  
  call zheev('v','u',tndim,matrix,tndim,eig,zwork,lwork,rwork,info)
- if(pawprtvol>3) then
+ 
+ 
+if(pawprtvol>3) then
    write(message,'(2a)') ch10,'  - rotation matrix - '
    call wrtout(std_out,message,'COLL')
    do im1=1,tndim
-     write(message,'(12(1x,18(1x,"(",f7.3,",",f7.3,")")))')&
+     write(message,'(12(16(2x,f6.3,1x,",",f6.3)))')&
 !     write(message,'(12(1x,18(1x,"(",f20.16,",",f20.16,")")))')&
 &     (matrix(im1,im2),im2=1,tndim)
     call wrtout(std_out,message,'COLL')
@@ -125,7 +140,7 @@ subroutine invsqrt_matrix(matrix,tndim)
   MSG_ERROR(message)
  end if
 
-!  == Secondly Compute sqrt(diagonalized matrix)
+!  == Secondly Compute 1/sqrt(diagonalized matrix)
  ABI_ALLOCATE(diag,(tndim,tndim))
  diag=czero
  nb_of_zero=0
@@ -140,12 +155,16 @@ subroutine invsqrt_matrix(matrix,tndim)
        write(std_out,'(100f7.3)') (initialmatrix(im1,im2),im2=1,tndim)
      enddo
      MSG_ERROR(message)
-   else if(abs(eig(im))<tol8) then
+   else if(abs(eig(im))<tol12) then
      nb_of_zero=nb_of_zero+1
+     diag(im,im)=cmplx(tol12,zero,kind=dp)
    else
      diag(im,im)=cmplx(one/sqrt(eig(im)),zero,kind=dp)
    endif
  enddo
+ if (pawprtvol>3)then
+   write(std_out,'(2x,a,i3)')"Number of zeros :", nb_of_zero 
+ end if
  ABI_DEALLOCATE(eig)
 ! write(std_out,*) "sqrt(eig)                , diag(1,1)",sqrt(eig(1)),diag(1,1)
 ! write(std_out,*) "cmplx(sqrt(eig(1)),zero,dp) , diag(1,1)",cmplx(sqrt(eig(1)),zero,dp),diag(1,1)
@@ -158,9 +177,9 @@ subroutine invsqrt_matrix(matrix,tndim)
    write(message,'(2a)') ch10,'  - 1.0/sqrt(Eigenmatrix) - '
    call wrtout(std_out,message,'COLL')
    do im1=1,tndim
-     write(message,'(12(1x,18(1x,"(",f7.3,",",f7.3,")")))')&
+     write(message,'(12(17(1x,f6.3)))')&
 !     write(message,'(12(1x,18(1x,"(",f20.16,",",f20.16,")")))')&
-&     (diag(im1,im2),im2=1,tndim)
+&     (real(diag(im1,im2)),im2=1,tndim)
     call wrtout(std_out,message,'COLL')
    end do
  endif
@@ -172,7 +191,7 @@ subroutine invsqrt_matrix(matrix,tndim)
    write(message,'(3a)') ch10,"  - inverse Sqrt root of matrix is - "
    call wrtout(std_out,message,'COLL')
    do im1=1,tndim
-     write(message,'(12(1x,18(1x,"(",f20.16,",",f20.16,")")))')&
+     write(message,'(12(16(2x,f6.3,1x,",",f6.3)))')&
 &     (sqrtmat(im1,im2),im2=1,tndim)
      call wrtout(std_out,message,'COLL')
    end do
@@ -186,13 +205,13 @@ subroutine invsqrt_matrix(matrix,tndim)
  ABI_ALLOCATE(sqrtmatinv,(tndim,tndim))
  sqrtmatinv=sqrtmat
  if(pawprtvol>3) then
-   write(message,'(2a)') ch10,"  - inverse Sqrt root of matrix is - "
-   call wrtout(std_out,message,'COLL')
-   do im1=1,tndim
-     write(message,'(12(1x,18(1x,"(",f20.16,",",f20.16,")")))')&
-&     (sqrtmatinv(im1,im2),im2=1,tndim)
-     call wrtout(std_out,message,'COLL')
-   end do
+!    write(message,'(2a)') ch10,"  - inverse Sqrt root of matrix is - "
+!    call wrtout(std_out,message,'COLL')
+!    do im1=1,tndim
+!      write(message,'(12(18("(",f6.3,",",f6.3,")")))')&
+! &     (sqrtmatinv(im1,im2),im2=1,tndim)
+!      call wrtout(std_out,message,'COLL')
+!    end do
  endif
  ABI_DEALLOCATE(sqrtmat)
 
@@ -204,7 +223,7 @@ subroutine invsqrt_matrix(matrix,tndim)
    write(message,'(3a)') ch10,"  - O^{-0/5} O O^{-0/5}=I - "
    call wrtout(std_out,message,'COLL')
    do im1=1,tndim
-     write(message,'(12(1x,18(1x,"(",f10.6,",",f4.1,")")))')&
+     write(message,'(12(16(2x,f6.3,1x,",",f6.3)))')&
 !     write(message,'(12(1x,18(1x,"(",f20.16,",",f20.16,")")))')&
 &     (initialmatrix(im1,im2),im2=1,tndim)
      call wrtout(std_out,message,'COLL')

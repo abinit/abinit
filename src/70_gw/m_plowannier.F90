@@ -763,7 +763,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 !scalars
  integer :: band_index,dimpsichi,facpara
  integer :: iatom,iatom1,iatom2,iband,ibandc,ibg,ierr,ikpt
- integer :: iband1,owrunt
+ integer :: iband1,owrunt,opt
  integer :: ilmn,iorder_cprj,ispinor,isppol,itypat,ilmn2
  integer :: lmn_size
  integer :: m1,maxnproju,me,natom,nband_k,nband_k_cprj
@@ -811,6 +811,13 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  integer :: lwork,info,whole_diag
  complex(dpc), allocatable :: densmat(:,:)
 !************************************************************************
+
+
+! Drive the normalization of the psichis
+opt = 1 ! 
+        ! 0 : normalization k-point by k-point
+        ! 1 : normalization of the sum over k-points
+
 
 ! Internal variables (could be put one day as input variables of ABINIT).
  plowan_computegreen   = 0  !
@@ -1221,18 +1228,19 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
    enddo
    do ikpt = 1,wan%nkpt
-     if (ikpt<=5)then
+    ! if (ikpt<=5)then
        write(message,*)char(10)," For ikpt=",ikpt,"the normalization matrix is before normalization :"
        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
        do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
          write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
          call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
        enddo
-     endif
+     !endif
    end do
  endif
 
- call normalization_plowannier(wan)
+ 
+ call normalization_plowannier(wan,opt)
 
 
  if (dtset%prtvol>=5) then
@@ -1241,14 +1249,14 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
    enddo
    do ikpt = 1,wan%nkpt
-     if (ikpt<=5)then
+     !if (ikpt<=5)then
        write(message,*)char(10)," For ikpt=",ikpt,"the normalization matrix is after normalization :"
        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
        do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
          write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
          call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
        enddo
-     endif
+     !endif
    end do
  endif
  !! -------------------------------------------------------------
@@ -2895,7 +2903,7 @@ end subroutine compute_oper_ks2wan
 !!  Use compute_oper_ks2wan to calculate overlap and do the normalization for the wan%psichi coefficients
 !!
 !! INPUTS
-!!  wan, option (=0 if we normalize over all k)
+!!  wan, opt (=0 normalize k-point by k-point; =1 normalize the sum over k)
 !!
 !! OUTPUT
 !!  wan itself is modified
@@ -2908,7 +2916,7 @@ end subroutine compute_oper_ks2wan
 !! SOURCE
 
 
-subroutine normalization_plowannier(wan)
+subroutine normalization_plowannier(wan,opt)
 
   use m_matrix, only : invsqrt_matrix
 
@@ -2916,19 +2924,25 @@ subroutine normalization_plowannier(wan)
 
 !Arguments------------------
   type(plowannier_type), intent(inout) :: wan
-
+  integer, intent(in) :: opt
 !Local----------------------
   complex(dpc), allocatable :: operks(:,:,:,:)
   type(operwan_type), allocatable :: operwan(:,:,:)
   complex(dpc), allocatable :: operwansquare(:,:,:,:)
   complex(dpc), allocatable :: tmp_operwansquare(:,:)
   integer :: ikpt, iband, iband1, iband2, isppol,  ispinor1, ispinor2, iatom1, &
-&  iatom2, il1, il2, im1, im2, index_c, index_l, n1,n2,n3
+&  iatom2, il1, il2, im1, im2, index_c, index_l, n1,n2,n3, nkpt
   type(orbital_type), allocatable :: psichinormalized(:,:,:)
   !character(len = 50) :: mat_writing2
   !character(len = 5000) :: mat_writing
   character(len = 500) :: message
 
+  !Initialize nkpt (wan%nkpt if opt=0, 1 if opt=1)
+  if (opt==1) then 
+    nkpt=1
+  else 
+    nkpt=wan%nkpt
+  end if
 
   !First, creation of the ks identity operator
   ABI_ALLOCATE(operks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
@@ -2957,7 +2971,7 @@ subroutine normalization_plowannier(wan)
     call compute_oper_ks2wan(wan,operks,operwan,ikpt)
   end do
 
-
+  
 
   !transform the operwan into an inversible matrix
   !!operwansquare is the overlap square matrix (wan%size_wan * wan%size_wan)
@@ -2985,8 +2999,14 @@ subroutine normalization_plowannier(wan)
                 do il2 = 1,wan%nbl_atom_wan(iatom2)
                   do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
                     do ikpt = 1,wan%nkpt
-         operwansquare(ikpt,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+wan%size_wan*(ispinor2-1))  &
-&                 = operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)
+                      if (opt==1) then ! operwansquare is a sum of operwan over k points     
+                        operwansquare(1,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+wan%size_wan*(ispinor2-1))  &
+&                        =operwansquare(1,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+wan%size_wan*(ispinor2-1))+ &
+&                        (operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)*wan%wtk(ikpt))
+                      else !operwansquare is a matrix with a k-point dimension
+                        operwansquare(ikpt,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+wan%size_wan*(ispinor2-1))  &
+                          &= operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)
+                      end if
                     end do
                     index_c = index_c + 1
                   end do !im2
@@ -3019,7 +3039,8 @@ subroutine normalization_plowannier(wan)
   !take the square root inverse of operwansquare for normalization purposes
   ABI_ALLOCATE(tmp_operwansquare,(wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan))
   do isppol = 1,wan%nsppol
-    do ikpt = 1,wan%nkpt
+    do ikpt = 1,nkpt
+      write(6,*)"ikpt = ", ikpt
       tmp_operwansquare(:,:)=operwansquare(ikpt,isppol,:,:)
       call invsqrt_matrix(tmp_operwansquare,wan%nspinor*wan%size_wan)
       operwansquare(ikpt,isppol,:,:)=tmp_operwansquare(:,:)
@@ -3055,11 +3076,19 @@ subroutine normalization_plowannier(wan)
                   do il2 = 1,wan%nbl_atom_wan(iatom2)
                     do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
                       do ikpt = 1,wan%nkpt
-                        psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) =&
-                          psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) +&
-                          wan%psichi(ikpt,iband,iatom2)%atom(il2)%matl(im2,isppol,ispinor2)*&
-                          operwansquare(ikpt,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+&
-                          wan%size_wan*(ispinor2-1))
+                        if (opt==1)then ! all the psichi are normalized with the same operwansquare
+                          psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) =&
+&                           psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) +&
+&                           wan%psichi(ikpt,iband,iatom2)%atom(il2)%matl(im2,isppol,ispinor2)*&
+&                           operwansquare(1,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+&
+&                           wan%size_wan*(ispinor2-1))                          
+                        else ! each psichi is normalized with his own operwansquare
+                          psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) =&
+&                           psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) +&
+&                           wan%psichi(ikpt,iband,iatom2)%atom(il2)%matl(im2,isppol,ispinor2)*&
+&                           operwansquare(ikpt,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+&
+&                           wan%size_wan*(ispinor2-1))
+                        end if
                       end do
                       index_c = index_c + 1
                     end do !im2
@@ -3108,22 +3137,24 @@ subroutine normalization_plowannier(wan)
                 do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
                   do ispinor1 = 1,wan%nspinor
                     do ispinor2 = 1,wan%nspinor
-                      if (iatom1.eq.iatom2 .and. il1.eq.il2 .and. im1.eq.im2 .and. ispinor1.eq.ispinor2) then
-                        if (abs(cmplx(1.0,0.0,dpc)-&
-             &             operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
-                          write(message,'(a,i0,a,F18.11)') 'Normalization error for ikpt =',ikpt,&
-         &                         ' on diag, value = ',&
-          &                        abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
-                          MSG_ERROR(message)
+                      if (opt==0) then
+                        if (iatom1.eq.iatom2 .and. il1.eq.il2 .and. im1.eq.im2 .and. ispinor1.eq.ispinor2) then
+                          if (abs(cmplx(1.0,0.0,dpc)-&
+                            &             operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
+                            write(message,'(a,i0,a,F18.11)') 'Normalization error for ikpt =',ikpt,&
+                              &' on diag, value = ',&
+                              &abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
+                            MSG_ERROR(message)
+                          end if
+                        else
+                          if (abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
+                            write(message,'(a,i0,a,F10.3)') 'Normalization error for ikpt =',ikpt,&
+                              &' not on diag, value = ',&
+                              &abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
+                            MSG_ERROR(message)
+                          end if
                         end if
-                      else
-                        if (abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
-                          write(message,'(a,i0,a,F10.3)') 'Normalization error for ikpt =',ikpt,&
-         &                         ' not on diag, value = ',&
-         &                           abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
-                         MSG_ERROR(message)
-                        end if
-                      end if
+                      endif
                     end do
                   end do
                 end do
