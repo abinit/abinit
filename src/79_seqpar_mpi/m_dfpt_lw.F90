@@ -3959,6 +3959,7 @@ end subroutine dfpt_flexoout
 !scalars
  integer :: alpha,beta,delta,gamma
  integer :: iatdir,iatom,iatpert,ibuf,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
+ integer :: q1pert,strcomp,strpert
  integer, parameter :: re=1,im=2
  real(dp) :: fac,tfrim,tfrre,t4im,tmpim,tmpre,t4re
  character(len=500) :: msg                   
@@ -4495,6 +4496,33 @@ end subroutine dfpt_flexoout
      end do
    end do
  end do
+
+!Add contributions to d3etot
+ q1pert=matom+8
+ do istrpert=1,nstrpert
+   strpert=pert_strain(1,istrpert)
+   strcomp=pert_strain(2,istrpert)
+   istr1dir=pert_strain(3,istrpert)
+   istr2dir=pert_strain(4,istrpert)
+   do iq1grad=1,nq1grad
+     iq1dir=q1grad(2,iq1grad)
+     do iatom=1,matom
+       do iatdir=1,3
+
+         if (redflg(iatom,iatdir,iq1dir,istr1dir,istr2dir)==1) then
+           d3etot(re,iatdir,iatom,strcomp,strpert,iq1dir,q1pert)= &
+         & -1.0_dp*isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           d3etot(im,iatdir,iatom,strcomp,strpert,iq1dir,q1pert)= &
+         & -1.0_dp*isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+         end if
+
+       end do
+     end do
+   end do
+ end do
+
+ ABI_DEALLOCATE(isdqtens_red)
+ ABI_DEALLOCATE(redflg)
 
  DBG_EXIT("COLL")
  end subroutine dfpt_isdqout
