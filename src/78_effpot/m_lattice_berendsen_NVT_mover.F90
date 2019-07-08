@@ -8,8 +8,8 @@
 !! This module contains the berendsen  (NVT) lattice mover.
 !! The method is described in  
 !! H.J.C. Berendsen, J.P.M. Postma, A. DiNola, and J.R. Haak,
-!! “Molecular dynamics with coupling to an external bath,”
-!!  J. Chem. Phys., 81 3684–3690 (1984)
+!! "Molecular dynamics with coupling to an external bath,"
+!!  J. Chem. Phys., 81 3684-3690 (1984)
 !! NOTE: that this method does NOT generate properly the thermostated
 !! ensemble. It does not have the correct distribution of the kinetic energy.
 !! However, it approches the target temperature exponentially without oscillation, 

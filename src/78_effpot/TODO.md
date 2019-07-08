@@ -14,7 +14,7 @@ State:
 
 State: 
 
-### [TODO] Make a example harmonic lattice potential. (hexu) [time: July, 2019]
+### [DONE] Make a example harmonic lattice potential. (hexu) [time: July, 2019]
 
 
 #### [DONE] implement primitive potentail (read from netcdf file). Tested.
@@ -29,11 +29,12 @@ State:
             Lattice_mover get E(lattice) + E(spin-lattice-couping) 
         Another problem is from the kinetic energy, which is not calculated by the potential
 	but the lattic mover.
+        Also note that the energy is related to specific heat, susceptibility, etc. 
 
 ---
 
 ## Documenation
-### [TODO] Document general data structure  (hexu) [time: July, 2019]
+### [DONE] Document general data structure  (hexu) [time: July, 2019]
 
 State: ?
 

@@ -296,7 +296,9 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-    write(msg, "(A13, 4X, A15, 4X, A15, 4X, A15, 4X, A15)")  "Iteration", "temperature(K)", "Ekin(Ha/uc)", "Epot(Ha/uc)", "ETOT(Ha/uc)"
+    write(msg, "(A13, 4X, A15, 4X, A15, 4X, A15, 4X, A15)") &
+            &  "Iteration", "temperature(K)", "Ekin(Ha/uc)", &
+            & "Epot(Ha/uc)", "ETOT(Ha/uc)"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
@@ -312,7 +314,8 @@ contains
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf)
        
        write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
-            & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, (self%Ek+self%energy)/self%supercell%ncell
+            & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &
+            & (self%Ek+self%energy)/self%supercell%ncell
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
 

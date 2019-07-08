@@ -100,7 +100,7 @@ contains
        self%current_vcart(:,i) = self%current_vcart(:,i) + &
             & (0.5_dp * self%dt) * self%forces(:,i)/self%masses(i)
     end do
-    call self%force_stationary()
+    !call self%force_stationary()
 
     self%displacement(:,:) = self%displacement(:,:)+self%current_vcart(:,:) * self%dt
     ! No need to update xcart.
@@ -119,7 +119,7 @@ contains
        self%current_vcart(:,i) = self%current_vcart(:,i) &
             & + (0.5_dp * self%dt) * self%forces(:,i)/self%masses(i)
     end do
-    call self%force_stationary()
+    !call self%force_stationary()
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(displacement)
   end subroutine run_one_step
