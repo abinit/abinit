@@ -1641,7 +1641,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
 !scalars
  integer :: ask_accurate,bantot_rbz,bdtot_index,bdtot1_index
  integer :: cplex,formeig,forunit,gscase,icg
- integer :: iatpert,iatpert_cnt,iatpol,iatdir
+ integer :: iatdir,iatom,iatpert,iatpert_cnt,iatpol
  integer :: ii,iefipert,iefipert_cnt,ierr,ikg,ikpt,ikpt1,ilm
  integer :: iq1dir,iq2dir,iq1grad,iq1grad_cnt,iq1q2grad,iq1q2grad_var
  integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jatpert,jj,ka,kb
@@ -1670,7 +1670,8 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  integer,allocatable :: ddmdq_flg(:,:,:,:,:),elflexoflg(:,:,:,:)
  integer,allocatable :: indkpt1(:), indkpt1_tmp(:)
  integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:)
- integer,allocatable :: istwfk_rbz(:),kg(:,:),kg_k(:,:)
+ integer,allocatable :: istwfk_rbz(:),isdq_flg(:,:,:,:,:)
+ integer,allocatable :: kg(:,:),kg_k(:,:)
  integer,allocatable :: nband_rbz(:),npwarr(:),npwtot(:)
  integer,allocatable :: pert_atdis(:,:),pert_atdis_tmp(:,:)
  integer,allocatable :: pert_efield(:,:),pert_efield_tmp(:,:)
@@ -1692,6 +1693,14 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  real(dp),allocatable :: elflexowf_t4(:,:,:,:,:),elflexowf_t4_k(:,:,:,:,:)
  real(dp),allocatable :: elflexowf_t5(:,:,:,:,:),elflexowf_t5_k(:,:,:,:,:)
  real(dp),allocatable :: elqgradhart(:,:,:,:,:)
+ real(dp),allocatable :: frwfdq(:,:,:,:,:,:),frwfdq_k(:,:,:,:,:,:)
+ real(dp),allocatable :: isdq_qgradhart(:,:,:,:,:,:)
+ real(dp),allocatable :: isdqwf(:,:,:,:,:,:),isdqwf_k(:,:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t1(:,:,:,:,:,:),isdqwf_t1_k(:,:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t2(:,:,:,:,:,:),isdqwf_t2_k(:,:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t3(:,:,:,:,:,:),isdqwf_t3_k(:,:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t4(:,:,:,:,:,:),isdqwf_t4_k(:,:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t5(:,:,:,:,:,:),isdqwf_t5_k(:,:,:,:,:,:)
  real(dp),allocatable :: kpt_rbz(:,:)
  real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
  real(dp),allocatable :: occ_k(:),occ_rbz(:)
@@ -1716,7 +1725,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
  
 !Anounce start of flexoelectric tensor calculation
  write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
-&   ' ==> Compute Flexoelectric Tensor <== ',ch10
+&   ' ==> Compute Flexoelectric Tensor Related Magnitudes <== ',ch10
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
@@ -2154,6 +2163,46 @@ end if
    end do
  end if 
 
+!1st g-gradient of internal strain tensor contribution
+ if (lw_flexo==1.or.lw_flexo==4) then
+   ABI_ALLOCATE(isdq_qgradhart,(2,matom,3,3,3,3))
+   ABI_ALLOCATE(isdq_flg,(matom,3,3,3,3))
+   isdq_flg=0
+   rhor1_tmp=zero
+   do iq1grad=1,nq1grad
+     qdir=q1grad(2,iq1grad)
+     do iatpert=1,natpert
+
+       rhog1_tmp(:,:)=rhog1_atdis(iatpert,:,:)
+       call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qdir,rhog1_tmp,vqgradhart) 
+
+       do istrpert=1,nstrpert
+
+         !Calculate the electrostatic energy term with the first order strain density 
+         if (timrev==1) then
+           do ii=1,nfft
+             jj=ii*2
+             rhor1_tmp(jj-1,:)=rhor1_strain(istrpert,ii,:)
+           end do
+         else if (timrev==0) then
+           rhor1_tmp(:,:)=rhor1_strain(istrpert,:,:)
+         end if
+       
+         call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+
+         isdq_qgradhart(re,pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
+         isdq_qgradhart(im,pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
+         isdq_flg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
+
+         blkflg(pert_atdis(2,iatpert),pert_atdis(1,iatpert), &
+       &        pert_strain(2,istrpert),pert_strain(1,istrpert), &
+       &        q1grad(2,iq1grad),matom+8)=1           
+     
+       end do
+     end do
+   end do
+ end if
+
  ABI_DEALLOCATE(rhor1_tmp)
  ABI_DEALLOCATE(rhog1_tmp)
  ABI_DEALLOCATE(vqgradhart)
@@ -2517,6 +2566,31 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ddmdqwf_t3=zero
  end if
 
+!Allocate arrays for wf contributions to the first q-gradient of the internal strain tensor 
+ if (lw_flexo==1.or.lw_flexo==4) then 
+   ABI_ALLOCATE(frwfdq,(2,matom,3,3,3,nq1grad))
+   ABI_ALLOCATE(frwfdq_k,(2,matom,3,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf,(2,matom,3,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_k,(2,matom,3,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t1,(2,matom,3,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t1_k,(2,matom,3,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t2,(2,matom,3,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t2_k,(2,matom,3,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t3,(2,matom,3,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t3_k,(2,matom,3,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t4,(2,matom,3,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t4_k,(2,matom,3,3,3,nq1grad))
+   ABI_ALLOCATE(isdqwf_t5,(2,matom,3,nq1grad,3,3))
+   ABI_ALLOCATE(isdqwf_t5_k,(2,matom,3,nq1grad,3,3))
+   frwfdq=zero
+   isdqwf=zero
+   isdqwf_t1=zero
+   isdqwf_t2=zero
+   isdqwf_t3=zero
+   isdqwf_t4=zero
+   isdqwf_t5=zero
+ end if
+
 !LOOP OVER SPINS
  bdtot_index=0
  icg=0
@@ -2585,21 +2659,49 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !    Compute the wf contributions to the first q-gradient of the dynamical matrix
      if (lw_flexo==1.or.lw_flexo==3) then
-       call dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k, &
-       &  ddmdqwf_t3_k,dtset, &
-       &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
-       &  kg_k,kpoint,mkmem_rbz, &
-       &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
-       &  npw_k,nq1grad,nspden,nsppol,nylmgr,occ_k, &
-       &  pert_atdis,ph1d,psps,q1grad,rmet,ucvol,useylmgr, &
-       &  vhxc1_atdis,wfk_t_atdis,wfk_t_ddk, &
-       &  wtk_k,xred,ylm_k,ylmgr_k)
+       call dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,ddmdqwf_t3_k,&
+       &  dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k,kg_k,kpoint,mkmem_rbz,    &
+       &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz,npw_k,nq1grad,nspden,  &
+       &  nsppol,nylmgr,occ_k,pert_atdis,ph1d,psps,q1grad,rmet,ucvol,useylmgr, &
+       &  vhxc1_atdis,wfk_t_atdis,wfk_t_ddk,wtk_k,xred,ylm_k,ylmgr_k)
 
 !      Add the contribution from each k-point
        ddmdqwf=ddmdqwf + ddmdqwf_k
        ddmdqwf_t1=ddmdqwf_t1 + ddmdqwf_t1_k
        ddmdqwf_t2=ddmdqwf_t2 + ddmdqwf_t2_k
        ddmdqwf_t3=ddmdqwf_t3 + ddmdqwf_t3_k
+     end if
+
+!    Compute the wf contributions to the first q-gradient of the internal strain tensor
+     if (lw_flexo==1.or.lw_flexo==4) then
+
+!      First calculate the frozen wf contribution (notice the type-I indexing of
+!      this term)
+       call dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
+       &  isppol,istwf_k,kg_k,kpoint,mkmem_rbz,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
+       &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
+       &  pert_strain,ph1d,psps,q1grad,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
+
+!      Add the contribution from each k-point
+       frwfdq=frwfdq + frwfdq_k
+
+!      Now comute the 1st order wf contributions
+       call dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isdqwf_k, &
+       &  isdqwf_t1_k,isdqwf_t2_k,isdqwf_t3_k,isdqwf_t4_k,isdqwf_t5_k,isppol,istwf_k, &
+       &  kg_k,kpoint,matom,mkmem_rbz,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
+       &  npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
+       &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
+       &  vhxc1_atdis,vhxc1_strain,wfk_t_atdis,wfk_t_ddk, &
+       &  wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
+       
+!      Add the contribution from each k-point
+       isdqwf=isdqwf + isdqwf_k
+       isdqwf_t1=isdqwf_t1 + isdqwf_t1_k
+       isdqwf_t2=isdqwf_t2 + isdqwf_t2_k
+       isdqwf_t3=isdqwf_t3 + isdqwf_t3_k
+       isdqwf_t4=isdqwf_t4 + isdqwf_t4_k
+       isdqwf_t5=isdqwf_t5 + isdqwf_t5_k
+
      end if
 
 !    Keep track of total number of bands
@@ -2664,7 +2766,46 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      call xmpi_sum(ddmdqwf_t3,spaceworld,ierr)
    end if
 
+   if (lw_flexo==1.or.lw_flexo==4) then
+     call xmpi_sum(frwfdq,spaceworld,ierr)
+     call xmpi_sum(isdqwf,spaceworld,ierr)
+     call xmpi_sum(isdqwf_t1,spaceworld,ierr)
+     call xmpi_sum(isdqwf_t2,spaceworld,ierr)
+     call xmpi_sum(isdqwf_t3,spaceworld,ierr)
+     call xmpi_sum(isdqwf_t4,spaceworld,ierr)
+     call xmpi_sum(isdqwf_t5,spaceworld,ierr)
+   end if
+
  end if
+
+!TMP: Writing of individual terms
+ do iatpert= 1, natpert
+   iatom=pert_atdis(1,iatpert)
+   iatdir=pert_atdis(2,iatpert)
+   do istrpert= 1, nstrpert
+     ka=pert_strain(3,istrpert)
+     kb=pert_strain(4,istrpert)
+     do iq1grad=1,3
+       write(98,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
+     & frwfdq(1,iatom,iatdir,ka,kb,iq1grad), frwfdq(2,iatom,iatdir,ka,kb,iq1grad)
+       write(99,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+     & isdq_qgradhart(re,iatom,iatdir,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert)), &
+     & isdq_qgradhart(im,iatom,iatdir,q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))
+       write(101,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+     & isdqwf_t1(re,iatom,iatdir,iq1grad,ka,kb),isdqwf_t1(im,iatom,iatdir,iq1grad,ka,kb)
+       write(102,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+     & isdqwf_t2(re,iatom,iatdir,iq1grad,ka,kb),isdqwf_t2(im,iatom,iatdir,iq1grad,ka,kb)
+       write(103,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+     & isdqwf_t3(re,iatom,iatdir,iq1grad,ka,kb),isdqwf_t3(im,iatom,iatdir,iq1grad,ka,kb)
+       write(104,'(4i3,1x,2f14.8)')iatpert,ka,kb,iq1grad,&
+     & isdqwf_t3(re,iatom,iatdir,ka,kb,iq1grad), isdqwf_t3(im,iatom,iatdir,ka,kb,iq1grad)
+       write(105,'(4i3,1x,2f14.8)')iatpert,iq1grad,ka,kb,&
+     & isdqwf_t5(re,iatom,iatdir,iq1grad,ka,kb),isdqwf_t5(im,iatom,iatdir,iq1grad,ka,kb)
+     end do
+   end do
+ end do
+
+
 
 !Anounce finalization of calculations
  if (lw_flexo==1.or.lw_flexo==2) then
@@ -2676,6 +2817,12 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  if (lw_flexo==1.or.lw_flexo==3) then
    write(msg, '(a,a,a)' ) ch10, &
    ' Dynamical matrix 1st q-gradient calculation completed ',ch10
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end if
+ if (lw_flexo==1.or.lw_flexo==4) then
+   write(msg, '(a,a,a)' ) ch10, &
+   'Internal strain tensor 1st q-gradient calculation completed ',ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
@@ -2691,6 +2838,11 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    if (lw_flexo==1.or.lw_flexo==3) then
      call dfpt_ddmdqout(ddmdq_flg,ddmdq_qgradhart,ddmdqwf,ddmdqwf_t1,ddmdqwf_t2,ddmdqwf_t3,d3etot,&
    & dyewdq,gprimd,dtset%kptopt,matom,mpert,natpert,nq1grad,pert_atdis,dtset%prtvol,q1grad,rprimd)
+   end if
+   if (lw_flexo==1.or.lw_flexo==4) then
+     call dfpt_isdqout(d3etot,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
+   & isdqwf_t3,isdqwf_t4,isdqwf_t5,dtset%kptopt,matom,mpert,natpert, &
+   & nstrpert,nq1grad,pert_atdis,pert_strain,dtset%prtvol,q1grad,rprimd)
    end if
  end if
 
@@ -2738,6 +2890,22 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ABI_DEALLOCATE(vhxc1_strain)
    ABI_DEALLOCATE(wfk_t_strain)
  end if
+ if (lw_flexo==1.or.lw_flexo==4) then 
+   ABI_DEALLOCATE(frwfdq)
+   ABI_DEALLOCATE(frwfdq_k)
+   ABI_DEALLOCATE(isdqwf)
+   ABI_DEALLOCATE(isdqwf_k)
+   ABI_DEALLOCATE(isdqwf_t1)
+   ABI_DEALLOCATE(isdqwf_t1_k)
+   ABI_DEALLOCATE(isdqwf_t2)
+   ABI_DEALLOCATE(isdqwf_t2_k)
+   ABI_DEALLOCATE(isdqwf_t3)
+   ABI_DEALLOCATE(isdqwf_t3_k)
+   ABI_DEALLOCATE(isdqwf_t4)
+   ABI_DEALLOCATE(isdqwf_t4_k)
+   ABI_DEALLOCATE(isdqwf_t5)
+   ABI_DEALLOCATE(isdqwf_t5_k)
+ end if
  ABI_DEALLOCATE(q1grad)
  ABI_DEALLOCATE(ph1d)
  ABI_DEALLOCATE(indkpt1)
@@ -2783,11 +2951,12 @@ end subroutine dfpt_flexo
 !!                                             q-gradient of the Hartree potential
 !!  elflexoflg(3,3,3,3)=array that indicates which elements of the electronic contribution to the
 !!                                             flexoelectric tensor have been calculated
-!!  elflexowf(2,3,3,3,3)=total wave function contribution to the electronic flexoelectric tensor 
+!!  elflexowf(2,3,3,3,3)=total wave function contributions to the electronic flexoelectric tensor 
+!!                       (except t4)
 !!  elflexowf_t1(2,3,3,3,3)=term 1 of the wave function contribution 
 !!  elflexowf_t2(2,3,3,3,3)=term 2 of the wave function contribution 
 !!  elflexowf_t3(2,3,3,3,3)=term 3 of the wave function contribution 
-!!  elflexowf_t4(2,3,3,3,3)=term 3 of the wave function contribution 
+!!  elflexowf_t4(2,3,3,3,3)=term 4 of the wave function contribution (type-I)
 !!  elflexowf_t5(2,3,3,3,3)=term 5 of the wave function contribution 
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
@@ -2871,11 +3040,13 @@ end subroutine dfpt_flexo
  real(dp),allocatable :: elec_flexotens_cart(:,:,:,:,:),elec_flexotens_red(:,:,:,:,:)
  real(dp),allocatable :: elflexowf_buffer_cart(:,:,:,:,:,:),elflexowf_t4_cart(:,:,:,:,:)
 
+! *************************************************************************
+
  DBG_ENTER("COLL")
 
 !Gather the different terms in the electronic contribution to the flexoelectric tensor
  ABI_ALLOCATE(elec_flexotens_red,(2,3,3,3,3))
- elec_flexotens_red=zero
+! elec_flexotens_red=zero
  ucvolinv= 1.0_dp/ucvol
 
  if (kptopt==3) then
@@ -3014,7 +3185,7 @@ end subroutine dfpt_flexo
    end do
 
  else
-   write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for long-wave DFPT calculations'
    MSG_BUG(msg)
  end if
 
@@ -3277,7 +3448,6 @@ end subroutine dfpt_flexo
          call cart39(flg1,flg2,transpose(rprimd),matom+2,matom,transpose(gprimd),vec1,vec2)
          do iq1dir=1,3
            elec_flexotens_red(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)*fac
-           redflg(iefidir,iq1dir,istr1dir,istr2dir)=flg2(iq1dir)
          end do
        end do
      end do
@@ -3638,7 +3808,7 @@ end subroutine dfpt_flexoout
 !Write the tensor in cartesian coordinates
  write(ab_out,*)' '
  write(ab_out,*)' First moment of real space IFC, in cartesian coordinates,'
- write(ab_out,*)' iatom   iatddir   jatom   jatddir   qgrdir           real part          imaginary part'
+ write(ab_out,*)' iatom   iatdir   jatom   jatddir   qgrdir           real part          imaginary part'
  do iq1dir=1,3
    do jatdir=1,3
      do jatom=1,matom
@@ -3694,6 +3864,669 @@ end subroutine dfpt_flexoout
 
  DBG_EXIT("COLL")
  end subroutine dfpt_ddmdqout
+
+!!****f* ABINIT/dfpt_isdqout
+!! NAME
+!!  dfpt_isdqout
+!!
+!! FUNCTION
+!!  This subroutine gathers the different terms entering the q-gradient of the
+!!  internal strain tensor, perfofms the transformation from reduced to cartesian coordinates and 
+!!  writes out the tensor in output files in type-II formulation.
+!!  
+!! COPYRIGHT
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  frwfdq(2,natpert,3,3,nq1grad)=frozen wf contribution (type-I)
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  isdq_flg(matom,3,nq1grad,3,3)=array that indicates which elements of the q-gradient of
+!!                                  internal strain tensor have been calculated
+!!  isdq_qgradhart(2,matom,3,nq1grad,3,3)=electronic electrostatic contribution from the 
+!!                                             q-gradient of the Hartree potential
+!!  isdqwf(2,matom,3,nq1grad,3,3)=total wave function contributions to the q-gradient of
+!!                          internal strain tensor (except t4)
+!!  isdqwf_t1(2,matom,3,nq1grad,3,3)=term 1 of the wave function contribution 
+!!  isdqwf_t2(2,matom,3,nq1grad,3,3)=term 2 of the wave function contribution 
+!!  isdqwf_t3(2,matom,3,nq1grad,3,3)=term 3 of the wave function contribution 
+!!  isdqwf_t4(2,matom,3,3,3,nq1grad)=term 4 of the wave function contribution (type-I) 
+!!  isdqwf_t5(2,matom,3,nq1grad,3,3)=term 5 of the wave function contribution 
+!!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
+!!  matom=number of atoms 
+!!  mpert=maximum number of perturbations
+!!  natpert=number of atomic displacement perturbations
+!!  nstrpert=number of strain perturbations
+!!  nq1grad=number of q1 (q_{\gamma}) gradients
+!!  pert_atdis(3,natpert)=array with the info for the atomic displacement perturbations
+!!  pert_strain(6,nstrpert)=array with the info for the strain perturbations
+!!  prtvol=volume of information to be printed. 1-> The different contributions to the quadrupole are printed.
+!!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  
+!! OUTPUT
+!!  d3etot(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!!  dfpt_flexo
+!!
+!! CHILDREN
+!!
+!!  cart39 
+!!
+!! SOURCE
+
+ subroutine dfpt_isdqout(d3etot,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
+   & isdqwf_t3,isdqwf_t4,isdqwf_t5,kptopt,matom,mpert,natpert, &
+   & nstrpert,nq1grad,pert_atdis,pert_strain,prtvol,q1grad,rprimd)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_isdqout'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: kptopt,matom,mpert,natpert,nstrpert,nq1grad,prtvol
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
+
+!arrays
+ integer,intent(in) :: isdq_flg(matom,3,nq1grad,3,3)
+ integer,intent(in) :: pert_atdis(3,natpert)
+ integer,intent(in) :: pert_strain(6,nstrpert)
+ integer,intent(in) :: q1grad(3,nq1grad)
+ real(dp),intent(in) :: isdqwf(2,matom,3,nq1grad,3,3)
+ real(dp),intent(inout) :: frwfdq(2,matom,3,3,3,nq1grad)
+ real(dp),intent(inout) :: isdq_qgradhart(2,matom,3,nq1grad,3,3)
+ real(dp),intent(inout) :: isdqwf_t1(2,matom,3,nq1grad,3,3)
+ real(dp),intent(inout) :: isdqwf_t2(2,matom,3,nq1grad,3,3)
+ real(dp),intent(inout) :: isdqwf_t3(2,matom,3,nq1grad,3,3)
+ real(dp),intent(inout) :: isdqwf_t4(2,matom,3,3,3,nq1grad)
+ real(dp),intent(inout) :: isdqwf_t5(2,matom,3,nq1grad,3,3)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: rprimd(3,3)
+ 
+!Local variables-------------------------------
+!scalars
+ integer :: alpha,beta,delta,gamma
+ integer :: iatdir,iatom,iatpert,ibuf,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
+ integer :: q1pert,strcomp,strpert
+ integer, parameter :: re=1,im=2
+ real(dp) :: fac,tfrim,tfrre,t4im,tmpim,tmpre,t4re
+ character(len=500) :: msg                   
+
+!arrays
+ integer :: flg1(3),flg2(3)
+ integer, allocatable :: typeI_cartflag(:,:,:,:,:),redflg(:,:,:,:,:)
+ real(dp) :: vec1(3),vec2(3)
+ real(dp),allocatable :: frwfdq_cart(:,:,:,:,:,:)
+ real(dp),allocatable :: isdqtens_cart(:,:,:,:,:,:),isdqtens_red(:,:,:,:,:,:)
+ real(dp),allocatable :: isdqwf_t4_cart(:,:,:,:,:,:)
+ real(dp),allocatable :: isdqtens_buffer_cart(:,:,:,:,:,:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Gather the different terms in the q-gradient of the internal strain tensor
+ ABI_ALLOCATE(isdqtens_red,(2,matom,3,nq1grad,3,3))
+! isdqtens_red=zero
+
+ if (kptopt==3) then
+
+   !Compute real and 'true' imaginary parts of isdq tensor and independent
+   !terms. The T4 term and the frozen wf contributions need further treatment 
+   !and they will be lately added to the cartesian coordinates
+   !version of the isdq tensor
+   do istrpert=1,nstrpert
+     istr1dir=pert_strain(3,istrpert)
+     istr2dir=pert_strain(4,istrpert)
+     do iq1grad=1,nq1grad
+       iq1dir=q1grad(2,iq1grad)
+       do iatpert=1,natpert
+         iatom=pert_atdis(1,iatpert)
+         iatdir=pert_atdis(2,iatpert)
+
+         if (isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)==1) then  
+        
+           !The interesting magnitude is minus the gradient of the second order Energy
+           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+         & ( isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
+         &   isdqwf(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
+           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+         & ( isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
+         &   isdqwf(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
+
+           !Multiply by the imaginary unit that has been factorized out
+           tmpre=isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           tmpim=isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpim
+           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpre
+
+           !Do the smae for the T4 term 
+           !(This is different from the flexoout routine because the factorized -i in the T4
+           ! has to be multiplied by -1 as we did for the rest of contributions)
+           tmpre=isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           tmpim=isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpim
+           isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=tmpre
+
+           !Multiply by -1 the frozen wf contribution 
+           tmpre=frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           tmpim=frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpre
+           frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpim
+
+           !Compute and save individual terms in mixed coordinates
+           if (prtvol==1) then
+             
+             tmpre=isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             tmpim=isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+
+             tmpre=isdqwf_t1(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             tmpim=isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t1(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+
+             tmpre=isdqwf_t2(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             tmpim=isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t2(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+
+             tmpre=isdqwf_t3(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             tmpim=isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t3(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+
+             tmpre=isdqwf_t5(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             tmpim=isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t5(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpre
+
+           end if
+
+         end if
+
+       end do
+     end do
+   end do
+
+ else if (kptopt==2) then
+
+   !Compute real part of isdq tensor and independent
+   !terms. The T4 term and the frozen wf contributions need further treatment 
+   !and they will be lately added to the cartesian coordinates
+   !version of the isdq tensor
+   do istrpert=1,nstrpert
+     istr1dir=pert_strain(3,istrpert)
+     istr2dir=pert_strain(4,istrpert)
+     do iq1grad=1,nq1grad
+       iq1dir=q1grad(2,iq1grad)
+       do iatpert=1,natpert
+         iatom=pert_atdis(1,iatpert)
+         iatdir=pert_atdis(2,iatpert)
+
+         if (isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)==1) then  
+        
+           !The interesting magnitude is minus the gradient of the second order Energy
+           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+         & ( isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
+         &   isdqwf(re,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
+           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-1.0_dp* &
+         & ( isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) + &
+         &   isdqwf(im,iatom,iatdir,iq1dir,istr1dir,istr2dir) )
+
+           !Multiply by the imaginary unit that has been factorized out
+           tmpre=isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           tmpim=isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-tmpim
+           isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+           !Do the smae for the T4 term 
+           !(This is different from the flexoout routine because the factorized -i in the T4
+           ! has to be multiplied by -1 as we did for the rest of contributions)
+           tmpre=isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           tmpim=isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           isdqwf_t4(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpim
+           isdqwf_t4(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
+
+           !Multiply by -1 the frozen wf contribution 
+           tmpre=frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           tmpim=frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+           frwfdq(re,iatom,iatdir,istr1dir,istr2dir,iq1dir)=-tmpre
+           frwfdq(im,iatom,iatdir,istr1dir,istr2dir,iq1dir)=zero
+
+           !Compute and save individual terms in mixed coordinates
+           if (prtvol==1) then
+             
+             tmpim=isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+             tmpim=isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t1(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t1(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+             tmpim=isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t2(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t2(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+             tmpim=isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t3(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t3(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+             tmpim=isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             isdqwf_t5(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=tmpim
+             isdqwf_t5(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)=zero
+
+           end if
+
+         end if
+
+       end do
+     end do
+   end do
+
+ else
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for long-wave DFPT calculations'
+   MSG_BUG(msg)
+ end if
+
+!Transform to complete cartesian coordinates all the contributions
+ ABI_ALLOCATE(isdqtens_cart,(2,matom,3,nq1grad,3,3))
+ ABI_ALLOCATE(isdqwf_t4_cart,(2,matom,3,3,3,nq1grad))
+ ABI_ALLOCATE(frwfdq_cart,(2,matom,3,3,3,nq1grad))
+ ABI_ALLOCATE(typeI_cartflag,(matom,3,3,3,nq1grad))
+ isdqtens_cart=isdqtens_red
+ isdqwf_t4_cart=isdqwf_t4
+ frwfdq_cart=frwfdq
+ typeI_cartflag=0
+
+ if (prtvol==1) then
+   ABI_ALLOCATE(isdqtens_buffer_cart,(5,2,matom,3,nq1grad,3,3))
+   isdqtens_buffer_cart(1,:,:,:,:,:,:)=isdqwf_t1(:,:,:,:,:,:)
+   isdqtens_buffer_cart(2,:,:,:,:,:,:)=isdqwf_t2(:,:,:,:,:,:)
+   isdqtens_buffer_cart(3,:,:,:,:,:,:)=isdqwf_t3(:,:,:,:,:,:)
+   isdqtens_buffer_cart(4,:,:,:,:,:,:)=isdq_qgradhart(:,:,:,:,:,:)
+   isdqtens_buffer_cart(5,:,:,:,:,:,:)=isdqwf_t5(:,:,:,:,:,:)
+ end if
+
+!##1st transform coordinates of the atomic displacement derivative contributions
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iq1dir=1,3
+       do ii=1,2
+         do iatom=1,matom
+
+           do iatdir=1,3
+             vec1(iatdir)=isdqtens_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             flg1(iatdir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+           do iatdir=1,3
+             isdqtens_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iatdir)
+           end do
+
+           do iatdir=1,3
+             vec1(iatdir)=isdqwf_t4_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+             flg1(iatdir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+           do iatdir=1,3
+             isdqwf_t4_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(iatdir)
+             typeI_cartflag(iatom,iatdir,istr1dir,istr2dir,iq1dir)=flg2(iatdir)
+           end do
+
+           do iatdir=1,3
+             vec1(iatdir)=frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+             flg1(iatdir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+           do iatdir=1,3
+             frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(iatdir)
+           end do
+
+         end do 
+       end do
+     end do
+   end do
+ end do
+
+!For debugging, transform also all the individual contributions
+ if (prtvol==1) then
+   do ibuf=1,5
+     do istr2dir=1,3
+       do istr1dir=1,3
+         do iq1dir=1,3
+           do ii=1,2
+             do iatom=1,matom
+    
+               do iatdir=1,3
+                 vec1(iatdir)=isdqtens_buffer_cart(ibuf,ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+                 flg1(iatdir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+               end do
+               call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+               do iatdir=1,3
+                 isdqtens_buffer_cart(ibuf,ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iatdir)
+               end do
+
+             end do 
+           end do
+         end do
+       end do
+     end do
+   end do
+ end if
+
+!##2nd transform coordinates of the q-gradient (treat it as electric field)
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iatom=1,matom
+       do iatdir=1,3
+         do ii=1,2
+
+           do iq1dir=1,3
+             vec1(iq1dir)=isdqtens_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             flg1(iq1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+           do iq1dir=1,3
+             isdqtens_cart(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)
+           end do
+
+           do iq1dir=1,3
+             vec1(iq1dir)=frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+             flg1(iq1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+           do iq1dir=1,3
+             frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(iq1dir)
+           end do
+
+         end do 
+       end do
+     end do
+   end do
+ end do
+
+!For debugging, transform also all the individual contributions
+ if (prtvol==1) then
+   do ibuf=1,5
+     do istr2dir=1,3
+       do istr1dir=1,3
+         do iatom=1,matom
+           do iatdir=1,3
+             do ii=1,2
+    
+               do iq1dir=1,3
+                 vec1(iq1dir)=isdqtens_buffer_cart(ibuf,ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+                 flg1(iq1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+               end do
+               call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+               do iq1dir=1,3
+                 isdqtens_buffer_cart(ibuf,ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)
+               end do
+    
+             end do 
+           end do
+         end do
+       end do
+     end do
+   end do
+ endif
+
+!3rd## Transform the metric perturbation direction to cartesian coordinates in
+!the frozen wf contributions (treat it as an atomic displacement)
+ do istr2dir=1,3
+   do iq1dir=1,3
+     do iatom=1,matom
+       do iatdir=1,3
+         do ii=1,2
+
+           do istr1dir=1,3
+             vec1(istr1dir)=frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+             flg1(istr1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+           do istr1dir=1,3
+             frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(istr1dir)
+           end do
+
+         end do 
+       end do
+     end do
+   end do
+ end do
+
+!4th## Transform the second q-gradient direction to cartesian coordinates in
+!the frozen wf contributions (treat it as an electric field)
+ do istr1dir=1,3
+   do iq1dir=1,3
+     do iatom=1,matom
+       do iatdir=1,3
+         do ii=1,2
+
+           do istr2dir=1,3
+             vec1(istr2dir)=frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)
+             flg1(istr2dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+           do istr2dir=1,3
+             frwfdq_cart(ii,iatom,iatdir,istr1dir,istr2dir,iq1dir)=vec2(istr2dir)
+           end do
+
+         end do 
+       end do
+     end do
+   end do
+ end do
+
+!Write the q-gradient fo the internal strain tensor in cartesian coordinates
+!Open output files
+ if (prtvol==1) then
+   open(unit=71,file='isdq_wf_t1.out',status='unknown',form='formatted',action='write')
+   open(unit=72,file='isdq_wf_t2.out',status='unknown',form='formatted',action='write')
+   open(unit=73,file='isdq_wf_t3.out',status='unknown',form='formatted',action='write')
+   open(unit=74,file='isdq_wf_t4.out',status='unknown',form='formatted',action='write')
+   open(unit=75,file='isdq_wf_t5.out',status='unknown',form='formatted',action='write')
+   open(unit=76,file='isdq_elecstic.out',status='unknown',form='formatted',action='write')
+   open(unit=77,file='isdq_frwf.out',status='unknown',form='formatted',action='write')
+   open(unit=78,file='isdq_ewdqdq.out',status='unknown',form='formatted',action='write')
+ end if
+
+ write(ab_out,*)' '
+ write(ab_out,*)' q-gradient of internal strain tensor, in cartesian coordinates,'
+ write(ab_out,'(a85)')'atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
+ do istr2dir=1,3
+   delta=istr2dir
+   do istr1dir=1,3
+     beta=istr1dir
+     do iq1dir=1,3
+       gamma=iq1dir
+       do iatom=1,matom
+         do iatdir=1,3
+           alpha=iatdir
+
+           if (typeI_cartflag(iatom,alpha,beta,delta,gamma)==1 .and. &
+          &    typeI_cartflag(iatom,alpha,delta,gamma,beta)==1 .and. & 
+          &    typeI_cartflag(iatom,alpha,gamma,beta,delta)==1 ) then
+
+             !Converts the T4 term to type-II form
+             t4re= isdqwf_t4_cart(re,iatom,alpha,beta,delta,gamma) + &
+                 & isdqwf_t4_cart(re,iatom,alpha,delta,gamma,beta) - &
+                 & isdqwf_t4_cart(re,iatom,alpha,gamma,beta,delta) 
+             t4im= isdqwf_t4_cart(im,iatom,alpha,beta,delta,gamma) + &
+                 & isdqwf_t4_cart(im,iatom,alpha,delta,gamma,beta) - &
+                 & isdqwf_t4_cart(im,iatom,alpha,gamma,beta,delta) 
+
+             !Converts the frozen wf term to type-II form
+             tfrre= frwfdq_cart(re,iatom,alpha,beta,delta,gamma) + &
+                  & frwfdq_cart(re,iatom,alpha,delta,gamma,beta) - & 
+                  & frwfdq_cart(re,iatom,alpha,gamma,beta,delta) 
+             tfrim= frwfdq_cart(im,iatom,alpha,beta,delta,gamma) + &
+                  & frwfdq_cart(im,iatom,alpha,delta,gamma,beta) - & 
+                  & frwfdq_cart(im,iatom,alpha,gamma,beta,delta) 
+
+             !Add the type-II T4 and frozen wf contributions 
+             isdqtens_cart(re,iatom,alpha,gamma,beta,delta)= &
+           & isdqtens_cart(re,iatom,alpha,gamma,beta,delta) + t4re + tfrre
+             isdqtens_cart(im,iatom,alpha,gamma,beta,delta)= &
+           & isdqtens_cart(im,iatom,alpha,gamma,beta,delta) + t4im + tfrim
+
+             !Writes the complete q-gradient of internal strain tensor
+             write(ab_out,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+           & isdqtens_cart(re,iatom,alpha,gamma,beta,delta), &
+           & isdqtens_cart(im,iatom,alpha,gamma,beta,delta)
+ 
+             if (prtvol==1) then
+               write(71,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(1,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(1,im,iatom,alpha,gamma,beta,delta)
+   
+               write(72,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(2,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(2,im,iatom,alpha,gamma,beta,delta)
+
+               write(73,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(3,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(3,im,iatom,alpha,gamma,beta,delta)
+
+               write(74,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta,t4re,t4im
+
+               write(75,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(5,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(5,im,iatom,alpha,gamma,beta,delta)
+
+               write(76,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
+             & isdqtens_buffer_cart(4,re,iatom,alpha,gamma,beta,delta), &
+             & isdqtens_buffer_cart(4,im,iatom,alpha,gamma,beta,delta)
+
+               write(77,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta,tfrre,tfrim
+             end if 
+
+           end if
+
+         end do
+       end do
+       write(ab_out,*)' '
+       if (prtvol==1) then
+         write(71,*)' ' 
+         write(72,*)' ' 
+         write(73,*)' ' 
+         write(74,*)' ' 
+         write(75,*)' ' 
+         write(76,*)' ' 
+         write(77,*)' ' 
+         write(78,*)' ' 
+       end if
+     end do
+   end do
+ end do
+
+ if (prtvol==1) then
+   close(71)
+   close(72)
+   close(73)
+   close(74)
+   close(75)
+   close(76)
+   close(77)
+   close(78)
+ end if
+
+!Calculate the contribution to the d3etot in mixed (reduced/cartesian) coordinates
+ isdqtens_red=isdqtens_cart
+ ABI_DEALLOCATE(isdqtens_cart) 
+ ABI_DEALLOCATE(isdqwf_t4_cart)
+ ABI_DEALLOCATE(frwfdq_cart)
+ ABI_DEALLOCATE(typeI_cartflag)
+ ABI_ALLOCATE(redflg,(matom,3,3,3,3))
+
+!1st transform back coordinates of the electric field derivative of the flexoelectric tensor
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iq1dir=1,3
+       do ii=1,2
+         do iatom=1,matom
+           do iatdir=1,3
+             vec1(iatdir)=isdqtens_red(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+             flg1(iatdir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,transpose(rprimd),iatom,matom,transpose(gprimd),vec1,vec2)
+           do iatdir=1,3
+             isdqtens_red(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iatdir)
+             redflg(iatom,iatdir,iq1dir,istr1dir,istr2dir)=flg2(iatdir)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!2nd transform back coordinates of the q-gradient (treat it as electric field)
+!of the flexoelectric tensor
+ fac=two_pi ** 2
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iatom=1,matom
+       do iatdir=1,3
+         do ii=1,2
+           do iq1dir=1,3
+           vec1(iq1dir)=isdqtens_red(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           flg1(iq1dir)=isdq_flg(iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           end do
+           call cart39(flg1,flg2,transpose(rprimd),matom+2,matom,transpose(gprimd),vec1,vec2)
+           do iq1dir=1,3
+             isdqtens_red(ii,iatom,iatdir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)*fac
+             redflg(iatom,iatdir,iq1dir,istr1dir,istr2dir)=flg2(iq1dir)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Add contributions to d3etot
+ q1pert=matom+8
+ do istrpert=1,nstrpert
+   strpert=pert_strain(1,istrpert)
+   strcomp=pert_strain(2,istrpert)
+   istr1dir=pert_strain(3,istrpert)
+   istr2dir=pert_strain(4,istrpert)
+   do iq1grad=1,nq1grad
+     iq1dir=q1grad(2,iq1grad)
+     do iatom=1,matom
+       do iatdir=1,3
+
+         if (redflg(iatom,iatdir,iq1dir,istr1dir,istr2dir)==1) then
+           d3etot(re,iatdir,iatom,strcomp,strpert,iq1dir,q1pert)= &
+         & -1.0_dp*isdqtens_red(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+           d3etot(im,iatdir,iatom,strcomp,strpert,iq1dir,q1pert)= &
+         & -1.0_dp*isdqtens_red(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
+         end if
+
+       end do
+     end do
+   end do
+ end do
+
+ ABI_DEALLOCATE(isdqtens_red)
+ ABI_DEALLOCATE(redflg)
+
+ DBG_EXIT("COLL")
+ end subroutine dfpt_isdqout
 
 end module m_dfpt_lw
 !!***

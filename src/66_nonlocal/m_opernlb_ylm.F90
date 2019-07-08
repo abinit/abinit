@@ -477,7 +477,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 #ifdef MR_DEV
 !        ------
-         if (choice==25) then ! mixed derivative w.r.t. atm. pos and thwo q vectors (at q=0)
+         if (choice==25) then ! mixed derivative w.r.t. atm. pos and two q vectors (at q=0)
            !Use same notation as the notes for clarity
            ialpha=nalpha(idir)
            idelta=nbeta(idir)
@@ -490,7 +490,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            end if
            if (ialpha==idelta) then
              do ilmn=1,nlmn
-               ztab(:)=ztab(:)+ffnl(:,1+igamma,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+              ztab(:)=ztab(:)+ffnl(:,1+igamma,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
              end do
            end if
            do ilmn=1,nlmn

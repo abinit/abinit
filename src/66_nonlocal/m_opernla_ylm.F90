@@ -442,6 +442,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
          !Use same notation as the notes for clarity
          if(choice_==22) ialpha=idir
          if(choice_==25) ialpha=nalpha(idir)
+
          mu0=1
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
