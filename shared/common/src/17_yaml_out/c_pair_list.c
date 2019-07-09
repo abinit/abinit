@@ -1,12 +1,14 @@
 /*
  * Author: Theo Cavignac
- * Implementation of a simple pair list structure.
+ * Implementation of a simple linked pair list structure.
  * Unless you really know what you are doing you probably should
  * look at the Fortran interface instead: m_pair_list.F90
  *
  * Possible improvement:
- * - Add new type to be stored
- * - Optimise memory allocation
+ * - Add new type to be stored: it may worth it to implement
+ *   the possibility to store numerical arrays
+ * - Optimise memory allocation: malloc is not super efficient
+ *   on little chuncks
  */
 #include <stdlib.h>
 

@@ -598,7 +598,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  end if
 
  if(use_ndo==1 .and. (istwf_k==2 .and.me_g0==1)) then
-   MSG_BUG('use_ndo==1, not tested')
+   MSG_BUG('use_ndo==1, not tested, use istwfk=1')
  end if
 
  ar=zero

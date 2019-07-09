@@ -431,6 +431,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dmft_entropy       = dtin%dmft_entropy
  dtout%dmft_charge_prec   = dtin%dmft_charge_prec
  dtout%dmft_iter          = dtin%dmft_iter
+ dtout%dmft_kspectralfunc = dtin%dmft_kspectralfunc
  dtout%dmft_nlambda       = dtin%dmft_nlambda
  dtout%dmft_mxsf          = dtin%dmft_mxsf
  dtout%dmft_nwlo          = dtin%dmft_nwlo
@@ -2194,8 +2195,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmft_entropy dmft_nlambda'
- list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_iter dmft_mxsf dmft_nwli dmft_nwlo'
- list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv dmft_t2g'
+ list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_iter dmft_kspectralfunc dmft_mxsf dmft_nwli dmft_nwlo'
+ list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv dmft_t2g dmft_x2my2d'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka'
