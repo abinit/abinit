@@ -19610,7 +19610,7 @@ Variable(
     dimensions=[2],
     mnemonics="EPH PHonon mode RANGE.",
     text=r"""
-This variable is used to select the range of phonon modes included in the computation of the phonon self-energy.
+This variable is used to select the range of phonon modes included in the computation of the electron-phonon self-energy.
 By default all phonon modes are included ([0, 0]), otherwise only the phonon modes with index between the first 
 and second entry are included.
 """,
@@ -19803,19 +19803,19 @@ at the input [[qpt]].
 """,
 ),
 
-Variable(
-    abivarname="eph_alpha_gmin",
-    varset="eph",
-    vartype="real",
-    topics=['ElPhonInt_expert'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="EPH ALPHA times norm of GMIN.",
-    text=r"""
-This is an *advanced option* used to compute the long-range part of the DFTP potential.
-TO BE DESCRIBED WHEN WE ENTER PRODUCTION
-""",
-),
+#Variable(
+#    abivarname="eph_alpha_gmin",
+#    varset="eph",
+#    vartype="real",
+#    topics=['ElPhonInt_expert'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="EPH ALPHA times norm of GMIN.",
+#    text=r"""
+#This is an *advanced option* used to compute the long-range part of the DFTP potential.
+#TO BE DESCRIBED WHEN WE ENTER PRODUCTION
+#""",
+#),
 
 Variable(
     abivarname="getpot_path",

@@ -247,7 +247,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
- ! IF eph_task is needed and ird/get variables are not provided we assume WFQ == WFK
+ ! If eph_task is needed and ird/get variables are not provided we assume WFQ == WFK
  if (any(dtset%eph_task == [2, -2, 3]) .and. .not. use_wfq) then
    wfq_path = wfk0_path
    use_wfq = .True.

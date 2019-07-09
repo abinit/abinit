@@ -577,6 +577,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !kptgw
  narr=3*dtsets(1)%nkptgw ! default size for all datasets
+ dprarr(:,0)=zero
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
      narrm(idtset)=3*dtsets(idtset)%nkptgw
