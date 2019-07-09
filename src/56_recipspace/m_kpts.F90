@@ -42,7 +42,7 @@ module m_kpts
  use m_geometry,       only : metric
  use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
  use m_htetrahedron,   only : t_htetrahedron, htetra_init
- use m_symkpt,         only : symkpt
+ use m_symkpt,         only : symkpt, symkpt_new
 
  implicit none
 
@@ -176,21 +176,15 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
  my_kptrlatt = kptrlatt
 
  call getkgrid_low(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
-   cryst%nsym,-1,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,cryst%symrel,vacuum0,wtk,&
-   indkpt,bz2ibz_smap,fullbz=kbz)
+   cryst%nsym,-1,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,&
+   cryst%symrel,vacuum0,wtk,indkpt,bz2ibz_smap,fullbz=kbz)
 
  if (present(bz2ibz)) then
-   nkbz = size(kbz, dim=2)
-   ABI_CALLOC(bz2ibz,(6,nkbz))
-   if(kptopt==1 .or. kptopt==2 .or. kptopt==4)then
-     bz2ibz = bz2ibz_smap
-   else
-     bz2ibz(1,:) = [(ii,ii=1,nkbz)]
-   end if
+   ABI_MOVE_ALLOC(bz2ibz_smap,bz2ibz)
+ else
+   ABI_SFREE(bz2ibz_smap)
  endif
-
  ABI_SFREE(indkpt)
- ABI_SFREE(bz2ibz_smap)
 
  nkbz = size(kbz, dim=2)
 
@@ -1356,9 +1350,9 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  !call cwtime_report(' shifts', cpu, wall, gflops)
 
- if (PRESENT(downsampling))then
+ if (present(downsampling))then
    call smpbz(brav,iout,kptrlatt2,mkpt,nkpthf_computed,nshiftk2,option,shiftk2,spkpt,downsampling=downsampling)
-   if (PRESENT(kpthf) .and. nkpthf/=0) then
+   if (present(kpthf) .and. nkpthf/=0) then
      ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
      kpthf = spkpt(:,1:nkpthf)
    end if
@@ -1368,32 +1362,51 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  call smpbz(brav,iout,kptrlatt2,mkpt,nkpt_fullbz,nshiftk2,option,shiftk2,spkpt)
  !call cwtime_report(' smpbz', cpu, wall, gflops)
 
- if (PRESENT(fullbz)) then
-   ! Returns list of k-points in the Full BZ.
-   ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))
-   fullbz = spkpt(:,1:nkpt_fullbz)
- end if
-
  if(kptopt==1 .or. kptopt==2 .or. kptopt==4)then
 
    ABI_ALLOCATE(indkpt,(nkpt_fullbz))
    ABI_ALLOCATE(kpt_fullbz,(3,nkpt_fullbz))
+   ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
+#if 1
    ABI_ALLOCATE(wtk_fullbz,(nkpt_fullbz))
    ABI_ALLOCATE(wtk_folded,(nkpt_fullbz))
-   ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
 
    kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
    wtk_fullbz(1:nkpt_fullbz)=1.0_dp/dble(nkpt_fullbz)
 
    timrev=1;if (kptopt==4) timrev=0
 
+   indkpt = 0
    call symkpt(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
-&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded, bz2ibz_smap, xmpi_comm_self)
+&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded,bz2ibz_smap,xmpi_comm_self)
 
    ABI_DEALLOCATE(symrec)
    ABI_DEALLOCATE(wtk_fullbz)
 
+   !do ikpt=1,nkpt_fullbz
+   !  write(*,*) ikpt, indkpt(ikpt), bz2ibz_smap(1,ikpt), indkpt(bz2ibz_smap(1,ikpt))
+   !end do
+#else
+   kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
+
+   timrev=1;if (kptopt==4) timrev=0
+
+   call symkpt_new(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
+&   nkpt_computed,nsym_used,symrec,timrev,bz2ibz_smap,xmpi_comm_self)
+
+   ABI_DEALLOCATE(symrec)
+   ABI_CALLOC(wtk_folded,(nkpt_fullbz))
+   do ii=1,nkpt_fullbz
+    ikpt = indkpt(bz2ibz_smap(1,ii))
+    wtk_folded(ikpt) = wtk_folded(ikpt) + one
+   end do
+   wtk_folded = wtk_folded / nkpt_fullbz
+#endif
+
  else if(kptopt==3)then
+   ABI_CALLOC(bz2ibz_smap, (6, nkpt_fullbz))
+   bz2ibz_smap(1,:) = [(ii,ii=1,nkpt_fullbz)]
+   bz2ibz_smap(2,:) = 1 !isym
    nkpt_computed=nkpt_fullbz
  end if
  !call cwtime_report(' symkpt', cpu, wall, gflops)
@@ -1427,7 +1440,13 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
      end do
    end if
 
-   ABI_DEALLOCATE(kpt_fullbz)
+   if (present(fullbz)) then
+     ! Returns list of k-points in the Full BZ.
+     ABI_MOVE_ALLOC(kpt_fullbz,fullbz)
+   else
+     ABI_DEALLOCATE(kpt_fullbz)
+   end if
+
    ABI_DEALLOCATE(wtk_folded)
 
  else if(kptopt==3)then
@@ -1435,6 +1454,12 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    if(nkpt_use/=0)then
      kpt(:,1:nkpt_use)=spkpt(:,1:nkpt_use)
      if(iscf>1 .or. iscf==-3 .or. iscf==-1.or.iscf==-2)wtk(1:nkpt_use)=1.0_dp/dble(nkpt_use)
+   end if
+
+   if (present(fullbz)) then
+     ! Returns list of k-points in the Full BZ.
+     ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))
+     fullbz = spkpt(:,1:nkpt_fullbz)
    end if
 
  end if

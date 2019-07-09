@@ -44,6 +44,7 @@ module m_transport
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div !polyn_interp,
  use m_fstrings,       only : strcat, sjoin, ltoa
+ use m_kpts,           only : listkk
  use m_occ,            only : occ_fd, occ_dfd
 
  implicit none
@@ -227,6 +228,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  sigeph_path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  sigmaph = sigmaph_read(sigeph_path, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
+ ! if dtset%sigma_ngkpt /= sigeph_path
 
  ! Initialize transport
  transport_rta = transport_rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
@@ -247,7 +249,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  if (my_rank == 0) then
    path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-   call transport_rta_ncwrite(transport_rta, cryst, ncid)
+   call transport_rta_ncwrite(transport_rta, cryst, dtset, ncid)
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
@@ -290,11 +292,12 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
 
 !Local variables ------------------------------
  type(ebands_t) :: tmp_ebands
- integer,parameter :: occopt3=3, ndop=10
+ integer,parameter :: occopt3=3, timrev1=1, sppoldbl1=1
  integer :: ierr, itemp, spin
  integer :: nprocs, my_rank
  integer :: kptrlatt(3,3)
- real(dp) :: nelect
+ integer,allocatable :: indkk(:,:)
+ real(dp) :: nelect, dksqmax
  character(len=500) :: msg
 
 !************************************************************************
@@ -337,6 +340,50 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
  else
    new%ebands = sigmaph_ebands(sigmaph, cryst, ebands, new%linewidth_serta, new%linewidth_mrta, &
                                new%velocity, xmpi_comm_self, ierr)
+ end if
+
+ ! Perform further downsampling (usefull for debugging purposes)
+ ! TODO: introduce transport_ngkpt variable
+ if (any(dtset%transport_ngkpt/=0)) then
+
+   call wrtout(std_out, sjoin(" Downsampling the k-point mesh before computing transport:", ltoa(dtset%transport_ngkpt)))
+   kptrlatt = 0
+   kptrlatt(1,1) = dtset%transport_ngkpt(1)
+   kptrlatt(2,2) = dtset%transport_ngkpt(2)
+   kptrlatt(3,3) = dtset%transport_ngkpt(3)
+   tmp_ebands = ebands_downsample(new%ebands, cryst, kptrlatt, 1, [zero,zero,zero])
+
+   ! Map the points of downsampled bands to dense ebands
+   ABI_MALLOC(indkk,(tmp_ebands%nkpt, 6))
+   call listkk(dksqmax, cryst%gmet, indkk, new%ebands%kptns, tmp_ebands%kptns, &
+               new%ebands%nkpt, tmp_ebands%nkpt, cryst%nsym, &
+               sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+
+   if (dksqmax > tol12) then
+      write(msg, '(3a,es16.6,a)' ) &
+       "Error downsampling ebands in transport driver",ch10,&
+       "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
+      MSG_ERROR(msg)
+   end if
+
+   ! linewidths serta
+   if (allocated(new%linewidth_serta)) then
+     call downsample_array(new%linewidth_serta,indkk,tmp_ebands%nkpt)
+   end if
+
+   ! linewidths mrta
+   if (allocated(new%linewidth_mrta)) then
+     call downsample_array(new%linewidth_mrta,indkk,tmp_ebands%nkpt)
+   end if
+
+   ! velocities
+   if (allocated(new%linewidth_serta)) then
+     call downsample_array(new%velocity,indkk,tmp_ebands%nkpt)
+   end if
+
+   ABI_SFREE(indkk)
+   call ebands_copy(tmp_ebands,new%ebands)
+   call ebands_free(tmp_ebands)
  end if
 
  ABI_CHECK(allocated(new%velocity), 'Could not read velocities from SIGEPH.nc file')
@@ -396,6 +443,27 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    call ebands_free(tmp_ebands)
    call xmpi_sum(new%transport_mu_e, comm, ierr)
  endif
+
+ contains
+ subroutine downsample_array(array,indkk,nkpt)
+
+   real(dp),allocatable,intent(inout) :: array(:,:,:,:)
+   integer,allocatable,intent(in) :: indkk(:,:)
+
+   real(dp),allocatable :: tmp_array(:,:,:,:)
+   integer :: ikpt,nkpt
+   integer :: tmp_shape(4)
+
+   ABI_MOVE_ALLOC(array, tmp_array)
+   tmp_shape = shape(array)
+   tmp_shape(3) = nkpt
+   ABI_MALLOC(array,(tmp_shape(1),tmp_shape(2),tmp_shape(3),tmp_shape(4)))
+   do ikpt=1,nkpt
+     array(:,:,ikpt,:) = tmp_array(:,:,indkk(ikpt,1),:)
+   end do
+   ABI_FREE(tmp_array)
+
+ end subroutine downsample_array
 
 end function transport_rta_new
 !!***
@@ -794,11 +862,12 @@ end subroutine transport_rta_compute_mobility
 !!
 !! SOURCE
 
-subroutine transport_rta_ncwrite(self, cryst, ncid)
+subroutine transport_rta_ncwrite(self, cryst, dtset, ncid)
 
 !Arguments --------------------------------------
  type(transport_rta_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
+ type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: ncid
 
 !Local variables --------------------------------
@@ -814,6 +883,7 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
  NCF_CHECK(cryst%ncwrite(ncid))
 
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.))
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('transport_ngkpt', "int", "three")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('kTmesh', "dp", "ntemp")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_tau', "dp", "edos_nw, nsppol_plus1, three, three, ntemp")]))
@@ -841,6 +911,7 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
                                     [self%eph_extrael, self%eph_fermie, self%transport_extrael, self%transport_fermie])
  NCF_CHECK(ncerr)
 
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_ngkpt"), dtset%transport_ngkpt))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_mu_e"), self%eph_mu_e))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_mu_e"), self%transport_mu_e))

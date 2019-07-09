@@ -953,6 +953,7 @@ type dataset_type
  integer :: prteliash = 0
  real(dp) :: ph_wstep
  real(dp) :: ph_smear
+ integer :: dvdb_ngqpt(3)
  integer :: ddb_ngqpt(3)
  real(dp) :: ddb_shiftq(3)
 
@@ -963,6 +964,9 @@ type dataset_type
  integer :: sigma_bsum_range(2) = 0
 
  real(dp) :: sigma_erange(2) = -one
+
+ integer :: transport_ngkpt(3) = 0
+ ! K-mesh for Transport calculation.
 
  integer :: sigma_ngkpt(3) = 0
  ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.

@@ -563,7 +563,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    dvdb = dvdb_new(dvdb_path, comm)
    if (dtset%prtvol > 10) dvdb%debug = .True.
    ! This to symmetrize the DFPT potentials.
-   dvdb%symv1 = dtset%symv1scf > 0
+   dvdb%symv1 = dtset%symv1scf
+
+   ! Set qdamp from frohl_params
+   if (dtset%frohl_params(4)/=0) then
+     dvdb%qdamp = dtset%frohl_params(4)
+   end if
 
    !dvdb%diel = 13.103 * dvdb%dielt
    !do ii=1,dvdb%natom
@@ -588,9 +593,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
        !  " WARNING: Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
      end if
    end if
-
-   ! Allow user to change alpha_gmin parameter
-   dvdb%alpha_gmin = dtset%eph_alpha_gmin
 
    if (my_rank == master) then
      call dvdb%print()
@@ -684,7 +686,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wrtout(std_out, sjoin("Saving W(r, R) to file:", path))
    call dvdb%open_read(ngfftf, xmpi_comm_self)
    ! This to symmetrize the DFPT potentials.
-   dvdb%symv1 = dtset%symv1scf > 0
+   dvdb%symv1 = dtset%symv1scf
    call dvdb%print()
    !call dvdb%list_perts([-1, -1, -1])
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, path, comm_rpt)

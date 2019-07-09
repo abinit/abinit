@@ -53,7 +53,7 @@ Merged successfully 8 files
  Number of q-points in DVDB: 3
 -P Number of CPUs for parallelism over perturbations: 1
 -P Number of perturbations treated by this CPU: 6
- Activate symmetrization of v1scf(r): no
+ Option for symmetrization of v1scf(r): 0
  List of q-points: min(10, nqpt)
 [ 1 ] [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 [ 2 ] [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
@@ -61,7 +61,7 @@ Merged successfully 8 files
  Have dielectric tensor: no
  Have Born effective charges: no
  Treatment of long-range part in V1scf: 1
- alpha_gmin:   0.0
+ qdamp:  -1.0
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes

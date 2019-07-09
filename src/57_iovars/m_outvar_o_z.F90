@@ -853,6 +853,11 @@ contains
  dprarr(2,:)=dtsets(:)%sigma_erange(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'sigma_erange','ENE',0)
 
+ intarr(1,:)=dtsets(:)%transport_ngkpt(1)
+ intarr(2,:)=dtsets(:)%transport_ngkpt(2)
+ intarr(3,:)=dtsets(:)%transport_ngkpt(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'transport_ngkpt','INT',0)
+
  intarr(1,:)=dtsets(:)%sigma_ngkpt(1)
  intarr(2,:)=dtsets(:)%sigma_ngkpt(2)
  intarr(3,:)=dtsets(:)%sigma_ngkpt(3)

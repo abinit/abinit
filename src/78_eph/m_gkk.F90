@@ -364,7 +364,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
        "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"])
      NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "alpha_gmin"]))
+     NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"]))
 
      ! Define EPH arrays
      ncerr = nctk_def_arrays(ncid, [ &
@@ -387,7 +387,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"], &
        [dtset%symdynmat, dtset%symv1scf, dtset%dvdb_add_lr, interpolated])
      NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "alpha_gmin"], [dvdb%alpha_gmin]))
+     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [dvdb%qdamp]))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpoint"), qpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart"), dvdb%dielt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "becs_cart"), dvdb%zeff))

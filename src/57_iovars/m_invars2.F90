@@ -1288,6 +1288,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_ngqpt',tread,'INT')
  if(tread==1) dtset%ddb_ngqpt=intarr(1:3)
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'dvdb_ngqpt',tread,'INT')
+ if(tread==1) dtset%dvdb_ngqpt=intarr(1:3)
+ if (all(dtset%dvdb_ngqpt==0)) dtset%dvdb_ngqpt = dtset%ddb_ngqpt
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
  if(tread==1) dtset%ddb_shiftq=dprarr(1:3)
 
@@ -3258,6 +3262,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! band range for self-energy corrections.
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_erange', tread, 'ENE')
  if (tread == 1) dtset%sigma_erange = dprarr(1:2)
+
+ ! IBZ k-points for transport calculation in terms of transport_ngkpt
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'transport_ngkpt', tread, 'INT')
+ if (tread == 1) dtset%transport_ngkpt = intarr(1:3)
 
  ! IBZ k-points for electron self-energy given in terms of sigma_ngkpt
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'sigma_ngkpt', tread, 'INT')

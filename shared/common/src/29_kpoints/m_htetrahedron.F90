@@ -47,7 +47,7 @@ implicit none
 private
 !!***
 
-integer, parameter :: TETRA_SIZE = 24
+integer, parameter :: TETRA_SIZE = 6
 integer, parameter :: TETRA_STEP = 6
 
 !!****t* m_htetrahedron/t_htetra_bucket

@@ -506,6 +506,7 @@ subroutine dtset_copy(dtout, dtin)
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
+ dtout%dvdb_ngqpt        = dtin%dvdb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
  dtout%dvdb_add_lr       = dtin%dvdb_add_lr
@@ -515,6 +516,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%sigma_ngkpt = dtin%sigma_ngkpt
  dtout%sigma_nshiftk = dtin%sigma_nshiftk
  if (allocated(dtin%sigma_shiftk)) call alloc_copy(dtin%sigma_shiftk, dtout%sigma_shiftk)
+
+ dtout%transport_ngkpt = dtin%transport_ngkpt
 
  dtout%ph_freez_disp_addStrain = dtin%ph_freez_disp_addStrain
  dtout%ph_freez_disp_option = dtin%ph_freez_disp_option
@@ -2169,7 +2172,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
 !D
- list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_add_lr dvdb_qcache_mb delayperm densfor_pred densty dfield'
+ list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
@@ -2325,7 +2328,7 @@ subroutine chkvars (string)
 !T
  list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
- list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'
+ list_vars=trim(list_vars)//' tolvrs tolwfr tphysel transport_ngkpt ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
