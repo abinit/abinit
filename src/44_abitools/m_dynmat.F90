@@ -2769,7 +2769,6 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
  integer,intent(in) :: brav, natom, nqbz, nqshift, cutmode, comm
  integer,intent(out) :: nrpt
  real(dp),intent(out) :: r_inscribed_sphere
-
 !arrays
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: gprim(3,3),rprim(3,3),rprimd(3,3), rcan(3, natom)
