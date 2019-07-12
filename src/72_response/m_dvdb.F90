@@ -2769,7 +2769,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,jj,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
- integer :: ifft, ierr, nrtot, my_rstart, my_rstop, iatom, my_ir0
+ integer :: ifft, ierr, nrtot, my_rstart, my_rstop, iatom
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
 #endif
@@ -2795,7 +2795,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  db%q0rad = two_pi * (three / (four_pi * db%cryst%ucvol * nqbz)) ** third
 
  if (db%add_lr == 4) then
-   call wrtout(std_out, " Skipping constructing of V(r,R) because add_lr = 4")
+   call wrtout(std_out, " Skipping construction of V(r,R) because add_lr = 4")
    return
  end if
 
@@ -2815,10 +2815,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  !end do
  call wrtout(std_out, " It may take some time depending on the number of MPI procs, ngqpt and nfft points...")
 
- cryst => db%cryst
- nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3); my_qptopt = 1 !; if (present(qptopt)) my_qptopt = qptopt
+#if 0
+ !call prepare_ftinterp(db, method, ngqpt, nqshift, qshift, qptopt, qbz, indqq, all_rpt, nqsts, iqs_dvdb, comm)
 
+#else
+ cryst => db%cryst
  ! Generate q-mesh: find BZ, IBZ and the corresponding weights from ngqpt.
+ nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3); my_qptopt = 1 !; if (present(qptopt)) my_qptopt = qptopt
  qptrlatt = 0; qptrlatt(1, 1) = ngqpt(1); qptrlatt(2, 2) = ngqpt(2); qptrlatt(3, 3) = ngqpt(3)
 
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_qptopt, nqshift, qshift, &
@@ -2883,6 +2886,76 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
    MSG_ERROR(sjoin("Wrong method:", itoa(method)))
  end if
 
+ ! Find correspondence BZ --> IBZ. Note:
+ ! q --> -q symmetry is always used for phonons.
+ ! we use symrec instead of symrel
+ ABI_MALLOC(indqq, (nqbz*sppoldbl1, 6))
+ call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
+   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, db%comm, exit_loop=.True., use_symrec=.True.)
+
+ if (dksqmax > tol12) then
+   MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+ end if
+
+ ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
+ ABI_MALLOC(iperm, (nqbz))
+ ABI_MALLOC(bz2ibz_sort, (nqbz))
+ iperm = [(ii, ii=1,nqbz)]
+ bz2ibz_sort = indqq(:,1)
+ call sort_int(nqbz, bz2ibz_sort, iperm)
+
+ ! Reconstruct the IBZ according to what is present in the DVDB.
+ ABI_MALLOC(nqsts, (nqibz))
+ ABI_MALLOC(iqs_dvdb, (nqibz))
+ iqs_dvdb = -1
+
+ iqst = 0
+ do iq_ibz=1,nqibz
+   ! In each q-point star, count the number of q-points and find the one present in the DVDB.
+   nqst = 0
+   found = .false.
+   do ii=iqst+1,nqbz
+     if (bz2ibz_sort(ii) /= iq_ibz) exit
+     nqst = nqst + 1
+     iq_bz = iperm(ii)
+     if (.not. found) then
+       iq_dvdb = dvdb_findq(db, qbz(:,iq_bz))
+       if (iq_dvdb /= -1) then
+         qibz(:,iq_ibz) = qbz(:,iq_bz)
+         iqs_dvdb(iq_ibz) = iq_dvdb
+         found = .true.
+       end if
+     end if
+   end do
+
+   ! Check that nqst has been counted properly.
+   ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst+1) == iq_ibz, "Wrong iqst")
+   if (abs(nqst - wtq(iq_ibz) * nqbz) > tol12) then
+     write(msg, "(a,i0,a,f5.2)")"Error in q-point star or q-weights. nqst:", nqst, "wtq * nqbz = ", wtq(iq_ibz) * nqbz
+     MSG_ERROR(msg)
+   end if
+
+   ! Check that the q-point has been found in DVDB.
+   if (.not. found) then
+     MSG_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
+   end if
+
+   iqst = iqst + nqst
+   nqsts(iq_ibz) = nqst
+ end do
+
+ ABI_FREE(wtq)
+ ABI_FREE(bz2ibz_sort)
+
+ ! Redo the mapping with the new IBZ
+ call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
+   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, db%comm, exit_loop=.True., use_symrec=.True.)
+
+ if (dksqmax > tol12) then
+   MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+ end if
+#endif
+
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
  write(std_out, "(a, i0)")" Using method for integration weights: ", method
  write(std_out, "(a, i0)")" Number of R-points in real-space big box: ", nrtot
@@ -2906,81 +2979,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  end if
  MSG_WARNING_IF(db%my_nrpt == 0, "my_nrpt == 0!")
 
- my_ir0 = -1
- do irpt=1,db%my_nrpt
-   if (all(abs(db%my_rpt(:,irpt)) <= 1.0d-10)) then
-     my_ir0 = irpt; exit
-   end if
- end do
-
  ABI_SFREE(all_cell)
  ABI_SFREE(all_wghatm)
-
- ! Find correspondence BZ --> IBZ. Note:
- ! q --> -q symmetry is always used for phonons.
- ! we use symrec instead of symrel
- ABI_MALLOC(indqq, (nqbz*sppoldbl1, 6))
- call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, db%comm, exit_loop=.True., use_symrec=.True.)
-
- if (dksqmax > tol12) then
-   MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
- end if
-
- ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
- ABI_MALLOC(iperm, (nqbz))
- ABI_MALLOC(bz2ibz_sort, (nqbz))
- iperm = [(ii, ii=1,nqbz)]
- bz2ibz_sort = indqq(:,1)
- call sort_int(nqbz, bz2ibz_sort, iperm)
-
- ! Reconstruct the IBZ according to what is present in the DVDB.
- ABI_MALLOC(nqsts, (nqibz))
- ABI_MALLOC(iqs_dvdb, (nqibz))
- ABI_CALLOC(v1r_lr, (2, nfft, db%my_npert))
-
- iqst = 0
- do iq_ibz=1,nqibz
-   ! In each q-point star, count the number of q-points and find the one present in DVDB.
-   nqst = 0
-   found = .false.
-   do ii=iqst+1,nqbz
-     if (bz2ibz_sort(ii) /= iq_ibz) exit
-     nqst = nqst + 1
-     iq_bz = iperm(ii)
-     if (.not. found) then
-       iq_dvdb = dvdb_findq(db, qbz(:,iq_bz))
-       if (iq_dvdb /= -1) then
-         qibz(:,iq_ibz) = qbz(:,iq_bz)
-         iqs_dvdb(iq_ibz) = iq_dvdb
-         found = .true.
-       end if
-     end if
-   end do
-
-   ! Check that nqst has been counted properly.
-   ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst+1) == iq_ibz, "Wrong iqst")
-   if (abs(nqst - wtq(iq_ibz) * nqbz) > tol12) then
-     write(msg, "(a,i0,a,f5.2)")"Error in q-point star or q-weights. nqst:", nqst, "wtw * nqbz = ", wtq(iq_ibz) * nqbz
-     MSG_ERROR(msg)
-   end if
-
-   ! Check that the q-point has been found in DVDB.
-   if (.not. found) then
-     MSG_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
-   end if
-
-   iqst = iqst + nqst
-   nqsts(iq_ibz) = nqst
- end do
-
- ! Redo the mapping with the new IBZ
- call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, db%comm, exit_loop=.True., use_symrec=.True.)
-
- if (dksqmax > tol12) then
-   MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
- end if
 
  ! Allocate potential in the supercell (memory is distributed over nrpt and npert)
  call wrtout(std_out, sjoin(" Memory required for W(r,R): ", &
@@ -2990,8 +2990,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  db%v1scf_rpt = zero
 
  ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%natom3))
- !ABI_CALLOC(average_v1r_qbz, (2, ndb%nspden, db%natom3, nqbz))
- !ABI_SFREE(average_v1r_qbz)
+ ABI_CALLOC(v1r_lr, (2, nfft, db%my_npert))
 
  iqst = 0
  do iq_ibz=1,nqibz
@@ -3042,24 +3041,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
            end do
          end do
        end if
-       if (db%add_lr == 4) then
-         do imyp=1,db%my_npert
-           ipc = db%my_pinfo(3, imyp)
-           do ispden=1,db%nspden
-             v1r_qibz(1, :, ispden, ipc) = - v1r_lr(1, :, imyp)
-           end do
-         end do
-       end if
-
-       !if (db%me_pert == 0) then
-       !do imyp=1,db%my_npert
-       !  ipc = db%my_pinfo(3, imyp)
-       !  do ispden=1,db%nspden
-       !      write(std_out,*)"Average v1scf", sum(v1r_qibz(:, :, ispden, ipc), dim=2) / nfft, "qbz", trim(ktoa(qbz(:, iq_bz)))
-       !  !average_v1r_qbz(:, ispden, ipc, iq_bz) = sum(v1r_qibz(:, :, ispden, ipc), dim=2) / nfft
-       !  end do
-       !end do
-       !end if
 
        ! Slow FT.
        do imyp=1,db%my_npert
@@ -3075,24 +3056,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
        end do
 
      else
-       ! q /= Gamma
-       ! Get the periodic part of the potential in BZ (v1r_qbz)
+       ! q /= Gamma. Get the periodic part of the potential in BZ (v1r_qbz)
        if (isirr_q) then
          v1r_qbz = v1r_qibz
        else
          call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q, &
            ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
        end if
-
-       !if (db%me_pert == 0) then
-       !do imyp=1,db%my_npert
-       !  ipc = db%my_pinfo(3, imyp)
-       !  do ispden=1,db%nspden
-       !    write(std_out,*)"Average v1scf", sum(v1r_qbz(:, :, ispden, ipc), dim=2) / nfft, "qbz", trim(ktoa(qbz(:, iq_bz)))
-       !    !average_v1r_qbz(:, ispden, ipc, iq_bz) = sum(v1r_qbz(:, :, ispden, ipc), dim=2) / nfft
-       !  end do
-       !end do
-       !endif
 
        ! Multiply by e^{iqpt_bz.r}
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
@@ -3102,22 +3072,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
          do imyp=1,db%my_npert
            ipc = db%my_pinfo(3, imyp)
            do ispden=1,db%nspden
-             !if (db%add_lr >= 3 .and. ispden == 1) then
-             !  write(std_out,*)"q != 0: Reshifting v1r_lr with cplx average", sum(v1r_qbz(:,:,ispden, ipc), dim=2) / nfft
-             !  write(std_out,*)"Average of v1r_lr: ", sum(v1r_lr(1, :, imyp)) /nfft
-             !  v1r_lr(1,:,imyp) = v1r_lr(1,:,imyp) - sum(v1r_lr(1,:,imyp)) / nfft + sum(v1r_qbz(1,:,ispden,ipc)) / nfft
-             !  v1r_lr(2,:,imyp) = v1r_lr(2,:,imyp) - sum(v1r_lr(2,:,imyp)) / nfft + sum(v1r_qbz(2,:,ispden,ipc)) / nfft
-             !end if
              v1r_qbz(:, :, ispden, ipc) = v1r_qbz(:, :, ispden, ipc) - v1r_lr(:, :, imyp)
-           end do
-         end do
-       end if
-       if (db%add_lr == 4) then
-         do imyp=1,db%my_npert
-           ipc = db%my_pinfo(3, imyp)
-           do ispden=1,db%nspden
-             v1r_qbz(1, :, ispden, ipc) = - v1r_lr(1, :, imyp)
-             v1r_qbz(2, :, ispden, ipc) = - v1r_lr(2, :, imyp)
            end do
          end do
        end if
@@ -3158,59 +3113,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  !call xmpi_sum(db%v1scf_rpt, db%comm, ierr)
  db%v1scf_rpt = db%v1scf_rpt / nqbz
 
-#if 0
- ! Enforce ASR. Use v1r_qbz as workspace array.
- call wrtout(std_out, "Enforcing ASR on potentials.")
-
- v1r_qbz = zero
-
- !do imyp=1,db%my_npert
- !  idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp); ipc = db%my_pinfo(3, imyp)
- !  do ispden=1,db%nspden
- !    v1r_qbz(:, :, ispden, idir) = v1r_qbz(:, :, ispden, idir) = sum(db%v1scf_rpt(:, :, :, ispden, imyp), dim=2)
- !  end do
- !end do
- !if (db%nprocs_pert /= 1) call xmpi_sum(v1r_qbz, db%comm_pert, ierr)
- !v1r_qbz = v1r_qbz / (nrtot * db%natom)
-
- !if (my_ir0 /= -1) then
- !  do imyp=1,db%my_npert
- !    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp); ipc = db%my_pinfo(3, imyp)
- !    do ispden=1,db%nspden
- !      !write(std_out, *)"imyp ispden:", imyp, ispden, "max: ", maxval(v1r_qbz(:, :, ispden, imyp), dim=2)
- !      db%v1scf_rpt(:, my_ir0, :, ispden, imyp) = db%v1scf_rpt(:, my_ir0, :, ispden, imyp) - v1r_qbz(:, :, ispden, idir)
- !    end do
- !  end do
- !end if
-
- do imyp=1,db%my_npert
-   do ispden=1,db%nspden
-     v1r_qbz(:, :, ispden, imyp) = sum(db%v1scf_rpt(:, :, :, ispden, imyp), dim=2)
-   end do
- end do
-
- if (db%nprocs_pert /= 1) call xmpi_sum(v1r_qbz, db%comm_pert, ierr)
-
- if (my_ir0 /= -1) then
-   do imyp=1,db%my_npert
-     do ispden=1,db%nspden
-       write(std_out, *)"imyp ispden:", imyp, ispden, "max: ", maxval(v1r_qbz(:, :, ispden, imyp), dim=2)
-       db%v1scf_rpt(:, my_ir0, :, ispden, imyp) = db%v1scf_rpt(:, my_ir0, :, ispden, imyp) - v1r_qbz(:, :, ispden, imyp)
-     end do
-   end do
- end if
-
- !v1r_qbz = v1r_qbz / nrtot
- !do imyp=1,db%my_npert
- !  do ispden=1,db%nspden
- !    write(std_out, *)"imyp ispden:", imyp, ispden, "max: ", maxval(v1r_qbz(:, :, ispden, imyp), dim=2)
- !    do irpt=1,db%my_nrpt
- !      db%v1scf_rpt(:, irpt, :, ispden, imyp) = db%v1scf_rpt(:, irpt, :, ispden, imyp) - v1r_qbz(:, :, ispden, imyp)
- !    end do
- !  end do
- !end do
-#endif
-
  ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
  ! TODO
  write_maxw = len_trim(outwr_path) > 0
@@ -3230,7 +3132,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      end do
    end do
    call xmpi_sum_master(maxw, master, db%comm, ierr)
-   !call xmpi_sum_master(average_v1r_qbz, master, db%comm, ierr)
 
    if (xmpi_comm_rank(db%comm) == master) then
      sc_rprimd(:, 1) = nq1 * db%cryst%rprimd(:, 1)
@@ -3303,10 +3204,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
 
  ABI_FREE(emiqr)
  ABI_FREE(qibz)
- ABI_FREE(wtq)
  ABI_FREE(qbz)
  ABI_FREE(indqq)
- ABI_FREE(bz2ibz_sort)
  ABI_FREE(iqs_dvdb)
  ABI_FREE(nqsts)
  ABI_FREE(v1r_qbz)
@@ -3316,6 +3215,141 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  call cwtime_report(" Construction of W(r, R)", cpu_all, wall_all, gflops_all)
 
 end subroutine dvdb_ftinterp_setup
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/prepare_ftinterp
+!! NAME
+!!  prepare_ftinterp
+!!
+!! FUNCTION
+!!
+subroutine prepare_ftinterp
+
+#if 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+end subroutine prepare_ftinterp
 !!***
 
 !----------------------------------------------------------------------

@@ -498,9 +498,29 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  !do ii=1,3; do jj=1,3; if (ii /= jj) dielt(ii, jj) = zero; enddo; enddo
 
- call ifc_init(ifc,cryst,ddb,&
-   brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
-   nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
+ !if (any(inp%qrefine(:) > 1)) then
+ !  ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
+ !  ! Build the IFCs using the coarse q-mesh.
+ !  do ii = 1, 3
+ !    ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
+ !  end do
+ !  call ifc_init(ifc_coarse, cryst, ddb, &
+ !    brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, ddb_nqshft, ddb_q1shfts, dielt, zeff, &
+ !    nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+
+ !  ! Now use the coarse q-mesh to fill the entries in dynmat(q)
+ !  ! on the dense q-mesh that cannot be obtained from the DDB file.
+ !  call ifc_init(ifc, cryst, ddb, &
+ !    brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshft, ddb_qshfts, dielt, zeff, &
+ !    nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
+ !  call ifc_free(Ifc_coarse)
+ !else
+
+ call ifc_init(ifc, cryst, ddb, &
+   brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+   nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+ !end if
+
  ABI_FREE(ddb_qshifts)
  call ifc_print(ifc, unit=std_out)
 

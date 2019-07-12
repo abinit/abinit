@@ -457,26 +457,25 @@ program anaddb
 
    if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
-
      ! Build the IFCs using the coarse q-mesh.
      do ii = 1, 3
-       ngqpt_coarse(ii) = inp%ngqpt(ii)/inp%qrefine(ii)
+       ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
      end do
      call ifc_init(Ifc_coarse,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
-     ! And now use the coarse q-mesh to fill the entries in dynmat(q)
+     ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
      call ifc_init(Ifc,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
      call ifc_free(Ifc_coarse)
 
    else
      call ifc_init(Ifc,Crystal,ddb,&
-&     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    end if
 
    call ifc_print(ifc, unit=std_out)
@@ -484,8 +483,6 @@ program anaddb
    ! Compute speed of sound.
    if (inp%vs_qrad_tolkms(1) > zero) then
      call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
-     !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
-     !stop
    end if
 
    ! Print analysis of the real-space interatomic force constants
