@@ -782,8 +782,6 @@ end subroutine ncwrite_v1qnu
 !!
 !! PARENTS
 !!
-!! NOTES
-!!
 !! CHILDREN
 !!
 !! SOURCE
@@ -825,7 +823,7 @@ subroutine v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_red, v1_qnu)
  end do
 
 end subroutine v1atm_to_vqnu
-!!**
+!!***
 
 !----------------------------------------------------------------------
 

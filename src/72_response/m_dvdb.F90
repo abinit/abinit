@@ -304,6 +304,10 @@ module m_dvdb
    ! 1 --> Symmetrization in real space
    ! 2 --> Call v1phq_complete after interpolation of the potentials in ftinterp_qpt
 
+  real(dp) :: q0rad = -one
+   ! If > 0, use Verdi's model to interpolate potential if |q| < q0rad without adding (short-range) contribution
+   ! coming from W(r, R). Used when add_lr = 5
+
   type(qcache_t) :: qcache
     ! Cache used to store potentials if Fourier interpolation is not used
     ! (see dvdb_readsym_qbz for the implementation)
@@ -2072,7 +2076,7 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
  character(len=500) :: msg
  integer,save :: enough=0
 !arrays
- integer :: symrel_eq(3,3),symrec_eq(3,3),symm(3,3),g0_qpt(3),l0(3),tsm1g(3)
+ integer :: symrel_eq(3,3),symrec_eq(3,3),g0_qpt(3),l0(3),tsm1g(3) !symm(3,3),
  integer :: symq(4,2,cryst%nsym)
  real(dp) :: phnon1(2),tnon(3)
  real(dp),allocatable :: workg(:,:), workg_eq(:,:),v1g(:,:,:)
@@ -2786,8 +2790,16 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
 
 ! *************************************************************************
 
- ABI_CHECK(.not. allocated(db%v1scf_rpt), " v1scf_rpt is already allocated!")
+ ! Radius of sphere with volume equivalent to the micro zone.
+ nqbz = product(ngqpt) * nqshift
+ db%q0rad = two_pi * (three / (four_pi * db%cryst%ucvol * nqbz)) ** third
 
+ if (db%add_lr == 4) then
+   call wrtout(std_out, " Skipping constructing of V(r,R) because add_lr = 4")
+   return
+ end if
+
+ ABI_CHECK(.not. allocated(db%v1scf_rpt), " v1scf_rpt is already allocated!")
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Set communicator for R-point parallelism.
@@ -3379,16 +3391,32 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
 !scalars
  integer,parameter :: cplex2 = 2
  integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr
- real(dp) :: wr, wi
+ real(dp) :: wr, wi, qmod
  !complex(dpc) :: beta
 !arrays
  integer :: symq(4,2,db%cryst%nsym)
  integer :: rfdir(3)
+ real(dp) :: qcart(3)
  real(dp),allocatable :: eiqr(:,:), weiqr(:,:), v1r_lr(:,:,:)
  integer,allocatable :: pertsy(:,:),rfpert(:)
  integer,allocatable :: pflag(:,:)
 
 ! *************************************************************************
+
+ qcart = two_pi * matmul(db%cryst%gprimd, qpt)
+ qmod = sqrt(dot_product(qcart, qcart))
+
+ if (db%add_lr == 4 .or. (db%add_lr == 5 .and. qmod < db%q0rad .and. qmod > tol20)) then
+   ov1r = zero
+   do imyp=1,db%my_npert
+     idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
+     call dvdb_v1r_long_range(db, qpt, ipert, idir, nfft, ngfft, ov1r(:, :, 1, imyp))
+     ! Remove the phase to get the lattice-periodic part.
+     call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, 1, imyp))
+     if (db%nspden == 2) ov1r(:, :, 2, imyp) = ov1r(:, :, 1, imyp)
+   end do
+   return
+ end if
 
  ABI_CHECK(allocated(db%v1scf_rpt), "v1scf_rpt is not allocated (call dvdb_ftinterp_setup)")
 
@@ -5662,21 +5690,20 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
 !Local variables-------------------------------
 !scalars
  integer,parameter :: brav1 = 1, master = 0, natifc0 = 0, rfmeth1 = 1, selectz0 = 0
- integer :: nfft, iq, cplex, mu, ispden, comm_rpt, chneut, iblock_dielt, iblock_dielt_zeff, my_rank,  ierr
+ integer :: nfft, iq, cplex, mu, ispden, comm_rpt, chneut, iblock_dielt, iblock_dielt_zeff, my_rank !,  ierr
  integer :: idir, ipert
  integer :: i1,i2,i3,n1,n2,n3,id1,id2,id3
  integer :: cnt, unt, ifft, iqpt
- logical :: autotest
  type(dvdb_t) :: dvdb
  type(vdiff_t) :: vd_max
  type(crystal_t) :: cryst_ddb
  type(ddb_type) :: ddb
  character(len=500) :: msg
- character(len=fnlen) :: outwr_path
+ !character(len=fnlen) :: outwr_path
 !arrays
  integer :: ngfft(18)
  integer,allocatable :: dummy_atifc(:)
- real(dp) :: qpt
+ !real(dp) :: qpt
  real(dp),allocatable :: file_v1r(:,:,:,:),long_v1r(:,:,:,:),tmp_v1r(:,:,:,:), zeff(:,:,:), zeff_raw(:,:,:)
  real(dp) :: dielt(3,3)
 
@@ -6282,9 +6309,9 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
 
 !Local variables-------------------------------
 !scalars
- integer :: n1, n2, n3, nfftot, ig, ii !, jj, kk
- real(dp) :: fac, qGZ, denom, denom_inv, qtau, ll
- real(dp) :: re, im, phre, phim, qg_mod, gsq_max, qdamp
+ integer :: n1, n2, n3, nfftot, ig !, ii !, jj, kk
+ real(dp) :: fac, qGZ, denom, denom_inv, qtau !, ll
+ real(dp) :: re, im, phre, phim, qg_mod, gsq_max !, qdamp
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer, allocatable :: gfft(:,:)
@@ -6330,7 +6357,6 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
  call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
  ! Compute the long-range potential in G-space
- qdamp = zero
  v1G_lr = zero
 
  do ig=1,nfft

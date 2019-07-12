@@ -159,7 +159,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 !Local variables-------------------------------
 !scalars
  integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
- integer :: my_nshiftk,ii
+ integer :: my_nshiftk !,ii
  integer,allocatable :: indkpt(:),bz2ibz_smap(:,:)
  real(dp) :: kptrlen
 !arrays
