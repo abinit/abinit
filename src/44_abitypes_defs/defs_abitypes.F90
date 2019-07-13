@@ -955,6 +955,7 @@ type dataset_type
  real(dp) :: ph_smear
  integer :: dvdb_ngqpt(3)
  integer :: ddb_ngqpt(3)
+ integer :: ddb_qrefine(3) = [1, 1, 1]
  real(dp) :: ddb_shiftq(3)
 
  integer :: mixprec = 0

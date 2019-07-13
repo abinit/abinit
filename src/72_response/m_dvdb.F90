@@ -2742,6 +2742,7 @@ end subroutine rotate_fqg
 !!
 !! INPUTS
 !!  ngqpt(3)=Divisions of the ab-initio q-mesh.
+!!  qrefine(3)=Defines intial coarse q-mesh if qrefine /= [1, 1, 1]
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
@@ -2755,7 +2756,7 @@ end subroutine rotate_fqg
 !!
 !! SOURCE
 
-subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, outwr_path, comm_rpt)
+subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft, method, outwr_path, comm_rpt)
 
 !Arguments ------------------------------------
 !scalars
@@ -2763,12 +2764,12 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  class(dvdb_t),target,intent(inout) :: db
  character(len=*),intent(in) :: outwr_path
 !arrays
- integer,intent(in) :: ngqpt(3),ngfft(18)
+ integer,intent(in) :: ngqpt(3), qrefine(3), ngfft(18)
  real(dp),intent(in) :: qshift(3,nqshift)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0, my_qptopt = 1
+ integer,parameter :: master=0, qptopt1 = 1
  integer :: iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,jj,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,nqst,itimrev,isym,r1,r2,r3
@@ -2790,14 +2791,14 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
 
 ! *************************************************************************
 
- !ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
+ !ngqpt_coarse = ngqpt / qrefine
 
  ! Radius of sphere with volume equivalent to the micro zone.
  nqbz = product(ngqpt) * nqshift
  db%q0rad = two_pi * (three / (four_pi * db%cryst%ucvol * nqbz)) ** third
 
  if (db%add_lr == 4) then
-   call wrtout(std_out, " Skipping construction of V(r,R) because add_lr = 4")
+   call wrtout(std_out, " Skipping construction of W(R, r, p) because add_lr = 4")
    return
  end if
 
@@ -2809,15 +2810,15 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  ! with all procs inside comm_rpt to avoid MPI deadlocks.
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
- call wrtout(std_out, sjoin(ch10, "Building V(r,R) using ngqpt: ", ltoa(ngqpt), &
-   " q-mesh with nprocs_rpt:", itoa(db%nprocs_rpt)), do_flush=.True.)
+ call wrtout(std_out, sjoin(ch10, "Building W(R, r, p) using ngqpt: ", ltoa(ngqpt), &
+   ", with nprocs_rpt:", itoa(db%nprocs_rpt)), do_flush=.True.)
  !call wrtout(std_out, "qshifts:")
  !do ii=1,nqshift
  !  call wrtout(std_out, ltoa(qshift(:, ii))
  !end do
  call wrtout(std_out, " It may take some time depending on the number of MPI procs, ngqpt and nfft points...")
 
- call prepare_ftinterp(db, method, ngqpt, my_qptopt, nqshift, qshift, &
+ call prepare_ftinterp(db, method, ngqpt, qptopt1, nqshift, qshift, &
      qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, db%comm)
 
  nqibz = size(qibz, dim=2); nqbz = size(qbz, dim=2); nrtot = size(all_rpt, dim=2)
@@ -2985,9 +2986,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  db%v1scf_rpt = db%v1scf_rpt / nqbz
 
  ! Now we have W(R, r)
- !if (any(dtset%ddb_qrefine > 1)) then
- !  call dvdb_ftinterp_refine(db, ddb_qrefine, ngqpt, qptopt, nqshift, qshiftq, nfftf, ngfftf, method)
- !end if
+ if (any(qrefine > 1)) then
+   call dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt1, nqshift, qshift, nfft, ngfft, method)
+ end if
 
  ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
  ! TODO: Cleanup, support ftinterp_refine case.
@@ -3128,6 +3129,9 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
  ngqpt_fine = qrefine * ngqpt
  cryst => db%cryst
 
+ !nqbz = product(ngqpt) * nqshift
+ !db%q0rad = two_pi * (three / (four_pi * db%cryst%ucvol * nqbz)) ** third
+
  ! Build q-points in the microzone (assume unshifted mesh).
  nq_zone = product(2 * (qrefine - 1))
  ABI_MALLOC(microzone, (3, nq_zone))
@@ -3203,7 +3207,8 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
      end if
    end do
 
-   if (in_microzone == 0) then ! Note add_lr = 0
+   if (in_microzone == 0) then
+     ! Note add_lr = 0 because we want the short-range part.
      call db%ftinterp_qpt(qpt_bz, nfft, ngfft, v1r_qbz, db%comm_rpt, add_lr=0)
    else
      !
@@ -6090,7 +6095,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
  type(ddb_type) :: ddb
  character(len=fnlen) :: outwr_path, coarse_fname
 !arrays
- integer :: ngfft(18)
+ integer :: ngfft(18), qrefine(3)
  integer,allocatable :: dummy_atifc(:)
  real(dp),allocatable :: file_v1r(:,:,:,:),intp_v1r(:,:,:,:),tmp_v1r(:,:,:,:), zeff(:,:,:), zeff_raw(:,:,:)
  real(dp) :: dielt(3,3)
@@ -6098,6 +6103,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
+ qrefine = 1
 
  write(std_out,"(a)")sjoin(" Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(dvdb_ngqpt))
  if (len_trim(ddb_path) > 0) then
@@ -6176,7 +6182,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
  if (autotest) then
    outwr_path = strcat(dvdb_path, "_WRMAX")
    !outwr_path = ""
-   call dvdb%ftinterp_setup(dvdb_ngqpt, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
+   call dvdb%ftinterp_setup(dvdb_ngqpt, qrefine, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
 
    ! First step: Use FT interpolation to get q-points in the initial ab-initio mesh.
    ! We should get the same result...
@@ -6248,7 +6254,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
    ! Prepare FT interpolation using coarse q-mesh.
    outwr_path = strcat(dvdb_path, "_QCOARSE_WRMAX")
    !outwr_path = ""
-   call coarse_dvdb%ftinterp_setup(coarse_ngqpt, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
+   call coarse_dvdb%ftinterp_setup(coarse_ngqpt, qrefine, 1, [zero, zero, zero], nfft, ngfft, method, outwr_path, comm_rpt)
 
    do iq=1,dvdb%nqpt
      ! Read data from DVDB file and store it in file_v1r

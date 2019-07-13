@@ -472,10 +472,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  ABI_FREE(dummy_atifc)
 
+ ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
  ddb_nqshift = 1
- ABI_CALLOC(ddb_qshifts, (3,ddb_nqshift))
-
- ! Set the q-shift for the DDB
+ ABI_CALLOC(ddb_qshifts, (3, ddb_nqshift))
  ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
 
  ! Get Dielectric Tensor
@@ -494,26 +493,26 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  !do ii=1,3; do jj=1,3; if (ii /= jj) dielt(ii, jj) = zero; enddo; enddo
 
- !if (any(dtset%ddb_qrefine > 1)) then
- !  ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
- !  ! Build the IFCs using the coarse q-mesh.
- !  ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
- !  call ifc_init(ifc_coarse, cryst, ddb, &
- !    brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, ddb_nqshft, ddb_q1shfts, dielt, zeff, &
- !    nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+ if (any(dtset%ddb_qrefine > 1)) then
+   ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
+   ! Build the IFCs using the coarse q-mesh.
+   ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
+   call ifc_init(ifc_coarse, cryst, ddb, &
+     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+     nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
 
- !  ! Now use the coarse q-mesh to fill the entries in dynmat(q)
- !  ! on the dense q-mesh that cannot be obtained from the DDB file.
- !  call ifc_init(ifc, cryst, ddb, &
- !    brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshft, ddb_qshfts, dielt, zeff, &
- !    nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
- !  call ifc_free(ifc_coarse)
- !else
+   ! Now use the coarse q-mesh to fill the entries in dynmat(q)
+   ! on the dense q-mesh that cannot be obtained from the DDB file.
+   call ifc_init(ifc, cryst, ddb, &
+     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+     nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
+   call ifc_free(ifc_coarse)
 
- call ifc_init(ifc, cryst, ddb, &
-   brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-   nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
- !end if
+ else
+   call ifc_init(ifc, cryst, ddb, &
+     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+     nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+ end if
 
  ABI_FREE(ddb_qshifts)
  call ifc_print(ifc, unit=std_out)
@@ -703,7 +702,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    dvdb%symv1 = dtset%symv1scf
    call dvdb%print()
    !call dvdb%list_perts([-1, -1, -1])
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, path, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, path, comm_rpt)
 
  case (16)
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.

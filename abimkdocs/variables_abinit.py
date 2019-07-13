@@ -19711,13 +19711,13 @@ of the KS potential that can be modeled in terms of the Born effective charges a
 the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]].
 Possible values are [0, -1, 1].
 
-Setting this flag to 0 deactivates the treatment of the LR contribution (not recommended).
+Setting this flag to 0 deactivates the treatment of the LR contribution (not recommended in polar materials).
 
-If *dvdb_add_lr* is set to 1, this part is removed when computing the real-space representation
+If *dvdb_add_lr* is set to 1, the LR part is removed when computing the real-space representation
 of the DFPT potentials so that the potential in real space is short-ranged and ameneable to Fourier interpolation.
 The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
 
-If *dvdb_add_lr* is set to -1, the long range part is removed before computing the real-space representation
+If *dvdb_add_lr* is set to -1, the LR part is removed before computing the real-space representation
 but the LR term is **not** added back during the interpolation in $\qq$-space. This option is mainly used 
 for debugging purposes.
 
@@ -19831,6 +19831,28 @@ that should be used in input.
 At present, it is mainly used in EPH code when performing calculation with the Sternheimer equation. 
 Note that the path must be inserted between quotation marks.
 Note also that relative paths are interpreted according to the working directory in which Abinit is executed!
+""",
+),
+
+Variable(
+    abivarname="ddb_qrefine",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions=[3],
+    defaultval=[1, 1, 1],
+    mnemonics="Q-point REFINEment order (experimental)",
+    text=r"""
+If **ddb_qrefine** is superior to 1, the EPH code attempts to initialize a first set of
+dynamical matrices from the DDB file and DFPT potentials from the DVDB file, with a q-point grid which is
+[[ddb_ngqpt]] divided by **qrefine** (e.g. ddb_ngqpt 4 4 2 ddb_qrefine 2 2 1 starts with a 2x2x2 grid). 
+The dynamical matrices and DFPT potentials are interpolated onto the full
+[[ddb_ngqpt]] grid and any additional information found in the DDB file is
+imposed, before proceeding to normal band structure and other interpolations.
+Should implement Gaal-Nagy's algorithm in [[cite:GaalNagy2006]].
+
+A similar option is also available in anaddb. The main difference is that ddb_qrefine will also densify
+the q-mesh used for the Fourier transform of the DFPT potentials.
 """,
 ),
 

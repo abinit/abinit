@@ -1077,7 +1077,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      wr_path = strcat(dtfil%filnam_ds(4), "_WRMAX")
      wr_path = ""
      method = dtset%userid
-     call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, wr_path, comm_rpt)
+     call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, &
+                              nfftf, ngfftf, method, wr_path, comm_rpt)
 
      ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
      ABI_CALLOC(qselect, (sigma%nqibz))
