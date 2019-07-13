@@ -159,8 +159,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0
- integer,parameter :: nsphere0=0, prtsrlr0=0
+ integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,jj
  integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc, comm_rpt, method
@@ -174,49 +173,46 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  logical :: use_wfk,use_wfq,use_dvdb
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path, wfq_path, ddb_path, dvdb_path, path
- character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
  type(ddk_t) :: ddk
- type(ifc_type) :: ifc
+ type(ifc_type) :: ifc, ifc_coarse
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
 !arrays
- integer :: ngfftc(18),ngfftf(18)
+ integer :: ngfftc(18), ngfftf(18), ngqpt_coarse(3), count_wminmax(2)
  integer,allocatable :: dummy_atifc(:)
- integer :: count_wminmax(2)
- real(dp) :: wminmax(2)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
+ real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:)
- real(dp),allocatable :: ddb_qshifts(:,:)
- real(dp),allocatable :: kpt_efmas(:,:)
+ real(dp),allocatable :: ddb_qshifts(:,:), kpt_efmas(:,:)
+ character(len=fnlen) :: ddk_path(3)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
  type(efmasval_type),allocatable :: efmasval(:,:)
- !real(dp) :: tsec(2)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
  !type(paw_ij_type),allocatable :: paw_ij(:)
  !type(paw_an_type),allocatable :: paw_an(:)
 
 !************************************************************************
 
- ! This part performs the initialization of basic objects used to perform e-ph calculations i.e:
+ ! This part performs the initialization of basic objects used to perform e-ph calculations:
  !
- ! 1) Crystal structure `cryst`
- ! 2) Ground state band energies: `ebands`
- ! 3) Interatomic force constants: `ifc`
- ! 4) DVDB database with the dvscf potentials
- ! 5) Pseudos and PAW basic objects.
+ !     1) Crystal structure `cryst`
+ !     2) Ground state band energies: `ebands`
+ !     3) Interatomic force constants: `ifc`
+ !     4) DVDB database with the dvscf potentials
+ !     5) Pseudos and PAW basic objects.
  !
  ! Once we have these objects, we can call specialized routines for e-ph calculations.
  ! Notes:
+ !
  !   * Any modification to the basic objects mentioned above should be done here (e.g. change of efermi)
  !   * This routines shall not allocate big chunks of memory. The CPU-demanding sections should be
- !     performed in the specialized routines that will employ different MPI distribution schemes.
+ !     performed in the subdriver that will employ different MPI distribution schemes optimized for that particular task.
 
  DBG_ENTER('COLL')
 
@@ -312,7 +308,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (dtset%eph_frohlichm /= 1) call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", dtfil%fnameabi_efmas))
 
  ! autoparal section
- ! TODO: This just to activate autoparal in abipy. Lot of things should be improved.
+ ! TODO: This just to activate autoparal in AbiPy. Lot of things should be improved.
  if (dtset%max_ncpus /=0) then
    write(ab_out,'(a)')"--- !Autoparal"
    write(ab_out,"(a)")"# Autoparal section for EPH runs"
@@ -498,12 +494,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  !do ii=1,3; do jj=1,3; if (ii /= jj) dielt(ii, jj) = zero; enddo; enddo
 
- !if (any(inp%qrefine(:) > 1)) then
+ !if (any(dtset%ddb_qrefine > 1)) then
  !  ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
  !  ! Build the IFCs using the coarse q-mesh.
- !  do ii = 1, 3
- !    ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
- !  end do
+ !  ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
  !  call ifc_init(ifc_coarse, cryst, ddb, &
  !    brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, ddb_nqshft, ddb_q1shfts, dielt, zeff, &
  !    nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
@@ -513,7 +507,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !  call ifc_init(ifc, cryst, ddb, &
  !    brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshft, ddb_qshfts, dielt, zeff, &
  !    nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
- !  call ifc_free(Ifc_coarse)
+ !  call ifc_free(ifc_coarse)
  !else
 
  call ifc_init(ifc, cryst, ddb, &

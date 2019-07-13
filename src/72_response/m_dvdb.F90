@@ -2768,7 +2768,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: tim_fourdp0=0, master=0, my_qptopt = 1
+ integer,parameter :: master=0, my_qptopt = 1
  integer :: iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,jj,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
  integer :: iqst,nqst,itimrev,isym,r1,r2,r3
@@ -2789,6 +2789,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  real(dp),allocatable :: maxw(:,:), all_rmod(:)
 
 ! *************************************************************************
+
+ !ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
 
  ! Radius of sphere with volume equivalent to the micro zone.
  nqbz = product(ngqpt) * nqshift
@@ -2825,8 +2827,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  ! Distribute R-points inside comm_rpt. In the unlikely case that nqbz > nprocs, my_nrpt is set to zero
  call xmpi_split_work(nrtot, db%comm_rpt, my_rstart, my_rstop)
  db%my_nrpt = 0
- ii = minval(db%my_pinfo(2,:))
- jj = maxval(db%my_pinfo(2,:))
+ ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
  if (my_rstop >= my_rstart) then
    db%my_nrpt = my_rstop - my_rstart + 1
    ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
@@ -2840,12 +2841,12 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
      end do
    end if
  end if
- MSG_WARNING_IF(db%my_nrpt == 0, "my_nrpt == 0!")
+ ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
  ABI_SFREE(all_cell)
  ABI_SFREE(all_wghatm)
 
- ! Allocate potential in the supercell (memory is distributed over nrpt and npert)
- call wrtout(std_out, sjoin(" Memory required for W(r, R): ", &
+ ! Allocate potential in the supercell. Memory is distributed over my_nrpt and my_npert
+ call wrtout(std_out, sjoin(" Memory required for W(R, r, p): ", &
     ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * dp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
 
  ABI_MALLOC(emiqr, (2, db%my_nrpt))
@@ -2983,43 +2984,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, method, 
  !call xmpi_sum(db%v1scf_rpt, db%comm, ierr)
  db%v1scf_rpt = db%v1scf_rpt / nqbz
 
- !ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%my_npert))
- !ABI_MALLOC(emiqr, (2, db%my_nrpt))
- !!db%add_lr == 0
- !do iq_bz=1,nqbz
- !  !qpt_bz = qbz(:, iq_bz)
- !  if (.not. inzone) then
- !  call db%ftinterp_qpt(db, qpt_bz, nfft, ngfft, v1r_qbz, db%comm_rpt)
- !  else
- !  end if
- !  ! Multiply by e^{iqpt_bz.r}
- !  call times_eikr(qpt_bz, ngfft, nfft, db%nspden*db%my_npert, v1r_qbz)
- !  ! Compute FT phases for this qpt_bz.
- !  call calc_eiqr(-qpt_bz, db%my_nrpt, db%my_rpt, emiqr)
-
- !  ! Slow FT.
- !  do imyp=1,db%my_npert
- !    ipc = db%my_pinfo(3, imyp)
- !    do ispden=1,db%nspden
- !      do ifft=1,nfft
- !        db%v1scf_rpt(1, :, ifft, ispden, imyp) = db%v1scf_rpt(1, :, ifft, ispden, imyp) &
- !           + emiqr(1, :) * v1r_qbz(1, ifft, ispden, ipc) &
- !           - emiqr(2, :) * v1r_qbz(2, ifft, ispden, ipc)
-
- !        db%v1scf_rpt(2, :, ifft, ispden, imyp) = db%v1scf_rpt(2, :, ifft, ispden, imyp) &
- !           + emiqr(1, :) * v1r_qbz(2, ifft, ispden, ipc) &
- !           + emiqr(2, :) * v1r_qbz(1, ifft, ispden, ipc)
- !      end do
- !    end do ! ispden
- !  end do ! imyp
- !end do
- !ABI_FREE(v1r_qibz)
- !ABI_FREE(emiqr)
- !db%v1scf_rpt = db%v1scf_rpt / nqbz
-
+ ! Now we have W(R, r)
+ !if (any(dtset%ddb_qrefine > 1)) then
+ !  call dvdb_ftinterp_refine(db, ddb_qrefine, ngqpt, qptopt, nqshift, qshiftq, nfftf, ngfftf, method)
+ !end if
 
  ! Write file with |R| R(1:3)_frac MAX_r |W(R,r,idir,ipert)|
- ! TODO
+ ! TODO: Cleanup, support ftinterp_refine case.
  write_maxw = len_trim(outwr_path) > 0
  !write_maxw = .False.
  if (write_maxw) then
@@ -3116,6 +3087,202 @@ end subroutine dvdb_ftinterp_setup
 
 !----------------------------------------------------------------------
 
+!!****f* m_dvdb/dvdb_ftinterp_refine
+!! NAME
+!!  dvdb_ftinterp_refine
+!!
+!! FUNCTION
+!!
+
+subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, method)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nqshift, qptopt, nfft, method
+ class(dvdb_t),target,intent(inout) :: db
+!arrays
+ integer,intent(in) :: ngqpt(3), ngfft(18), qrefine(3)
+ real(dp),intent(in) :: qshift(3,nqshift)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1 = 1, timrev1 = 1
+ integer :: i1, i2, i3, ii, jj, nq_zone, iq, nqbz_fine, nqibz_fine, nrtot_fine, my_nrpt_fine
+ integer :: ifft, ierr, my_rstart, my_rstop, iatom, iq_bz, imyp, ipc, ispden, in_microzone
+ !integer :: isym, itimrev
+ !logical :: isirr_q
+ real(dp) :: dksqmax
+ type(crystal_t),pointer :: cryst
+!arrays
+ integer :: ngqpt_fine(3) !, g0q(3)
+ integer,allocatable :: indqq(:,:),qzone2ibz(:,:),iperm(:), iperm_irpt(:), nqsts(:),iqs_dvdb(:),all_cell(:,:)
+ real(dp) :: qpt_bz(3)
+ real(dp),allocatable :: qibz_fine(:,:), qbz_fine(:,:), emiqr(:,:), all_rpt_fine(:,:), all_wghatm(:,:,:), all_rcart(:,:)
+ real(dp),allocatable :: v1r_qbz(:,:,:,:), v1r_qibz(:,:,:,:) !, work_qbz(:,:,:,:)
+ real(dp),allocatable :: microzone(:,:), my_rpt_fine(:,:)
+ real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
+
+! *************************************************************************
+
+ ! Dense q-mesh
+ ngqpt_fine = qrefine * ngqpt
+ cryst => db%cryst
+
+ ! Build q-points in the microzone (assume unshifted mesh).
+ nq_zone = product(2 * (qrefine - 1))
+ ABI_MALLOC(microzone, (3, nq_zone))
+ iq = 0
+ do i1=1, qrefine(1) - 1
+   do i2=1, qrefine(2) - 1
+     do i3=1, qrefine(3) - 1
+       iq = iq + 1
+       microzone(:, iq) = (one * [i1, i2, i3]) / ngqpt_fine
+       iq = iq + 1
+       microzone(:, iq) = (-one * [i1, i2, i3]) / ngqpt_fine
+     end do
+   end do
+ end do
+
+ ! Compute tables for ngqpt_fine
+ ! TODO: iqs_dvdb will likely fail here
+ call prepare_ftinterp(db, method, ngqpt_fine, qptopt, nqshift, qshift, &
+     qibz_fine, qbz_fine, indqq, iperm, nqsts, iqs_dvdb, all_rpt_fine, all_wghatm, db%comm)
+
+ nqibz_fine = size(qibz_fine, dim=2); nqbz_fine = size(qbz_fine, dim=2); nrtot_fine = size(all_rpt_fine, dim=2)
+ write(std_out, "(a, i0)")" Using method for integration weights: ", method
+ write(std_out, "(a, i0)")" Number of R-points in real-space big box: ", nrtot_fine
+
+ ! Find correspondence Microzone --> IBZ. Note:
+ ! q --> -q symmetry is always used for phonons.
+ ! we use symrec instead of symrel
+ ABI_MALLOC(qzone2ibz, (nq_zone * sppoldbl1, 6))
+ call listkk(dksqmax, cryst%gmet, qzone2ibz, qibz_fine, microzone, nqibz_fine, nq_zone, cryst%nsym, &
+   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, db%comm, exit_loop=.True., use_symrec=.True.)
+
+ write(std_out, "(a)")" Microzone --> IBZ"
+ do iq=1,nq_zone
+   write(std_out,"(3a)" )trim(ktoa(microzone(:, iq))), " --> ", trim(ktoa(qibz_fine(:, qzone2ibz(iq, 1))))
+ end do
+
+ if (dksqmax > tol12) then
+   MSG_BUG("Cannot map microzone to IBZ")
+ end if
+
+ !iq_dvdb = dvdb_findq(db, qbz(:,iq_bz))
+
+ ! Distribute R-points fine inside comm_rpt.
+ call xmpi_split_work(nrtot_fine, db%comm_rpt, my_rstart, my_rstop)
+ my_nrpt_fine = 0
+ ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
+ if (my_rstop >= my_rstart) then
+   my_nrpt_fine = my_rstop - my_rstart + 1
+   ABI_MALLOC(my_rpt_fine, (3, my_nrpt_fine))
+   my_rpt_fine = all_rpt_fine(:, my_rstart:my_rstop)
+ end if
+ ABI_CHECK(my_nrpt_fine /= 0, "my_nrpt_fine == 0!")
+ ABI_SFREE(all_rpt_fine)
+
+ ! Allocate potential in the supercell. Memory is distributed over my_nrpt_fine and my_npert.
+ call wrtout(std_out, sjoin(" Memory required for W(R, r, p): ", &
+    ftoa(two * my_nrpt_fine * nfft * db%nspden * db%my_npert * dp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
+
+ ABI_MALLOC(emiqr, (2, my_nrpt_fine))
+ ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%my_npert))
+ ABI_MALLOC_OR_DIE(v1scf_rpt, (2, my_nrpt_fine, nfft, db%nspden, db%my_npert), ierr)
+ v1scf_rpt = zero
+
+ do iq_bz=1,nqbz_fine
+   qpt_bz = qbz_fine(:, iq_bz)
+   ! IS(q_ibz) + g0q = q_bz
+   !isym = indqq(iq_bz, 2); itimrev = indqq(iq_bz, 6) + 1; g0q = indqq(iq_bz, 3:5)
+   !isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
+   in_microzone = 0
+   do ii=1,nq_zone
+     if (all(abs(qpt_bz - microzone(:, ii)) < tol12)) then
+       in_microzone = 1; exit
+     end if
+   end do
+
+   if (in_microzone == 0) then ! Note add_lr = 0
+     call db%ftinterp_qpt(qpt_bz, nfft, ngfft, v1r_qbz, db%comm_rpt, add_lr=0)
+   else
+     !
+     ! Here all procs get all potentials for this IBZ q-point on the real-space FFT mesh.
+     ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
+     ! Note that here we need all 3*natom perturbations because of v1phq_rotate
+     !call db%readsym_allv1(iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, db%comm)
+     ! q /= Gamma. Get the periodic part of the potential in BZ (v1r_qbz)
+     !if (isirr_q) then
+     !  do imyp=1,db%my_npert
+     !    v1r_qbz(:,:,:,imyp) = v1r_qibz(:,:,:,db%my_pinfo(3, imyp))
+     !  end do
+     !else
+     !  ABI_MALLOC(work_qbz, (2, nfft, db%nspden, db%natom3))
+     !  call v1phq_rotate(db%cryst, qibz(:,iq_ibz), isym, itimrev, g0q, &
+     !    ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, work_qbz, xmpi_comm_self)
+     !  do imyp=1,db%my_npert
+     !    v1r_qbz(:,:,:,imyp) = work_qbz(:,:,:,db%my_pinfo(3, imyp))
+     !  end do
+     !  ABI_FREE(work_qbz)
+     !end if
+     !ABI_FREE(v1r_qibz)
+   end if
+
+   ! Multiply by e^{iqpt_bz.r}
+   call times_eikr(qpt_bz, ngfft, nfft, db%nspden * db%my_npert, v1r_qbz)
+
+   ! Compute FT phases for this qpt_bz.
+   call calc_eiqr(-qpt_bz, my_nrpt_fine, my_rpt_fine, emiqr)
+
+   ! Slow FT.
+   do imyp=1,db%my_npert
+     !ipc = db%my_pinfo(3, imyp)
+     do ispden=1,db%nspden
+       do ifft=1,nfft
+         v1scf_rpt(1, :, ifft, ispden, imyp) = v1scf_rpt(1, :, ifft, ispden, imyp) &
+            + emiqr(1, :) * v1r_qbz(1, ifft, ispden, imyp) &
+            - emiqr(2, :) * v1r_qbz(2, ifft, ispden, imyp)
+
+         v1scf_rpt(2, :, ifft, ispden, imyp) = v1scf_rpt(2, :, ifft, ispden, imyp) &
+            + emiqr(1, :) * v1r_qbz(2, ifft, ispden, imyp) &
+            + emiqr(2, :) * v1r_qbz(1, ifft, ispden, imyp)
+       end do
+     end do ! ispden
+   end do ! imyp
+ end do
+ v1scf_rpt = v1scf_rpt / nqbz_fine
+
+ ABI_FREE(iperm)
+ ABI_FREE(emiqr)
+ ABI_FREE(qibz_fine)
+ ABI_FREE(qbz_fine)
+ ABI_FREE(indqq)
+ ABI_FREE(qzone2ibz)
+ ABI_FREE(iqs_dvdb)
+ ABI_FREE(nqsts)
+ ABI_FREE(v1r_qbz)
+ ABI_FREE(microzone)
+
+ ! Redefine dimensions and reallocate R-arrays.
+ db%my_nrpt = my_nrpt_fine
+ ABI_MOVE_ALLOC(my_rpt_fine, db%my_rpt)
+ ABI_MOVE_ALLOC(v1scf_rpt, db%v1scf_rpt)
+ ! Copy weights for the atoms treated by this proc.
+ ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
+ ABI_REMALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
+ db%my_wratm = one
+ if (method == 1) then
+   do iatom=1,db%cryst%natom
+     if (iatom >= ii .and. iatom <= jj) db%my_wratm(:, iatom) = all_wghatm(iatom, iatom, my_rstart:my_rstop)
+   end do
+ end if
+ ABI_SFREE(all_wghatm)
+
+end subroutine dvdb_ftinterp_refine
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_dvdb/prepare_ftinterp
 !! NAME
 !!  prepare_ftinterp
@@ -3159,6 +3326,7 @@ subroutine prepare_ftinterp(db, method, ngqpt, qptopt, nqshift, qshift, &
 ! *************************************************************************
 
  cryst => db%cryst
+
  ! Generate q-mesh: find BZ, IBZ and the corresponding weights from ngqpt.
  nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3)
  qptrlatt = 0; qptrlatt(1, 1) = ngqpt(1); qptrlatt(2, 2) = ngqpt(2); qptrlatt(3, 3) = ngqpt(3)
@@ -3343,6 +3511,7 @@ end subroutine dvdb_ftinterp_load
 !!  nfft=Number of FFT-points treated by this processors.
 !!  ngfft(18)=contain all needed information about 3D FFT.
 !!  comm=MPI communicator for R-points.
+!!  [add_lr]= If present, use this value for the LR treatment instead of dv%add_lr
 !!
 !! OUTPUT
 !!  ov1r(2*nfft, nspden, my_npert)=Interpolated DFPT potentials at the given q-point.
@@ -3354,11 +3523,12 @@ end subroutine dvdb_ftinterp_load
 !!
 !! SOURCE
 
-subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
+subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft, comm_rpt
+ integer,optional,intent(in) :: add_lr
  class(dvdb_t),intent(in) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -3369,7 +3539,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cplex2 = 2
- integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr
+ integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr, my_add_lr
  real(dp) :: wr, wi, qmod
  !complex(dpc) :: beta
 !arrays
@@ -3382,10 +3552,12 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
 
 ! *************************************************************************
 
+ my_add_lr = db%add_lr; if (present(add_lr)) my_add_lr = add_lr
+
  qcart = two_pi * matmul(db%cryst%gprimd, qpt)
  qmod = sqrt(dot_product(qcart, qcart))
 
- if (db%add_lr == 4 .or. (db%add_lr == 5 .and. qmod < db%q0rad .and. qmod > tol20)) then
+ if (my_add_lr == 4 .or. (my_add_lr == 5 .and. qmod < db%q0rad .and. qmod > tol20)) then
    ov1r = zero
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3408,7 +3580,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
  call calc_eiqr(qpt, db%my_nrpt, db%my_rpt, eiqr)
 
  ! Compute long-range part of the coupling potential
- if (db%add_lr > 0) then
+ if (my_add_lr > 0) then
    ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3434,14 +3606,14 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt)
          ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) + wi * weiqr(1, ir)
        end do
        ! Add the long-range part of the potential
-       if (db%add_lr > 0) then
+       if (my_add_lr > 0) then
          ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + v1r_lr(1, ifft, imyp)
          ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + v1r_lr(2, ifft, imyp)
        end if
      end do ! ifft
 
      !beta = czero
-     !if (db%add_lr > 0) then
+     !if (my_add_lr > 0) then
      !  beta = cone
      !  ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
      !end if
@@ -3944,7 +4116,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1,timrev1=1,tim_fourdp0=0
+ integer,parameter :: sppoldbl1=1,timrev1=1
  integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,iq_dvdb,cplex_qibz,ispden,irpt,idir,iat
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
