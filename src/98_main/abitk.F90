@@ -111,7 +111,7 @@ program abitk
      write(std_out,"(2a)")ch10,"=== HEADER ==="
      write(std_out,"(a)")"hdr FILE                   Print ABINIT header."
      write(std_out,"(2a)")ch10,"=== KPOINTS ==="
-     write(std_out,"(a)")"ibz FILE --kptopt 1 --kptrlatt or --ngkpt --shiftk 0.5 0.5, 0.5 --chksymbreak 1"
+     write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
      write(std_out,"(2a)")ch10,"=== CRYSTAL ==="
      write(std_out,"(a)")"crystal_print FILE                   Print info on crystalline structure."
      write(std_out,"(2a)")ch10,"=== ELECTRONS ==="

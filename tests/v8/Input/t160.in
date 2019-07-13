@@ -149,6 +149,7 @@ getdvdb8  20
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t157.in, t158.in, t159.in, t160.in, t161.in
 #%% [files]
 #%% files_to_test = 

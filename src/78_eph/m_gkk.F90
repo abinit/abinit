@@ -735,7 +735,7 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
      do idir=1,3
        do ipert=1,dvdb%natom
          ip = (ipert - 1) * 3 + idir
-         call dvdb%v1r_long_range(qpt, ipert, idir, nfft, ngfft, v1lr_atm(:,:,1,ip))
+         call dvdb%get_v1r_long_range(qpt, idir, ipert, nfft, ngfft, v1lr_atm(:,:,1,ip))
          if (dvdb%nspden == 2) v1lr_atm(:,:,2,ip) = v1lr_atm(:,:,1,ip)
        end do
      end do

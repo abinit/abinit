@@ -459,7 +459,7 @@ module m_dvdb
    procedure :: ftqcache_update_from_ft => dvdb_ftqcache_update_from_ft
    ! This function initializes the internal q-cache from W(r, R)
 
-   procedure :: v1r_long_range => dvdb_v1r_long_range
+   procedure :: get_v1r_long_range => dvdb_get_v1r_long_range
    ! Long-range part of the phonon potential
 
    procedure :: interpolate_v1scf => dvdb_interpolate_v1scf
@@ -2771,8 +2771,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 !scalars
  integer,parameter :: master=0, qptopt1 = 1
  integer :: iq_ibz,nqibz,iq_bz,nqbz
- integer :: ii,jj,iq_dvdb,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
- integer :: iqst,nqst,itimrev,isym,r1,r2,r3
+ integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc, unt
+ integer :: iqst,itimrev,isym
  integer :: ifft, ierr, nrtot, my_rstart, my_rstop, iatom
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
@@ -2784,8 +2784,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 !arrays
  integer :: g0q(3)
  integer,allocatable :: indqq(:,:),iperm(:), iperm_irpt(:), nqsts(:),iqs_dvdb(:),all_cell(:,:)
- real(dp) :: qpt_bz(3),shift(3), sc_rprimd(3,3), sc_rmet(3, 3)
- real(dp),allocatable :: qibz(:,:),qbz(:,:),emiqr(:,:), all_rpt(:,:), all_wghatm(:,:,:), all_rcart(:,:)
+ real(dp) :: qpt_bz(3), sc_rprimd(3,3), sc_rmet(3, 3)
+ real(dp),allocatable :: qibz(:,:),qbz(:,:),emiqr(:,:), all_rpt(:,:), all_wghatm(:,:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:,:)
  real(dp),allocatable :: maxw(:,:), all_rmod(:)
 
@@ -2881,7 +2881,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
      if (db%add_lr /= 0) then
        do imyp=1,db%my_npert
          idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
-         call dvdb_v1r_long_range(db, qpt_bz, ipert, idir, nfft, ngfft, v1r_lr(:,:,imyp))
+         call db%get_v1r_long_range(qpt_bz, idir, ipert, nfft, ngfft, v1r_lr(:,:,imyp))
        end do
      end if
 
@@ -3109,17 +3109,17 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
 !scalars
  integer,parameter :: sppoldbl1 = 1, timrev1 = 1
  integer :: i1, i2, i3, ii, jj, nq_zone, iq, nqbz_fine, nqibz_fine, nrtot_fine, my_nrpt_fine
- integer :: ifft, ierr, my_rstart, my_rstop, iatom, iq_bz, imyp, ipc, ispden, in_microzone
+ integer :: ifft, ierr, my_rstart, my_rstop, iatom, iq_bz, imyp, ispden, in_microzone
  !integer :: isym, itimrev
  !logical :: isirr_q
  real(dp) :: dksqmax
  type(crystal_t),pointer :: cryst
 !arrays
  integer :: ngqpt_fine(3) !, g0q(3)
- integer,allocatable :: indqq(:,:),qzone2ibz(:,:),iperm(:), iperm_irpt(:), nqsts(:),iqs_dvdb(:),all_cell(:,:)
+ integer,allocatable :: indqq(:,:),qzone2ibz(:,:),iperm(:), nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3)
- real(dp),allocatable :: qibz_fine(:,:), qbz_fine(:,:), emiqr(:,:), all_rpt_fine(:,:), all_wghatm(:,:,:), all_rcart(:,:)
- real(dp),allocatable :: v1r_qbz(:,:,:,:), v1r_qibz(:,:,:,:) !, work_qbz(:,:,:,:)
+ real(dp),allocatable :: qibz_fine(:,:), qbz_fine(:,:), emiqr(:,:), all_rpt_fine(:,:), all_wghatm(:,:,:)
+ real(dp),allocatable :: v1r_qbz(:,:,:,:) !, v1r_qibz(:,:,:,:) !, work_qbz(:,:,:,:)
  real(dp),allocatable :: microzone(:,:), my_rpt_fine(:,:)
  real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
 
@@ -3133,16 +3133,15 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
  !db%q0rad = two_pi * (three / (four_pi * db%cryst%ucvol * nqbz)) ** third
 
  ! Build q-points in the microzone (assume unshifted mesh).
- nq_zone = product(2 * (qrefine - 1))
+ nq_zone = product(2 * qrefine - 1) - 1
  ABI_MALLOC(microzone, (3, nq_zone))
  iq = 0
- do i1=1, qrefine(1) - 1
-   do i2=1, qrefine(2) - 1
-     do i3=1, qrefine(3) - 1
+ do i1=-qrefine(1) + 1, qrefine(1) - 1
+   do i2=-qrefine(2) + 1, qrefine(2) - 1
+     do i3=-qrefine(3) + 1 , qrefine(3) - 1
+       if (all([i1, i2, i3] == 0)) continue
        iq = iq + 1
        microzone(:, iq) = (one * [i1, i2, i3]) / ngqpt_fine
-       iq = iq + 1
-       microzone(:, iq) = (-one * [i1, i2, i3]) / ngqpt_fine
      end do
    end do
  end do
@@ -3216,6 +3215,7 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
      ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
      ! Note that here we need all 3*natom perturbations because of v1phq_rotate
      !call db%readsym_allv1(iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, db%comm)
+
      ! q /= Gamma. Get the periodic part of the potential in BZ (v1r_qbz)
      !if (isirr_q) then
      !  do imyp=1,db%my_npert
@@ -3231,6 +3231,16 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
      !  ABI_FREE(work_qbz)
      !end if
      !ABI_FREE(v1r_qibz)
+
+     !real(dp),intent(out) :: v1r_lr(2,nfft)
+     !ABI_MALLOC(v1r_lr, (2, nfft))
+     !do imyp=1,db%my_npert
+     ! idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
+     ! !call db%get_v1r_long_range(qpt, idir, ipert, nfft, ngfft, v1lr)
+     ! !v1r_qbz(:, :, 1, imyp) = v1r_qbz(:, :, 1, imyp) - v1lr
+     ! if (db%nspden /= 1) v1r_qbz(:, :, 2, imyp) = v1r_qbz(:, :, 2, imyp) - v1lr
+     !end do
+     !ABI_FREE(v1r_lr)
    end if
 
    ! Multiply by e^{iqpt_bz.r}
@@ -3241,7 +3251,6 @@ subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nff
 
    ! Slow FT.
    do imyp=1,db%my_npert
-     !ipc = db%my_pinfo(3, imyp)
      do ispden=1,db%nspden
        do ifft=1,nfft
          v1scf_rpt(1, :, ifft, ispden, imyp) = v1scf_rpt(1, :, ifft, ispden, imyp) &
@@ -3313,9 +3322,8 @@ subroutine prepare_ftinterp(db, method, ngqpt, qptopt, nqshift, qshift, &
 !scalars
  integer,parameter :: sppoldbl1=1, timrev1=1, brav1=1, cutmode2=2
  integer :: iq_ibz,nqibz,iq_bz,nqbz
- integer :: ii,jj,iq_dvdb,irpt
- integer :: iqst,nqst,itimrev,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
- integer :: nrtot, iatom
+ integer :: ii,iq_dvdb
+ integer :: iqst,nqst,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3, nrtot
  real(dp) :: dksqmax,r_inscribed_sphere
  logical :: found
  character(len=500) :: msg
@@ -3323,8 +3331,7 @@ subroutine prepare_ftinterp(db, method, ngqpt, qptopt, nqshift, qshift, &
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz_sort(:),all_cell(:,:)
- real(dp) :: qpt_bz(3),shift(3)
- real(dp):: rcan(3, db%cryst%natom), trans(3, db%cryst%natom)
+ real(dp) :: shift(3), rcan(3, db%cryst%natom), trans(3, db%cryst%natom)
  real(dp) :: acell(3), rprim(3,3), gprim(3,3)
  real(dp),allocatable :: wtq(:),all_rcart(:,:)
 
@@ -3552,8 +3559,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  integer :: rfdir(3)
  real(dp) :: qcart(3)
  real(dp),allocatable :: eiqr(:,:), weiqr(:,:), v1r_lr(:,:,:)
- integer,allocatable :: pertsy(:,:),rfpert(:)
- integer,allocatable :: pflag(:,:)
+ integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
 
 ! *************************************************************************
 
@@ -3566,10 +3572,10 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    ov1r = zero
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
-     call dvdb_v1r_long_range(db, qpt, ipert, idir, nfft, ngfft, ov1r(:, :, 1, imyp))
+     call db%get_v1r_long_range(qpt, idir, ipert, nfft, ngfft, ov1r(:, :, 1, imyp))
      ! Remove the phase to get the lattice-periodic part.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, 1, imyp))
-     if (db%nspden == 2) ov1r(:, :, 2, imyp) = ov1r(:, :, 1, imyp)
+     if (db%nspden /= 1) ov1r(:, :, 2, imyp) = ov1r(:, :, 1, imyp)
    end do
    return
  end if
@@ -3589,7 +3595,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
-     call dvdb_v1r_long_range(db, qpt, ipert, idir, nfft, ngfft, v1r_lr(:,:,imyp))
+     call db%get_v1r_long_range(qpt, idir, ipert, nfft, ngfft, v1r_lr(:,:,imyp))
    end do
  end if
 
@@ -3665,8 +3671,9 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    ! Complete potentials
    call v1phq_complete(db%cryst,qpt,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,db%symv1,pflag,ov1r)
 
-   ABI_SFREE(pertsy)
-   ABI_SFREE(rfpert)
+   ABI_FREE(pertsy)
+   ABI_FREE(rfpert)
+   ABI_FREE(pflag)
  endif
 
  ! Set imaginary part to zero if gamma point.
@@ -3917,7 +3924,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
  call timab(1808, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, " Precomputing Vscf(q) from W(r, R) and building qcache...", do_flush=.True.)
+ call wrtout(std_out, " Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
 
  db%ft_qcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%ft_qcache%itreatq(:) = itreatq
@@ -3981,7 +3988,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(my_mbsize, fmt="f8.1"), " [Mb] <<< MEM"))
  call xmpi_max(my_mbsize, max_mbsize, comm, ierr)
  call wrtout(std_out, sjoin(" Max memory inside MPI comm: ", ftoa(max_mbsize, fmt="f8.1"), " [Mb] <<< MEM"))
- call cwtime_report(" Qcache from W(r,R) + symmetrization", cpu_all, wall_all, gflops_all, end_str=ch10)
+ call cwtime_report(" Qcache from W(R,r,p) + symmetrization", cpu_all, wall_all, gflops_all, end_str=ch10)
  call timab(1808, 2, tsec)
 
  ! This barrier seems to be needed on lemaitre3. DO NOT REMOVE!
@@ -4030,7 +4037,6 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  real(dp) :: cpu_all, wall_all, gflops_all, mbsize, max_mbsize
  character(len=500) :: msg
 !arrays
- !integer :: qselect(nqibz)
  real(dp),allocatable :: v1scf(:,:,:,:)
  !real(dp) :: tsec(2)
 
@@ -4299,9 +4305,9 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
      v1r_lr = zero; cnt = 0
      if (db%add_lr /= 0) then
        idir = mod(ipert-1, 3) + 1; iat = (ipert - idir) / 3 + 1
-       call dvdb_v1r_long_range(db, qpt_bz, iat, idir, nfft, ngfft, v1r_lr)
+       call db%get_v1r_long_range(qpt_bz, idir, iat, nfft, ngfft, v1r_lr)
      end if
-     !call cwtime_report(" dvdb_v1r_long_range", cpu, wall, gflops)
+     !call cwtime_report(" dvdb_get_v1r_long_range", cpu, wall, gflops)
 
      if (cplex_qibz == 1) then
        ! Gamma point.
@@ -4484,9 +4490,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
  ! Compute long-range part of the coupling potential
  v1r_lr = zero; cnt = 0
- if (db%add_lr > 0) then
-   call dvdb_v1r_long_range(db, qpt, iat, idir, nfft, ngfft, v1r_lr)
- end if
+ if (db%add_lr > 0) call db%get_v1r_long_range(qpt, idir, iat, nfft, ngfft, v1r_lr)
 
  ! TODO: If high-symmetry q-points, one could save flops by FFT interpolating the independent
  ! TODO: Use ZGEMM with MPI
@@ -5968,7 +5972,7 @@ subroutine dvdb_test_addlr(dvdb_path, symv1, dvdb_add_lr, qdamp, ddb_path, dump_
      do ispden=0,dvdb%nspden
        do mu=1,dvdb%natom3
          idir = dvdb%my_pinfo(1, mu); ipert = dvdb%my_pinfo(2, mu)
-         call dvdb%v1r_long_range(dvdb%qpts(:,iq),ipert,idir,nfft,ngfft,long_v1r(:,:,ispden,mu))
+         call dvdb%get_v1r_long_range(dvdb%qpts(:,iq), idir, ipert, nfft, ngfft, long_v1r(:,:,ispden,mu))
        end do
      end do
    end if
@@ -6421,9 +6425,9 @@ end subroutine dvdb_fix_nonpolar
 
 !----------------------------------------------------------------------
 
-!!****f* m_dvdb/dvdb_v1r_long_range
+!!****f* m_dvdb/dvdb_get_v1r_long_range
 !! NAME
-!!  dvdb_v1r_long_range
+!!  dvdb_get_v1r_long_range
 !!
 !! FUNCTION
 !!  Compute the long-range part of the phonon potential
@@ -6438,8 +6442,8 @@ end subroutine dvdb_fix_nonpolar
 !! INPUTS
 !!  db = the DVDB object.
 !!  qpt = the q-point in reduced coordinates.
-!!  iatom = atom index.
 !!  idir = direction index.
+!!  iatom = atom index.
 !!  nfft = number of fft points.
 !!  ngfft(18) = FFT mesh.
 !!
@@ -6453,12 +6457,12 @@ end subroutine dvdb_fix_nonpolar
 !!
 !! SOURCE
 
-subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
+subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr)
 
 !Arguments ------------------------------------
 !scalars
  class(dvdb_t),intent(in) :: db
- integer,intent(in) :: iatom, idir, nfft
+ integer,intent(in) :: idir, iatom, nfft
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
@@ -6557,7 +6561,7 @@ subroutine dvdb_v1r_long_range(db, qpt, iatom, idir, nfft, ngfft, v1r_lr)
  ABI_FREE(v1G_lr)
  call destroy_mpi_enreg(MPI_enreg_seq)
 
-end subroutine dvdb_v1r_long_range
+end subroutine dvdb_get_v1r_long_range
 !!***
 
 !----------------------------------------------------------------------
