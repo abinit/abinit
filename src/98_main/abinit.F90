@@ -114,7 +114,7 @@ program abinit
  use m_libpaw_tools,only : libpaw_spmsg_getcount
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
- use m_neat,        only : enable_yaml
+ use m_stream_string,only : enable_yaml
  use m_chkinp,      only : chkinp
  use m_dtset,       only : chkvars, dtset_free
  use m_dtfil,       only : iofn1

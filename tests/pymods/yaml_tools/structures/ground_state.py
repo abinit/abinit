@@ -9,9 +9,8 @@ from .pandas_commons import has_pandas
 
 @yaml_auto_map
 class EnergyTerms(object):
-    '''
-    Component if total energy.
-    '''
+    """Component of total energy."""
+
     not_components = {
         'total_energy',
         'comment',
@@ -34,9 +33,8 @@ class EnergyTerms(object):
 
 @yaml_auto_map
 class EnergyTermsDC(EnergyTerms):
-    '''
-    Components of total energy in Double Counting.
-    '''
+    """Components of total energy in Double Counting."""
+
     not_components = {
         'total_energy_dc',
         'comment',
@@ -48,16 +46,12 @@ class EnergyTermsDC(EnergyTerms):
 
 @yaml_auto_map
 class EtotSteps(object):
-    '''
-    Detail of the values of Etot through the steps of self consistent cycle.
-    '''
+    """Detail of the values of Etot through the steps of self consistent cycle."""
 
 
 @yaml_auto_map
 class ResultsGS(object):
-    '''
-    Miscellaneous results from ground state computations.
-    '''
+    """Miscellaneous results from ground state computations."""
 
 
 if has_pandas:
@@ -68,13 +62,13 @@ if has_pandas:
         is_dict_like = False  # prevent tester from browsing columns
 
         def last_iter(self, other, **opts):
-            '''
-                Expects opts to be a dictionary with keys being column names and
-                values being 'ceil': ceiling_tol_value or 'tol': tolerance_value.
-                The checks are only performed on the last values of each columns.
-                An additional optional key of opts is 'tol_iter' giving a tolerance
-                for the variation of number of iterations. The default value is 5.
-            '''
+            """
+            Expects opts to be a dictionary with keys being column names and
+            values being 'ceil': ceiling_tol_value or 'tol': tolerance_value.
+            The checks are only performed on the last values of each columns.
+            An additional optional key of opts is 'tol_iter' giving a tolerance
+            for the variation of number of iterations. The default value is 5.
+            """
             tol_iter = opts.get('tol_iter', 5)
 
             def chk_tol(a, b, tol):
