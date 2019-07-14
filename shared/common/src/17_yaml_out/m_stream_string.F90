@@ -58,11 +58,11 @@ module m_stream_string
     integer :: length = 0
     type(stream_chunk), pointer :: head => null()
     contains
-      procedure :: dump => wrtout_stream
+      procedure :: flush => stream_flush
       procedure :: free => stream_free
       procedure :: copy => stream_copy
-      procedure :: write => stream_write
-      procedure :: get_chunk => stream_get_chunk
+      procedure :: push => stream_push
+      procedure :: pop_chunk => stream_pop_chunk
       procedure :: to_string => stream_to_string
       procedure :: to_file => stream_to_file
       procedure :: transfer => stream_transfer
@@ -82,7 +82,7 @@ subroutine enable_yaml(yes)
   enable = yes
 end subroutine enable_yaml
 
-subroutine wrtout_stream(stream, unit, newline)
+subroutine stream_flush(stream, unit, newline)
   class(stream_string),intent(inout) :: stream
   integer,intent(in) :: unit
   logical,optional,intent(in) :: newline
@@ -95,11 +95,11 @@ subroutine wrtout_stream(stream, unit, newline)
       if (newline) write(unit, "(a)")""
     end if
     write(unit, "(a)")trim(s)
-  endif
+  end if
 
   call stream%free()
 
-end subroutine wrtout_stream
+end subroutine stream_flush
 
 !!****f* m_stream_string/stream_free
 !! NAME
@@ -157,15 +157,15 @@ subroutine stream_copy(src, dest)
   type(stream_chunk), pointer :: cursor
   cursor => src%head
   do while (associated(cursor))
-    call stream_write(dest, cursor%chunk)
+    call dest%push(cursor%chunk)
     cursor => cursor%next
   end do
 end subroutine stream_copy
 !!***
 
-!!****f* m_stream_string/stream_write
+!!****f* m_stream_string/stream_push
 !! NAME
-!! stream_write
+!! stream_push
 !!
 !! FUNCTION
 !!  Write string to stream, allocating memory if needed
@@ -183,7 +183,7 @@ end subroutine stream_copy
 !!
 !! SOURCE
 
-subroutine stream_write(stream, string)
+subroutine stream_push(stream, string)
   class(stream_string),intent(inout) :: stream
   character(len=*),intent(in) :: string
   integer :: offset, room_left, soffset
@@ -217,12 +217,12 @@ subroutine stream_write(stream, string)
   end if
   stream%length = stream%length + len(string)
 
-end subroutine stream_write
+end subroutine stream_push
 !!***
 
-!!****f* m_stream_string/stream_get_chunk
+!!****f* m_stream_string/stream_pop_chunk
 !! NAME
-!! stream_get_chunk
+!! stream_pop_chunk
 !!
 !! FUNCTION
 !!  Remove the last chunk of stream an put its content in string
@@ -240,7 +240,7 @@ end subroutine stream_write
 !!
 !! SOURCE
 
-subroutine stream_get_chunk(stream, string)
+subroutine stream_pop_chunk(stream, string)
   class(stream_string),intent(inout) :: stream
   character(len=chunk_size),intent(out) :: string
   type(stream_chunk),pointer :: cursor
@@ -260,7 +260,7 @@ subroutine stream_get_chunk(stream, string)
     stream%length = 0
   end if
 
-end subroutine stream_get_chunk
+end subroutine stream_pop_chunk
 !!***
 
 !!****f* m_stream_string/stream_to_string
@@ -295,7 +295,7 @@ subroutine stream_to_string(stream, string)
   string = repeat(' ', len(string))
   do while (stream%length > 0)
     length = stream%length
-    call stream_get_chunk(stream, stmp)
+    call stream%pop_chunk(stmp)
     string(offset+1:offset+min(length, chunk_size)) = stmp(1:min(length, chunk_size))
     offset = offset + chunk_size
   end do
@@ -332,7 +332,7 @@ subroutine stream_to_file(stream, file_d)
 
   do while (stream%length > 0)
     length = stream%length
-    call stream_get_chunk(stream, stmp)
+    call stream%pop_chunk(stmp)
     write(file_d, '(A)', advance='no') stmp(1:min(length, chunk_size))
     offset = offset + chunk_size
   end do
@@ -375,11 +375,11 @@ subroutine stream_transfer(src, dest)
   else
     do while (src%length > 0)
       length = src%length
-      call stream_get_chunk(src, chunk)
+      call src%pop_chunk(chunk)
       if(length > chunk_size) then
-        call stream_write(dest, chunk)
+        call stream_push(dest, chunk)
       else
-        call stream_write(dest, chunk(1:length))
+        call stream_push(dest, chunk(1:length))
       end if
     end do
   end if

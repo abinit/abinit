@@ -16,8 +16,7 @@ module m_neat
   implicit none
 
   private
-  public :: neat_start_iter
-  public :: neat_etot_add_line, neat_open_etot, neat_finish_etot
+  !public :: neat_start_iter
   public :: stream_string
 
   contains
@@ -46,102 +45,15 @@ module m_neat
 !!     yaml_iterstart
 !!
 !! SOURCE
-  subroutine neat_start_iter(n, name, unit)
-    integer,intent(in) :: n, unit
-    character(len=*),intent(in) :: name
-    type(stream_string) :: stream
-
-    call yaml_iterstart(trim(name), n, stream=stream)
-    call stream%dump(unit)
-  end subroutine neat_start_iter
+!  subroutine neat_start_iter(n, name, unit)
+!    integer,intent(in) :: n, unit
+!    character(len=*),intent(in) :: name
+!    type(stream_string) :: stream
+!
+!    call yaml_iterstart(trim(name), n, stream=stream)
+!    call stream%flush(unit)
+!  end subroutine neat_start_iter
 !!***
 
-!!****f* m_neat/neat_open_etot
-!!
-!! NAME
-!! neat_open_etot
-!!
-!! FUNCTION
-!! Open a document for ETOT
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!    Write the beginning of the document to stream
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-  subroutine neat_open_etot(stream, comment, header)
-    type(stream_string),intent(inout) :: stream
-    character(len=*),intent(in) :: header, comment
-
-    call yaml_open_doc('EtotSteps', comment, stream=stream)
-
-    call yaml_open_tabular('data', stream=stream, tag='EtotIters')
-    call yaml_add_tabular_line(header, stream=stream)
-
-  end subroutine neat_open_etot
-!!***
-
-!!***f* m_neat/neat_etot_add_line
-!!
-!! NAME
-!! neat_etot_add_line
-!!
-!! FUNCTION
-!! Add a line to the ETOT table
-!!
-!! INPUTS
-!!     stream <type(stream_string)>= stream to accumulate the document
-!!     line <character(len=*)>= line to add
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-  subroutine neat_etot_add_line(stream, line)
-    type(stream_string),intent(inout) :: stream
-    character(len=*),intent(in) :: line
-
-    call yaml_add_tabular_line('  '//line(6:), stream=stream)
-  end subroutine neat_etot_add_line
-!!***
-
-!!****f* m_neat/neat_finish_etot
-!!
-!! NAME
-!! neat_finish_etot
-!!
-!! FUNCTION
-!! Close the document and write the document to unit
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-  subroutine neat_finish_etot(stream, unit)
-    type(stream_string),intent(inout) :: stream
-    integer,intent(in) :: unit
-
-    if(stream%length > 0) then
-      call yaml_close_doc(stream=stream)
-      call stream%dump(unit)
-    end if
-  end subroutine neat_finish_etot
-!!***
 end module m_neat
 !!***

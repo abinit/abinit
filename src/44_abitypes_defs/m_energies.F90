@@ -25,7 +25,6 @@
 
 #include "abi_common.h"
 
-
 MODULE m_energies
 
  use defs_basis
