@@ -58,6 +58,8 @@ module m_yaml
    integer :: use_yaml = 1
    ! Temporary flag used to deactivate Yaml output
 
+   !integer :: open_count = 0
+
    integer :: default_keysize = 30
    ! Default key size
 
@@ -220,10 +222,10 @@ type(yamldoc_t) function yamldoc_open(tag, comment, newline, width, int_fmt, rea
 
  SET_DEFAULT(nl, newline, .true.)
 
- new = yamldoc_t()
  if (present(width)) new%default_width = width
  if (present(int_fmt)) new%default_ifmt = int_fmt
  if (present(real_fmt)) new%default_rfmt = real_fmt
+ !new%open_count = 1
 
  call new%stream%push('---'//' !'//trim(tag))
  if (comment /= '') then
@@ -1083,12 +1085,17 @@ subroutine yamldoc_write_and_free(self, unit, newline)
  logical :: nl
 ! *************************************************************************
 
+ if (self%stream%length == 0) return
  SET_DEFAULT(nl, newline, .true.)
 
+ !if new%open_count /= 1
+ !MSG_ERROR("Document should be created by calling yamldoc_open")
+ !end if
+
  call self%stream%push('...')
- if (nl) call self%stream%push(eol)
 
  if (self%use_yaml == 1) then
+   !write(unit, "(a)")""
    call self%stream%flush(unit, newline=nl)
  else
    call self%stream%free()

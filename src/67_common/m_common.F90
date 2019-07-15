@@ -1443,7 +1443,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: msg
- !type(pair_list) :: e_components, e_components_dc
  type(yamldoc_t) :: edoc, dc_edoc
 !arrays
  character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
@@ -1498,7 +1497,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call wrtout(iout,msg,'COLL')
      edoc = yamldoc_open('EnergyTerms', 'Components of total free energy in Hartree', width=20, real_fmt='(es21.14)')
      edoc%use_yaml = dtset%use_yaml
-     !call yaml_single_dict('EnergyTerms', '', e_components, 35, 500, width=20, stream=stream, real_fmt='(es21.14)')
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
      call wrtout(iout,msg,'COLL')
      call edoc%add_real('kinetic', energies%e_kinetic)
@@ -1617,11 +1615,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
      '  without the knowledge of imaginary part of Rhoij atomic occupancies',ch10,&
      '  (computed only when pawcpxocc=2).'
      call wrtout(iout,msg,'COLL')
-     call edoc%add_string('warning', &
-         '"Direct" decomposition of total free energy cannot be printed out !!!'//ch10// &
-         'PAW contribution due to spin-orbit coupling cannot be evaluated'//ch10// &
-         'without the knowledge of imaginary part of Rhoij atomic occupancies'//ch10// &
-         '(computed only when pawcpxocc=2).')
    end if
  end if
 !============= Printing of Etotal by double-counting scheme ===========
@@ -1707,7 +1700,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    call wrtout(iout,msg,'COLL')
    call dc_edoc%add_real('total_energy_dc', etotaldc)
-
  end if
 
 !======= Additional printing for compatibility  ==========
@@ -1724,7 +1716,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
  if ((optdc==0.or.optdc==2).and.(.not.directE_avail)) then
    write(msg, '(a,a,es18.10)' ) ch10,' Band energy (Ha)= ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
-   call edoc%add_real('band_energy', energies%e_eigenvalues)
+   !call edoc%add_real('band_energy', energies%e_eigenvalues)
  end if
 
  if (usepaw==1) then
@@ -1759,18 +1751,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
  call wrtout(iout,msg,'COLL')
  call wrtout(iout, ch10, 'COLL')
 
- ! Write components of total energies in a structured way
- !call yaml_single_dict('EnergyTerms', '', e_components, 35, 500, width=20, stream=stream, real_fmt='(es21.14)')
- !call stream%flush(iout)
- !call e_components%free()
+ ! Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
 
  if (optdc >= 1) then
-   call wrtout(iout, ch10, 'COLL')
+   !call wrtout(iout, ch10, 'COLL')
    call dc_edoc%write_and_free(iout)
-   !call yaml_single_dict('EnergyTermsDC', '', e_components_dc, 35, 500, width=20, stream=stream, real_fmt='(es21.14)')
-   !call stream%flush(iout)
-   !call e_components_dc%free()
  end if
 
 end subroutine prtene

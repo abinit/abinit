@@ -204,7 +204,6 @@ MODULE m_results_gs
  public :: destroy_results_gs_array
  public :: copy_results_gs
  public :: results_gs_ncwrite
- public :: results_gs_yaml_write
 !!***
 
 CONTAINS
@@ -711,7 +710,7 @@ end subroutine copy_results_gs
 !!
 !! SOURCE
 
-integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
+integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
