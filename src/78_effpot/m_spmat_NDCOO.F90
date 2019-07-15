@@ -56,6 +56,7 @@ module m_spmat_NDCOO
      procedure :: get_ind_inz
      procedure :: get_ind
      procedure :: group_by_1dim
+     procedure :: vec_product
      procedure :: mv1vec
      !procedure :: print
   end type ndcoo_mat_t

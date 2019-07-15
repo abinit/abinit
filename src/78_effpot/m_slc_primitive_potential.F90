@@ -37,11 +37,15 @@ module m_slc_primitive_potential
   use defs_basis
   use m_errors
 
+  use m_abstract_potential, only: abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
+  use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_cell, only: mbcell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_primitive_potential, only: primitive_potential_t
+  use m_slc_potential, only: slc_potential_t
   use m_spmat_ndcoo, only: ndcoo_mat_t
+  use m_supercell_maker, only: supercell_maker_t
   use m_xmpi
 
 
@@ -67,7 +71,8 @@ module m_slc_primitive_potential
      !procedure:: set_tijuv
      procedure :: load_from_files
      procedure :: read_netcdf
-     !procedure:: fill_supercell
+     procedure :: fill_supercell
+     procedure :: set_oiju_sc
   end type slc_primitive_potential_t
 
 contains
@@ -89,7 +94,7 @@ contains
     class(slc_primitive_potential_t), intent(inout) :: self
     call self%oiju%finalize()
     call self%oRjlist%finalize()
-    call self%oRulist%finalize
+    call self%oRulist%finalize()
     !call self%tijuv%finalize()
     nullify(self%primcell)
     self%nspin=0
@@ -107,9 +112,9 @@ contains
     integer :: ii
 
     if (xmpi_comm_rank(xmpi_world)==0) then
-       ncdf_fname=fnames(4)
+       ncdf_fname=fnames(3)
        write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-            &     'reading spin-lattice coupling terms.'
+            &     'Reading spin-lattice coupling terms from'
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
     endif
@@ -149,7 +154,7 @@ contains
     if(ncerr /= NF90_NOERR) then
       write(std_out,'(A24)') 'Could not open netcdf file'
     else 
-      write(std_out,'(A55)') 'Reading spin-lattice coupling parameters from netcdf file'
+      write(std_out,'(A30)') ncdf_fname
     endif
     
     ! read primcell info
@@ -169,40 +174,40 @@ contains
       ABI_ALLOCATE(oiju_Rulist, (3, oiju_ndata))
       ABI_ALLOCATE(oiju_vallist, (oiju_ndata))
 
-      ierr =nf90_inq_varid(ncid, "Oiju_ilist", varid)
-      call nc_handle_err(ierr, "Oiju_ilist")
-      ierr = nf90_get_var(ncid, varid, oiju_ilist)
-      call nc_handle_err(ierr, "Oiju_ilist")
+      ncerr =nf90_inq_varid(ncid, "Oiju_ilist", varid)
+      call nc_handle_err(ncerr, "Oiju_ilist")
+      ncerr = nf90_get_var(ncid, varid, oiju_ilist)
+      call nc_handle_err(ncerr, "Oiju_ilist")
 
-      ierr =nf90_inq_varid(ncid, "Oiju_jlist", varid)
-      call nc_handle_err(ierr, "Oiju_jlist")
-      ierr = nf90_get_var(ncid, varid, oiju_jlist)
-      call nc_handle_err(ierr, "Oiju_jlist")
+      ncerr =nf90_inq_varid(ncid, "Oiju_jlist", varid)
+      call nc_handle_err(ncerr, "Oiju_jlist")
+      ncerr = nf90_get_var(ncid, varid, oiju_jlist)
+      call nc_handle_err(ncerr, "Oiju_jlist")
 
-      ierr =nf90_inq_varid(ncid, "Oiju_ulist", varid)
-      call nc_handle_err(ierr, "Oiju_uist")
-      ierr = nf90_get_var(ncid, varid, oiju_ulist)
-      call nc_handle_err(ierr, "Oiju_ulist")
+      ncerr =nf90_inq_varid(ncid, "Oiju_ulist", varid)
+      call nc_handle_err(ncerr, "Oiju_uist")
+      ncerr = nf90_get_var(ncid, varid, oiju_ulist)
+      call nc_handle_err(ncerr, "Oiju_ulist")
 
-      ierr =nf90_inq_varid(ncid, "Oiju_Rjlist", varid)
-      call nc_handle_err(ierr, "Oiju_Rjlist")
-      ierr = nf90_get_var(ncid, varid, oiju_Rjlist)
-      call nc_handle_err(ierr, "Oiju_Rjlist")
+      ncerr =nf90_inq_varid(ncid, "Oiju_Rjlist", varid)
+      call nc_handle_err(ncerr, "Oiju_Rjlist")
+      ncerr = nf90_get_var(ncid, varid, oiju_Rjlist)
+      call nc_handle_err(ncerr, "Oiju_Rjlist")
 
-      ierr =nf90_inq_varid(ncid, "Oiju_Rulist", varid)
-      call nc_handle_err(ierr, "Oiju_Rulist")
-      ierr = nf90_get_var(ncid, varid, oiju_Rulist)
-      call nc_handle_err(ierr, "Oiju_Rulist")
+      ncerr =nf90_inq_varid(ncid, "Oiju_Rulist", varid)
+      call nc_handle_err(ncerr, "Oiju_Rulist")
+      ncerr = nf90_get_var(ncid, varid, oiju_Rulist)
+      call nc_handle_err(ncerr, "Oiju_Rulist")
 
-      ierr =nf90_inq_varid(ncid, "Oiju_Rulist", varid)
-      call nc_handle_err(ierr, "Oiju_Rulist")
-      ierr = nf90_get_var(ncid, varid, oiju_Rulist)
-      call nc_handle_err(ierr, "Oiju_Rulist")
+      ncerr =nf90_inq_varid(ncid, "Oiju_Rulist", varid)
+      call nc_handle_err(ncerr, "Oiju_Rulist")
+      ncerr = nf90_get_var(ncid, varid, oiju_Rulist)
+      call nc_handle_err(ncerr, "Oiju_Rulist")
 
-      ierr =nf90_inq_varid(ncid, "Oiju_vallist", varid)
-      call nc_handle_err(ierr, "Oiju_vallist")
-      ierr = nf90_get_var(ncid, varid, oiju_vallist)
-      call nc_handle_err(ierr, "Oiju_vallist")
+      ncerr =nf90_inq_varid(ncid, "Oiju_vallist", varid)
+      call nc_handle_err(ncerr, "Oiju_vallist")
+      ncerr = nf90_get_var(ncid, varid, oiju_vallist)
+      call nc_handle_err(ncerr, "Oiju_vallist")
 
       write(std_out,'(A7,I10,A11)') 'O_iju:', oiju_ndata, 'terms read'  
 
@@ -293,6 +298,73 @@ contains
        stop "Stopped"
     end if
   end subroutine nc_handle_err
+
+  subroutine fill_supercell(self, scmaker, scpot)
+    class(slc_primitive_potential_t) , intent(inout) :: self
+    type(supercell_maker_t), intent(inout):: scmaker
+    class(abstract_potential_t), pointer, intent(inout) :: scpot
+
+    integer :: nspin, sc_nspin, natom, sc_natom
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    nspin=self%nspin
+    natom=self%natom
+    sc_nspin=nspin * scmaker%ncells
+    sc_natom=natom * scmaker%ncells
+    
+    call xmpi_bcast(sc_nspin, master, comm, ierr)
+    call xmpi_bcast(sc_natom, master, comm, ierr)
+    ABI_DATATYPE_ALLOCATE_SCALAR(slc_potential_t, scpot)
+    select type(scpot) ! use select type because properties only defined for slc_potential is used.
+    type is (slc_potential_t) 
+      call scpot%initialize(sc_nspin, sc_natom)
+      if (iam_master) then
+        call self%oiju%sum_duplicates()
+        call self%set_oiju_sc(scpot, scmaker)
+      endif
+    end select
+  end subroutine fill_supercell
+
+  subroutine set_oiju_sc(self, scpot, scmaker)
+    class(slc_primitive_potential_t), intent(inout) :: self
+    type(slc_potential_t),            intent(inout) :: scpot
+    type(supercell_maker_t),          intent(inout) :: scmaker
+        
+    integer :: icell, Rj(3), Ru(3), oiju_ind(5), iRj, iRu, ii, ij, iu, inz
+    integer :: ngroup
+    integer, allocatable :: i_sc(:), j_sc(:), u_sc(:), Rj_sc(:, :), Ru_sc(:,:)
+    integer, allocatable :: i1list(:), ise(:)
+    real(dp) :: val_sc(scmaker%ncells)
+
+    do inz=1, self%oiju%nnz
+      oiju_ind=self%oiju%get_ind_inz(inz)
+      iRj=oiju_ind(1)
+      iRu=oiju_ind(2)
+      ii=oiju_ind(3)
+      ij=oiju_ind(4)
+      iu=oiju_ind(5)
+      Rj=self%oRjlist%data(:,iRj)
+      Ru=self%oRulist%data(:,iRu)
+      call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
+      call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=Rj, j_sc=j_sc, Rj_sc=Rj_sc)
+      call scmaker%trans_j_and_Rj(nbasis=natom*3, j=iu, Rj=Ru, j_sc=u_sc, Rj_sc=Ru_sc)
+      val_sc(:)= self%oiju%val%data(inz)
+      do icell=1, scmaker%ncells
+        call scpot%add_oiju_term(i_sc(icell), j_sc(icell), u_sc(icell), val_sc(icell))
+      end do
+      if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
+      if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
+      if(allocated(u_sc)) ABI_DEALLOCATE(u_sc)
+      if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
+      if(allocated(Ru_sc)) ABI_DEALLOCATE(Ru_sc)
+    end do
+    
+    call scpot%oiju_sc%group_by_1dim(ngroup, i1list, ise)
+
+  end subroutine set_oiju_sc
 
 
 end module m_slc_primitive_potential

@@ -1434,11 +1434,25 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%slc_coupling=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_coupling',tread,'INT')
  if(tread==1) multibinit_dtset%slc_coupling=intarr(1)
- if(multibinit_dtset%slc_coupling < 0 .or.& 
-      &   multibinit_dtset%slc_coupling > 2) then
+ if(multibinit_dtset%slc_coupling.ne. 1111 .and. & 
+      &   multibinit_dtset%slc_coupling.ne. 1110 .and. &
+      &   multibinit_dtset%slc_coupling.ne. 1101 .and. &
+      &   multibinit_dtset%slc_coupling.ne. 1011 .and. &
+      &   multibinit_dtset%slc_coupling.ne.  111 .and. &
+      &   multibinit_dtset%slc_coupling.ne. 1100 .and. &
+      &   multibinit_dtset%slc_coupling.ne. 1010 .and. &
+      &   multibinit_dtset%slc_coupling.ne. 1001 .and. &
+      &   multibinit_dtset%slc_coupling.ne.  110 .and. &
+      &   multibinit_dtset%slc_coupling.ne.  101 .and. &
+      &   multibinit_dtset%slc_coupling.ne.   11 .and. &
+      &   multibinit_dtset%slc_coupling.ne. 1000 .and. &
+      &   multibinit_dtset%slc_coupling.ne.  100 .and. &
+      &   multibinit_dtset%slc_coupling.ne.   10 .and. &
+      &   multibinit_dtset%slc_coupling.ne.    1 .and. &
+      &   multibinit_dtset%slc_coupling.ne.    0) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'slc_coupling is',multibinit_dtset%slc_coupling,', but the only allowed values',ch10,&
-         &   'are 0, 1, and 2.',ch10,&
+         &   'are 1111, 1110, 1101, 1011, 111, 1100, 1010, 1001, 110, 101, 11, 1000, 100, 10, 1, and 0.',ch10,&
          &   'Action: correct slc_coupling in your input file.'
     MSG_ERROR(message)
  end if

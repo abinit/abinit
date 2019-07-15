@@ -78,10 +78,10 @@ module m_multibinit_manager
   use m_lattice_berendsen_NVT_mover, only: lattice_berendsen_NVT_mover_t
   use m_lattice_berendsen_NPT_mover, only: lattice_berendsen_NPT_mover_t
 
-
   ! Spin lattice coupling
   use m_slc_primitive_potential, only: slc_primitive_potential_t
-!  use m_spin_lattice_coupling_effpot, only : spin_lattice_coupling_effpot_t
+  use m_slc_potential, only : slc_potential_t
+
   implicit none
   private
 
@@ -101,7 +101,7 @@ module m_multibinit_manager
      type(potential_list_t) :: pots     ! potential list
      ! a polymorphic lattice mover so multiple mover could be used.
      class(lattice_mover_t), pointer :: lattice_mover=> null()
-     ! as for the spin, there is only one mover which has several  methods
+     ! as for the spin, there is only one mover which has several methods
      type(spin_mover_t) :: spin_mover  
      ! type(lwf_mover_t) :: lwf_mover
 
@@ -257,6 +257,11 @@ contains
     ! It is only for lattice potential
     if(.False.) then
        call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
+    else
+       natom=0
+       ntypat=0
+       nph1l=0
+       nrpt=0
     endif
 
     !Read the input file, and store the information in a long string of characters
@@ -269,7 +274,6 @@ contains
 
        !Check whether the string only contains valid keywords
        call chkvars(string)
-
     end if
 
     call xmpi_bcast(string,master, comm, ierr)
@@ -357,6 +361,7 @@ contains
        type is (slc_primitive_potential_t)
           call slc_pot%initialize(self%unitcell)
           call slc_pot%load_from_files(self%params, self%filenames)
+          call self%prim_pots%append(slc_pot)
        end select 
     endif
   end subroutine read_potentials
@@ -518,15 +523,15 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
     do istep = 1 , self%params%ntime
-       call self%spin_mover%run_one_step(self%pots)
+       call self%spin_mover%run_one_step(self%pots, displacement=self%lattice_mover%displacement)
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
-       call self%lattice_mover%run_one_step(self%pots)
+       call self%lattice_mover%run_one_step(self%pots, displacement=self%lattice_mover%displacement, spin=self%spin_mover%Stmp)
        write(msg, "(A13, 4X,  I13)")  "Latt_Iter", istep
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
 
-       call self%spin_mover%run_one_step(self%pots)
+       call self%spin_mover%run_one_step(self%pots, displacement=self%lattice_mover%displacement)
        write(msg, "(A13, 4X,  I13)")  "Spin_Iter", istep
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')

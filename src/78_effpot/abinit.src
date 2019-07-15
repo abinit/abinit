@@ -69,6 +69,7 @@ sources = [
     "m_spin_reciprocal.F90",
     #"m_spin_supercell.F90",
     "m_slc_primitive_potential.F90",
+    "m_slc_potential.F90",
     "m_spmat_base.F90",
     "m_spmat_convert.F90",
     "m_spmat_coo.F90",

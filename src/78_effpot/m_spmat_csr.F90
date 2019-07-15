@@ -61,6 +61,7 @@ module m_spmat_csr
      procedure :: mv_select_row =>csr_mat_t_mv_select_row ! mv of selected rows
      !procedure :: print
   end type CSR_mat_t
+
 contains
 
   subroutine initialize(self, mshape)
@@ -73,7 +74,7 @@ contains
   end subroutine initialize
 
   ! COO matrix
-  subroutine set(self,  nnz, icol, row_shift, val)
+  subroutine set(self, nnz, icol, row_shift, val)
 
     class(CSR_mat_t), intent(inout) :: self
     integer, intent(in) :: nnz 
