@@ -16,14 +16,11 @@
 !!
 !! NOTES
 !! Provide tools to manipulate variable size strings in an incremental FIFO way
-!! Use write to incrementaly fill the string. The required memory space will be allocated
+!! Use `stream%push` to incrementaly fill the string. The required memory space will be allocated
 !! automatically when needed.
 !! To avoid memory leaks you have to use stream_free on the stream to free the memory space unless
-!! you already flushed it using stream_transfer, stream_to_string or stream_to_file.
-!! Unlike the latter three methods, stream_copy and stream_debug do not modify the source stream
-!!
-!! PARENTS
-!!   m_yaml_out
+!! you already flushed it using stream%flush, stream%transfer, stream%to_string or stream%to_file.
+!! Unlike the last four methods, stream_copy and stream_debug do not modify the source stream
 !!
 !! CHILDREN
 !!
@@ -123,14 +120,6 @@ end subroutine stream_free
 !! FUNCTION
 !!  copy src content to dest without altering src
 !!
-!! INPUTS
-!!  src <class(stream_string)>=
-!!  dest <class(stream_string)>=
-!!
-!! OUTPUT
-!!  src <class(stream_string)>=
-!!  dest <class(stream_string)>=
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -154,13 +143,6 @@ end subroutine stream_copy
 !!
 !! FUNCTION
 !!  Write string to stream, allocating memory if needed
-!!
-!! INPUTS
-!!  stream <class(stream_string)>=
-!!  string <character(len=*)>=
-!!
-!! OUTPUT
-!!  stream <class(stream_string)>=
 !!
 !! PARENTS
 !!
@@ -212,13 +194,6 @@ end subroutine stream_push
 !! FUNCTION
 !!  Remove the last chunk of stream an put its content in string
 !!
-!! INPUTS
-!!  stream <class(stream_string)>=
-!!
-!! OUTPUT
-!!  stream <class(stream_string)>=
-!!  string <character(len=chunk_size)>=
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -253,15 +228,7 @@ end subroutine stream_pop_chunk
 !! stream_to_string
 !!
 !! FUNCTION
-!!  Copy the content of stream to string, freeing stream
-!!  string HAVE to be large enough
-!!
-!! INPUTS
-!!  stream <class(stream_string)>=
-!!
-!! OUTPUT
-!!  stream <class(stream_string)>=
-!!  string <character(len=*)>=
+!!  Copy the content of stream to string, freeing stream string must be large enough
 !!
 !! PARENTS
 !!
@@ -295,13 +262,6 @@ end subroutine stream_to_string
 !! FUNCTION
 !!  Write the content of stream to the file, freeing stream
 !!
-!! INPUTS
-!!  stream <class(stream_string)>=
-!!  file_d <integer>=
-!!
-!! OUTPUT
-!!  stream <class(stream_string)>=
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -333,14 +293,6 @@ end subroutine stream_to_file
 !!  Copy the content of src to dest, freeing src
 !!  If possible does not reallocate memory and just have
 !!  dest point to src content
-!!
-!! INPUTS
-!!  src <class(stream_string)>=
-!!  dest <class(stream_string)>=
-!!
-!! OUTPUT
-!!  src <class(stream_string)>=
-!!  dest <class(stream_string)>=
 !!
 !! PARENTS
 !!
@@ -378,12 +330,6 @@ end subroutine stream_transfer
 !!
 !! FUNCTION
 !!  Show the content of the chunks on stdout
-!!
-!! INPUTS
-!!  src <class(stream_string)>=
-!!
-!! OUTPUT
-!!  src <class(stream_string)>=
 !!
 !! PARENTS
 !!

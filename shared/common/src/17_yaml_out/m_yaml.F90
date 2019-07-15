@@ -299,7 +299,6 @@ end subroutine yamldoc_add_real
 !!
 !! FUNCTION
 !!  Add an integer field to a document
-!!  One and only one of file_d, stream or string have to be provided as the output destination.
 !!
 !! INPUTS
 !!  label = key name
@@ -873,7 +872,6 @@ end subroutine yamldoc_open_tabular
 !!
 !! FUNCTION
 !!  Add a line of tabular data in an already opened table field
-!!  One and only one of file_d, stream or string have to be provided as the output destination.
 !!
 !! INPUTS
 !!  line <character(len=*)>=
@@ -964,8 +962,6 @@ end subroutine yamldoc_add_tabular_line
 !!
 !! FUNCTION
 !!  Create a full document from a single dictionary
-!!  One and only one of file_d, stream or string have to be provided as
-!!  the output destination.
 !!
 !! INPUTS
 !!  unit
