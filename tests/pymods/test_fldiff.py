@@ -9,7 +9,7 @@ from .fldiff import (
     ForcedDifference,
 )
 from .data_extractor import DataExtractor
-from .yaml_tools.errors import NoIteratorDefinedError
+from .yaml_tools.errors import NoIteratorDefinedError, UntaggedDocumentError
 from .yaml_tools.structures.commons import GenericMap
 
 
@@ -226,7 +226,6 @@ class TestDataExtractor:
         assert ignored == []
 
     def test_extract_require_iterstart(self):
-
         dext = DataExtractor(True)
         dext.iterators_state = {'dtset': 1}
         lines = '''\
@@ -242,6 +241,28 @@ a list of strings:
         with pytest.raises(NoIteratorDefinedError):
             _, documents, _ = dext.extract(lines)
             print(documents)
+
+    def test_extract_require_label(self):
+        dext = DataExtractor(True)
+        dext.iterators_state = {'dtset': 1}
+        lines = '''\
+--- !IterStart
+dtset: 1
+...
+
+---
+a field: 58
+another: 78
+a list of strings:
+- "a string"
+- "two strings"
+- "..."
+...'''
+        lines = [line + '\n' for line in lines.split('\n')]
+        with pytest.raises(UntaggedDocumentError):
+            _, documents, _ = dext.extract(lines)
+            assert len(documents) == 1
+            print(*(doc.obj for doc in documents))
 
     def test_extract_find_yaml_doc(self):
         dext = DataExtractor(True)

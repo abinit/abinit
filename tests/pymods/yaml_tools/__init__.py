@@ -5,7 +5,7 @@
 from __future__ import print_function, division, unicode_literals
 
 import warnings
-from .errors import NoYAMLSupportError, UntaggedDocumentError
+from .errors import NoYAMLSupportError, UntaggedDocumentError, TagMismatchError
 
 try:
     import yaml
@@ -50,12 +50,12 @@ class Document(object):
         Represent a document with all its metadata extracted from the original file.
     '''
 
-    def __init__(self, iterators, start, lines):
+    def __init__(self, iterators, start, lines, tag=None):
         self.iterators = iterators
         self.start = start
         self.end = -1
         self.lines = lines
-        self._tag = None
+        self._tag = tag
         self._obj = None
         self._corrupted = False
         self._id = None
@@ -70,6 +70,8 @@ class Document(object):
             try:
                 self._obj = yaml_parse(content)
             except yaml.YAMLError as e:
+                print(content)
+                print(e)
                 self._obj = e
                 self._corrupted = True
                 self._tag = 'Corrupted'
@@ -78,7 +80,12 @@ class Document(object):
             if type(self._obj) in {dict, list, tuple, string}:
                 raise UntaggedDocumentError(self.start)
             else:
-                self._tag = get_yaml_tag(type(self._obj))
+                tag = get_yaml_tag(type(self._obj))
+                if self._tag is not None and tag != self._tag:
+                    self._corrupted = True
+                    self._obj = TagMismatchError(self.start, tag, self._tag)
+                else:
+                    self._tag = tag
         else:
             raise NoYAMLSupportError('Try to access YAML document but YAML is'
                                      ' not available in this environment.')
