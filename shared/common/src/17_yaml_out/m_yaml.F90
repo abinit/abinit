@@ -1012,8 +1012,6 @@ subroutine yaml_single_dict(unit, tag, comment, pl, key_size, string_size, &
  logical :: nl
 ! *************************************************************************
 
- doc = yamldoc_t()
-
  SET_DEFAULT(nl, newline, .true.)
  SET_DEFAULT(rfmt, real_fmt, doc%default_rfmt)
  SET_DEFAULT(ifmt, int_fmt, doc%default_ifmt)
