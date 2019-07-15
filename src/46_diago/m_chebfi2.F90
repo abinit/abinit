@@ -31,8 +31,8 @@ module m_chebfi2
   
   integer, parameter :: EIGENV = 1
   integer, parameter :: EIGENVD = 2
-  integer, parameter :: DEBUG_ROWS = 10
-  integer, parameter :: DEBUG_COLUMNS = 20
+  integer, parameter :: DEBUG_ROWS = 5
+  integer, parameter :: DEBUG_COLUMNS = 5
   
 #ifdef HAVE_OPENMP 
   integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
@@ -364,8 +364,10 @@ module m_chebfi2
     double precision :: radius
     
     double precision :: errmax
-    double precision, pointer :: cg(:,:)
+    double precision, allocatable, target :: cg(:,:)
     double precision, pointer :: cg0(:,:)
+    
+    logical :: status_p
     
     integer :: remainder
     
@@ -461,6 +463,13 @@ module m_chebfi2
     lambda_plus = chebfi%ecut
     chebfi%X = X0
     
+!    if (associated(cg0)) then
+!      print *, "CGA"
+!    else
+!      print *, "CGNA"
+!    end if
+!    stop
+    
     !print *, "xmpi_comm_rank(comm)", xmpi_comm_rank(chebfi%spacecom)
     !print *, "xmpi_comm_size(chebfi%spacecom)", xmpi_comm_size(chebfi%spacecom)
     !print *, "xmpi_comm_size(xmpi_world)", xmpi_comm_size(xmpi_world)
@@ -475,7 +484,10 @@ module m_chebfi2
     !call debug_me_g0_LINALG(chebfi%X, chebfi)  !OK 1-2 ISTWFK2 MPI
     !stop
     
-    
+    !call debug_helper_colrows(chebfi%X_prev, chebfi) 
+    !call debug_helper_colrows(chebfi%X_next, chebfi) 
+    !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
+    !stop  
     
     !print *, "AJDE" 
    
@@ -498,8 +510,8 @@ module m_chebfi2
     !end if
     !stop
      
-      !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)
-      !stop
+    !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)
+    !stop
     !print *, "RANK", xmpi_comm_rank(chebfi%spacecom)
     !stop
     ! Transpose
@@ -717,22 +729,22 @@ module m_chebfi2
      !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)    
    ! print *, "AAAAAAAAAAAAAAAAAAAA"
    
-    if (xmpi_comm_rank(xmpi_world) == 0) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
+    !if (xmpi_comm_rank(xmpi_world) == 0) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
     print *, "************************"
     print *, "BITNI POINTERI PRE LOOPA"
-    print *, "xXcolsRows"
+    print *, "xXcolsRows, rank", xmpi_comm_rank(xmpi_world)
     call xg_getPointer(chebfi%xXColsRows)
-    print *, "X"
+    print *, "X, rank", xmpi_comm_rank(xmpi_world)
     call xg_getPointer(chebfi%X)
-    print *, "X_next"
+    print *, "X_next, rank", xmpi_comm_rank(xmpi_world)
     call xg_getPointer(chebfi%X_next)
-    print *, "X_prev"
+    print *, "X_prev, rank", xmpi_comm_rank(xmpi_world)
     call xg_getPointer(chebfi%X_prev)
-    print *, "X_NP"
+    print *, "X_NP, rank", xmpi_comm_rank(xmpi_world)
     call xg_getPointer(chebfi%X_NP%self)
     !stop
     print *, "***********************"
-    end if
+    !end if
     
     !stop
     !stop
@@ -748,18 +760,28 @@ module m_chebfi2
 !        stop    
       end if
       
+      !print *, "X_next BEFORE chebfi_computeNextOrderChebfiPolynom, rank", xmpi_comm_rank(xmpi_world)
+      !call xg_getPointer(chebfi%X_next)
+      !call debug_helper_colrows(chebfi%X_next, chebfi)
+      !stop 
+      
       call timab(tim_next_p,1,tsec)         
       call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X) !inline 2 problem istwfk 2 MPI
       call timab(tim_next_p,2,tsec)   
       
-      if (iline == 2) then
+      !print *, "X_next AFTER chebfi_computeNextOrderChebfiPolynom, rank", xmpi_comm_rank(xmpi_world)
+      !call xg_getPointer(chebfi%X_next)
+      !call debug_helper_colrows(chebfi%X_next, chebfi)
+      !stop 
+      
+      !if (iline == 2) then
 !        print *, "2 after chebfi_computeNextOrderChebfiPolynom"
 !        call xgBlock_setBlock(chebfi%X_next, chebfi%xXColsRows, 1, chebfi%total_spacedim, chebfi%bandpp)  
 !        call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG) !all_to_all
 !        call debug_helper_linalg(chebfi%X, chebfi, 1, 1)
 !        call xmpi_barrier(chebfi%spacecom)
 !        stop    
-      end if
+      !end if
       
       
       !stop
@@ -788,7 +810,7 @@ module m_chebfi2
       !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)
       !stop
       
-      if (iline == 2) then
+      !if (iline == 2) then
         !print *, "2 before swap"
         !call debug_helper_colrows(chebfi%xXColsRows, chebfi)
         !stop
@@ -797,12 +819,15 @@ module m_chebfi2
         !call xmpi_barrier(chebfi%spacecom)
         !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)
         !stop    
-      end if
+      !end if
 
       !call debug_helper_linalg(chebfi%X, chebfi, 1, 1)  
       !stop
       
-      
+      !call debug_helper_colrows(chebfi%X_prev, chebfi) 
+      !call debug_helper_colrows(chebfi%X_next, chebfi) 
+      !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
+      !stop  
       
       call timab(tim_swap,1,tsec)  
       if (chebfi%paral_kgb == 0) then             
@@ -811,7 +836,13 @@ module m_chebfi2
         !print *, "chebfi%bandpp SIB", chebfi%bandpp
         !print *, "chebfi%total_spacedim", chebfi%total_spacedim
         !stop
+        !call debug_helper_colrows(chebfi%X_next, chebfi)  !!TODO MYSTIRIOUS BUG HERE
+        !call debug_helper_colrows(chebfi%xXColsRows, chebfi)
+        !stop 
         call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
+        !call debug_helper_colrows(chebfi%X_next, chebfi)
+        !call debug_helper_colrows(chebfi%xXColsRows, chebfi)
+        !stop 
       end if
       call timab(tim_swap,2,tsec) 
       
@@ -847,7 +878,7 @@ module m_chebfi2
 !        stop    
 !      end if
             
-      if (iline == 2) then
+      !if (iline == 2) then
 !          if (xmpi_comm_rank(xmpi_world) == 0) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
 !            print *, "************************"
 !            print *, "BITNI POINTERI POSLE SWAPA"
@@ -876,7 +907,7 @@ module m_chebfi2
         !call xmpi_barrier(chebfi%spacecom)
         !stop
       
-      end if
+      !end if
       
 !      call xgBlock_setBlock(chebfi%X_prev, chebfi%xXColsRows, 1, chebfi%total_spacedim, chebfi%bandpp) 
 !      call xgBlock_copy(chebfi%X_prev, chebfi%xXColsRows, 1, 1)  
@@ -886,6 +917,7 @@ module m_chebfi2
       
       
       !call xg_getPointer(chebfi%X)
+      !print *, "xXColsRows before LINE 905"
       !call xg_getPointer(chebfi%xXColsRows)
       !stop
       
@@ -901,11 +933,22 @@ module m_chebfi2
       !print *, "getAX_BX before"
       call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%nproc_band,chebfi%xgTransposerX)  !OVO SAD MORA SVUDA DA SE MENJA
       !print *, "getAX_BX after"
+      
+      print *, "xXColsRows before LINE 905, rank", xmpi_comm_rank(xmpi_world)
+      call xg_getPointer(chebfi%xXColsRows)
+      !call xgBlock_reverseMap(chebfi%xXColsRows,cg,spacedim,chebfi%bandpp)
+      if (xg_associated(chebfi%xXColsRows)) then
+        print *, "xXColsRows associated!!!, rank", xmpi_comm_rank(xmpi_world) 
+      end if
+      call xmpi_barrier(chebfi%spacecom)
       !stop
+      !stop
+      !call debug_helper_colrows(chebfi%X_prev, chebfi) 
+      !call debug_helper_colrows(chebfi%X_next, chebfi) 
       !call debug_helper_colrows(chebfi%xXColsRows, chebfi) 
+      !stop
       !call debug_helper_colrows(chebfi%xAXColsRows, chebfi) 
       !call debug_helper_colrows(chebfi%xBXColsRows, chebfi) 
-      !stop
       call timab(tim_getAX_BX,2,tsec) 
       
       !stop  
@@ -1191,31 +1234,33 @@ module m_chebfi2
     
     
     !X_swap izgleda ne mora da se koristi kod MPI > 1 jer je X vec poseban bafer
-    if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+    !if (xmpi_comm_rank(chebfi%spacecom) == 0) then
       print *, "X_swap AT THE END"
       call xg_getPointer(chebfi%X_swap)
     
       print *, "************************"
       print *, "BITNI POINTERI"
-      print *, "xXcolsRows"
+      print *, "xXcolsRows, rank", xmpi_comm_rank(xmpi_world)
       call xg_getPointer(chebfi%xXColsRows)
-      print *, "X"
+      print *, "X, rank", xmpi_comm_rank(xmpi_world)
       call xg_getPointer(chebfi%X)
-      print *, "X_next"
+      print *, "X_next, rank", xmpi_comm_rank(xmpi_world)
       call xg_getPointer(chebfi%X_next)
-      print *, "X_prev"
+      print *, "X_prev, rank", xmpi_comm_rank(xmpi_world)
       call xg_getPointer(chebfi%X_prev)
-      print *, "X_NP"
+      print *, "X_NP, rank", xmpi_comm_rank(xmpi_world)
       call xg_getPointer(chebfi%X_NP%self)
       !stop
       print *, "***********************"
-    end if
+    !end if
     
     if (xmpi_comm_size(chebfi%spacecom) > 1) then
       call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1)    !copy cannot be avoided :(
     end if
     
-    !call debug_helper_linalg(chebfi%X_swap, chebfi, 1, 1) !MPI 1,2 OK
+    print *, "xgx0 INSIDE CB2 AT THE END"
+    call xg_getPointer(chebfi%X) 
+    call debug_helper_linalg(chebfi%X, chebfi, 1, 1) !MPI 1,2 OK
     !stop   
      
   end subroutine chebfi_run
@@ -1342,15 +1387,15 @@ module m_chebfi2
 !        stop 
 !      end if
       !stop
-      if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+      !if (xmpi_comm_rank(chebfi%spacecom) == 0) then
         print *, "ILINE", iline
-        print *, "X_next before getBm1X"
+        print *, "X_next before getBm1X, rank", xmpi_comm_rank(xmpi_world)
         call xg_getPointer(chebfi%X_next)
-        print *, "X_prev before getBm1X"
+        print *, "X_prev before getBm1X, rank", xmpi_comm_rank(xmpi_world)
         call xg_getPointer(chebfi%X_prev)
-        print *, "X_xXColsRows before getBm1X"
+        print *, "X_xXColsRows before getBm1X, rank", xmpi_comm_rank(xmpi_world)
         call xg_getPointer(chebfi%xXColsRows)
-      end if
+      !end if
       if (iline == 2) then
      
 !        call debug_helper_colrows(chebfi%X_next, chebfi)
@@ -1367,15 +1412,15 @@ module m_chebfi2
       !!TODO UCI U WRAPPER SA ILINE=2 i transposerom i probati transponovati unutra
       call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, chebfi%xXColsRows, chebfi%X, chebfi%nproc_band, chebfi%xgTransposerX) !ovde pobrljavi X skroz za iline 2 MPI istwfk 2
       
-      if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+      !if (xmpi_comm_rank(chebfi%spacecom) == 0) then
         print *, "ILINE", iline
-        print *, "X_next after getBm1X"
+        print *, "X_next after getBm1X, rank", xmpi_comm_rank(xmpi_world)
         call xg_getPointer(chebfi%X_next)
-        print *, "X_prev after getBm1X"
+        print *, "X_prev after getBm1X, rank", xmpi_comm_rank(xmpi_world)
         call xg_getPointer(chebfi%X_prev)
-        print *, "X_xXColsRows after getBm1X"
+        print *, "X_xXColsRows after getBm1X, rank", xmpi_comm_rank(xmpi_world)
         call xg_getPointer(chebfi%xXColsRows)
-      end if
+      !end if
       if (iline == 2) then
         !call debug_helper_colrows(chebfi%X_next, chebfi)
         !call xmpi_barrier(chebfi%spacecom)
@@ -2213,7 +2258,7 @@ module m_chebfi2
     
     call xmpi_barrier(chebfi%spacecom)   
     
-  end subroutine
+  end subroutine debug_me_g0_COLROWS
   
   subroutine debug_helper_colrows(debugBlock, chebfi)
       
@@ -2223,8 +2268,8 @@ module m_chebfi2
     
     call xmpi_barrier(chebfi%spacecom)
     
-    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-      !print *, "USAOOSOOSOSOSO"
+    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc
+      print *, "size 1 -> chebfi%bandpp/2+1", chebfi%bandpp/2+1
       call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
       call xgBlock_print(HELPER, 100+xmpi_comm_rank(chebfi%spacecom)) 
       

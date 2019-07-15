@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_lobpcgwf
 !! NAME
-!! m_lobpcgwf
+!! m_chebfiwf
 !!
 !! FUNCTION
 !! this routine updates the whole wave functions at a given k-point,
@@ -76,8 +76,8 @@ module m_chebfiwf
   type(mpi_type),pointer,save :: l_mpi_enreg
   type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
   
-    integer, parameter :: DEBUG_ROWS = 10
-  integer, parameter :: DEBUG_COLUMNS = 20
+  integer, parameter :: DEBUG_ROWS = 5
+  integer, parameter :: DEBUG_COLUMNS = 5
   
   type(c_ptr) :: cptr
  
@@ -472,6 +472,8 @@ module m_chebfiwf
     
     !print *, "spacedim", spacedim
     !print *, "blockdim", blockdim
+    !print *, "npband", npband
+    !print *, "l_npw", l_npw
     !stop
     
     ! scale back cg
@@ -483,8 +485,11 @@ module m_chebfiwf
         if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
       else
         call xgTransposer_getCPURow(transposer, cpuRow)
+        !print *, "CPUROW", cpurow
+        !l_npw is not same for all processes so the lower formula cannot be like
+        !that
         if (cpuRow == 0) then
-          cg(:, 1:spacedim*blockdim:l_npw*npband) = cg(:, 1:spacedim*blockdim:l_npw*npband) * sqrt2
+          cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * sqrt2
         end if
       end if
     end if
@@ -533,8 +538,8 @@ module m_chebfiwf
       else 
         if (cpuRow == 0) then
           !print *, "RANK", xmpi_comm_rank(l_mpi_enreg%comm_bandspinorfft)
-          cg(:, 1:spacedim*blockdim:l_npw*npband) = cg(:, 1:spacedim*blockdim:l_npw*npband) * inv_sqrt2
-          ghc(:, 1:spacedim*blockdim:l_npw*npband) = ghc(:, 1:spacedim*blockdim:l_npw*npband) * inv_sqrt2
+          cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+          ghc(:, 1:spacedim*blockdim:spacedim) = ghc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
         end if
       end if
       if(l_paw) then
@@ -546,7 +551,7 @@ module m_chebfiwf
           if (cpuRow == 0) then
             !print *, "USAO CPUROW0"
             !stop
-            gsc(:, 1:spacedim*blockdim:l_npw*npband) = gsc(:, 1:spacedim*blockdim:l_npw*npband) * inv_sqrt2
+            gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
           end if
         end if
       end if
@@ -625,7 +630,7 @@ module m_chebfiwf
       else
         call xgTransposer_getCPURow(transposer, cpuRow)
         if (cpuRow == 0) then
-          ghc_filter(:, 1:spacedim*blockdim:l_npw*npband) = ghc_filter(:, 1:spacedim*blockdim:l_npw*npband) * sqrt2
+          ghc_filter(:, 1:spacedim*blockdim:spacedim) = ghc_filter(:, 1:spacedim*blockdim:spacedim) * sqrt2
         end if
       end if
       if(l_paw) then
@@ -646,7 +651,7 @@ module m_chebfiwf
           if (cpuRow == 0) then
             print *, "CPUROW0"
             !!TODO OVDE JE PROBLEM NE ZNAM ZASTO
-            gsm1hc_filter(:, 1:spacedim*blockdim:l_npw*npband) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw*npband) * sqrt2
+            gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) = gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) * sqrt2
           end if
          if (iline_t == 2) then
             !print *, "spacedim", spacedim
@@ -705,7 +710,7 @@ module m_chebfiwf
         endif
       else
         if (cpuRow == 0) then
-          ghc_filter(:, 1:spacedim*blockdim:l_npw*npband) = ghc_filter(:, 1:spacedim*blockdim:l_npw*npband) * inv_sqrt2
+          ghc_filter(:, 1:spacedim*blockdim:spacedim) = ghc_filter(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
         end if
       end if
       if(l_paw) then
@@ -715,7 +720,7 @@ module m_chebfiwf
           if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
         else
           if (cpuRow == 0) then
-            gsm1hc_filter(:, 1:spacedim*blockdim:l_npw*npband) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw*npband) * inv_sqrt2
+            gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) = gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
           end if
         end if
       end if
@@ -752,80 +757,89 @@ module m_chebfiwf
 
   end subroutine precond1
   
-  subroutine debug_me_g0_COLROWS(debugBlock, chebfi)
+  !subroutine debug_me_g0_COLROWS(debugBlock, chebfi)
   
+    !type(xgBlock_t) , intent(inout) :: debugBlock
+    !type(chebfi_t) , intent(inout) :: chebfi
+    !type(xgBlock_t) :: HELPER
+    
+    !call xmpi_barrier(chebfi%spacecom)
+    
+    !if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+      !if (xmpi_comm_rank(chebfi%spacecom) == 0) then
+       ! call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
+      !  call xgBlock_print(HELPER, 100) 
+      
+       ! call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, 2, 5) 
+      !  call xgBlock_print(HELPER, 101) 
+     ! end if
+    !else 
+     ! call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
+     ! call xgBlock_print(HELPER, 200 + xmpi_comm_rank(chebfi%spacecom)) 
+    !end if
+    
+   ! call xmpi_barrier(chebfi%spacecom)   
+    
+  !end subroutine
+  
+  subroutine debug_helper_colrows(debugBlock, blockdim)
+      
     type(xgBlock_t) , intent(inout) :: debugBlock
-    type(chebfi_t) , intent(inout) :: chebfi
+    type(integer) , intent(inout) :: blockdim
     type(xgBlock_t) :: HELPER
     
-    call xmpi_barrier(chebfi%spacecom)
-    
-    if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-      if (xmpi_comm_rank(chebfi%spacecom) == 0) then
-        call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
-        call xgBlock_print(HELPER, 100) 
-      
-        call xgBlock_setBlock(debugBlock, HELPER, chebfi%bandpp/2+1, 2, 5) 
-        call xgBlock_print(HELPER, 101) 
-      end if
-    else 
-      call xgBlock_setBlock(debugBlock, HELPER, 1, 2, 5) 
-      call xgBlock_print(HELPER, 200 + xmpi_comm_rank(chebfi%spacecom)) 
-    end if
-    
-    call xmpi_barrier(chebfi%spacecom)   
-    
-  end subroutine
-  
-  subroutine debug_helper_colrows(debugBlock)
-      
-    type(xgBlock_t) , intent(inout) :: debugBlock
-    type(xgBlock_t) :: HELPER
-    
-    call xmpi_barrier(xmpi_world)
-    
+    call xmpi_barrier(xmpi_world)   
+ 
     if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
       call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
       call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)) 
       
-      call xgBlock_setBlock(debugBlock, HELPER, 192/2+1, DEBUG_ROWS, DEBUG_COLUMNS) 
-      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)+1) 
+      call xgBlock_setBlock(debugBlock, HELPER, blockdim/4+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)+1)
+
+      call xgBlock_setBlock(debugBlock, HELPER, 2*blockdim/4+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)+2)
+
+      call xgBlock_setBlock(debugBlock, HELPER, 3*blockdim/4+1, DEBUG_ROWS, DEBUG_COLUMNS) 
+      call xgBlock_print(HELPER, 100+xmpi_comm_rank(xmpi_world)+3)
     else
       call xgBlock_setBlock(debugBlock, HELPER, 1, DEBUG_ROWS, DEBUG_COLUMNS) 
       call xgBlock_print(HELPER, 200+xmpi_comm_rank(xmpi_world)) 
     end if
     
+    !print *, "debugBlock%rows", rows(debugBlock)
+    !print *, "debugBlock%cols", cols(debugBlock)
     call xmpi_barrier(xmpi_world)
 
   end subroutine debug_helper_colrows
   
-  subroutine debug_helper_linalg(debugBlock)
+  !subroutine debug_helper_linalg(debugBlock)
       
-    type(xgBlock_t) , intent(inout) :: debugBlock
-    type(xgBlock_t) :: HELPER
+   ! type(xgBlock_t) , intent(inout) :: debugBlock
+   ! type(xgBlock_t) :: HELPER
     
-    integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
+    !integer, parameter :: FROW = 1, FCOL = 1, DROWS = 1, DCOLS = 10
      
-      call xmpi_barrier(xmpi_world)
+     ! call xmpi_barrier(xmpi_world)
      
-      if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
-        call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 100) 
+      !if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+       ! call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+       ! call xgBlock_print(HELPER, 100) 
         
-        call xgBlock_setBlock1(debugBlock, HELPER, 3888/2+1, FCOL, DROWS, DCOLS) 
-        call xgBlock_print(HELPER, 101)    
-      else
-        if (xmpi_comm_rank(xmpi_world) == 0) then
-          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 200)
-        else 
-          call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
-          call xgBlock_print(HELPER, 201)
-        end if
-      end if
+       ! call xgBlock_setBlock1(debugBlock, HELPER, 3888/2+1, FCOL, DROWS, DCOLS) 
+       ! call xgBlock_print(HELPER, 101)    
+      !else
+        !if (xmpi_comm_rank(xmpi_world) == 0) then
+       !   call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+        !  call xgBlock_print(HELPER, 200)
+       ! else 
+        !  call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+        !  call xgBlock_print(HELPER, 201)
+        !end if
+  !    end if
       
-      call xmpi_barrier(xmpi_world)
+  !    call xmpi_barrier(xmpi_world)
 
-  end subroutine debug_helper_linalg
+ ! end subroutine debug_helper_linalg
   
 end module m_chebfiwf

@@ -149,7 +149,9 @@ module m_xg
   public :: xg_get
   public :: xg_setBlock
   public :: xg_free
-
+  
+  public :: xg_associated
+  
   public :: xgBlock_setBlock
   public :: xgBlock_setBlock1
   public :: xgBlock_set
@@ -2715,7 +2717,23 @@ module m_xg
     end select
 
   end subroutine xgBlock_setBlock1
+  
+  function xg_associated(xgB) result (tf)
 
+    type(xgBlock_t), intent(inout) :: xgB
+    logical :: tf
+
+    if ( associated(xgB%vecR) ) then 
+      tf = .TRUE.
+    end if
+
+    if ( associated(xgB%vecC) ) then
+      tf = .FALSE.
+    end if
+  end function xg_associated
+  
+
+  
 
 end module m_xg
 !!***

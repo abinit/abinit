@@ -52,6 +52,8 @@ module m_vtowfk
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
+ 
+ use m_xg
 
  implicit none
 
@@ -210,6 +212,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+ 
+ type(xgBlock_t) :: xgx0
 
 ! **********************************************************************
 
@@ -324,6 +328,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !(often 1 for SCF calculation, =nstep for non-SCF calculations)
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
+ !print *, "nnsclo_now", nnsclo_now
+ !stop
+
  do inonsc=1,nnsclo_now
    if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
 
@@ -402,12 +409,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
          else
-           !print *, "CHEBFI2 CALL"
+           !print *, "gs_hamk%istwf_k", gs_hamk%istwf_k
+           !print *, "gs_hamk%istwf_k*npw_k*my_nspinor", gs_hamk%istwf_k*npw_k*my_nspinor
            !print *, "nband_k", nband_k
-           !print *, eig_k
+
+           call xgBlock_map(xgx0,cg(:, icg+1:),3,gs_hamk%istwf_k*npw_k*my_nspinor,nband_k,mpi_enreg%comm_bandspinorfft) 
+           call debug_helper_linalg(xgx0)
            !stop
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
-&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k) 
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+           call debug_helper_linalg(xgx0)
+           
+           !if (inonsc == 2) stop
+           !stop 
          end if            
        end if
 
@@ -1288,6 +1302,36 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
 
 end subroutine fxphas
 !!***
+
+  
+subroutine debug_helper_linalg(debugBlock)
+      
+  type(xgBlock_t) , intent(inout) :: debugBlock
+  type(xgBlock_t) :: HELPER
+    
+  integer, parameter :: FROW = 1, FCOL = 1, DROWS = 5, DCOLS = 5
+     
+  call xmpi_barrier(xmpi_world)
+
+  if (xmpi_comm_size(xmpi_world) == 1) then !only one MPI proc
+    call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+    call xgBlock_print(HELPER, 100) 
+
+    call xgBlock_setBlock1(debugBlock, HELPER, 3888/2+1, FCOL, DROWS, DCOLS) 
+    call xgBlock_print(HELPER, 101)    
+  else
+    if (xmpi_comm_rank(xmpi_world) == 0) then
+      call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+      call xgBlock_print(HELPER, 200)
+    else 
+      call xgBlock_setBlock1(debugBlock, HELPER, 1, FCOL, DROWS, DCOLS) 
+      call xgBlock_print(HELPER, 201)
+    end if
+  end if
+
+  call xmpi_barrier(xmpi_world)
+
+end subroutine debug_helper_linalg
 
 end module m_vtowfk
 !!***
