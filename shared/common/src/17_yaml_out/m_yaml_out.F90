@@ -56,7 +56,7 @@ module m_yaml_out
 
  type,public :: yamldoc_t
 
-   !integer :: use_yaml = 1
+   integer :: use_yaml = 1
 
    integer :: default_keysize = 30
    ! Default key size
@@ -161,9 +161,9 @@ contains
 !!
 !! SOURCE
 
-subroutine yaml_iterstart(label, val, unit, newline)
+subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
 
- integer,intent(in) :: val, unit
+ integer,intent(in) :: val, unit, use_yaml
  character(len=*),intent(in) :: label
  logical,intent(in),optional :: newline
 
@@ -176,9 +176,11 @@ subroutine yaml_iterstart(label, val, unit, newline)
  SET_DEFAULT(nl, newline, .true.)
  write(tmp_i, '(I6)') val
 
- call stream%push('--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
- if (nl) call stream%push(eol)
- call stream%flush(unit)
+ if (use_yaml == 1) then
+   call stream%push('--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
+   if (nl) call stream%push(eol)
+   call stream%flush(unit)
+ end if
 
 end subroutine yaml_iterstart
 !!***
@@ -195,8 +197,8 @@ end subroutine yaml_iterstart
 !!  comment: string with comment.
 !!  [newline]: optional, set to false to prevent adding newlines after fields
 !!  [width]: optional, impose a minimum width of the field name side of the column (padding with spaces)
-!!  [int_fmt]
-!!  [real_fmt]
+!!  [int_fmt]: Default format for integers.
+!!  [real_fmt]: Default format for real.
 !!
 !! PARENTS
 !!
@@ -228,7 +230,7 @@ type(yamldoc_t) function yaml_open_doc(tag, comment, newline, width, int_fmt, re
    call new%stream%push(eol//'comment')
    if (new%default_width > 7) call new%stream%push(repeat(' ', new%default_width - 7))
    call new%stream%push(': ')
-   call yaml_print_string(new%stream, comment, 70)
+   call yaml_print_string(new%stream, comment)
  end if
  if (nl) call new%stream%push(eol)
 
@@ -393,7 +395,7 @@ subroutine yaml_add_string(self, label, val, tag, newline, width)
  end if
 
  call self%stream%push(' ')
- call yaml_print_string(self%stream, val, 70)
+ call yaml_print_string(self%stream, val)
  if (nl) call self%stream%push(eol)
 
 end subroutine yaml_add_string
@@ -1025,7 +1027,7 @@ subroutine yaml_single_dict(unit, tag, comment, pl, key_size, string_size, &
  if (comment /= '') then
    call doc%stream%push(eol)
    call yaml_start_field(doc%stream, 'comment', width=w)
-   call yaml_print_string(doc%stream, comment, 70)
+   call yaml_print_string(doc%stream, comment)
  end if
  call doc%stream%push(eol)
 
@@ -1048,7 +1050,7 @@ subroutine yaml_single_dict(unit, tag, comment, pl, key_size, string_size, &
    else if (type_code == TC_STRING) then
      call string_clear(tmp_s)
      write(tmp_s, sfmt) vs
-     call yaml_print_string(doc%stream, trim(tmp_s), 100)
+     call yaml_print_string(doc%stream, trim(tmp_s))
    end if
    call doc%stream%push(eol)
  end do
@@ -1090,10 +1092,11 @@ subroutine yaml_write_and_free(self, unit, newline)
  call self%stream%push('...')
  if (nl) call self%stream%push(eol)
 
- !if (self%use_yaml == 1)
- call self%stream%flush(unit, newline=nl)
- !else
- !call self%stream%free()
+ if (self%use_yaml == 1) then
+   call self%stream%flush(unit, newline=nl)
+ else
+   call self%stream%free()
+ end if
 
 end subroutine yaml_write_and_free
 !!***
@@ -1119,32 +1122,32 @@ subroutine format_real(val, dest, formt)
 
 end subroutine format_real
 
-subroutine write_indent(input, output, n)
- class(stream_string),intent(inout) :: input, output
- integer,intent(in) :: n
-
- integer :: buffstart, buffstop, length
- character(len=chunk_size) :: buffer
-
- do while (input%length > 0)
-   length = input%length
-   call input%pop_chunk(buffer)
-
-   buffstart = 1
-   buffstop = 1
-   do while (buffstart < min(length, chunk_size))
-     buffstop = index(buffer(buffstart:), eol)
-     if (buffstop > 0) then
-       call output%push(buffer(buffstart:buffstop))
-       call output%push(repeat(' ', n))
-       buffstart = buffstop+1
-     else if (buffstart < min(length, chunk_size)) then
-       call output%push(buffer(buffstart:min(length, chunk_size)))
-       buffstart = chunk_size
-     end if
-   end do
- end do
-end subroutine write_indent
+!subroutine write_indent(input, output, n)
+! class(stream_string),intent(inout) :: input, output
+! integer,intent(in) :: n
+!
+! integer :: buffstart, buffstop, length
+! character(len=chunk_size) :: buffer
+!
+! do while (input%length > 0)
+!   length = input%length
+!   call input%pop_chunk(buffer)
+!
+!   buffstart = 1
+!   buffstop = 1
+!   do while (buffstart < min(length, chunk_size))
+!     buffstop = index(buffer(buffstart:), eol)
+!     if (buffstop > 0) then
+!       call output%push(buffer(buffstart:buffstop))
+!       call output%push(repeat(' ', n))
+!       buffstart = buffstop+1
+!     else if (buffstart < min(length, chunk_size)) then
+!       call output%push(buffer(buffstart:min(length, chunk_size)))
+!       buffstart = chunk_size
+!     end if
+!   end do
+! end do
+!end subroutine write_indent
 
 subroutine forbid_reserved_label(label)
  character(len=*),intent(in) :: label
@@ -1323,7 +1326,7 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
    else if(type_code == TC_STRING) then
      call string_clear(tmp_s)
      write(tmp_s, sfmt) vs
-     call yaml_print_string(stream, trim(tmp_s), 100)
+     call yaml_print_string(stream, trim(tmp_s))
    end if
    if (i > 0 .and. mod(i, vmax) == 0 .and. i /= pl%length()) then
      call stream%push(', '//eol//'    ')
@@ -1337,10 +1340,9 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
 
 end subroutine yaml_print_dict
 
-subroutine yaml_print_string(stream, string, vmax)
+subroutine yaml_print_string(stream, string)
 
  type(stream_string),intent(inout) :: stream
- integer,intent(in) :: vmax
  character(len=*),intent(in) :: string
  character(len=len_trim(string)+2) :: quoted
 

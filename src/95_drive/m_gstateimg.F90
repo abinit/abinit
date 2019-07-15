@@ -502,7 +502,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      call wrtout(ab_out ,msg,'COLL')
      call wrtout(std_out,msg,'PERS')
    end if
-   call yaml_iterstart('timimage', itimimage, ab_out)
+   call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
 
    call timab(704,2,tsec)
 
@@ -541,7 +541,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (dtset%prtvolimg==0) call wrtout(ab_out ,msg,'COLL')
          if (do_write_log) call wrtout(std_out,msg,'PERS')
        end if
-       call yaml_iterstart('image', iimage, ab_out)
+       call yaml_iterstart('image', iimage, ab_out, dtset%use_yaml)
 
        acell(:)     =res_img(iimage)%acell(:)
        rprim(:,:)   =res_img(iimage)%rprim(:,:)

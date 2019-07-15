@@ -834,7 +834,7 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  else
    ydoc = yaml_open_doc('ResultsGS', '', width=width)
  end if
- !ydoc%use_yaml = dtset%use_yaml
+ ydoc%use_yaml = dtset%use_yaml
 
  call ydoc%add_int('natom', results%natom)
  call ydoc%add_int('nsppol', results%nsppol)

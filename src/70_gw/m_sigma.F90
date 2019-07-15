@@ -411,11 +411,11 @@ end subroutine write_sigma_header
 !! SOURCE
 !!
 
-subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
+subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ikcalc,ikibz
+ integer,intent(in) :: ikcalc,ikibz, use_yaml
  type(ebands_t),intent(in) :: KS_BSt
  type(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(in) :: Sr
@@ -460,7 +460,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    call wrtout(ab_out,msg,'COLL')
 
    ydoc = yaml_open_doc('SelfEnergy_ee', "", width=11, real_fmt='(3f8.3)')
-   !ydoc%use_yaml = 1
+   ydoc%use_yaml = use_yaml
    call ydoc%add_real1d('kpoint', Sigp%kptgw(:,ikcalc))
    call ydoc%add_int('spin', is, int_fmt="(i1)")
    call ydoc%add_real('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV)

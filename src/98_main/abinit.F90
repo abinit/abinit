@@ -114,7 +114,6 @@ program abinit
  use m_libpaw_tools,only : libpaw_spmsg_getcount
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
- use m_stream_string,only : enable_yaml
  use m_chkinp,      only : chkinp
  use m_dtset,       only : chkvars, dtset_free
  use m_dtfil,       only : iofn1
@@ -356,9 +355,6 @@ program abinit
 
 !------------------------------------------------------------------------------
 
- ! Enable or disable yaml output
- call enable_yaml(dtsets(1)%use_yaml == 1)
-
 !14) Print more information, and activate GPU
 
  if (me == 0) then
@@ -570,9 +566,7 @@ program abinit
  end if
 
  if (me==0) then
-   if (xml_output) then
-     call outxml_finalise(tsec, values)
-   end if
+   if (xml_output) call outxml_finalise(tsec, values)
 #ifndef HAVE_MEM_PROFILING
    close(unit=ab_out)
 #endif

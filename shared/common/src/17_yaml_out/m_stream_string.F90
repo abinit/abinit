@@ -23,7 +23,7 @@
 !! Unlike the latter three methods, stream_copy and stream_debug do not modify the source stream
 !!
 !! PARENTS
-!!   m_yaml_out, m_neat
+!!   m_yaml_out
 !!
 !! CHILDREN
 !!
@@ -38,14 +38,11 @@
 module m_stream_string
 
   use defs_basis
-  use m_errors
   use m_profiling_abi
 
   implicit none
 
   private
-
-  public :: enable_yaml
 
   integer,public,parameter :: chunk_size = 248
 
@@ -69,18 +66,8 @@ module m_stream_string
       procedure :: debug => stream_debug
   end type stream_string
 
-  logical,private,save :: enable = .false.
-
 contains
 !!***
-
-! Can only be called once, then it lock. This is to prevent unconsistent
-! behaviour with activating and disabling on demand (the parser on the python
-! side won't like it)
-subroutine enable_yaml(yes)
-  logical, intent(in) :: yes
-  enable = yes
-end subroutine enable_yaml
 
 subroutine stream_flush(stream, unit, newline)
   class(stream_string),intent(inout) :: stream
@@ -89,13 +76,11 @@ subroutine stream_flush(stream, unit, newline)
 
   character(len=stream%length) :: s
 
-  if (enable) then
-    call stream%to_string(s)
-    if (present(newline)) then
-      if (newline) write(unit, "(a)")""
-    end if
-    write(unit, "(a)")trim(s)
+  call stream%to_string(s)
+  if (present(newline)) then
+    if (newline) write(unit, "(a)")""
   end if
+  write(unit, "(a)")trim(s)
 
   call stream%free()
 
@@ -377,9 +362,9 @@ subroutine stream_transfer(src, dest)
       length = src%length
       call src%pop_chunk(chunk)
       if(length > chunk_size) then
-        call stream_push(dest, chunk)
+        call dest%push(chunk)
       else
-        call stream_push(dest, chunk(1:length))
+        call dest%push(chunk(1:length))
       end if
     end do
   end if
