@@ -45,7 +45,7 @@ module m_gstateimg
  use m_io_redirect
  use m_m1geo
  use m_abimover
- use m_yaml_out
+ use m_yaml
 
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric

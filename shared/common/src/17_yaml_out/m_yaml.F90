@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_yaml_out
+!!****m* ABINIT/m_yaml
 !! NAME
-!!  m_yaml_out
+!!  m_yaml
 !!
 !! FUNCTION
 !!  This module defines low-level routines to format data into YAML documents.
@@ -13,8 +13,6 @@
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! NOTES
 !!
 !! PARENTS
 !!
@@ -31,7 +29,7 @@
 
 #define SET_DEFAULT(v, optv, defv) v = defv; if (present(optv)) v = optv
 
-module m_yaml_out
+module m_yaml
 
  use defs_basis
  use ieee_arithmetic
@@ -46,17 +44,19 @@ module m_yaml_out
 
 !----------------------------------------------------------------------
 
-!!****t* m_yaml_out/yamldoc_t
+!!****t* m_yaml/yamldoc_t
 !! NAME
 !! yamldoc_t
 !!
 !! FUNCTION
+!! High-level API to write (simple) Yaml documents.
 !!
 !! SOURCE
 
  type,public :: yamldoc_t
 
    integer :: use_yaml = 1
+   ! Temporary flag used to deactivate Yaml output
 
    integer :: default_keysize = 30
    ! Default key size
@@ -84,53 +84,53 @@ module m_yaml_out
 
  contains
 
-   procedure :: write_and_free => yaml_write_and_free
-     ! Close a previously opened document
+   procedure :: write_and_free => yamldoc_write_and_free
+    ! Write Yaml document to unit and free memory.
 
-   procedure :: add_real => yaml_add_real
+   procedure :: add_real => yamldoc_add_real
      ! Add a real number field to a document
 
-   procedure :: add_int => yaml_add_int
+   procedure :: add_int => yamldoc_add_int
      ! Add an integer field to a document
 
-   procedure :: add_string => yaml_add_string
+   procedure :: add_string => yamldoc_add_string
      ! Add a string field to a document
 
-   procedure :: add_real1d => yaml_add_real1d
+   procedure :: add_real1d => yamldoc_add_real1d
      ! Add a field containing a 1D array of real numbers
 
-   procedure :: add_real2d => yaml_add_real2d
+   procedure :: add_real2d => yamldoc_add_real2d
      ! Add a field containing a 2D real number array
 
-   procedure :: add_int1d => yaml_add_int1d
+   procedure :: add_int1d => yamldoc_add_int1d
      ! Add a field containing a 1D integer array
 
-   procedure :: add_int2d => yaml_add_int2d
+   procedure :: add_int2d => yamldoc_add_int2d
      ! Add a field containing a 2D integer array
 
-   !procedure :: add_tabular => yaml_add_tabular
+   !procedure :: add_tabular => yamldoc_add_tabular
      ! Add a field with a complete table data
 
-   procedure :: open_tabular => yaml_open_tabular
+   procedure :: open_tabular => yamldoc_open_tabular
      ! Open a field for tabular data
 
-   procedure :: add_tabular_line => yaml_add_tabular_line
+   procedure :: add_tabular_line => yamldoc_add_tabular_line
      ! Add a line of tabular data in an already opened table field
 
-   procedure :: add_dict => yaml_add_dict
+   procedure :: add_dict => yamldoc_add_dict
      ! Add a field containing a dictionary/pair_list
 
-   procedure :: add_dictlist => yaml_add_dictlist
+   procedure :: add_dictlist => yamldoc_add_dictlist
      ! Add a field containing a list of dictionaries/array of pair_list
 
  end type yamldoc_t
 !!***
 
+ public :: yamldoc_open
+ ! Open a yaml document
+
  public :: yaml_single_dict
  ! Create a full document from a single dictionary
-
- public :: yaml_open_doc
- ! Open a yaml document
 
  public :: yaml_iterstart
 
@@ -143,7 +143,7 @@ module m_yaml_out
 
 contains
 
-!!****f* m_yaml_out/yaml_iterstart
+!!****f* m_yaml/yaml_iterstart
 !! NAME
 !! yaml_iterstart
 !!
@@ -185,9 +185,9 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
 end subroutine yaml_iterstart
 !!***
 
-!!****f* m_yaml_out/yaml_open_doc
+!!****f* m_yaml/yamldoc_open
 !! NAME
-!! yaml_open_doc
+!! yamldoc_open
 !!
 !! FUNCTION
 !!  Open a yaml document
@@ -206,7 +206,7 @@ end subroutine yaml_iterstart
 !!
 !! SOURCE
 
-type(yamldoc_t) function yaml_open_doc(tag, comment, newline, width, int_fmt, real_fmt) result(new)
+type(yamldoc_t) function yamldoc_open(tag, comment, newline, width, int_fmt, real_fmt) result(new)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: tag, comment
@@ -234,12 +234,12 @@ type(yamldoc_t) function yaml_open_doc(tag, comment, newline, width, int_fmt, re
  end if
  if (nl) call new%stream%push(eol)
 
-end function yaml_open_doc
+end function yamldoc_open
 !!***
 
-!!****f* m_yaml_out/yaml_add_real
+!!****f* m_yaml/yamldoc_add_real
 !! NAME
-!! yaml_add_real
+!! yamldoc_add_real
 !!
 !! FUNCTION
 !!  Add a real number field to a document
@@ -258,7 +258,7 @@ end function yaml_open_doc
 !!
 !! SOURCE
 
-subroutine yaml_add_real(self, label, val, tag, real_fmt, newline, width)
+subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -290,12 +290,12 @@ subroutine yaml_add_real(self, label, val, tag, real_fmt, newline, width)
  call self%stream%push(trim(tmp_r))
  if (nl) call self%stream%push(eol)
 
-end subroutine yaml_add_real
+end subroutine yamldoc_add_real
 !!***
 
-!!****f* m_yaml_out/yaml_add_int
+!!****f* m_yaml/yamldoc_add_int
 !! NAME
-!! yaml_add_int
+!! yamldoc_add_int
 !!
 !! FUNCTION
 !!  Add an integer field to a document
@@ -315,7 +315,7 @@ end subroutine yaml_add_real
 !!
 !! SOURCE
 
-subroutine yaml_add_int(self, label, val, tag, int_fmt, newline, width)
+subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -347,12 +347,12 @@ subroutine yaml_add_int(self, label, val, tag, int_fmt, newline, width)
  call self%stream%push(trim(tmp_i))
  if (nl) call self%stream%push(eol)
 
-end subroutine yaml_add_int
+end subroutine yamldoc_add_int
 !!***
 
-!!****f* m_yaml_out/yaml_add_string
+!!****f* m_yaml/yamldoc_add_string
 !! NAME
-!! yaml_add_string
+!! yamldoc_add_string
 !!
 !! FUNCTION
 !!  Add a string field to a document
@@ -370,7 +370,7 @@ end subroutine yaml_add_int
 !!
 !! SOURCE
 
-subroutine yaml_add_string(self, label, val, tag, newline, width)
+subroutine yamldoc_add_string(self, label, val, tag, newline, width)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -398,12 +398,12 @@ subroutine yaml_add_string(self, label, val, tag, newline, width)
  call yaml_print_string(self%stream, val)
  if (nl) call self%stream%push(eol)
 
-end subroutine yaml_add_string
+end subroutine yamldoc_add_string
 !!***
 
-!!****f* m_yaml_out/yaml_add_real1d
+!!****f* m_yaml/yamldoc_add_real1d
 !! NAME
-!! yaml_add_real1d
+!! yamldoc_add_real1d
 !!
 !! FUNCTION
 !!  Add a field containing a 1D array of real numbers
@@ -423,7 +423,7 @@ end subroutine yaml_add_string
 !!
 !! SOURCE
 
-subroutine yaml_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, newline, width)
+subroutine yamldoc_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, newline, width)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -457,12 +457,12 @@ subroutine yaml_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, newl
  call yaml_print_real1d(self%stream, length, arr, trim(rfmt), vmax)
  if (nl) call self%stream%push(eol)
 
-end subroutine yaml_add_real1d
+end subroutine yamldoc_add_real1d
 !!***
 
-!!****f* m_yaml_out/yaml_add_int1d
+!!****f* m_yaml/yamldoc_add_int1d
 !! NAME
-!! yaml_add_int1d
+!! yamldoc_add_int1d
 !!
 !! FUNCTION
 !!  Add a field containing a 1D integer array
@@ -482,7 +482,7 @@ end subroutine yaml_add_real1d
 !!
 !! SOURCE
 
-subroutine yaml_add_int1d(self, label, arr, tag, int_fmt, multiline_trig, newline, width)
+subroutine yamldoc_add_int1d(self, label, arr, tag, int_fmt, multiline_trig, newline, width)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -514,12 +514,12 @@ subroutine yaml_add_int1d(self, label, arr, tag, int_fmt, multiline_trig, newlin
  call yaml_print_int1d(self%stream, length, arr, trim(ifmt), vmax)
  if (nl) call self%stream%push(eol)
 
-end subroutine yaml_add_int1d
+end subroutine yamldoc_add_int1d
 !!***
 
-!!****f* m_yaml_out/yaml_add_dict
+!!****f* m_yaml/yamldoc_add_dict
 !! NAME
-!! yaml_add_dict
+!! yamldoc_add_dict
 !!
 !! FUNCTION
 !!  Add a field containing a dictionary/pair_list
@@ -547,8 +547,8 @@ end subroutine yaml_add_int1d
 !!
 !! SOURCE
 
-subroutine yaml_add_dict(self, label, pl, tag, key_size, string_size, key_fmt, &
-                         int_fmt, real_fmt, string_fmt, multiline_trig, newline, width)
+subroutine yamldoc_add_dict(self, label, pl, tag, key_size, string_size, key_fmt, &
+                            int_fmt, real_fmt, string_fmt, multiline_trig, newline, width)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -585,12 +585,12 @@ subroutine yaml_add_dict(self, label, pl, tag, key_size, string_size, key_fmt, &
  call yaml_print_dict(self%stream, pl, ks, ss, trim(kfmt), trim(ifmt), trim(rfmt), trim(sfmt), vmax)
  if (nl) call self%stream%push(eol)
 
-end subroutine yaml_add_dict
+end subroutine yamldoc_add_dict
 !!***
 
-!!****f* m_yaml_out/yaml_add_real2d
+!!****f* m_yaml/yamldoc_add_real2d
 !! NAME
-!! yaml_add_real2d
+!! yamldoc_add_real2d
 !!
 !! FUNCTION
 !!  Add a field containing a 2D real number array
@@ -611,7 +611,7 @@ end subroutine yaml_add_dict
 !!
 !! SOURCE
 
-subroutine yaml_add_real2d(self, label, arr, tag, real_fmt, multiline_trig, newline, width, mode)
+subroutine yamldoc_add_real2d(self, label, arr, tag, real_fmt, multiline_trig, newline, width, mode)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -662,12 +662,12 @@ subroutine yaml_add_real2d(self, label, arr, tag, real_fmt, multiline_trig, newl
 
  if (nl) call self%stream%push(eol)
 
-end subroutine yaml_add_real2d
+end subroutine yamldoc_add_real2d
 !!***
 
-!!****f* m_yaml_out/yaml_add_int2d
+!!****f* m_yaml/yamldoc_add_int2d
 !! NAME
-!! yaml_add_int2d
+!! yamldoc_add_int2d
 !!
 !! FUNCTION
 !!  Add a field containing a 2D integer array
@@ -688,7 +688,7 @@ end subroutine yaml_add_real2d
 !!
 !! SOURCE
 
-subroutine yaml_add_int2d(self, label, arr, tag, int_fmt, multiline_trig, newline, width, mode)
+subroutine yamldoc_add_int2d(self, label, arr, tag, int_fmt, multiline_trig, newline, width, mode)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -739,12 +739,12 @@ subroutine yaml_add_int2d(self, label, arr, tag, int_fmt, multiline_trig, newlin
 
  if (nl) call self%stream%push(eol)
 
-end subroutine yaml_add_int2d
+end subroutine yamldoc_add_int2d
 !!***
 
-!!****f* m_yaml_out/yaml_add_dictlist
+!!****f* m_yaml/yamldoc_add_dictlist
 !! NAME
-!! yaml_add_dictlist
+!! yamldoc_add_dictlist
 !!
 !! FUNCTION
 !!  Add a field containing a list of dictionaries/array of pair_list
@@ -770,8 +770,8 @@ end subroutine yaml_add_int2d
 !!
 !! SOURCE
 
-subroutine yaml_add_dictlist(self, label, n, plarr, tag, key_size, string_size, key_fmt, int_fmt, &
-                             real_fmt, string_fmt, multiline_trig, newline, width)
+subroutine yamldoc_add_dictlist(self, label, n, plarr, tag, key_size, string_size, key_fmt, int_fmt, &
+                                real_fmt, string_fmt, multiline_trig, newline, width)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -814,12 +814,12 @@ subroutine yaml_add_dictlist(self, label, n, plarr, tag, key_size, string_size, 
    if (nl .or. i/=n) call self%stream%push(eol)
  end do
 
-end subroutine yaml_add_dictlist
+end subroutine yamldoc_add_dictlist
 !!***
 
-!!****f* m_yaml_out/yaml_open_tabular
+!!****f* m_yaml/yamldoc_open_tabular
 !! NAME
-!! yaml_open_tabular
+!! yamldoc_open_tabular
 !!
 !! FUNCTION
 !!  Open a field for tabular data
@@ -836,7 +836,7 @@ end subroutine yaml_add_dictlist
 !!
 !! SOURCE
 
-subroutine yaml_open_tabular(self, label, tag, indent, newline)
+subroutine yamldoc_open_tabular(self, label, tag, indent, newline)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -864,12 +864,12 @@ subroutine yaml_open_tabular(self, label, tag, indent, newline)
  end if
  call self%stream%push(' |'//eol)
 
-end subroutine yaml_open_tabular
+end subroutine yamldoc_open_tabular
 !!***
 
-!!****f* m_yaml_out/yaml_add_tabular_line
+!!****f* m_yaml/yamldoc_add_tabular_line
 !! NAME
-!! yaml_add_tabular_line
+!! yamldoc_add_tabular_line
 !!
 !! FUNCTION
 !!  Add a line of tabular data in an already opened table field
@@ -886,7 +886,7 @@ end subroutine yaml_open_tabular
 !!
 !! SOURCE
 
-subroutine yaml_add_tabular_line(self, line, newline, indent)
+subroutine yamldoc_add_tabular_line(self, line, newline, indent)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -905,12 +905,12 @@ subroutine yaml_add_tabular_line(self, line, newline, indent)
  call self%stream%push(repeat(' ', n)//trim(line))
  if (nl) call self%stream%push(eol)
 
-end subroutine yaml_add_tabular_line
+end subroutine yamldoc_add_tabular_line
 !!***
 
-!!****f* m_yaml_out/yaml_add_tabular
+!!****f* m_yaml/yamldoc_add_tabular
 !! NAME
-!! yaml_add_tabular
+!! yamldoc_add_tabular
 !!
 !! FUNCTION
 !!  Add a field with a complete table data
@@ -928,7 +928,7 @@ end subroutine yaml_add_tabular_line
 !!
 !! SOURCE
 
-!subroutine yaml_add_tabular(self, label, input, tag,  newline, indent)
+!subroutine yamldoc_add_tabular(self, label, input, tag,  newline, indent)
 !
 !!Arguments ------------------------------------
 ! class(yamldoc_t),intent(inout) :: self
@@ -955,10 +955,10 @@ end subroutine yaml_add_tabular_line
 ! call write_indent(input, self%stream, n)
 ! if (nl) call self%stream%push(eol)
 !
-!end subroutine yaml_add_tabular
+!end subroutine yamldoc_add_tabular
 !!***
 
-!!****f* m_yaml_out/yaml_single_dict
+!!****f* m_yaml/yaml_single_dict
 !! NAME
 !! yaml_single_dict
 !!
@@ -1060,9 +1060,9 @@ subroutine yaml_single_dict(unit, tag, comment, pl, key_size, string_size, &
 end subroutine yaml_single_dict
 !!***
 
-!!****f* m_yaml_out/yaml_write_and_free
+!!****f* m_yaml/yamldoc_write_and_free
 !! NAME
-!! yaml_write_and_free
+!! yamldoc_write_and_free
 !!
 !! FUNCTION
 !!  Close a previously opened document
@@ -1076,7 +1076,7 @@ end subroutine yaml_single_dict
 !!
 !! SOURCE
 
-subroutine yaml_write_and_free(self, unit, newline)
+subroutine yamldoc_write_and_free(self, unit, newline)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -1098,7 +1098,7 @@ subroutine yaml_write_and_free(self, unit, newline)
    call self%stream%free()
  end if
 
-end subroutine yaml_write_and_free
+end subroutine yamldoc_write_and_free
 !!***
 
 ! private
@@ -1351,5 +1351,5 @@ subroutine yaml_print_string(stream, string)
 
 end subroutine yaml_print_string
 
-end module m_yaml_out
+end module m_yaml
 !!***

@@ -259,8 +259,7 @@ program abinit
     '- output file    -> ',trim(filnam(2)),ch10,&
     '- root for input  files -> ',trim(filnam(3)),ch10,&
     '- root for output files -> ',trim(filnam(4)),ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
  end if
 
  call timab(44,1,tsec)
@@ -400,8 +399,7 @@ program abinit
  call timab(46,1,tsec)
 
  write(message,'(a,a,a,62a,80a)') ch10,'== END DATASET(S) ',('=',mu=1,62),ch10,('=',mu=1,80)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout([std_out, ab_out], message)
 
  ! Gather contributions to results_out from images of the cell, if needed
  if (test_img) then
@@ -415,8 +413,7 @@ program abinit
  if(me==0) then
    if(test_exit)then
      write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip outvars '
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
      choice=2
@@ -474,8 +471,7 @@ program abinit
  if(me==0) then
    if(test_exit)then
      write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    else
      do ii=1,2
        if(ii==1)iounit=ab_out

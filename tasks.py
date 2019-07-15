@@ -219,12 +219,21 @@ def links(ctx):
     top = find_top_build_tree(".", with_abinit=True)
     main98 = os.path.join(top, "src", "98_main")
     for dest in ALL_BINARIES: 
-        if os.path.isfile(dest): continue
+        if os.path.islink(os.path.join(os.getcwd(), dest)): continue
         source = os.path.join(main98, dest)
         if os.path.isfile(source):
             os.symlink(source, dest)
         else:
             cprint("Cannot find `%s` in dir `%s" % (source, main98), "yellow")
+
+
+@task
+def ctags(ctx):
+    """
+    Update ctags file.
+    """
+    with cd(ABINIT_ROOTDIR):
+        ctx.run('ctags -R --exclude="_*"', pty=True)
 
 @task
 def fgrep(ctx, pattern):

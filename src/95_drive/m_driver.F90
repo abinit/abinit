@@ -118,7 +118,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_errors
  use m_results_out
  use m_results_respfn
- use m_yaml_out
+ use m_yaml
  use m_xmpi
  use m_xomp
  use m_abi_linalg

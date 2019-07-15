@@ -32,7 +32,7 @@ MODULE m_results_gs
  use m_xmpi
  use m_energies
  use m_errors
- use m_yaml_out
+ use m_yaml
  use m_crystal
  use m_stream_string
  use m_pair_list
@@ -830,9 +830,9 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
 !************************************************************************
 
  if (present(comment)) then
-   ydoc = yaml_open_doc('ResultsGS', comment, width=width)
+   ydoc = yamldoc_open('ResultsGS', comment, width=width)
  else
-   ydoc = yaml_open_doc('ResultsGS', '', width=width)
+   ydoc = yamldoc_open('ResultsGS', '', width=width)
  end if
  ydoc%use_yaml = dtset%use_yaml
 

@@ -34,7 +34,7 @@ MODULE m_sigma
  use m_errors
  use iso_c_binding
  use m_nctk
- use m_yaml_out
+ use m_yaml
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -459,7 +459,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
 
-   ydoc = yaml_open_doc('SelfEnergy_ee', "", width=11, real_fmt='(3f8.3)')
+   ydoc = yamldoc_open('SelfEnergy_ee', "", width=11, real_fmt='(3f8.3)')
    ydoc%use_yaml = use_yaml
    call ydoc%add_real1d('kpoint', Sigp%kptgw(:,ikcalc))
    call ydoc%add_int('spin', is, int_fmt="(i1)")

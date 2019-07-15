@@ -48,7 +48,7 @@ module m_common
  use m_xmpi
  use m_dtset
  use m_xpapi
- use m_yaml_out
+ use m_yaml
  use m_invars2
 
  use m_fstrings,          only : indent, endswith, sjoin
@@ -350,7 +350,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
      end if
      ! Will save iterations in this global variables.
-     etot_yaml_doc = yaml_open_doc('EtotSteps', "")
+     etot_yaml_doc = yamldoc_open('EtotSteps', "")
      etot_yaml_doc%use_yaml = dtset%use_yaml
      call etot_yaml_doc%open_tabular('data', tag='EtotIters')
      call etot_yaml_doc%add_tabular_line(message)
@@ -1496,7 +1496,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if (directE_avail) then
      write(msg, '(2a)' ) ' Components of total free energy (in Hartree) :',ch10
      call wrtout(iout,msg,'COLL')
-     edoc = yaml_open_doc('EnergyTerms', 'Components of total free energy in Hartree', width=20, real_fmt='(es21.14)')
+     edoc = yamldoc_open('EnergyTerms', 'Components of total free energy in Hartree', width=20, real_fmt='(es21.14)')
      edoc%use_yaml = dtset%use_yaml
      !call yaml_single_dict('EnergyTerms', '', e_components, 35, 500, width=20, stream=stream, real_fmt='(es21.14)')
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
@@ -1632,7 +1632,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
     ' "Double-counting" decomposition of free energy:',ch10,&
     '    Band energy     = ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
-   dc_edoc = yaml_open_doc('EnergyTermsDC', '"Double-counting" decomposition of free energy', width=20)
+   dc_edoc = yamldoc_open('EnergyTermsDC', '"Double-counting" decomposition of free energy', width=20)
    dc_edoc%use_yaml = dtset%use_yaml
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
    if (ipositron/=1) then
