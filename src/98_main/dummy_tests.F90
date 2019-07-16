@@ -60,7 +60,9 @@ program dummy_tests
 !Local variables-------------------------------
 !scalars
  integer :: comm,dummy_out,my_rank
- integer :: unused_arg,unused_variable,used_arg,used_variable
+ ! unused_variable is not used below, makes abiref_gnu_5.3_debug case 03 test fail
+ ! integer :: unused_arg,unused_variable,used_arg,used_variable
+ integer :: unused_arg,used_arg,used_variable
 !arrays
  character(len=10) :: dummy_string
 

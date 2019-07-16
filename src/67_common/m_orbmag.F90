@@ -4029,28 +4029,28 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
 
  !Local variables -------------------------
  !scalars
- integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,countb,countg,countjb,countjg,cpopt
- integer :: dest,exchn2n3d,gdir,gdx,gdxc,gdxstor,gfor,gg,gsigma
- integer :: iatom,icgb,icgg,icprjbi,icprjgi,idat,idir,ierr
- integer :: ikg1,ikgb,ikgg,ikpt,ikptb,ikptbi,ikptg,ikptg_loc,ikptgi,ilmn,jlmn,klmn
- integer :: ipw,isppol,istwf_k,itypat
- integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jpw,jsppol
+ integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,countb,countjb,cpopt
+ integer :: dest,exchn2n3d,gdir,gdx,gdxc,gfor,gsigma
+ integer :: icgb,icgg,icprjbi,icprjgi,idir,ierr
+ integer :: ikg1,ikgg,ikpt,ikptb,ikptbi,ikptg,ikptg_loc,ikptgi
+ integer :: ipw,isppol,istwf_k
+ integer :: jcgb,jcprjbi,jkpt,jkptb,jkptbi,jkptg,jpw,jsppol
  integer :: me,my_nspinor,n1,n2dim,ncpgr,ndat,dummy_onpw
  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn,nproc,npw_kb,npw_kg,ntotcp
- integer :: prtvol,sij_opt,sourceb,sourceg,spaceComm,tagb,tagg,tim_getghc,tim_fourwf,type_calc
- real(dp) :: dkg2,dotr,doti,ecut_eff,htpisq,keg,lambda,weight
- complex(dpc) :: cdij,cgdijcb,cpb,cpg
+ integer :: prtvol,sij_opt,sourceb,spaceComm,tagb,tim_getghc,type_calc
+ real(dp) :: dotr,doti,ecut_eff,htpisq,lambda
+ complex(dpc) :: cgdijcb
  logical :: has_vectornd
  type(gs_hamiltonian_type) :: gs_hamk
 
  !arrays
  integer :: nattyp_dum(dtset%ntypat)
- integer,allocatable :: dimlmn(:),gbound_kg(:,:),kg_kb(:,:),kg_kg(:,:),pwind_bg(:)
- real(dp) ::dkb(3),dkg(3),dkbg(3),kpointb(3),kpointg(3),rhodum(1)
- real(dp),allocatable :: bra(:,:),cwavef(:,:),gcwavef(:,:,:),ghc(:,:),ghc1(:,:),gsc(:,:),gvnlc(:,:)
- real(dp),allocatable :: ket(:,:),kpg_k_dummy(:,:),kgkpg(:,:)
- real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqb(:,:),cgqg(:,:),cgrvtrial(:,:),ghc_vectornd(:,:)
- real(dp),allocatable :: tkbra(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:),work(:,:,:,:)
+ integer,allocatable :: dimlmn(:),kg_kg(:,:),pwind_bg(:)
+ real(dp) ::dkb(3),dkg(3),dkbg(3),kpointg(3),rhodum(1)
+ real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable :: ket(:,:),kpg_k_dummy(:,:)
+ real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqb(:,:),cgrvtrial(:,:),ghc_vectornd(:,:)
+ real(dp),allocatable :: tkbra(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
  type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_kb(:,:),cprj_kg(:,:),cwaveprj(:,:)
 
 
