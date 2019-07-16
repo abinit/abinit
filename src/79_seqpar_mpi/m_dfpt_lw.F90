@@ -3635,6 +3635,7 @@ end subroutine dfpt_flexoout
            & ddmdq_cart(:,iatom,iatdir,jatom,jatdir,iq1dir)
            end if
 
+
          end do
        end do
      end do
