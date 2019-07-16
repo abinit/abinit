@@ -4353,6 +4353,7 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                       
                       end do ! end loop over n1
                       ABI_DEALLOCATE(ket)
+                      ABI_DEALLOCATE(cgqb)
 
                    end if ! end check that ikptg > 0
                    
