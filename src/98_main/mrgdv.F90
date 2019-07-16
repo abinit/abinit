@@ -216,15 +216,15 @@ program mrgdv
      call dvdb%qdownsample(dump_file, ngqpt, comm)
      call dvdb%free()
 
+   !case ("compare")
+   !  call get_command_argument(2, dvdb_path)
+   !  call get_command_argument(3, other_dvdb_path)
+   !  ABI_CHECK(get_arg_list("qpt", qpt, lenr, msg, want_len=3) == 0, msg)
+
    !case ("convert")
    !  call get_command_argument(2, dvdb_path)
    !  call get_command_argument(3, dump_file)
    !  call dvdb_convert_fort2nc(dvdb_path, dump_file, comm)
-
-   !case ("add_gspot")
-   !  call get_command_argument(2, gspot_path)
-   !  call get_command_argument(3, dvdb_path)
-   !  call dvdb_add_gspot(dvdb_path, gspot_path, comm)
 
    case default
      MSG_ERROR(sjoin("Unknown command:", command))

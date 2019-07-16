@@ -95,8 +95,6 @@ program abitk
  nargs = command_argument_count()
  ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
 
- !if (nargs == 0) then
- !else
  ! Command line options.
  do ii=1,command_argument_count()
    call get_command_argument(ii, arg)

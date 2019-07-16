@@ -1077,17 +1077,17 @@ subroutine fixsym(iatfix,indsym,natom,nsym)
  if (nsym > 1) then
    do iatom=1,natom
      do isym=1,nsym
-!      jatom is the label of a symmetrically related atom
+       ! jatom is the label of a symmetrically related atom
        jatom=indsym(4,isym,iatom)
-!      Thus the atoms jatom and iatom must be fixed along the same directions
-       if ( iatfix(1,jatom) /=  iatfix(1,iatom) .or. &
-&       iatfix(2,jatom) /=  iatfix(2,iatom) .or. &
-&       iatfix(3,jatom) /=  iatfix(3,iatom)       ) then
+       ! Thus the atoms jatom and iatom must be fixed along the same directions
+       if (iatfix(1,jatom) /=  iatfix(1,iatom) .or. &
+           iatfix(2,jatom) /=  iatfix(2,iatom) .or. &
+           iatfix(3,jatom) /=  iatfix(3,iatom)) then
          write(message, '(a,i0,a,i0,7a)' )&
-&         'Atom number ',jatom,' is symmetrically  equivalent to atom number ',iatom,',',ch10,&
-&         'but according to iatfix, iatfixx, iatfixy and iatfixz, they',ch10,&
-&         'are not fixed along the same directions, which is forbidden.',ch10,&
-&         'Action: modify either the symmetry or iatfix(x,y,z) and resubmit.'
+           'Atom number: ',jatom,' is symmetrically  equivalent to atom number: ',iatom,',',ch10,&
+           'but according to iatfix, iatfixx, iatfixy and iatfixz, they',ch10,&
+           'are not fixed along the same directions, which is forbidden.',ch10,&
+           'Action: modify either the symmetry or iatfix(x,y,z) and resubmit.'
          MSG_ERROR(message)
        end if
      end do
@@ -1379,7 +1379,6 @@ end subroutine chkrprimd
 !!                handle_error
 !!              end if
 !!
-!!
 !! PARENTS
 !!      driver,mover
 !!
@@ -1449,17 +1448,17 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
      rprimd = alpha * rprimd + (one - alpha) * rprimd_orig
 
      write(dilatmx_errmsg,'(3a,es16.6,4a,es16.6,2a,es16.6,a)')&
-&     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
-&     'are too large with respect to the old rprimd and the accompanying dilatmx:',dilatmx,ch10,&
-&     'This large change of unit cell parameters is not allowed by the present value of dilatmx.',ch10,&
-&     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
-&     'Calculation continues with limited jump, by rescaling the projected move by the factor',alpha,'.'
+       'The new primitive vectors rprimd (an evolving quantity)',ch10,&
+       'are too large with respect to the old rprimd and the accompanying dilatmx: ',dilatmx,ch10,&
+       'This large change of unit cell parameters is not allowed by the present value of dilatmx.',ch10,&
+       'An adequate value would have been dilatmx_new= ',dilatmx_new,ch10,&
+       'Calculation continues with limited jump, by rescaling the projected move by the factor: ',alpha,'.'
    else
      write(message, '(3a,es16.6,2a,es16.6,2a)' )&
-&     'The new primitive vectors rprimd (an evolving quantity)',ch10,&
-&     'are too large, given the initial rprimd and the accompanying dilatmx:',dilatmx,ch10,&
-&     'An adequate value would have been dilatmx_new=',dilatmx_new,ch10,&
-&     'As chkdilatmx=0, assume experienced user. Execution will continue.'
+      'The new primitive vectors rprimd (an evolving quantity)',ch10,&
+      'are too large, given the initial rprimd and the accompanying dilatmx: ',dilatmx,ch10,&
+      'An adequate value would have been dilatmx_new= ',dilatmx_new,ch10,&
+      'As chkdilatmx=0, assume experienced user. Execution will continue.'
      MSG_WARNING(message)
    end if
 

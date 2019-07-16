@@ -474,8 +474,8 @@ module m_sigmaph
    ! Integration in q-space is done according to eph_intmeth.
 
   real(dp),allocatable :: gfw_mesh(:)
-   ! Frequency mesh for Eliashberg function (Allen-Cardona adiabatic, phonons only)
    ! gfw_mesh(gfw_nomega)
+   ! Frequency mesh for Eliashberg function (Allen-Cardona adiabatic, phonons only)
 
    real(dp),allocatable :: gf_nnuq(:,:,:,:)
    ! (nbcalc_ks, natom3, %nqibz_k, 3)
@@ -4259,24 +4259,6 @@ subroutine distribute_nqibz_k_nofilter()
   end do
 
 end subroutine distribute_nqibz_k_nofilter
-
-!subroutine distribute_nqibz_k_noitreatq()
-! integer :: q_start, q_stop
-! call xmpi_split_work(self%nqibz_k, self%comm_qpt, q_start, q_stop)
-! self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
-! ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-! if (self%my_nqibz_k /= 0) self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=q_start, q_stop)]
-!
-!end subroutine distribute_nqibz_k_noitreatq
-!
-!subroutine dont_distribute_nqibz_k()
-!
-! ! Use full IBZ(k) in q-integration ==> build trivial myq2ibz_k map.
-! self%my_nqibz_k = self%nqibz_k
-! ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-! self%myq2ibz_k = [(iq_ibz_k, iq_ibz_k=1, self%nqibz_k)]
-!
-!end subroutine dont_distribute_nqibz_k
 
 end subroutine sigmaph_setup_qloop
 !!***
